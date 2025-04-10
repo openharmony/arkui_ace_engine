@@ -1312,14 +1312,6 @@ void SelectOverlayNode::MoreOrBackAnimation(bool isMore, bool noAnimation)
     CHECK_NULL_VOID(backButton_);
     if (isMore && !isExtensionMenu_) {
         MoreAnimation(noAnimation);
-        auto context = GetContext();
-        if (context) {
-            context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(extensionMenu_))]() {
-                auto menuNode = weakNode.Upgrade();
-                CHECK_NULL_VOID(menuNode);
-                menuNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
-            });
-        }
     } else if (!isMore && isExtensionMenu_) {
         BackAnimation(noAnimation);
     }
@@ -1385,14 +1377,16 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
     CHECK_NULL_VOID(menuPattern);
     menuPattern->SetMenuShow();
     FinishCallback callback = [selectMenuInnerProperty, extensionProperty, backButtonProperty, id = containerId,
-                                  weak = WeakClaim(this)]() {
+                                  weak = WeakClaim(this), weakExtensionMenu = WeakClaim(RawPtr(extensionMenu_))]() {
         ContainerScope scope(id);
         selectMenuInnerProperty->UpdateVisibility(VisibleType::GONE);
         extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
         auto selectOverlay = weak.Upgrade();
         CHECK_NULL_VOID(selectOverlay);
         selectOverlay->SetAnimationStatus(false);
-        selectOverlay->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        auto extensionMenu = weakExtensionMenu.Upgrade();
+        CHECK_NULL_VOID(extensionMenu);
+        extensionMenu->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
     };
     AnimationOption selectOption;
     selectOption.SetDuration(ANIMATION_DURATION1);
@@ -2193,7 +2187,7 @@ void SelectOverlayNode::ShowCamera(
 bool SelectOverlayNode::IsShowOnTargetAPIVersion()
 {
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return false;
     }
     return true;
@@ -2202,7 +2196,7 @@ bool SelectOverlayNode::IsShowOnTargetAPIVersion()
 bool SelectOverlayNode::IsShowTranslateOnTargetAPIVersion()
 {
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
         return false;
     }
     return true;

@@ -92,10 +92,11 @@ struct PreparedInfoForDrag {
     OffsetF dragMovePosition = { 0.0f, 0.0f };
     RefPtr<PixelMap> pixelMap;
     RefPtr<FrameNode> imageNode;
+    NG::DraggingSizeChangeEffect sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
     RefPtr<FrameNode> relativeContainerNode { nullptr };
     RefPtr<FrameNode> menuPreviewNode { nullptr };
     RefPtr<FrameNode> textRowNode { nullptr };
-    RefPtr<FrameNode> gatherNode { nullptr };
+    RefPtr<FrameNode> textNode { nullptr };
     RefPtr<FrameNode> menuNode { nullptr };
     bool hasTransition = false;
     // for menu follow animation
@@ -107,7 +108,10 @@ struct PreparedInfoForDrag {
     Placement menuPosition = Placement::NONE;
     RectF menuRect;
     RectF frameNodeRect;
-    RectF menuPreviewRect;
+    RefPtr<FrameNode> menuPreviewImageNode { nullptr };
+    RefPtr<FrameNode> stackNode { nullptr };
+    RefPtr<FrameNode> gatherNode { nullptr };
+    RectF originPreviewRect;
     RectF dragPreviewRect;
     BorderRadiusProperty borderRadius = BorderRadiusProperty(0.0_vp);
 };
@@ -225,7 +229,11 @@ public:
         int32_t duration = 500);
     // Set by user define, which will replace old one.
     void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
+    void SetPanEvent(
+        const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap);
     void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
+    void AddPanEvent(
+        const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap);
     void RemovePanEvent(const RefPtr<PanEvent>& panEvent);
     void SetPanEventType(GestureTypeName typeName);
     // Set by user define, which will replace old one.

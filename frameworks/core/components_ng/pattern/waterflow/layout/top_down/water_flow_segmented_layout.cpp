@@ -70,9 +70,9 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 
     mainSize_ = GetMainAxisSize(idealSize, axis_);
 
-    if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
+    if (info_->jumpIndex_ != WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX) {
         MeasureOnJump(info_->jumpIndex_);
-        info_->jumpIndex_ = EMPTY_JUMP_INDEX;
+        info_->jumpIndex_ = WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX;
     } else if (info_->targetIndex_) {
         MeasureToTarget(*info_->targetIndex_, std::nullopt);
         info_->targetIndex_.reset();
@@ -150,7 +150,7 @@ inline float GetMeasuredHeight(const RefPtr<LayoutWrapper>& item, Axis axis)
  */
 void PrepareJump(const RefPtr<WaterFlowLayoutInfo>& info, std::optional<float>& postJumpOffset)
 {
-    if (info->endIndex_ == -1 || info->jumpIndex_ != EMPTY_JUMP_INDEX) {
+    if (info->endIndex_ == -1 || info->jumpIndex_ != WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX) {
         // implies that LayoutInfo has already been reset, no need to jump
         return;
     }

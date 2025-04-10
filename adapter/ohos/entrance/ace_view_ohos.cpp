@@ -234,8 +234,13 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::KeyEvent>& keyE
         inputType = LAST_DOWN;
     }
     PerfSourceType sourceType = PERF_KEY_EVENT;
-    int64_t inputTime = (keyEvent->GetKeyItem())->GetDownTime() * US_TO_MS;
-    pMonitor->RecordInputEvent(inputType, sourceType, inputTime);
+    auto keyItem = keyEvent->GetKeyItem();
+    if (keyItem.has_value()) {
+        int64_t inputTime = keyItem->GetDownTime() * US_TO_MS;
+        pMonitor->RecordInputEvent(inputType, sourceType, inputTime);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "DispatchEventToPerf keyItem is invalid.");
+    }
 }
 
 bool AceViewOhos::DispatchKeyEvent(const RefPtr<AceViewOhos>& view,
@@ -394,7 +399,7 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
     if (pointerEvent) {
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
-        ConvertMouseEvent(pointerEvent, event, container->IsScenceBoardWindow());
+        ConvertMouseEvent(pointerEvent, event, container->IsSceneBoardWindow());
         markEnabled = pointerEvent->IsMarkEnabled();
     }
     event.isInjected = isInjected;

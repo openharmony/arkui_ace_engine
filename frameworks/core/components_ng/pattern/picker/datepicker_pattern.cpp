@@ -157,7 +157,7 @@ void DatePickerPattern::InitFocusEvent()
     CHECK_NULL_VOID(pickerTheme);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -377,7 +377,7 @@ void DatePickerPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto datePickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(datePickerRowLayoutProperty);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         ColumnPatternInitHapticController();
         isHapticChanged_ = false;
     }
@@ -429,7 +429,7 @@ void DatePickerPattern::InitDisabled()
     if (!enabled_) {
         opacity *= DISABLE_ALPHA;
         renderContext->UpdateOpacity(opacity);
-    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    } else if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         renderContext->UpdateOpacity(opacity);
     }
 
@@ -501,6 +501,7 @@ void DatePickerPattern::UpdateLunarSwitch()
     auto lunarSwitchTextLayoutProperty = lunarSwitchNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(lunarSwitchTextLayoutProperty);
     lunarSwitchTextLayoutProperty->UpdateContent(pickerTheme->GetLunarSwitchText());
+    lunarSwitchTextLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
     lunarSwitchNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -620,6 +621,7 @@ void DatePickerPattern::OnColorConfigurationUpdate()
         titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     }
     UpdateTitleTextColor(buttonTitleNode, pickerTheme);
+    UpdateLunarSwitch();
     OnModifyDone();
 }
 

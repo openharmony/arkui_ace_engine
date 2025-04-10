@@ -70,6 +70,9 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         if (self->snapshotWindow_) {
             self->BufferAvailableCallbackForSnapshot();
         }
+        if (self->newAppWindow_ && self->appWindow_) {
+            self->BufferAvailableCallback();
+        }
     };
 }
 
@@ -95,6 +98,19 @@ std::shared_ptr<Rosen::RSSurfaceNode> WindowScene::CreateLeashWindowNode()
     return surfaceNode;
 }
 
+RefPtr<RosenRenderContext> WindowScene::GetContextByDisableDelegator(bool isAbilityHook, bool isBufferAvailable)
+{
+    if (isAbilityHook) {
+        if (isBufferAvailable) {
+            return AceType::DynamicCast<RosenRenderContext>(appWindow_->GetRenderContext());
+        }
+        return AceType::DynamicCast<RosenRenderContext>(newAppWindow_->GetRenderContext());
+    }
+    if (isBufferAvailable) {
+        return AceType::DynamicCast<RosenRenderContext>(startingWindow_->GetRenderContext());
+    }
+    return AceType::DynamicCast<RosenRenderContext>(appWindow_->GetRenderContext());
+}
 void WindowScene::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -263,14 +279,22 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 
 void WindowScene::BufferAvailableCallback()
 {
+    bool isAbilityHook = session_->GetSessionInfo().reuseDelegatorWindow;
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-        "BufferAvailableCallback id: %{public}d, enableRemoveStartingWindow: %{public}d, appBufferReady: %{public}d",
-        session_->GetPersistentId(), session_->GetEnableRemoveStartingWindow(), session_->GetAppBufferReady());
-    auto uiTask = [weakThis = WeakClaim(this)]() {
+        "isAbilityHook: %{public}d,BufferAvailableCallback id: %{public}d,"
+        "enableRemoveStartingWindow: %{public}d, appBufferReady: %{public}d",
+        isAbilityHook, session_->GetPersistentId(),
+        session_->GetEnableRemoveStartingWindow(), session_->GetAppBufferReady());
+    auto uiTask = [weakThis = WeakClaim(this), isAbilityHook]() {
         ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallback");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
+        if (isAbilityHook) {
+            CHECK_NULL_VOID(self->appWindow_);
+        } else {
+            CHECK_NULL_VOID(self->startingWindow_);
+        }
         auto surfaceNode = self->session_->GetSurfaceNode();
         bool isWindowSizeEqual = self->IsWindowSizeEqual();
         if (!isWindowSizeEqual || surfaceNode == nullptr || !surfaceNode->IsBufferAvailable()) {
@@ -289,7 +313,7 @@ void WindowScene::BufferAvailableCallback()
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
         if (config.enabled_ && self->session_->NeedStartingWindowExitAnimation()) {
-            auto context = self->startingWindow_->GetRenderContext();
+            auto context = self->GetContextByDisableDelegator(isAbilityHook, true);
             CHECK_NULL_VOID(context);
             context->SetMarkNodeGroup(true);
             context->SetOpacity(config.opacityStart_);
@@ -315,8 +339,16 @@ void WindowScene::BufferAvailableCallback()
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        self->RemoveChild(host, self->startingWindow_, self->startingWindowName_, true);
-        self->startingWindow_.Reset();
+        if (isAbilityHook && self->appWindow_ && self->newAppWindow_) {
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "reuseDelegatorWindow from true to false");
+            self->RemoveChild(host, self->appWindow_, self->appWindowName_, true);
+            self->appWindow_.Reset();
+            self->session_->EditSessionInfo().reuseDelegatorWindow = false;
+        }
+        if (self->startingWindow_ != nullptr) {
+            self->RemoveChild(host, self->startingWindow_, self->startingWindowName_, true);
+            self->startingWindow_.Reset();
+        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "Remove starting window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
@@ -326,7 +358,7 @@ void WindowScene::BufferAvailableCallback()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (session_->GetEnableRemoveStartingWindow() && !session_->GetAppBufferReady()) {
+    if (!isAbilityHook && session_->GetEnableRemoveStartingWindow() && !session_->GetAppBufferReady()) {
         auto taskExecutor = pipelineContext->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         removeStartingWindowTask_.Cancel();
@@ -416,9 +448,11 @@ void WindowScene::OnActivation()
             self->RemoveChild(host, self->appWindow_, self->appWindowName_);
             self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
             self->RemoveChild(host, self->blankWindow_, self->blankWindowName_);
+            self->RemoveChild(host, self->newAppWindow_, self->newAppWindowName_);
             self->startingWindow_.Reset();
             self->appWindow_.Reset();
             self->snapshotWindow_.Reset();
+            self->newAppWindow_.Reset();
             self->session_->SetNeedSnapshot(true);
             self->blankWindow_.Reset();
             self->OnAttachToFrameNode();
@@ -479,7 +513,9 @@ void WindowScene::DisposeSnapshotAndBlankWindow()
 
 void WindowScene::OnConnect()
 {
-    auto uiTask = [weakThis = WeakClaim(this)]() {
+    bool isAbilityHook = session_->GetSessionInfo().reuseDelegatorWindow;
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "isAbilityHook: %{public}d", isAbilityHook);
+    auto uiTask = [weakThis = WeakClaim(this), isAbilityHook]() {
         ACE_SCOPED_TRACE("WindowScene::OnConnect");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
@@ -488,8 +524,13 @@ void WindowScene::OnConnect()
         auto surfaceNode = self->session_->GetSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
 
-        CHECK_NULL_VOID(self->appWindow_);
-        auto context = AceType::DynamicCast<NG::RosenRenderContext>(self->appWindow_->GetRenderContext());
+        if (isAbilityHook) {
+            self->CreateAppWindow();
+            CHECK_NULL_VOID(self->newAppWindow_);
+        } else {
+            CHECK_NULL_VOID(self->appWindow_);
+        }
+        auto context = self->GetContextByDisableDelegator(isAbilityHook, false);
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
 
@@ -501,7 +542,11 @@ void WindowScene::OnConnect()
         RectF windowRect(0, 0, frameSize.Width(), frameSize.Height());
         context->SyncGeometryProperties(windowRect);
 
-        self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
+        if (isAbilityHook) {
+            self->AddChild(host, self->newAppWindow_, self->newAppWindowName_, 0);
+        } else {
+            self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
+        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "Add app window finished, id: %{public}d, node id: %{public}d, "

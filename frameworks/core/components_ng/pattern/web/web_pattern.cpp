@@ -361,6 +361,7 @@ const std::string IS_HINT_TYPE = "{\"isHint2Type\": true}";
 const std::string STRING_LF = "\n";
 const std::string DRAG_DATA_TYPE_TEXT = "general.plain-text";
 const std::string DRAG_DATA_TYPE_HTML = "general.html";
+const std::string DRAG_DATA_TYPE_APP_DEF = "ApplicationDefinedType";
 const std::set<std::string> FILE_TYPE_SET = {"general.file", "general.audio", "general.video", "general.image"};
 const std::string DRAG_DATA_TYPE_LINK = "general.hyperlink";
 const std::string FAKE_DRAG_DATA_VAL = " ";
@@ -953,7 +954,9 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panDirection.type = PanDirection::ALL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
     gestureHub->SetPanEventType(GestureTypeName::WEBSCROLL);
     gestureHub->SetOnGestureJudgeNativeBegin([](const RefPtr<NG::GestureInfo>& gestureInfo,
                                                 const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
@@ -2277,7 +2280,7 @@ void WebPattern::SetFakeDragData(const RefPtr<OHOS::Ace::DragEvent>& info)
                 delegate_->dragData_->SetFileUri(FAKE_DRAG_DATA_VAL);
             } else if (DRAG_DATA_TYPE_TEXT == iter->first) {
                 delegate_->dragData_->SetFragmentText(FAKE_DRAG_DATA_VAL);
-            } else if (DRAG_DATA_TYPE_HTML == iter->first) {
+            } else if (DRAG_DATA_TYPE_HTML == iter->first || DRAG_DATA_TYPE_APP_DEF == iter->first) {
                 delegate_->dragData_->SetFragmentHtml(FAKE_DRAG_DATA_VAL);
             } else if (DRAG_DATA_TYPE_LINK == iter->first) {
                 delegate_->dragData_->SetLinkURL(FAKE_LINK_VAL);
@@ -2292,7 +2295,7 @@ void WebPattern::SetFakeDragData(const RefPtr<OHOS::Ace::DragEvent>& info)
 
 void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -3810,6 +3813,9 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
     if (!isReceivedArkDrag_) {
         ResetDragAction();
     }
+    if (isDragging_) {
+        ResetDragStateValue();
+    }
     HideMagnifier();
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos)) {
@@ -5286,12 +5292,13 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
     if (!isSmoothDragResizeEnabled) {
                 return;
     }
-    if (type == WindowSizeChangeReason::DRAG_START || type == WindowSizeChangeReason::DRAG) {
+    if (type == WindowSizeChangeReason::DRAG_START || type == WindowSizeChangeReason::DRAG ||
+        type == WindowSizeChangeReason::SPLIT_DRAG_START || type == WindowSizeChangeReason::SPLIT_DRAG) {
         dragWindowFlag_ = true;
         delegate_->SetDragResizeStartFlag(true);
         WindowDrag(width, height);
     }
-    if (type == WindowSizeChangeReason::DRAG_END) {
+    if (type == WindowSizeChangeReason::DRAG_END || type == WindowSizeChangeReason::SPLIT_DRAG_END) {
         delegate_->SetDragResizeStartFlag(false);
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
@@ -7140,30 +7147,35 @@ bool WebPattern::GetAccessibilityVisible(int64_t accessibilityId)
 
 void WebPattern::DumpInfo()
 {
-    float totalSize = DumpGpuInfo();
+    DumpSurfaceInfo();
+    DumpGpuInfo();
+}
+
+void WebPattern::DumpGpuInfo()
+{
+    float totalSize = 0.0f;
+    if (delegate_ != nullptr && delegate_->GetNweb() != nullptr) {
+        totalSize = delegate_->GetNweb()->DumpGpuInfo();
+    }
     if (totalSize > GPU_SERIOUS_ABNORMAL_VALUE) {
-        totalSize = totalSize / SIZE_UNIT / SIZE_UNIT; // 转换成MB
+        totalSize /= SIZE_UNIT * SIZE_UNIT; // 转换成MB
     } else if (totalSize > GPU_ABNORMAL_VALUE) {
-        totalSize = totalSize / SIZE_UNIT;
+        totalSize /= SIZE_UNIT;
     }
     totalSize = std::round(totalSize * FLOAT_UNIT) / FLOAT_UNIT; // 变为浮点数
     // 使用ostringstream来格式化数字为字符串
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(DECIMAL_POINTS) << totalSize; // 转换成保留两位小数的字符串
-    std::string formattedSize = oss.str(); // 获取格式化后的字符串
+    std::string formattedSize = oss.str();                               // 获取格式化后的字符串
     DumpLog::GetInstance().Print("------------GpuMemoryInfo-----------");
     DumpLog::GetInstance().Print("Total Gpu Memory size: " + formattedSize + "(MB)");
 }
 
-float WebPattern::DumpGpuInfo()
+void WebPattern::DumpSurfaceInfo()
 {
-    if (delegate_ != nullptr) {
-        if (delegate_->GetNweb() != nullptr) {
-            float totalSize = delegate_->GetNweb()->DumpGpuInfo();
-            return totalSize;
-        }
+    if (renderSurface_ != nullptr) {
+        DumpLog::GetInstance().AddDesc(std::string("surfaceId: ").append(renderSurface_->GetUniqueId()));
     }
-    return 0;
 }
 
 RefPtr<WebEventHub> WebPattern::GetWebEventHub()

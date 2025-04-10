@@ -339,8 +339,6 @@ public:
 
     RefPtr<FrameNode> GetDragPixelMapContentNode() const;
 
-    RefPtr<FrameNode> GetRelativeContainerNode() const;
-
     RefPtr<FrameNode> GetPixelMapBadgeNode() const;
 
     RefPtr<FrameNode> GetDragPixelMapBadgeNode() const;
@@ -378,6 +376,10 @@ public:
     void SetFilterColumnNode(const RefPtr<FrameNode>& columnNode)
     {
         filterColumnNodeWeak_ = columnNode;
+    }
+    RefPtr<FrameNode> GetFilterColumnNode() const
+    {
+        return filterColumnNodeWeak_.Upgrade();
     }
     void MountFilterToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
     void MountPixelMapToWindowScene(

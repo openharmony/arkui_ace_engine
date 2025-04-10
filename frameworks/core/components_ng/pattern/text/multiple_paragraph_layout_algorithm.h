@@ -144,7 +144,7 @@ private:
     void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle);
     void SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
-        const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle);
+        const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode);
     void SetDecorationPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
         const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle);
     void SetFontSizePropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
@@ -157,7 +157,8 @@ private:
     bool CustomSpanMeasure(const RefPtr<CustomSpanItem>& customSpanItem, LayoutWrapper* layoutWrapper);
     bool PlaceholderSpanMeasure(const RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
         const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain);
-    void UpdateSymbolStyle(TextStyle& textStyle);
+    void UpdateFontFamilyWithSymbol(TextStyle& textStyle, std::vector<std::string>& fontFamilies, bool isSymbol);
+    void UpdateSymbolStyle(TextStyle& textStyle, bool isSymbol);
 
     ACE_DISALLOW_COPY_AND_MOVE(MultipleParagraphLayoutAlgorithm);
 };

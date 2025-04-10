@@ -87,7 +87,9 @@ void SelectContentOverlayPattern::CancelHiddenHandleTask()
     CHECK_NULL_VOID(gestureEventHub);
     gestureEventHub->SetHitTestMode(info_->hitTestMode);
     gestureEventHub->AddClickEvent(clickEvent_);
-    gestureEventHub->AddPanEvent(panEvent_, { PanDirection::ALL }, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureEventHub->AddPanEvent(panEvent_, { PanDirection::ALL }, 1, distanceMap);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

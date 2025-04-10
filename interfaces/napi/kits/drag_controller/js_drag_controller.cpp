@@ -204,7 +204,11 @@ public:
         napi_value thisVar = nullptr;
         napi_value cb = nullptr;
         size_t argc = ParseArgs(env, info, thisVar, cb);
-        NAPI_ASSERT(env, (argc == ARG_COUNT_2 && thisVar != nullptr && cb != nullptr), "Invalid arguments");
+        if (argc != ARG_COUNT_2 || thisVar == nullptr || cb == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_DRAG, "Invalid arguments");
+            napi_close_handle_scope(env, scope);
+            return nullptr;
+        }
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, cb, &valueType);
         if (valueType != napi_function) {
@@ -279,7 +283,11 @@ public:
         napi_value thisVar = nullptr;
         napi_value cb = nullptr;
         size_t argc = ParseArgs(env, info, thisVar, cb);
-        NAPI_ASSERT(env, (argc == 0 && thisVar != nullptr), "Invalid arguments");
+        if (argc != 0 || thisVar == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_DRAG, "Invalid arguments");
+            napi_close_escapable_handle_scope(env, scope);
+            return nullptr;
+        }
         DragAction* dragAction = ConvertDragAction(env, thisVar);
         if (!dragAction) {
             NapiThrow(env, "convert drag action failed.", ERROR_CODE_INTERNAL_ERROR);
@@ -515,6 +523,29 @@ DragRet TranslateDragResult(Msdp::DeviceStatus::DragResult dragResult)
             return DragRet::DRAG_FAIL;
     }
 }
+bool SetDragEventForJs(
+    std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const napi_value& eventNapi, const DragNotifyMsg& dragNotifyMsg)
+{
+    CHECK_NULL_RETURN(asyncCtx, false);
+    auto localRef = NapiValueToLocalValue(eventNapi);
+    if (localRef->IsNull()) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "napi value convert to local value failed.");
+        return false;
+    }
+    auto vm = reinterpret_cast<NativeEngine*>(asyncCtx->env)->GetEcmaVm();
+    auto* jsDragEvent =
+        static_cast<Framework::JsDragEvent*>(Local<panda::ObjectRef>(localRef)->GetNativePointerField(vm, 0));
+    CHECK_NULL_RETURN(jsDragEvent, false);
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>();
+    if (!dragEvent) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "create dragEvent failed.");
+        return false;
+    }
+    dragEvent->SetResult(TranslateDragResult(dragNotifyMsg.result));
+    dragEvent->SetDragBehavior(static_cast<DragBehavior>(dragNotifyMsg.dragBehavior));
+    jsDragEvent->SetDragEvent(dragEvent);
+    return true;
+}
 
 void GetCallBackDataForJs(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const DragNotifyMsg& dragNotifyMsg,
     const DragStatus dragStatus)
@@ -522,7 +553,6 @@ void GetCallBackDataForJs(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, cons
     CHECK_NULL_VOID(asyncCtx);
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(asyncCtx->env, &scope);
-    auto resultCode = dragNotifyMsg.result;
     napi_value result = nullptr;
     napi_get_undefined(asyncCtx->env, &result);
     napi_create_object(asyncCtx->env, &result);
@@ -539,21 +569,11 @@ void GetCallBackDataForJs(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, cons
         napi_close_handle_scope(asyncCtx->env, scope);
         return;
     }
-    auto localRef = NapiValueToLocalValue(eventNapi);
-    if (localRef->IsNull()) {
-        TAG_LOGE(AceLogTag::ACE_DRAG, "napi value convert to local value failed.");
+    if (!SetDragEventForJs(asyncCtx, eventNapi, dragNotifyMsg)) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "set dragEvent for JS failed.");
         napi_close_handle_scope(asyncCtx->env, scope);
         return;
     }
-    auto vm = reinterpret_cast<NativeEngine*>(asyncCtx->env)->GetEcmaVm();
-    auto* jsDragEvent =
-        static_cast<Framework::JsDragEvent*>(Local<panda::ObjectRef>(localRef)->GetNativePointerField(vm, 0));
-    CHECK_NULL_VOID(jsDragEvent);
-    auto dragEvent = AceType::MakeRefPtr<DragEvent>();
-    CHECK_NULL_VOID(dragEvent);
-    dragEvent->SetResult(TranslateDragResult(resultCode));
-    dragEvent->SetDragBehavior(static_cast<DragBehavior>(dragNotifyMsg.dragBehavior));
-    jsDragEvent->SetDragEvent(dragEvent);
     napi_set_named_property(asyncCtx->env, result, "event", eventNapi);
 
     napi_value extraParamsNapi = nullptr;

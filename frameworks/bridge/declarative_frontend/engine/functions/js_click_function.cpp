@@ -55,6 +55,7 @@ void JsClickFunction::Execute(const ClickInfo& info)
     obj->SetProperty<double>("pressure", info.GetForce());
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
+    obj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
@@ -109,6 +110,7 @@ void JsClickFunction::Execute(GestureEvent& info)
     obj->SetProperty<double>("deviceId", static_cast<int32_t>(info.GetDeviceId()));
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
+    obj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
@@ -148,6 +150,7 @@ void JsClickFunction::Execute(MouseInfo& info)
     obj->SetProperty<double>("pressure", info.GetForce());
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
+    obj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
@@ -205,6 +208,7 @@ void JsWeakClickFunction::Execute(const ClickInfo& info)
     obj->SetProperty<double>("pressure", info.GetForce());
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
+    obj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
@@ -238,6 +242,7 @@ void JsWeakClickFunction::Execute(GestureEvent& info)
     obj->SetProperty<double>("deviceId", static_cast<int32_t>(info.GetDeviceId()));
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
+    obj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
@@ -276,6 +281,7 @@ void JsWeakClickFunction::Execute(MouseInfo& info)
     obj->SetProperty<double>("pressure", info.GetForce());
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
+    obj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);

@@ -21,19 +21,14 @@ namespace OHOS::Ace {
 
 bool CheckThread(TaskExecutor::TaskType threadType)
 {
-    if (threadType == TaskExecutor::TaskType::UI || threadType == TaskExecutor::TaskType::JS) {
-        auto taskExecutor = Container::CurrentTaskExecutor();
-        if (taskExecutor) {
-            return taskExecutor->WillRunOnCurrentThread(threadType);
-        }
-        LOGI("checkThread: null taskExecutor, check id:%{public}d", Container::CurrentId());
-    }
-
-    if (threadType == TaskExecutor::TaskType::PLATFORM) {
+    if (!Container::IsCurrentUseNewPipeline() && threadType == TaskExecutor::TaskType::PLATFORM) {
         return Container::CurrentId() == INSTANCE_ID_PLATFORM;
     }
-
-    LOGE("not support thread check for other thread type");
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    if (taskExecutor) {
+        return taskExecutor->WillRunOnCurrentThread(threadType);
+    }
+    LOGI("checkThread: null taskExecutor, check id:%{public}d", Container::CurrentId());
     return false;
 }
 

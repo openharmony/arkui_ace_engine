@@ -613,7 +613,11 @@ void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, c
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     config.isSvg_ = sourceInfo.IsSvg();
     config.frameCount_ = frameCount;
-    config.orientation_ = joinOrientation_;
+    if (GreatNotEqual(frameCount, 1)) {
+        config.orientation_ = ImageRotateOrientation::UP;
+    } else {
+        config.orientation_ = joinOrientation_;
+    }
     canvasImage->SetPaintConfig(config);
 }
 
@@ -2100,9 +2104,9 @@ void ImagePattern::InitDefaultValue()
         interpolationDefault_ = ImageInterpolation::LOW;
     }
     auto container = Container::Current();
-    // If the default value is set to false, the ScenceBoard memory increases.
-    // Therefore the default value is different in the ScenceBoard.
-    if (container && container->IsScenceBoardWindow()) {
+    // If the default value is set to false, the SceneBoard memory increases.
+    // Therefore the default value is different in the SceneBoard.
+    if (container && container->IsSceneBoardWindow()) {
         autoResizeDefault_ = true;
         interpolationDefault_ = ImageInterpolation::NONE;
     }

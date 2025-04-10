@@ -37,6 +37,7 @@ private:
     int32_t RegisterWebUnfocusEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t SendCommandInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t SendCommandInnerAsync(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t SendCommandKeyCodeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t UnregisterClickEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t UnregisterSearchEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t UnregisterRouterChangeEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
@@ -53,6 +54,7 @@ private:
     int32_t GetCurrentPageNameInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t EndWebViewTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetCurrentImagesShowingInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t GetVisibleInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_H

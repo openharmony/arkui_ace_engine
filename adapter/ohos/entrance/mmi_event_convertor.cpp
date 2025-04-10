@@ -286,7 +286,7 @@ void SetTouchEventType(int32_t orgAction, TouchEvent& event)
     }
 }
 
-void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardWindow)
+void GetMouseEventAction(int32_t action, MouseEvent& events, bool isSceneBoardWindow)
 {
     switch (action) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
@@ -352,7 +352,7 @@ MouseButton GetMouseEventButton(int32_t button)
 }
 
 void ConvertMouseEvent(
-    const std::shared_ptr<MMI::PointerEvent>& pointerEvent, MouseEvent& events, bool isScenceBoardWindow)
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent, MouseEvent& events, bool isSceneBoardWindow)
 {
     int32_t pointerID = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem item;
@@ -368,7 +368,7 @@ void ConvertMouseEvent(
     events.screenY = item.GetDisplayY();
     events.rawDeltaX = item.GetRawDx();
     events.rawDeltaY = item.GetRawDy();
-    GetMouseEventAction(pointerEvent->GetPointerAction(), events, isScenceBoardWindow);
+    GetMouseEventAction(pointerEvent->GetPointerAction(), events, isSceneBoardWindow);
     events.button = GetMouseEventButton(pointerEvent->GetButtonId());
     GetEventDevice(pointerEvent->GetSourceType(), events);
     events.isPrivacyMode = pointerEvent->HasFlag(OHOS::MMI::InputEvent::EVENT_FLAG_PRIVACY_MODE);
@@ -522,6 +522,8 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     event.rawKeyEvent = keyEvent;
     event.code = static_cast<KeyCode>(keyEvent->GetKeyCode());
     event.numLock = keyEvent->GetFunctionKey(MMI::KeyEvent::NUM_LOCK_FUNCTION_KEY);
+    event.enableCapsLock = keyEvent->GetFunctionKey(MMI::KeyEvent::CAPS_LOCK_FUNCTION_KEY);
+    event.scrollLock = keyEvent->GetFunctionKey(MMI::KeyEvent::SCROLL_LOCK_FUNCTION_KEY);
     event.keyIntention = static_cast<KeyIntention>(keyEvent->GetKeyIntention());
     if (keyEvent->GetKeyAction() == OHOS::MMI::KeyEvent::KEY_ACTION_UP) {
         event.action = KeyAction::UP;

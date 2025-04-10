@@ -60,7 +60,6 @@ std::string GetWebLanguageByNodeId(int32_t nodeId)
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(const TreeParams& params, std::string& tree)
 {
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "GetSimplifiedInspectorTree.");
     auto containerId = Recorder::EventRecorder::Get().GetContainerId(params.inspectorType == InspectorPageType::FOCUS);
     auto container = Container::GetContainer(containerId);
     if (!container) {
@@ -83,7 +82,6 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(const TreeP
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTreeAsync(
     const TreeParams& params, OnInspectorTreeResult&& callback)
 {
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "GetSimplifiedInspectorTreeAsync.");
     auto containerId = Recorder::EventRecorder::Get().GetContainerId(params.inspectorType == InspectorPageType::FOCUS);
     auto container = Container::GetContainer(containerId);
     if (!container) {

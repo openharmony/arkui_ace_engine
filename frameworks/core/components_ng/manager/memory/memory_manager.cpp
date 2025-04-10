@@ -122,7 +122,7 @@ void MemoryManager::RebuildImage(const RefPtr<UINode>& node)
 void MemoryManager::PostMemRecycleTask()
 {
     auto container = Container::Current();
-    if (!isTrimMemWork_ || (container && container->IsScenceBoardWindow())) {
+    if (!isTrimMemWork_ || (container && container->IsSceneBoardWindow())) {
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();

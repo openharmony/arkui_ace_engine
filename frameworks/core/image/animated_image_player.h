@@ -95,13 +95,8 @@ public:
     }
 
 private:
-#ifndef USE_ROSEN_DRAWING
-    sk_sp<SkImage> DecodeFrameImage(const int32_t& index);
-    static bool CopyTo(SkBitmap* dst, SkColorType dstColorType, const SkBitmap& src);
-#else
     std::shared_ptr<RSImage> DecodeFrameImage(const int32_t& index);
     static bool CopyTo(RSBitmap* dst, const RSBitmap& src);
-#endif
 
     ImageSourceInfo imageSource_;
     UploadSuccessCallback successCallback_;
@@ -116,19 +111,12 @@ private:
     int32_t dstWidth_ = -1;
     int32_t dstHeight_ = -1;
 
-#ifndef USE_ROSEN_DRAWING
-    // used to cache required frame.
-    std::unordered_map<int32_t, std::unique_ptr<SkBitmap>> cachedFrame_;
-
-    // used to cache last required frame. this will be reset during looping.
-    std::unique_ptr<SkBitmap> lastRequiredBitmap_;
-#else
     // used to cache required frame.
     std::unordered_map<int32_t, std::unique_ptr<RSBitmap>> cachedFrame_;
 
     // used to cache last required frame. this will be reset during looping.
     std::unique_ptr<RSBitmap> lastRequiredBitmap_;
-#endif
+  
     int32_t lastRequiredFrameIndex_ = -1;
 };
 

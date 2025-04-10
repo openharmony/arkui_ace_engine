@@ -208,6 +208,7 @@ public:
     void AddSelectOverlaySubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
     RefPtr<Subwindow> GetOrCreateSelectOverlayWindow(
         int32_t containerId, const ToastWindowType& windowType, uint32_t mainWindowId);
+    RefPtr<Subwindow> GetOrCreateMenuSubWindow(int32_t instanceId);
     void SetSelectOverlayHotAreas(const std::vector<Rect>& rects, int32_t nodeId, int32_t instanceId);
     void DeleteSelectOverlayHotAreas(const int32_t instanceId, int32_t nodeId);
     bool IsWindowEnableSubWindowMenu(const int32_t instanceId, const RefPtr<NG::FrameNode>& callerFrameNode);
@@ -227,6 +228,9 @@ private:
     SubwindowKey GetCurrentSubwindowKey(int32_t instanceId, SubwindowType windowType);
     void MarkSetSubwindowRect(const NG::RectF& rect, int32_t instanceId, SubwindowType type);
     void AddInstanceSubwindowMap(int32_t subInstanceId, RefPtr<Subwindow> subwindow);
+    RefPtr<Subwindow> GetSubwindowBySearchKey(const SubwindowKey& searchKey);
+    void RemoveSubwindowBySearchKey(const SubwindowKey& searchKey);
+    void AddSubwindowBySearchKey(const SubwindowKey& searchKey, const RefPtr<Subwindow>& subwindow);
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
 

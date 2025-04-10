@@ -72,14 +72,14 @@ public:
         isUIExtensionWindow_ = isUIExtensionWindow;
     }
 
-    bool IsScenceBoardWindow() override
+    bool IsSceneBoardWindow() override
     {
-        return isScenceBoardWindow_;
+        return isSceneBoardWindow_;
     }
 
-    void SetIsScenceBoardWindow(bool isScenceBoardWindow)
+    void SetIsSceneBoardWindow(bool isSceneBoardWindow)
     {
-        isScenceBoardWindow_ = isScenceBoardWindow;
+        isSceneBoardWindow_ = isSceneBoardWindow;
     }
 
     bool IsCrossAxisWindow()
@@ -108,7 +108,7 @@ public:
         container_->isFormRender_ = false;
         container_->isUIExtensionWindow_ = false;
         container_->isSubContainer_ = false;
-        container_->isScenceBoardWindow_ = false;
+        container_->isSceneBoardWindow_ = false;
         container_->isCrossAxisWindow_ = false;
     }
 
@@ -143,6 +143,13 @@ public:
     MOCK_METHOD(void, DumpHeapSnapshot, (bool isPrivate), (override));
     MOCK_METHOD(void, TriggerGarbageCollection, (), (override));
     MOCK_METHOD(bool, WindowIsShow, (), (const, override));
+    MOCK_METHOD(bool, IsPcOrPadFreeMultiWindowMode, (), (const, override));
+    MOCK_METHOD(bool, IsMainWindow, (), (const, override));
+    MOCK_METHOD(bool, IsFullScreenWindow, (), (const, override));
+    MOCK_METHOD(RefPtr<PageViewportConfig>, GetCurrentViewportConfig, (), (const, override));
+    MOCK_METHOD(RefPtr<PageViewportConfig>, GetTargetViewportConfig, (Orientation orientation,
+        bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator), (override));
+    MOCK_METHOD(bool, SetSystemBarEnabled, (SystemBarType type, bool enable, bool animation), (override));
     static RefPtr<MockContainer> container_;
     static ColorMode mockColorMode_;
 
@@ -152,7 +159,7 @@ private:
     bool isFormRender_ = false;
     bool isUIExtensionWindow_ = false;
     bool isSubContainer_ = false;
-    bool isScenceBoardWindow_ = false;
+    bool isSceneBoardWindow_ = false;
     bool isCrossAxisWindow_ = false;
     RefPtr<DisplayInfo> displayInfo_ = MakeRefPtr<DisplayInfo>();
 };

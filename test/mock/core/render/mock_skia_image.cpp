@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#include "core/components_ng/render/adapter/drawing_image.h"
 
 namespace OHOS::Ace::NG {
 

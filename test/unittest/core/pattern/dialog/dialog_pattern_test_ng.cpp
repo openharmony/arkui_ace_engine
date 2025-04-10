@@ -448,7 +448,7 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump008, Te
     pattern->dialogProperties_.isMenu = false;
     pattern->dialogProperties_.isMask = false;
     pattern->dialogProperties_.isModal = false;
-    pattern->dialogProperties_.isScenceBoardDialog = false;
+    pattern->dialogProperties_.isSceneBoardDialog = false;
     pattern->dialogProperties_.isSysBlurStyle = false;
     pattern->dialogProperties_.isShowInSubWindow = false;
     pattern->DumpSimplifyBoolProperty(jsonPtr);
@@ -457,7 +457,7 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump008, Te
     EXPECT_FALSE(jsonPtr->Contains("IsMenu"));
     EXPECT_FALSE(jsonPtr->Contains("IsMask"));
     EXPECT_FALSE(jsonPtr->Contains("IsModal"));
-    EXPECT_FALSE(jsonPtr->Contains("IsScenceBoardDialog"));
+    EXPECT_FALSE(jsonPtr->Contains("IsSceneBoardDialog"));
     EXPECT_FALSE(jsonPtr->Contains("IsSysBlurStyle"));
     EXPECT_FALSE(jsonPtr->Contains("IsShowInSubWindow"));
 
@@ -469,7 +469,7 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump008, Te
     pattern->dialogProperties_.isMenu = true;
     pattern->dialogProperties_.isMask = true;
     pattern->dialogProperties_.isModal = true;
-    pattern->dialogProperties_.isScenceBoardDialog = true;
+    pattern->dialogProperties_.isSceneBoardDialog = true;
     pattern->dialogProperties_.isSysBlurStyle = true;
     pattern->dialogProperties_.isShowInSubWindow = true;
     pattern->DumpSimplifyBoolProperty(jsonPtr);
@@ -478,7 +478,7 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump008, Te
     EXPECT_TRUE(jsonPtr->Contains("IsMenu"));
     EXPECT_TRUE(jsonPtr->Contains("IsMask"));
     EXPECT_TRUE(jsonPtr->Contains("IsModal"));
-    EXPECT_TRUE(jsonPtr->Contains("IsScenceBoardDialog"));
+    EXPECT_TRUE(jsonPtr->Contains("IsSceneBoardDialog"));
     EXPECT_TRUE(jsonPtr->Contains("IsSysBlurStyle"));
     EXPECT_TRUE(jsonPtr->Contains("IsShowInSubWindow"));
 }

@@ -312,6 +312,10 @@ RefPtr<ListChildrenMainSize> ListItemGroupPattern::GetOrCreateListChildrenMainSi
         context->RequestFrame();
     };
     childrenSize_->SetOnDataChange(callback);
+    auto pipeline = GetContext();
+    if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+        childrenSize_->SetIsRoundingMode();
+    }
     return childrenSize_;
 }
 
@@ -320,6 +324,10 @@ void ListItemGroupPattern::SetListChildrenMainSize(
 {
     childrenSize_ = AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, defaultSize);
     OnChildrenSizeChanged({ -1, -1, -1 }, LIST_UPDATE_CHILD_SIZE);
+    auto pipeline = GetContext();
+    if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+        childrenSize_->SetIsRoundingMode();
+    }
 }
 
 void ListItemGroupPattern::OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag)

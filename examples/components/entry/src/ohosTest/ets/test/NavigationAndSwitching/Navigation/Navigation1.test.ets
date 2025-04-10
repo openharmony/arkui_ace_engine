@@ -1534,6 +1534,7 @@ export default function Navigation1() {
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
+          toggleClickObj: 'minContentWidth'
         },
         id: 'Navigation',
         arr: [
@@ -1547,6 +1548,7 @@ export default function Navigation1() {
         slideStar: Slide.end,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
+          toggleClickObj: 'minContentWidth'
         },
         id: 'Navigation',
         arr: [
@@ -1568,6 +1570,7 @@ export default function Navigation1() {
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
+          toggleClickObj: 'ignoreLayoutSafeArea.types'
         },
       })
       done();

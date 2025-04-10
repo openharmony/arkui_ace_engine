@@ -29,69 +29,6 @@ export default function SteeperItem8() {
     beforeAll(async (done: Function) => {
       await SteeperItemStart(done)
     })
-
-    //bindSheet.options.mode
-    /*
-     * 测试组件bindSheet.options.mode支持设置OVERLAY且获取属性正确
-     * */
-    it('ArkUI_StepperItem_Comp_0756', 0, async (done: Function) => {
-      //无法获取属性
-      await searchToggle('bindSheet.isShow', 'bindSheet.options.mode', '通用属性7')
-      await titleSearch('基础属性', 'bindSheet.options.mode', '通用属性7')
-      await radioClick({
-        radioClickObj: 0
-      })
-      done();
-    })
-    /*
-     * 测试组件bindSheet.options.mode支持设置EMBEDDED且获取属性正确
-     * */
-    it('ArkUI_StepperItem_Comp_0757', 0, async (done: Function) => {
-      //无法获取属性
-      await searchToggle('bindSheet.isShow', 'bindSheet.options.mode', '通用属性7')
-      await titleSearch('基础属性', 'bindSheet.options.mode', '通用属性7')
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close
-        }
-      })
-      done();
-    })
-    //bindSheet.options.scrollSizeMode
-    /*
-     * 测试组件bindSheet.options.scrollSizeMode支持设置DOLLOW_DETENT且获取属性正确
-     * */
-    it('ArkUI_StepperItem_Comp_0758', 0, async (done: Function) => {
-      //无法获取属性
-      await searchToggle('bindSheet.isShow', 'bindSheet.options.scrollSizeMode', '通用属性7')
-      await titleSearch('基础属性', 'bindSheet.options.scrollSizeMode', '通用属性7')
-      await radioClick({
-        radioClickObj: 0
-      })
-      done();
-    })
-    /*
-     * 测试组件bindSheet.options.scrollSizeMode支持设置CONTINUOUS且获取属性正确
-     * */
-    it('ArkUI_StepperItem_Comp_0759', 0, async (done: Function) => {
-      //无法获取属性
-      await searchToggle('bindSheet.isShow', 'bindSheet.options.scrollSizeMode', '通用属性7')
-      await titleSearch('基础属性', 'bindSheet.options.scrollSizeMode', '通用属性7')
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close
-        }
-      })
-      done();
-    })
-    //bindSheet相关属性测试完毕，关闭bindSheet.isShow开关，无需断言
-    it('ArkUI_StepperItem_Comp_0760', 0, async (done: Function) => {
-      await titleSearch('基础属性', 'bindSheet.isShow', '通用属性7')
-      await getToggle(ToggleClick.Close)
-      done();
-    })
     // obscured
     /*
      * 测试组件obscured支持设置null且获取属性正确

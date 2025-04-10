@@ -121,9 +121,7 @@ export struct AlertDialogBootcamp {
   @State enableAlertDialogParamButtonsBackgroundColor: boolean = false;
   @State alertDialogParamButtonDirection: DialogButtonDirection = DialogButtonDirection.AUTO;
   @State enableAlertDialogParamButtonDirection: boolean = false;
-
   @State scrollShow: number = 0
-
   scroller: Scroller = new Scroller()
 
   aboutToAppear(): void {
@@ -137,6 +135,9 @@ export struct AlertDialogBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        generic: () => {
+          this.Generic()
         },
         parameters: () => {
           this.Parameters()
@@ -434,6 +435,14 @@ export struct AlertDialogBootcamp {
 
     }
     .width('100%')
+  }
+
+  @Builder
+  Generic() {
+    Scroll(this.scroller) {
+
+    }.height('52%')
+    .id('scroll')
   }
 
   @Builder
@@ -881,7 +890,6 @@ export struct AlertDialogBootcamp {
     }
     .id('scroll')
     .height('52%')
-
 
   }
 }

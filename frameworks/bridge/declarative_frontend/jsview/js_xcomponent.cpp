@@ -211,7 +211,7 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     JSRef<JSObject> controllerObj;
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto aiOptions = paramObject->GetProperty("imageAIOptions");
-    ExtractInfoToXComponentOptions(options, controllerObj, info);
+    ExtractInfoToXComponentOptions(options, controllerObj, paramObject, info);
     if (options.id == std::nullopt && options.xcomponentController == nullptr &&
         (options.xcomponentType == XComponentType::SURFACE || options.xcomponentType == XComponentType::TEXTURE)) {
         XComponentModel::GetInstance()->Create(options.xcomponentType);
@@ -241,9 +241,9 @@ void JSXComponent::Create(const JSCallbackInfo& info)
 }
 
 void JSXComponent::ExtractInfoToXComponentOptions(
-    XComponentOptions& options, JSRef<JSObject>& controllerObj, const JSCallbackInfo& info)
+    XComponentOptions& options, JSRef<JSObject>& controllerObj,
+    const JSRef<JSObject>& paramObject, const JSCallbackInfo& info)
 {
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto id = paramObject->GetProperty("id");
     auto type = paramObject->GetProperty("type");
     auto libraryNameValue = paramObject->GetProperty("libraryname");

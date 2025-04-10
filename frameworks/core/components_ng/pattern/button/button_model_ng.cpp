@@ -303,7 +303,7 @@ RefPtr<FrameNode> ButtonModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, nodeId, AceType::MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty();
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     if (layoutProperty->GetPaddingProperty()) {
         return frameNode;
@@ -316,6 +316,14 @@ RefPtr<FrameNode> ButtonModelNG::CreateFrameNode(int32_t nodeId)
     PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
         CalcLength(padding.Top()), CalcLength(padding.Bottom()), std::nullopt, std::nullopt };
     layoutProperty->UpdatePadding(defaultPadding);
+
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        // undefined use ROUNDED_RECTANGLE type.
+        layoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        // undefined use capsule type.
+        layoutProperty->UpdateType(ButtonType::CAPSULE);
+    }
     return frameNode;
 }
 
@@ -418,10 +426,13 @@ void ButtonModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Di
 
 void ButtonModelNG::SetTypeAndStateEffect(const std::optional<ButtonType>& type, const std::optional<bool>& stateEffect)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
     if (type.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, type.value());
     } else {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             // undefined use ROUNDED_RECTANGLE type.
             ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::ROUNDED_RECTANGLE);
         } else {
@@ -430,8 +441,6 @@ void ButtonModelNG::SetTypeAndStateEffect(const std::optional<ButtonType>& type,
         }
     }
 
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->SetStateEffect(stateEffect.value_or(true));
@@ -625,7 +634,7 @@ void ButtonModelNG::ResetBorderRadius()
 ButtonType ButtonModelNG::GetType(FrameNode* frameNode)
 {
     ButtonType value = ButtonType::CAPSULE;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         value = ButtonType::ROUNDED_RECTANGLE;
         ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value,
                                                         frameNode, ButtonType::ROUNDED_RECTANGLE);

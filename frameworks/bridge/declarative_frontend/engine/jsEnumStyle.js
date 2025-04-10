@@ -3914,3 +3914,9 @@ let EventQueryType;
 (function (EventQueryType) {
   EventQueryType[EventQueryType.ON_CLICK = 0] = 'ON_CLICK';
 })(EventQueryType || (EventQueryType = {}));
+
+let RichEditorDeleteDirection;
+(function (RichEditorDeleteDirection) {
+  RichEditorDeleteDirection[RichEditorDeleteDirection.BACKWARD = 0] = 'BACKWARD';
+  RichEditorDeleteDirection[RichEditorDeleteDirection.FORWARD = 1] = 'FORWARD';
+})(RichEditorDeleteDirection || (RichEditorDeleteDirection = {}));

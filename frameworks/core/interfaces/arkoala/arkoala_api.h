@@ -301,6 +301,7 @@ struct ArkUITouchEvent {
     ArkUI_Int32 changedPointerId;
     ArkUI_Int32 targetDisplayId;
     void* rawPointerEvent;
+    ArkUI_Float64 rollAngle;
 };
 
 struct ArkUIMouseEvent {
@@ -1340,7 +1341,10 @@ struct ArkUIKeyEvent {
     ArkUI_Int32 keyCodesLength;
     ArkUI_Int32 intentionCode;
     ArkUI_Uint64 modifierKeyState;
-
+    ArkUI_Bool isNumLockOn;
+    ArkUI_Bool isCapsLockOn;
+    ArkUI_Bool isScrollLockOn;
+    
     // user input.
     bool isConsumed;
     bool stopPropagation;
@@ -1370,6 +1374,7 @@ struct ArkUIClickEvent {
     ArkUI_Float32 height;
     ArkUI_Int64 deviceId;
     ArkUI_Uint64 modifierKeyState;
+    ArkUI_Float64 rollAngle;
 };
 
 struct ArkUIHoverEvent {
@@ -3436,6 +3441,8 @@ struct ArkUIListItemModifier {
     void (*resetListItemSwipeAction)(ArkUINodeHandle node);
     void (*setListItemOnSelectCallback)(ArkUINodeHandle node, void* callback);
     void (*resetListItemOnSelectCallback)(ArkUINodeHandle node);
+    void (*setListItemStyle)(ArkUINodeHandle node, ArkUI_Uint32 style);
+    void (*resetListItemStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollBarModifier {
@@ -3645,7 +3652,7 @@ struct ArkUIGestureModifier {
     ArkUI_Int32 (*gestureEventTargetInfoIsScrollEnd)(ArkUIGestureEventTargetInfo* info, bool* ret);
     ArkUI_Int32 (*getPanGestureDirectionMask)(ArkUIGestureRecognizer* recognizer, ArkUIGestureDirection* direction);
     ArkUI_Int32 (*getSwipeGestureDirectionMask)(
-        ArkUIGestureRecognizer* recognizer, ArkUISwipeGestureDirection* direction);
+        ArkUIGestureRecognizer* recognizer, ArkUIGestureDirection* direction);
     ArkUI_Int32 (*getGestureFingerCount)(ArkUIGestureRecognizer* recognizer, int* finger);
     ArkUI_Int32 (*getGestureLimitFingerCount)(ArkUIGestureRecognizer* recognizer, bool* isLimited);
     ArkUI_Int32 (*getLongPressGestureRepeat)(ArkUIGestureRecognizer* recognizer, bool* isRepeat);
@@ -3655,6 +3662,8 @@ struct ArkUIGestureModifier {
     ArkUI_Int32 (*getLongPressGestureDuration)(ArkUIGestureRecognizer* recognizer, int* duration);
     ArkUI_Int32 (*getRotationGestureAngle)(ArkUIGestureRecognizer* recognizer, double* angle);
     ArkUI_Int32 (*getTapGestureDistanceThreshold)(ArkUIGestureRecognizer* recognizer, double* distanceThreshold);
+    ArkUI_Int32 (*setDistanceMap)(ArkUIGesture* gesture, int size, int* toolTypeArray, double* distanceArray);
+    ArkUI_Int32 (*getDistanceByToolType)(ArkUIGestureRecognizer* recognizer, int toolType, double* distance);
     ArkUI_Bool (*isBuiltInGesture)(ArkUIGestureRecognizer* recognizer);
     ArkUI_Int32 (*getGestureTag)(
         ArkUIGestureRecognizer* recognizer, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* result);
@@ -5801,7 +5810,8 @@ struct ArkUIFrameNodeModifier {
     void (*resetSystemFontStyleChangeEvent)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getCustomPropertyCapiByKey)(
         ArkUINodeHandle node, ArkUI_CharPtr key, char** value, ArkUI_Uint32* size);
-    void (*setCustomPropertyModiferByKey)(ArkUINodeHandle node, void* callback, void* getCallback);
+    void (*setCustomPropertyModiferByKey)(ArkUINodeHandle node, void* callback, void* getCallback,
+        void* getCustomPropertyMap);
     void (*addCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key, ArkUI_CharPtr value);
     void (*removeCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key);
     void (*freeCustomPropertyCharPtr)(char* value, ArkUI_Uint32 size);

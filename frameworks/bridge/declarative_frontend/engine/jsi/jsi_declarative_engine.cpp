@@ -2402,7 +2402,7 @@ void JsiDeclarativeEngine::TimerCallback(const std::string& callbackId, const st
     if (isInterval) {
         delegate->WaitTimer(callbackId, delay, isInterval, false);
     } else {
-        JsiTimerModule::GetInstance()->RemoveCallBack(std::stoi(callbackId));
+        JsiTimerModule::GetInstance()->RemoveCallBack(StringUtils::StringToInt(callbackId));
         delegate->ClearTimer(callbackId);
     }
 }
@@ -2411,7 +2411,7 @@ void JsiDeclarativeEngine::TimerCallJs(const std::string& callbackId) const
 {
     shared_ptr<JsValue> func;
     std::vector<shared_ptr<JsValue>> params;
-    if (!JsiTimerModule::GetInstance()->GetCallBack(std::stoi(callbackId), func, params)) {
+    if (!JsiTimerModule::GetInstance()->GetCallBack(StringUtils::StringToInt(callbackId), func, params)) {
         return;
     }
     auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();

@@ -16,17 +16,17 @@
 #include "js_accessibility_manager.h"
 
 #include "accessibility_system_ability_client.h"
+#include "js_third_provider_interaction_operation.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/event_report.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "frameworks/core/accessibility/utils/accessibility_action_function_utils.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_container_handler.h"
 #include "frameworks/core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
-#include "frameworks/core/components_ng/pattern/web/web_pattern.h"
-#include "js_third_provider_interaction_operation.h"
 #include "frameworks/core/components_ng/pattern/web/transitional_node_info.h"
-#include "base/log/event_report.h"
+#include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
@@ -2348,12 +2348,14 @@ bool ActClick(RefPtr<NG::FrameNode>& frameNode)
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, result);
     auto accessibilityAction = ACTIONS.find(ACCESSIBILITY_ACTION_CLICK);
-    if (accessibilityAction == ACTIONS.end()) {
-        return result;
+    if (accessibilityAction != ACTIONS.end()) {
+        AccessibilityActionParam param;
+        param.accessibilityProperty = accessibilityProperty;
+        result |= accessibilityAction->second(param);
     }
-    AccessibilityActionParam param;
-    param.accessibilityProperty = accessibilityProperty;
-    result |= accessibilityAction->second(param);
+
+    // notify child action happened to parent
+    NG::AccessibilityFunctionUtils::HandleNotifyChildAction(frameNode, NotifyChildActionType::ACTION_CLICK);
     return result;
 }
 
@@ -3089,7 +3091,7 @@ void JsAccessibilityManager::RegisterDynamicRenderGetParentRectHandler()
         CHECK_NULL_VOID(ngPipeline);
         auto container = Platform::AceContainer::GetContainer(ngPipeline->GetInstanceId());
         CHECK_NULL_VOID(container);
-        auto containerHandler = container->GetContainerHandler().Upgrade();
+        auto containerHandler = container->GetContainerHandler();
         CHECK_NULL_VOID(containerHandler);
 
         HandlerData data = {
@@ -3902,6 +3904,11 @@ RefPtr<NG::PipelineContext> JsAccessibilityManager::GetPipelineByWindowId(uint32
 
 // DFX related
 namespace {
+enum class InjectActionType : uint32_t {
+    UNDEFINED_ACTION = 0,
+    NOTIFY_CHILD_ACTION = 1,
+};
+
 bool CheckAndGetEventTestArgument(std::vector<std::string>::const_iterator start,
     const std::vector<std::string>& params, DumpInfoArgument& argument)
 {
@@ -3919,7 +3926,72 @@ bool CheckAndGetEventTestArgument(std::vector<std::string>::const_iterator start
     argument.eventId = StringUtils::StringToInt(*arg);
     return true;
 }
+
+bool DumpProcessInjectActionParameters(
+    const std::vector<std::string>& params,
+    int64_t& nodeId,
+    int32_t& result,
+    InjectActionType& actionType)
+{
+    constexpr int32_t NUM_PARAMETERS_DIMENSION = 1;
+    if (params.size() < 1) {
+        return false;
+    }
+
+    for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
+        if (*arg == "--inject-action") {
+            if (std::distance(arg, params.end()) <= NUM_PARAMETERS_DIMENSION) {
+                DumpLog::GetInstance().Print(std::string("Error: parameters need with data"));
+                return false;
+            }
+            ++arg;
+            nodeId = StringUtils::StringToLongInt(*arg);
+        } else if (*arg == "--NotifyChildAction") {
+            if (std::distance(arg, params.end()) <= NUM_PARAMETERS_DIMENSION) {
+                DumpLog::GetInstance().Print(std::string("Error: parameters need with data"));
+                return false;
+            }
+            ++arg;
+            result = StringUtils::StringToInt(*arg);
+            actionType = InjectActionType::NOTIFY_CHILD_ACTION;
+            return true;
+        }
+    }
+    return false;
+}
 } // DFX related
+
+void JsAccessibilityManager::DumpInjectActionTest(const std::vector<std::string>& params)
+{
+    int64_t nodeId;
+    int32_t result;
+    InjectActionType actionType = InjectActionType::UNDEFINED_ACTION;
+
+    if (!DumpProcessInjectActionParameters(params, nodeId, result, actionType)) {
+        return;
+    }
+
+    auto pipeline = context_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    RefPtr<NG::PipelineContext> ngPipeline;
+
+    RefPtr<NG::FrameNode> frameNode;
+    ngPipeline = FindPipelineByElementId(nodeId, frameNode);
+    CHECK_NULL_VOID(ngPipeline);
+    CHECK_NULL_VOID(frameNode);
+
+    if (actionType == InjectActionType::NOTIFY_CHILD_ACTION) {
+        auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        int64_t nodeId = frameNode->GetAccessibilityId();
+        accessibilityProperty->SetNotifyChildAction([nodeId, result] (NotifyChildActionType childActionType) {
+            TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "onNotifyChildAction callback: nodeid %{public}" \
+                PRId64 " result %{public}d", nodeId, result);
+            return static_cast<AccessibilityActionResult>(result);
+        });
+    }
+    DumpLog::GetInstance().Print(std::string("Result: inject action done"));
+}
 
 void JsAccessibilityManager::DumpTreeNG(bool useWindowId, uint32_t windowId, int64_t rootId, bool isDumpSimplify)
 {
@@ -4078,6 +4150,9 @@ bool JsAccessibilityManager::GetDumpInfoArgument(const std::vector<std::string>&
             argument.pointY = StringUtils::StringToInt(*arg);
         } else if (*arg == "--event-test") {
             return CheckAndGetEventTestArgument(arg, params, argument);
+        } else if (*arg == "--inject-action") {
+            argument.mode = DumpMode::INJECT_ACTION_TEST;
+            break;
         } else if (*arg == "-v") {
             argument.verbose = true;
         } else if (*arg == "-json") {
@@ -4127,6 +4202,9 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
             break;
         case DumpMode::EVENT_TEST:
             DumpSendEventTest(argument.nodeId, argument.eventId, params);
+            break;
+        case DumpMode::INJECT_ACTION_TEST:
+            DumpInjectActionTest(params);
             break;
         default:
             DumpLog::GetInstance().Print("Error: invalid arguments!");

@@ -335,6 +335,7 @@ private:
     void HandleDragEnd();
     void SetSelectedMarkPaint(bool paint);
     void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme);
+    void UpdateAnimationColor(const RefPtr<PickerTheme>& pickerTheme);
 #ifdef SUPPORT_DIGITAL_CROWN
     void HandleCrownBeginEvent(const CrownEvent& event);
     void HandleCrownMoveEvent(const CrownEvent& event);

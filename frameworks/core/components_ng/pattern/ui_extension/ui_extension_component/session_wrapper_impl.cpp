@@ -38,10 +38,12 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_container_handler.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "pointer_event.h"
+#include "string_wrapper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -62,6 +64,7 @@ constexpr char LIFECYCLE_TIMEOUT_NAME[] = "extension_lifecycle_timeout";
 constexpr char LIFECYCLE_TIMEOUT_MESSAGE[] = "the lifecycle of extension ability is timeout, please check AMS log.";
 constexpr char EVENT_TIMEOUT_NAME[] = "handle_event_timeout";
 constexpr char EVENT_TIMEOUT_MESSAGE[] = "the extension ability has timed out processing the key event.";
+constexpr char UIEXTENSION_HOST_UICONTENT_TYPE[] = "ohos.ace.uiextension.hostUicontentType";
 // Defines the want parameter to control the soft-keyboard area change of the provider.
 constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupiedAreaChange";
 // Set the UIExtension type of the EmbeddedComponent.
@@ -742,6 +745,8 @@ void SessionWrapperImpl::UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr)
     auto container = Platform::AceContainer::GetContainer(GetInstanceIdFromHost());
     CHECK_NULL_VOID(container);
     container->GetExtensionConfig(configParam);
+    auto str = UIExtensionContainerHandler::FromUIContentTypeToStr(container->GetUIContentType());
+    configParam.SetParam(UIEXTENSION_HOST_UICONTENT_TYPE, AAFwk::String::Box(str));
     AAFwk::WantParams wantParam(wantPtr->GetParams());
     wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
     wantPtr->SetParams(wantParam);
@@ -956,9 +961,9 @@ void SessionWrapperImpl::NotifyForeground()
     auto hostWindowId = pipeline->GetFocusWindowId();
     int32_t windowSceneId = GetWindowSceneId();
     UIEXT_LOGI("NotifyForeground, persistentid = %{public}d, hostWindowId = %{public}u,"
-        " windowSceneId = %{public}d, IsScenceBoardWindow: %{public}d, componentId=%{public}d.",
-        session_->GetPersistentId(), hostWindowId, windowSceneId, container->IsScenceBoardWindow(), GetFrameNodeId());
-    if (container->IsScenceBoardWindow() && windowSceneId != INVALID_WINDOW_ID) {
+        " windowSceneId = %{public}d, IsSceneBoardWindow: %{public}d, componentId=%{public}d.",
+        session_->GetPersistentId(), hostWindowId, windowSceneId, container->IsSceneBoardWindow(), GetFrameNodeId());
+    if (container->IsSceneBoardWindow() && windowSceneId != INVALID_WINDOW_ID) {
         hostWindowId = static_cast<uint32_t>(windowSceneId);
     }
     auto pattern = hostPattern_.Upgrade();
@@ -1288,7 +1293,7 @@ bool SessionWrapperImpl::InnerNotifyOccupiedAreaChangeInfo(
     auto curWindow = pipeline->GetCurrentWindowRect();
     auto container = Platform::AceContainer::GetContainer(GetInstanceIdFromHost());
     CHECK_NULL_RETURN(container, false);
-    if (container->IsScenceBoardWindow()) {
+    if (container->IsSceneBoardWindow()) {
         Rosen::WSRect rect = GetWindowSceneRect();
         curWindow.SetRect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     }

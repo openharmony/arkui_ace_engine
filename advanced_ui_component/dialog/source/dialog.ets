@@ -1147,16 +1147,14 @@ struct CustomDialogContentComponent {
                   }
                 }.padding(this.getContentPadding())
               } else {
-                WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
-                  this.ButtonBuilder();
-                }
+                this.buildButton();
               }
             });
           }
         }
         .constraintSize({ maxHeight: this.contentMaxHeight })
         .backgroundBlurStyle(this.customStyle ?
-          BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true })
+        BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true })
         .borderRadius(this.customStyle ? $r('sys.float.ohos_id_corner_radius_dialog') : 0)
         .margin(this.customStyle ? {
           start: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_start')),
@@ -1431,6 +1429,33 @@ struct CustomDialogContentComponent {
     .padding(this.getOperationAreaPadding());
   }
 
+  private isSetCustomButtonTheme(): boolean {
+    // is set fadeout style: now only on TV
+    if (IS_FADEOUT_ENABLE()) {
+      // has set button background color prop
+      if (this.theme?.colors?.compBackgroundTertiary || this.theme?.colors?.backgroundEmphasize) {
+        return true;
+      }
+      // has set button font color prop
+      if (this.theme?.colors?.fontEmphasize || this.theme?.colors?.fontOnPrimary || this.theme?.colors?.warning) {
+        return true;
+      }
+      return false;
+    }
+    return true;
+  }
+
+  @Builder
+  buildButton() {
+    if (this.isSetCustomButtonTheme()) {
+      WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+        this.ButtonBuilder();
+      }
+    } else {
+      this.ButtonBuilder();
+    }
+  }
+
   /**
    * get operation area padding
    *
@@ -1603,14 +1628,21 @@ struct CustomDialogContentComponent {
       }
       let isVertical: boolean = false;
       let maxButtonTextSize = vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN() -
-        BUTTON_HORIZONTAL_SPACE() - 2 * BUTTON_HORIZONTAL_PADDING);
+      BUTTON_HORIZONTAL_SPACE() - 2 * BUTTON_HORIZONTAL_PADDING);
       this.buttons.forEach((button) => {
-        let contentSize: SizeOptions = measure.measureTextSize({
-          textContent: button.value,
-          fontSize: this.buttonMaxFontSize
-        });
-        if (Number(contentSize.width) > maxButtonTextSize) {
-          isVertical = true;
+        try {
+          let contentSize: SizeOptions = measure.measureTextSize({
+            textContent: button.value,
+            fontSize: this.buttonMaxFontSize
+          });
+          if (Number(contentSize?.width) > maxButtonTextSize) {
+            isVertical = true;
+          }
+        } catch (err) {
+          let code: number = (exception as BusinessError).code;
+          let message: string = (exception as BusinessError).message;
+          hilog.error(0x3900, 'Ace',
+            `Faild to dialog isVerticalAlignButton measureTextSize,cause, code: ${code}, message: ${message}`);
         }
       });
       return isVertical;

@@ -197,139 +197,6 @@ HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan001, TestSize.Level1)
 }
 
 /**
- * @tc.name: AddPlaceholderSpan001
- * @tc.desc: test add builder span
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorAddSpanTestNg, AddPlaceholderSpan001, TestSize.Level1)
-{
-    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
-    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
-        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
-    ASSERT_NE(richEditorNode_, nullptr);
-    RefPtr<GeometryNode> containerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(containerGeometryNode == nullptr);
-    containerGeometryNode->SetFrameSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
-    ASSERT_NE(richEditorNode_->GetLayoutProperty(), nullptr);
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(richEditorNode_, containerGeometryNode, richEditorNode_->GetLayoutProperty());
-
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
-
-    auto builderId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto builderNode = FrameNode::GetOrCreateFrameNode(
-        V2::ROW_ETS_TAG, builderId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-    auto index = richEditorController->AddPlaceholderSpan(builderNode, {});
-    EXPECT_EQ(index, 0);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
-    auto builderSpanChildren = richEditorNode_->GetChildren();
-    ASSERT_NE(static_cast<int32_t>(builderSpanChildren.size()), 0);
-    auto builderSpan = builderSpanChildren.begin();
-    auto builderSpanChild = AceType::DynamicCast<FrameNode>(*builderSpan);
-    ASSERT_NE(builderSpanChild, nullptr);
-    EXPECT_EQ(builderSpanChild->GetTag(), V2::PLACEHOLDER_SPAN_ETS_TAG);
-
-    auto richEditorLayoutAlgorithm = richEditorPattern->CreateLayoutAlgorithm();
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(richEditorLayoutAlgorithm));
-    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
-    childLayoutConstraint.selfIdealSize = OptionalSizeF(BUILDER_SIZE);
-    RefPtr<GeometryNode> builderGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    builderGeometryNode->Reset();
-    RefPtr<LayoutWrapperNode> builderLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        builderSpanChild, builderGeometryNode, builderSpanChild->GetLayoutProperty());
-    EXPECT_FALSE(builderLayoutWrapper == nullptr);
-    auto builderPattern = builderSpanChild->GetPattern();
-    builderLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
-    auto firstItemLayoutAlgorithm = builderPattern->CreateLayoutAlgorithm();
-    EXPECT_FALSE(firstItemLayoutAlgorithm == nullptr);
-}
-
-/**
- * @tc.name: AddPlaceholderSpan002
- * @tc.desc: test add builder span
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorAddSpanTestNg, AddPlaceholderSpan002, TestSize.Level1)
-{
-    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
-    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
-        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
-    AddSpan("test");
-    auto builderId1 = ElementRegister::GetInstance()->MakeUniqueId();
-    auto builderNode1 = FrameNode::GetOrCreateFrameNode(
-        V2::ROW_ETS_TAG, builderId1, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-    auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
-    EXPECT_EQ(index1, 1);
-    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 2);
-    auto builderSpanChildren = richEditorNode_->GetChildren();
-    ASSERT_NE(static_cast<int32_t>(builderSpanChildren.size()), 0);
-    auto builderSpanChild = builderSpanChildren.begin();
-    EXPECT_EQ((*builderSpanChild)->GetTag(), "Span");
-    ClearSpan();
-}
-
-/**
- * @tc.name: AddPlaceholderSpan003
- * @tc.desc: test AddPlaceholderSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorAddSpanTestNg, AddPlaceholderSpan003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create richEditorNode_ and layoutWrapper.
-     */
-    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
-    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
-        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
-    ASSERT_NE(richEditorNode_, nullptr);
-
-    RefPtr<GeometryNode> containerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(containerGeometryNode == nullptr);
-    containerGeometryNode->SetFrameSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
-    ASSERT_NE(richEditorNode_->GetLayoutProperty(), nullptr);
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(richEditorNode_, containerGeometryNode, richEditorNode_->GetLayoutProperty());
-
-    /**
-     * @tc.steps: step2. get richEditorPattern and richEditorController.
-     */
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
-    AddSpan("test");
-
-    /**
-     * @tc.steps: step3. test AddPlaceholderSpan.
-     */
-    auto builderId1 = ElementRegister::GetInstance()->MakeUniqueId();
-    auto builderNode1 = FrameNode::GetOrCreateFrameNode(
-        V2::ROW_ETS_TAG, builderId1, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-
-    auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
-    EXPECT_EQ(index1, 1);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
-    auto builderSpanChildren = richEditorNode_->GetChildren();
-    ASSERT_NE(static_cast<int32_t>(builderSpanChildren.size()), 0);
-    auto eventHub = builderNode1->GetEventHub<EventHub>();
-    EXPECT_NE(eventHub, nullptr);
-}
-
-/**
  * @tc.name: AddSymbolSpan001
  * @tc.desc: test add symbol span
  * @tc.type: FUNC
@@ -598,4 +465,56 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpansByPaste001, TestSize.Level1)
     richEditorPattern->AddSpansByPaste(spans);
     ASSERT_EQ(richEditorPattern->textSelector_.IsValid(), false);
 }
+
+/**
+ * @tc.name: AddSpansAndReplacePlaceholder001
+ * @tc.desc: test AddSpansAndReplacePlaceholder
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAddSpanTestNg, AddSpansAndReplacePlaceholder001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"test![id1]");
+    auto start = richEditorPattern->operationRecords_.size();
+    richEditorPattern->AddSpansAndReplacePlaceholder(spanString);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
+    richEditorPattern->ClearOperationRecords();
+
+    spanString = AceType::MakeRefPtr<SpanString>(u"test![id2]");
+    start = richEditorPattern->operationRecords_.size();
+    richEditorPattern->AddSpansAndReplacePlaceholder(spanString);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
+    richEditorPattern->ClearOperationRecords();
+
+    richEditorPattern->placeholderSpansMap_[u"![id3]"] = nullptr;
+    spanString = AceType::MakeRefPtr<SpanString>(u"test![id3]");
+    start = richEditorPattern->operationRecords_.size();
+    richEditorPattern->AddSpansAndReplacePlaceholder(spanString);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
+    richEditorPattern->ClearOperationRecords();
+
+    richEditorPattern->placeholderSpansMap_[u"![id4]"] = AceType::MakeRefPtr<SpanItem>();
+    spanString = AceType::MakeRefPtr<SpanString>(u"test![id4]");
+    start = richEditorPattern->operationRecords_.size();
+    richEditorPattern->AddSpansAndReplacePlaceholder(spanString);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
+    richEditorPattern->ClearOperationRecords();
+
+    spanString = AceType::MakeRefPtr<SpanString>(u"![id5]");
+    richEditorPattern->placeholderSpansMap_[u"![id5]"] = AceType::MakeRefPtr<SpanItem>();
+    start = richEditorPattern->operationRecords_.size();
+    richEditorPattern->AddSpansAndReplacePlaceholder(spanString);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 1);
+    richEditorPattern->ClearOperationRecords();
+
+    spanString = AceType::MakeRefPtr<SpanString>(u"");
+    start = richEditorPattern->operationRecords_.size();
+    richEditorPattern->AddSpansAndReplacePlaceholder(spanString);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start);
+    richEditorPattern->ClearOperationRecords();
+}
+
 } // namespace OHOS::Ace::NG

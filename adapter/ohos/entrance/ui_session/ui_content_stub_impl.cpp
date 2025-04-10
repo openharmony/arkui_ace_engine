@@ -65,6 +65,12 @@ int32_t UIContentServiceStubImpl::SendCommandAsync(int32_t id, const std::string
     return UiSessionManager::GetInstance()->NotifySendCommandAsyncPattern(id, command);
 }
 
+int32_t UIContentServiceStubImpl::SendCommand(const std::string command)
+{
+    UiSessionManager::GetInstance()->SendCommand(command);
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceStubImpl::UnregisterClickEventCallback()
 {
     UiSessionManager::GetInstance()->SetClickEventRegistered(false);
@@ -161,4 +167,10 @@ int32_t UIContentServiceStubImpl::GetCurrentPageName(const EventCallback& eventC
     return NO_ERROR;
 }
 
+int32_t UIContentServiceStubImpl::GetVisibleInspectorTree(
+    const std::function<void(std::string, int32_t, bool)>& eventCallback)
+{
+    UiSessionManager::GetInstance()->GetVisibleInspectorTree();
+    return NO_ERROR;
+}
 } // namespace OHOS::Ace

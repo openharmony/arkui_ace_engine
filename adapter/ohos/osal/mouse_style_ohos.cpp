@@ -140,7 +140,14 @@ void MouseStyleOhos::SetCustomCursor(
     CHECK_NULL_VOID(inputManager);
     CHECK_NULL_VOID(pixelMap);
 
-    int32_t status = inputManager->SetCustomCursor(windowId, static_cast<void*>(pixelMap.get()), focusX, focusY);
+    MMI::CustomCursor cursor;
+    cursor.pixelMap = pixelMap.get();
+    cursor.focusX = focusX;
+    cursor.focusY = focusY;
+
+    MMI::CursorOptions options;
+    TAG_LOGI(AceLogTag::ACE_WEB, "set custom cursor start");
+    int32_t status = inputManager->SetCustomCursor(windowId, cursor, options);
     if (status != 0) {
         TAG_LOGE(AceLogTag::ACE_WEB, "set custom cursor failed %{public}u", status);
         return;

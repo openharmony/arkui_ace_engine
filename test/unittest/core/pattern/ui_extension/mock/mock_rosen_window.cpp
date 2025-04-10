@@ -47,6 +47,7 @@ float RosenWindow::GetRefreshRate() const
 }
 
 void RosenWindow::SetKeepScreenOn(bool keepScreenOn) {}
+void RosenWindow::SetViewKeepScreenOn(bool keepScreenOn) {}
 
 int64_t RosenWindow::GetVSyncPeriod() const
 {

@@ -231,6 +231,7 @@ public:
     void ResetLastSelectedOptionFlags(const RefPtr<MenuItemPattern>& optionPattern);
     void UpdateOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern);
     void UpdateSelectedOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern);
+    void DumpInfo() override;
 
 private:
     void OnAttachToFrameNode() override;

@@ -67,7 +67,7 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     dragStatus_ = MakeRefPtr<PropertyBool>(false);
     AttachProperty(dragStatus_);
     if (textStyle.has_value()) {
-        SetDefaultAnimatablePropertyValue(textStyle.value());
+        SetDefaultAnimatablePropertyValue(textStyle.value(), host);
     }
 
     textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
@@ -79,7 +79,7 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     racePercentFloat_ = MakeRefPtr<AnimatablePropertyFloat>(0.0f);
     AttachProperty(racePercentFloat_);
 
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip_ = MakeRefPtr<PropertyBool>(true);
     } else {
         clip_ = MakeRefPtr<PropertyBool>(false);
@@ -98,14 +98,17 @@ void TextContentModifier::ChangeDragStatus()
     dragStatus_->Set(!dragStatus_->Get());
 }
 
-void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& textStyle)
+void TextContentModifier::SetDefaultAnimatablePropertyValue(
+    const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode)
 {
     SetDefaultFontSize(textStyle);
     SetDefaultAdaptMinFontSize(textStyle);
     SetDefaultAdaptMaxFontSize(textStyle);
     SetDefaultFontWeight(textStyle);
     SetDefaultTextColor(textStyle);
-    SetDefaultSymbolColor(textStyle);
+    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        SetDefaultSymbolColor(textStyle);
+    }
     SetDefaultTextShadow(textStyle);
     SetDefaultTextDecoration(textStyle);
     SetDefaultBaselineOffset(textStyle);
@@ -406,7 +409,13 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
     ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f][contentRect:%s]", host->GetId(), paintOffset_.GetX(),
         paintOffset_.GetY(), contentRect.ToString().c_str());
 
-    AnimationMeasureUpdate(host);
+    PropertyChangeFlag flag = 0;
+    if (NeedMeasureUpdate(flag)) {
+        host->MarkDirtyNode(flag);
+        auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->OnPropertyChangeMeasure();
+    }
     if (!ifPaintObscuration_) {
         auto& canvas = drawingContext.canvas;
         CHECK_NULL_VOID(contentSize_);
@@ -422,7 +431,15 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
             canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         }
         if (!marqueeSet_) {
-            DrawText(canvas, pManager);
+            auto paintOffsetY = paintOffset_.GetY();
+            auto paragraphs = pManager->GetParagraphs();
+            for (auto&& info : paragraphs) {
+                auto paragraph = info.paragraph;
+                CHECK_NULL_VOID(paragraph);
+                ChangeParagraphColor(paragraph);
+                paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
+                paintOffsetY += paragraph->GetHeight();
+            }
         } else {
             // Racing
             DrawTextRacing(drawingContext, fadeoutInfo, pManager);
@@ -709,6 +726,9 @@ void TextContentModifier::UpdateTextColorMeasureFlag(PropertyChangeFlag& flag)
 
 void TextContentModifier::UpdateSymbolColorMeasureFlag(PropertyChangeFlag& flag)
 {
+    if (!symbolColors_.has_value()) {
+        return;
+    }
     auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);

@@ -1816,4 +1816,27 @@ HWTEST_F(WebPatternPartTwoTest, OnEnableFollowSystemFontWeightUpdate_002, TestSi
 
 #endif
 }
+
+/**
+ * @tc.name: RunJavascriptAsync_001
+ * @tc.desc: RunJavascriptAsync.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartTwoTest, RunJavascriptAsync_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->delegate_ = nullptr;
+    auto ret = webPattern->RunJavascriptAsync("console.log('hello')", [](const std::string&) {});
+    ASSERT_FALSE(ret);
+#endif
+}
 }

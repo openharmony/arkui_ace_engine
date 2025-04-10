@@ -237,7 +237,7 @@ public:
         rect_ = rect;
     }
 
-    void SetExtensionHandler(ExtensionHandler* extensionHandler);
+    void SetExtensionHandler(const RefPtr<ExtensionHandler>& extensionHandler);
 
     void SetOverlayChange()
     {
@@ -247,9 +247,9 @@ public:
 private:
     std::vector<RefPtr<PropertyBase>> attachedProperties_;
     RectF rect_;
-    ExtensionHandler* extensionHandler_ = nullptr;
     RefPtr<PropertyInt> changeCount_;
     ACE_DISALLOW_COPY_AND_MOVE(OverlayModifier);
+    WeakPtr<ExtensionHandler> extensionHandler_;
 };
 
 class ForegroundModifier : public Modifier {
@@ -285,7 +285,7 @@ public:
         rect_ = rect;
     }
 
-    void SetExtensionHandler(ExtensionHandler* extensionHandler);
+    void SetExtensionHandler(const RefPtr<ExtensionHandler>& extensionHandler);
 
     void SetForegroundChange()
     {
@@ -295,9 +295,9 @@ public:
 private:
     std::vector<RefPtr<PropertyBase>> attachedProperties_;
     RectF rect_;
-    ExtensionHandler* extensionHandler_ = nullptr;
     RefPtr<PropertyInt> changeCount_;
     ACE_DISALLOW_COPY_AND_MOVE(ForegroundModifier);
+    WeakPtr<ExtensionHandler> extensionHandler_;
 };
 
 class ContentModifier : public Modifier {
@@ -349,14 +349,14 @@ public:
         changeCount_->Set(changeCount_->Get() + 1);
     }
 
-    void SetExtensionHandler(ExtensionHandler* extensionHandler);
+    void SetExtensionHandler(const RefPtr<ExtensionHandler>& extensionHandler);
 
 private:
     std::vector<RefPtr<PropertyBase>> attachedProperties_;
     std::optional<RectF> rect_;
     bool isCustomFont_ = false;
     RefPtr<PropertyInt> changeCount_; // use to trigger rerendering
-    ExtensionHandler* extensionHandler_ = nullptr;
+    WeakPtr<ExtensionHandler> extensionHandler_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifier);
 };

@@ -248,7 +248,7 @@ void SearchModelNG::SetSearchButton(const std::string& text)
     } else {
         searchButtonEvent->SetEnabled(false);
         searchButtonRenderContext->UpdateOpacity(0.0);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             ACE_RESET_LAYOUT_PROPERTY(SearchLayoutProperty, SearchButton);
         }
     }
@@ -2252,6 +2252,7 @@ void SearchModelNG::SetBackBorderRadius()
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
+    CHECK_NULL_VOID(renderContext->GetBorderRadius());
 
     bool isRTL = textFieldLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     auto optRadius = renderContext->GetBorderRadius();

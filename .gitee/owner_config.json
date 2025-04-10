@@ -4,7 +4,9 @@
             "https://gitee.com/raulnaruto_admin",
             "https://gitee.com/jiangdayuan",
             "https://gitee.com/tsj_2020",
-            "https://gitee.com/cheng-feiwang"
+            "https://gitee.com/cheng-feiwang",
+            "https://gitee.com/huangxiaolinabc123",
+            "https://gitee.com/h-xinwei"
         ],
         "https://gitee.com/arkuiabilitygroup": [
             "https://gitee.com/lmleon",
@@ -22,7 +24,6 @@
         "https://gitee.com/arkuievent": [
             "https://gitee.com/jiangtao92",
             "https://gitee.com/piggyguy",
-            "https://gitee.com/zhaojian2021",
             "https://gitee.com/benb365",
             "https://gitee.com/zhou-chaobo",
             "https://gitee.com/liukaii",
@@ -118,8 +119,16 @@
             "info": "[导航类组件 tongshijia]",
             "group": "https://gitee.com/arkui_superman"
         },
+        "https://gitee.com/huangxiaolinabc123": {
+            "info": "[导航类组件 huangxiaolin]",
+            "group": "https://gitee.com/arkui_superman"
+        },
         "https://gitee.com/cheng-feiwang": {
             "info": "[模态类组件 chenfeiwang]",
+            "group": "https://gitee.com/arkui_superman"
+        },
+        "https://gitee.com/h-xinwei": {
+            "info": "[模态类组件 huangxinwei]",
             "group": "https://gitee.com/arkui_superman"
         },
         "https://gitee.com/lmleon": {
@@ -170,16 +179,12 @@
             "info": "[拖拽 liukai]",
             "group": "https://gitee.com/arkuievent"
         },
-        "https://gitee.com/zhaojian2021": {
-            "info": "[事件手势 zhaojian]",
-            "group": "https://gitee.com/arkuievent"
-        },
         "https://gitee.com/zhou-chaobo": {
             "info": "[事件手势 zhouchaobo]",
             "group": "https://gitee.com/arkuievent"
         },
         "https://gitee.com/benb365": {
-            "info": "[焦点/根视图/通用属性 liuyongchang]",
+            "info": "[事件/焦点/根视图/通用属性 liuyongchang]",
             "group": "https://gitee.com/arkuievent"
         },
         "https://gitee.com/yihao-lin": {

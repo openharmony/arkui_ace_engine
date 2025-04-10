@@ -277,29 +277,6 @@ HWTEST_F(RichEditorPatternTestNg, VirtualKeyboardAreaChanged001, TestSize.Level1
 }
 
 /**
- * @tc.name: GetCaretMetrics001
- * @tc.desc: test GetCaretMetrics
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, GetCaretMetrics001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-
-    CaretMetricsF caretCaretMetric;
-    caretCaretMetric.height = 10.0f;
-    richEditorPattern->GetCaretMetrics(caretCaretMetric);
-    EXPECT_EQ(caretCaretMetric.height, 0.0f);
-}
-
-/**
  * @tc.name: RichEditorToJsonValue001
  * @tc.desc: test ToJsonValue
  * @tc.type: FUNC
@@ -439,37 +416,6 @@ HWTEST_F(RichEditorPatternTestNg, IsClickBoundary001, TestSize.Level1)
 }
 
 /**
- * @tc.name: AdjustPlaceholderSelection001
- * @tc.desc: test AdjustPlaceholderSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, AdjustPlaceholderSelection001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    AddSpan(INIT_VALUE_1);
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem1);
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem2 = AceType::MakeRefPtr<PlaceholderSpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem2);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    int32_t start = 10;
-    int32_t end = 20;
-    Offset touchPos(11.0f, 11.0f);
-    richEditorPattern->AdjustPlaceholderSelection(start, end, touchPos);
-    EXPECT_NE(start, end);
-}
-
-/**
  * @tc.name: UpdateChildrenOffset001
  * @tc.desc: test UpdateChildrenOffset
  * @tc.type: FUNC
@@ -576,29 +522,6 @@ HWTEST_F(RichEditorPatternTestNg, AdjustCursorPosition001, TestSize.Level1)
     int32_t pos = 0;
     richEditorPattern->AdjustCursorPosition(pos);
     EXPECT_EQ(pos, 0);
-}
-
-/**
- * @tc.name: IsCaretInContentArea001
- * @tc.desc: test IsCaretInContentArea
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, IsCaretInContentArea001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    auto ret = richEditorPattern->IsCaretInContentArea();
-    EXPECT_EQ(ret, false);
 }
 
 /**

@@ -157,11 +157,13 @@ public:
     }
 
     LayeredDrawableDescriptor(size_t len, std::string path, uint32_t iconType, DataInfo& foregroundInfo,
-        DataInfo& backgroundInfo, const std::pair<int32_t, int32_t>& decoderSize)
+        DataInfo& backgroundInfo, const std::pair<int32_t, int32_t>& decoderSize,
+        const SharedResourceManager& resourceMgr = nullptr)
         : len_(len), maskPath_(std::move(path)), iconType_(iconType)
     {
         SetDecodeSize(decoderSize.first, decoderSize.second);
         InitLayeredParam(foregroundInfo, backgroundInfo);
+        InitialResource(resourceMgr);
     }
 
     ~LayeredDrawableDescriptor() override = default;

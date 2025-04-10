@@ -2615,10 +2615,31 @@ HWTEST_F(UINodeTestNg, IsAutoFillContainerNode001, TestSize.Level1)
  */
 HWTEST_F(UINodeTestNg, AddFunc_API01, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
     const RefPtr<FrameNode> testNode =
         FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
-    std::list<RefPtr<UINode>>::iterator itr = testNode->children_.begin();
-    testNode->DoAddChild(itr, ONE, true);
+    testNode->AddChild(TWO, 1, false);
+    testNode->AddChild(THREE, 1, false);
+    std::list<RefPtr<UINode>>::iterator itr = testNode->children_.end();
+    testNode->CanAddChildWhenTopNodeIsModalUec(itr);
+
+    /**
+     * @tc.steps: step2. change function parameters.
+     */
+    itr = testNode->children_.begin();
+    testNode->CanAddChildWhenTopNodeIsModalUec(itr);
+    itr = testNode->children_.begin();
+    itr++;
+    TWO->isAllowAddChildBelowModalUec_ = false;
+    TWO->tag_ = V2::MODAL_PAGE_TAG;
+    THREE->isAllowAddChildBelowModalUec_ = false;
+    THREE->tag_ = V2::MODAL_PAGE_TAG;
+
+    /**
+     * @tc.steps: step3. test CanAddChildWhenTopNodeIsModalUec.
+     */
     bool res = testNode->CanAddChildWhenTopNodeIsModalUec(itr);
     EXPECT_EQ(res, true);
 }
@@ -2630,17 +2651,573 @@ HWTEST_F(UINodeTestNg, AddFunc_API01, TestSize.Level1)
  */
 HWTEST_F(UINodeTestNg, AddFunc_API02, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
     const RefPtr<FrameNode> testNode =
         FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
     EXPECT_EQ(testNode->children_.size(), 0);
     auto node = TestNode::CreateTestNode(TEST_ID_ONE);
     auto node2 = TestNode::CreateTestNode(TEST_ID_TWO);
     testNode->AddChild(node, 1, false);
+
+    /**
+     * @tc.steps: step2. test CanAddChildWhenTopNodeIsModalUec.
+     */
     testNode->AddChildAfter(node, node);
     EXPECT_EQ(testNode->children_.size(), 1);
     testNode->AddChildAfter(node2, node);
     EXPECT_EQ(testNode->children_.size(), 2);
     testNode->Clean(false);
+}
+
+/**
+ * @tc.name: AddFunc_API03
+ * @tc.desc: RemoveChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    ONE->AddChild(TWO, 1, false);
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto testNode2 = TestNode::CreateTestNode(TEST_ID_TWO);
+    ONE->AddChild(testNode, 1, false);
+    ONE->AddChild(testNode2, 1, false);
+    EXPECT_EQ(ONE->children_.size(), 3);
+    ONE->isDestroyingState_ = true;
+
+    /**
+     * @tc.steps: step2. observe the changes in the number of children after removal.
+     */
+    auto iter = ONE->RemoveChild(TWO);
+    EXPECT_EQ(iter, ONE->children_.end());
+    ONE->isDestroyingState_ = false;
+    iter = ONE->RemoveChild(testNode);
+    EXPECT_EQ(iter, ONE->children_.end());
+}
+
+/**
+ * @tc.name: AddFunc_API04
+ * @tc.desc: Clean
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API04, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    ONE->AddChild(TWO, 1, false);
+    auto iter = ONE->RemoveChild(TWO);
+    EXPECT_NE(iter, ONE->children_.end());
+    ONE->RemoveChildAtIndex(0);
+    EXPECT_EQ(ONE->children_.size(), 0);
+
+    /**
+     * @tc.steps: step2. add child nodes, to compare the number of child nodes after cleaning.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode("testNode2", 1, AceType::MakeRefPtr<Pattern>(), true);
+    testNode->AddChild(testNode2, 1, false);
+
+    /**
+     * @tc.steps: step3. test Clean.
+     */
+    testNode2->isDestroyingState_ = true;
+    testNode->Clean(true, false);
+    EXPECT_EQ(testNode->children_.size(), 0);
+}
+
+/**
+ * @tc.name: AddFunc_API05
+ * @tc.desc: MountToParentAfter
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API05, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    ONE->isInDestroying_ = true;
+    ONE->hostPageId_ = 3;
+
+    /**
+     * @tc.steps: step2. test MountToParentAfter.
+     */
+    ONE->MountToParentAfter(ONE, testNode);
+    EXPECT_EQ(testNode->hostPageId_, 0);
+    EXPECT_EQ(testNode->isInDestroying_, false);
+}
+
+/**
+ * @tc.name: AddFunc_API06
+ * @tc.desc: MountToParentBefore
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API06, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    ONE->isInDestroying_ = true;
+    ONE->hostPageId_ = 5;
+
+    /**
+     * @tc.steps: step2. test MountToParentBefore.
+     */
+    ONE->MountToParentBefore(ONE, testNode);
+    EXPECT_EQ(testNode->hostPageId_, 0);
+    EXPECT_EQ(testNode->isInDestroying_, false);
+}
+
+/**
+ * @tc.name: AddFunc_API07
+ * @tc.desc: OnRemoveFromParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API07, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+
+    /**
+     * @tc.steps: step2. set the variables to meet the conditional values and test the function.
+     */
+    testNode->isDestroyingState_ = true;
+    bool res = testNode->OnRemoveFromParent(true);
+    EXPECT_EQ(res, false);
+    testNode->isDestroyingState_ = false;
+    res = testNode->OnRemoveFromParent(true);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: AddFunc_API08
+ * @tc.desc: GetParentCustomNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API08, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto child = CustomNode::CreateCustomNode(childId, "child");
+
+    /**
+     * @tc.steps: step2. set the variables to meet the conditional values and test the function.
+     */
+    child->AddChild(testNode, 1, false);
+    auto res = testNode->GetParentCustomNode();
+    EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: AddFunc_API09
+ * @tc.desc: GetFocusParentWithBoundary、GetCurrentChildrenFocusHub
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API09, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    std::list<RefPtr<UINode>>::iterator itr = testNode->children_.begin();
+    testNode->DoAddChild(itr, ONE, true);
+
+    /**
+     * @tc.steps: step2. test GetFocusParentWithBoundary.
+     */
+    testNode->tag_ = V2::SCREEN_ETS_TAG;
+    ONE->parent_ = testNode;
+    auto res = ONE->GetFocusParentWithBoundary();
+
+    /**
+     * @tc.steps: step3. set the variables to meet the conditional values and test the function.
+     */
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode("testNode2", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode3 =
+        FrameNode::CreateFrameNode("testNode3", 1, AceType::MakeRefPtr<Pattern>(), true);
+    testNode2->AddChild(testNode3, 1, false);
+    std::list<RefPtr<FocusHub>> focusNodes;
+    testNode2->GetCurrentChildrenFocusHub(focusNodes);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: AddFunc_API10
+ * @tc.desc: DoAddChild、AttachToMainTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API10, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    std::list<RefPtr<UINode>>::iterator itr = testNode->children_.begin();
+
+    /**
+     * @tc.steps: step2. test DoAddChild.
+     */
+    testNode->isAccessibilityVirtualNode_ = true;
+    testNode->themeScopeId_ = 2;
+    testNode->isAllowUseParentTheme_ = true;
+    testNode->DoAddChild(itr, ONE, false);
+
+    /**
+     * @tc.steps: step2. set the variables to meet the conditional values and test AttachToMainTree.
+     */
+    TWO->AddChild(THREE, 1, false);
+    bool recursive = true;
+    PipelineContext* ret = TWO->GetContextWithCheck();
+    ret->isOpenInvisibleFreeze_ = true;
+    TWO->onMainTree_ = false;
+    TWO->AttachToMainTree(recursive, ret);
+    EXPECT_TRUE(TWO->onMainTree_);
+    TWO->DetachFromMainTree();
+    TWO->Clean();
+}
+
+/**
+ * @tc.name: AddFunc_API11
+ * @tc.desc: AttachToMainTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API11, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    TWO->AddChild(THREE, 1, false);
+    TWO->onMainTree_ = false;
+    TWO->nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
+
+    /**
+     * @tc.steps: step2. test AttachToMainTree.
+     */
+    TWO->AttachToMainTree();
+    EXPECT_TRUE(TWO->onMainTree_);
+    TWO->DetachFromMainTree();
+    TWO->Clean();
+}
+
+/**
+ * @tc.name: AddFunc_API12
+ * @tc.desc: DetachFromMainTree、SetFreeze
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API12, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test SetFreeze.
+     */
+    ONE->SetUserFreeze(true);
+    ONE->SetFreeze(true, true, true);
+    ONE->SetFreeze(true, true, false);
+
+    /**
+     * @tc.steps: step2. set the variables to meet the conditional values.
+     */
+    TWO->AddChild(THREE, 1, false);
+    TWO->onMainTree_ = false;
+    TWO->nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
+
+    /**
+     * @tc.steps: step3. test DetachFromMainTree.
+     */
+    TWO->AttachToMainTree();
+    EXPECT_TRUE(TWO->onMainTree_);
+    TWO->isDestroyingState_ = true;
+    TWO->DetachFromMainTree();
+    TWO->Clean();
+}
+
+/**
+ * @tc.name: AddFunc_API13
+ * @tc.desc: DumpTree、DumpTreeJsonForDiff
+	 * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API13, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    testNode->isDisappearing_ =true;
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+
+    /**
+     * @tc.steps: step2. test DumpTreeJsonForDiff and DumpTree.
+     */
+    testNode->DumpTreeJsonForDiff(json);
+    testNode->DumpTree(0, true);
+    EXPECT_TRUE(DumpLog::GetInstance().result_.find("_"));
+}
+
+/**
+ * @tc.name: AddFunc_API14
+ * @tc.desc: DumpSimplifyTree、DumpTreeById
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API14, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    testNode->AddChild(ONE, 1, false);
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    auto child = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>());
+    auto child2 = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 4, AceType::MakeRefPtr<Pattern>());
+    testNode->AddDisappearingChild(child);
+    testNode->AddDisappearingChild(child2);
+
+    /**
+     * @tc.steps: step2. test DumpSimplifyTree and DumpTreeById.
+     */
+    testNode->DumpSimplifyTree(0, json);
+    std::string str = "11";
+    testNode->nodeId_ = 11;
+    auto res = testNode->DumpTreeById(1, str, true);
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: AddFunc_API15
+ * @tc.desc: MouseTest、AddDisappearingChild、NotifyChange、UpdateThemeScopeUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API15, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    PointT<float> globalPoint;
+    PointT<float> parentLocalPoint;
+    MouseTestResult onMouseResult;
+    MouseTestResult onHoverResult;
+    RefPtr<FrameNode> hoverNode;
+    auto testNode2 = TestNode::CreateTestNode(TEST_ID_TWO);
+    testNode2->hitTestResult_ = HitTestResult::STOP_BUBBLING;
+    testNode->AddChild(testNode2, 1, false);
+
+    /**
+     * @tc.steps: step2. set the variables to meet the conditional values and test NotifyChange.
+     */
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode("testNode4", 1, AceType::MakeRefPtr<Pattern>(), true);
+    int32_t changeIdx = 0;
+    int32_t count = 0;
+    int64_t id = 0;
+    testNode4->AddChild(ONE, 1, false);
+    ONE->UINode::NotifyChange(changeIdx, count, id, SelectOverlayNode::NotificationType::START_CHANGE_POSITION);
+
+    /**
+     * @tc.steps: step3. set the variables to meet the conditional values and test UpdateThemeScopeUpdate.
+     */
+    const RefPtr<FrameNode> testNode5 =
+        FrameNode::CreateFrameNode("testNode5", 1, AceType::MakeRefPtr<Pattern>(), true);
+    int32_t themeScopeId = 3;
+    testNode5->themeScopeId_ = 5;
+    testNode5->UpdateThemeScopeUpdate(themeScopeId);
+    themeScopeId = 5;
+    testNode5->needCallChildrenUpdate_ = true;
+    testNode5->UpdateThemeScopeUpdate(themeScopeId);
+
+    /**
+     * @tc.steps: step4. test AddDisappearingChild and MouseTest.
+     */
+    auto parent = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    parent->AddDisappearingChild(parent);
+    HitTestResult ret =
+        testNode->UINode::MouseTest(globalPoint, parentLocalPoint, onMouseResult, onHoverResult, hoverNode);
+    EXPECT_EQ(ret == HitTestResult::STOP_BUBBLING, true);
+}
+
+/**
+ * @tc.name: AddFunc_API16
+ * @tc.desc: AxisTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API16, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto testNode2 = TestNode::CreateTestNode(TEST_ID_ONE);
+    testNode2->hitTestResult_ = HitTestResult::BUBBLING;
+    testNode->AddChild(testNode2, 1, false);
+    auto testNode3 = TestNode::CreateTestNode(TEST_ID_TWO);
+    testNode3->hitTestResult_ = HitTestResult::STOP_BUBBLING;
+    testNode4->AddChild(testNode3, 1, false);
+
+    /**
+     * @tc.steps: step2. set the variables to meet the conditional values and test AxisTest.
+     */
+    TouchRestrict touchRestrict;
+    AxisTestResult onAxisResult;
+    PointT<float> globalPoint;
+    PointT<float> parentLocalPoint;
+    PointT<float> parentRevertPoint;
+    HitTestResult ret =
+        testNode->UINode::AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    EXPECT_EQ(ret == HitTestResult::BUBBLING, true);
+}
+
+/**
+ * @tc.name: AddFunc_API17
+ * @tc.desc: CollectReservedChildren、GetContainerComponentText
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API17, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function and test CollectReservedChildren.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    std::list<int32_t> reservedElmtId;
+    testNode->CollectReservedChildren(reservedElmtId);
+    testNode->tag_ = V2::JS_VIEW_ETS_TAG;
+    testNode->CollectReservedChildren(reservedElmtId);
+
+    /**
+     * @tc.steps: step2. set the variables to meet the conditional values and test GetContainerComponentText.
+     */
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode("testNode2", 1, AceType::MakeRefPtr<Pattern>(), true);
+    testNode2->AddChild(ONE, 1, false);
+    ONE->tag_ = V2::TEXT_ETS_TAG;
+    std::u16string text;
+    testNode2->GetContainerComponentText(text);
+    ONE->tag_ = V2::TEXT_COMPONENT_TAG;
+    testNode2->GetContainerComponentText(text);
+
+    /**
+     * @tc.steps: step3. set the variables to meet the conditional values.
+     */
+    TouchRestrict touchRestrict;
+    AxisTestResult onAxisResult;
+    PointT<float> globalPoint;
+    PointT<float> parentLocalPoint;
+    PointT<float> parentRevertPoint;
+    auto testNode3 = TestNode::CreateTestNode(TEST_ID_TWO);
+    testNode3->hitTestResult_ = HitTestResult::STOP_BUBBLING;
+
+    /**
+     * @tc.steps: step4. test AxisTest.
+     */
+    testNode->AddChild(testNode3, 1, false);
+    HitTestResult ret =
+        testNode->UINode::AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    EXPECT_EQ(ret == HitTestResult::STOP_BUBBLING, true);
+}
+
+/**
+ * @tc.name: AddFunc_API18
+ * @tc.desc: SetDestroying、HasSkipNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API18, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto testNode2 = TestNode::CreateTestNode(TEST_ID_ONE);
+    testNode->AddChild(testNode2, 1, false);
+    bool isDestroying = false;
+    bool cleanStatus = false;
+    testNode->isInDestroying_ = false;
+
+    /**
+     * @tc.steps: step2. test SetDestroying.
+     */
+    testNode->SetDestroying(isDestroying, cleanStatus);
+    testNode->isInDestroying_ = true;
+    testNode2->isCNode_ = true;
+    testNode->SetDestroying(isDestroying, cleanStatus);
+
+    /**
+     * @tc.steps: step3. set the variables to meet the conditional values.
+     */
+    const RefPtr<FrameNode> testNode3 =
+        FrameNode::CreateFrameNode("testNode3", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode("testNode4", 1, AceType::MakeRefPtr<Pattern>(), true);
+    testNode->AddChild(testNode3, 1, false);
+    testNode3->AddChild(testNode4, 1, false);
+
+    /**
+     * @tc.steps: step4. test HasSkipNode.
+     */
+    bool res = testNode->HasSkipNode();
+    EXPECT_FALSE(res);
+    testNode4->tag_ = V2::WEB_ETS_TAG;
+    res = testNode->HasSkipNode();
+    EXPECT_TRUE(res);
+    testNode3->tag_ = V2::WEB_ETS_TAG;
+    res = testNode->HasSkipNode();
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: AddFunc_API19
+ * @tc.desc: TraversingCheck、LessThanAPITargetVersion
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API19, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function and test LessThanAPITargetVersion.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    bool res = testNode->LessThanAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
+    EXPECT_TRUE(res);
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode("testNode2", 1, AceType::MakeRefPtr<Pattern>(), true);
+    int32_t apiTargetVersion  = 1;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(apiTargetVersion);
+    auto context = MockPipelineContext::GetCurrent();
+    testNode2->context_ = AceType::RawPtr(context);
+    res = testNode2->LessThanAPITargetVersion(PlatformVersion::VERSION_SIX);
+
+    /**
+     * @tc.steps: step2. set the variables to meet the conditional values and test TraversingCheck.
+     */
+    const RefPtr<FrameNode> testNode3 =
+        FrameNode::CreateFrameNode("testNode3", 0, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode("testNode4", 0, AceType::MakeRefPtr<Pattern>());
+    bool withAbort = false;
+    testNode3->isTraversing_ = true;
+    testNode3->TraversingCheck(testNode4, withAbort);
+    testNode3->TraversingCheck(nullptr, withAbort);
+    EXPECT_TRUE(res);
 }
 
 /**

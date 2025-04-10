@@ -959,17 +959,17 @@ std::optional<NG::MarginProperty> NativeRichEditorController::ParseMargin(const 
 std::optional<NG::BorderRadiusProperty> NativeRichEditorController::ParseBorderRadius(
     const NativeBorderRadiuses& nativeBorderRadius)
 {
-    std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
+    NG::BorderRadiusProperty prop;
 
-    prop->radiusTopLeft = CalcDimension(
+    prop.radiusTopLeft = CalcDimension(
         nativeBorderRadius.topLeftRadiuses, static_cast<DimensionUnit>(nativeBorderRadius.topLeftUnit));
-    prop->radiusTopRight = CalcDimension(
+    prop.radiusTopRight = CalcDimension(
         nativeBorderRadius.topRightRadiuses, static_cast<DimensionUnit>(nativeBorderRadius.topRightUnit));
-    prop->radiusBottomLeft = CalcDimension(
+    prop.radiusBottomLeft = CalcDimension(
         nativeBorderRadius.bottomLeftRadiuses, static_cast<DimensionUnit>(nativeBorderRadius.bottomLeftUnit));
-    prop->radiusBottomRight = CalcDimension(
+    prop.radiusBottomRight = CalcDimension(
         nativeBorderRadius.bottomRightRadiuses, static_cast<DimensionUnit>(nativeBorderRadius.bottomRightUnit));
-    prop->multiValued = true;
+    prop.multiValued = true;
 
     return prop;
 }

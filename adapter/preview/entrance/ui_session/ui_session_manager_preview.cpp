@@ -22,5 +22,6 @@ UiSessionManager* UiSessionManager::GetInstance()
     static UiSessionManagerPreview instance;
     return &instance;
 }
-
+void UiSessionManagerPreview::AddValueForTree(int32_t id, const std::string& value) {};
+void UiSessionManagerPreview::ReportInspectorTreeValue(const std::string& value) {};
 } // namespace OHOS::Ace

@@ -1328,7 +1328,15 @@ int32_t OH_ArkUI_PointerEvent_GetRollAngle(const ArkUI_UIInputEvent* event, doub
             if (!touchEvent || touchEvent->touchPointSize <= 0) {
                 return ARKUI_ERROR_CODE_PARAM_INVALID;
             }
-            *rollAngle = touchEvent->touchPointes[touchEvent->touchPointSize - 1].rollAngle;
+            *rollAngle = touchEvent->rollAngle;
+            return ARKUI_ERROR_CODE_NO_ERROR;
+        }
+        case C_CLICK_EVENT_ID: {
+            const auto* clickEvent = reinterpret_cast<ArkUIClickEvent*>(event->inputEvent);
+            if (!clickEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            *rollAngle = clickEvent->rollAngle;
             return ARKUI_ERROR_CODE_NO_ERROR;
         }
         case C_HOVER_EVENT_ID: {

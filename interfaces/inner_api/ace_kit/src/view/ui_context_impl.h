@@ -43,6 +43,12 @@ public:
     float GetFontScale() override;
 
     RefPtr<OverlayManager> GetOverlayManager() override;
+
+    void AddAfterLayoutTask(Task&& task, bool isFlushInImplicitAnimationTask = false) override;
+    void RequestFrame() override;
+
+    int32_t GetApiTargetVersion() override;
+    bool GreatOrEqualTargetAPIVersion(int32_t version) override;
 private:
     NG::PipelineContext* context_ = nullptr;
     RefPtr<OverlayManager> overlayManager_;

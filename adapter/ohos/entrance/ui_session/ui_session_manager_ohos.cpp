@@ -186,11 +186,20 @@ bool UiSessionManagerOhos::GetComponentChangeEventRegistered()
 
 void UiSessionManagerOhos::GetInspectorTree()
 {
+    webTaskNums_.store(0);
     WebTaskNumsChange(1);
     std::unique_lock<std::mutex> lock(mutex_);
     jsonValue_ = InspectorJsonUtil::Create(true);
-    webTaskNums_.store(0);
-    inspectorFunction_();
+    if (inspectorFunction_) {
+        inspectorFunction_(false);
+    }
+}
+
+void UiSessionManagerOhos::GetVisibleInspectorTree()
+{
+    if (inspectorFunction_) {
+        inspectorFunction_(true);
+    }
 }
 
 void UiSessionManagerOhos::SaveInspectorTreeFunction(InspectorFunction&& function)
@@ -450,5 +459,24 @@ void UiSessionManagerOhos::SendPixelMap(std::vector<std::pair<int32_t, std::shar
 bool UiSessionManagerOhos::IsHasReportObject()
 {
     return !reportObjectMap_.empty();
+}
+
+void UiSessionManagerOhos::SendCommand(const std::string& command)
+{
+    if (sendCommandFunction_) {
+        auto json = InspectorJsonUtil::ParseJsonString(command);
+        if (!json || json->IsNull()) {
+            LOGW("SendCommand ParseJsonString failed");
+            return;
+        }
+
+        int32_t value = json->GetInt("cmd");
+        sendCommandFunction_(value);
+    }
+}
+
+void UiSessionManagerOhos::SaveSendCommandFunction(SendCommandFunction&& function)
+{
+    sendCommandFunction_ = std::move(function);
 }
 } // namespace OHOS::Ace

@@ -63,6 +63,8 @@ public:
     bool needBuildNewInstance = false;
     bool fromRecovery = false;
     int32_t mode = 0; // 0 for standard and 1 for dialog
+    bool isForceSet = false;
+    bool isReplaced = false;
 
 private:
     std::function<void()> onPop_;
@@ -225,6 +227,13 @@ public:
     {
         return size_;
     }
+
+    int32_t GetRecoveredDestinationMode(int32_t index);
+    uint64_t GetNavDestinationIdInt(int32_t index);
+    bool GetIsForceSet(int32_t index);
+    void ResetIsForceSetFlag(int32_t index);
+    bool CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex);
+    void SetRecoveryFromReplaceDestination(int32_t index, bool value);
 
     // ============================ operation above is for mock NavPathStack in arkTS ============================
 private:

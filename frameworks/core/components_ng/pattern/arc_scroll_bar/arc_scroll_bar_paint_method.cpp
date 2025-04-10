@@ -33,13 +33,13 @@ void ArcScrollBarPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(arcScrollBarOverlayModifier);
     auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar);
     CHECK_NULL_VOID(arcScrollBar);
-    arcScrollBarOverlayModifier->SetBackgroundBarColor(arcScrollBar->GetBackgroundColor());
+    arcScrollBarOverlayModifier->SetBackgroundBarColor(arcScrollBar->GetArcBackgroundColor());
     arcScrollBarOverlayModifier->StartArcBarAnimation(arcScrollBar->GetHoverAnimationType(),
         arcScrollBar->GetOpacityAnimationType(), arcScrollBar->GetNeedAdaptAnimation(),
         arcScrollBar->GetArcActiveRect(), arcScrollBar->GetArcBarRect());
 
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
-    scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
+    scrollBarOverlayModifier->SetBarColor(scrollBar->GetArcForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 } // namespace OHOS::Ace::NG

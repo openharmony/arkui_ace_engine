@@ -586,6 +586,7 @@ private:
         float final, float position, float signum, float friction, float threshold = DEFAULT_MULTIPLIER);
     void InitFriction(double friction);
     void CalcOverScrollVelocity();
+    double CalcNextStep(double position, double mainDelta);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void HandleCrownEvent(const CrownEvent& event, const OffsetF& center);

@@ -154,6 +154,7 @@
 #include "bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "bridge/declarative_frontend/jsview/js_toggle.h"
+#include "bridge/declarative_frontend/jsview/js_toolbaritem.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "bridge/declarative_frontend/jsview/js_water_flow.h"
@@ -598,6 +599,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "StepperItem", JSStepperItem::JSBind },
 #endif
     { "Toggle", JSToggle::JSBind },
+    { "ToolBarItem", JSToolBarItem::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
 #ifndef ARKUI_WEARABLE
@@ -750,10 +752,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Checkbox", JSCheckbox::JSBind },
     { "CheckboxGroup", JSCheckboxGroup::JSBind },
     { "Refresh", JSRefresh::JSBind },
-#ifndef ARKUI_WEARABLE
     { "WaterFlow", JSWaterFlow::JSBind },
     { "FlowItem", JSWaterFlowItem::JSBind },
-#endif
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "__Recycle__", JSRecycleView::JSBind },
@@ -1015,9 +1015,8 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     if (cleanUpIdleTask->IsFunction()) {
         LOGI("CleanUpIdleTask is a valid function");
         const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
-        const auto callback = [jsFunc = globalFunc, globalObject = globalObject](int64_t maxTimeInNs) {
-            auto params = ConvertToJSValues(maxTimeInNs / 1e6);
-            jsFunc->Call(globalObject, params.size(), params.data());
+        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
+            jsFunc->Call(globalObject);
         };
         ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(callback);
     }

@@ -381,6 +381,8 @@ void NavigationPattern::OnModifyDone()
     RestoreJsStackIfNeeded();
     UpdateToobarFocusColor();
     UpdateDividerBackgroundColor();
+    InitToolBarManager();
+    toolbarManager_->OnNavigationModifyDone();
 }
 
 void NavigationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
@@ -493,10 +495,6 @@ bool NavigationPattern::JudgeFoldStateChangeAndUpdateState()
 
 void NavigationPattern::UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host)
 {
-    if (viewportConfig_) {
-        return;
-    }
-
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -526,7 +524,7 @@ void NavigationPattern::UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation[%{public}d] change to %{public}s",
         host->GetId(), isFullPageNavigation_ ? "FullPage" : "PartialPage");
     MarkAllNavDestinationDirtyIfNeeded(host);
-    UpdateSystemBarConfigForSizeChanged();
+    UpdatePageLevelConfigForSizeChanged();
     UpdateSystemBarStyleOnFullPageStateChange(windowManager);
     if (isFullPageNavigation_) {
         RegisterPageVisibilityChangeCallback();
@@ -712,6 +710,9 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
         static_cast<int32_t>(navigationStack_->GetAllPathName().size()));
     GetVisibleNodes(true, preVisibleNodes_);
     BackupPreSystemBarConfigIfNeeded(preVisibleNodes_);
+    if (runningTransitionCount_ <= 0) {
+        isTransitionAnimationAborted_ = false;
+    }
     preTopNavPath_ = navigationStack_->GetPreTopNavPath();
     preStackSize_ = navigationStack_->PreSize();
     preContext_ = nullptr;
@@ -1646,6 +1647,9 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 void NavigationPattern::AbortAnimation(RefPtr<NavigationGroupNode>& hostNode)
 {
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Aborting navigation animations");
+    if (runningTransitionCount_ > 0) {
+        isTransitionAnimationAborted_ = true;
+    }
     if (!hostNode->GetPushAnimations().empty()) {
         auto pushAnimations = hostNode->GetPushAnimations();
         for (const auto& animation : pushAnimations) {
@@ -1745,6 +1749,9 @@ void NavigationPattern::FireNavBarWidthChangeEvent(const RefPtr<LayoutWrapper>& 
             Dimension(realBavBarWidth / frameWidth, DimensionUnit::PERCENT) :
             Dimension(realNavBarWidthDimension.GetNativeValue(userSetDimensionUnit), userSetDimensionUnit);
     }
+    auto dividerWidth = static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
+    UpdateNavBarToolBarManager(true, realBavBarWidth);
+    UpdateNavDestToolBarManager(frameWidth - realBavBarWidth - dividerWidth);
     auto eventHub = host->GetEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireNavBarWidthChangeEvent(usrSetUnitWidth);
@@ -1869,11 +1876,9 @@ void NavigationPattern::HandleDragUpdate(float xOffset)
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto frameSize = geometryNode->GetFrameSize();
-    auto frameWidth = frameSize.Width();
+    auto frameWidth = geometryNode->GetFrameSize().Width();
     auto constraint = navigationLayoutProperty->GetLayoutConstraint();
     auto parentSize = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
-
     float minNavBarWidthPx = minNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
     float maxNavBarWidthPx = maxNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
     float minContentWidthPx = minContentWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
@@ -1908,12 +1913,12 @@ void NavigationPattern::HandleDragUpdate(float xOffset)
         } else {
             realNavBarWidth_ = minNavBarWidthPx;
         }
+        UpdateDividerToolBarManager(realDividerWidth_);
     }
-    realNavBarWidth_ = std::min(realNavBarWidth_, frameWidth);
-    realNavBarWidth_ = std::min(realNavBarWidth_, maxNavBarWidthPx);
-    realNavBarWidth_ = std::max(realNavBarWidth_, minNavBarWidthPx);
-    // MEASURE
+    realNavBarWidth_ = std::max(std::min(std::min(realNavBarWidth_, frameWidth), maxNavBarWidthPx), minNavBarWidthPx);
+    UpdateNavDestToolBarManager(frameWidth - realNavBarWidth_ - realDividerWidth_);
     if (realNavBarWidth_ != currentNavBarWidth) {
+        UpdateNavBarToolBarManager(true, realNavBarWidth_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }
 }
@@ -1954,7 +1959,9 @@ void NavigationPattern::InitDividerPanEvent(const RefPtr<GestureEventHub>& gestu
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
-    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
 }
 
 void NavigationPattern::InitDragBarPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1983,7 +1990,9 @@ void NavigationPattern::InitDragBarPanEvent(const RefPtr<GestureEventHub>& gestu
     dragBarPanEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
-    gestureHub->AddPanEvent(dragBarPanEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(dragBarPanEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
 }
 
 void NavigationPattern::OnHover(bool isHover)
@@ -3960,6 +3969,8 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
     preNavIndicatorConfig_ = std::nullopt;
     showStatusBar_ = std::nullopt;
     showNavIndicator_ = std::nullopt;
+    bool animationAborted = isTransitionAnimationAborted_;
+    isTransitionAnimationAborted_ = false;
     if (!IsPageLevelConfigEnabled()) {
         ClearPageAndNavigationConfig();
         return;
@@ -3991,8 +4002,8 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
     CHECK_NULL_VOID(container);
     auto curOrientation = container->GetRequestedOrientation();
     auto targetOrientation = visibleNodes[0]->GetEffectiveOrientation();
-    auto restoreTask =
-        [nodes = std::move(visibleNodes), weakPattern = WeakClaim(this)](bool needMarkDirtyNode = false) {
+    auto restoreTask = [nodes = std::move(visibleNodes), weakPattern = WeakClaim(this),
+        animationAborted](bool needMarkDirtyNode = false) {
         ACE_SCOPED_TRACE("NavigationPattern restoreTask");
         for (auto& node : nodes) {
             CHECK_NULL_CONTINUE(node);
@@ -4005,6 +4016,14 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->ClearPageAndNavigationConfig();
+        if (!animationAborted) {
+            return;
+        }
+        auto pageNode = pattern->GetNavBasePageNode();
+        CHECK_NULL_VOID(pageNode);
+        auto geometryNode = pageNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        geometryNode->ResetParentLayoutConstraint();
     };
     if (!targetOrientation.has_value()) {
         targetOrientation = mgr->GetOrientationByWindowApi();
@@ -4019,12 +4038,28 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
     container->SetRequestedOrientation(targetOrientation.value(), false);
 }
 
-void NavigationPattern::UpdateSystemBarConfigForSizeChanged()
+void NavigationPattern::UpdatePageLevelConfigForSizeChanged()
 {
     if (!IsPageLevelConfigEnabled(false)) {
         return;
     }
     if (runningTransitionCount_ > 0) {
+        if (isFullPageNavigation_) {
+            return;
+        }
+        // full page -> partial page
+        std::vector<RefPtr<NavDestinationNodeBase>> invisibleNodes;
+        std::vector<RefPtr<NavDestinationNodeBase>> visibleNodes;
+        GetAllNodes(invisibleNodes, visibleNodes);
+        for (auto& node: invisibleNodes) {
+            CHECK_NULL_CONTINUE(node);
+            node->RestoreRenderContext();
+        }
+        for (auto& node: visibleNodes) {
+            CHECK_NULL_CONTINUE(node);
+            node->RestoreRenderContext();
+            node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
         return;
     }
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
@@ -4226,5 +4261,42 @@ void NavigationPattern::ClearPageAndNavigationConfig()
         pageNode->SetPageViewportConfig(nullptr);
     }
     SetPageViewportConfig(nullptr);
+}
+
+void NavigationPattern::UpdateNavBarToolBarManager(bool isShow, float width)
+{
+    InitToolBarManager();
+    auto info = toolbarManager_->GetNavBarInfo();
+    if (width == info.width && isShow == info.isShow) {
+        return;
+    }
+    info.isShow = isShow;
+    info.width = width;
+    toolbarManager_->SetHasNavBar(true);
+    toolbarManager_->SetNavBarInfo(info);
+}
+
+void NavigationPattern::UpdateNavDestToolBarManager(float width)
+{
+    InitToolBarManager();
+    auto info = toolbarManager_->GetNavDestInfo();
+    if (width == info.width) {
+        return;
+    }
+    info.isShow = true;
+    info.width = width;
+    toolbarManager_->SetHasNavDest(true);
+    toolbarManager_->SetNavDestInfo(info);
+}
+
+void NavigationPattern::UpdateDividerToolBarManager(float dividerWidth)
+{
+    InitToolBarManager();
+    auto info = toolbarManager_->GetNavBarDividerInfo();
+    if (dividerWidth == info.width) {
+        return;
+    }
+    info.width = dividerWidth;
+    toolbarManager_->SetNavBarDividerInfo(info);
 }
 } // namespace OHOS::Ace::NG

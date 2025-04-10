@@ -83,6 +83,18 @@ const std::vector<DragDropInitiatingStateReadyTestCase> DRAG_DROP_INITIATING_STA
         DragDropInitiatingStatus::IDLE, true, false, false, false, 0, SourceType::MOUSE),
     DragDropInitiatingStateReadyTestCase(DragDropInitiatingReceivedInput::HandlePanOnActionEnd,
         DragDropInitiatingStatus::IDLE, false, false, false, false, 0, SourceType::MOUSE),
+    DragDropInitiatingStateReadyTestCase(DragDropInitiatingReceivedInput::HandlePullEvent,
+        DragDropInitiatingStatus::READY, false, false, false, false, 0, SourceType::MOUSE),
+    DragDropInitiatingStateReadyTestCase(DragDropInitiatingReceivedInput::HandleReStartDrag,
+        DragDropInitiatingStatus::READY, false, false, false, false, 0, SourceType::MOUSE),
+    DragDropInitiatingStateReadyTestCase(DragDropInitiatingReceivedInput::HandleDragStart,
+        DragDropInitiatingStatus::MOVING, false, false, false, false, 0, SourceType::MOUSE),
+    DragDropInitiatingStateReadyTestCase(DragDropInitiatingReceivedInput::HandleDragEnd, DragDropInitiatingStatus::IDLE,
+        false, false, false, false, 0, SourceType::MOUSE),
+    DragDropInitiatingStateReadyTestCase(DragDropInitiatingReceivedInput::TransDragWindowToFwk,
+        DragDropInitiatingStatus::IDLE, false, false, false, false, 0, SourceType::MOUSE),
+    DragDropInitiatingStateReadyTestCase(DragDropInitiatingReceivedInput::TransMenuShow, DragDropInitiatingStatus::IDLE,
+        false, false, false, false, 0, SourceType::MOUSE),
 };
 
 void DragDropInitiatingStateReadyTestNG::SetUpTestCase()

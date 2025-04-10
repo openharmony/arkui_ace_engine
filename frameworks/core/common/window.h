@@ -166,6 +166,7 @@ public:
     }
 
     virtual void SetKeepScreenOn(bool keepScreenOn) {};
+    virtual void SetViewKeepScreenOn(bool keepScreenOn) {};
 
     virtual int64_t GetVSyncPeriod() const
     {

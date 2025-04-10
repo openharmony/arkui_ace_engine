@@ -90,6 +90,19 @@ void PanGestureModelImpl::Create(
     gestureProcessor->PushGesture(gesture);
 }
 
+void PanGestureModelImpl::Create(
+    int32_t fingersNum, const PanDirection& panDirection, const PanDistanceMap& distanceMap, bool isLimitFingerCount)
+{
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    auto distanceNum = DEFAULT_PAN_DISTANCE.ConvertToPx();
+    if (distanceMap.find(SourceTool::UNKNOWN) != distanceMap.end()) {
+        distanceNum = distanceMap.at(SourceTool::UNKNOWN);
+    }
+    auto gesture = AceType::MakeRefPtr<PanGesture>(fingersNum, panDirection, distanceNum);
+    gestureProcessor->PushGesture(gesture);
+}
+
 void PanGestureModelImpl::SetPanGestureOption(const RefPtr<PanGestureOption>& panGestureOption)
 {
     RefPtr<GestureProcessor> gestureProcessor;

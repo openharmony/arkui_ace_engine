@@ -117,7 +117,7 @@ void NativeLazyForEachBuilder::OnItemDeleted(UINode* node, const std::string& ke
         return;
     }
     ArkUINodeAdapterEvent event {
-        .id = std::stoi(key), .idSet = false, .type = ON_REMOVE_NODE_FROM_ADAPTER, .nodeSet = false
+        .id = StringUtils::StringToInt(key), .idSet = false, .type = ON_REMOVE_NODE_FROM_ADAPTER, .nodeSet = false
     };
     event.extraParam = reinterpret_cast<intptr_t>(userData_);
     event.handle = reinterpret_cast<ArkUINodeHandle>(node);

@@ -14,7 +14,7 @@
  */
 
 import { describe, beforeAll, it,} from '@ohos/hypium'
-import { Component, Driver, ON } from '@kit.TestKit';
+import { Driver, ON } from '@kit.TestKit';
 
 import {
   buttonClick,
@@ -31,7 +31,6 @@ import {
 } from '../../../utils';
 import { ScrollTest } from './ScrollTest'
 
-
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
 
@@ -40,138 +39,6 @@ export default function ScrollTest8() {
     beforeAll(async (done: Function) => {
       await ScrollTest(done)
     })
-    // bindMenu.item中是否显示右侧图标
-    it('ArkUI_Scroll_Comp_0551', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindMenu.item中是否显示右侧图标', '通用属性4')
-
-      //取不到bindMenu属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Scroll_Comp_0552', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindMenu.item中是否显示右侧图标', '通用属性4')
-
-      //取不到bindMenu属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindMenu.Opacity
-    it('ArkUI_Scroll_Comp_0553', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindMenu.Opacity', '通用属性4')
-
-      //取不到bindMenu属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindMenu.Visibility
-    it('ArkUI_Scroll_Comp_0554', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindMenu.Visibility', '通用属性4')
-
-      //取不到bindMenu属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Scroll_Comp_0555', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindMenu.Visibility', '通用属性4')
-
-      //取不到bindMenu属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-
-    })
-
-    // bindMenu.Padding
-    it('ArkUI_Scroll_Comp_0556', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindMenu.Padding', '通用属性4')
-
-      //取不到bindMenu属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindMenu.Margin
-    it('ArkUI_Scroll_Comp_0557', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindMenu.Margin', '通用属性4')
-
-      //取不到bindMenu属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
     // hoverEffect
     it('ArkUI_Scroll_Comp_0558', 0, async (done: Function) => {
 

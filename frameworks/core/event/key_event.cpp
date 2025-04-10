@@ -211,6 +211,9 @@ void KeyEventInfo::ParseKeyEvent(KeyEvent& keyEvent)
     keyEvent.timeStamp = GetTimeStamp();
     keyEvent.keyIntention = GetKeyIntention();
     keyEvent.pressedCodes = GetPressedKeyCodes();
+    keyEvent.numLock = GetNumLock();
+    keyEvent.scrollLock = GetScrollLock();
+    keyEvent.enableCapsLock = GetCapsLock();
 }
 
 } // namespace OHOS::Ace

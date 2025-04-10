@@ -140,7 +140,7 @@ DCResultCode DynamicPattern::CheckConstraint()
         return DCResultCode::DC_NOT_SUPPORT_UI_CONTENT_TYPE;
     }
 
-    if (container->IsScenceBoardWindow()) {
+    if (container->IsSceneBoardWindow()) {
         return DCResultCode::DC_NO_ERRORS;
     }
 
@@ -274,10 +274,10 @@ void DynamicPattern::HandleBlurEvent()
 void DynamicPattern::OnAttachToFrameNode()
 {
     ContainerScope scope(instanceId_);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     pipeline->AddOnAreaChangeNode(host->GetId());
 }
 
@@ -346,6 +346,7 @@ void DynamicPattern::OnAttachContext(PipelineContext *context)
         RegisterPipelineEvent(newInstanceId);
         instanceId_ = newInstanceId;
     }
+    AddToPageEventController();
 }
 
 void DynamicPattern::RegisterPipelineEvent(int32_t instanceId)
@@ -478,6 +479,33 @@ void DynamicPattern::OnAccessibilityChildTreeDeregister() const
     dynamicComponentRenderer_->TransferAccessibilityChildTreeDeregister();
 }
 
+void DynamicPattern::AddToPageEventController()
+{
+    ContainerScope scope(instanceId_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frontend = pipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->AddToPageEventController(host);
+}
+
+void DynamicPattern::ReleasePageEvent() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frontend = pipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->ReleasePageEvent(host, true);
+}
+
 void DynamicPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) const
 {
     auto frameNode = frameNode_.Upgrade();
@@ -486,6 +514,7 @@ void DynamicPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int32_t 
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetChildWindowId(childWindowId);
     accessibilityProperty->SetChildTreeId(childTreeId);
+    ReleasePageEvent();
 }
 
 void DynamicPattern::OnAccessibilityDumpChildInfo(

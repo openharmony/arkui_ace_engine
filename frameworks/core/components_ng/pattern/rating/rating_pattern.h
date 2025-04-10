@@ -109,6 +109,8 @@ public:
         return isNeedFocusStyle_;
     }
 
+    void DumpInfo() override;
+
 private:
     void OnAttachToFrameNode() override;
     void UpdateRatingScore(double ratingScore);

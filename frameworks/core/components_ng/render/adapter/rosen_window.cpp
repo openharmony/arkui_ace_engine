@@ -275,6 +275,18 @@ void RosenWindow::SetKeepScreenOn(bool keepScreenOn)
 #endif
 }
 
+void RosenWindow::SetViewKeepScreenOn(bool keepScreenOn)
+{
+#ifdef OHOS_PLATFORM
+    if (rsWindow_) {
+        rsWindow_->SetViewKeepScreenOn(keepScreenOn);
+    } else {
+        LOGE("SetViewKeepScreenOn Rosenwindow is null");
+    }
+#else
+#endif
+}
+
 int64_t RosenWindow::GetVSyncPeriod() const
 {
 #ifdef PREVIEW

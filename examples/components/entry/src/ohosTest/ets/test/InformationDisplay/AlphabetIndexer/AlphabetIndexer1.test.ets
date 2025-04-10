@@ -32,6 +32,9 @@ export default function AlphabetIndexer1Test() {
       await AlphabetIndexerStart(done)
 
     })
+    /**
+     * 测试组件popupFontSize且获取属性正确
+     */
     it('ArkUI_AlphabetIndexer_0042', 0, async (done: Function) => {
       await Search('参数列表', 'popupFontSize')
       await sliderDrag({
@@ -61,7 +64,7 @@ export default function AlphabetIndexer1Test() {
           new KeyStruct('popupFont', JsonType.obj),
           new KeyStruct('fontSize', JsonType.value),
         ],
-        assertEqual: "1.00fp"
+        assertEqual: "12.00fp"
       })
 
 
@@ -391,7 +394,6 @@ export default function AlphabetIndexer1Test() {
     })
 
     it('ArkUI_AlphabetIndexer_0057', 0, async (done: Function) => {
-      //无法取到子组件状态
       await Search('参数列表', 'fontWeight')
 
       await radioClick({
@@ -434,7 +436,7 @@ export default function AlphabetIndexer1Test() {
     })
 
     it('ArkUI_AlphabetIndexer_0059', 0, async (done: Function) => {
-      //无法取到子组件状态
+
       await Search('参数列表', 'fontWeight')
 
       await radioClick({
@@ -514,7 +516,6 @@ export default function AlphabetIndexer1Test() {
     })
 
     it('ArkUI_AlphabetIndexer_0062', 0, async (done: Function) => {
-      //无法取到子组件状态
       await Search('参数列表', 'alignStyle.value')
 
       await radioClick({
@@ -555,7 +556,6 @@ export default function AlphabetIndexer1Test() {
     })
 
     it('ArkUI_AlphabetIndexer_0064', 0, async (done: Function) => {
-      //无法取到子组件状态
       await Search('参数列表', 'alignStyle.value')
 
       await radioClick({
@@ -1754,14 +1754,14 @@ export default function AlphabetIndexer1Test() {
     /**
      * 测试组件width且获取属性正确
      */
-    it('ArkUI_Column_Comp_0001', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0001', 0, async (done: Function) => {
       await titleSearch('基础属性', 'width');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('width', JsonType.value),
@@ -1774,7 +1774,7 @@ export default function AlphabetIndexer1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('width', JsonType.value),

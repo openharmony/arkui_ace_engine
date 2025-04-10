@@ -86,7 +86,6 @@ constexpr float HIGHT_RATIO_LIMIT = 0.8;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
 constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
-constexpr int32_t DEFAULT_PRECISION = 2;
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -951,47 +950,8 @@ void FrameNode::DumpOverlayInfo()
 
 void FrameNode::DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json)
 {
-    if (geometryNode_->GetFrameRect() != RectF(0.0, 0.0, 0.0, 0.0)) {
-        json->Put("FrameRect", geometryNode_->GetFrameRect().ToString().c_str());
-    }
-    if (renderContext_->GetPaintRectWithoutTransform() != RectF(0.0, 0.0, 0.0, 0.0)) {
-        json->Put("PaintRectWithoutTransform", renderContext_->GetPaintRectWithoutTransform().ToString().c_str());
-    }
-    if (renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
-        json->Put("BackgroundColor", renderContext_->GetBackgroundColor()->ColorToString().c_str());
-    }
-    auto offset = GetOffsetRelativeToWindow();
-    if (offset != OffsetF(0.0, 0.0)) {
-        std::stringstream stream;
-        stream << std::fixed << std::setprecision(DEFAULT_PRECISION) << offset.GetX() << "," << offset.GetY();
-        json->Put("Offset", stream.str().c_str());
-    }
-    VisibleType visible = layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE);
-    if (visible != VisibleType::VISIBLE) {
-        json->Put("Visible", static_cast<int32_t>(visible));
-    }
-    DumpPadding(layoutProperty_->GetPaddingProperty(), std::string("Padding"), json);
-    DumpPadding(layoutProperty_->GetSafeAreaPaddingProperty(), std::string("SafeAreaPadding"), json);
-    DumpBorder(layoutProperty_->GetBorderWidthProperty(), std::string("Border"), json);
-    DumpPadding(layoutProperty_->GetMarginProperty(), std::string("Margin"), json);
-    if (layoutProperty_->GetLayoutRect()) {
-        json->Put("LayoutRect", layoutProperty_->GetLayoutRect().value().ToString().c_str());
-    }
-    if (layoutProperty_->GetCalcLayoutConstraint()) {
-        json->Put("UserDefinedConstraint", layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str());
-    }
-    if (layoutProperty_->GetPaddingProperty() || layoutProperty_->GetBorderWidthProperty() ||
-        layoutProperty_->GetMarginProperty() || layoutProperty_->GetCalcLayoutConstraint()) {
-        if (layoutProperty_->GetContentLayoutConstraint().has_value()) {
-            json->Put("ContentConstraint", layoutProperty_->GetContentLayoutConstraint().value().ToString().c_str());
-        }
-    }
-    if (!NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
-        json->Put("ZIndex: ", renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE));
-    }
-    if (geometryNode_->GetParentLayoutConstraint().has_value()) {
-        json->Put("ParentLayoutConstraint", geometryNode_->GetParentLayoutConstraint().value().ToString().c_str());
-    }
+    json->Put("$rect", GetTransformRectRelativeToWindow().ToBounds().c_str());
+    json->Put("$debugLine", "");
 }
 
 void FrameNode::DumpPadding(const std::unique_ptr<NG::PaddingProperty>& padding, std::string label,
@@ -1079,18 +1039,10 @@ void FrameNode::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(json);
     DumpSimplifyCommonInfo(json);
-    DumpSimplifySafeAreaInfo(json);
-    DumpSimplifyOverlayInfo(json);
     if (pattern_) {
-        pattern_->DumpSimplifyInfo(json);
-    }
-    if (pattern_ && GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
-        pattern_->DumpInfo(json);
-    }
-    if (renderContext_) {
-        auto renderContextJson = JsonUtil::Create();
-        renderContext_->DumpSimplifyInfo(renderContextJson);
-        json->PutRef("RenderContext", std::move(renderContextJson));
+        auto child = JsonUtil::Create();
+        pattern_->DumpSimplifyInfo(child);
+        json->Put("$attrs", std::move(child));
     }
 }
 
@@ -1220,6 +1172,15 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const 
     }
 }
 
+bool FrameNode::IsJsCustomPropertyUpdated() const
+{
+    auto iter = customPropertyMap_.find(UPDATE_FLAG_KEY);
+    if (iter != customPropertyMap_.end()) {
+        return iter->second == "1";
+    }
+    return false;
+}
+
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     if (renderContext_) {
@@ -1245,6 +1206,17 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
     }
     json->PutFixedAttr("id", propInspectorId_.value_or("").c_str(), filter, FIXED_ATTR_ID);
     ExtraCustomPropertyToJsonValue(json, filter);
+    if (IsCNode() || !IsJsCustomPropertyUpdated()) {
+        auto jsonNode = JsonUtil::Create(true);
+        for (const auto &iter : customPropertyMap_) {
+            jsonNode->Put(iter.first.c_str(), iter.second.c_str());
+        }
+        if (!customPropertyMap_.empty()) {
+            json->Put("customProperty", jsonNode->ToString().c_str());
+        }
+    } else if (getCustomPropertyMapFunc_) {
+        json->Put("customProperty", getCustomPropertyMapFunc_().c_str());
+    }
 }
 
 void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
@@ -1381,6 +1353,10 @@ bool FrameNode::RenderCustomChild(int64_t deadline)
 
 void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
+    if (configurationUpdateCallback_) {
+        auto cb = configurationUpdateCallback_;
+        cb(configurationChange);
+    }
     if (configurationChange.languageUpdate) {
         pattern_->OnLanguageConfigurationUpdate();
         MarkModifyDone();
@@ -1498,6 +1474,9 @@ void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleT
 
 void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
+    if (detachRelatedNodeCallback_) {
+        detachRelatedNodeCallback_();
+    }
     auto focusHub = GetFocusHub();
     if (focusHub) {
         auto focusView = focusHub->GetFirstChildFocusView();
@@ -5665,6 +5644,11 @@ CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool l
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
     auto rectToParent = GetPaintRectWithTransform();
     auto scale = GetTransformScale();
+    if (renderContext_) {
+        auto matrix4 = renderContext_->GetTransformMatrixValue(Matrix4());
+        scale = { scale.x * static_cast<float>(matrix4.GetScaleX()),
+            scale.y * static_cast<float>(matrix4.GetScaleY()) };
+    }
 
     if (!parentUi || IsWindowBoundary()) {
         cachedVisibleRectResult_ = {timestamp,
@@ -5697,10 +5681,8 @@ CacheVisibleRectResult FrameNode::CalculateCacheVisibleRect(CacheVisibleRectResu
     auto parentRenderContext = parentUi->GetRenderContext();
     OffsetF windowOffset;
     auto offset = rectToParent.GetOffset();
-    if (parentRenderContext && parentRenderContext->GetTransformScale()) {
-        auto parentScale = parentRenderContext->GetTransformScale();
-        offset = OffsetF(offset.GetX() * parentScale.value().x, offset.GetY() * parentScale.value().y);
-    }
+    offset = OffsetF(offset.GetX() * parentCacheVisibleRect.cumulativeScale.x,
+        offset.GetY() * parentCacheVisibleRect.cumulativeScale.y);
     windowOffset = parentCacheVisibleRect.windowOffset + offset;
 
     RectF rect;
@@ -6390,7 +6372,8 @@ void FrameNode::ResetPredictNodes()
     }
 }
 
-void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc)
+void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc,
+    std::function<std::string()>&& getCustomPropertyMapFunc)
 {
     bool result = func();
     if (IsCNode()) {
@@ -6401,6 +6384,9 @@ void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<st
     }
     if (!getCustomProperty_) {
         getCustomProperty_ = getFunc;
+    }
+    if (getCustomPropertyMapFunc && (!getCustomPropertyMapFunc_)) {
+        getCustomPropertyMapFunc_ = std::move(getCustomPropertyMapFunc);
     }
 }
 

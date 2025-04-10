@@ -860,7 +860,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, const Di
     CHECK_NULL_VOID(dialogPattern);
     dialogPattern->CallDialogWillAppearCallback();
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         root = dialogPattern->GetDialogProperties().windowScene.Upgrade();
     }
     CHECK_NULL_VOID(root);
@@ -966,7 +966,7 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, co
     );
 
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         root = dialogPattern->GetDialogProperties().windowScene.Upgrade();
     }
 
@@ -2019,7 +2019,7 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
 
     auto rootNode = rootNodeWeak_.Upgrade();
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         rootNode = FindWindowScene(popupInfo.target.Upgrade());
     }
     CHECK_NULL_VOID(rootNode);
@@ -2128,7 +2128,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
 
     auto rootNode = rootNodeWeak_.Upgrade();
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         rootNode = FindWindowScene(popupInfo.target.Upgrade());
     }
     CHECK_NULL_VOID(rootNode);
@@ -2446,7 +2446,7 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
     }
     auto rootNode = rootNodeWeak_.Upgrade();
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menu->GetPattern());
         CHECK_NULL_VOID(wrapperPattern);
         auto menuChild = wrapperPattern->GetMenu();
@@ -2593,7 +2593,7 @@ void OverlayManager::HideAllMenus()
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide all menus enter");
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         for (const auto& windowScene : windowSceneSet_) {
             if (!windowScene.Upgrade()) {
                 continue;
@@ -6360,7 +6360,7 @@ void OverlayManager::AvoidCustomKeyboard(int32_t targetId, float safeHeight)
 RefPtr<UINode> OverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
 {
     auto container = Container::Current();
-    if (!container || !container->IsScenceBoardWindow() || isAttachToCustomNode_) {
+    if (!container || !container->IsSceneBoardWindow() || isAttachToCustomNode_) {
         return rootNodeWeak_.Upgrade();
     }
     CHECK_NULL_RETURN(targetNode, nullptr);
@@ -6642,9 +6642,14 @@ void OverlayManager::RemoveFilterAnimation()
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
     AnimationOption option;
-    option.SetOnFinishEvent([weak = WeakClaim(this)] {
+    option.SetOnFinishEvent([weak = WeakClaim(this), filterId = filterNode->GetId()] {
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
+        auto filterNode = overlayManager->GetFilterColumnNode();
+        if (filterNode && filterNode->GetId() != filterId) {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY, "no more removing the non-existing filter node");
+            return;
+        }
         if (!overlayManager->hasFilterActived) {
             overlayManager->RemoveFilter();
         }
@@ -7642,18 +7647,6 @@ RefPtr<FrameNode> OverlayManager::GetDragPixelMapContentNode() const
     return framNodeFirstChild;
 }
 
-RefPtr<FrameNode> OverlayManager::GetRelativeContainerNode() const
-{
-    auto column = dragPixmapColumnNodeWeak_.Upgrade();
-    CHECK_NULL_RETURN(column, nullptr);
-    auto relativeContainerNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
-    CHECK_NULL_RETURN(relativeContainerNode, nullptr);
-    if (relativeContainerNode->GetTag() != V2::RELATIVE_CONTAINER_ETS_TAG) {
-        return nullptr;
-    }
-    return relativeContainerNode;
-}
-
 RefPtr<FrameNode> OverlayManager::GetPixelMapBadgeNode() const
 {
     auto column = pixmapColumnNodeWeak_.Upgrade();
@@ -7766,7 +7759,7 @@ void OverlayManager::RemoveMenuNotInSubWindow(
     CHECK_NULL_VOID(overlayManager);
 
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         rootNode = overlayManager->FindWindowScene(menu);
     }
     CHECK_NULL_VOID(rootNode);
@@ -8228,7 +8221,7 @@ Rect OverlayManager::GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode)
     auto parentContainer = AceEngine::Get().GetContainer(mainPipeline->GetInstanceId());
     CHECK_NULL_RETURN(parentContainer, rect);
     auto isCrossWindow = parentContainer->IsCrossAxisWindow();
-    auto isSceneBoard = parentContainer->IsScenceBoardWindow();
+    auto isSceneBoard = parentContainer->IsSceneBoardWindow();
     if (isCrossWindow || isSceneBoard) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(pipeContext->GetInstanceId());
         CHECK_NULL_RETURN(subwindow, rect);

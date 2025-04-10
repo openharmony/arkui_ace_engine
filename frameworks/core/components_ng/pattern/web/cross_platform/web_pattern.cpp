@@ -300,7 +300,7 @@ bool WebPattern::IsImageDrag()
 
 void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -1394,6 +1394,12 @@ void WebPattern::RemovePreviewMenuNode()
 void WebPattern::UpdateImagePreviewParam()
 {
     // cross platform is not support now;
+}
+
+bool WebPattern::RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback)
+{
+    // cross platform is not support now;
+    return false;
 }
 
 void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)

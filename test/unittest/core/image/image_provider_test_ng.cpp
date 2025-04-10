@@ -35,7 +35,7 @@
 #include "base/image/pixel_map.h"
 #include "base/utils/system_properties.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
 #include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -46,7 +46,7 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/image/image_source_info.h"
-#include "core/image/sk_image_cache.h"
+#include "core/image/image_cache.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1670,5 +1670,131 @@ HWTEST_F(ImageProviderTestNg, CreateImageObjHelper003, TestSize.Level1)
     WaitForAsyncTasks();
 
     EXPECT_EQ(ctx->errorMsg_, "");
+}
+
+/**
+ * @tc.name: ImageProviderFailCallback001
+ * @tc.desc: Test ImageProvider FailCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderFailCallback001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo();
+    // Create multiple ImageLoadingContext instances associated with the same ImageSourceInfo.
+    // The LoadNotifier parameters are set to nullptr, meaning no callback is registered.
+    auto ctx1 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx1, nullptr);
+
+    auto ctx2 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx2, nullptr);
+
+    auto ctx3 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx3, nullptr);
+
+    // Register weak references of these ImageLoadingContext instances in ImageProvider's task management.
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx1));
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx2));
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx3));
+
+    ctx2 = nullptr;
+
+    // Define the error message.
+    auto errorMsg = "error";
+
+    // Invoke FailCallback to trigger the failure callback.
+    // Expected behavior: ctx1 and ctx3 should update their error messages.
+    ImageProvider::FailCallback(src.GetKey(), errorMsg, true);
+
+    // Verify that ctx1 and ctx3 have correctly received the error message.
+    EXPECT_EQ(ctx1->errorMsg_, errorMsg);
+    EXPECT_EQ(ctx2, nullptr);
+    EXPECT_EQ(ctx3->errorMsg_, errorMsg);
+}
+
+/**
+ * @tc.name: ImageProviderFailCallback002
+ * @tc.desc: Test ImageProvider FailCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderFailCallback002, TestSize.Level1)
+{
+    auto src = ImageSourceInfo();
+    // Create multiple ImageLoadingContext instances associated with the same ImageSourceInfo.
+    // The LoadNotifier parameters are set to nullptr, meaning no callback is registered.
+    auto ctx1 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx1, nullptr);
+
+    auto ctx2 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx2, nullptr);
+
+    auto ctx3 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx3, nullptr);
+
+    auto ctx4 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx3, nullptr);
+
+    // Register weak references of these ImageLoadingContext instances in ImageProvider's task management.
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx1));
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx2));
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx3));
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx4));
+
+    ctx2 = nullptr;
+    ctx3 = nullptr;
+
+    // Define the error message.
+    auto errorMsg = "error";
+
+    // Invoke FailCallback to trigger the failure callback.
+    // Expected behavior: ctx1 and ctx3 should update their error messages.
+    ImageProvider::FailCallback(src.GetKey(), errorMsg, true);
+
+    // Verify that ctx1 and ctx4 have correctly received the error message.
+    EXPECT_EQ(ctx1->errorMsg_, errorMsg);
+    EXPECT_EQ(ctx2, nullptr);
+    EXPECT_EQ(ctx3, nullptr);
+    EXPECT_EQ(ctx4->errorMsg_, errorMsg);
+}
+
+/**
+ * @tc.name: ImageProviderFailCallback003
+ * @tc.desc: Test ImageProvider FailCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProviderFailCallback003, TestSize.Level1)
+{
+    auto src = ImageSourceInfo();
+    // Create multiple ImageLoadingContext instances associated with the same ImageSourceInfo.
+    // The LoadNotifier parameters are set to nullptr, meaning no callback is registered.
+    auto ctx1 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx1, nullptr);
+
+    auto ctx2 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx2, nullptr);
+
+    auto ctx3 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx3, nullptr);
+
+    auto ctx4 = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx3, nullptr);
+
+    // Register weak references of these ImageLoadingContext instances in ImageProvider's task management.
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx1));
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx2));
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx3));
+    ImageProvider::RegisterTask(src.GetKey(), WeakPtr(ctx4));
+
+    // Define the error message.
+    auto errorMsg = "error";
+
+    // Invoke FailCallback to trigger the failure callback.
+    // Expected behavior: all ctx should update their error messages.
+    ImageProvider::FailCallback(src.GetKey(), errorMsg, true);
+
+    // Verify that all ctx have correctly received the error message.
+    EXPECT_EQ(ctx1->errorMsg_, errorMsg);
+    EXPECT_EQ(ctx2->errorMsg_, errorMsg);
+    EXPECT_EQ(ctx3->errorMsg_, errorMsg);
+    EXPECT_EQ(ctx4->errorMsg_, errorMsg);
 }
 } // namespace OHOS::Ace::NG

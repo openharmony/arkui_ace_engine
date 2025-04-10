@@ -475,6 +475,8 @@ public:
 
     void ChangeSensitiveStyle(bool isSensitive);
 
+    bool IsJsCustomPropertyUpdated() const;
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
@@ -597,6 +599,12 @@ public:
     void PushDestroyCallbackWithTag(std::function<void()>&& callback, std::string tag)
     {
         destroyCallbacksMap_[tag] = callback;
+    }
+
+    void SetConfigurationModeUpdateCallback(
+        const std::function<void(const ConfigurationChange& configurationChange)>&& callback)
+    {
+        configurationUpdateCallback_ = callback;
     }
 
     void SetColorModeUpdateCallback(const std::function<void()>&& callback)
@@ -1215,7 +1223,8 @@ public:
         return childrenUpdatedFrom_;
     }
 
-    void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
+    void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc,
+        std::function<std::string()>&& getCustomPropertyMapFunc = nullptr);
     bool GetJSCustomProperty(const std::string& key, std::string& value);
     bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
@@ -1342,6 +1351,10 @@ public:
     void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
 
     std::string PrintVisibilityDumpInfo() const;
+    void SetDetachRelatedNodeCallback(std::function<void()>&& callback)
+    {
+        detachRelatedNodeCallback_ = std::move(callback);
+    }
 
     int32_t OnRecvCommand(const std::string& command) override;
 
@@ -1496,6 +1509,7 @@ private:
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
+    std::function<void(const ConfigurationChange& configurationChange)> configurationUpdateCallback_;
     std::function<void()> colorModeUpdateCallback_;
     std::function<void(int32_t)> ndkColorModeUpdateCallback_;
     std::function<void(float, float)> ndkFontUpdateCallback_;
@@ -1519,6 +1533,7 @@ private:
     std::set<std::string> allowDrop_;
     std::function<void()> removeCustomProperties_;
     std::function<std::string(const std::string& key)> getCustomProperty_;
+    std::function<std::string()> getCustomPropertyMapFunc_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
@@ -1641,6 +1656,8 @@ private:
 
     RefPtr<Kit::FrameNode> kitNode_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
+
+    std::function<void()> detachRelatedNodeCallback_;
 };
 } // namespace OHOS::Ace::NG
 

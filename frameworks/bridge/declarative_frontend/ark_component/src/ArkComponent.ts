@@ -149,11 +149,7 @@ function isResource(variable: any): variable is Resource {
 }
 
 function isResourceEqual(stageValue: Resource, value: Resource): boolean {
-  return (stageValue.bundleName === value.bundleName) &&
-    (stageValue.moduleName === value.moduleName) &&
-    (stageValue.id === value.id) &&
-    (stageValue.params === value.params) &&
-    (stageValue.type === value.type);
+  return false;
 }
 function isBaseOrResourceEqual(stageValue: any, value: any): boolean {
   if (isResource(stageValue) && isResource(value)) {
@@ -5407,8 +5403,8 @@ class UIGestureEvent {
         let panGesture: PanGestureHandler = gesture as PanGestureHandler;
         getUINativeModule().common.addPanGesture(this._nodePtr, priority, mask, panGesture.gestureTag,
           panGesture.allowedTypes, panGesture.fingers, panGesture.direction, panGesture.distance,
-          panGesture.limitFingerCount, panGesture.onActionStartCallback, panGesture.onActionUpdateCallback,
-          panGesture.onActionEndCallback, panGesture.onActionCancelCallback);
+          panGesture.limitFingerCount, panGesture.distanceMap, panGesture.onActionStartCallback,
+          panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback);
         break;
       }
       case CommonGestureType.SWIPE_GESTURE: {
@@ -5508,8 +5504,9 @@ function addGestureToGroup(nodePtr: Object | null, gesture: any, gestureGroupPtr
     case CommonGestureType.PAN_GESTURE: {
       let panGesture: PanGestureHandler = gesture as PanGestureHandler;
       getUINativeModule().common.addPanGestureToGroup(nodePtr, panGesture.gestureTag, panGesture.allowedTypes,
-        panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.limitFingerCount, panGesture.onActionStartCallback,
-        panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback, gestureGroupPtr);
+        panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.limitFingerCount,
+        panGesture.distanceMap, panGesture.onActionStartCallback, panGesture.onActionUpdateCallback,
+        panGesture.onActionEndCallback, panGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.SWIPE_GESTURE: {
@@ -5627,6 +5624,31 @@ function __getCustomPropertyString__(nodeId: number, key: string): string | unde
   }
 
   return undefined;
+}
+
+function __getCustomPropertyMapString__(nodeId: number): string | undefined {
+  const customProperties = __elementIdToCustomProperties__.get(nodeId);
+  if (customProperties === undefined) {
+    return undefined;
+  }
+  const resultObj = Object.create(null);
+  const obj = Object.fromEntries(customProperties);
+  Object.keys(obj).forEach(key => {
+    const value = obj[key];
+    let str = "{}";
+    try {
+      str = JSON.stringify(value);
+    } catch (err) {
+      resultObj[key] = "Unsupported Type";
+      return;
+    }
+    if ((value !== "{}" && str === "{}") || str == null) {
+      resultObj[key] = "Unsupported Type";
+    } else {
+      resultObj[key] = value;
+    }
+  });
+  return JSON.stringify(resultObj);
 }
 
 function __setCustomProperty__(nodeId: number, key: string, value: Object): boolean {

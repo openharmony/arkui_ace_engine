@@ -2031,7 +2031,7 @@ HWTEST_F(TextTestTwoNg, TextContentModifier004, TestSize.Level1)
     TextStyle textStyle;
     textStyle.SetFontSize(ADAPT_FONT_SIZE_VALUE);
     textStyle.SetTextColor(TEXT_COLOR_VALUE);
-    textContentModifier->SetDefaultAnimatablePropertyValue(textStyle);
+    textContentModifier->SetDefaultAnimatablePropertyValue(textStyle, textFrameNode);
     SizeF contentSize(TEXT_CONTENT_SIZE, TEXT_CONTENT_SIZE);
     textContentModifier->SetContentSize(contentSize);
     std::vector<RectF> drawObscuredRects;

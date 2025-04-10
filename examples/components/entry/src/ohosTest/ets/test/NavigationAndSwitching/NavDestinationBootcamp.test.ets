@@ -31,8 +31,9 @@ export default function NavDestinationBootcampTest(){
           abilityName: 'EntryAbility'
         });
         await driver.delayMs(5000);
+        
+        let atomNavigates: Component = await driver.findComponent(ON.text('导航与切换'));
 
-        let atomNavigates: Component = await driver.findComponent(ON.text('导航类'));
         await atomNavigates.click();
         await driver.delayMs(3500);
 

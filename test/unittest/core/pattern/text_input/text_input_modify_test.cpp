@@ -501,7 +501,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback003, TestSize.Level1)
      * @tc.expected: Check if return true.
      */
 
-    pattern_->GetFocusHub()->onFocusInternal_.operator()();
+    pattern_->GetFocusHub()->onFocusInternal_.operator()(pattern_->GetFocusHub()->focusReason_);
     RoundRect roundRect;
     pattern_->GetFocusHub()->getInnerFocusRectFunc_.operator()(roundRect);
     EXPECT_TRUE(pattern_->isFocusedBeforeClick_);

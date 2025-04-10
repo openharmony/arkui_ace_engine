@@ -1068,7 +1068,7 @@ void XComponentPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetFocusable(true);
 #endif
 
-    auto onFocusEvent = [weak = WeakClaim(this)]() {
+    auto onFocusEvent = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         return pattern->HandleFocusEvent();

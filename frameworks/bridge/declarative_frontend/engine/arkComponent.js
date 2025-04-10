@@ -98,11 +98,7 @@ function isResource(variable) {
   return (variable === null || variable === void 0 ? void 0 : variable.bundleName) !== undefined;
 }
 function isResourceEqual(stageValue, value) {
-  return (stageValue.bundleName === value.bundleName) &&
-    (stageValue.moduleName === value.moduleName) &&
-    (stageValue.id === value.id) &&
-    (stageValue.params === value.params) &&
-    (stageValue.type === value.type);
+  return false;
 }
 function isBaseOrResourceEqual(stageValue, value) {
   if (isResource(stageValue) && isResource(value)) {
@@ -4895,6 +4891,12 @@ class PanGestureHandler extends GestureHandler {
       this.direction = options.direction;
       this.distance = options.distance;
       this.limitFingerCount = options.isFingerCountLimited;
+      if (options.distanceMap !== undefined && options.distanceMap !== null) {
+          this.distanceMap = new Map();
+          options.distanceMap.forEach((value, key) => {
+              this.distanceMap.set(key, value);
+          });
+      }
     }
   }
 
@@ -5301,7 +5303,7 @@ class UIGestureEvent {
         let panGesture = gesture;
         getUINativeModule().common.addPanGesture(this._nodePtr, priority, mask, panGesture.gestureTag,
           panGesture.allowedTypes, panGesture.fingers, panGesture.direction, panGesture.distance,
-          panGesture.limitFingerCount, panGesture.onActionStartCallback,
+          panGesture.limitFingerCount, panGesture.distanceMap, panGesture.onActionStartCallback,
           panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback);
         break;
       }
@@ -5403,7 +5405,7 @@ function addGestureToGroup(nodePtr, gesture, gestureGroupPtr) {
       let panGesture = gesture;
       getUINativeModule().common.addPanGestureToGroup(nodePtr, panGesture.gestureTag, panGesture.allowedTypes,
         panGesture.fingers, panGesture.direction, panGesture.distance,
-        panGesture.limitFingerCount, panGesture.onActionStartCallback,
+        panGesture.limitFingerCount, panGesture.distanceMap, panGesture.onActionStartCallback,
         panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
@@ -5521,6 +5523,31 @@ function __getCustomPropertyString__(nodeId, key) {
   }
 
   return undefined;
+}
+
+function __getCustomPropertyMapString__(nodeId) {
+  const customProperties = __elementIdToCustomProperties__.get(nodeId);
+  if (customProperties === undefined) {
+    return undefined;
+  }
+  const resultObj = Object.create(null);
+  const obj = Object.fromEntries(customProperties);
+  Object.keys(obj).forEach(key => {
+    const value = obj[key];
+    let str = "{}";
+    try {
+      str = JSON.stringify(value);
+    } catch (err) {
+      resultObj[key] = "Unsupported Type";
+      return;
+    }
+    if ((value !== "{}" && str === "{}") || str == null) {
+      resultObj[key] = "Unsupported Type";
+    } else {
+      resultObj[key] = value;
+    }
+  });
+  return JSON.stringify(resultObj);
 }
 
 function __setCustomProperty__(nodeId, key, value) {
@@ -30660,11 +30687,31 @@ class ListItemOnSelectModifier extends ModifierWithKey {
   }
 }
 ListItemOnSelectModifier.identity = Symbol('listItemOnSelect');
+class ListItemInitializeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().listItem.resetListItemInitialize(node);
+    } else {
+      getUINativeModule().listItem.setListItemInitialize(node, this.value?.style);
+    }
+  }
+}
+ListItemInitializeModifier.identity = Symbol('listItemInitialize');
 class ArkListItemComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
   initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, ListItemInitializeModifier.identity,
+        ListItemInitializeModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ListItemInitializeModifier.identity,
+        ListItemInitializeModifier, undefined);
+    }
     return this;
   }
   sticky(value) {

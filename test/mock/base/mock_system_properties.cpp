@@ -277,7 +277,7 @@ int32_t SystemProperties::GetDragDropFrameworkStatus()
 
 bool SystemProperties::GetContainerDeleteFlag()
 {
-    return false;
+    return containerDeleteFlag_;
 }
 
 bool SystemProperties::IsSuperFoldDisplayDevice()

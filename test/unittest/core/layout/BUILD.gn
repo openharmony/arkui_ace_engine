@@ -13,12 +13,6 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("box_layout_algorithm_test_ng") {
-  type = "new"
-  module_output = "layout"
-  sources = [ "box_layout_algorithm_test_ng.cpp" ]
-}
-
 ace_unittest("layout_property_test_ng") {
   type = "new"
   module_output = "layout"
@@ -52,11 +46,11 @@ ace_unittest("layout_wrapper_node_test_ng") {
 group("core_layout_unittest") {
   testonly = true
   deps = [
-    ":box_layout_algorithm_test_ng",
     ":layout_property_test_ng",
     ":layout_wrapper_build_test_ng",
     ":layout_wrapper_node_test_ng",
     ":layout_wrapper_test_ng",
+    "box:box_layout_algorithm_test_ng",
     "safe_area:safeArea_test_expandSafeArea_ng",
   ]
 }

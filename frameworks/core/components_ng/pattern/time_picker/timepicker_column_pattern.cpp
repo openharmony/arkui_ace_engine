@@ -56,6 +56,8 @@ constexpr int32_t HOT_ZONE_HEIGHT_CANDIDATE = 2;
 constexpr int32_t HOT_ZONE_HEIGHT_DISAPPEAR = 4;
 constexpr char PICKER_DRAG_SCENE[] = "picker_drag_scene";
 const int32_t HALF_NUMBER = 2;
+const uint32_t NEXT_COLOUM_DIFF = 1;
+const std::string AMPM = "amPm";
 } // namespace
 
 void TimePickerColumnPattern::OnAttachToFrameNode()
@@ -803,7 +805,9 @@ void TimePickerColumnPattern::TextPropertiesLinearAnimation(
     textLayoutProperty->UpdateFontSize(updateSize);
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, distancePercent_);
-    GetAnimationColor(index, showCount, updateColor);
+    if (selectedColumnId_ == AMPM) {
+        GetAnimationColor(index, showCount, updateColor);
+    }
 
     textLayoutProperty->UpdateTextColor(updateColor);
     if (scale < FONTWEIGHT) {
@@ -878,7 +882,9 @@ void TimePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
 }
 
 void TimePickerColumnPattern::HandleDragStart(const GestureEvent& event)
@@ -1612,6 +1618,8 @@ void TimePickerColumnPattern::SetSelectedMarkPaint(bool paint)
 
 void TimePickerColumnPattern::UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme)
 {
+    UpdateAnimationColor(pickerTheme);
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto blendNode = DynamicCast<FrameNode>(host->GetParent());
@@ -1640,18 +1648,34 @@ void TimePickerColumnPattern::UpdateSelectedTextColor(const RefPtr<PickerTheme>&
     host->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
 }
 
-void TimePickerColumnPattern::GetAnimationColor(uint32_t index, uint32_t showCount, Color& color)
+void TimePickerColumnPattern::GetAnimationColor(uint32_t index, uint32_t showCount, Color& color, bool selectedMark)
 {
+    CHECK_EQUAL_VOID(index == showCount / PICKER_SELECT_AVERAGE, false);
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    if (pickerTheme->IsCircleDial() && (index == (showCount / PICKER_SELECT_AVERAGE)) && !isUserSetSelectColor_) {
-        if (selectedMarkPaint_) {
-            color = pickerTheme->GetOptionStyle(true, true).GetTextColor();
-        } else {
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto layoutProperty = parentNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    if (pickerTheme->IsCircleDial() && !isUserSetSelectColor_) {
+        if (!selectedMarkPaint_) {
             color = pickerTheme->GetOptionStyle(false, false).GetTextColor();
+        } else if (selectedMark) {
+            color = pickerTheme->GetOptionStyle(true, false).GetTextColor();
         }
+    } else if (selectedMark) {
+        color = layoutProperty->GetSelectedColor().value_or(
+            pickerTheme->GetOptionStyle(true, false).GetTextColor());
     }
 }
 
@@ -1663,6 +1687,19 @@ void TimePickerColumnPattern::UpdateUserSetSelectColor()
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     UpdateSelectedTextColor(pickerTheme);
+}
+
+void TimePickerColumnPattern::UpdateAnimationColor(const RefPtr<PickerTheme>& pickerTheme)
+{
+    Color color;
+    uint32_t showCount = GetShowCount();
+    uint32_t middleIndex = showCount / PICKER_SELECT_AVERAGE;
+    GetAnimationColor(middleIndex, showCount, color, true);
+    if (middleIndex - NEXT_COLOUM_DIFF >= 0 && animationProperties_.size() > middleIndex) {
+        animationProperties_[middleIndex - NEXT_COLOUM_DIFF].downColor = color;
+        animationProperties_[middleIndex + NEXT_COLOUM_DIFF].upColor = color;
+        animationProperties_[middleIndex].currentColor = color;
+    }
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN

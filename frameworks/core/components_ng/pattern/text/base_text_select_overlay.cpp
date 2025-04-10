@@ -1376,7 +1376,7 @@ void BaseTextSelectOverlay::HandleOnSearch()
 bool BaseTextSelectOverlay::IsSupportMenuShare()
 {
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         return false;
     }
     return SystemProperties::IsSyscapExist(SYSTEM_CAPABILITY_OF_SHARE);

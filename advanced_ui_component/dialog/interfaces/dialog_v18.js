@@ -2884,14 +2884,7 @@ class CustomDialogContentComponent extends ViewPU {
                                             });
                                         } else {
                                             this.ifElseBranchUpdateFunction(2, () => {
-                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                    WithTheme.create({
-                                                        theme: this.theme,
-                                                        colorMode: this.themeColorMode
-                                                    });
-                                                }, WithTheme);
-                                                this.ButtonBuilder.bind(this)();
-                                                WithTheme.pop();
+                                                this.buildButton.bind(this)();
                                             });
                                         }
                                     }, If);
@@ -2946,14 +2939,7 @@ class CustomDialogContentComponent extends ViewPU {
                                                 });
                                             } else {
                                                 this.ifElseBranchUpdateFunction(2, () => {
-                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        WithTheme.create({
-                                                            theme: this.theme,
-                                                            colorMode: this.themeColorMode
-                                                        });
-                                                    }, WithTheme);
-                                                    this.ButtonBuilder.bind(this)();
-                                                    WithTheme.pop();
+                                                    this.buildButton.bind(this)();
                                                 });
                                             }
                                         }, If);
@@ -3379,6 +3365,43 @@ class CustomDialogContentComponent extends ViewPU {
         If.pop();
         Column.pop();
     }
+
+    isSetCustomButtonTheme() {
+        // is set fadeout style: now only on TV
+        if (IS_FADEOUT_ENABLE()) {
+            // has set button background color prop
+            if (this.theme?.colors?.compBackgroundTertiary || this.theme?.colors?.backgroundEmphasize) {
+                return true;
+            }
+            // has set button font color prop
+            if (this.theme?.colors?.fontEmphasize || this.theme?.colors?.fontOnPrimary || this.theme?.colors?.warning) {
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    buildButton(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (this.isSetCustomButtonTheme()) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        WithTheme.create({ theme: this.theme, colorMode: this.themeColorMode });
+                    }, WithTheme);
+                    this.ButtonBuilder.bind(this)();
+                    WithTheme.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.ButtonBuilder.bind(this)();
+                });
+            }
+        }, If);
+        If.pop();
+    }
+
     getOperationAreaPadding() {
         if (this.isButtonVertical) {
             return {
@@ -3686,12 +3709,19 @@ class CustomDialogContentComponent extends ViewPU {
             let maxButtonTextSize = vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN() -
                 BUTTON_HORIZONTAL_SPACE() - 2 * BUTTON_HORIZONTAL_PADDING);
             this.buttons.forEach((button) => {
-                let contentSize = measure.measureTextSize({
-                    textContent: button.value,
-                    fontSize: this.buttonMaxFontSize
-                });
-                if (Number(contentSize.width) > maxButtonTextSize) {
-                    isVertical = true;
+                try {
+                    let contentSize = measure.measureTextSize({
+                        textContent: button.value,
+                        fontSize: this.buttonMaxFontSize
+                    });
+                    if (Number(contentSize?.width) > maxButtonTextSize) {
+                        isVertical = true;
+                    }
+                } catch (err) {
+                    let code = (exception).code;
+                    let message = (exception).message;
+                    hilog.error(0x3900, 'Ace', `Faild to dialog isVerticalAlignButton measureTextSize,cause,
+                    code: ${code}, message: ${message}`);
                 }
             });
             return isVertical;

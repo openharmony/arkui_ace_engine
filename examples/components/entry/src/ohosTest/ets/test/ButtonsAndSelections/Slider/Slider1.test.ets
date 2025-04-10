@@ -419,14 +419,12 @@ export default function Slider1Test() {
       await Search('参数列表', 'sliderRange.to')
       await sliderDrag({
         slideStar: Slide.start,
-        slideDragObj: 1,
         toggleClick: {
           toggleClickObj: 'sliderRange.to'
         }
       })
       await sliderDrag({
         slideStar: Slide.end,
-        slideDragObj: 1,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
           toggleClickObj: 'sliderRange.to'

@@ -532,7 +532,7 @@ public:
         return false;
     }
 
-    virtual bool IsScenceBoardWindow()
+    virtual bool IsSceneBoardWindow()
     {
         return false;
     }
@@ -735,12 +735,12 @@ public:
         return false;
     }
 
-    void RegisterContainerHandler(const WeakPtr<ContainerHandler>& containerHandler)
+    void RegisterContainerHandler(const RefPtr<ContainerHandler>& containerHandler)
     {
         containerHandler_ = containerHandler;
     }
 
-    WeakPtr<ContainerHandler> GetContainerHandler()
+    RefPtr<ContainerHandler> GetContainerHandler()
     {
         return containerHandler_;
     }
@@ -803,7 +803,7 @@ protected:
     bool isFRSCardContainer_ = false;
     bool isDynamicRender_ = false;
     // for common handler
-    WeakPtr<ContainerHandler> containerHandler_;
+    RefPtr<ContainerHandler> containerHandler_;
     RefPtr<DisplayInfoUtils> displayManager_ = AceType::MakeRefPtr<DisplayInfoUtils>();
 
 private:

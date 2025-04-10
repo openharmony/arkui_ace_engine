@@ -399,6 +399,7 @@ template("declarative_js_engine") {
       "jsview/js_textpicker.cpp",
       "jsview/js_texttimer.cpp",
       "jsview/js_toggle.cpp",
+      "jsview/js_toolbaritem.cpp",
       "jsview/js_touch_handler.cpp",
       "jsview/js_utils.cpp",
       "jsview/js_view.cpp",
@@ -408,6 +409,9 @@ template("declarative_js_engine") {
       "jsview/js_view_functions.cpp",
       "jsview/js_view_measure_layout.cpp",
       "jsview/js_view_stack_processor.cpp",
+      "jsview/js_water_flow.cpp",
+      "jsview/js_water_flow_item.cpp",
+      "jsview/js_water_flow_sections.cpp",
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
       "jsview/text_menu/js_text_menu.cpp",
@@ -502,6 +506,8 @@ template("declarative_js_engine") {
       "jsview/models/view_context_model_impl.cpp",
       "jsview/models/view_full_update_model_impl.cpp",
       "jsview/models/view_partial_update_model_impl.cpp",
+      "jsview/models/water_flow_item_model_impl.cpp",
+      "jsview/models/water_flow_model_impl.cpp",
     ]
 
     if (!ace_engine_feature_wearable) {
@@ -512,15 +518,10 @@ template("declarative_js_engine") {
         "jsview/js_select.cpp",
         "jsview/js_stepper.cpp",
         "jsview/js_stepper_item.cpp",
-        "jsview/js_water_flow.cpp",
-        "jsview/js_water_flow_item.cpp",
-        "jsview/js_water_flow_sections.cpp",
         "jsview/models/linear_split_model_impl.cpp",
         "jsview/models/select_model_impl.cpp",
         "jsview/models/stepper_item_model_impl.cpp",
         "jsview/models/stepper_model_impl.cpp",
-        "jsview/models/water_flow_item_model_impl.cpp",
-        "jsview/models/water_flow_model_impl.cpp",
       ]
     }
 
@@ -965,11 +966,15 @@ template("declarative_js_engine_ng") {
       "jsview/js_textpicker.cpp",
       "jsview/js_texttimer.cpp",
       "jsview/js_toggle.cpp",
+      "jsview/js_toolbaritem.cpp",
       "jsview/js_utils.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
       "jsview/js_view_abstract_bridge.cpp",
       "jsview/js_view_context.cpp",
+      "jsview/js_water_flow.cpp",
+      "jsview/js_water_flow_item.cpp",
+      "jsview/js_water_flow_sections.cpp",
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
       "jsview/text_menu/js_text_menu.cpp",
@@ -988,9 +993,6 @@ template("declarative_js_engine_ng") {
         "jsview/js_select.cpp",
         "jsview/js_stepper.cpp",
         "jsview/js_stepper_item.cpp",
-        "jsview/js_water_flow.cpp",
-        "jsview/js_water_flow_item.cpp",
-        "jsview/js_water_flow_sections.cpp",
       ]
     }
 

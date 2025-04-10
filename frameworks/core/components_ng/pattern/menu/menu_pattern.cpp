@@ -1980,7 +1980,9 @@ void MenuPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
     auto panEvent = MakeRefPtr<PanEvent>(nullptr, nullptr, std::move(actionEndTask), nullptr);
-    gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, distanceMap);
     gestureHub->AddPreviewMenuHandleDragEnd(std::move(actionScrollEndTask));
 }
 
@@ -2037,7 +2039,7 @@ float MenuPattern::GetSelectMenuWidth()
         finalWidth = defaultWidth;
     }
 
-    if (finalWidth < minSelectWidth) {
+    if (LessNotEqual(finalWidth, minSelectWidth)) {
         finalWidth = defaultWidth;
     }
 
@@ -2372,7 +2374,7 @@ float MenuPattern::GetSelectMenuWidthFromTheme() const
     auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, minSelectWidth);
     float finalWidth = (theme->GetMenuNormalWidth() + OPTION_MARGIN).ConvertToPx();
-    if (finalWidth < minSelectWidth) {
+    if (LessNotEqual(finalWidth, minSelectWidth)) {
         finalWidth = defaultWidth;
     }
     return finalWidth;

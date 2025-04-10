@@ -20,6 +20,7 @@ config("uicontent_public_config") {
     "${ace_root}/interfaces/inner_api/ace",
     "${ace_root}/interfaces/inner_api/ace/ai/",
     "${ace_root}/interfaces/inner_api/ace/share/",
+    "$ace_root/interfaces/inner_api/ace_kit/include",
   ]
   if (use_hilog) {
     defines = [ "USE_HILOG" ]

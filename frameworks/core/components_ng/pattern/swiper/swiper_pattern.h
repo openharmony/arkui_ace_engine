@@ -1193,6 +1193,7 @@ private:
     bool NeedForceMeasure() const;
     void SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex = std::nullopt);
     void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
+    void SetIndicatorIsInFast(std::optional<bool> isInFast);
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
 
@@ -1241,6 +1242,11 @@ private:
     std::shared_ptr<SwiperParameters> GetBindIndicatorParameters() const;
     int32_t GetNodeId() const;
     bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
+    void ReportComponentChangeEvent(
+        const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset = 0.0) const;
+    void ReportTraceOnDragEnd() const;
+    void UpdateBottomTypeOnMultiple(int32_t currentFirstIndex);
+    void UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex);
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;

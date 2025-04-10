@@ -25,7 +25,6 @@ config("config_svg_parse_test") {
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
     "//foundation/graphic/graphic_2d/rosen/modules/platform/image_native",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export/rosen_text",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
@@ -34,12 +33,6 @@ config("config_svg_parse_test") {
     "$ace_root",
     "$ace_root/frameworks",
   ]
-  if (enable_graphic_text_gine) {
-    include_dirs += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export" ]
-  } else {
-    include_dirs +=
-        [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text" ]
-  }
 }
 
 ohos_unittest("parse_test_ng") {

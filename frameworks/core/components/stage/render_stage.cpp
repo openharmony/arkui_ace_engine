@@ -147,7 +147,7 @@ void RenderStage::HandleDragUpdate(const DragUpdateInfo& info)
     auto childIter = children.rbegin();
     auto topElement = *childIter++;
     auto nextTopElement = *childIter++;
-    SetPageHidden(nextTopElement, NearEqual(tickTime_, TRANSITION_WATCH_DURATION));
+    SetPageHidden(nextTopElement, false);
     if (!controllerIn_ || !controllerOut_) {
         LOGE("HandleDragUpdate : controllerIn or controllerOut is null.");
         return;

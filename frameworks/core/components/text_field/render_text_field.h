@@ -729,7 +729,7 @@ private:
 
     // distribute
     void ApplyRestoreInfo();
-    void OnTapCallback();
+    void OnTapCallback(const TouchEventInfo& info);
     virtual double GetRealTextWidth() const
     {
         return 0;

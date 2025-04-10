@@ -183,6 +183,54 @@ std::string InspectorJsonValue::ToString()
     return result;
 }
 
+std::string InspectorJsonValue::GetString() const
+{
+    return ((object_ == nullptr) || (object_->valuestring == nullptr)) ? "" : std::string(object_->valuestring);
+}
+
+std::string InspectorJsonValue::GetString(const std::string& key, const std::string& defaultVal) const
+{
+    auto value = GetValue(key);
+    if (value && value->IsString()) {
+        return value->GetString();
+    }
+    return defaultVal;
+}
+
+std::unique_ptr<InspectorJsonValue> InspectorJsonValue::GetValue(const std::string& key) const
+{
+    return std::make_unique<InspectorJsonValue>(cJSON_GetObjectItem(object_, key.c_str()));
+}
+
+int32_t InspectorJsonValue::GetInt() const
+{
+    return static_cast<int32_t>((object_ == nullptr) ? 0 : object_->valuedouble);
+}
+
+int32_t InspectorJsonValue::GetInt(const std::string& key, int32_t defaultVal) const
+{
+    auto value = GetValue(key);
+    if (value && value->IsNumber()) {
+        return value->GetInt();
+    }
+    return defaultVal;
+}
+
+bool InspectorJsonValue::IsNull() const
+{
+    return (object_ == nullptr) || cJSON_IsNull(object_);
+}
+
+bool InspectorJsonValue::IsString() const
+{
+    return cJSON_IsString(object_);
+}
+
+bool InspectorJsonValue::IsNumber() const
+{
+    return cJSON_IsNumber(object_);
+}
+
 std::shared_ptr<InspectorJsonValue> InspectorJsonUtil::Create(bool isRoot)
 {
     return std::make_shared<InspectorJsonValue>(cJSON_CreateObject(), isRoot);
@@ -192,4 +240,16 @@ std::unique_ptr<InspectorJsonValue> InspectorJsonUtil::CreateObject(bool isRoot)
 {
     return std::make_unique<InspectorJsonValue>(cJSON_CreateObject(), isRoot);
 }
+
+std::unique_ptr<InspectorJsonValue> InspectorJsonUtil::ParseJsonData(const char* data, const char** parseEnd)
+{
+    return std::make_unique<InspectorJsonValue>(cJSON_ParseWithOpts(data, parseEnd, true), true);
+}
+
+std::unique_ptr<InspectorJsonValue> InspectorJsonUtil::ParseJsonString(
+    const std::string& content, const char** parseEnd)
+{
+    return ParseJsonData(content.c_str(), parseEnd);
+}
+
 } // namespace OHOS::Ace

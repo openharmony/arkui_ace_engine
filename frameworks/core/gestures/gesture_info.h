@@ -38,6 +38,7 @@ constexpr int32_t DEFAULT_PAN_FINGER = 1;
 constexpr Dimension DEFAULT_PAN_DISTANCE = 5.0_vp;
 constexpr Dimension DRAG_PAN_DISTANCE_MOUSE = 1.0_vp;
 constexpr Dimension DEFAULT_SLIDE_DISTANCE = DEFAULT_PAN_DISTANCE;
+constexpr Dimension DEFAULT_PEN_PAN_DISTANCE = 8.0_vp;
 constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
 constexpr double DEFAULT_SLIDE_SPEED = 300.0;
 constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 100;
@@ -137,6 +138,7 @@ using OnPanDirectionFunc = EventCallback<void(const PanDirection& direction)>;
 using PanDirectionFuncType = OnPanDirectionFunc::FunctionType;
 using OnPanDistanceFunc = EventCallback<void(double distance)>;
 using PanDistanceFuncType = OnPanDistanceFunc::FunctionType;
+using PanDistanceMap = std::unordered_map<SourceTool, float>;
 
 class PanGestureOption : public AceType {
     DECLARE_ACE_TYPE(PanGestureOption, AceType);
@@ -161,9 +163,20 @@ public:
     void SetDistance(double distance)
     {
         distance_ = distance;
+        distanceMap_[SourceTool::UNKNOWN] = distance;
         for (const auto& callback : onPanDistanceIds_) {
             (callback.second.GetCallback())(distance);
         }
+    }
+
+    void SetDistanceMap(const PanDistanceMap& distanceMap)
+    {
+        distanceMap_ = distanceMap;
+    }
+
+    const PanDistanceMap& GetPanDistanceMap() const
+    {
+        return distanceMap_;
     }
 
     double GetDistance() const
@@ -227,6 +240,7 @@ public:
 private:
     PanDirection direction_;
     double distance_ = DEFAULT_PAN_DISTANCE.ConvertToPx();
+    PanDistanceMap distanceMap_;
     int32_t fingers_ = 1;
     bool isLimitFingerCount_ = false;
     std::unordered_map<typename OnPanFingersFunc::IdType, OnPanFingersFunc> onPanFingersIds_;

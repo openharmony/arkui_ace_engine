@@ -42,6 +42,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/event_pass_through_subscriber.cpp",
       "$ace_root/adapter/ohos/entrance/file_asset_provider_impl.cpp",
       "$ace_root/adapter/ohos/entrance/form_utils_impl.cpp",
+      "$ace_root/adapter/ohos/entrance/global_pipeline_context_manager.cpp",
       "$ace_root/adapter/ohos/entrance/hap_asset_provider_impl.cpp",
       "$ace_root/adapter/ohos/entrance/mmi_event_convertor.cpp",
       "$ace_root/adapter/ohos/entrance/navigation_controller_helper.cpp",

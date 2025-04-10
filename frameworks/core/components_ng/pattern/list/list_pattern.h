@@ -239,6 +239,10 @@ public:
     void CalculateCurrentOffset(float delta, const ListLayoutAlgorithm::PositionMap& recycledItemPosition);
     void UpdatePosMap(const ListLayoutAlgorithm::PositionMap& itemPos);
     void UpdateScrollBarOffset() override;
+    virtual bool IsNeedAddContentOffset(bool isContentLessThanSize)
+    {
+        return !IsScrollSnapAlignCenter() || childrenSize_;
+    }
     // chain animation
     void SetChainAnimation();
     void SetChainAnimationOptions(const ChainAnimationOptions& options);
@@ -354,6 +358,8 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void GetEventDumpInfo() override;
+    void GetEventDumpInfo(std::unique_ptr<JsonValue>& json) override;
 
     void SetNeedToUpdateListDirectionInCardStyle(bool isNeedToUpdateListDirection)
     {

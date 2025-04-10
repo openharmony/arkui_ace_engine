@@ -826,6 +826,25 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnDisappear(ArkUIRuntimeCallInfo* run
     return panda::JSValueRef::Undefined(vm);
 }
 
+Local<panda::ObjectRef> FrameNodeBridge::CreateKeyEventInfoObj(EcmaVM* vm, KeyEventInfo& info)
+{
+    const char* keys[] = { "type", "keyCode", "keyText", "keySource", "deviceId", "metaKey", "timestamp",
+        "stopPropagation", "getModifierKeyState", "intentionCode", "isNumLockOn", "isCapsLockOn", "isScrollLockOn" };
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyType())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyCode())),
+        panda::StringRef::NewFromUtf8(vm, info.GetKeyText()),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeySource())),
+        panda::NumberRef::New(vm, info.GetDeviceId()), panda::NumberRef::New(vm, info.GetMetaKey()),
+        panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
+        panda::FunctionRef::New(vm, Framework::JsStopPropagation),
+        panda::FunctionRef::New(vm, NG::ArkTSUtils::JsGetModifierKeyState),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyIntention())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetNumLock())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetCapsLock())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetScrollLock())) };
+    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+}
+
 ArkUINativeModuleValue FrameNodeBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -854,18 +873,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runt
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        const char* keys[] = { "type", "keyCode", "keyText", "keySource", "deviceId", "metaKey", "timestamp",
-            "stopPropagation", "getModifierKeyState", "intentionCode" };
-        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyType())),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyCode())),
-            panda::StringRef::NewFromUtf8(vm, info.GetKeyText()),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeySource())),
-            panda::NumberRef::New(vm, info.GetDeviceId()), panda::NumberRef::New(vm, info.GetMetaKey()),
-            panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
-            panda::FunctionRef::New(vm, Framework::JsStopPropagation),
-            panda::FunctionRef::New(vm, NG::ArkTSUtils::JsGetModifierKeyState),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyIntention())) };
-        auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        auto obj = CreateKeyEventInfoObj(vm, info);
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
         panda::Local<panda::JSValueRef> params[] = { obj };
@@ -1529,6 +1537,34 @@ std::function<std::string(const std::string&)> ParseGetFunc(ArkUIRuntimeCallInfo
     };
 }
 
+std::function<std::string()> JsGetCustomMapFunc(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t nodeId)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    return [vm, nodeId]() -> std::string {
+        std::string resultString = std::string();
+        CHECK_NULL_RETURN(vm, resultString);
+        panda::LocalScope scope(vm);
+        auto global = JSNApi::GetGlobalObject(vm);
+        if (global.IsNull()) {
+            return resultString;
+        }
+        auto getCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getCustomPropertyMapString__"));
+        if (getCustomProperty->IsUndefined() || !getCustomProperty->IsFunction(vm)) {
+            return resultString;
+        }
+        auto obj = getCustomProperty->ToObject(vm);
+        panda::Local<panda::FunctionRef> func = obj;
+        panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, nodeId) };
+        auto function = panda::CopyableGlobal(vm, func);
+        auto callValue = function->Call(vm, function.ToLocal(), params, 1);
+        if (callValue.IsNull() || callValue->IsUndefined() || !callValue->IsString(vm)) {
+            return resultString;
+        }
+        auto value = callValue->ToString(vm)->ToString(vm);
+        return value;
+    };
+}
+
 std::function<bool()> ParseFunc(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1597,8 +1633,10 @@ ArkUINativeModuleValue FrameNodeBridge::SetCustomPropertyModiferByKey(ArkUIRunti
     std::function<bool()> funcCallback = ParseFunc(runtimeCallInfo);
     CHECK_NULL_RETURN(funcCallback, panda::BooleanRef::New(vm, false));
     std::function<std::string(const std::string&)> getFuncCallback = ParseGetFunc(runtimeCallInfo, nodeId);
+    std::function<std::string()> getCustomPropertyMapCallback = JsGetCustomMapFunc(runtimeCallInfo, nodeId);
     GetArkUINodeModifiers()->getFrameNodeModifier()->setCustomPropertyModiferByKey(
-        nativeNode, reinterpret_cast<void*>(&funcCallback), reinterpret_cast<void*>(&getFuncCallback));
+        nativeNode, reinterpret_cast<void*>(&funcCallback), reinterpret_cast<void*>(&getFuncCallback),
+            reinterpret_cast<void*>(&getCustomPropertyMapCallback));
     return defaultReturnValue;
 }
 

@@ -23,10 +23,10 @@
 #include "base/image/image_source.h"
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
-#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#include "core/components_ng/render/adapter/drawing_image.h"
 #include "core/image/image_compressor.h"
 #include "core/image/image_loader.h"
 

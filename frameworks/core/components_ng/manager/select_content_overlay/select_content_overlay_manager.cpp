@@ -150,12 +150,12 @@ void SelectContentOverlayManager::NotifyAccessibilityOwner()
     auto context = menuNode->GetContext();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(selectOverlayHolder_);
-    auto accessibilityManager = selectOverlayHolder_->GetOwner();
-    CHECK_NULL_VOID(accessibilityManager);
-    context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(accessibilityManager))]() {
-        auto manager = weakNode.Upgrade();
-        CHECK_NULL_VOID(manager);
-        manager->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+    auto owner = selectOverlayHolder_->GetOwner();
+    CHECK_NULL_VOID(owner);
+    context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(owner))]() {
+        auto owner = weakNode.Upgrade();
+        CHECK_NULL_VOID(owner);
+        owner->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
     });
 }
 
@@ -176,6 +176,7 @@ void SelectContentOverlayManager::Show(bool animation, int32_t requestCode)
             CloseInternal(selectOverlayHolder_->GetOwnerId(), false, CloseReason::CLOSE_REASON_BY_RECREATE);
             SetHolder(holder);
             CreateSelectOverlay(info, animation);
+            FocusFirstFocusableChildInMenu();
             return;
         }
         UpdateExistOverlay(info, animation, requestCode);
@@ -691,7 +692,7 @@ const RefPtr<FrameNode> SelectContentOverlayManager::GetSelectOverlayRoot()
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(shareOverlayInfo_, rootNode);
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto root = FindWindowScene(shareOverlayInfo_->callerFrameNode.Upgrade());
         rootNode = DynamicCast<FrameNode>(root);
     } else if (rootNode && selectOverlayHolder_ && selectOverlayHolder_->IsEnableContainerModal()) {
@@ -713,7 +714,7 @@ const RefPtr<FrameNode> SelectContentOverlayManager::GetSelectOverlayRoot()
 RefPtr<UINode> SelectContentOverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
 {
     auto container = Container::Current();
-    if (!container || !container->IsScenceBoardWindow()) {
+    if (!container || !container->IsSceneBoardWindow()) {
         return rootNodeWeak_.Upgrade();
     }
     CHECK_NULL_RETURN(targetNode, nullptr);
@@ -744,7 +745,14 @@ bool SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     auto selectOverlayNode = selectOverlayNode_.Upgrade();
     auto menuNode = menuNode_.Upgrade();
     auto handleNode = handleNode_.Upgrade();
-    NotifyAccessibilityOwner();
+    auto owner = selectOverlayHolder_->GetOwner();
+    if (owner) {
+        auto ownerTag = owner->GetTag();
+        if (ownerTag != V2::RICH_EDITOR_ETS_TAG ||
+            (reason != CloseReason::CLOSE_REASON_SELECT_ALL && reason != CloseReason::CLOSE_REASON_BY_RECREATE)) {
+            NotifyAccessibilityOwner();
+        }
+    }
     if (animation && !shareOverlayInfo_->isUsingMouse) {
         ClearAllStatus();
         DestroySelectOverlayNodeWithAnimation(selectOverlayNode);

@@ -2406,4 +2406,258 @@ HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest007, TestSize.Level1)
     animator->repeatEvent_ = event;
     animator->innerRepeatEvent_ = event;
 }
+
+/**
+ * @tc.name: ControlledAnimatorTest_001
+ * @tc.desc: Verify infinite iterations
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set single-frame animation with infinite iterations
+     * @tc.expected: Should not crash and iteration expect infinite
+     */
+    auto animator = ControlledAnimator();
+    animator.SetIteration(INT_MAX);
+    EXPECT_EQ(animator.GetIteration(), INT_MAX);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_002
+ * @tc.desc: Verify control status setting
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create animator and set control status
+     * @tc.expected: Control status should be updated correctly
+     */
+    auto animator = ControlledAnimator();
+    animator.SetControlStatus(ControlledAnimator::ControlStatus::RUNNING);
+    EXPECT_EQ(animator.GetControlStatus(), ControlledAnimator::ControlStatus::RUNNING);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_003
+ * @tc.desc: Verify fill mode setting
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create animator and set fill mode
+     * @tc.expected: Fill mode should be updated correctly
+     */
+    auto animator = ControlledAnimator();
+    animator.SetFillMode(FillMode::FORWARDS);
+    EXPECT_EQ(animator.GetFillMode(), FillMode::FORWARDS);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_004
+ * @tc.desc: Verify duration setting
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create animator and set duration
+     * @tc.expected: Duration should be updated correctly
+     */
+    auto animator = ControlledAnimator();
+    animator.SetDuration(1000);
+    EXPECT_EQ(animator.GetDuration(), 1000);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_005
+ * @tc.desc: Verify forward playback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_005, TestSize.Level1)
+{
+    /**
+     * @tc.steps:
+     *   step1. Create animator with test data
+     *   step2. Start forward playback
+     * @tc.expected: Control status should be RUNNING and not reversed
+     */
+    auto animator = ControlledAnimator();
+    std::vector<PictureInfo> frames { { 0.5f, 100 }, { 0.5f, 200 } };
+    animator.AddInterpolator(frames);
+    int32_t flagNumber = 1;
+    animator.AddListener([&flagNumber](int32_t number) { flagNumber = 2; });
+    animator.Forward();
+    EXPECT_EQ(animator.GetControlStatus(), ControlledAnimator::ControlStatus::STOPPED);
+    EXPECT_EQ(flagNumber, 2);
+    EXPECT_FALSE(animator.isReverse_);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_006
+ * @tc.desc: Verify backward playback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_006, TestSize.Level1)
+{
+    /**
+     * @tc.steps:
+     *   step1. Create animator with test data
+     *   step2. Start backward playback
+     * @tc.expected: Control status should be RUNNING and reversed
+     */
+    auto animator = ControlledAnimator();
+    animator.AddInterpolator({ { 0.1, 1 }, { 0.2, 1 } });
+    int32_t flagNumber = 1;
+    animator.AddListener([&flagNumber](int32_t number) { flagNumber = 2; });
+    animator.Backward();
+    EXPECT_EQ(animator.GetControlStatus(), ControlledAnimator::ControlStatus::STOPPED);
+    EXPECT_EQ(flagNumber, 2);
+    EXPECT_FALSE(animator.isReverse_);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_007
+ * @tc.desc: Verify pause functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_007, TestSize.Level1)
+{
+    /**
+     * @tc.steps:
+     *   step1. Create animator with test data
+     *   step2. Start playback and then pause
+     * @tc.expected: Control status should be PAUSED
+     */
+    auto animator = ControlledAnimator();
+    animator.AddInterpolator({ { 0.1, 1 }, { 0.2, 1 } });
+    int32_t flagNumber = 1;
+    animator.AddListener([&flagNumber](int32_t number) { flagNumber = 2; });
+    animator.Forward();
+    animator.Pause();
+    EXPECT_EQ(animator.GetControlStatus(), ControlledAnimator::ControlStatus::PAUSED);
+    EXPECT_EQ(flagNumber, 2);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_008
+ * @tc.desc: Verify cancel functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_008, TestSize.Level1)
+{
+    /**
+     * @tc.steps:
+     *   step1. Create animator with test data
+     *   step2. Start playback and then cancel
+     * @tc.expected: Control status should be IDLE
+     */
+    auto animator = ControlledAnimator();
+    animator.AddInterpolator({ { 0.1, 1 }, { 0.2, 1 } });
+    int32_t flagNumber = 1;
+    animator.AddListener([&flagNumber](int32_t number) { flagNumber = 2; });
+    animator.Forward();
+    animator.Cancel();
+    EXPECT_EQ(animator.GetControlStatus(), ControlledAnimator::ControlStatus::IDLE);
+    EXPECT_EQ(flagNumber, 2);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_009
+ * @tc.desc: Verify finish functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_009, TestSize.Level1)
+{
+    /**
+     * @tc.steps:
+     *   step1. Create animator with test data
+     *   step2. Start playback and then finish
+     * @tc.expected: Control status should be STOPPED
+     */
+    auto animator = ControlledAnimator();
+    animator.AddInterpolator({ { 0.1, 1 }, { 0.2, 1 } });
+    int32_t flagNumber = 1;
+    animator.AddListener([&flagNumber](int32_t number) { flagNumber = 2; });
+    animator.Forward();
+    animator.Finish();
+    EXPECT_EQ(animator.GetControlStatus(), ControlledAnimator::ControlStatus::STOPPED);
+    EXPECT_EQ(flagNumber, 2);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_010
+ * @tc.desc: Verify listener functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_010, TestSize.Level1)
+{
+    /**
+     * @tc.steps:
+     *   step1. Create animator and add listeners
+     *   step2. Trigger various events
+     * @tc.expected: Listener flags should be set correctly
+     */
+    auto animator = ControlledAnimator();
+    bool startCalled = false;
+    bool stopCalled = false;
+
+    animator.AddStartListener([&startCalled]() { startCalled = true; });
+    animator.AddStopListener([&stopCalled]() { stopCalled = true; });
+    int32_t flagNumber = 1;
+    animator.AddListener([&flagNumber](int32_t number) { flagNumber = 2; });
+
+    animator.Forward();
+    EXPECT_FALSE(startCalled);
+
+    animator.Finish();
+    EXPECT_FALSE(stopCalled);
+    EXPECT_EQ(flagNumber, 1);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_011
+ * @tc.desc: Verify empty interpolators handling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_011, TestSize.Level1)
+{
+    /**
+     * @tc.steps:
+     *   step1. Create animator with no interpolators
+     *   step2. Attempt to start playback
+     * @tc.expected: Control status should remain unchanged
+     */
+    auto animator = ControlledAnimator();
+    auto initialStatus = animator.GetControlStatus();
+    animator.Forward();
+    EXPECT_EQ(animator.GetControlStatus(), initialStatus);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_012
+ * @tc.desc: Verify zero duration handling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_012, TestSize.Level1)
+{
+    /**
+     * @tc.steps:
+     *   step1. Create animator with zero duration
+     *   step2. Attempt to start playback
+     * @tc.expected: Should finish immediately
+     */
+    auto animator = ControlledAnimator();
+    animator.AddInterpolator({ { 0.1, 1 } });
+    int32_t flagNumber = 1;
+    animator.AddListener([&flagNumber](int32_t number) { flagNumber = 2; });
+    animator.SetDuration(0);
+    bool finished = false;
+    animator.AddStopListener([&finished]() { finished = true; });
+    animator.Forward();
+    EXPECT_TRUE(finished);
+    EXPECT_EQ(flagNumber, 1);
+}
 } // namespace OHOS::Ace::NG

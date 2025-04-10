@@ -58,8 +58,8 @@
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "render_service_client/core/pipeline/rs_render_thread.h"
 #endif
-#include "core/components_ng/render/adapter/rosen/drawing_decoration_painter.h"
-#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#include "core/components_ng/render/adapter/drawing_decoration_painter.h"
+#include "core/components_ng/render/adapter/drawing_image.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
@@ -839,10 +839,11 @@ void RosenRenderContext::PaintBackground()
     OffsetF positionOffset =
         ImagePainter::CalculateBgImagePosition(paintRect_.GetSize(), renderSize, GetBackgroundImagePosition());
     auto slice = GetBackgroundImageResizableSliceValue(ImageResizableSlice());
-    Rosen::Vector4f rect(slice.left.ConvertToPxWithSize(srcSize.Width()),
-        slice.top.ConvertToPxWithSize(srcSize.Height()),
-        srcSize.Width() - (slice.left + slice.right).ConvertToPxWithSize(srcSize.Width()),
-        srcSize.Height() - (slice.top + slice.bottom).ConvertToPxWithSize(srcSize.Height()));
+    auto left = static_cast<float>(slice.left.ConvertToPxWithSize(srcSize.Width()));
+    auto top = static_cast<float>(slice.top.ConvertToPxWithSize(srcSize.Height()));
+    auto right = static_cast<float>(slice.right.ConvertToPxWithSize(srcSize.Width()));
+    auto bottom = static_cast<float>(slice.bottom.ConvertToPxWithSize(srcSize.Height()));
+    Rosen::Vector4f rect(left, top, srcSize.Width() - left - right, srcSize.Height() - top - bottom);
     rsNode_->SetBgImageWidth(renderSize.Width());
     rsNode_->SetBgImageHeight(renderSize.Height());
     rsNode_->SetBgImagePositionX(positionOffset.GetX());
@@ -6561,6 +6562,11 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint16_t flag)
 
 void RosenRenderContext::UpdatePaintRect(const RectF& paintRect)
 {
+    auto host = GetHost();
+    if (host && SystemProperties::GetSyncDebugTraceEnabled()) {
+        ACE_LAYOUT_SCOPED_TRACE("UpdatePaintRect[%s][self:%d] from %s to %s", host->GetTag().c_str(), host->GetId(),
+            paintRect_.ToString().c_str(), paintRect.ToString().c_str());
+    }
     paintRect_ = paintRect;
 }
 

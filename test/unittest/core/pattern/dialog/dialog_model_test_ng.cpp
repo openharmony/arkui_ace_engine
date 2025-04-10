@@ -1748,10 +1748,10 @@ HWTEST_F(DialogModelTestNg, SetOpenDialogWithNode001, TestSize.Level1)
     controllerModel.SetOpenDialogWithNode(props, nullptr);
     props.isShowInSubWindow = true;
     props.isModal = true;
-    props.isScenceBoardDialog = true;
+    props.isSceneBoardDialog = true;
     /**
      * @tc.steps: step3. Call  SetOpenDialogWithNode.
-     * @tc.desc: Covering branch isScenceBoardDialog is true
+     * @tc.desc: Covering branch isSceneBoardDialog is true
      * @tc.expected: running result(dialog) is nullptr.
      */
     auto result = controllerModel.SetOpenDialogWithNode(props, nullptr);
