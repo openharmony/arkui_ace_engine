@@ -1913,7 +1913,7 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
         }
     }
     if (!NearZero(targetPos)) {
-        AnimateTo(targetPos + currentOffset_, -1, nullptr, true, false);
+        AnimateTo(targetPos + currentOffset_, -1, nullptr, true, false, false);
         if (predictSnapOffset_.has_value() && AnimateRunning()) {
             scrollSnapVelocity_ = 0.0f;
             predictSnapOffset_.reset();
@@ -2159,6 +2159,21 @@ Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
         groupItemGeometry->GetFrameRect().Width(), groupItemGeometry->GetFrameRect().Height());
 }
 
+bool ListPattern::CalculateJumpOffset()
+{
+    for (const auto& pos : itemPosition_) {
+        if (pos.second.groupInfo && !pos.second.groupInfo.value().atStart) {
+            continue;
+        }
+        PositionInfo info = posMap_->GetPositionInfo(pos.first);
+        if (!Negative(info.mainSize)) {
+            currentOffset_ = info.mainPos - pos.second.startPos;
+            return true;
+        }
+    }
+    return false;
+}
+
 float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, bool isJump)
 {
     float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
@@ -2168,13 +2183,21 @@ float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayo
         currentOffset_ = itemPosition_.empty() ? 0.0f :
             posMap_->GetPos(itemPosition_.begin()->first, itemPosition_.begin()->second.startPos);
     } else {
-        if (isJump || needReEstimateOffset_) {
+        if (isJump && !needReEstimateOffset_) {
+            if (CalculateJumpOffset()) {
+                relativeOffset = 0.0f;
+            } else {
+                needReEstimateOffset_ = true;
+            }
+        }
+        if (needReEstimateOffset_) {
+            posMap_->ClearPosMap();
             auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis(), itemStartIndex_);
+            calculate.SetPosMap(posMap_, true);
             calculate.GetEstimateHeightAndOffset(GetHost());
             currentOffset_ = calculate.GetEstimateOffset();
             relativeOffset = 0;
             needReEstimateOffset_ = false;
-            posMap_->ClearPosMap();
         }
         CalculateCurrentOffset(relativeOffset, listLayoutAlgorithm->GetRecycledItemPosition());
     }
@@ -2191,7 +2214,7 @@ float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayo
             if (!NearEqual(relativeOffset + prevOffset, currentOffset_, epsilon) ||
                 !NearEqual(target.targetOffset, targetPos, epsilon)) {
                 target.targetOffset = targetPos;
-                AnimateTo(targetPos, -1, nullptr, true);
+                AnimateTo(targetPos, -1, nullptr, true, false, false);
             }
         }
     }

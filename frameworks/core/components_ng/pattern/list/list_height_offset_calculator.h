@@ -38,17 +38,45 @@ public:
             startIndex_ = itemPosition.begin()->first;
             endIndex_ = itemPosition.rbegin()->first;
             float itemsSize = itemPosition.rbegin()->second.endPos - itemPosition.begin()->second.startPos + space;
-            estimateItemHeight_ = itemsSize / itemPosition.size() - space;
             for (const auto& pos : itemPosition) {
                 if (pos.second.groupInfo && pos.second.groupInfo.value().averageHeight > 0) {
                     groupedItemHeight_ = pos.second.groupInfo.value().averageHeight;
                     groupHeaderHeight_ = pos.second.groupInfo.value().headerSize;
                     groupFooterHeight_ = pos.second.groupInfo.value().footerSize;
                     groupSpaceWidth_ = pos.second.groupInfo.value().spaceWidth;
+                    lanes = 1;
                     break;
                 }
             }
+            estimateItemHeight_ = itemsSize / GetLines(lanes, itemPosition.size()) - space;
         }
+    }
+
+    void CalculateListItemGroup(RefPtr<ListItemGroupPattern> listItemGroupPatten)
+    {
+        if (currentIndex_ > 0) {
+            estimateHeight_ += spaceWidth_;
+        }
+        if (currentIndex_ == startIndex_) {
+            estimateOffset_ = listItemGroupPatten->GetEstimateOffset(estimateHeight_, targetPos_,
+                groupHeaderHeight_, groupFooterHeight_);
+        }
+        if (currLane_ > 0) {
+            if (syncPosMap_ && posMap_) {
+                PositionInfo info = { estimateHeight_, currRowHeight_ };
+                posMap_->UpdatePosRange(currentIndex_ - currLane_, currentIndex_, info, spaceWidth_, lanes_);
+            }
+            estimateHeight_ += currRowHeight_;
+            currLane_ = 0;
+            currRowHeight_ = 0.0f;
+        }
+        float height = listItemGroupPatten->GetEstimateHeight(groupedItemHeight_,
+            groupHeaderHeight_, groupFooterHeight_, groupSpaceWidth_);
+        if (syncPosMap_ && posMap_) {
+            posMap_->UpdatePos(currentIndex_, PositionInfo{ estimateHeight_, height });
+        }
+        estimateHeight_ += height;
+        currentIndex_++;
     }
 
     void CalculateFrameNode(RefPtr<FrameNode> frameNode)
@@ -56,21 +84,7 @@ public:
         CHECK_NULL_VOID(frameNode);
         auto listItemGroupPatten = frameNode->GetPattern<ListItemGroupPattern>();
         if (listItemGroupPatten) {
-            if (currentIndex_ > 0) {
-                estimateHeight_ += spaceWidth_;
-            }
-            if (currentIndex_ == startIndex_) {
-                estimateOffset_ = listItemGroupPatten->GetEstimateOffset(estimateHeight_, targetPos_,
-                    groupHeaderHeight_, groupFooterHeight_);
-            }
-            if (currLane_ > 0) {
-                estimateHeight_ += currRowHeight_;
-                currLane_ = 0;
-                currRowHeight_ = 0.0f;
-            }
-            estimateHeight_ += listItemGroupPatten->GetEstimateHeight(groupedItemHeight_,
-                groupHeaderHeight_, groupFooterHeight_, groupSpaceWidth_);
-            currentIndex_++;
+            CalculateListItemGroup(listItemGroupPatten);
             return;
         }
         auto listItemPatten = frameNode->GetPattern<ListItemPattern>();
@@ -89,6 +103,10 @@ public:
         currRowHeight_ = std::max(currRowHeight_, height);
         currLane_++;
         if (currLane_ == lanes_) {
+            if (syncPosMap_ && posMap_) {
+                PositionInfo info = { estimateHeight_, currRowHeight_ };
+                posMap_->UpdatePosRange(currentIndex_ - (lanes_ - 1), currentIndex_ + 1, info, spaceWidth_, lanes_);
+            }
             estimateHeight_ += currRowHeight_;
             currLane_ = 0;
             currRowHeight_ = 0.0f;
@@ -190,6 +208,10 @@ public:
             return;
         }
         if ((endIndex_ < currentIndex_) || (startIndex_ >= currentIndex_ + count)) {
+            if (syncPosMap_ && posMap_ && (startIndex_ >= currentIndex_ + count)) {
+                PositionInfo info = { estimateHeight_, estimateItemHeight_ };
+                posMap_->UpdatePosRange(currentIndex_, startIndex_, info, spaceWidth_, lanes_);
+            }
             estimateHeight_ += (estimateItemHeight_ + spaceWidth_) * GetLines(lanes_, count);
             if (currentIndex_ > 0) {
                 estimateHeight_ -= spaceWidth_;
@@ -205,6 +227,10 @@ public:
         int32_t endIndex = std::min(currentIndex_ + count - 1, endIndex_);
         float averageHeight = GetLazyForEachIndexAverageHeight(node, startIndex, endIndex, hasGroup);
         int32_t lanes = hasGroup ? 1 : lanes_;
+        if (syncPosMap_ && posMap_) {
+            PositionInfo info = { estimateHeight_, averageHeight };
+            posMap_->UpdatePosRange(currentIndex_, startIndex_, info, spaceWidth_, lanes);
+        }
         if (startIndex == startIndex_) {
             int32_t curr = GetLines(lanes, startIndex_ - currentIndex_);
             estimateOffset_ = estimateHeight_ + (averageHeight + spaceWidth_) * curr;
@@ -233,6 +259,12 @@ public:
     float GetEstimateOffset() const
     {
         return estimateOffset_;
+    }
+
+    void SetPosMap(const RefPtr<ListPositionMap>& posMap, bool syncPosMap = false)
+    {
+        posMap_ = posMap;
+        syncPosMap_ = syncPosMap;
     }
 
 private:
@@ -281,6 +313,8 @@ private:
 
     const ListLayoutAlgorithm::PositionMap& itemPosition_;
     int32_t itemStartIndex_ = 0;
+    RefPtr<ListPositionMap> posMap_;
+    bool syncPosMap_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif
