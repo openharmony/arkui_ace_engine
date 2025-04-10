@@ -37,33 +37,31 @@ void DestroyPeerImpl(Ark_TransitionEffect peer)
     peer->handler = nullptr;
     delete peer;
 }
-RefPtr<OHOS::Ace::NG::ChainedRotateEffect> HandleRotate(const Ark_TransitionEffects* effect)
+RefPtr<OHOS::Ace::NG::ChainedRotateEffect> HandleRotate(const Ark_TransitionEffects& effect)
 {
     auto emptyDimension = Dimension();
-    CHECK_NULL_RETURN(effect, nullptr);
-    auto x = Converter::Convert<float>(effect->rotate.x.value);
-    auto y = Converter::Convert<float>(effect->rotate.y.value);
-    auto z = Converter::Convert<float>(effect->rotate.z.value);
-    auto centerX = Converter::OptConvert<CalcDimension>(effect->rotate.centerX.value);
-    auto centerY = Converter::OptConvert<CalcDimension>(effect->rotate.centerY.value);
-    auto centerZ = Converter::OptConvert<CalcDimension>(effect->rotate.centerZ.value);
-    auto perspective = Converter::Convert<float>(effect->rotate.perspective.value);
-    auto angle = Converter::OptConvert<float>(effect->rotate.angle);
+    auto x = Converter::Convert<float>(effect.rotate.x.value);
+    auto y = Converter::Convert<float>(effect.rotate.y.value);
+    auto z = Converter::Convert<float>(effect.rotate.z.value);
+    auto centerX = Converter::OptConvert<CalcDimension>(effect.rotate.centerX.value);
+    auto centerY = Converter::OptConvert<CalcDimension>(effect.rotate.centerY.value);
+    auto centerZ = Converter::OptConvert<CalcDimension>(effect.rotate.centerZ.value);
+    auto perspective = Converter::Convert<float>(effect.rotate.perspective.value);
+    auto angle = Converter::OptConvert<float>(effect.rotate.angle);
     RotateOptions rotate(x, y, z, angle.value_or(0),
         centerX.value_or(emptyDimension),
         centerY.value_or(emptyDimension),
         centerZ.value_or(emptyDimension), perspective);
     return AceType::MakeRefPtr<ChainedRotateEffect>(rotate);
 }
-RefPtr<OHOS::Ace::NG::ChainedScaleEffect> HandleScale(const Ark_TransitionEffects* effect)
+RefPtr<OHOS::Ace::NG::ChainedScaleEffect> HandleScale(const Ark_TransitionEffects& effect)
 {
     auto emptyDimension = Dimension();
-    CHECK_NULL_RETURN(effect, nullptr);
-    auto x = Converter::Convert<float>(effect->scale.x.value);
-    auto y = Converter::Convert<float>(effect->scale.y.value);
-    auto z = Converter::Convert<float>(effect->scale.z.value);
-    auto centerX = Converter::OptConvert<CalcDimension>(effect->scale.centerX.value);
-    auto centerY = Converter::OptConvert<CalcDimension>(effect->scale.centerY.value);
+    auto x = Converter::Convert<float>(effect.scale.x.value);
+    auto y = Converter::Convert<float>(effect.scale.y.value);
+    auto z = Converter::Convert<float>(effect.scale.z.value);
+    auto centerX = Converter::OptConvert<CalcDimension>(effect.scale.centerX.value);
+    auto centerY = Converter::OptConvert<CalcDimension>(effect.scale.centerY.value);
     ScaleOptions scale(x, y, z, centerX.value_or(emptyDimension), centerY.value_or(emptyDimension));
     return AceType::MakeRefPtr<ChainedScaleEffect>(scale);
 }
@@ -85,9 +83,9 @@ Ark_TransitionEffect CtorImpl(const Ark_String* type,
     } else if (valueText == SLIDE_SWITCH_TOKEN) {
         peer->handler = AceType::MakeRefPtr<ChainedSlideSwitchEffect>();
     } else if (valueText == ROTATE_TOKEN) {
-        peer->handler = HandleRotate(effect);
+        peer->handler = HandleRotate(*effect);
     } else if (valueText == SCALE_TOKEN) {
-        peer->handler = HandleScale(effect);
+        peer->handler = HandleScale(*effect);
     } else if (valueText == OPACITY_TOKEN) {
         auto opacity = Converter::Convert<float>(effect->opacity);
         peer->handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity);
@@ -198,14 +196,36 @@ Ark_TransitionEffect GetIDENTITYImpl()
 }
 Ark_TransitionEffect GetOPACITYImpl()
 {
-    Ark_Number value = Converter::ArkValue<Ark_Number>(0);
-    return OpacityImpl(&value);
+    auto alpha = Converter::ArkValue<Ark_Number>(static_cast<float>(0.0f));
+    Ark_String type = Converter::ArkValue<Ark_String>(OPACITY_TOKEN);
+    Ark_TransitionEffects effects {
+        .opacity = alpha
+    };
+    return CtorImpl(&type, &effects);
 }
 Ark_TransitionEffect GetSLIDEImpl()
 {
-    auto effect1 = MoveImpl(ARK_TRANSITION_EDGE_START);
-    auto effect2 = MoveImpl(ARK_TRANSITION_EDGE_END);
-    return AsymmetricImpl(effect1, effect2);
+    Ark_String type = Converter::ArkValue<Ark_String>(MOVE_TOKEN);
+    Ark_TransitionEdge startEdge = Converter::ArkValue<Ark_TransitionEdge>(TransitionEdge::START);
+    Ark_TransitionEffects startEffects {
+        .move = startEdge
+    };
+    Ark_TransitionEffect appear = CtorImpl(&type, &startEffects);
+    Ark_TransitionEdge endEdge = Converter::ArkValue<Ark_TransitionEdge>(TransitionEdge::END);
+    Ark_String type1 = Converter::ArkValue<Ark_String>(MOVE_TOKEN);
+    Ark_TransitionEffects endEffects {
+        .move = endEdge
+    };
+    Ark_TransitionEffect disappear = CtorImpl(&type1, &endEffects);
+
+    Ark_String asyType = Converter::ArkValue<Ark_String>(ASYMMETRIC_TOKEN);
+    Ark_Literal_TransitionEffect_appear_disappear asymm;
+    asymm.appear = appear;
+    asymm.disappear = disappear;
+    Ark_TransitionEffects effects {
+        .asymmetric = asymm
+    };
+    return CtorImpl(&asyType, &effects);
 }
 Ark_TransitionEffect GetSLIDE_SWITCHImpl()
 {
