@@ -2915,18 +2915,9 @@ void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config,
 
 void UIContentImpl::ExecKeyFrameCachedAnimateAction()
 {
-    TAG_LOGD(AceLogTag::ACE_WINDOW, "exec keyframe cache in");
     if (cachedAnimateFlag_.load()) {
-        const int32_t waitDuration = 50;
-        AnimationOption option;
-        option.SetDuration(watiDuration);
-        AnimationUtils::Animate(option,
-            []() {
-                TAG_LOGD(AceLogTag::ACE_WINDOW, "exec keyframe cache waiting");
-            },
-            [this]() {
-                UpdateViewportConfig(cachedConfig_, cachedReason_, cachedRsTransaction_, cachedAvoidAreas_);
-            });
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "ExecKeyFrameCachedAnimateAction");
+        UpdateViewportConfig(cachedConfig_, cachedReason_, cachedRsTransaction_, cachedAvoidAreas_);
         cachedAnimateFlag_.store(false);
     }
 }
