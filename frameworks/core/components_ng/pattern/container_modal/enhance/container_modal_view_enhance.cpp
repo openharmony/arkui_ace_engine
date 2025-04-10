@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "wm_common.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -227,9 +228,8 @@ bool ContainerModalViewEnhance::GetContainerModalComponentRect(
     return pattern->GetContainerModalComponentRect(floatContainerModal, floatButtons);
 }
 
-void ContainerModalViewEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> pipeline, uint32_t buttonsize,
-    uint32_t spacingBetweenButtons, uint32_t closeButtonRightMargin, int32_t colorMode, uint32_t buttonIconSize,
-    uint32_t buttonBackgroundCornerRadius)
+void ContainerModalViewEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> pipeline,
+    const OHOS::Rosen::DecorButtonStyle& buttonStyle)
 {
     CHECK_NULL_VOID(pipeline);
     if (!pipeline || pipeline->GetWindowModal() != WindowModal::CONTAINER_MODAL) {
@@ -243,17 +243,21 @@ void ContainerModalViewEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> 
     CHECK_NULL_VOID(containerPattern);
     auto controlButtonsNode = containerPattern->GetCustomButtonNode();
     CHECK_NULL_VOID(controlButtonsNode);
-    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SPACING_CHANGE, std::to_string(spacingBetweenButtons));
-    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SIZE_CHANGE, std::to_string(buttonsize));
-    controlButtonsNode->FireCustomCallback(EVENT_NAME_COLOR_CONFIGURATION_LOCKED, std::to_string(colorMode));
-    if (colorMode != static_cast<int32_t>(ColorMode::DARK) && colorMode != static_cast<int32_t>(ColorMode::LIGHT)) {
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SPACING_CHANGE,
+        std::to_string(buttonStyle.spacingBetweenButtons));
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SIZE_CHANGE, std::to_string(buttonStyle.buttonBackgroundSize));
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_COLOR_CONFIGURATION_LOCKED,
+        std::to_string(buttonStyle.colorMode));
+    if (buttonStyle.colorMode != static_cast<int32_t>(ColorMode::DARK) &&
+        buttonStyle.colorMode != static_cast<int32_t>(ColorMode::LIGHT)) {
         containerPattern->OnColorConfigurationUpdate();
     }
     controlButtonsNode->FireCustomCallback(
-        EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE, std::to_string(closeButtonRightMargin));
-    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_ICON_SIZE_CHANGE, std::to_string(buttonIconSize));
+        EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE, std::to_string(buttonStyle.closeButtonRightMargin));
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_ICON_SIZE_CHANGE,
+        std::to_string(buttonStyle.buttonIconSize));
     controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_BACKGROUND_CORNER_RADIUS_CHANGE,
-        std::to_string(buttonBackgroundCornerRadius));
+        std::to_string(buttonStyle.buttonBackgroundCornerRadius));
     containerPattern->CallButtonsRectChange();
 }
 
