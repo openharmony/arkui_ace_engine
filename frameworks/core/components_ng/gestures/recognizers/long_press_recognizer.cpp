@@ -145,6 +145,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     if (fingersId_.find(event.id) == fingersId_.end()) {
         fingersId_.insert(event.id);
     }
+    longPressFingerCountForSequence_++;
     globalPoint_ = Point(event.x, event.y);
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
@@ -176,6 +177,7 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (touchPoints_.find(event.id) != touchPoints_.end()) {
         touchPoints_.erase(event.id);
     }
+    longPressFingerCountForSequence_--;
     lastTouchEvent_ = event;
     if (refereeState_ == RefereeState::SUCCEED) {
         if (isLimitFingerCount_ && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
@@ -342,6 +344,14 @@ void LongPressRecognizer::StartRepeatTimer()
     taskExecutor.PostDelayedTask(timer_, duration_, "ArkUIGestureLongPressRepeatTimer");
 }
 
+void LongPressRecognizer::RemoteRepeatTimer()
+{
+    longPressFingerCountForSequence_--;
+    if (longPressFingerCountForSequence_ < fingers_) {
+        timer_.Cancel();
+    }
+}
+
 double LongPressRecognizer::ConvertPxToVp(double offset) const
 {
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -402,6 +412,7 @@ void LongPressRecognizer::OnResetStatus()
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
+    longPressFingerCountForSequence_ = 0;
 }
 
 bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
