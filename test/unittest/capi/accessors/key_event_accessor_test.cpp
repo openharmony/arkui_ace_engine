@@ -464,8 +464,10 @@ HWTEST_F(KeyEventAccessorTest, getTimestampValidTest, TestSize.Level1)
 
     ASSERT_NE(accessor_->getTimestamp, nullptr);
     const std::vector<std::pair<int64_t, Duration>> TEST_PLAN {
-        { 1, Duration(std::chrono::nanoseconds(1)) },
-        { 9999, Duration(std::chrono::nanoseconds(9999)) }
+        {1, Duration(std::chrono::nanoseconds(1))},
+        {9999, Duration(std::chrono::nanoseconds(9999))},
+        {std::numeric_limits<int64_t>::min(), Duration(std::chrono::nanoseconds(std::numeric_limits<int64_t>::min()))},
+        {std::numeric_limits<int64_t>::max(), Duration(std::chrono::nanoseconds(std::numeric_limits<int64_t>::max()))},
     };
 
     for (auto& [expected, value] : TEST_PLAN) {
@@ -564,31 +566,60 @@ HWTEST_F(KeyEventAccessorTest, setStopPropagationInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setIntentionCodeValidTest
+ * @tc.name: getIntentionCodeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, DISABLED_setIntentionCodeValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getIntentionCodeTest, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->setIntentionCode, nullptr);
-    // setIntentionCode doesn't have sense.
+    ASSERT_NE(accessor_->getIntentionCode, nullptr);
+    const std::vector<std::tuple<KeyIntention, Ark_IntentionCode>> TEST_PLAN {
+        {KeyIntention::INTENTION_UNKNOWN, ARK_INTENTION_CODE_INTENTION_UNKNOWN},
+        {KeyIntention::INTENTION_UP, ARK_INTENTION_CODE_INTENTION_UP},
+        {KeyIntention::INTENTION_DOWN, ARK_INTENTION_CODE_INTENTION_DOWN},
+        {KeyIntention::INTENTION_LEFT, ARK_INTENTION_CODE_INTENTION_LEFT},
+        {KeyIntention::INTENTION_RIGHT, ARK_INTENTION_CODE_INTENTION_RIGHT},
+        {KeyIntention::INTENTION_SELECT, ARK_INTENTION_CODE_INTENTION_SELECT},
+        {KeyIntention::INTENTION_ESCAPE, ARK_INTENTION_CODE_INTENTION_ESCAPE},
+        {KeyIntention::INTENTION_BACK, ARK_INTENTION_CODE_INTENTION_BACK},
+        {KeyIntention::INTENTION_FORWARD, ARK_INTENTION_CODE_INTENTION_FORWARD},
+        {KeyIntention::INTENTION_MENU, ARK_INTENTION_CODE_INTENTION_MENU},
+        {KeyIntention::INTENTION_PAGE_UP, ARK_INTENTION_CODE_INTENTION_PAGE_UP},
+        {KeyIntention::INTENTION_PAGE_DOWN, ARK_INTENTION_CODE_INTENTION_PAGE_DOWN},
+        {KeyIntention::INTENTION_ZOOM_OUT, ARK_INTENTION_CODE_INTENTION_ZOOM_OUT},
+        {KeyIntention::INTENTION_ZOOM_IN, ARK_INTENTION_CODE_INTENTION_ZOOM_IN},
+        {KeyIntention::INTENTION_CAMERA, ARK_INTENTION_CODE_INTENTION_UNKNOWN},
+    };
+    for (const auto& [value, expected] : TEST_PLAN) {
+        KeyEvent event;
+        event.keyIntention = value;
+        KeyEventInfo info(event);
+        peer_->SetEventInfo(&info);
+        Ark_IntentionCode code = accessor_->getIntentionCode(peer_);
+        EXPECT_EQ(code, expected);
+    }
+    Ark_KeyEvent emptyPeer = PeerUtils::CreatePeer<KeyEventPeer>();
+    EXPECT_EQ(accessor_->getIntentionCode(emptyPeer), ARK_INTENTION_CODE_INTENTION_UNKNOWN);
+    EXPECT_EQ(accessor_->getIntentionCode(nullptr), ARK_INTENTION_CODE_INTENTION_UNKNOWN);
 }
 
 /**
- * @tc.name: setIntentionCodeInvalidTest
+ * @tc.name: setIntentionCodeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setIntentionCodeInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setIntentionCodeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setIntentionCode, nullptr);
     const std::vector<std::tuple<KeyEventPeer*, Ark_IntentionCode>> TEST_PLAN {
-        { nullptr, ARK_INTENTION_CODE_INTENTION_UNKNOWN },
+        {peer_, ARK_INTENTION_CODE_INTENTION_UP},
+        {peer_, ARK_INTENTION_CODE_INTENTION_DOWN},
+        {nullptr, ARK_INTENTION_CODE_INTENTION_FORWARD},
+        {PeerUtils::CreatePeer<KeyEventPeer>(), ARK_INTENTION_CODE_INTENTION_FORWARD},
     };
-    const auto currentCode = eventInfo_->GetKeyIntention();
-    for (auto& [peer, code] : TEST_PLAN) {
+    for (const auto& [peer, code] : TEST_PLAN) {
         accessor_->setIntentionCode(peer, code);
-        EXPECT_EQ(eventInfo_->GetKeyIntention(), currentCode);
+        EXPECT_EQ(eventInfo_->GetKeyIntention(), KeyIntention::INTENTION_UNKNOWN);
     }
 }
 

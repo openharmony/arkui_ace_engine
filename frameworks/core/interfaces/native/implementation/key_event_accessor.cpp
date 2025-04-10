@@ -150,7 +150,11 @@ void SetStopPropagationImpl(Ark_KeyEvent peer,
 }
 Ark_IntentionCode GetIntentionCodeImpl(Ark_KeyEvent peer)
 {
-    return {};
+    static constexpr auto intentionCodeError = static_cast<Ark_IntentionCode>(-1);
+    CHECK_NULL_RETURN(peer, intentionCodeError);
+    const auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, intentionCodeError);
+    return Converter::ArkValue<Ark_IntentionCode>(info->GetKeyIntention());
 }
 void SetIntentionCodeImpl(Ark_KeyEvent peer,
                           Ark_IntentionCode intentionCode)

@@ -160,7 +160,9 @@ HWTEST_F(BaseEventAccessorTest, GetTimeStampTest, TestSize.Level1)
 
     const std::vector<std::pair<int64_t, Duration>> TEST_PLAN = {
         { 123, Duration(std::chrono::nanoseconds(123)) },
-        { 10000, Duration(std::chrono::nanoseconds(10000)) }
+        { 10000, Duration(std::chrono::nanoseconds(10000)) },
+        {std::numeric_limits<int64_t>::min(), Duration(std::chrono::nanoseconds(std::numeric_limits<int64_t>::min()))},
+        {std::numeric_limits<int64_t>::max(), Duration(std::chrono::nanoseconds(std::numeric_limits<int64_t>::max()))},
     };
 
     for (auto& [expected, value] : TEST_PLAN) {
@@ -181,7 +183,9 @@ HWTEST_F(BaseEventAccessorTest, SetTimeStampTest, TestSize.Level1)
     using Duration = std::chrono::high_resolution_clock::duration;
     const std::vector<std::pair<Ark_Int64, Duration>> TEST_PLAN = {
         { 123, Duration(std::chrono::nanoseconds(123)) },
-        { 10000, Duration(std::chrono::nanoseconds(10000)) }
+        { 10000, Duration(std::chrono::nanoseconds(10000)) },
+        {std::numeric_limits<int64_t>::min(), Duration(std::chrono::nanoseconds(std::numeric_limits<int64_t>::min()))},
+        {std::numeric_limits<int64_t>::max(), Duration(std::chrono::nanoseconds(std::numeric_limits<int64_t>::max()))},
     };
 
     for (auto& [value, duration] : TEST_PLAN) {
