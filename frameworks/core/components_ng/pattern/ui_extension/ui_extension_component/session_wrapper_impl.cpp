@@ -950,6 +950,23 @@ Rosen::WSRect SessionWrapperImpl::GetWindowSceneRect()
     return hostSession->GetSessionRect();
 }
 
+RectF SessionWrapperImpl::GetDisplayAreaWithWindowScene()
+{
+    RectF displayArea = displayArea_;
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, displayArea);
+    auto curWindow = pipeline->GetCurrentWindowRect();
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, displayArea);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, displayArea);
+    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate(false, true);
+    displayArea.SetOffset(displayOffset);
+    displayArea = displayArea + OffsetF(curWindow.Left(), curWindow.Top());
+    return displayArea;
+}
+
 void SessionWrapperImpl::NotifyForeground()
 {
     ContainerScope scope(instanceId_);
@@ -1293,25 +1310,26 @@ bool SessionWrapperImpl::InnerNotifyOccupiedAreaChangeInfo(
     auto curWindow = pipeline->GetCurrentWindowRect();
     auto container = Platform::AceContainer::GetContainer(GetInstanceIdFromHost());
     CHECK_NULL_RETURN(container, false);
+    auto displayArea = GetDisplayAreaWithWindowScene();
     if (container->IsSceneBoardWindow()) {
         Rosen::WSRect rect = GetWindowSceneRect();
         curWindow.SetRect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
     if (keyboardHeight > 0) {
-        if (curWindow.Bottom() >= displayArea_.Bottom()) {
-            int32_t spaceWindow = std::max(curWindow.Bottom() - displayArea_.Bottom(), 0.0);
+        if (curWindow.Bottom() >= displayArea.Bottom()) {
+            int32_t spaceWindow = std::max(curWindow.Bottom() - displayArea.Bottom(), 0.0);
             keyboardHeight = static_cast<int32_t>(std::max(keyboardHeight - spaceWindow, 0));
         } else {
-            keyboardHeight = keyboardHeight + (displayArea_.Bottom() - curWindow.Bottom());
+            keyboardHeight = keyboardHeight + (displayArea.Bottom() - curWindow.Bottom());
         }
     }
     sptr<Rosen::OccupiedAreaChangeInfo> newInfo = new Rosen::OccupiedAreaChangeInfo(
         info->type_, info->rect_, info->safeHeight_, info->textFieldPositionY_, info->textFieldHeight_);
     newInfo->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
-    UIEXT_LOGI("OccupiedArea keyboardHeight = %{public}d, displayArea = %{public}s, "
-        "curWindow = %{public}s, persistentid = %{public}d, componentId=%{public}d.",
-        keyboardHeight, displayArea_.ToString().c_str(), curWindow.ToString().c_str(), GetSessionId(),
-        GetFrameNodeId());
+    UIEXT_LOGI("OccupiedArea keyboardHeight = %{public}d, displayOffset = %{public}s, displayArea = %{public}s, "
+               "curWindow = %{public}s, persistentid = %{public}d, componentId=%{public}d.",
+        keyboardHeight, displayArea.GetOffset().ToString().c_str(), displayArea_.ToString().c_str(),
+        curWindow.ToString().c_str(), GetSessionId(), GetFrameNodeId());
     session_->NotifyOccupiedAreaChangeInfo(newInfo);
     return true;
 }
