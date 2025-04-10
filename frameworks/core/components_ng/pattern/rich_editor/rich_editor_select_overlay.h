@@ -75,6 +75,10 @@ public:
     {
         return isHandleMoving_ && IsSingleHandle();
     }
+    bool NeedRefreshMenu()
+    {
+        return needRefreshMenu_;
+    }
     void OnHandleIsHidden() override;
     void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
     void OnHandleMouseEvent(const MouseInfo& event) override;

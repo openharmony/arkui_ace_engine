@@ -11376,18 +11376,41 @@ void RichEditorPattern::HandleSelectFontStyle(KeyCode code)
 
 void RichEditorPattern::HandleOnShowMenu()
 {
-    CHECK_NULL_VOID(overlayMod_);
-    auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
-    auto caretOffsetOverlay = overlayMod->GetCaretOffset();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto focusHub = host->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    selectionMenuOffsetByMouse_ = OffsetF(
-        parentGlobalOffset_.GetX() + caretOffsetOverlay.GetX(), parentGlobalOffset_.GetY() + caretOffsetOverlay.GetY());
-    focusHub->RequestFocusImmediately();
-    StartTwinkling();
-    ShowSelectOverlay(RectF(), RectF(), IsSelectAll(), TextResponseType::RIGHT_CLICK);
+    auto isSelectAreaVisible = IsSelectAreaVisible();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnShowMenu, selectAreaVisible=%{public}d,"
+        "previewTextInputting=%{public}d,isDragging=%{public}d,isMoveCaret=%{public}d,isHandleMoving=%{public}d,"
+        "isTouchSelecting=%{public}d,mouseStatus=%{public}d",
+        isSelectAreaVisible, IsPreviewTextInputting(), IsDragging(), moveCaretState_.isMoveCaret,
+        selectOverlay_->GetIsHandleMoving(), isTouchSelecting_, mouseStatus_);
+    CHECK_NULL_VOID(isSelectAreaVisible && !IsPreviewTextInputting() && !IsDragging());
+    CHECK_NULL_VOID(!moveCaretState_.isMoveCaret && !selectOverlay_->GetIsHandleMoving());
+    CHECK_NULL_VOID(!isTouchSelecting_ && mouseStatus_ != MouseStatus::MOVE);
+
+    if (sourceType_ == SourceType::MOUSE) {
+        if (!IsSelected()) {
+            selectedType_ = TextSpanType::TEXT;
+        }
+        textResponseType_ = TextResponseType::RIGHT_CLICK;
+        selectionMenuOffsetByMouse_ = GetCaretRect().GetOffset() + GetParentGlobalOffset();
+        selectOverlay_->ProcessOverlay({ .animation = true });
+        return;
+    }
+    if (!IsSelected()) {
+        CreateAndShowSingleHandle();
+        return;
+    }
+    if (SelectOverlayIsOn()) {
+        selectOverlay_->SwitchToOverlayMode();
+        if (selectOverlay_->NeedRefreshMenu()) {
+            selectOverlay_->ProcessOverlay({ .animation = true, .requestCode = REQUEST_RECREATE });
+            return;
+        }
+        selectOverlay_->UpdateMenuOffset();
+        selectOverlay_->ShowMenu();
+        return;
+    }
+    CalculateHandleOffsetAndShowOverlay();
+    selectOverlay_->ProcessOverlay({ .animation = true });
 }
 
 PositionType RichEditorPattern::GetPositionTypeFromLine()
