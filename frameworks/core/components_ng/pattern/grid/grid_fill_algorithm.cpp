@@ -59,6 +59,7 @@ void GridFillAlgorithm::FillMarkItem(const SizeF& viewport, Axis axis, FrameNode
     FillNext(viewport, axis, node, index);
     if (resetRangeOnJump_) {
         range_.startLine = range_.endLine = info_.GetItemPos(index).second;
+        range_.offset = 0.0f; // synced from LayoutInfo. Might contain large offset that FillAlgorithm can't handle
         resetRangeOnJump_ = false;
     }
 }
