@@ -59,6 +59,8 @@ constexpr int32_t FORM_STATUS_TIME_OUT = 16501009;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
 constexpr char IS_DYNAMIC[] = "isDynamic";
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_10S = 10000;
+constexpr int64_t MAX_REQUEST_CODE = 562949953421311;
+constexpr int32_t BASE_REQUEST_CODE_NUM = 10;
 } // namespace
 
 FormManagerDelegate::~FormManagerDelegate()
@@ -825,7 +827,13 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
 {
     int32_t externalErrorCode = 0;
     std::string errorMsg;
-    OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(std::stoi(code), externalErrorCode, errorMsg);
+    int64_t parsedRequestCode = 0;
+    parsedRequestCode = strtoll(code.c_str(), nullptr, BASE_REQUEST_CODE_NUM);
+    if (parsedRequestCode > MAX_REQUEST_CODE) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "code too large: %{public}s", code.c_str());
+        return;
+    }
+    OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(parsedRequestCode, externalErrorCode, errorMsg);
     TAG_LOGI(AceLogTag::ACE_FORM,
         "OnFormError, code:%{public}s, msg:%{public}s, externalErrorCode:%{public}d, errorMsg: %{public}s",
         code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
