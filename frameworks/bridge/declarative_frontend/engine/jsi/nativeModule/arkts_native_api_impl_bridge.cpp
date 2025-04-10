@@ -2032,6 +2032,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetMaxLines));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLines"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetMaxLines));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinLines"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetMinLines));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinLines"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetMinLines));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOption"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetCopyOption));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOption"),

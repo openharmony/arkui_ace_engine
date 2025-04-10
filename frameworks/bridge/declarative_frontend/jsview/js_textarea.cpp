@@ -34,6 +34,7 @@ constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MAXLINESMODE_CLIP = 0;
 constexpr uint32_t MAXLINESMODE_SCROLL = 1;
 constexpr uint32_t TWO_ARGS = 2;
+constexpr uint32_t MIN_LINES = 1;
 }
 
 void JSTextArea::JSBind(BindingTarget globalObj)
@@ -68,6 +69,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("showCounter", &JSTextField::SetShowCounter);
     JSClass<JSTextArea>::StaticMethod("barState", &JSTextField::SetBarState);
     JSClass<JSTextArea>::StaticMethod("maxLines", &JSTextArea::SetMaxLines);
+    JSClass<JSTextArea>::StaticMethod("minLines", &JSTextArea::SetMinLines);
     JSClass<JSTextArea>::StaticMethod("style", &JSTextField::SetInputStyle);
     JSClass<JSTextArea>::StaticMethod("onWillChange", &JSTextField::SetOnWillChange);
     JSClass<JSTextArea>::StaticMethod("onChange", &JSTextField::SetOnChange);
@@ -152,6 +154,18 @@ void JSTextArea::SetMaxLines(const JSCallbackInfo& info)
         }
     }
     TextFieldModel::GetInstance()->SetOverflowMode(OVERFLOWS_MODE[overflow]);
+}
+
+void JSTextArea::SetMinLines(const JSCallbackInfo& info)
+{
+    auto minLines = MIN_LINES;
+    if (info.Length() == 1) {
+        auto tmpInfo = info[0];
+        if (tmpInfo->IsNumber() && tmpInfo->ToNumber<int32_t>() > 0) {
+            minLines = tmpInfo->ToNumber<int32_t>();
+        }
+    }
+    TextFieldModel::GetInstance()->SetMinLines(minLines);
 }
 
 void JSTextAreaController::JSBind(BindingTarget globalObj)

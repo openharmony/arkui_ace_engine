@@ -3849,6 +3849,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaSelectionMenuHidden)(ArkUINodeHandle node);
     void (*setTextAreaMaxLines)(ArkUINodeHandle node, ArkUI_Uint32 maxLine, ArkUI_Uint32 overflowMode);
     void (*resetTextAreaMaxLines)(ArkUINodeHandle node);
+    void (*setTextAreaMinLines)(ArkUINodeHandle node, ArkUI_Uint32 maxLine);
+    void (*resetTextAreaMinLines)(ArkUINodeHandle node);
     void (*setTextAreaCopyOption)(ArkUINodeHandle node, ArkUI_Int32 copyOptions);
     void (*resetTextAreaCopyOption)(ArkUINodeHandle node);
     void (*setTextAreaPlaceholderColor)(ArkUINodeHandle node, ArkUI_Uint32 color);

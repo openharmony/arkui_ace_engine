@@ -202,6 +202,23 @@ class TextAreaMaxLinesModifier extends ModifierWithKey<ArkTextFieldMaxLines> {
   }
 }
 
+class TextAreaMinLinesModifier extends ModifierWithKey<number | undefined> {
+  constructor(value: number | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaMinLines');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetMinLines(node);
+    } else {
+      getUINativeModule().textArea.setMinLines(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaMinFontSizeModifier extends ModifierWithKey<number | string | Resource> {
   constructor(value: number | string | Resource) {
     super(value);
@@ -1400,6 +1417,10 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     arkValue.value = value;
     arkValue.overflowMode = options?.overflowMode;
     modifierWithKey(this._modifiersWithKeys, TextAreaMaxLinesModifier.identity, TextAreaMaxLinesModifier, arkValue);
+    return this;
+  }
+  minLines(value: number): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaMinLinesModifier.identity, TextAreaMinLinesModifier, value);
     return this;
   }
   fontFeature(value: FontFeature): TextAreaAttribute {
