@@ -583,13 +583,13 @@ HWTEST_F(SymbolGlyphModifierTest, setMinFontScaleTestInvalidValues, TestSize.Lev
         { "2.89", Converter::ArkValue<Ark_Number>(2.89), ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE },
         { "-1", Converter::ArkValue<Ark_Number>(-1), ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE },
     };
-    Opt_Union_Number_Resource initValueMinFontScale;
+    Opt_Union_Number_Resource initValue;
 
     // Initial setup
-    initValueMinFontScale = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(2.1));
-    auto checkValue = [this, &initValueMinFontScale](const std::string& input, const std::string& expectedStr,
+    initValue = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(2.1));
+    auto checkValue = [this, &initValue](const std::string& input, const std::string& expectedStr,
                                                      const Opt_Union_Number_Resource& value) {
-        Opt_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
+        Opt_Union_Number_Resource inputValueMinFontScale = initValue;
 
         modifier_->setMinFontScale(node_, &inputValueMinFontScale);
         inputValueMinFontScale = value;
@@ -663,13 +663,13 @@ HWTEST_F(SymbolGlyphModifierTest, setMaxFontScaleTestInvalidValues, TestSize.Lev
         { "-1.5", Converter::ArkValue<Ark_Number>(-1.5), "ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE" },
         { "-0.99", Converter::ArkValue<Ark_Number>(-0.99), "ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE" },
     };
-    Opt_Union_Number_Resource initValueMaxFontScale;
+    Opt_Union_Number_Resource initValue;
 
     // Initial setup
-    initValueMaxFontScale = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.1));
-    auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const std::string& expectedStr,
+    initValue = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.1));
+    auto checkValue = [this, &initValue](const std::string& input, const std::string& expectedStr,
                                                      const Opt_Union_Number_Resource& value) {
-        Opt_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
+        Opt_Union_Number_Resource inputValueMaxFontScale = initValue;
 
         modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
         inputValueMaxFontScale = value;
