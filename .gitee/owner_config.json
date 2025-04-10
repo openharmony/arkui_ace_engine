@@ -1,5 +1,11 @@
 {
     "groups": {
+        "https://gitee.com/arkui-auto-tdd": [
+            "https://gitee.com/ileft2019",
+            "https://gitee.com/zhongjianfei",
+            "https://gitee.com/uniquexch",
+            "https://gitee.com/gongpingde"
+        ],
         "https://gitee.com/arkui_superman": [
             "https://gitee.com/raulnaruto_admin",
             "https://gitee.com/jiangdayuan",
@@ -107,6 +113,22 @@
         ]
     },
     "userInfos": {
+        "https://gitee.com/ileft2019": {
+            "info": "[自测试管理 zuopengpeng]",
+            "group": "https://gitee.com/arkui-auto-tdd"
+        },
+        "https://gitee.com/zhongjianfei": {
+            "info": "[自测试管理 zhongjianfei]",
+            "group": "https://gitee.com/arkui-auto-tdd"
+        },
+        "https://gitee.com/uniquexch": {
+            "info": "[自测试管理 xuchenghua]",
+            "group": "https://gitee.com/arkui-auto-tdd"
+        },
+        "https://gitee.com/gongpingde": {
+            "info": "[自测试管理 chengongping]",
+            "group": "https://gitee.com/arkui-auto-tdd"
+        },
         "https://gitee.com/raulnaruto_admin": {
             "info": "[导航/模态公共 laoyitong]",
             "group": "https://gitee.com/arkui_superman"
