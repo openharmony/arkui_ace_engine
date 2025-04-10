@@ -1615,8 +1615,8 @@ struct CustomDialogContentComponent {
             isVertical = true;
           }
         } catch (err) {
-          let code: number = (exception as BusinessError).code;
-          let message: string = (exception as BusinessError).message;
+          let code: number = (err as BusinessError).code;
+          let message: string = (err as BusinessError).message;
           hilog.error(0x3900, 'Ace',
             `Faild to dialog isVerticalAlignButton measureTextSize,cause, code: ${code}, message: ${message}`);
         }
