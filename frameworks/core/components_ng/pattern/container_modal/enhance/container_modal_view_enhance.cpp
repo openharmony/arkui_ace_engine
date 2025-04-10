@@ -23,7 +23,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "wm_common.h"
+#include "previewer/include/wm_common.h"
 
 namespace OHOS::Ace::NG {
 namespace {
