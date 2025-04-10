@@ -163,6 +163,9 @@ public:
     }
 
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    static int32_t ParseCommand(const std::string& command, bool& selectStatus);
+    void ReportChangeEvent(bool selectStatus);
+    int32_t OnInjectionEvent(const std::string& command) override;
 
 private:
     void OnAttachToFrameNode() override;
