@@ -5426,12 +5426,22 @@ void TextPattern::SetupMagnifier()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     if (renderContext->GetClipEdge().value_or(false)) {
         return;
     }
     RectF viewPort;
     if (selectOverlay_->GetClipHandleViewPort(viewPort)) {
         viewPort.SetHeight(std::min(pManager_->GetHeight(), viewPort.Height()));
+        viewPort.SetWidth(std::min(pManager_->GetLongestLine(), viewPort.Width()));
+        auto globalFrameRect = geometryNode->GetFrameRect();
+        globalFrameRect.SetOffset(parentGlobalOffset_);
+        auto maxRight = std::max(viewPort.Right(), globalFrameRect.Right());
+        auto maxBottom = std::max(viewPort.Bottom(), globalFrameRect.Bottom());
+        viewPort = geometryNode->GetFrameRect();
+        viewPort.SetWidth(maxRight - globalFrameRect.Left());
+        viewPort.SetHeight(maxBottom - globalFrameRect.Top());
         magnifierController_->SetHostViewPort(viewPort);
     }
 }
