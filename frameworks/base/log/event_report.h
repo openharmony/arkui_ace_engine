@@ -21,6 +21,7 @@
 
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/base/frame_scene_status.h"
 
 namespace OHOS::Ace {
@@ -252,6 +253,7 @@ public:
     static void ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType);
     static void ReportClipboardFailEvent(const std::string& errorType);
     static void ReportReusedNodeSkipMeasureApp();
+    static void ReportPageSlidInfo(NG::SlidInfo &slidInfo);
     static void SendDiffFrameRatesDuring(const std::string& scene, const FRCSceneFpsInfo& curFRCSceneFpsInfo_);
     static void FrameRateDurationsStatistics(int32_t expectedRate, const std::string& scene, NG::SceneStatus status);
     static void AddFrameRateDuration(int32_t frameRate, int32_t duration);
