@@ -1350,4 +1350,640 @@ HWTEST_F(RenderNodeAccessorTest, SetPositionTest, TestSize.Level1)
     EXPECT_EQ(checkValue.GetX().Value(), 1.000000);
     EXPECT_EQ(checkValue.GetY().Value(), 2.000000);
 }
+
+/**
+ * @tc.name: GetPivotTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, GetPivotTest, TestSize.Level1)
+{
+    // default value
+    ASSERT_NE(accessor_->getPivot, nullptr);
+    auto checkValue = accessor_->getPivot(peer_);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.x), 0.5f);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.y), 0.5f);
+
+    // valid value
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    auto pivot = DimensionOffset(Dimension(0.5f), Dimension(0.7f));
+    ViewAbstract::SetPivot(fnode, pivot);
+    checkValue = accessor_->getPivot(peer_);
+    EXPECT_NEAR(Converter::Convert<float>(checkValue.x), 0.5f, FLT_EPSILON);
+    EXPECT_NEAR(Converter::Convert<float>(checkValue.y), 0.7f, FLT_EPSILON);
+    // invalid value
+    checkValue = accessor_->getPivot(nullptr);
+    EXPECT_NEAR(Converter::Convert<float>(checkValue.x), 0.5f, FLT_EPSILON);
+    EXPECT_NEAR(Converter::Convert<float>(checkValue.y), 0.5f, FLT_EPSILON);
+}
+
+/**
+ * @tc.name: SetPivotTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, SetPivotTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setPivot, nullptr);
+
+    Ark_Vector2 arkPivot {
+        .x = Converter::ArkValue<Ark_Number>(0.5f),
+        .y = Converter::ArkValue<Ark_Number>(0.7f)
+    };
+    accessor_->setPivot(peer_, &arkPivot);
+
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    auto renderContext = fnode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto checkValue = renderContext->GetTransformCenter();
+    ASSERT_TRUE(checkValue.has_value());
+    EXPECT_NEAR(checkValue.value().GetX().Value(), 0.5f, FLT_EPSILON);
+    EXPECT_NEAR(checkValue.value().GetY().Value(), 0.7f, FLT_EPSILON);
+
+    // invalid value
+    accessor_->setPivot(peer_, nullptr);
+    fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    renderContext = fnode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    checkValue = renderContext->GetTransformCenter();
+    ASSERT_TRUE(checkValue.has_value());
+    EXPECT_NEAR(checkValue.value().GetX().Value(), 0.5f, FLT_EPSILON);
+    EXPECT_NEAR(checkValue.value().GetY().Value(), 0.7f, FLT_EPSILON);
+}
+
+/**
+ * @tc.name: GetScaleTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, GetScaleTest, TestSize.Level1)
+{
+    // default value
+    ASSERT_NE(accessor_->getScale, nullptr);
+    auto checkValue = accessor_->getScale(peer_);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.x), 1.f);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.y), 1.f);
+
+    // valid value
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    ViewAbstract::SetScale(Referenced::RawPtr(peer_->node), VectorF(1.f, 2.f));
+    checkValue = accessor_->getScale(peer_);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.x), 1.f);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.y), 2.f);
+
+    // invalid value
+    checkValue = accessor_->getScale(nullptr);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.x), 1.f);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.y), 1.f);
+}
+
+/**
+ * @tc.name: SetScaleTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, SetScaleTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setScale, nullptr);
+
+    Ark_Vector2 arkScale {
+        .x = Converter::ArkValue<Ark_Number>(0.5f),
+        .y = Converter::ArkValue<Ark_Number>(0.7f)
+    };
+    accessor_->setScale(peer_, &arkScale);
+
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    auto checkValue = ViewAbstract::GetScale(fnode);
+    EXPECT_EQ(checkValue.x, 0.5f);
+    EXPECT_EQ(checkValue.y, 0.7f);
+
+    // invalid value
+    accessor_->setScale(peer_, nullptr);
+    fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    checkValue = ViewAbstract::GetScale(fnode);
+    EXPECT_EQ(checkValue.x, 0.5f);
+    EXPECT_EQ(checkValue.y, 0.7f);
+
+    arkScale = {
+        .x = Converter::ArkValue<Ark_Number>(-0.5f),
+        .y = Converter::ArkValue<Ark_Number>(-0.7f)
+    };
+    accessor_->setScale(peer_, &arkScale);
+
+    fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    checkValue = ViewAbstract::GetScale(fnode);
+    EXPECT_EQ(checkValue.x, 1.f);
+    EXPECT_EQ(checkValue.y, 1.f);
+}
+
+/**
+ * @tc.name: GetTranslationTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, GetTranslationTest, TestSize.Level1)
+{
+    // default value
+    ASSERT_NE(accessor_->getTranslation, nullptr);
+    auto checkValue = accessor_->getTranslation(peer_);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.x), 0.f);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.y), 0.f);
+
+    // valid value
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    ViewAbstract::SetTranslate(fnode,
+        TranslateOptions(CalcDimension(1.f), CalcDimension(2.f), CalcDimension(0.f)));
+    checkValue = accessor_->getTranslation(peer_);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.x), 1.f);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.y), 2.f);
+
+    // invalid value
+    checkValue = accessor_->getTranslation(nullptr);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.x), 0.f);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.y), 0.f);
+}
+
+/**
+ * @tc.name: SetTranslationTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, SetTranslationTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setTranslation, nullptr);
+
+    Ark_Vector2 arkTranslation {
+        .x = Converter::ArkValue<Ark_Number>(0.5f),
+        .y = Converter::ArkValue<Ark_Number>(0.7f)
+    };
+    accessor_->setTranslation(peer_, &arkTranslation);
+
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    auto checkValue = ViewAbstract::GetTranslate(fnode);
+    EXPECT_EQ(checkValue.x.Value(), 0.5f);
+    EXPECT_EQ(checkValue.y.Value(), 0.7f);
+
+    // invalid value
+    accessor_->setTranslation(peer_, nullptr);
+    fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    checkValue = ViewAbstract::GetTranslate(fnode);
+    EXPECT_EQ(checkValue.x.Value(), 0.5f);
+    EXPECT_EQ(checkValue.y.Value(), 0.7f);
+
+    arkTranslation = {
+        .x = Converter::ArkValue<Ark_Number>(-0.5f),
+        .y = Converter::ArkValue<Ark_Number>(-0.7f)
+    };
+    accessor_->setTranslation(peer_, &arkTranslation);
+
+    fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    checkValue = ViewAbstract::GetTranslate(fnode);
+    EXPECT_EQ(checkValue.x.Value(), 0.f);
+    EXPECT_EQ(checkValue.y.Value(), 0.f);
+}
+
+/**
+ * @tc.name: GetRotationTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, GetRotationTest, TestSize.Level1)
+{
+    // default value
+    ASSERT_NE(accessor_->getRotation, nullptr);
+    auto checkValue = accessor_->getRotation(peer_);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.x), 0.f);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.y), 0.f);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.z), 0.f);
+
+    // valid value
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    ViewAbstract::SetRotate(fnode, Vector5F(1.f, 2.f, 3.f, 0.f, 0.f));
+    checkValue = accessor_->getRotation(peer_);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.x), 1.f);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.y), 2.f);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.z), 3.f);
+
+    // invalid value
+    checkValue = accessor_->getRotation(nullptr);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.x), 0.f);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.y), 0.f);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.z), 0.f);
+}
+
+/**
+ * @tc.name: SetRotationTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, SetRotationTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setRotation, nullptr);
+
+    Ark_Vector3 arkRotation {
+        .x = Converter::ArkValue<Ark_Number>(0.5f),
+        .y = Converter::ArkValue<Ark_Number>(0.7f),
+        .z = Converter::ArkValue<Ark_Number>(0.9f)
+    };
+    accessor_->setRotation(peer_, &arkRotation);
+
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    auto checkValue = ViewAbstract::GetRotate(fnode);
+    EXPECT_EQ(checkValue.x, 0.5f);
+    EXPECT_EQ(checkValue.y, 0.7f);
+    EXPECT_EQ(checkValue.z, 0.9f);
+
+    // invalid value
+    accessor_->setRotation(peer_, nullptr);
+    fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    checkValue = ViewAbstract::GetRotate(fnode);
+    EXPECT_EQ(checkValue.x, 0.5f);
+    EXPECT_EQ(checkValue.y, 0.7f);
+    EXPECT_EQ(checkValue.z, 0.9f);
+
+    arkRotation = {
+        .x = Converter::ArkValue<Ark_Number>(-0.5f),
+        .y = Converter::ArkValue<Ark_Number>(-0.7f),
+        .z = Converter::ArkValue<Ark_Number>(-0.9f)
+    };
+    accessor_->setRotation(peer_, &arkRotation);
+
+    fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    checkValue = ViewAbstract::GetRotate(fnode);
+    EXPECT_EQ(checkValue.x, 0.f);
+    EXPECT_EQ(checkValue.y, 0.f);
+    EXPECT_EQ(checkValue.z, 0.f);
+}
+
+/**
+ * @tc.name: GetTrasformTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, GetTrasformTest, TestSize.Level1)
+{
+    // default value
+    ASSERT_NE(accessor_->getTransform, nullptr);
+    auto matrix = Matrix4(1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+    auto checkValue = accessor_->getTransform(peer_);
+    EXPECT_EQ(Converter::Convert<Matrix4>(checkValue), matrix);
+
+    // invalid value
+    checkValue = accessor_->getTransform(nullptr);
+    EXPECT_EQ(Converter::Convert<Matrix4>(checkValue), matrix);
+
+    // valid value
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    matrix = Matrix4(1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+    ViewAbstract::SetTransformMatrix(fnode, matrix);
+    checkValue = accessor_->getTransform(peer_);
+    EXPECT_EQ(Converter::Convert<Matrix4>(checkValue), matrix);
+}
+
+/**
+ * @tc.name: SetTransformTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, SetTransformTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setTransform, nullptr);
+    auto matrix = Matrix4(1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f);
+
+    Ark_Matrix4 arkMatrix = {
+        .value0 = Converter::ArkValue<Ark_Number>(1.f),
+        .value1 = Converter::ArkValue<Ark_Number>(1.f),
+        .value2 = Converter::ArkValue<Ark_Number>(1.f),
+        .value3 = Converter::ArkValue<Ark_Number>(1.f),
+        .value4 = Converter::ArkValue<Ark_Number>(1.f),
+        .value5 = Converter::ArkValue<Ark_Number>(1.f),
+        .value6 = Converter::ArkValue<Ark_Number>(1.f),
+        .value7 = Converter::ArkValue<Ark_Number>(1.f),
+        .value8 = Converter::ArkValue<Ark_Number>(1.f),
+        .value9 = Converter::ArkValue<Ark_Number>(1.f),
+        .value10 = Converter::ArkValue<Ark_Number>(1.f),
+        .value11 = Converter::ArkValue<Ark_Number>(1.f),
+        .value12 = Converter::ArkValue<Ark_Number>(1.f),
+        .value13 = Converter::ArkValue<Ark_Number>(1.f),
+        .value14 = Converter::ArkValue<Ark_Number>(1.f),
+        .value15 = Converter::ArkValue<Ark_Number>(1.f)
+    };
+    accessor_->setTransform(peer_, &arkMatrix);
+
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    auto checkValue = ViewAbstract::GetTransform(fnode);
+    EXPECT_EQ(checkValue, matrix);
+
+    // invalid value
+    accessor_->setRotation(peer_, nullptr);
+    fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    checkValue = ViewAbstract::GetTransform(fnode);
+    EXPECT_EQ(checkValue, matrix);
+}
+
+/**
+ * @tc.name: GetShadowColorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, GetShadowColorTest, TestSize.Level1)
+{
+    // default value
+    ASSERT_NE(accessor_->getShadowColor, nullptr);
+    auto checkValue = accessor_->getShadowColor(peer_);
+    EXPECT_EQ(Converter::Convert<uint32_t>(checkValue), Color::BLACK.GetValue());
+
+    // valid value
+    Shadow shadow;
+    shadow.SetColor(Color::RED);
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    ViewAbstract::SetBackShadow(fnode, shadow);
+    checkValue = accessor_->getShadowColor(peer_);
+    EXPECT_EQ(Converter::Convert<uint32_t>(checkValue), Color::RED.GetValue());
+
+    // invalid value
+    checkValue = accessor_->getShadowColor(nullptr);
+    EXPECT_EQ(Converter::Convert<uint32_t>(checkValue), Color::TRANSPARENT.GetValue());
+}
+
+/**
+ * @tc.name: SetShadowColorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, SetShadowColorTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setShadowColor, nullptr);
+
+    auto color = static_cast<int32_t>(Color::RED.GetValue());
+    auto arkColor = Converter::ArkValue<Ark_Number>(color);
+    accessor_->setShadowColor(peer_, &arkColor);
+
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    auto shadow = ViewAbstract::GetShadow(fnode);
+    ASSERT_TRUE(shadow.has_value());
+    auto checkValue = shadow.value().GetColor();
+    EXPECT_EQ(checkValue.GetValue(), Color::RED.GetValue());
+
+    // invalid value
+    accessor_->setShadowColor(peer_, nullptr);
+    fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    shadow = ViewAbstract::GetShadow(fnode);
+    ASSERT_TRUE(shadow.has_value());
+    checkValue = shadow.value().GetColor();
+    EXPECT_EQ(checkValue.GetValue(), Color::RED.GetValue());
+}
+
+/**
+ * @tc.name: GetShadowOffsetTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, GetShadowOffsetTest, TestSize.Level1)
+{
+    // default value
+    ASSERT_NE(accessor_->getShadowOffset, nullptr);
+    auto checkValue = accessor_->getShadowOffset(peer_);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.x), 0.f);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.y), 0.f);
+
+    // valid value
+    Offset offset {1.f, 2.f};
+    Shadow shadow;
+    shadow.SetOffset(offset);
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    ViewAbstract::SetBackShadow(fnode, shadow);
+    checkValue = accessor_->getShadowOffset(peer_);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.x), 1.f);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.y), 2.f);
+
+    // invalid value
+    checkValue = accessor_->getShadowOffset(nullptr);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.x), 0.f);
+    EXPECT_EQ(Converter::Convert<float>(checkValue.y), 0.f);
+}
+
+/**
+ * @tc.name: SetShadowOffsetTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, SetShadowOffsetTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setShadowOffset, nullptr);
+
+    Ark_Vector2 arkOffset = {
+        .x = Converter::ArkValue<Ark_Number>(1.f),
+        .y = Converter::ArkValue<Ark_Number>(2.f)
+    };
+    accessor_->setShadowOffset(peer_, &arkOffset);
+
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    auto shadow = ViewAbstract::GetShadow(fnode);
+    ASSERT_TRUE(shadow.has_value());
+    auto checkValue = shadow.value().GetOffset();
+    EXPECT_EQ(checkValue.GetX(), 1.f);
+    EXPECT_EQ(checkValue.GetY(), 2.f);
+
+    // invalid value
+    accessor_->setShadowColor(peer_, nullptr);
+    fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    shadow = ViewAbstract::GetShadow(fnode);
+    ASSERT_TRUE(shadow.has_value());
+    checkValue = shadow.value().GetOffset();
+    EXPECT_EQ(checkValue.GetX(), 1.f);
+    EXPECT_EQ(checkValue.GetY(), 2.f);
+}
+
+/**
+ * @tc.name: GetShadowAlphaTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, GetShadowAlphaTest, TestSize.Level1)
+{
+    // default value
+    ASSERT_NE(accessor_->getShadowAlpha, nullptr);
+    auto checkValue = accessor_->getShadowAlpha(peer_);
+    EXPECT_EQ(Converter::Convert<int32_t>(checkValue), 0);
+
+    // valid value
+    peer_->shadowAlpha = 1;
+    checkValue = accessor_->getShadowAlpha(peer_);
+    EXPECT_EQ(Converter::Convert<int32_t>(checkValue), 1);
+
+    // invalid value
+    checkValue = accessor_->getShadowAlpha(nullptr);
+    EXPECT_EQ(Converter::Convert<int32_t>(checkValue), 0);
+}
+
+/**
+ * @tc.name: SetShadowAlphaTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, SetShadowAlphaTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setShadowAlpha, nullptr);
+
+    auto color = static_cast<int32_t>(Color::TRANSPARENT.GetValue());
+    auto arkColor = Converter::ArkValue<Ark_Number>(color);
+    accessor_->setShadowColor(peer_, &arkColor);
+
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    auto shadow = ViewAbstract::GetShadow(fnode);
+    ASSERT_TRUE(shadow.has_value());
+    auto shadowColor = shadow.value().GetColor();
+    EXPECT_EQ(shadowColor.GetValue(), Color::TRANSPARENT.GetValue());
+
+    Ark_Number arkAlpha = Converter::ArkValue<Ark_Number>(1);
+    accessor_->setShadowAlpha(peer_, &arkAlpha);
+
+    ASSERT_TRUE(peer_->shadowAlpha.has_value());
+    EXPECT_EQ(peer_->shadowAlpha.value(), 1);
+
+    shadow = ViewAbstract::GetShadow(fnode);
+    ASSERT_TRUE(shadow.has_value());
+    auto checkValue = shadow.value().GetColor().GetAlpha();
+    EXPECT_EQ(checkValue, 1);
+}
+
+/**
+ * @tc.name: GetShadowElevationTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, GetShadowElevationTest, TestSize.Level1)
+{
+    // default value
+    ASSERT_NE(accessor_->getShadowElevation, nullptr);
+    auto checkValue = accessor_->getShadowElevation(peer_);
+    EXPECT_EQ(Converter::Convert<float>(checkValue), 0.f);
+
+    // valid value
+    float elevation {1.f};
+    Shadow shadow;
+    shadow.SetElevation(elevation);
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    ViewAbstract::SetBackShadow(fnode, shadow);
+    checkValue = accessor_->getShadowElevation(peer_);
+    EXPECT_EQ(Converter::Convert<float>(checkValue), 1.f);
+
+    // invalid value
+    checkValue = accessor_->getShadowElevation(nullptr);
+    EXPECT_EQ(Converter::Convert<float>(checkValue), 0.f);
+}
+
+/**
+ * @tc.name: SetShadowElevationTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, SetShadowElevationTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setShadowElevation, nullptr);
+
+    Ark_Number arkElevation = Converter::ArkValue<Ark_Number>(1);
+    accessor_->setShadowElevation(peer_, &arkElevation);
+
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    auto shadow = ViewAbstract::GetShadow(fnode);
+    ASSERT_TRUE(shadow.has_value());
+    auto checkValue = shadow.value().GetElevation();
+    EXPECT_EQ(checkValue, 1.f);
+
+    // invalid value
+    accessor_->setShadowColor(peer_, nullptr);
+    fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    shadow = ViewAbstract::GetShadow(fnode);
+    ASSERT_TRUE(shadow.has_value());
+    checkValue = shadow.value().GetElevation();
+    EXPECT_EQ(checkValue, 1.f);
+}
+
+/**
+ * @tc.name: GetShadowRadiusTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, GetShadowRadiusTest, TestSize.Level1)
+{
+    // default value
+    ASSERT_NE(accessor_->getShadowRadius, nullptr);
+    auto checkValue = accessor_->getShadowRadius(peer_);
+    EXPECT_EQ(Converter::Convert<float>(checkValue), 0.f);
+
+    // valid value
+    float radius {1.f};
+    Shadow shadow;
+    shadow.SetBlurRadius(radius);
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    ViewAbstract::SetBackShadow(fnode, shadow);
+    checkValue = accessor_->getShadowRadius(peer_);
+    EXPECT_EQ(Converter::Convert<float>(checkValue), 1.f);
+
+    // invalid value
+    checkValue = accessor_->getShadowRadius(nullptr);
+    EXPECT_EQ(Converter::Convert<float>(checkValue), 0.f);
+}
+
+/**
+ * @tc.name: SetShadowRadiusTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderNodeAccessorTest, SetShadowRadiusTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setShadowRadius, nullptr);
+
+    Ark_Number arkRadius = Converter::ArkValue<Ark_Number>(1);
+    accessor_->setShadowRadius(peer_, &arkRadius);
+
+    auto fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    auto shadow = ViewAbstract::GetShadow(fnode);
+    ASSERT_TRUE(shadow.has_value());
+    auto checkValue = shadow.value().GetBlurRadius();
+    EXPECT_EQ(checkValue, 1.f);
+
+    // invalid value
+    arkRadius = Converter::ArkValue<Ark_Number>(-1);
+    accessor_->setShadowRadius(peer_, &arkRadius);
+
+    fnode = Referenced::RawPtr(peer_->node);
+    ASSERT_NE(fnode, nullptr);
+    shadow = ViewAbstract::GetShadow(fnode);
+    ASSERT_TRUE(shadow.has_value());
+    checkValue = shadow.value().GetBlurRadius();
+    EXPECT_EQ(checkValue, 0.f);
+}
 } // namespace OHOS::Ace::NG
