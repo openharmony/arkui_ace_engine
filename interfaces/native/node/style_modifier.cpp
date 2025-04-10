@@ -1229,6 +1229,64 @@ const ArkUI_AttributeItem* GetMargin(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetTranslateWithPercentage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_THREE_PARAM);
+    if (actualSize < NUM_3 || actualSize > NUM_5) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (actualSize == NUM_4) {
+        if (item->value[NUM_3].i32 != 0 && item->value[NUM_3].i32 != 1) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    } else if (actualSize == NUM_5) {
+        if ((item->value[NUM_3].i32 != 0 && item->value[NUM_3].i32 != 1) ||
+            (item->value[NUM_4].i32 != 0 && item->value[NUM_4].i32 != 1)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    }
+    auto fullImpl = GetFullImpl();
+    ArkUI_Float32 values[NUM_3];
+    ArkUI_Int32 units[NUM_3];
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
+    for (int i = 0; i < NUM_2; ++i) {
+        if (i < item->size - NUM_3 && item->value[i + NUM_3].i32 == 0) {
+            values[i] = item->value[i].f32;
+            units[i] = unit;
+        } else {
+            values[i] = item->value[i].f32;
+            units[i] = UNIT_PERCENT;
+        }
+    }
+    values[NUM_2] = item->value[NUM_2].f32;
+    units[NUM_2] = unit;
+    fullImpl->getNodeModifiers()->getCommonModifier()->setTranslate(node->uiNodeHandle, values, units, NUM_3);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTranslateWithPercentage(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetTranslate(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetTranslateWithPercentage(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUI_Float32 translate[NUM_3];
+    ArkUI_Int32 units[NUM_2];
+    ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
+    fullImpl->getNodeModifiers()->getCommonModifier()->getTranslateWithPercentage(node->uiNodeHandle, &translate, &units, unit);
+    g_numberValues[NUM_0].f32 = translate[NUM_0];
+    g_numberValues[NUM_1].f32 = translate[NUM_1];
+    g_numberValues[NUM_2].f32 = translate[NUM_2];
+    g_numberValues[NUM_3].i32 = units[NUM_0];
+    g_numberValues[NUM_4].i32 = units[NUM_1];
+    g_attributeItem.size = REQUIRED_FIVE_PARAM;
+    return &g_attributeItem;
+}
+
 int32_t SetTranslate(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_THREE_PARAM);
@@ -14667,6 +14725,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetBackgroundImageResizableWithSlice,
         SetNextFocus,
         SetAreaChangeApproximateOptions,
+        SetTranslateWithPercentage,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14781,6 +14840,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetBackgroundImageResizableWithSlice,
         nullptr,
         GetAreaChangeApproximateOptions,
+        GetTranslateWithPercentage,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14899,6 +14959,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetBackgroundImageResizableWithSlice,
         ResetNextFocus,
         ResetAreaChangeApproximateOptions,
+        ResetTranslateWithPercentage,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
