@@ -428,4 +428,18 @@ bool NavDestinationPatternBase::CustomizeExpandSafeArea()
     CHECK_NULL_RETURN(host, false);
     return host->CustomizeExpandSafeArea();
 }
+
+void NavDestinationPatternBase::OnColorConfigurationUpdate()
+{
+    auto node = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_VOID(node);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(node->GetToolBarDividerNode());
+    CHECK_NULL_VOID(dividerNode);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(dividerNode);
+    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+    dividerRenderProperty->UpdateDividerColor(theme->GetToolBarDividerColor());
+    node->MarkModifyDone();
+}
 } // namespace OHOS::Ace::NG
