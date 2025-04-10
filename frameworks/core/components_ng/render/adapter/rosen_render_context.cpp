@@ -7109,7 +7109,7 @@ bool RosenRenderContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t
                 callbackCachedAnimateAction_();
             }
         });
-        return true;
+    return true;
 }
 
 void RosenRenderContext::LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootNode)
