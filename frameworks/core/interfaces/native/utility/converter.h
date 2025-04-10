@@ -446,6 +446,9 @@ namespace Converter {
     template<> BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src);
     template<> BorderStyleProperty Convert(const Ark_BorderStyle& src);
     template<> BorderStyleProperty Convert(const Ark_EdgeStyles& src);
+    template<> BorderColorProperty Convert(const Ark_Edges& src);
+    template<> BorderRadiusProperty Convert(const Ark_BorderRadiuses_graphics& src);
+    template<> BorderWidthProperty Convert(const Ark_Edges& src);
     template<> BorderWidthProperty Convert(const Ark_EdgeWidths& src);
     template<> BorderWidthProperty Convert(const Ark_Length& src);
     template<> BorderWidthProperty Convert(const Ark_LengthMetrics& src);
@@ -460,6 +463,7 @@ namespace Converter {
     template<> CalcLength Convert(const Ark_LengthMetrics& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
     template<> CheckboxSettingData Convert(const Ark_LunarSwitchStyle& src);
+    template<> Color Convert(const Ark_Length& src);
     template<> Color Convert(const Ark_Number& src);
     template<> Color Convert(const Ark_String& src);
     template<> Corner Convert(const Ark_CornerRadius& src);

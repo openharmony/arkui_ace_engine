@@ -22,6 +22,9 @@
 #include "base/memory/referenced.h"
 
 struct RenderNodePeer final {
+    enum class LengthMetricsUnit : int32_t { DEFAULT = 0, PX };
+    LengthMetricsUnit lengthMetricsUnit{ LengthMetricsUnit::DEFAULT };
+    std::optional<uint8_t> shadowAlpha{ std::nullopt };
     OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> node;
     friend OHOS::Ace::NG::PeerUtils;
 

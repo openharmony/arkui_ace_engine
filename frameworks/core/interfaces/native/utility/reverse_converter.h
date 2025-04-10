@@ -63,6 +63,7 @@
 #include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/render_node_peer_impl.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/utility/peer_utils.h"
@@ -180,6 +181,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
     void AssignArkValue(Ark_BorderRadiuses& dst, const BorderRadiusProperty& src);
+    void AssignArkValue(Ark_BorderRadiuses_graphics& dst, const BorderRadiusProperty& src);
     void AssignArkValue(Ark_BorderStyle& dst, const BorderStyle& src);
     void AssignArkValue(Ark_Buffer& dst, const std::string& src);
     void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src);
@@ -199,6 +201,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Edge& dst, const ScrollEdge& src);
     void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
     void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src);
+    void AssignArkValue(Ark_Edges& dst, const BorderColorProperty& src);
+    void AssignArkValue(Ark_Edges& dst, const BorderWidthProperty& src);
     void AssignArkValue(Ark_EdgeStyles& dst, const BorderStyleProperty& src);
     void AssignArkValue(Ark_EffectDirection& dst, const OHOS::Ace::CommonSubType& src);
     void AssignArkValue(Ark_EffectScope& dst, const OHOS::Ace::ScopeType& src);
@@ -235,6 +239,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Length& dst, const int& src);
     void AssignArkValue(Ark_Length& dst, const std::string& src);
     void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src);
+    void AssignArkValue(Ark_LengthMetricsUnit& dst, const RenderNodePeer::LengthMetricsUnit& src);
     void AssignArkValue(Ark_LengthUnit& dst, const DimensionUnit& src);
     void AssignArkValue(Ark_LineBreakStrategy& dst, const LineBreakStrategy& src);
     void AssignArkValue(Ark_LineMetrics& dst, const TextLineMetrics& src);
@@ -363,6 +368,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Array_Number& dst, const std::vector<double>& src);
     void AssignArkValue(Array_ScriptItem& dst, const ScriptItems& src);
     void AssignArkValue(Ark_Vector2& dst, const DimensionOffset& src);
+    void AssignArkValue(Ark_Vector2& dst, const Offset& src);
     void AssignArkValue(Ark_Vector2& dst, const VectorF& src);
     void AssignArkValue(Ark_Vector2& dst, const TranslateOptions& src);
     void AssignArkValue(Ark_Vector3& dst, const Vector3F& src);
