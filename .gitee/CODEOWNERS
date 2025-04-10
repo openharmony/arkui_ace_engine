@@ -1322,6 +1322,8 @@ frameworks/bridge/declarative_frontend/jsview/js_texttimer.cpp @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_texttimer.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_toggle.cpp @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/js_toggle.h @arkuipopupwindow
+frameworks/bridge/declarative_frontend/jsview/js_toolbaritem.cpp @arkuievent
+frameworks/bridge/declarative_frontend/jsview/js_toolbaritem.h @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_touch_handler.cpp @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_ui_extension.cpp @arkuiabilitygroup
@@ -2374,6 +2376,7 @@ frameworks/core/components_ng/manager/safe_area/ @arkuilayout
 frameworks/core/components_ng/manager/select_content_overlay/ @huawei_g_five
 frameworks/core/components_ng/manager/select_overlay/ @huawei_g_five
 frameworks/core/components_ng/manager/shared_overlay/ @arkuiframework
+frameworks/core/components_ng/manager/toolbar/ @arkuievent
 frameworks/core/components_ng/pattern/ability_component/ @arkuilayout
 frameworks/core/components_ng/pattern/action_sheet/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/animator/ @arkui_superman
@@ -2528,6 +2531,7 @@ frameworks/core/components_ng/pattern/texttimer/ @arkui_image
 frameworks/core/components_ng/pattern/time_picker/ @arkui_image
 frameworks/core/components_ng/pattern/toast/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/toggle/ @arkuipopupwindow
+frameworks/core/components_ng/pattern/toolbaritem/ @arkuievent
 frameworks/core/components_ng/pattern/ui_extension/ @arkuiabilitygroup
 frameworks/core/components_ng/pattern/video/ @arkuilayout
 frameworks/core/components_ng/pattern/view_context/ @arkuiframework

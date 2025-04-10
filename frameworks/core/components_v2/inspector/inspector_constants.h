@@ -416,6 +416,12 @@ ACE_EXPORT extern const char STEPPER_ETS_TAG[];
 ACE_EXPORT extern const char STEPPER_ITEM_COMPONENT_TAG[];
 ACE_EXPORT extern const char STEPPER_ITEM_ETS_TAG[];
 
+// toolbar
+ACE_EXPORT extern const char TOOLBAR_ETS_TAG[];
+
+// toolbaritem
+ACE_EXPORT extern const char TOOLBARITEM_ETS_TAG[];
+
 // scrollBar
 ACE_EXPORT extern const char SCROLL_BAR_COMPONENT_TAG[];
 ACE_EXPORT extern const char SCROLL_BAR_ETS_TAG[];

@@ -408,6 +408,12 @@ const char STEPPER_ETS_TAG[] = "Stepper";
 const char STEPPER_ITEM_COMPONENT_TAG[] = "StepperItemComponentV2";
 const char STEPPER_ITEM_ETS_TAG[] = "StepperItem";
 
+// toolbar
+const char TOOLBAR_ETS_TAG[] = "Tool_Bar";
+
+// toolbaritem
+const char TOOLBARITEM_ETS_TAG[] = "ToolBarItem";
+
 // scrollbar
 const char SCROLL_BAR_COMPONENT_TAG[] = "ScrollBarComponent";
 const char SCROLL_BAR_ETS_TAG[] = "ScrollBar";

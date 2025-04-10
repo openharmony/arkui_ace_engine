@@ -1342,6 +1342,10 @@ public:
     void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
 
     std::string PrintVisibilityDumpInfo() const;
+    void SetDetachRelatedNodeCallback(std::function<void()>&& callback)
+    {
+        detachRelatedNodeCallback_ = std::move(callback);
+    }
 
 protected:
     void DumpInfo() override;
@@ -1639,6 +1643,8 @@ private:
 
     RefPtr<Kit::FrameNode> kitNode_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
+
+    std::function<void()> detachRelatedNodeCallback_;
 };
 } // namespace OHOS::Ace::NG
 
