@@ -116,8 +116,9 @@ void ListItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
     dragOffset_ = geometry->GetMarginFrameOffset();
     auto parent = listNode_.Upgrade();
     CHECK_NULL_VOID(parent);
-    auto listGeometry=parent->GetGeometryNode();
-    dragOffset_=dragOffset_-OffsetF(listGeometry->GetPadding()->left.value_or(0),listGeometry->GetPadding()->top.value_or(0));
+    auto listGeometry = parent->GetGeometryNode();
+    dragOffset_ = dragOffset_-OffsetF(listGeometry->GetPadding()->left.value_or(0),
+        listGeometry->GetPadding()->top.value_or(0));
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     axis_ = pattern->GetAxis();
