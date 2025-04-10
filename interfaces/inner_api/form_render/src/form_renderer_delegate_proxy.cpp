@@ -51,12 +51,7 @@ int32_t FormRendererDelegateProxy::OnSurfaceCreate(const std::shared_ptr<Rosen::
 
     MessageParcel reply;
     MessageOption option;
-    auto remoteProxy = Remote();
-    if (!remoteProxy) {
-        HILOG_ERROR("Send surfaceNode failed, ipc remoteObj is null");
-        return IPC_PROXY_ERR;
-    }
-    int32_t error = remoteProxy->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CREATE), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
@@ -87,12 +82,7 @@ int32_t FormRendererDelegateProxy::OnSurfaceReuse(
 
     MessageParcel reply;
     MessageOption option;
-    auto remoteProxy = Remote();
-    if (!remoteProxy) {
-        HILOG_ERROR("Send surfaceNode failed, ipc remoteObj is null");
-        return IPC_PROXY_ERR;
-    }
-    int32_t error = remoteProxy->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_REUSE), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
@@ -114,12 +104,7 @@ int32_t FormRendererDelegateProxy::OnSurfaceDetach(uint64_t surfaceId)
 
     MessageParcel reply;
     MessageOption option;
-    auto remoteProxy = Remote();
-    if (!remoteProxy) {
-        HILOG_ERROR("Send surfaceNode failed, ipc remoteObj is null");
-        return IPC_PROXY_ERR;
-    }
-    int32_t error = remoteProxy->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDelegate::Message::ON_FORMSURFACE_DETACH), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
@@ -141,12 +126,7 @@ int32_t FormRendererDelegateProxy::OnSurfaceRelease(uint64_t surfaceId)
 
     MessageParcel reply;
     MessageOption option;
-    auto remoteProxy = Remote();
-    if (!remoteProxy) {
-        HILOG_ERROR("Send surfaceNode failed, ipc remoteObj is null");
-        return IPC_PROXY_ERR;
-    }
-    int32_t error = remoteProxy->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_RELEASE), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
@@ -171,7 +151,7 @@ int32_t FormRendererDelegateProxy::OnActionEvent(const std::string& action)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = Remote()->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ACTION_CREATE), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
@@ -201,8 +181,7 @@ int32_t FormRendererDelegateProxy::OnError(const std::string& code, const std::s
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error =
-        Remote()->SendRequest(static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ERROR), data, reply, option);
+    int32_t error = SendRequest(static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ERROR), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
         return error;
@@ -236,7 +215,7 @@ int32_t FormRendererDelegateProxy::OnSurfaceChange(float width, float height, fl
 
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CHANGE), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
@@ -259,7 +238,7 @@ int32_t FormRendererDelegateProxy::OnFormLinkInfoUpdate(const std::vector<std::s
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = Remote()->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDelegate::Message::ON_FORM_LINK_INFO_UPDATE), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
@@ -279,7 +258,7 @@ int32_t FormRendererDelegateProxy::OnGetRectRelativeToWindow(AccessibilityParent
 
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDelegate::Message::ON_GET_RECT_RELATIVE_TO_WINDOW), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("failed to SendRequest: %{public}d", error);
@@ -316,7 +295,7 @@ int32_t FormRendererDelegateProxy::OnCheckManagerDelegate(bool &checkFlag)
     }
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDelegate::Message::ON_CHECK_MANAGER_DELEGATE), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("failed to SendRequest: %{public}d", error);
@@ -330,6 +309,17 @@ int32_t FormRendererDelegateProxy::OnCheckManagerDelegate(bool &checkFlag)
     }
     reply.ReadBool(checkFlag);
     return ERR_OK;
+}
+
+int32_t FormRendererDelegateProxy::SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+    MessageOption &option)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("remote is null");
+        return IPC_PROXY_ERR;
+    }
+    return remote->SendRequest(code, data, reply, option);
 }
 } // namespace Ace
 } // namespace OHOS
