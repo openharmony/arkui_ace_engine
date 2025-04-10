@@ -182,6 +182,7 @@ private:
     void UpdateBorderRadius();
     void RegisterVisibleAreaChange();
     void OnVisibleAreaChange(bool visible = true, double ratio = 0.0);
+    void ReportComponentChangeEvent(const char* event);
 
     int32_t iteration_ = 1;
     RefPtr<ControlledAnimator> controlledAnimator_;

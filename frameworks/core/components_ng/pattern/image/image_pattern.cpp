@@ -34,6 +34,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -200,6 +201,7 @@ void ImagePattern::OnCompleteInDataReady()
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+    ReportComponentChangeEvent("onCompleteLoadSuccess");
     auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
     CHECK_NULL_VOID(loadingCtx_);
@@ -449,6 +451,7 @@ void ImagePattern::OnImageLoadSuccess()
         EnableDrag();
     }
     ClearAltData();
+    ReportComponentChangeEvent("onCompleteDoneLayout");
     auto eventHub = GetEventHub<ImageEventHub>();
     if (eventHub) {
         eventHub->FireCompleteEvent(event);
@@ -530,6 +533,7 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
+    ReportComponentChangeEvent("onError");
     auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
     LoadImageFailEvent event(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), errorMsg);
@@ -2767,6 +2771,22 @@ void ImagePattern::OnInActive()
 {
     if (status_ == AnimatorStatus::RUNNING) {
         animator_->Pause();
+    }
+}
+
+void ImagePattern::ReportComponentChangeEvent(const std::string& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // If the current control is a child control of the ImageAnimator, then the id is -1.
+    if (host->GetId() == -1) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Image." + value);
+    } else {
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+        auto json = InspectorJsonUtil::Create();
+        json->Put("Image", value.data());
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(), "event", json);
+#endif
     }
 }
 } // namespace OHOS::Ace::NG

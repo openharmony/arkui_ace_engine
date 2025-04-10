@@ -23,7 +23,6 @@
 #endif
 
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/geometry/ng/vector.h"
 #include "base/image/drawable_descriptor.h"
@@ -272,7 +271,6 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onComplete");
             func->Execute(info);
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Image.onComplete");
         };
         ImageModel::GetInstance()->SetOnComplete(std::move(onComplete));
     }
@@ -288,7 +286,6 @@ void JSImage::OnError(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onError");
             func->Execute(info);
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Image.onError");
         };
 
         ImageModel::GetInstance()->SetOnError(onError);
