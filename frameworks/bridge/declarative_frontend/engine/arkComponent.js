@@ -3447,11 +3447,13 @@ class ArkComponent {
     this._instanceId = instanceId;
   }
   getOrCreateGestureEvent() {
-    if (this._gestureEvent !== null) {
+    if (this._gestureEvent === null || this._gestureEvent === undefined) {
       this._gestureEvent = new UIGestureEvent();
       this._gestureEvent.setNodePtr(this.nativePtr);
       this._gestureEvent.setWeakNodePtr(this._weakPtr);
-      this._gestureEvent.registerFrameNodeDeletedCallback(this.nativePtr);
+      if (!this._weakPtr?.invalid()) {
+        this._gestureEvent.registerFrameNodeDeletedCallback(this.nativePtr);
+      }
     }
     return this._gestureEvent;
   }
@@ -5275,7 +5277,7 @@ class UIGestureEvent {
     getUINativeModule().common.registerFrameNodeDestructorCallback(nodePtr, this._destructorCallback);
   }
   addGesture(gesture, priority, mask) {
-    if (this._weakNodePtr.invalid()) {
+    if (this._weakNodePtr?.invalid()) {
       return;
     }
     if (this._gestures === undefined) {
@@ -5349,7 +5351,7 @@ class UIGestureEvent {
     this.addGesture(gesture, GesturePriority.PARALLEL, mask);
   }
   removeGestureByTag(tag) {
-    if (this._weakNodePtr.invalid()) {
+    if (this._weakNodePtr?.invalid()) {
       return;
     }
     getUINativeModule().common.removeGestureByTag(this._nodePtr, tag);
@@ -5365,7 +5367,7 @@ class UIGestureEvent {
     }
   }
   clearGestures() {
-    if (this._weakNodePtr.invalid()) {
+    if (this._weakNodePtr?.invalid()) {
       return;
     }
     getUINativeModule().common.clearGestures(this._nodePtr);
