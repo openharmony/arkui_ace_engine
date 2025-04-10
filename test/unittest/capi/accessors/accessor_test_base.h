@@ -28,6 +28,8 @@
 #include "test/mock/core/common/mock_theme_style.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+using testing::NiceMock;
+
 namespace OHOS::Ace::NG {
 
 extern "C" const GENERATED_ArkUIAnyAPI* GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind kind, int version);
@@ -37,7 +39,14 @@ void ReportTheme(ThemeType type);
 void ResetThemes();
 #endif
 
-inline RefPtr<Theme> CatchEmptyTheme(ThemeType type)
+inline RefPtr<Theme> CatchEmptyAccessorTheme1(ThemeType type)
+{
+#ifdef CAPI_BACKTRACE
+    ReportTheme(type);
+#endif
+    return nullptr;
+}
+inline RefPtr<Theme> CatchEmptyAccessorTheme2(ThemeType type, uint32_t id)
 {
 #ifdef CAPI_BACKTRACE
     ReportTheme(type);
@@ -63,14 +72,15 @@ public:
         accessor_ = accessors_ ? (accessors_->*GetAccessorFunc)() : nullptr;
         MockPipelineContext::SetUp();
 
-        themeManager_ = AceType::MakeRefPtr<MockThemeManager>();
+        themeManager_ = AceType::MakeRefPtr<NiceMock<MockThemeManager>>();
         ASSERT_TRUE(MockPipelineContext::GetCurrent());
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
         // assume using of test/mock/core/common/mock_theme_constants.cpp in build
         themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
         EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
             .WillRepeatedly(testing::Return(themeConstants_));
-        EXPECT_CALL(*themeManager_, GetTheme(testing::_)).WillRepeatedly(CatchEmptyTheme);
+        ON_CALL(*themeManager_, GetTheme(testing::_)).WillByDefault(CatchEmptyAccessorTheme1);
+        ON_CALL(*themeManager_, GetTheme(testing::_, testing::_)).WillByDefault(CatchEmptyAccessorTheme2);
 
         themeConstants_->LoadTheme(0);
         MockThemeStyle::GetInstance()->SetAttributes({});
@@ -147,7 +157,8 @@ public:
     static void SetupTheme()
     {
         auto theme = typename Theme::Builder().Build(themeConstants_);
-        EXPECT_CALL(*themeManager_, GetTheme(Theme::TypeId())).WillRepeatedly(testing::Return(theme));
+        ON_CALL(*themeManager_, GetTheme(Theme::TypeId())).WillByDefault(testing::Return(theme));
+        ON_CALL(*themeManager_, GetTheme(Theme::TypeId(), testing::_)).WillByDefault(testing::Return(theme));
     }
 
 protected:

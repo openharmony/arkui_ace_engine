@@ -178,17 +178,6 @@ void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpan
     dst.style = Converter::ArkValue<Opt_TextDecorationStyle>(src.GetTextDecorationStyle());
 }
 
-void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src)
-{
-    CHECK_NULL_VOID(src.empty());
-    JsonValue jsonValue;
-    for (auto it = src.begin(); it != src.end(); it++) {
-        jsonValue.Put((it->first.c_str()), it->second);
-    }
-    static std::string list = jsonValue.ToString();
-    dst = Converter::ArkValue<Ark_String>(list);
-}
-
 void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstractSpanResult& src)
 {
     dst.fontColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(src.GetFontColor());
@@ -202,32 +191,6 @@ void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstract
     dst.letterSpacing = Converter::ArkValue<Opt_Number>(src.GetLetterspacing());
     dst.lineHeight = Converter::ArkValue<Opt_Number>(src.GetLineHeight());
     dst.fontFeature = Converter::ArkValue<Opt_String>(src.GetFontFeatures());
-}
-
-void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src)
-{
-    dst.fontSize = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(src.fontSize);
-    dst.fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(src.fontWeight);
-    dst.effectStrategy.value = static_cast<Ark_SymbolEffectStrategy>(src.effectStrategy);
-    dst.renderingStrategy.value = static_cast<Ark_SymbolRenderingStrategy>(src.renderingStrategy);
-}
-
-void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx)
-{
-    dst.bundleName = Converter::ArkValue<Ark_String>(src.GetBundleName(), ctx);
-    dst.moduleName = Converter::ArkValue<Ark_String>(src.GetModuleName(), ctx);
-    dst.id = Converter::ArkValue<Ark_Number>(src.GetId());
-
-    std::vector<std::string> paramsArray;
-    auto params = src.GetParams();
-    for (ResourceObjectParams& param : params) {
-        if (param.value) {
-            paramsArray.push_back(*param.value);
-        }
-    }
-    auto arkArray = Converter::ArkValue<Array_String>(paramsArray, ctx);
-    dst.params = Converter::ArkValue<Opt_Array_String>(arkArray, ctx);
-    dst.type = Converter::ArkValue<Opt_Number>(src.GetType());
 }
 
 void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractSpanResult& src, ConvContext *ctx)
@@ -291,20 +254,6 @@ void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue&
         src.GetRichEditorReplacedImageSpans(), ctx);
     dst.replacedSymbolSpans = Converter::ArkValue<Array_RichEditorTextSpanResult>(
         src.GetRichEditorReplacedSymbolSpans(), ctx);
-}
-
-void AssignArkValue(Ark_RichEditorImageSpanStyleResult& dst, const ImageStyleResult& src)
-{
-    dst.size.value0 = Converter::ArkValue<Ark_Number>(src.size[0]);
-    dst.size.value1 = Converter::ArkValue<Ark_Number>(src.size[1]);
-    VerticalAlign align = static_cast<VerticalAlign>(src.verticalAlign);
-    dst.verticalAlign = Converter::ArkValue<Ark_ImageSpanAlignment>(align);
-    ImageFit fit = static_cast<ImageFit>(src.objectFit);
-    dst.objectFit = Converter::ArkValue<Ark_ImageFit>(fit);
-    dst.layoutStyle.value.borderRadius.value =
-        Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(src.borderRadius);
-    dst.layoutStyle.value.margin.value =
-        Converter::ArkUnion<Ark_Union_Dimension_Margin, Ark_Length>(src.margin);
 }
 
 template<>
