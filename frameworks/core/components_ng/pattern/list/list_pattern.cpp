@@ -453,7 +453,7 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
     CHECK_NULL_VOID(listEventHub);
     paintStateFlag_ = !NearZero(finalOffset) && !isJump;
     isFramePaintStateValid_ = true;
-    ACE_SCOPED_TRACE("scrollType:list, offset:%f, id:%d, tag:%s", finalOffset,
+    ACE_SCOPED_TRACE("processed offset:%f, id:%d, tag:%s", finalOffset,
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     auto onScroll = listEventHub->GetOnScroll();
     PrintOffsetLog(AceLogTag::ACE_LIST, host->GetId(), finalOffset);
