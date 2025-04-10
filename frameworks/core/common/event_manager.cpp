@@ -32,6 +32,10 @@ constexpr int32_t DUMP_START_NUMBER = 4;
 constexpr int32_t DUMP_LIMIT_SIZE = 500;
 constexpr int64_t EVENT_CLEAR_DURATION = 1000;
 constexpr int64_t TRANSLATE_NS_TO_MS = 1000000;
+constexpr int32_t MIN_DUMP_SIZE = 1;
+constexpr int32_t MAX_DUMP_SIZE = 5;
+constexpr int32_t MIN_PARAM_SIZE = 1;
+constexpr int32_t COUNT_PARAM_SIZE = 3;
 
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
     TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
@@ -2222,4 +2226,36 @@ void EventManager::CheckMousePendingRecognizersState(const TouchEvent& event)
     mousePendingRecognizers_.clear();
 }
 
+void EventManager::DumpEventWithCount(const std::vector<std::string>& params, NG::EventTreeType type, bool hasJson)
+{
+    if (params.size() == MIN_PARAM_SIZE) {
+        DumpEvent(type, hasJson);
+        return;
+    }
+    if (params.size() >= COUNT_PARAM_SIZE) {
+        if (params[1] != "-n") {
+            DumpEvent(type, hasJson);
+            return;
+        }
+        auto size = StringUtils::StringToInt(params[2]);
+        if (size < MIN_DUMP_SIZE || size > MAX_DUMP_SIZE) {
+            DumpEvent(type, hasJson);
+            return;
+        }
+        auto& eventTree = GetEventTreeRecord(type);
+        if (hasJson) {
+            std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+            std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+            eventTree.Dump(children, 0, MAX_DUMP_SIZE - size);
+            json->Put("DumpEvent", children);
+            DumpLog::GetInstance().PrintJson(json->ToString());
+        } else {
+            std::list<std::pair<int32_t, std::string>> dumpList;
+            eventTree.Dump(dumpList, 0, MAX_DUMP_SIZE - size);
+            for (auto& item : dumpList) {
+                DumpLog::GetInstance().Print(item.first, item.second);
+            }
+        }
+    }
+}
 } // namespace OHOS::Ace

@@ -40,6 +40,7 @@ struct FrameNodeSnapshot {
     bool isHit = false;
     int32_t hitTestMode = 0;
     std::vector<RectF> responseRegionList;
+    bool active = false;
 };
 
 struct TouchPointSnapshot {

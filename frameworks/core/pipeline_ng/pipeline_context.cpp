@@ -3154,7 +3154,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         }
     } else if (params[0] == "-event") {
         if (eventManager_) {
-            eventManager_->DumpEvent(EventTreeType::TOUCH, hasJson);
+            eventManager_->DumpEventWithCount(params, EventTreeType::TOUCH, hasJson);
         }
         DumpUIExt();
     } else if (params[0] == "-postevent") {
