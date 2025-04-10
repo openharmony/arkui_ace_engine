@@ -1417,6 +1417,7 @@ void ScrollablePattern::AnimateTo(
         PlaySpringAnimation(position, DEFAULT_SCROLL_TO_VELOCITY, DEFAULT_SCROLL_TO_MASS, DEFAULT_SCROLL_TO_STIFFNESS,
             DEFAULT_SCROLL_TO_DAMPING, useTotalOffset);
     } else {
+        useTotalOffset_ = true;
         PlayCurveAnimation(position, duration, curve, canOverScroll);
     }
     if (!GetIsDragging()) {
@@ -1431,7 +1432,6 @@ void ScrollablePattern::AnimateTo(
 
 void ScrollablePattern::OnAnimateFinish()
 {
-    useTotalOffset_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (isAnimationStop_) {
