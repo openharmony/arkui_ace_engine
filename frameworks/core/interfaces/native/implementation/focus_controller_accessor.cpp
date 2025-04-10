@@ -16,11 +16,46 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+// #include "frameworks/bridge/js_frontend/frontend_delegate.cpp"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FocusControllerAccessor {
 void RequestFocusImpl(const Ark_String* key)
 {
+    CHECK_NULL_VOID(key);
+    std::string convKey = Converter::Convert<std::string>(*key);
+    auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipelineContext);
+
+    // bool isSyncRequest = false;
+    // auto targetNodeId = convKey;
+    // pipelineContext->RequestFocus(targetNodeId, isSyncRequest);
+
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        return;
+    }
+    auto focusCallback = [](NG::RequestFocusResult result) {
+        switch (result) {
+            case NG::RequestFocusResult::NON_FOCUSABLE:
+                LOGE("This component is not focusable. %{public}d", ERROR_CODE_NON_FOCUSABLE);
+                break;
+            case NG::RequestFocusResult::NON_FOCUSABLE_ANCESTOR:
+                LOGE("This component has unfocusable ancestor. %{public}d", ERROR_CODE_NON_FOCUSABLE_ANCESTOR);
+                break;
+            case NG::RequestFocusResult::NON_EXIST:
+                LOGE("The component doesn't exist, is currently invisible, or has been disabled. %{public}d",
+                    ERROR_CODE_NON_EXIST);
+                break;
+            default:
+                LOGE("An internal error occurred. %{public}d", ERROR_CODE_INTERNAL_ERROR);
+                break;
+        }
+    };
+    delegate->SetRequestFocusCallback(focusCallback);
+    delegate->RequestFocus(convKey, true);
+    delegate->ResetRequestFocusCallback();
 }
 } // FocusControllerAccessor
 const GENERATED_ArkUIFocusControllerAccessor* GetFocusControllerAccessor()
