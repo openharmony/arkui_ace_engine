@@ -424,6 +424,15 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
     contentProperty.unselectedIndicatorHeight = { 100.0f, 200.0f, 300.0f };
     indicatorModifier->isCustomSize_ = false;
     indicatorModifier->PaintBlackPoint(context, contentProperty);
+
+    /**
+     * @tc.steps: step4. Set i >= contentProperty.unselectedIndicatorWidth.size()
+     * @tc.expected: Verify the result and result should be as expected
+     */
+    contentProperty.unselectedIndicatorWidth = {};
+    contentProperty.unselectedIndicatorHeight = { 100.0f, 200.0f, 300.0f };
+    indicatorModifier->isCustomSize_ = true;
+    indicatorModifier->PaintBlackPoint(context, contentProperty);
 }
 
 /**
@@ -1207,5 +1216,531 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalculateNormalMarginr001, Tes
     paintMethod->CalculateNormalMargin(itemHalfSizes, frameSize, displayCount, indicatorDotItemSpace, ignoreSize);
     EXPECT_NE(paintMethod->normalMargin_.GetX(), 0);
     EXPECT_NE(paintMethod->normalMargin_.GetY(), 0);
+}
+
+/**
+ * @tc.name: UpdateShrinkPaintProperty001
+ * @tc.desc: Test UpdateShrinkPaintProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, UpdateShrinkPaintProperty001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, 100.f, 100.f };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    LinearVector<float> vectorBlackPointCenterX = { 20.f };
+    LinearVector<float> normalItemHalfSizes = { 20.f, 20.f, 20.f, 20.f };
+    dotIndicatorModifier.longPointLeftAnimEnd_ = true;
+    dotIndicatorModifier.longPointRightAnimEnd_ = false;
+    dotIndicatorModifier.UpdateShrinkPaintProperty(OffsetF(50.0, 60.0), normalItemHalfSizes, { 1.f, 1.f });
+    dotIndicatorModifier.onDraw(context);
+
+    /**
+     * @tc.expected: itemHalfSizes_->Get()[0] is 20.f.
+     *               itemHalfSizes_->Get()[1] is 20.f.
+     *               itemHalfSizes_->Get()[2] is 20.f.
+     *               itemHalfSizes_->Get()[3] is 20.f.
+     */
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[0], 20.f);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[1], 20.f);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[2], 20.f);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[3], 20.f);
+    EXPECT_NE(dotIndicatorModifier.longPointLeftCenterX_->Get(), 1.f);
+    EXPECT_NE(dotIndicatorModifier.longPointRightCenterX_->Get(), 1.f);
+}
+
+/**
+ * @tc.name: UpdateShrinkPaintProperty002
+ * @tc.desc: Test UpdateShrinkPaintProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, UpdateShrinkPaintProperty002, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, 100.f, 100.f };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    LinearVector<float> vectorBlackPointCenterX = { 20.f };
+    LinearVector<float> normalItemHalfSizes = { 20.f, 20.f, 20.f, 20.f };
+    dotIndicatorModifier.longPointLeftAnimEnd_ = true;
+    dotIndicatorModifier.longPointRightAnimEnd_ = true;
+    dotIndicatorModifier.blackPointsAnimEnd_ = false;
+    dotIndicatorModifier.currentSelectedIndex_ = 0.0;
+    dotIndicatorModifier.currentOverlongType_ = OverlongType::NONE;
+    dotIndicatorModifier.targetSelectedIndex_ = 10.0;
+    dotIndicatorModifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    dotIndicatorModifier.UpdateShrinkPaintProperty(OffsetF(50.0, 60.0), normalItemHalfSizes, { 1.f, 1.f });
+    dotIndicatorModifier.onDraw(context);
+
+    /**
+     * @tc.expected: itemHalfSizes_->Get()[0] is 20.f.
+     *               itemHalfSizes_->Get()[1] is 20.f.
+     *               itemHalfSizes_->Get()[2] is 20.f.
+     *               itemHalfSizes_->Get()[3] is 20.f.
+     */
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[0], 20.f);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[1], 20.f);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[2], 20.f);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[3], 20.f);
+    EXPECT_EQ(dotIndicatorModifier.longPointLeftCenterX_->Get(), 1.f);
+    EXPECT_EQ(dotIndicatorModifier.longPointRightCenterX_->Get(), 1.f);
+    EXPECT_NE(dotIndicatorModifier.currentSelectedIndex_, 10.f);
+    EXPECT_NE(dotIndicatorModifier.currentOverlongType_, OverlongType::LEFT_NORMAL_RIGHT_FADEOUT);
+}
+
+/**
+ * @tc.name: CalcLongPointEndCenterXWithBlack001
+ * @tc.desc: Test CalcLongPointEndCenterXWithBlack
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalcLongPointEndCenterXWithBlack001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    size_t index = 1;
+    LinearVector<float> itemHalfSizes = { 20.f };
+    std::pair<float, float> expectedValue = std::make_pair(0.0f, 0.0f);
+    dotIndicatorModifier.isHorizontalAndRTL_ = true;
+    auto result = dotIndicatorModifier.CalcLongPointEndCenterXWithBlack(index, itemHalfSizes);
+    EXPECT_EQ(result, expectedValue);
+}
+
+/**
+ * @tc.name: CalcLongPointEndCenterXWithBlack002
+ * @tc.desc: Test CalcLongPointEndCenterXWithBlack
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalcLongPointEndCenterXWithBlack002, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    size_t index = 1;
+    LinearVector<float> itemHalfSizes = { 20.f, 20.f, 20.f, 20.f };
+    std::pair<float, float> expectedValue = std::make_pair(-10.0f, 30.0f);
+    dotIndicatorModifier.isHorizontalAndRTL_ = false;
+    dotIndicatorModifier.animationEndCenterX_ = { 10.f, 10.f, 10.f, 10.f };
+    auto result = dotIndicatorModifier.CalcLongPointEndCenterXWithBlack(index, itemHalfSizes);
+    EXPECT_EQ(result, expectedValue);
+}
+
+/**
+ * @tc.name: CalcIndicatorSize001
+ * @tc.desc: Test CalcIndicatorSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalcIndicatorSize001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    LinearVector<float> itemHalfSizes = { 20.f };
+    OverlongType overlongType = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    bool isWidth = true;
+    dotIndicatorModifier.isHorizontalAndRTL_ = true;
+    dotIndicatorModifier.animationEndCenterX_ = { 10.f, 10.f, 10.f, 10.f };
+    auto result = dotIndicatorModifier.CalcIndicatorSize(itemHalfSizes, overlongType, isWidth);
+    EXPECT_EQ(result[0], 0);
+}
+
+/**
+ * @tc.name: CalcIndicatorSize002
+ * @tc.desc: Test CalcIndicatorSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalcIndicatorSize002, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    LinearVector<float> itemHalfSizes = { 60.f, 60.f, 60.f, 60.f };
+    OverlongType overlongType = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    bool isWidth = true;
+    dotIndicatorModifier.maxDisplayCount_ = 6;
+    dotIndicatorModifier.isHorizontalAndRTL_ = false;
+    dotIndicatorModifier.animationEndCenterX_ = { 10.f, 10.f, 10.f, 10.f };
+    auto result = dotIndicatorModifier.CalcIndicatorSize(itemHalfSizes, overlongType, isWidth);
+    EXPECT_EQ(result[0], 40);
+}
+
+/**
+ * @tc.name: CalcTargetIndexOnDrag001
+ * @tc.desc: Test CalcTargetIndexOnDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalcTargetIndexOnDrag001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    dotIndicatorModifier.turnPageRate_ = 5.0f;
+    dotIndicatorModifier.isHorizontalAndRTL_ = false;
+    dotIndicatorModifier.animationStartIndex_ = 5;
+    dotIndicatorModifier.animationEndIndex_ = 10;
+    auto result = dotIndicatorModifier.CalcTargetIndexOnDrag();
+    EXPECT_EQ(result, 10);
+}
+
+/**
+ * @tc.name: CalcTargetIndexOnDrag002
+ * @tc.desc: Test CalcTargetIndexOnDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalcTargetIndexOnDrag002, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    dotIndicatorModifier.turnPageRate_ = 5.0f;
+    dotIndicatorModifier.isHorizontalAndRTL_ = false;
+    dotIndicatorModifier.realItemCount_ = 10;
+    dotIndicatorModifier.animationStartIndex_ = 0;
+    dotIndicatorModifier.animationEndIndex_ = 9;
+    auto result = dotIndicatorModifier.CalcTargetIndexOnDrag();
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: PlayIndicatorAnimation001
+ * @tc.desc: Test PlayIndicatorAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, PlayIndicatorAnimation001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    OffsetF margin = OffsetF(20.f, 25.f);
+    LinearVector<float> itemHalfSizes = { 20.f, 20.f, 20.f, 20.f };
+    GestureState gestureState = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    TouchBottomTypeLoop touchBottomTypeLoop = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    dotIndicatorModifier.isHorizontalAndRTL_ = false;
+    dotIndicatorModifier.currentSelectedIndex_ = 0;
+    dotIndicatorModifier.maxDisplayCount_ = 10;
+    dotIndicatorModifier.targetSelectedIndex_ = 9;
+    dotIndicatorModifier.animationEndCenterX_ = { 10.f, 10.f, 10.f, 10.f };
+    dotIndicatorModifier.PlayIndicatorAnimation(margin, itemHalfSizes, gestureState, touchBottomTypeLoop);
+    EXPECT_GT(dotIndicatorModifier.overlongSelectedStartCenterX_.first, 490);
+}
+
+/**
+ * @tc.name: PlayIndicatorAnimation002
+ * @tc.desc: Test PlayIndicatorAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, PlayIndicatorAnimation002, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    OffsetF margin = OffsetF(20.f, 25.f);
+    LinearVector<float> itemHalfSizes = { 20.f, 20.f, 20.f, 20.f };
+    GestureState gestureState = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    TouchBottomTypeLoop touchBottomTypeLoop = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    dotIndicatorModifier.isHorizontalAndRTL_ = true;
+    dotIndicatorModifier.currentSelectedIndex_ = 9;
+    dotIndicatorModifier.maxDisplayCount_ = 10;
+    dotIndicatorModifier.targetSelectedIndex_ = 0;
+    dotIndicatorModifier.animationEndCenterX_ = { 10.f, 10.f, 10.f, 10.f };
+    dotIndicatorModifier.PlayIndicatorAnimation(margin, itemHalfSizes, gestureState, touchBottomTypeLoop);
+    EXPECT_GT(dotIndicatorModifier.overlongSelectedStartCenterX_.first, 430);
+}
+
+/**
+ * @tc.name: StopAnimation002
+ * @tc.desc: Test StopAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, StopAnimation002, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    LinearVector<float> itemHalfSizes = { 20.f, 20.f };
+    GestureState gestureState = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    TouchBottomTypeLoop touchBottomTypeLoop = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    OffsetF margin = OffsetF(20.f, 25.f);
+    dotIndicatorModifier.PlayIndicatorAnimation(margin, itemHalfSizes, gestureState, touchBottomTypeLoop);
+    EXPECT_FALSE(dotIndicatorModifier.longPointRightAnimEnd_);
+
+    dotIndicatorModifier.StopAnimation(false);
+    EXPECT_TRUE(dotIndicatorModifier.longPointLeftAnimEnd_);
+}
+
+/**
+ * @tc.name: InitOverlongSelectedIndex001
+ * @tc.desc: Test InitOverlongSelectedIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, InitOverlongSelectedIndex001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    int32_t pageIndex = 19;
+    dotIndicatorModifier.maxDisplayCount_ = 10;
+    dotIndicatorModifier.realItemCount_ = 20;
+    dotIndicatorModifier.targetSelectedIndex_ = -1;
+    dotIndicatorModifier.InitOverlongSelectedIndex(pageIndex);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 9);
+}
+
+/**
+ * @tc.name: InitOverlongStatus001
+ * @tc.desc: Test InitOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, InitOverlongStatus001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    int32_t pageIndex = 19;
+    dotIndicatorModifier.maxDisplayCount_ = 10;
+    dotIndicatorModifier.realItemCount_ = 20;
+    dotIndicatorModifier.currentSelectedIndex_ = -1;
+    dotIndicatorModifier.InitOverlongStatus(pageIndex);
+    EXPECT_EQ(dotIndicatorModifier.currentSelectedIndex_, 9);
+}
+
+/**
+ * @tc.name: CalcTargetSelectedIndex001
+ * @tc.desc: Test CalcTargetSelectedIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalcTargetSelectedIndex001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    int32_t currentPageIndex = 20;
+    int32_t targetPageIndex = 20;
+    dotIndicatorModifier.maxDisplayCount_ = 10;
+    dotIndicatorModifier.realItemCount_ = 20;
+    dotIndicatorModifier.CalcTargetSelectedIndex(currentPageIndex, targetPageIndex);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 0);
+}
+
+/**
+ * @tc.name: CalcIndicatorCenterX001
+ * @tc.desc: Test CalcIndicatorCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalcIndicatorCenterX001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    LinearVector<float> itemHalfSizes = { 20.f, 20.f, 20.f, 20.f };
+    int32_t selectedIndex = 20;
+    OverlongType overlongType = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    dotIndicatorModifier.isHorizontalAndRTL_ = true;
+    dotIndicatorModifier.isCustomSizeValue_ = false;
+    dotIndicatorModifier.maxDisplayCount_ = 10;
+    dotIndicatorModifier.realItemCount_ = 20;
+    auto result = dotIndicatorModifier.CalcIndicatorCenterX(itemHalfSizes, selectedIndex, overlongType);
+    EXPECT_EQ(result.second.first, 0);
+}
+
+/**
+ * @tc.name: CalcIndicatorCenterX002
+ * @tc.desc: Test CalcIndicatorCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalcIndicatorCenterX002, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    LinearVector<float> itemHalfSizes = { 20.f, 20.f, 20.f, 20.f };
+    int32_t selectedIndex = 8;
+    OverlongType overlongType = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    dotIndicatorModifier.isHorizontalAndRTL_ = false;
+    dotIndicatorModifier.isCustomSizeValue_ = true;
+    dotIndicatorModifier.maxDisplayCount_ = 10;
+    dotIndicatorModifier.realItemCount_ = 20;
+    auto result = dotIndicatorModifier.CalcIndicatorCenterX(itemHalfSizes, selectedIndex, overlongType);
+    EXPECT_EQ(result.second.first, 416);
+}
+
+/**
+ * @tc.name: CalcIndicatorCenterX003
+ * @tc.desc: Test CalcIndicatorCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalcIndicatorCenterX003, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    LinearVector<float> itemHalfSizes = { 20.f, 20.f, 20.f, 20.f };
+    int32_t selectedIndex = 20;
+    OverlongType overlongType = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    dotIndicatorModifier.isHorizontalAndRTL_ = false;
+    dotIndicatorModifier.isCustomSizeValue_ = true;
+    dotIndicatorModifier.maxDisplayCount_ = 10;
+    dotIndicatorModifier.realItemCount_ = 20;
+    auto result = dotIndicatorModifier.CalcIndicatorCenterX(itemHalfSizes, selectedIndex, overlongType);
+    EXPECT_EQ(result.second.first, 0);
+}
+
+/**
+ * @tc.name: CalcIndicatorCenterX004
+ * @tc.desc: Test CalcIndicatorCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalcIndicatorCenterX004, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    LinearVector<float> itemHalfSizes = { 20.f, 20.f, 20.f, 20.f };
+    int32_t selectedIndex = 9;
+    OverlongType overlongType = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    dotIndicatorModifier.isHorizontalAndRTL_ = false;
+    dotIndicatorModifier.isCustomSizeValue_ = true;
+    dotIndicatorModifier.maxDisplayCount_ = 10;
+    dotIndicatorModifier.realItemCount_ = 20;
+    auto result = dotIndicatorModifier.CalcIndicatorCenterX(itemHalfSizes, selectedIndex, overlongType);
+    EXPECT_GT(result.second.first, 450);
+}
+
+/**
+ * @tc.name: AdjustTargetStatus001
+ * @tc.desc: Test AdjustTargetStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, AdjustTargetStatus001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    int32_t targetPageIndex = 3;
+    dotIndicatorModifier.realItemCount_ = 5;
+    dotIndicatorModifier.maxDisplayCount_ = 0;
+    dotIndicatorModifier.targetSelectedIndex_ = 1;
+    dotIndicatorModifier.AdjustTargetStatus(targetPageIndex);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, -2);
+}
+
+/**
+ * @tc.name: AdjustTargetStatus001
+ * @tc.desc: Test AdjustTargetStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, AdjustTargetStatus002, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = 1.0;
+    dotIndicatorModifier.normalToHoverIndex_ = 0.0;
+    dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    int32_t targetPageIndex = 1;
+    dotIndicatorModifier.realItemCount_ = 10;
+    dotIndicatorModifier.maxDisplayCount_ = 0;
+    dotIndicatorModifier.targetSelectedIndex_ = 1;
+    dotIndicatorModifier.AdjustTargetStatus(targetPageIndex);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 1);
 }
 } // namespace OHOS::Ace::NG

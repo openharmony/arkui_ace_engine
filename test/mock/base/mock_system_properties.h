@@ -22,6 +22,7 @@ extern bool g_isSuperFoldDisplayDevice;
 // unit test globals
 extern bool g_irregularGrid;
 extern bool g_segmentedWaterflow;
+extern bool g_isNeedSymbol;
 
 class APIVersionGuard final {
 public:
