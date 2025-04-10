@@ -1289,6 +1289,9 @@ void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         json->PutExtAttr("subtitle", subtitle_.c_str(), filter);
         json->PutExtAttr("message", message_.c_str(), filter);
     }
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    json->PutExtAttr("uniRender", context->IsUniRenderEnabled() ? "true" : "false", filter);
 }
 
 void DialogPattern::OnColorConfigurationUpdate()
