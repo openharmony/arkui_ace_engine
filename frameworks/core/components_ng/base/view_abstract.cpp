@@ -2282,11 +2282,11 @@ int32_t ViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UI
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The customNode of popup is null.");
         return ERROR_CODE_DIALOG_CONTENT_ERROR;
     }
-    if (param->GetTargetId().empty() || std::stoi(param->GetTargetId()) < 0) {
+    int32_t targetId = StringUtils::StringToInt(param->GetTargetId(), -1);
+    if (targetId < 0) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetId is error.");
         return ERROR_CODE_TARGET_INFO_NOT_EXIST;
     }
-    int32_t targetId = std::stoi(param->GetTargetId());
     auto targetNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(targetId);
     if (!targetNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not exist when oepn popup.");
@@ -2334,11 +2334,11 @@ int32_t ViewAbstract::UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The customNode of popup is null.");
         return ERROR_CODE_DIALOG_CONTENT_ERROR;
     }
-    if (param->GetTargetId().empty() || std::stoi(param->GetTargetId()) < 0) {
+    int32_t targetId = StringUtils::StringToInt(param->GetTargetId(), -1);
+    if (targetId < 0) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetId is error.");
         return ERROR_CODE_INTERNAL_ERROR;
     }
-    int32_t targetId = std::stoi(param->GetTargetId());
     auto targetNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(targetId);
     if (!targetNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not exist when update popup.");
@@ -2374,11 +2374,11 @@ int32_t ViewAbstract::ClosePopup(const RefPtr<UINode>& customNode)
         TAG_LOGE(AceLogTag::ACE_DIALOG, "GetPopupParam failed");
         return result;
     }
-    if (param->GetTargetId().empty() || std::stoi(param->GetTargetId()) < 0) {
+    int32_t targetId = StringUtils::StringToInt(param->GetTargetId(), -1);
+    if (targetId < 0) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetId is error.");
         return ERROR_CODE_INTERNAL_ERROR;
     }
-    int32_t targetId = std::stoi(param->GetTargetId());
     auto overlayManager = BubbleView::GetPopupOverlayManager(customNode, targetId);
     if (!overlayManager) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The overlayManager of popup is null.");
@@ -2408,7 +2408,8 @@ int32_t ViewAbstract::GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<UINo
     CHECK_NULL_RETURN(popupPattern, ERROR_CODE_INTERNAL_ERROR);
     param = popupPattern->GetPopupParam();
     CHECK_NULL_RETURN(param, ERROR_CODE_INTERNAL_ERROR);
-    if (param->GetTargetId().empty() || std::stoi(param->GetTargetId()) < 0) {
+    int32_t targetId = StringUtils::StringToInt(param->GetTargetId(), -1);
+    if (targetId < 0) {
         return ERROR_CODE_INTERNAL_ERROR;
     }
     return ERROR_CODE_NO_ERROR;
