@@ -247,7 +247,7 @@ struct DialogProperties {
     DialogButtonDirection buttonDirection = DialogButtonDirection::AUTO;
     bool isMask = false;
     bool isModal = true;
-    bool enableHoverMode = false;
+    std::optional<bool> enableHoverMode;
     bool isSceneBoardDialog = false;
     bool isSysBlurStyle = true;           // init use sysBlurStyle
     std::function<void()> customBuilder;
@@ -311,7 +311,7 @@ struct PromptDialogAttr {
     bool autoCancel = true;
     bool showInSubWindow = false;
     bool isModal = false;
-    bool enableHoverMode = false;
+    std::optional<bool> enableHoverMode;
     bool isUserCreatedDialog = false;
     std::function<void()> customBuilder;
     std::function<void(const int32_t dialogId)> customBuilderWithId;

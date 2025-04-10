@@ -77,12 +77,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     isKeyBoardShow_ = keyboardInsert.IsValid();
     isHoverMode_ = enableHoverMode ? pipeline->IsHalfFoldHoverStatus() : false;
-    if (dialogPattern->IsWaterfallWindowMode()) {
-        TAG_LOGI(AceLogTag::ACE_DIALOG, "enableHoverMode for waterfallMode, isShowInSubWindow: %{public}d",
-            isShowInSubWindow_);
-        isHoverMode_ = true;
-        hoverModeArea_ = HoverModeAreaType::TOP_SCREEN;
-    }
+    AdjustHoverModeForWaterfall(hostNode);
 
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
@@ -156,6 +151,35 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         AnalysisHeightOfChild(layoutWrapper);
     }
+}
+
+void DialogLayoutAlgorithm::AdjustHoverModeForWaterfall(const RefPtr<FrameNode>& frameNode)
+{
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto dialogProp = DynamicCast<DialogLayoutProperty>(frameNode->GetLayoutProperty());
+    CHECK_NULL_VOID(dialogProp);
+    auto enableHoverMode = dialogProp->GetEnableHoverMode().value_or(false);
+    if (!pattern->IsWaterfallWindowMode()) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "enableHoverMode for waterfallMode, isShowInSubWindow: %{public}d",
+        isShowInSubWindow_);
+    if (enableHoverMode) {
+        isHoverMode_ = true;
+        hoverModeArea_ = dialogProp->GetHoverModeArea().value_or(HoverModeAreaType::TOP_SCREEN);
+    } else if (IsDefaultPosition(dialogProp) && !dialogProp->GetEnableHoverMode().has_value()) {
+        isHoverMode_ = true;
+        hoverModeArea_ = HoverModeAreaType::TOP_SCREEN;
+    }
+}
+
+bool DialogLayoutAlgorithm::IsDefaultPosition(const RefPtr<DialogLayoutProperty>& dialogProp)
+{
+    CHECK_NULL_RETURN(dialogProp, false);
+    auto alignment = dialogProp->GetDialogAlignment().value_or(DialogAlignment::DEFAULT);
+    auto offset = dialogProp->GetDialogOffset().value_or(DimensionOffset());
+    return alignment == DialogAlignment::DEFAULT && NearZero(offset.GetX().Value()) && NearZero(offset.GetY().Value());
 }
 
 void DialogLayoutAlgorithm::ResizeDialogSubwindow(

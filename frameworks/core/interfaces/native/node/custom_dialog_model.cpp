@@ -113,7 +113,7 @@ ArkUIDialogHandle CreateDialog()
         .blurStyleOption = std::nullopt,
         .effectOption = std::nullopt,
         .keyboardAvoidMode = OHOS::Ace::KeyboardAvoidMode::DEFAULT,
-        .enableHoverMode = false,
+        .enableHoverMode = std::nullopt,
         .hoverModeAreaType = OHOS::Ace::HoverModeAreaType::TOP_SCREEN,
         .focusable = true,
     });
@@ -363,7 +363,6 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.blurStyleOption = controllerHandler->blurStyleOption;
     dialogProperties.effectOption = controllerHandler->effectOption;
     dialogProperties.keyboardAvoidMode = controllerHandler->keyboardAvoidMode;
-    dialogProperties.enableHoverMode = controllerHandler->enableHoverMode;
     dialogProperties.hoverModeArea = controllerHandler->hoverModeAreaType;
     if (controllerHandler->customShadow.has_value()) {
         dialogProperties.shadow = controllerHandler->customShadow;
@@ -426,7 +425,9 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
         AnimationOption animation;
         dialogProperties.closeAnimation = animation;
     }
-
+    if (controllerHandler->enableHoverMode.has_value()) {
+        dialogProperties.enableHoverMode = controllerHandler->enableHoverMode.value();
+    }
     ParseDialogKeyboardAvoidDistance(dialogProperties, controllerHandler);
     ParseDialogBorderWidth(dialogProperties, controllerHandler);
     ParseDialogBorderColor(dialogProperties, controllerHandler);
