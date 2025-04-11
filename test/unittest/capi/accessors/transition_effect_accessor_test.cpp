@@ -190,9 +190,9 @@ HWTEST_F(TransitionEffectAccessorTest, getMoveTest, TestSize.Level1)
 HWTEST_F(TransitionEffectAccessorTest, getAsymmetricTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->asymmetric, nullptr);
-    TransitionEffectPeer app;
-    TransitionEffectPeer disapp;
-    auto peer = accessor_->asymmetric(&app, &disapp);
+    TransitionEffectPeer* app = PeerUtils::CreatePeer<TransitionEffectPeer>();
+    TransitionEffectPeer* disapp = PeerUtils::CreatePeer<TransitionEffectPeer>();
+    auto peer = accessor_->asymmetric(app, disapp);
     ASSERT_NE(peer, nullptr);
 }
 
@@ -208,10 +208,10 @@ HWTEST_F(TransitionEffectAccessorTest, getAnimationTest, TestSize.Level1)
     Ark_AnimateParam animParam;
     animParam.duration = Converter::ArkValue<Opt_Number>(testValue);
     animParam.tempo =  Converter::ArkValue<Opt_Number>(0.5);
-    TransitionEffectPeer peer;
-    peer.handler = AceType::MakeRefPtr<ChainedOpacityEffect>(33);
+    TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
+    peer->handler = AceType::MakeRefPtr<ChainedOpacityEffect>(33);
 
-    auto peer2 = accessor_->animation(reinterpret_cast<TransitionEffectPeer*>(&peer), &animParam);
+    auto peer2 = accessor_->animation(reinterpret_cast<TransitionEffectPeer*>(peer), &animParam);
     ASSERT_NE(peer2, nullptr);
     ASSERT_EQ(peer2->handler->GetAnimationOption()->GetDuration(), testValue);
 }
@@ -227,13 +227,13 @@ HWTEST_F(TransitionEffectAccessorTest, getCombineTest, TestSize.Level1)
     auto opacity1 = 444;
     auto opacity2 = 555;
 
-    TransitionEffectPeer peer1;
-    peer1.handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity1);
+    TransitionEffectPeer* peer1 = PeerUtils::CreatePeer<TransitionEffectPeer>();
+    peer1->handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity1);
 
-    TransitionEffectPeer peer2;
-    peer2.handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity2);
+    TransitionEffectPeer* peer2 = PeerUtils::CreatePeer<TransitionEffectPeer>();
+    peer2->handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity2);
 
-    auto ret_peer1 = accessor_->combine(reinterpret_cast<TransitionEffectPeer*>(&peer1), &peer2);
+    auto ret_peer1 = accessor_->combine(reinterpret_cast<TransitionEffectPeer*>(peer1), peer2);
     ASSERT_NE(ret_peer1, nullptr);
     auto effect1 = AceType::DynamicCast<ChainedOpacityEffect>(ret_peer1->handler);
     ASSERT_NE(effect1, nullptr);

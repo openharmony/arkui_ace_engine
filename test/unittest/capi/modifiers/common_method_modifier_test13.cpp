@@ -2009,11 +2009,11 @@ HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsSecondaryButtonTest, T
 HWTEST_F(CommonMethodModifierTest13, bindPopupPopupOptionsTransitionTest, TestSize.Level1)
 {
     Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    TransitionEffectPeer peer;
+    TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ChainedTransitionEffect> transitionHandler =
         AceType::Claim(new ChainedOpacityEffect(1.0f));
-    peer.handler = transitionHandler;
-    auto arkEffect = Converter::ArkValue<Opt_TransitionEffect>(&peer);
+    peer->handler = transitionHandler;
+    auto arkEffect = Converter::ArkValue<Opt_TransitionEffect>(peer);
 
     Ark_PopupOptions arkOptions = {
         .message = Converter::ArkValue<Ark_String>(ACCESSABLE_PROP_TEXT_VALUE),
