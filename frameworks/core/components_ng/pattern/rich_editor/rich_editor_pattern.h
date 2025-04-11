@@ -1408,7 +1408,7 @@ private:
     int32_t GetParagraphLength(const std::list<RefPtr<UINode>>& spans) const;
     // REQUIRES: 0 <= start < end
     std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
-    void OnHover(bool isHover);
+    void OnHover(bool isHover, HoverInfo& hoverInfo);
     void ChangeMouseStyle(MouseFormat format, bool freeMouseHoldNode = false);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
         SourceType sourceType = SourceType::NONE);
