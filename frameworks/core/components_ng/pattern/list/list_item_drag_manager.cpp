@@ -45,13 +45,10 @@ RefPtr<FrameNode> ListItemDragManager::GetListFrameNode() const
 OffsetF ListItemDragManager::GetParentPaddingOffset()
 {
     auto parent = listNode_.Upgrade();
+    CHECK_NULL_RETURN(parent, OffsetF(0.0f, 0.0f));
     auto listGeometry = parent->GetGeometryNode();
-    if (!listGeometry) {
-        return OffsetF(0, 0);
-    }
-    if (!(listGeometry->GetPadding())) {
-        return OffsetF(0, 0);
-    }
+    CHECK_NULL_RETURN(listGeometry, OffsetF(0.0f, 0.0f));
+    CHECK_NULL_RETURN(listGeometry->GetPadding(), OffsetF(0.0f, 0.0f));
     float left = listGeometry->GetPadding()->left.value_or(0);
     float top = listGeometry->GetPadding()->top.value_or(0);
     return OffsetF(left, top);
