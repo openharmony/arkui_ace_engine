@@ -391,7 +391,6 @@ void JSRenderingContext::JsStartImageAnalyzer(const JSCallbackInfo& info)
     CHECK_NULL_VOID(engine);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     auto env = reinterpret_cast<napi_env>(nativeEngine);
-
     auto asyncCtx = std::make_shared<CanvasAsyncCxt>();
     asyncCtx->env = env;
     napi_value promise = nullptr;
@@ -405,6 +404,7 @@ void JSRenderingContext::JsStartImageAnalyzer(const JSCallbackInfo& info)
     panda::Local<JsiValue> value = info[0].Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;
     napi_value configNativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+
     if (isImageAnalyzing_) {
         napi_value result = CreateErrorValue(env, ERROR_CODE_AI_ANALYSIS_IS_ONGOING);
         napi_reject_deferred(env, asyncCtx->deferred, result);
