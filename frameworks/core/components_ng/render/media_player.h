@@ -146,6 +146,10 @@ public:
     {
         return -1;
     }
+    virtual int32_t SetPlayRangeWithMode(int64_t /*startTime*/, int64_t /*endTime*/, SeekMode /*mode */)
+    {
+        return -1;
+    }
     virtual int32_t SetParameter(const std::string& key, int64_t value)
     {
         return -1;

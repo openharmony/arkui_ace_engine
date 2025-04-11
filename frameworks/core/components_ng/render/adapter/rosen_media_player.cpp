@@ -527,6 +527,13 @@ int32_t RosenMediaPlayer::SetPlayRange(int64_t startTime, int64_t endTime)
     return mediaPlayer_->SetPlayRange(startTime, endTime);
 }
 
+int32_t RosenMediaPlayer::SetPlayRangeWithMode(int64_t startTime, int64_t endTime, OHOS::Ace::SeekMode mode)
+{
+    LOGI("Media player start to SetPlayRangeWithMode.");
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
+    return mediaPlayer_->SetPlayRangeWithMode(startTime, endTime, ConvertToMediaSeekMode(mode));
+}
+
 int32_t RosenMediaPlayer::SetParameter(const std::string& key, int64_t value)
 {
     LOGI("Media player start to SetParameter.");
