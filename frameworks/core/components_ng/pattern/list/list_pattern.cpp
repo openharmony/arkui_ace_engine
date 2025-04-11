@@ -2318,16 +2318,19 @@ void ListPattern::UpdateScrollBarOffset()
     if (GetAlwaysEnabled()) {
         estimatedHeight = estimatedHeight - spaceWidth_;
     }
-    if (!IsScrollSnapAlignCenter() || childrenSize_) {
-        currentOffset += contentStartOffset_;
-        estimatedHeight += contentStartOffset_ + contentEndOffset_;
-    }
 
     // calculate padding offset of list
     auto layoutPriority = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutPriority);
     auto padding = layoutPriority->CreatePaddingAndBorder();
     auto paddingMain = GetAxis() == Axis::VERTICAL ? padding.Height() : padding.Width();
+
+    auto mainSize = GetAxis() == Axis::VERTICAL ? size.Height() : size.Width();
+    if (IsNeedAddContentOffset(LessOrEqual(estimatedHeight + paddingMain, mainSize))) {
+        currentOffset += contentStartOffset_;
+        estimatedHeight += contentStartOffset_ + contentEndOffset_;
+    }
+
     UpdateScrollBarRegion(currentOffset, estimatedHeight + paddingMain, size, Offset(0.0f, 0.0f));
 }
 
