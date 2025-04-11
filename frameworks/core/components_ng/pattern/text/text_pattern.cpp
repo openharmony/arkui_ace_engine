@@ -2431,7 +2431,7 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
     }
     auto dragStatusUpdateAction = [weakPtr = WeakClaim(this), isDragging](const ResultObject& resultObj) {
         auto pattern = weakPtr.Upgrade();
-        CHECK_NULL_VOID(pattern || !pattern->spans_.empty());
+        CHECK_NULL_VOID(pattern && !pattern->spans_.empty());
         auto it = pattern->spans_.begin();
         if (resultObj.spanPosition.spanIndex >= static_cast<int32_t>(pattern->spans_.size())) {
             std::advance(it, !pattern->spans_.empty() ? static_cast<int32_t>(pattern->spans_.size()) - 1 : 0);
