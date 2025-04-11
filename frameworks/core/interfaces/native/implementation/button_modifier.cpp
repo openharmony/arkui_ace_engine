@@ -142,7 +142,7 @@ void TypeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto typeInt = EnumToInt(Converter::OptConvert<ButtonType>(value));
-    // ButtonModelNG::SetType(frameNode, typeInt);
+    ButtonModelNG::SetType(frameNode, typeInt);
 }
 void StateEffectImpl(Ark_NativePointer node,
                      Ark_Boolean value)
@@ -178,7 +178,7 @@ void FontColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    // ButtonModelNG::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
+    ButtonModelNG::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void FontSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)
@@ -189,7 +189,7 @@ void FontSizeImpl(Ark_NativePointer node,
     auto fontSize = Converter::OptConvert<Dimension>(*value);
     Validator::ValidatePositive(fontSize);
     Validator::ValidateNonPercent(fontSize);
-    // ButtonModelNG::SetFontSize(frameNode, fontSize);
+    ButtonModelNG::SetFontSize(frameNode, fontSize);
 }
 void FontWeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_FontWeight_String* value)
@@ -197,14 +197,14 @@ void FontWeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    // ButtonModelNG::SetFontWeight(frameNode, Converter::OptConvert<Ace::FontWeight>(*value));
+    ButtonModelNG::SetFontWeight(frameNode, Converter::OptConvert<Ace::FontWeight>(*value));
 }
 void FontStyleImpl(Ark_NativePointer node,
                    Ark_FontStyle value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // ButtonModelNG::SetFontStyle(frameNode, Converter::OptConvert<Ace::FontStyle>(value));
+    ButtonModelNG::SetFontStyle(frameNode, Converter::OptConvert<Ace::FontStyle>(value));
 }
 void FontFamilyImpl(Ark_NativePointer node,
                     const Ark_Union_String_Resource* value)
@@ -216,7 +216,7 @@ void FontFamilyImpl(Ark_NativePointer node,
     if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value); fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
-    // ButtonModelNG::SetFontFamily(frameNode, families);
+    ButtonModelNG::SetFontFamily(frameNode, families);
 }
 void ContentModifierImpl(Ark_NativePointer node,
                          const Ark_CustomObject* value)
@@ -234,7 +234,7 @@ void LabelStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto parameters = Converter::OptConvert<ButtonParameters>(*value);
-    // ButtonModelNG::SetLabelStyle(frameNode, parameters);
+    ButtonModelNG::SetLabelStyle(frameNode, parameters);
 }
 } // ButtonAttributeModifier
 const GENERATED_ArkUIButtonModifier* GetButtonModifier()
