@@ -3691,6 +3691,7 @@ void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& contain
         auto resourceManager = context->GetResourceManager();
         if (resourceManager != nullptr) {
             resourceManager->GetResConfig(*resConfig);
+            CHECK_NULL_VOID(resConfig);
             if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
                 dialogContainer->SetColorMode(ColorMode::DARK);
             } else {

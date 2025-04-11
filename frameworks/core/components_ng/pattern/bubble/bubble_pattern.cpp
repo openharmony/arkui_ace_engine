@@ -824,6 +824,8 @@ void BubblePattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("targetSpace: " + dumpInfo_.targetSpace.ToString());
     DumpLog::GetInstance().AddDesc("originPlacement: " + dumpInfo_.originPlacement);
     DumpLog::GetInstance().AddDesc("finalPlacement: " + dumpInfo_.finalPlacement);
+    DumpLog::GetInstance().AddDesc("enableHoverMode: " + std::to_string(dumpInfo_.enableHoverMode));
+    DumpLog::GetInstance().AddDesc("avoidKeyboard: " + std::to_string(dumpInfo_.avoidKeyboard));
 }
 
 void BubblePattern::UpdateBubbleText()
