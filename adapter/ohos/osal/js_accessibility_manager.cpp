@@ -2344,6 +2344,12 @@ bool ActClick(RefPtr<NG::FrameNode>& frameNode)
     CHECK_NULL_RETURN(eventHub, false);
     auto gesture = eventHub->GetGestureEventHub();
     CHECK_NULL_RETURN(gesture, false);
+    auto interceptResult =
+        NG::AccessibilityFunctionUtils::HandleAccessibilityActionIntercept(
+            frameNode, AccessibilityInterfaceAction::ACCESSIBILITY_CLICK);
+    if (interceptResult == AccessibilityActionInterceptResult::ACTION_INTERCEPT) {
+        return true;
+    }
     bool result = gesture->ActClick();
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, result);

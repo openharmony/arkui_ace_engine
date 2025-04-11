@@ -232,6 +232,17 @@ enum class AccessibilityActionResult : int32_t {
     ACTION_RISE = 2,
 };
 
+enum class AccessibilityInterfaceAction : uint32_t {
+    UNDEFINED_ACTION = 0,
+    ACCESSIBILITY_CLICK = 1,
+};
+
+enum class AccessibilityActionInterceptResult : uint32_t {
+    ACTION_INTERCEPT = 0,
+    ACTION_CONTINUE = 1,
+    ///< need to  bubble up the action
+    ACTION_RISE = 2,
+};
 bool CheckBetterRect(const Rect& nodeRect, int direction, const Rect& itemRect, const Rect& tempBest);
 
 } // namespace OHOS::Ace

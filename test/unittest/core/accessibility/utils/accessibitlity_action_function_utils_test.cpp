@@ -161,4 +161,113 @@ HWTEST_F(AccessibilityActionFunctionUtilsTest, AccessibilityActionFunctionUtilsT
     EXPECT_EQ(processType1_, static_cast<int32_t>(NotifyChildActionType::ACTION_CLICK));
     EXPECT_EQ(processType2_, static_cast<int32_t>(NotifyChildActionType::ACTION_CLICK));
 }
+
+/**
+ * @tc.name: AccessibilityActionFunctionUtilsTest003
+ * @tc.desc: AddMultipleNodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityActionFunctionUtilsTest, AccessibilityActionFunctionUtilsTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct framenodes
+     */
+    auto frameNode1 = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    CHECK_NULL_VOID(frameNode1);
+    auto frameNode2 = FrameNode::CreateFrameNode("framenode", 2, AceType::MakeRefPtr<Pattern>(), false);
+    CHECK_NULL_VOID(frameNode2);
+    frameNode2->MountToParent(frameNode1);
+    frameNode1->AddChild(frameNode2);
+    auto frameNode3 = FrameNode::CreateFrameNode("framenode", 3, AceType::MakeRefPtr<Pattern>(), false);
+    CHECK_NULL_VOID(frameNode3);
+    frameNode3->MountToParent(frameNode2);
+    frameNode2->AddChild(frameNode3);
+
+    /**
+    * @tc.steps: step2. framenode1 framenode2 set callback.
+    * @tc.expected: callback of framenode0  framenode1 framenode2 framenode3 can be handled,
+    * when no callcack is setted in framenode3.
+    */
+
+    processFlag1_ = false;
+    processFlag2_ = false;
+    processFlag3_ = false;
+
+    auto accessibilityProperty1 = frameNode1->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty1);
+    accessibilityProperty1->SetAccessibilityActionIntercept(
+        [this] (AccessibilityInterfaceAction accessibilityInterfaceAction) {
+            this->processFlag1_ = true;
+            return AccessibilityActionInterceptResult::ACTION_CONTINUE;
+        }
+    );
+
+    auto accessibilityProperty2 = frameNode2->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty2);
+    accessibilityProperty2->SetAccessibilityActionIntercept(
+        [this] (AccessibilityInterfaceAction accessibilityInterfaceAction) {
+            this->processFlag2_ = true;
+            return AccessibilityActionInterceptResult::ACTION_INTERCEPT;
+        }
+    );
+
+    auto result =  AccessibilityFunctionUtils::HandleAccessibilityActionIntercept(frameNode3,
+        AccessibilityInterfaceAction::ACCESSIBILITY_CLICK);
+    EXPECT_FALSE(processFlag3_);
+    EXPECT_FALSE(processFlag2_);
+    EXPECT_FALSE(processFlag1_);
+}
+
+/**
+ * @tc.name: AccessibilityActionFunctionUtilsTest004
+ * @tc.desc: AddMultipleNodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityActionFunctionUtilsTest, AccessibilityActionFunctionUtilsTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct framenodes
+     */
+    auto frameNode1 = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    CHECK_NULL_VOID(frameNode1);
+    auto frameNode2 = FrameNode::CreateFrameNode("framenode", 2, AceType::MakeRefPtr<Pattern>(), false);
+    CHECK_NULL_VOID(frameNode2);
+    frameNode2->MountToParent(frameNode1);
+    frameNode1->AddChild(frameNode2);
+    auto frameNode3 = FrameNode::CreateFrameNode("framenode", 3, AceType::MakeRefPtr<Pattern>(), false);
+    CHECK_NULL_VOID(frameNode3);
+    frameNode3->MountToParent(frameNode2);
+    frameNode2->AddChild(frameNode3);
+
+    /**
+    * @tc.steps: step2. framenode0  framenode1 framenode2 framenode3 set callback. framenode3 need to bubble up
+    * @tc.expected: callback of framenode1 can be handled, when framenode3 HandleAccessibilityActionIntercept.
+    */
+
+    processFlag1_ = false;
+    processFlag2_ = false;
+    processFlag3_ = false;
+
+    auto accessibilityProperty1 = frameNode1->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty1);
+    accessibilityProperty1->SetAccessibilityActionIntercept(
+        [this] (AccessibilityInterfaceAction accessibilityInterfaceAction) {
+            this->processFlag1_ = true;
+            return AccessibilityActionInterceptResult::ACTION_CONTINUE;
+        }
+    );
+
+    auto accessibilityProperty3 = frameNode3->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty3);
+    accessibilityProperty3->SetAccessibilityActionIntercept(
+        [this] (AccessibilityInterfaceAction accessibilityInterfaceAction) {
+            this->processFlag3_ = true;
+            return AccessibilityActionInterceptResult::ACTION_RISE;
+        }
+    );
+    auto result =  AccessibilityFunctionUtils::HandleAccessibilityActionIntercept(frameNode3,
+        AccessibilityInterfaceAction::ACCESSIBILITY_CLICK);
+    EXPECT_TRUE(processFlag3_);
+    EXPECT_TRUE(processFlag1_);
+}
 } // namespace OHOS::Ace::NG

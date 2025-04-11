@@ -3889,6 +3889,19 @@ let FocusDrawLevel;
   FocusDrawLevel[FocusDrawLevel.TOP = 1] = 'TOP';
 })(FocusDrawLevel || (FocusDrawLevel = {}));
 
+let AccessibilityAction;
+(function (AccessibilityAction) {
+  AccessibilityAction[AccessibilityAction.UNDEFINED_ACTION = 0] = 'UNDEFINED_ACTION';
+  AccessibilityAction[AccessibilityAction.ACCESSIBILITY_CLICK = 1] = 'ACCESSIBILITY_CLICK';
+})(AccessibilityAction || (AccessibilityAction = {}));
+
+let AccessibilityActionInterceptResult;
+(function (AccessibilityActionInterceptResult) {
+  AccessibilityActionInterceptResult[AccessibilityActionInterceptResult.ACTION_INTERCEPT = 0] = 'ACTION_INTERCEPT';
+  AccessibilityActionInterceptResult[AccessibilityActionInterceptResult.ACTION_CONTINUE = 1] = 'ACTION_CONTINUE';
+  AccessibilityActionInterceptResult[AccessibilityActionInterceptResult.ACTION_RISE = 2] = 'ACTION_RISE';
+})(AccessibilityActionInterceptResult || (AccessibilityActionInterceptResult = {}));
+
 let TextMenuShowMode;
 (function (TextMenuShowMode) {
   TextMenuShowMode[TextMenuShowMode.DEFAULT = 0] = 'DEFAULT';

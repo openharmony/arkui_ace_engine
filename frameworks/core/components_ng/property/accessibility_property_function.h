@@ -34,7 +34,7 @@ public: \
     { \
         return action##TYPE##_ == nullptr; \
     } \
-    Action##TYPE GetFunc() const \
+    Action##TYPE Get##TYPE##Func() const \
     {  \
         return action##TYPE##_; \
     } \
@@ -42,6 +42,9 @@ protected: \
     Action##TYPE action##TYPE##_;
 
 using ActionNotifyChildAction = std::function<AccessibilityActionResult(NotifyChildActionType childActionType)>;
+
+using ActionAccessibilityActionIntercept =
+    std::function<AccessibilityActionInterceptResult(AccessibilityInterfaceAction action)>;
 
 /**
  * @brief maintaining the callbacks for components
@@ -71,7 +74,41 @@ class ACE_FORCE_EXPORT AccessibilityPropertyInnerFunction {
 public:
     AccessibilityPropertyInnerFunction() = default;
 
-    ~AccessibilityPropertyInnerFunction() = default;
+    virtual ~AccessibilityPropertyInnerFunction() = default;
+};
+
+/**
+ * @brief maintaining the callbacks for interfaces of accessibility property of callback
+ * @details maintaining the callbacks for interfaces of accessibility property of callback
+ * @note
+ * @attention
+ * @since
+ */
+class ACE_FORCE_EXPORT AccessibilityPropertyInterfaceFunction {
+    /**
+     * @brief when register interface of onAccessibilityActionIntercept,
+     *        saving the callback and processing before accessibility click
+     *
+     * @details callback function prototype: ActionNAccessibilityActionIntercept
+     *          register function:
+     *              SetAccessibilityActionIntercept(
+     *                  const ActionNAccessibilityActionIntercept& actionNAccessibilityActionIntercept)
+     *          use register function to register callback.
+     *          when the result is ACTION_INTERCEPT, will intercept click action
+     *          when the result is ACTION_CONTINUE, will continue process click action
+     *          when the result is ACTION_RISE,
+     *              will bubble up to the ancestor component to check and process AccessibilityActionIntercept
+     * @param [in] AccessibilityInterfaceAction the accessibility action type that handled by registered component
+     *
+     * @return ActionAccessibilityActionIntercept: the result of intercept or continue handle or continuing to bubble up
+     *
+     * @attention it will be executed on the UI thread, so be aware of thread safety.
+     */
+    DEFINE_ACTION_FUNCTIONS(AccessibilityActionIntercept)
+public:
+    AccessibilityPropertyInterfaceFunction() = default;
+
+    virtual ~AccessibilityPropertyInterfaceFunction() = default;
 };
 } // namespace OHOS::Ace::NG
 

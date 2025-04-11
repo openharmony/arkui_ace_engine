@@ -1693,4 +1693,7 @@ void ViewAbstractModelImpl::SetAccessibilityScrollTriggerable(bool triggerable, 
 void ViewAbstractModelImpl::SetAccessibilityFocusDrawLevel(int32_t drawLevel)
 {}
 
+void ViewAbstractModelImpl::SetOnAccessibilityActionIntercept(
+    NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept)
+{}
 } // namespace OHOS::Ace::Framework
