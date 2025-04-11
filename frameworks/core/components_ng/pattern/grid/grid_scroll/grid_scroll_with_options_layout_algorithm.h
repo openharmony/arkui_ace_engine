@@ -23,7 +23,7 @@ class ACE_EXPORT GridScrollWithOptionsLayoutAlgorithm : public GridScrollLayoutA
     DECLARE_ACE_TYPE(GridScrollWithOptionsLayoutAlgorithm, GridScrollLayoutAlgorithm);
 
 public:
-    GridScrollWithOptionsLayoutAlgorithm(GridLayoutInfo gridLayoutInfo, uint32_t crossCount, uint32_t mainCount)
+    GridScrollWithOptionsLayoutAlgorithm(GridLayoutInfo& gridLayoutInfo, uint32_t crossCount, uint32_t mainCount)
         : GridScrollLayoutAlgorithm(gridLayoutInfo, crossCount, mainCount) {};
     ~GridScrollWithOptionsLayoutAlgorithm() override = default;
 

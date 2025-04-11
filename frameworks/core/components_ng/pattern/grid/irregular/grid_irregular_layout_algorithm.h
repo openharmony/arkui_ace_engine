@@ -35,8 +35,8 @@ class GridIrregularLayoutAlgorithm : public GridLayoutBaseAlgorithm {
 
 public:
     explicit GridIrregularLayoutAlgorithm(
-        GridLayoutInfo info, bool canOverScrollStart = false, bool canOverScrollEnd = false)
-        : GridLayoutBaseAlgorithm(std::move(info)), canOverScrollStart_(canOverScrollStart),
+        GridLayoutInfo& info, bool canOverScrollStart = false, bool canOverScrollEnd = false)
+        : GridLayoutBaseAlgorithm(info), canOverScrollStart_(canOverScrollStart),
           canOverScrollEnd_(canOverScrollEnd) {};
 
     ~GridIrregularLayoutAlgorithm() override = default;

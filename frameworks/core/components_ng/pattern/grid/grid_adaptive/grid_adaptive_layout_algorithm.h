@@ -30,8 +30,8 @@ class ACE_EXPORT GridAdaptiveLayoutAlgorithm : public GridLayoutBaseAlgorithm {
     DECLARE_ACE_TYPE(GridAdaptiveLayoutAlgorithm, GridLayoutBaseAlgorithm);
 
 public:
-    explicit GridAdaptiveLayoutAlgorithm(GridLayoutInfo gridLayoutInfo)
-        : GridLayoutBaseAlgorithm(std::move(gridLayoutInfo)) {};
+    explicit GridAdaptiveLayoutAlgorithm(GridLayoutInfo& gridLayoutInfo)
+        : GridLayoutBaseAlgorithm(gridLayoutInfo) {};
     ~GridAdaptiveLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
