@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -440,6 +441,5 @@ void NavDestinationPatternBase::OnColorConfigurationUpdate()
     auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_VOID(dividerRenderProperty);
     dividerRenderProperty->UpdateDividerColor(theme->GetToolBarDividerColor());
-    node->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG
