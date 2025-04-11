@@ -1247,6 +1247,7 @@ private:
     void ReportTraceOnDragEnd() const;
     void UpdateBottomTypeOnMultiple(int32_t currentFirstIndex);
     void UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex);
+    void CheckTargetPositon(float& correctOffset);
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1348,6 +1349,7 @@ private:
     float endMainPos_ = 0.0f;
     float contentMainSize_ = 0.0f;
     float oldContentMainSize_ = 0.0f;
+    float contentMainSizeBeforeAni_ = 0.0f;
     float contentCrossSize_ = 0.0f;
     bool crossMatchChild_ = false;
 
