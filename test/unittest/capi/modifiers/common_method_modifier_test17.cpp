@@ -1434,11 +1434,11 @@ HWTEST_F(CommonMethodModifierTest17, bindPopupCustomPopupOptionsBlurStyleTest, T
 HWTEST_F(CommonMethodModifierTest17, bindPopupCustomPopupOptionsTransitionTest, TestSize.Level1)
 {
     Ark_Boolean arkShow = Converter::ArkValue<Ark_Boolean>(true);
-    TransitionEffectPeer peer;
+    TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ChainedTransitionEffect> transitionHandler =
         AceType::Claim(new ChainedOpacityEffect(1.0f));
-    peer.handler = transitionHandler;
-    auto arkEffect = Converter::ArkValue<Opt_TransitionEffect>(&peer);
+    peer->handler = transitionHandler;
+    auto arkEffect = Converter::ArkValue<Opt_TransitionEffect>(peer);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
