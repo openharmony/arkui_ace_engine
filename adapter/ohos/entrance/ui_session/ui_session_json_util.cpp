@@ -187,4 +187,9 @@ std::shared_ptr<InspectorJsonValue> InspectorJsonUtil::Create(bool isRoot)
 {
     return std::make_shared<InspectorJsonValue>(cJSON_CreateObject(), isRoot);
 }
+
+std::unique_ptr<InspectorJsonValue> InspectorJsonUtil::CreateObject(bool isRoot)
+{
+    return std::make_unique<InspectorJsonValue>(cJSON_CreateObject(), isRoot);
+}
 } // namespace OHOS::Ace

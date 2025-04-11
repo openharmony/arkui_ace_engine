@@ -1111,7 +1111,7 @@ public:
     {
         uiTranslateManager_ = uiTranslateManager;
     }
-    
+
     void RegisterListenerForTranslate(const WeakPtr<NG::FrameNode> node)
     {
         uiTranslateManager_->AddTranslateListener(node);
@@ -1289,6 +1289,7 @@ private:
     void DumpInspector(const std::vector<std::string>& params, bool hasJson) const;
     void DumpElement(const std::vector<std::string>& params, bool hasJson) const;
     void DumpData(const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const;
+    void OnDumpInjection(const std::vector<std::string>& params) const;
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
@@ -1311,7 +1312,7 @@ private:
 
     uint64_t AdjustVsyncTimeStamp(uint64_t nanoTimestamp);
     bool FlushModifierAnimation(uint64_t nanoTimestamp);
-    
+
     void FlushAnimationDirtysWhenExist(const AnimationOption& option);
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();

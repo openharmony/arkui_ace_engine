@@ -55,7 +55,7 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
-
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -208,7 +208,6 @@ void SwiperPattern::OnIndexChange(bool isInLayout)
     if (NonPositive(totalCount)) {
         return;
     }
-
     auto oldIndex = GetLoopIndex(oldIndex_);
     if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != totalCount) {
         oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
@@ -1527,6 +1526,7 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool
         CHECK_NULL_VOID(host);
         host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     }
+    ReportComponentChangeEvent("onChange", currentIndex, false);
 }
 
 void SwiperPattern::FireAnimationStartEvent(
@@ -1553,6 +1553,7 @@ void SwiperPattern::FireAnimationEndEvent(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    ReportComponentChangeEvent("onAnimationEnd", currentIndex, true, info.currentOffset.value_or(0.0));
 }
 
 void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
@@ -7263,5 +7264,78 @@ void SwiperPattern::ResetIndicatorNode()
     CHECK_NULL_VOID(indicatorPattern);
     indicatorPattern->ResetSwiperNode();
     indicatorNode_ = nullptr;
+}
+
+bool SwiperPattern::GetTargetIndex(const std::string& command, int32_t& targetIndex)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || !json->IsValid() || !json->IsObject()) {
+        return false;
+    }
+
+    if (json->GetString("cmd") != "changeIndex") {
+        TAG_LOGW(AceLogTag::ACE_SWIPER, "Invalid command");
+        return false;
+    }
+
+    auto paramJson = json->GetValue("params");
+    if (!paramJson || !paramJson->IsObject()) {
+        return false;
+    }
+
+    targetIndex = paramJson->GetInt("index");
+    return true;
+}
+
+int32_t SwiperPattern::OnInjectionEvent(const std::string& command)
+{
+    if (hasTabsAncestor_) {
+        return RET_FAILED;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    int32_t targetIndex = 0;
+    if (!GetTargetIndex(command, targetIndex)) {
+        return RET_FAILED;
+    }
+    ChangeIndex(targetIndex, true);
+    return RET_SUCCESS;
+}
+
+int32_t SwiperPattern::GetNodeId() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    if (hasTabsAncestor_) {
+        auto tabsNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+        CHECK_NULL_RETURN(tabsNode, -1);
+        return tabsNode->GetId();
+    }
+    return host->GetId();
+}
+
+void SwiperPattern::ReportComponentChangeEvent(
+    const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset) const
+{
+    if (!UiSessionManager::GetInstance()->IsHasReportObject()) {
+        return;
+    }
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("index", currentIndex);
+    if (includeOffset) {
+        params->Put("currentOffset", offset);
+    }
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("cmd", eventType.data());
+    json->Put("params", params);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    int32_t nodeId = GetNodeId();
+    result->Put("nodeId", nodeId);
+    result->Put("event", json);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
 }
 } // namespace OHOS::Ace::NG
