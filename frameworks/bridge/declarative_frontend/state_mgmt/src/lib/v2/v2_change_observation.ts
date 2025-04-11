@@ -421,7 +421,7 @@ class ObserveV2 {
 
     this.id2targets_[id] ??= new Set<WeakRef<Object>>();
     this.id2targets_[id].add(weakRef);
-    WeakRefPool.register(target, id, () => this.id2targets_?.[id]?.delete(weakRef) )
+    WeakRefPool.register(target, id, () => this.id2targets_?.[id]?.delete(weakRef) );
   }
 
   /**
