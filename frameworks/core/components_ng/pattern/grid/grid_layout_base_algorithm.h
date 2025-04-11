@@ -82,7 +82,7 @@ protected:
     void UpdateOverlay(LayoutWrapper* layoutWrapper);
 
     /**
-     * Reference to LayoutInfo in GridPattern 
+     * Reference to LayoutInfo in GridPattern
      * Framework must guarantee that Pattern outlives LayoutAlgorithm
      */
     GridLayoutInfo& info_;

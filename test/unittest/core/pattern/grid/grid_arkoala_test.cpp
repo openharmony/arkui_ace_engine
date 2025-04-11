@@ -117,7 +117,7 @@ HWTEST_F(GridArkoalaTest, Basic002, TestSize.Level1)
     model.SetRowsGap(Dimension(8.0f));
     InitMockLazy(100);
     CreateDone();
-
+    EXPECT_EQ(pattern_->info_.gridMatrix_.size(), 1);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(0, 6));
 
