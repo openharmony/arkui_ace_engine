@@ -102,6 +102,7 @@ using RSCubicResampler = Rosen::Drawing::CubicResampler;
 using RSColorSpace = Rosen::Drawing::ColorSpace;
 using RSData = Rosen::Drawing::Data;
 using RSDrawCmdList = Rosen::Drawing::DrawCmdList;
+using RSHybridRenderType = Rosen::Drawing::DrawCmdList::HybridRenderType;
 using RSFilterMode = Rosen::Drawing::FilterMode;
 using RSImageFilter = Rosen::Drawing::ImageFilter;
 using RSMipmapMode = Rosen::Drawing::MipmapMode;
