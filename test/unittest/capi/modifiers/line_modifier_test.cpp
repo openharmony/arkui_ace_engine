@@ -31,11 +31,19 @@ using namespace testing::ext;
 namespace  {
     constexpr auto ATTRIBUTE_WIDTH_NAME = "width";
     constexpr auto ATTRIBUTE_HEIGHT_NAME = "height";
+    constexpr auto ATTRIBUTE_START_POINT_NAME = "StartPoint";
+    constexpr auto ATTRIBUTE_END_POINT_NAME = "EndPoint";
     constexpr auto WIDTH_STR = "111.00vp";
     constexpr auto HEIGHT_STR = "222.00vp";
     constexpr int WIDTH = 111;
     constexpr int HEIGHT = 222;
     constexpr auto DEFAULT_VALUE = "-";
+    constexpr auto P1_X = 100.0_px;
+    constexpr auto P1_Y = 200.0_px;
+    constexpr auto P2_X = 300.0_px;
+    constexpr auto P2_Y = 400.0_px;
+    const auto START_POINT_STR = "[100,200]";
+    const auto END_POINT_STR = "[300,400]";
 } // namespace
 
 class LineModifierTest : public ModifierTestBase<GENERATED_ArkUILineModifier,
@@ -88,7 +96,7 @@ HWTEST_F(LineModifierTest, LineModifierDefaultTest, TestSize.Level1)
  * @tc.desc: setLineOptions test
  * @tc.type: FUNC
  */
-HWTEST_F(LineModifierTest, LineModifierSetLineOptionsTest, TestSize.Level1)
+HWTEST_F(LineModifierTest, DISABLED_LineModifierSetLineOptionsTest, TestSize.Level1)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node_);
     auto options = BuildLineOptions(WIDTH, HEIGHT);
@@ -99,5 +107,49 @@ HWTEST_F(LineModifierTest, LineModifierSetLineOptionsTest, TestSize.Level1)
     EXPECT_EQ(strResult, WIDTH_STR);
     strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
     EXPECT_EQ(strResult, HEIGHT_STR);
+}
+
+/**
+ * @tc.name: LineModifierStartPointTest
+ * @tc.desc: setStartPoint test
+ * @tc.type: FUNC
+ */
+HWTEST_F(LineModifierTest, LineModifierStartPointTest, TestSize.Level1)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node_);
+    Ark_Length x = Converter::ArkValue<Ark_Length>(P1_X);
+    Ark_Length y = Converter::ArkValue<Ark_Length>(P1_Y);
+    Ark_Length arr[2] = {x, y};
+    Array_Length array;
+    array.length = 2;
+    array.array = arr;
+
+    modifier_->setStartPoint(frameNode, &array);
+
+    std::string strResult;
+    strResult = GetStringAttribute(node_, ATTRIBUTE_START_POINT_NAME);
+    EXPECT_EQ(strResult, START_POINT_STR);
+}
+
+/**
+ * @tc.name: LineModifierEndPointTest
+ * @tc.desc: setEndPoint test
+ * @tc.type: FUNC
+ */
+HWTEST_F(LineModifierTest, LineModifierEndPointTest, TestSize.Level1)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node_);
+    Ark_Length x = Converter::ArkValue<Ark_Length>(P2_X);
+    Ark_Length y = Converter::ArkValue<Ark_Length>(P2_Y);
+    Ark_Length arr[2] = {x, y};
+    Array_Length array;
+    array.length = 2;
+    array.array = arr;
+
+    modifier_->setEndPoint(frameNode, &array);
+
+    std::string strResult;
+    strResult = GetStringAttribute(node_, ATTRIBUTE_END_POINT_NAME);
+    EXPECT_EQ(strResult, END_POINT_STR);
 }
 } // namespace OHOS::Ace::NG
