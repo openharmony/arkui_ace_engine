@@ -1539,4 +1539,252 @@ HWTEST_F(TextFieldTenPatternNg, SetExternalSpanItem001, TestSize.Level1)
     pattern->SetExternalSpanItem(spans);
     EXPECT_NE(pattern->styledString_, nullptr);
 }
+
+/**
+ * @tc.name: PauseSymbolAnimation001
+ * @tc.desc: test PauseSymbolAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, PauseSymbolAnimation001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 0, pattern);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    layoutProperty->SetIsLoopAnimation(true);
+    pattern->PauseSymbolAnimation();
+    auto testSymbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    EXPECT_FALSE(testSymbolEffectOptions.GetIsTxtActive());
+
+    SymbolEffectOptions symbolEffectOptions;
+    symbolEffectOptions.SetIsTxtActive(true);
+    layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+    testSymbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    EXPECT_TRUE(testSymbolEffectOptions.GetIsTxtActive());
+    pattern->PauseSymbolAnimation();
+    testSymbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    EXPECT_FALSE(testSymbolEffectOptions.GetIsTxtActive());
+}
+
+/**
+ * @tc.name: HandleSurfaceChanged001
+ * @tc.desc: test HandleSurfaceChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleSurfaceChanged001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 0, pattern);
+
+    pattern->HandleSurfaceChanged(10, 10, 20, 20, WindowSizeChangeReason::UNDEFINED);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_TRUE(layoutProperty->propNeedReCreateParagraph_);
+}
+
+/**
+ * @tc.name: AddImageToSpanItem001
+ * @tc.desc: test AddImageToSpanItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, AddImageToSpanItem001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::RICH_EDITOR_ETS_TAG, 0, pattern);
+
+    auto imageSpanNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    pattern->AddImageToSpanItem(imageSpanNode);
+    EXPECT_EQ(pattern->spans_.size(), 1);
+}
+
+/**
+ * @tc.name: DumpSpanItem001
+ * @tc.desc: test DumpSpanItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, DumpSpanItem001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    pattern->spans_.push_back(spanItem);
+    pattern->spans_.push_back(nullptr);
+    pattern->isSpanStringMode_ = true;
+
+    auto& dumpLog = DumpLog::GetInstance();
+    pattern->DumpSpanItem();
+    auto it = std::find(dumpLog.description_.begin(), dumpLog.description_.end(), "-----SpanDumpInfo-----\n");
+    EXPECT_NE(it, dumpLog.description_.end());
+}
+
+/**
+ * @tc.name: DumpInfo001
+ * @tc.desc: test DumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, DumpInfo001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 0, pattern);
+    pattern->textStyle_ = TextStyle();
+    pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    pattern->pManager_ = nullptr;
+
+    pattern->DumpInfo();
+    auto& dumpLog = DumpLog::GetInstance();
+    auto it = std::find(dumpLog.description_.begin(), dumpLog.description_.end(), "PaintInfo: NA\n");
+    EXPECT_EQ(it, dumpLog.description_.end());
+}
+
+/**
+ * @tc.name: HasContent001
+ * @tc.desc: test TextPattern HasContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HasContent001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->spanItemType = SpanItemType::NORMAL;
+    pattern->spans_.push_back(span1);
+    auto ret = pattern->HasContent();
+    EXPECT_FALSE(ret);
+
+    auto span2 = AceType::MakeRefPtr<SpanItem>();
+    span2->spanItemType = SpanItemType::CustomSpan;
+    pattern->spans_.push_back(span2);
+    ret = pattern->HasContent();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ChangeHandleHeight001
+ * @tc.desc: test TextPattern ChangeHandleHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, ChangeHandleHeight001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    GestureEvent event;
+    bool isFirst = false;
+    bool isOverlayMode = false;
+
+    pattern->ChangeHandleHeight(event, isFirst, isOverlayMode);
+    bool isChangeFirstHandle = isFirst ?
+        (!pattern->textSelector_.StartGreaterDest()) : pattern->textSelector_.StartGreaterDest();
+    EXPECT_FALSE(isChangeFirstHandle);
+}
+
+/**
+ * @tc.name: ChangeFirstHandleHeight001
+ * @tc.desc: test TextPattern ChangeFirstHandleHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, ChangeFirstHandleHeight001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    Offset touchOffset = Offset(10.0f, 5.0f);
+    RectF handleRect = RectF(10.0f, 10.0f, 10.0f, 10.0f);
+    pattern->ChangeFirstHandleHeight(touchOffset, handleRect);
+    bool isTouchHandleCircle = LessNotEqual(touchOffset.GetY(), handleRect.Top());
+    EXPECT_TRUE(isTouchHandleCircle);
+}
+
+/**
+ * @tc.name: DumpInfoTest001
+ * @tc.desc: test TextPattern DumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, DumpInfoTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    pattern->pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+    ParagraphManager::ParagraphInfo info1;
+    pattern->pManager_->paragraphs_.push_back(info1);
+
+    SystemProperties::debugEnabled_ = true;
+    pattern->DumpInfo(json);
+    EXPECT_NE(pattern->pManager_, nullptr);
+    EXPECT_FALSE(pattern->pManager_->GetParagraphs().empty());
+    EXPECT_TRUE(SystemProperties::GetDebugEnabled());
+    EXPECT_FALSE(json->Contains("Content"));
+    EXPECT_FALSE(json->Contains("PaintInfo"));
+    EXPECT_FALSE(json->Contains("contentRect"));
+}
+
+/**
+ * @tc.name: ActSetSelection001
+ * @tc.desc: test ActSetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, ActSetSelection001, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    pattern->textForDisplay_ = u"testString";
+    TextSelector textSelector;
+    RectF firstHandle(0.0, 0.0, 0.0, 0.0);
+    RectF secondHandle(1.0, 1.0, 1.0, 1.0);
+    textSelector.firstHandle = firstHandle;
+    textSelector.secondHandle = secondHandle;
+    pattern->textSelector_ = textSelector;
+    pattern->pManager_ = nullptr;
+    pattern->ActSetSelection(5, 7);
+    EXPECT_FALSE(pattern->showSelected_);
+}
+
+/**
+ * @tc.name: LogForFormRender001
+ * @tc.desc: test LogForFormRender
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, LogForFormRender001, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    auto host = pattern->GetHost();
+    auto pipeline = host->GetContext();
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+
+    std::string logTag = "logTag";
+    pipeline->SetIsFormRender(true);
+    pattern->spans_.clear();
+    pattern->spans_.push_back(spanItem);
+    pattern->isSensitive_ = false;
+    pattern->LogForFormRender(logTag);
+    EXPECT_FALSE(pattern->IsSetObscured());
+
+    pipeline->SetIsFormRender(true);
+    pattern->spans_.clear();
+    pattern->spans_.push_back(spanItem);
+    pattern->isSensitive_ = true;
+    pattern->LogForFormRender(logTag);
+    EXPECT_FALSE(pattern->IsSetObscured());
+
+    pipeline->SetIsFormRender(false);
+    pattern->spans_.clear();
+    pattern->isSensitive_ = false;
+    pattern->LogForFormRender(logTag);
+    EXPECT_FALSE(pattern->IsSensitiveEnable());
+
+    pipeline->SetIsFormRender(false);
+    pattern->spans_.clear();
+    pattern->spans_.push_back(spanItem);
+    pattern->isSensitive_ = false;
+    pattern->LogForFormRender(logTag);
+    EXPECT_FALSE(pattern->IsSensitiveEnable());
+}
 } // namespace OHOS::Ace::NG
