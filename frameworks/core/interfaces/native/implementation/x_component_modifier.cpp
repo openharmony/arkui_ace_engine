@@ -150,11 +150,11 @@ void OnDestroyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+#ifdef XCOMPONENT_SUPPORTED
     auto onDestroy =
         [arkCallback = CallbackHelper(*value)](const std::string&) {
             arkCallback.Invoke();
-        };
-#ifdef XCOMPONENT_SUPPORTED
+    };
     XComponentModelNG::SetOnDestroy(frameNode, std::move(onDestroy));
 #endif // XCOMPONENT_SUPPORTED
 }
@@ -163,8 +163,8 @@ void EnableAnalyzerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
 #ifdef XCOMPONENT_SUPPORTED
+    auto convValue = Converter::Convert<bool>(value);
     XComponentModelNG::EnableAnalyzer(frameNode, convValue);
 #endif // XCOMPONENT_SUPPORTED
 }
@@ -173,8 +173,8 @@ void EnableSecureImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
 #ifdef XCOMPONENT_SUPPORTED
+    auto convValue = Converter::Convert<bool>(value);
     XComponentModelNG::EnableSecure(frameNode, convValue);
 #endif // XCOMPONENT_SUPPORTED
 }
@@ -184,8 +184,8 @@ void HdrBrightnessImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<float>(*value);
     #ifdef XCOMPONENT_SUPPORTED
+    auto convValue = Converter::Convert<float>(*value);
     XComponentModelNG::HdrBrightness(frameNode, convValue);
     #endif // XCOMPONENT_SUPPORTED
 }
@@ -194,8 +194,8 @@ void EnableTransparentLayerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
     #ifdef XCOMPONENT_SUPPORTED
+    auto convValue = Converter::Convert<bool>(value);
     XComponentModelNG::EnableTransparentLayer(frameNode, convValue);
     #endif // XCOMPONENT_SUPPORTED
 }
