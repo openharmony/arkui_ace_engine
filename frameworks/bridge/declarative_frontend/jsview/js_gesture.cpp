@@ -394,7 +394,10 @@ napi_value JSPanGesture::ParsePanDistanceMap(JSRef<JSVal> jsDistanceMap, PanDist
         NAPI_CALL(env, napi_get_value_int32(env, key, &sourceTool));
         double distance = 0.0;
         NAPI_CALL(env, napi_get_value_double(env, value, &distance));
-        distanceMap[static_cast<SourceTool>(sourceTool)] = distance;
+        SourceTool st = static_cast<SourceTool>(sourceTool);
+        if (st >= SourceTool::UNKNOWN && st <= SourceTool::JOYSTICK) {
+            distanceMap[st] = distance;
+        }
     }
     return next;
 }
@@ -426,6 +429,7 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
     PanDirection panDirection;
     PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() } };
     if (args.Length() <= 0 || !args[0]->IsObject()) {
+        distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
         PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceMap, isLimitFingerCount);
         return;
     }
