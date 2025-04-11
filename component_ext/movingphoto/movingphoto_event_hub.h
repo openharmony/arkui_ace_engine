@@ -45,7 +45,8 @@ public:
     void FireCompleteEvent()
     {
         if (onComplete_) {
-            onComplete_();
+            auto onComplete = onComplete_;
+            onComplete();
         }
     }
 

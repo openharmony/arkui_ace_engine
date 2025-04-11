@@ -245,6 +245,8 @@ private:
     bool isSetAutoPlayPeriod_ = false;
     bool isVisible_ = false;
     bool isChangePlayMode_ = false;
+    bool isRepeatChangePlayMode_ = false;
+    bool isAutoChangePlayMode_ = false;
     bool needUpdateImageNode_ = false;
     PlaybackStatus currentPlayStatus_ = PlaybackStatus::NONE;
     PlaybackMode autoAndRepeatLevel_ = PlaybackMode::NONE;
