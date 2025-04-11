@@ -48,6 +48,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/pipeline/container_window_manager.h"
 
 #if !defined(ACE_UNITTEST)
 #include "core/components_ng/base/transparent_node_detector.h"
