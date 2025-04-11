@@ -120,6 +120,7 @@ ace_unittest("capi_all_accessors_test") {
     "scrollable_target_info_accessor_test.cpp",
     "scroller_accessor_test.cpp",
     "search_controller_test.cpp",
+    "shape_clip_accessor_test.cpp",
     "shape_mask_accessor_test.cpp",
     "ssl_error_handler_accessor_test.cpp",
     "styled_string_accessor_test.cpp",
