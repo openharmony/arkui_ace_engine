@@ -359,11 +359,25 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& pa
     auto manager = GetResourceManager();
     if (manager) {
         ResourceThemeStyle::RawAttrMap attrMap;
-        auto id = patternNameMap[patternName];
-        auto state = manager->GetPatternById(id, attrMap);
+        uint32_t id = 0;
+        Global::Resource::RState state;
+        bool patternNameFound = true;
+        if (!patternNameMap.count(patternName)) {
+            patternNameFound = false;
+            constexpr char flag[] = "ohos_";
+            std::string patternTag = std::string(flag) + patternName;
+            state = manager->GetPatternByName(patternTag.c_str(), attrMap);
+        } else {
+            id = patternNameMap[patternName];
+            state = manager->GetPatternById(id, attrMap);
+        }
         if (state != Global::Resource::SUCCESS) {
             TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternName.c_str());
-            state = manager->GetPatternById(id, attrMap);
+            if (patternNameFound) {
+                state = manager->GetPatternById(id, attrMap);
+            } else {
+                state = manager->GetPatternByName(patternName.c_str(), attrMap);
+            }
             if (state != Global::Resource::SUCCESS) {
                 TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternName.c_str());
                 auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
