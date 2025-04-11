@@ -26,7 +26,6 @@ const int32_t DEFAULT_COLOR = 0xFF000000;
 const float DEFAULT_WIDTH = 0.0f;
 
 struct ShapeClipPeer final {
-
 protected:
         ShapeClipPeer() = default;
         ~ ShapeClipPeer() = default;
