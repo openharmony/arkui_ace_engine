@@ -75,7 +75,8 @@ private:
     int32_t GetLanes() const;
     bool IsInHotZone(int32_t index, const RectF& frameRect) const;
     RefPtr<FrameNode> GetListFrameNode() const;
-
+    OffsetF GetParentPaddingOffset();
+    
     OffsetF dragOffset_;
     WeakPtr<FrameNode> frameNode_;
     WeakPtr<ForEachBaseNode> forEachNode_;
