@@ -4705,7 +4705,8 @@ void UIContentImpl::SetContainerButtonStyle(const Rosen::DecorButtonStyle& butto
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    Ace::DecorButtonStyle(buttonStyle, decorButtonStyle);
+    Ace::DecorButtonStyle decorButtonStyle;
+    ConvertDecorButtonStyle(buttonStyle, decorButtonStyle);
     taskExecutor->PostTask(
         [container, decorButtonStyle]() {
             auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
