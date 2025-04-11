@@ -47,6 +47,7 @@ RSRecordingPath SvgG::AsPath(const SvgLengthScaleRule& lengthRule)
         lengthRule_ = lengthRule;
         path_ = path;
     }
+    ApplyTransform(path, lengthRule);
     return path;
 }
 
