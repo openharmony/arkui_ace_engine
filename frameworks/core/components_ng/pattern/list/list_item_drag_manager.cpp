@@ -49,8 +49,8 @@ OffsetF ListItemDragManager::GetParentPaddingOffset()
     auto listGeometry = parent->GetGeometryNode();
     CHECK_NULL_RETURN(listGeometry, OffsetF(0.0f, 0.0f));
     CHECK_NULL_RETURN(listGeometry->GetPadding(), OffsetF(0.0f, 0.0f));
-    float left = listGeometry->GetPadding()->left.value_or(0);
-    float top = listGeometry->GetPadding()->top.value_or(0);
+    float left = listGeometry->GetPadding()->left.value_or(0.0f);
+    float top = listGeometry->GetPadding()->top.value_or(0.0f);
     return OffsetF(left, top);
 }
 
