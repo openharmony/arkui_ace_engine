@@ -114,11 +114,8 @@ void GridRowModelNG::SetBreakpoints(FrameNode* frameNode, const RefPtr<V2::Break
 void GridRowModelNG::SetDirection(FrameNode* frameNode, const std::optional<V2::GridRowDirection>& direction)
 {
     CHECK_NULL_VOID(frameNode);
-    if (direction.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction, direction.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction,
+        direction.has_value()? direction.value() : V2::GridRowDirection::Row, frameNode);
 }
 
 void GridRowModelNG::SetOnBreakPointChange(FrameNode* frameNode,
