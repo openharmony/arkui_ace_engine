@@ -272,7 +272,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetNavigationInfoByUniqueId(ArkUIRunti
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigationId"),
         panda::StringRef::NewFromUtf8(vm, result->navigationId.c_str()));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pathStack"), navPathStackObj->GetLocalHandle());
-
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "uniqueId"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(result->uniqueId)));
+    }
     return obj;
 }
 

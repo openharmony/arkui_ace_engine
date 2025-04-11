@@ -53,6 +53,7 @@ struct NavDestinationInfo {
     std::string navDestinationId;
     NavDestinationMode mode;
     int32_t uniqueId;
+    int32_t navigationUniqueId; //Internal use only
 
     NavDestinationInfo() = default;
 
@@ -70,6 +71,13 @@ struct NavDestinationInfo {
         int32_t index, napi_value param, std::string navDesId, NavDestinationMode mode, int32_t uniqueId)
         : navigationId(std::move(id)), name(std::move(name)), state(state),
         index(index), param(param), navDestinationId(std::move(navDesId)), mode(mode), uniqueId(std::move(uniqueId))
+    {}
+
+    NavDestinationInfo(std::string id, std::string name, NavDestinationState state, int32_t index, napi_value param,
+        std::string navDesId, NavDestinationMode mode, int32_t uniqueId, int32_t navigationUniqueId)
+        : navigationId(std::move(id)), name(std::move(name)), state(state), index(index), param(param),
+          navDestinationId(std::move(navDesId)), mode(mode),
+          uniqueId(std::move(uniqueId)), navigationUniqueId(std::move(navigationUniqueId))
     {}
 };
 

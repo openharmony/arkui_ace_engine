@@ -202,6 +202,32 @@ HWTEST_F(NavigationManagerTestNg, GetNavigationInfo003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetNavigationInfo004
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, GetNavigationInfo004, TestSize.Level1)
+{
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG);
+    customNode->SetNavigationNode(AceType::WeakClaim(AceType::RawPtr(navigationGroupNode)));
+
+    auto pipelineContext = customNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    auto navigationInfo = navigationManager->GetNavigationInfo(customNode);
+    ASSERT_NE(navigationInfo, nullptr);
+    EXPECT_EQ(navigationInfo->uniqueId, navigationGroupNode->GetId());
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
  * @tc.name: AddInteractiveAnimation001
  * @tc.desc: Branch: if (!isInteractive_) = true
  * @tc.type: FUNC

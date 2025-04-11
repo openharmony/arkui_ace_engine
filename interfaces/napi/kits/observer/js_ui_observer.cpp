@@ -421,6 +421,15 @@ napi_value ObserverProcess::ProcessNavigationRegister(napi_env env, napi_callbac
         }
     }
 
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_number) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        int32_t navigationUniqueId;
+        if (napi_get_value_int32(env, argv[PARAM_INDEX_ONE], &navigationUniqueId) == napi_ok) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
+            UIObserver::RegisterNavigationCallback(navigationUniqueId, listener);
+        }
+    }
+
     napi_value result = nullptr;
     return result;
 }
@@ -449,6 +458,21 @@ napi_value ObserverProcess::ProcessNavigationUnRegister(napi_env env, napi_callb
         std::string id;
         if (ParseNavigationId(env, argv[PARAM_INDEX_ONE], id)) {
             UIObserver::UnRegisterNavigationCallback(id, argv[PARAM_INDEX_TWO]);
+        }
+    }
+
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_number)) {
+        int32_t navigationUniqueId;
+        if (napi_get_value_int32(env, argv[PARAM_INDEX_ONE], &navigationUniqueId) == napi_ok) {
+            UIObserver::UnRegisterNavigationCallback(navigationUniqueId, nullptr);
+        }
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_number) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        int32_t navigationUniqueId;
+        if (napi_get_value_int32(env, argv[PARAM_INDEX_ONE], &navigationUniqueId) == napi_ok) {
+            UIObserver::UnRegisterNavigationCallback(navigationUniqueId, argv[PARAM_INDEX_TWO]);
         }
     }
 
