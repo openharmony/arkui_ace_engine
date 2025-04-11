@@ -839,11 +839,10 @@ void RosenRenderContext::PaintBackground()
     OffsetF positionOffset =
         ImagePainter::CalculateBgImagePosition(paintRect_.GetSize(), renderSize, GetBackgroundImagePosition());
     auto slice = GetBackgroundImageResizableSliceValue(ImageResizableSlice());
-    auto left = static_cast<float>(slice.left.ConvertToPxWithSize(srcSize.Width()));
-    auto top = static_cast<float>(slice.top.ConvertToPxWithSize(srcSize.Height()));
-    auto right = static_cast<float>(slice.right.ConvertToPxWithSize(srcSize.Width()));
-    auto bottom = static_cast<float>(slice.bottom.ConvertToPxWithSize(srcSize.Height()));
-    Rosen::Vector4f rect(left, top, srcSize.Width() - left - right, srcSize.Height() - top - bottom);
+    Rosen::Vector4f rect(slice.left.ConvertToPxWithSize(srcSize.Width()),
+        slice.top.ConvertToPxWithSize(srcSize.Height()),
+        srcSize.Width() - (slice.left + slice.right).ConvertToPxWithSize(srcSize.Width()),
+        srcSize.Height() - (slice.top + slice.bottom).ConvertToPxWithSize(srcSize.Height()));
     rsNode_->SetBgImageWidth(renderSize.Width());
     rsNode_->SetBgImageHeight(renderSize.Height());
     rsNode_->SetBgImagePositionX(positionOffset.GetX());
