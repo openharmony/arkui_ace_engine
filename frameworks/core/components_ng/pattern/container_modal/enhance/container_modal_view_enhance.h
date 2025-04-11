@@ -34,7 +34,7 @@ public:
     static bool GetContainerModalComponentRect(PipelineContext *pipelineContext,
         RectF& floatContainerModal, RectF& floatButtons);
     static void SetContainerButtonStyle(RefPtr<PipelineContext> pipeline,
-        const OHOS::Rosen::DecorButtonStyle& buttonStyle);
+        const Ace::DecorButtonStyle& buttonStyle);
     static int32_t AddButtonsRectChangeListener(PipelineContext* context, ButtonsRectChangeListener&& listener);
     static void RemoveButtonsRectChangeListener(PipelineContext* context, int32_t id);
     static bool GetContainerModalTitleVisible(RefPtr<PipelineContext> pipeline, bool isImmersive);
