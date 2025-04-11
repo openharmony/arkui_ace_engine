@@ -392,6 +392,7 @@ public:
     void RemoveDragPixelMap();
     void UpdatePixelMapScale(float& scale);
     void RemoveFilter();
+    void RemoveFilterWithNode(const RefPtr<FrameNode>& filterNode);
     void RemoveFilterAnimation();
     void RemoveEventColumn();
     void UpdatePixelMapPosition(bool isSubwindowOverlay = false);
@@ -714,16 +715,6 @@ public:
     void SkipMenuShow(int32_t targetId);
     void ResumeMenuShow(int32_t targetId);
     bool CheckSkipMenuShow(int32_t targetId);
-    
-    int32_t GetMarkRemoveFilterId()
-    {
-        return markRemoveFilterId_;
-    }
-
-    void SetMarkRemoveFilterId(int32_t filterId)
-    {
-        markRemoveFilterId_ = filterId;
-    }
 
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
@@ -979,7 +970,6 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 
     bool hasFilterActived {false};
-    int32_t markRemoveFilterId_ = 0;
 
     int32_t dismissPopupId_ = 0;
 
