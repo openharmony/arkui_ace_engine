@@ -195,6 +195,12 @@ void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Di
     dst.value1 = ArkValue<Ark_Length>(src.second);
 }
 
+void AssignArkValue(Ark_Tuple_Number_Number& dst, const Point& src)
+{
+    dst.value0 = ArkValue<Ark_Number>(src.GetX());
+    dst.value1 = ArkValue<Ark_Number>(src.GetY());
+}
+
 void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx)
 {
     dst.radius = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(src.GetBlurRadius());
