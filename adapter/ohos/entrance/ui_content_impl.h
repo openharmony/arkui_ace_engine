@@ -455,6 +455,8 @@ private:
     bool GetWindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason lastReason,
         OHOS::Rosen::WindowSizeChangeReason reason);
     void ChangeDisplayAvailableAreaListener(uint64_t displayId);
+    void ConvertDecorButtonStyle(const Rosen::DecorButtonStyle& buttonStyle,
+        Ace::DecorButtonStyle& decorButtonStyle);
     void SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::Context> &context);
     void SetDeviceProperties();
     RefPtr<Platform::AceContainer> CreateContainer(
