@@ -2628,11 +2628,11 @@ void OverlayManager::HideAllMenus()
 
 void OverlayManager::DeleteMenu(int32_t targetId)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "delete menu enter");
     auto it = menuMap_.find(targetId);
     if (it == menuMap_.end()) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "delete menu enter");
     auto node = AceType::DynamicCast<FrameNode>(it->second);
     if (node->GetParent()) {
         auto id = Container::CurrentId();
@@ -6641,21 +6641,13 @@ void OverlayManager::RemoveFilterAnimation()
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
     AnimationOption option;
-    option.SetOnFinishEvent([weak = WeakClaim(this), filterId = filterNode->GetId()] {
+    option.SetOnFinishEvent([weak = WeakClaim(this), filterWeak_ = WeakClaim(RawPtr(filterNode))] {
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "remove filter animation finish");
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
-        auto filterNode = overlayManager->GetFilterColumnNode();
-        if (filterNode && filterNode->GetId() != filterId) {
-            TAG_LOGW(AceLogTag::ACE_OVERLAY, "no more removing the non-existing filter node");
-            return;
-        }
-        if (!overlayManager->hasFilterActived) {
-            overlayManager->RemoveFilter();
-        } else {
-            TAG_LOGW(AceLogTag::ACE_OVERLAY, "mark actived filter need to be removed, filterId: %{public}d", filterId);
-            overlayManager->SetMarkRemoveFilterId(filterId);
-        }
+        auto filterNode = filterWeak_.Upgrade();
+        CHECK_NULL_VOID(filterNode);
+        overlayManager->RemoveFilterWithNode(filterNode);
     });
     option.SetDuration(menuTheme->GetFilterAnimationDuration());
     option.SetCurve(Curves::SHARP);
@@ -6672,6 +6664,22 @@ void OverlayManager::RemoveFilterAnimation()
         option.GetOnFinishEvent());
 }
 
+void OverlayManager::RemoveFilterWithNode(const RefPtr<FrameNode>& filterNode)
+{
+    CHECK_NULL_VOID(filterNode);
+    auto filterId = filterNode->GetId();
+    auto rootNode = filterNode->GetParent();
+    CHECK_NULL_VOID(rootNode);
+    rootNode->RemoveChild(filterNode);
+    rootNode->RebuildRenderContextTree();
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "remove filter sucessfully");
+
+    auto columnNode = filterColumnNodeWeak_.Upgrade();
+    if (columnNode && columnNode->GetId() == filterId) {
+        hasFilter_ = false;
+    }
+}
+
 void OverlayManager::RemoveFilter()
 {
     if (!hasFilter_) {
@@ -6680,11 +6688,7 @@ void OverlayManager::RemoveFilter()
     }
     auto columnNode = filterColumnNodeWeak_.Upgrade();
     if (columnNode) {
-        auto rootNode = columnNode->GetParent();
-        CHECK_NULL_VOID(rootNode);
-        rootNode->RemoveChild(columnNode);
-        rootNode->RebuildRenderContextTree();
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "removeFilter without animation");
+        RemoveFilterWithNode(columnNode);
     }
     hasFilter_ = false;
 }
@@ -7733,13 +7737,6 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->SetFilterActive(false);
-
-        auto filterNode = overlayManager->GetFilterColumnNode();
-        CHECK_NULL_VOID(filterNode);
-        if (filterNode->GetId() == filterId && filterId == overlayManager->GetMarkRemoveFilterId()) {
-            TAG_LOGW(AceLogTag::ACE_OVERLAY, "remove marked filer node, filterId: %{public}d", filterId);
-            overlayManager->RemoveFilter();
-        }
     });
     filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
     if (!menuTheme->GetHasBackBlur()) {
