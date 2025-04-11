@@ -31,7 +31,6 @@
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline/base/element_register.h"
-#include "core/components_ng/pattern/divider/divider_render_property.h"
 
 
 namespace OHOS::Ace::NG {
