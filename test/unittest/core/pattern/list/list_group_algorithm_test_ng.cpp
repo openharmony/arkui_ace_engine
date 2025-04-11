@@ -21,7 +21,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t HEADER_INDEX = 0;
-constexpr int32_t FOOTER_INDEX = 1;
 } // namespace
 
 class ListGroupAlgTestNg : public ListTestNg {
@@ -286,10 +285,10 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayout001, TestSize.Level1)
     float groupHeight = GROUP_ITEM_NUMBER * (ITEM_MAIN_SIZE + SPACE) - SPACE + GROUP_HEADER_LEN * 2;
     RectF groupRect = GetChildRect(frameNode_, 0);
     RectF headRect = GetChildRect(groupNode, HEADER_INDEX);
-    RectF firstItemRect = GetChildRect(groupNode, FOOTER_INDEX + 1);
-    RectF secondItemRect = GetChildRect(groupNode, FOOTER_INDEX + 2);
-    RectF footRect = GetChildRect(groupNode, FOOTER_INDEX);
-    EXPECT_TRUE(IsEqual(groupRect, RectF(0, 0, WIDTH, groupHeight)));
+    RectF firstItemRect = GetChildRect(groupNode, HEADER_INDEX + 1);
+    RectF secondItemRect = GetChildRect(groupNode, HEADER_INDEX + 2);
+    RectF footRect = GetChildRect(groupNode, 3);
+     EXPECT_TRUE(IsEqual(groupRect, RectF(0, 0, WIDTH, groupHeight)));
     EXPECT_TRUE(IsEqual(headRect, RectF(0, 0, WIDTH, GROUP_HEADER_LEN)));
     EXPECT_TRUE(IsEqual(firstItemRect, RectF(0, GROUP_HEADER_LEN, WIDTH, ITEM_MAIN_SIZE)));
     EXPECT_TRUE(IsEqual(secondItemRect, RectF(0, GROUP_HEADER_LEN + SPACE + ITEM_MAIN_SIZE, WIDTH, ITEM_MAIN_SIZE)));
@@ -310,9 +309,9 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayout002, TestSize.Level1)
     float groupHeight = GROUP_ITEM_NUMBER * (ITEM_MAIN_SIZE + SPACE) - SPACE + GROUP_HEADER_LEN * 2;
     RectF groupRect = GetChildRect(frameNode_, 0);
     RectF headRect = GetChildRect(groupNode, 0);
-    RectF firstItemRect = GetChildRect(groupNode, FOOTER_INDEX + 1);
-    RectF secondItemRect = GetChildRect(groupNode, FOOTER_INDEX + 2);
-    RectF footRect = GetChildRect(groupNode, 1);
+    RectF firstItemRect = GetChildRect(groupNode, HEADER_INDEX + 1);
+    RectF secondItemRect = GetChildRect(groupNode, HEADER_INDEX + 2);
+    RectF footRect = GetChildRect(groupNode, 3);
     float expectWidth = 216.f;
     EXPECT_TRUE(IsEqual(groupRect, RectF(12.f, 0, expectWidth, groupHeight)));
     EXPECT_TRUE(IsEqual(headRect, RectF(0, 0, expectWidth, GROUP_HEADER_LEN)));
@@ -422,9 +421,10 @@ HWTEST_F(ListGroupAlgTestNg, Sticky001, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     float expectOffset = HEIGHT - GetChildHeight(frameNode_, 0) - GROUP_HEADER_LEN;
-    EXPECT_EQ(GetChildY(secondGroupNode, FOOTER_INDEX), GROUP_HEADER_LEN);
+    auto footerIndex  = 1/*HeaderCount*/ + GROUP_ITEM_NUMBER;
+    EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), GROUP_HEADER_LEN);
     ScrollTo(ITEM_MAIN_SIZE);
-    EXPECT_EQ(GetChildY(secondGroupNode, FOOTER_INDEX), expectOffset + ITEM_MAIN_SIZE);
+    EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), expectOffset + ITEM_MAIN_SIZE);
 
     /**
      * @tc.steps: step3. V2::StickyStyle::BOTH
@@ -435,10 +435,10 @@ HWTEST_F(ListGroupAlgTestNg, Sticky001, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0);
-    EXPECT_EQ(GetChildY(secondGroupNode, FOOTER_INDEX), GROUP_HEADER_LEN);
+    EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), GROUP_HEADER_LEN);
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), ITEM_MAIN_SIZE);
-    EXPECT_EQ(GetChildY(secondGroupNode, FOOTER_INDEX), expectOffset + ITEM_MAIN_SIZE);
+    EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), expectOffset + ITEM_MAIN_SIZE);
 }
 
 /**
@@ -486,11 +486,12 @@ HWTEST_F(ListGroupAlgTestNg, Sticky003, TestSize.Level1)
      * @tc.steps: step1. V2::StickyStyle::FOOTER
      * @tc.expected: foot is Sticky
      */
-    const int32_t footerIndex = 0;
+ 
     ListModelNG model = CreateList();
     model.SetSticky(V2::StickyStyle::FOOTER);
     CreateGroupWithFooter(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
     CreateDone();
+    const int32_t footerIndex = GROUP_ITEM_NUMBER;
     RefPtr<FrameNode> secondGroupNode = GetChildFrameNode(frameNode_, 1);
     float expectOffset = HEIGHT - GetChildHeight(frameNode_, 0) - GROUP_HEADER_LEN;
     EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), expectOffset);
@@ -542,9 +543,10 @@ HWTEST_F(ListGroupAlgTestNg, Sticky004, TestSize.Level1)
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::FOOTER);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
-    EXPECT_EQ(GetChildX(secondGroupNode, FOOTER_INDEX), 210.f);
+    auto footerIndex = 1/*HeaderCount*/ + GROUP_ITEM_NUMBER;
+    EXPECT_EQ(GetChildX(secondGroupNode, footerIndex), 210.f);
     ScrollTo(ITEM_MAIN_SIZE);
-    EXPECT_EQ(GetChildX(secondGroupNode, FOOTER_INDEX), 120.f);
+    EXPECT_EQ(GetChildX(secondGroupNode, footerIndex), 120.f);
 
     /**
      * @tc.steps: step3. V2::StickyStyle::BOTH
@@ -555,10 +557,10 @@ HWTEST_F(ListGroupAlgTestNg, Sticky004, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0);
-    EXPECT_EQ(GetChildY(secondGroupNode, FOOTER_INDEX), 0);
+    EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), 0);
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_EQ(GetChildY(firstGroupNode, HEADER_INDEX), 0);
-    EXPECT_EQ(GetChildY(secondGroupNode, FOOTER_INDEX), 0);
+    EXPECT_EQ(GetChildY(secondGroupNode, footerIndex), 0);
 }
 
 /**
@@ -608,7 +610,7 @@ HWTEST_F(ListGroupAlgTestNg, Sticky006, TestSize.Level1)
      * @tc.steps: step1. V2::StickyStyle::FOOTER
      * @tc.expected: foot is Sticky
      */
-    const int32_t footerIndex = 0;
+    const int32_t footerIndex = GROUP_ITEM_NUMBER;
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
     ListModelNG model = CreateList();
     ViewAbstract::SetWidth(CalcLength(400));
@@ -650,7 +652,7 @@ HWTEST_F(ListGroupAlgTestNg, Sticky007, TestSize.Level1)
     CreateGroupWithFooter(1, V2::ListItemGroupStyle::NONE, 4);
     CreateDone();
     RefPtr<FrameNode> firstGroupNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_EQ(GetChildY(firstGroupNode, 0), 350.f);
+    EXPECT_EQ(GetChildY(firstGroupNode, 4), 350.f);
 
     /**
      * @tc.steps: step2. List scroll out of Top
@@ -660,11 +662,11 @@ HWTEST_F(ListGroupAlgTestNg, Sticky007, TestSize.Level1)
     EXPECT_NE(scrollable, nullptr);
     scrollable->isTouching_ = true;
     UpdateCurrentOffset(100, SCROLL_FROM_UPDATE);
-    float footerPos = GetChildY(frameNode_, 0) + GetChildY(firstGroupNode, 0);
+    float footerPos = GetChildY(frameNode_, 0) + GetChildY(firstGroupNode, 4);
     EXPECT_EQ(footerPos, 350.f);
 
     UpdateCurrentOffset(100, SCROLL_FROM_UPDATE);
-    footerPos = GetChildY(frameNode_, 0) + GetChildY(firstGroupNode, 0);
+    footerPos = GetChildY(frameNode_, 0) + GetChildY(firstGroupNode, 4);
     EXPECT_EQ(footerPos, 350.f);
 }
 
@@ -726,7 +728,7 @@ HWTEST_F(ListGroupAlgTestNg, LanesLayout001, TestSize.Level1)
     CreateGroupWithSetting(1, V2::ListItemGroupStyle::NONE);
     CreateDone();
     groupNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_LT(GetChildX(groupNode, 2), GetChildX(groupNode, 3));
+    EXPECT_LT(GetChildX(groupNode, 1), GetChildX(groupNode, 2));
 
     /**
      * @tc.steps: step5. set minLaneLength/maxLaneLength with header/footer/space ...
@@ -740,7 +742,7 @@ HWTEST_F(ListGroupAlgTestNg, LanesLayout001, TestSize.Level1)
     CreateDone();
     groupNode = GetChildFrameNode(frameNode_, 0);
     EXPECT_EQ(GetChildWidth(groupNode, HEADER_INDEX), WIDTH);
-    EXPECT_LT(GetChildY(groupNode, 2), GetChildY(groupNode, 3));
+    EXPECT_LT(GetChildY(groupNode, 1), GetChildY(groupNode, 2));
 }
 
 /**

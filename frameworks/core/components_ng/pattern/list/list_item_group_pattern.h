@@ -85,6 +85,19 @@ public:
         return false;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
+
+    bool FindHeadOrTailChild(const RefPtr<FocusHub>& groupFocus, FocusStep step, WeakPtr<FocusHub>& target);
+
+    WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarIndexInGroup);
+
+    WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
+
     void NotifyDataChange(int32_t index, int32_t count) override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -108,6 +121,17 @@ public:
         auto prevHeader = header_.Upgrade();
         if (!prevHeader) {
             host->AddChild(header, 0);
+            // Initialize headerIndex_, itemStartIndex_
+            if (headerIndex_ == -1) {
+                auto count = header->FrameCount();
+                if (count > 0) {
+                    headerIndex_ = 0;
+                    itemStartIndex_ += count;
+                }
+                if (footerIndex_ >= 0) {
+                    footerIndex_ = footerIndex_ + count;
+                }
+            }
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         } else {
             if (header != prevHeader) {
@@ -130,6 +154,14 @@ public:
             } else {
                 host->AddChild(footer, 0);
             }
+            // Initialize itemStartIndex_, footerIndex_
+            if (footerIndex_ == -1) {
+                int32_t count = footer->FrameCount();
+                if (count > 0) {
+                    footerIndex_ = itemStartIndex_;
+                    itemStartIndex_ += count;
+                }
+            }
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         } else {
             if (footer != prevFooter) {
@@ -149,6 +181,8 @@ public:
             host->RemoveChild(prevHeader);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             header_ = nullptr;
+            headerIndex_ = -1;
+            itemStartIndex_ = 0;
             isHeaderComponentContentExist_ = false;
         }
     }
@@ -162,6 +196,8 @@ public:
             host->RemoveChild(prevFooter);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             footer_ = nullptr;
+            footerIndex_ = -1;
+            footerCount_ = 0;
             isFooterComponentContentExist_ = false;
         }
     }
@@ -337,6 +373,28 @@ private:
     bool FirstItemFullVisible(const RefPtr<FrameNode>& listNode) const;
     bool CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex);
 
+    void HandleForwardStep(
+        const RefPtr<FrameNode>& curFrame, int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex);
+    void HandleBackwardStep(
+        const RefPtr<FrameNode>& curFrame, int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex);
+    bool HandleCrossAxisRightOrDownStep(
+        bool isVertical, int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex);
+    bool HandleCrossAxisLeftOrUpStep(bool isVertical, int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex);
+
+    bool GetCurrentFocusIndices(
+        const RefPtr<FrameNode>& curFrame, const RefPtr<Pattern>& curPattern, int32_t& curIndexInGroup);
+    bool IsListVertical() const;
+    void AdjustFocusStepForRtl(FocusStep& step, bool isVertical);
+    bool DetermineSingleLaneStep(
+        FocusStep step, bool isVertical, int32_t curIndex, int32_t& moveStep, int32_t& nextIndex);
+    bool DetermineMultiLaneStep(FocusStep step, bool isVertical, const RefPtr<FrameNode>& curFrame,
+        int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex);
+    bool IsIndexInValidRange(int32_t index, int32_t maxIndex);
+    bool IsFocusMovementBlock(int32_t nextIndex, int32_t curIndex, int32_t maxIndex) const;
+    WeakPtr<FocusHub> FindNextValidFocus(int32_t moveStep, int32_t curIndexInGroup, int32_t curGroupIndexInList,
+        int32_t nextIndexInGroup, const WeakPtr<FocusHub>& currentFocusNode);
+    void AdjustMountTreeSequence(int32_t footerCount);
+    
     RefPtr<ShallowBuilder> shallowBuilder_;
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListChildrenMainSize> childrenSize_;
@@ -351,6 +409,7 @@ private:
     int32_t itemStartIndex_ = 0;
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;
+    int32_t footerCount_ = 0;
     int32_t itemTotalCount_ = -1;
     int32_t itemDisplayEndIndex_ = -1;
     int32_t itemDisplayStartIndex_ = -1;

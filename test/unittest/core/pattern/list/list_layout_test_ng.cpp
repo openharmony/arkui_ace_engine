@@ -503,13 +503,13 @@ HWTEST_F(ListLayoutTestNg, ContentOffset004, TestSize.Level1)
     auto group1 = GetChildFrameNode(frameNode_, 1);
     auto groupRect = group1->GetGeometryNode()->GetFrameRect();
     float groupPos = groupRect.Top();
-    auto item1Rect = GetChildRect(group1, 2);
+    auto item1Rect = GetChildRect(group1, 1);
     EXPECT_EQ(item1Rect.Top(), contentStartOffset - groupPos);
 
     JumpToItemInGroup(2, 1, false, ScrollAlign::END);
     auto group2 = GetChildFrameNode(frameNode_, 2);
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
-    auto item2Rect = GetChildRect(group1, 3);
+    auto item2Rect = GetChildRect(group1, 2);
     EXPECT_EQ(item2Rect.Bottom(), HEIGHT - contentEndOffset - groupPos);
 
     JumpToItemInGroup(1, 0, true, ScrollAlign::START);
@@ -518,7 +518,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset004, TestSize.Level1)
     group1 = GetChildFrameNode(frameNode_, 1);
     groupRect = group1->GetGeometryNode()->GetFrameRect();
     groupPos = groupRect.Top();
-    item1Rect = GetChildRect(group1, 2);
+    item1Rect = GetChildRect(group1, 1);
     EXPECT_EQ(item1Rect.Top(), contentStartOffset - groupPos);
 
     JumpToItemInGroup(2, 1, true, ScrollAlign::END);
@@ -526,7 +526,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset004, TestSize.Level1)
     FlushUITasks();
     group2 = GetChildFrameNode(frameNode_, 2);
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
-    item2Rect = GetChildRect(group1, 3);
+    item2Rect = GetChildRect(group1, 2);
     EXPECT_EQ(item2Rect.Bottom(), HEIGHT - contentEndOffset - groupPos);
 }
 
@@ -562,9 +562,9 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     EXPECT_EQ(header0Rect.Top(), contentStartOffset - groupPos);
 
     auto group1 = GetChildFrameNode(frameNode_, 1);
-    groupPos = group1->GetGeometryNode()->GetFrameRect().Top();
-    auto footer1Rect = GetChildRect(group1, 1);
-    EXPECT_EQ(footer1Rect.Bottom(), 100.f);
+    auto footerIndex = 1/*HeaderCount*/ + GROUP_ITEM_NUMBER;
+    auto footer1Rect = GetChildRect(group1, footerIndex);
+    EXPECT_EQ(footer1Rect.Bottom(), 100.f); 
 
     /**
      * @tc.steps: step3. Scroll To ListItem in group.
@@ -573,13 +573,13 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     JumpToItemInGroup(1, 0, false, ScrollAlign::START);
     group1 = GetChildFrameNode(frameNode_, 1);
     groupPos = group1->GetGeometryNode()->GetFrameRect().Top();
-    auto item1Rect = GetChildRect(group1, 2);
+    auto item1Rect = GetChildRect(group1, 1);
     EXPECT_EQ(item1Rect.Top(), contentStartOffset + GROUP_HEADER_LEN - groupPos);
 
     JumpToItemInGroup(2, 1, false, ScrollAlign::END);
     auto group2 = GetChildFrameNode(frameNode_, 2);
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
-    auto item2Rect = GetChildRect(group2, 3);
+    auto item2Rect = GetChildRect(group2, 2);
     EXPECT_EQ(item2Rect.Bottom(), HEIGHT - contentEndOffset - GROUP_HEADER_LEN - groupPos);
 
     JumpToItemInGroup(1, 0, true, ScrollAlign::START);
@@ -587,7 +587,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     FlushUITasks();
     group1 = GetChildFrameNode(frameNode_, 1);
     groupPos = group1->GetGeometryNode()->GetFrameRect().Top();
-    item1Rect = GetChildRect(group1, 2);
+    item1Rect = GetChildRect(group1, 1);
     EXPECT_EQ(item1Rect.Top(), contentStartOffset + GROUP_HEADER_LEN - groupPos);
 
     JumpToItemInGroup(2, 1, true, ScrollAlign::END);
@@ -595,7 +595,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     FlushUITasks();
     group2 = GetChildFrameNode(frameNode_, 2);
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
-    item2Rect = GetChildRect(group2, 3);
+    item2Rect = GetChildRect(group2, 2);
     EXPECT_EQ(item2Rect.Bottom(), HEIGHT - contentEndOffset - GROUP_HEADER_LEN - groupPos);
 }
 

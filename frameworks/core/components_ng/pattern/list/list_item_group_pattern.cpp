@@ -14,8 +14,10 @@
  */
 
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
+#include <cstdint>
 
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -96,7 +98,8 @@ void ListItemGroupPattern::DumpAdvanceInfo()
 RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
 {
     CalculateItemStartIndex();
-    auto layoutAlgorithm = MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex_, footerIndex_, itemStartIndex_);
+    auto layoutAlgorithm =
+        MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex_, footerIndex_, itemStartIndex_, footerCount_);
     layoutAlgorithm->SetItemsPosition(itemPosition_);
     layoutAlgorithm->SetCachedItemsPosition(cachedItemPosition_);
     layoutAlgorithm->SetCachedIndex(forwardCachedIndex_, backwardCachedIndex_);
@@ -142,6 +145,7 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     auto layoutAlgorithm = DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     itemTotalCount_ = layoutAlgorithm->GetTotalItemCount();
+    footerIndex_ = layoutAlgorithm->GetFooterIndex();
     isStackFromEnd_ = layoutAlgorithm->GetStackFromEnd();
     auto cacheParam = layoutAlgorithm->GetCacheParam();
     if (cacheParam) {
@@ -417,8 +421,17 @@ void ListItemGroupPattern::ClearCachedItemPosition()
 
 void ListItemGroupPattern::CalculateItemStartIndex()
 {
+    int32_t footerCount = 0;
+    auto footer = footer_.Upgrade();
+    if (footer) {
+        int32_t count = footer->FrameCount();
+        if (count > 0) {
+            footerCount = count;
+        }
+    }
+    AdjustMountTreeSequence(footerCount);
+    
     int32_t headerIndex = -1;
-    int32_t footerIndex = -1;
     int32_t itemStartIndex = 0;
     auto header = header_.Upgrade();
     if (header) {
@@ -428,17 +441,10 @@ void ListItemGroupPattern::CalculateItemStartIndex()
             itemStartIndex += count;
         }
     }
-    auto footer = footer_.Upgrade();
-    if (footer) {
-        int32_t count = footer->FrameCount();
-        if (count > 0) {
-            footerIndex = itemStartIndex;
-            itemStartIndex += count;
-        }
-    }
+
     headerIndex_ = headerIndex;
-    footerIndex_ = footerIndex;
     itemStartIndex_ = itemStartIndex;
+    footerCount_ = footerCount;
 }
 
 void ListItemGroupPattern::UpdateActiveChildRange(bool forward, int32_t cacheCount, bool show)
@@ -589,7 +595,7 @@ CachedIndexInfo ListItemGroupPattern::UpdateCachedIndex(
         listNode->GetLayoutProperty<ListLayoutProperty>()->GetShowCachedItemsValue(false) : false;
     if (itemTotalCount_ == -1 || host->CheckNeedForceMeasureAndLayout()) {
         CalculateItemStartIndex();
-        itemTotalCount_ = host->GetTotalChildCount() - itemStartIndex_;
+        itemTotalCount_ = host->GetTotalChildCount() - itemStartIndex_ - footerCount_;
     }
     if (outOfView) {
         ClearItemPosition();
@@ -801,5 +807,403 @@ void ListItemGroupPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("laneGutter", laneGutter_);
     json->Put("startHeaderPos", startHeaderPos_);
     json->Put("endFooterPos", endFooterPos_);
+}
+
+ScopeFocusAlgorithm ListItemGroupPattern::GetScopeFocusAlgorithm()
+{
+    auto property = GetLayoutProperty<ListItemGroupLayoutProperty>();
+    if (!property) {
+        return {};
+    }
+    auto listNode = GetListFrameNode();
+    CHECK_NULL_RETURN(listNode, {});
+    auto listProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(listProperty, {});
+    return ScopeFocusAlgorithm(listProperty->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL, true,
+        ScopeType::OTHERS,
+        [wp = WeakClaim(this)](
+            FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) -> bool {
+            auto listItemGroup = wp.Upgrade();
+            if (listItemGroup) {
+                nextFocusNode = listItemGroup->GetNextFocusNode(step, currFocusNode);
+            }
+            return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
+        });
+}
+
+WeakPtr<FocusHub> ListItemGroupPattern::GetChildFocusNodeByIndex(int32_t tarIndexInGroup)
+{
+    auto listItemGroupFrame = GetHost();
+    CHECK_NULL_RETURN(listItemGroupFrame, nullptr);
+    auto listItemGroupFocus = listItemGroupFrame->GetFocusHub();
+    CHECK_NULL_RETURN(listItemGroupFocus, nullptr);
+    WeakPtr<FocusHub> target;
+    listItemGroupFocus->AnyChildFocusHub([&target, tarIndexInGroup](const RefPtr<FocusHub>& childFocus) {
+        if (!childFocus->IsFocusable()) {
+            return false;
+        }
+        auto childFrame = childFocus->GetFrameNode();
+        if (!childFrame) {
+            return false;
+        }
+        auto childPattern = childFrame->GetPattern();
+        if (!childPattern) {
+            return false;
+        }
+        auto childItemPattern = AceType::DynamicCast<ListItemPattern>(childPattern);
+        if (!childItemPattern) {
+            auto parentNode = childFrame->GetParentFrameNode();
+            CHECK_NULL_RETURN(parentNode, false);
+            auto parentPattern = AceType::DynamicCast<ListItemGroupPattern>(parentNode->GetPattern());
+            CHECK_NULL_RETURN(parentPattern, false);
+            if ((parentPattern->GetHeader() == childFrame && tarIndexInGroup == -1) ||
+                (parentPattern->GetFooter() == childFrame && tarIndexInGroup == parentPattern->GetTotalItemCount())) {
+                target = childFocus;
+                return true;
+            }
+
+            return false;
+        }
+
+        auto curIndexInGroup = childItemPattern->GetIndexInListItemGroup();
+        if (curIndexInGroup == tarIndexInGroup) {
+            target = childFocus;
+            return true;
+        }
+        return false;
+    });
+    return target;
+}
+
+void ListItemGroupPattern::AdjustMountTreeSequence(int32_t footerCount)
+{
+    // Adjust the mount tree sequence to header, listitem, footer
+    if (footerIndex_ >= 0 && footerIndex_ < itemStartIndex_) {
+        auto groupHost = GetHost();
+        CHECK_NULL_VOID(groupHost);
+        auto totalChildCount = groupHost->GetTotalChildCount();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto childNode = host->GetChildAtIndex(itemStartIndex_);
+        CHECK_NULL_VOID(childNode);
+        auto endNode = host->GetChildAtIndex(footerIndex_);
+        CHECK_NULL_VOID(endNode);
+        endNode->MovePosition(-1);
+        footerIndex_ = totalChildCount - footerCount;
+        itemStartIndex_ -= footerCount;
+    }
+}
+
+bool ListItemGroupPattern::GetCurrentFocusIndices(
+    const RefPtr<FrameNode>& curFrame, const RefPtr<Pattern>& curPattern, int32_t& curIndexInGroup)
+{
+    // Only for GetNextFocusNode
+    CHECK_NULL_RETURN(curFrame, false);
+    CHECK_NULL_RETURN(curPattern, false);
+    auto curItemPattern = AceType::DynamicCast<ListItemPattern>(curPattern);
+    // In ListItemGroup, the current focus node could be the Header, Footer, or a ListItem of the ListItemGroup.
+    // If the current focus node is the Header or Footer of the ListItemGroup,
+    // it is necessary to retrieve the index of the current focus node within the ListItemGroup.
+    if (!curItemPattern) {
+        if (GetHeader() == curFrame) {
+            curIndexInGroup = -1;
+        } else if (GetFooter() == curFrame) {
+            curIndexInGroup = GetTotalItemCount();
+        } else {
+            return false;
+        }
+    } else {
+        // If the current focus node is a ListItem, it is necessary to retrieve the index of the current focus node
+        // within the ListItemGroup.
+        curIndexInGroup = curItemPattern->GetIndexInListItemGroup();
+    }
+    return true;
+}
+
+void ListItemGroupPattern::AdjustFocusStepForRtl(FocusStep& step, bool isVertical)
+{
+    // FocusStep LEFT/RIGH reverse flag
+    bool reverseHorizontal = false;
+    // FocusStep UP/DOWN reverse flag
+    bool reverseVertical = false;
+
+    if ((layoutDirection_ != TextDirection::RTL && isVertical && isStackFromEnd_) ||
+        (layoutDirection_ == TextDirection::RTL && !isStackFromEnd_)) {
+        reverseHorizontal = true;
+    } else if (layoutDirection_ != TextDirection::RTL && !isVertical && isStackFromEnd_) {
+        reverseVertical = true;
+    } else if (layoutDirection_ == TextDirection::RTL && !isVertical && isStackFromEnd_) {
+        reverseHorizontal = true;
+        reverseVertical = true;
+    }
+
+    if (reverseHorizontal) {
+        if (step == FocusStep::LEFT) {
+            step = FocusStep::RIGHT;
+        } else if (step == FocusStep::RIGHT) {
+            step = FocusStep::LEFT;
+        }
+    }
+
+    if (reverseVertical) {
+        if (step == FocusStep::UP) {
+            step = FocusStep::DOWN;
+        } else if (step == FocusStep::DOWN) {
+            step = FocusStep::UP;
+        }
+    }
+}
+
+void ListItemGroupPattern::HandleForwardStep(
+    const RefPtr<FrameNode>& curFrame, int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex)
+{
+    // Only for DetermineMultiLaneStep
+    CHECK_NULL_VOID(curFrame);
+    moveStep = (GetHeader() == curFrame || GetFooter() == curFrame) ? 1 : lanes_;
+    nextIndex = nextIndex + moveStep;
+    if (curIndexInGroup < GetTotalItemCount() && curIndexInGroup >= 0) {
+        // Neither Header nor Footer. If it is the last row and the DOWN key is pressed,
+        // if there is a footer, move to the footer; if there is no footer, directly move
+        // to the position where nextIndex >= itemTotalCount_, which is nullptr.
+        auto row = (itemTotalCount_ - 1) / lanes_;
+        auto curRow = curIndexInGroup / lanes_;
+        if (isStackFromEnd_) {
+            curRow = row - (itemTotalCount_ - 1 - curIndexInGroup) / lanes_;
+        }
+        if (curRow == row && IsHasFooter()) {
+            nextIndex = itemTotalCount_;
+        } else if (curRow == row - 1 && nextIndex >= itemTotalCount_) {
+            // If it is the second-to-last row, pressing DOWN when nextIndex >= itemTotalCount_ moves to the last item.
+            nextIndex = itemTotalCount_ - 1;
+        }
+    }
+}
+
+void ListItemGroupPattern::HandleBackwardStep(
+    const RefPtr<FrameNode>& curFrame, int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex)
+{
+    // Only for DetermineMultiLaneStep
+    CHECK_NULL_VOID(curFrame);
+    // If the current focus is on the header, set moveStep = 1; if the current focus is on the footer,
+    // set moveStep = -1;
+    moveStep = (GetHeader() == curFrame || GetFooter() == curFrame) ? -1 : -lanes_;
+    nextIndex = curIndexInGroup + moveStep;
+    if (curIndexInGroup >= 0 && curIndexInGroup < GetTotalItemCount()) {
+        auto curRow = curIndexInGroup / lanes_;
+        if (isStackFromEnd_) {
+            auto row = (itemTotalCount_ - 1) / lanes_;
+            curRow = row - (itemTotalCount_ - 1 - curIndexInGroup) / lanes_;
+        }
+        // If the current focus is on the first row, pressing the UP key moves to the Header
+        if (curRow == 0 && IsHasHeader()) {
+            nextIndex = -1;
+        } else if (curRow == 1 && nextIndex < 0) {
+            // If it is the second row, pressing UP when nextIndex < 0 moves to the first item.
+            nextIndex = 0;
+        }
+    }
+}
+
+bool ListItemGroupPattern::HandleCrossAxisRightOrDownStep(
+    bool isVertical, int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex)
+{
+    // Only for DetermineMultiLaneStep
+    moveStep = 1;
+    nextIndex = curIndexInGroup + moveStep;
+    auto col = curIndexInGroup % lanes_;
+    // If the current focus is on the last column, pressing the RIGHT key will not move the focus further.
+    if (isStackFromEnd_) {
+        if ((itemTotalCount_ - 1 - curIndexInGroup) % lanes_ == 0) {
+            nextIndex = curIndexInGroup;
+        }
+    } else if (col == lanes_ - 1 || curIndexInGroup == itemTotalCount_ - 1) {
+        nextIndex = curIndexInGroup;
+    }
+    return true;
+}
+
+bool ListItemGroupPattern::HandleCrossAxisLeftOrUpStep(
+    bool isVertical, int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex)
+{
+    // Only for DetermineMultiLaneStep
+    moveStep = -1;
+    nextIndex = curIndexInGroup + moveStep;
+    auto col = curIndexInGroup % lanes_;
+    // If the current focus is in the first column, pressing the LEFT key will not move the focus further.
+    if (isStackFromEnd_) {
+        if ((itemTotalCount_ - lanes_ - curIndexInGroup) % lanes_ == 0) {
+            nextIndex = curIndexInGroup;
+        }
+    } else if (col <= 0) {
+        nextIndex = curIndexInGroup;
+    }
+    return true;
+}
+
+bool ListItemGroupPattern::DetermineMultiLaneStep(FocusStep step, bool isVertical, const RefPtr<FrameNode>& curFrame,
+    int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex)
+{
+    // Only for GetNextFocusNode
+    CHECK_NULL_RETURN(curFrame, false);
+    // ListItemGroup does not handle HOME/END, bubble it up to List for processing.
+    if (step == FocusStep::UP_END || step == FocusStep::LEFT_END || step == FocusStep::DOWN_END ||
+        step == FocusStep::RIGHT_END) {
+        return false;
+    } else if ((isVertical && (step == FocusStep::DOWN)) || (!isVertical && step == FocusStep::RIGHT)) {
+        HandleForwardStep(curFrame, curIndexInGroup, moveStep, nextIndex);
+    } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT)) {
+        HandleBackwardStep(curFrame, curIndexInGroup, moveStep, nextIndex);
+    } else if ((isVertical && (step == FocusStep::RIGHT)) || (!isVertical && step == FocusStep::DOWN)) {
+        if (!HandleCrossAxisRightOrDownStep(isVertical, curIndexInGroup, moveStep, nextIndex)) {
+            return false;
+        }
+    } else if ((isVertical && step == FocusStep::LEFT) || (!isVertical && step == FocusStep::UP)) {
+        if (!HandleCrossAxisLeftOrUpStep(isVertical, curIndexInGroup, moveStep, nextIndex)) {
+            return false;
+        }
+    } else if (step == FocusStep::TAB) {
+        moveStep = 1;
+        nextIndex = curIndexInGroup + 1;
+    } else if (step == FocusStep::SHIFT_TAB) {
+        moveStep = -1;
+        nextIndex = curIndexInGroup - 1;
+    }
+    return true;
+}
+
+bool ListItemGroupPattern::DetermineSingleLaneStep(
+    FocusStep step, bool isVertical, int32_t itemTotalCount_, int32_t& moveStep, int32_t& nextIndex)
+{
+    // Only for GetNextFocusNode
+    // ListItemGroup does not handle HOME/END, bubble it up to List for processing.
+    if (step == FocusStep::UP_END || step == FocusStep::LEFT_END || step == FocusStep::DOWN_END ||
+        step == FocusStep::RIGHT_END) {
+        return false;
+    } else if ((isVertical && (step == FocusStep::DOWN)) || (!isVertical && step == FocusStep::RIGHT) ||
+               (step == FocusStep::TAB)) {
+        moveStep = 1;
+        nextIndex += moveStep;
+    } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT) ||
+               (step == FocusStep::SHIFT_TAB)) {
+        moveStep = -1;
+        nextIndex += moveStep;
+    } else if ((!isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::DOWN)) {
+        // If it is horizontal and there is only one row, pressing UP or DOWN keys returns nullptr,
+        return false;
+    }
+    return true;
+}
+
+WeakPtr<FocusHub> ListItemGroupPattern::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
+{
+    // Retrieve information about the current focus node.
+    auto curFocus = currentFocusNode.Upgrade();
+    CHECK_NULL_RETURN(curFocus, nullptr);
+    auto curFrame = curFocus->GetFrameNode();
+    CHECK_NULL_RETURN(curFrame, nullptr);
+    auto parentList = GetListFrameNode();
+    CHECK_NULL_RETURN(parentList, nullptr);
+    auto listPattern = parentList->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(listPattern, nullptr);
+    auto curPattern = curFrame->GetPattern();
+    CHECK_NULL_RETURN(curPattern, nullptr);
+
+    int32_t curIndexInGroup = -1; // The index of the current item within the group.
+    if (!GetCurrentFocusIndices(curFrame, curPattern, curIndexInGroup)) {
+        return nullptr;
+    }
+
+    auto listProperty = parentList->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(listProperty, nullptr);
+    auto isVertical = listProperty->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL;
+
+    AdjustFocusStepForRtl(step, isVertical);
+
+    auto moveStep = 0;
+    auto nextIndex = curIndexInGroup;
+
+    if (lanes_ <= 1) {
+        if (!DetermineSingleLaneStep(step, isVertical, itemTotalCount_, moveStep, nextIndex)) {
+            return nullptr;
+        }
+    } else {
+        if (!DetermineMultiLaneStep(step, isVertical, curFrame, curIndexInGroup, moveStep, nextIndex)) {
+            return nullptr;
+        }
+    }
+    int32_t curGroupIndexInList = GetIndexInList();
+    return FindNextValidFocus(moveStep, curIndexInGroup, curGroupIndexInList, nextIndex, currentFocusNode);
+}
+
+WeakPtr<FocusHub> ListItemGroupPattern::FindNextValidFocus(int32_t moveStep, int32_t curIndexInGroup,
+    int32_t curGroupIndexInList, int32_t nextIndexInGroup, const WeakPtr<FocusHub>& currentFocusNode)
+{
+    auto curFocus = currentFocusNode.Upgrade();
+    CHECK_NULL_RETURN(curFocus, nullptr);
+    auto parentList = GetListFrameNode();
+    CHECK_NULL_RETURN(parentList, nullptr);
+    auto listPattern = parentList->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(listPattern, nullptr);
+
+    ListItemGroupPara listItemGroupPara = { GetLanesInGroup(), GetEndIndexInGroup(), GetDisplayStartIndexInGroup(),
+        GetDisplayEndIndexInGroup(), IsHasHeader(), IsHasFooter() };
+    while (IsIndexInValidRange(nextIndexInGroup, itemTotalCount_)) {
+        if (IsFocusMovementBlock(nextIndexInGroup, curIndexInGroup, itemTotalCount_)) {
+            return currentFocusNode;
+        }
+        listPattern->LayoutItemInGroupForFocus(
+            curGroupIndexInList, nextIndexInGroup, curIndexInGroup, listItemGroupPara, itemTotalCount_);
+        auto nextFocusNode = GetChildFocusNodeByIndex(nextIndexInGroup);
+        if (nextFocusNode.Upgrade()) {
+            return nextFocusNode;
+        }
+        nextIndexInGroup += moveStep;
+    }
+    return nullptr;
+}
+
+bool ListItemGroupPattern::IsIndexInValidRange(int32_t nextIndex, int32_t itemTotalCount_)
+{
+    const bool lowerBound = IsHasHeader() ? (nextIndex >= -1) : (nextIndex >= 0);
+    const bool upperBound = IsHasFooter() ? (nextIndex <= itemTotalCount_) : (nextIndex < itemTotalCount_);
+    return lowerBound && upperBound;
+}
+
+bool ListItemGroupPattern::IsFocusMovementBlock(int32_t nextIndex, int32_t curIndex, int32_t maxIndex) const
+{
+    return (nextIndex == curIndex) && (curIndex != -1) && (curIndex != maxIndex);
+}
+
+bool ListItemGroupPattern::FindHeadOrTailChild(
+    const RefPtr<FocusHub>& childFocus, FocusStep step, WeakPtr<FocusHub>& target)
+{
+    CHECK_NULL_RETURN(childFocus, false);
+    // Support moving focus to the first item of the List when pressing HOME
+    // and to the last item of the List when pressing END.
+    auto isHome = step == FocusStep::LEFT_END || step == FocusStep::UP_END;
+    auto isEnd = step == FocusStep::RIGHT_END || step == FocusStep::DOWN_END;
+    bool isFindTailOrHead = false;
+    if (isHome) {
+        isFindTailOrHead = childFocus->AnyChildFocusHub([&target](const RefPtr<FocusHub>& node) {
+            auto headNode = node->GetHeadOrTailChild(true);
+            if (headNode) {
+                target = headNode;
+                return true;
+            }
+            return false;
+        });
+    } else if (isEnd) {
+        isFindTailOrHead = childFocus->AnyChildFocusHub(
+            [&target](const RefPtr<FocusHub>& node) {
+                auto tailNode = node->GetHeadOrTailChild(true);
+                if (tailNode) {
+                    target = tailNode;
+                    return true;
+                }
+                return false;
+            },
+            true);
+    }
+    return isFindTailOrHead;
 }
 } // namespace OHOS::Ace::NG

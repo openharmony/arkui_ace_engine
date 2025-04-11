@@ -67,8 +67,11 @@ public:
 
     static const int32_t LAST_ITEM = -1;
 
-    ListItemGroupLayoutAlgorithm(int32_t headerIndex, int32_t footerIndex, int32_t itemStartIndex)
-        :headerIndex_(headerIndex), footerIndex_(footerIndex), itemStartIndex_(itemStartIndex) {}
+    ListItemGroupLayoutAlgorithm(int32_t headerIndex, int32_t footerIndex, int32_t itemStartIndex,
+        int32_t footerCount = 0)
+        : headerIndex_(headerIndex), footerIndex_(footerIndex), itemStartIndex_(itemStartIndex),
+          footerCount_(footerCount)
+    {}
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
@@ -274,6 +277,11 @@ public:
     {
         return totalItemCount_;
     }
+    
+    int32_t GetFooterIndex() const
+    {
+        return footerIndex_;
+    }
 
     float GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis);
 
@@ -478,6 +486,7 @@ private:
     int32_t headerIndex_;
     int32_t footerIndex_;
     int32_t itemStartIndex_;
+    int32_t footerCount_;
     RefPtr<ListLayoutProperty> listLayoutProperty_;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
