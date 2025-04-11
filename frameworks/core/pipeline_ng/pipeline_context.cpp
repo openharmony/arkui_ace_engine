@@ -5321,6 +5321,7 @@ void PipelineContext::StopWindowAnimation()
     if (taskScheduler_ && !taskScheduler_->IsPredictTaskEmpty()) {
         RequestFrame();
     }
+    OnRotationAnimationEnd();
 }
 
 void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
@@ -5961,5 +5962,14 @@ void PipelineContext::OnDumpInjection(const std::vector<std::string>& params) co
     auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
     CHECK_NULL_VOID(frameNode);
     frameNode->OnRecvCommand(params[1]);
+}
+
+void PipelineContext::OnRotationAnimationEnd()
+{
+    for (auto&& [id, callback] : rotationEndCallbackMap_) {
+        if (callback) {
+            callback();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

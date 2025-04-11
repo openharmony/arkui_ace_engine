@@ -7878,4 +7878,12 @@ void WebDelegate::RestoreRenderFit()
     CHECK_NULL_VOID(webPattern);
     webPattern->RestoreRenderFit();
 }
+
+bool WebDelegate::IsNWebEx()
+{
+    if (!nweb_) {
+        return false;
+    }
+    return nweb_->IsNWebEx();
+}
 } // namespace OHOS::Ace

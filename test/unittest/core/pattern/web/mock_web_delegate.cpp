@@ -1232,6 +1232,7 @@ std::string WebDelegate::GetCurrentLanguage()
 void WebDelegate::RegisterWebWindowFocusChangedListener() {}
 void WebDelegate::UnRegisterWebWindowFocusChangedListener() {}
 void WebDelegate::OnDragAttach() {}
+bool WebDelegate::IsNWebEx() { return false; }
 void WebDelegate::SetNativeInnerWeb(bool isInnerWeb) {}
 bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
 {

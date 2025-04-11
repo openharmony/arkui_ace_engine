@@ -703,7 +703,6 @@ public:
     {
         return false;
     }
-
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

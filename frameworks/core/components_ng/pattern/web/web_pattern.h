@@ -753,12 +753,14 @@ public:
     void UpdateImageOverlayTouchInfo(int touchPointX, int touchPointY, TouchType touchType);
     void PushOverlayInfo(float x, float y, int32_t id);
     void WebOverlayRequestFocus();
-    
+
     std::string GetCurrentLanguage() override;
 
     void RegisterSurfaceDensityCallback();
     void SetSurfaceDensity(double density);
 
+    void InitRotationEventCallback();
+    void UninitRotationEventCallback();
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
@@ -914,6 +916,8 @@ private:
     void InitTouchEventListener();
     void UninitTouchEventListener();
     void OnDragFileNameStart(const RefPtr<UnifiedData>& aceUnifiedData, const std::string& fileName);
+    void AdjustRotationRenderFit(WindowSizeChangeReason type);
+    void RecoverToTopLeft();
     bool needRestoreMenuForDrag_ = false;
     int32_t dropX_ = 0;
     int32_t dropY_ = 0;
@@ -1219,7 +1223,8 @@ private:
     bool keyboardGetready_ = false;
 
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
-
+    bool isRotating_ {false};
+    int32_t rotationEndCallbackId_ = 0;
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
