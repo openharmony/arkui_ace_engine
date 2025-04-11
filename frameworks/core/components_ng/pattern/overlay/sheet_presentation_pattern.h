@@ -655,7 +655,11 @@ public:
 
     void UpdateSheetType()
     {
-        sheetType_ = GetSheetType();
+        auto sheetType = GetSheetType();
+        if (sheetType_ != sheetType) {
+            sheetType_ = sheetType;
+            typeChanged_ = true;
+        }
     }
 
     // Used for isolation of SHEET_BOTTOMLANDSPACE after version 12, such as support for height setting callback,
@@ -891,6 +895,7 @@ private:
     bool windowChanged_ = false;
     bool isDirectionUp_ = true;
     bool topSafeAreaChanged_ = false;
+    bool typeChanged_ = false;
     ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
     SheetEffectEdge sheetEffectEdge_ = SheetEffectEdge::ALL;
 
