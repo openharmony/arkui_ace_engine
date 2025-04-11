@@ -2276,7 +2276,13 @@ void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, b
         RemovePixelMapAnimation(false, 0, 0);
         RemoveGatherNodeWithAnimation();
     }
-    RemoveFilterAnimation();
+    CHECK_NULL_VOID(menu);
+    auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    auto menuPreviewMode = wrapperPattern->GetPreviewMode();
+    if (menuPreviewMode != MenuPreviewMode::NONE) {
+        RemoveFilterAnimation();
+    }
 }
 
 void OverlayManager::HideAllMenus()
