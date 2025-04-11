@@ -488,10 +488,10 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
                 rsNode_ = Rosen::RSCanvasNode::Create(false, isTextureExportNode);
                 rsNode_->SetHybridRenderCanvas(true);
             } else {
-#endif
                 rsNode_ = Rosen::RSCanvasDrawingNode::Create(false, isTextureExportNode);
-#ifdef ACE_ENABLE_HYBRID_RENDER
             }
+#else
+            rsNode_ = Rosen::RSCanvasDrawingNode::Create(false, isTextureExportNode);
 #endif
             break;
         }
