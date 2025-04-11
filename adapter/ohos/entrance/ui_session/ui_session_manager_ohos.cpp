@@ -451,4 +451,23 @@ bool UiSessionManagerOhos::IsHasReportObject()
 {
     return !reportObjectMap_.empty();
 }
+
+void UiSessionManagerOhos::SendCommand(const std::string& command)
+{
+    if (sendCommandFunction_) {
+        auto json = InspectorJsonUtil::ParseJsonString(command);
+        if (!json || json->IsNull()) {
+            LOGW("SendCommand ParseJsonString failed");
+            return;
+        }
+
+        int32_t value = json->GetInt("cmd");
+        sendCommandFunction_(value);
+    }
+}
+
+void UiSessionManagerOhos::SaveSendCommandFunction(SendCommandFunction&& function)
+{
+    sendCommandFunction_ = std::move(function);
+}
 } // namespace OHOS::Ace

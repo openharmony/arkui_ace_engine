@@ -267,6 +267,8 @@ public:
 
     void SetCurrentVolume(float currentVolume);
     float GetCurrentVolume() const;
+    static bool ParseCommand(const std::string& command);
+    int32_t OnInjectionEvent(const std::string& command) override;
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
