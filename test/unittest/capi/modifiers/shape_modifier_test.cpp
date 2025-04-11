@@ -494,4 +494,162 @@ HWTEST_F(ShapeModifierTest, setAntiAliasTest, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: setStrokeDashArrayTest
+ * @tc.desc: Check the functionality of setStrokeDashArray
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeModifierTest, setStrokeDashArrayTest, TestSize.Level1)
+{
+    static const std::string propName("strokeDashArray");
+    ASSERT_NE(modifier_->setStrokeDashArray, nullptr);
+    using OneArrayLengthStep = std::tuple<Array_Length, std::vector<std::string>>;
+    std::vector<Dimension> vec1 = {3._px, 6._px};
+    std::vector<float> vec2 = {5.4f};
+    std::vector<Dimension> vec3 = {8.43_vp};
+    std::vector<Dimension> vec4 = {0.1_pct, 0.55_pct};
+    const std::vector<OneArrayLengthStep> TEST_PLAN = {
+        { Converter::ArkValue<Array_Length>(vec1, Converter::FC), {"3.00px", "6.00px"} },
+        { Converter::ArkValue<Array_Length>(vec2, Converter::FC), {"5.40vp", "5.40vp"} },
+        { Converter::ArkValue<Array_Length>(vec3, Converter::FC), {"8.43vp", "8.43vp"} },
+        { Converter::ArkValue<Array_Length>(vec4, Converter::FC), {"10.00%", "55.00%"} },
+    };
+    auto fullJson = GetJsonValue(node_);
+    auto checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    ASSERT_TRUE(checkVal->IsArray());
+    EXPECT_EQ(checkVal->GetArraySize(), 0);
+
+    for (const auto& [value, expectVal] : TEST_PLAN) {
+        modifier_->setStrokeDashArray(node_, &value);
+        auto fullJson = GetJsonValue(node_);
+        checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+        ASSERT_TRUE(checkVal->IsArray());
+        ASSERT_EQ(checkVal->GetArraySize(), 2);
+        ASSERT_NE(checkVal->GetArrayItem(0), nullptr);
+        EXPECT_EQ(checkVal->GetArrayItem(0)->GetString(), expectVal[0]);
+        ASSERT_NE(checkVal->GetArrayItem(1), nullptr);
+        EXPECT_EQ(checkVal->GetArrayItem(1)->GetString(), expectVal[1]);
+    }
+}
+
+/**
+ * @tc.name: setStrokeDashArrayInavlidTest
+ * @tc.desc: Check the invalid cases for setStrokeDashArray
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeModifierTest, setStrokeDashArrayInavlidTest, TestSize.Level1)
+{
+    static const std::string propName("strokeDashArray");
+    ASSERT_NE(modifier_->setStrokeDashArray, nullptr);
+    modifier_->setStrokeDashArray(node_, nullptr);
+    auto fullJson = GetJsonValue(node_);
+    auto checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    ASSERT_TRUE(checkVal->IsArray());
+    EXPECT_EQ(checkVal->GetArraySize(), 0);
+
+    modifier_->setStrokeDashArray(nullptr, nullptr);
+    fullJson = GetJsonValue(node_);
+    checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    ASSERT_TRUE(checkVal->IsArray());
+    EXPECT_EQ(checkVal->GetArraySize(), 0);
+}
+
+/**
+ * @tc.name: setMeshTest
+ * @tc.desc: Check the functionality of setMesh
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeModifierTest, setMeshTest, TestSize.Level1)
+{
+    static const std::string propName("mesh");
+    static const std::string propNameValue("value");
+    static const std::string propNameRow("row");
+    static const std::string propNameColumn("column");
+    ASSERT_NE(modifier_->setMesh, nullptr);
+    auto fullJson = GetJsonValue(node_);
+    auto checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    EXPECT_EQ(checkVal->GetString(), "");
+
+    int32_t column = 2;
+    int32_t row = 3;
+    std::vector<float> mesh = { 1, 2, 4, 6, 4, 2, 1, 3, 5, 1, 3, 5, 6, 3, 2, 2, 4, 5, 5, 3, 2, 2, 2, 4 };
+
+    auto arkMesh = Converter::ArkValue<Array_Number>(mesh, Converter::FC);
+    auto arkColumn = Converter::ArkValue<Ark_Number>(column);
+    auto arkRow = Converter::ArkValue<Ark_Number>(row);
+
+    modifier_->setMesh(node_, &arkMesh, &arkColumn, &arkRow);
+    fullJson = GetJsonValue(node_);
+    checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    auto valueJson = GetAttrValue<std::unique_ptr<JsonValue>>(checkVal, propNameValue);
+    auto valueSize = valueJson->GetArraySize();
+    ASSERT_EQ(valueSize, mesh.size());
+    for (int i = 0; i < valueSize; i++) {
+        EXPECT_EQ(valueJson->GetArrayItem(i)->GetString(), std::to_string(mesh[i]));
+    }
+    auto rowJson = GetAttrValue<std::string>(checkVal, propNameRow);
+    EXPECT_EQ(rowJson, "3");
+    auto columnJson = GetAttrValue<std::string>(checkVal, propNameColumn);
+    EXPECT_EQ(columnJson, "2");
+}
+
+/**
+ * @tc.name: setMeshInvalidTest
+ * @tc.desc: Check the invalid values for setMesh
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeModifierTest, setMeshInvalidTest, TestSize.Level1)
+{
+    static const std::string propName("mesh");
+    static const std::string propNameValue("value");
+    static const std::string propNameRow("row");
+    static const std::string propNameColum("column");
+
+    int32_t column = 2;
+    int32_t row = 3;
+    std::vector<float> mesh = { 1, 2, 4, 6, 4, 2, 1, 3, 5, 1, 3, 5, 6, 3, 2, 2, 4, 5, 5, 3, 2, 2, 2, 4 };
+
+    auto arkMesh = Converter::ArkValue<Array_Number>(mesh, Converter::FC);
+    auto arkColumn = Converter::ArkValue<Ark_Number>(column);
+    auto arkRow = Converter::ArkValue<Ark_Number>(row);
+
+    modifier_->setMesh(nullptr, &arkMesh, &arkColumn, &arkRow);
+    ASSERT_NE(modifier_->setMesh, nullptr);
+    auto fullJson = GetJsonValue(node_);
+    auto checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    EXPECT_EQ(checkVal->GetString(), "");
+
+    modifier_->setMesh(node_, nullptr, &arkColumn, &arkRow);
+    ASSERT_NE(modifier_->setMesh, nullptr);
+    fullJson = GetJsonValue(node_);
+    checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    EXPECT_EQ(checkVal->GetString(), "");
+
+    modifier_->setMesh(node_, &arkMesh, nullptr, &arkRow);
+    ASSERT_NE(modifier_->setMesh, nullptr);
+    fullJson = GetJsonValue(node_);
+    checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    EXPECT_EQ(checkVal->GetString(), "");
+
+    modifier_->setMesh(node_, &arkMesh, &arkColumn, nullptr);
+    ASSERT_NE(modifier_->setMesh, nullptr);
+    fullJson = GetJsonValue(node_);
+    checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    EXPECT_EQ(checkVal->GetString(), "");
+
+    arkColumn = Converter::ArkValue<Ark_Number>(1);
+    arkRow = Converter::ArkValue<Ark_Number>(2);
+
+    modifier_->setMesh(node_, &arkMesh, &arkColumn, &arkRow);
+    fullJson = GetJsonValue(node_);
+    checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    auto valueJson = GetAttrValue<std::unique_ptr<JsonValue>>(checkVal, propNameValue);
+    auto valueSize = valueJson->GetArraySize();
+    EXPECT_EQ(valueSize, 0);
+    auto rowJson = GetAttrValue<std::string>(checkVal, propNameRow);
+    EXPECT_EQ(rowJson, "0");
+    auto columnJson = GetAttrValue<std::string>(checkVal, propNameColum);
+    EXPECT_EQ(columnJson, "0");
+}
+
 } // namespace OHOS::Ace::NG

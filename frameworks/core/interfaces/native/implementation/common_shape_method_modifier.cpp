@@ -135,9 +135,15 @@ void StrokeDashArrayImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("ARKOALA CommonShapeMethodModifier.StrokeDashArray -> Method is not implemented.");
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonShapeMethodModelNG::SetStrokeDashArray(frameNode, convValue);
+    auto dashArray = Converter::Convert<std::vector<Dimension>>(*value);
+    // if odd,add twice
+    auto length = value->length;
+    if (static_cast<uint32_t>(length) == dashArray.size() && (static_cast<uint32_t>(length) & 1)) {
+        for (int32_t i = 0; i < length; i++) {
+            dashArray.emplace_back(dashArray[i]);
+        }
+    }
+    ShapeModelNG::SetStrokeDashArray(frameNode, std::move(dashArray));
 }
 } // CommonShapeMethodModifier
 const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier()
