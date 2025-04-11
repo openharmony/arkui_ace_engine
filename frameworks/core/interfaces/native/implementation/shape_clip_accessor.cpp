@@ -16,10 +16,29 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/implementation/shape_clip_peer.h"
+#include "core/interfaces/native/utility/peer_utils.h"
+#include "shape_clip_peer.h"
 
 namespace OHOS::Ace::NG {
 namespace Converter {
+template<>
+RefPtr<Ace::ShapeRect> Convert(const Ark_Rect& src)
+{
+    auto dst = AceType::MakeRefPtr<Ace::ShapeRect>();
+    float left = Converter::Convert<float>(src.left);
+    float top = Converter::Convert<float>(src.top);
+    float right = Converter::Convert<float>(src.right);
+    float bottom = Converter::Convert<float>(src.bottom);
+    auto width = Dimension(right - left);
+    auto height = Dimension(bottom - top);
+    auto deltaX = Dimension(left);
+    auto deltaY = Dimension(top);
+    auto position = DimensionOffset(deltaX, deltaY);
+    dst->SetWidth(width);
+    dst->SetHeight(height);
+    dst->SetPosition(position);
+    return dst;
+}
 template<>
 Ace::Radius Convert(const Ark_Vector2& src)
 {
@@ -41,37 +60,27 @@ Ace::Corner Convert(const Ark_CornerRadius& src)
     };
 }
 template<>
-ShapeClipPeer::Rect Convert(const Ark_Rect& src)
+RefPtr<Ace::ShapeRect> Convert(const Ark_RoundRect& src)
 {
-    ShapeClipPeer::Rect dst;
-    float left = Converter::Convert<float>(src.left);
-    float top = Converter::Convert<float>(src.top);
-    float right = Converter::Convert<float>(src.right);
-    float bottom = Converter::Convert<float>(src.bottom);
-    return ShapeClipPeer::Rect {
-        .width = Dimension(right - left),
-        .height = Dimension(bottom - top),
-        .position = DimensionOffset(Dimension(left), Dimension(top)),
-    };
+    auto dst = Converter::Convert<RefPtr<Ace::ShapeRect>>(src.rect);
+    auto corners = Converter::Convert<Ace::Corner>(src.corners);
+    dst->SetTopLeftRadius(corners.topLeftRadius);
+    dst->SetTopRightRadius(corners.topRightRadius);
+    dst->SetBottomLeftRadius(corners.bottomLeftRadius);
+    dst->SetBottomRightRadius(corners.bottomRightRadius);
+    return dst;
 }
 template<>
-ShapeClipPeer::RoundRect Convert(const Ark_RoundRect& src)
+RefPtr<Ace::Circle> Convert(const Ark_Circle& src)
 {
-    return ShapeClipPeer::RoundRect {
-        .rect = Converter::Convert<ShapeClipPeer::Rect>(src.rect),
-        .corners = Converter::Convert<Ace::Corner>(src.corners),
-    };
-}
-template<>
-ShapeClipPeer::Circle Convert(const Ark_Circle& src)
-{
+    auto dst = AceType::MakeRefPtr<Ace::Circle>();
     auto centerX = Converter::Convert<float>(src.centerX);
     auto centerY = Converter::Convert<float>(src.centerY);
     auto radius = Converter::Convert<float>(src.radius);
-    return ShapeClipPeer::Circle {
-        .position = DimensionOffset(Dimension(centerX), Dimension(centerY)),
-        .radius = Dimension(radius),
-    };
+    auto position = DimensionOffset(Dimension(centerX), Dimension(centerY));
+    dst->SetPosition(position);
+    dst->SetRadius(Dimension(radius));
+    return dst;
 }
 template<>
 std::string Convert(const Ark_CommandPath& src)
@@ -99,28 +108,28 @@ void SetRectShapeImpl(Ark_ShapeClip peer,
                       const Ark_Rect* rect)
 {
     if (peer && rect) {
-        peer->SetRectShape(Converter::Convert<ShapeClipPeer::Rect>(*rect));
+        peer->SetRectShape(Converter::Convert<RefPtr<Ace::ShapeRect>>(*rect));
     }
 }
 void SetRoundRectShapeImpl(Ark_ShapeClip peer,
                            const Ark_RoundRect* roundRect)
 {
     if (peer && roundRect) {
-        peer->SetRoundRectShape(Converter::Convert<ShapeClipPeer::RoundRect>(*roundRect));
+        peer->SetRoundRectShape(Converter::Convert<RefPtr<Ace::ShapeRect>>(*roundRect));
     }
 }
 void SetCircleShapeImpl(Ark_ShapeClip peer,
                         const Ark_Circle* circle)
 {
     if (peer && circle) {
-        peer->SetCircleShape(Converter::Convert<ShapeClipPeer::Circle>(*circle));
+        peer->SetCircleShape(Converter::Convert<RefPtr<Ace::Circle>>(*circle));
     }
 }
 void SetOvalShapeImpl(Ark_ShapeClip peer,
                       const Ark_Rect* oval)
 {
     if (peer && oval) {
-        peer->SetOvalShape(Converter::Convert<ShapeClipPeer::Rect>(*oval));
+        peer->SetOvalShape(Converter::Convert<RefPtr<Ace::ShapeRect>>(*oval));
     }
 }
 void SetCommandPathImpl(Ark_ShapeClip peer,

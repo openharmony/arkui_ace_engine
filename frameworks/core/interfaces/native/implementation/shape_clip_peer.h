@@ -26,88 +26,43 @@ const int32_t DEFAULT_COLOR = 0xFF000000;
 const float DEFAULT_WIDTH = 0.0f;
 
 struct ShapeClipPeer {
-    struct Rect {
-        Dimension width;
-        Dimension height;
-        DimensionOffset position;
-    };
-    struct RoundRect {
-        Rect rect;
-        OHOS::Ace::Corner corners;
-    };
-    struct Circle {
-        DimensionOffset position;
-        Dimension radius;
-    };
-
     ShapeClipPeer() = default;
     virtual ~ShapeClipPeer() = default;
 
-    void SetRectShape(const Rect& src)
+    void SetRectShape(const RefPtr<OHOS::Ace::ShapeRect>& value)
     {
-        rect = MakeRefPtr(src);
-        roundRect = nullptr;
-        circle = nullptr;
-        oval = nullptr;
-        path = std::nullopt;
+        ResetAll();
+        rect = value;
     }
-    void SetRoundRectShape(const RoundRect& src)
+    void SetRoundRectShape(const RefPtr<OHOS::Ace::ShapeRect>& value)
     {
-        roundRect = MakeRefPtr(src);
-        rect = nullptr;
-        circle = nullptr;
-        oval = nullptr;
-        path = std::nullopt;
+        ResetAll();
+        roundRect = value;
     }
-    void SetCircleShape(const Circle& src)
+    void SetCircleShape(const RefPtr<OHOS::Ace::Circle>& value)
     {
-        circle = MakeRefPtr(src);
-        rect = nullptr;
-        roundRect = nullptr;
-        oval = nullptr;
-        path = std::nullopt;
+        ResetAll();
+        circle = value;
     }
-    void SetOvalShape(const Rect& src)
+    void SetOvalShape(const RefPtr<OHOS::Ace::ShapeRect>& value)
     {
-        oval = MakeRefPtr(src);
-        rect = nullptr;
-        roundRect = nullptr;
-        circle = nullptr;
-        path = std::nullopt;
+        ResetAll();
+        oval = value;
     }
     void SetCommandPath(const std::string& value)
     {
+        ResetAll();
         path = value;
+    }
+
+private:
+    void ResetAll()
+    {
         rect = nullptr;
         roundRect = nullptr;
         circle = nullptr;
         oval = nullptr;
-    }
-
-private:
-    RefPtr<OHOS::Ace::ShapeRect> MakeRefPtr(const Rect& src)
-    {
-        auto dst = AceType::MakeRefPtr<OHOS::Ace::ShapeRect>();
-        dst->SetWidth(src.width);
-        dst->SetHeight(src.height);
-        dst->SetPosition(src.position);
-        return dst;
-    }
-    RefPtr<OHOS::Ace::ShapeRect> MakeRefPtr(const RoundRect& src)
-    {
-        auto dst = MakeRefPtr(src.rect);
-        dst->SetTopLeftRadius(src.corners.topLeftRadius);
-        dst->SetTopRightRadius(src.corners.topRightRadius);
-        dst->SetBottomLeftRadius(src.corners.bottomLeftRadius);
-        dst->SetBottomRightRadius(src.corners.bottomRightRadius);
-        return dst;
-    }
-    RefPtr<OHOS::Ace::Circle> MakeRefPtr(const Circle& src)
-    {
-        auto dst = AceType::MakeRefPtr<OHOS::Ace::Circle>();
-        dst->SetPosition(src.position);
-        dst->SetRadius(Dimension(src.radius));
-        return dst;
+        path = std::nullopt;
     }
 
 public:
