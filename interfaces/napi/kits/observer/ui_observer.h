@@ -46,8 +46,11 @@ public:
     static void RegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener);
     static void RegisterNavigationCallback(
         std::string navigationId, const std::shared_ptr<UIObserverListener>& listener);
+    static void RegisterNavigationCallback(
+        int32_t navigationUniqueId, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterNavigationCallback(napi_value cb);
     static void UnRegisterNavigationCallback(std::string navigationId, napi_value cb);
+    static void UnRegisterNavigationCallback(int32_t navigationUniqueId, napi_value cb);
     static void HandleNavigationStateChange(const NG::NavDestinationInfo& info);
 
     static void RegisterScrollEventCallback(const std::shared_ptr<UIObserverListener>& listener);
@@ -171,6 +174,8 @@ private:
     static std::list<std::shared_ptr<UIObserverListener>> unspecifiedNavigationListeners_;
     static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedCNavigationListeners_;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedUniqueIdNavigationListeners_;
     static std::list<std::shared_ptr<UIObserverListener>> scrollEventListeners_;
     static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedScrollEventListeners_;
