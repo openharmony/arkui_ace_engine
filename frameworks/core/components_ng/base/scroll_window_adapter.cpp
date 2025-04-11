@@ -142,6 +142,13 @@ bool ScrollWindowAdapter::UpdateSlidingOffset(float delta)
     if (NearZero(delta)) {
         return false;
     }
+    if (GreatOrEqual(std::abs(delta), size_.MainSize(axis_))) {
+        return false; // TEMP: let layout task determine jump position
+        // todo: move jump on large offset logic to run in FillAlgorithm
+    }
+    if (jumpPending_) {
+        return false; // this is temporary. After we support jump in FillAlgorithm, we can remove this.
+    }
     fillAlgorithm_->OnSlidingOffsetUpdate(delta);
     if (rangeMode_) {
         bool res = fillAlgorithm_->OnSlidingOffsetUpdate(size_, axis_, delta);

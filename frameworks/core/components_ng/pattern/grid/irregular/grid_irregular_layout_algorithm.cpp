@@ -409,6 +409,7 @@ void AdjustStartOffset(const std::map<int32_t, float>& lineHeights, int32_t star
 
 std::pair<int32_t, int32_t> GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cacheLine)
 {
+    cacheLine = 0; // temp. fails cache tests. Will be removed when ChildMap in ScrollWindowAdapter is fixed
     const auto& info = info_;
     const auto& props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     const Alignment align = GetAlignment(info.axis_, props);

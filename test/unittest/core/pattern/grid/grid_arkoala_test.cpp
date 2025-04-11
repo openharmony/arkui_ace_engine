@@ -185,9 +185,43 @@ HWTEST_F(GridArkoalaTest, LargeOffset001, TestSize.Level1)
     UpdateCurrentOffset(4000.0f);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(42, 48));
+    EXPECT_EQ(pattern_->info_.ToString(),
+        "startMainLine = 21, offset = -0.000000, endMainLine = 23, startIndex = 42, "
+        "endIndex = 47, jumpIndex = -2, gridMatrix size = 50, lineHeightMap size = 16");
+}
+
+/**
+ * @tc.name: LargeOffset002
+ * @tc.desc: Test large offset with new pipeline
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridArkoalaTest, LargeOffset002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    ViewAbstract::SetWidth(CalcLength(480));
+    ViewAbstract::SetHeight(CalcLength(1280));
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(8.0f));
+    InitMockLazy(100);
+    CreateDone();
+
+    IncrementAndLayout(__LINE__);
+    // new pipeline order: Event -> Frontend Increment -> Layout
+    pattern_->UpdateCurrentOffset(-5000.0f, SCROLL_FROM_BAR);
+    EXPECT_FALSE(lazy_.NeedRecompose());
+    FlushUITasks();
+    /**
+     * Frame 2
+     * this is problematic. Currently we block offset before we handle jump in the frontend
+     * will fix after implementing jump conversion feature in FillAlgorithm
+     */
+    pattern_->UpdateCurrentOffset(-20000.0f, SCROLL_FROM_BAR);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(24, 30));
+    EXPECT_EQ(GetChildRect(frameNode_, 25).ToString(), "RectT (240.00, -86.00) - [240.00 x 450.00]");
     EXPECT_EQ(
-        pattern_->info_.ToString(), "startMainLine = 21, offset = -0.000000, endMainLine = 23, startIndex = 42, "
-                                    "endIndex = 47, jumpIndex = -2, gridMatrix size = 50, lineHeightMap size = 16");
+        pattern_->info_.ToString(), "startMainLine = 12, offset = -86.000000, endMainLine = 14, startIndex = 24, "
+                                    "endIndex = 29, jumpIndex = -2, gridMatrix size = 50, lineHeightMap size = 8");
 }
 
 /**
