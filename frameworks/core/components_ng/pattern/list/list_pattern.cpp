@@ -3132,6 +3132,9 @@ void ListPattern::NotifyDataChange(int32_t index, int32_t count)
     if (!maintainVisibleContentPosition_ || itemPosition_.empty() || count == 0) {
         return;
     }
+    if (index == 0 && count > 0 && IsBackToTopRunning()) {
+        SetUseTotalOffset(false);
+    }
     auto startIndex = itemPosition_.begin()->first;
     auto endIndex = itemPosition_.rbegin()->first;
     if (!CheckDataChangeOutOfStart(index, count, startIndex, endIndex)) {

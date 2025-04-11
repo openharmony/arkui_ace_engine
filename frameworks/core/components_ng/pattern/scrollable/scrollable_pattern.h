@@ -764,6 +764,11 @@ public:
 
     void DeleteNestScrollBarProxy(const WeakPtr<ScrollBarProxy>& scrollBarProxy);
 
+    void SetUseTotalOffset(bool useTotalOffset)
+    {
+        useTotalOffset_ = useTotalOffset;
+    }
+
     bool GetNestedScrolling() const
     {
         CHECK_NULL_RETURN(scrollableEvent_, false);
