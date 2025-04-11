@@ -24,6 +24,10 @@
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
+#ifdef ACE_ENABLE_VK
+#include "render_service_base/include/platform/common/rs_system_properties.h"
+#endif
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t HUNDRED = 100;
@@ -167,6 +171,18 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         return SizeF {};
     }
     CHECK_NULL_RETURN(paragraphManager_, std::nullopt);
+#ifdef ACE_ENABLE_VK
+    auto pipeline = host->GetContext();
+    auto fontManager = pipeline == nullptr ? nullptr : pipeline->GetFontManager();
+    if (fontManager != nullptr && Rosen::RSSystemProperties::GetHybridRenderEnabled()) {
+        if (static_cast<uint32_t>(paragraphManager_->GetLineCount()) >=
+            Rosen::RSSystemProperties::GetHybridRenderTextBlobLenCount()) {
+            fontManager->AddHybridRenderNode(host);
+        } else {
+            fontManager->RemoveHybridRenderNode(host);
+        }
+    }
+#endif
     auto height = paragraphManager_->GetHeight();
     auto maxWidth = paragraphManager_->GetMaxWidth();
     auto longestLine = paragraphManager_->GetLongestLine();

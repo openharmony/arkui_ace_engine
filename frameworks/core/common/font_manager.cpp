@@ -410,4 +410,35 @@ std::vector<std::string> FontManager::GetFontNames()
     return fontNames_;
 }
 
+#ifdef ACE_ENABLE_VK
+void FontManager::AddHybridRenderNode(const WeakPtr<NG::UINode>& node)
+{
+    std::lock_guard<std::mutex> lock(hybridRenderNodesMutex_);
+    if (hybridRenderNodes_.find(node) == hybridRenderNodes_.end()) {
+        hybridRenderNodes_.emplace(node);
+    }
+}
+
+void FontManager::RemoveHybridRenderNode(const WeakPtr<NG::UINode>& node)
+{
+    std::lock_guard<std::mutex> lock(hybridRenderNodesMutex_);
+    hybridRenderNodes_.erase(node);
+}
+
+void FontManager::UpdateHybridRenderNodes()
+{
+    std::lock_guard<std::mutex> lock(hybridRenderNodesMutex_);
+    for (auto iter = hybridRenderNodes_.begin(); iter != hybridRenderNodes_.end();) {
+        auto hybridNode = iter->Upgrade();
+        CHECK_NULL_VOID(hybridNode);
+        auto uiNode = DynamicCast<NG::UINode>(hybridNode);
+        if (uiNode != nullptr) {
+            uiNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+            ++iter;
+        } else {
+            iter = hybridRenderNodes_.erase(iter);
+        }
+    }
+}
+#endif
 } // namespace OHOS::Ace

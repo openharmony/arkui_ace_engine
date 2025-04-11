@@ -64,6 +64,10 @@
 
 #include "base/ressched/ressched_report.h"
 
+#ifdef ACE_ENABLE_VK
+#include "accessibility_config.h"
+#endif
+
 namespace OHOS::Ace::Platform {
 namespace {
 constexpr uint32_t DIRECTION_KEY = 0b1000;
@@ -324,6 +328,33 @@ void ParseLanguage(ConfigurationChange& configurationChange, const std::string& 
         AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
     }
 }
+
+#ifdef ACE_ENABLE_VK
+class HighContrastObserver : public AccessibilityConfig::AccessibilityConfigObserver {
+public:
+    HighContrastObserver(AceContainer* aceContainer) : aceContainer_(aceContainer) {}
+
+    void OnConfigChanged(const AccessibilityConfig::CONFIG_ID id, const AccessibilityConfig::ConfigValue& value)
+    {
+        if (first_) {
+            first_ = false;
+            return;
+        }
+        if (aceContainer_ == nullptr) {
+            return;
+        }
+        auto pipelineContext = aceContainer_->GetPipelineContext();
+        auto fontManager = pipelineContext == nullptr ? nullptr : pipelineContext->GetFontManager();
+        if (fontManager != nullptr) {
+            fontManager->UpdateHybridRenderNodes();
+        }
+    }
+
+private:
+    AceContainer* aceContainer_ = nullptr;
+    bool first_ = true;
+};
+#endif
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
@@ -344,6 +375,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_pt
     if (ability) {
         abilityInfo_ = ability->GetAbilityInfo();
     }
+#ifdef ACE_ENABLE_VK
+    SubscribeHighContrastChange();
+#endif
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type,
@@ -366,6 +400,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
+#ifdef ACE_ENABLE_VK
+    SubscribeHighContrastChange();
+#endif
 }
 
 // for DynamicComponent
@@ -389,6 +426,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
+#ifdef ACE_ENABLE_VK
+    SubscribeHighContrastChange();
+#endif
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type) : instanceId_(instanceId), type_(type)
@@ -405,6 +445,9 @@ AceContainer::~AceContainer()
 {
     std::lock_guard lock(destructMutex_);
     LOGI("Container Destroyed");
+#ifdef ACE_ENABLE_VK
+    UnsubscribeHighContrastChange();
+#endif
 }
 
 void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
@@ -4404,4 +4447,35 @@ bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool ani
     }
     return true;
 }
+
+#ifdef ACE_ENABLE_VK
+void AceContainer::SubscribeHighContrastChange()
+{
+    if (!Rosen::RSSystemProperties::GetHybridRenderEnabled()) {
+        return;
+    }
+    if (highContrastObserver_ != nullptr) {
+        return;
+    }
+    auto& config = AccessibilityConfig::AccessibilityConfig::GetInstance();
+    if (!config.InitializeContext()) {
+        return;
+    }
+    highContrastObserver_ = std::make_shared<HighContrastObserver>(this);
+    config.SubscribeConfigObserver(AccessibilityConfig::CONFIG_ID::CONFIG_HIGH_CONTRAST_TEXT, highContrastObserver_);
+}
+
+void AceContainer::UnsubscribeHighContrastChange()
+{
+    if (highContrastObserver_ == nullptr) {
+        return;
+    }
+    auto& config = AccessibilityConfig::AccessibilityConfig::GetInstance();
+    if (config.InitializeContext()) {
+        config.UnsubscribeConfigObserver(
+            AccessibilityConfig::CONFIG_ID::CONFIG_HIGH_CONTRAST_TEXT, highContrastObserver_);
+    }
+    highContrastObserver_ = nullptr;
+}
+#endif
 } // namespace OHOS::Ace::Platform
