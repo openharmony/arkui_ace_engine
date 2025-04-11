@@ -486,7 +486,8 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
     OnScrollStop(listEventHub->GetOnScrollStop(), listEventHub->GetJSFrameNodeOnScrollStop());
 }
 
-void ListPattern::FireOnScrollWithVersionCheck(float finalOffset, const std::function<void(float)>& onScroll) {
+void ListPattern::FireOnScrollWithVersionCheck(float finalOffset, const std::function<void(float)>& onScroll)
+{
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         FireOnScroll(finalOffset, onScroll);
     } else {
