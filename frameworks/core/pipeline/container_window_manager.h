@@ -43,7 +43,7 @@ struct DecorButtonStyle {
     uint32_t buttonBackgroundSize;
     uint32_t buttonIconSize;
     uint32_t buttonBackgroundCornerRadius;
-}
+};
 
 class WindowManager : public virtual AceType {
     DECLARE_ACE_TYPE(WindowManager, AceType);
