@@ -60,10 +60,9 @@ bool ScrollWindowAdapter::PrepareLoadToTarget(int32_t targetIdx, ScrollAlign ali
 
 FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
 {
-    auto* item = GetChildPtrByIndex(markIndex_);
+    auto* item = childMap_.get(markIndex_).value_or(nullptr).Upgrade().GetRawPtr();
     if (!item) {
-        nodeToIndex_.clear();
-        indexToNode_.clear();
+        childMap_.clear();
         item = static_cast<FrameNode*>(container_->GetLastChild().GetRawPtr());
     }
     if (!item) {
@@ -76,8 +75,7 @@ FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
         fillAlgorithm_->FillMarkItem(size_, axis_, item, markIndex_);
         filled_.insert(markIndex_);
 
-        indexToNode_[markIndex_] = WeakClaim(item);
-        nodeToIndex_[item] = markIndex_;
+        childMap_.put(markIndex_, WeakClaim(item));
     }
     // 2: check if more space for new item.
     if (!fillAlgorithm_->CanFillMore(axis_, size_, markIndex_, direction)) {
@@ -105,9 +103,13 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
         LOGW("fail to find pendingNode");
         return nullptr;
     }
-    auto index = direction == FillDirection::START ? nodeToIndex_[markItem] - 1 : nodeToIndex_[markItem] + 1;
-    indexToNode_[index] = WeakClaim(pendingNode);
-    nodeToIndex_[pendingNode] = index;
+    const auto markIndex = childMap_.getKey(WeakClaim(markItem));
+    if (!markIndex) {
+        LOGW("fail to find markIndex");
+        return nullptr;
+    }
+    auto index = direction == FillDirection::START ? *markIndex - 1 : *markIndex + 1;
+    childMap_.put(index, WeakClaim(pendingNode));
     // 1: check index.
     if (index <= 0 && direction == FillDirection::START) {
         return nullptr;
@@ -228,15 +230,15 @@ FrameNode* ScrollWindowAdapter::GetChildPtrByIndex(uint32_t index)
         // LazyForEach generated items are at the back of children list
         return container_->GetFrameNodeChildByIndex(index - filled_.size()); // filled.size = active item count
     }
-    FrameNode* node = nullptr;
-    auto iter = indexToNode_.find(index);
-    if (iter != indexToNode_.end()) {
-        node = iter->second.Upgrade().GetRawPtr();
-        if (node == nullptr) {
-            indexToNode_.erase(iter);
+    auto weakNode = childMap_.get(index);
+    if (weakNode) {
+        auto* node = weakNode->Upgrade().GetRawPtr();
+        if (!node) {
+            childMap_.remove(index);
         }
+        return node;
     }
-    return node;
+    return nullptr;
 }
 
 RefPtr<FrameNode> ScrollWindowAdapter::GetChildByIndex(uint32_t index)
@@ -246,9 +248,9 @@ RefPtr<FrameNode> ScrollWindowAdapter::GetChildByIndex(uint32_t index)
 
 uint32_t ScrollWindowAdapter::GetIndexOfChild(const RefPtr<FrameNode>& child) const
 {
-    auto iter = nodeToIndex_.find(child.GetRawPtr());
-    if (iter != nodeToIndex_.end()) {
-        return iter->second;
+    auto index = childMap_.getKey(WeakClaim(child.GetRawPtr()));
+    if (index) {
+        return *index;
     }
     return INT_MAX;
 }

@@ -25,6 +25,7 @@
 #include "fill_algorithm.h"
 
 #include "core/components/scroll/scroll_controller_base.h"
+#include "frameworks/base/utils/unique_valued_map.h"
 
 namespace OHOS::Ace::NG {
 
@@ -111,8 +112,9 @@ private:
     using FrontendUpdater = std::function<void(int32_t, void*)>;
     std::list<FrontendUpdater> updaters_;
 
-    std::unordered_map<int32_t, WeakPtr<FrameNode>> indexToNode_;
-    std::unordered_map<FrameNode*, int32_t> nodeToIndex_;
+    /* effectively prevents multiple indices mapping to the same node, which could occur when @Reusable is enabled */
+    UniqueValuedMap<uint32_t, WeakPtr<FrameNode>, WeakPtr<FrameNode>::Hash> childMap_;
+
     std::unordered_set<int32_t> filled_; // to record measured items during Fill
 
     Axis axis_ = Axis::VERTICAL;

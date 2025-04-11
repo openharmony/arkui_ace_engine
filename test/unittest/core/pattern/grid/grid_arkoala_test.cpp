@@ -187,7 +187,7 @@ HWTEST_F(GridArkoalaTest, LargeOffset001, TestSize.Level1)
     EXPECT_EQ(lazy_.GetRange(), std::pair(42, 48));
     EXPECT_EQ(pattern_->info_.ToString(),
         "startMainLine = 21, offset = -0.000000, endMainLine = 23, startIndex = 42, "
-        "endIndex = 47, jumpIndex = -2, gridMatrix size = 50, lineHeightMap size = 16");
+        "endIndex = 47, jumpIndex = -2, gridMatrix size = 34, lineHeightMap size = 16");
 }
 
 /**
@@ -219,9 +219,9 @@ HWTEST_F(GridArkoalaTest, LargeOffset002, TestSize.Level1)
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(24, 30));
     EXPECT_EQ(GetChildRect(frameNode_, 25).ToString(), "RectT (240.00, -86.00) - [240.00 x 450.00]");
-    EXPECT_EQ(
-        pattern_->info_.ToString(), "startMainLine = 12, offset = -86.000000, endMainLine = 14, startIndex = 24, "
-                                    "endIndex = 29, jumpIndex = -2, gridMatrix size = 50, lineHeightMap size = 8");
+    EXPECT_EQ(pattern_->info_.ToString(),
+        "startMainLine = 12, offset = -86.000000, endMainLine = 14, startIndex = 24, "
+        "endIndex = 29, jumpIndex = -2, gridMatrix size = 16, lineHeightMap size = 8");
 }
 
 /**
