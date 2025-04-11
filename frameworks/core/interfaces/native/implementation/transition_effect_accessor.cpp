@@ -109,7 +109,7 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_TransitionEffect TranslateImpl(const Ark_TranslateOptions* options)
 {
     CHECK_NULL_RETURN(options, nullptr);
-    Ark_String type = Converter::ArkValue<Ark_String>(TRANSLATE_TOKEN);
+    Ark_String type = Converter::ArkValue<Ark_String>(TRANSLATE_TOKEN, Converter::FC);
     Ark_TransitionEffects effects {
         .translate = *options
     };
@@ -118,7 +118,7 @@ Ark_TransitionEffect TranslateImpl(const Ark_TranslateOptions* options)
 Ark_TransitionEffect RotateImpl(const Ark_RotateOptions* options)
 {
     CHECK_NULL_RETURN(options, nullptr);
-    Ark_String type = Converter::ArkValue<Ark_String>(ROTATE_TOKEN);
+    Ark_String type = Converter::ArkValue<Ark_String>(ROTATE_TOKEN, Converter::FC);
     Ark_TransitionEffects effects {
         .rotate = *options
     };
@@ -127,7 +127,7 @@ Ark_TransitionEffect RotateImpl(const Ark_RotateOptions* options)
 Ark_TransitionEffect ScaleImpl(const Ark_ScaleOptions* options)
 {
     CHECK_NULL_RETURN(options, nullptr);
-    Ark_String type = Converter::ArkValue<Ark_String>(SCALE_TOKEN);
+    Ark_String type = Converter::ArkValue<Ark_String>(SCALE_TOKEN, Converter::FC);
     Ark_TransitionEffects effects {
         .scale = *options
     };
@@ -136,7 +136,7 @@ Ark_TransitionEffect ScaleImpl(const Ark_ScaleOptions* options)
 Ark_TransitionEffect OpacityImpl(const Ark_Number* alpha)
 {
     CHECK_NULL_RETURN(alpha, nullptr);
-    Ark_String type = Converter::ArkValue<Ark_String>(OPACITY_TOKEN);
+    Ark_String type = Converter::ArkValue<Ark_String>(OPACITY_TOKEN, Converter::FC);
     Ark_TransitionEffects effects {
         .opacity = *alpha
     };
@@ -144,7 +144,7 @@ Ark_TransitionEffect OpacityImpl(const Ark_Number* alpha)
 }
 Ark_TransitionEffect MoveImpl(Ark_TransitionEdge edge)
 {
-    Ark_String type = Converter::ArkValue<Ark_String>(MOVE_TOKEN);
+    Ark_String type = Converter::ArkValue<Ark_String>(MOVE_TOKEN, Converter::FC);
     Ark_TransitionEffects effects {
         .move = edge
     };
@@ -156,7 +156,7 @@ Ark_TransitionEffect AsymmetricImpl(Ark_TransitionEffect appear,
     CHECK_NULL_RETURN(appear, nullptr);
     CHECK_NULL_RETURN(disappear, nullptr);
 
-    Ark_String type = Converter::ArkValue<Ark_String>(ASYMMETRIC_TOKEN);
+    Ark_String type = Converter::ArkValue<Ark_String>(ASYMMETRIC_TOKEN, Converter::FC);
     Ark_Literal_TransitionEffect_appear_disappear asymm;
     asymm.appear = appear;
     asymm.disappear = disappear;
@@ -190,14 +190,14 @@ Ark_TransitionEffect CombineImpl(Ark_TransitionEffect peer,
 }
 Ark_TransitionEffect GetIDENTITYImpl()
 {
-    Ark_String type = Converter::ArkValue<Ark_String>(IDENTITY_TOKEN);
+    Ark_String type = Converter::ArkValue<Ark_String>(IDENTITY_TOKEN, Converter::FC);
     Ark_TransitionEffects effects {};
     return CtorImpl(&type, &effects);
 }
 Ark_TransitionEffect GetOPACITYImpl()
 {
     auto alpha = Converter::ArkValue<Ark_Number>(static_cast<float>(0.0f));
-    Ark_String type = Converter::ArkValue<Ark_String>(OPACITY_TOKEN);
+    Ark_String type = Converter::ArkValue<Ark_String>(OPACITY_TOKEN, Converter::FC);
     Ark_TransitionEffects effects {
         .opacity = alpha
     };
@@ -205,20 +205,20 @@ Ark_TransitionEffect GetOPACITYImpl()
 }
 Ark_TransitionEffect GetSLIDEImpl()
 {
-    Ark_String type = Converter::ArkValue<Ark_String>(MOVE_TOKEN);
+    Ark_String type = Converter::ArkValue<Ark_String>(MOVE_TOKEN, Converter::FC);
     Ark_TransitionEdge startEdge = Converter::ArkValue<Ark_TransitionEdge>(TransitionEdge::START);
     Ark_TransitionEffects startEffects {
         .move = startEdge
     };
     Ark_TransitionEffect appear = CtorImpl(&type, &startEffects);
     Ark_TransitionEdge endEdge = Converter::ArkValue<Ark_TransitionEdge>(TransitionEdge::END);
-    Ark_String type1 = Converter::ArkValue<Ark_String>(MOVE_TOKEN);
+    Ark_String type1 = Converter::ArkValue<Ark_String>(MOVE_TOKEN, Converter::FC);
     Ark_TransitionEffects endEffects {
         .move = endEdge
     };
     Ark_TransitionEffect disappear = CtorImpl(&type1, &endEffects);
 
-    Ark_String asyType = Converter::ArkValue<Ark_String>(ASYMMETRIC_TOKEN);
+    Ark_String asyType = Converter::ArkValue<Ark_String>(ASYMMETRIC_TOKEN, Converter::FC);
     Ark_Literal_TransitionEffect_appear_disappear asymm;
     asymm.appear = appear;
     asymm.disappear = disappear;
@@ -229,7 +229,7 @@ Ark_TransitionEffect GetSLIDEImpl()
 }
 Ark_TransitionEffect GetSLIDE_SWITCHImpl()
 {
-    Ark_String type = Converter::ArkValue<Ark_String>(SLIDE_SWITCH_TOKEN);
+    Ark_String type = Converter::ArkValue<Ark_String>(SLIDE_SWITCH_TOKEN, Converter::FC);
     Ark_TransitionEffects effects {};
     return CtorImpl(&type, &effects);
 }
