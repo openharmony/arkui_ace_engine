@@ -124,6 +124,7 @@ void DragDropEventActuator::InitLongPressAction()
 void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, ResponseLinkResult& responseLinkResult)
 {
+    InitDragDropStatusToIdle();
     auto gestureHub = gestureEventHub_.Upgrade();
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
@@ -135,6 +136,7 @@ void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset
         return;
     }
     auto touchEvent = touchRestrict.touchEvent;
+    RecordTouchDownPoint(touchEvent);
     dragDropInitiatingHandler_->NotifyHitTesting(touchEvent);
     InitPanAction();
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));

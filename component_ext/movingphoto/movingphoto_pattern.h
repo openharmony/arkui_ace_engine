@@ -148,6 +148,7 @@ private:
     void UpdateImageNode();
     void UpdateVideoNode();
     void UpdatePlayMode();
+    void UpdateImageHdrMode(const RefPtr<FrameNode>& imageNode);
     void HandleImageAnalyzerMode();
     void MovingPhotoFormatConvert(MovingPhotoFormat format);
     void DynamicRangeModeConvert(DynamicRangeMode rangeMode);
@@ -244,6 +245,8 @@ private:
     bool isSetAutoPlayPeriod_ = false;
     bool isVisible_ = false;
     bool isChangePlayMode_ = false;
+    bool isRepeatChangePlayMode_ = false;
+    bool isAutoChangePlayMode_ = false;
     bool needUpdateImageNode_ = false;
     PlaybackStatus currentPlayStatus_ = PlaybackStatus::NONE;
     PlaybackMode autoAndRepeatLevel_ = PlaybackMode::NONE;

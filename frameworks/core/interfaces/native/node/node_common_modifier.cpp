@@ -8004,6 +8004,8 @@ void SetOnClickInfo(ArkUINodeEvent& event, GestureEvent& info, bool usePx)
         usePx ? info.GetTiltX().value_or(0.0f) : PipelineBase::Px2VpWithCurrentDensity(info.GetTiltX().value_or(0.0f));
     event.clickEvent.tiltY =
         usePx ? info.GetTiltY().value_or(0.0f) : PipelineBase::Px2VpWithCurrentDensity(info.GetTiltY().value_or(0.0f));
+    // rollAngle
+    event.clickEvent.rollAngle = info.GetRollAngle().value_or(0.0f);
     //pressure
     event.clickEvent.pressure = info.GetForce();
     // sourcetool
@@ -8377,6 +8379,8 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
                                        : eventInfo.GetTarget().area.GetWidth().ConvertToVp();
         event.touchEvent.height = usePx ? eventInfo.GetTarget().area.GetHeight().ConvertToPx()
                                         : eventInfo.GetTarget().area.GetHeight().ConvertToVp();
+        // rollAngle
+        event.touchEvent.rollAngle = eventInfo.GetRollAngle().value_or(0.0f);
         // deviceid
         event.touchEvent.deviceId = eventInfo.GetDeviceId();
         //modifierkeystates

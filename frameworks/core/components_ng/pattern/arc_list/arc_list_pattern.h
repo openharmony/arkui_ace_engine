@@ -87,6 +87,7 @@ protected:
     void SetFriction(double friction) override;
     void HandleScrollBarOutBoundary() override;
     float GetSnapCenterOverScrollPos(float startPos, float prevScroll);
+    bool StartSnapAnimation(SnapAnimationOptions snapAnimationOptions) override;
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -94,7 +95,6 @@ private:
     bool ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup) override;
 
     bool OnScrollCallback(float offset, int32_t source) override;
-    void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
 
     bool GetOneItemSnapPosByFinalPos(float mainPos, float finalPos, float& snapPos);
     int32_t GetMidIndex();

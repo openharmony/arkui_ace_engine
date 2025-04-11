@@ -3479,13 +3479,11 @@ OffsetF FrameNode::GetPositionToScreen()
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
-        auto windowManager = pipelineContext->GetWindowManager();
-        auto container = Container::CurrentSafely();
-        if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-            auto windowScale = container->GetWindowScale();
-            offsetCurrent = offsetCurrent * windowScale;
-        }
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto container = Container::CurrentSafely();
+    if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto windowScale = container->GetWindowScale();
+        offsetCurrent = offsetCurrent * windowScale;
     }
     OffsetF offset(windowOffset.GetX() + offsetCurrent.GetX(), windowOffset.GetY() + offsetCurrent.GetY());
     return offset;
@@ -3512,13 +3510,11 @@ OffsetF FrameNode::GetPositionToScreenWithTransform()
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
     OffsetF nodeOffset = GetPositionToWindowWithTransform();
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
-        auto windowManager = pipelineContext->GetWindowManager();
-        auto container = Container::CurrentSafely();
-        if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-            auto windowScale = container->GetWindowScale();
-            nodeOffset = nodeOffset * windowScale;
-        }
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto container = Container::CurrentSafely();
+    if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto windowScale = container->GetWindowScale();
+        nodeOffset = nodeOffset * windowScale;
     }
     OffsetF offset(windowOffset.GetX() + nodeOffset.GetX(), windowOffset.GetY() + nodeOffset.GetY());
     return offset;
@@ -4681,13 +4677,12 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
     if (!config.skipMeasure && !config.skipLayout) {
-        auto pipeline = GetContext();
-        CHECK_NULL_RETURN(pipeline, false);
+        CHECK_NULL_RETURN(context, false);
         if (GetInspectorId()) {
-            pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
+            context->OnLayoutCompleted(GetInspectorId()->c_str());
         }
         if (eventHub_) {
-            eventHub_->FireLayoutNDKCallback(pipeline);
+            eventHub_->FireLayoutNDKCallback(context);
         }
     }
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config);

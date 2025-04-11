@@ -544,9 +544,6 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_ESCAPE) {
         auto dragDropMgr = GetDragDropManager(GetInstanceId());
         if (dragDropMgr && dragDropMgr->IsMSDPDragging()) {
-            dragDropMgr->SetIsDragCancel(true);
-            dragDropMgr->OnDragEnd(dragDropMgr->GetPreDragPointerEvent(), "", nullptr, true);
-            dragDropMgr->SetIsDragCancel(false);
             return true;
         }
     }
