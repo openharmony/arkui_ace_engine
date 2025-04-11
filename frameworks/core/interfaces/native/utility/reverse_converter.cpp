@@ -261,11 +261,11 @@ void AssignArkValue(Ark_Padding& dst, const PaddingProperty& src)
     dst = arkPadding;
 }
 
-void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src)
+void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, Converter::ConvContext *ctx)
 {
     dst.offset = ArkValue<Ark_Number>(src.offset);
     std::string u8Value = UtfUtils::Str16DebugToStr8(src.value);
-    dst.value = ArkValue<Ark_String>(u8Value);
+    dst.value = ArkValue<Ark_String>(u8Value, ctx);
 }
 
 void AssignArkValue(Ark_Length& dst, const int& src)

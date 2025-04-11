@@ -221,9 +221,10 @@ void OnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onChange = [arkCallback = CallbackHelper(*value)](const ChangeValueInfo& changeValueInfo) {
+        Converter::ConvContext ctx;
         const std::string u8Value = UtfUtils::Str16DebugToStr8(changeValueInfo.value);
-        arkCallback.Invoke(Converter::ArkValue<Ark_String>(u8Value),
-            Converter::ArkValue<Opt_PreviewText>(changeValueInfo.previewText));
+        arkCallback.Invoke(Converter::ArkValue<Ark_String>(u8Value, &ctx),
+            Converter::ArkValue<Opt_PreviewText>(changeValueInfo.previewText, &ctx));
     };
     TextFieldModelNG::SetOnChange(frameNode, onChange);
 }
@@ -337,14 +338,20 @@ void OnPasteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onPaste = [arkCallback = CallbackHelper(*value)](const std::u16string& content) {
+    auto onPaste = [arkCallback = CallbackHelper(*value)](const std::u16string& content,
+        NG::TextCommonEvent& event) -> void {
         const std::string u8Content = UtfUtils::Str16DebugToStr8(content);
-        auto arkContent = Converter::ArkValue<Ark_String>(u8Content);
-        Ark_PasteEvent arkEvent;
-        arkEvent.preventDefault = {};
+        Converter::ConvContext ctx;
+        auto arkContent = Converter::ArkValue<Ark_String>(u8Content, &ctx);
+        auto keeper = CallbackKeeper::Claim([&event]() {
+            event.SetPreventDefault(true);
+        });
+        Ark_PasteEvent arkEvent = {
+            .preventDefault = Converter::ArkValue<Opt_Callback_Void>(keeper.ArkValue())
+        };
         arkCallback.Invoke(arkContent, arkEvent);
     };
-    TextFieldModelNG::SetOnPaste(frameNode, std::move(onPaste));
+    TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
 }
 void CopyOptionImpl(Ark_NativePointer node,
                     Ark_CopyOptions value)
