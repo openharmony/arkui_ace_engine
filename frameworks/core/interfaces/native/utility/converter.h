@@ -469,6 +469,8 @@ namespace Converter {
     template<> CheckboxSettingData Convert(const Ark_LunarSwitchStyle& src);
     template<> Color Convert(const Ark_Number& src);
     template<> Color Convert(const Ark_String& src);
+
+    template<> Ace::Corner Convert(const Ark_CornerRadius& src);
     template<> DateTimeType Convert(const Ark_DateTimeOptions& src);
     template<> Dimension Convert(const Ark_CustomObject& src);
     template<> Dimension Convert(const Ark_Length& src);
@@ -525,6 +527,7 @@ namespace Converter {
     template<> PickerValueType Convert(const Array_String& src);
     template<> PointLightStyle Convert(const Ark_PointLightStyle& src);
     template<> RadioStyle Convert(const Ark_RadioStyle& src);
+    template<> Radius Convert(const Ark_Vector2& src);
     template<> RangeContent Convert(const Ark_TextPickerRangeContent& src);
     template<> Rect Convert(const Ark_RectResult& src);
     template<> RefPtr<BasicShape> Convert(const Ark_CircleShape& src);
@@ -532,6 +535,7 @@ namespace Converter {
     template<> RefPtr<BasicShape> Convert(const Ark_PathShape& src);
     template<> RefPtr<BasicShape> Convert(const Ark_RectShape& src);
     template<> RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src);
+    template<> RefPtr<Circle> Convert(const Ark_Circle& src);
     template<> RefPtr<Curve> Convert(const Ark_Curve& src);
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
     template<> RefPtr<Curve> Convert(const Ark_String& src);
@@ -544,6 +548,8 @@ namespace Converter {
     template<> RefPtr<Gesture> Convert(const Ark_SwipeGestureInterface& src);
     template<> RefPtr<Gesture> Convert(const Ark_TapGestureInterface& src);
     template<> RefPtr<PixelMap> Convert(const Ark_PixelMap& src);
+    template<> RefPtr<ShapeRect> Convert(const Ark_Rect& src);
+    template<> RefPtr<ShapeRect> Convert(const Ark_RoundRect& src);
     template<> ScaleOpt Convert(const Ark_ScaleOptions& src);
     template<> SelectionOptions Convert(const Ark_SelectionOptions& options);
     template<> Shadow Convert(const Ark_Int32& src);
@@ -571,6 +577,7 @@ namespace Converter {
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src);
     template<> std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src);
     template<> std::set<std::string> Convert(const Array_UniformDataType& src);
+    template<> std::string Convert(const Ark_CommandPath& src);
     template<> std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src);
     template<> std::u16string Convert(const Ark_String& src);
     template<> std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src);

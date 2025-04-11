@@ -2262,4 +2262,70 @@ std::set<std::string> Convert(const Array_UniformDataType& src)
     }
     return dst;
 }
+template<>
+RefPtr<ShapeRect> Convert(const Ark_Rect& src)
+{
+    auto dst = AceType::MakeRefPtr<ShapeRect>();
+    float left = Converter::Convert<float>(src.left);
+    float top = Converter::Convert<float>(src.top);
+    float right = Converter::Convert<float>(src.right);
+    float bottom = Converter::Convert<float>(src.bottom);
+    auto width = Dimension(right - left);
+    auto height = Dimension(bottom - top);
+    auto deltaX = Dimension(left);
+    auto deltaY = Dimension(top);
+    auto position = DimensionOffset(deltaX, deltaY);
+    dst->SetWidth(width);
+    dst->SetHeight(height);
+    dst->SetPosition(position);
+    return dst;
+}
+template<>
+Ace::Radius Convert(const Ark_Vector2& src)
+{
+    Ace::Radius dst;
+    auto x = Converter::Convert<float>(src.x);
+    auto y = Converter::Convert<float>(src.y);
+    dst.SetX(Dimension(x));
+    dst.SetY(Dimension(y));
+    return dst;
+}
+template<>
+Ace::Corner Convert(const Ark_CornerRadius& src)
+{
+    return Ace::Corner {
+        .topLeftRadius = Converter::Convert<Radius>(src.topLeft),
+        .topRightRadius = Converter::Convert<Radius>(src.topRight),
+        .bottomLeftRadius = Converter::Convert<Radius>(src.bottomLeft),
+        .bottomRightRadius = Converter::Convert<Radius>(src.bottomRight),
+    };
+}
+template<>
+RefPtr<ShapeRect> Convert(const Ark_RoundRect& src)
+{
+    auto dst = Converter::Convert<RefPtr<ShapeRect>>(src.rect);
+    auto corners = Converter::Convert<Corner>(src.corners);
+    dst->SetTopLeftRadius(corners.topLeftRadius);
+    dst->SetTopRightRadius(corners.topRightRadius);
+    dst->SetBottomLeftRadius(corners.bottomLeftRadius);
+    dst->SetBottomRightRadius(corners.bottomRightRadius);
+    return dst;
+}
+template<>
+RefPtr<Circle> Convert(const Ark_Circle& src)
+{
+    auto dst = AceType::MakeRefPtr<Circle>();
+    auto centerX = Converter::Convert<float>(src.centerX);
+    auto centerY = Converter::Convert<float>(src.centerY);
+    auto radius = Converter::Convert<float>(src.radius);
+    auto position = DimensionOffset(Dimension(centerX), Dimension(centerY));
+    dst->SetPosition(position);
+    dst->SetRadius(Dimension(radius));
+    return dst;
+}
+template<>
+std::string Convert(const Ark_CommandPath& src)
+{
+    return Converter::Convert<std::string>(src.commands);
+}
 } // namespace OHOS::Ace::NG::Converter
