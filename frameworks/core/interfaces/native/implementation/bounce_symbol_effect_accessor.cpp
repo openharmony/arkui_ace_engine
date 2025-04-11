@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BounceSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_BounceSymbolEffect peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_BounceSymbolEffect CtorImpl(const Opt_EffectScope* scope,
                                 const Opt_EffectDirection* direction)
@@ -36,7 +36,7 @@ Ark_BounceSymbolEffect CtorImpl(const Opt_EffectScope* scope,
     if (direction) {
         optDirection = Converter::OptConvert<OHOS::Ace::CommonSubType>(*direction);
     }
-    return new BounceSymbolEffectPeer(optScope, optDirection);
+    return PeerUtils::CreatePeer<BounceSymbolEffectPeer>(optScope, optDirection);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
