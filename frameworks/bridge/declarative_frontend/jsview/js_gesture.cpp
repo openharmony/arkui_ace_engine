@@ -395,9 +395,6 @@ napi_value JSPanGesture::ParsePanDistanceMap(JSRef<JSVal> jsDistanceMap, PanDist
         double distance = 0.0;
         NAPI_CALL(env, napi_get_value_double(env, value, &distance));
         SourceTool st = static_cast<SourceTool>(sourceTool);
-        if (distance < 0.0) {
-            distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
-        }
         if (st >= SourceTool::UNKNOWN && st <= SourceTool::JOYSTICK) {
             distanceMap[st] = distance;
         }

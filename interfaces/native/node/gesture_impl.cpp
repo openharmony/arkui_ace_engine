@@ -660,9 +660,6 @@ ArkUI_ErrorCode OH_ArkUI_PanGesture_SetDistanceMap(
     if (!gesture) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    if (size <= 0) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
     if (recognizer->type == PAN_GESTURE) {
         auto result = OHOS::Ace::NodeModel::GetFullImpl()
                           ->getNodeModifiers()
