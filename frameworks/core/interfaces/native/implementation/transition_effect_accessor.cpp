@@ -200,12 +200,10 @@ Ark_TransitionEffect GetOPACITYImpl()
 }
 Ark_TransitionEffect GetSLIDEImpl()
 {
-    TransitionEffectPeer* appearPeer = PeerUtils::CreatePeer<TransitionEffectPeer>();
-    appearPeer->handler = AceType::MakeRefPtr<ChainedMoveEffect>(TransitionEdge::START);
-    TransitionEffectPeer* disappearPeer = PeerUtils::CreatePeer<TransitionEffectPeer>();
-    disappearPeer->handler = AceType::MakeRefPtr<ChainedMoveEffect>(TransitionEdge::END);
+    auto appear = AceType::MakeRefPtr<ChainedMoveEffect>(TransitionEdge::START);
+    auto disappear = AceType::MakeRefPtr<ChainedMoveEffect>(TransitionEdge::END);
     TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
-    peer->handler = AceType::MakeRefPtr<ChainedAsymmetricEffect>(appearPeer->handler, disappearPeer->handler);
+    peer->handler = AceType::MakeRefPtr<ChainedAsymmetricEffect>(appear, disappear);
     return peer;
 }
 Ark_TransitionEffect GetSLIDE_SWITCHImpl()
