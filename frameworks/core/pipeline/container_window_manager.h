@@ -36,6 +36,15 @@ using GetFreeMultiWindowModeEnabledStateCallback = std::function<bool(void)>;
 using WindowIsStartMovingCallback = std::function<bool(void)>;
 using WindowCallNativeCallback = std::function<void(const std::string&, const std::string&)>;
 
+struct DecorButtonStyle {
+    int32_t colorMode;
+    uint32_t spacingBetweenButtons;
+    uint32_t closeButtonRightMargin;
+    uint32_t buttonBackgroundSize;
+    uint32_t buttonIconSize;
+    uint32_t buttonBackgroundCornerRadius;
+}
+
 class WindowManager : public virtual AceType {
     DECLARE_ACE_TYPE(WindowManager, AceType);
 
@@ -329,13 +338,6 @@ private:
 
 } // namespace OHOS::Ace
 
-struct DecorButtonStyle {
-    int32_t colorMode;
-    uint32_t spacingBetweenButtons;
-    uint32_t closeButtonRightMargin;
-    uint32_t buttonBackgroundSize;
-    uint32_t buttonIconSize;
-    uint32_t buttonBackgroundCornerRadius;
-}
+
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_CONTAINER_WINDOW_MANAGER_H
