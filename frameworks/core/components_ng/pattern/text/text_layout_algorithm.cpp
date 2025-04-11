@@ -172,7 +172,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     }
     CHECK_NULL_RETURN(paragraphManager_, std::nullopt);
 #ifdef ACE_ENABLE_VK
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = host->GetContext();
     auto fontManager = pipeline == nullptr ? nullptr : pipeline->GetFontManager();
     if (fontManager != nullptr && Rosen::RSSystemProperties::GetHybridRenderEnabled()) {
         if (static_cast<uint32_t>(paragraphManager_->GetLineCount()) >=
