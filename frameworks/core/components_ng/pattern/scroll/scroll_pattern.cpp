@@ -1533,4 +1533,12 @@ SizeF ScrollPattern::GetChildrenExpandedSize()
     }
     return SizeF();
 }
+
+void ScrollPattern::TriggerScrollBarDisplay()
+{
+    auto scrollBar = GetScrollBar();
+    CHECK_NULL_VOID(scrollBar);
+    scrollBar->PlayScrollBarAppearAnimation();
+    scrollBar->ScheduleDisappearDelayTask();
+}
 } // namespace OHOS::Ace::NG
