@@ -2411,10 +2411,10 @@ NG::RectT<int32_t> GetFrameNodeRectInt(const RefPtr<NG::FrameNode>& frameNode)
 {
     auto rect = frameNode->GetTransformRectRelativeToWindow();
     NG::RectT<int32_t> rectInt {
-        static_cast<int32_t>(std::round(rect.Left())),
-        static_cast<int32_t>(std::round(rect.Top())),
-        static_cast<int32_t>(std::round(rect.Width())),
-        static_cast<int32_t>(std::round(rect.Height()))
+        static_cast<int32_t>(std::floor(rect.Left())),
+        static_cast<int32_t>(std::floor(rect.Top())),
+        static_cast<int32_t>(std::floor(rect.Width())),
+        static_cast<int32_t>(std::floor(rect.Height()))
     };
     return rectInt;
 }
