@@ -5826,6 +5826,29 @@ void GetTranslate(ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Int32 
     (*values)[NUM_2] = translate.z.GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
+void GetTranslateWithPercentage(
+    ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Int32 (*units)[2], ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto translate = ViewAbstract::GetTranslate(frameNode);
+    if (translate.x.Unit() != DimensionUnit::PERCENT) {
+        (*units)[0] = NUM_0;
+        (*values)[0] = translate.x.GetNativeValue(static_cast<DimensionUnit>(unit));
+    } else {
+        (*units)[0] = NUM_1;
+        (*values)[0] = translate.x.Value();
+    }
+    if (translate.y.Unit() != DimensionUnit::PERCENT) {
+        (*units)[1] = NUM_0;
+        (*values)[1] = translate.y.GetNativeValue(static_cast<DimensionUnit>(unit));
+    } else {
+        (*units)[1] = NUM_1;
+        (*values)[1] = translate.y.Value();
+    }
+    (*values)[NUM_2] = translate.z.GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
 ArkUI_Float32 GetAspectRatio(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -7359,6 +7382,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .getMargin = GetMargin,
         .getMarginDimension = GetMarginDimension,
         .getTranslate = GetTranslate,
+        .getTranslateWithPercentage = GetTranslateWithPercentage,
         .setMoveTransition = SetMoveTransition,
         .getMoveTransition = GetMoveTransition,
         .resetMask = ResetMask,
@@ -7781,6 +7805,7 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .getMargin = GetMargin,
         .getMarginDimension = GetMarginDimension,
         .getTranslate = GetTranslate,
+        .getTranslateWithPercentage = GetTranslateWithPercentage,
         .setMoveTransition = SetMoveTransition,
         .getMoveTransition = GetMoveTransition,
         .resetMask = ResetMask,
