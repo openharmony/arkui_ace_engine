@@ -184,8 +184,10 @@ void HdrBrightnessImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //XComponentModelNG::SetHdrBrightness(frameNode, convValue);
+    auto convValue = Converter::Convert<float>(*value);
+    #ifdef XCOMPONENT_SUPPORTED
+    XComponentModelNG::HdrBrightness(frameNode, convValue);
+    #endif // XCOMPONENT_SUPPORTED
 }
 void EnableTransparentLayerImpl(Ark_NativePointer node,
                                 Ark_Boolean value)
@@ -193,7 +195,9 @@ void EnableTransparentLayerImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //XComponentModelNG::SetEnableTransparentLayer(frameNode, convValue);
+    #ifdef XCOMPONENT_SUPPORTED
+    XComponentModelNG::EnableTransparentLayer(frameNode, convValue);
+    #endif // XCOMPONENT_SUPPORTED
 }
 } // XComponentAttributeModifier
 const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
