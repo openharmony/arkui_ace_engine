@@ -1212,7 +1212,7 @@ void NavigationPattern::FireNavigationChange(const RefPtr<UINode>& node, bool is
 void NavigationPattern::FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle)
 {
     CHECK_NULL_VOID(node);
-    const auto& children = node->GetChildren(true);
+    const auto children = node->GetChildren(true);
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
         auto navigation = AceType::DynamicCast<NavigationGroupNode>(child);
