@@ -530,4 +530,64 @@ HWTEST_F(CommonShapeMethodModifierTest, setAntiAliasTest, TestSize.Level1)
         EXPECT_EQ(checkVal, expectVal);
     }
 }
+
+/**
+ * @tc.name: setStrokeDashArrayTest
+ * @tc.desc: Check the functionality of setStrokeDashArray
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonShapeMethodModifierTest, setStrokeDashArrayTest, TestSize.Level1)
+{
+    static const std::string propName("strokeDashArray");
+    ASSERT_NE(modifier_->setStrokeDashArray, nullptr);
+    using OneArrayLengthStep = std::tuple<Array_Length, std::vector<std::string>>;
+    std::vector<Dimension> vec1 = {3._px, 6._px};
+    std::vector<float> vec2 = {5.4f};
+    std::vector<Dimension> vec3 = {8.43_vp};
+    std::vector<Dimension> vec4 = {0.1_pct, 0.55_pct};
+    const std::vector<OneArrayLengthStep> TEST_PLAN = {
+        { Converter::ArkValue<Array_Length>(vec1, Converter::FC), {"3.00px", "6.00px"} },
+        { Converter::ArkValue<Array_Length>(vec2, Converter::FC), {"5.40vp", "5.40vp"} },
+        { Converter::ArkValue<Array_Length>(vec3, Converter::FC), {"8.43vp", "8.43vp"} },
+        { Converter::ArkValue<Array_Length>(vec4, Converter::FC), {"10.00%", "55.00%"} },
+    };
+    auto fullJson = GetJsonValue(node_);
+    auto checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    ASSERT_TRUE(checkVal->IsArray());
+    EXPECT_EQ(checkVal->GetArraySize(), 0);
+
+    for (const auto& [value, expectVal] : TEST_PLAN) {
+        modifier_->setStrokeDashArray(node_, &value);
+        auto fullJson = GetJsonValue(node_);
+        checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+        ASSERT_TRUE(checkVal->IsArray());
+        ASSERT_EQ(checkVal->GetArraySize(), 2);
+        ASSERT_NE(checkVal->GetArrayItem(0), nullptr);
+        EXPECT_EQ(checkVal->GetArrayItem(0)->GetString(), expectVal[0]);
+        ASSERT_NE(checkVal->GetArrayItem(1), nullptr);
+        EXPECT_EQ(checkVal->GetArrayItem(1)->GetString(), expectVal[1]);
+    }
+}
+
+/**
+ * @tc.name: setStrokeDashArrayInavlidTest
+ * @tc.desc: Check the invalid cases for setStrokeDashArray
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonShapeMethodModifierTest, setStrokeDashArrayInavlidTest, TestSize.Level1)
+{
+    static const std::string propName("strokeDashArray");
+    ASSERT_NE(modifier_->setStrokeDashArray, nullptr);
+    modifier_->setStrokeDashArray(node_, nullptr);
+    auto fullJson = GetJsonValue(node_);
+    auto checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    ASSERT_TRUE(checkVal->IsArray());
+    EXPECT_EQ(checkVal->GetArraySize(), 0);
+
+    modifier_->setStrokeDashArray(nullptr, nullptr);
+    fullJson = GetJsonValue(node_);
+    checkVal = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    ASSERT_TRUE(checkVal->IsArray());
+    EXPECT_EQ(checkVal->GetArraySize(), 0);
+}
 } // namespace OHOS::Ace::NG

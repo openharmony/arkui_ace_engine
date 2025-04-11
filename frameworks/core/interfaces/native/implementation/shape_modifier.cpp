@@ -125,24 +125,15 @@ void StrokeDashArrayImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    int32_t length = value->length;
-    std::vector<Dimension> strokeDashArray;
-    for (int32_t i = 0; i < length; ++i) {
-        Ark_Length arkStrokeDash = value->array[i];
-        auto optStrokeDash = Converter::OptConvert<Dimension>(arkStrokeDash);
-        Validator::ValidatePositive(optStrokeDash);
-        Validator::ValidateNonPercent(optStrokeDash);
-        if (optStrokeDash.has_value()) {
-            strokeDashArray.emplace_back(optStrokeDash.value());
+    auto dashArray = Converter::Convert<std::vector<Dimension>>(*value);
+    // if odd,add twice
+    auto length = value->length;
+    if (static_cast<uint32_t>(length) == dashArray.size() && (static_cast<uint32_t>(length) & 1)) {
+        for (int32_t i = 0; i < length; i++) {
+            dashArray.emplace_back(dashArray[i]);
         }
     }
-    if (length == static_cast<int32_t>(strokeDashArray.size()) && (length & 1)) {
-        for (int32_t i = 0; i < length; ++i) {
-            strokeDashArray.emplace_back(strokeDashArray[i]);
-        }
-    }
-    ShapeModelNG::SetStrokeDashArray(frameNode, strokeDashArray);
-    LOGE("ARKOALA CommonShapeMethodModifier.StrokeDashArray -> Method is not fully implemented.");
+    ShapeModelNG::SetStrokeDashArray(frameNode, std::move(dashArray));
 }
 void StrokeLineCapImpl(Ark_NativePointer node,
                        Ark_LineCapStyle value)
@@ -219,10 +210,20 @@ void MeshImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //ShapeModelNG::SetMesh(frameNode, convValue);
-    LOGE("ARKOALA ShapeModifier.MeshImpl -> Method is not implemented.");
+    CHECK_NULL_VOID(value);
+    CHECK_NULL_VOID(column);
+    CHECK_NULL_VOID(row);
+    std::vector<float> mesh;
+    auto columnValue = Converter::Convert<int32_t>(*column);
+    auto rowValue = Converter::Convert<int32_t>(*row);
+    auto meshSize = value->length;
+    auto tempMeshSize = static_cast<int64_t>(columnValue + 1) * (rowValue + 1) * 2;
+    if (tempMeshSize != meshSize) {
+        ShapeModelNG::SetBitmapMesh(frameNode, std::move(mesh), 0, 0);
+        return;
+    }
+    mesh = Converter::Convert<std::vector<float>>(*value);
+    ShapeModelNG::SetBitmapMesh(frameNode, std::move(mesh), columnValue, rowValue);
 }
 } // ShapeAttributeModifier
 const GENERATED_ArkUIShapeModifier* GetShapeModifier()
