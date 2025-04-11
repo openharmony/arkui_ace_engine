@@ -535,6 +535,7 @@
       OHOS::Ace::NG::NGGestureRecognizer::IsInResponseLinkRecognizers*;
       OHOS::Ace::TouchEventTarget::GetAttachedNode*;
       "OHOS::Ace::CheckThread(OHOS::Ace::TaskExecutor::TaskType)";
+      OHOS::Ace::NG::PanRecognizer::GetDistance*;
     };
   local:
     *;
