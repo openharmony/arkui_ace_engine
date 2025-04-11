@@ -32,3 +32,4 @@ export * from "./peers/ArkTestComponentPeer"
 export * from "./ArkTestComponent"
 export * from "./generated/peers/ArkButtonPeer"
 export * from './stateManagement'
+export { LengthMetrics, LengthMetricsInternal } from './Graphics'
