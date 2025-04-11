@@ -102,7 +102,7 @@ void MinFontScaleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
     Validator::ValidatePositive(convValue);
     Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
     SymbolModelNG::SetMinFontScale(frameNode, convValue);
@@ -112,7 +112,7 @@ void MaxFontScaleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
     Validator::ValidatePositive(convValue);
     Validator::ValidateGreatOrEqual(convValue, SCALE_LIMIT);
     SymbolModelNG::SetMaxFontScale(frameNode, convValue);
