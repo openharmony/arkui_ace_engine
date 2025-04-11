@@ -431,7 +431,7 @@ void ListItemDragManager::HandleOnItemDragUpdate(const GestureEvent& info)
     HandleAutoScroll(from, point, frameRect);
 
     auto paddingOffset = GetParentPaddingOffset();
-    int32_t to = ScaleNearItem(from, frameRect,realOffset_ - frameRect.GetOffset() + paddingOffset);
+    int32_t to = ScaleNearItem(from, frameRect, realOffset_ - frameRect.GetOffset() + paddingOffset);
     if (to == from) {
         return;
     }
