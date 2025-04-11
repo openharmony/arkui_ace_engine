@@ -33,23 +33,4 @@ WeakPtr<NG::Pattern> TouchEventListener::GetPatternFromListener()
 {
     return pattern_;
 }
-
-RotationEventListener::RotationEventListener()
-{}
-
-RotationEventListener::~RotationEventListener()
-{}
-
-void RotationEventListener::OnRotationEnd()
-{
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    // zhaopf todo
-    pattern->RecoverToTopLeft();
-}
-
-WeakPtr<NG::Pattern> RotationEventListener::GetPatternFromListener()
-{
-    return pattern_;
-}
 } // namespace OHOS::Ace::NG

@@ -462,6 +462,7 @@ WebPattern::WebPattern()
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
     RegisterSurfaceDensityCallback();
+    InitRotationEventCallback();
 }
 
 WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, RenderMode renderMode,
@@ -473,6 +474,7 @@ WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& w
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
     RegisterSurfaceDensityCallback();
+    InitRotationEventCallback();
 }
 
 WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, RenderMode renderMode,
@@ -484,6 +486,7 @@ WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWeb
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
     RegisterSurfaceDensityCallback();
+    InitRotationEventCallback();
 }
 
 WebPattern::~WebPattern()
@@ -491,7 +494,6 @@ WebPattern::~WebPattern()
     TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
     ACE_SCOPED_TRACE("WebPattern::~WebPattern, web id = %d", GetWebId());
     UninitTouchEventListener();
-    UninitRotationEventListener();
     if (delegate_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern delegate_ start SetAudioMuted");
         delegate_->SetAudioMuted(true);
@@ -522,6 +524,7 @@ WebPattern::~WebPattern()
     if (pipeline) {
         pipeline->UnregisterDensityChangedCallback(densityCallbackId_);
     }
+    UninitRotationEventCallback();
 }
 
 void WebPattern::ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
@@ -3568,7 +3571,6 @@ void WebPattern::InitInOfflineMode()
     }
     delegate_->HideWebView();
     CloseContextSelectionMenu();
-    UninitRotationEventListener();
 }
 
 bool WebPattern::IsNeedResizeVisibleViewport()
@@ -5491,7 +5493,6 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
         if (isVisibleActiveEnable_ && (!isDialogNested || !isFocus_)) {
             OnInActive();
         }
-        UninitRotationEventListener();
     } else {
         if (isVisibleActiveEnable_) {
             OnActive();
@@ -7253,32 +7254,35 @@ void WebPattern::RegisterSurfaceDensityCallback()
     }
 }
 
-void WebPattern::InitRotationEventListener()
+void WebPattern::InitRotationEventCallback()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::InitRotationEventListener");
-    if (rotationEventListener_) {
+    if (rotationEndCallbackId_ != 0) {
         return;
     }
-    rotationEventListener_ = std::make_shared<RotationEventListener>();
-    rotationEventListener_->SetPatternToListener(AceType::WeakClaim(this));
+
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::InitRotationEventCallback");
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-
-    context->RegisterRotationEndListener(rotationEventListener_);
+    rotationEndCallbackId_ = context->RegisterRotationEndCallback(
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->RecoverToTopLeft();
+        }
+    );
 }
 
-void WebPattern::UninitRotationEventListener()
+void WebPattern::UninitRotationEventCallback()
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::UninitRotationEventListener");
-    if (!rotationEventListener_) {
-        return;
-    }
-    rotationEventListener_ = nullptr;
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::UninitRotationEventCallback");
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    context->UnregisterRotationEndListener(AceType::WeakClaim(this));
+    if (rotationEndCallbackId_ != 0) {
+        context->UnregisterRotationEndCallback(rotationEndCallbackId_);
+        rotationEndCallbackId_ = 0;
+    }
 }
 
 void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
@@ -7286,20 +7290,20 @@ void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
     if (type != WindowSizeChangeReason::ROTATION) {
         return;
     }
-
     if (delegate_) {
         delegate_->MaximizeResize();
     }
+
     bool isNwebEx = delegate_->IsNWebEx();
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::AdjustRotationRenderFit, isNwebEx: %{public}d", isNwebEx);
     if (isNwebEx && SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE &&
-        isVisible_ && type == WindowSizeChangeReason::ROTATION) {
+        isVisible_) {
         isRotating_ = true;
-        InitRotationEventListener();
         TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::AdjustRotationRenderFit, webId: %{public}d", GetWebId());
         if (renderContextForSurface_) {
             renderContextForSurface_->SetRenderFit(RenderFit::RESIZE_FILL);
         }
+
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
         auto host = GetHost();
@@ -7311,8 +7315,7 @@ void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
         std::string taskName = "ArkUIWebRotationDelayTask_" + std::to_string(GetWebId());
         taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, taskName);
         taskExecutor->PostDelayedTask(
-            [weak = WeakClaim(this),
-            taskName]() {
+            [weak = WeakClaim(this), taskName]() {
             auto webPattern = weak.Upgrade();
             CHECK_NULL_VOID(webPattern);
             TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RestoreRenderFit DelayedTask, task: %{public}s",
@@ -7327,6 +7330,9 @@ void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
 
 void WebPattern::RecoverToTopLeft()
 {
+    if (!isRotating_) {
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RecoverToTopLeft, webId: %{public}d", GetWebId());
     isRotating_ = false;
     if (renderContextForSurface_) {

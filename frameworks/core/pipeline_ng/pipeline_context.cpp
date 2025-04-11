@@ -5319,11 +5319,7 @@ void PipelineContext::StopWindowAnimation()
     if (taskScheduler_ && !taskScheduler_->IsPredictTaskEmpty()) {
         RequestFrame();
     }
-    for (auto listenerItem : ratationEndListener_) {
-        if (listenerItem) {
-            listenerItem->OnRotationEnd();
-        }
-    }
+    OnRotationAnimationEnd();
 }
 
 void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
@@ -5965,22 +5961,11 @@ void PipelineContext::OnDumpInjection(const std::vector<std::string>& params) co
     frameNode->OnRecvCommand(params[1]);
 }
 
-void PipelineContext::RegisterRotationEndListener(const std::shared_ptr<NG::IRotationEventCallback>& listener)
+void PipelineContext::OnRotationAnimationEnd()
 {
-    if (!listener) {
-        return;
-    }
-    ratationEndListener_.emplace_back(listener);
-}
-
-void PipelineContext::UnregisterRotationEndListener(const WeakPtr<NG::Pattern>& pattern)
-{
-    for (auto iter = ratationEndListener_.begin(); iter != ratationEndListener_.end();) {
-        auto patternPtr = (*iter)->GetPatternFromListener();
-        if (patternPtr.Invalid() || patternPtr == pattern) {
-            iter = ratationEndListener_.erase(iter);
-        } else {
-            iter++;
+    for (auto&& [id, callback] : rotationEndCallbackMap_) {
+        if (callback) {
+            callback();
         }
     }
 }

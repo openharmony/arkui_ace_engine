@@ -19,6 +19,7 @@ namespace OHOS::Ace::NG {
 void WebPattern::Backward()
 {
 }
+
 bool IsNWebEx()
 {
     return false;

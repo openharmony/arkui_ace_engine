@@ -1442,11 +1442,11 @@ HWTEST_F(WebPatternSelectTestNg, ShowDateTimeDialog_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitRotationEventListener_001
- * @tc.desc: InitRotationEventListener
+ * @tc.name: InitRotationEventCallback_001
+ * @tc.desc: InitRotationEventCallback
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternSelectTestNg, InitRotationEventListener_001, TestSize.Level1)
+HWTEST_F(WebPatternSelectTestNg, InitRotationEventCallback_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -1459,18 +1459,18 @@ HWTEST_F(WebPatternSelectTestNg, InitRotationEventListener_001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->rotationEventListener_ = nullptr;
-    ASSERT_EQ(webPattern->rotationEventListener_, nullptr);
-    webPattern->InitRotationEventListener();
+    webPattern->touchEventListener_ = nullptr;
+    ASSERT_EQ(webPattern->touchEventListener_, nullptr);
+    webPattern->InitRotationEventCallback();
 #endif
 }
 
 /**
- * @tc.name: InitRotationEventListener_002
- * @tc.desc: InitRotationEventListener
+ * @tc.name: InitRotationEventCallback_002
+ * @tc.desc: InitRotationEventCallback
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternSelectTestNg, InitRotationEventListener_002, TestSize.Level1)
+HWTEST_F(WebPatternSelectTestNg, InitRotationEventCallback_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -1483,18 +1483,18 @@ HWTEST_F(WebPatternSelectTestNg, InitRotationEventListener_002, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->rotationEventListener_ = std::make_shared<RotationEventListener>();
-    ASSERT_NE(webPattern->rotationEventListener_, nullptr);
-    webPattern->InitRotationEventListener();
+    webPattern->rotationEndCallbackId_ = 0;
+    ASSERT_EQ(webPattern->rotationEndCallbackId_, 0);
+    webPattern->InitRotationEventCallback();
 #endif
 }
 
 /**
- * @tc.name: UninitRotationEventListener_001
- * @tc.desc: UninitRotationEventListener
+ * @tc.name: UninitRotationEventCallback_001
+ * @tc.desc: UninitRotationEventCallback
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternSelectTestNg, UninitRotationEventListener_001, TestSize.Level1)
+HWTEST_F(WebPatternSelectTestNg, UninitRotationEventCallback_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -1507,7 +1507,7 @@ HWTEST_F(WebPatternSelectTestNg, UninitRotationEventListener_001, TestSize.Level
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->UninitRotationEventListener();
+    webPattern->UninitRotationEventCallback();
 #endif
 }
 } // namespace OHOS::Ace::NG

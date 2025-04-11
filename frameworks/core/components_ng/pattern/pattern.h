@@ -703,7 +703,6 @@ public:
     {
         return false;
     }
-    virtual void RecoverToTopLeft() {}
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

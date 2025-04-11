@@ -1042,11 +1042,11 @@ HWTEST_F(WebPatternWindowTestNg, CalculateTooltipOffset_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitRotationEventListener_001
- * @tc.desc: InitRotationEventListener
+ * @tc.name: InitRotationEventCallback_001
+ * @tc.desc: InitRotationEventCallback
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternWindowTestNg, InitRotationEventListener_001, TestSize.Level1)
+HWTEST_F(WebPatternWindowTestNg, InitRotationEventCallback_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -1059,21 +1059,21 @@ HWTEST_F(WebPatternWindowTestNg, InitRotationEventListener_001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->rotationEventListener_ = nullptr;
+    webPattern->rotationEndCallbackId_ = 0;
     MockPipelineContext::SetUp();
     auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    webPattern->InitRotationEventListener();
+    webPattern->InitRotationEventCallback();
     MockPipelineContext::TearDown();
-    ASSERT_NE(webPattern->rotationEventListener_, nullptr);
+    ASSERT_NE(webPattern->rotationEndCallbackId_, 0);
 #endif
 }
 
 /**
- * @tc.name: UninitRotationEventListener_001
- * @tc.desc: UninitRotationEventListener
+ * @tc.name: UninitRotationEventCallback_001
+ * @tc.desc: UninitRotationEventCallback
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternWindowTestNg, UninitRotationEventListener_001, TestSize.Level1)
+HWTEST_F(WebPatternWindowTestNg, UninitRotationEventCallback_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -1086,13 +1086,11 @@ HWTEST_F(WebPatternWindowTestNg, UninitRotationEventListener_001, TestSize.Level
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    auto rotation = std::make_shared<RotationEventListener>();
-    webPattern->rotationEventListener_ = rotation;
     MockPipelineContext::SetUp();
     auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    webPattern->UninitRotationEventListener();
+    webPattern->UninitRotationEventCallback();
     MockPipelineContext::TearDown();
-    EXPECT_EQ(webPattern->rotationEventListener_, nullptr);
+    EXPECT_EQ(webPattern->rotationEndCallbackId_, 0);
 #endif
 }
 } // namespace OHOS::Ace::NG
