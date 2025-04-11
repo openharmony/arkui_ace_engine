@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "text_base.h"
 
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
@@ -35,6 +36,10 @@ class TextFieldTenPatternNg : public TextBases {
 public:
 };
 
+class MockTextBase : public TextBase {
+public:
+    MOCK_METHOD1(BetweenSelectedPosition, bool(const Offset& globalOffset));
+};
 
 /**
  * @tc.name: SpanItemUpdateParagraph007
@@ -1728,26 +1733,6 @@ HWTEST_F(TextFieldTenPatternNg, DumpInfoTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ActSetSelection001
- * @tc.desc: test ActSetSelection
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldTenPatternNg, ActSetSelection001, TestSize.Level1)
-{
-    auto [frameNode, pattern] = Init();
-    pattern->textForDisplay_ = u"testString";
-    TextSelector textSelector;
-    RectF firstHandle(0.0, 0.0, 0.0, 0.0);
-    RectF secondHandle(1.0, 1.0, 1.0, 1.0);
-    textSelector.firstHandle = firstHandle;
-    textSelector.secondHandle = secondHandle;
-    pattern->textSelector_ = textSelector;
-    pattern->pManager_ = nullptr;
-    pattern->ActSetSelection(5, 7);
-    EXPECT_FALSE(pattern->showSelected_);
-}
-
-/**
  * @tc.name: LogForFormRender001
  * @tc.desc: test LogForFormRender
  * @tc.type: FUNC
@@ -1786,5 +1771,445 @@ HWTEST_F(TextFieldTenPatternNg, LogForFormRender001, TestSize.Level1)
     pattern->isSensitive_ = false;
     pattern->LogForFormRender(logTag);
     EXPECT_FALSE(pattern->IsSensitiveEnable());
+}
+
+/**
+ * @tc.name: HandleMouseLeftMoveAction001
+ * @tc.desc: test DeleteRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleMouseLeftMoveAction001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textForDisplay_ = u"test";
+    pattern->textSelector_.Update(0, 3);
+    pattern->copyOption_ = CopyOptions::None;
+
+    /**
+     * @tc.steps: step2. Set IsSelectableAndCopy is true.
+     * @tc.expect: isMousePressed_ value will  be change.
+     */
+    MouseInfo info;
+    Offset offset(1, 1);
+    pattern->HandleMouseLeftMoveAction(info, offset);
+    EXPECT_EQ(pattern->isMousePressed_, false);
+}
+
+/**
+ * @tc.name: HandleMouseLeftMoveAction002
+ * @tc.desc: test DeleteRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleMouseLeftMoveAction002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textForDisplay_ = u"test";
+    pattern->textSelector_.Update(0, 3);
+    pattern->copyOption_ = CopyOptions::InApp;
+
+    /**
+     * @tc.steps: step2. Set IsSelectableAndCopy is false.
+     * @tc.expect: mouseStatus_ value result  MOVE.
+     */
+    MouseInfo info;
+    Offset offset(1, 1);
+    pattern->isMousePressed_ = true;
+    pattern->leftMousePressed_ = true;
+    pattern->HandleMouseLeftMoveAction(info, offset);
+    EXPECT_EQ(pattern->mouseStatus_, MouseStatus::MOVE);
+}
+
+/**
+ * @tc.name: HandleMouseRightButton001
+ * @tc.desc: test DeleteRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleMouseRightButton001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern, InitMouseEvent.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"1234567890");
+    textModelNG.SetTextDetectEnable(true);
+    auto host = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = host->GetPattern<TextPattern>();
+    auto inputHub = host->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+    inputHub->mouseEventActuator_->inputEvents_.clear();
+    pattern->mouseEventInitialized_ = false;
+    pattern->InitMouseEvent();
+
+    /**
+     * @tc.steps: step2. test HandleMouseRightButton function and MouseButton LEFT_BUTTON.
+     * @tc.expect:hasClickedAISpan_ is false.
+     */
+    MouseInfo info;
+    info.button_ = MouseButton::LEFT_BUTTON;
+    info.action_ = MouseAction::PRESS;
+    Offset offset(5.f, 5.f);
+    info.button_ = MouseButton::RIGHT_BUTTON;
+    info.action_ = MouseAction::RELEASE;
+    pattern->copyOption_ = CopyOptions::None;
+    pattern->HandleMouseRightButton(info, offset);
+    EXPECT_FALSE(pattern->dataDetectorAdapter_->hasClickedAISpan_);
+
+    /**
+     * @tc.steps: step3. test HandleMouseRightButton function and MouseButton RIGHT_BUTTON..
+     * @tc.expect: hasClickedAISpan_ is false.
+     */
+    pattern->dataDetectorAdapter_->hasClickedAISpan_ = false;
+    info.button_ = MouseButton::RIGHT_BUTTON;
+    info.action_ = MouseAction::RELEASE;
+    pattern->copyOption_ = CopyOptions::InApp;
+    pattern->HandleMouseRightButton(info, offset);
+    EXPECT_FALSE(pattern->dataDetectorAdapter_->hasClickedAISpan_);
+
+    info.SetAction(MouseAction::PRESS);
+    pattern->HandleMouseRightButton(info, offset);
+    EXPECT_NE(pattern->dataDetectorAdapter_->hasClickedAISpan_, true);
+}
+
+/**
+ * @tc.name: UpdateShiftFlag001
+ * @tc.desc: test DeleteRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, UpdateShiftFlag001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pattern and KeyEvent.
+     * @tc.expected: Ensure that the pattern is not empty.
+     */
+    
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    KeyEvent keyEvent;
+
+    /**
+     * @tc.steps: step2. pressing the left Shift KeyAction:: DOWN
+     * @tc.expected: called UpdateShiftFlag shiftFlag_ should be set to true.
+     */
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_SHIFT_LEFT);
+    pattern->UpdateShiftFlag(keyEvent);
+    EXPECT_EQ(pattern->shiftFlag_, true);
+
+    /**
+     * @tc.steps: step2. pressing the left Shift KeyAction:: UP
+     * @tc.expected: called UpdateShiftFlag shiftFlag_ should be set to false.
+     */
+    keyEvent.action = KeyAction::UP;
+    pattern->shiftFlag_ = true;
+    keyEvent.pressedCodes.clear();
+    pattern->UpdateShiftFlag(keyEvent);
+    EXPECT_EQ(pattern->shiftFlag_, false);
+}
+
+/**
+ * @tc.name: CreateTextDragInfo001
+ * @tc.desc: test CreateTextDragInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, CreateTextDragInfo001, TestSize.Level1)
+{
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    RefPtr<TextPattern> pattern = textNode->GetPattern<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    WeakPtr<MockTextBase> textBase = mockBase;
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textNode);
+    pattern->selectOverlay_->OnBind(manager);
+    pattern->selectOverlay_->ToggleMenu();
+    pattern->AttachToFrameNode(frameNode);
+
+    RectF paintRect1(2.0, 0.0, 0.0, 0.0);
+    RectF paintRect2(1.0, 1.0, 1.0, 1.0);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    pipeline->themeManager_ = theme;
+    auto ret = pattern->CreateTextDragInfo();
+    EXPECT_NE(ret.firstHandle, paintRect1);
+    EXPECT_NE(ret.secondHandle, paintRect2);
+
+    auto manager1 = pattern->selectOverlay_->GetManager<SelectContentOverlayManager>();
+    std::shared_ptr<SelectOverlayInfo> shareOverlayInfo = std::make_shared<SelectOverlayInfo>();
+    SelectHandleInfo firstHandle;
+    firstHandle.paintRect = paintRect1;
+
+    SelectHandleInfo secondHandle;
+    secondHandle.paintRect = paintRect2;
+    shareOverlayInfo->firstHandle = firstHandle;
+    shareOverlayInfo->secondHandle = secondHandle;
+    manager1->shareOverlayInfo_ = shareOverlayInfo;
+    manager1->shareOverlayInfo_->firstHandle.isShow = true;
+    manager1->shareOverlayInfo_->secondHandle.isShow = true;
+    ret = pattern->CreateTextDragInfo();
+    EXPECT_EQ(ret.firstHandle, paintRect1);
+    EXPECT_EQ(ret.secondHandle, paintRect2);
+
+    manager1->shareOverlayInfo_ = shareOverlayInfo;
+    manager1->shareOverlayInfo_->firstHandle.isShow = false;
+    manager1->shareOverlayInfo_->secondHandle.isShow = false;
+    ret = pattern->CreateTextDragInfo();
+    EXPECT_NE(ret.firstHandle, paintRect1);
+    EXPECT_NE(ret.secondHandle, paintRect2);
+}
+
+/**
+ * @tc.name: GetUrlSpanColor001
+ * @tc.desc: test GetUrlSpanColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, GetUrlSpanColor001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    pattern->AttachToFrameNode(frameNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    WeakPtr<MockTextBase> textBase = mockBase;
+
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
+    pattern->selectOverlay_->ProcessOverlay({ .animation = false });
+    pipeline->themeManager_ = theme;
+    auto eventHub = pattern->GetHost()->GetEventHub<EventHub>();
+    eventHub->enabled_ = true;
+    Color ret = pattern->GetUrlSpanColor();
+    EXPECT_EQ(ret, pipeline->GetTheme<TextTheme>()->GetUrlDefaultColor());
+
+    eventHub->enabled_ = false;
+    ret = pattern->GetUrlSpanColor();
+    EXPECT_EQ(ret, pipeline->GetTheme<TextTheme>()->GetUrlDisabledColor());
+}
+
+/**
+ * @tc.name: ResumeSymbolAnimation001
+ * @tc.desc: test ResumeSymbolAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, ResumeSymbolAnimation001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 1, pattern);
+    auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    layoutProperty->SetIsLoopAnimation(true);
+    pattern->ResumeSymbolAnimation();
+    EXPECT_TRUE(pattern->GetLayoutProperty<TextLayoutProperty>()->
+        GetSymbolEffectOptionsValue(SymbolEffectOptions()).GetIsTxtActive());
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate001
+ * @tc.desc: test OnThemeScopeUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, OnThemeScopeUpdate001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 0, pattern);
+    int32_t themeScopeId = 0;
+    bool result = pattern->OnThemeScopeUpdate(themeScopeId);
+    EXPECT_FALSE(result);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    layoutProperty->UpdateTextColor(Color::RED);
+    result = pattern->OnThemeScopeUpdate(themeScopeId);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetOriginCaretPosition001
+ * @tc.desc: test GetOriginCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, GetOriginCaretPosition001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    OffsetF offset(0, 0);
+    pattern->ResetOriginCaretPosition();
+    bool result = pattern->GetOriginCaretPosition(offset);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ProcessBoundRectByTextMarquee001
+ * @tc.desc: test ProcessBoundRectByTextMarquee
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, ProcessBoundRectByTextMarquee001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 0, pattern);
+    auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+    RectF rect = RectF(10, 0, 0, 0);
+    pattern->ProcessBoundRectByTextMarquee(rect);
+    EXPECT_EQ(rect.Width(), -10);
+
+    RectF testRect = RectF(10, 0, 0, 0);
+    frameNode->GetGeometryNode()->SetContentSize({ 10, 10 });
+    pattern->ProcessBoundRectByTextMarquee(testRect);
+    EXPECT_EQ(testRect.Width(), 0);
+}
+
+/**
+ * @tc.name: CreateModifier001
+ * @tc.desc: test CreateModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, CreateModifier001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    pattern->SetIsCustomFont(true);
+    pattern->CreateModifier();
+    EXPECT_TRUE(pattern->contentMod_->GetIsCustomFont());
+}
+
+/**
+ * @tc.name: OnHandleAreaChanged001
+ * @tc.desc: test OnHandleAreaChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, OnHandleAreaChanged001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. parentGlobalOffset_ is default vaule { 0, 0 } and call OnHandleAreaChanged.
+     * @tc.expect: pattern->GetParentGlobalOffset() is equal to pattern->parentGlobalOffset_.
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 0, pattern);
+    pattern->ShowSelectOverlay();
+    pattern->OnHandleAreaChanged();
+    EXPECT_EQ(pattern->GetParentGlobalOffset(), pattern->parentGlobalOffset_);
+
+    /**
+     * @tc.steps: step2. parentGlobalOffset_ is { 1, 1 } and call OnHandleAreaChanged.
+     * @tc.expect: pattern->GetParentGlobalOffset() is equal to pattern->parentGlobalOffset_.
+     */
+    pattern->parentGlobalOffset_ = { 1, 1 };
+    pattern->OnHandleAreaChanged();
+    EXPECT_EQ(pattern->GetParentGlobalOffset(), pattern->parentGlobalOffset_);
+}
+
+/**
+ * @tc.name: SetTextDetectEnable001
+ * @tc.desc: test SetTextDetectEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, SetTextDetectEnable001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 0, pattern);
+    bool enable = false;
+    pattern->SetTextDetectEnable(enable);
+    EXPECT_FALSE(pattern->textDetectEnable_);
+
+    pattern->textDetectEnable_ = true;
+    pattern->SetTextDetectEnable(enable);
+    EXPECT_FALSE(pattern->textDetectEnable_);
+}
+
+/**
+ * @tc.name: FireOnMarqueeStateChange001
+ * @tc.desc: test FireOnMarqueeStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, FireOnMarqueeStateChange001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 0, pattern);
+    TextMarqueeState state = TextMarqueeState::FINISH;
+    pattern->isMarqueeRunning_ = true;
+    pattern->FireOnMarqueeStateChange(state);
+    EXPECT_FALSE(pattern->isMarqueeRunning_);
+}
+
+/**
+ * @tc.name: HandleSelectionChange001
+ * @tc.desc: test HandleSelectionChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleSelectionChange001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 0, pattern);
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->unicode = 1;
+    pattern->spans_.push_back(spanItem);
+
+    int32_t start = 1;
+    int32_t end = 1;
+    pattern->HandleSelectionChange(start, end);
+    EXPECT_EQ(pattern->textSelector_.GetStart(), start);
+    EXPECT_EQ(pattern->textSelector_.GetEnd(), end);
+}
+
+/**
+ * @tc.name: GetBuilderResultObject001
+ * @tc.desc: test GetBuilderResultObject
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, GetBuilderResultObject001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 0, pattern);
+    int32_t index = -1;
+    int32_t start = 0;
+    int32_t end = 0;
+    ResultObject resultObject;
+    ResultObject result = pattern->GetBuilderResultObject(frameNode, index, start, end);
+    EXPECT_EQ(result.spanPosition.spanIndex, resultObject.spanPosition.spanIndex);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    pattern->spans_.push_back(spanItem);
+    pattern->spans_.push_back(spanItem);
+    index = 1;
+    start = -100;
+    end = -100;
+    result = pattern->GetBuilderResultObject(frameNode, index, start, end);
+    EXPECT_EQ(result.spanPosition.spanIndex, resultObject.spanPosition.spanIndex);
+
+    start = 100;
+    result = pattern->GetBuilderResultObject(frameNode, index, start, end);
+    EXPECT_EQ(result.spanPosition.spanIndex, resultObject.spanPosition.spanIndex);
+}
+
+/**
+ * @tc.name: ProcessMarqueeVisibleAreaCallback001
+ * @tc.desc: test TextPattern ProcessMarqueeVisibleAreaCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, ProcessMarqueeVisibleAreaCallback001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+
+    /**
+     * @tc.steps: visible is 0, ratio is 0, raceAnimation_ is null.
+     * @tc.expected: marqueeState_ is default value MarqueeState::IDLE.
+     */
+    RefPtr<TextContentModifier> contentMod =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    pattern->contentMod_ = contentMod;
+    EXPECT_NE(pattern->contentMod_, nullptr);
+    pattern->ProcessMarqueeVisibleAreaCallback();
+    EXPECT_EQ(pattern->contentMod_->marqueeState_, MarqueeState::IDLE);
 }
 } // namespace OHOS::Ace::NG
