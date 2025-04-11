@@ -244,7 +244,8 @@ void ContainerModalViewEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> 
     CHECK_NULL_VOID(controlButtonsNode);
     controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SPACING_CHANGE,
         std::to_string(buttonStyle.spacingBetweenButtons));
-    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SIZE_CHANGE, std::to_string(buttonStyle.buttonBackgroundSize));
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SIZE_CHANGE,
+        std::to_string(buttonStyle.buttonBackgroundSize));
     controlButtonsNode->FireCustomCallback(EVENT_NAME_COLOR_CONFIGURATION_LOCKED,
         std::to_string(buttonStyle.colorMode));
     if (buttonStyle.colorMode != static_cast<int32_t>(ColorMode::DARK) &&
