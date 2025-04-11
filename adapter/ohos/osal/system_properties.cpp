@@ -584,6 +584,7 @@ bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentE
 int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus();
 int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
+bool SystemProperties::formSkeletonBlurEnabled_ = true;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -733,6 +734,7 @@ void SystemProperties::InitDeviceInfo(
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
     taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
+    formSkeletonBlurEnabled_ = system::GetBoolParameter("const.form.skeleton_view.bulr_style_enable", true);
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -1148,6 +1150,11 @@ bool SystemProperties::IsSuperFoldDisplayDevice()
 bool SystemProperties::IsPageTransitionFreeze()
 {
     return pageTransitionFrzEnabled_;
+}
+
+bool SystemProperties::IsFormSkeletonBlurEnabled()
+{
+    return formSkeletonBlurEnabled_;
 }
 
 } // namespace OHOS::Ace
