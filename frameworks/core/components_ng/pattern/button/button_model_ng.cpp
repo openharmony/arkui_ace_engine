@@ -175,7 +175,7 @@ void ButtonModelNG::SetButtonSize(FrameNode* frameNode, const std::optional<Cont
             float leftPadding =  buttonTheme->GetPaddingText().ConvertToPx();
             float rightPadding = buttonTheme->GetPaddingText().ConvertToPx();
             defaultPadding = { CalcLength(leftPadding), CalcLength(rightPadding),
-            CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
+                CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
         } else {
             defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
                 CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
