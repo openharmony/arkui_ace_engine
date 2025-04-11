@@ -316,7 +316,11 @@ void MenuItemPattern::ShowSubMenu()
     CHECK_NULL_VOID(customNode);
     UpdateSubmenuExpandingMode(customNode);
     if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
+        auto frameNode = GetSubMenu(customNode);
+        if (!frameNode) {
+            frameNode = AceType::DynamicCast<FrameNode>(customNode);
+        }
+        CHECK_NULL_VOID(frameNode);
         OnExpandChanged(frameNode);
         return;
     }
@@ -354,7 +358,7 @@ void MenuItemPattern::ShowSubMenu()
         static_cast<int32_t>(AccessibilityEventType::PAGE_OPEN));
 }
 
-RefPtr<FrameNode> GetSubMenu(RefPtr<UINode>& customNode)
+RefPtr<FrameNode> MenuItemPattern::GetSubMenu(RefPtr<UINode>& customNode)
 {
     CHECK_NULL_RETURN(customNode, nullptr);
     if (customNode->GetTag() == V2::MENU_ETS_TAG) {
