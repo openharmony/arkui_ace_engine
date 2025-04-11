@@ -445,7 +445,8 @@ bool ListPattern::UpdateEndListItemIndex()
     return endFlagChanged;
 }
 
-void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump) {
+void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump) 
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto listEventHub = host->GetEventHub<ListEventHub>();
