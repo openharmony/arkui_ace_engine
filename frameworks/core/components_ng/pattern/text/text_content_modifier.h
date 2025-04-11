@@ -113,6 +113,10 @@ public:
     }
     void TextColorModifier(const Color& value);
     void ContentModifierDump();
+#ifdef ACE_ENABLE_VK
+    void SetHybridRenderTypeIfNeeded(DrawingContext& drawingContext, const RefPtr<ParagraphManager>& pManager,
+        RefPtr<FrameNode>& host);
+#endif
 
 protected:
     OffsetF GetPaintOffset() const

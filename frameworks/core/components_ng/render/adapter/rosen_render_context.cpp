@@ -482,9 +482,19 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
         case ContextType::EFFECT:
             rsNode_ = Rosen::RSEffectNode::Create(false, isTextureExportNode);
             break;
-        case ContextType::INCREMENTAL_CANVAS:
+        case ContextType::INCREMENTAL_CANVAS: {
+#ifdef ACE_ENABLE_HYBRID_RENDER
+            if (RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
+                rsNode_ = Rosen::RSCanvasNode::Create(false, isTextureExportNode);
+                rsNode_->SetHybridRenderCanvas(true);
+            } else {
+                rsNode_ = Rosen::RSCanvasDrawingNode::Create(false, isTextureExportNode);
+            }
+#else
             rsNode_ = Rosen::RSCanvasDrawingNode::Create(false, isTextureExportNode);
+#endif
             break;
+        }
         case ContextType::EXTERNAL:
             break;
         default:
@@ -1619,16 +1629,16 @@ void RosenRenderContext::OnOpacityUpdate(double opacity)
 
 void RosenRenderContext::OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode)
 {
-    auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
-    CHECK_NULL_VOID(rsCanvasDrawingNode);
+    auto rsCanvasNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
+    CHECK_NULL_VOID(rsCanvasNode);
     if (dynamicRangeMode < DynamicRangeMode::STANDARD && !isHdr_) {
         TAG_LOGD(AceLogTag::ACE_IMAGE, "Set HDRPresent True.");
         isHdr_ = true;
-        rsCanvasDrawingNode->SetHDRPresent(true);
+        rsCanvasNode->SetHDRPresent(true);
     } else if (isHdr_) {
         TAG_LOGD(AceLogTag::ACE_IMAGE, "Set HDRPresent False.");
         isHdr_ = false;
-        rsCanvasDrawingNode->SetHDRPresent(false);
+        rsCanvasNode->SetHDRPresent(false);
     }
 }
 
@@ -1730,6 +1740,15 @@ void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scal
 
 bool RosenRenderContext::GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList)
 {
+#ifdef ACE_ENABLE_HYBRID_RENDER
+    if (RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
+        auto rsCanvasNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
+        if (!rsCanvasNode || !rsCanvasNode->IsHybridRenderCanvas()) {
+            return false;
+        }
+        return rsCanvasNode->GetBitmap(bitmap, drawCmdList);
+    }
+#endif
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
     if (!rsCanvasDrawingNode) {
         return false;
@@ -1740,6 +1759,15 @@ bool RosenRenderContext::GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdLi
 bool RosenRenderContext::GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
     std::shared_ptr<RSDrawCmdList> drawCmdList, Rosen::Drawing::Rect* rect)
 {
+#ifdef ACE_ENABLE_HYBRID_RENDER
+    if (RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
+        auto rsCanvasNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
+        if (!rsCanvasNode || !rsCanvasNode->IsHybridRenderCanvas()) {
+            return false;
+        }
+        return rsCanvasNode->GetPixelmap(pixelMap, drawCmdList, rect);
+    }
+#endif
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
     if (!rsCanvasDrawingNode) {
         return false;
@@ -6525,6 +6553,16 @@ int32_t RosenRenderContext::GetRotateDegree()
 
 void RosenRenderContext::ResetSurface(int width, int height)
 {
+#ifdef ACE_ENABLE_HYBRID_RENDER
+    if (RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
+        auto rsCanvasNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
+        CHECK_NULL_VOID(rsCanvasNode);
+        if (rsCanvasNode->IsHybridRenderCanvas()) {
+            rsCanvasNode->ResetSurface(width, height);
+        }
+        return;
+    }
+#endif
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
     CHECK_NULL_VOID(rsCanvasDrawingNode);
     rsCanvasDrawingNode->ResetSurface(width, height);
