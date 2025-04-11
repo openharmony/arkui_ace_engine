@@ -517,7 +517,9 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto isBlock = bubbleProp->GetBlockEventValue(true);
     dumpInfo_.mask = isBlock;
     UpdateHostWindowRect();
-    SetHotAreas(showInSubWindow, isBlock, frameNode, bubblePattern->GetContainerId());
+    if (!isTips_) {
+        SetHotAreas(showInSubWindow, isBlock, frameNode, bubblePattern->GetContainerId());
+    }
     UpdateClipOffset(frameNode);
 }
 
