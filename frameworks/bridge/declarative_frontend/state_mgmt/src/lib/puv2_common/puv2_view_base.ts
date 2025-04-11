@@ -394,6 +394,10 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     // and clean up all book keeping for them
     this.purgeDeletedElmtIds();
 
+    // forceCompleteRerender() might have been called externally,
+    // ensure all pending book keeping is finished to prevent unwanted element updates
+    ObserveV2.getObserve()?.runIdleTasks();
+
     Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
 
     if (!deep) {
