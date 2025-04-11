@@ -469,7 +469,7 @@ namespace Converter {
     template<> CheckboxSettingData Convert(const Ark_LunarSwitchStyle& src);
     template<> Color Convert(const Ark_Number& src);
     template<> Color Convert(const Ark_String& src);
-    template<> Ace::Corner Convert(const Ark_CornerRadius& src);
+    template<> Corner Convert(const Ark_CornerRadius& src);
     template<> DateTimeType Convert(const Ark_DateTimeOptions& src);
     template<> Dimension Convert(const Ark_CustomObject& src);
     template<> Dimension Convert(const Ark_Length& src);

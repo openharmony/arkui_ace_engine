@@ -23,11 +23,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ShapeClipAccessor {
 void DestroyPeerImpl(Ark_ShapeClip peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_ShapeClip CtorImpl()
 {
-    return new ShapeClipPeer();
+    return PeerUtils::CreatePeer<ShapeClipPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

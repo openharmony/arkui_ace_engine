@@ -2281,9 +2281,9 @@ RefPtr<ShapeRect> Convert(const Ark_Rect& src)
     return dst;
 }
 template<>
-Ace::Radius Convert(const Ark_Vector2& src)
+Radius Convert(const Ark_Vector2& src)
 {
-    Ace::Radius dst;
+    Radius dst;
     auto x = Converter::Convert<float>(src.x);
     auto y = Converter::Convert<float>(src.y);
     dst.SetX(Dimension(x));
@@ -2291,9 +2291,9 @@ Ace::Radius Convert(const Ark_Vector2& src)
     return dst;
 }
 template<>
-Ace::Corner Convert(const Ark_CornerRadius& src)
+Corner Convert(const Ark_CornerRadius& src)
 {
-    return Ace::Corner {
+    return Corner {
         .topLeftRadius = Converter::Convert<Radius>(src.topLeft),
         .topRightRadius = Converter::Convert<Radius>(src.topRight),
         .bottomLeftRadius = Converter::Convert<Radius>(src.bottomLeft),
