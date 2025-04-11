@@ -2109,16 +2109,18 @@ void MenuPattern::HandlePrevPressed(const RefPtr<UINode>& parent, int32_t index,
         }
     } else {
         auto syntaxNode = GetSyntaxNode(parent);
-        if (parent->GetParent()->GetChildIndex(parent) == 0 && syntaxNode) {
+        auto grandParent = parent->GetParent();
+        CHECK_NULL_VOID(grandParent);
+        if (grandParent->GetChildIndex(parent) == 0 && syntaxNode) {
             prevNode = GetForEachMenuItem(syntaxNode, false);
         }
         bool matchFirstItemInIfElse = parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG &&
-            parent->GetParent()->GetChildIndex(parent) == 0 &&
-            parent->GetParent()->GetTag() == V2::JS_IF_ELSE_ETS_TAG;
+            grandParent->GetChildIndex(parent) == 0 &&
+            grandParent->GetTag() == V2::JS_IF_ELSE_ETS_TAG;
         if (matchFirstItemInIfElse) { // the first item in first group in ifElse
-            prevNode = GetOutsideForEachMenuItem(parent->GetParent(), false);
+            prevNode = GetOutsideForEachMenuItem(grandParent, false);
         }
-        bool notFirstGroupInMenu = parent->GetParent()->GetChildIndex(parent) > 0 &&
+        bool notFirstGroupInMenu = grandParent->GetChildIndex(parent) > 0 &&
             parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG;
         if (notFirstGroupInMenu) {
             prevNode = GetOutsideForEachMenuItem(parent, false);
