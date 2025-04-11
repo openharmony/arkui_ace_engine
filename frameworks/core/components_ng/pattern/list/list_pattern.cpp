@@ -843,7 +843,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     FireAndCleanScrollingListener();
     auto lastDelta = currentDelta_;
     currentDelta_ = currentDelta_ - offset;
-    if (source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING) {
+    if (source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING || source == SCROLL_FROM_STATUSBAR) {
         isNeedCheckOffset_ = true;
     }
     if (!NearZero(offset)) {
