@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DisappearSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_DisappearSymbolEffect peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_DisappearSymbolEffect CtorImpl(const Opt_EffectScope* scope)
 {
@@ -31,7 +31,7 @@ Ark_DisappearSymbolEffect CtorImpl(const Opt_EffectScope* scope)
     if (scope) {
         optScope = Converter::OptConvert<OHOS::Ace::ScopeType>(*scope);
     }
-    return new DisappearSymbolEffectPeer(optScope);
+    return PeerUtils::CreatePeer<DisappearSymbolEffectPeer>(optScope);
 }
 Ark_NativePointer GetFinalizerImpl()
 {

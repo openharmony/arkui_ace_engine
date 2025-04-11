@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HierarchicalSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_HierarchicalSymbolEffect peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_HierarchicalSymbolEffect CtorImpl(const Opt_EffectFillStyle* fillStyle)
 {
@@ -31,7 +31,7 @@ Ark_HierarchicalSymbolEffect CtorImpl(const Opt_EffectFillStyle* fillStyle)
     if (fillStyle) {
         optFillStyle = Converter::OptConvert<OHOS::Ace::FillStyle>(*fillStyle);
     }
-    return new HierarchicalSymbolEffectPeer(optFillStyle);
+    return PeerUtils::CreatePeer<HierarchicalSymbolEffectPeer>(optFillStyle);
 }
 Ark_NativePointer GetFinalizerImpl()
 {

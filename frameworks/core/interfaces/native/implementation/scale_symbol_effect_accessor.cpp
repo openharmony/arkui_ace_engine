@@ -23,8 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScaleSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_ScaleSymbolEffect peer)
 {
-    CHECK_NULL_VOID(peer);
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_ScaleSymbolEffect CtorImpl(const Opt_EffectScope* scope,
                                const Opt_EffectDirection* direction)
@@ -37,7 +36,7 @@ Ark_ScaleSymbolEffect CtorImpl(const Opt_EffectScope* scope,
     if (direction) {
         optDirection = Converter::OptConvert<OHOS::Ace::CommonSubType>(*direction);
     }
-    return new ScaleSymbolEffectPeer(optScope, optDirection);
+    return PeerUtils::CreatePeer<ScaleSymbolEffectPeer>(optScope, optDirection);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
