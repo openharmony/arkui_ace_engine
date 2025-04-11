@@ -19,7 +19,6 @@
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/focus_hub.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -28,8 +27,8 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #endif
 
@@ -523,24 +522,29 @@ void ViewAbstractModelNG::BindDragWithContextMenuParams(FrameNode* targetNode, c
 
 void ViewAbstractModelNG::SetToolbarBuilder(std::function<void()>&& buildFunc)
 {
-    CHECK_NULL_VOID(buildFunc);
-    auto buildNodeFunc = [func = std::move(buildFunc)]() -> RefPtr<UINode> {
-        NG::ScopedViewStackProcessor builderViewStackProcessor;
-        func();
-        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-        return customNode;
-    };
     auto pipelineContext = NG::PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto rootNode = pipelineContext->GetRootElement();
     CHECK_NULL_VOID(rootNode);
-    auto containerMode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetChildren().front());
+    auto rootNodeChild = rootNode->GetChildren();
+    CHECK_NULL_VOID(!rootNodeChild.empty());
+    auto containerMode = AceType::DynamicCast<NG::FrameNode>(rootNodeChild.front());
     CHECK_NULL_VOID(containerMode);
     auto pattern = containerMode->GetPattern<NG::ContainerModalPattern>();
     CHECK_NULL_VOID(pattern);
     auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto parent = frameNode.Upgrade();
     CHECK_NULL_VOID(parent);
+    if (buildFunc == nullptr) {
+        pattern->SetToolbarBuilder(parent, nullptr);
+        return;
+    }
+    auto buildNodeFunc = [func = std::move(buildFunc)]() -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        func();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        return customNode;
+    };
     pattern->SetToolbarBuilder(parent, std::move(buildNodeFunc));
 }
 

@@ -20,29 +20,21 @@
 
 namespace OHOS::Ace {
 
-std::unique_ptr<ToolBarItemModel> ToolBarItemModel::instance_ = nullptr;
-std::mutex ToolBarItemModel::mutex_;
-
 ToolBarItemModel* ToolBarItemModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ToolBarItemModelNG());
+    static NG::ToolBarItemModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::ToolBarItemModelNG());
-            } else {
-                instance_.reset(new NG::ToolBarItemModelNG());
-            }
-
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::ToolBarItemModelNG instance;
+        return &instance;
+    } else {
+        static NG::ToolBarItemModelNG instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
@@ -68,5 +60,4 @@ void JSToolBarItem::JSBind(BindingTarget globalObj)
     JSClass<JSToolBarItem>::StaticMethod("create", &JSToolBarItem::Create);
     JSClass<JSToolBarItem>::InheritAndBind<JSContainerBase>(globalObj);
 }
-
 } // namespace OHOS::Ace::Framework

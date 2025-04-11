@@ -159,6 +159,16 @@ public:
 
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
+    void InitToolBarManager()
+    {
+        if (!toolbarManager_) {
+            auto pipeline = GetHost()->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            toolbarManager_ = pipeline->GetToolbarManager();
+            UpdateSideBarStatus();
+        }
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
@@ -208,19 +218,10 @@ private:
     void SetAccessibilityEvent();
     void InitImageErrorCallback(const RefPtr<SideBarTheme>& sideBarTheme, const RefPtr<FrameNode>& imgNode);
     void SetMouseStyle(MouseFormat format);
-    void UpdateSideBarToolBarManager(bool isShowDivider, float width);
-    void UpdateSideBarColorToolBarManager(const Color& backgroudColor);
-    void UpdateSideBarDividerToolBarManager(float dividerWidth);
     void UpdateSideBarStatus();
-
-    void InitToolBarManager()
-    {
-        if (!toolbarManager_) {
-            auto pipeline = GetHost()->GetContext();
-            CHECK_NULL_VOID(pipeline);
-            toolbarManager_ = pipeline->GetToolbarManager();
-        }
-    }
+    void SetSideBarWidthToolBarManager(bool isShow, float sideBarWidth, float dividerWidth);
+    void SideBarModifyDoneToolBarManager();
+    void UpdateSideBarColorToolBarManager(const Color& backgroudColor);
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;

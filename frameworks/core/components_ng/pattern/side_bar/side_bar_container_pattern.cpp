@@ -425,8 +425,7 @@ void SideBarContainerPattern::OnModifyDone()
     if (!hasInit_) {
         hasInit_ = true;
     }
-    InitToolBarManager();
-    toolbarManager_->OnSideBarModifyDone();
+    SideBarModifyDoneToolBarManager();
 }
 
 void SideBarContainerPattern::CreateAndMountNodes()
@@ -967,10 +966,7 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
-
     UpdateSideBarStatus();
-    UpdateSideBarDividerToolBarManager(realDividerWidth_);
-
     return paddingProperty != nullptr;
 }
 
@@ -1003,7 +999,8 @@ void SideBarContainerPattern::UpdateSideBarStatus()
             break;
         }
     }
-    UpdateSideBarToolBarManager(showSideBar, realSideBarWidth_.ConvertToPxWithSize(frameSize.Width()));
+    SetSideBarWidthToolBarManager(
+        showSideBar, realSideBarWidth_.ConvertToPxWithSize(frameSize.Width()), realDividerWidth_);
 }
 
 void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm)
@@ -1161,7 +1158,7 @@ void SideBarContainerPattern::FireSideBarWidthChangeEvent()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
-    UpdateSideBarToolBarManager(true, usrSetUnitWidth.ConvertToPxWithSize(frameSize.Width()));
+    SetSideBarWidthToolBarManager(true, usrSetUnitWidth.ConvertToPxWithSize(frameSize.Width()), realDividerWidth_);
     eventHub->FireSideBarWidthChangeEvent(usrSetUnitWidth);
 }
 
@@ -1471,17 +1468,27 @@ bool SideBarContainerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     return false;
 }
 
-void SideBarContainerPattern::UpdateSideBarToolBarManager(bool isShow, float width)
+void SideBarContainerPattern::SetSideBarWidthToolBarManager(bool isShow, float sideBarWidth, float dividerWidth)
 {
-    InitToolBarManager();
-    auto info = toolbarManager_->GetSideBarInfo();
-    if (info.isShow == isShow && info.width == width) {
-        return;
+    CHECK_NULL_VOID(toolbarManager_);
+    auto sideBarInfo = toolbarManager_->GetSideBarInfo();
+    if (!NearEqual(sideBarInfo.isShow, sideBarWidth) || !NearEqual(sideBarInfo.width, sideBarWidth)) {
+        sideBarInfo.isShow = isShow;
+        sideBarInfo.width = sideBarWidth;
+        toolbarManager_->SetHasSideBar(true);
+        toolbarManager_->SetSideBarInfo(sideBarInfo);
     }
-    info.isShow = isShow;
-    info.width = width;
-    toolbarManager_->SetHasSideBar(true);
-    toolbarManager_->SetSideBarInfo(info);
+    auto dividerInfo = toolbarManager_->GetSideBarDividerInfo();
+    if (!NearEqual(dividerInfo.width, dividerWidth)) {
+        dividerInfo.width = dividerWidth;
+        toolbarManager_->SetSideBarDividerInfo(dividerInfo);
+    }
+}
+
+void SideBarContainerPattern::SideBarModifyDoneToolBarManager()
+{
+    CHECK_NULL_VOID(toolbarManager_);
+    toolbarManager_->OnSideBarModifyDone();
 }
 
 void SideBarContainerPattern::UpdateSideBarColorToolBarManager(const Color& backgroudColor)
@@ -1492,16 +1499,5 @@ void SideBarContainerPattern::UpdateSideBarColorToolBarManager(const Color& back
         return;
     }
     toolbarManager_->SetSideBarColor(backgroudColor);
-}
-
-void SideBarContainerPattern::UpdateSideBarDividerToolBarManager(float dividerWidth)
-{
-    InitToolBarManager();
-    auto info = toolbarManager_->GetSideBarDividerInfo();
-    if (info.width == dividerWidth) {
-        return;
-    }
-    info.width = dividerWidth;
-    toolbarManager_->SetSideBarDividerInfo(info);
 }
 } // namespace OHOS::Ace::NG
