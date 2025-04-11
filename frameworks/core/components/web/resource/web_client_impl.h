@@ -305,6 +305,10 @@ public:
     bool OnBeforeUnloadByJSV2(const std::string& url, const std::string& message, bool isReload,
         std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
 
+    void OnLoadStarted(const std::string& url) override;
+
+    void OnLoadFinished(const std::string& url) override;
+
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

@@ -209,6 +209,8 @@ public:
     virtual void SetOptimizeParserBudgetEnabled(bool enable) = 0;
     virtual void SetWebMediaAVSessionEnabled(bool isEnabled) {};
     virtual void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) {};
+    virtual void SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

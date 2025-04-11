@@ -1202,6 +1202,10 @@ public:
     
     void OnDragAttach();
 
+    void OnLoadStarted(const std::string& param);
+
+    void OnLoadFinished(const std::string& param);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1302,6 +1306,8 @@ private:
     EventCallback onPageFinished_;
     EventCallback onPageError_;
     EventCallback onMessage_;
+    EventCallback onLoadStarted_;
+    EventCallback onLoadFinished_;
     Method reloadMethod_;
     Method updateUrlMethod_;
     Method routerBackMethod_;
@@ -1354,6 +1360,8 @@ private:
     EventCallbackV2 onViewportFitChangedV2_;
     std::function<WebKeyboardOption(const std::shared_ptr<BaseEventInfo>&)> onInterceptKeyboardAttachV2_;
     EventCallbackV2 onAdsBlockedV2_;
+    EventCallbackV2 onLoadStartedV2_;
+    EventCallbackV2 onLoadFinishedV2_;
 
     int32_t renderMode_ = -1;
     int32_t layoutMode_ = -1;

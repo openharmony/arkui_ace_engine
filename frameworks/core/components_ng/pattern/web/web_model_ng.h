@@ -233,6 +233,8 @@ public:
     void SetOptimizeParserBudgetEnabled(bool enable) override;
     void SetWebMediaAVSessionEnabled(bool isEnabled) override;
     void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) override;
+    void SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
 
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);

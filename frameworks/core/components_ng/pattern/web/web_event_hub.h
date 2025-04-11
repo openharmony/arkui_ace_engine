@@ -172,6 +172,8 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnViewportFitChanged, void);
     ACE_WEB_EVENT_PROPERTY(OnInterceptKeyboardAttach,  WebKeyboardOption);
     ACE_WEB_EVENT_PROPERTY(OnAdsBlocked, void);
+    ACE_WEB_EVENT_PROPERTY(OnLoadStarted, void);
+    ACE_WEB_EVENT_PROPERTY(OnLoadFinished, void);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;
