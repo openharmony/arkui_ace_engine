@@ -1489,7 +1489,7 @@ void OverlayManager::CloseToast(int32_t toastId, const std::function<void(int32_
     }
     for (auto [id, toastNodeWeak] : toastMap_) {
         if (id == toastId) {
-            rootNode->RemoveChild(toastNodeWeak.Upgrade());
+            RemoveChildWithService(rootNode, toastNodeWeak.Upgrade());
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             toastMap_.erase(id);
             callback(ERROR_CODE_NO_ERROR);
