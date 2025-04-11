@@ -32,7 +32,6 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline/base/element_register.h"
 
-
 namespace OHOS::Ace::NG {
 
 class NavDestinationPatternBase : public Pattern, public FocusView {
