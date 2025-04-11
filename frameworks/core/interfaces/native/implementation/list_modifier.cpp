@@ -129,6 +129,14 @@ namespace OHOS::Ace::NG::Converter {
             .scroller = OptConvert<Ark_Scroller>(src.scroller)
         };
     }
+
+    template<>
+    ScrollFrameResult Convert<ScrollFrameResult>(const Ark_ScrollResult& src)
+    {
+        return {
+            .offset = Convert<Dimension>(src.offsetRemain)
+        };
+    }
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListModifier {
@@ -371,6 +379,34 @@ void OnScrollVisibleContentChangeImpl(Ark_NativePointer node,
         arkCallback.Invoke(startItemInfo, endItemInfo);
     };
     ListModelNG::SetOnScrollVisibleContentChange(frameNode, std::move(onScrollVisibleContentChange));
+}
+void OnWillScrollImpl(Ark_NativePointer node,
+                      const Opt_OnWillScrollCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto callValue = Converter::OptConvert<OnWillScrollCallback>(*value);
+    if (callValue.has_value()) {
+        auto modelCallback = [arkCallback = CallbackHelper(callValue.value())] (
+            const Dimension& scrollOffset,
+            const ScrollState& scrollState,
+            const ScrollSource& scrollSource) {
+            auto retVal = arkCallback.InvokeWithOptConvertResult<
+                ScrollFrameResult,
+                Ark_ScrollResult,
+                Callback_ScrollResult_Void>(
+                Converter::ArkValue<Ark_Number>(scrollOffset),
+                Converter::ArkValue<Ark_ScrollState>(scrollState),
+                Converter::ArkValue<Ark_ScrollSource>(scrollSource)
+            );
+            ScrollFrameResult scrollRes { .offset = scrollOffset };
+            return retVal.value_or(scrollRes);
+        };
+        ScrollableModelNG::SetOnWillScroll(frameNode, modelCallback);
+    } else {
+        ScrollableModelNG::SetOnWillScroll(frameNode, nullptr);
+    }
 }
 void OnDidScrollImpl(Ark_NativePointer node,
                      const OnScrollCallback* value)
@@ -623,6 +659,7 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::OnScrollImpl,
         ListAttributeModifier::OnScrollIndexImpl,
         ListAttributeModifier::OnScrollVisibleContentChangeImpl,
+        ListAttributeModifier::OnWillScrollImpl,
         ListAttributeModifier::OnDidScrollImpl,
         ListAttributeModifier::OnReachStartImpl,
         ListAttributeModifier::OnReachEndImpl,

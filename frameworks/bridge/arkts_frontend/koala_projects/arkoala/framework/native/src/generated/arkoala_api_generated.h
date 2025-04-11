@@ -17160,6 +17160,8 @@ typedef struct GENERATED_ArkUIGridModifier {
                           const Opt_GridItemAlignment* value);
     void (*setOnScroll)(Ark_NativePointer node,
                         const Callback_Number_Number_Void* value);
+    void (*setOnWillScroll)(Ark_NativePointer node,
+                            const Opt_OnWillScrollCallback* value);
     void (*setOnDidScroll)(Ark_NativePointer node,
                            const OnScrollCallback* value);
     void (*setOnReachStart)(Ark_NativePointer node,
@@ -17417,6 +17419,8 @@ typedef struct GENERATED_ArkUIListModifier {
                              const Callback_Number_Number_Number_Void* value);
     void (*setOnScrollVisibleContentChange)(Ark_NativePointer node,
                                             const OnScrollVisibleContentChangeCallback* value);
+    void (*setOnWillScroll)(Ark_NativePointer node,
+                            const Opt_OnWillScrollCallback* value);
     void (*setOnDidScroll)(Ark_NativePointer node,
                            const OnScrollCallback* value);
     void (*setOnReachStart)(Ark_NativePointer node,
@@ -19540,6 +19544,8 @@ typedef struct GENERATED_ArkUIWaterFlowModifier {
     void (*setCachedCount1)(Ark_NativePointer node,
                             const Ark_Number* count,
                             Ark_Boolean show);
+    void (*setOnWillScroll)(Ark_NativePointer node,
+                            const Opt_OnWillScrollCallback* value);
     void (*setOnDidScroll)(Ark_NativePointer node,
                             const OnScrollCallback* value);
     void (*setOnReachStart)(Ark_NativePointer node,

@@ -3059,7 +3059,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void OnDidScrollImpl(Ark_NativePointer node,
-                         const Opt_OnScrollCallback* value)
+                         const OnScrollCallback* value)
     {
     }
     void OnReachStartImpl(Ark_NativePointer node,
@@ -3582,7 +3582,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void OnDidScrollImpl(Ark_NativePointer node,
-                         const Opt_OnScrollCallback* value)
+                         const OnScrollCallback* value)
     {
     }
     void OnReachStartImpl(Ark_NativePointer node,
@@ -7845,7 +7845,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void OnDidScrollImpl(Ark_NativePointer node,
-                         const Opt_OnScrollCallback* value)
+                         const OnScrollCallback* value)
     {
     }
     void OnReachStartImpl(Ark_NativePointer node,
