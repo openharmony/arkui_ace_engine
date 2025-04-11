@@ -167,7 +167,7 @@ public:
     {
         asyncCallbackCounter_++;
         EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode_);
-        CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode_));
+        CallbackHelper(continuation).InvokeSync(reinterpret_cast<Ark_NativePointer>(expectedCustomNode_));
     }
 
     void TestFunctionSync(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
@@ -175,7 +175,7 @@ public:
     {
         syncCallbackCounter_++;
         EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode_);
-        CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode_));
+        CallbackHelper(continuation).InvokeSync(reinterpret_cast<Ark_NativePointer>(expectedCustomNode_));
     }
 
 private:

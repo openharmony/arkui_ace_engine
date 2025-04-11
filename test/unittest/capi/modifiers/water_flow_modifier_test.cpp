@@ -198,7 +198,7 @@ HWTEST_F(WaterFlowModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
         EXPECT_EQ(Converter::Convert<float>(offset), TEST_OFFSET);
         ScrollFrameResult result;
         result.offset = Converter::Convert<Dimension>(offset);
-        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Literal_Number_offsetRemain>(result));
+        CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Ark_Literal_Number_offsetRemain>(result));
     };
     auto arkFunc = Converter::ArkValue<Callback_Number_ScrollState_Literal_Number_offsetRemain>(
         nullptr, onScrollFrameBegin, expectedResId);

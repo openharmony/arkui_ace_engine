@@ -398,7 +398,7 @@ HWTEST_F(WebModifierTest, onAlertTest, TestSize.Level1)
             .message = Converter::Convert<std::string>(parameter.message),
             .peer = parameter.result,
         };
-        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnAlertEvent_Boolean arkCallback =
@@ -453,7 +453,7 @@ HWTEST_F(WebModifierTest, onBeforeUnloadTest, TestSize.Level1)
             .message = Converter::Convert<std::string>(parameter.message),
             .peer = parameter.result,
         };
-        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnBeforeUnloadEvent_Boolean arkCallback =
@@ -508,7 +508,7 @@ HWTEST_F(WebModifierTest, onConfirmTest, TestSize.Level1)
             .message = Converter::Convert<std::string>(parameter.message),
             .peer = parameter.result,
         };
-        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnConfirmEvent_Boolean arkCallback =
@@ -563,7 +563,7 @@ HWTEST_F(WebModifierTest, onPromptTest, TestSize.Level1)
             .message = Converter::Convert<std::string>(parameter.message),
             .peer = parameter.result,
         };
-        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnPromptEvent_Boolean arkCallback =
@@ -615,7 +615,7 @@ HWTEST_F(WebModifierTest, onConsoleTest, TestSize.Level1)
             .resourceId = resourceId,
             .peer = parameter.message,
         };
-        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnConsoleEvent_Boolean arkCallback =
@@ -859,7 +859,7 @@ HWTEST_F(WebModifierTest, onUrlLoadInterceptTest, TestSize.Level1)
                 []() {}
             );
         }
-        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Type_WebAttribute_onUrlLoadIntercept_callback arkCallback =
@@ -943,7 +943,7 @@ HWTEST_F(WebModifierTest, onShowFileSelectorTest, TestSize.Level1)
             .resultPeer = parameter.result,
             .paramPeer = parameter.fileSelector,
         };
-        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnShowFileSelectorEvent_Boolean arkCallback =
@@ -1150,7 +1150,7 @@ HWTEST_F(WebModifierTest, onHttpAuthRequestTest, TestSize.Level1)
             .host = Converter::Convert<std::string>(parameter.host),
             .realm = Converter::Convert<std::string>(parameter.realm)
         };
-        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnHttpAuthRequestEvent_Boolean arkCallback =
@@ -1202,7 +1202,7 @@ HWTEST_F(WebModifierTest, onInterceptRequestTest, TestSize.Level1)
             .resourceId = resourceId,
             .peer = parameter.request,
         };
-        CallbackHelper(continuation).Invoke(callResult);
+        CallbackHelper(continuation).InvokeSync(callResult);
     };
 
     Callback_OnInterceptRequestEvent_WebResourceResponse arkCallback =
@@ -1332,7 +1332,7 @@ HWTEST_F(WebModifierTest, onContextMenuShowTest, TestSize.Level1)
             .paramPeer = parameter.param,
             .resultPeer = parameter.result,
         };
-        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnContextMenuShowEvent_Boolean arkCallback =
@@ -2039,7 +2039,7 @@ HWTEST_F(WebModifierTest, onLoadInterceptTest, TestSize.Level1)
             .resourceId = resourceId,
             .peer = parameter.data,
         };
-        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnLoadInterceptEvent_Boolean arkCallback =

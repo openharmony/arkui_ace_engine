@@ -159,7 +159,7 @@ HWTEST_F(TextInputModifierTest, setShowUnitTest, TestSize.Level1)
         };
 
         if (uiNode) {
-            CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
+            CallbackHelper(continuation).InvokeSync(AceType::RawPtr(uiNode.value()));
         }
     };
 
@@ -193,7 +193,7 @@ HWTEST_F(TextInputModifierTest, setOnWillInsertTest, TestSize.Level1)
         EXPECT_EQ(resourceId, expectedResId);
         EXPECT_EQ(Converter::Convert<std::u16string>(data.insertValue), CHECK_TEXT);
         auto result = Converter::Convert<int32_t>(data.insertOffset) > 0;
-        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Boolean>(result));
+        CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Ark_Boolean>(result));
     };
     auto arkCallback = Converter::ArkValue<Callback_InsertValue_Boolean>(nullptr, onWillInsertHandler, expectedResId);
     modifier_->setOnWillInsert(node_, &arkCallback);
@@ -235,7 +235,7 @@ HWTEST_F(TextInputModifierTest, setOnWillDeleteTest, TestSize.Level1)
         EXPECT_EQ(Converter::Convert<int32_t>(data.deleteOffset), expectedOffset);
         auto willDeleteDirection = Converter::OptConvert<TextDeleteDirection>(data.direction);
         auto result = willDeleteDirection == TextDeleteDirection::FORWARD;
-        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Boolean>(result));
+        CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Ark_Boolean>(result));
     };
     auto arkCallback = Converter::ArkValue<Callback_DeleteValue_Boolean>(nullptr, callbackSyncFunc, expectedResId);
     modifier_->setOnWillDelete(node_, &arkCallback);

@@ -65,7 +65,7 @@ public:
                     .parentNode = parentNode
                 };
                 if (uiNode_1) {
-                    CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode_1.value()));
+                    CallbackHelper(continuation).InvokeSync(AceType::RawPtr(uiNode_1.value()));
                 }
             }
 
@@ -75,7 +75,7 @@ public:
                     .parentNode = parentNode
                 };
                 if (uiNode_2) {
-                    CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode_2.value()));
+                    CallbackHelper(continuation).InvokeSync(AceType::RawPtr(uiNode_2.value()));
                 }
             }
         };

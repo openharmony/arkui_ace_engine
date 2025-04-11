@@ -173,7 +173,7 @@ HWTEST_F(CheckboxModifierTest, setCheckboxOptionsTestBuilder, TestSize.Level1)
         .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
             const Callback_Pointer_Void continuation) {
             actualParentNode = reinterpret_cast<FrameNode*>(parentNode);
-            CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
+            CallbackHelper(continuation).InvokeSync(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
         }
     };
 
