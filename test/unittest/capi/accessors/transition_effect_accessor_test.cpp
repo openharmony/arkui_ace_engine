@@ -245,11 +245,11 @@ HWTEST_F(TransitionEffectAccessorTest, getCombineTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getIdentityTest
+ * @tc.name: getIDENTITYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, getIdentityTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, getIDENTITYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getIDENTITY, nullptr);
     auto peer = accessor_->getIDENTITY();
@@ -259,11 +259,11 @@ HWTEST_F(TransitionEffectAccessorTest, getIdentityTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getSlideSwitchTest
+ * @tc.name: getSLIDE_SWITCHTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, getSlideSwitchTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, getSLIDE_SWITCHTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getSLIDE_SWITCH, nullptr);
     auto peer = accessor_->getSLIDE_SWITCH();
@@ -273,11 +273,11 @@ HWTEST_F(TransitionEffectAccessorTest, getSlideSwitchTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getZeroOpacityTest
+ * @tc.name: getOPACITYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, getZeroOpacityTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, getOPACITYTest, TestSize.Level1)
 {
     const int testValue = 0;
     ASSERT_NE(accessor_->getOPACITY, nullptr);
@@ -294,11 +294,11 @@ HWTEST_F(TransitionEffectAccessorTest, getZeroOpacityTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getSlideTest
+ * @tc.name: getSLIDETest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, getSlideTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, getSLIDETest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getSLIDE, nullptr);
     auto peer = accessor_->getSLIDE();
