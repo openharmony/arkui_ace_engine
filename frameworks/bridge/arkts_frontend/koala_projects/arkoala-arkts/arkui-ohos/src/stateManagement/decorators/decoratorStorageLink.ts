@@ -24,7 +24,7 @@ export class StorageLinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     private asLink : LinkDecoratedVariable<Object> | undefined;
     constructor(propName: string, varName: string, localValue: T, watchFunc?: WatchFuncType) {
         super("@StorageLink", varName, undefined as T, watchFunc);
-        this.asLink = AppStorage.setAndLink(propName, localValue as Object);
+        this.asLink = AppStorage.createLink<T>(propName, localValue);
         const value : T = this.asLink!.get() as T;
         this.registerWatchForObservedObjectChanges(value);
         this.asLink!.addWatch(watchFunc)

@@ -49,6 +49,13 @@ export interface IDecoratedUpdatableVariable<T> {
     update(newValue: T): void;
 }
 
+export interface AbstractProperty<T> extends IDecoratedMutableVariable<T> {
+    info(): string;
+}
+
+export interface SubscribedAbstractProperty<T> extends AbstractProperty<T> {
+    aboutToBeDeleted(): void;
+}
 
 /**
 * Base class of all decorated variable classes
