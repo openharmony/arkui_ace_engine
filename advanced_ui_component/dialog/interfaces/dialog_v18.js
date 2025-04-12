@@ -3718,8 +3718,8 @@ class CustomDialogContentComponent extends ViewPU {
                         isVertical = true;
                     }
                 } catch (err) {
-                    let code = (exception).code;
-                    let message = (exception).message;
+                    let code = (err).code;
+                    let message = (err).message;
                     hilog.error(0x3900, 'Ace', `Faild to dialog isVerticalAlignButton measureTextSize,cause,
                     code: ${code}, message: ${message}`);
                 }
