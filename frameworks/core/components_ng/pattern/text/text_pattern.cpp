@@ -2440,10 +2440,7 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
     }
     auto dragStatusUpdateAction = [weakPtr = WeakClaim(this), isDragging](const ResultObject& resultObj) {
         auto pattern = weakPtr.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (pattern->spans_.empty()) {
-            return;
-        }
+        CHECK_NULL_VOID(pattern && !pattern->spans_.empty());
         auto it = pattern->spans_.begin();
         if (resultObj.spanPosition.spanIndex >= static_cast<int32_t>(pattern->spans_.size())) {
             std::advance(it, !pattern->spans_.empty() ? static_cast<int32_t>(pattern->spans_.size()) - 1 : 0);
@@ -2458,6 +2455,7 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
                 spanItem = resultObj.span.Upgrade();
                 CHECK_NULL_VOID(spanItem);
             }
+            spanItem->MarkDirty();
             if (isDragging) {
                 spanItem->StartDrag(resultObj.offsetInSpan[RichEditorSpanRange::RANGESTART],
                     resultObj.offsetInSpan[RichEditorSpanRange::RANGEEND]);
@@ -2467,7 +2465,7 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
             }
             return;
         }
-
+        spanItem->MarkDirty();
         if (resultObj.type == SelectSpanType::TYPEIMAGE) {
             if (isDragging) {
                 pattern->dragSpanItems_.emplace_back(spanItem);
