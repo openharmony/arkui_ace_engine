@@ -1386,7 +1386,16 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
         selectOverlay->SetAnimationStatus(false);
         auto extensionMenu = weakExtensionMenu.Upgrade();
         CHECK_NULL_VOID(extensionMenu);
-        extensionMenu->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        auto child = extensionMenu->GetFirstChild();
+        while (child) {
+            if (child->GetTag() == V2::OPTION_ETS_TAG) {
+                auto target = AceType::DynamicCast<FrameNode>(child);
+                CHECK_NULL_VOID(target);
+                target->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+                break;
+            }
+            child = child->GetFirstChild();
+        }
     };
     AnimationOption selectOption;
     selectOption.SetDuration(ANIMATION_DURATION1);
@@ -1471,7 +1480,16 @@ void SelectOverlayNode::BackAnimation(bool noAnimation)
         CHECK_NULL_VOID(selectOverlay);
         selectOverlay->UpdateMoreOrBackSymbolOptions(true, false);
         selectOverlay->SetAnimationStatus(false);
-        selectOverlay->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        auto child = selectOverlay->GetFirstChild();
+        while (child) {
+            if (child->GetTag() == "SelectMenuButton") {
+                auto target = AceType::DynamicCast<FrameNode>(child);
+                CHECK_NULL_VOID(target);
+                target->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+                break;
+            }
+            child = child->GetFirstChild();
+        }
     };
 
     AnimationOption selectOption;
