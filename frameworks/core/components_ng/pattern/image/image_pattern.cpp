@@ -42,6 +42,7 @@ constexpr uint32_t CRITICAL_TIME = 50;     // ms. If show time of image is less 
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t DEFAULT_ITERATIONS = 1;
 constexpr int32_t MEMORY_LEVEL_CRITICAL_STATUS = 2;
+constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
 
 std::string GetImageInterpolation(ImageInterpolation interpolation)
 {
@@ -1707,6 +1708,13 @@ void ImagePattern::DumpRenderInfo()
     DumpSmoothEdge(renderProp);
     DumpBorderRadiusProperties(renderProp);
     DumpResizable(renderProp);
+    DumpHdrBrightness(renderProp);
+}
+
+inline void ImagePattern::DumpHdrBrightness(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
+{
+    auto hdrBrightness = renderProp->GetHdrBrightness().value_or(DEFAULT_HDR_BRIGHTNESS);
+    DumpLog::GetInstance().AddDesc(std::string("hdrBrightness: ").append(std::to_string(hdrBrightness)));
 }
 
 inline void ImagePattern::DumpRenderMode(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
