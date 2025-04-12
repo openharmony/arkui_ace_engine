@@ -88,7 +88,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     }
     if (contentModifier) {
         if (textLayoutProperty->GetIsAnimationNeededValue(true)) {
-            SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle);
+            SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle, frameNode);
             contentModifier->ModifyTextStyle(textStyle);
         }
         contentModifier->SetFontReady(false);
@@ -327,7 +327,7 @@ void MultipleParagraphLayoutAlgorithm::SetDecorationPropertyToModifier(const Ref
 }
 
 void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
-    const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle)
+    const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode)
 {
     SetFontSizePropertyToModifier(layoutProperty, modifier, textStyle);
     auto fontWeight = layoutProperty->GetFontWeight();
@@ -342,11 +342,13 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLa
     } else {
         modifier->SetTextColor(textStyle.GetTextColor(), true);
     }
-    auto symbolColors = layoutProperty->GetSymbolColorList();
-    if (symbolColors && symbolColors.has_value()) {
-        modifier->SetSymbolColor(symbolColors.value());
-    } else {
-        modifier->SetSymbolColor(textStyle.GetSymbolColorList(), true);
+    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolColors = layoutProperty->GetSymbolColorList();
+        if (symbolColors && symbolColors.has_value()) {
+            modifier->SetSymbolColor(symbolColors.value());
+        } else {
+            modifier->SetSymbolColor(textStyle.GetSymbolColorList(), true);
+        }
     }
     auto textShadow = layoutProperty->GetTextShadow();
     if (textShadow.has_value()) {

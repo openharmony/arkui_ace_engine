@@ -139,9 +139,6 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     TextStyle textStyle;
     bool needRemain = false;
     ConstructTextStyles(contentConstraint, layoutWrapper, textStyle, needRemain);
-    auto logTag = "MeasureContent";
-    pattern->DumpRecord(logTag);
-    pattern->LogForFormRender(logTag);
     ACE_SCOPED_TRACE(
         "TextLayoutAlgorithm::MeasureContent[id:%d][needReCreateParagraph:%d]", host->GetId(), needReCreateParagraph_);
     if (textStyle.GetTextOverflow() == TextOverflow::MARQUEE) { // create a paragraph with all text in 1 line
@@ -153,7 +150,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     if (isSpanStringMode_ && spanStringHasMaxLines_) {
         textStyle.SetMaxLines(UINT32_MAX);
     }
-    if (isSpanStringMode_ && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (isSpanStringMode_ && host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         textStyle_ = textStyle;
         BuildParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
     } else {
@@ -329,9 +326,6 @@ bool TextLayoutAlgorithm::CreateParagraph(
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    auto logTag = "CreateParagraph";
-    pattern->DumpRecord(logTag);
-    pattern->LogForFormRender(logTag);
     pattern->ClearCustomSpanPlaceholderInfo();
     if (pattern->IsSensitiveEnalbe()) {
         UpdateSensitiveContent(content);
@@ -344,7 +338,7 @@ bool TextLayoutAlgorithm::CreateParagraph(
             paraStyle = externalParagraphStyle.value();
         }
     }
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) || isSpanStringMode_) {
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) || isSpanStringMode_) {
         paraStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
             textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     }

@@ -122,7 +122,7 @@ protected:
 
 private:
     double NormalizeToPx(const Dimension& dimension);
-    void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle);
+    void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode);
     void SetDefaultFontSize(const TextStyle& textStyle);
     void SetDefaultAdaptMinFontSize(const TextStyle& textStyle);
     void SetDefaultAdaptMaxFontSize(const TextStyle& textStyle);

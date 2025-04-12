@@ -146,7 +146,7 @@ private:
     void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle);
     void SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
-        const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle);
+        const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode);
     void SetDecorationPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
         const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle);
     void SetFontSizePropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
