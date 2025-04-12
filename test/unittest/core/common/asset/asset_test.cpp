@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/common/asset_manager_impl.h"
 #define private public
 #define protected public
-#include "core/common/asset_manager_impl.h"
-#undef private
-#undef protected
+
 #include "mock_asset.h"
 #include "test/mock/core/common/mock_container.h"
 
