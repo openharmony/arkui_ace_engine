@@ -7815,9 +7815,9 @@ ArkUINativeModuleValue CommonBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runtime
             panda::FunctionRef::New(vm, Framework::JsStopPropagation),
             panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
             panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyIntention())),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetNumLock())),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetCapsLock())),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetScrollLock())) };
+            panda::BooleanRef::New(vm, info.GetNumLock()),
+            panda::BooleanRef::New(vm, info.GetCapsLock()),
+            panda::BooleanRef::New(vm, info.GetScrollLock()) };
         auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
@@ -7871,9 +7871,9 @@ ArkUINativeModuleValue CommonBridge::SetOnKeyPreIme(ArkUIRuntimeCallInfo* runtim
             panda::FunctionRef::New(vm, Framework::JsStopPropagation),
             panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
             panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyIntention())),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetNumLock())),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetCapsLock())),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetScrollLock())) };
+            panda::BooleanRef::New(vm, info.GetNumLock()),
+            panda::BooleanRef::New(vm, info.GetCapsLock()),
+            panda::BooleanRef::New(vm, info.GetScrollLock()) };
         auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));

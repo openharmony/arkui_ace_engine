@@ -839,9 +839,9 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateKeyEventInfoObj(EcmaVM* vm, KeyEv
         panda::FunctionRef::New(vm, Framework::JsStopPropagation),
         panda::FunctionRef::New(vm, NG::ArkTSUtils::JsGetModifierKeyState),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyIntention())),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetNumLock())),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetCapsLock())),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetScrollLock())) };
+        panda::BooleanRef::New(vm, info.GetNumLock()),
+        panda::BooleanRef::New(vm, info.GetCapsLock()),
+        panda::BooleanRef::New(vm, info.GetScrollLock()) };
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
