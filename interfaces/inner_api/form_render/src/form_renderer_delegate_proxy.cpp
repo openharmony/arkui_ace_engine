@@ -311,6 +311,17 @@ int32_t FormRendererDelegateProxy::OnCheckManagerDelegate(bool &checkFlag)
     return ERR_OK;
 }
 
+int32_t FormRendererDelegateProxy::SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+    MessageOption &option)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("remote is null");
+        return IPC_PROXY_ERR;
+    }
+    return remote->SendRequest(code, data, reply, option);
+}
+
 int32_t FormRendererDelegateProxy::OnUpdateFormDone(const int64_t formId)
 {
     MessageParcel data;
