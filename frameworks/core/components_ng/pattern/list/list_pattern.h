@@ -502,6 +502,7 @@ private:
 
     SizeF GetContentSize() const;
     void ProcessEvent(bool indexChanged, float finalOffset, bool isJump);
+    void FireOnScrollWithVersionCheck(float finalOffset, OnScrollEvent& onScroll);
     void CheckScrollable();
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
