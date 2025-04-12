@@ -940,8 +940,11 @@ DatePickerMode DatePickerModelNG::getMode(FrameNode* frameNode)
 uint32_t DatePickerModelNG::getBackgroundColor(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarColor();
-    return value->GetValue();
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, 0);
+    auto color = paintProperty->GetScrollBarColor();
+    CHECK_NULL_RETURN(color, 0);
+    return color->GetValue();
 }
 
 const Dimension DatePickerModelNG::ConvertFontScaleValue(const Dimension& fontSizeValue)
