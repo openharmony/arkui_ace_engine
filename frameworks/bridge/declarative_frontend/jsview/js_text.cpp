@@ -639,7 +639,7 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     } else {
         auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        textDecoration = theme->GetTextStyle().GetTextDecoration();
+        textDecoration = theme->GetTextDecoration();
     }
     Color result;
     if (!ParseJsColor(colorValue, result)) {

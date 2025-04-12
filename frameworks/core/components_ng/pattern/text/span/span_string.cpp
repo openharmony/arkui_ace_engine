@@ -356,7 +356,141 @@ RefPtr<NG::CustomSpanItem> SpanString::MakeCustomSpanItem(const RefPtr<CustomSpa
     return spanItem;
 }
 
-void SpanString::AddSpan(const RefPtr<SpanBase>& span)
+bool SpanString::CheckMultiTypeDecorationSpan(const RefPtr<SpanBase>& span)
+{
+    if (span->GetSpanType() != SpanType::Decoration) {
+        return false;
+    }
+    auto decorationSpan = AceType::DynamicCast<DecorationSpan>(span);
+    if (!decorationSpan->GetTextDecorationOptions().has_value()) {
+        return false;
+    }
+    auto options = decorationSpan->GetTextDecorationOptions().value();
+    return options.enableMultiType.value_or(false);
+}
+
+std::vector<RefPtr<SpanBase>> SpanString::GetWholeSpans(int32_t start, int32_t end, SpanType spanType) const
+{
+    std::vector<RefPtr<SpanBase>> res;
+    if (!CheckRange(start, end - start)) {
+        return res;
+    }
+
+    auto spans = spansMap_.find(spanType)->second;
+    for (const auto& span : spans) {
+        int32_t tempStart = span->GetStartIndex();
+        int32_t tempEnd = span->GetEndIndex();
+        if ((tempStart <= start && tempEnd > start) ||
+            (tempStart <= end && tempEnd > end) ||
+            (tempStart >= start && tempEnd <= end)) {
+            res.push_back(span);
+        }
+    }
+    return res;
+}
+
+void SpanString::ProcessMultiDecorationSpanForIntersection(
+    const RefPtr<SpanBase>& span, const RefPtr<SpanBase>& lastSpan,
+    std::vector<int32_t>& spanNoIntersection, int32_t start, int32_t end)
+{
+    auto lastDecorationSpan = AceType::DynamicCast<DecorationSpan>(lastSpan);
+    auto lastDecorations = lastDecorationSpan->GetTextDecorationTypes();
+    if (!CheckMultiTypeDecorationSpan(lastSpan)) {
+        return;
+    }
+
+    int32_t lastSpanStart = lastSpan->GetStartIndex();
+    int32_t lastSpanEnd = lastSpan->GetEndIndex();
+    int32_t intersectionStart = std::max(start, lastSpanStart);
+    int32_t intersectionEnd = std::min(end, lastSpanEnd);
+
+    bool spanInRight = lastSpanStart <= start && lastSpanEnd <= end;
+    bool isInclude = lastSpanStart >= start && lastSpanEnd <= end;
+
+    int32_t newStart = 0;
+    int32_t newEnd = 0;
+    if (isInclude) {
+        newStart = intersectionStart;
+        newEnd = intersectionEnd;
+    } else if (spanInRight) {
+        newStart = intersectionStart;
+        newEnd = lastSpanEnd;
+    } else {
+        newStart = lastSpanStart;
+        newEnd = intersectionEnd;
+    }
+    auto intersectionSpan = span->GetSubSpan(newStart, newEnd);
+    auto intersectionDecorationSpan = AceType::DynamicCast<DecorationSpan>(intersectionSpan);
+    // apply new data to newSpan
+    for (TextDecoration value : lastDecorations) {
+        intersectionDecorationSpan->AddTextDecorationType(value);
+    }
+    AddSpan(intersectionSpan, false);
+    for (int32_t index = newStart; index < newEnd; index++) {
+        spanNoIntersection[index] = 0; //unmark
+    }
+}
+
+void SpanString::ProcessMultiDecorationSpanForNoIntersection(
+    const RefPtr<SpanBase>& span, std::vector<int32_t>& spanNoIntersection,
+    int32_t start, int32_t end)
+{
+    int32_t tempStart = start;
+    int32_t tempEnd = start;
+    for (int32_t index = start; index < end;) {
+        index++;
+        if (spanNoIntersection[tempStart] != 0) {
+            while (tempEnd < end && spanNoIntersection[tempEnd] != 0) {
+                tempEnd++;
+            }
+            if (tempEnd == tempStart) {
+                continue;
+            }
+            auto tempSpan = span->GetSubSpan(tempStart, tempEnd);
+            AddSpan(tempSpan, false);
+        } else {
+            tempStart = index;
+            tempEnd = index;
+        }
+    }
+}
+
+bool SpanString::ProcessMultiDecorationSpan(const RefPtr<SpanBase>& span, int32_t start, int32_t end)
+{
+    bool multiTypeDecoration = CheckMultiTypeDecorationSpan(span);
+    if (!multiTypeDecoration) {
+        return false;
+    }
+    auto lastSpans = GetWholeSpans(start, end, SpanType::Decoration);
+    if (lastSpans.size() <= 0) {
+        return false;
+    }
+    bool enableMultiType = false;
+    for (const RefPtr<SpanBase>& lastSpan : lastSpans) {
+        if (CheckMultiTypeDecorationSpan(lastSpan)) {
+            enableMultiType = true;
+            break;
+        }
+    }
+    if (!enableMultiType) {
+        return false;
+    }
+    std::vector<int32_t> spanNoIntersection;
+    for (int32_t index = 0; index <= end; index++) {
+        if (index >= start) {
+            spanNoIntersection.push_back(1); // mark
+        } else {
+            spanNoIntersection.push_back(0);
+        }
+    }
+    for (const RefPtr<SpanBase>& lastSpan : lastSpans) {
+        ProcessMultiDecorationSpanForIntersection(span, lastSpan, spanNoIntersection, start, end);
+    }
+    ProcessMultiDecorationSpanForNoIntersection(span, spanNoIntersection, start, end);
+    return true;
+}
+
+void SpanString::AddSpan(const RefPtr<SpanBase>& span, bool processMultiDecoration)
 {
     if (!span || !CheckRange(span)) {
         return;
@@ -370,6 +504,9 @@ void SpanString::AddSpan(const RefPtr<SpanBase>& span)
     if (spansMap_.find(span->GetSpanType()) == spansMap_.end()) {
         spansMap_[span->GetSpanType()].emplace_back(span);
         ApplyToSpans(span, { start, end }, SpanOperation::ADD);
+        return;
+    }
+    if (processMultiDecoration && ProcessMultiDecorationSpan(span, start, end)) {
         return;
     }
     RemoveSpan(start, end - start, span->GetSpanType());
@@ -1052,11 +1189,14 @@ RefPtr<DecorationSpan> SpanString::ToDecorationSpan(
     const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
 {
     CHECK_NULL_RETURN(spanItem && spanItem->fontStyle, nullptr);
-    TextDecoration type = spanItem->fontStyle->GetTextDecoration().value_or(TextDecoration::NONE);
+    std::vector<TextDecoration> types = spanItem->fontStyle->GetTextDecoration().value_or(
+        std::vector<TextDecoration>({TextDecoration::NONE}));
     std::optional<Color> color = spanItem->fontStyle->GetTextDecorationColor();
     std::optional<TextDecorationStyle> style = spanItem->fontStyle->GetTextDecorationStyle();
     std::optional<float> lineThicknessScale = spanItem->fontStyle->GetLineThicknessScale();
-    return AceType::MakeRefPtr<DecorationSpan>(type, color, style, lineThicknessScale, start, end);
+    std::optional<TextDecorationOptions> options;
+    return AceType::MakeRefPtr<DecorationSpan>(
+        types, color, style, lineThicknessScale, options, start, end);
 }
 
 RefPtr<BaselineOffsetSpan> SpanString::ToBaselineOffsetSpan(

@@ -345,12 +345,12 @@ void TextModelNG::SetIsOnlyBetweenLines(bool isOnlyBetweenLines)
 
 void TextModelNG::SetTextDecoration(Ace::TextDecoration value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecoration, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecoration, {value});
 }
 
 void TextModelNG::SetTextDecoration(FrameNode* frameNode, TextDecoration value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecoration, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecoration, {value}, frameNode);
 }
 
 void TextModelNG::SetTextDecorationColor(const Color& value)
@@ -810,7 +810,7 @@ TextDecoration TextModelNG::GetDecoration(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, TextDecoration::NONE);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, TextDecoration::NONE);
-    return layoutProperty->GetTextDecoration().value_or(TextDecoration::NONE);
+    return layoutProperty->GetTextDecorationFirst();
 }
 
 Color TextModelNG::GetTextDecorationColor(FrameNode* frameNode)

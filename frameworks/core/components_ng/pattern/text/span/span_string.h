@@ -58,7 +58,16 @@ public:
     RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
     bool operator==(const SpanString& other) const;
     std::list<RefPtr<NG::SpanItem>> GetSpanItems() const;
-    void AddSpan(const RefPtr<SpanBase>& span);
+    bool CheckMultiTypeDecorationSpan(const RefPtr<SpanBase>& span);
+    std::vector<RefPtr<SpanBase>> GetWholeSpans(int32_t start, int32_t end, SpanType spanType) const;
+    void ProcessMultiDecorationSpanForIntersection(
+        const RefPtr<SpanBase>& span, const RefPtr<SpanBase>& lastSpan,
+        std::vector<int32_t>& spanNoIntersection, int32_t start, int32_t end);
+    void ProcessMultiDecorationSpanForNoIntersection(
+        const RefPtr<SpanBase>& span, std::vector<int32_t>& spanNoIntersection,
+        int32_t start, int32_t end);
+    bool ProcessMultiDecorationSpan(const RefPtr<SpanBase>& span, int32_t start, int32_t end);
+    void AddSpan(const RefPtr<SpanBase>& span, bool processMultiDecoration = true);
     void RemoveSpan(int32_t start, int32_t length, SpanType key);
     bool CheckRange(int32_t start, int32_t length, bool allowLengthZero = false) const;
     void BindWithSpans(const std::vector<RefPtr<SpanBase>>& spans);

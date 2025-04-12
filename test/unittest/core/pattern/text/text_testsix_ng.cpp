@@ -55,7 +55,7 @@ HWTEST_F(TextTestSixNg, UseSelfStyle001, TestSize.Level1)
     fontFamilies.emplace_back("Calibri");
     fontStyle->UpdateFontFamily(fontFamilies);
     fontStyle->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
-    fontStyle->UpdateTextDecoration(TextDecoration::OVERLINE);
+    fontStyle->UpdateTextDecoration({TextDecoration::OVERLINE});
     fontStyle->UpdateTextDecorationColor(Color::WHITE);
     fontStyle->UpdateTextDecorationStyle(TextDecorationStyle::SOLID);
     fontStyle->UpdateTextCase(TextCase::LOWERCASE);

@@ -52,6 +52,26 @@ struct UserMouseOptions {
     OnHoverFunc onHover;
 };
 
+struct TextDecorationOptions {
+    std::optional<bool> enableMultiType;
+
+    bool IsEqual(const TextDecorationOptions& other) const
+    {
+        return this->enableMultiType.has_value() == other.enableMultiType.has_value() &&
+            this->enableMultiType.value_or(false) == other.enableMultiType.value_or(false);
+    }
+
+    bool operator==(const TextDecorationOptions& other) const
+    {
+        return IsEqual(other);
+    }
+
+    bool operator!=(const TextDecorationOptions& other) const
+    {
+        return !IsEqual(other);
+    }
+};
+
 struct ImageSpanSize {
     std::optional<CalcDimension> width;
     std::optional<CalcDimension> height;
@@ -179,9 +199,10 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableVariableFontWeight, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFeature, FONT_FEATURES_LIST);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, TextDecoration);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, std::vector<TextDecoration>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationStyle, TextDecorationStyle);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationOptions, TextDecorationOptions);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextCase, TextCase);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMinFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMaxFontSize, Dimension);
@@ -197,6 +218,16 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
 
     void UpdateColorByResourceId();
+
+    TextDecoration GetTextDecorationFirst() const
+    {
+        auto decorations = GetTextDecoration();
+        if (!decorations.has_value()) {
+            return TextDecoration::NONE;
+        }
+        return decorations.value().size() > 0 ?
+            decorations.value()[0] : TextDecoration::NONE;
+    }
 };
 
 struct TextLineStyle {

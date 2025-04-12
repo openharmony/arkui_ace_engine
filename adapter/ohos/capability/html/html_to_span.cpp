@@ -14,6 +14,7 @@
  */
 
 #include "html_to_span.h"
+#include <sstream>
 
 #include "core/text/html_utils.h"
 
@@ -99,25 +100,33 @@ TextDecorationStyle StringToTextDecorationStyle(const std::string& textDecoratio
     return TextDecorationStyle::SOLID;
 }
 
-TextDecoration StringToTextDecoration(const std::string& textDecoration)
+std::vector<TextDecoration> StringToTextDecoration(const std::string& textDecoration)
 {
-    std::string value = StringUtils::TrimStr(textDecoration);
-    if (value == "inherit") {
-        return TextDecoration::INHERIT;
+    std::istringstream ss(textDecoration);
+    std::string tmp;
+    std::vector<std::string> decorations;
+    while (std::getline(ss, tmp, ' ')) {
+        decorations.emplace_back(tmp);
     }
-    if (value == "line-through") {
-        return TextDecoration::LINE_THROUGH;
+    std::vector<TextDecoration> result;
+    for (const auto &its : decorations) {
+        std::string value = StringUtils::TrimStr(its);
+        TextDecoration decoration;
+        if (value == "inherit") {
+            decoration = TextDecoration::INHERIT;
+        }
+        if (value == "line-through") {
+            decoration = TextDecoration::LINE_THROUGH;
+        }
+        if (value == "overline") {
+            decoration = TextDecoration::OVERLINE;
+        }
+        if (value == "underline") {
+            decoration = TextDecoration::UNDERLINE;
+        }
+        result.push_back(decoration);
     }
-    if (value == "none") {
-        return TextDecoration::NONE;
-    }
-    if (value == "overline") {
-        return TextDecoration::OVERLINE;
-    }
-    if (value == "underline") {
-        return TextDecoration::UNDERLINE;
-    }
-    return TextDecoration::NONE;
+    return result;
 }
 
 ImageFit ConvertStrToFit(const std::string& fit)
@@ -1065,9 +1074,11 @@ RefPtr<SpanBase> HtmlToSpan::MakeDimensionSpan(const SpanInfo& info, StyleValue&
 RefPtr<SpanBase> HtmlToSpan::MakeDecorationSpan(const SpanInfo& info, StyleValue& value)
 {
     auto style = Get<DecorationSpanParam>(&value);
+    std::optional<TextDecorationOptions> options;
     if (style != nullptr) {
-        return AceType::MakeRefPtr<DecorationSpan>(style->decorationType, style->color,
-            style->decorationSytle, 1.0f, info.start, info.end);
+        return AceType::MakeRefPtr<DecorationSpan>(
+            std::vector<TextDecoration>({style->decorationType}), style->color,
+            style->decorationSytle, 1.0f, options, info.start, info.end);
     }
 
     return nullptr;

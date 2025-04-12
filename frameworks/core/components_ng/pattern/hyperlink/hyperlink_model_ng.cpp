@@ -59,7 +59,7 @@ void HyperlinkModelNG::SetTextStyle(
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
     textLayoutProperty->UpdateTextColor(theme->GetTextColor());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
-    textLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
+    textLayoutProperty->UpdateTextDecoration({theme->GetTextUnSelectedDecoration()});
     textLayoutProperty->UpdateAdaptMinFontSize(10.0_vp);
     textLayoutProperty->UpdateAdaptMaxFontSize(textStyle.GetFontSize());
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);

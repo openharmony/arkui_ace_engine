@@ -272,6 +272,12 @@ public:
         return textStyle_;
     }
 
+    TextDecoration GetTextDecoration() const
+    {
+        return textStyle_.GetTextDecoration().size() > 0 ?
+            textStyle_.GetTextDecoration()[0] : TextDecoration::NONE;
+    }
+
     uint32_t GetSearchSymbolId() const
     {
         return searchSymbolId_;

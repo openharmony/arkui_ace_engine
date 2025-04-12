@@ -868,7 +868,7 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     modifier->SetTextColor(textStyle.GetTextColor());
     modifier->SetFontStyle(textStyle.GetFontStyle());
     modifier->SetTextOverflow(textStyle.GetTextOverflow());
-    modifier->SetTextDecoration(textStyle.GetTextDecoration(), textStyle.GetTextDecorationColor(),
+    modifier->SetTextDecoration(textStyle.GetTextDecorationFirst(), textStyle.GetTextDecorationColor(),
         textStyle.GetTextDecorationStyle());
 }
 

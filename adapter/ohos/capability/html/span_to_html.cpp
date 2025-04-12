@@ -96,7 +96,7 @@ std::string SpanToHtml::FontFamilyToHtml(const std::optional<std::vector<std::st
     return ToHtmlStyleFormat("font-family", GetFontFamilyInJson(value));
 }
 
-std::string SpanToHtml::TextDecorationToHtml(TextDecoration decoration)
+std::string SpanToHtml::TextDecorationToHtml(const std::vector<TextDecoration>& decorations)
 {
     static const LinearEnumMapNode<TextDecoration, std::string> decorationTable[] = {
         { TextDecoration::NONE, "none" },
@@ -106,12 +106,17 @@ std::string SpanToHtml::TextDecorationToHtml(TextDecoration decoration)
         { TextDecoration::INHERIT, "inherit" },
     };
 
-    auto index = BinarySearchFindIndex(decorationTable, ArraySize(decorationTable), decoration);
-    if (index < 0) {
-        return "";
+    std::string style;
+    for (TextDecoration decoration : decorations) {
+        auto index = BinarySearchFindIndex(decorationTable, ArraySize(decorationTable), decoration);
+        if (index < 0) {
+            continue;
+        }
+        style += decorationTable[index].value + " ";
     }
+    style.pop_back();
 
-    return ToHtmlStyleFormat("text-decoration-line", decorationTable[index].value);
+    return ToHtmlStyleFormat("text-decoration-line", style);
 }
 
 std::string SpanToHtml::TextDecorationStyleToHtml(TextDecorationStyle decorationStyle)
@@ -156,8 +161,9 @@ std::string SpanToHtml::ToHtml(const std::string& key, const std::optional<Dimen
 
 std::string SpanToHtml::DecorationToHtml(const NG::FontStyle& fontStyle)
 {
-    auto type = fontStyle.GetTextDecoration().value_or(TextDecoration::NONE);
-    if (type == TextDecoration::NONE) {
+    auto types = fontStyle.GetTextDecoration().value_or(
+        std::vector<TextDecoration>({TextDecoration::NONE}));
+    if (!V2::IsValidTextDecorations(types)) {
         return "";
     }
     std::string html;
@@ -167,7 +173,7 @@ std::string SpanToHtml::DecorationToHtml(const NG::FontStyle& fontStyle)
         ToHtmlColor(htmlColor);
         html += ToHtmlStyleFormat("text-decoration-color", htmlColor);
     }
-    html += TextDecorationToHtml(type);
+    html += TextDecorationToHtml(types);
     auto style = fontStyle.GetTextDecorationStyle();
     if (style) {
         html += TextDecorationStyleToHtml(*style);

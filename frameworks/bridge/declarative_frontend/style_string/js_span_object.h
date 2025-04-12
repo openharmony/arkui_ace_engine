@@ -115,7 +115,8 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSDecorationSpan* decorationSpan);
     static void JSBind(BindingTarget globalObj);
-    static RefPtr<DecorationSpan> ParseJsDecorationSpan(const JSRef<JSObject>& obj);
+    static RefPtr<DecorationSpan> ParseJsDecorationSpan(const JSCallbackInfo& args);
+    static TextDecorationOptions ParseJsDecorationOptions(const JSRef<JSObject>& obj);
     void GetTextDecorationType(const JSCallbackInfo& info);
     void SetTextDecorationType(const JSCallbackInfo& info);
     void GetTextDecorationColor(const JSCallbackInfo& info);
@@ -124,6 +125,8 @@ public:
     void SetTextDecorationStyle(const JSCallbackInfo& info);
     void GetLineThicknessScale(const JSCallbackInfo& info);
     void SetLineThicknessScale(const JSCallbackInfo& info);
+    void GetTextDecorationOptions(const JSCallbackInfo& info);
+    void SetTextDecorationOptions(const JSCallbackInfo& info);
 
     RefPtr<DecorationSpan>& GetDecorationSpan();
     void SetDecorationSpan(const RefPtr<DecorationSpan>& decorationSpan);

@@ -214,7 +214,7 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     } else {
         auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        textDecoration = theme->GetTextStyle().GetTextDecoration();
+        textDecoration = theme->GetTextDecoration();
     }
     std::optional<TextDecorationStyle> textDecorationStyle;
     if (styleValue->IsNumber()) {
