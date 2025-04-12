@@ -1862,7 +1862,7 @@ void DialogPattern::UpdateHostWindowRect()
         auto container = AceEngine::Get().GetContainer(currentId);
         auto isHalfFold = container && container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD;
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(currentId);
-        needUpdate = isHalfFold && subwindow && subwindow->IsSameDisplayWithParentWindow();
+        needUpdate = isHalfFold && subwindow && subwindow->IsSameDisplayWithParentWindow() && dialogProperties_.isModal;
     }
 
     if (needUpdate) {

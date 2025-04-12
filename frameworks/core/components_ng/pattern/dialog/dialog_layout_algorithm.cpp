@@ -650,6 +650,26 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
 }
 
+void DialogLayoutAlgorithm::AvoidScreen(
+    OffsetF& topLeftPoint, const RefPtr<DialogLayoutProperty>& dialogProp, SizeF childSize)
+{
+    CHECK_NULL_VOID(dialogProp);
+    auto availableRect = OverlayManager::GetDisplayAvailableRect(dialogProp->GetHost());
+    auto overScreen = LessNotEqual(availableRect.Width(), childSize.Width()) ||
+                      LessNotEqual(availableRect.Height(), childSize.Height());
+    auto needAvoidScreen =
+        SystemProperties::IsSuperFoldDisplayDevice() && !isModal_ && isUIExtensionSubWindow_ && !overScreen;
+    if (!needAvoidScreen) {
+        return;
+    }
+    auto left = std::clamp(topLeftPoint.GetX(), static_cast<float>(availableRect.Left()),
+        static_cast<float>(availableRect.Right() - childSize.Width()));
+    auto top = std::clamp(topLeftPoint.GetY(), static_cast<float>(availableRect.Top()),
+        static_cast<float>(availableRect.Bottom() - childSize.Height()));
+    topLeftPoint.SetX(left);
+    topLeftPoint.SetY(top);
+}
+
 void DialogLayoutAlgorithm::ParseSubwindowId(const RefPtr<DialogLayoutProperty>& dialogProp)
 {
     CHECK_NULL_VOID(dialogProp);
@@ -800,7 +820,9 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
         keyboardAvoidMode_ == KeyboardAvoidMode::NONE) {
         needAvoidKeyboard = false;
     }
-    return AdjustChildPosition(topLeftPoint, dialogOffset, childSize, needAvoidKeyboard);
+    auto childOffset = AdjustChildPosition(topLeftPoint, dialogOffset, childSize, needAvoidKeyboard);
+    AvoidScreen(childOffset, prop, childSize);
+    return childOffset;
 }
 
 bool DialogLayoutAlgorithm::IsAlignmentByWholeScreen()
