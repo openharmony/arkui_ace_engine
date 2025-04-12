@@ -47,6 +47,7 @@ constexpr uint32_t HALF = 2;
 const Dimension FOCUS_WIDTH = 2.0_vp;
 constexpr float DISABLE_ALPHA = 0.6f;
 constexpr float MAX_PERCENT = 100.0f;
+const int32_t UNOPTION_COUNT = 2;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -1160,25 +1161,10 @@ bool TextPickerPattern::OnKeyEvent(const KeyEvent& event)
         return false;
     }
 
-    if (event.code == KeyCode::KEY_SPACE || event.code == KeyCode::KEY_ENTER) {
-        if (!operationOn_ && event.code == KeyCode::KEY_ENTER) {
-            HandleDirectionKey(event.code);
-        }
-        operationOn_ = (event.code == KeyCode::KEY_SPACE) || (event.code == KeyCode::KEY_ENTER);
-        return true;
-    }
-
-    if (event.code == KeyCode::KEY_TAB) {
-        operationOn_ = false;
-        return false;
-    }
-
     if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN ||
-        event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_RIGHT) {
-        if (operationOn_) {
-            HandleDirectionKey(event.code);
-        }
-        return true;
+        event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_RIGHT ||
+        event.code == KeyCode::KEY_MOVE_HOME || event.code == KeyCode::KEY_MOVE_END) {
+        return HandleDirectionKey(event.code);
     }
     return false;
 }
@@ -1355,44 +1341,46 @@ void TextPickerPattern::CheckFocusID(int32_t childSize)
     }
 }
 
-bool TextPickerPattern::ParseDirectionKey(
-    RefPtr<TextPickerColumnPattern>& textPickerColumnPattern, KeyCode& code, int32_t childSize)
+bool TextPickerPattern::ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textPickerColumnPattern,
+    KeyCode& code, uint32_t totalOptionCount, int32_t childSize)
 {
     bool result = true;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     switch (code) {
         case KeyCode::KEY_DPAD_UP:
-            if (textPickerColumnPattern->InnerHandleScroll(0, false)) {
-                textPickerColumnPattern->HandleScrollStopEventCallback(true);
-            }
-            break;
-        case KeyCode::KEY_DPAD_DOWN:
-            if (textPickerColumnPattern->InnerHandleScroll(1, false)) {
+            if (textPickerColumnPattern->InnerHandleScroll(false, false)) {
                 textPickerColumnPattern->HandleScrollStopEventCallback(true);
             }
             break;
 
-        case KeyCode::KEY_ENTER:
-            focusKeyID_ = 0;
-            PaintFocusState();
+        case KeyCode::KEY_DPAD_DOWN:
+            if (textPickerColumnPattern->InnerHandleScroll(true, false)) {
+                textPickerColumnPattern->HandleScrollStopEventCallback(true);
+            }
+            break;
+
+        case KeyCode::KEY_MOVE_HOME:
+            textPickerColumnPattern->SetCurrentIndex(1);
+            if (textPickerColumnPattern->InnerHandleScroll(false, false)) {
+                textPickerColumnPattern->HandleScrollStopEventCallback(true);
+            }
+            break;
+
+        case KeyCode::KEY_MOVE_END:
+            textPickerColumnPattern->SetCurrentIndex(totalOptionCount - UNOPTION_COUNT);
+            if (textPickerColumnPattern->InnerHandleScroll(true, false)) {
+                textPickerColumnPattern->HandleScrollStopEventCallback(true);
+            }
             break;
 
         case KeyCode::KEY_DPAD_LEFT:
-            if (isRtl) {
-                focusKeyID_ += 1;
-            } else {
-                focusKeyID_ -= 1;
-            }
+            focusKeyID_ = isRtl ? (focusKeyID_ + 1) : (focusKeyID_ - 1);
             CheckFocusID(childSize);
             PaintFocusState();
             break;
 
         case KeyCode::KEY_DPAD_RIGHT:
-            if (isRtl) {
-                focusKeyID_ -= 1;
-            } else {
-                focusKeyID_ += 1;
-            }
+            focusKeyID_ = isRtl ? (focusKeyID_ - 1) : (focusKeyID_ + 1);
             CheckFocusID(childSize);
             PaintFocusState();
             break;
@@ -1417,7 +1405,7 @@ bool TextPickerPattern::HandleDirectionKey(KeyCode code)
     if (totalOptionCount == 0) {
         return false;
     }
-    return ParseDirectionKey(textPickerColumnPattern, code, static_cast<int32_t>(childSize));
+    return ParseDirectionKey(textPickerColumnPattern, code, totalOptionCount, static_cast<int32_t>(childSize));
 }
 
 std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::string>& values,

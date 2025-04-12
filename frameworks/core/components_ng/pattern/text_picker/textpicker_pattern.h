@@ -584,7 +584,8 @@ private:
     void UpdateCancelButtonMargin(
         const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
     void CheckFocusID(int32_t childSize);
-    bool ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textPickerColumnPattern, KeyCode& code, int32_t childSize);
+    bool ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textPickerColumnPattern, KeyCode& code,
+        uint32_t totalOptionCount, int32_t childSize);
     RectF CalculatePaintRect(int32_t currentFocusIndex,
         float centerX, float centerY, float paintRectWidth, float paintRectHeight, float columnWidth);
     void AdjustFocusBoxOffset(float& centerX, float& centerY);
@@ -619,9 +620,6 @@ private:
     bool resizeFlag_ = false;
     bool isShowInDialog_ = false;
     bool canloop_ = true;
-
-    // inner focus switch
-    bool operationOn_ = false;
 
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;
