@@ -29,13 +29,8 @@ class ACE_EXPORT GridLayoutBaseAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(GridLayoutBaseAlgorithm, LayoutAlgorithm);
 
 public:
-    explicit GridLayoutBaseAlgorithm(GridLayoutInfo gridLayoutInfo) : info_(std::move(gridLayoutInfo)) {};
+    explicit GridLayoutBaseAlgorithm(GridLayoutInfo& gridLayoutInfo) : info_(gridLayoutInfo) {};
     ~GridLayoutBaseAlgorithm() override = default;
-
-    const GridLayoutInfo& GetGridLayoutInfo()
-    {
-        return std::move(info_);
-    }
 
     virtual void UpdateRealGridItemPositionInfo(
         const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t mainIndex, int32_t crossIndex)
@@ -86,7 +81,11 @@ protected:
 
     void UpdateOverlay(LayoutWrapper* layoutWrapper);
 
-    GridLayoutInfo info_;
+    /**
+     * Reference to LayoutInfo in GridPattern
+     * Framework must guarantee that Pattern outlives LayoutAlgorithm
+     */
+    GridLayoutInfo& info_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutBaseAlgorithm);
 };
