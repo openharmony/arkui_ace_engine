@@ -2235,8 +2235,9 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 
 void JSViewAbstract::ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOption& blurOption)
 {
-    if (jsBlurOption->GetProperty("grayscale")->IsArray()) {
-        JSRef<JSArray> params = JSRef<JSArray>::Cast(jsBlurOption->GetProperty("grayscale"));
+    auto blurOptionProperty = jsBlurOption->GetProperty("grayscale");
+    if (blurOptionProperty->IsArray()) {
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(blurOptionProperty);
         auto grey1 = params->GetValueAt(0)->ToNumber<uint32_t>();
         auto grey2 = params->GetValueAt(1)->ToNumber<uint32_t>();
         std::vector<float> greyVec(2); // 2 number
