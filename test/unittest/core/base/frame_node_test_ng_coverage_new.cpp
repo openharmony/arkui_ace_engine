@@ -448,4 +448,345 @@ HWTEST_F(FrameNodeTestNg, ProcessVisibleAreaChangeEventTest, TestSize.Level1)
     frameNode->ProcessVisibleAreaChangeEvent(visibleRect, frameRect, visibleAreaRatios, visibleAreaCallback, false);
     EXPECT_EQ(frameNode->lastInnerVisibleRatio_, 1.0);
 }
+
+/**
+ * @tc.name: FrameNodeTestNg_AxisTest001
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. callback AxisTest.
+     * @tc.expected: expect isActive_ is flase and.
+     */
+    PointF globalPoint;
+    PointF parentLocalPoint;
+    PointF parentRevertPoint;
+    TouchRestrict touchRestrict;
+    AxisTestResult onAxisResult;
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->isActive_ = false;
+    /**
+     * @tc.steps: step2. callback AxisTest.
+     * @tc.expected: expect eventHub_ is nullptr.
+     */
+    ASSERT_EQ(frameNode->eventHub_, nullptr);
+    auto result = frameNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    EXPECT_EQ(result, HitTestResult::OUT_OF_REGION);
+    /**
+     * @tc.steps: step3. callback AxisTest.
+     * @tc.expected: expect eventHub_ is not nullptr and enabled_ is false.
+     */
+    frameNode->eventHub_ = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(frameNode->eventHub_, nullptr);
+    auto eventHub_ = frameNode->eventHub_;
+    eventHub_->enabled_ = false;
+    result = frameNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    EXPECT_EQ(result, HitTestResult::OUT_OF_REGION);
+    /**
+     * @tc.steps: step4. callback AxisTest.
+     * @tc.expected: expect eventHub_ is not nullptr and enabled_ is true.
+     */
+    eventHub_->enabled_ = true;
+    result = frameNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    EXPECT_EQ(result, HitTestResult::OUT_OF_REGION);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_AxisTest002
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. callback AxisTest.
+     * @tc.expected: expect isActive_ is true and.
+     */
+    PointF globalPoint;
+    PointF parentLocalPoint;
+    PointF parentRevertPoint;
+    TouchRestrict touchRestrict;
+    AxisTestResult onAxisResult;
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_TRUE(frameNode->IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent));
+    frameNode->isActive_ = true;
+    /**
+     * @tc.steps: step2. callback AxisTest.
+     * @tc.expected: expect eventHub_ is nullptr.
+     */
+    ASSERT_EQ(frameNode->eventHub_, nullptr);
+    auto result = frameNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    EXPECT_EQ(result, HitTestResult::OUT_OF_REGION);
+    /**
+     * @tc.steps: step3. callback AxisTest.
+     * @tc.expected: expect eventHub_ is not nullptr and enabled_ is false.
+     */
+    frameNode->eventHub_ = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(frameNode->eventHub_, nullptr);
+    auto eventHub_ = frameNode->eventHub_;
+    eventHub_->enabled_ = false;
+    result = frameNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    EXPECT_EQ(result, HitTestResult::OUT_OF_REGION);
+    /**
+     * @tc.steps: step4. callback AxisTest.
+     * @tc.expected: expect eventHub_ is not nullptr and enabled_ is true.
+     */
+    eventHub_->enabled_ = true;
+    result = frameNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    EXPECT_EQ(result, HitTestResult::OUT_OF_REGION);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_AxisTest003
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. callback AxisTest.
+     * @tc.expected: expect isActive_ is true and.
+     */
+    PointF globalPoint;
+    PointF parentLocalPoint = { 1.0f, 1.0f };
+    PointF parentRevertPoint = { 1.0f, 1.0f };
+    TouchRestrict touchRestrict;
+    AxisTestResult onAxisResult;
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->isActive_ = true;
+    auto eventHub_ = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub_, nullptr);
+    frameNode->eventHub_ = eventHub_;
+    eventHub_->enabled_ = true;
+    /**
+     * @tc.steps: step2. callback AxisTest.
+     * @tc.expected: expect IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent) is false.
+     */
+    auto renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(renderContext_, nullptr);
+    frameNode->renderContext_ = renderContext_;
+    renderContext_->paintRect_ = { 1.0f, 1.0f, 1.0f, 1.0f };
+    frameNode->GetOrRefreshMatrixFromCache().paintRectWithTransform = { 1.0f, 1.0f, 1.0f, 1.0f };
+    EXPECT_FALSE(frameNode->IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent));
+    /**
+     * @tc.steps: step3. callback AxisTest.
+     * @tc.expected: expect consumed is false.
+     */
+    auto result = frameNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    EXPECT_EQ(result, HitTestResult::BUBBLING);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_AxisTest004
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. callback AxisTest.
+     * @tc.expected: expect isActive_ is true and.
+     */
+    PointF globalPoint;
+    PointF parentLocalPoint = { 1.0f, 1.0f };
+    PointF parentRevertPoint = { 1.0f, 1.0f };
+    TouchRestrict touchRestrict;
+    AxisTestResult onAxisResult;
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->isActive_ = true;
+    auto eventHub_ = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub_, nullptr);
+    frameNode->eventHub_ = eventHub_;
+    eventHub_->enabled_ = true;
+    /**
+     * @tc.steps: step2. callback AxisTest.
+     * @tc.expected: expect IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent) is false.
+     */
+    auto renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(renderContext_, nullptr);
+    frameNode->renderContext_ = renderContext_;
+    renderContext_->paintRect_ = { 1.0f, 1.0f, 1.0f, 1.0f };
+    frameNode->GetOrRefreshMatrixFromCache().paintRectWithTransform = { 1.0f, 1.0f, 1.0f, 1.0f };
+    auto childNode = FrameNode::CreateFrameNode("childNode", 2, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step3. callback AxisTest.
+     * @tc.expected: expect GetHitTestMode() == HitTestMode::HTMBLOCK is false.
+     */
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    frameNode->frameChildren_ = { children.begin(), children.end() };
+    EXPECT_FALSE(frameNode->IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent));
+    /**
+     * @tc.steps: step5. callback AxisTest.
+     * @tc.expected: expect consumed is true.
+     */
+    auto gestureHub = eventHub_->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    gestureHub->hitTestMode_ = HitTestMode::HTMNONE;
+    auto result = frameNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    EXPECT_EQ(result, HitTestResult::OUT_OF_REGION);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_AxisTest005
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. callback AxisTest.
+     * @tc.expected: expect isActive_ is true and.
+     */
+    PointF globalPoint;
+    PointF parentLocalPoint = { 1.0f, 1.0f };
+    PointF parentRevertPoint = { 1.0f, 1.0f };
+    TouchRestrict touchRestrict;
+    AxisTestResult onAxisResult;
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->isActive_ = true;
+    auto eventHub_ = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub_, nullptr);
+    frameNode->eventHub_ = eventHub_;
+    eventHub_->enabled_ = true;
+    /**
+     * @tc.steps: step2. callback AxisTest.
+     * @tc.expected: expect IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent) is false.
+     */
+    auto renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(renderContext_, nullptr);
+    frameNode->renderContext_ = renderContext_;
+    renderContext_->paintRect_ = { 1.0f, 1.0f, 1.0f, 1.0f };
+    frameNode->GetOrRefreshMatrixFromCache().paintRectWithTransform = { 1.0f, 1.0f, 1.0f, 1.0f };
+    auto childNode = FrameNode::CreateFrameNode("childNode", 2, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step3. callback AxisTest.
+     * @tc.expected: expect GetHitTestMode() == HitTestMode::HTMBLOCK is true.
+     */
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    frameNode->frameChildren_ = { children.begin(), children.end() };
+    EXPECT_FALSE(frameNode->IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent));
+    auto gestureHub = eventHub_->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    gestureHub->hitTestMode_ = HitTestMode::HTMBLOCK;
+    auto result = frameNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    EXPECT_EQ(result, HitTestResult::BUBBLING);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_AxisTest006
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. callback AxisTest.
+     * @tc.expected: expect isActive_ is true and.
+     */
+    PointF globalPoint;
+    PointF parentLocalPoint = { 1.0f, 1.0f };
+    PointF parentRevertPoint = { 1.0f, 1.0f };
+    TouchRestrict touchRestrict;
+    AxisTestResult onAxisResult;
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->isActive_ = true;
+    auto eventHub_ = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub_, nullptr);
+    frameNode->eventHub_ = eventHub_;
+    eventHub_->enabled_ = true;
+    /**
+     * @tc.steps: step2. callback AxisTest.
+     * @tc.expected: expect IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent) is false.
+     */
+    auto renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(renderContext_, nullptr);
+    frameNode->renderContext_ = renderContext_;
+    renderContext_->paintRect_ = { 1.0f, 1.0f, 1.0f, 1.0f };
+    frameNode->GetOrRefreshMatrixFromCache().paintRectWithTransform = { 1.0f, 1.0f, 1.0f, 1.0f };
+    /**
+     * @tc.steps: step3. callback AxisTest.
+     * @tc.expected: expect !child is true.
+     */
+    auto childNode = nullptr;
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    frameNode->frameChildren_ = { children.begin(), children.end() };
+    EXPECT_FALSE(frameNode->IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent));
+    auto gestureHub = eventHub_->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    gestureHub->hitTestMode_ = HitTestMode::HTMNONE;
+    auto result = frameNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    EXPECT_EQ(result, HitTestResult::OUT_OF_REGION);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_AxisTest007
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. callback AxisTest.
+     * @tc.expected: expect isActive_ is true and.
+     */
+    PointF globalPoint;
+    PointF parentLocalPoint = { 3.0f, 3.0f };
+    PointF parentRevertPoint = { 2.0f, 2.0f };
+    TouchRestrict touchRestrict;
+    AxisTestResult onAxisResult;
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->isActive_ = true;
+    auto eventHub_ = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub_, nullptr);
+    frameNode->eventHub_ = eventHub_;
+    eventHub_->enabled_ = true;
+    /**
+     * @tc.steps: step2. callback AxisTest.
+     * @tc.expected: expect IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent) is false.
+     */
+    auto renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(renderContext_, nullptr);
+    frameNode->renderContext_ = renderContext_;
+    renderContext_->paintRect_ = { 1.0f, 1.0f, 1.0f, 1.0f };
+    frameNode->GetOrRefreshMatrixFromCache().paintRectWithTransform = { 1.0f, 1.0f, 1.0f, 1.0f };
+    auto childNode = FrameNode::CreateFrameNode("childNode", 2, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(childNode, nullptr);
+    /**
+     * @tc.steps: step3. callback AxisTest.
+     * @tc.expected: expect CheckChildHitTestReslut is true.
+     */
+    childNode->isActive_ = true;
+    auto childEventHub_ = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(childEventHub_, nullptr);
+    childNode->eventHub_ = childEventHub_;
+    childEventHub_->enabled_ = true;
+    auto childRenderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(childRenderContext_, nullptr);
+    childNode->renderContext_ = childRenderContext_;
+    childRenderContext_->paintRect_ = { 1.0f, 1.0f, 1.0f, 1.0f };
+    childNode->GetOrRefreshMatrixFromCache().paintRectWithTransform = { 1.0f, 1.0f, 1.0f, 1.0f };
+    auto childGestureHub = childEventHub_->GetOrCreateGestureEventHub();
+    childGestureHub->hitTestMode_ = HitTestMode::HTMDEFAULT;
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    frameNode->frameChildren_ = { children.begin(), children.end() };
+    EXPECT_FALSE(frameNode->IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent));
+    auto gestureHub = eventHub_->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    gestureHub->hitTestMode_ = HitTestMode::HTMNONE;
+    auto result = frameNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    EXPECT_EQ(result, HitTestResult::BUBBLING);
+}
 } // namespace OHOS::Ace::NG
