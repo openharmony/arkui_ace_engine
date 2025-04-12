@@ -6396,6 +6396,7 @@ int32_t RichEditorPattern::GetLeftWordIndex(int32_t index)
 {
     AdjustIndexSkipSpace(index, MoveDirection::BACKWARD);
     int32_t newPos = std::max(0, index - 1);
+    AdjustSelectorForSymbol(newPos, HandleType::FIRST, SelectorAdjustPolicy::INCLUDE);
     AdjustWordSelection(newPos, index);
     AdjustSelector(newPos, HandleType::FIRST);
     return newPos;
@@ -11618,6 +11619,7 @@ void RichEditorPattern::DeleteBackwardWord()
     int32_t spaceEndIndex = startIndex;
     AdjustIndexSkipSpace(spaceEndIndex, MoveDirection::BACKWARD);
     int32_t wordEndIndex = std::max(0, spaceEndIndex - 1);
+    AdjustSelectorForSymbol(wordEndIndex, HandleType::FIRST, SelectorAdjustPolicy::INCLUDE);
     AdjustWordSelection(wordEndIndex, spaceEndIndex);
     DeleteBackward(startIndex - wordEndIndex);
 }
