@@ -280,6 +280,16 @@ public:
     RefPtr<PixelMap> GetPreScaledPixelMapForDragThroughTouch(float& preScale);
     void ResetPreScaledPixelMapForDragThroughTouch();
 
+    void RecordTouchDownPoint(const TouchEvent& downTouchEvent)
+    {
+        touchDownPoint_ = downTouchEvent;
+    }
+
+    const TouchEvent& GetTouchDownPoint()
+    {
+        return touchDownPoint_;
+    }
+
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
     void UpdatePreviewOptionDefaultAttr(const RefPtr<FrameNode>& frameNode);
@@ -317,6 +327,7 @@ private:
     std::function<void()> actionCancel_;
     std::function<void(Offset)> textDragCallback_;
     GestureEvent longPressInfo_;
+    TouchEvent touchDownPoint_;
     bool isReceivedLongPress_ = false;
     bool isFloatImage_ = true;
     bool isNotInPreviewState_ = false;
