@@ -1900,7 +1900,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
     SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::VISIBLE_AREA_CHANGE);
     if (hasInnerCallback) {
         if (isCalculateInnerVisibleRectClip_) {
-            ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.frameRect,
+            ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.innerFrameRect,
                 visibleAreaInnerRatios, visibleAreaInnerCallback, false);
         } else {
             ProcessVisibleAreaChangeEvent(visibleResult.visibleRect, visibleResult.frameRect, visibleAreaInnerRatios,
@@ -5700,25 +5700,29 @@ CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool l
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
     auto rectToParent = GetPaintRectWithTransform();
     auto scale = GetTransformScale();
+    auto innerScale = scale;
     if (renderContext_) {
         auto matrix4 = renderContext_->GetTransformMatrixValue(Matrix4());
-        scale = { scale.x * static_cast<float>(matrix4.GetScaleX()),
-            scale.y * static_cast<float>(matrix4.GetScaleY()) };
+        innerScale = { innerScale.x * static_cast<float>(matrix4.GetScaleX()),
+            innerScale.y * static_cast<float>(matrix4.GetScaleY()) };
     }
 
     if (!parentUi || IsWindowBoundary()) {
-        cachedVisibleRectResult_ = {timestamp,
-            {rectToParent.GetOffset(), rectToParent, rectToParent, scale, rectToParent, rectToParent}};
+        cachedVisibleRectResult_ = { timestamp,
+            { rectToParent.GetOffset(), rectToParent.GetOffset(), rectToParent, rectToParent, scale, innerScale,
+                rectToParent, rectToParent, rectToParent } };
         return cachedVisibleRectResult_.second;
     }
 
     CacheVisibleRectResult result;
     if (parentUi->cachedVisibleRectResult_.first == timestamp) {
         auto parentCacheVisibleRectResult = parentUi->cachedVisibleRectResult_.second;
-        result = CalculateCacheVisibleRect(parentCacheVisibleRectResult, parentUi, rectToParent, scale, timestamp);
+        result = CalculateCacheVisibleRect(
+            parentCacheVisibleRectResult, parentUi, rectToParent, { scale, innerScale }, timestamp);
     } else {
         CacheVisibleRectResult parentCacheVisibleRectResult = parentUi->GetCacheVisibleRect(timestamp, logFlag);
-        result = CalculateCacheVisibleRect(parentCacheVisibleRectResult, parentUi, rectToParent, scale, timestamp);
+        result = CalculateCacheVisibleRect(
+            parentCacheVisibleRectResult, parentUi, rectToParent, { scale, innerScale }, timestamp);
     }
     if (logFlag) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT,
@@ -5732,32 +5736,51 @@ CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool l
 }
 
 CacheVisibleRectResult FrameNode::CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
-    const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp)
+    const RefPtr<FrameNode>& parentUi, RectF& rectToParent, const std::pair<VectorF, VectorF>& pairScale,
+    uint64_t timestamp)
 {
     auto parentRenderContext = parentUi->GetRenderContext();
     OffsetF windowOffset;
+    OffsetF innerWindowOffset;
     auto offset = rectToParent.GetOffset();
-    offset = OffsetF(offset.GetX() * parentCacheVisibleRect.cumulativeScale.x,
-        offset.GetY() * parentCacheVisibleRect.cumulativeScale.y);
+    auto innerOffset = rectToParent.GetOffset();
+    if (parentRenderContext && parentRenderContext->GetTransformScale()) {
+        auto parentScale = parentRenderContext->GetTransformScale();
+        offset = OffsetF(offset.GetX() * parentScale.value().x, offset.GetY() * parentScale.value().y);
+    }
     windowOffset = parentCacheVisibleRect.windowOffset + offset;
+
+    innerOffset = OffsetF(innerOffset.GetX() * parentCacheVisibleRect.innerCumulativeScale.x,
+        innerOffset.GetY() * parentCacheVisibleRect.innerCumulativeScale.y);
+    innerWindowOffset = parentCacheVisibleRect.innerWindowOffset + innerOffset;
 
     RectF rect;
     rect.SetOffset(windowOffset);
     rect.SetWidth(rectToParent.Width() * parentCacheVisibleRect.cumulativeScale.x);
     rect.SetHeight(rectToParent.Height() * parentCacheVisibleRect.cumulativeScale.y);
 
+    RectF innerRect;
+    innerRect.SetOffset(innerWindowOffset);
+    innerRect.SetWidth(rectToParent.Width() * parentCacheVisibleRect.innerCumulativeScale.x);
+    innerRect.SetHeight(rectToParent.Height() * parentCacheVisibleRect.innerCumulativeScale.y);
+
     auto visibleRect = rect.Constrain(parentCacheVisibleRect.visibleRect);
-    auto innerVisibleRect = rect;
+    auto innerVisibleRect = innerRect;
     auto innerBoundaryRect = parentCacheVisibleRect.innerBoundaryRect;
     if (parentRenderContext && parentRenderContext->GetClipEdge().value_or(false)) {
         innerBoundaryRect = parentCacheVisibleRect.innerVisibleRect.Constrain(innerBoundaryRect);
     }
-    innerVisibleRect = rect.Constrain(innerBoundaryRect);
+    innerVisibleRect = innerRect.Constrain(innerBoundaryRect);
 
-    scale = {scale.x * parentCacheVisibleRect.cumulativeScale.x, scale.y * parentCacheVisibleRect.cumulativeScale.y};
+    VectorF cumulativeScale = { pairScale.first.x * parentCacheVisibleRect.cumulativeScale.x,
+        pairScale.first.y * parentCacheVisibleRect.cumulativeScale.y };
+    VectorF innerCumulativeScale = { pairScale.second.x * parentCacheVisibleRect.innerCumulativeScale.x,
+        pairScale.second.y * parentCacheVisibleRect.innerCumulativeScale.y };
     cachedVisibleRectResult_ = { timestamp,
-        { windowOffset, visibleRect, innerVisibleRect, scale, rect, innerBoundaryRect } };
-    return {windowOffset, visibleRect, innerVisibleRect, scale, rect, innerBoundaryRect};
+        { windowOffset, innerWindowOffset, visibleRect, innerVisibleRect, cumulativeScale, innerCumulativeScale, rect,
+            innerRect, innerBoundaryRect } };
+    return { windowOffset, innerWindowOffset, visibleRect, innerVisibleRect, cumulativeScale, innerCumulativeScale,
+        rect, innerRect, innerBoundaryRect };
 }
 
 bool FrameNode::IsContextTransparent()

@@ -75,10 +75,13 @@ struct DirtySwapConfig;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
+    OffsetF innerWindowOffset = OffsetF();
     RectF visibleRect = RectF();
     RectF innerVisibleRect = RectF();
     VectorF cumulativeScale = {1.0f, 1.0f};
+    VectorF innerCumulativeScale = {1.0f, 1.0f};
     RectF frameRect = RectF();
+    RectF innerFrameRect = RectF();
     RectF innerBoundaryRect = RectF();
 };
 
@@ -1501,7 +1504,8 @@ private:
     CacheVisibleRectResult GetCacheVisibleRect(uint64_t timestamp, bool logFlag = false);
 
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
-        const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
+        const RefPtr<FrameNode>& parentUi, RectF& rectToParent, const std::pair<VectorF, VectorF>& pairScale,
+        uint64_t timestamp);
 
     void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
 
