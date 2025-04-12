@@ -6669,15 +6669,17 @@ void OverlayManager::RemoveFilterAnimation()
 void OverlayManager::RemoveFilterWithNode(const RefPtr<FrameNode>& filterNode)
 {
     CHECK_NULL_VOID(filterNode);
-    auto filterId = filterNode->GetId();
     auto rootNode = filterNode->GetParent();
     CHECK_NULL_VOID(rootNode);
+
+    auto columnNode = filterColumnNodeWeak_.Upgrade();
+    auto isRemoveCurrentFilter = columnNode && columnNode->GetId() == filterNode->GetId();
+    
     rootNode->RemoveChild(filterNode);
     rootNode->RebuildRenderContextTree();
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "remove filter sucessfully");
 
-    auto columnNode = filterColumnNodeWeak_.Upgrade();
-    if (columnNode && columnNode->GetId() == filterId) {
+    if (isRemoveCurrentFilter) {
         hasFilter_ = false;
     }
 }
@@ -6691,8 +6693,9 @@ void OverlayManager::RemoveFilter()
     auto columnNode = filterColumnNodeWeak_.Upgrade();
     if (columnNode) {
         RemoveFilterWithNode(columnNode);
+    } else {
+        hasFilter_ = false;
     }
-    hasFilter_ = false;
 }
 
 void OverlayManager::RemoveEventColumn()
