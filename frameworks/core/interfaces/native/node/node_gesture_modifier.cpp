@@ -1037,10 +1037,11 @@ ArkUI_Int32 getTapGestureDistanceThreshold(ArkUIGestureRecognizer* recognizer, d
 
 ArkUI_Int32 setDistanceMap(ArkUIGesture* gesture, int size, int* toolTypeArray, double* distanceArray)
 {
-    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() } };
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
     for (int i = 0; i < size; i++) {
         SourceTool st = static_cast<SourceTool>(toolTypeArray[i]);
-        if (st >= SourceTool::UNKNOWN && st <= SourceTool::JOYSTICK) {
+        if (st >= SourceTool::UNKNOWN && st <= SourceTool::JOYSTICK && GreatOrEqual(distanceArray[i], 0.0)) {
             distanceMap[st] = distanceArray[i];
         }
     }
