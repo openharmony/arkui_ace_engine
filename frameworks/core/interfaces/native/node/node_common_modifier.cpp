@@ -8321,6 +8321,7 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.contactAreaHeight = locationInfo.GetSize();
     touchPoint.tiltX = locationInfo.GetTiltX().value_or(0.0f);
     touchPoint.tiltY = locationInfo.GetTiltY().value_or(0.0f);
+    touchPoint.rollAngle = locationInfo.GetRollAngle().value_or(0.0f);
     touchPoint.toolType = static_cast<int32_t>(locationInfo.GetSourceTool());
     touchPoint.pressedTime = locationInfo.GetPressedTime().time_since_epoch().count();
     touchPoint.operatingHand = locationInfo.GetOperatingHand();
@@ -8356,6 +8357,7 @@ void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
         points[i].pressure = touchPoint.force;
         points[i].tiltX = touchPoint.tiltX.value_or(0.0f);
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
+        points[i].rollAngle = touchPoint.rollAngle.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(historyLoaction.GetSourceTool());
         points[i].operatingHand = touchPoint.operatingHand;

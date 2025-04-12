@@ -480,7 +480,7 @@
         "name": "OH_ArkUI_PointerEvent_GetTiltY"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_PointerEvent_GetRollAngle"
     },
     {
