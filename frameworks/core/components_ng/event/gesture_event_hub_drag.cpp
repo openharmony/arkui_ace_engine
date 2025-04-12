@@ -629,6 +629,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
      */
     DragDropInfo dragPreviewInfo;
     auto dragDropInfo = GetDragDropInfo(info, frameNode, dragPreviewInfo, event);
+    GetUnifiedData(frameNode->GetTag(), dragDropInfo, event);
     auto continueFunc = [id = Container::CurrentId(), weak = WeakClaim(this), dragPreviewInfo, info, event,
         dragDropInfo, frameNode, pipeline]() {
         ContainerScope scope(id);
@@ -702,7 +703,6 @@ void GestureEventHub::DoOnDragStartHandling(const GestureEvent& info, const RefP
     DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event, DragDropInfo dragPreviewInfo,
     const RefPtr<PipelineContext>& pipeline)
 {
-    GetUnifiedData(frameNode->GetTag(), dragDropInfo, event);
     // set drag pointer status
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
