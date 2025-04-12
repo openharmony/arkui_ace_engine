@@ -128,9 +128,6 @@ void TextClockModelNG::InitFontDefault(const TextStyle& textStyle)
     if (!textClockLayoutProperty->GetFontWeight().has_value()) {
         SetFontWeight(textStyle.GetFontWeight());
     }
-    if (!textClockLayoutProperty->GetTextColor().has_value()) {
-        SetTextColor(textStyle.GetTextColor());
-    }
     if (!textClockLayoutProperty->GetFontFamily().has_value()) {
         SetFontFamily(textStyle.GetFontFamilies());
     }
