@@ -395,8 +395,9 @@ napi_value JSPanGesture::ParsePanDistanceMap(JSRef<JSVal> jsDistanceMap, PanDist
         double distance = 0.0;
         NAPI_CALL(env, napi_get_value_double(env, value, &distance));
         SourceTool st = static_cast<SourceTool>(sourceTool);
-        if (st >= SourceTool::UNKNOWN && st <= SourceTool::JOYSTICK) {
-            distanceMap[st] = distance;
+        if (st >= SourceTool::UNKNOWN && st <= SourceTool::JOYSTICK && GreatOrEqual(distance, 0.0)) {
+            Dimension dimension = Dimension(distance, DimensionUnit::VP);
+            distanceMap[st] = dimension.ConvertToPx();
         }
     }
     return next;
