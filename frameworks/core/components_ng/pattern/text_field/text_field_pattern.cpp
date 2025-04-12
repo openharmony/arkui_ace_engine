@@ -4977,6 +4977,7 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
     auto isIME = (info.reason == InputReason::IME);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    TwinklingByFocus();
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
     auto caretStart = IsSelected() ? start : selectController_->GetCaretIndex();
@@ -5029,7 +5030,6 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
     if (isIME) {
         AfterIMEInsertValue(contentController_->GetInsertValue());
     }
-    TwinklingByFocus();
 }
 
 void TextFieldPattern::TwinklingByFocus()
