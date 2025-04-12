@@ -3563,18 +3563,6 @@ void RichEditorPattern::UseHostToUpdateTextFieldManager()
     UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
 }
 
-void RichEditorPattern::OnVisibleChange(bool isVisible)
-{
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isVisible=%{public}d", isVisible);
-    TextPattern::OnVisibleChange(isVisible);
-    StopTwinkling();
-    CloseSelectOverlay();
-    ResetSelection();
-    if (!isVisible && HasFocus()) {
-        CloseKeyboard(false);
-    }
-}
-
 bool RichEditorPattern::CloseKeyboard(bool forceClose)
 {
     if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {

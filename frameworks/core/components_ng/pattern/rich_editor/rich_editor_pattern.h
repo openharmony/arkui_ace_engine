@@ -524,7 +524,6 @@ public:
     void ResetBeforePaste();
     void ResetAfterPaste();
 
-    void OnVisibleChange(bool isVisible) override;
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
