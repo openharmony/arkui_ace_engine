@@ -21,7 +21,7 @@ import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { PixelMap } from "./ArkPixelMapMaterialized"
 import { GestureJudgeResult, GestureRecognizer } from "./../component/gesture"
-import { TouchResult, CustomBuilder, DragItemInfo, Tuple_Number_Number, ItemDragInfo } from "./../component/common"
+import { TouchResult, CustomBuilder, DragItemInfo, Tuple_Number_Number, ItemDragInfo, ScrollResult } from "./../component/common"
 import { HitTestMode } from "./../component/enums"
 import { Tuple_Number_Number_Number_Number, ComputedBarAttribute, Literal_Number_offsetRemain } from "./../component/grid"
 import { NavigationAnimatedTransition } from "./../component/navigation"
@@ -48,6 +48,7 @@ export type Callback_Literal_Number_offsetRemain_Void = (value: Literal_Number_o
 export type Callback_Opt_NavigationAnimatedTransition_Void = (value: NavigationAnimatedTransition | undefined) => void;
 export type Callback_OnScrollFrameBeginHandlerResult_Void = (value: OnScrollFrameBeginHandlerResult) => void;
 export type Callback_OffsetResult_Void = (value: OffsetResult) => void;
+export type Callback_ScrollResult_Void = (value: ScrollResult) => void;
 export type Callback_Opt_TabContentAnimatedTransition_Void = (value: TabContentAnimatedTransition | undefined) => void;
 export type Callback_WithThemeAttribute_Void = (value: WithThemeAttribute) => void;
 export type Callback_WebKeyboardOptions_Void = (value: WebKeyboardOptions) => void;

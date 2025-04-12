@@ -24,7 +24,7 @@ import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { Deserializer } from "./../generated/peers/Deserializer"
 import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
 import { Callback_Void } from "./abilityComponent"
-import { MouseButton, MouseAction, AccessibilityHoverType, TouchType, KeyType, KeySource, Color, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, ColoringStrategy, BorderStyle, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, GradientDirection, HitTestMode, Alignment, ImageSize, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, PixelRoundCalcPolicy, BarState, EdgeEffect, IlluminatedType } from "./enums"
+import { MouseButton, MouseAction, AccessibilityHoverType, TouchType, KeyType, KeySource, Color, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, ColoringStrategy, BorderStyle, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, GradientDirection, HitTestMode, Alignment, ImageSize, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, PixelRoundCalcPolicy, BarState, EdgeEffect, IlluminatedType, ScrollSource } from "./enums"
 import { UnifiedData, UnifiedDataInternal } from "./../generated/ArkUnifiedDataMaterialized"
 import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, Length, Bias, Area, Font, BorderRadiuses, EdgeWidths, LocalizedEdgeWidths, SizeOptions, ResourceStr, Dimension, EdgeColors, LocalizedEdgeColors, EdgeStyles, Position, LocalizedBorderRadiuses, Margin, ChainWeightOptions, Padding, LocalizedPadding, LocalizedMargin, BorderOptions, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, EdgeWidth } from "./units"
 import { Resource } from "global/resource";
@@ -3517,9 +3517,7 @@ export enum ContentClipMode {
 export interface ScrollResult {
     offsetRemain: number;
 }
-export interface OnWillScrollCallback {
-    stub: string;
-}
+export type OnWillScrollCallback = (scrollOffset: number, scrollState: ScrollState, scrollSource: ScrollSource) => ScrollResult;
 export type OnScrollCallback = (scrollOffset: number, scrollState: ScrollState) => void;
 export type OnMoveHandler = (from: number, to: number) => void;
 export interface DynamicNode {
@@ -4036,8 +4034,6 @@ export interface ScrollableCommonMethod extends CommonMethod {
     friction(value: number | Resource): this
     /** @memo */
     onScroll(value: ((first: number,last: number) => void)): this
-    /** @memo */
-    onWillScroll(value?: ScrollOnWillScrollCallback): this
     /** @memo */
     onReachStart(value: (() => void)): this
     /** @memo */

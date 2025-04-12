@@ -429,6 +429,34 @@ void OnScrollImpl(Ark_NativePointer node,
     };
     GridModelNG::SetOnScroll(frameNode, std::move(onScroll));
 }
+void OnWillScrollImpl(Ark_NativePointer node,
+                      const Opt_OnWillScrollCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto callValue = Converter::OptConvert<OnWillScrollCallback>(*value);
+    if (callValue.has_value()) {
+        auto modelCallback = [arkCallback = CallbackHelper(callValue.value())] (
+            const Dimension& scrollOffset,
+            const ScrollState& scrollState,
+            const ScrollSource& scrollSource) {
+            auto retVal = arkCallback.InvokeWithOptConvertResult<
+                ScrollFrameResult,
+                Ark_ScrollResult,
+                Callback_ScrollResult_Void>(
+                Converter::ArkValue<Ark_Number>(scrollOffset),
+                Converter::ArkValue<Ark_ScrollState>(scrollState),
+                Converter::ArkValue<Ark_ScrollSource>(scrollSource)
+            );
+            ScrollFrameResult scrollRes { .offset = scrollOffset };
+            return retVal.value_or(scrollRes);
+        };
+        ScrollableModelNG::SetOnWillScroll(frameNode, modelCallback);
+    } else {
+        ScrollableModelNG::SetOnWillScroll(frameNode, nullptr);
+    }
+}
 void OnDidScrollImpl(Ark_NativePointer node,
                      const OnScrollCallback* value)
 {
@@ -549,6 +577,7 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
         GridAttributeModifier::FrictionImpl,
         GridAttributeModifier::AlignItemsImpl,
         GridAttributeModifier::OnScrollImpl,
+        GridAttributeModifier::OnWillScrollImpl,
         GridAttributeModifier::OnDidScrollImpl,
         GridAttributeModifier::OnReachStartImpl,
         GridAttributeModifier::OnReachEndImpl,

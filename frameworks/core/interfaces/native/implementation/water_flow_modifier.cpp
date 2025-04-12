@@ -226,6 +226,34 @@ void CachedCount1Impl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(count); // for enums
     //WaterFlowModelNG::SetCachedCount1(frameNode, convValue);
 }
+void OnWillScrollImpl(Ark_NativePointer node,
+                      const Opt_OnWillScrollCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto callValue = Converter::OptConvert<OnWillScrollCallback>(*value);
+    if (callValue.has_value()) {
+        auto modelCallback = [arkCallback = CallbackHelper(callValue.value())] (
+            const Dimension& scrollOffset,
+            const ScrollState& scrollState,
+            const ScrollSource& scrollSource) {
+            auto retVal = arkCallback.InvokeWithOptConvertResult<
+                ScrollFrameResult,
+                Ark_ScrollResult,
+                Callback_ScrollResult_Void>(
+                Converter::ArkValue<Ark_Number>(scrollOffset),
+                Converter::ArkValue<Ark_ScrollState>(scrollState),
+                Converter::ArkValue<Ark_ScrollSource>(scrollSource)
+            );
+            ScrollFrameResult scrollRes { .offset = scrollOffset };
+            return retVal.value_or(scrollRes);
+        };
+        ScrollableModelNG::SetOnWillScroll(frameNode, modelCallback);
+    } else {
+        ScrollableModelNG::SetOnWillScroll(frameNode, nullptr);
+    }
+}
 void OnDidScrollImpl(Ark_NativePointer node,
                      const OnScrollCallback* value)
 {
@@ -310,6 +338,7 @@ const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()
         WaterFlowAttributeModifier::FrictionImpl,
         WaterFlowAttributeModifier::CachedCount0Impl,
         WaterFlowAttributeModifier::CachedCount1Impl,
+        WaterFlowAttributeModifier::OnWillScrollImpl,
         WaterFlowAttributeModifier::OnDidScrollImpl,
         WaterFlowAttributeModifier::OnReachStartImpl,
         WaterFlowAttributeModifier::OnReachEndImpl,

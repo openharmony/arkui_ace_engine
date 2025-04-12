@@ -22,7 +22,7 @@ import { CallbackKind } from "./CallbackKind"
 import { NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, InteropNativeModule } from "@koalaui/interop"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, CustomBuilder, GestureRecognizerJudgeBeginCallback, HoverCallback, OnMoveHandler, OnScrollCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, ICurve, ICurveInternal, ShadowType, SymbolGlyphModifier, ShadowOptions, SheetSize, DrawContext, ShadowStyle, ComponentContent, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, SheetTitleOptions, TransitionEffect, TransitionEffectInternal, TransitionEffects, TranslateOptions, RotateOptions, ScaleOptions, TransitionEdge, AnimateParam, MenuPreviewMode, Callback_DismissPopupAction_Void, DismissPopupAction, DragPreviewMode, OutlineStyle, SourceTool, SourceType, EventTarget, HoverModeAreaType, BlurStyle, Rectangle, PickerTextStyle, PickerDialogButtonStyle, MenuPolicy, BlurStyleActivePolicy, BlurOptions, Tuple_Number_Number, AdaptiveColor, ThemeColorMode, ExpectedFrameRateRange, FinishCallbackType, SheetKeyboardAvoidMode, UIContext, Callback_SheetType_Void, SheetType, ScrollSizeMode, SheetMode, Callback_SpringBackAction_Void, SpringBackAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_SheetDismiss_Void, SheetDismiss, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, ModalTransition, ContextMenuAnimationOptions, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, PopupMessageOptions, TransitionHierarchyStrategy, OverlayOffset, ImageModifier, MotionPathOptions, LinearGradient_common, Tuple_ResourceColor_Number, ScrollableCommonMethod, CommonMethod, DrawModifier, DrawModifierInternal, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, Callback_Boolean_HoverEvent_Void, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, Callback_KeyEvent_Boolean, TransitionOptions, MotionBlurOptions, InvertOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, DragEventInternal, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, ProgressMask, ProgressMaskInternal, StateStyles, PixelStretchEffectOptions, GestureModifier, GestureModifierInternal, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ContentCoverOptions, SheetOptions, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, RectResult, BaseEvent, BaseEventInternal, TouchObject, HistoricalPoint, TextDecorationOptions, InputCounterOptions, TextContentControllerBase, TextContentControllerBaseInternal, CaretOffset, SelectionOptions, BlurStyleOptions, ContentModifier, LayoutSafeAreaType, LayoutSafeAreaEdge, ChildrenMainSize, ChildrenMainSizeInternal, ItemDragInfo, KeyboardAvoidMode, UIGestureEvent, VisibleAreaEventOptions, MeasureResult, SizeResult, DismissReason, BindOptions, Type_SheetOptions_detents, Literal_ResourceColor_color, Literal_String_value_Callback_Void_action, FractionStop, LocalizedVerticalAlignParam, LocalizedHorizontalAlignParam, MotionBlurAnchor, RepeatMode, TouchTestStrategy, IntentionCode, DragResult, Summary, DragBehavior, Context, LightSource, MultiShadowOptions, UICommonEvent, UICommonEventInternal, View, ViewInternal, Measurable, MeasurableInternal, Literal_String_anchor_HorizontalAlign_align, Literal_String_anchor_VerticalAlign_align, AccessibilityHoverEvent, AccessibilityHoverEventInternal, PixelMapMock, PixelMapMockInternal, PointLightStyle } from "./../../component/common"
+import { AccessibilityCallback, CustomBuilder, GestureRecognizerJudgeBeginCallback, HoverCallback, OnMoveHandler, OnScrollCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, ICurve, ICurveInternal, ShadowType, SymbolGlyphModifier, ShadowOptions, SheetSize, DrawContext, ShadowStyle, ComponentContent, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, SheetTitleOptions, TransitionEffect, TransitionEffectInternal, TransitionEffects, TranslateOptions, RotateOptions, ScaleOptions, TransitionEdge, AnimateParam, MenuPreviewMode, Callback_DismissPopupAction_Void, DismissPopupAction, DragPreviewMode, OutlineStyle, SourceTool, SourceType, EventTarget, HoverModeAreaType, BlurStyle, Rectangle, PickerTextStyle, PickerDialogButtonStyle, MenuPolicy, BlurStyleActivePolicy, BlurOptions, Tuple_Number_Number, AdaptiveColor, ThemeColorMode, ExpectedFrameRateRange, FinishCallbackType, SheetKeyboardAvoidMode, UIContext, Callback_SheetType_Void, SheetType, ScrollSizeMode, SheetMode, Callback_SpringBackAction_Void, SpringBackAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_SheetDismiss_Void, SheetDismiss, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, ModalTransition, ContextMenuAnimationOptions, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, PopupMessageOptions, TransitionHierarchyStrategy, OverlayOffset, ImageModifier, MotionPathOptions, LinearGradient_common, Tuple_ResourceColor_Number, ScrollableCommonMethod, CommonMethod, DrawModifier, DrawModifierInternal, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, Callback_Boolean_HoverEvent_Void, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, Callback_KeyEvent_Boolean, TransitionOptions, MotionBlurOptions, InvertOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, DragEventInternal, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, ProgressMask, ProgressMaskInternal, StateStyles, PixelStretchEffectOptions, GestureModifier, GestureModifierInternal, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ContentCoverOptions, SheetOptions, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, RectResult, BaseEvent, BaseEventInternal, TouchObject, HistoricalPoint, TextDecorationOptions, InputCounterOptions, TextContentControllerBase, TextContentControllerBaseInternal, CaretOffset, SelectionOptions, BlurStyleOptions, ContentModifier, LayoutSafeAreaType, LayoutSafeAreaEdge, ChildrenMainSize, ChildrenMainSizeInternal, ItemDragInfo, KeyboardAvoidMode, UIGestureEvent, VisibleAreaEventOptions, MeasureResult, SizeResult, DismissReason, BindOptions, Type_SheetOptions_detents, Literal_ResourceColor_color, Literal_String_value_Callback_Void_action, FractionStop, LocalizedVerticalAlignParam, LocalizedHorizontalAlignParam, MotionBlurAnchor, RepeatMode, TouchTestStrategy, IntentionCode, DragResult, Summary, DragBehavior, Context, LightSource, MultiShadowOptions, UICommonEvent, UICommonEventInternal, View, ViewInternal, Measurable, MeasurableInternal, Literal_String_anchor_HorizontalAlign_align, Literal_String_anchor_VerticalAlign_align, AccessibilityHoverEvent, AccessibilityHoverEventInternal, PixelMapMock, PixelMapMockInternal, PointLightStyle, OnWillScrollCallback, ScrollResult } from "./../../component/common"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, LabelStyle, ControlSize, ButtonOptions } from "./../../component/button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../ArkAnimationExtenderInterfaces"
 import { Callback_RangeUpdate, PointerStyle } from "./../ArkArkuiCustomInterfaces"
@@ -5985,6 +5985,24 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.release();
     return (_continuationValue as OffsetResult); }
     }
+    readOnWillScrollCallback(isSync: boolean = false): OnWillScrollCallback {
+        const _resource: CallbackResource = this.readCallbackResource()
+        const _call: KPointer = this.readPointer()
+        const _callSync: KPointer = this.readPointer()
+        return (scrollOffset: number, scrollState: ScrollState, scrollSource: ScrollSource): ScrollResult => { const _argsSerializer: Serializer = Serializer.hold();
+        _argsSerializer.writeInt32(_resource.resourceId);
+        _argsSerializer.writePointer(_call);
+        _argsSerializer.writePointer(_callSync);
+        _argsSerializer.writeNumber(scrollOffset);
+        _argsSerializer.writeInt32((scrollState.valueOf() as int32));
+        _argsSerializer.writeInt32((scrollSource.valueOf() as int32));
+        let _continuationValue: ScrollResult | undefined|undefined ;
+        const _continuationCallback: ((value: ScrollResult) => void) = (value: ScrollResult): void => { _continuationValue = value; }
+        _argsSerializer.holdAndWriteCallback(_continuationCallback);
+        (isSync) ? (InteropNativeModule._CallCallbackSync(-150015401, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-150015401, _argsSerializer.asBuffer(), _argsSerializer.length()));
+        _argsSerializer.release();
+        return (_continuationValue as ScrollResult); }
+    }
     readRectResult(): RectResult {
         let valueDeserializer : Deserializer = this
         const x_result : number = (valueDeserializer.readNumber() as number)
@@ -6011,6 +6029,12 @@ export class Deserializer extends DeserializerBase {
         const xOffset_result : number = (valueDeserializer.readNumber() as number)
         const yOffset_result : number = (valueDeserializer.readNumber() as number)
         let value : OffsetResult = ({xOffset: xOffset_result, yOffset: yOffset_result} as OffsetResult)
+        return value
+    }
+    readScrollResult(): ScrollResult {
+        let valueDeserializer: Deserializer = this
+        const offsetRemain_result: number = (valueDeserializer.readNumber() as number)
+        let value: ScrollResult = ({offsetRemain: offsetRemain_result} as ScrollResult)
         return value
     }
     readScrollPageOptions(): ScrollPageOptions {
@@ -13467,6 +13491,19 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOffsetResult(value);
     (isSync) ? (InteropNativeModule._CallCallbackSync(1295952075, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1295952075, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCallback_ScrollResult_Void(isSync: boolean = false): ((value: ScrollResult) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (value: ScrollResult):void => { const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeScrollResult(value);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1385252075, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1385252075, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
