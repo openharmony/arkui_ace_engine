@@ -3407,7 +3407,7 @@ void RichEditorPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "rich editor in focus");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleFocusEvent();
+        pattern->HandleFocusEvent(reason);
     };
     focusHub->SetOnFocusInternal(focusTask);
     auto blurTask = [weak = WeakClaim(this)]() {
@@ -3474,7 +3474,7 @@ void RichEditorPattern::HandleBlurEvent()
     HandleOnEditChanged(false);
 }
 
-void RichEditorPattern::HandleFocusEvent()
+void RichEditorPattern::HandleFocusEvent(FocusReason focusReason)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent/%{public}d", frameId_);
     blockKbInFloatingWindow_= false;
@@ -3506,7 +3506,7 @@ void RichEditorPattern::HandleFocusEvent()
     bool needShowSoftKeyboard = needToRequestKeyboardOnFocus_;
     needShowSoftKeyboard &= !usingMouseRightButton_; // do not show kb when mouseRightClick
 
-    if (windowMode == WindowMode::WINDOW_MODE_FLOATING) {
+    if (windowMode == WindowMode::WINDOW_MODE_FLOATING && focusReason == FocusReason::WINDOW_FOCUS) {
         blockKbInFloatingWindow_ = needShowSoftKeyboard;
         needShowSoftKeyboard = false;
     }
