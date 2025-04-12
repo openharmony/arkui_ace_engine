@@ -1621,11 +1621,18 @@ double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection 
     return distance;
 }
 
+bool TextPickerColumnPattern::IsDisableTextStyleAnimation() const
+{
+    RefPtr<TextPickerLayoutProperty> layout = GetParentLayout();
+    CHECK_NULL_RETURN(layout, false);
+    return layout->GetDisableTextStyleAnimation().value_or(false);
+}
+
 double TextPickerColumnPattern::GetSelectedDistance(int32_t index, int32_t nextIndex, ScrollDirection dir)
 {
     double distance = 0.0;
     double val = 0.0;
-    if (columnKind_ == TEXT && !isDisableTextStyleAnimation_) {
+    if (columnKind_ == TEXT && !IsDisableTextStyleAnimation()) {
         if (GreatOrEqual(optionProperties_[nextIndex].fontheight, optionProperties_[nextIndex].height)) {
             distance = (dir == ScrollDirection::UP) ?
                 - optionProperties_[nextIndex].height : optionProperties_[index].height;
@@ -1652,7 +1659,7 @@ double TextPickerColumnPattern::GetUpCandidateDistance(int32_t index, int32_t ne
     if (index > maxIndex || index < minIndex || nextIndex > maxIndex || nextIndex < minIndex) {
         return distance;
     }
-    if (columnKind_ == TEXT && !isDisableTextStyleAnimation_) {
+    if (columnKind_ == TEXT && !IsDisableTextStyleAnimation()) {
         if (dir == ScrollDirection::UP) {
             distance = -optionProperties_[nextIndex].height;
         } else {
@@ -1671,7 +1678,7 @@ double TextPickerColumnPattern::GetDownCandidateDistance(int32_t index, int32_t 
 {
     double distance = 0.0;
     double val = 0.0;
-    if (columnKind_ == TEXT && !isDisableTextStyleAnimation_) {
+    if (columnKind_ == TEXT && !IsDisableTextStyleAnimation()) {
         if (dir == ScrollDirection::DOWN) {
             distance = optionProperties_[index].height;
         } else {
