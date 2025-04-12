@@ -94,12 +94,12 @@ void TextStyle::ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optiona
 }
 
 std::string TextStyle::GetDeclarationString(
-    const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration,
+    const std::optional<Color>& color, const std::vector<TextDecoration>& textDecorations,
     const std::optional<TextDecorationStyle>& textDecorationStyle, const std::optional<float>& lineThicknessScale)
 {
     auto jsonSpanDeclaration = JsonUtil::Create(true);
     jsonSpanDeclaration->Put(
-        "type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value_or(TextDecoration::NONE)).c_str());
+        "type", V2::ConvertWrapTextDecorationToStirng(textDecorations).c_str());
     jsonSpanDeclaration->Put("color", (color.value_or(Color::BLACK).ColorToString()).c_str());
     jsonSpanDeclaration->Put("style", V2::ConvertWrapTextDecorationStyleToString(
         textDecorationStyle.value_or(TextDecorationStyle::SOLID)).c_str());
@@ -138,7 +138,7 @@ std::string TextStyle::ToString() const
     JSON_STRING_PUT_INT(jsonValue, propTextVerticalAlign_);
     JSON_STRING_PUT_INT(jsonValue, propTextAlign_);
     JSON_STRING_PUT_INT(jsonValue, propTextDecorationStyle_);
-    JSON_STRING_PUT_INT(jsonValue, propTextDecoration_);
+    JSON_STRING_PUT_INT(jsonValue, propTextDecoration_.size() > 0 ? propTextDecoration_[0] : TextDecoration::NONE);
     JSON_STRING_PUT_INT(jsonValue, propWhiteSpace_);
     JSON_STRING_PUT_INT(jsonValue, propWordBreak_);
     JSON_STRING_PUT_INT(jsonValue, propTextCase_);

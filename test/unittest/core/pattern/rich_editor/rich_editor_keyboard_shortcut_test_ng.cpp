@@ -1185,7 +1185,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts205, TestS
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
     auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
     ASSERT_NE(newSpan1, nullptr);
-    EXPECT_EQ(newSpan1->GetTextDecoration(), TextDecoration::UNDERLINE);
+    EXPECT_EQ(newSpan1->GetTextDecorationFirst(), TextDecoration::UNDERLINE);
 
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
     EXPECT_EQ(newSpan1->GetItalicFontStyle(), OHOS::Ace::FontStyle::ITALIC);
@@ -1200,7 +1200,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts205, TestS
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
     auto newSpan2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
     ASSERT_NE(newSpan2, nullptr);
-    EXPECT_EQ(newSpan2->GetTextDecoration(), TextDecoration::NONE);
+    EXPECT_EQ(newSpan2->GetTextDecorationFirst(), TextDecoration::NONE);
 
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
     EXPECT_EQ(newSpan2->GetItalicFontStyle(), OHOS::Ace::FontStyle::NORMAL);
@@ -1281,7 +1281,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts207, TestS
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
     auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(1));
     ASSERT_NE(newSpan1, nullptr);
-    EXPECT_EQ(newSpan1->GetTextDecoration(), TextDecoration::UNDERLINE);
+    EXPECT_EQ(newSpan1->GetTextDecorationFirst(), TextDecoration::UNDERLINE);
 
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);

@@ -244,6 +244,8 @@ public:
     static ImageSpanAttribute ReadImageSpanAttribute(std::vector<uint8_t>& buff, int32_t& cursor);
     static void WriteLeadingMargin(std::vector<uint8_t>& buff, NG::LeadingMargin& value);
     static NG::LeadingMargin ReadLeadingMargin(std::vector<uint8_t>& buff, int32_t& cursor);
+    static void WriteTextDecorations(std::vector<uint8_t>& buff, const std::vector<TextDecoration>& values);
+    static std::vector<TextDecoration> ReadTextDecorations(std::vector<uint8_t>& buff, int32_t& cursor);
     static void WriteFloat(std::vector<uint8_t>& buff, float value);
     static float ReadFloat(std::vector<uint8_t>& buff, int32_t& cursor);
 };

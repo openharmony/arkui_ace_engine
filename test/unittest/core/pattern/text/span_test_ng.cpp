@@ -116,7 +116,7 @@ HWTEST_F(SpanTestNg, SpanFrameNodeCreator001, TestSize.Level1)
     spanModelNG.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
     spanModelNG.SetTextCase(TEXT_CASE_VALUE);
     spanModelNG.SetLetterSpacing(LETTER_SPACING);
-    EXPECT_EQ(spanNode->GetTextDecoration(), TEXT_DECORATION_VALUE);
+    EXPECT_EQ(spanNode->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(spanNode->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
     EXPECT_EQ(spanNode->GetTextCase(), TEXT_CASE_VALUE);
     EXPECT_EQ(spanNode->GetLetterSpacing(), LETTER_SPACING);

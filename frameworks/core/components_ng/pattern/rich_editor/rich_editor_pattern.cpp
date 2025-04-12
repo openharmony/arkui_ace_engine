@@ -416,8 +416,9 @@ RefPtr<DecorationSpan> RichEditorPattern::CreateDecorationSpanByTextStyle(
     TextDecoration type = TextDecoration::NONE;
     std::optional<Color> colorOption;
     std::optional<TextDecorationStyle> styleOption;
+    std::optional<TextDecorationOptions> options;
     if (updateSpanStyle.updateTextDecoration.has_value()) {
-        type = textStyle.GetTextDecoration();
+        type = textStyle.GetTextDecorationFirst();
     }
     if (updateSpanStyle.updateTextDecorationColor.has_value()) {
         colorOption = textStyle.GetTextDecorationColor();
@@ -425,7 +426,8 @@ RefPtr<DecorationSpan> RichEditorPattern::CreateDecorationSpanByTextStyle(
     if (updateSpanStyle.updateTextDecorationStyle.has_value()) {
         styleOption = textStyle.GetTextDecorationStyle();
     }
-    return AceType::MakeRefPtr<DecorationSpan>(type, colorOption, styleOption, 0, length);
+    return AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({type}), colorOption, styleOption, options, 0, length);
 }
 
 void RichEditorPattern::DeleteBackwardInStyledString(int32_t length)
@@ -2300,7 +2302,7 @@ void RichEditorPattern::SetSelectSpanStyle(int32_t start, int32_t end, KeyCode c
     updateSpanStyle.updateItalicFontStyle = spanStyle.GetFontStyle();
     updateSpanStyle.updateFontWeight = spanStyle.GetFontWeight();
     updateSpanStyle.updateFontFamily = spanStyle.GetFontFamilies();
-    updateSpanStyle.updateTextDecoration = spanStyle.GetTextDecoration();
+    updateSpanStyle.updateTextDecoration = spanStyle.GetTextDecorationFirst();
     if (!isStart) {
         auto updateSpanStyle_ = GetUpdateSpanStyle();
         switch (code) {
@@ -2513,7 +2515,7 @@ void RichEditorPattern::UpdateSelectStyledStringStyle(int32_t start, int32_t end
     case KeyCode::KEY_U: {
         auto firstDecorationSpan = DynamicCast<DecorationSpan>(styledString_->GetSpan(start, 1, SpanType::Decoration));
         isFirstSpanStylePresent =
-            firstDecorationSpan && firstDecorationSpan->GetTextDecorationType() == TextDecoration::UNDERLINE;
+            firstDecorationSpan && firstDecorationSpan->GetTextDecorationFirst() == TextDecoration::UNDERLINE;
         auto updateDecorationType = isFirstSpanStylePresent ? TextDecoration::NONE : TextDecoration::UNDERLINE;
         UpdateStyledStringDecorationType(start, end, updateDecorationType);
         break;
@@ -2566,13 +2568,15 @@ void RichEditorPattern::UpdateStyledStringDecorationType(int32_t start, int32_t 
 {
     std::optional<Color> colorOption;
     std::optional<TextDecorationStyle> styleOption;
-    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(type, colorOption, styleOption, start, end);
+    std::optional<TextDecorationOptions> options;
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({type}), colorOption, styleOption, options, start, end);
     auto updateDecorationSpanFunc = [&type](const RefPtr<DecorationSpan>& oriDecorationSpan) -> RefPtr<DecorationSpan> {
         CHECK_NULL_RETURN(oriDecorationSpan, nullptr);
         auto decorationColor = oriDecorationSpan->GetColor();
         auto decorationStyle = oriDecorationSpan->GetTextDecorationStyle();
-        return AceType::MakeRefPtr<DecorationSpan>(type, decorationColor, decorationStyle,
-            oriDecorationSpan->GetStartIndex(), oriDecorationSpan->GetEndIndex());
+        auto decorationOptions = oriDecorationSpan->GetTextDecorationOptions();
+        return AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({type}), decorationColor, decorationStyle,
+            decorationOptions, oriDecorationSpan->GetStartIndex(), oriDecorationSpan->GetEndIndex());
     };
     UpdateSpansStyleInRange<DecorationSpan>(start, end, decorationSpan, updateDecorationSpanFunc);
 }
@@ -4223,7 +4227,7 @@ TextStyleResult RichEditorPattern::GetTextStyleBySpanItem(const RefPtr<SpanItem>
         fontFamilyValue = fontFamilyValue.substr(0, fontFamilyValue.size() ? fontFamilyValue.size() - 1 : 0);
         textStyle.fontFamily = !fontFamilyValue.empty() ? fontFamilyValue : defaultFontFamily.front();
         textStyle.decorationType =
-            static_cast<int32_t>(spanItem->fontStyle->GetTextDecoration().value_or(TextDecoration::NONE));
+            static_cast<int32_t>(spanItem->fontStyle->GetTextDecorationFirst());
         textStyle.decorationColor =
             spanItem->fontStyle->GetTextDecorationColor().value_or(style.GetTextDecorationColor()).ColorToString();
         textStyle.decorationStyle =
@@ -5793,7 +5797,7 @@ bool RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
         fontFamilyValue += str;
     }
     retInfo.SetFontFamily(fontFamilyValue);
-    retInfo.SetTextDecoration(spanNode->GetTextDecorationValue(TextDecoration::NONE));
+    retInfo.SetTextDecoration(spanNode->GetTextDecorationFirst());
     retInfo.SetTextDecorationStyle(spanNode->GetTextDecorationStyleValue(TextDecorationStyle::SOLID));
     retInfo.SetFontFeature(spanNode->GetFontFeatureValue(ParseFontFeatureSettings("\"pnum\" 1")));
     retInfo.SetColor(spanNode->GetTextDecorationColorValue(Color::BLACK).ColorToString());
@@ -6882,7 +6886,7 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
         spanResult.SetFontFamily(spanItem->GetTextStyle()->GetFontFamilies().at(0));
     }
     spanResult.SetColor(spanItem->GetTextStyle()->GetTextDecorationColor().ColorToString());
-    spanResult.SetTextDecoration(spanItem->GetTextStyle()->GetTextDecoration());
+    spanResult.SetTextDecoration(spanItem->GetTextStyle()->GetTextDecorationFirst());
     spanResult.SetTextDecorationStyle(spanItem->GetTextStyle()->GetTextDecorationStyle());
     spanResult.SetFontFeature(spanItem->GetTextStyle()->GetFontFeatures());
     auto host = GetHost();
@@ -10465,7 +10469,7 @@ void RichEditorPattern::CreateSpanResult(RichEditorChangeValue& changeValue, int
 
 void RichEditorPattern::SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo, const TextStyle& textStyle)
 {
-    retInfo.SetTextDecoration(textStyle.GetTextDecoration());
+    retInfo.SetTextDecoration(textStyle.GetTextDecorationFirst());
     retInfo.SetFontColor(textStyle.GetTextColor().ColorToString());
     retInfo.SetColor(textStyle.GetTextDecorationColor().ColorToString());
     retInfo.SetTextDecorationStyle(textStyle.GetTextDecorationStyle());
@@ -11372,7 +11376,7 @@ void RichEditorPattern::HandleSelectFontStyleWrapper(KeyCode code, TextStyle& sp
             }
             break;
         case KeyCode::KEY_U:
-            if (spanStyle.GetTextDecoration() == TextDecoration::UNDERLINE) {
+            if (spanStyle.GetTextDecorationFirst() == TextDecoration::UNDERLINE) {
                 spanStyle.SetTextDecoration(TextDecoration::NONE);
             } else {
                 spanStyle.SetTextDecoration(TextDecoration::UNDERLINE);

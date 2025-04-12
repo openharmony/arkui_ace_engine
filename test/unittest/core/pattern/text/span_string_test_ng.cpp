@@ -256,8 +256,10 @@ HWTEST_F(SpanStringTestNg, SpanString004, TestSize.Level1)
 HWTEST_F(SpanStringTestNg, SpanString005, TestSize.Level1)
 {
     auto spanString3 = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
-    spanString3->AddSpan(
-        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, TextDecorationStyle::WAVY, 0, 1));
+    std::optional<TextDecorationOptions> options;
+    spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+            std::vector<TextDecoration>({TextDecoration::OVERLINE}),
+            Color::RED, TextDecorationStyle::WAVY, options, 0, 1));
     spanString3->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
     spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 0, 3));
     Shadow textShadow;
@@ -297,8 +299,10 @@ HWTEST_F(SpanStringTestNg, SpanString005, TestSize.Level1)
 HWTEST_F(SpanStringTestNg, SpanString006, TestSize.Level1)
 {
     auto spanString3 = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
-    spanString3->AddSpan(
-        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, TextDecorationStyle::WAVY, 0, 1));
+    std::optional<TextDecorationOptions> options;
+    spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+            std::vector<TextDecoration>({TextDecoration::OVERLINE}),
+            Color::RED, TextDecorationStyle::WAVY, options, 0, 1));
     spanString3->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
     spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 5, 8));
     Shadow textShadow;
@@ -1327,8 +1331,9 @@ HWTEST_F(SpanStringTestNg, SpanString009, TestSize.Level1)
     EXPECT_EQ(buffer.find("FontSpan"), 0);
 
     auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
-    auto decorationSpan =
-        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, TextDecorationStyle::WAVY, 0, 1);
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::OVERLINE}), Color::RED,
+        TextDecorationStyle::WAVY, std::optional<TextDecorationOptions>(), 0, 1);
     EXPECT_FALSE(fontSpan->IsAttributesEqual(decorationSpan));
     decorationSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
     buffer.clear();
@@ -2500,11 +2505,14 @@ HWTEST_F(SpanStringTestNg, SpanLineThicknessScaleTest001, TestSize.Level1)
      */
     auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"SpanLineThicknessScaleTest123");
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
-        TextDecoration::UNDERLINE, Color::BLACK, TextDecorationStyle::WAVY, 1.0f, 0, 1));
+        std::vector<TextDecoration>({TextDecoration::UNDERLINE}), Color::BLACK,
+        TextDecorationStyle::WAVY, 1.0f, std::optional<TextDecorationOptions>(), 0, 1));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
-        TextDecoration::LINE_THROUGH, Color::BLACK, TextDecorationStyle::DASHED, 5.0f, 0, 2));
+        std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLACK,
+        TextDecorationStyle::DASHED, 5.0f, std::optional<TextDecorationOptions>(), 0, 2));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
-        TextDecoration::OVERLINE, Color::BLACK, TextDecorationStyle::DOTTED, 10.0f, 0, 3));
+        std::vector<TextDecoration>({TextDecoration::OVERLINE}), Color::BLACK,
+        TextDecorationStyle::DOTTED, 10.0f, std::optional<TextDecorationOptions>(), 0, 3));
     Shadow textShadow;
     textShadow.SetBlurRadius(1.0);
     textShadow.SetOffsetX(2.0);
@@ -2538,8 +2546,9 @@ HWTEST_F(SpanStringTestNg, SpanLineThicknessScaleTest002, TestSize.Level1)
     EXPECT_EQ(buffer.find("FontSpan"), 0);
 
     auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
-    auto decorationSpan1 = AceType::MakeRefPtr<DecorationSpan>(TextDecoration::UNDERLINE,
-        Color::RED, TextDecorationStyle::WAVY, 1.0f, 0, 1);
+    auto decorationSpan1 = AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::UNDERLINE}),
+        Color::RED, TextDecorationStyle::WAVY, 1.0f, std::optional<TextDecorationOptions>(), 0, 1);
     EXPECT_FALSE(fontSpan->IsAttributesEqual(decorationSpan1));
     decorationSpan1->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
     buffer.clear();
@@ -2547,8 +2556,9 @@ HWTEST_F(SpanStringTestNg, SpanLineThicknessScaleTest002, TestSize.Level1)
     EXPECT_FALSE(buffer.empty());
     EXPECT_EQ(buffer.find("DecorationSpan"), 0);
 
-    auto decorationSpan2 = AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE,
-        Color::RED, TextDecorationStyle::DASHED, 5.0f, 0, 1);
+    auto decorationSpan2 = AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({TextDecoration::OVERLINE}),
+        Color::RED, TextDecorationStyle::DASHED, 5.0f, std::optional<TextDecorationOptions>(), 0, 1);
     EXPECT_FALSE(fontSpan->IsAttributesEqual(decorationSpan2));
     decorationSpan2->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
     buffer.clear();

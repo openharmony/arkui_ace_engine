@@ -2296,7 +2296,7 @@ HWTEST_F(TextTestFiveNg, EncodeTlv002, TestSize.Level1)
     fontFamilies.emplace_back("Calibri");
     spanItem->fontStyle->UpdateFontFamily(fontFamilies);
     spanItem->fontStyle->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
-    spanItem->fontStyle->UpdateTextDecoration(TextDecoration::OVERLINE);
+    spanItem->fontStyle->UpdateTextDecoration({TextDecoration::OVERLINE});
     spanItem->fontStyle->UpdateTextDecorationColor(Color::WHITE);
     spanItem->fontStyle->UpdateTextDecorationStyle(TextDecorationStyle::SOLID);
     spanItem->fontStyle->UpdateTextCase(TextCase::LOWERCASE);
@@ -3147,7 +3147,7 @@ HWTEST_F(TextTestFiveNg, UseSelfStyle001, TestSize.Level1)
     fontFamilies.emplace_back("Calibri");
     fontStyle->UpdateFontFamily(fontFamilies);
     fontStyle->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
-    fontStyle->UpdateTextDecoration(TextDecoration::OVERLINE);
+    fontStyle->UpdateTextDecoration({TextDecoration::OVERLINE});
     fontStyle->UpdateTextDecorationColor(Color::WHITE);
     fontStyle->UpdateTextDecorationStyle(TextDecorationStyle::SOLID);
     fontStyle->UpdateTextCase(TextCase::LOWERCASE);

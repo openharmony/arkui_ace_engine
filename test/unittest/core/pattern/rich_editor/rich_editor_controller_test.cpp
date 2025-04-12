@@ -422,7 +422,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController005, TestSize.Level1)
     EXPECT_EQ(newSpan1->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(newSpan1->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(newSpan1->GetFontFamily(), FONT_FAMILY_VALUE);
-    EXPECT_EQ(newSpan1->GetTextDecoration(), TEXT_DECORATION_VALUE);
+    EXPECT_EQ(newSpan1->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(newSpan1->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
 }
 
@@ -1059,7 +1059,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController22, TestSize.Level1)
     EXPECT_EQ(newSpan2->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(newSpan2->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(newSpan2->GetFontFamily(), FONT_FAMILY_VALUE);
-    EXPECT_EQ(newSpan2->GetTextDecoration(), TEXT_DECORATION_VALUE);
+    EXPECT_EQ(newSpan2->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(newSpan2->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
 }
 }

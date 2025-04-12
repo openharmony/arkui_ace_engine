@@ -64,7 +64,8 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert000, TestSize.Level1)
     // Add text decoration (line through) span
     // change Test by search MakeRefPtr<DecorationSpan>
     spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
-        TextDecoration::LINE_THROUGH, Color::BLUE, TextDecorationStyle::WAVY, 0, 1));
+        std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLUE,
+        TextDecorationStyle::WAVY, std::optional<TextDecorationOptions>(), 0, 1));
 
     // Add paragraph style span
     auto spanParagraphStyle = GetDefaultParagraphStyle();
@@ -689,7 +690,8 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert014, TestSize.Level1)
     spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 5, 8));
     spanString->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 5, 8));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
-        TextDecoration::LINE_THROUGH, Color::BLUE, TextDecorationStyle::WAVY, 0, 1));
+        std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLUE,
+        TextDecorationStyle::WAVY, std::optional<TextDecorationOptions>(), 0, 1));
 
     SpanToHtml convert;
     auto out = convert.ToHtml(*spanString);
@@ -716,13 +718,17 @@ HWTEST_F(HtmlConvertTestNg, HTMLLineThicknessScaleTest001, TestSize.Level1)
 
     // Add 4 different text decoration span
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
-        TextDecoration::UNDERLINE, Color::BLACK, TextDecorationStyle::SOLID, 1.0f, 0, 1));
+        std::vector<TextDecoration>({TextDecoration::UNDERLINE}), Color::BLACK,
+        TextDecorationStyle::SOLID, 1.0f, std::optional<TextDecorationOptions>(), 0, 1));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
-        TextDecoration::UNDERLINE, Color::BLACK, TextDecorationStyle::WAVY, 5.0f, 0, 1));
+        std::vector<TextDecoration>({TextDecoration::UNDERLINE}), Color::BLACK,
+        TextDecorationStyle::WAVY, 5.0f, std::optional<TextDecorationOptions>(), 0, 1));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
-        TextDecoration::LINE_THROUGH, Color::BLACK, TextDecorationStyle::DASHED, -5.0f, 0, 1));
+        std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLACK,
+        TextDecorationStyle::DASHED, -5.0f, std::optional<TextDecorationOptions>(), 0, 1));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
-        TextDecoration::LINE_THROUGH, Color::BLACK, TextDecorationStyle::DOTTED, 0, 0, 1));
+        std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLACK,
+        TextDecorationStyle::DOTTED, 0, std::optional<TextDecorationOptions>(), 0, 1));
 
     // Add paragraph style span
     auto spanParagraphStyle = GetDefaultParagraphStyle();
@@ -769,11 +775,14 @@ HWTEST_F(HtmlConvertTestNg, HTMLLineThicknessScaleTest002, TestSize.Level1)
      * @tc.steps2: Create a SpanString with multiple spans, including 3 different text decoration.
      */
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
-        TextDecoration::UNDERLINE, Color::BLACK, TextDecorationStyle::SOLID, 1.0f, 0, 1));
+        std::vector<TextDecoration>({TextDecoration::UNDERLINE}), Color::BLACK,
+        TextDecorationStyle::SOLID, 1.0f, std::optional<TextDecorationOptions>(), 0, 1));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
-        TextDecoration::LINE_THROUGH, Color::BLACK, TextDecorationStyle::SOLID, 5.0f, 2, 6));
+        std::vector<TextDecoration>({TextDecoration::LINE_THROUGH}), Color::BLACK,
+        TextDecorationStyle::SOLID, 5.0f, std::optional<TextDecorationOptions>(), 2, 6));
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
-        TextDecoration::OVERLINE, Color::BLACK, TextDecorationStyle::SOLID, -1.0f, 7, 9));
+        std::vector<TextDecoration>({TextDecoration::OVERLINE}), Color::BLACK,
+        TextDecorationStyle::SOLID, -1.0f, std::optional<TextDecorationOptions>(), 7, 9));
     /**
      * @tc.steps3: Create a SpanString with multiple spans, including font styles, letter spacing, and text decoration.
      * @tc.expected: Convert the resulting HTML back to a SpanString and check if the conversion valid.

@@ -166,30 +166,57 @@ bool FontSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
 }
 
 // DecorationSpan
+DecorationSpan::DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+    std::optional<TextDecorationStyle> style, std::optional<TextDecorationOptions> options)
+    : SpanBase(0, 0), types_(types), color_(color), style_(style), options_(options)
+{}
+
+DecorationSpan::DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+    std::optional<TextDecorationStyle> style, std::optional<TextDecorationOptions> options,
+    int32_t start, int32_t end)
+    : SpanBase(start, end), types_(types), color_(color), style_(style), options_(options)
+{}
+
 DecorationSpan::DecorationSpan(
-    TextDecoration type, std::optional<Color> color, std::optional<TextDecorationStyle> style)
-    : SpanBase(0, 0), type_(type), color_(color), style_(style)
+    const std::vector<TextDecoration>& types, std::optional<Color> color,
+    std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale,
+    std::optional<TextDecorationOptions> options)
+    : SpanBase(0, 0), types_(types), color_(color), style_(style),
+    lineThicknessScale_(lineThicknessScale), options_(options)
 {}
 
-DecorationSpan::DecorationSpan(TextDecoration type, std::optional<Color> color,
-    std::optional<TextDecorationStyle> style, int32_t start, int32_t end)
-    : SpanBase(start, end), type_(type), color_(color), style_(style)
+DecorationSpan::DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+    std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale,
+    std::optional<TextDecorationOptions> options, int32_t start, int32_t end)
+    : SpanBase(start, end), types_(types), color_(color), style_(style),
+    lineThicknessScale_(lineThicknessScale), options_(options)
 {}
 
-DecorationSpan::DecorationSpan(
-    TextDecoration type, std::optional<Color> color,
-    std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale)
-    : SpanBase(0, 0), type_(type), color_(color), style_(style), lineThicknessScale_(lineThicknessScale)
-{}
-
-DecorationSpan::DecorationSpan(TextDecoration type, std::optional<Color> color,
-    std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale, int32_t start, int32_t end)
-    : SpanBase(start, end), type_(type), color_(color), style_(style), lineThicknessScale_(lineThicknessScale)
-{}
-
-TextDecoration DecorationSpan::GetTextDecorationType() const
+TextDecoration DecorationSpan::GetTextDecorationFirst() const
 {
-    return type_;
+    return types_.size() > 0 ? types_[0] : TextDecoration::NONE;
+}
+
+std::vector<TextDecoration> DecorationSpan::GetTextDecorationTypes() const
+{
+    return types_;
+}
+
+void DecorationSpan::SetTextDecorationTypes(const std::vector<TextDecoration>& types)
+{
+    types_ = types;
+}
+
+void DecorationSpan::AddTextDecorationType(TextDecoration value)
+{
+    if (value == TextDecoration::NONE || V2::HasTextDecoration(types_, value)) {
+        return;
+    }
+    auto iter = std::find(types_.begin(), types_.end(), TextDecoration::NONE);
+    if (iter != types_.end()) {
+        types_.erase(iter);
+    }
+    types_.push_back(value);
 }
 
 std::optional<Color> DecorationSpan::GetColor() const
@@ -200,6 +227,21 @@ std::optional<Color> DecorationSpan::GetColor() const
 std::optional<TextDecorationStyle> DecorationSpan::GetTextDecorationStyle() const
 {
     return style_;
+}
+
+std::optional<float> DecorationSpan::GetTextDecorationLineThicknessScale() const
+{
+    return lineThicknessScale_;
+}
+
+std::optional<TextDecorationOptions> DecorationSpan::GetTextDecorationOptions() const
+{
+    return options_;
+}
+
+void DecorationSpan::SetTextDecorationOptions(const TextDecorationOptions& options)
+{
+    options_ = options;
 }
 
 void DecorationSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
@@ -220,13 +262,14 @@ std::optional<float> DecorationSpan::GetLineThicknessScale() const
 
 RefPtr<SpanBase> DecorationSpan::GetSubSpan(int32_t start, int32_t end)
 {
-    RefPtr<SpanBase> spanBase = MakeRefPtr<DecorationSpan>(type_, color_, style_, lineThicknessScale_, start, end);
+    RefPtr<SpanBase> spanBase = MakeRefPtr<DecorationSpan>(
+        types_, color_, style_, lineThicknessScale_, options_, start, end);
     return spanBase;
 }
 
 void DecorationSpan::AddDecorationStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
-    spanItem->fontStyle->UpdateTextDecoration(type_);
+    spanItem->fontStyle->UpdateTextDecoration(types_);
     if (color_.has_value()) {
         spanItem->fontStyle->UpdateTextDecorationColor(color_.value());
     }
@@ -235,6 +278,9 @@ void DecorationSpan::AddDecorationStyle(const RefPtr<NG::SpanItem>& spanItem) co
     }
     if (lineThicknessScale_.has_value()) {
         spanItem->fontStyle->UpdateLineThicknessScale(lineThicknessScale_.value());
+    }
+    if (options_.has_value()) {
+        spanItem->fontStyle->UpdateTextDecorationOptions(options_.value());
     }
 }
 
@@ -251,6 +297,29 @@ SpanType DecorationSpan::GetSpanType() const
     return SpanType::Decoration;
 }
 
+std::string DecorationSpan::DecorationTypesToString() const
+{
+    std::string result = "";
+    for (TextDecoration type : types_) {
+        switch (type) {
+            case TextDecoration::UNDERLINE:
+                result += "UNDERLINE,";
+                break;
+            case TextDecoration::OVERLINE:
+                result += "OVERLINE,";
+                break;
+            case TextDecoration::LINE_THROUGH:
+                result += "LINE_THROUGH";
+                break;
+            default:
+                result += "NONE,";
+                break;
+        }
+    }
+    result.pop_back();
+    return result;
+}
+
 std::string DecorationSpan::ToString() const
 {
     std::stringstream ss;
@@ -259,7 +328,7 @@ std::string DecorationSpan::ToString() const
     ss << ":";
     ss << GetEndIndex();
     ss << "]";
-    ss << " type:" << static_cast<int32_t>(type_) << " color:"
+    ss << " type:" << DecorationTypesToString() << " color:"
         << (color_.has_value() ? color_.value().ColorToString(): "None")
         << " style:" << (style_.has_value() ? static_cast<int32_t>(style_.value()): -1);
     std::string output = ss.str();
@@ -274,8 +343,11 @@ bool DecorationSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     }
     std::optional<Color> color = decorationSpan->GetColor();
     std::optional<TextDecorationStyle> style = decorationSpan->GetTextDecorationStyle();
-    TextDecoration type = decorationSpan->GetTextDecorationType();
-    return color == color_ && style == style_ && type == type_;
+    std::optional<float> lineThicknessScale = decorationSpan->GetTextDecorationLineThicknessScale();
+    std::optional<TextDecorationOptions> options = decorationSpan->GetTextDecorationOptions();
+    return color == color_ && style == style_ && lineThicknessScale_ == lineThicknessScale &&
+        V2::IsEqualTextDecorations(types_, decorationSpan->GetTextDecorationTypes()) &&
+        options_.value_or(TextDecorationOptions()) == options.value_or(TextDecorationOptions());
 }
 
 // BaselineOffsetSpan

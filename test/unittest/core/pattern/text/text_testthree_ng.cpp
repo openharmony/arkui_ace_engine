@@ -1961,7 +1961,7 @@ HWTEST_F(TextTestThreeNg, TextModelNgProperty001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontSize().value(), FONT_SIZE_VALUE);
     EXPECT_EQ(layoutProperty->GetLineHeight().value(), ADAPT_LINE_HEIGHT_VALUE);
     EXPECT_EQ(layoutProperty->GetTextOverflow().value(), TextOverflow::ELLIPSIS);
-    EXPECT_EQ(layoutProperty->GetTextDecoration().value(), TextDecoration::UNDERLINE);
+    EXPECT_EQ(layoutProperty->GetTextDecorationFirst(), TextDecoration::UNDERLINE);
     EXPECT_EQ(layoutProperty->GetTextDecorationColor().value(), Color::BLACK);
     EXPECT_EQ(layoutProperty->GetTextDecorationStyle().value(), TextDecorationStyle::SOLID);
     EXPECT_EQ(layoutProperty->GetTextCase().value(), TextCase::UPPERCASE);

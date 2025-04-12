@@ -344,9 +344,10 @@ void MultipleParagraphLayoutAlgorithm::SetDecorationPropertyToModifier(const Ref
     }
     auto textDecoration = layoutProperty->GetTextDecoration();
     if (textDecoration.has_value()) {
-        modifier->SetTextDecoration(textDecoration.value());
+        auto value = textDecoration.value().size() > 0 ? textDecoration.value()[0] : TextDecoration::NONE;
+        modifier->SetTextDecoration(value, false);
     } else {
-        modifier->SetTextDecoration(textStyle.GetTextDecoration(), true);
+        modifier->SetTextDecoration(textStyle.GetTextDecorationFirst(), true);
     }
 }
 
