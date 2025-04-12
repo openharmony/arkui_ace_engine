@@ -7912,6 +7912,23 @@ class ImageDynamicRangeModeModifier extends ModifierWithKey {
   }
 }
 ImageDynamicRangeModeModifier.identity = Symbol('dynamicRangeMode');
+class ImageHdrBrightnessModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetHdrBrightness(node);
+    }
+    else {
+      getUINativeModule().image.setHdrBrightness(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ImageHdrBrightnessModifier.identity = Symbol('hdrBrightness');
 class ImageRotateOrientationModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -8166,6 +8183,11 @@ class ArkImageComponent extends ArkComponent {
   dynamicRangeMode(value) {
     modifierWithKey(
       this._modifiersWithKeys, ImageDynamicRangeModeModifier.identity, ImageDynamicRangeModeModifier, value);
+    return this;
+  }
+  hdrBrightness(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageHdrBrightnessModifier.identity, ImageHdrBrightnessModifier, value);
     return this;
   }
   enhancedImageQuality(value) {
