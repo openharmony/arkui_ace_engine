@@ -961,7 +961,7 @@ void TextPickerModelNG::SetColumnKind(FrameNode* frameNode, uint32_t columnKind)
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
-    columnkind_ = columnKind;
+    columnKind_ = columnKind;
     textPickerPattern->SetColumnsKind(columnKind);
 }
 
@@ -1074,9 +1074,9 @@ void TextPickerModelNG::SetRange(FrameNode* frameNode, const std::vector<NG::Ran
     if (frameNode->GetChildren().empty()) {
         std::lock_guard<std::shared_mutex> lock(showCountMutex_);
         RefPtr<FrameNode> columnNode = nullptr;
-        if (columnkind_ == TEXT) {
+        if (columnKind_ == TEXT) {
             columnNode = CreateColumnNode(TEXT, showCount_);
-        } else if (columnkind_ == MIXTURE) {
+        } else if (columnKind_ == MIXTURE) {
             columnNode = CreateColumnNode(MIXTURE, showCount_);
         }
         auto stackNode = CreateStackNode();

@@ -878,7 +878,7 @@ HWTEST_F(TextPickerColumnTestOneNg, GetSelectedDistance001, TestSize.Level1)
     int32_t tstIndex = 0;
     int32_t tstNextIndex = 0;
     ScrollDirection dir = ScrollDirection::UP;
-    columnPattern->columnkind_ = TEXT;
+    columnPattern->columnKind_ = TEXT;
     columnPattern->optionProperties_[0].fontheight = 100.0f;
     columnPattern->optionProperties_[0].height = 800.0f;
     double distance = columnPattern->GetSelectedDistance(tstIndex, tstNextIndex, dir);

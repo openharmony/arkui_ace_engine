@@ -117,7 +117,7 @@ public:
         return MakeRefPtr<LinearLayoutProperty>(true);
     }
 
-    void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false, bool isDirectlyClear = false,
+    void FlushCurrentOptions(bool isDown = false, bool isUpdateTextContentOnly = false, bool isDirectlyClear = false,
         bool isUpdateAnimationProperties = false);
 
     void InitilaScorllEvent();
@@ -213,7 +213,7 @@ public:
 
     void SetColumnKind(int32_t kind)
     {
-        columnkind_ = kind;
+        columnKind_ = kind;
     }
 
     float GetCurrentOffset() const
@@ -441,7 +441,9 @@ private:
     bool HandleDirectionKey(KeyCode code);
     void SetSelectedMarkPaint(bool paint);
     void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme);
+    void InitTextHeightAndFontHeight(uint32_t childIndex, uint32_t midIndex, TextPickerOptionProperty &prop);
     void UpdateAnimationColor(const RefPtr<PickerTheme>& pickerTheme);
+
 #ifdef SUPPORT_DIGITAL_CROWN
     void HandleCrownBeginEvent(const CrownEvent& event);
     void HandleCrownMoveEvent(const CrownEvent& event);
@@ -460,6 +462,7 @@ private:
     void ResetAlgorithmOffset();
     void CalcAlgorithmOffset(ScrollDirection dir, double distancePercent);
     void SetOptionShiftDistance();
+    void SetOptionShiftDistanceByIndex(int32_t index, const bool isLandscape);
     double GetShiftDistanceForLandscape(int32_t index, ScrollDirection dir);
     double GetShiftDistance(int32_t index, ScrollDirection dir);
     double GetSelectedDistance(int32_t index, int32_t nextIndex, ScrollDirection dir);
@@ -474,10 +477,10 @@ private:
     void SetButtonBackgroundColor(const Color& pressColor);
     void PlayPressAnimation(const Color& pressColor);
     void FlushCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
-        bool isUpateTextContentOnly, bool isDirectlyClear);
+        bool isUpdateTextContentOnly, bool isDirectlyClear);
     void FlushCurrentImageOptions();
     void FlushCurrentMixtureOptions(
-        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty, bool isUpateTextContentOnly);
+        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty, bool isUpdateTextContentOnly);
     void UpdatePickerTextProperties(const RefPtr<TextLayoutProperty>& textLayoutProperty,
         const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty, uint32_t currentIndex, uint32_t middleIndex,
         uint32_t showCount);
@@ -499,9 +502,9 @@ private:
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     void ClearCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
-        bool isUpateTextContentOnly, bool isDirectlyClear);
+        bool isUpdateTextContentOnly, bool isDirectlyClear);
     void UpdateDefaultTextProperties(const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty);
+        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty, uint32_t currentIndex, uint32_t middleIndex);
 
     RefPtr<TextPickerLayoutProperty> GetParentLayout() const;
     RefPtr<TouchEventImpl> CreateItemTouchEventListener();
@@ -532,6 +535,7 @@ private:
     void UnregisterWindowStateChangedCallback(FrameNode* frameNode);
 
     void HandleEnterSelectedArea(double scrollDelta, float shiftDistance, ScrollDirection dir);
+    bool IsDisableTextStyleAnimation() const;
 
     bool isFocusColumn_ = false;
     bool isTextFadeOut_ = false;
@@ -564,7 +568,7 @@ private:
     std::vector<std::string> range_ { "" };
     uint32_t currentIndex_ = 0;
     std::vector<NG::RangeContent> options_;
-    int32_t columnkind_ = 0;
+    int32_t columnKind_ = TEXT;
     int32_t currentChildIndex_ = 0;
     float deltaSize_ = 0.0f;
     double totalDragDelta_ = 0.0;
