@@ -168,6 +168,8 @@ private:
         return touchRestrict_;
     }
 
+    void UpdateAxisDeltaTransform(const AxisEvent& event);
+
     PanDirection direction_;
     double distance_ = 0.0;
     double mouseDistance_ = 0.0;
