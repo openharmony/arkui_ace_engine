@@ -311,15 +311,24 @@ int32_t FormRendererDelegateProxy::OnCheckManagerDelegate(bool &checkFlag)
     return ERR_OK;
 }
 
-int32_t FormRendererDelegateProxy::SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-    MessageOption &option)
+int32_t FormRendererDelegateProxy::OnUpdateFormDone(const int64_t formId)
 {
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        HILOG_ERROR("remote is null");
-        return IPC_PROXY_ERR;
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("failed to write interface token");
+        return ERR_INVALID_VALUE;
     }
-    return remote->SendRequest(code, data, reply, option);
+    data.WriteInt64(formId);
+    MessageParcel reply;
+    MessageOption option;
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_UPDATE_FORM_DONE), data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("failed to SendRequest: %{public}d", error);
+        return error;
+    }
+
+    return reply.ReadInt32();
 }
 } // namespace Ace
 } // namespace OHOS

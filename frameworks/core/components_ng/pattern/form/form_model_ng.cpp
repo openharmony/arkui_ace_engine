@@ -179,6 +179,15 @@ void FormModelNG::SetOnLoad(std::function<void(const std::string&)>&& onLoad)
     eventHub->SetOnLoad(std::move(onLoad));
 }
 
+void FormModelNG::SetOnUpdate(std::function<void(const std::string&)>&& onUpdate)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnUpdate(std::move(onUpdate));
+}
+
 void FormModelNG::SetVisibility(FrameNode* frameNode, VisibleType visible)
 {
     CHECK_NULL_VOID(frameNode);
