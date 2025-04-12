@@ -19,4 +19,4 @@ interface_sdk-js
 **/*.abc
 cachegrind.out.*
 perf.data*
-
+**/arktsconfig-unmemoized-merged.json

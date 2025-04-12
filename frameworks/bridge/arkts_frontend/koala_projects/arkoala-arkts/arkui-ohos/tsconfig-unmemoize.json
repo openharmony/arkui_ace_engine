@@ -37,16 +37,22 @@
             "#components": [
                 "./src/generated/ts"
             ],
+            "#external": [
+                "./src/external/ts",
+            ],
+            "arkui.ani": [
+                "./src/ani/ts"
+            ],
             "@ohos/animator": [
                 "./ohos.animator.ts"
             ],
-            "@ohos.arkui.UIContext": [
+            "@ohos/arkui/UIContext": [
                 "./ohos.arkui.UIContext.ts"
             ],
-            "@ohos.measure": [
+            "@ohos/measure": [
                 "./ohos.measure.ts"
             ],
-            "@ohos.font.font": [
+            "@ohos/font/font": [
                 "./ohos.font.ts"
             ],
             "global/resource": [
@@ -67,14 +73,22 @@
         "./src/generated/arkts",
         "./src/generated/common.ts",
         "./src/generated/test_utils.ts",
-        "./src/generated/main.ts"
+        "./src/generated/main.ts",
+        "./src/external/arkts",
+        "./src/ani/arkts",
     ],
     "files": [
         "../../incremental/tools/panda/arkts/std-lib/global.d.ts"
     ],
     "references": [
-        { "path": "../../arkoala/arkui-common" },
-        { "path": "../../arkoala/arkui-common/tsconfig-unmemoize.json" },
-        { "path": "../../interop" }
+        {
+            "path": "../../arkoala/arkui-common"
+        },
+        {
+            "path": "../../arkoala/arkui-common/tsconfig-unmemoize.json"
+        },
+        {
+            "path": "../../interop"
+        }
     ]
 }

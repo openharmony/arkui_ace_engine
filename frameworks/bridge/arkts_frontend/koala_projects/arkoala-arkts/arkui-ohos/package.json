@@ -6,7 +6,7 @@
   "types": "build/ts/src/index.d.ts",
   "scripts": {
     "clean": "rimraf build",
-    "build:arkui-components": "npm run unmemoize && fast-arktsc --input-files ./arktsconfig-unmemoized.json --output-dir ./build --compiler ../../incremental/tools/panda/arkts/arktsc --link-name arkui-components && ninja ${NINJA_OPTIONS} -f build/build.ninja",
+    "build:arkui-components": "npm run unmemoize && fast-arktsc --input-files ./arktsconfig-unmemoized-merged.json --output-dir ./build --compiler ../../incremental/tools/panda/arkts/arktsc --link-name arkui-components && ninja ${NINJA_OPTIONS} -f build/build.ninja",
     "unmemoize": "ets-tsc -b ./tsconfig-unmemoize.json && cp -r ./src/generated/arkts ./build/unmemoized/src/generated"
   }
 }

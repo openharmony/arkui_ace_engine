@@ -35,9 +35,9 @@ import { CircleShape } from "./ArkCircleShapeMaterialized"
 import { EllipseShape } from "./ArkEllipseShapeMaterialized"
 import { PathShape } from "./ArkPathShapeMaterialized"
 import { RectShape } from "./ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
+import { AttributeModifier } from "./../component/common"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./../component/gesture"
-import { PixelMap } from "./ArkPixelMapMaterialized"
+import { PixelMap } from "#external"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./../component/imageCommon"
 /** @memo:stable */
 export class ArkImageComponent extends ArkCommonMethodComponent implements ImageAttribute {
