@@ -72,9 +72,6 @@ void KeyboardPattern::OnModifyDone()
 
 void KeyboardPattern::OnAreaChangedInner()
 {
-    if (!supportAvoidance_) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto customHeight = GetKeyboardHeight();
@@ -83,9 +80,9 @@ void KeyboardPattern::OnAreaChangedInner()
     }
     auto boundaryHeight = 0.0f;
     // Check that the effective height of the keyboard is captured
-    if (std::abs(customHeight) > boundaryHeight) {
-        auto pipeline = host->GetContext();
-        CHECK_NULL_VOID(pipeline);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (std::abs(customHeight) > boundaryHeight && supportAvoidance_) {
         Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, customHeight);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         if (safeAreaManager) {
@@ -96,6 +93,9 @@ void KeyboardPattern::OnAreaChangedInner()
         pipeline->OnVirtualKeyboardAreaChange(keyboardRect, nullptr, safeHeight_, supportAvoidance_, true);
     }
     keyboardHeight_ = customHeight;
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->UpdateCustomKeyboardPosition();
 }
 
 void KeyboardPattern::SetKeyboardAreaChange(bool keyboardAvoidance)
