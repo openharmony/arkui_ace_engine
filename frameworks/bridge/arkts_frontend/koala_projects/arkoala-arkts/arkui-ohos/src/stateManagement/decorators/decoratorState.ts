@@ -105,7 +105,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
         const watchThis = new WatchFunc((_: string) => { });
         const watchFunc: WatchFuncType = (_: string) => {
             if (weakProp.deref()) {
-                weakProp.deref()!.update(this.get());
+                weakProp.deref()!.updateForStorage(this.get());
             } else {
                 // the prop no longer exists 
                 // note: StorageLink.prop also deleted the WatchFunc in 
