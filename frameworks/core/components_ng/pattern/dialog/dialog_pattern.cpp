@@ -1300,10 +1300,37 @@ void DialogPattern::OnColorConfigurationUpdate()
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
     dialogTheme_ = dialogTheme;
+    UpdateTitleAndContentColor();
     UpdateWrapperBackgroundStyle(host, dialogTheme);
     UpdateButtonsProperty();
     OnModifyDone();
     host->MarkDirtyNode();
+}
+
+void DialogPattern::UpdateTitleAndContentColor()
+{
+    CHECK_NULL_VOID(dialogTheme_);
+    if (!dialogProperties_.title.empty() && contentNodeMap_.find(DialogContentNode::TITLE) != contentNodeMap_.end()) {
+        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::TITLE], dialogTheme_->GetTitleTextStyle());
+    }
+    if (!dialogProperties_.subtitle.empty() &&
+        contentNodeMap_.find(DialogContentNode::SUBTITLE) != contentNodeMap_.end()) {
+        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::SUBTITLE],
+            dialogProperties_.title.empty() ? dialogTheme_->GetTitleTextStyle() : dialogTheme_->GetSubTitleTextStyle());
+    }
+    if (!dialogProperties_.content.empty() &&
+        contentNodeMap_.find(DialogContentNode::MESSAGE) != contentNodeMap_.end()) {
+        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::MESSAGE], dialogTheme_->GetContentTextStyle());
+    }
+}
+
+void DialogPattern::UpdateDialogTextColor(const RefPtr<FrameNode>& textNode, const TextStyle& textStyle)
+{
+    CHECK_NULL_VOID(textNode);
+    auto textProps = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
+    CHECK_NULL_VOID(textProps);
+    textProps->UpdateTextColor(textStyle.GetTextColor());
+    textNode->MarkModifyDone();
 }
 
 void DialogPattern::UpdateAlignmentAndOffset()
