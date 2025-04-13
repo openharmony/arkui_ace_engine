@@ -29,6 +29,7 @@
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/system_properties.h"
 #include "core/common/form_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
 #include "core/components_ng/pattern/form/form_node.h"
@@ -1127,11 +1128,16 @@ void FormPattern::LoadFormSkeleton(bool isRefresh)
 
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext != nullptr) {
-        BlurStyleOption styleOption;
-        styleOption.blurStyle = static_cast<BlurStyle>(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
-        renderContext->UpdateBackBlurStyle(styleOption);
-        renderContext->UpdateBackgroundColor(isDarkMode ?
-            Color(CONTENT_BG_COLOR_DARK) : Color(CONTENT_BG_COLOR_LIGHT));
+        Color colorStyle = isDarkMode ? Color(CONTENT_BG_COLOR_DARK) : Color(CONTENT_BG_COLOR_LIGHT);
+        if (SystemProperties::IsFormSkeletonBlurEnabled()) {
+            BlurStyleOption styleOption;
+            styleOption.blurStyle = static_cast<BlurStyle>(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+            renderContext->UpdateBackBlurStyle(styleOption);
+        } else {
+            colorStyle = isDarkMode ?
+                Color(CONTENT_BG_COLOR_DARK_WITHOUT_BLUR) : Color(CONTENT_BG_COLOR_LIGHT_WITHOUT_BLUR);
+        }
+        renderContext->UpdateBackgroundColor(colorStyle);
         double opacity = formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
             != formChildrenNodeMap_.end() ? TRANSPARENT_VAL : CONTENT_BG_OPACITY;
         renderContext->SetOpacity(opacity);
