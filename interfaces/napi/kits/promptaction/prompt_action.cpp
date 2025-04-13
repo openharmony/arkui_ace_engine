@@ -1514,11 +1514,10 @@ std::optional<double> GetLevelOrderParam(napi_env env, const std::shared_ptr<Pro
         napi_unwrap(env, levelOrderApi, reinterpret_cast<void**>(&levelOrder));
     }
 
-    double order = NG::LevelOrder::ORDER_DEFAULT;
     if (levelOrder) {
-        order = levelOrder->GetOrder();
+        return std::make_optional(levelOrder->GetOrder());
     }
-    return std::make_optional(order);
+    return std::nullopt;
 }
 
 napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
