@@ -965,6 +965,12 @@ private:
     void PauseSymbolAnimation();
     void ResumeSymbolAnimation();
     bool IsLocationInFrameRegion(const Offset& localOffset) const;
+    void GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle,
+        NG::TextLineStyle& textLineStyle, const std::optional<TextStyle>& textStyle);
+    RefPtr<TaskExecutor> GetTaskExecutorItem();
+    void AsyncHandleOnCopySpanStringHtml(RefPtr<SpanString>& subSpanString);
+    void AsyncHandleOnCopyWithoutSpanStringHtml(const std::string& pasteData);
+    std::list<RefPtr<SpanItem>> GetSpanSelectedContent();
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 #include <cstdint>
+#include <future>
 #include <iterator>
 #include <stack>
 #include <string>
@@ -43,6 +44,8 @@
 #include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_select_overlay.h"
+#include "core/components_ng/pattern/text/text_styles.h"
+#include "core/text/html_utils.h"
 #include "core/text/text_emoji_processor.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
@@ -630,6 +633,82 @@ void TextPattern::HandleOnCopy()
     eventHub->FireOnCopy(value);
 }
 
+void TextPattern::GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle,
+    NG::TextLineStyle& textLineStyle, const std::optional<TextStyle>& textStyle)
+{
+    if (!textStyle.has_value()) {
+        return;
+    }
+    fontStyle.UpdateFontSize(textStyle->GetFontSize());
+    fontStyle.UpdateTextColor(textStyle->GetTextColor());
+    fontStyle.UpdateTextShadow(textStyle->GetTextShadows());
+    fontStyle.UpdateItalicFontStyle(textStyle->GetFontStyle());
+    fontStyle.UpdateFontWeight(textStyle->GetFontWeight());
+    fontStyle.UpdateVariableFontWeight(textStyle->GetVariableFontWeight());
+    fontStyle.UpdateEnableVariableFontWeight(textStyle->GetEnableVariableFontWeight());
+    fontStyle.UpdateFontFamily(textStyle->GetFontFamilies());
+    fontStyle.UpdateFontFeature(textStyle->GetFontFeatures());
+    fontStyle.UpdateTextDecoration(textStyle->GetTextDecoration());
+    fontStyle.UpdateTextDecorationColor(textStyle->GetTextDecorationColor());
+    fontStyle.UpdateTextDecorationStyle(textStyle->GetTextDecorationStyle());
+    fontStyle.UpdateTextCase(textStyle->GetTextCase());
+    fontStyle.UpdateAdaptMinFontSize(textStyle->GetAdaptMinFontSize());
+    fontStyle.UpdateAdaptMaxFontSize(textStyle->GetAdaptMaxFontSize());
+    fontStyle.UpdateLetterSpacing(textStyle->GetLetterSpacing());
+    fontStyle.UpdateSymbolColorList(textStyle->GetSymbolColorList());
+    fontStyle.UpdateSymbolType(textStyle->GetSymbolType());
+    textLineStyle.UpdateLineHeight(textStyle->GetLineHeight());
+    textLineStyle.UpdateTextBaseline(textStyle->GetTextBaseline());
+    textLineStyle.UpdateBaselineOffset(textStyle->GetBaselineOffset());
+    textLineStyle.UpdateTextOverflow(textStyle->GetTextOverflow());
+    textLineStyle.UpdateTextAlign(textStyle->GetTextAlign());
+    textLineStyle.UpdateMaxLines(textStyle->GetMaxLines());
+    textLineStyle.UpdateTextIndent(textStyle->GetTextIndent());
+    textLineStyle.UpdateWordBreak(textStyle->GetWordBreak());
+    textLineStyle.UpdateEllipsisMode(textStyle->GetEllipsisMode());
+    textLineStyle.UpdateLineSpacing(textStyle->GetLineSpacing());
+    textLineStyle.UpdateLineBreakStrategy(textStyle->GetLineBreakStrategy());
+    textLineStyle.UpdateHalfLeading(textStyle->GetHalfLeading());
+    textLineStyle.UpdateAllowScale(textStyle->IsAllowScale());
+    textLineStyle.UpdateParagraphSpacing(textStyle->GetParagraphSpacing());
+}
+
+RefPtr<TaskExecutor> TextPattern::GetTaskExecutorItem()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetTaskExecutor();
+}
+
+void TextPattern::AsyncHandleOnCopySpanStringHtml(RefPtr<SpanString>& subSpanString)
+{
+    auto taskExecutor = GetTaskExecutorItem();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [subSpanString, weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
+            std::vector<uint8_t> tlvData;
+            subSpanString->EncodeTlv(tlvData);
+            auto multiTypeRecordImpl = AceType::MakeRefPtr<MultiTypeRecordImpl>();
+            multiTypeRecordImpl->SetPlainText(subSpanString->GetString());
+            std::string htmlText = HtmlUtils::ToHtml(Referenced::RawPtr(subSpanString));
+            multiTypeRecordImpl->SetHtmlText(htmlText);
+
+            auto uiTaskExecutor = task.Upgrade();
+            uiTaskExecutor->PostTask(
+                [weak, multiTypeRecordImpl, tlvData]() {
+                    auto textPattern = weak.Upgrade();
+                    CHECK_NULL_VOID(textPattern);
+                    RefPtr<PasteDataMix> pasteData = textPattern->clipboard_->CreatePasteDataMix();
+                    std::vector<uint8_t> tlvDataCopy = tlvData;
+                    textPattern->clipboard_->AddSpanStringRecord(pasteData, tlvDataCopy);
+                    textPattern->clipboard_->AddMultiTypeRecord(pasteData, multiTypeRecordImpl);
+                    textPattern->clipboard_->SetData(pasteData, textPattern->copyOption_);
+                }, TaskExecutor::TaskType::UI, "AsyncHandleOnCopySpanStringHtmlSetClipboardData");
+        }, TaskExecutor::TaskType::BACKGROUND, "AsyncHandleOnCopySpanStringHtml");
+}
+
 void TextPattern::HandleOnCopySpanString()
 {
     auto subSpanString = styledString_->GetSubSpanString(textSelector_.GetTextStart(),
@@ -638,12 +717,88 @@ void TextPattern::HandleOnCopySpanString()
     clipboard_->SetData(subSpanString->GetString(), copyOption_);
     return;
 #endif
-    RefPtr<PasteDataMix> pasteData = clipboard_->CreatePasteDataMix();
-    std::vector<uint8_t> tlvData;
-    subSpanString->EncodeTlv(tlvData);
-    clipboard_->AddSpanStringRecord(pasteData, tlvData);
-    clipboard_->AddTextRecord(pasteData, subSpanString->GetString());
-    clipboard_->SetData(pasteData, copyOption_);
+    AsyncHandleOnCopySpanStringHtml(subSpanString);
+}
+
+std::list<RefPtr<SpanItem>> TextPattern::GetSpanSelectedContent()
+{
+    std::list<RefPtr<SpanItem>> spans;
+    auto selectStart = textSelector_.GetTextStart();
+    auto selectEnd = textSelector_.GetTextEnd();
+    int32_t tag = 0;
+    for (const auto& item : spans_) {
+        if (item->GetSymbolUnicode() != 0) {
+            tag = item->position == -1 ? tag + 1 : item->position;
+            continue;
+        }
+        std::u16string spanSelectedContent;
+        if (item->position - 1 >= selectStart && item->placeholderIndex == -1 && item->position != -1) {
+            auto wideString = item->GetSpanContent();
+            auto max = std::min(item->position, selectEnd);
+            auto min = std::max(selectStart, tag);
+            spanSelectedContent = TextEmojiProcessor::SubU16string(
+                std::clamp((min - tag), 0, static_cast<int32_t>(wideString.length())),
+                std::clamp((max - min), 0, static_cast<int32_t>(wideString.length())),
+                wideString, false, false);
+        } else if (item->position - 1 >= selectStart && item->position != -1) {
+            spanSelectedContent = u" ";
+        }
+        auto spanItem = MakeRefPtr<SpanItem>();
+        NG::FontStyle fontStyle;
+        NG::TextLineStyle textLineStyle;
+        GetSpanItemAttributeUseForHtml(fontStyle, textLineStyle, item->GetTextStyle());
+        spanItem->fontStyle = std::make_unique<FontStyle>(fontStyle);
+        spanItem->textLineStyle = std::make_unique<TextLineStyle>(textLineStyle);
+        spanItem->content = spanSelectedContent;
+        spanItem->spanItemType = item->spanItemType;
+        spans.emplace_back(spanItem);
+        tag = item->position == -1 ? tag + 1 : item->position;
+        if (item->position >= selectEnd) {
+            break;
+        }
+    }
+    return spans;
+}
+
+void TextPattern::AsyncHandleOnCopyWithoutSpanStringHtml(const std::string& pasteData)
+{
+    auto multiTypeRecordImpl = AceType::MakeRefPtr<MultiTypeRecordImpl>();
+    std::list<RefPtr<SpanItem>> spans;
+    NG::FontStyle fontStyle;
+    NG::TextLineStyle textLineStyle;
+    if (spans_.empty()) {
+        EncodeTlvNoChild(pasteData, multiTypeRecordImpl->GetSpanStringBuffer());
+        GetSpanItemAttributeUseForHtml(fontStyle, textLineStyle, textStyle_);
+    } else {
+        EncodeTlvSpanItems(pasteData, multiTypeRecordImpl->GetSpanStringBuffer());
+        spans = GetSpanSelectedContent();
+    }
+    auto taskExecutor = GetTaskExecutorItem();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [pasteData, multiTypeRecordImpl, fontStyle, textLineStyle, spans,
+            weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
+            auto textPattern = weak.Upgrade();
+            CHECK_NULL_VOID(textPattern);
+            multiTypeRecordImpl->SetPlainText(pasteData);
+            std::string htmlText = "";
+            if (!textPattern->spans_.empty()) {
+                htmlText = HtmlUtils::ToHtml(spans);
+            } else {
+                std::u16string content = UtfUtils::Str8DebugToStr16(pasteData);
+                htmlText = HtmlUtils::ToHtmlForNormalType(fontStyle, textLineStyle, content);
+            }
+            multiTypeRecordImpl->SetHtmlText(htmlText);
+            auto uiTaskExecutor = task.Upgrade();
+            uiTaskExecutor->PostTask(
+                [weak, multiTypeRecordImpl]() {
+                    auto textPattern = weak.Upgrade();
+                    CHECK_NULL_VOID(textPattern);
+                    RefPtr<PasteDataMix> pasteDataMix = textPattern->clipboard_->CreatePasteDataMix();
+                    textPattern->clipboard_->AddMultiTypeRecord(pasteDataMix, multiTypeRecordImpl);
+                    textPattern->clipboard_->SetData(pasteDataMix, textPattern->copyOption_);
+                }, TaskExecutor::TaskType::UI, "AsyncHandleOnCopyWithoutSpanStringSetClipboardData");
+        }, TaskExecutor::TaskType::BACKGROUND, "AsyncHandleOnCopyWithoutSpanStringHtml");
 }
 
 void TextPattern::HandleOnCopyWithoutSpanString(const std::string& pasteData)
@@ -652,16 +807,7 @@ void TextPattern::HandleOnCopyWithoutSpanString(const std::string& pasteData)
     clipboard_->SetData(pasteData, copyOption_);
     return;
 #endif
-    RefPtr<PasteDataMix> pasteDataMix = clipboard_->CreatePasteDataMix();
-    auto multiTypeRecordImpl = AceType::MakeRefPtr<MultiTypeRecordImpl>();
-    if (spans_.empty()) {
-        EncodeTlvNoChild(pasteData, multiTypeRecordImpl->GetSpanStringBuffer());
-    } else {
-        EncodeTlvSpanItems(pasteData, multiTypeRecordImpl->GetSpanStringBuffer());
-    }
-    multiTypeRecordImpl->SetPlainText(pasteData);
-    clipboard_->AddMultiTypeRecord(pasteDataMix, multiTypeRecordImpl);
-    clipboard_->SetData(pasteDataMix, copyOption_);
+    AsyncHandleOnCopyWithoutSpanStringHtml(pasteData);
 }
 
 #define WRITE_TLV_INHERIT(group, name, tag, type, inheritName)   \
