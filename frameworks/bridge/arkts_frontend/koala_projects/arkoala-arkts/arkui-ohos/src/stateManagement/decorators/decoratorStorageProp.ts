@@ -43,7 +43,7 @@ export class StoragePropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
 
     public set(newValue: T): void {
         const oldValue : T = this.asProp!.get() as T;
-        if ( oldValue != newValue) {
+        if ( oldValue !== newValue) {
             this.unregisterWatchFromObservedObjectChanges(oldValue);
             this.registerWatchForObservedObjectChanges(newValue);
             this.asProp!.set(newValue as Object);

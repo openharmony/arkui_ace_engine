@@ -63,7 +63,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
 
     public set(newValue: T): void {
         const value = this.__backing.value
-        if (value != newValue) {
+        if (value !== newValue) {
             // if (this.validateValue(locanewValueInitValue) === false) {
             //     throw new Error("@State Object-type Value must be ObservedObject")
             // }

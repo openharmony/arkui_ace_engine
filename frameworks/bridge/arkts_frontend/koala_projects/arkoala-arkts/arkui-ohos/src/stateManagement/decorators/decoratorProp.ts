@@ -79,7 +79,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     }
 
     public set(newValue: T): void {
-        if (this.__backing.value != newValue) {
+        if (this.__backing.value !== newValue) {
             // if (this.validateValue(locanewValueInitValue) === false) {
             //     throw new Error("@State Object-type Value must be ObservedObject")
             // }
@@ -100,7 +100,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     // @Prop updates from parent, value from parent needs to be copied
     public update(newValue: T): void {
         this.meta_.addRef(); // TODO: is it needed?
-        if (this.__soruceValue.value != newValue) {
+        if (this.__soruceValue.value !== newValue) {
             this.unregisterWatchFromObservedObjectChanges(this.__backing.value);
             this.registerWatchForObservedObjectChanges(newValue);
 

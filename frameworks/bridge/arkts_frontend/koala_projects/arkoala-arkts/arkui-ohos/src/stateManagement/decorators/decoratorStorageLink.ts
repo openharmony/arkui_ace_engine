@@ -42,7 +42,7 @@ export class StorageLinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
 
     public set(newValue: T): void {
         const oldValue : T = this.asLink!.get() as T;
-        if ( oldValue != newValue) {
+        if ( oldValue !== newValue) {
             this.unregisterWatchFromObservedObjectChanges(oldValue);
             this.registerWatchForObservedObjectChanges(newValue);
             this.asLink!.set(newValue as Object);
