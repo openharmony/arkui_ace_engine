@@ -105,6 +105,8 @@ private:
     bool IsEmbeddedDialog(const RefPtr<FrameNode>& frameNode);
     float GetEmbeddedDialogOffsetY(const RefPtr<FrameNode>& frameNode);
     float GetStackRootDialogOffsetY(const RefPtr<FrameNode>& frameNode);
+    void AdjustHoverModeForWaterfall(const RefPtr<FrameNode>& frameNode);
+    bool IsDefaultPosition(const RefPtr<DialogLayoutProperty>& dialogProp);
 
     RectF touchRegion_;
     OffsetF topLeftPoint_;
