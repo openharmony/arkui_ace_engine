@@ -24,8 +24,10 @@ namespace {
 const std::string FORMAT_FONT = "%s|%s|%s";
 const std::string DEFAULT_ERR_CODE = "-1";
 const int32_t DEFAULT_NEGATIVE_NUM = -1;
+const int32_t DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS = 24;
 constexpr uint32_t DEFAULT_TIME_PICKER_TEXT_COLOR = 0xFF182431;
 constexpr uint32_t DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR = 0xFF0A59F7;
+constexpr uint32_t DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_COLOR = 0x0C182431;
 
 constexpr int32_t NODE_INDEX = 0;
 constexpr int32_t STROKE_WIDTH_INDEX = 1;
@@ -33,11 +35,15 @@ constexpr int32_t COLOR_INDEX = 2;
 constexpr int32_t START_MARGIN_INDEX = 3;
 constexpr int32_t END_MARGIN_INDEX = 4;
 constexpr int32_t NUM_1 = 1;
+constexpr int32_t VP = 1;
 
 constexpr int32_t ARG_GROUP_LENGTH = 3;
 constexpr int PARAM_ARR_LENGTH_2 = 2;
 constexpr int NUM_0 = 0;
 constexpr int NUM_2 = 2;
+constexpr int NUM_3 = 3;
+constexpr int NUM_4 = 4;
+constexpr int NUM_5 = 5;
 bool ParseDividerDimension(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& valueDim)
 {
     return !ArkTSUtils::ParseJsDimensionVpNG(vm, value, valueDim, false) || LessNotEqual(valueDim.Value(), 0.0f) ||
@@ -610,6 +616,70 @@ ArkUINativeModuleValue TextPickerBridge::ResetTextPickerEnableHapticFeedback(Ark
     auto textPickerModifier = modifiers->getTextPickerModifier();
     CHECK_NULL_RETURN(textPickerModifier, panda::NativePointerRef::New(vm, nullptr));
     textPickerModifier->resetTextPickerEnableHapticFeedback(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::SetTextPickerSelectedBackgroundStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // framenode
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1); // background color
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    ArkUI_Bool getValue[NUM_5] = {false, false, false, false, false};
+    ArkUI_Uint32 colorValue = DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_COLOR;
+    Color color;
+    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+        colorValue = color.GetValue();
+        getValue[NUM_0] = true;
+    }
+    ArkUI_Float32 value[NUM_4] = {DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS,
+        DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS, DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS,
+        DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS};
+    ArkUI_Int32 unit[NUM_4] = {VP, VP, VP, VP};
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    CalcDimension calcDimension;
+    for (int i = NUM_0; i < NUM_4; i++) {
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, runtimeCallInfo->GetCallArgRef(i + NUM_2), calcDimension) &&
+            !calcDimension.IsNegative()) {
+            getValue[i + NUM_1] = true;
+            value[i] = calcDimension.Value();
+            unit[i] = static_cast<int>(calcDimension.Unit());
+        }
+        if (ArkTSUtils::ParseJsDimensionVp(vm, runtimeCallInfo->GetCallArgRef(i + NUM_2), calcDimension) &&
+            !calcDimension.IsNegative()) {
+            getValue[i + NUM_1] = true;
+            value[i] = calcDimension.Value();
+            unit[i] = static_cast<int>(calcDimension.Unit());
+        }
+    }
+    if (isRightToLeft && (value[NUM_0] != value[NUM_2] || value[NUM_1] != value[NUM_3]) &&
+        (unit[NUM_0] != unit[NUM_2] || unit[NUM_1] != unit[NUM_3])) {
+        std::swap(value[NUM_0], value[NUM_2]);
+        std::swap(value[NUM_1], value[NUM_3]);
+        std::swap(unit[NUM_0], unit[NUM_2]);
+        std::swap(unit[NUM_1], unit[NUM_3]);
+        std::swap(getValue[NUM_1], getValue[NUM_3]);
+        std::swap(getValue[NUM_2], getValue[NUM_4]);
+    }
+    auto modifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(modifiers, panda::NativePointerRef::New(vm, nullptr));
+    auto textPickerModifier = modifiers->getTextPickerModifier();
+    CHECK_NULL_RETURN(textPickerModifier, panda::NativePointerRef::New(vm, nullptr));
+    textPickerModifier->setTextPickerSelectedBackgroundStyle(nativeNode, getValue, colorValue, value, unit);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::ResetTextPickerSelectedBackgroundStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto modifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(modifier, panda::NativePointerRef::New(vm, nullptr));
+    modifier->getTextPickerModifier()->resetTextPickerSelectedBackgroundStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

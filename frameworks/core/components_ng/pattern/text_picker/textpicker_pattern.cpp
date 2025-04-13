@@ -199,33 +199,17 @@ void TextPickerPattern::SetButtonIdeaSize()
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
+    auto layoutProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     auto children = host->GetChildren();
     auto currentFocusButtonNode = GetFocusButtonNode();
     CHECK_NULL_VOID(currentFocusButtonNode);
     for (const auto& child : children) {
+        CalculateButtonMetrics(child, pickerTheme);
         auto stackNode = DynamicCast<FrameNode>(child);
-        CHECK_NULL_VOID(stackNode);
-        auto width = stackNode->GetGeometryNode()->GetFrameSize().Width();
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
-        CHECK_NULL_VOID(buttonNode);
-        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_VOID(buttonLayoutProperty);
-        buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-        buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
-        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(selectorItemRadius_));
-        auto buttonHeight = CalculateHeight() - PRESS_INTERVAL.ConvertToPx() * (useButtonFocusArea_ ? 1 : RATE);
-        if (resizeFlag_) {
-            buttonHeight = resizePickerItemHeight_ - PRESS_INTERVAL.ConvertToPx() * RATE;
-        }
-
-        auto buttonSpace = useButtonFocusArea_ ? pickerTheme->GetSelectorItemSpace() : PRESS_INTERVAL * RATE;
-        if (children.size() == 1 && useButtonFocusArea_) {
-            buttonSpace = PRESS_INTERVAL * RATE;
-        }
-        buttonLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         CHECK_NULL_VOID(buttonConfirmRenderContext);
         auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
@@ -244,6 +228,41 @@ void TextPickerPattern::SetButtonIdeaSize()
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode();
     }
+}
+
+void TextPickerPattern::CalculateButtonMetrics(RefPtr<UINode> child, RefPtr<PickerTheme> pickerTheme)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    auto layoutProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto stackNode = DynamicCast<FrameNode>(child);
+    CHECK_NULL_VOID(stackNode);
+    auto width = stackNode->GetGeometryNode()->GetFrameSize().Width();
+    auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+    if (layoutProperty->HasSelectedBorderRadius() || pickerTheme->GetUsePickerBackgroundStyle()) {
+        buttonLayoutProperty->UpdateBorderRadius(layoutProperty->GetSelectedBorderRadius().value_or(
+            pickerTheme->GetSelectedBorderRadius()));
+    } else {
+        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(selectorItemRadius_));
+    }
+    auto buttonHeight = CalculateHeight() - PRESS_INTERVAL.ConvertToPx() * (useButtonFocusArea_ ? 1 : RATE);
+    if (resizeFlag_) {
+        buttonHeight = resizePickerItemHeight_ - PRESS_INTERVAL.ConvertToPx() * RATE;
+    }
+
+    auto buttonSpace = useButtonFocusArea_ ? pickerTheme->GetSelectorItemSpace() : PRESS_INTERVAL * RATE;
+    if (children.size() == 1 && useButtonFocusArea_) {
+        buttonSpace = PRESS_INTERVAL * RATE;
+    }
+    buttonLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(buttonHeight)));
 }
 
 void TextPickerPattern::InitSelectorProps()
@@ -374,7 +393,8 @@ void TextPickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect, float
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
+    auto layoutProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto context = host->GetContext();
@@ -397,10 +417,13 @@ void TextPickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect, float
         OffsetF(focusSpace - leftPadding, focusSpace - stackRenderContext->GetPaintRectWithoutTransform().GetY());
     focusButtonRect += SizeF(focusSpace + focusSpace, focusSpace + focusSpace);
     focusButtonRect += OffsetF(focusButtonXOffset, 0);
-
     paintRect.SetRect(focusButtonRect);
     BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(selectorItemRadius_);
+    if (layoutProperty->HasSelectedBorderRadius() || pickerTheme->GetUsePickerBackgroundStyle()) {
+        borderRadius = layoutProperty->GetSelectedBorderRadius().value_or(pickerTheme->GetSelectedBorderRadius());
+    } else {
+        borderRadius.SetRadius(selectorItemRadius_);
+    }
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto radius = renderContext->GetBorderRadius().value_or(borderRadius);
@@ -1110,11 +1133,17 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto layoutProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto theme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
     auto childSize = static_cast<int32_t>(host->GetChildren().size());
     if (childSize == 0) {
         return;
     }
-    if (useButtonFocusArea_) {
+    if (useButtonFocusArea_ || layoutProperty->HasSelectedBorderRadius() || theme->GetUsePickerBackgroundStyle()) {
         auto leftTotalColumnWidth = 0.0f;
         CalcLeftTotalColumnWidth(host, leftTotalColumnWidth, childSize);
         return GetInnerFocusButtonPaintRect(paintRect, leftTotalColumnWidth);

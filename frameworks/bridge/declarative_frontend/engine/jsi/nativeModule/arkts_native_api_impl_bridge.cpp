@@ -3112,6 +3112,12 @@ void ArkUINativeModule::RegisterTextpickerAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetOnScrollStop));
     textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnScrollStop"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetOnScrollStop));
+    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextpickerSelectedBackgroundStyle"),
+        panda::FunctionRef::New(
+            const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetTextPickerSelectedBackgroundStyle));
+    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextpickerSelectedBackgroundStyle"),
+        panda::FunctionRef::New(
+            const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetTextPickerSelectedBackgroundStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textpicker"), textpicker);
     textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDigitalCrownSensitivity"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetDigitalCrownSensitivity));

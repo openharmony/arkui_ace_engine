@@ -5079,6 +5079,10 @@ struct ArkUITextPickerModifier {
         ArkUINodeHandle node, ArkUITextPickerRangeContentArray arry, ArkUI_Bool isSingleRange, ArkUI_Int32 rangeType);
     void (*setTextCascadePickRangeContent)(
         ArkUINodeHandle node, ArkUITextCascadePickerRangeContentArray arry, ArkUI_Int32 rangeType);
+    void (*setTextPickerSelectedBackgroundStyle)(ArkUINodeHandle node, ArkUI_Bool* getValue, ArkUI_Uint32 color,
+        ArkUI_Float32* value, ArkUI_Int32* unit);
+    void (*getTextPickerSelectedBackgroundStyle)(ArkUINodeHandle node, ArkUINumberValue* result);
+    void (*resetTextPickerSelectedBackgroundStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUITextTimerModifier {

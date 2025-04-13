@@ -21554,6 +21554,10 @@ class ArkTextPickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextpickerEnableHapticFeedbackModifier.identity, TextpickerEnableHapticFeedbackModifier, value);
     return this;
   }
+  selectedBackgroundStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, TextpickerSelectedBackgroundStyleModifier.identity, TextpickerSelectedBackgroundStyleModifier, value);
+    return this;
+  }
   onScrollStop(callback){
     modifierWithKey(
       this._modifiersWithKeys, TextpickerOnScrollStopModifier.identity, TextpickerOnScrollStopModifier, callback);
@@ -21851,6 +21855,67 @@ class TextpickerEnableHapticFeedbackModifier extends ModifierWithKey {
   }
 }
 TextpickerEnableHapticFeedbackModifier.identity = Symbol('textpickerEnableHapticFeedback');
+
+class TextpickerSelectedBackgroundStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textpicker.resetTextpickerSelectedBackgroundStyle(node);
+    } else if (this.value != null) {
+      const { color, borderRadius } = this.value;
+      if (borderRadius != null) {
+        const borderRadiusKeys = Object.keys(borderRadius);
+        let topLeft;
+        let topRight;
+        let bottomLeft;
+        let bottomRight;
+        if (borderRadiusKeys.indexOf('value') >= 0) {
+          topLeft = topRight = bottomLeft = bottomRight = borderRadius;
+        } else if (borderRadiusKeys.indexOf('topLeft') >= 0) {
+          topLeft = borderRadius.topLeft;
+          topRight = borderRadius.topRight;
+          bottomLeft = borderRadius.bottomLeft;
+          bottomRight = borderRadius.bottomRight;
+        } else if (borderRadiusKeys.indexOf('topStart') >= 0) {
+          topLeft = borderRadius.topStart;
+          topRight = borderRadius.topEnd;
+          bottomLeft = borderRadius.bottomStart;
+          bottomRight = borderRadius.bottomEnd;
+        }
+        getUINativeModule().textpicker.setTextpickerSelectedBackgroundStyle(node, color, topLeft, topRight, bottomLeft,
+          bottomRight);
+      } else {
+        getUINativeModule().textpicker.setTextpickerSelectedBackgroundStyle(node, undefined, undefined, undefined,
+          undefined, undefined);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (!(this.stageValue.color === this.value.color)) {
+      return true;
+    } else if (Object.keys(this.value.borderRadius).indexOf('value') >= 0) {
+      return !(
+        this.stageValue.borderRadius.value === this.value.borderRadius.value &&
+        this.stageValue.borderRadius.unit === this.value.borderRadius.unit);
+    } else if (Object.keys(this.value.borderRadius).indexOf('topLeft') >= 0) {
+      return !(
+        this.stageValue.borderRadius.topLeft === this.value.borderRadius.topLeft &&
+        this.stageValue.borderRadius.topRight === this.value.borderRadius.topRight &&
+        this.stageValue.borderRadius.bottomLeft === this.value.borderRadius.bottomLeft &&
+        this.stageValue.borderRadius.bottomRight === this.value.borderRadius.bottomRight);
+    } else if (Object.keys(this.value.borderRadius).indexOf('topStart') >= 0) {
+      return !(
+        this.stageValue.borderRadius.topStart === this.value.borderRadius.topStart &&
+        this.stageValue.borderRadius.topEnd === this.value.borderRadius.topEnd &&
+        this.stageValue.borderRadius.bottomStart === this.value.borderRadius.bottomStart &&
+        this.stageValue.borderRadius.bottomEnd === this.value.borderRadius.bottomEnd);
+    }
+    return true;
+  }
+}
+TextpickerSelectedBackgroundStyleModifier.identity = Symbol('textpickerSelectedBackgroundStyle');
 
 class TextpickerOnChangeModifier extends ModifierWithKey {
   constructor(value) {
