@@ -850,8 +850,6 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 swiper->SetIndicatorJumpIndex(currentIndex);
                 swiper->MarkDirtyNodeSelf();
                 swiper->SetLazyForEachFlag();
-                TAG_LOGI(AceLogTag::ACE_SWIPER, "SurfaceChanged, currentIndex: %{public}d", currentIndex);
-                ACE_SCOPED_TRACE("SurfaceChanged, currentIndex: %d", currentIndex);
             });
         UpdateSurfaceChangedCallbackId(callbackId);
     }
@@ -3900,13 +3898,11 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
 
 void SwiperPattern::CheckTargetPositon(float& correctOffset)
 {
-    auto props = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(props);
-    if (contentMainSizeBeforeAni_ != contentMainSize_ && targetIndex_.has_value() && !itemPosition_.empty() &&
-        props->GetDisplayCount().has_value()) {
+    if (contentMainSizeBeforeAni_ != contentMainSize_ && targetIndex_.has_value() && !itemPosition_.empty()) {
         auto iter = itemPosition_.find(targetIndex_.value());
         if (iter != itemPosition_.end()) {
             correctOffset = -iter->second.startPos;
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper correctOffset: %{public}f", correctOffset);
         }
     }
 }
