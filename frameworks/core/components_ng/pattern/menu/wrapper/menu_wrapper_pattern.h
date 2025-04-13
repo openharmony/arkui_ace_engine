@@ -86,7 +86,7 @@ public:
         return targetId_;
     }
 
-    void HideMenu();
+    void HideMenu(const HideMenuType& reason = HideMenuType::NORMAL);
 
     bool IsHide() const
     {
@@ -607,8 +607,9 @@ private:
     RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const PointF& position);
     bool IsNeedSetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
 
-    void HideMenu(const RefPtr<FrameNode>& menu);
-    void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const PointF& position);
+    void HideMenu(const RefPtr<FrameNode>& menu, const HideMenuType& reason = HideMenuType::NORMAL);
+    void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const PointF& position,
+        const HideMenuType& reason = HideMenuType::NORMAL);
     void SetExitAnimation(const RefPtr<FrameNode>& host);
     void SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow);
     bool CheckPointInMenuZone(const RefPtr<FrameNode>& node, const PointF& point);

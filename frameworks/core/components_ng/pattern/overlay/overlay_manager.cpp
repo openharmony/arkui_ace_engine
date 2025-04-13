@@ -2644,9 +2644,10 @@ RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)
     return nullptr;
 }
 
-void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch)
+void OverlayManager::HideMenu(
+    const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch, const HideMenuType& reason)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide menu enter");
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide menu enter %{public}d", reason);
     PopMenuAnimation(menu);
     RemoveEventColumn();
     if (isMenuOnTouch) {
@@ -3807,7 +3808,7 @@ bool OverlayManager::RemoveMenu(const RefPtr<FrameNode>& overlay)
     auto menuWrapperPattern = overlay->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, false);
     menuWrapperPattern->UpdateMenuAnimation(overlay);
-    menuWrapperPattern->HideMenu();
+    menuWrapperPattern->HideMenu(HideMenuType::REMOVE_MENU);
     return true;
 }
 
@@ -7199,7 +7200,7 @@ void OverlayManager::CloseAIEntityMenu(int32_t targetId)
     } else {
         auto menuNode = GetMenuNode(targetId);
         CHECK_NULL_VOID(menuNode);
-        HideMenu(menuNode, targetId);
+        HideMenu(menuNode, targetId, false, HideMenuType::CLOSE_AI_MENU);
     }
 }
 

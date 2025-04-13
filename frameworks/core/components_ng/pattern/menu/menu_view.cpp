@@ -595,7 +595,7 @@ void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<Fr
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu");
-    wrapperPattern->HideMenu();
+    wrapperPattern->HideMenu(HideMenuType::VIEW_DRAG_END);
 }
 
 void InitPanEvent(const RefPtr<GestureEventHub>& targetGestureHub, const RefPtr<GestureEventHub>& gestureHub,

@@ -2517,7 +2517,7 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
     auto isShowMenu = overlayManager->GetMenuNode(targetNode->GetId());
     if (isShowMenu) {
         // The menu is already opened, close the previous menu and open the new menu
-        overlayManager->HideMenu(isShowMenu, targetNode->GetId(), false);
+        overlayManager->HideMenu(isShowMenu, targetNode->GetId(), false, HideMenuType::OPEN_MENU);
     }
     NG::MenuView::UpdatePreviewInfo(targetNode, menuParam);
     auto wrapperNode = NG::MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam);
@@ -2611,7 +2611,7 @@ int32_t ViewAbstract::CloseMenu(const RefPtr<UINode>& customNode)
     if (!menuWrapperNode) {
         return ERROR_CODE_DIALOG_CONTENT_NOT_FOUND;
     }
-    overlayManager->HideMenu(menuWrapperNode, customNode->GetId(), false);
+    overlayManager->HideMenu(menuWrapperNode, customNode->GetId(), false, HideMenuType::CLOSE_MENU);
     return ERROR_CODE_NO_ERROR;
 }
 

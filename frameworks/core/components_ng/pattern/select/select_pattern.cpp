@@ -189,7 +189,7 @@ void SelectPattern::SetItemSelected(int32_t index, const std::string& value)
     textProps->UpdateContent(value);
     text_->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    menuPattern->HideMenu();
+    menuPattern->HideMenu(HideMenuType::SELECT_SELECTED);
     auto hub = host->GetEventHub<SelectEventHub>();
     CHECK_NULL_VOID(hub);
 

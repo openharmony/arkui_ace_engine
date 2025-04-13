@@ -200,7 +200,7 @@ bool ViewAbstractModelNG::CheckMenuIsShow(
     }
     if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow && !wrapperPattern->GetIsOpenMenu()) {
         TAG_LOGI(AceLogTag::ACE_MENU, "execute hide menu.");
-        overlayManager->HideMenu(menuNode, targetId, false);
+        overlayManager->HideMenu(menuNode, targetId, false, HideMenuType::IS_SHOW);
     }
     return true;
 }

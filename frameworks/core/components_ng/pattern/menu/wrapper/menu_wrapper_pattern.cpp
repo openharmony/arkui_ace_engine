@@ -19,7 +19,7 @@
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 
 namespace OHOS::Ace::NG {
-void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
+void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu, const HideMenuType& reason)
 {
     CHECK_NULL_VOID(menu);
     auto host = GetHost();
@@ -30,7 +30,7 @@ void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
     SetIsStopHoverImageAnimation(true);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    menuPattern->HideMenu();
+    menuPattern->HideMenu(reason);
 }
 
 void MenuWrapperPattern::OnModifyDone()
@@ -48,7 +48,7 @@ void MenuWrapperPattern::InitFocusEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu due to lost focus");
-        pattern->HideMenu();
+        pattern->HideMenu(HideMenuType::WRAPPER_LOSE_FOCUS);
     };
     focusHub->SetOnBlurInternal(std::move(blurTask));
 }
@@ -213,13 +213,13 @@ void MenuWrapperPattern::HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItem
     }
 }
 
-void MenuWrapperPattern::HideMenu()
+void MenuWrapperPattern::HideMenu(const HideMenuType& reason)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
     CHECK_NULL_VOID(menuNode);
-    HideMenu(menuNode);
+    HideMenu(menuNode, reason);
 }
 
 void MenuWrapperPattern::GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenuExpandingMode& expandingMode,
@@ -464,7 +464,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
                 continue;
             }
             TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu due to touch down");
-            HideMenu(menuPattern, menuWrapperChildNode, position);
+            HideMenu(menuPattern, menuWrapperChildNode, position, HideMenuType::WRAPPER_TOUCH_DOWN);
         }
         return;
     }
@@ -500,7 +500,7 @@ void MenuWrapperPattern::ChangeTouchItem(const TouchEventInfo& info, TouchType t
 }
 
 void MenuWrapperPattern::HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu,
-    const PointF& position)
+    const PointF& position, const HideMenuType& reason)
 {
     CHECK_NULL_VOID(menuPattern);
     auto host = GetHost();
@@ -520,7 +520,7 @@ void MenuWrapperPattern::HideMenu(const RefPtr<MenuPattern>& menuPattern, const 
         if (HasEmbeddedSubMenu() && embeddedSubMenuCount_ > 0 && !isFindTargetId) {
             UpdateMenuAnimation(host);
         }
-        HideMenu(menu);
+        HideMenu(menu, reason);
     }
 }
 
