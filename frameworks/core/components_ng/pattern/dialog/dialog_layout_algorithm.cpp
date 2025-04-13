@@ -48,14 +48,14 @@ constexpr int32_t EXTRA_MASK_NODE_INDEX = 1;
 void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
     auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(dialogProp);
-    auto hostNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(hostNode);
     auto dialogPattern = hostNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
     auto parent = hostNode->GetParent();
