@@ -861,7 +861,6 @@ HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level1)
     model.InitFontDefault(
         TextStyle(FONT_FAMILY_VALUE, fontSize, FONT_WEIGHT_VALUE, ITALIC_FONT_STYLE_VALUE, TEXT_COLOR_VALUE));
     EXPECT_EQ(layoutProperty->GetFontSize(), Dimension(fontSize));
-    EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
     EXPECT_EQ(layoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(layoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(layoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
@@ -872,7 +871,6 @@ HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level1)
      */
     model.InitFontDefault(TextStyle());
     EXPECT_EQ(layoutProperty->GetFontSize(), Dimension(fontSize));
-    EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
     EXPECT_EQ(layoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(layoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(layoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
@@ -915,7 +913,6 @@ HWTEST_F(TextClockTestNG, TextClockTest014, TestSize.Level1)
     TextClockModelNG::InitFontDefault(node, textStyle);
     EXPECT_EQ(layoutProperty->GetFontSizeValue(), FONT_SIZE_VALUE);
     EXPECT_EQ(layoutProperty->GetFontWeightValue(), FONT_WEIGHT_VALUE);
-    EXPECT_EQ(layoutProperty->GetTextColorValue(), TEXT_COLOR_VALUE);
     EXPECT_EQ(layoutProperty->GetFontFamilyValue(), FONT_FAMILY_VALUE);
     EXPECT_EQ(layoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
 
@@ -1261,6 +1258,7 @@ HWTEST_F(TextClockTestNG, TextClockTest016, TestSize.Level1)
     const double fontSize = 20.1;
     model.InitFontDefault(
         TextStyle(FONT_FAMILY_VALUE, fontSize, FONT_WEIGHT_VALUE, ITALIC_FONT_STYLE_VALUE, TEXT_COLOR_VALUE));
+    model.SetTextColor(TEXT_COLOR_VALUE);
 
     EXPECT_EQ(textProperty->GetPropertyChangeFlag(), PROPERTY_CHANGE_FLAG_2);
     EXPECT_FALSE(pattern->OnThemeScopeUpdate(host->GetThemeScopeId()));
