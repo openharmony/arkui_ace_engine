@@ -18,7 +18,6 @@ ohos_unittest("html_convert_test") {
   include_dirs = [ "$ace_root/adapter/ohos/capability/html" ]
   sources = [
     "$ace_root/adapter/ohos/capability/html/html_to_span.cpp",
-    "$ace_root/adapter/ohos/capability/html/span_to_html.cpp",
     "convert_test_tools.cpp",
     "html_to_spanstring_test.cpp",
     "spanstring_to_html_test.cpp",
