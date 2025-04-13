@@ -126,9 +126,9 @@ private:
     ToolbarInfo navBarInfo_;
     ToolbarInfo navBarDividerInfo_;
     ToolbarInfo navDestInfo_;
-    std::function<void()> sideBarColorChangeCallbackFunc_;
-    std::function<void()> onChangeCallbackFunc_;
-    std::function<void()> modifyDoneCallbackFunc_;
+    std::list<std::function<void()>> sideBarColorChangeCallbackFunc_;
+    std::list<std::function<void()>> onChangeCallbackFuncs_;
+    std::list<std::function<void()>> modifyDoneCallbackFuncs_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_TOOLBAR_TOOLBAR_MANAGER_H

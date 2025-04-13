@@ -81,6 +81,7 @@ build_component_ng("pattern_ng") {
     "common_view/common_view_model_ng.cpp",
     "container_modal/container_modal_accessibility_property.cpp",
     "container_modal/container_modal_pattern.cpp",
+    "container_modal/container_modal_toolbar.cpp",
     "container_modal/container_modal_utils.cpp",
     "container_modal/container_modal_view.cpp",
     "container_modal/enhance/container_modal_pattern_enhance.cpp",

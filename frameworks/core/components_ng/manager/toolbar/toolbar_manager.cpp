@@ -47,44 +47,52 @@ void ToolbarManager::SetNavDestInfo(const ToolbarInfo& info)
 
 void ToolbarManager::SetToolBarChangeCallback(const std::function<void()>&& callback)
 {
-    onChangeCallbackFunc_ = std::move(callback);
+    onChangeCallbackFuncs_.emplace_back(std::move(callback));
 }
 
 void ToolbarManager::OnChange()
 {
-    if (onChangeCallbackFunc_) {
-        onChangeCallbackFunc_();
+    for (auto onChangeCallbackFuncCopy : onChangeCallbackFuncs_) {
+        if (onChangeCallbackFuncCopy) {
+            onChangeCallbackFuncCopy();
+        }
     }
 }
 
 void ToolbarManager::SetModifyDoneCallback(const std::function<void()>&& callback)
 {
-    modifyDoneCallbackFunc_ = std::move(callback);
+    modifyDoneCallbackFuncs_.emplace_back(std::move(callback));
 }
 
 void ToolbarManager::OnNavigationModifyDone()
 {
-    if (modifyDoneCallbackFunc_) {
-        modifyDoneCallbackFunc_();
+    for (auto modifyDoneCallbackFuncCopy : modifyDoneCallbackFuncs_) {
+        if (modifyDoneCallbackFuncCopy) {
+            modifyDoneCallbackFuncCopy();
+        }
     }
 }
 
 void ToolbarManager::OnSideBarModifyDone()
 {
-    if (modifyDoneCallbackFunc_) {
-        modifyDoneCallbackFunc_();
+    for (auto modifyDoneCallbackFuncCopy : modifyDoneCallbackFuncs_) {
+        if (modifyDoneCallbackFuncCopy) {
+            modifyDoneCallbackFuncCopy();
+        }
     }
 }
 
 void ToolbarManager::SetSideBarColorChangeCallback(const std::function<void()>&& callback)
 {
-    sideBarColorChangeCallbackFunc_ = std::move(callback);
+    sideBarColorChangeCallbackFunc_.emplace_back(std::move(callback));
 }
 
 void ToolbarManager::OnChangeSideBarColor()
 {
-    if (sideBarColorChangeCallbackFunc_) {
-        sideBarColorChangeCallbackFunc_();
+    for (auto sideBarColorChangeCallbackFuncCopy : sideBarColorChangeCallbackFunc_) {
+        if (sideBarColorChangeCallbackFuncCopy) {
+            sideBarColorChangeCallbackFuncCopy();
+        }
     }
 }
 } // namespace OHOS::Ace::NG

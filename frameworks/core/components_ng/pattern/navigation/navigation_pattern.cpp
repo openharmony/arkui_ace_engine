@@ -381,8 +381,7 @@ void NavigationPattern::OnModifyDone()
     RestoreJsStackIfNeeded();
     UpdateToobarFocusColor();
     UpdateDividerBackgroundColor();
-    InitToolBarManager();
-    toolbarManager_->OnNavigationModifyDone();
+    NavigationModifyDoneToolBarManager();
 }
 
 void NavigationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
@@ -1748,8 +1747,8 @@ void NavigationPattern::FireNavBarWidthChangeEvent(const RefPtr<LayoutWrapper>& 
             Dimension(realNavBarWidthDimension.GetNativeValue(userSetDimensionUnit), userSetDimensionUnit);
     }
     auto dividerWidth = static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
-    UpdateNavBarToolBarManager(true, realBavBarWidth);
-    UpdateNavDestToolBarManager(frameWidth - realBavBarWidth - dividerWidth);
+    initNavBarWidth_ = realBavBarWidth;
+    SetNavigationWidthToolBarManager(realBavBarWidth, frameWidth - realBavBarWidth - dividerWidth, dividerWidth);
     auto eventHub = host->GetEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireNavBarWidthChangeEvent(usrSetUnitWidth);
@@ -1886,7 +1885,6 @@ void NavigationPattern::HandleDragUpdate(float xOffset)
     bool isNavBarStart = navigationPosition == NavBarPosition::START;
     auto navBarLine = isRightToLeft_ ? preNavBarWidth_ + (isNavBarStart ? -xOffset : xOffset)
                                      : preNavBarWidth_ + (isNavBarStart ? xOffset : -xOffset);
-    float currentNavBarWidth = realNavBarWidth_;
 
     if (maxNavBarWidthPx + dividerWidth + minContentWidthPx > frameWidth) {
         maxNavBarWidthPx = frameWidth - minContentWidthPx - dividerWidth;
@@ -1911,14 +1909,11 @@ void NavigationPattern::HandleDragUpdate(float xOffset)
         } else {
             realNavBarWidth_ = minNavBarWidthPx;
         }
-        UpdateDividerToolBarManager(realDividerWidth_);
     }
     realNavBarWidth_ = std::max(std::min(std::min(realNavBarWidth_, frameWidth), maxNavBarWidthPx), minNavBarWidthPx);
-    UpdateNavDestToolBarManager(frameWidth - realNavBarWidth_ - realDividerWidth_);
-    if (realNavBarWidth_ != currentNavBarWidth) {
-        UpdateNavBarToolBarManager(true, realNavBarWidth_);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    }
+    SetNavigationWidthToolBarManager(
+        realNavBarWidth_, frameWidth - realNavBarWidth_ - realDividerWidth_, realDividerWidth_);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 void NavigationPattern::HandleDragEnd()
@@ -4228,40 +4223,44 @@ void NavigationPattern::ClearPageAndNavigationConfig()
     SetPageViewportConfig(nullptr);
 }
 
-void NavigationPattern::UpdateNavBarToolBarManager(bool isShow, float width)
+void NavigationPattern::UpdateNavigationStatus()
 {
-    InitToolBarManager();
-    auto info = toolbarManager_->GetNavBarInfo();
-    if (width == info.width && isShow == info.isShow) {
-        return;
-    }
-    info.isShow = isShow;
-    info.width = width;
-    toolbarManager_->SetHasNavBar(true);
-    toolbarManager_->SetNavBarInfo(info);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameWidth = geometryNode->GetFrameSize().Width();
+    auto dividerWidth = static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
+    SetNavigationWidthToolBarManager(initNavBarWidth_, frameWidth - initNavBarWidth_ - dividerWidth, dividerWidth);
 }
 
-void NavigationPattern::UpdateNavDestToolBarManager(float width)
+void NavigationPattern::SetNavigationWidthToolBarManager(float navBarWidth, float navDestWidth, float dividerWidth)
 {
-    InitToolBarManager();
-    auto info = toolbarManager_->GetNavDestInfo();
-    if (width == info.width) {
-        return;
+    CHECK_NULL_VOID(toolbarManager_);
+    auto navBarInfo = toolbarManager_->GetNavBarInfo();
+    if (!NearEqual(navBarWidth, navBarInfo.width)) {
+        navBarInfo.isShow = true;
+        navBarInfo.width = navBarWidth;
+        toolbarManager_->SetHasNavBar(true);
+        toolbarManager_->SetNavBarInfo(navBarInfo);
     }
-    info.isShow = true;
-    info.width = width;
-    toolbarManager_->SetHasNavDest(true);
-    toolbarManager_->SetNavDestInfo(info);
+    auto navDestInfo = toolbarManager_->GetNavDestInfo();
+    if (!NearEqual(navDestWidth, navDestInfo.width)) {
+        navDestInfo.isShow = true;
+        navDestInfo.width = navDestWidth;
+        toolbarManager_->SetHasNavDest(true);
+        toolbarManager_->SetNavDestInfo(navDestInfo);
+    }
+    auto dividerInfo = toolbarManager_->GetNavBarDividerInfo();
+    if (!NearEqual(dividerWidth, dividerInfo.width)) {
+        dividerInfo.width = dividerWidth;
+        toolbarManager_->SetNavBarDividerInfo(dividerInfo);
+    }
 }
 
-void NavigationPattern::UpdateDividerToolBarManager(float dividerWidth)
+void NavigationPattern::NavigationModifyDoneToolBarManager()
 {
-    InitToolBarManager();
-    auto info = toolbarManager_->GetNavBarDividerInfo();
-    if (dividerWidth == info.width) {
-        return;
-    }
-    info.width = dividerWidth;
-    toolbarManager_->SetNavBarDividerInfo(info);
+    CHECK_NULL_VOID(toolbarManager_);
+    toolbarManager_->OnNavigationModifyDone();
 }
 } // namespace OHOS::Ace::NG
