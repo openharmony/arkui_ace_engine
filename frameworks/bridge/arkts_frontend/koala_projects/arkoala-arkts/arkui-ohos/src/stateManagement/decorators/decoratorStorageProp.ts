@@ -25,7 +25,7 @@ export class StoragePropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     private asProp : PropDecoratedVariable<Object> | undefined;
     constructor(propName: string, varName:string, localVal: T, watchFunc?: WatchFuncType) {
         super("StorageProp", varName, undefined as T, undefined);
-        this.asProp = AppStorage.setAndProp(propName, localVal as Object);
+        this.asProp = AppStorage.createProp<T>(propName, localVal);
         const value : T = this.asProp!.get() as T;
         this.registerWatchForObservedObjectChanges(value);
         this.asProp!.addWatch(watchFunc);

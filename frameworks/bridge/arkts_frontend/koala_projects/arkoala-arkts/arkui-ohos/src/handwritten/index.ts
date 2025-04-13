@@ -7,7 +7,6 @@ export * from "./ForeignFunctions"
 // TODO: implement this
 export interface SubscribaleAbstract {}
 export interface CommonTransition {}
-export interface AbstractProperty {}
 export interface CustomComponent {}
 export interface IPropertySubscriber {}
 export interface ISinglePropertyChangeSubscriber {}
