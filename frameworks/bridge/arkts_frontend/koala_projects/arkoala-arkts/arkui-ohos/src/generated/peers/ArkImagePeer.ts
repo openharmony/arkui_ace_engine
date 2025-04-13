@@ -37,7 +37,8 @@ import { EllipseShape } from "./../ArkEllipseShapeMaterialized"
 import { PathShape } from "./../ArkPathShapeMaterialized"
 import { RectShape } from "./../ArkRectShapeMaterialized"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface } from "./../../component/gesture"
-import { PixelMap } from "./../ArkPixelMapMaterialized"
+import { PixelMap } from "#external"
+import { ArkUIAniModule } from "arkui.ani"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./../../component/imageCommon"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
@@ -59,9 +60,10 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let src_type : int32 = RuntimeType.UNDEFINED
         src_type = runtimeType(src)
         if (TypeChecker.isPixelMap(src, false, false)) {
-            thisSerializer.writeInt8(0 as int32)
             const src_0  = src as PixelMap
-            thisSerializer.writePixelMap(src_0)
+            ArkUIAniModule._Image_Transfer_PixelMap(this.peer.ptr, src_0)
+            thisSerializer.release()
+            return
         }
         else if ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) {
             thisSerializer.writeInt8(1 as int32)
@@ -92,9 +94,10 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let src_type : int32 = RuntimeType.UNDEFINED
         src_type = runtimeType(src)
         if (TypeChecker.isPixelMap(src, false, false)) {
-            thisSerializer.writeInt8(0 as int32)
             const src_0  = src as PixelMap
-            thisSerializer.writePixelMap(src_0)
+            ArkUIAniModule._Image_Transfer_PixelMap(this.peer.ptr, src_0)
+            thisSerializer.release()
+            return
         }
         else if ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) {
             thisSerializer.writeInt8(1 as int32)
@@ -130,9 +133,10 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let src_type : int32 = RuntimeType.UNDEFINED
         src_type = runtimeType(src)
         if (TypeChecker.isPixelMap(src, false, false)) {
-            thisSerializer.writeInt8(0 as int32)
             const src_0  = src as PixelMap
-            thisSerializer.writePixelMap(src_0)
+            ArkUIAniModule._Image_Transfer_PixelMap(this.peer.ptr, src_0)
+            thisSerializer.release()
+            return
         }
         else if ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) {
             thisSerializer.writeInt8(1 as int32)
@@ -174,9 +178,10 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
             thisSerializer.writeResource(value_1)
         }
         else if (TypeChecker.isPixelMap(value, false, false)) {
-            thisSerializer.writeInt8(2 as int32)
             const value_2  = value as PixelMap
-            thisSerializer.writePixelMap(value_2)
+            ArkUIAniModule._Image_Transfer_PixelMap(this.peer.ptr, value_2)
+            thisSerializer.release()
+            return
         }
         ArkUIGeneratedNativeModule._ImageAttribute_alt(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()

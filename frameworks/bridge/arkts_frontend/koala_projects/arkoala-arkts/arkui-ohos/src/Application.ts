@@ -391,4 +391,3 @@ function makeClickEvent(x: number, y: number): ClickEvent {
     result.y = y
     return result
 }
-

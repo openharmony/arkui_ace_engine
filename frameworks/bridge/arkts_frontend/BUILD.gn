@@ -26,14 +26,14 @@ template("arkts_frontend") {
       ":ArkoalaNative_ark",
       "arkoala:arkoala_prebuild",
     ]
-  
+
     if (build_ohos_sdk) {
       deps -= [
         ":ArkoalaNative_ark",
         "arkoala:arkoala_prebuild",
       ]
     }
-  
+
     sources = [
       "arkts_ani_utils.cpp",
       "arkts_frontend.cpp",
@@ -62,7 +62,7 @@ foreach(item, ace_platforms) {
   }
 }
 
-ohos_shared_library("ArkoalaNative_ark") {
+config("arkoala_native_config") {
   include_dirs = [
     "koala_projects/arkoala/framework/native/src",
     "koala_projects/arkoala/framework/native/src/generated",
@@ -72,7 +72,9 @@ ohos_shared_library("ArkoalaNative_ark") {
     "koala_projects/interop/src/cpp/types",
     "koala_projects/interop/src/cpp/ohos",
   ]
+}
 
+ohos_shared_library("ArkoalaNative_ark") {
   defines = [
     "KOALA_OHOS",
     "__MUSL__",
@@ -99,7 +101,16 @@ ohos_shared_library("ArkoalaNative_ark") {
     "koala_projects/interop/src/cpp/types/signatures.cc",
   ]
 
-  external_deps = [ "hilog:hilog_ndk" ]
+  deps = [
+    "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:arkoala_native_ani",
+  ]
+
+  configs = [ ":arkoala_native_config" ]
+
+  external_deps = [
+    "hilog:hilog_ndk",
+    "hilog:libhilog",
+  ]
 
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
