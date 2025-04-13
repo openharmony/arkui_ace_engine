@@ -61,6 +61,7 @@ private:
     void Distribute(float& scrollHeight, float& listHeight, float restHeight);
     void AnalysisHeightOfChild(LayoutWrapper* layoutWrapper);
     void AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& scroll);
+    void AvoidScreen(OffsetF& topLeftPoint, const RefPtr<DialogLayoutProperty>& prop, SizeF childSize);
 
     bool ComputeInnerLayoutSizeParam(LayoutConstraintF& innerLayout, const RefPtr<DialogLayoutProperty>& dialogProp);
     bool IsGetExpandDisplayValidHeight();
