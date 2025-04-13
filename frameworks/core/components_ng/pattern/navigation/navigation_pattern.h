@@ -515,6 +515,11 @@ public:
         }
     }
 
+    RefPtr<ToolbarManager> GetToolBarManager()
+    {
+        return toolbarManager_;
+    }
+
 private:
     void FireOnNewParam(const RefPtr<UINode>& uiNode);
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
@@ -551,6 +556,9 @@ private:
     bool GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& node);
     int32_t GenerateUINodeFromRecovery(int32_t lastStandardIndex, NavPathList& navPathList);
     void DoNavbarHideAnimation(const RefPtr<NavigationGroupNode>& hostNode);
+    RefPtr<FrameNode> GetNavigationNode() const;
+    RefPtr<FrameNode> GetNavBarNode() const;
+    RefPtr<FrameNode> GetContentNode() const;
     RefPtr<FrameNode> GetDividerNode() const;
     void FireInterceptionEvent(bool isBefore,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);

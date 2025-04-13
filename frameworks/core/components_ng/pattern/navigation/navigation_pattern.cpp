@@ -2003,6 +2003,37 @@ void NavigationPattern::OnHover(bool isHover)
     SetMouseStyle(format);
 }
 
+RefPtr<FrameNode> NavigationPattern::GetNavigationNode() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto navigationNode = AceType::DynamicCast<FrameNode>(host);
+    CHECK_NULL_RETURN(navigationNode, nullptr);
+    return host;
+}
+
+RefPtr<FrameNode> NavigationPattern::GetNavBarNode() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(host);
+    CHECK_NULL_RETURN(navigationNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(navigationNode->GetNavBarNode());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode;
+}
+
+RefPtr<FrameNode> NavigationPattern::GetContentNode() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(host);
+    CHECK_NULL_RETURN(navigationNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(navigationNode->GetContentNode());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode;
+}
+
 RefPtr<FrameNode> NavigationPattern::GetDividerNode() const
 {
     auto host = GetHost();
@@ -4237,12 +4268,14 @@ void NavigationPattern::UpdateNavigationStatus()
 void NavigationPattern::SetNavigationWidthToolBarManager(float navBarWidth, float navDestWidth, float dividerWidth)
 {
     CHECK_NULL_VOID(toolbarManager_);
+    toolbarManager_->SetNavigationNode(GetNavigationNode());
     auto navBarInfo = toolbarManager_->GetNavBarInfo();
     if (!NearEqual(navBarWidth, navBarInfo.width)) {
         navBarInfo.isShow = true;
         navBarInfo.width = navBarWidth;
         toolbarManager_->SetHasNavBar(true);
         toolbarManager_->SetNavBarInfo(navBarInfo);
+        toolbarManager_->SetNavBarNode(GetNavBarNode());
     }
     auto navDestInfo = toolbarManager_->GetNavDestInfo();
     if (!NearEqual(navDestWidth, navDestInfo.width)) {
@@ -4250,11 +4283,13 @@ void NavigationPattern::SetNavigationWidthToolBarManager(float navBarWidth, floa
         navDestInfo.width = navDestWidth;
         toolbarManager_->SetHasNavDest(true);
         toolbarManager_->SetNavDestInfo(navDestInfo);
+        toolbarManager_->SetNavDestNode(GetContentNode());
     }
     auto dividerInfo = toolbarManager_->GetNavBarDividerInfo();
     if (!NearEqual(dividerWidth, dividerInfo.width)) {
         dividerInfo.width = dividerWidth;
         toolbarManager_->SetNavBarDividerInfo(dividerInfo);
+        toolbarManager_->SetNavBarDividerNode(GetDividerNode());
     }
 }
 

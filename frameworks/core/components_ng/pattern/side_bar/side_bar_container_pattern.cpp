@@ -1471,17 +1471,21 @@ bool SideBarContainerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 void SideBarContainerPattern::SetSideBarWidthToolBarManager(bool isShow, float sideBarWidth, float dividerWidth)
 {
     CHECK_NULL_VOID(toolbarManager_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto sideBarInfo = toolbarManager_->GetSideBarInfo();
     if (!NearEqual(sideBarInfo.isShow, sideBarWidth) || !NearEqual(sideBarInfo.width, sideBarWidth)) {
         sideBarInfo.isShow = isShow;
         sideBarInfo.width = sideBarWidth;
         toolbarManager_->SetHasSideBar(true);
         toolbarManager_->SetSideBarInfo(sideBarInfo);
+        toolbarManager_->SetSiderBarNode(GetSideBarNode(host));
     }
     auto dividerInfo = toolbarManager_->GetSideBarDividerInfo();
     if (!NearEqual(dividerInfo.width, dividerWidth)) {
         dividerInfo.width = dividerWidth;
         toolbarManager_->SetSideBarDividerInfo(dividerInfo);
+        toolbarManager_->SetSiderBarDividerNode(GetDividerNode());
     }
 }
 

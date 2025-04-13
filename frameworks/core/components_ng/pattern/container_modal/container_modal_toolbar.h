@@ -42,6 +42,7 @@ public:
     ~ContainerModalToolBar() = default;
 
     void InitToolBarManager();
+    void SetOnChangeCallback();
     void SetToolbarBuilder(const RefPtr<FrameNode>& parent, std::function<RefPtr<UINode>()>& builder);
     void OnToolBarLayoutChange();
 
@@ -51,6 +52,18 @@ public:
 protected:
     void UpdateTitleAfterRemove();
     void RemoveToolbarItem(const RefPtr<FrameNode>& frameNode);
+
+public:
+    void HasExpandStackLayout();
+    void ExpandStackLayout();
+    void UpdateTargetNodesBarMargin();
+    void SetExpandStackLayout(bool isExpand) {
+        CHECK_NULL_VOID(toolbarManager_);
+        toolbarManager_->SetIsMoveUp(isExpand);
+    }
+    bool GetExpandStackLayout() const {
+        return toolbarManager_->GetIsMoveUp();
+    }
 
 private:
     void ParsePlacementType();
@@ -76,6 +89,11 @@ private:
     void AdjustNavbarRowWidth();
     void AdjustNavDestRowWidth();
     void AdjustContainerModalTitleHeight();
+    void SetcustomTitleRowBlurStyle(BlurStyle& blurStyle);
+    void UpdateSidebarMargin();
+    void UpdateNavbarTitlebarMargin();
+    void UpdateNavDestinationTitlebarMargin();
+
     bool TargetNodes()
     {
         return hasTargetNodes_;
@@ -110,6 +128,8 @@ private:
     RefPtr<FrameNode> navigationNode_;
     RefPtr<FrameNode> navDestNode_;
     bool hasTargetNodes_ = false;
+    bool hasFind_ = false;
+    bool hasSetOnchangeCallback_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_TOOLBAR_H

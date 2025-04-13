@@ -28,6 +28,15 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
 #include "core/components_ng/pattern/toolbaritem/toolbaritem_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
+#include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_layout_algorithm.h"
+#include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -45,13 +54,20 @@ void ContainerModalToolBar::InitToolBarManager()
         auto pipeline = toolbar->GetContext();
         CHECK_NULL_VOID(pipeline);
         toolbarManager_ = pipeline->GetToolbarManager();
+    }
+}
 
+void ContainerModalToolBar::SetOnChangeCallback()
+{
+    CHECK_NULL_VOID(toolbarManager_);
+    if (!hasSetOnchangeCallback_) {
         std::function<void()> func = [weak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnToolBarLayoutChange();
         };
         toolbarManager_->SetToolBarChangeCallback(std::move(func));
+        hasSetOnchangeCallback_ = true;
     }
 }
 
@@ -81,7 +97,7 @@ void ContainerModalToolBar::SetToolbarBuilder(const RefPtr<FrameNode>& parent, s
     };
     parent->SetDetachRelatedNodeCallback(std::move(callback));
     InitToolBarManager();
-
+    SetOnChangeCallback();
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto pipeline = pattern->GetContext();
@@ -628,6 +644,149 @@ void ContainerModalToolBar::AdjustContainerModalTitleHeight()
     if (isFloating_) {
         auto floatingTitleRow = pattern->GetFloatingTitleRow();
         pattern->UpdateRowHeight(floatingTitleRow, titleHeight_);
+    }
+}
+
+void ContainerModalToolBar::SetcustomTitleRowBlurStyle(BlurStyle& blurStyle)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto customTitleRow = pattern->GetCustomTitleRow();
+    CHECK_NULL_VOID(customTitleRow);
+    auto renderContext = customTitleRow->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = blurStyle;
+    renderContext->UpdateBackBlurStyle(styleOption);
+}
+
+void ContainerModalToolBar::HasExpandStackLayout()
+{
+    if (!hasTargetNodes_) {
+        if (!hasFind_) {
+            hasFind_ = true;
+            auto pattern = pattern_.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto pipeline = pattern->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
+                auto toolbar = weak.Upgrade();
+                CHECK_NULL_VOID(toolbar);
+                if (!(toolbar->TargetNodes())) {
+                    if (toolbar->GetTargetNodes()) {
+                        toolbar->setTargetNodes(true);
+                        toolbar->ToInitTargetNode();
+                    } else {
+                        return;
+                    }
+                }
+                toolbar->InitToolBarManager();
+                toolbar->ExpandStackLayout();
+                toolbar->SetExpandStackLayout(true);
+                toolbar->UpdateTargetNodesBarMargin();
+            });
+        } else {
+            return;
+        }
+    }
+}
+
+void ContainerModalToolBar::ExpandStackLayout()
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto stackNode = pattern->GetStackNode();
+    CHECK_NULL_VOID(stackNode);
+    auto renderContext = stackNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdatePosition(OffsetT(Dimension(0.0f), Dimension(0.0f)));
+    // 设置Z轴层级为-1，确保该布局显示在默认层级之下
+    renderContext->UpdateZIndex(-1);
+}
+
+void ContainerModalToolBar::UpdateSidebarMargin()
+{
+    CHECK_NULL_VOID(toolbarManager_);
+    if (toolbarManager_->GetIsMoveUp()) {
+        auto sideBarNode = toolbarManager_->GetSiderBar().Upgrade();
+        CHECK_NULL_VOID(sideBarNode);
+        auto sideBarProperty = sideBarNode->GetLayoutProperty();
+        CHECK_NULL_VOID(sideBarProperty);
+        PaddingProperty paddingProperty;
+        paddingProperty.left = CalcLength(0.0_vp);
+        paddingProperty.right = CalcLength(0.0_vp);
+        paddingProperty.top = CalcLength(titleHeight_);
+        paddingProperty.bottom = CalcLength(0.0_vp);
+        sideBarProperty->UpdatePadding(paddingProperty);
+    
+        auto sideBarContainerModelNode = toolbarManager_->GetSideBarContainerModel().Upgrade();
+        CHECK_NULL_VOID(sideBarContainerModelNode);
+        auto sideBarContainerPattern = sideBarContainerModelNode->GetPattern<SideBarContainerPattern>();
+        auto layoutAlgorithm = sideBarContainerPattern->CreateLayoutAlgorithm();
+        RefPtr<LayoutWrapper> layoutWrapper = sideBarContainerModelNode->CreateLayoutWrapper();
+        CHECK_NULL_VOID(layoutWrapper);
+        layoutAlgorithm->Layout(RawPtr(layoutWrapper));
+        sideBarContainerModelNode->MarkDirtyNode(NG::PROPERTY_UPDATE_LAYOUT);
+    }
+}
+
+void ContainerModalToolBar::UpdateNavbarTitlebarMargin()
+{
+    CHECK_NULL_VOID(toolbarManager_);
+    if (toolbarManager_->GetIsMoveUp()) {
+        auto navBar = toolbarManager_->GetNavBar().Upgrade();
+        CHECK_NULL_VOID(navBar);
+        auto navBarTitlebarLayoutProperty = navBar->GetChildByIndex(0)->GetLayoutProperty();
+        CHECK_NULL_VOID(navBarTitlebarLayoutProperty);
+        PaddingProperty paddingProperty;
+        paddingProperty.left = CalcLength(0.0_vp);
+        paddingProperty.right = CalcLength(0.0_vp);
+        paddingProperty.top = CalcLength(titleHeight_);
+        paddingProperty.bottom = CalcLength(0.0_vp);
+        navBarTitlebarLayoutProperty->UpdateMargin(paddingProperty);
+        navBar->MarkDirtyNode(NG::PROPERTY_UPDATE_LAYOUT);
+    }
+}
+
+void ContainerModalToolBar::UpdateNavDestinationTitlebarMargin()
+{
+    CHECK_NULL_VOID(toolbarManager_);
+    if (toolbarManager_->GetIsMoveUp()) {
+        auto navDestination = toolbarManager_->GetNavDest().Upgrade();
+        CHECK_NULL_VOID(navDestination);
+        if (navDestination->GetChildren().size() != 0) {
+            auto navDesinationNode = AceType::DynamicCast<FrameNode>(navDestination->GetChildren().front());
+            CHECK_NULL_VOID(navDesinationNode);
+
+            auto navDestinationPattern = navDesinationNode->GetPattern<NavDestinationPattern>();
+            CHECK_NULL_VOID(navDestinationPattern);
+            auto NavDestlayoutAlgorithm =
+                AceType::DynamicCast<NavDestinationLayoutAlgorithm>(navDestinationPattern->CreateLayoutAlgorithm());
+            CHECK_NULL_VOID(NavDestlayoutAlgorithm);
+            auto navDesinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(navDesinationNode);
+            CHECK_NULL_VOID(navDesinationGroupNode);
+            RefPtr<LayoutWrapper> layoutWrapper = navDesinationGroupNode->CreateLayoutWrapper();
+            CHECK_NULL_VOID(layoutWrapper);
+            NavDestlayoutAlgorithm->Layout(RawPtr(layoutWrapper));
+            navDesinationNode->MarkDirtyNode(NG::PROPERTY_UPDATE_LAYOUT);
+        }
+    }
+}
+
+void ContainerModalToolBar::UpdateTargetNodesBarMargin()
+{
+    CHECK_NULL_VOID(toolbarManager_);
+    toolbarManager_->SetTitleHeight(titleHeight_);
+    if (toolbarManager_->HasSideBar()) {
+        BlurStyle blurStyle = BlurStyle::THIN;
+        SetcustomTitleRowBlurStyle(blurStyle);
+        UpdateSidebarMargin();
+    }
+    if (toolbarManager_->HasNavBar()) {
+        UpdateNavbarTitlebarMargin();
+    }
+    if (toolbarManager_->HasNavDest()) {
+        UpdateNavDestinationTitlebarMargin();
     }
 }
 
