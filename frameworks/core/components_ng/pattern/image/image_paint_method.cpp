@@ -50,7 +50,9 @@ void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper, ImageDfxCo
     auto renderCtx = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderCtx);
     auto borderRadius = renderCtx->GetBorderRadius();
-
+    if (!borderRadius.has_value()) {
+        return;
+    }
     BorderRadiusArray radiusXY = BorderRadiusArray();
 
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
