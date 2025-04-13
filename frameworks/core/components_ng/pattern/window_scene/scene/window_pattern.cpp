@@ -504,6 +504,7 @@ void WindowPattern::UpdateSnapshotWindowProperty()
     CHECK_NULL_VOID(snapshotWindow_ && session_);
     auto isExitSplitOnBackground = session_->IsExitSplitOnBackground();
     if (isExitSplitOnBackground) {
+        Rosen::SceneSessionManager::GetInstance().SetDelayRemoveSnapshot(false);
         auto imagePattern = snapshotWindow_->GetPattern<ImagePattern>();
         auto renderContext = snapshotWindow_->GetRenderContext();
         auto imageRenderProperty = snapshotWindow_->GetPaintProperty<ImageRenderProperty>();
