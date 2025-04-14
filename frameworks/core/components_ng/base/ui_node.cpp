@@ -1447,14 +1447,14 @@ void UINode::UpdateChildrenVisible(VisibleType preVisibility, VisibleType curren
 
 void UINode::OnRecycle()
 {
-    for (const auto& child : GetChildren(true)) {
+    for (const auto& child : GetChildren()) {
         child->OnRecycle();
     }
 }
 
 void UINode::OnReuse()
 {
-    for (const auto& child : GetChildren(true)) {
+    for (const auto& child : GetChildren()) {
         child->OnReuse();
     }
 }
