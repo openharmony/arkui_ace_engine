@@ -90,9 +90,10 @@ void RichEditorUndoManager::RecordSelectionBefore()
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
+    auto caretPosition = pattern->caretPosition_;
     auto& textSelector = pattern->textSelector_;
-    CHECK_NULL_VOID(!textSelector.SelectNothing());
-    selectionBefore_ = TextRange{ textSelector.GetStart(), textSelector.GetEnd() };
+    selectionBefore_ = textSelector.SelectNothing() ? TextRange{ caretPosition, caretPosition }
+        : TextRange{ textSelector.GetStart(), textSelector.GetEnd() };
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "RecordSelectionBefore:%{public}s", selectionBefore_.ToString().c_str());
 }
 

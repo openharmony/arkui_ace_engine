@@ -4668,11 +4668,14 @@ void RichEditorPattern::HandleOnDragInsertStyledString(const RefPtr<SpanString>&
         styledString_->InsertSpanString(currentCaretPosition, spanString);
         AfterStyledStringChange(record);
         if (isInsertForward) {
+            // Record current state before updating caret position by insertion
+            undoManager_->RecordSelectionBefore();
             SetCaretPosition(currentCaretPosition + strLength);
             dragRange_.first += strLength;
             dragRange_.second += strLength;
         }
         DeleteValueInStyledString(dragRange_.first, strLength, true, false);
+        undoManager_->ClearSelectionBefore();
     } else {
         CHECK_NULL_VOID(BeforeStyledStringChange(record));
         undoManager_->RecordOperation(record);
