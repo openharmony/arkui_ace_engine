@@ -9758,9 +9758,9 @@ bool TextFieldPattern::IsContentRectNonPositive()
 void TextFieldPattern::ReportEvent()
 {
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (UiSessionManager::GetInstance()->GetSearchEventRegistered()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         auto data = JsonUtil::Create();
         data->Put("event", "onTextSearch");
         data->Put("id", host->GetId());
@@ -9770,6 +9770,15 @@ void TextFieldPattern::ReportEvent()
         data->Put("position", host->GetGeometryNode()->GetFrameRect().ToString().data());
         // report all use textfield component unfocus event,more than just the search box
         UiSessionManager::GetInstance()->ReportSearchEvent(data->ToString());
+    }
+    if (!IsInPasswordMode()) {
+        auto value = InspectorJsonUtil::Create();
+        CHECK_NULL_VOID(value);
+        auto textString = GetTextValue();
+        value->Put("text", textString.c_str());
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(), "event", value);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] TextField reportComponentChangeEvent %{public}s",
+            host->GetId(), textString.c_str());
     }
 #endif
 }

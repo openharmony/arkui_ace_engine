@@ -1719,6 +1719,7 @@ private:
     bool UnableStandardInputCrossPlatform(TextInputConfiguration& config, bool isFocusViewChanged);
 #endif
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
+    void ReportComponentChangeEvent();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;

@@ -3674,6 +3674,7 @@ void RichEditorPattern::HandleBlurEvent()
         lastSelectionRange_.reset();
     }
     HandleOnEditChanged(false);
+    ReportComponentChangeEvent();
 }
 
 void RichEditorPattern::HandleFocusEvent(FocusReason focusReason)
@@ -12927,4 +12928,16 @@ void RichEditorPattern::OnAccessibilityEventTextChange(const std::string& change
     pipeline->SendEventToAccessibilityWithNode(event, GetHost());
 }
 
+void RichEditorPattern::ReportComponentChangeEvent() {
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    CHECK_NULL_VOID(styledString_);
+    auto textString = styledString_->ToString();
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_VOID(value);
+    value->Put("text", textString.c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameId_, "event", value);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}s", frameId_,
+        textString.c_str());
+#endif
+}
 } // namespace OHOS::Ace::NG
