@@ -283,7 +283,8 @@ HWTEST_F(TextClockTestNG, TextClockTest003, TestSize.Level1)
      * @tc.steps: step2. get textClock frameNode and event.
      * @tc.expected: function is called.
      */
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    auto frameNode = stack->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<TextClockEventHub> eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -294,6 +295,7 @@ HWTEST_F(TextClockTestNG, TextClockTest003, TestSize.Level1)
      */
     eventHub->FireChangeEvent(UTC_2);
     EXPECT_EQ(utc, UTC_2);
+    stack->Pop();
 }
 
 /**
@@ -792,7 +794,8 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
      * @tc.steps: step2. get textClock frameNode and event.
      * @tc.expected: function is called.
      */
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    auto frameNode = stack->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<TextClockEventHub> eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -835,6 +838,7 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
     pattern->OnVisibleChange(true);
     pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_2);
+    stack->Pop();
     MockPipelineContext::TearDown();
 }
 
@@ -850,7 +854,8 @@ HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level1)
      */
     TextClockModelNG model;
     model.Create();
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    auto frameNode = stack->GetMainFrameNode();
     auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
 
     /**
@@ -874,6 +879,7 @@ HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(layoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(layoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
+    stack->Pop();
 }
 
 /**
