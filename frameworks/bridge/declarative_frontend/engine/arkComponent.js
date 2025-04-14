@@ -1729,8 +1729,10 @@ class ClickModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._clickEvent = null;
       getUINativeModule().common.resetOnClick(node);
     } else {
+      this._clickEvent = this.value;
       getUINativeModule().common.setOnClick(node, this.value);
     }
   }
@@ -1820,8 +1822,10 @@ class OnTouchModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._touchEvent = null;
       getUINativeModule().common.resetOnTouch(node);
     } else {
+      this._touchEvent = this.value;
       getUINativeModule().common.setOnTouch(node, this.value);
     }
   }
@@ -1833,8 +1837,10 @@ class OnAppearModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._onAppearEvent = null;
       getUINativeModule().common.resetOnAppear(node);
     } else {
+      this._onAppearEvent = this.value;
       getUINativeModule().common.setOnAppear(node, this.value);
     }
   }
@@ -1846,8 +1852,10 @@ class OnDisappearModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._onDisappearEvent = null;
       getUINativeModule().common.resetOnDisappear(node);
     } else {
+      this._onDisappearEvent = this.value;
       getUINativeModule().common.setOnDisappear(node, this.value);
     }
   }
@@ -1859,8 +1867,10 @@ class OnAttachModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._onAttach = null;
       getUINativeModule().common.resetOnAttach(node);
     } else {
+      this._onAttach = this.value;
       getUINativeModule().common.setOnAttach(node, this.value);
     }
   }
@@ -1872,8 +1882,10 @@ class OnDetachModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._onDetach = null;
       getUINativeModule().common.resetOnDetach(node);
     } else {
+      this._onDetach = this.value;
       getUINativeModule().common.setOnDetach(node, this.value);
     }
   }
@@ -1885,8 +1897,10 @@ class OnKeyEventModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._onKeyEvent = null;
       getUINativeModule().common.resetOnKeyEvent(node);
     } else {
+      this._onKeyEvent = this.value;
       getUINativeModule().common.setOnKeyEvent(node, this.value);
     }
   }
@@ -1898,8 +1912,10 @@ class OnKeyPreImeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._onKeyPreIme = null;
       getUINativeModule().common.resetOnKeyPreIme(node);
     } else {
+      this._onKeyPreIme = this.value;
       getUINativeModule().common.setOnKeyPreIme(node, this.value);
     }
   }
@@ -1911,8 +1927,10 @@ class OnFocusAxisEventModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._onFocusAxisEvent = null;
       getUINativeModule().common.resetOnFocusAxisEvent(node);
     } else {
+      this._onFocusAxisEvent = this.value;
       getUINativeModule().common.setOnFocusAxisEvent(node, this.value);
     }
   }
@@ -1924,8 +1942,10 @@ class OnFocusModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._onFocus = null;
       getUINativeModule().common.resetOnFocus(node);
     } else {
+      this._onFocus = this.value;
       getUINativeModule().common.setOnFocus(node, this.value);
     }
   }
@@ -1937,8 +1957,10 @@ class OnBlurModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._onBlur = null;
       getUINativeModule().common.resetOnBlur(node);
     } else {
+      this._onBlur = this.value;
       getUINativeModule().common.setOnBlur(node, this.value);
     }
   }
@@ -1951,8 +1973,10 @@ class OnHoverModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._onHover = null;
       getUINativeModule().common.resetOnHover(node);
     } else {
+      this._onHover = this.value;
       getUINativeModule().common.setOnHover(node, this.value);
     }
   }
@@ -1965,8 +1989,10 @@ class OnHoverMoveModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._onHoverMove = null;
       getUINativeModule().common.resetOnHoverMove(node);
     } else {
+      this._onHoverMove = this.value;
       getUINativeModule().common.setOnHoverMove(node, this.value);
     }
   }
@@ -1978,8 +2004,10 @@ class OnMouseModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._onMouse = null;
       getUINativeModule().common.resetOnMouse(node);
     } else {
+      this._onMouse = this.value;
       getUINativeModule().common.setOnMouse(node, this.value);
     }
   }
@@ -1991,8 +2019,10 @@ class OnAxisEventModifier extends ModifierWithKey {
     }
     applyPeer(node, reset) {
       if (reset) {
+        this._onAxis = null;
         getUINativeModule().common.resetOnAxisEvent(node);
       } else {
+        this._onAxis = this.value;
         getUINativeModule().common.setOnAxisEvent(node, this.value);
       }
     }
@@ -2004,8 +2034,10 @@ class OnSizeChangeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._onSizeChange = null;
       getUINativeModule().common.resetOnSizeChange(node);
     } else {
+      this._onSizeChange = this.value;
       getUINativeModule().common.setOnSizeChange(node, this.value);
     }
   }
@@ -2017,8 +2049,10 @@ class OnAreaChangeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._onAreaChange = null;
       getUINativeModule().common.resetOnAreaChange(node);
     } else {
+      this._onAreaChange = this.value;
       getUINativeModule().common.setOnAreaChange(node, this.value);
     }
   }
@@ -2030,8 +2064,10 @@ class OnGestureJudgeBeginModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._onGestureJudgeBegin = null;
       getUINativeModule().common.resetOnGestureJudgeBegin(node);
     } else {
+      this._onGestureJudgeBegin = this.value;
       getUINativeModule().common.setOnGestureJudgeBegin(node, this.value);
     }
   }
@@ -2043,8 +2079,10 @@ class OnGestureRecognizerJudgeBeginModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._onGestureRecognizerJudgeBegin = null;
       getUINativeModule().common.resetOnGestureRecognizerJudgeBegin(node);
     } else {
+      this._onGestureRecognizerJudgeBegin = this.value;
       getUINativeModule().common.setOnGestureRecognizerJudgeBegin(node, this.value);
     }
   }
@@ -2056,8 +2094,10 @@ class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
+      this._shouldBuiltInRecognizerParallelWith = null;
       getUINativeModule().common.resetShouldBuiltInRecognizerParallelWith(node);
     } else {
+      this._shouldBuiltInRecognizerParallelWith = this.value;
       getUINativeModule().common.setShouldBuiltInRecognizerParallelWith(node, this.value);
     }
   }
