@@ -3060,6 +3060,7 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
             return true;
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_END:
             rosenRenderContext->SetIsDraggingFlag(false);
+            [[fallthrough]];
         case OHOS::Rosen::WindowSizeChangeReason::DRAG:
             animateRes = rosenRenderContext->SetCanvasNodeOpacityAnimation(
                 config.GetKeyFrameConfig().animationDuration_,
