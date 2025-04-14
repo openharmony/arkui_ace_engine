@@ -326,9 +326,13 @@ void CounterModelNG::SetWidth(FrameNode* frameNode, const Dimension& value)
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(value), std::nullopt));
 }
 
-void CounterModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& value)
+void CounterModelNG::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, value, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
+    }
 }
 
 void CounterModelNG::ResetBackgroundColor(FrameNode* frameNode)
