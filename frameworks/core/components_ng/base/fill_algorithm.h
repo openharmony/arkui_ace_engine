@@ -57,7 +57,15 @@ public:
         return false;
     }
 
+    /**
+     * @brief synchronize offset to FillAlgorithm
+     */
     virtual void OnSlidingOffsetUpdate(float delta) = 0;
+
+    virtual int32_t ConvertLargeDelta(float delta)
+    {
+        return 0;
+    }
 
     /**
      * @param idx index of the item just filled. Can pass in -1 if nothing was filled.

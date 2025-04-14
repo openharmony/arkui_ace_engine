@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
+#include "core/components_ng/pattern/grid/irregular/grid_large_delta_converter.h"
 
 namespace OHOS::Ace::NG {
 class GridIrregularLayoutTest : public GridTestNg {};
@@ -1090,12 +1091,13 @@ HWTEST_F(GridIrregularLayoutTest, SkipLines001, TestSize.Level1)
     info.gridMatrix_ = MATRIX_DEMO_1;
     info.childrenCount_ = 11;
 
+    auto converter = GridLargeDeltaConverter(info, frameNode_.GetRawPtr());
     info.currentOffset_ = -500.0f;
-    EXPECT_EQ(algorithm->SkipLinesForward(), 5);
+    EXPECT_EQ(converter.SkipLinesForward(), 5);
     info.currentOffset_ = -900.0f;
-    EXPECT_EQ(algorithm->SkipLinesForward(), 9);
+    EXPECT_EQ(converter.SkipLinesForward(), 9);
     info.currentOffset_ = -1500.0f;
-    EXPECT_EQ(algorithm->SkipLinesForward(), 10);
+    EXPECT_EQ(converter.SkipLinesForward(), 10);
 
     info.lineHeightMap_ = { { 3, 200.0f }, { 4, 200.0f } };
     info.startIndex_ = 5;
@@ -1103,13 +1105,13 @@ HWTEST_F(GridIrregularLayoutTest, SkipLines001, TestSize.Level1)
     info.endMainLineIndex_ = 4;
 
     info.currentOffset_ = 400.0f;
-    EXPECT_EQ(algorithm->SkipLinesBackward(), 2);
+    EXPECT_EQ(converter.SkipLinesBackward(), 2);
 
     info.currentOffset_ = 800.0f;
-    EXPECT_EQ(algorithm->SkipLinesBackward(), 1);
+    EXPECT_EQ(converter.SkipLinesBackward(), 1);
 
     info.currentOffset_ = 1500.0f;
-    EXPECT_EQ(algorithm->SkipLinesBackward(), 1);
+    EXPECT_EQ(converter.SkipLinesBackward(), 1);
 }
 
 /**
@@ -1139,13 +1141,14 @@ HWTEST_F(GridIrregularLayoutTest, SkipLines002, TestSize.Level1)
     info.endIndex_ = 9;
 
     info.currentOffset_ = 700.0f;
-    EXPECT_EQ(algorithm->SkipLinesBackward(), 5);
+    auto converter = GridLargeDeltaConverter(info, frameNode_.GetRawPtr());
+    EXPECT_EQ(converter.SkipLinesBackward(), 5);
 
     info.currentOffset_ = 1300.0f;
-    EXPECT_EQ(algorithm->SkipLinesBackward(), 2);
+    EXPECT_EQ(converter.SkipLinesBackward(), 2);
 
     info.currentOffset_ = 1600.0f;
-    EXPECT_EQ(algorithm->SkipLinesBackward(), 1);
+    EXPECT_EQ(converter.SkipLinesBackward(), 1);
 }
 
 /**
