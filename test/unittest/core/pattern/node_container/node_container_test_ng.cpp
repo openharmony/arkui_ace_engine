@@ -676,7 +676,8 @@ HWTEST_F(NodeContainerTestNg, PaintWrapperTest001, TestSize.Level1)
     paintWrapper->FlushContentModifier();
     auto contentModifier =
         AceType::DynamicCast<ContentModifier>(paintMethod->GetContentModifier(AceType::RawPtr(paintWrapper)));
-    EXPECT_NE(contentModifier->extensionHandler_, nullptr);
+    auto handle = contentModifier->extensionHandler_.Upgrade();
+    EXPECT_NE(handle, nullptr);
 }
 
 /**
@@ -710,7 +711,8 @@ HWTEST_F(NodeContainerTestNg, PaintWrapperTest002, TestSize.Level1)
     paintWrapper->FlushRender();
     auto foregroundModifier =
         AceType::DynamicCast<ForegroundModifier>(paintMethod->GetForegroundModifier(AceType::RawPtr(paintWrapper)));
-    EXPECT_NE(foregroundModifier->extensionHandler_, nullptr);
+    auto handle = foregroundModifier->extensionHandler_.Upgrade();
+    EXPECT_NE(handle, nullptr);
 }
 
 /**
@@ -745,7 +747,8 @@ HWTEST_F(NodeContainerTestNg, PaintWrapperTest003, TestSize.Level1)
     paintWrapper->FlushOverlayModifier();
     auto overlayModifier =
         AceType::DynamicCast<OverlayModifier>(imageMethod->GetOverlayModifier(AceType::RawPtr(paintWrapper)));
-    EXPECT_NE(overlayModifier->extensionHandler_, nullptr);
+    auto handle = overlayModifier->extensionHandler_.Upgrade();
+    EXPECT_NE(handle, nullptr);
 }
 
 /**
@@ -776,7 +779,8 @@ HWTEST_F(NodeContainerTestNg, PaintWrapperTest004, TestSize.Level1)
     paintWrapper->FlushRender();
     auto contentModifier =
         AceType::DynamicCast<ContentModifier>(paintMethod->GetContentModifier(AceType::RawPtr(paintWrapper)));
-    EXPECT_EQ(contentModifier->extensionHandler_, nullptr);
+    auto handle = contentModifier->extensionHandler_.Upgrade();
+    EXPECT_EQ(handle, nullptr);
 }
 
 /**
@@ -810,7 +814,8 @@ HWTEST_F(NodeContainerTestNg, PaintWrapperTest005, TestSize.Level1)
     paintWrapper->FlushRender();
     auto foregroundModifier =
         AceType::DynamicCast<ForegroundModifier>(paintMethod->GetForegroundModifier(AceType::RawPtr(paintWrapper)));
-    EXPECT_EQ(foregroundModifier->extensionHandler_, nullptr);
+    auto handle = foregroundModifier->extensionHandler_.Upgrade();
+    EXPECT_EQ(handle, nullptr);
 }
 
 /**
@@ -844,6 +849,7 @@ HWTEST_F(NodeContainerTestNg, PaintWrapperTest006, TestSize.Level1)
     paintWrapper->FlushRender();
     auto overlayModifier =
         AceType::DynamicCast<OverlayModifier>(imageMethod->GetOverlayModifier(AceType::RawPtr(paintWrapper)));
-    EXPECT_EQ(overlayModifier->extensionHandler_, nullptr);
+    auto handle = overlayModifier->extensionHandler_.Upgrade();
+    EXPECT_EQ(handle, nullptr);
 }
 } // namespace OHOS::Ace::NG
