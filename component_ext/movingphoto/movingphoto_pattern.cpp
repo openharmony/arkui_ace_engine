@@ -1242,7 +1242,11 @@ void MovingPhotoPattern::StopAnimation()
 
 void MovingPhotoPattern::StopAnimationCallback()
 {
-    Seek(0);
+    if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO && autoPlayPeriodStartTime_ >= 0) {
+        Seek(static_cast<int32_t>(autoPlayPeriodStartTime_));
+    } else {
+        Seek(0);
+    }
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "StopAnimation OnFinishEvent:%{public}d.", autoAndRepeatLevel_);
     if (needUpdateImageNode_) {
         UpdateImageNode();
@@ -1332,8 +1336,9 @@ void MovingPhotoPattern::RepeatPlay(bool isRepeatPlay)
 
 void MovingPhotoPattern::AutoPlayPeriod(int64_t startTime, int64_t endTime)
 {
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto AutoPlayPeriod: [%{public}lld, %{public}lld].",
+        startTime, endTime);
     if (startTime >= VIDEO_PLAYTIME_START_POSITION && startTime < endTime) {
-        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer set Period.");
         autoPlayPeriodStartTime_ = startTime;
         autoPlayPeriodEndTime_ = endTime;
     }
@@ -1341,6 +1346,8 @@ void MovingPhotoPattern::AutoPlayPeriod(int64_t startTime, int64_t endTime)
 
 void MovingPhotoPattern::SetAutoPlayPeriod(int64_t startTime, int64_t endTime)
 {
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto SetAutoPlayPeriod: [%{public}lld, %{public}lld].",
+        startTime, endTime);
     if (startTime < VIDEO_PLAYTIME_START_POSITION || startTime >= endTime) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer SetAutoPlayPeriod error.");
         return;
@@ -1349,12 +1356,7 @@ void MovingPhotoPattern::SetAutoPlayPeriod(int64_t startTime, int64_t endTime)
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
         return;
     }
-
-    ContainerScope scope(instanceId_);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-
-    mediaPlayer_->SetPlayRange(startTime, endTime);
+    mediaPlayer_->SetPlayRangeWithMode(startTime, endTime, SeekMode::SEEK_CLOSEST);
 }
 
 void MovingPhotoPattern::HandleImageAnalyzerPlayCallBack()
