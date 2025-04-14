@@ -536,8 +536,6 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     MarkSelectedItems();
 
     UpdateLayoutRange(info_.axis_, !isInitialized_);
-    RequestReset(info_.jumpForRecompose_, -info_.currentOffset_);
-    info_.jumpForRecompose_ = EMPTY_JUMP_INDEX;
     isInitialized_ = true;
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);

@@ -17,6 +17,7 @@
 
 #include "irregular/grid_layout_range_solver.h"
 
+#include "core/components_ng/pattern/grid/irregular/grid_large_delta_converter.h"
 #include "base/geometry/axis.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
@@ -160,6 +161,11 @@ void GridFillAlgorithm::OnSlidingOffsetUpdate(float delta)
     if (range_.startLine == 0) {
         range_.offset = std::min(range_.offset, 0.0f);
     }
+}
+
+int32_t GridFillAlgorithm::ConvertLargeDelta(float delta) {
+    GridLargeDeltaConverter converter(info_, props_.GetHost().GetRawPtr());
+    return converter.Convert(delta);
 }
 
 bool GridFillAlgorithm::OnSlidingOffsetUpdate(const SizeF& viewport, Axis axis, float delta)
