@@ -1793,6 +1793,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                             Button.stateEffect(false);
                                             Button.hoverEffect(HoverEffect.None);
                                             Button.backgroundColor(Color.Transparent);
+                                            Button.accessibilityGroup(true);
                                             Button.accessibilityLevel(item.accessibilityLevel);
                                             Button.accessibilitySelected(
                                                 this.options.multiply ? undefined : this.selectedIndexes.includes(index)

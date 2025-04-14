@@ -950,6 +950,7 @@ struct SegmentButtonItemArrayComponent {
             .stateEffect(false)
             .hoverEffect(HoverEffect.None)
             .backgroundColor(Color.Transparent)
+            .accessibilityGroup(true);
             .accessibilityLevel(item.accessibilityLevel)
             .accessibilitySelected(this.options.multiply ? undefined : this.selectedIndexes.includes(index))
             .accessibilityChecked(this.options.multiply ? this.selectedIndexes.includes(index) : undefined)
