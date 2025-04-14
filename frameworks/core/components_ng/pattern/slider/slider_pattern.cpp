@@ -59,9 +59,8 @@ const std::string SLIDER_EFFECT_ID_NAME = "haptic.slide";
 constexpr float CROWN_SENSITIVITY_LOW = 0.5f;
 constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
 constexpr float CROWN_SENSITIVITY_HIGH = 2.0f;
-constexpr int32_t CROWN_EVENT_NUN_THRESH = 30;
+constexpr int64_t CROWN_TIME_THRESH = 30;
 constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength2";
-constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.feedback.crown.impact";
 #endif
 
 bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
@@ -1825,13 +1824,11 @@ void SliderPattern::HandleCrownAction(double mainDelta)
 
 void SliderPattern::StartVibrateFeedback()
 {
-    crownEventNum_ = reachBoundary_ ? 0 : crownEventNum_ + 1;
-    if (valueChangeFlag_ && reachBoundary_) {
-        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s", CROWN_VIBRATOR_STRONG);
-    } else if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
+    timestampCur_ = GetCurrentTimestamp();
+    if (!reachBoundary_ && (timeStampCur_ - timestampPre_ >= CROWN_TIME_THRESH)) {
         VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s", CROWN_VIBRATOR_WEAK);
+        timeStampPre_ = timeStampCur_;
     }
 }
 #endif
