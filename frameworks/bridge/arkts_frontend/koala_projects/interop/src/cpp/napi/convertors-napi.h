@@ -195,7 +195,7 @@ struct InteropTypeConverter<KInteropReturnBuffer> {
     static inline void release(napi_env env, InteropType value, const KInteropReturnBuffer& converted) = delete;
 };
 
-
+#ifndef KOALA_LINUX
 #define KOALA_INTEROP_THROW(vmcontext, object, ...) \
    do { \
      napi_env env = (napi_env)vmcontext; \
@@ -205,6 +205,16 @@ struct InteropTypeConverter<KInteropReturnBuffer> {
      napi_close_handle_scope(env, scope); \
      return __VA_ARGS__;  \
    } while (0)
+#else
+#define KOALA_INTEROP_THROW(vmcontext, object, ...) \
+   do { \
+     napi_env env = (napi_env)vmcontext; \
+     napi_handle_scope scope = nullptr; \
+     napi_throw((napi_env)vmcontext, object); \
+     napi_close_handle_scope(env, scope); \
+     return __VA_ARGS__;  \
+   } while (0)
+#endif
 
 #define KOALA_INTEROP_THROW_STRING(vmContext, message, ...) \
   do { \
