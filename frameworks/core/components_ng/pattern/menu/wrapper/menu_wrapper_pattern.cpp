@@ -196,6 +196,7 @@ void MenuWrapperPattern::HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItem
     if (!menuItemPattern->IsInHoverRegions(mousePosition.GetX(), mousePosition.GetY()) &&
         menuItemPattern->IsSubMenuShowed()) {
         HideSubMenu();
+        menuItemPattern->OnHover(false);
         menuItemPattern->SetIsSubMenuShowed(false);
         menuItemPattern->ClearHoverRegions();
         menuItemPattern->ResetWrapperMouseEvent();
