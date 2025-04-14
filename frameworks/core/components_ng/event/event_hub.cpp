@@ -561,7 +561,7 @@ void EventHub::FireDrawCompletedNDKCallback(const RefPtr<PipelineContext>& pipel
     executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireDrawCompletedNDKCallback");
 }
 
-void EventHub::FireLayoutNDKCallback(const RefPtr<PipelineContext>& pipeline)
+void EventHub::FireLayoutNDKCallback(const PipelineContext* pipeline)
 {
     if (!ndkLayoutCallback_) {
         return;
