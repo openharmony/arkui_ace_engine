@@ -17,7 +17,6 @@
 
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
-#include "core/interfaces/native/utility/peer_utils.h"
 
 struct SubmitEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::NG::TextFieldCommonEvent> {
