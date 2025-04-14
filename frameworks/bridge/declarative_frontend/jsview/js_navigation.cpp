@@ -475,6 +475,9 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
     }
     std::list<RefPtr<AceType>> items;
     NavigationModel::GetInstance()->GetToolBarItems(items);
+    if (!itemsValue->IsArray()) {
+        return;
+    }
     ParseToolBarItems(JSRef<JSArray>::Cast(itemsValue), items);
 }
 
@@ -492,6 +495,9 @@ void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
         } else {
             std::list<RefPtr<AceType>> items;
             NavigationModel::GetInstance()->GetToolBarItems(items);
+            if (info[0]->IsUndefined()) {
+                return;
+            }
             ParseToolBarItems(JSRef<JSArray>::Cast(info[0]), items);
         }
     } else if (info[0]->IsObject()) {
@@ -531,6 +537,9 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
         }
         std::list<RefPtr<AceType>> items;
         NavigationModel::GetInstance()->GetMenuItems(items);
+        if (info[0]->IsUndefined()) {
+            return;
+        }
         ParseToolBarItems(JSRef<JSArray>::Cast(info[0]), items);
     } else if (info[0]->IsObject()) {
         auto builderObject = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
