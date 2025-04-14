@@ -471,8 +471,7 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     bool isShiftKeyPressed = false;
     bool hasDifferentDirectionGesture = false;
     if (pipeline) {
-        isShiftKeyPressed =
-            event.HasKey(KeyCode::KEY_SHIFT_LEFT) || event.HasKey(KeyCode::KEY_SHIFT_RIGHT);
+        isShiftKeyPressed = event.HasKey(KeyCode::KEY_SHIFT_LEFT) || event.HasKey(KeyCode::KEY_SHIFT_RIGHT);
         hasDifferentDirectionGesture = pipeline->HasDifferentDirectionGesture();
     }
     delta_ = event.ConvertToOffset(isShiftKeyPressed, hasDifferentDirectionGesture);
@@ -482,8 +481,11 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         } else if ((direction_.type & PanDirection::VERTICAL) == 0) { // Direction is horizontal
             delta_.SetY(0.0);
         }
+    } else if (event.sourceTool == SourceTool::TOUCHPAD) {
+        PointF deltaPoint(delta_.GetX(), delta_.GetY());
+        NGGestureRecognizer::Transform(deltaPoint, GetAttachedNode(), false, false, -1);
+        delta_ = Offset(deltaPoint.GetX(), deltaPoint.GetY());
     }
-
     globalPoint_ = Point(event.x, event.y);
     mainDelta_ = GetMainAxisDelta();
     averageDistance_ += delta_;
