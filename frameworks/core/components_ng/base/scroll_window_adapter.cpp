@@ -144,6 +144,7 @@ bool ScrollWindowAdapter::UpdateSlidingOffset(float delta)
     }
     if (jumpPending_) {
         LOGW("weirdness, received offset when jump is pending. Koala");
+        return false;
     }
     if (rangeMode_) {
         bool res = fillAlgorithm_->OnSlidingOffsetUpdate(size_, axis_, delta);
