@@ -265,6 +265,7 @@ friend class ServiceCollaborationMenuAceHelper;
     void UpdateDisabledStyle();
 
     void ShowSubMenu();
+    RefPtr<FrameNode> GetSubMenu(RefPtr<UINode>& customNode);
     void UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode);
     void ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu);
     void HideSubMenu();
