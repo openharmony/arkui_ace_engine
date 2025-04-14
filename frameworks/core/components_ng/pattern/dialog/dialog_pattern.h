@@ -380,6 +380,8 @@ private:
     void UpdateButtonsPropertyForEachButton(RefPtr<FrameNode> buttonFrameNode, int32_t btnindex);
     void UpdateButtonsProperty();
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
+    void UpdateTitleAndContentColor();
+    void UpdateDialogTextColor(const RefPtr<FrameNode>& textNode);
     void UpdateAlignmentAndOffset();
     void DumpBoolProperty();
     void DumpBoolProperty(std::unique_ptr<JsonValue>& json);
