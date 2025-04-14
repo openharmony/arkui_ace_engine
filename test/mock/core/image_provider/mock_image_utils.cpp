@@ -43,5 +43,9 @@ void ImageUtils::PostToBg(
     }
     g_threads.emplace_back(std::thread(task));
 }
+
+void ImageUtils::PostDelayedTaskToUI(std::function<void()>&& task, uint32_t delayTime, const std::string& name,
+    const int32_t containerId, PriorityType priorityType)
+{}
 } // namespace NG
 } // namespace OHOS::Ace
