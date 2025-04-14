@@ -82,6 +82,7 @@ const char IS_FOCUS_ACTIVE_KEY[] = "persist.gesture.smart_gesture_enable";
 std::mutex g_mutexFormRenderFontFamily;
 constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
 constexpr int32_t EXTENSION_HALF_SCREEN_MODE = 2;
+constexpr size_t RESOURCE_CACHE_DEFAULT_SIZE = 5;
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
 #else
@@ -1323,6 +1324,9 @@ void AceContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiW
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
     container->SetUIWindowInner(uiWindow);
+    if (!container->IsScenceBoardWindow()) {
+        ResourceManager::GetInstance().SetResourceCacheSize(RESOURCE_CACHE_DEFAULT_SIZE);
+    }
 }
 
 sptr<OHOS::Rosen::Window> AceContainer::GetUIWindow(int32_t instanceId)
