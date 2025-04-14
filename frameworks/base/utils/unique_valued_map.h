@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UNIQUE_VALUED_MAP_H
+#define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UNIQUE_VALUED_MAP_H
 
-#include <unordered_map>
 #include <optional>
+#include <unordered_map>
 
+namespace OHOS::Ace {
 template<typename Key, typename Value, typename VHash = std::hash<Value>>
 class UniqueValuedMap {
 private:
@@ -103,3 +105,6 @@ public:
         valueToKey.clear();
     }
 };
+} // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UNIQUE_VALUED_MAP_H
