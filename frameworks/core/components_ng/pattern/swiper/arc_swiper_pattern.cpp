@@ -81,9 +81,7 @@ constexpr int32_t NO_ANIMAION_DEFAULT_DURATION = 400;
 constexpr int32_t VERTICAL_ANIMAION_DEFAULT_DURATION = 330;
 constexpr int32_t HORIZONTAL_ANIMAION_DEFAULT_DURATION = 750;
 #ifdef SUPPORT_DIGITAL_CROWN
-constexpr int32_t COUNT_TWO_INDEX = 2;
-constexpr const char* HAPTIC_STRENGTH4 = "watchhaptic.feedback.crown.strength4";
-constexpr const char* HAPTIC_IMPACT = "watchhaptic.feedback.crown.impact";
+constexpr const char* HAPTIC_STRENGTH3 = "watchhaptic.feedback.crown.strength3";
 #endif
 
 float GetHorizontalExitScaleValue(bool rollBack)
@@ -1581,13 +1579,7 @@ void ArcSwiperPattern::StartVibrator(bool isLeft)
     if ((isLeft && currentIndex_ == 0) || (!isLeft && currentIndex_ == TotalCount() - 1)) {
         return;
     }
-    // Perform HAPTIC_STRENGTH4 vibration when switching between each item
-    // Perform HAPTIC_IMPACT vibration when reaching the boundary
-    const char* effectId = ((currentIndex_ == 1 && isLeft) ||
-        (currentIndex_ == TotalCount() - COUNT_TWO_INDEX && (!isLeft)))
-                               ? HAPTIC_IMPACT
-                               : HAPTIC_STRENGTH4;
-    VibratorUtils::StartVibraFeedback(effectId);
+    VibratorUtils::StartVibraFeedback(HAPTIC_STRENGTH3);
 }
 
 void ArcSwiperPattern::HandleCrownActionCancel()
