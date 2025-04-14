@@ -6622,7 +6622,8 @@ int32_t RichEditorPattern::GetParagraphEndPosition(int32_t caretPosition)
 
 void RichEditorPattern::HandleOnSelectAll()
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnSelectAll");
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnSelectAll IsPreviewTextInputting:%{public}d", IsPreviewTextInputting());
+    CHECK_NULL_VOID(!IsPreviewTextInputting());
     selectOverlay_->CloseOverlay(true, CloseReason::CLOSE_REASON_SELECT_ALL);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -8140,6 +8141,10 @@ void RichEditorPattern::InsertValueByPaste(const std::u16string& pasteStr)
 
 void RichEditorPattern::HandleOnPaste()
 {
+    if (IsPreviewTextInputting()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Paste blocked during preview text input");
+        return;
+    }
     auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     TextCommonEvent event;
