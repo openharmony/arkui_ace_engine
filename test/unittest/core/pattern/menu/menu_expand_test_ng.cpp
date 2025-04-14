@@ -850,4 +850,71 @@ HWTEST_F(MenuExpandTestNg, MenuExpandTestNg019, TestSize.Level1)
     layoutAlgorithm->UpdateConstraintSelectHeight(layoutWrapper, layoutConstraintF);
     EXPECT_EQ(layoutConstraintF.maxSize.height_, NEGATIVE_EIGHT);
 }
+
+/**
+ * @tc.name: MenuExpandTestNg020
+ * @tc.desc: Test SetMenuBackGroundStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuExpandTestNg, MenuExpandTestNg020, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<MenuPattern>(NODE_ID, "menu", MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->renderContext_ = AceType::MakeRefPtr<RenderContext>();
+    MenuParam menuParam;
+    MenuPattern menuPattern(3, "menu", MenuType::MENU);
+    menuPattern.SetMenuBackGroundStyle(frameNode, menuParam);
+    EXPECT_EQ(frameNode->GetRenderContext()->propBackgroundColor_, Color::TRANSPARENT);
+    menuParam.backgroundColor = Color::RED;
+    BlurStyleOption blurStyleInfo = { BlurStyle::NO_MATERIAL, ThemeColorMode::SYSTEM, AdaptiveColor::DEFAULT, 1.0 };
+    menuParam.backgroundBlurStyleOption = blurStyleInfo;
+    menuParam.backgroundEffectOption = std::make_optional(EffectOption());
+    menuPattern.SetMenuBackGroundStyle(frameNode, menuParam);
+    EXPECT_EQ(frameNode->GetRenderContext()->propBackgroundColor_, Color::RED);
+    CalcDimension radius;
+    radius.SetValue(80.0f);
+    Color color = Color::FromARGB(13, 255, 255, 255);
+    EffectOption effectOption = { radius, 1.0, 1.08, color };
+    auto& background = frameNode->renderContext_->GetOrCreateBackground();
+    ASSERT_NE(&background, nullptr);
+    background->propEffectOption = effectOption;
+    ASSERT_TRUE(background->propEffectOption.has_value());
+    ASSERT_EQ(background->propEffectOption.value(), effectOption);
+    background->propBlurRadius = 0.0_px;
+    background->propBlurStyleOption = blurStyleInfo;
+    menuPattern.SetMenuBackGroundStyle(frameNode, menuParam);
+    EXPECT_EQ(frameNode->GetRenderContext()->GetBackBlurStyle(), blurStyleInfo);
+}
+
+/**
+ * @tc.name: MenuExpandTestNg021
+ * @tc.desc: Test DuplicateMenuNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuExpandTestNg, MenuExpandTestNg021, TestSize.Level1)
+{
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(2, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<MenuPattern>(0, "menu", MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+    menuNode->MountToParent(frameNode);
+    MenuParam menuParam;
+    MenuPattern menuPattern(4, "menu", MenuType::MENU);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(0));
+    auto duplicateMenuNode = menuPattern.DuplicateMenuNode(frameNode, menuParam);
+    ASSERT_NE(duplicateMenuNode, nullptr);
+    EXPECT_EQ(duplicateMenuNode->GetChildByIndex(0), scrollNode);
+    menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(5, TEXT_TAG, MenuType::MENU));
+    menuNode->MountToParent(frameNode);
+    auto menuLayoutProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(0.1));
+    menuLayoutProperty->UpdateBorderRadius(borderRadius);
+    menuPattern.DuplicateMenuNode(frameNode, menuParam);
+    EXPECT_TRUE(menuLayoutProperty->GetBorderRadius().has_value());
+}
 } // namespace OHOS::Ace::NG
