@@ -26,7 +26,7 @@ import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
-export interface ClickEvent {
+export interface ClickEvent extends BaseEvent {
     displayX: number
     displayY: number
     windowX: number

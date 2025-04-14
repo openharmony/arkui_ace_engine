@@ -9,6 +9,7 @@ import { PointerStyle, Callback_RangeUpdate } from "./../ArkArkuiCustomInterface
 import { UnifiedData } from "./../ArkUnifiedDataMaterialized"
 import { LazyForEachOps } from "./../ArkLazyForEachOpsMaterialized"
 import { SystemOps } from "./../ArkSystemOpsMaterialized"
+import { GestureOps } from "./../ArkGestureOpsMaterialized"
 import { FocusController } from "./../ArkFocusControllerMaterialized"
 import { DrawingCanvas } from "./../ArkDrawingCanvasMaterialized"
 import { PixelMap } from "#external"
@@ -3279,6 +3280,9 @@ export class TypeChecker {
     }
     static isTapGestureInterface(value: object|string|number|undefined|null): boolean {
         return value instanceof TapGestureInterface
+    }
+    static isGestureOps(value: object|string|number|undefined|null): boolean {
+        return value instanceof GestureOps
     }
     static isTapGestureParameters(value: object|string|number|undefined|null, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof TapGestureParameters

@@ -16205,6 +16205,9 @@ export class TypeChecker {
     static isTapGestureInterface(value: object|string|number|undefined|null|boolean): boolean {
         throw new Error("Can not discriminate value typeof TapGestureInterface")
     }
+    static isGestureOps(value: object|string|number|undefined|null|boolean): boolean {
+        throw new Error("Can not discriminate value typeof GestureOps")
+    }
     static isTapGestureParameters(value: object|string|number|undefined|null|boolean, duplicated_count: boolean, duplicated_fingers: boolean, duplicated_distanceThreshold: boolean): boolean {
         if ((!duplicated_count) && (value?.hasOwnProperty("count"))) {
             return true

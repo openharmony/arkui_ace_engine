@@ -2334,6 +2334,9 @@ typedef struct Opt_TapGestureParameters Opt_TapGestureParameters;
 typedef struct GestureEventPeer GestureEventPeer;
 typedef struct GestureEventPeer* Ark_GestureEvent;
 typedef struct Opt_GestureEvent Opt_GestureEvent;
+typedef struct GestureOpsPeer GestureOpsPeer;
+typedef struct GestureOpsPeer* Ark_GestureOps;
+typedef struct Opt_GestureOps Opt_GestureOps;
 typedef struct SwipeGestureEventPeer SwipeGestureEventPeer;
 typedef struct SwipeGestureEventPeer* Ark_SwipeGestureEvent;
 typedef struct Opt_SwipeGestureEvent Opt_SwipeGestureEvent;
@@ -14379,6 +14382,18 @@ typedef struct Opt_GestureEvent {
     Ark_Tag tag;
     Ark_GestureEvent value;
 } Opt_GestureEvent;
+typedef struct Array_SourceTool {
+    Ark_SourceTool* array;
+    Ark_Int32 length;
+} Array_SourceTool;
+typedef struct Opt_Array_SourceTool {
+    Ark_Tag tag;
+    Array_SourceTool value;
+} Opt_Array_SourceTool;
+typedef struct Opt_GestureOps {
+    Ark_Tag tag;
+    Ark_GestureOps value;
+} Opt_GestureOps;
 typedef struct Opt_SwipeGestureEvent {
     Ark_Tag tag;
     Ark_SwipeGestureEvent value;
@@ -19649,6 +19664,55 @@ typedef struct GENERATED_ArkUISystemOpsAccessor {
                                const Array_String* params);
 } GENERATED_ArkUISystemOpsAccessor;
 
+typedef struct GENERATED_ArkUIGestureOpsAccessor {
+    void (*destroyPeer)(Ark_GestureOps peer);
+    Ark_GestureOps (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_NativePointer (*createTapGesture)(const Ark_Number* fingers,
+                                          const Ark_Number* count,
+                                          const Ark_Number* distanceThreshold,
+                                          Ark_Boolean isFingerCountLimited);
+    Ark_NativePointer (*createLongPressGesture)(const Ark_Number* fingers,
+                                                Ark_Boolean repeat,
+                                                const Ark_Number* duration,
+                                                Ark_Boolean isFingerCountLimited);
+    Ark_NativePointer (*createPanGesture)(const Ark_Number* fingers,
+                                          Ark_PanDirection direction,
+                                          const Ark_Number* distance,
+                                          Ark_Boolean isFingerCountLimited);
+    Ark_NativePointer (*createPinchGesture)(const Ark_Number* fingers,
+                                            const Ark_Number* distance,
+                                            Ark_Boolean isFingerCountLimited);
+    Ark_NativePointer (*createRotationGesture)(const Ark_Number* fingers,
+                                               const Ark_Number* angle,
+                                               Ark_Boolean isFingerCountLimited);
+    Ark_NativePointer (*createSwipeGesture)(const Ark_Number* fingers,
+                                            Ark_SwipeDirection direction,
+                                            const Ark_Number* speed,
+                                            Ark_Boolean isFingerCountLimited);
+    Ark_NativePointer (*createGestureGroup)(Ark_GestureMode mode);
+    void (*setOnAction)(Ark_NativePointer gesture,
+                        const Callback_GestureEvent_Void* onAction);
+    void (*setOnActionStart)(Ark_NativePointer gesture,
+                             const Callback_GestureEvent_Void* onActionStart);
+    void (*setOnActionUpdate)(Ark_NativePointer gesture,
+                              const Callback_GestureEvent_Void* onActionUpdate);
+    void (*setOnActionEnd)(Ark_NativePointer gesture,
+                           const Callback_GestureEvent_Void* onActionEnd);
+    void (*setOnActionCancel)(Ark_NativePointer gesture,
+                              const Callback_Void* onActionCancel);
+    void (*setGestureTag)(Ark_NativePointer gesture,
+                          const Ark_String* tag);
+    void (*setAllowedTypes)(Ark_NativePointer gesture,
+                            const Array_SourceTool* types);
+    void (*addGestureToNode)(Ark_NativePointer node,
+                             const Ark_Number* priority,
+                             Ark_GestureMask mask,
+                             Ark_NativePointer gesture);
+    void (*addGestureToGroup)(Ark_NativePointer group,
+                              Ark_NativePointer gesture);
+} GENERATED_ArkUIGestureOpsAccessor;
+
 typedef struct GENERATED_ArkUIFocusControllerAccessor {
     void (*requestFocus)(const Ark_String* key);
 } GENERATED_ArkUIFocusControllerAccessor;
@@ -22395,6 +22459,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIUnifiedDataAccessor* (*getUnifiedDataAccessor)();
     const GENERATED_ArkUILazyForEachOpsAccessor* (*getLazyForEachOpsAccessor)();
     const GENERATED_ArkUISystemOpsAccessor* (*getSystemOpsAccessor)();
+    const GENERATED_ArkUIGestureOpsAccessor* (*getGestureOpsAccessor)();
     const GENERATED_ArkUIFocusControllerAccessor* (*getFocusControllerAccessor)();
     const GENERATED_ArkUIDrawableDescriptorAccessor* (*getDrawableDescriptorAccessor)();
     const GENERATED_ArkUILayeredDrawableDescriptorAccessor* (*getLayeredDrawableDescriptorAccessor)();

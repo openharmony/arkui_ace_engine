@@ -591,7 +591,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         return obj
     }
 }
-export interface ClickEvent {
+export interface ClickEvent extends BaseEvent {
     displayX: number
     displayY: number
     windowX: number

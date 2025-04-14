@@ -17156,6 +17156,89 @@ Ark_Int32 impl_SystemOps_getResourceId(const KStringPtr& bundleName, const KStri
         return GetAccessors()->getSystemOpsAccessor()->getResourceId((const Ark_String*) (&bundleName), (const Ark_String*) (&moduleName), (const Array_String*)&params_value);
 }
 KOALA_INTEROP_4(SystemOps_getResourceId, Ark_Int32, KStringPtr, KStringPtr, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_GestureOps_createTapGesture(KInteropNumber fingers, KInteropNumber count, KInteropNumber distanceThreshold, Ark_Boolean isFingerCountLimited) {
+        return GetAccessors()->getGestureOpsAccessor()->createTapGesture((const Ark_Number*) (&fingers), (const Ark_Number*) (&count), (const Ark_Number*) (&distanceThreshold), isFingerCountLimited);
+}
+KOALA_INTEROP_DIRECT_4(GestureOps_createTapGesture, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, Ark_Boolean)
+Ark_NativePointer impl_GestureOps_createLongPressGesture(KInteropNumber fingers, Ark_Boolean repeat, KInteropNumber duration, Ark_Boolean isFingerCountLimited) {
+        return GetAccessors()->getGestureOpsAccessor()->createLongPressGesture((const Ark_Number*) (&fingers), repeat, (const Ark_Number*) (&duration), isFingerCountLimited);
+}
+KOALA_INTEROP_DIRECT_4(GestureOps_createLongPressGesture, Ark_NativePointer, KInteropNumber, Ark_Boolean, KInteropNumber, Ark_Boolean)
+Ark_NativePointer impl_GestureOps_createPanGesture(KInteropNumber fingers, Ark_Int32 direction, KInteropNumber distance, Ark_Boolean isFingerCountLimited) {
+        return GetAccessors()->getGestureOpsAccessor()->createPanGesture((const Ark_Number*) (&fingers), static_cast<Ark_PanDirection>(direction), (const Ark_Number*) (&distance), isFingerCountLimited);
+}
+KOALA_INTEROP_DIRECT_4(GestureOps_createPanGesture, Ark_NativePointer, KInteropNumber, Ark_Int32, KInteropNumber, Ark_Boolean)
+Ark_NativePointer impl_GestureOps_createPinchGesture(KInteropNumber fingers, KInteropNumber distance, Ark_Boolean isFingerCountLimited) {
+        return GetAccessors()->getGestureOpsAccessor()->createPinchGesture((const Ark_Number*) (&fingers), (const Ark_Number*) (&distance), isFingerCountLimited);
+}
+KOALA_INTEROP_DIRECT_3(GestureOps_createPinchGesture, Ark_NativePointer, KInteropNumber, KInteropNumber, Ark_Boolean)
+Ark_NativePointer impl_GestureOps_createRotationGesture(KInteropNumber fingers, KInteropNumber angle, Ark_Boolean isFingerCountLimited) {
+        return GetAccessors()->getGestureOpsAccessor()->createRotationGesture((const Ark_Number*) (&fingers), (const Ark_Number*) (&angle), isFingerCountLimited);
+}
+KOALA_INTEROP_DIRECT_3(GestureOps_createRotationGesture, Ark_NativePointer, KInteropNumber, KInteropNumber, Ark_Boolean)
+Ark_NativePointer impl_GestureOps_createSwipeGesture(KInteropNumber fingers, Ark_Int32 direction, KInteropNumber speed, Ark_Boolean isFingerCountLimited) {
+        return GetAccessors()->getGestureOpsAccessor()->createSwipeGesture((const Ark_Number*) (&fingers), static_cast<Ark_SwipeDirection>(direction), (const Ark_Number*) (&speed), isFingerCountLimited);
+}
+KOALA_INTEROP_DIRECT_4(GestureOps_createSwipeGesture, Ark_NativePointer, KInteropNumber, Ark_Int32, KInteropNumber, Ark_Boolean)
+Ark_NativePointer impl_GestureOps_createGestureGroup(Ark_Int32 mode) {
+        return GetAccessors()->getGestureOpsAccessor()->createGestureGroup(static_cast<Ark_GestureMode>(mode));
+}
+KOALA_INTEROP_DIRECT_1(GestureOps_createGestureGroup, Ark_NativePointer, Ark_Int32)
+void impl_GestureOps_setOnAction(Ark_NativePointer gesture, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Callback_GestureEvent_Void onAction_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_GestureEvent_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_GestureEvent_Void))))};;
+        GetAccessors()->getGestureOpsAccessor()->setOnAction(gesture, (const Callback_GestureEvent_Void*)&onAction_value);
+}
+KOALA_INTEROP_DIRECT_V3(GestureOps_setOnAction, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_GestureOps_setOnActionStart(Ark_NativePointer gesture, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Callback_GestureEvent_Void onActionStart_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_GestureEvent_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_GestureEvent_Void))))};;
+        GetAccessors()->getGestureOpsAccessor()->setOnActionStart(gesture, (const Callback_GestureEvent_Void*)&onActionStart_value);
+}
+KOALA_INTEROP_DIRECT_V3(GestureOps_setOnActionStart, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_GestureOps_setOnActionUpdate(Ark_NativePointer gesture, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Callback_GestureEvent_Void onActionUpdate_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_GestureEvent_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_GestureEvent_Void))))};;
+        GetAccessors()->getGestureOpsAccessor()->setOnActionUpdate(gesture, (const Callback_GestureEvent_Void*)&onActionUpdate_value);
+}
+KOALA_INTEROP_DIRECT_V3(GestureOps_setOnActionUpdate, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_GestureOps_setOnActionEnd(Ark_NativePointer gesture, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Callback_GestureEvent_Void onActionEnd_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_GestureEvent_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_GestureEvent_Void))))};;
+        GetAccessors()->getGestureOpsAccessor()->setOnActionEnd(gesture, (const Callback_GestureEvent_Void*)&onActionEnd_value);
+}
+KOALA_INTEROP_DIRECT_V3(GestureOps_setOnActionEnd, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_GestureOps_setOnActionCancel(Ark_NativePointer gesture, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Callback_Void onActionCancel_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
+        GetAccessors()->getGestureOpsAccessor()->setOnActionCancel(gesture, (const Callback_Void*)&onActionCancel_value);
+}
+KOALA_INTEROP_DIRECT_V3(GestureOps_setOnActionCancel, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_GestureOps_setGestureTag(Ark_NativePointer gesture, const KStringPtr& tag) {
+        GetAccessors()->getGestureOpsAccessor()->setGestureTag(gesture, (const Ark_String*) (&tag));
+}
+KOALA_INTEROP_V2(GestureOps_setGestureTag, Ark_NativePointer, KStringPtr)
+void impl_GestureOps_setAllowedTypes(Ark_NativePointer gesture, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const Ark_Int32 types_value_buf_length = thisDeserializer.readInt32();
+        Array_SourceTool types_value_buf = {};
+        thisDeserializer.resizeArray<std::decay<decltype(types_value_buf)>::type,
+        std::decay<decltype(*types_value_buf.array)>::type>(&types_value_buf, types_value_buf_length);
+        for (int types_value_buf_i = 0; types_value_buf_i < types_value_buf_length; types_value_buf_i++) {
+            types_value_buf.array[types_value_buf_i] = static_cast<Ark_SourceTool>(thisDeserializer.readInt32());
+        }
+        Array_SourceTool types_value = types_value_buf;;
+        GetAccessors()->getGestureOpsAccessor()->setAllowedTypes(gesture, (const Array_SourceTool*)&types_value);
+}
+KOALA_INTEROP_DIRECT_V3(GestureOps_setAllowedTypes, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_GestureOps_addGestureToNode(Ark_NativePointer node, KInteropNumber priority, Ark_Int32 mask, Ark_NativePointer gesture) {
+        GetAccessors()->getGestureOpsAccessor()->addGestureToNode(node, (const Ark_Number*) (&priority), static_cast<Ark_GestureMask>(mask), gesture);
+}
+KOALA_INTEROP_DIRECT_V4(GestureOps_addGestureToNode, Ark_NativePointer, KInteropNumber, Ark_Int32, Ark_NativePointer)
+void impl_GestureOps_addGestureToGroup(Ark_NativePointer group, Ark_NativePointer gesture) {
+        GetAccessors()->getGestureOpsAccessor()->addGestureToGroup(group, gesture);
+}
+KOALA_INTEROP_DIRECT_V2(GestureOps_addGestureToGroup, Ark_NativePointer, Ark_NativePointer)
 void impl_FocusController_requestFocus(const KStringPtr& key) {
         GetAccessors()->getFocusControllerAccessor()->requestFocus((const Ark_String*) (&key));
 }
