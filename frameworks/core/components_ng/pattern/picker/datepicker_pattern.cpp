@@ -2208,7 +2208,7 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
 
     options_[dayColumn].clear();
     if (startYear == endYear && startMonth == endMonth) {
-        options_[dayColumn].resize(startDay - 1, emptyPickerDate_);
+        options_[dayColumn].resize(startDay > 0 ? startDay - 1 : 0, emptyPickerDate_);
     }
     // lunar's day start from startDay
     for (uint32_t index = startDay; index <= endDay; ++index) {
