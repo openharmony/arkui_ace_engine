@@ -330,6 +330,12 @@ napi_modules = [
           part_name = "ace_engine"
           lib_names = [ "ArkoalaNative_ark" ]
         },
+        {
+          label = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend:ArkoalaLoader"
+          subsystem_name = "arkui"
+          part_name = "ace_engine"
+          lib_names = [ "ArkoalaLoader" ]
+        },
       ]
     }
   },
