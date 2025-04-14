@@ -48,7 +48,7 @@ void AddSafeIntervalBetweenToolbarItem(
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (count == ONE_TOOLBAR_ITEM && toolbarItemSize != ONE_TOOLBAR_ITEM) {
             margin.right = CalcLength(theme->GetToolbarItemMargin());
         } else if (!needMoreButton && (count == toolbarItemSize) && (toolbarItemSize != ONE_TOOLBAR_ITEM)) {
@@ -93,7 +93,7 @@ RefPtr<FrameNode> CreateToolbarItemTextNode(const std::string& text)
     CHECK_NULL_RETURN(theme, nullptr);
     textLayoutProperty->UpdateContent(text);
     textLayoutProperty->UpdateFontSize(theme->GetToolBarItemFontSize());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         textLayoutProperty->UpdateLineHeight(theme->GetToolBarItemFontSize());
     }
     textLayoutProperty->UpdateTextColor(theme->GetToolBarItemFontColor());
@@ -324,7 +324,7 @@ RefPtr<FrameNode> CreateToolbarItemInContainer(
     buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
     buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
     buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonPattern->SetBlendColor(Color::TRANSPARENT, std::nullopt);
     }
     auto toolBarItemNode = FrameNode::CreateFrameNode(
@@ -395,7 +395,7 @@ RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNo
     buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
     buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
     buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonPattern->SetBlendColor(Color::TRANSPARENT, std::nullopt);
     }
     auto toolBarItemNode = FrameNode::CreateFrameNode(
