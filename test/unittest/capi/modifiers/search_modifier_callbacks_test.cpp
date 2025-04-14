@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "test/unittest/capi/stubs/friend_class_accessor.h"
+
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 
@@ -77,6 +79,9 @@ const std::vector<ArkNumberFloatTest> FLOAT_NUMBER_TEST_PLAN = {
     { AFLT32_POS, AFLT32_POS },
     { AFLT32_NEG, AFLT32_NEG },
 };
+
+const std::string TEST_CONTENT_ONE = "ContentTestOne";
+const std::string TEST_CONTENT_TWO = "ContentTestTwo";
 } // namespace
 
 namespace Converter {
@@ -98,6 +103,24 @@ public:
         SetupTheme<SearchTheme>();
         SetupTheme<TextFieldTheme>();
         SetupTheme<IconTheme>();
+    }
+
+    std::vector<MenuItemParam> GetMenuItemParams()
+    {
+        std::vector<MenuItemParam> params;
+        MenuOptionsParam menuOptionItemOne;
+        menuOptionItemOne.content = TEST_CONTENT_ONE;
+        menuOptionItemOne.action = [](const std::string&) {};
+        MenuOptionsParam menuOptionItemTwo;
+        menuOptionItemTwo.content = TEST_CONTENT_TWO;
+        menuOptionItemTwo.action = [](const std::string&) {};
+        MenuItemParam param1;
+        param1.menuOptionsParam = menuOptionItemOne;
+        MenuItemParam param2;
+        param2.menuOptionsParam = menuOptionItemTwo;
+        params.push_back(param1);
+        params.push_back(param2);
+        return params;
     }
 };
 
@@ -676,5 +699,65 @@ HWTEST_F(SearchModifierCallbackTest, setOnDidDeleteTest, TestSize.Level1)
             EXPECT_EQ(g_deleteDirection, deleteDirection);
         }
     }
+}
+
+/**
+ * @tc.name: setEditMenuOptionsTest
+ * @tc.desc: setEditMenuOptions test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierCallbackTest, setEditMenuOptionsTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setEditMenuOptions, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    int32_t testID = 323;
+    struct CheckEvent {
+        int32_t resourceId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto testOnCreateMenuCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Array_TextMenuItem menuItems, const Callback_Array_TextMenuItem_Void continuation) {
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+        };
+        CallbackHelper(continuation).Invoke(menuItems);
+    };
+    auto arkCreateCallback = Converter::ArkValue<
+        AsyncCallback_Array_TextMenuItem_Array_TextMenuItem>(testOnCreateMenuCallback, testID);
+
+    auto testOnMenuItemClickCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_TextMenuItem menuItem, const Ark_TextRange range, const Callback_Boolean_Void continuation) {
+        auto item = Converter::OptConvert<MenuOptionsParam>(menuItem);
+        ASSERT_TRUE(item.has_value());
+        ASSERT_TRUE(item->content.has_value());
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(*item->content == TEST_CONTENT_ONE));
+    };
+    auto arkClickCallback = Converter::ArkValue<
+        AsyncCallback_TextMenuItem_TextRange_Boolean>(testOnMenuItemClickCallback, testID);
+
+    Ark_EditMenuOptions options {
+        .onCreateMenu = arkCreateCallback,
+        .onMenuItemClick = arkClickCallback
+    };
+
+    SelectOverlayInfo selectOverlayInfo;
+    auto params = GetMenuItemParams();
+    FriendClassAccessor::OnUpdateOnCreateMenuCallback(selectOverlayInfo, pattern);
+    EXPECT_TRUE(selectOverlayInfo.onCreateCallback.onCreateMenuCallback == nullptr);
+    modifier_->setEditMenuOptions(node_, &options);
+    FriendClassAccessor::OnUpdateOnCreateMenuCallback(selectOverlayInfo, pattern);
+    ASSERT_NE(selectOverlayInfo.onCreateCallback.onCreateMenuCallback, nullptr);
+    selectOverlayInfo.onCreateCallback.onCreateMenuCallback(params);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->resourceId, testID);
+
+    ASSERT_NE(selectOverlayInfo.onCreateCallback.onMenuItemClick, nullptr);
+    EXPECT_TRUE(selectOverlayInfo.onCreateCallback.onMenuItemClick(params[0]));
+    EXPECT_FALSE(selectOverlayInfo.onCreateCallback.onMenuItemClick(params[1]));
 }
 } // namespace OHOS::Ace::NG

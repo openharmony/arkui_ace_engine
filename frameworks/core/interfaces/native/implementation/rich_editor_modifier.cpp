@@ -590,9 +590,23 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RichEditorModelNG::SetEditMenuOptions(frameNode, convValue);
-    LOGW("RichEditor modifier :: EditMenuOptionsImpl() needs onCreateMenuCallback, onMenuItemClick input");
+    auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(value->onCreateMenu)](
+        const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+            auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
+            auto arkResult = arkCreateMenu.InvokeWithObtainResult<
+                Array_TextMenuItem, Callback_Array_TextMenuItem_Void>(menuItems);
+            return Converter::Convert<std::vector<NG::MenuOptionsParam>>(arkResult);
+        };
+    auto onMenuItemClick = [arkMenuItemClick = CallbackHelper(value->onMenuItemClick)](
+        NG::MenuItemParam menuOptionsParam) -> bool {
+            TextRange range {.start = menuOptionsParam.start, .end = menuOptionsParam.end};
+            auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
+            auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
+            auto arkResult = arkMenuItemClick.InvokeWithObtainResult<
+                Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
+            return Converter::Convert<bool>(arkResult);
+        };
+    RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
                                Ark_Boolean value)

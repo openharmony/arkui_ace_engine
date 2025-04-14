@@ -76,6 +76,7 @@ class TextPattern : public virtual Pattern,
                     public Magnifier,
                     public LayoutInfoInterface {
     DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase, TextGestureSelector, Magnifier);
+    UNITEST_FRIEND_CLASS;
 
 public:
     TextPattern()

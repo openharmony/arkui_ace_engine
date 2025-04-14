@@ -27,6 +27,7 @@
 #include "core/interfaces/native/implementation/line_height_style_peer.h"
 #include "core/interfaces/native/implementation/paragraph_style_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
 #include "core/interfaces/native/implementation/text_shadow_style_peer.h"
 #include "core/interfaces/native/implementation/text_style_styled_string_peer.h"
 #include "core/interfaces/native/implementation/url_style_peer.h"
@@ -139,6 +140,16 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
         .minute = ArkValue<Ark_Number>(minute),
         .second = ArkValue<Ark_Number>(second),
     };
+}
+
+void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src)
+{
+    if (src.menuOptionsParam.content.has_value()) {
+        dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(src.menuOptionsParam.content.value());
+    }
+    dst.icon = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.icon);
+    dst.id = PeerUtils::CreatePeer<TextMenuItemIdPeer>(src.menuOptionsParam.id);
+    dst.labelInfo = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.labelInfo);
 }
 
 void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src)

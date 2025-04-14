@@ -189,6 +189,8 @@ public:
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType, TextResponseType& responseType,
         std::function<void()>&& buildFunc, SelectMenuParam& menuParam);
+    static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick);
 };
 } // namespace OHOS::Ace::NG
 

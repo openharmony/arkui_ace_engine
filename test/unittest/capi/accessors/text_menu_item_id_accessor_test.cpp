@@ -84,35 +84,48 @@ HWTEST_F(TextMenuItemIdAccessorTest, ofTest, TestSize.Level1)
 HWTEST_F(TextMenuItemIdAccessorTest, equalsTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->equals, nullptr);
-    TextMenuItemIdPeer peer1 {.id = "Test 1"};
-    TextMenuItemIdPeer peer2 {.id = "Test 1"};
-    TextMenuItemIdPeer peer3 {.id = "Compare2"};
-    TextMenuItemIdPeer peer4 {.id = "Compare22"};
-    TextMenuItemIdPeer peer5 {.id = "ID"};
-    TextMenuItemIdPeer peer6 {.id = "Id"};
-    TextMenuItemIdPeer peer7 {.id = "1234567890"};
-    TextMenuItemIdPeer peer8 {.id = "1234567890"};
-    TextMenuItemIdPeer peer9 {.id = ""};
-    TextMenuItemIdPeer peer10 {.id = " "};
-    TextMenuItemIdPeer peer11 {.id = std::nullopt};
-    TextMenuItemIdPeer peer12 {.id = std::nullopt};
+    auto peer1 = PeerUtils::CreatePeer<TextMenuItemIdPeer>("Test 1");
+    auto peer2 = PeerUtils::CreatePeer<TextMenuItemIdPeer>("Test 1");
+    auto peer3 = PeerUtils::CreatePeer<TextMenuItemIdPeer>("Compare2");
+    auto peer4 = PeerUtils::CreatePeer<TextMenuItemIdPeer>("Compare22");
+    auto peer5 = PeerUtils::CreatePeer<TextMenuItemIdPeer>("ID");
+    auto peer6 = PeerUtils::CreatePeer<TextMenuItemIdPeer>("Id");
+    auto peer7 = PeerUtils::CreatePeer<TextMenuItemIdPeer>("1234567890");
+    auto peer8 = PeerUtils::CreatePeer<TextMenuItemIdPeer>("1234567890");
+    auto peer9 = PeerUtils::CreatePeer<TextMenuItemIdPeer>("");
+    auto peer10 = PeerUtils::CreatePeer<TextMenuItemIdPeer>(" ");
+    auto peer11 = PeerUtils::CreatePeer<TextMenuItemIdPeer>(std::nullopt);
+    auto peer12 = PeerUtils::CreatePeer<TextMenuItemIdPeer>(std::nullopt);
     const std::vector<std::tuple<Ark_TextMenuItemId, Ark_TextMenuItemId, bool>> testPlan {
-        {&peer1, &peer2, true},
-        {&peer3, &peer4, false},
-        {&peer5, &peer6, false},
-        {&peer7, &peer8, true},
-        {&peer9, &peer10, false},
-        {&peer11, &peer12, false},
-        {&peer11, &peer1, false},
-        {&peer1, &peer1, true},
-        {&peer1, nullptr, false},
-        {nullptr, &peer2, false},
+        {peer1, peer2, true},
+        {peer3, peer4, false},
+        {peer5, peer6, false},
+        {peer7, peer8, true},
+        {peer9, peer10, false},
+        {peer11, peer12, false},
+        {peer11, peer1, false},
+        {peer1, peer1, true},
+        {peer1, nullptr, false},
+        {nullptr, peer2, false},
         {nullptr, nullptr, false},
     };
     for (auto [value1, value2, expected] : testPlan) {
         const bool result = Converter::Convert<bool>(accessor_->equals(value1, value2));
         EXPECT_EQ(result, expected);
     }
+
+    PeerUtils::DestroyPeer(peer1);
+    PeerUtils::DestroyPeer(peer2);
+    PeerUtils::DestroyPeer(peer3);
+    PeerUtils::DestroyPeer(peer4);
+    PeerUtils::DestroyPeer(peer5);
+    PeerUtils::DestroyPeer(peer6);
+    PeerUtils::DestroyPeer(peer7);
+    PeerUtils::DestroyPeer(peer8);
+    PeerUtils::DestroyPeer(peer9);
+    PeerUtils::DestroyPeer(peer10);
+    PeerUtils::DestroyPeer(peer11);
+    PeerUtils::DestroyPeer(peer12);
 }
 
 /**

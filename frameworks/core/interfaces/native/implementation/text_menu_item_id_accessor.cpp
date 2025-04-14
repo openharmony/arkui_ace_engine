@@ -24,11 +24,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextMenuItemIdAccessor {
 void DestroyPeerImpl(Ark_TextMenuItemId peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_TextMenuItemId CtorImpl()
 {
-    return new TextMenuItemIdPeer();
+    return PeerUtils::CreatePeer<TextMenuItemIdPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

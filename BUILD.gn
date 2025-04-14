@@ -64,6 +64,7 @@ config("ace_config") {
     "-Werror=abstract-final-class",
     "-Werror=range-loop-construct",
     "-Werror=incompatible-pointer-types",
+    "-DUNITEST_FRIEND_CLASS=",
   ]
 
   if (is_arkui_x) {
@@ -174,6 +175,7 @@ config("ace_test_config") {
     "-fvisibility=hidden",
     "-fdata-sections",
     "-ffunction-sections",
+    "-DUNITEST_FRIEND_CLASS=",
   ]
 
   cflags_cc += [ "-fvisibility-inlines-hidden" ]

@@ -1710,11 +1710,28 @@ void KeyboardAvoidModeImpl(Ark_NativePointer node,
 void EditMenuOptionsImpl(Ark_NativePointer node,
                          const Ark_EditMenuOptions* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetEditMenuOptions(frameNode, convValue);
+    auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(value->onCreateMenu)](
+        const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+            auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
+            auto arkResult = arkCreateMenu.InvokeWithObtainResult<
+                Array_TextMenuItem, Callback_Array_TextMenuItem_Void>(menuItems);
+            return Converter::Convert<std::vector<NG::MenuOptionsParam>>(arkResult);
+        };
+    auto onMenuItemClick = [arkMenuItemClick = CallbackHelper(value->onMenuItemClick)](
+        NG::MenuItemParam menuOptionsParam) -> bool {
+            TextRange range {.start = menuOptionsParam.start, .end = menuOptionsParam.end};
+            auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
+            auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
+            auto arkResult = arkMenuItemClick.InvokeWithObtainResult<
+                Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
+            return Converter::Convert<bool>(arkResult);
+        };
+    WebModelNG::SetEditMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+#endif // WEB_SUPPORTED
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
                               Ark_Boolean value)

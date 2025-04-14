@@ -159,6 +159,7 @@ struct SysScale {
 class RichEditorPattern
     : public TextPattern, public ScrollablePattern, public TextInputClient, public SpanWatcher {
     DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient, SpanWatcher);
+    UNITEST_FRIEND_CLASS;
 
 public:
     RichEditorPattern();

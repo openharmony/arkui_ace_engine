@@ -316,6 +316,8 @@ public:
     static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
     static int32_t GetKeyboardAppearance(FrameNode* frameNode);
+    static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
 private:
     void AddDragFrameNodeToManager() const;
