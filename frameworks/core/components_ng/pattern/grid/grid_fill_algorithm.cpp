@@ -47,6 +47,10 @@ void GridFillAlgorithm::Init(const SizeF& viewport, Axis axis, int32_t totalCnt)
     info_.axis_ = axis;
     info_.childrenCount_ = totalCnt;
 
+    if (std::abs(info_.currentOffset_) > viewport.MainSize(axis)) {
+        LOGW("Koala received large delta %f in FillAlgorithm, jumpIndex = %d", info_.currentOffset_, info_.jumpIndex_);
+        info_.currentOffset_ = 0.0f;
+    }
     range_.startLine = info_.startMainLineIndex_;
     range_.offset = info_.currentOffset_;
     range_.endLine = info_.endMainLineIndex_;

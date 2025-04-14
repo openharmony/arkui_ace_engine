@@ -287,10 +287,10 @@ constexpr float SKIP_THRESHOLD = 2.0f;
 
 bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
 {
-    float delta = std::abs(info_.currentOffset_ - info_.prevOffset_);
-    if (enableSkip_ && GreatNotEqual(delta, mainSize)) {
+    float delta = info_.currentOffset_ - info_.prevOffset_;
+    if (enableSkip_ && GreatNotEqual(std::abs(delta), mainSize)) {
         // a more costly check, therefore perform after comparing to [mainSize]
-        if (LessOrEqual(delta, SKIP_THRESHOLD * info_.GetTotalHeightOfItemsInView(mainGap_))) {
+        if (LessOrEqual(std::abs(delta), SKIP_THRESHOLD * info_.GetTotalHeightOfItemsInView(mainGap_))) {
             return false;
         }
 
