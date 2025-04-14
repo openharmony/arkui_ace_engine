@@ -3018,7 +3018,7 @@ class stateMgmtDFX {
         if (arr.length > stateMgmtDFX.DUMP_MAX_LENGTH) {
             dumpArr.splice(stateMgmtDFX.DUMP_MAX_LENGTH - stateMgmtDFX.DUMP_LAST_LENGTH, stateMgmtDFX.DUMP_LAST_LENGTH, '...', ...arr.slice(-stateMgmtDFX.DUMP_LAST_LENGTH));
         }
-        return dumpArr.map(item => typeof item === 'object' ? this.getType(item) : item);
+        return dumpArr.map(item => (item && typeof item === 'object') ? this.getType(item) : item);
     }
     static dumpMap(map) {
         let dumpKey = this.dumpItems(Array.from(map.keys()));
@@ -3033,7 +3033,7 @@ class stateMgmtDFX {
                 .slice(0, stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT)
                 .forEach((varName) => {
                 const propertyValue = Reflect.get(value, varName);
-                tempObj[varName] = typeof propertyValue === 'object' ? this.getType(propertyValue) : propertyValue;
+                tempObj[varName] = (propertyValue && typeof propertyValue === 'object') ? this.getType(propertyValue) : propertyValue;
             });
             if (properties.length > stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT) {
                 tempObj['...'] = '...';
@@ -3047,7 +3047,7 @@ class stateMgmtDFX {
     }
     static getRawValue(observedProp) {
         let wrappedValue = observedProp.getUnmonitored();
-        if (typeof wrappedValue !== 'object') {
+        if (!wrappedValue || typeof wrappedValue !== 'object') {
             return wrappedValue;
         }
         let rawObject = ObservedObject.GetRawObject(wrappedValue);
@@ -3971,7 +3971,7 @@ class UpdateFuncsByElmtId {
     }
     debugInfoElmtId(elmtId) {
         const updateFuncEntry = this.map_.get(elmtId);
-        return updateFuncEntry ? `${updateFuncEntry.getComponentName()}[${elmtId}]` : `'unknown component type'[${elmtId}]`;
+        return updateFuncEntry ? `${updateFuncEntry.getComponentName()}[${elmtId}]` : `unknown component type[${elmtId}]`;
     }
 } // class UpdateFuncByElmtId
 /*
@@ -6413,7 +6413,7 @@ class ViewPU extends PUV2ViewBase {
             .filter((varName) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
             .forEach((varName) => {
             const prop = Reflect.get(this, varName);
-            if ('debugInfoDecorator' in prop) {
+            if (prop && typeof prop === 'object' && 'debugInfoDecorator' in prop) {
                 const observedProp = prop;
                 result += `\n  ${observedProp.debugInfoDecorator()} '${observedProp.info()}'[${observedProp.id__()}]`;
                 result += `\n  ${observedProp.debugInfoSubscribers()}`;
@@ -7199,7 +7199,7 @@ class ViewPU extends PUV2ViewBase {
             .filter((varName) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
             .forEach((varName) => {
             const prop = Reflect.get(this, varName);
-            if (typeof prop === 'object' && 'debugInfoDecorator' in prop) {
+            if (prop && typeof prop === 'object' && 'debugInfoDecorator' in prop) {
                 const observedProp = prop;
                 res.observedPropertiesInfo.push(stateMgmtDFX.getObservedPropertyInfo(observedProp, false));
             }
