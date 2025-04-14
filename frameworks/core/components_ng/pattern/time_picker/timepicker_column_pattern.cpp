@@ -1695,8 +1695,8 @@ void TimePickerColumnPattern::UpdateUserSetSelectColor()
 void TimePickerColumnPattern::UpdateAnimationColor(const RefPtr<PickerTheme>& pickerTheme)
 {
     Color color;
-    int showCount = GetShowCount();
-    int32_t middleIndex = showCount / PICKER_SELECT_AVERAGE;
+    uint32_t showCount = GetShowCount();
+    uint32_t middleIndex = showCount / PICKER_SELECT_AVERAGE;
     GetAnimationColor(middleIndex, showCount, color, true);
     if (middleIndex - NEXT_COLOUM_DIFF >= 0 && animationProperties_.size() > middleIndex) {
         animationProperties_[middleIndex - NEXT_COLOUM_DIFF].downColor = color;
