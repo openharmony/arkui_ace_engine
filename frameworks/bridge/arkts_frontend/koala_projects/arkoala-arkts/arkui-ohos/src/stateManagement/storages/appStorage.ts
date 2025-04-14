@@ -1,24 +1,25 @@
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
-import { LocalStorage } from "./localStorage";
+import { LocalStorage } from './localStorage';
 
-import { AbstractProperty, SubscribedAbstractProperty } from "../base/decoratorBase";
+import { NullableObject } from '../base/types';
+import { AbstractProperty, SubscribedAbstractProperty } from '../base/decoratorBase';
 
-import { LinkDecoratedVariable } from "../decorators/decoratorLink";
-import { PropDecoratedVariable } from "../decorators/decoratorProp";
+import { LinkDecoratedVariable } from '../decorators/decoratorLink';
+import { PropDecoratedVariable } from '../decorators/decoratorProp';
 
 export class AppStorage extends LocalStorage {
     public static createSingleton(/*initializingPropersties?: Object */): void {
@@ -44,7 +45,7 @@ export class AppStorage extends LocalStorage {
         return AppStorage.getOrCreate().setAndLink<T>(propName, defaultValue);
     }
 
-    public static createLink<T>(propName: string, defaultValue: T) : LinkDecoratedVariable<Object> {
+    public static createLink<T>(propName: string, defaultValue: T) : LinkDecoratedVariable<NullableObject> {
         return AppStorage.getOrCreate().createLink<T>(propName, defaultValue);
     }
 
@@ -56,7 +57,7 @@ export class AppStorage extends LocalStorage {
         return AppStorage.getOrCreate().setAndProp<T>(propName, defaultValue);
     }
 
-    public static createProp<T>(propName: string, defaultValue: T) : PropDecoratedVariable<Object> {
+    public static createProp<T>(propName: string, defaultValue: T) : PropDecoratedVariable<NullableObject> {
         return AppStorage.getOrCreate().createProp<T>(propName, defaultValue);
     }
 

@@ -86,7 +86,7 @@ export abstract class DecoratedVariableBase<T> {
 base class for all V1 decorated DecoratedVariableBase implements DecoratedVariableBase
 */
 
-export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase<T> {
+export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase<T> implements SubscribedAbstractProperty<T>{
 
     // V1 decorators can optionally have one @Watch function
     // to manage Local/AppStorge dependencies additional WatchFunc are required
@@ -104,18 +104,28 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase<T
             this._watchFuncs.set(w.id(), w);
         }
     }
+
+    public aboutToBeDeleted(): void {}
+
+    public info(): string {
+        return this.varName;
+    }
+
     get(): T {
         return this.__backing.value;
     }
+
     set(newValue: T) {
         console.log("Dummpy set function called");
     }
+
     public addWatch(watchFunc?: WatchFuncType) {
         if (watchFunc) {
             const w = new WatchFunc(watchFunc);
             this._watchFuncs.set(w.id(), w);
         }
     }
+    
     /**
      * remove WatchFunc with given id
      * @param watchId 

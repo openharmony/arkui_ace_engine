@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { DecoratedV1VariableBase, SubscribedAbstractProperty } from '../base/decoratorBase';
+import { DecoratedV1VariableBase, IDecoratedMutableVariable } from '../base/decoratorBase';
 import { setObservationDepth } from '../base/iObservedObject';
 import { WatchFunc, WatchFuncType } from './decoratorWatch';
 /** 
@@ -29,7 +29,7 @@ import { WatchFunc, WatchFuncType } from './decoratorWatch';
 * manage dependencies of the @link: LinkDecoratedVariable does not use its meta
 */
 export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements SubscribedAbstractProperty<T> {
+    implements IDecoratedMutableVariable<T> {
 
     private sourceGet_: () => T;
     private sourceSet_?: (newValue: T) => void;
@@ -50,12 +50,6 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
         // @Watch function exec
         this.registerWatchForObservedObjectChanges(initValue);
         source.registerWatchToSource(this);
-    }
-
-    public aboutToBeDeleted(): void {}
-
-    public info(): string {
-        return this.varName;
     }
 
     public getInfo(): string {
