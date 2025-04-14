@@ -105,7 +105,8 @@ public:
         }
         currRowHeight_ = std::max(currRowHeight_, height);
         currLane_++;
-        if (currLane_ == lanes_) {
+        if (currLane_ == lanes_ || (posMap_ &&
+            posMap_->GetPositionInfo(currentIndex_).mainPos != posMap_->GetPositionInfo(currentIndex_ + 1).mainPos)) {
             if (syncPosMap_ && posMap_) {
                 PositionInfo info = { estimateHeight_, currRowHeight_, false };
                 posMap_->UpdatePosRange(currentIndex_ - (lanes_ - 1), currentIndex_ + 1, info, spaceWidth_, lanes_);
