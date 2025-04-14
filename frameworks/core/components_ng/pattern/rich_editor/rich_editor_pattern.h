@@ -492,7 +492,8 @@ public:
     void ProcessStyledString();
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
     void SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, const ImageSpanOptions& options);
-    void InsertValueInStyledString(const std::u16string& insertValue, bool shouldCommitInput = false);
+    void InsertValueInStyledString(
+        const std::u16string& insertValue, bool shouldCommitInput = false, bool isPaste = false);
     void HandleStyledStringInsertion(RefPtr<SpanString> insertStyledString, const UndoRedoRecord& record,
         std::u16string& subValue, bool needReplaceInTextPreview, bool shouldCommitInput);
     RefPtr<SpanString> CreateStyledStringByTextStyle(
@@ -1594,6 +1595,7 @@ private:
     void SetMagnifierOffsetWithAnimation(Offset offset);
     void UpdateSelectionAndHandleVisibility();
     void SetIsEnableSubWindowMenu();
+    void OnReportRichEditorEvent(const std::string& event);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
