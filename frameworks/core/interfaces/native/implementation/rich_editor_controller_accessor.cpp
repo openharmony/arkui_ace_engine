@@ -443,18 +443,14 @@ Ark_Number AddTextSpanImpl(Ark_RichEditorController peer,
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
     CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
-    int32_t result = 0;
-    std::optional<TextSpanOptions> locOptions;
-    if (options) {
-        locOptions = Converter::OptConvert<TextSpanOptions>(*options);
+    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Number>(0));
+    TextSpanOptions locOptions;
+    auto optionsOpt = options ? Converter::OptConvert<TextSpanOptions>(*options) : std::nullopt;
+    if (optionsOpt) {
+        locOptions = optionsOpt.value();
     }
-    if (value && locOptions) {
-        locOptions->value = Converter::Convert<std::u16string>(*value);
-    }
-    if (locOptions) {
-        result = peerImpl->AddTextSpanImpl(locOptions.value());
-    }
-    return Converter::ArkValue<Ark_Number>(result);
+    locOptions.value = Converter::Convert<std::u16string>(*value);
+    return Converter::ArkValue<Ark_Number>(peerImpl->AddTextSpanImpl(locOptions));
 }
 Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
                             const Ark_Union_PixelMap_ResourceStr* value,
@@ -462,26 +458,21 @@ Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
     CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
-    int32_t result = 0;
-    std::optional<ImageSpanOptions> locOptions;
-    if (options) {
-        locOptions = Converter::OptConvert<ImageSpanOptions>(*options);
+    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Number>(0));
+    ImageSpanOptions locOptions;
+    auto optionsOpt = options ? Converter::OptConvert<ImageSpanOptions>(*options) : std::nullopt;
+    if (optionsOpt) {
+        locOptions = optionsOpt.value();
     }
-
-    if (value && locOptions) {
-        auto info = Converter::OptConvert<ImageSourceInfo>(*value);
-        if (info) {
-            locOptions->image = info->GetSrc();
-            locOptions->bundleName = info->GetBundleName();
-            locOptions->moduleName = info->GetModuleName();
-            locOptions->imagePixelMap = info->GetPixmap();
-            locOptions->isUriPureNumber = info->GetIsUriPureNumber();
-        }
+    auto info = Converter::OptConvert<ImageSourceInfo>(*value);
+    if (info) {
+        locOptions.image = info->GetSrc();
+        locOptions.bundleName = info->GetBundleName();
+        locOptions.moduleName = info->GetModuleName();
+        locOptions.imagePixelMap = info->GetPixmap();
+        locOptions.isUriPureNumber = info->GetIsUriPureNumber();
     }
-    if (locOptions) {
-        result = peerImpl->AddImageSpanImpl(locOptions.value());
-    }
-    return Converter::ArkValue<Ark_Number>(result);
+    return Converter::ArkValue<Ark_Number>(peerImpl->AddImageSpanImpl(locOptions));
 }
 Ark_Number AddBuilderSpanImpl(Ark_RichEditorController peer,
                               const CustomNodeBuilder* value,
@@ -489,21 +480,16 @@ Ark_Number AddBuilderSpanImpl(Ark_RichEditorController peer,
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
     CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
-    int32_t result = 0;
-    std::optional<SpanOptionBase> locOptions = options ? Converter::OptConvert<SpanOptionBase>(*options) : std::nullopt;
-    if (locOptions.has_value()) {
-        if (!value) {
-            result = peerImpl->AddBuilderSpanImpl(locOptions.value());
-        } else {
-            auto pattern = peerImpl->GetPattern().Upgrade();
-            auto frameNodeWeakPtr = pattern ? pattern->GetHost() : nullptr;
-            auto customNode = CallbackHelper(*value).BuildSync(Referenced::RawPtr(frameNodeWeakPtr));
-            if (customNode) {
-                result = peerImpl->AddBuilderSpanImpl(customNode, locOptions.value());
-            }
-        }
+    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Number>(0));
+    SpanOptionBase locOptions;
+    auto optionsOpt = options ? Converter::OptConvert<SpanOptionBase>(*options) : std::nullopt;
+    if (optionsOpt) {
+        locOptions = optionsOpt.value();
     }
-    return Converter::ArkValue<Ark_Number>(result);
+    auto pattern = peerImpl->GetPattern().Upgrade();
+    auto frameNodeWeakPtr = pattern ? pattern->GetHost() : nullptr;
+    auto customNode = CallbackHelper(*value).BuildSync(Referenced::RawPtr(frameNodeWeakPtr));
+    return Converter::ArkValue<Ark_Number>(peerImpl->AddBuilderSpanImpl(customNode, locOptions));
 }
 Ark_Number AddSymbolSpanImpl(Ark_RichEditorController peer,
                              const Ark_Resource* value,
@@ -511,19 +497,17 @@ Ark_Number AddSymbolSpanImpl(Ark_RichEditorController peer,
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
     CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
-    int32_t result = 0;
-    std::optional<SymbolSpanOptions> locOptions;
-    if (options && value) {
-        locOptions = Converter::OptConvert<SymbolSpanOptions>(*options);
-        auto convValue = Converter::OptConvert<Converter::SymbolData>(*value);
-        if (convValue && convValue->symbol) {
-            locOptions->symbolId = convValue->symbol.value();
-        }
+    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Number>(0));
+    SymbolSpanOptions locOptions;
+    auto optionsOpt = options ? Converter::OptConvert<SymbolSpanOptions>(*options) : std::nullopt;
+    if (optionsOpt) {
+        locOptions = optionsOpt.value();
     }
-    if (locOptions) {
-        result = peerImpl->AddSymbolSpanImpl(locOptions.value());
+    auto convValue = Converter::OptConvert<Converter::SymbolData>(*value);
+    if (convValue && convValue->symbol) {
+        locOptions.symbolId = convValue->symbol.value();
     }
-    return Converter::ArkValue<Ark_Number>(result);
+    return Converter::ArkValue<Ark_Number>(peerImpl->AddSymbolSpanImpl(locOptions));
 }
 void UpdateSpanStyleImpl(Ark_RichEditorController peer,
                          const Ark_Type_RichEditorController_updateSpanStyle_value* value)
