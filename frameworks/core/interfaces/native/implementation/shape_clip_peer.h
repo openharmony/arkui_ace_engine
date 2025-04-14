@@ -15,67 +15,12 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_SHAPE_CLIP_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_SHAPE_CLIP_PEER_IMPL_H
 
-#include "base/geometry/shape.h"
+#include "shape_mask_peer.h"
 
-using OHOS::Ace::AceType;
-using OHOS::Ace::Dimension;
-using OHOS::Ace::DimensionOffset;
-using OHOS::Ace::RefPtr;
-
-const int32_t DEFAULT_COLOR = 0xFF000000;
-const float DEFAULT_WIDTH = 0.0f;
-
-struct ShapeClipPeer final {
+struct ShapeClipPeer final : public BaseShapePeer {
 protected:
-        ShapeClipPeer() = default;
-        ~ ShapeClipPeer() = default;
-        friend OHOS::Ace::NG::PeerUtils;
-
-public:
-    void SetRectShape(const RefPtr<OHOS::Ace::ShapeRect>& value)
-    {
-        ResetAll();
-        rect = value;
-    }
-    void SetRoundRectShape(const RefPtr<OHOS::Ace::ShapeRect>& value)
-    {
-        ResetAll();
-        roundRect = value;
-    }
-    void SetCircleShape(const RefPtr<OHOS::Ace::Circle>& value)
-    {
-        ResetAll();
-        circle = value;
-    }
-    void SetOvalShape(const RefPtr<OHOS::Ace::ShapeRect>& value)
-    {
-        ResetAll();
-        oval = value;
-    }
-    void SetCommandPath(const std::string& value)
-    {
-        ResetAll();
-        path = value;
-    }
-
-private:
-    void ResetAll()
-    {
-        rect = nullptr;
-        roundRect = nullptr;
-        circle = nullptr;
-        oval = nullptr;
-        path = std::nullopt;
-    }
-
-public:
-    RefPtr<OHOS::Ace::ShapeRect> rect = nullptr;
-    RefPtr<OHOS::Ace::ShapeRect> roundRect = nullptr;
-    RefPtr<OHOS::Ace::Circle> circle = nullptr;
-    RefPtr<OHOS::Ace::ShapeRect> oval = nullptr;
-    std::optional<std::string> path = std::nullopt;
-    uint32_t fillColor = DEFAULT_COLOR;
-    uint32_t strokeColor = DEFAULT_COLOR;
-    float strokeWidth = DEFAULT_WIDTH;
+    ShapeClipPeer() = default;
+    ~ShapeClipPeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };
-#endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_SHAPE_CLIP_PEER_IMPL_H
+#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_SHAPE_CLIP_PEER_IMPL_H

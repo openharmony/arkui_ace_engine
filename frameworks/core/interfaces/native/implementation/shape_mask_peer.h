@@ -25,9 +25,9 @@ using OHOS::Ace::RefPtr;
 const int32_t DEFAULT_COLOR = 0xFF000000;
 const float DEFAULT_WIDTH = 0.0f;
 
-struct ShapeMaskPeer {
-    ShapeMaskPeer() = default;
-    virtual ~ShapeMaskPeer() = default;
+struct BaseShapePeer {
+    BaseShapePeer() = default;
+    virtual ~BaseShapePeer() = default;
 
     void SetRectShape(const RefPtr<OHOS::Ace::ShapeRect>& value)
     {
@@ -71,6 +71,15 @@ public:
     RefPtr<OHOS::Ace::Circle> circle = nullptr;
     RefPtr<OHOS::Ace::ShapeRect> oval = nullptr;
     std::optional<std::string> path = std::nullopt;
+};
+
+struct ShapeMaskPeer final : public BaseShapePeer {
+protected:
+    ShapeMaskPeer() = default;
+    ~ShapeMaskPeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
+
+public:
     uint32_t fillColor = DEFAULT_COLOR;
     uint32_t strokeColor = DEFAULT_COLOR;
     float strokeWidth = DEFAULT_WIDTH;
