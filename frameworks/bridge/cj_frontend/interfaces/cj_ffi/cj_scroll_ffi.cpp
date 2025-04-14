@@ -109,6 +109,9 @@ void NativeNGScroller::ScrollToIndex(int32_t index, bool smooth, int32_t align)
         LOGE("controller_ is nullptr");
         return;
     }
+    if (align < 0 || align >= static_cast<int32_t>(SCROLL_ALIGN_LIST.size())) {
+        return;
+    }
     controller_->ScrollToIndex(index, smooth, SCROLL_ALIGN_LIST[align]);
 }
 
