@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { DecoratedV1VariableBase, SubscribedAbstractProperty, IDecoratedUpdatableVariable } from '../base/decoratorBase';
+import { DecoratedV1VariableBase, IDecoratedMutableVariable, IDecoratedUpdatableVariable } from '../base/decoratorBase';
 import { setObservationDepth } from '../base/iObservedObject';
 import { WatchFunc, WatchFuncType } from './decoratorWatch';
 import { BackingValue } from '../base/backingValue';
@@ -49,9 +49,9 @@ function deepCopy<T>(value: T): T {
     // when object property
     return propDeepCopy<T>(value) as T;
 }
-
+ 
 export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements SubscribedAbstractProperty<T>, IDecoratedUpdatableVariable<T> {
+    implements IDecoratedMutableVariable<T>, IDecoratedUpdatableVariable<T> {
     private __soruceValue: BackingValue<T>;
     // initValue is the init value either from parent @Component or local initialized value
     // constructor takes a copy of it
@@ -65,12 +65,6 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
         // if initValue not from parent, this __sourceValue should never changed
         this.__soruceValue = new BackingValue<T>(initValue); 
         this.registerWatchForObservedObjectChanges(this.__backing.value);
-    }
-
-    public aboutToBeDeleted(): void {}
-    
-    public info(): string {
-        return this.varName;
     }
 
     public getInfo(): string {
