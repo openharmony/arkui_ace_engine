@@ -98,7 +98,6 @@ struct PreparedInfoForDrag {
     RefPtr<FrameNode> textRowNode { nullptr };
     RefPtr<FrameNode> textNode { nullptr };
     RefPtr<FrameNode> menuNode { nullptr };
-    bool hasTransition = false;
     // for menu follow animation
     float menuPositionLeft = 0.0f;
     float menuPositionTop = 0.0f;

@@ -688,4 +688,28 @@ HWTEST_F(DragAnimationHelperTestNg, CreateBadgeTextNodeTest001, TestSize.Level1)
     auto textNode = DragAnimationHelper::CreateBadgeTextNode(2);
     EXPECT_NE(textNode, nullptr);
 }
+
+/**
+ * @tc.name: ShowMenuHideAnimation001
+ * @tc.desc: Test ShowMenuHideAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, ShowMenuHideAnimation001, TestSize.Level1)
+{
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, GetElmtId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    DragPreviewOption previewOption;
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
+    imageNode->SetDragPreviewOptions(previewOption);
+    PreparedInfoForDrag data;
+    DragAnimationHelper::ShowMenuHideAnimation(imageNode, data);
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
+    imageNode->SetDragPreviewOptions(previewOption);
+    auto menuNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_TAG, GetElmtId(), []() { return AceType::MakeRefPtr<MenuPattern>(0, "", MenuType::MENU); });
+    data.menuNode = menuNode;
+    DragAnimationHelper::ShowMenuHideAnimation(imageNode, data);
+    EXPECT_EQ(data.menuNode, menuNode);
+}
 } // namespace OHOS::Ace::NG
