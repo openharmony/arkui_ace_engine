@@ -53,12 +53,15 @@
 #include "core/components_ng/svg/parse/svg_circle.h"
 #include "core/components_ng/svg/parse/svg_clip_path.h"
 #include "core/components_ng/svg/parse/svg_defs.h"
+#include "core/components_ng/svg/parse/svg_ellipse.h"
 #include "core/components_ng/svg/parse/svg_fe_color_matrix.h"
 #include "core/components_ng/svg/parse/svg_fe_composite.h"
 #include "core/components_ng/svg/parse/svg_fe_offset.h"
 #include "core/components_ng/svg/parse/svg_filter.h"
 #include "core/components_ng/svg/parse/svg_g.h"
 #include "core/components_ng/svg/parse/svg_gradient.h"
+#include "core/components_ng/svg/parse/svg_image.h"
+#include "core/components_ng/svg/parse/svg_line.h"
 #include "core/components_ng/svg/parse/svg_linear_gradient.h"
 #include "core/components_ng/svg/parse/svg_mask.h"
 #include "core/components_ng/svg/parse/svg_path.h"
@@ -1051,6 +1054,176 @@ HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SvgLinearGradientTest010
+ * @tc.desc: test/ LinearGradient spread reflect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest010, TestSize.Level1)
+{
+    auto svgLinearGradient = AceType::DynamicCast<SvgLinearGradient>(SvgLinearGradient::Create());
+    EXPECT_NE(svgLinearGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    const std::string gradienttransform("scale(1.5)");
+    svgLinearGradient->SetAttr("gradienttransform", gradienttransform);
+    svgLinearGradient->SetAttr("spreadmethod", "reflect");
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    auto linearGradientInfo = svgLinearGradient->GetLinearGradientInfo(svgCoordinateSystemContext);
+    EXPECT_EQ(linearGradientInfo.spreadMethod, static_cast<int32_t>(OHOS::Ace::NG::SvgSpreadMethod::REFLECT));
+    EXPECT_EQ(linearGradientInfo.gradientTransform, gradienttransform);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: SvgLinearGradientTest011
+ * @tc.desc: test LinearGradient spread pad
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest011, TestSize.Level1)
+{
+    auto svgLinearGradient = AceType::DynamicCast<SvgLinearGradient>(SvgLinearGradient::Create());
+    EXPECT_NE(svgLinearGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    svgLinearGradient->SetAttr("spreadmethod", "pad");
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    auto linearGradientInfo = svgLinearGradient->GetLinearGradientInfo(svgCoordinateSystemContext);
+    EXPECT_EQ(linearGradientInfo.spreadMethod, static_cast<int32_t>(OHOS::Ace::NG::SvgSpreadMethod::PAD));
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: SvgLinearGradientTest012
+ * @tc.desc: test LinearGradient spread repeat
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest012, TestSize.Level1)
+{
+    auto svgLinearGradient = AceType::DynamicCast<SvgLinearGradient>(SvgLinearGradient::Create());
+    EXPECT_NE(svgLinearGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    svgLinearGradient->SetAttr("spreadmethod", "repeat");
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    auto linearGradientInfo = svgLinearGradient->GetLinearGradientInfo(svgCoordinateSystemContext);
+    EXPECT_EQ(linearGradientInfo.spreadMethod, static_cast<int32_t>(OHOS::Ace::NG::SvgSpreadMethod::REPEAT));
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: SvgLinearGradientTest013
+ * @tc.desc: test LinearGradient spread error, api equal 18
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest013, TestSize.Level1)
+{
+    auto svgLinearGradient = AceType::DynamicCast<SvgLinearGradient>(SvgLinearGradient::Create());
+    EXPECT_NE(svgLinearGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    svgLinearGradient->SetAttr("spreadmethod", "error");
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    auto linearGradientInfo = svgLinearGradient->GetLinearGradientInfo(svgCoordinateSystemContext);
+    EXPECT_EQ(linearGradientInfo.spreadMethod, static_cast<int32_t>(OHOS::Ace::NG::SvgSpreadMethod::PAD));
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: SvgLinearGradientTest014
+ * @tc.desc: test LinearGradient x1, y1, x2, y2, api equal 18
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest014, TestSize.Level1)
+{
+    auto svgLinearGradient = AceType::DynamicCast<SvgLinearGradient>(SvgLinearGradient::Create());
+    EXPECT_NE(svgLinearGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    svgLinearGradient->SetAttr("x1", "30");
+    svgLinearGradient->SetAttr("y1", "30");
+    svgLinearGradient->SetAttr("x2", "30");
+    svgLinearGradient->SetAttr("y2", "30");
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    auto linearGradientInfo = svgLinearGradient->GetLinearGradientInfo(svgCoordinateSystemContext);
+    EXPECT_FLOAT_EQ(linearGradientInfo.x1, 30);
+    EXPECT_FLOAT_EQ(linearGradientInfo.y1, 30);
+    EXPECT_FLOAT_EQ(linearGradientInfo.x2, 30);
+    EXPECT_FLOAT_EQ(linearGradientInfo.y2, 30);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: SvgLinearGradientTest015
+ * @tc.desc: test LinearGradient, api equal 18
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest015, TestSize.Level1)
+{
+    auto svgLinearGradient = AceType::DynamicCast<SvgLinearGradient>(SvgLinearGradient::Create());
+    EXPECT_NE(svgLinearGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    svgLinearGradient->SetAttr("gradientunits", "objectBoundingBox");
+    svgLinearGradient->SetAttr("x1", "0.5");
+    svgLinearGradient->SetAttr("y1", "0.5");
+    svgLinearGradient->SetAttr("x2", "0.5");
+    svgLinearGradient->SetAttr("y2", "0.5");
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    auto linearGradientInfo = svgLinearGradient->GetLinearGradientInfo(svgCoordinateSystemContext);
+    EXPECT_FLOAT_EQ(linearGradientInfo.x1, 0.5);
+    EXPECT_FLOAT_EQ(linearGradientInfo.y1, 0.5);
+    EXPECT_FLOAT_EQ(linearGradientInfo.x2, 0.5);
+    EXPECT_FLOAT_EQ(linearGradientInfo.y2, 0.5);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: SvgLinearGradientTest016
+ * @tc.desc: test LinearGradient, api equal 18
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest016, TestSize.Level1)
+{
+    auto svgLinearGradient = AceType::DynamicCast<SvgLinearGradient>(SvgLinearGradient::Create());
+    EXPECT_NE(svgLinearGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    svgLinearGradient->SetAttr("gradientunits", "error");
+    svgLinearGradient->SetAttr("x1", "0.5");
+    svgLinearGradient->SetAttr("y1", "0.5");
+    svgLinearGradient->SetAttr("x2", "0.5");
+    svgLinearGradient->SetAttr("y2", "0.5");
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    auto linearGradientInfo = svgLinearGradient->GetLinearGradientInfo(svgCoordinateSystemContext);
+    EXPECT_FLOAT_EQ(linearGradientInfo.x1, 0.5);
+    EXPECT_FLOAT_EQ(linearGradientInfo.y1, 0.5);
+    EXPECT_FLOAT_EQ(linearGradientInfo.x2, 0.5);
+    EXPECT_FLOAT_EQ(linearGradientInfo.y2, 0.5);
+    MockContainer::TearDown();
+}
+
+/**
  * @tc.name: Svg Linear Gradient
  * @tc.desc: test ApplyTransform
  * @tc.type: FUNC
@@ -1159,6 +1332,182 @@ HWTEST_F(SvgNodeTestNg, SvgRadialGradientTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SvgRadialGradientTest004
+ * @tc.desc: test/ RadialGradient spread reflect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgRadialGradientTest004, TestSize.Level1)
+{
+    auto svgRadialGradient = AceType::DynamicCast<SvgRadialGradient>(SvgRadialGradient::Create());
+    EXPECT_NE(svgRadialGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    const std::string gradienttransform("scale(1.5)");
+    svgRadialGradient->SetAttr("gradienttransform", gradienttransform);
+    svgRadialGradient->SetAttr("spreadmethod", "reflect");
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    auto radialGradientInfo = svgRadialGradient->GetRadialGradientInfo(svgCoordinateSystemContext);
+    EXPECT_EQ(radialGradientInfo.spreadMethod, static_cast<int32_t>(OHOS::Ace::NG::SvgSpreadMethod::REFLECT));
+    EXPECT_EQ(radialGradientInfo.gradientTransform, gradienttransform);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: SvgRadialGradientTest005
+ * @tc.desc: test/ RadialGradient spread pad
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgRadialGradientTest005, TestSize.Level1)
+{
+    auto svgRadialGradient = AceType::DynamicCast<SvgRadialGradient>(SvgRadialGradient::Create());
+    EXPECT_NE(svgRadialGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    svgRadialGradient->SetAttr("spreadmethod", "pad");
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    auto radialGradientInfo = svgRadialGradient->GetRadialGradientInfo(svgCoordinateSystemContext);
+    EXPECT_EQ(radialGradientInfo.spreadMethod, static_cast<int32_t>(OHOS::Ace::NG::SvgSpreadMethod::PAD));
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: SvgRadialGradientTest006
+ * @tc.desc: test/ RadialGradient spread repeat
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgRadialGradientTest006, TestSize.Level1)
+{
+    auto svgRadialGradient = AceType::DynamicCast<SvgRadialGradient>(SvgRadialGradient::Create());
+    EXPECT_NE(svgRadialGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    svgRadialGradient->SetAttr("spreadmethod", "repeat");
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    auto radialGradientInfo = svgRadialGradient->GetRadialGradientInfo(svgCoordinateSystemContext);
+    EXPECT_EQ(radialGradientInfo.spreadMethod, static_cast<int32_t>(OHOS::Ace::NG::SvgSpreadMethod::REPEAT));
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: SvgRadialGradientTest007
+ * @tc.desc: test/ RadialGradient spread error
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgRadialGradientTest007, TestSize.Level1)
+{
+    auto svgRadialGradient = AceType::DynamicCast<SvgRadialGradient>(SvgRadialGradient::Create());
+    EXPECT_NE(svgRadialGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    svgRadialGradient->SetAttr("spreadmethod", "error");
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    auto radialGradientInfo = svgRadialGradient->GetRadialGradientInfo(svgCoordinateSystemContext);
+    EXPECT_EQ(radialGradientInfo.spreadMethod, static_cast<int32_t>(OHOS::Ace::NG::SvgSpreadMethod::PAD));
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: SvgRadialGradientTest008
+ * @tc.desc: test/ RadialGradient gradientunits default cx, cy, fx, fy, r
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgRadialGradientTest008, TestSize.Level1)
+{
+    auto svgRadialGradient = AceType::DynamicCast<SvgRadialGradient>(SvgRadialGradient::Create());
+    EXPECT_NE(svgRadialGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    svgRadialGradient->SetAttr("cx", "30");
+    svgRadialGradient->SetAttr("cy", "30");
+    svgRadialGradient->SetAttr("fx", "30");
+    svgRadialGradient->SetAttr("fy", "30");
+    svgRadialGradient->SetAttr("r", "30");
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    auto radialGradientInfo = svgRadialGradient->GetRadialGradientInfo(svgCoordinateSystemContext);
+    EXPECT_FLOAT_EQ(radialGradientInfo.cx, 30);
+    EXPECT_FLOAT_EQ(radialGradientInfo.cy, 30);
+    EXPECT_FLOAT_EQ(radialGradientInfo.fx, 30);
+    EXPECT_FLOAT_EQ(radialGradientInfo.fy, 30);
+    EXPECT_FLOAT_EQ(radialGradientInfo.r, 30);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: SvgRadialGradientTest009
+ * @tc.desc: test/ RadialGradient gradientunits=objectBoundingBox cx, cy, fx, fy, r
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgRadialGradientTest009, TestSize.Level1)
+{
+    auto svgRadialGradient = AceType::DynamicCast<SvgRadialGradient>(SvgRadialGradient::Create());
+    EXPECT_NE(svgRadialGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    svgRadialGradient->SetAttr("gradientunits", "objectBoundingBox");
+    svgRadialGradient->SetAttr("cx", "30");
+    svgRadialGradient->SetAttr("cy", "30");
+    svgRadialGradient->SetAttr("fx", "30");
+    svgRadialGradient->SetAttr("fy", "30");
+    svgRadialGradient->SetAttr("r", "30");
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    auto radialGradientInfo = svgRadialGradient->GetRadialGradientInfo(svgCoordinateSystemContext);
+    EXPECT_FLOAT_EQ(radialGradientInfo.cx, 30);
+    EXPECT_FLOAT_EQ(radialGradientInfo.cy, 30);
+    EXPECT_FLOAT_EQ(radialGradientInfo.fx, 30);
+    EXPECT_FLOAT_EQ(radialGradientInfo.fy, 30);
+    EXPECT_FLOAT_EQ(radialGradientInfo.r, 30);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: SvgRadialGradientTest010
+ * @tc.desc: test/ RadialGradient gradientunits = error cx, cy, fx, fy, r
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgRadialGradientTest010, TestSize.Level1)
+{
+    auto svgRadialGradient = AceType::DynamicCast<SvgRadialGradient>(SvgRadialGradient::Create());
+    EXPECT_NE(svgRadialGradient, nullptr);
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    svgRadialGradient->SetAttr("gradientunits", "error");
+    svgRadialGradient->SetAttr("cx", "30");
+    svgRadialGradient->SetAttr("cy", "30");
+    svgRadialGradient->SetAttr("fx", "30");
+    svgRadialGradient->SetAttr("fy", "30");
+    svgRadialGradient->SetAttr("r", "30");
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    auto radialGradientInfo = svgRadialGradient->GetRadialGradientInfo(svgCoordinateSystemContext);
+    EXPECT_FLOAT_EQ(radialGradientInfo.cx, 30);
+    EXPECT_FLOAT_EQ(radialGradientInfo.cy, 30);
+    EXPECT_FLOAT_EQ(radialGradientInfo.fx, 30);
+    EXPECT_FLOAT_EQ(radialGradientInfo.fy, 30);
+    EXPECT_FLOAT_EQ(radialGradientInfo.r, 30);
+    MockContainer::TearDown();
+}
+
+/**
  * @tc.name: SvgPolygonPathTest001
  * @tc.desc: test asPath
  * @tc.type: FUNC
@@ -1200,6 +1549,427 @@ HWTEST_F(SvgNodeTestNg, SvgPolygonPathTest003, TestSize.Level1)
     Size viewPort(100, 100);
     auto rsPath = svgPolygon->AsPath(viewPort);
     EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgPolygonPathTest004
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgPolygonPathTest004, TestSize.Level1)
+{
+    auto svgPolygon = AceType::DynamicCast<SvgPolygon>(SvgPolygon::CreatePolygon());
+    EXPECT_NE(svgPolygon, nullptr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    auto rsPath = svgPolygon->AsPath(clipPathRule);
+    EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgPolygonPathTest005
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgPolygonPathTest005, TestSize.Level1)
+{
+    auto svgPolygon = AceType::DynamicCast<SvgPolygon>(SvgPolygon::CreatePolygon());
+    EXPECT_NE(svgPolygon, nullptr);
+    svgPolygon->polyAttr_.points = "abc";
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    auto rsPath = svgPolygon->AsPath(clipPathRule);
+    EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgPolygonPathTest006
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgPolygonPathTest006, TestSize.Level1)
+{
+    auto svgPolygon = AceType::DynamicCast<SvgPolygon>(SvgPolygon::CreatePolygon());
+    EXPECT_NE(svgPolygon, nullptr);
+    svgPolygon->polyAttr_.points = "200 210";
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    auto rsPath = svgPolygon->AsPath(clipPathRule);
+    EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgPolygonPathTest007
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgPolygonPathTest007, TestSize.Level1)
+{
+    auto svgPolygon = AceType::DynamicCast<SvgPolygon>(SvgPolygon::CreatePolygon());
+    EXPECT_NE(svgPolygon, nullptr);
+    svgPolygon->polyAttr_.points = "200 210";
+    SvgBaseAttribute attr;
+    attr.clipState.clipRule_ = SvgRuleType::SVG_RULE_EVENODD;
+    svgPolygon->SetBaseAttributes(attr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    auto rsPath = svgPolygon->AsPath(clipPathRule);
+    EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgPolygonPathTest008
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgPolygonPathTest008, TestSize.Level1)
+{
+    auto svgPolygon = AceType::DynamicCast<SvgPolygon>(SvgPolygon::CreatePolygon());
+    EXPECT_NE(svgPolygon, nullptr);
+    svgPolygon->polyAttr_.points = "200 210";
+    SvgBaseAttribute attr;
+    attr.clipState.clipRule_ = SvgRuleType::SVG_RULE_EVENODD;
+    svgPolygon->SetBaseAttributes(attr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+    auto rsPath = svgPolygon->AsPath(clipPathRule);
+    svgPolygon->path_ = rsPath;
+    svgPolygon->lengthRule_ = clipPathRule;
+    rsPath = svgPolygon->AsPath(clipPathRule);
+    EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgCirclePathTest001
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgCirclePathTest001, TestSize.Level1)
+{
+    auto svgCircle = AceType::DynamicCast<SvgCircle>(SvgCircle::Create());
+    EXPECT_NE(svgCircle, nullptr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    auto rsPath = svgCircle->AsPath(clipPathRule);
+    svgCircle->path_ = rsPath;
+    svgCircle->lengthRule_ = clipPathRule;
+    rsPath = svgCircle->AsPath(clipPathRule);
+    EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgDefsPathTest001
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgDefsPathTest001, TestSize.Level1)
+{
+    auto svgDefs = AceType::DynamicCast<SvgDefs>(SvgDefs::Create());
+    EXPECT_NE(svgDefs, nullptr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    auto rsPath = svgDefs->AsPath(clipPathRule);
+    EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgEllipsePathTest001
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgEllipsePathTest001, TestSize.Level1)
+{
+    auto svgEllipse = AceType::DynamicCast<SvgEllipse>(SvgEllipse::Create());
+    EXPECT_NE(svgEllipse, nullptr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    auto rsPath = svgEllipse->AsPath(clipPathRule);
+    EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgEllipsePathTest002
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgEllipsePathTest002, TestSize.Level1)
+{
+    auto svgEllipse = AceType::DynamicCast<SvgEllipse>(SvgEllipse::Create());
+    EXPECT_NE(svgEllipse, nullptr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    auto rsPath = svgEllipse->AsPath(clipPathRule);
+    svgEllipse->path_ = rsPath;
+    svgEllipse->lengthRule_ = clipPathRule;
+    rsPath = svgEllipse->AsPath(clipPathRule);
+    EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgGPathTest001
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGPathTest001, TestSize.Level1)
+{
+    auto svgG = AceType::DynamicCast<SvgG>(SvgG::Create());
+    EXPECT_NE(svgG, nullptr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    auto rsPath = svgG->AsPath(clipPathRule);
+    EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgLinePathTest001
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinePathTest001, TestSize.Level1)
+{
+    auto svgLine = AceType::DynamicCast<SvgLine>(SvgLine::Create());
+    EXPECT_NE(svgLine, nullptr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    auto rsPath = svgLine->AsPath(clipPathRule);
+    EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgPathPathTest001
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgPathPathTest001, TestSize.Level1)
+{
+    auto svgPath = AceType::DynamicCast<SvgPath>(SvgPath::Create());
+    EXPECT_NE(svgPath, nullptr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    SvgBaseAttribute attr;
+    attr.fillState.SetFillRule("evenodd");
+    svgPath->SetBaseAttributes(attr);
+    svgPath->d_ = "test";
+    auto rsPath = svgPath->AsPath(clipPathRule);
+    svgPath->path_ = rsPath;
+    rsPath = svgPath->AsPath(clipPathRule);
+    EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgRectPathTest001
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgRectPathTest001, TestSize.Level1)
+{
+    auto svgRect = AceType::DynamicCast<SvgRect>(SvgRect::Create());
+    EXPECT_NE(svgRect, nullptr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    auto rsPath = svgRect->AsPath(clipPathRule);
+    svgRect->path_ = rsPath;
+    svgRect->lengthRule_ = clipPathRule;
+    rsPath = svgRect->AsPath(clipPathRule);
+    EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgUsePathTest001
+ * @tc.desc: test asPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgUsePathTest001, TestSize.Level1)
+{
+    auto svgUse = AceType::DynamicCast<SvgUse>(SvgUse::Create());
+    EXPECT_NE(svgUse, nullptr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    SvgBaseAttribute attr;
+    attr.href = "testFill";
+    svgUse->SetBaseAttributes(attr);
+    auto rsPath = svgUse->AsPath(clipPathRule);
+    EXPECT_EQ(rsPath.IsValid(), false);
+}
+
+/**
+ * @tc.name: SvgImageOnDrawTest001
+ * @tc.desc: test OnDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgImageOnDrawTest001, TestSize.Level1)
+{
+    auto svgImage = AceType::DynamicCast<SvgImage>(SvgImage::Create());
+    EXPECT_NE(svgImage, nullptr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    svgImage->imageAttr_.x = Dimension(5.0);
+    svgImage->imageAttr_.y = Dimension(5.0);
+    svgImage->imageAttr_.width = Dimension(5.0);
+    svgImage->imageAttr_.height = Dimension(5.0);
+    RSCanvas canvas;
+    svgImage->OnDraw(canvas, clipPathRule);
+}
+
+/**
+ * @tc.name: SvgImageOnDrawTest002
+ * @tc.desc: test OnDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgImageOnDrawTest002, TestSize.Level1)
+{
+    auto svgImage = AceType::DynamicCast<SvgImage>(SvgImage::Create());
+    EXPECT_NE(svgImage, nullptr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    svgImage->imageAttr_.x = Dimension(5.0);
+    svgImage->imageAttr_.y = Dimension(5.0);
+    svgImage->imageAttr_.width = Dimension(-5.0);
+    svgImage->imageAttr_.height = Dimension(-5.0);
+    svgImage->imageAttr_.href = "hrefTest";
+    RSCanvas canvas;
+    svgImage->OnDraw(canvas, clipPathRule);
+}
+
+/**
+ * @tc.name: SvgImageOnDrawTest003
+ * @tc.desc: test OnDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgImageOnDrawTest003, TestSize.Level1)
+{
+    auto svgImage = AceType::DynamicCast<SvgImage>(SvgImage::Create());
+    EXPECT_NE(svgImage, nullptr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    svgImage->imageAttr_.x = Dimension(0.0);
+    svgImage->imageAttr_.y = Dimension(0.0);
+    svgImage->imageAttr_.width = Dimension(200.0);
+    svgImage->imageAttr_.height = Dimension(200.0);
+    svgImage->imageAttr_.href = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...";
+    RSCanvas canvas;
+    svgImage->OnDraw(canvas, clipPathRule);
+}
+
+/**
+ * @tc.name: SvgImageOnDrawTest004
+ * @tc.desc: test OnDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgImageOnDrawTest004, TestSize.Level1)
+{
+    auto svgImage = AceType::DynamicCast<SvgImage>(SvgImage::Create());
+    EXPECT_NE(svgImage, nullptr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    svgImage->imageAttr_.x = Dimension(0.0);
+    svgImage->imageAttr_.y = Dimension(0.0);
+    svgImage->imageAttr_.width = Dimension(200.0);
+    svgImage->imageAttr_.height = Dimension(200.0);
+    svgImage->imageAttr_.href = "image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...";
+    RSCanvas canvas;
+    svgImage->OnDraw(canvas, clipPathRule);
+}
+
+/**
+ * @tc.name: SvgImageOnDrawTest005
+ * @tc.desc: test OnDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgImageOnDrawTest005, TestSize.Level1)
+{
+    auto svgImage = AceType::DynamicCast<SvgImage>(SvgImage::Create());
+    EXPECT_NE(svgImage, nullptr);
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    svgImage->imageAttr_.x = Dimension(0.0);
+    svgImage->imageAttr_.y = Dimension(0.0);
+    svgImage->imageAttr_.width = Dimension(200.0);
+    svgImage->imageAttr_.height = Dimension(200.0);
+    svgImage->imageAttr_.href = "data:";
+    RSCanvas canvas;
+    svgImage->OnDraw(canvas, clipPathRule);
+}
+
+/**
+ * @tc.name: SvgLengthScaleRuleTest001
+ * @tc.desc: test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLengthScaleRuleTest001, TestSize.Level1)
+{
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, viewPort);
+    SvgLengthScaleRule clipPathRule =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    auto baseRect = clipPathRule.GetContainerRect();
+    EXPECT_EQ(baseRect.Left(), 0);
+    EXPECT_EQ(baseRect.Top(), 0);
+    EXPECT_EQ(baseRect.Width(), 1);
+    EXPECT_EQ(baseRect.Height(), 1);
+    auto lengthScaleUnit = clipPathRule.GetLengthScaleUnit();
+    EXPECT_EQ(lengthScaleUnit, OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    SvgLengthScaleRule clipPathRule2 =
+        svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+    EXPECT_EQ(clipPathRule==clipPathRule2, false);
 }
 
 /**
