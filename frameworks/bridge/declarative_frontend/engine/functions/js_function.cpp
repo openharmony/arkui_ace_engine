@@ -114,7 +114,7 @@ void JsFunctionBase::ExecuteNew(const std::vector<std::string>& keys, const std:
     ExecuteJS(1, &jsVal);
 }
 
-JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
+JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[], bool isAnimation)
 {
     JS_CALLBACK_DURATION();
     JAVASCRIPT_EXECUTION_SCOPE_STATIC
@@ -129,14 +129,14 @@ JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
     return result;
 }
 
-JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
+JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[], bool isAnimation)
 {
     JS_CALLBACK_DURATION();
     JAVASCRIPT_EXECUTION_SCOPE_STATIC
     ACE_FUNCTION_TRACE();
 
     JSRef<JSVal> jsObject = jsThis_.Lock();
-    JSRef<JSVal> result = jsFunction_->Call(jsObject, argc, argv);
+    JSRef<JSVal> result = jsFunction_->Call(jsObject, argc, argv, isAnimation);
     return result;
 }
 

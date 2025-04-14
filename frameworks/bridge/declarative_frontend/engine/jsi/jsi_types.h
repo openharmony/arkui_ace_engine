@@ -234,7 +234,8 @@ public:
     explicit JsiFunction(const panda::CopyableGlobal<panda::FunctionRef>& val);
     ~JsiFunction() override = default;
 
-    JsiRef<JsiValue> Call(JsiRef<JsiValue> thisVal, int argc = 0, JsiRef<JsiValue> argv[] = nullptr) const;
+    JsiRef<JsiValue> Call(
+        JsiRef<JsiValue> thisVal, int argc = 0, JsiRef<JsiValue> argv[] = nullptr, bool isAnimation = false) const;
     static panda::Local<panda::FunctionRef> New(JsiFunctionCallback func);
 
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiFunction)
