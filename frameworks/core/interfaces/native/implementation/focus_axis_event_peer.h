@@ -17,7 +17,6 @@
 
 #include "core/event/focus_axis_event.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
-#include "core/interfaces/native/utility/peer_utils.h"
 
 struct FocusAxisEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::NG::FocusAxisEventInfo> {

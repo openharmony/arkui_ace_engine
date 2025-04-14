@@ -60,11 +60,11 @@ const Ark_Number DefaultValueArkNumber = Converter::ArkValue<Ark_Number>(0);
 
 void DestroyPeerImpl(Ark_BaseEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_BaseEvent CtorImpl()
 {
-    return new BaseEventPeerImpl();
+    return PeerUtils::CreatePeer<BaseEventPeerImpl>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -215,11 +215,17 @@ void SetDeviceIdImpl(Ark_BaseEvent peer,
 }
 Opt_Number GetTargetDisplayIdImpl(Ark_BaseEvent peer)
 {
-    return {};
+    auto invalid = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
+    int32_t value = peer->GetBaseInfo()->GetTargetDisplayId();
+    return Converter::ArkValue<Opt_Number>(value);
 }
 void SetTargetDisplayIdImpl(Ark_BaseEvent peer,
                             const Ark_Number* targetDisplayId)
 {
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(targetDisplayId);
+    peer->GetBaseInfo()->SetTargetDisplayId(Converter::Convert<int32_t>(*targetDisplayId));
 }
 } // BaseEventAccessor
 

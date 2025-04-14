@@ -17,7 +17,6 @@
 
 #include "core/event/mouse_event.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
-#include "core/interfaces/native/utility/peer_utils.h"
 
 struct AccessibilityHoverEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::AccessibilityHoverInfo> {
