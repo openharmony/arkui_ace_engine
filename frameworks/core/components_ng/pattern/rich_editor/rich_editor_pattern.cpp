@@ -417,6 +417,7 @@ RefPtr<DecorationSpan> RichEditorPattern::CreateDecorationSpanByTextStyle(
     std::optional<Color> colorOption;
     std::optional<TextDecorationStyle> styleOption;
     std::optional<TextDecorationOptions> options;
+    std::optional<float> thicknessScale;
     if (updateSpanStyle.updateTextDecoration.has_value()) {
         type = textStyle.GetTextDecorationFirst();
     }
@@ -426,8 +427,12 @@ RefPtr<DecorationSpan> RichEditorPattern::CreateDecorationSpanByTextStyle(
     if (updateSpanStyle.updateTextDecorationStyle.has_value()) {
         styleOption = textStyle.GetTextDecorationStyle();
     }
+    if (updateSpanStyle.updateLineThicknessScale.has_value()) {
+        thicknessScale = textStyle.GetLineThicknessScale();
+    }
     return AceType::MakeRefPtr<DecorationSpan>(
-        std::vector<TextDecoration>({type}), colorOption, styleOption, options, 0, length);
+        std::vector<TextDecoration>({type}), colorOption, styleOption,
+        thicknessScale, options, 0, length);
 }
 
 void RichEditorPattern::DeleteBackwardInStyledString(int32_t length)
@@ -1263,6 +1268,7 @@ void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpan
         spanNode->UpdateTextDecoration(textStyle.GetTextDecoration());
         spanNode->UpdateTextDecorationColorWithoutCheck(textStyle.GetTextDecorationColor());
         spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
+        spanNode->UpdateLineThicknessScale(textStyle.GetLineThicknessScale());
         spanNode->UpdateTextShadow(textStyle.GetTextShadows());
         spanNode->UpdateHalfLeading(textStyle.GetHalfLeading());
         spanNode->UpdateLineHeight(textStyle.GetLineHeight());
@@ -1703,6 +1709,7 @@ void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<S
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextDecoration);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextDecorationColor);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextDecorationStyle);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, LineThicknessScale);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextCase);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, LineHeight);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, HalfLeading);
@@ -2106,6 +2113,9 @@ void RichEditorPattern::UpdateDecoration(
     }
     if (updateSpanStyle.updateTextDecorationStyle.has_value()) {
         spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
+    }
+    if (updateSpanStyle.updateLineThicknessScale.has_value()) {
+        spanNode->UpdateLineThicknessScale(textStyle.GetLineThicknessScale());
     }
 }
 
@@ -2569,14 +2579,12 @@ void RichEditorPattern::UpdateStyledStringDecorationType(int32_t start, int32_t 
     std::optional<Color> colorOption;
     std::optional<TextDecorationStyle> styleOption;
     std::optional<TextDecorationOptions> options;
-    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({type}), colorOption, styleOption, options, start, end);
-    auto updateDecorationSpanFunc = [&type](const RefPtr<DecorationSpan>& oriDecorationSpan) -> RefPtr<DecorationSpan> {
+    std::optional<float> lineThicknessScale;
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({ type }), colorOption, styleOption, lineThicknessScale, options, start, end);
+    auto updateDecorationSpanFunc = [](const RefPtr<DecorationSpan>& oriDecorationSpan) -> RefPtr<DecorationSpan> {
         CHECK_NULL_RETURN(oriDecorationSpan, nullptr);
-        auto decorationColor = oriDecorationSpan->GetColor();
-        auto decorationStyle = oriDecorationSpan->GetTextDecorationStyle();
-        auto decorationOptions = oriDecorationSpan->GetTextDecorationOptions();
-        return AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({type}), decorationColor, decorationStyle,
-            decorationOptions, oriDecorationSpan->GetStartIndex(), oriDecorationSpan->GetEndIndex());
+        return oriDecorationSpan;
     };
     UpdateSpansStyleInRange<DecorationSpan>(start, end, decorationSpan, updateDecorationSpanFunc);
 }
@@ -4232,6 +4240,7 @@ TextStyleResult RichEditorPattern::GetTextStyleBySpanItem(const RefPtr<SpanItem>
             spanItem->fontStyle->GetTextDecorationColor().value_or(style.GetTextDecorationColor()).ColorToString();
         textStyle.decorationStyle =
             static_cast<int32_t>(spanItem->fontStyle->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
+        textStyle.lineThicknessScale = static_cast<float>(spanItem->fontStyle->GetLineThicknessScale().value_or(0.0f));
         textStyle.fontFeature = spanItem->fontStyle->GetFontFeature().value_or(ParseFontFeatureSettings("\"pnum\" 1"));
         textStyle.letterSpacing = spanItem->fontStyle->GetLetterSpacing().value_or(Dimension()).ConvertToFp();
     }
@@ -5610,6 +5619,7 @@ TextStyle RichEditorPattern::CreateTextStyleByTypingStyle()
     IF_TRUE(updateSpanStyle.updateTextDecoration, ret.SetTextDecoration(textStyle.GetTextDecoration()));
     IF_TRUE(updateSpanStyle.updateTextDecorationColor, ret.SetTextDecorationColor(textStyle.GetTextDecorationColor()));
     IF_TRUE(updateSpanStyle.updateTextDecorationStyle, ret.SetTextDecorationStyle(textStyle.GetTextDecorationStyle()));
+    IF_TRUE(updateSpanStyle.updateLineThicknessScale, ret.SetLineThicknessScale(textStyle.GetLineThicknessScale()));
     IF_TRUE(updateSpanStyle.updateTextBackgroundStyle, ret.SetTextBackgroundStyle(textStyle.GetTextBackgroundStyle()));
     return ret;
 }
@@ -5799,6 +5809,7 @@ bool RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     retInfo.SetFontFamily(fontFamilyValue);
     retInfo.SetTextDecoration(spanNode->GetTextDecorationFirst());
     retInfo.SetTextDecorationStyle(spanNode->GetTextDecorationStyleValue(TextDecorationStyle::SOLID));
+    retInfo.SetLineThicknessScale(spanNode->GetLineThicknessScaleValue(0.0f));
     retInfo.SetFontFeature(spanNode->GetFontFeatureValue(ParseFontFeatureSettings("\"pnum\" 1")));
     retInfo.SetColor(spanNode->GetTextDecorationColorValue(Color::BLACK).ColorToString());
     TextRange onDidIMEInputRange{ caretPosition_, caretPosition_ + insertValueLength };
@@ -6888,6 +6899,7 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
     spanResult.SetColor(spanItem->GetTextStyle()->GetTextDecorationColor().ColorToString());
     spanResult.SetTextDecoration(spanItem->GetTextStyle()->GetTextDecorationFirst());
     spanResult.SetTextDecorationStyle(spanItem->GetTextStyle()->GetTextDecorationStyle());
+    spanResult.SetLineThicknessScale(spanItem->GetTextStyle()->GetLineThicknessScale());
     spanResult.SetFontFeature(spanItem->GetTextStyle()->GetFontFeatures());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, eraseLength);
@@ -10473,6 +10485,7 @@ void RichEditorPattern::SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo,
     retInfo.SetFontColor(textStyle.GetTextColor().ColorToString());
     retInfo.SetColor(textStyle.GetTextDecorationColor().ColorToString());
     retInfo.SetTextDecorationStyle(textStyle.GetTextDecorationStyle());
+    retInfo.SetLineThicknessScale(textStyle.GetLineThicknessScale());
     retInfo.SetFontSize(textStyle.GetFontSize().ConvertToVp());
     retInfo.SetFontStyle(textStyle.GetFontStyle());
     TextStyleResult textStyleResult;

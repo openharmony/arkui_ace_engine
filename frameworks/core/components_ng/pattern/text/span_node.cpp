@@ -1515,6 +1515,7 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
         json->Put("SymbolEffect",
             spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString().c_str());
     }
+    json->Put("LineThicknessScale", std::to_string(textStyle->GetLineThicknessScale()).c_str());
 }
 
 void SpanNode::UpdateContent(const uint32_t& unicode)

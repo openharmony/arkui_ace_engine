@@ -218,6 +218,7 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     decorationObj->SetProperty<int32_t>("type", textStyleResult.decorationType);
     decorationObj->SetProperty<std::string>("color", textStyleResult.decorationColor);
     decorationObj->SetProperty<int32_t>("style", textStyleResult.decorationStyle);
+    decorationObj->SetProperty<float>("thicknessScale", textStyleResult.lineThicknessScale);
     textStyleObj->SetPropertyObject("decoration", decorationObj);
 
     textStyleObj->SetProperty<double>("lineHeight", textStyleResult.lineHeight);
@@ -720,6 +721,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     decorationObj->SetProperty<int32_t>("type", static_cast<int32_t>(textSpanResult.GetTextDecoration()));
     decorationObj->SetProperty<std::string>("color", textSpanResult.GetColor());
     decorationObj->SetProperty<int32_t>("style", static_cast<int32_t>(textSpanResult.GetTextDecorationStyle()));
+    decorationObj->SetProperty<int32_t>("thicknessScale", static_cast<float>(textSpanResult.GetLineThicknessScale()));
     textStyleObj->SetProperty<std::string>("fontColor", textSpanResult.GetFontColor());
     textStyleObj->SetProperty<std::string>("fontFeature", UnParseFontFeatureSetting(textSpanResult.GetFontFeatures()));
     textStyleObj->SetProperty<double>("fontSize", textSpanResult.GetFontSize());
@@ -943,6 +945,7 @@ void JSRichEditor::CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::R
     decorationObj->SetProperty<int32_t>("type", (int32_t)(spanResult.GetTextDecoration()));
     decorationObj->SetProperty<std::string>("color", spanResult.GetColor());
     decorationObj->SetProperty<int32_t>("style", (int32_t)(spanResult.GetTextDecorationStyle()));
+    decorationObj->SetProperty<int32_t>("thicknessScale", (int32_t)(spanResult.GetLineThicknessScale()));
     textStyleObj->SetProperty<std::string>("fontColor", spanResult.GetFontColor());
     textStyleObj->SetProperty<std::string>("fontFeature", UnParseFontFeatureSetting(spanResult.GetFontFeatures()));
     textStyleObj->SetProperty<double>("fontSize", spanResult.GetFontSize());
@@ -2622,6 +2625,12 @@ void JSRichEditorBaseController::ParseTextDecoration(
             updateSpanStyle.updateTextDecorationStyle =
                 static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>());
             style.SetTextDecorationStyle(static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>()));
+        }
+        JSRef<JSVal> thicknessScale = decorationObject->GetProperty("thicknessScale");
+        if (!thicknessScale->IsNull() && !thicknessScale->IsUndefined() && thicknessScale->IsNumber()) {
+            float thickness = std::max(thicknessScale->ToNumber<float>(), 0.0f);
+            updateSpanStyle.updateLineThicknessScale = thickness;
+            style.SetLineThicknessScale(thickness);
         }
         updateSpanStyle.isInitDecoration = true;
     }
