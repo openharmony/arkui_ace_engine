@@ -38,6 +38,14 @@ const auto ATTRIBUTE_EDGE_EFFECT_OPTIONS_ALWAYS_ENABLED_NAME = "alwaysEnabled";
 const auto ATTRIBUTE_EDGE_EFFECT_OPTIONS_ALWAYS_ENABLED_DEFAULT_VALUE = "false";
 const auto ATTRIBUTE_FRICTION_NAME = "friction";
 const auto ATTRIBUTE_FRICTION_DEFAULT_VALUE = "0.75";
+const auto ATTRIBUTE_BACK_TO_TOP_NAME = "backToTop";
+const auto ATTRIBUTE_BACK_TO_TOP_DEFAULT_VALUE = "false";
+#ifdef SUPPORT_DIGITAL_CROWN
+const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE = "1";
+const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME = "digitalCrownSensitivity";
+#endif
+static const std::string EXPECTED_TRUE("true");
+static const std::string EXPECTED_FALSE("false");
 } // namespace
 
 class ScrollableCommonMethodModifierTest
@@ -364,5 +372,83 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setOnScrollStopTest, TestSize.Level
 
     ASSERT_TRUE(checkData.has_value());
     EXPECT_EQ(checkData.value(), contextId);
+}
+
+#ifdef SUPPORT_DIGITAL_CROWN
+std::vector<std::tuple<std::string, Opt_CrownSensitivity, std::string>> testFixtureEnumCrownSensitivityTestPlan = {
+    { "CrownSensitivity.LOW", Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_LOW),
+        "0" },
+    { "CrownSensitivity.MEDIUM", Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_MEDIUM),
+        "1" },
+    { "CrownSensitivity.HIGH", Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_HIGH),
+        "2" },
+    { "-1", Converter::ArkValue<Opt_CrownSensitivity>(static_cast<Ark_CrownSensitivity>(-1)),
+        ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE },
+    { "INT_MAX", Converter::ArkValue<Opt_CrownSensitivity>(static_cast<Ark_CrownSensitivity>(INT_MAX)),
+        ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE },
+    { "Ark_Empty", Converter::ArkValue<Opt_CrownSensitivity>(static_cast<Ark_CrownSensitivity>(INT_MAX)),
+        ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE },
+};
+/*
+ * @tc.name: setDigitalCrownSensitivityDefaultValuesTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCommonMethodModifierTest, setDigitalCrownSensitivityDefaultValuesTest, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE)
+        << "Default value for attribute 'digitalCrownSensitivity'";
+}
+
+/*
+ * @tc.name: setDigitalCrownSensitivityValidValuesTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCommonMethodModifierTest, setDigitalCrownSensitivityValuesTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDigitalCrownSensitivity, nullptr);
+    Opt_CrownSensitivity initValueDigitalCrownSensitivity;
+    // Initial setup
+    initValueDigitalCrownSensitivity = std::get<1>(testFixtureEnumCrownSensitivityTestPlan[0]);
+    auto checkValue = [this, &initValueDigitalCrownSensitivity](
+                        const std::string& input, const std::string& expectedStr, const Opt_CrownSensitivity& value) {
+        Opt_CrownSensitivity inputValueDigitalCrownSensitivity = initValueDigitalCrownSensitivity;
+        inputValueDigitalCrownSensitivity = value;
+        modifier_->setDigitalCrownSensitivity(node_, &inputValueDigitalCrownSensitivity);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
+                                        << ", method: setDigitalCrownSensitivity, attribute: digitalCrownSensitivity";
+    };
+    for (auto& [input, value, expected] : testFixtureEnumCrownSensitivityTestPlan) {
+        checkValue(input, expected, value);
+    }
+}
+#endif
+//BackToTopImpl
+/**
+ * @tc.name: backToTop
+ * @tc.desc: Check backToTop method of ScrollableCommonMethod modifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCommonMethodModifierTest, backToTop, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackToTop, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_BACK_TO_TOP_NAME);
+    EXPECT_EQ(checkVal, ATTRIBUTE_BACK_TO_TOP_DEFAULT_VALUE);
+    auto value = Converter::ArkValue<Ark_Boolean>(false);
+    modifier_->setBackToTop(node_, value);
+    checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_BACK_TO_TOP_NAME);
+    EXPECT_EQ(checkVal, EXPECTED_FALSE);
+    value = Converter::ArkValue<Ark_Boolean>(true);
+    modifier_->setBackToTop(node_, value);
+    checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_BACK_TO_TOP_NAME);
+    EXPECT_EQ(checkVal, EXPECTED_TRUE);
 }
 } // namespace OHOS::Ace::NG
