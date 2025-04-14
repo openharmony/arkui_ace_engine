@@ -958,8 +958,8 @@ HWTEST_F(TextTestEightNg, GetSuitableSizeLD002, TestSize.Level1)
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     ASSERT_NE(rowLayoutAlgorithm, nullptr);
     TextStyle textStyle;
-    textStyle.adaptMaxFontSize_ = Dimension(-1);
-    textStyle.adaptMinFontSize_ = Dimension(5);
+    textStyle.adaptMaxFontSize_.value = Dimension(-1);
+    textStyle.adaptMinFontSize_.value = Dimension(5);
     std::u16string content;
     LayoutConstraintF contentConstraint;
     RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);

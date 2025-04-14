@@ -1785,7 +1785,7 @@ HWTEST_F(TextTestFiveNg, UpdateTextColorIfForeground001, TestSize.Level1)
     TextStyle textStyle;
 
     renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::INVERT);
-    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle);
+    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle, Color::BLACK);
     EXPECT_EQ(textStyle.GetTextColor(), Color::FOREGROUND);
 
     textStyle.SetTextColor(Color::BLACK);

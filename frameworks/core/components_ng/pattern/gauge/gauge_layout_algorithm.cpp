@@ -353,10 +353,7 @@ bool GaugeLayoutAlgorithm::GetLimitFontSize(LayoutWrapper* layoutWrapper, bool i
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(textLayoutTextWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(textLayoutAlgorithm, false);
     auto limitTextStyle = textLayoutAlgorithm->GetTextStyle();
-    if (!limitTextStyle.has_value()) {
-        return false;
-    }
-    fontSize = limitTextStyle->GetFontSize();
+    fontSize = limitTextStyle.GetFontSize();
     return true;
 }
 

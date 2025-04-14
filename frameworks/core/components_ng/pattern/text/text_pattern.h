@@ -109,9 +109,11 @@ public:
         auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
         if (textLayoutProperty &&
             textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
-            return MakeRefPtr<TextLayoutAlgorithm>(spans_, pManager_, isSpanStringMode_, true);
+            return MakeRefPtr<TextLayoutAlgorithm>(
+                spans_, pManager_, isSpanStringMode_, textStyle_.value_or(TextStyle()), true);
         } else {
-            return MakeRefPtr<TextLayoutAlgorithm>(spans_, pManager_, isSpanStringMode_);
+            return MakeRefPtr<TextLayoutAlgorithm>(
+                spans_, pManager_, isSpanStringMode_, textStyle_.value_or(TextStyle()));
         }
     }
 

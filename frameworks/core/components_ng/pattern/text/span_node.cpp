@@ -348,7 +348,7 @@ int32_t SpanItem::UpdateParagraph(
     auto pipelineContext = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, -1);
     auto spanTextStyle = textStyle;
-    UseSelfStyle(fontStyle, textLineStyle, spanTextStyle, false, frameNode->GetTag() == V2::RICH_EDITOR_ETS_TAG);
+    UseSelfStyle(fontStyle, textLineStyle, spanTextStyle, false);
     if (fontStyle && fontStyle->HasFontWeight()) {
         spanTextStyle.SetEnableVariableFontWeight(false);
     }
@@ -384,8 +384,7 @@ bool SpanItem::UpdateSpanTextStyle(const TextStyle& textStyle, const RefPtr<Fram
     auto pipelineContext = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, false);
     CHECK_NULL_RETURN(textStyle_.has_value(), true);
-    UpdateReLayoutTextStyle(
-        textStyle_.value(), textStyle, unicode != 0, frameNode->GetTag() == V2::RICH_EDITOR_ETS_TAG);
+    UpdateReLayoutTextStyle(textStyle_.value(), textStyle, unicode != 0);
     if (fontStyle && fontStyle->HasFontWeight()) {
         textStyle_.value().SetEnableVariableFontWeight(false);
     } else {
@@ -431,42 +430,20 @@ bool SpanItem::CheckSpanNeedReCreate(int32_t index)
         }                                                              \
     } while (false)
 
-#define UPDATE_TEXT_STYLE_DIMENSION_TYPE(group, name, styleName)                                              \
-    do {                                                                                                       \
-        Dimension value;                                                                                       \
-        if (group) {                                                                                           \
-            value = (group)->prop##name.value_or(textStyle.Get##styleName());                                  \
-        } else {                                                                                               \
-            value = textStyle.Get##styleName();                                                                \
-        }                                                                                                      \
-        if (value.Unit() != DimensionUnit::PERCENT) {                                                          \
-            spanTextStyle.Set##styleName(Dimension(value.ConvertToPxDistribute(textStyle.GetMinFontScale(),    \
-                                                       textStyle.GetMaxFontScale(), textStyle.IsAllowScale()), \
-                DimensionUnit::PX));                                                                           \
-        } else {                                                                                               \
-            spanTextStyle.Set##styleName(value);                                                               \
-        }                                                                                                      \
-    } while (false)
-
 void SpanItem::UpdateReLayoutTextStyle(
-    TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol, bool isRichEditor)
+    TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol)
 {
     // The setting of AllowScale, MinFontScale, MaxFontScale must be done before any Dimension-type properties that
     // depend on its value.
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, AllowScale, AllowScale);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, MinFontScale, MinFontScale);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, MaxFontScale, MaxFontScale);
-    if (!isRichEditor) {
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, FontSize, FontSize);
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, LetterSpacing, LetterSpacing);
-    } else {
-        UPDATE_SPAN_TEXT_STYLE(fontStyle, FontSize, FontSize);
-        UPDATE_SPAN_TEXT_STYLE(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
-        UPDATE_SPAN_TEXT_STYLE(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
-        UPDATE_SPAN_TEXT_STYLE(fontStyle, LetterSpacing, LetterSpacing);
-    }
+
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, FontSize, FontSize);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, LetterSpacing, LetterSpacing);
+
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextColor, TextColor);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextShadow, TextShadows);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, ItalicFontStyle, FontStyle);
@@ -488,15 +465,10 @@ void SpanItem::UpdateReLayoutTextStyle(
         UPDATE_SPAN_TEXT_STYLE(fontStyle, FontFamily, FontFamilies);
     }
 
-    if (!isRichEditor) {
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE(textLineStyle, LineHeight, LineHeight);
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE(textLineStyle, BaselineOffset, BaselineOffset);
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE(textLineStyle, LineSpacing, LineSpacing);
-    } else {
-        UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineHeight, LineHeight);
-        UPDATE_SPAN_TEXT_STYLE(textLineStyle, BaselineOffset, BaselineOffset);
-        UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineSpacing, LineSpacing);
-    }
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineHeight, LineHeight);
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, BaselineOffset, BaselineOffset);
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineSpacing, LineSpacing);
+
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, HalfLeading, HalfLeading);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextBaseline, TextBaseline);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextOverflow, TextOverflow);
@@ -1381,7 +1353,7 @@ int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNo
 bool PlaceholderSpanItem::UpdateSpanTextStyle(const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_RETURN(textStyle_.has_value(), true);
-    UpdateReLayoutTextStyle(textStyle_.value(), textStyle, false, frameNode->GetTag() == V2::RICH_EDITOR_ETS_TAG);
+    UpdateReLayoutTextStyle(textStyle_.value(), textStyle, false);
     textStyle_->SetTextDecoration(TextDecoration::NONE);
     textStyle_->SetTextBackgroundStyle(backgroundStyle);
     textStyle_->SetTextStyleUid(nodeId_);

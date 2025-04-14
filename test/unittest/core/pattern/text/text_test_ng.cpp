@@ -842,7 +842,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithm001, TestSize.Level1)
     std::list<RefPtr<SpanItem>> spans1_;
     auto pManager_ = AceType::MakeRefPtr<ParagraphManager>();
     ASSERT_NE(pManager_, nullptr);
-    auto textLayoutAlgorithm1 = AceType::MakeRefPtr<TextLayoutAlgorithm>(spans1_, pManager_, true);
+    auto textLayoutAlgorithm1 = AceType::MakeRefPtr<TextLayoutAlgorithm>(spans1_, pManager_, false, TextStyle(), true);
     ASSERT_NE(textLayoutAlgorithm1, nullptr);
     /**
      * @tc.steps: step2. call function.
@@ -852,7 +852,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithm001, TestSize.Level1)
     EXPECT_EQ(spans2_.size(), 4);
     auto pManager_1 = AceType::MakeRefPtr<ParagraphManager>();
     ASSERT_NE(pManager_1, nullptr);
-    auto textLayoutAlgorithm2 = AceType::MakeRefPtr<TextLayoutAlgorithm>(spans2_, pManager_1, true, true);
+    auto textLayoutAlgorithm2 = AceType::MakeRefPtr<TextLayoutAlgorithm>(spans2_, pManager_1, true, TextStyle(), true);
     ASSERT_NE(textLayoutAlgorithm2, nullptr);
     /**
      * @tc.steps: step3. call function.
@@ -867,7 +867,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithm001, TestSize.Level1)
     spans3_.emplace_back(span1);
     auto pManager_2 = AceType::MakeRefPtr<ParagraphManager>();
     ASSERT_NE(pManager_2, nullptr);
-    auto textLayoutAlgorithm3 = AceType::MakeRefPtr<TextLayoutAlgorithm>(spans3_, pManager_2, true, false);
+    auto textLayoutAlgorithm3 = AceType::MakeRefPtr<TextLayoutAlgorithm>(spans3_, pManager_2, true, TextStyle(), false);
     ASSERT_NE(textLayoutAlgorithm3, nullptr);
 }
 
@@ -895,7 +895,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithm002, TestSize.Level1)
     spans_.emplace_back(span2);
     auto pManager_ = AceType::MakeRefPtr<ParagraphManager>();
     ASSERT_NE(pManager_, nullptr);
-    auto textLayoutAlgorithm4 = AceType::MakeRefPtr<TextLayoutAlgorithm>(spans_, pManager_, true, false);
+    auto textLayoutAlgorithm4 = AceType::MakeRefPtr<TextLayoutAlgorithm>(spans_, pManager_, true, TextStyle(), false);
     ASSERT_NE(textLayoutAlgorithm4, nullptr);
 }
 
@@ -2344,7 +2344,8 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest002, TestSize.Level1)
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
     textPattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(std::move(textStyle)));
     auto contentModifier = textPattern->GetContentModifier();
-    textLayoutAlgorithm->SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle, textFrameNode);
+    textLayoutAlgorithm->SetPropertyToModifier(
+        textLayoutProperty, contentModifier, textStyle, textFrameNode, Color::BLACK);
     EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraphManager_->GetMaxWidth());
 }
 
@@ -2666,13 +2667,14 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
     textContentModifier.textDecorationAnimatable_ = true;
     textContentModifier.textDecoration_ = TextDecoration::UNDERLINE;
     textContentModifier.SetTextDecoration(TextDecoration::NONE);
-    textContentModifier.ModifyTextStyle(textStyle);
+    Color textColor;
+    textContentModifier.ModifyTextStyle(textStyle, textColor);
     // set textDecorationColorAlpha_ value
     textContentModifier.textDecorationColorAlpha_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1000.0f);
-    textContentModifier.ModifyTextStyle(textStyle);
+    textContentModifier.ModifyTextStyle(textStyle, textColor);
     // set textDecorationAnimatable_ false
     textContentModifier.SetTextDecoration(TextDecoration::LINE_THROUGH);
-    textContentModifier.ModifyTextStyle(textStyle);
+    textContentModifier.ModifyTextStyle(textStyle, textColor);
     EXPECT_EQ(textContentModifier.fontSizeFloat_->Get(), ADAPT_FONT_SIZE_VALUE.Value());
     EXPECT_EQ(textContentModifier.baselineOffsetFloat_->Get(), BASELINE_OFFSET_VALUE.Value());
     EXPECT_EQ(textStyle.GetFontSize().Value(), textContentModifier.fontSizeFloat_->Get());
