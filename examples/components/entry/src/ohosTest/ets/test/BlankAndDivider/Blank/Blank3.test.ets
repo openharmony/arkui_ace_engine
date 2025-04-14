@@ -33,8 +33,8 @@ import { BlankStart } from './Blank';
 
 const driver = Driver.create();
 
-export default function Blank1() {
-  describe('Blank1', () => {
+export default function Blank3() {
+  describe('Blank3', () => {
     /**
      * 打开应用
      */
