@@ -479,6 +479,7 @@ void WindowPattern::CreateStartingWindow()
     Rosen::SceneSessionManager::GetInstance().GetStartupPage(sessionInfo, startingWindowInfo);
     if (startingWindowInfo.configFileEnabled_) {
         CHECK_NULL_VOID(startingWindowLayoutHelper_);
+        lastParentSize_ = { 0.0f, 0.0f };
         startingWindow_ = startingWindowLayoutHelper_->CreateStartingWindowNode(
             startingWindowInfo, sessionInfo.bundleName_, sessionInfo.moduleName_);
         return;
