@@ -110,7 +110,7 @@ void TextPattern::OnAttachToFrameNode()
     if (fontManager) {
         fontManager->AddFontNodeNG(host);
     }
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         if (pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
             host->GetRenderContext()->UpdateClipEdge(true);
             host->GetRenderContext()->SetClipToFrame(true);
@@ -1711,6 +1711,21 @@ void TextPattern::RecoverCopyOption()
             copyOption_ = CopyOptions::None;
         }
     }
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (copyOption_ == CopyOptions::None && !textDetectEnable_ && !textLayoutProperty->GetTextOverflow() &&
+        !onClick_ && !longPressEvent_) { // performance prune
+        if (host->IsDraggable() || gestureEventHub->GetTextDraggable()) {
+            gestureEventHub->SetTextDraggable(false);
+            eventHub->SetDefaultOnDragStart(nullptr);
+            if (!eventHub->HasOnDragStart() && IsTextNode()) {
+                gestureEventHub->RemoveDragEvent();
+            }
+        }
+        return;
+    }
     if (copyOption_ == CopyOptions::None) {
         CloseSelectOverlay();
         ResetSelection();
@@ -1720,10 +1735,6 @@ void TextPattern::RecoverCopyOption()
         dataDetectorAdapter_->StartAITask();
     }
     ProcessMarqueeVisibleAreaCallback();
-    auto gestureEventHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureEventHub);
-    auto eventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
     InitCopyOption(gestureEventHub, eventHub);
     bool enabledCache = eventHub->IsEnabled();
     selectOverlay_->SetMenuTranslateIsSupport(IsShowTranslate());
@@ -2976,9 +2987,6 @@ void TextPattern::OnModifyDone()
     CHECK_NULL_VOID(renderContext);
     auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
     ACE_TEXT_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
-    auto logTag = "OnModifyDone:" + std::to_string(nowTime);
-    DumpRecord(logTag, true);
-    LogForFormRender(logTag);
     auto pipeline = host->GetContext();
     if (!(pipeline && pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
         bool shouldClipToContent =
@@ -4389,7 +4397,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, paintMethod);
     auto frameSize = geometryNode->GetFrameSize();
-    if (context->GetClipEdge().value_or(Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE))) {
+    if (context->GetClipEdge().value_or(host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE))) {
         SetResponseRegion(frameSize, frameSize);
         return paintMethod;
     }
