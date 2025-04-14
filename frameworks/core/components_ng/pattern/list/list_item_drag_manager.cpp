@@ -42,6 +42,18 @@ RefPtr<FrameNode> ListItemDragManager::GetListFrameNode() const
     return nullptr;
 }
 
+OffsetF ListItemDragManager::GetParentPaddingOffset()
+{
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_RETURN(parent, OffsetF(0.0f, 0.0f));
+    auto listGeometry = parent->GetGeometryNode();
+    CHECK_NULL_RETURN(listGeometry, OffsetF(0.0f, 0.0f));
+    CHECK_NULL_RETURN(listGeometry->GetPadding(), OffsetF(0.0f, 0.0f));
+    float left = listGeometry->GetPadding()->left.value_or(0.0f);
+    float top = listGeometry->GetPadding()->top.value_or(0.0f);
+    return OffsetF(left, top);
+}
+
 void ListItemDragManager::InitDragDropEvent()
 {
     auto host = GetHost();
@@ -114,9 +126,10 @@ void ListItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
     auto geometry = host->GetGeometryNode();
     CHECK_NULL_VOID(geometry);
     dragOffset_ = geometry->GetMarginFrameOffset();
-
     auto parent = listNode_.Upgrade();
     CHECK_NULL_VOID(parent);
+    auto paddingOffset = GetParentPaddingOffset();
+    dragOffset_ = dragOffset_ - paddingOffset;
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     axis_ = pattern->GetAxis();
@@ -414,7 +427,8 @@ void ListItemDragManager::HandleOnItemDragUpdate(const GestureEvent& info)
     PointF point(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
     HandleAutoScroll(from, point, frameRect);
 
-    int32_t to = ScaleNearItem(from, frameRect, realOffset_ - frameRect.GetOffset());
+    auto paddingOffset = GetParentPaddingOffset();
+    int32_t to = ScaleNearItem(from, frameRect, realOffset_ - frameRect.GetOffset() + paddingOffset);
     if (to == from) {
         return;
     }
