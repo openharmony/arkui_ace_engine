@@ -18,15 +18,29 @@
 #include "accessor_test_base.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
-// #include "test/mock/core/pipeline/mock_pipeline_context.cpp"
-
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
 
 class FocusControllerAccessorTest : public StaticAccessorTest<GENERATED_ArkUIFocusControllerAccessor,
-    &GENERATED_ArkUIAccessors::getFocusControllerAccessor> { };
+    &GENERATED_ArkUIAccessors::getFocusControllerAccessor> {
+public:
+    void SetUp(void) override
+    {
+        StaticAccessorTest::SetUp();
+        mockPipeLine_ = MockPipelineContext::GetCurrent();
+        ASSERT_NE(mockPipeLine_, nullptr);
+    }
+
+    void TearDown() override
+    {
+        StaticAccessorTest::TearDown();
+        mockPipeLine_ = nullptr;
+    }
+
+    RefPtr<MockPipelineContext> mockPipeLine_ = nullptr;
+};
 
 /**
  * @tc.name: RequestFocusTest
@@ -39,11 +53,7 @@ HWTEST_F(FocusControllerAccessorTest, RequestFocusTest, TestSize.Level1)
     const std::string expectedKey = "123";
     auto arkKey = Converter::ArkValue<Ark_String>(expectedKey);
 
-    auto pipeLine = MockPipelineContext::GetCurrent();
-    ASSERT_NE(pipeLine, nullptr);
-
-    EXPECT_CALL(*pipeLine, RequestFocus(expectedKey, false)).Times(1);
-    
+    EXPECT_CALL(*mockPipeLine_, RequestFocus(expectedKey, true)).Times(1);
     accessor_->requestFocus(&arkKey);
 }
 } // namespace OHOS::Ace::NG

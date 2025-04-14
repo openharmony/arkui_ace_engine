@@ -16,26 +16,19 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-// #include "frameworks/bridge/js_frontend/frontend_delegate.cpp"
-#include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FocusControllerAccessor {
 void RequestFocusImpl(const Ark_String* key)
 {
     CHECK_NULL_VOID(key);
-    std::string convKey = Converter::Convert<std::string>(*key);
-    auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipelineContext);
+    auto convKey = Converter::Convert<std::string>(*key);
+    bool isSyncRequest = true;
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    CHECK_NULL_VOID(focusManager);
 
-    // bool isSyncRequest = false;
-    // auto targetNodeId = convKey;
-    // pipelineContext->RequestFocus(targetNodeId, isSyncRequest);
-
-    auto delegate = EngineHelper::GetCurrentDelegateSafely();
-    if (!delegate) {
-        return;
-    }
     auto focusCallback = [](NG::RequestFocusResult result) {
         switch (result) {
             case NG::RequestFocusResult::NON_FOCUSABLE:
@@ -53,9 +46,10 @@ void RequestFocusImpl(const Ark_String* key)
                 break;
         }
     };
-    delegate->SetRequestFocusCallback(focusCallback);
-    delegate->RequestFocus(convKey, true);
-    delegate->ResetRequestFocusCallback();
+
+    focusManager->SetRequestFocusCallback(focusCallback);
+    pipeline->RequestFocus(convKey, isSyncRequest);
+    focusManager->ResetRequestFocusCallback();
 }
 } // FocusControllerAccessor
 const GENERATED_ArkUIFocusControllerAccessor* GetFocusControllerAccessor()

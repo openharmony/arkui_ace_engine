@@ -637,22 +637,7 @@ bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& event)
 
 bool PipelineContext::RequestFocus(const std::string& targetNodeId, bool isSyncRequest)
 {
-    auto rootNode = GetFocusedWindowSceneNode();
-    if (!rootNode) {
-        rootNode = rootNode_;
-    }
-    CHECK_NULL_RETURN(rootNode, false);
-    auto focusHub = rootNode->GetFocusHub();
-    CHECK_NULL_RETURN(focusHub, false);
-    auto currentFocusChecked = focusHub->RequestFocusImmediatelyById(targetNodeId, isSyncRequest);
-    if (!isSubPipeline_ || currentFocusChecked) {
-        return currentFocusChecked;
-    }
-    auto parentPipelineBase = parentPipeline_.Upgrade();
-    CHECK_NULL_RETURN(parentPipelineBase, false);
-    auto parentPipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentPipelineBase);
-    CHECK_NULL_RETURN(parentPipelineContext, false);
-    return parentPipelineContext->RequestFocus(targetNodeId, isSyncRequest);
+    return false;
 }
 
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const

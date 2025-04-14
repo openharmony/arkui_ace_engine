@@ -51,24 +51,17 @@ RefPtr<Framework::JsEngine> EngineHelper::GetCurrentEngine()
 
 RefPtr<Framework::JsEngine> EngineHelper::GetCurrentEngineSafely()
 {
-    // return nullptr;
-    return GetEngine(Container::CurrentIdSafely());
+    return nullptr;
 }
 
 ScopedDelegate EngineHelper::GetCurrentDelegate()
 {
-    // return { nullptr, 0 };
-    auto engine = GetCurrentEngineSafely();
-    if (engine) {
-        return { engine->GetFrontend(), Container::CurrentIdSafely() };
-    }
-    auto container = Container::CurrentSafely();
-    return GetDelegateByContainer(container);
+    return { nullptr, 0 };
 }
 
 ScopedDelegate EngineHelper::GetCurrentDelegateSafely()
 {
-    return GetCurrentDelegate();
+    return { nullptr, 0 };
 }
 
 std::pair<int32_t, int32_t> EngineHelper::StringToPair(const std::string& match)
