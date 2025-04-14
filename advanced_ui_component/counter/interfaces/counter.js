@@ -20,6 +20,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const accessibility = requireNapi('accessibility');
 const intl = requireNapi('intl');
+const i18n = requireNapi('i18n'); 
 
 export var CounterType;
 (function (CounterType) {
