@@ -21,8 +21,8 @@ import {
   ToggleClick } from '../../../utils';
 import { TextPickerStart } from './TextPicker';
 
-export default function TimePicker9() {
-  describe('TimePicker9', () => {
+export default function TextPicker9() {
+  describe('TextPicker9', () => {
 
     beforeAll(async (done: Function) => {
       await TextPickerStart(done)
