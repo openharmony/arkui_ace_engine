@@ -14,6 +14,7 @@
  */
 
 #include "image_ani_modifier.h"
+#include "web_ani_modifier.h"
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
@@ -21,6 +22,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
     static const ArkUIAniModifiers impl = {
         .version = ARKUI_ANI_API_VERSION,
         .getImageAniModifier = OHOS::Ace::NG::GetImageAniModifier,
+        .getWebAniModifier = OHOS::Ace::NG::GetWebAniModifier,
     };
     return &impl;
 }

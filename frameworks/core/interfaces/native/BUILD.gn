@@ -133,6 +133,7 @@ template("ace_core_interfaces_native_node") {
     sources += [
       "ani/image_ani_modifier.cpp",
       "ani/node_ani_modifier.cpp",
+      "ani/web_ani_modifier.cpp",
     ]
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]

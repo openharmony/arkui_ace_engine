@@ -13,16 +13,13 @@
  * limitations under the License.
  */
 
-import { KPointer } from "@koalaui/interop"
-import image from "@ohos.multimedia.image"
-import webview from "@ohos.web.webview"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_WEB_ANI_MODIFIER
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_WEB_ANI_MODIFIER
 
-export class ArkUIAniModule {
-    static {
-        loadLibrary("arkoala_native_ani")
-    }
+#include "core/interfaces/ani/ani_api.h"
 
-    native static _Image_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
+namespace OHOS::Ace::NG {
+const ArkUIAniWebModifier* GetWebAniModifier();
+} // namespace OHOS::Ace::NG
 
-    native static _Web_SetWebOptions(ptr: KPointer, webviewController: webview.WebviewController): void
-}
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_WEB_ANI_MODIFIER

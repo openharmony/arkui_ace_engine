@@ -12,6 +12,7 @@ import { SystemOps } from "./../ArkSystemOpsMaterialized"
 import { FocusController } from "./../ArkFocusControllerMaterialized"
 import { DrawingCanvas } from "./../ArkDrawingCanvasMaterialized"
 import { PixelMap } from "#external"
+import { WebviewController as WebviewControllerAni } from "#external"
 import { NodeController, TextModifier, RectWidthStyle, RectHeightStyle, Want, WebHeader, SnapshotOptions, PerfMonitorActionType, PerfMonitorSourceType, ShapeSize, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, EffectDirection, EffectScope, SymbolEffect, ErrorCallback } from "./../ArkArkuiExternalInterfaces"
 import { FontOptions, FontInfo } from "@ohos/font/font"
 import { MeasureOptions } from "@ohos/measure"
@@ -3717,6 +3718,9 @@ export class TypeChecker {
     }
     static isWebviewController(value: object|string|number|undefined|null): boolean {
         return value instanceof WebviewController
+    }
+    static isWebviewControllerAni(value: object|string|number|undefined|null): boolean {
+        return value instanceof WebviewControllerAni
     }
     static isWeek(value: object|string|number|undefined|null): boolean {
         return value instanceof Week

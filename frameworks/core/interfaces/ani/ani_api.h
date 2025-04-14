@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ANI_API_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ANI_API_H
 
+#include <functional>
+#include <string>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -32,9 +35,16 @@ struct ArkUIAniImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
 };
 
+struct ArkUIAniWebModifier {
+    void (*setWebOptions)(ArkUINodeHandle node,
+        std::function<void(int32_t)>&& onNWebId,
+        std::function<void(const std::string&)>&& onHapPath);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
+    const ArkUIAniWebModifier* (*getWebAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

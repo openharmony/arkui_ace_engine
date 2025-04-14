@@ -15,7 +15,9 @@
 
 import image from "@ohos.multimedia.image"
 import _Want from "@ohos.app.ability.Want"
+import webview from "@ohos.web.webview"
 export * from "@ohos.base"
 
 export type PixelMap = image.PixelMap
 export type AbilityWant = _Want
+export type WebviewController = webview.WebviewController

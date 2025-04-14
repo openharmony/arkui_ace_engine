@@ -24,6 +24,7 @@ import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { Deserializer } from "./../generated/peers/Deserializer"
 import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
 import { WebviewController, WebviewControllerInternal } from "./../generated/ArkWebviewControllerMaterialized"
+import { WebviewController as WebviewControllerAni } from "#external"
 import { Resource } from "global/resource";
 import { Callback_String_Void } from "./gridRow"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -1729,7 +1730,7 @@ export interface Literal_Object_object__String_name_Array_String_methodList {
 }
 export interface WebOptions {
     src: string | Resource;
-    controller: WebController | WebviewController;
+    controller: WebController | WebviewController| WebviewControllerAni;
     renderMode?: RenderMode;
     incognitoMode?: boolean;
     sharedRenderProcessToken?: string;
