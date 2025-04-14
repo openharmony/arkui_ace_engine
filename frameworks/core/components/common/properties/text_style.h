@@ -360,6 +360,9 @@ enum class ParagraphStyleAttribute {
     ELLIPSIS = 21,
     ELLIPSE_MODAL = 22,
     TEXT_ALIGN = 23,
+    SPACING = 24,
+    SPACING_IS_END = 25,
+    TEXT_HEIGHT_BEHAVIOR = 26,
 
     MAX_TEXT_STYLE
 };
