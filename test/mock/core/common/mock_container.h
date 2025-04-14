@@ -102,6 +102,11 @@ public:
         return isSubContainer_;
     }
 
+    bool IsFreeMultiWindow() const override
+    {
+        return isFreeMultiWindow_;
+    }
+
     void ResetContainer()
     {
         CHECK_NULL_VOID(container_);
@@ -110,6 +115,9 @@ public:
         container_->isSubContainer_ = false;
         container_->isSceneBoardWindow_ = false;
         container_->isCrossAxisWindow_ = false;
+        container_->isFreeMultiWindow_ = false;
+        container_->SetApiTargetVersion(0);
+        UpdateCurrent(0);
     }
 
     int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
@@ -159,6 +167,7 @@ private:
     bool isFormRender_ = false;
     bool isUIExtensionWindow_ = false;
     bool isSubContainer_ = false;
+    bool isFreeMultiWindow_ = false;
     bool isSceneBoardWindow_ = false;
     bool isCrossAxisWindow_ = false;
     RefPtr<DisplayInfo> displayInfo_ = MakeRefPtr<DisplayInfo>();
