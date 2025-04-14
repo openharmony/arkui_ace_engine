@@ -105,6 +105,28 @@ void SheetPresentationLayoutAlgorithm::ComputeWidthAndHeight(LayoutWrapper* layo
     sheetHeight_ = GetHeightByScreenSizeType(parentHeightConstraint, parentWidthConstraint, layoutWrapper);
 }
 
+void SheetPresentationLayoutAlgorithm::MeasureOperation(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto operationNode = sheetPattern->GetTitleBuilderNode();
+    CHECK_NULL_VOID(operationNode);
+    operationNode->Measure(constraint);
+}
+
+void SheetPresentationLayoutAlgorithm::MeasureCloseIcon(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto sheetCloseIcon = sheetPattern->GetSheetCloseIcon();
+    CHECK_NULL_VOID(sheetCloseIcon);
+    sheetCloseIcon->Measure(constraint);
+}
+
 void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -126,9 +148,8 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
         auto childConstraint = CreateSheetChildConstraint(layoutProperty, layoutWrapper);
         layoutConstraint->percentReference = SizeF(sheetWidth_, sheetHeight_);
-        for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-            child->Measure(childConstraint);
-        }
+        MeasureOperation(layoutWrapper, childConstraint);
+        MeasureCloseIcon(layoutWrapper, childConstraint);
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(host);
         auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
