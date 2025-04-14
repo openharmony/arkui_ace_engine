@@ -17,20 +17,9 @@
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
-
-namespace OHOS::Ace::NG::Converter {
-    template<>
-    void AssignCast(std::optional<CheckBoxStyle>& dst, const Ark_CheckBoxShape& src)
-    {
-        switch (src) {
-            case ARK_CHECK_BOX_SHAPE_CIRCLE: dst = CheckBoxStyle::CIRCULAR_STYLE; break;
-            case ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE: dst = CheckBoxStyle::SQUARE_STYLE; break;
-            default: LOGE("Unexpected enum value in Ark_CheckBoxShape: %{public}d", src);
-        }
-    }
-}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CheckboxModifier {
