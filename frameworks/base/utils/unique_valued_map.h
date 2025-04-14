@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include <iostream>
 #include <unordered_map>
+#include <optional>
 
 template<typename Key, typename Value, typename VHash = std::hash<Value>>
 class UniqueValuedMap {
@@ -25,18 +25,20 @@ private:
     std::unordered_map<Value, Key, VHash> valueToKey;
 
 public:
-    void put(const Key& key, const Value& value)
+    void Put(const Key& key, const Value& value)
     {
         // Remove previous mapping for this value (if exists)
-        if (valueToKey.count(value)) {
-            Key oldKey = valueToKey[value];
-            keyToValue.erase(oldKey);
+        auto valueIt = valueToKey.find(value);
+        if (valueIt != valueToKey.end()) {
+            keyToValue.erase(valueIt->second);
+            valueToKey.erase(valueIt);
         }
 
         // Remove previous mapping for this key (if exists)
-        if (keyToValue.count(key)) {
-            Value oldValue = keyToValue[key];
-            valueToKey.erase(oldValue);
+        auto keyIt = keyToValue.find(key);
+        if (keyIt != keyToValue.end()) {
+            valueToKey.erase(keyIt->second);
+            keyToValue.erase(keyIt);
         }
 
         // Add new mappings
@@ -44,56 +46,58 @@ public:
         valueToKey[value] = key;
     }
 
-    std::optional<Value> get(const Key& key) const
+    std::optional<Value> Get(const Key& key) const
     {
-        if (!keyToValue.count(key)) {
+        auto it = keyToValue.find(key);
+        if (it == keyToValue.end()) {
             return std::nullopt;
         }
-        return keyToValue.at(key);
+        return it->second;
     }
 
-    std::optional<Key> getKey(const Value& value) const
+    std::optional<Key> GetKey(const Value& value) const
     {
-        if (!valueToKey.count(value)) {
+        auto it = valueToKey.find(value);
+        if (it == valueToKey.end()) {
             return std::nullopt;
         }
-        return valueToKey.at(value);
+        return it->second;
     }
 
-    void remove(const Key& key)
+    void Remove(const Key& key)
     {
-        if (keyToValue.count(key)) {
-            Value value = keyToValue[key];
-            keyToValue.erase(key);
-            valueToKey.erase(value);
+        auto it = keyToValue.find(key);
+        if (it != keyToValue.end()) {
+            valueToKey.erase(it->second);
+            keyToValue.erase(it);
         }
     }
 
-    void removeValue(const Value& value)
+    void RemoveValue(const Value& value)
     {
-        if (valueToKey.count(value)) {
-            Key key = valueToKey[value];
-            valueToKey.erase(value);
-            keyToValue.erase(key);
+        auto it = valueToKey.find(value);
+        if (it != valueToKey.end()) {
+            keyToValue.erase(it->second);
+            valueToKey.erase(it);
         }
     }
 
-    bool containsKey(const Key& key) const
+    bool ContainsKey(const Key& key) const
     {
-        return keyToValue.count(key) > 0;
+        return keyToValue.find(key) != keyToValue.end();
     }
 
-    bool containsValue(const Value& value) const
+    bool ContainsValue(const Value& value) const
     {
-        return valueToKey.count(value) > 0;
+        return valueToKey.find(value) != valueToKey.end();
     }
 
-    size_t size() const
+    size_t Size() const
     {
         return keyToValue.size();
     }
 
-    void clear()
+    void Clear()
     {
         keyToValue.clear();
         valueToKey.clear();

@@ -28,89 +28,89 @@ protected:
 
 HWTEST_F(UniqueValuedMapTest, PutAndGet, TestSize.Level1)
 {
-    map.put(1, "one");
-    map.put(2, "two");
+    map.Put(1, "one");
+    map.Put(2, "two");
 
-    EXPECT_EQ(map.get(1).value(), "one");
-    EXPECT_EQ(map.get(2).value(), "two");
-    EXPECT_EQ(map.get(3), std::nullopt);
+    EXPECT_EQ(map.Get(1).value(), "one");
+    EXPECT_EQ(map.Get(2).value(), "two");
+    EXPECT_EQ(map.Get(3), std::nullopt);
 }
 
 HWTEST_F(UniqueValuedMapTest, OverwriteKey, TestSize.Level1)
 {
-    map.put(1, "one");
-    map.put(1, "uno");
+    map.Put(1, "one");
+    map.Put(1, "uno");
 
-    EXPECT_EQ(map.get(1).value(), "uno");
-    EXPECT_EQ(map.containsValue("one"), false);
+    EXPECT_EQ(map.Get(1).value(), "uno");
+    EXPECT_EQ(map.ContainsValue("one"), false);
 }
 
 HWTEST_F(UniqueValuedMapTest, OverwriteValue, TestSize.Level1)
 {
-    map.put(1, "one");
-    map.put(2, "one");
+    map.Put(1, "one");
+    map.Put(2, "one");
 
-    EXPECT_EQ(map.get(2).value(), "one");
-    EXPECT_EQ(map.containsKey(1), false);
+    EXPECT_EQ(map.Get(2).value(), "one");
+    EXPECT_EQ(map.ContainsKey(1), false);
 }
 
 HWTEST_F(UniqueValuedMapTest, RemoveByKey, TestSize.Level1)
 {
-    map.put(1, "one");
-    map.put(2, "two");
+    map.Put(1, "one");
+    map.Put(2, "two");
 
-    map.remove(1);
+    map.Remove(1);
 
-    EXPECT_EQ(map.get(1), std::nullopt);
-    EXPECT_EQ(map.containsValue("one"), false);
-    EXPECT_EQ(map.get(2).value(), "two");
+    EXPECT_EQ(map.Get(1), std::nullopt);
+    EXPECT_EQ(map.ContainsValue("one"), false);
+    EXPECT_EQ(map.Get(2).value(), "two");
 }
 
 HWTEST_F(UniqueValuedMapTest, RemoveByValue, TestSize.Level1)
 {
-    map.put(1, "one");
-    map.put(2, "two");
+    map.Put(1, "one");
+    map.Put(2, "two");
 
-    map.removeValue("one");
+    map.RemoveValue("one");
 
-    EXPECT_EQ(map.get(1), std::nullopt);
-    EXPECT_EQ(map.containsKey(1), false);
-    EXPECT_EQ(map.get(2).value(), "two");
+    EXPECT_EQ(map.Get(1), std::nullopt);
+    EXPECT_EQ(map.ContainsKey(1), false);
+    EXPECT_EQ(map.Get(2).value(), "two");
 }
 
 HWTEST_F(UniqueValuedMapTest, ContainsKeyAndValue, TestSize.Level1)
 {
-    map.put(1, "one");
+    map.Put(1, "one");
 
-    EXPECT_TRUE(map.containsKey(1));
-    EXPECT_TRUE(map.containsValue("one"));
-    EXPECT_FALSE(map.containsKey(2));
-    EXPECT_FALSE(map.containsValue("two"));
+    EXPECT_TRUE(map.ContainsKey(1));
+    EXPECT_TRUE(map.ContainsValue("one"));
+    EXPECT_FALSE(map.ContainsKey(2));
+    EXPECT_FALSE(map.ContainsValue("two"));
 }
 
 HWTEST_F(UniqueValuedMapTest, Clear, TestSize.Level1)
 {
-    map.put(1, "one");
-    map.put(2, "two");
+    map.Put(1, "one");
+    map.Put(2, "two");
 
-    map.clear();
+    map.Clear();
 
-    EXPECT_EQ(map.size(), 0);
-    EXPECT_FALSE(map.containsKey(1));
-    EXPECT_FALSE(map.containsValue("one"));
+    EXPECT_EQ(map.Size(), 0);
+    EXPECT_FALSE(map.ContainsKey(1));
+    EXPECT_FALSE(map.ContainsValue("one"));
 }
 
 HWTEST_F(UniqueValuedMapTest, Size, TestSize.Level1)
 {
-    EXPECT_EQ(map.size(), 0);
+    EXPECT_EQ(map.Size(), 0);
 
-    map.put(1, "one");
-    EXPECT_EQ(map.size(), 1);
+    map.Put(1, "one");
+    EXPECT_EQ(map.Size(), 1);
 
-    map.put(2, "two");
-    EXPECT_EQ(map.size(), 2);
+    map.Put(2, "two");
+    EXPECT_EQ(map.Size(), 2);
 
-    map.remove(1);
-    EXPECT_EQ(map.size(), 1);
+    map.Remove(1);
+    EXPECT_EQ(map.Size(), 1);
 }
 } // namespace OHOS::Ace

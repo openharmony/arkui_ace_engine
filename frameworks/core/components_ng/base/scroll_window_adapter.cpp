@@ -60,9 +60,9 @@ bool ScrollWindowAdapter::PrepareLoadToTarget(int32_t targetIdx, ScrollAlign ali
 
 FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
 {
-    auto* item = childMap_.get(markIndex_).value_or(nullptr).Upgrade().GetRawPtr();
+    auto* item = childMap_.Get(markIndex_).value_or(nullptr).Upgrade().GetRawPtr();
     if (!item) {
-        childMap_.clear();
+        childMap_.Clear();
         item = static_cast<FrameNode*>(container_->GetLastChild().GetRawPtr());
     }
     if (!item) {
@@ -75,7 +75,7 @@ FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
         fillAlgorithm_->FillMarkItem(size_, axis_, item, markIndex_);
         filled_.insert(markIndex_);
 
-        childMap_.put(markIndex_, WeakClaim(item));
+        childMap_.Put(markIndex_, WeakClaim(item));
     }
     // 2: check if more space for new item.
     if (!fillAlgorithm_->CanFillMore(axis_, size_, markIndex_, direction)) {
@@ -103,13 +103,13 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
         LOGW("fail to find pendingNode");
         return nullptr;
     }
-    const auto markIndex = childMap_.getKey(WeakClaim(markItem));
+    const auto markIndex = childMap_.GetKey(WeakClaim(markItem));
     if (!markIndex) {
         LOGW("fail to find markIndex");
         return nullptr;
     }
     auto index = direction == FillDirection::START ? *markIndex - 1 : *markIndex + 1;
-    childMap_.put(index, WeakClaim(pendingNode));
+    childMap_.Put(index, WeakClaim(pendingNode));
     // 1: check index.
     if (index <= 0 && direction == FillDirection::START) {
         return nullptr;
@@ -230,11 +230,11 @@ FrameNode* ScrollWindowAdapter::GetChildPtrByIndex(uint32_t index)
         // LazyForEach generated items are at the back of children list
         return container_->GetFrameNodeChildByIndex(index - filled_.size()); // filled.size = active item count
     }
-    auto weakNode = childMap_.get(index);
+    auto weakNode = childMap_.Get(index);
     if (weakNode) {
         auto* node = weakNode->Upgrade().GetRawPtr();
         if (!node) {
-            childMap_.remove(index);
+            childMap_.Remove(index);
         }
         return node;
     }
@@ -248,7 +248,7 @@ RefPtr<FrameNode> ScrollWindowAdapter::GetChildByIndex(uint32_t index)
 
 uint32_t ScrollWindowAdapter::GetIndexOfChild(const RefPtr<FrameNode>& child) const
 {
-    auto index = childMap_.getKey(WeakClaim(child.GetRawPtr()));
+    auto index = childMap_.GetKey(WeakClaim(child.GetRawPtr()));
     if (index) {
         return *index;
     }
