@@ -331,7 +331,7 @@ int32_t FormRendererDelegateProxy::OnUpdateFormDone(const int64_t formId)
     }
     data.WriteInt64(formId);
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     int error = Remote()->SendRequest(
         static_cast<uint32_t>(IFormRendererDelegate::Message::ON_UPDATE_FORM_DONE), data, reply, option);
     if (error != NO_ERROR) {
