@@ -18,6 +18,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+#include "core/components_ng/pattern/text/span/tlv_util.h"
 
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
@@ -2211,5 +2212,356 @@ HWTEST_F(TextFieldTenPatternNg, ProcessMarqueeVisibleAreaCallback001, TestSize.L
     EXPECT_NE(pattern->contentMod_, nullptr);
     pattern->ProcessMarqueeVisibleAreaCallback();
     EXPECT_EQ(pattern->contentMod_->marqueeState_, MarqueeState::IDLE);
+}
+
+/**
+ * @tc.name: AddChildSpanItem001
+ * @tc.desc: test AddChildSpanItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, AddChildSpanItem001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: set isOverlayNode_ to true and call AddChildSpanItem.
+     * @tc.expected: spans_ is null.
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 0, pattern);
+    auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->SetIsOverlayNode(true);
+    pattern->AddChildSpanItem(frameNode);
+    EXPECT_EQ(pattern->spans_.size(), 0);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: colorModeChange_ is default value false and call OnColorConfigurationUpdate.
+     * @tc.expected: colorModeChange_ is true.
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 0, pattern);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_TRUE(pattern->magnifierController_->colorModeChange_);
+}
+
+/**
+ * @tc.name: RecordOriginCaretPosition001
+ * @tc.desc: test RecordOriginCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, RecordOriginCaretPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: offset is negative value and call RecordOriginCaretPosition.
+     * @tc.expected: result is false.
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    OffsetF offset(-1, -1);
+    bool result = pattern->RecordOriginCaretPosition(offset);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetResponseRegion001
+ * @tc.desc: test SetResponseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, SetResponseRegion001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: set isUserSetResponseRegion_ to true and call SetResponseRegion.
+     * @tc.expected: isUserSetResponseRegion_ is true and SetResponseRegion function return.
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("test", 0, pattern);
+    SizeF frameSize(0, 0);
+    SizeF boundsSize(0, 0);
+    pattern->SetIsUserSetResponseRegion(true);
+    pattern->SetResponseRegion(frameSize, boundsSize);
+    EXPECT_TRUE(pattern->isUserSetResponseRegion_);
+}
+
+/**
+ * @tc.name: GetStartAndEnd001
+ * @tc.desc: test TextPattern GetStartAndEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, GetStartAndEnd001, TestSize.Level1)
+{
+    RefPtr<SpanItem> spanItem1 = AceType::MakeRefPtr<SpanItem>();
+    int32_t StartIndex = 0;
+    int32_t EndIndex = 3;
+    auto urlSpan = AceType::MakeRefPtr<UrlSpan>("test", StartIndex, EndIndex);
+    urlSpan->AddUrlStyle(spanItem1);
+    auto [frameNode, pattern] = Init();
+    pattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"test");
+    pattern->styledString_->text_ = u"testText";
+    pattern->styledString_->AddSpan(urlSpan);
+
+    int32_t start = 0;
+    auto ret = pattern->GetStartAndEnd(start, spanItem1);
+    EXPECT_EQ(ret.first, StartIndex);
+    EXPECT_EQ(ret.second, EndIndex);
+
+    start = -1;
+    ret = pattern->GetStartAndEnd(start, spanItem1);
+    EXPECT_EQ(ret.first, 0);
+    EXPECT_EQ(ret.second, 0);
+
+    start = 10;
+    ret = pattern->GetStartAndEnd(start, spanItem1);
+    EXPECT_EQ(ret.first, 0);
+    EXPECT_EQ(ret.second, 0);
+}
+
+/**
+ * @tc.name: EncodeTlvSpanItems002
+ * @tc.desc: test TextPattern EncodeTlvSpanItems
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, EncodeTlvSpanItems002, TestSize.Level1)
+{
+    int32_t cursor = 1;
+    auto [frameNode, pattern] = Init();
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->spanItemType = NG::SpanItemType::SYMBOL;
+    int32_t textSelectorLength = pattern->textSelector_.GetTextEnd() - pattern->textSelector_.GetTextStart();
+    
+    std::string pasteData;
+    std::vector<uint8_t> buff;
+
+    spanItem->position = pattern->textSelector_.GetTextEnd() + 1;
+    spanItem->length = textSelectorLength + 2;
+    pattern->spans_.push_back(spanItem);
+    pattern->EncodeTlvSpanItems(pasteData, buff);
+    int32_t size = TLVUtil::ReadInt32(buff, cursor);
+    EXPECT_EQ(size, 0);
+}
+
+/**
+ * @tc.name: BeforeSyncGeometryProperties002
+ * @tc.desc: test TextPattern BeforeSyncGeometryProperties
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, BeforeSyncGeometryProperties002, TestSize.Level1)
+{
+    DirtySwapConfig config;
+    int32_t test = 1;
+    auto [frameNode, pattern] = Init();
+    std::function<void()> callback = [&]() {
+        test++;
+        return;
+    };
+    pattern->afterLayoutCallback_ = callback;
+    pattern->BeforeSyncGeometryProperties(config);
+    EXPECT_EQ(test, 2);
+}
+
+/**
+ * @tc.name: HandleKeyEvent001
+ * @tc.desc:  test DeleteRange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleKeyEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize textModelNG and textSelector_.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"123456789");
+    textPattern->copyOption_ = CopyOptions::InApp;
+    textPattern->textSelector_.Update(2, 6);
+
+    /**
+     * @tc.steps: step3. test the enter key is or not legal.
+     * @tc.expect: the key is legal result is true.
+     */
+    KeyEvent event;
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_A);
+    event.code = KeyCode::KEY_A;
+    event.action = KeyAction::DOWN;
+    EXPECT_TRUE(textPattern->HandleKeyEvent(event));
+}
+
+/**
+ * @tc.name: HandleSelectionUp001
+ * @tc.desc:  test DeleteRange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleSelectionUp001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize textModelNG and textSelector_.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"123456789");
+    textPattern->copyOption_ = CopyOptions::InApp;
+    textPattern->textSelector_.Update(2, 6);
+
+    /**
+     * @tc.steps: step3.set the line count is 1.
+     * @tc.expect: the key is legal result is true.
+     */
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(1));
+    textPattern->HandleSelectionUp();
+    EXPECT_EQ(textPattern->pManager_->GetLineCount(), 1);
+}
+
+/**
+ * @tc.name: HandleSelectionDown001
+ * @tc.desc:  test DeleteRange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleSelectionDown001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize textModelNG and textSelector_.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"123456789");
+    textPattern->copyOption_ = CopyOptions::InApp;
+    textPattern->textSelector_.Update(2, 6);
+
+    /**
+     * @tc.steps: step3.set the line count is 1.
+     * @tc.expect: the key is legal result is true.
+     */
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(1));
+    textPattern->HandleSelectionDown();
+    EXPECT_EQ(textPattern->pManager_->GetLineCount(), 1);
+}
+
+/**
+ * @tc.name: SetTextSelectableMode001
+ * @tc.desc: test DeleteRange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, SetTextSelectableMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2.Set the selectable mode to SELECTABLE_FOCUSABLE.
+     * @tc.expected: The focusable value of focusHub is true.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"123456789");
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    TextSelectableMode value = TextSelectableMode::SELECTABLE_FOCUSABLE;
+    textPattern->SetTextSelectableMode(value);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    EXPECT_TRUE(focusHub->focusable_);
+}
+
+/**
+ * @tc.name: GetTextHeight001
+ * @tc.desc: test DeleteRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, GetTextHeight001, TestSize.Level1)
+{
+   /**
+     * @tc.steps: step1. Create a textFrameNode and  textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    ASSERT_NE(textPattern->pManager_, nullptr);
+
+    auto layoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Set GetLineCount return value of 1.
+     */
+    auto paragraph1 = MockParagraph::GetOrCreateMockParagraph();
+    auto paragraph2 = MockParagraph::GetOrCreateMockParagraph();
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph1, .start = 0, .end = 2 });
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph2, .start = 2, .end = 4 });
+    EXPECT_CALL(*paragraph1, GetLineCount()).WillRepeatedly(Return(1));
+    EXPECT_CALL(*paragraph2, GetLineCount()).WillRepeatedly(Return(1));
+    
+    /**
+     * @tc.steps: step3. UpdateMaxLines of lines in the layout property to 3
+     * @tc.expected: The result of GetTextHeight is 0.0.
+     */
+    layoutProperty->UpdateMaxLines(3);
+    double result = textPattern->GetTextHeight(1, true);
+    EXPECT_EQ(result, 0.0);
+    result = textPattern->GetTextHeight(3, true);
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: HandleSpanLongPressEvent001
+ * @tc.desc: test TextPattern HandleSpanLongPressEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleSpanLongPressEvent001, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    GestureEvent info;
+    info.localLocation_ = Offset(15.0f, 15.0f);
+    pattern->contentRect_ = RectF { 0, 0, 30, 30 };
+    RefPtr<SpanItem> spanItem1 = AceType::MakeRefPtr<SpanItem>();
+    RefPtr<SpanItem> spanItem2 = AceType::MakeRefPtr<SpanItem>();
+    pattern->spans_.push_back(nullptr);
+    pattern->spans_.push_back(spanItem1);
+    pattern->spans_.push_back(spanItem2);
+    pattern->pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+
+    /**
+     * @tc.steps: Cover the branch when isInRegion is true, spans_.empty() is false and pManager_has value.
+     * @tc.expected: spans_ has value, isInRegion is true.
+     */
+    pattern->HandleSpanLongPressEvent(info);
+    auto localLocation = info.GetLocalLocation();
+    bool isInRegion = pattern->contentRect_.IsInRegion(
+        PointF(static_cast<float>(localLocation.GetX()), static_cast<float>(localLocation.GetY())));
+    bool isSpansEmpty = pattern->spans_.empty();
+    EXPECT_TRUE(isInRegion);
+    EXPECT_FALSE(isSpansEmpty);
 }
 } // namespace OHOS::Ace::NG
