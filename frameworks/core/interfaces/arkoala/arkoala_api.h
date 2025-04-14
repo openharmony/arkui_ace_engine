@@ -1951,6 +1951,7 @@ struct ArkUICommonModifier {
     void (*setOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
     void (*resetOpacity)(ArkUINodeHandle node);
     void (*setAlign)(ArkUINodeHandle node, ArkUI_Int32 align);
+    void (*setLocalizedAlign)(ArkUINodeHandle node, ArkUI_CharPtr align);
     void (*resetAlign)(ArkUINodeHandle node);
     void (*setBackdropBlur)(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues,
         ArkUI_Int32 blurValuesSize, ArkUI_Bool disableSystemAdaptation);

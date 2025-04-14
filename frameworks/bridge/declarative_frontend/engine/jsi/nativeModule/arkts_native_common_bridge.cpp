@@ -2236,6 +2236,9 @@ ArkUINativeModuleValue CommonBridge::SetAlign(ArkUIRuntimeCallInfo *runtimeCallI
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsNumber()) {
         GetArkUINodeModifiers()->getCommonModifier()->setAlign(nativeNode, secondArg->ToNumber(vm)->Value());
+    } else if (secondArg->IsString(vm)) {
+        GetArkUINodeModifiers()->getCommonModifier()->setLocalizedAlign(nativeNode, secondArg->ToString(vm)
+            ->ToString(vm).c_str());
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetAlign(nativeNode);
     }

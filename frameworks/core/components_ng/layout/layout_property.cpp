@@ -1114,6 +1114,26 @@ void LayoutProperty::UpdateAlignment(Alignment value)
     }
 }
 
+void LayoutProperty::UpdateLocalizedAlignment(std::string value)
+{
+    if (!positionProperty_) {
+        positionProperty_ = std::make_unique<PositionProperty>();
+    }
+    if (positionProperty_->UpdateLocalizedAlignment(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
+    }
+}
+
+void LayoutProperty::UpdateIsMirrorable(bool value)
+{
+    if (!positionProperty_) {
+        positionProperty_ = std::make_unique<PositionProperty>();
+    }
+    if (positionProperty_->UpdateIsMirrorable(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
+    }
+}
+
 void LayoutProperty::UpdateMargin(const MarginProperty& value)
 {
     if (!margin_) {
@@ -2088,6 +2108,16 @@ void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direct
     target->UpdateBorderImage(borderImageProperty);
 }
 
+void LayoutProperty::CheckLocalizedAlignment(const TextDirection& direction)
+{
+    CHECK_NULL_VOID(GetPositionProperty());
+    if (GetPositionProperty()->GetIsMirrorable().value_or(false)) {
+        auto localizedAlignment = GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+        auto alignment = GetAlignmentStringFromLocalized(direction, localizedAlignment);
+        GetPositionProperty()->UpdateLocalizedAlignment(alignment);
+    }
+}
+
 std::string LayoutProperty::LayoutInfoToString()
 {
     std::stringstream ss;
@@ -2108,5 +2138,27 @@ std::string LayoutProperty::LayoutInfoToString()
 RefPtr<GeometryTransition> LayoutProperty::GetGeometryTransition() const
 {
     return geometryTransition_.Upgrade();
+}
+
+std::string LayoutProperty::GetAlignmentStringFromLocalized(
+    TextDirection layoutDirection, std::string localizedAlignment)
+{
+    static const std::unordered_map<std::string, std::pair<std::string, std::string>> alignmentMap = {
+        {"top_start", {"top_start", "top_end"}},
+        {"top", {"top", "top"}},
+        {"top_end", {"top_end", "top_start"}},
+        {"start", {"start", "end"}},
+        {"center", {"center", "center"}},
+        {"end", {"end", "start"}},
+        {"bottom_start", {"bottom_start", "bottom_end"}},
+        {"bottom", {"bottom", "bottom"}},
+        {"bottom_end", {"bottom_end", "bottom_start"}}
+    };
+
+    auto it = alignmentMap.find(localizedAlignment);
+    if (it != alignmentMap.end()) {
+        return layoutDirection == TextDirection::LTR ? it->second.first : it->second.second;
+    }
+    return "center";
 }
 } // namespace OHOS::Ace::NG

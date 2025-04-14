@@ -568,6 +568,16 @@ public:
         ViewAbstract::SetAlign(alignment);
     }
 
+    void SetAlign(const std::string& localizedAlignment) override
+    {
+        ViewAbstract::SetAlign(localizedAlignment);
+    }
+
+    void SetIsMirrorable(const bool& isMirrorable) override
+    {
+        ViewAbstract::SetIsMirrorable(isMirrorable);
+    }
+
     void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) override
     {
         ViewAbstract::SetAlignRules(alignRules);
