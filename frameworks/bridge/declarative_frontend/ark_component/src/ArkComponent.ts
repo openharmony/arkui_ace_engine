@@ -2508,6 +2508,20 @@ class AccessibilityFocusCallbackModifier extends ModifierWithKey<AccessibilityFo
   }
 }
 
+class AccessibilityActionInterceptCallbackModifier extends ModifierWithKey<AccessibilityActionInterceptCallback> {
+  constructor(value: AccessibilityActionInterceptCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAccessibilityActionIntercept');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnAccessibilityActionIntercept(node);
+    } else {
+      getUINativeModule().common.setOnAccessibilityActionIntercept(node, this.value);
+    }
+  }
+}
+
 class AllowDropModifier extends ModifierWithKey<Array<UniformDataType>> {
   constructor(value: Array<UniformDataType>) {
     super(value);
@@ -4998,6 +5012,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   onAccessibilityFocus(value: AccessibilityFocusCallback): this {
     modifierWithKey(this._modifiersWithKeys, AccessibilityFocusCallbackModifier.identity, AccessibilityFocusCallbackModifier, value);
+    return this;
+  }
+
+  onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback): this {
+    modifierWithKey(this._modifiersWithKeys,
+      AccessibilityActionInterceptCallbackModifier.identity, AccessibilityActionInterceptCallbackModifier, value);
     return this;
   }
 

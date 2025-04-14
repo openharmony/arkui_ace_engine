@@ -30,6 +30,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_accessibility_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 
@@ -4251,6 +4252,43 @@ ArkUINativeModuleValue CommonBridge::ResetAccessibilityFocusCallback(ArkUIRuntim
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     ViewAbstractModelNG::ResetOnAccessibilityFocus(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnAccessibilityActionIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
+    auto jsVal = info[1];
+    if (!JSViewAbstract::CheckJSCallbackInfo("onAccessibilityActionIntercept", jsVal, checkList)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto jsInterceptFunc = AceType::MakeRefPtr<JsAccessibilityActionInterceptFunction>(JSRef<JSFunc>::Cast(jsVal));
+    auto onAccessibilityActionIntercept = [execCtx = info.GetExecutionContext(), func = std::move(jsInterceptFunc),
+        node = AceType::WeakClaim<NG::FrameNode>(frameNode)](AccessibilityInterfaceAction action) ->
+            AccessibilityActionInterceptResult {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, AccessibilityActionInterceptResult::ACTION_CONTINUE);
+        PipelineContext::SetCallBackNode(node);
+        return func->Execute(action);
+    };
+    ViewAbstractModelNG::SetOnAccessibilityActionIntercept(frameNode, std::move(onAccessibilityActionIntercept));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnAccessibilityActionIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    if (runtimeCallInfo->GetArgsNumber() < NUM_1) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstractModelNG::SetOnAccessibilityActionIntercept(frameNode, nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 
