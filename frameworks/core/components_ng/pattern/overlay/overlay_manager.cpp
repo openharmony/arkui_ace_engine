@@ -930,6 +930,41 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "close dialog animation");
 }
 
+void OverlayManager::SetTransitionCallbacks(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& contentNode,
+    const RefPtr<FrameNode>& maskNode, const DialogProperties& dialogProps)
+{
+    if (contentNode) {
+        auto layoutProperty = contentNode->GetLayoutProperty();
+        layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+        auto ctx = contentNode->GetRenderContext();
+        CHECK_NULL_VOID(ctx);
+        if (dialogProps.dialogTransitionEffect != nullptr) {
+            ctx->SetTransitionInCallback([weak = WeakClaim(this), nodeWK = WeakPtr<FrameNode>(node)] {
+                auto overlayManager = weak.Upgrade();
+                auto node = nodeWK.Upgrade();
+                CHECK_NULL_VOID(overlayManager && node);
+                auto dialogPattern = node->GetPattern<DialogPattern>();
+                CHECK_NULL_VOID(dialogPattern);
+                dialogPattern->CallDialogDidAppearCallback();
+            });
+        } else {
+            auto dialogPattern = node->GetPattern<DialogPattern>();
+            CHECK_NULL_VOID(dialogPattern);
+            dialogPattern->CallDialogDidAppearCallback();
+        }
+    }
+    if (maskNode) {
+        auto layoutProperty = maskNode->GetLayoutProperty();
+        layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+        auto ctx = maskNode->GetRenderContext();
+        CHECK_NULL_VOID(ctx);
+        ctx->SetTransitionInCallback([weak = WeakClaim(this), nodeWK = WeakPtr<FrameNode>(node)] {
+            auto overlayManager = weak.Upgrade();
+            auto node = nodeWK.Upgrade();
+        });
+    }
+}
+
 void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "set dialog transition");
@@ -940,19 +975,15 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, co
 
     auto layoutProperty = node->GetLayoutProperty();
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-    if (dialogProps.dialogTransitionEffect != nullptr) {
+
+    if (dialogProps.dialogTransitionEffect != nullptr || dialogProps.maskTransitionEffect != nullptr) {
         auto contentNode = AceType::DynamicCast<FrameNode>(node->GetChildByIndex(0));
-        CHECK_NULL_VOID(contentNode);
-        layoutProperty = contentNode->GetLayoutProperty();
-        layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-    }
-    if (dialogProps.maskTransitionEffect != nullptr) {
         auto maskNode = AceType::DynamicCast<FrameNode>(node->GetChildByIndex(1));
-        if (maskNode) {
-            layoutProperty = maskNode->GetLayoutProperty();
-            layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+        if (contentNode) {
+            SetTransitionCallbacks(node, contentNode, maskNode, dialogProps);
         }
     }
+
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
     auto levelOrder = GetLevelOrder(node, dialogProps.levelOrder);
@@ -983,6 +1014,7 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, co
         SendDialogAccessibilityEvent(node, AccessibilityEventType::PAGE_OPEN);
     }
 }
+
 void OverlayManager::SendDialogAccessibilityEvent(const RefPtr<FrameNode>& node, AccessibilityEventType eventType)
 {
     auto dialogPattern = node->GetPattern<DialogPattern>();
