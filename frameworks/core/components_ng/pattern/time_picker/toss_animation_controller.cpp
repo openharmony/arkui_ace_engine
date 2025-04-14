@@ -115,6 +115,9 @@ void TimePickerTossAnimationController::StartSpringMotion()
         if (isTouchBreak == false) {
             column->SetTossStatus(false);
             column->SetYOffset(0.0);
+            if (!NearZero(column->GetOffset()) && column->IsStartEndTimeDefined()) {
+                column->TossStoped();
+            }
         }
     };
     AnimationUtils::Animate(
