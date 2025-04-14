@@ -1735,9 +1735,9 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     DragAnimationHelper::MountPixelMap(
         subWindowOverlayManager, eventHub->GetOrCreateGestureEventHub(), data, true);
 
+    HideMenu();
     // update position
     UpdateNodePositionBeforeStartAnimation(frameNode, data);
-    HideMenu();
     pipeline->FlushSyncGeometryNodeTasks();
     overlayManager->RemovePixelMap();
     DragAnimationHelper::ShowBadgeAnimation(data.textNode);
