@@ -429,7 +429,8 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnDateChange001, TestSize.Level1)
      * @tc.steps: step2. get textClock frameNode and event.
      * @tc.expected: function is called.
      */
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    auto frameNode = stack->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<TextClockEventHub> eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -465,6 +466,7 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnDateChange001, TestSize.Level1)
     EXPECT_NE(textLayoutProperty, nullptr);
     pattern->OnModifyDone();
     EXPECT_EQ(textLayoutProperty->GetContent(), StringUtils::Str8ToStr16(UTC_INPUT_NEXT_STRING));
+    stack->Pop();
     MockPipelineContext::TearDown();
 }
 
@@ -488,7 +490,8 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnDateChange002, TestSize.Level1)
      * @tc.steps: step2. get textClock frameNode and event.
      * @tc.expected: function is called.
      */
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    auto frameNode = stack->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<TextClockEventHub> eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -528,6 +531,7 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnDateChange002, TestSize.Level1)
     EXPECT_NE(textLayoutProperty, nullptr);
     pattern->OnModifyDone();
     EXPECT_EQ(textLayoutProperty->GetContent(), StringUtils::Str8ToStr16(UTC_INPUT_NEXT_STRING));
+    stack->Pop();
     MockPipelineContext::TearDown();
 }
 
@@ -551,7 +555,8 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnDateChange003, TestSize.Level1)
      * @tc.steps: step2. get textClock frameNode and event.
      * @tc.expected: function is called.
      */
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    auto frameNode = stack->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<TextClockEventHub> eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -591,6 +596,7 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnDateChange003, TestSize.Level1)
     EXPECT_NE(textLayoutProperty, nullptr);
     pattern->OnModifyDone();
     EXPECT_EQ(textLayoutProperty->GetContent(), StringUtils::Str8ToStr16(UTC_INPUT_NEXT_STRING));
+    stack->Pop();
     MockPipelineContext::TearDown();
 }
 
