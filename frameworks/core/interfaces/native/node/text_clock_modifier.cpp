@@ -53,11 +53,15 @@ void ResetFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextClockTheme>();
-    CHECK_NULL_VOID(theme);
-    TextClockModelNG::SetFontColor(frameNode, theme->GetTextParseFailedColor());
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        TextClockModelNG::SetFontColor(frameNode, theme->GetTextStyle().GetTextColor());
+    } else {
+        TextClockModelNG::ResetFontColor(frameNode);
+    }
 }
 
 void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSizeValue, ArkUI_Int32 fontSizeUnit)

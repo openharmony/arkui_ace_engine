@@ -103,14 +103,30 @@ void TextClockPatternTestNG::SetUpTestSuite()
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_TEXT);
-    auto textTheme = TextClockTheme::Builder().Build(themeConstants);
-    EXPECT_CALL(*themeManager, GetTheme(TextClockTheme::TypeId())).WillRepeatedly(Return(textTheme));
-    TextStyle textStyle;
-    textStyle.SetTextColor(Color::FromString("#ff182431"));
-    textStyle.SetFontSize(Dimension(14.f));
-    textStyle.SetFontWeight(FontWeight::W800);
-    textTheme->textStyleClock_ = textStyle;
-    MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        auto textTheme = TextTheme::Builder().Build(themeConstants);
+        EXPECT_CALL(*themeManager, GetTheme(TextTheme::TypeId())).WillRepeatedly(Return(textTheme));
+        textTheme->selectedColor_ = Color::FromString("#007DFF");
+        textTheme->dragBackgroundColor_ = Color::WHITE;
+        textTheme->draggable_ = false;
+        textTheme->linearSplitChildMinSize_ = 20.0f;
+        textTheme->isShowHandle_ = false;
+        TextStyle textStyle;
+        textStyle.SetTextColor(Color::FromString("#ff182431"));
+        textStyle.SetFontSize(Dimension(14.f));
+        textStyle.SetFontWeight(FontWeight::W800);
+        textTheme->textStyle_ = textStyle;
+        MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    } else {
+        auto textTheme = TextClockTheme::Builder().Build(themeConstants);
+        EXPECT_CALL(*themeManager, GetTheme(TextClockTheme::TypeId())).WillRepeatedly(Return(textTheme));
+        TextStyle textStyle;
+        textStyle.SetTextColor(Color::FromString("#ff182431"));
+        textStyle.SetFontSize(Dimension(14.f));
+        textStyle.SetFontWeight(FontWeight::W800);
+        textTheme->textStyleClock_ = textStyle;
+        MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    }
 }
 
 void TextClockPatternTestNG::TearDownTestSuite()
@@ -215,9 +231,16 @@ HWTEST_F(TextClockPatternTestNG, UpdateTimeText001, TestSize.Level1)
 
     auto themeManager = PipelineBase::GetCurrentContext()->GetThemeManager();
     ASSERT_NE(themeManager, nullptr);
-    auto textTheme = themeManager->GetTheme<TextClockTheme>();
-    ASSERT_NE(textTheme, nullptr);
-
+    RefPtr<TextTheme> textTheme = nullptr;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        textTheme = themeManager->GetTheme<TextTheme>();
+        ASSERT_NE(textTheme, nullptr);
+    }
+    RefPtr<TextClockTheme> textClockTheme = nullptr;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        textClockTheme = themeManager->GetTheme<TextClockTheme>();
+        ASSERT_NE(textClockTheme, nullptr);
+    }
     auto onChange = [](const std::string& szStr) { LOGD("szStr change: %s", szStr.c_str()); };
     CreateWithItem([&](TextClockModelNG model) {
         model.SetFormat(CLOCK_FORMAT);
@@ -227,7 +250,11 @@ HWTEST_F(TextClockPatternTestNG, UpdateTimeText001, TestSize.Level1)
         model.SetItalicFontStyle(ITALIC_FONT_STYLE_VALUE);
         model.SetFontWeight(FONT_WEIGHT_VALUE);
         model.SetFontFamily(FONT_FAMILY_VALUE);
-        model.InitFontDefault(textTheme->GetTextStyleClock());
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+            model.InitFontDefault(textTheme->GetTextStyle());
+        } else {
+            model.InitFontDefault(textClockTheme->GetTextStyleClock());
+        }
         model.SetDateTimeOptions(ZeroPrefixType::AUTO);
         model.SetTextShadow({ Shadow() });
         model.SetOnDateChange(onChange);
@@ -256,8 +283,16 @@ HWTEST_F(TextClockPatternTestNG, RequestUpdateForNextSecond001, TestSize.Level1)
      */
     auto themeManager = PipelineBase::GetCurrentContext()->GetThemeManager();
     ASSERT_NE(themeManager, nullptr);
-    auto textTheme = themeManager->GetTheme<TextClockTheme>();
-    ASSERT_NE(textTheme, nullptr);
+    RefPtr<TextTheme> textTheme = nullptr;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        textTheme = themeManager->GetTheme<TextTheme>();
+        ASSERT_NE(textTheme, nullptr);
+    }
+    RefPtr<TextClockTheme> textClockTheme = nullptr;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        textClockTheme = themeManager->GetTheme<TextClockTheme>();
+        ASSERT_NE(textClockTheme, nullptr);
+    }
 
     auto onChange = [](const std::string& szStr) { LOGD("szStr change: %s", szStr.c_str()); };
     CreateWithItem([&](TextClockModelNG model) {
@@ -268,7 +303,11 @@ HWTEST_F(TextClockPatternTestNG, RequestUpdateForNextSecond001, TestSize.Level1)
         model.SetItalicFontStyle(ITALIC_FONT_STYLE_VALUE);
         model.SetFontWeight(FONT_WEIGHT_VALUE);
         model.SetFontFamily(FONT_FAMILY_VALUE);
-        model.InitFontDefault(textTheme->GetTextStyleClock());
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+            model.InitFontDefault(textTheme->GetTextStyle());
+        } else {
+            model.InitFontDefault(textClockTheme->GetTextStyleClock());
+        }
         model.SetDateTimeOptions(ZeroPrefixType::AUTO);
         model.SetTextShadow({ Shadow() });
         model.SetOnDateChange(onChange);
