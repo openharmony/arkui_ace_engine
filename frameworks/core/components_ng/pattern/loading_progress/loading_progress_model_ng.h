@@ -37,7 +37,6 @@ public:
     void SetColor(const Color& value) override;
     void SetEnableLoading(bool enable) override;
     void ResetColor() override;
-    void SetForegroundColorParseFailed(bool isParseFailed) override;
     
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static uint32_t GetColor(FrameNode* frameNode);
@@ -47,9 +46,6 @@ public:
     static void SetForegroundColor(FrameNode* frameNode, const Color& value);
     static void SetBuilderFunc(FrameNode* frameNode, NG::LoadingProgressMakeCallback&& jsMake);
     static void ResetColor(FrameNode* frameNode);
-    static void ResetForegroundColor(FrameNode* frameNode);
-    static void SetForegroundColorParseFailed(FrameNode* frameNode, bool isParseFailed);
-    static void SetColorParseFailed(FrameNode* frameNode, bool isParseFailed);
 };
 
 } // namespace OHOS::Ace::NG

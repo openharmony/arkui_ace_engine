@@ -39,6 +39,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const Color COLOR_DEFAULT = Color::RED;
 const Color COLOR_DEFAULT_DARK = Color(0x99FFFFFF);
+const int32_t API_VERSION_TWENTY = 20;
 } // namespace
 
 class LoadingProgressTestNg : public testing::Test {
@@ -378,6 +379,10 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest005, TestSize.Level1)
  */
 HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest006, TestSize.Level1)
 {
+    MockContainer::SetUp();
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+
     LoadingProgressModelNG modelNg;
     modelNg.Create();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -390,6 +395,8 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest006, TestSize.Level1)
     EXPECT_FALSE(pattern->OnThemeScopeUpdate(frameNode->GetThemeScopeId()));
     modelNg.ResetColor();
     EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode->GetThemeScopeId()));
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -421,15 +428,24 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPaintMethodTest001, TestSize.Leve
     PaintWrapper paintWrapper(renderContext, geometryNode, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto progressTheme = AceType::MakeRefPtr<ProgressThemeWrapper>();
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(API_VERSION_TWENTY);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     progressTheme->loadingColor_ = COLOR_DEFAULT;
+    auto progressThemeWrapper = AceType::MakeRefPtr<ProgressThemeWrapper>();
+    progressThemeWrapper->loadingColor_ = COLOR_DEFAULT;
     /**
      * @tc.cases: case1. LoadingProgressPaintProperty has no Color property and modifier will use Theme Color.
      */
     auto loadingProgressPaintProperty = loadingProgressPattern->GetPaintProperty<LoadingProgressPaintProperty>();
     EXPECT_TRUE(loadingProgressPaintProperty != nullptr);
     PaintWrapper paintWrapper1(renderContext, geometryNode, loadingProgressPaintProperty);
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillOnce(Return(progressTheme));
+    if (rollbackApiVersion < API_VERSION_TWENTY) {
+        EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
+    } else {
+        EXPECT_CALL(*themeManager, GetTheme(_, _)).WillOnce(Return(progressThemeWrapper));
+    }
     paintMethod->UpdateContentModifier(&paintWrapper1);
     EXPECT_EQ(paintMethod->color_, COLOR_DEFAULT);
     /**
@@ -437,7 +453,11 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPaintMethodTest001, TestSize.Leve
      */
     renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy());
     PaintWrapper paintWrapper3(renderContext, geometryNode, loadingProgressPaintProperty);
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillOnce(Return(progressTheme));
+    if (rollbackApiVersion < API_VERSION_TWENTY) {
+        EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
+    } else {
+        EXPECT_CALL(*themeManager, GetTheme(_, _)).WillOnce(Return(progressThemeWrapper));
+    }
     paintMethod->UpdateContentModifier(&paintWrapper3);
     EXPECT_EQ(paintMethod->color_, Color::FOREGROUND);
     /**
@@ -446,7 +466,11 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPaintMethodTest001, TestSize.Leve
     loadingProgressPaintProperty->UpdateRefreshAnimationState(RefreshAnimationState::FOLLOW_HAND);
     loadingProgressPaintProperty->UpdateRefreshSizeScaleRatio(-1.0f);
     paintMethod->loadingProgressModifier_->loadingProgressOwner_ = LoadingProgressOwner::REFRESH;
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillOnce(Return(progressTheme));
+    if (rollbackApiVersion < API_VERSION_TWENTY) {
+        EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
+    } else {
+        EXPECT_CALL(*themeManager, GetTheme(_, _)).WillOnce(Return(progressThemeWrapper));
+    }
     paintMethod->UpdateContentModifier(&paintWrapper3);
     /**
      * test loadingState == REFRESH_STATE_FOLLOW_TO_RECYCLE
@@ -454,13 +478,21 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPaintMethodTest001, TestSize.Leve
     auto context = PipelineBase::GetCurrentContext();
     context->SetIsFormRender(true);
     loadingProgressPaintProperty->UpdateRefreshAnimationState(RefreshAnimationState::FOLLOW_TO_RECYCLE);
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillOnce(Return(progressTheme));
+    if (rollbackApiVersion < API_VERSION_TWENTY) {
+        EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
+    } else {
+        EXPECT_CALL(*themeManager, GetTheme(_, _)).WillOnce(Return(progressThemeWrapper));
+    }
     paintMethod->UpdateContentModifier(&paintWrapper3);
     /**
      * test loadingState == REFRESH_STATE_RECYCLE
      */
     loadingProgressPaintProperty->UpdateRefreshAnimationState(RefreshAnimationState::FOLLOW_TO_RECYCLE);
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillOnce(Return(progressTheme));
+    if (rollbackApiVersion < API_VERSION_TWENTY) {
+        EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
+    } else {
+        EXPECT_CALL(*themeManager, GetTheme(_, _)).WillOnce(Return(progressThemeWrapper));
+    }
     paintMethod->UpdateContentModifier(&paintWrapper3);
 }
 

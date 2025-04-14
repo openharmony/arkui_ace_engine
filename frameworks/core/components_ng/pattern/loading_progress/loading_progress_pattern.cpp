@@ -191,7 +191,9 @@ void LoadingProgressPattern::InitThemeValues()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>(host->GetThemeScopeId());
+    auto progressTheme = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                             ? pipeline->GetTheme<ProgressTheme>(host->GetThemeScopeId())
+                             : pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
 
     defaultColor_ = progressTheme->GetLoadingColor();
@@ -295,21 +297,13 @@ void LoadingProgressPattern::RemoveIsFocusActiveUpdateEvent()
 bool LoadingProgressPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     bool result = false;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        return result;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, result);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_RETURN(pipeline, result);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>(host->GetThemeScopeId());
-    CHECK_NULL_RETURN(progressTheme, result);
     auto paintProperty = host->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, result);
-
-    result = !paintProperty->HasColor();
-
-    if (themeScopeId && !colorLock_) {
-        paintProperty->UpdateColor(progressTheme->GetLoadingColor());
-        result = true;
-    }
-    return result;
+    return !paintProperty->HasColor();
 }
 } // namespace OHOS::Ace::NG

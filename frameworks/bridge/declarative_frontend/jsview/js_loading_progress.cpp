@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/models/loading_progress_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_loading_progress_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model.h"
@@ -71,16 +72,22 @@ void JSLoadingProgress::JSBind(BindingTarget globalObj)
 void JSLoadingProgress::Create()
 {
     LoadingProgressModel::GetInstance()->Create();
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        JSLoadingProgressTheme::ApplyTheme();
+    }
 }
 
 void JSLoadingProgress::SetColor(const JSCallbackInfo& info)
 {
     Color progressColor;
     if (!ParseJsColor(info[0], progressColor)) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+            LoadingProgressModel::GetInstance()->ResetColor();
+            return;
+        } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             RefPtr<ProgressTheme> progressTheme = GetTheme<ProgressTheme>();
             CHECK_NULL_VOID(progressTheme);
-            progressColor = progressTheme->GetLoadingParseFailedColor();
+            progressColor = progressTheme->GetLoadingColor();
         } else {
             return;
         }
@@ -98,13 +105,11 @@ void JSLoadingProgress::SetForegroundColor(const JSCallbackInfo& info)
     }
     Color progressColor;
     if (!ParseJsColor(info[0], progressColor)) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            LoadingProgressModel::GetInstance()->SetForegroundColorParseFailed(true);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
             LoadingProgressModel::GetInstance()->ResetColor();
         }
         return;
     }
-    LoadingProgressModel::GetInstance()->SetForegroundColorParseFailed(false);
     LoadingProgressModel::GetInstance()->SetColor(progressColor);
 }
 

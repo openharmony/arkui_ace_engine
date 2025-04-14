@@ -30,7 +30,6 @@ public:
     virtual void SetColor(const Color& value) = 0;
     virtual void SetEnableLoading(bool enable) = 0;
     virtual void ResetColor() = 0;
-    virtual void SetForegroundColorParseFailed(bool isParseFailed) {};
 private:
     static std::unique_ptr<LoadingProgressModel> instance_;
     static std::mutex mutex_;

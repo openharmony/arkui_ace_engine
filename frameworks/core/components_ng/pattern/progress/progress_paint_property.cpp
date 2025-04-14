@@ -27,7 +27,9 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     PaintProperty::ToJsonValue(json, filter);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    auto progressTheme = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)
+                             ? pipeline->GetTheme<ProgressTheme>(GetThemeScopeId())
+                             : pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
 
     json->PutExtAttr("constructor", ProgressOptions().c_str(), filter);
@@ -46,8 +48,6 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
         defaultBackgroundColor = progressTheme->GetCapsuleBgColor();
     } else if (progressType == ProgressType::RING) {
         defaultBackgroundColor = progressTheme->GetRingProgressBgColor();
-    } else if (progressType == ProgressType::SCALE) {
-        defaultColor = progressTheme->GetScaleTrackSelectedColor();
     }
     json->PutExtAttr("color", (GetColor().value_or(defaultColor)).ColorToString().c_str(), filter);
     json->PutExtAttr("backgroundColor",
@@ -75,7 +75,9 @@ std::string ProgressPaintProperty::ToJsonGradientColor() const
     } else {
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, "");
-        auto theme = pipelineContext->GetTheme<ProgressTheme>(GetThemeScopeId());
+        auto theme = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)
+                         ? pipelineContext->GetTheme<ProgressTheme>(GetThemeScopeId())
+                         : pipelineContext->GetTheme<ProgressTheme>();
         auto endColor = theme->GetRingProgressEndSideColor();
         auto beginColor = theme->GetRingProgressBeginSideColor();
         GradientColor gradientColorEnd;

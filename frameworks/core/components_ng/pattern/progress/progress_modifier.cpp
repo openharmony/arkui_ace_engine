@@ -108,7 +108,9 @@ ProgressModifier::ProgressModifier(const WeakPtr<FrameNode>& host,
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    auto theme = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)
+                     ? pipeline->GetTheme<ProgressTheme>(GetThemeScopeId())
+                     : pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);
 
     pressBlendColor_ = theme->GetClickEffect();
@@ -703,40 +705,27 @@ void ProgressModifier::ContentDrawWithFunction(DrawingContext& context)
 {
     auto contentSize = contentSize_->Get();
     auto& canvas = context.canvas;
-    if (progressType_->Get() == static_cast<int32_t>(ProgressType::LINEAR)) {
-        PaintLinear(canvas, offset_->Get(), contentSize);
-    } else if (progressType_->Get() == static_cast<int32_t>(ProgressType::RING)) {
-        PaintRing(canvas, offset_->Get(), contentSize);
-    } else if (progressType_->Get() == static_cast<int32_t>(ProgressType::SCALE)) {
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            PaintScaleRingForApiNine(canvas, offset_->Get(), contentSize);
-        } else {
-            PaintScaleRing(canvas, offset_->Get(), contentSize);
-        }
-    } else if (progressType_->Get() == static_cast<int32_t>(ProgressType::MOON)) {
-        PaintMoon(canvas, offset_->Get(), contentSize);
-    } else if (progressType_->Get() == static_cast<int32_t>(ProgressType::CAPSULE)) {
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            if (contentSize.Width() >= contentSize.Height()) {
-                PaintCapsuleForApiNine(canvas, offset_->Get(), contentSize);
-            } else {
-                PaintVerticalCapsuleForApiNine(canvas, offset_->Get(), contentSize);
-            }
-        } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-            if (contentSize.Width() >= contentSize.Height()) {
-                PaintCapsule(canvas, offset_->Get(), contentSize, contentSize.Height() / INT32_TWO);
-            } else {
-                PaintVerticalCapsule(canvas, offset_->Get(), contentSize, contentSize.Width() / INT32_TWO);
-            }
-        } else {
-            if (contentSize.Width() >= contentSize.Height()) {
-                PaintCapsule(canvas, offset_->Get(), contentSize, capsuleBorderRadius_->Get());
-            } else {
-                PaintVerticalCapsule(canvas, offset_->Get(), contentSize, capsuleBorderRadius_->Get());
-            }
-        }
-    } else {
-        PaintLinear(canvas, offset_->Get(), contentSize);
+    auto progressType = static_cast<ProgressType>(progressType_->Get());
+    auto offset = offset_->Get();
+    switch (progressType) {
+        case ProgressType::LINEAR:
+            PaintLinear(canvas, offset, contentSize);
+            break;
+        case ProgressType::RING:
+            PaintRing(canvas, offset, contentSize);
+            break;
+        case ProgressType::SCALE:
+            PaintScaleRingWithApiCheck(canvas, offset, contentSize);
+            break;
+        case ProgressType::MOON:
+            PaintMoon(canvas, offset, contentSize);
+            break;
+        case ProgressType::CAPSULE:
+            PaintCapsuleWithApiCheck(canvas, offset, contentSize);
+            break;
+        default:
+            PaintLinear(canvas, offset, contentSize);
+            break;
     }
 }
 
@@ -1380,6 +1369,16 @@ void ProgressModifier::PaintTrailing(RSCanvas& canvas, const RingProgressData& r
     canvas.Restore();
 }
 
+void ProgressModifier::PaintScaleRingWithApiCheck(
+    RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
+{
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        PaintScaleRingForApiNine(canvas, offset_->Get(), contentSize);
+    } else {
+        PaintScaleRing(canvas, offset_->Get(), contentSize);
+    }
+}
+
 void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
     PointF centerPt = PointF(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO) + offset;
@@ -1470,6 +1469,29 @@ void ProgressModifier::PaintMoon(RSCanvas& canvas, const OffsetF& offset, const 
         canvas.DrawPath(path);
     }
     canvas.DetachBrush();
+}
+
+void ProgressModifier::PaintCapsuleWithApiCheck(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
+{
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (contentSize.Width() >= contentSize.Height()) {
+            PaintCapsuleForApiNine(canvas, offset_->Get(), contentSize);
+        } else {
+            PaintVerticalCapsuleForApiNine(canvas, offset_->Get(), contentSize);
+        }
+    } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (contentSize.Width() >= contentSize.Height()) {
+            PaintCapsule(canvas, offset_->Get(), contentSize, contentSize.Height() / INT32_TWO);
+        } else {
+            PaintVerticalCapsule(canvas, offset_->Get(), contentSize, contentSize.Width() / INT32_TWO);
+        }
+    } else {
+        if (contentSize.Width() >= contentSize.Height()) {
+            PaintCapsule(canvas, offset_->Get(), contentSize, capsuleBorderRadius_->Get());
+        } else {
+            PaintVerticalCapsule(canvas, offset_->Get(), contentSize, capsuleBorderRadius_->Get());
+        }
+    }
 }
 
 void ProgressModifier::PaintCapsule(

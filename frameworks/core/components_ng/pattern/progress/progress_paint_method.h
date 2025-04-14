@@ -38,10 +38,9 @@ constexpr float DEFAULT_BORDER_WIDTH = 1.0f;
 class ACE_EXPORT ProgressPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ProgressPaintMethod, NodePaintMethod)
 public:
-    explicit ProgressPaintMethod(ProgressType progressType, float strokeWidth,
-        const RefPtr<ProgressModifier>& progressModifier, bool isUserInitiatedColor)
-        : strokeWidth_(strokeWidth), progressType_(progressType), progressModifier_(progressModifier),
-          isUserInitiatedColor_(isUserInitiatedColor)
+    explicit ProgressPaintMethod(
+        ProgressType progressType, float strokeWidth, const RefPtr<ProgressModifier>& progressModifier)
+        : strokeWidth_(strokeWidth), progressType_(progressType), progressModifier_(progressModifier)
     {
         progressModifier_->SetProgressType(progressType_);
     }
@@ -60,11 +59,7 @@ public:
         auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_VOID(paintProperty);
         auto isSensitive = paintProperty->GetIsSensitive().value_or(false);
-        if (progressType_ != ProgressType::SCALE) {
-            color_ = isUserInitiatedColor_ ? paintProperty->GetColor().value_or(color_) : color_;
-        } else {
-            color_ = paintProperty->GetColor().value_or(color_);
-        }
+        color_ = paintProperty->GetColor().value_or(color_);
         bgColor_ = paintProperty->GetBackgroundColor().value_or(bgColor_);
         borderColor_ = paintProperty->GetBorderColor().value_or(borderColor_);
         maxValue_ = paintProperty->GetMaxValue().value_or(maxValue_);
@@ -145,7 +140,6 @@ private:
     bool ringSweepEffect_ = false;
     bool linearSweepEffect_ = false;
     bool isItalic_ = false;
-    bool isUserInitiatedColor_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPaintMethod);
 

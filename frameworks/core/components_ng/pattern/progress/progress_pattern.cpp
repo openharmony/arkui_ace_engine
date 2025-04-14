@@ -55,7 +55,9 @@ void ProgressPattern::InitAnimatableProperty(ProgressAnimatableProperty& progres
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    auto progressTheme = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)
+                             ? pipeline->GetTheme<ProgressTheme>(GetThemeScopeId())
+                             : pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
     auto progressLayoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
@@ -95,8 +97,6 @@ void ProgressPattern::InitColorProperty(ProgressAnimatableProperty& progressAnim
         bgColor = progressTheme->GetCapsuleBgColor();
     } else if (progressType_ == ProgressType::RING) {
         bgColor = progressTheme->GetRingProgressBgColor();
-    } else if (progressType_ == ProgressType::SCALE) {
-        color = progressTheme->GetScaleTrackSelectedColor();
     }
     color = paintProperty->GetColor().value_or(color);
     bgColor = paintProperty->GetBackgroundColor().value_or(bgColor);
@@ -147,7 +147,9 @@ void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
     CHECK_NULL_VOID(paintProperty);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    auto theme = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)
+                     ? pipeline->GetTheme<ProgressTheme>(GetThemeScopeId())
+                     : pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
@@ -398,7 +400,9 @@ void ProgressPattern::HandleEnabled()
     CHECK_NULL_VOID(renderContext);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    auto theme = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)
+                     ? pipeline->GetTheme<ProgressTheme>(GetThemeScopeId())
+                     : pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);
     auto alpha = theme->GetProgressDisable();
     auto originalOpacity = renderContext->GetOpacityValue(1.0);
@@ -410,7 +414,9 @@ void ProgressPattern::OnPress(const TouchEventInfo& info)
     auto touchType = info.GetTouches().front().GetTouchType();
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    auto theme = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)
+                     ? pipeline->GetTheme<ProgressTheme>(GetThemeScopeId())
+                     : pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -519,7 +525,9 @@ void ProgressPattern::OnModifyDone()
     if (progressLayoutProperty->GetType() == ProgressType::RING && !progressLayoutProperty->GetPaddingProperty()) {
         auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+        auto theme = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)
+                         ? pipeline->GetTheme<ProgressTheme>(GetThemeScopeId())
+                         : pipeline->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(theme);
         PaddingProperty padding;
         padding.SetEdges(CalcLength(theme->GetRingDefaultPadding()));
@@ -535,7 +543,9 @@ void ProgressPattern::DumpInfo()
     CHECK_NULL_VOID(layoutProperty);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>();
+    auto theme = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)
+                     ? pipeline->GetTheme<ProgressTheme>(GetThemeScopeId())
+                     : pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -591,7 +601,9 @@ void ProgressPattern::ToJsonValueForCapsuleStyleOptions(
     CHECK_NULL_VOID(paintProperty);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    auto progressTheme = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)
+                             ? pipeline->GetTheme<ProgressTheme>(GetThemeScopeId())
+                             : pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
     auto capsuleStyle = JsonUtil::Create(true);
     auto font = JsonUtil::Create(true);
@@ -652,7 +664,9 @@ void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>&
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
     auto pipeline = PipelineBase::GetCurrentContext();
-    auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    auto theme = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)
+                     ? pipeline->GetTheme<ProgressTheme>(GetThemeScopeId())
+                     : pipeline->GetTheme<ProgressTheme>();
 
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
@@ -673,7 +687,9 @@ void ProgressPattern::ToJsonValueForLinearStyleOptions(
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
     auto pipeline = PipelineBase::GetCurrentContext();
-    auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    auto theme = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)
+                     ? pipeline->GetTheme<ProgressTheme>(GetThemeScopeId())
+                     : pipeline->GetTheme<ProgressTheme>();
 
     auto jsonValue = JsonUtil::Create(true);
     auto strokeWidth = layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness());
@@ -773,7 +789,9 @@ void ProgressPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(layoutProperty);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>();
+    auto theme = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)
+                     ? pipeline->GetTheme<ProgressTheme>(GetThemeScopeId())
+                     : pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -812,37 +830,17 @@ void ProgressPattern::OnAccessibilityEvent()
 bool ProgressPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     bool result = false;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        return result;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, result);
     auto paintProperty = host->GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, result);
     const auto& type = paintProperty->GetProgressType();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, result);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>(themeScopeId);
-    CHECK_NULL_RETURN(progressTheme, result);
-
     result = !paintProperty->HasBackgroundColor() ||
         ((type != ProgressType::RING) && (type != ProgressType::SCALE) && !paintProperty->HasColor()) ||
         ((type == ProgressType::CAPSULE) && !paintProperty->HasBorderColor());
-
-    if (themeScopeId && !isUserInitiatedColor_) {
-        if (type == ProgressType::LINEAR || type == ProgressType::MOON) {
-            paintProperty->UpdateColor(progressTheme->GetTrackSelectedColor());
-            result = true;
-        } else if (type == ProgressType::CAPSULE) {
-            paintProperty->UpdateColor(progressTheme->GetCapsuleSelectColor());
-            result = true;
-        }
-    }
-
-    if (themeScopeId && !isUserInitiatedBgColor_ && type != ProgressType::CAPSULE) {
-        paintProperty->UpdateBackgroundColor(progressTheme->GetTrackBgColor());
-        result = true;
-    }
-    isUserInitiatedColor_ = (themeScopeId && isModifierInitiatedColor_) ? false : isUserInitiatedColor_;
-    isUserInitiatedBgColor_ = (themeScopeId && isModifierInitiatedBgColor_) ? false : isUserInitiatedBgColor_;
-
     return result;
 }
 

@@ -1531,6 +1531,9 @@ HWTEST_F(ProgressTestNg, ProgressModelTest005, TestSize.Level1)
  */
 HWTEST_F(ProgressTestNg, ProgressPatternTest001, TestSize.Level1)
 {
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+
     ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
     RefPtr<ProgressPattern> pattern = frameNode_->GetPattern<ProgressPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -1546,6 +1549,8 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest001, TestSize.Level1)
     modelNg.SetColor(FRONT_COLOR);
     modelNg.ResetBackgroundColor();
     EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1555,6 +1560,9 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest001, TestSize.Level1)
  */
 HWTEST_F(ProgressTestNg, ProgressPatternTest002, TestSize.Level1)
 {
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+
     ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_RING);
     RefPtr<ProgressPattern> pattern = frameNode_->GetPattern<ProgressPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -1570,6 +1578,8 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest002, TestSize.Level1)
     modelNg.SetColor(FRONT_COLOR);
     modelNg.ResetBackgroundColor();
     EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1579,6 +1589,9 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest002, TestSize.Level1)
  */
 HWTEST_F(ProgressTestNg, ProgressPatternTest003, TestSize.Level1)
 {
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+
     ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
     RefPtr<ProgressPattern> pattern = frameNode_->GetPattern<ProgressPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -1599,6 +1612,8 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest003, TestSize.Level1)
     modelNg.SetBackgroundColor(BG_COLOR);
     modelNg.ResetBorderColor();
     EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1608,6 +1623,9 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest003, TestSize.Level1)
  */
 HWTEST_F(ProgressTestNg, ProgressThemeWrapperTest001, TestSize.Level1)
 {
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_PROGRESS);
     ASSERT_NE(themeConstants, nullptr);
     auto progressThemeWrapper = ProgressThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants);
@@ -1644,5 +1662,7 @@ HWTEST_F(ProgressTestNg, ProgressThemeWrapperTest001, TestSize.Level1)
     EXPECT_EQ(progressTheme->GetCapsuleSelectColor(), colors[TokenColors::COMP_EMPHASIZE_SECONDARY]);
     EXPECT_EQ(progressTheme->GetTrackSelectedColor(), colors[TokenColors::BACKGROUND_EMPHASIZE]);
     EXPECT_EQ(progressTheme->GetBorderColor(), colors[TokenColors::COMP_EMPHASIZE_SECONDARY]);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG
