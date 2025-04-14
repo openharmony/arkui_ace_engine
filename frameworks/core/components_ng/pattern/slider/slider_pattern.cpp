@@ -1824,8 +1824,8 @@ void SliderPattern::HandleCrownAction(double mainDelta)
 
 void SliderPattern::StartVibrateFeedback()
 {
-    timestampCur_ = GetCurrentTimestamp();
-    if (!reachBoundary_ && (timeStampCur_ - timestampPre_ >= CROWN_TIME_THRESH)) {
+    timeStampCur_ = GetCurrentTimestamp();
+    if (!reachBoundary_ && (timeStampCur_ - timeStampPre_ >= CROWN_TIME_THRESH)) {
         VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s", CROWN_VIBRATOR_WEAK);
         timeStampPre_ = timeStampCur_;
