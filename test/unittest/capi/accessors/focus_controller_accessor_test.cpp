@@ -18,49 +18,32 @@
 #include "accessor_test_base.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
-// #include "core/interfaces/native/implementation/calendar_controller_peer.h"
+// #include "test/mock/core/pipeline/mock_pipeline_context.cpp"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
 
-namespace {
-    struct FocusControllerPeer { };
-} // namespace
-
-class FocusControllerAccessorTest : public AccessorTestBase<GENERATED_ArkUIFocusControllerAccessor,
-    &GENERATED_ArkUIAccessors::requestFocus, FocusControllerPeer> {
-public:
-    void SetUp() override
-    {
-        AccessorTestBase::SetUp();
-        // mockController_ = Referenced::MakeRefPtr<MockFocusController>();
-        // ASSERT_NE(mockController_, nullptr);
-        // peer_->controller = mockController_;
-    }
-
-    void TearDown() override
-    {
-        AccessorTestBase::TearDown();
-        // mockController_ = nullptr;
-    }
-
-    // RefPtr<MockCalendarController> mockController_ = nullptr;
-};
+class FocusControllerAccessorTest : public StaticAccessorTest<GENERATED_ArkUIFocusControllerAccessor,
+    &GENERATED_ArkUIAccessors::getFocusControllerAccessor> { };
 
 /**
- * @tc.name: backToTodayTest
+ * @tc.name: RequestFocusTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarControllerAccessorTest, backToTodayTest, TestSize.Level1)
+HWTEST_F(FocusControllerAccessorTest, RequestFocusTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->requestFocus, nullptr);
+    const std::string expectedKey = "123";
+    auto arkKey = Converter::ArkValue<Ark_String>(expectedKey);
 
-    // EXPECT_CALL(*mockController_, BackToToday()).Times(3);
-    // accessor_->backToToday(peer_);
-    // accessor_->backToToday(peer_);
-    // accessor_->backToToday(peer_);
+    auto pipeLine = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeLine, nullptr);
+
+    EXPECT_CALL(*pipeLine, RequestFocus(expectedKey, false)).Times(1);
+    
+    accessor_->requestFocus(&arkKey);
 }
 } // namespace OHOS::Ace::NG
