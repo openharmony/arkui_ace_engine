@@ -228,7 +228,7 @@ void LoadSystemThemeFromJson(const RefPtr<AssetManager>& assetManager, const Ref
             std::string systemThemeValue = themeRootJson->GetString("systemTheme", ""); // e.g. $theme:125829872
             if (!systemThemeValue.empty() && StringUtils::StartWith(systemThemeValue, themePrefix) &&
                 systemThemeValue.size() > sizeof(themePrefix) - 1) {
-                auto systemThemeId = std::stoi(systemThemeValue.substr(sizeof(themePrefix) - 1));
+                auto systemThemeId = StringUtils::StringToInt(systemThemeValue.substr(sizeof(themePrefix) - 1));
                 auto themeManager = pipelineContext->GetThemeManager();
                 CHECK_NULL_VOID(themeManager);
                 themeManager->SetSystemThemeId(systemThemeId);
