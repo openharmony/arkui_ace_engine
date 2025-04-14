@@ -885,12 +885,12 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
 
     invalidateOnReuse(): void {
         this.recomputeNeeded = true
-        for (let child = this.child; child; child = child.next) {
-            if (child.node)
+        for (let child = this.child; child; child = child?.next) {
+            if (child?.node)
                 return
-            if (child.once)
+            if (child?.once)
                 continue
-            child.invalidateOnReuse()
+            child?.invalidateOnReuse()
         }
     }
 
