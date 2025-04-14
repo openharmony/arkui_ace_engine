@@ -600,7 +600,13 @@ public:
 
     AccessibilityHoverAction ConvertAccessibilityHoverAction(TouchType type);
 
+    std::optional<bool> GetLastHoverState() const
+    {
+        return lastHoverState_;
+    }
+
 private:
+    std::optional<bool> lastHoverState_;
     OnHoverEventFunc onHoverCallback_;
     OnHoverFunc onHoverEventCallback_;
     OnAccessibilityHoverFunc onAccessibilityHoverCallback_;

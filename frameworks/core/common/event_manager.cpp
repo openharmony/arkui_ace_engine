@@ -1557,6 +1557,9 @@ bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
         }
         if (std::find(currHoverTestResults_.begin(), currHoverTestResults_.end(), hoverResult) ==
             currHoverTestResults_.end()) {
+            if (!hoverResult->GetLastHoverState().has_value()) {
+                TAG_LOGI(AceLogTag::ACE_MOUSE, "onHover-false trigger abnormal firstly");
+            }
             hoverResult->HandleHoverEvent(false, event);
         }
         if ((iterCountLast >= lastHoverDispatchLength_) && (lastHoverDispatchLength_ != 0)) {
@@ -1586,6 +1589,9 @@ bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
     for (auto hoverResultIt = lastHoverTestResults_.begin(); hoverResultIt != lastHoverEndNode; ++hoverResultIt) {
         // there may have previous hover nodes in the invalid part of current hover nodes. Those nodes exit hover also
         if (std::find(currHoverEndNode, currHoverTestResults_.end(), *hoverResultIt) != currHoverTestResults_.end()) {
+            if (!(*hoverResultIt)->GetLastHoverState().has_value()) {
+                TAG_LOGI(AceLogTag::ACE_MOUSE, "onHover-false trigger abnormal secondly");
+            }
             (*hoverResultIt)->HandleHoverEvent(false, event);
         }
     }
