@@ -1337,7 +1337,7 @@ void MovingPhotoPattern::RepeatPlay(bool isRepeatPlay)
 void MovingPhotoPattern::AutoPlayPeriod(int64_t startTime, int64_t endTime)
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto AutoPlayPeriod: [%{public}lld, %{public}lld].",
-        startTime, endTime);
+        static_cast<long long>(startTime), static_cast<long long>(endTime));
     if (startTime >= VIDEO_PLAYTIME_START_POSITION && startTime < endTime) {
         autoPlayPeriodStartTime_ = startTime;
         autoPlayPeriodEndTime_ = endTime;
@@ -1347,7 +1347,7 @@ void MovingPhotoPattern::AutoPlayPeriod(int64_t startTime, int64_t endTime)
 void MovingPhotoPattern::SetAutoPlayPeriod(int64_t startTime, int64_t endTime)
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto SetAutoPlayPeriod: [%{public}lld, %{public}lld].",
-        startTime, endTime);
+        static_cast<long long>(startTime), static_cast<long long>(endTime));
     if (startTime < VIDEO_PLAYTIME_START_POSITION || startTime >= endTime) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer SetAutoPlayPeriod error.");
         return;
