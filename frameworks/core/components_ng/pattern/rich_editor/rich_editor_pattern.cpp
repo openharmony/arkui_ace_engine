@@ -4868,11 +4868,11 @@ void RichEditorPattern::InitMouseEvent()
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent);
-    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover, HoverInfo& hoverInfo) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "on hover event isHover=%{public}d", isHover);
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->OnHover(isHover);
+            pattern->OnHover(isHover, hoverInfo);
         }
     };
     auto hoverEvent = MakeRefPtr<InputEvent>(std::move(hoverTask));
@@ -4880,9 +4880,12 @@ void RichEditorPattern::InitMouseEvent()
     mouseEventInitialized_ = true;
 }
 
-void RichEditorPattern::OnHover(bool isHover)
+void RichEditorPattern::OnHover(bool isHover, HoverInfo& hoverInfo)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isHover=%{public}d", isHover);
+    auto sourceTool = hoverInfo.GetSourceTool();
+    auto mouseAction = hoverInfo.GetMouseAction();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isHover=%{public}d, sourceTool=%{public}d, mouseAction=%{public}d",
+        isHover, sourceTool, mouseAction);
     if (!isHover && lastHoverSpanItem_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "spanItem hover false");
         lastHoverSpanItem_->onHover_(false, lastHoverInfo_);
@@ -4892,7 +4895,15 @@ void RichEditorPattern::OnHover(bool isHover)
     if (isHover && (!scrollBar || !scrollBar->IsPressed())) {
         ChangeMouseStyle(MouseFormat::TEXT_CURSOR);
     } else {
-        ChangeMouseStyle(MouseFormat::DEFAULT, true);
+        auto host = GetHost();
+        auto pipeline = GetContext();
+        bool hideMouseByTouch = sourceTool == SourceTool::FINGER && mouseAction == MouseAction::WINDOW_LEAVE;
+        bool keepStyle = host && pipeline && hideMouseByTouch;
+        if (keepStyle) {
+            pipeline->FreeMouseStyleHoldNode(host->GetId());
+        } else {
+            ChangeMouseStyle(MouseFormat::DEFAULT, true);
+        }
         HandleUrlSpanForegroundClear();
     }
 }

@@ -400,6 +400,12 @@ public:
         return *this;
     }
 
+    HoverInfo& SetMouseAction(MouseAction mouseAction)
+    {
+        mouseAction_ = mouseAction;
+        return *this;
+    }
+
     const Offset& GetScreenLocation() const
     {
         return screenLocation_;
@@ -415,6 +421,11 @@ public:
         return globalLocation_;
     }
 
+    MouseAction GetMouseAction() const
+    {
+        return mouseAction_;
+    }
+
 private:
     // global position at which the touch point contacts the screen.
     Offset globalLocation_;
@@ -423,6 +434,7 @@ private:
     Offset localLocation_;
 
     Offset screenLocation_;
+    MouseAction mouseAction_ = MouseAction::NONE;
 };
 
 class AccessibilityHoverInfo : public BaseEventInfo {

@@ -37,6 +37,7 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
     hoverInfo.SetSourceTool(event.sourceTool);
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
     hoverInfo.SetPressedKeyCodes(event.pressedKeyCodes_);
+    hoverInfo.SetMouseAction(event.action);
     // onHoverEventCallback_ may be overwritten in its invoke so we copy it first
     auto onHoverEventCallback = onHoverEventCallback_;
     onHoverEventCallback(isHovered, hoverInfo);
