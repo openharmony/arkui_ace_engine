@@ -750,6 +750,10 @@ void RatingPattern::SetRatingScore(double ratingScore)
         return;
     }
     UpdateRatingScore(ratingScore);
+    auto layoutProperty = host->GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    // Constrains ratingScore and starNum in case of the illegal input.
+    ConstrainsRatingScore(layoutProperty);
 }
 
 void RatingPattern::UpdateRatingScore(double ratingScore)
