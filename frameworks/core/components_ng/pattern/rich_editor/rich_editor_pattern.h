@@ -1341,6 +1341,7 @@ private:
     void StartFloatingCaretLand();
     void ResetTouchAndMoveCaretState(bool needAnimation = true);
     void ResetTouchSelectState();
+    void ScheduleFirstClickResetAfterWindowFocus();
     void HandleTouchUpAfterLongPress();
     void HandleTouchCancelAfterLongPress();
     void HandleTouchMove(const TouchLocationInfo& info);
@@ -1744,6 +1745,9 @@ private:
     LRUMap<std::uintptr_t, RefPtr<Paragraph>> paragraphCache_;
     SysScale lastSysScale_;
     std::map<int32_t, AISpan> lastAISpanMap_;
+    // Used to avoid show single handle by first click after window focus
+    bool firstClickAfterWindowFocus_ = false;
+    CancelableCallback<void()> firstClickResetTask_;
 };
 } // namespace OHOS::Ace::NG
 

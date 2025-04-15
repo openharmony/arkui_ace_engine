@@ -3144,10 +3144,15 @@ Offset RichEditorPattern::ConvertTouchOffsetToTextOffset(const Offset& touchOffs
 bool RichEditorPattern::IsShowSingleHandleByClick(
     const OHOS::Ace::GestureEvent& info, int32_t lastCaretPosition, const RectF& lastCaretRect, bool isCaretTwinkling)
 {
+    if (firstClickAfterWindowFocus_) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "do not show single handle by first click after window focus");
+        firstClickAfterWindowFocus_ = false;
+        return false;
+    }
     auto isAccessibilityClick = IsAccessibilityClick();
-    if (!isCaretTwinkling || (info.GetSourceDevice() == SourceType::MOUSE) || isAccessibilityClick) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "isCaretTwinkling=%{public}d,sourceType=%{public}d,"
-            "isAccessibilityClick=%{public}d", isCaretTwinkling, info.GetSourceDevice(), isAccessibilityClick);
+    if (!isCaretTwinkling || isAccessibilityClick) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "isCaretTwinkling=%{public}d,isAccessibilityClick=%{public}d"
+            ,isCaretTwinkling, isAccessibilityClick);
         return false;
     }
     auto offset = info.GetLocalLocation();
@@ -3449,6 +3454,8 @@ void RichEditorPattern::HandleBlurEvent()
     shiftFlag_ = false;
     moveCaretState_.Reset();
     floatingCaretState_.Reset();
+    firstClickResetTask_.Cancel();
+    firstClickAfterWindowFocus_ = false;
     StopTwinkling();
     // The pattern handles blurevent, Need to close the softkeyboard first.
     if ((customKeyboardBuilder_ && isCustomKeyboardAttached_) || reason == BlurReason::FRAME_DESTROY) {
@@ -3476,7 +3483,8 @@ void RichEditorPattern::HandleBlurEvent()
 
 void RichEditorPattern::HandleFocusEvent(FocusReason focusReason)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent/%{public}d", frameId_);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent frameId:%{public}d reason:%{public}d", frameId_, focusReason);
+    IF_TRUE(focusReason == FocusReason::WINDOW_FOCUS, ScheduleFirstClickResetAfterWindowFocus());
     blockKbInFloatingWindow_= false;
     UseHostToUpdateTextFieldManager();
     if (previewLongPress_ || isOnlyRequestFocus_) {
@@ -7378,6 +7386,25 @@ void RichEditorPattern::ResetTouchSelectState()
     isTouchSelecting_ = false;
     previewLongPress_ = false;
     editingLongPress_ = false;
+}
+
+void RichEditorPattern::ScheduleFirstClickResetAfterWindowFocus()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    firstClickResetTask_.Cancel();
+    firstClickResetTask_.Reset([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->firstClickAfterWindowFocus_ = false;
+    });
+    firstClickAfterWindowFocus_ = true;
+    taskExecutor->PostDelayedTask(firstClickResetTask_, TaskExecutor::TaskType::UI,
+        RICH_EDITOR_TWINKLING_INTERVAL_MS, "ResetFirstClickAfterWindowFocus");
 }
 
 void RichEditorPattern::HandleTouchUpAfterLongPress()
