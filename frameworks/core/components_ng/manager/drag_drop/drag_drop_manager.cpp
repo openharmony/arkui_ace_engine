@@ -824,6 +824,7 @@ void DragDropManager::OnDragThrow(const DragPointerEvent& pointerEvent)
         FireOnDragEvent(preTargetFrameNode_, pointerEvent, DragEventType::LEAVE, extraInfo_);
         preTargetFrameNode_ = nullptr;
     }
+    TransDragWindowToDragFwk(container->GetInstanceId());
     ClearSummary();
     ClearExtraInfo();
     SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
