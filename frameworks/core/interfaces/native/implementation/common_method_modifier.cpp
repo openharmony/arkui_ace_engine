@@ -3809,10 +3809,8 @@ void OnDragStartImpl(Ark_NativePointer node,
 
         PipelineContext::SetCallBackNode(weakNode);
 
-        auto continuation = CallbackKeeper::RegisterReverseCallback<Callback_Union_CustomBuilder_DragItemInfo_Void,
-            CallbackKeeper::AnyResultHandlerType>(handler);
-        callback.InvokeSync(arkDragInfo, arkExtraParam, continuation);
-        CallbackKeeper::ReleaseReverseCallback(continuation);
+        CallbackKeeper::InvokeWithResultHandler<Ark_Union_CustomBuilder_DragItemInfo,
+            Callback_Union_CustomBuilder_DragItemInfo_Void>(handler, callback, arkDragInfo, arkExtraParam);
         return result;
     };
     ViewAbstract::SetOnDragStart(frameNode, std::move(onDragStart));

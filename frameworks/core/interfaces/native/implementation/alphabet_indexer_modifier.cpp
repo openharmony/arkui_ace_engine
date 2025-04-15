@@ -207,13 +207,11 @@ void OnRequestPopupDataImpl(Ark_NativePointer node,
         std::vector<std::string> {
         auto arkValue = Converter::ArkValue<Ark_Number>(selected);
         std::vector<std::string> result;
-        CallbackKeeper::AnyResultHandlerType handler = [&result](const void *rawResultPtr) {
+        auto handler = [&result](const void *rawResultPtr) {
             auto arkResultPtr = reinterpret_cast<const Array_String*>(rawResultPtr);
             result = Converter::Convert<std::vector<std::string>>(*arkResultPtr);
         };
-        auto continuation = CallbackKeeper::RegisterReverseCallback<Callback_Array_String_Void>(handler);
-        callback.InvokeSync(arkValue, continuation);
-        CallbackKeeper::ReleaseReverseCallback(continuation);
+        CallbackKeeper::InvokeWithResultHandler<Array_String, Callback_Array_String_Void>(handler, callback, arkValue);
         return result;
     };
     IndexerModelNG::SetOnRequestPopupData(frameNode, std::move(onEvent));

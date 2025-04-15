@@ -51,10 +51,9 @@ public:
     using AnyResultHandlerType = std::function<void(const void *)>;
     using ReverseHandler = std::function<void()>;
 
-    // [deprecated]
     template <typename ArkResultType, typename ContinuationType, typename CallbackHelper, typename... Params>
-    static void InvokeWithResultHandler(std::function<void(const void *)> &&handler,
-        const CallbackHelper &helper, Params&&... args)
+    static void InvokeWithResultHandler(
+        std::function<void(const void *)> &&handler, const CallbackHelper &helper, Params&&... args)
     {
         // create continuation
         // register handler
@@ -63,7 +62,6 @@ public:
         Release(continuation.resource.resourceId);
     }
 
-    // [deprecated]
     template <typename ArkResultType, typename ContinuationType, typename CallbackHelper, typename... Params>
     static void InvokeWithResultHandlerAsync(
         std::function<void(const void *)> &&handler, const CallbackHelper &helper, Params&&... args)
