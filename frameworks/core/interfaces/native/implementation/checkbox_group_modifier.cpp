@@ -98,7 +98,6 @@ void UnselectedColor1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     CheckBoxGroupModelNG::SetUnSelectedColor(frameNode, value ? Converter::OptConvert<Color>(*value) : std::nullopt);
-
 }
 void Mark0Impl(Ark_NativePointer node,
                const Ark_MarkStyle* value)
