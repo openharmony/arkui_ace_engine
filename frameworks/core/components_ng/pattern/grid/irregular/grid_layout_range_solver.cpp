@@ -32,7 +32,7 @@ using Result = GridLayoutRangeSolver::StartingRowInfo;
 Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
 {
     if (info_->gridMatrix_.empty() || info_->lineHeightMap_.empty()) {
-        return { 0, 0, 0.0f };
+        return { -1, -1, 0.0f };
     }
     if (NearZero(info_->currentOffset_)) {
         return { info_->startMainLineIndex_, info_->startIndex_, 0.0f };
@@ -127,7 +127,7 @@ Result GridLayoutRangeSolver::SolveBackward(float mainGap, float targetLen, int3
     while (idx > 0 && LessNotEqual(len, targetLen)) {
         auto it = info_->lineHeightMap_.find(--idx);
         if (it == info_->lineHeightMap_.end()) {
-            return { 0, 0, 0.0f };
+            return { -1, -1, 0.0f };
         }
         len += it->second + mainGap;
     }

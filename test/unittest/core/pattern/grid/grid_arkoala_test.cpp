@@ -155,6 +155,38 @@ HWTEST_F(GridArkoalaTest, Basic002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollBackward001
+ * @tc.desc: Test scrolling backward when lineHeights are empty and items don't exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridArkoalaTest, ScrollBackward001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    ViewAbstract::SetHeight(CalcLength(1280));
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(8.0f));
+    InitMockLazy(100);
+    CreateDone();
+    EXPECT_EQ(pattern_->info_.gridMatrix_.size(), 1);
+    IncrementAndLayout(__LINE__);
+
+    UpdateCurrentOffset(-5000.0f);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(24, 30));
+
+    frameNode_->ChildrenUpdatedFrom(5);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 12);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -86);
+    UpdateCurrentOffset(500.0f);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 12);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 414);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(22, 28));
+    EXPECT_EQ(pattern_->info_.currentOffset_, -44);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 11);
+}
+
+/**
  * @tc.name: LargeOffset001
  * @tc.desc: Test large offset on ScrollWindowAdapter with MockKoala
  * @tc.type: FUNC

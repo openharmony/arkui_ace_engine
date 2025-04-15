@@ -274,9 +274,11 @@ void GridIrregularLayoutAlgorithm::MeasureBackward(float mainSize, bool toAdjust
     if ((toAdjust || !canOverScrollStart_) && res.row == 0) {
         res.pos = std::min(res.pos, 0.0f);
     }
-    UpdateStartInfo(info_, res);
+    if (res.idx > -1) {
+        UpdateStartInfo(info_, res);
+    }
 
-    auto [endLine, endIdx] = solver.SolveForwardForEndIdx(mainGap_, mainSize - res.pos, res.row);
+    auto [endLine, endIdx] = solver.SolveForwardForEndIdx(mainGap_, mainSize - info_.currentOffset_, info_.startMainLineIndex_);
     info_.endMainLineIndex_ = endLine;
     info_.endIndex_ = endIdx;
 }
