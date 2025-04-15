@@ -2374,6 +2374,19 @@ class AccessibilityFocusCallbackModifier extends ModifierWithKey {
   }
 }
 AccessibilityRoleModifier.identity = Symbol('onAccessibilityFocus');
+class AccessibilityActionInterceptCallbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnAccessibilityActionIntercept(node);
+    } else {
+      getUINativeModule().common.setOnAccessibilityActionIntercept(node, this.value);
+    }
+  }
+}
+AccessibilityActionInterceptCallbackModifier.identity = Symbol('onAccessibilityActionIntercept');
 class AllowDropModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4685,6 +4698,12 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, AccessibilityFocusCallbackModifier.identity, AccessibilityFocusCallbackModifier, value);
     return this;
   }
+
+  onAccessibilityActionIntercept(value) {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityActionInterceptCallbackModifier.identity, AccessibilityActionInterceptCallbackModifier, value);
+    return this;
+  }
+
   accessibilityDescription(value) {
     modifierWithKey(this._modifiersWithKeys, AccessibilityDescriptionModifier.identity, AccessibilityDescriptionModifier, value);
     return this;
