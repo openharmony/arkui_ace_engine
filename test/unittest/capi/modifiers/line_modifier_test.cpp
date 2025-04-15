@@ -96,7 +96,7 @@ HWTEST_F(LineModifierTest, LineModifierDefaultTest, TestSize.Level1)
  * @tc.desc: setLineOptions test
  * @tc.type: FUNC
  */
-HWTEST_F(LineModifierTest, DISABLED_LineModifierSetLineOptionsTest, TestSize.Level1)
+HWTEST_F(LineModifierTest, LineModifierSetLineOptionsTest, TestSize.Level1)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node_);
     auto options = BuildLineOptions(WIDTH, HEIGHT);

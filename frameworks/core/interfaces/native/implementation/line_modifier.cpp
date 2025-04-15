@@ -77,7 +77,12 @@ void SetLineOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
     auto opt = Converter::OptConvert<LineOptions>(*options);
     CHECK_NULL_VOID(opt);
-    LOGW("LineModifier :: SetLineOptionsImpl :: setting width and height are not supported");
+    if (opt->width) {
+        ShapeAbstractModelNG::SetWidth(frameNode, opt->width);
+    }
+    if (opt->height) {
+        ShapeAbstractModelNG::SetHeight(frameNode, opt->height);
+    }
 }
 } // LineInterfaceModifier
 namespace LineAttributeModifier {
