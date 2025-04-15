@@ -135,7 +135,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         auto alignmentValue = constructorArg->GetProperty("alignment");
         if (alignmentValue->IsNumber()) {
             auto alignment = alignmentValue->ToNumber<int32_t>();
-            if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+            if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
                 instance->dialogProperties_.alignment = DIALOG_ALIGNMENT[alignment];
             }
         }
