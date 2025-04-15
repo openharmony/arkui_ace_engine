@@ -587,6 +587,7 @@ namespace Converter {
     // SORTED_SECTION: No multiline declarations, please!
     template<> void AssignCast(std::optional<AccessibilityHoverAction>& dst, const Ark_AccessibilityHoverType& src);
     template<> void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src);
+    template<> void AssignCast(std::optional<AIImageQuality>& dst, const Ark_ResolutionQuality& src);
     template<> void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src);
     template<> void AssignCast(std::optional<AnimationDirection>& dst, const Ark_PlayMode& src);
     template<> void AssignCast(std::optional<Ark_IlluminatedType>& dst, const Ark_IlluminatedType& src);

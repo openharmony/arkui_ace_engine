@@ -1430,4 +1430,34 @@ HWTEST_F(ImageModifierTest, setResizableTestResizableSliceInvalidValues, TestSiz
     }
 }
 
+/**
+ * @tc.name: setEnhancedImageQualityValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setEnhancedImageQualityValues, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    // default value
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    EXPECT_EQ("ResolutionQuality.NONE", GetAttrValue<std::string>(json, "enhancedImageQuality"));
+
+    // new values
+    std::vector<std::pair<std::string, Ark_ResolutionQuality>> testMap = {
+        {"ResolutionQuality.LOW", Ark_ResolutionQuality::ARK_RESOLUTION_QUALITY_LOW},
+        {"ResolutionQuality.MEDIUM", Ark_ResolutionQuality::ARK_RESOLUTION_QUALITY_MEDIUM},
+        {"ResolutionQuality.HIGH", Ark_ResolutionQuality::ARK_RESOLUTION_QUALITY_HIGH},
+    };
+
+    for (auto& tv : testMap) {
+        modifier_->setEnhancedImageQuality(frameNode, tv.second);
+        auto json = GetJsonValue(node_);
+        ASSERT_TRUE(json);
+        EXPECT_EQ(tv.first, GetAttrValue<std::string>(json, "enhancedImageQuality"));
+    }
+}
+
 } // namespace OHOS::Ace::NG

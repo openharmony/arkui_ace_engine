@@ -26,6 +26,16 @@
 
 namespace OHOS::Ace::NG::Converter {
 template<>
+void AssignCast(std::optional<AIImageQuality>& dst, const Ark_ResolutionQuality& src)
+{
+    switch (src) {
+        case ARK_RESOLUTION_QUALITY_LOW: dst = AIImageQuality::LOW; break;
+        case ARK_RESOLUTION_QUALITY_MEDIUM: dst = AIImageQuality::NORMAL; break;
+        case ARK_RESOLUTION_QUALITY_HIGH: dst = AIImageQuality::HIGH; break;
+        default: LOGE("Unexpected enum value in Ark_ResolutionQuality: %{public}d", src);
+    }
+}
+template<>
 void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src)
 {
     switch (src) {
