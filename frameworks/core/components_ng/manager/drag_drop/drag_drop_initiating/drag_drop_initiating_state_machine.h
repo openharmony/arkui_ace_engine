@@ -70,6 +70,7 @@ public:
         return static_cast<DragDropInitiatingStatus>(currentState_);
     }
 
+    bool DragInitStateIsNotEmpty();
 private:
     DragDropInitiatingParams dragDropInitiatingParams_;
     int32_t currentState_ = 0;
