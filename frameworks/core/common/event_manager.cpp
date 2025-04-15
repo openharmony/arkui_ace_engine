@@ -832,7 +832,16 @@ void EventManager::LogTouchTestRecognizerStates(int32_t touchEventId)
         }
         std::string gestureLog = "{";
         gestureLog += "types: " + gestureSnapshot->type.substr(0, gestureSnapshot->type.find("Recognizer"));
-        gestureLog += ", node: " + hitFrameNode[gestureSnapshot->nodeId];
+        gestureLog += ", tag: " + hitFrameNode[gestureSnapshot->nodeId];
+#ifndef IS_RELEASE_VERSION
+        auto frameNode =
+            NG::FrameNode::GetFrameNodeOnly(hitFrameNode[gestureSnapshot->nodeId], gestureSnapshot->nodeId);
+        if (!frameNode) {
+            LOGI("frameNodeId:%{public}d not found", gestureSnapshot->nodeId);
+        } else {
+            gestureLog += ", inspectorId: " + frameNode->GetInspectorId().value_or("");
+        }
+#endif
 
         auto stateHistorys = gestureSnapshot->stateHistory;
         for (auto stateHistory : stateHistorys) {
