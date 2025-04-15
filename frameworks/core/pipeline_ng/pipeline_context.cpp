@@ -1540,11 +1540,14 @@ void PipelineContext::OnDrawCompleted(const std::string& componentId)
 
 void PipelineContext::ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type)
 {
-    for (auto&& [id, callback] : surfaceChangedCallbackMap_) {
+    SurfaceChangedCallbackMap callbackMap;
+    std::swap(callbackMap, surfaceChangedCallbackMap_);
+    for (auto&& [id, callback] : callbackMap) {
         if (callback) {
             callback(newWidth, newHeight, rootWidth_, rootHeight_, type);
         }
     }
+    std::swap(callbackMap, surfaceChangedCallbackMap_);
 }
 
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY)
@@ -4549,16 +4552,19 @@ void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow)
 
 void PipelineContext::FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    auto iter = onWindowSizeChangeCallbacks_.begin();
-    while (iter != onWindowSizeChangeCallbacks_.end()) {
+    std::list<int32_t> callbacks;
+    std::swap(callbacks, onWindowSizeChangeCallbacks_);
+    auto iter = callbacks.begin();
+    while (iter != callbacks.end()) {
         auto node = ElementRegister::GetInstance()->GetUINodeById(*iter);
         if (!node) {
-            iter = onWindowSizeChangeCallbacks_.erase(iter);
+            iter = callbacks.erase(iter);
         } else {
             node->OnWindowSizeChanged(width, height, type);
             ++iter;
         }
     }
+    std::swap(callbacks, onWindowSizeChangeCallbacks_);
 }
 
 void PipelineContext::RequireSummary()
