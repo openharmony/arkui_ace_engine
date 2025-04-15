@@ -2338,6 +2338,30 @@ bool LostFocus(const RefPtr<NG::FrameNode>& frameNode)
     return true;
 }
 
+void HandleWillClickAccept(RefPtr<NG::FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    auto gestureEventInfo = gestureEventHub->GetGestureEventInfo();
+    auto clickInfo = gestureEventHub->GetClickInfo();
+    NG::UIObserverHandler::GetInstance().NotifyWillClick(gestureEventInfo, clickInfo, frameNode);
+}
+
+void HandleDidClickAccept(RefPtr<NG::FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    auto gestureEventInfo = gestureEventHub->GetGestureEventInfo();
+    auto clickInfo = gestureEventHub->GetClickInfo();
+    NG::UIObserverHandler::GetInstance().NotifyDidClick(gestureEventInfo, clickInfo, frameNode);
+}
+
 bool ActClick(RefPtr<NG::FrameNode>& frameNode)
 {
     auto eventHub = frameNode->GetEventHub<NG::EventHub>();
@@ -2350,7 +2374,9 @@ bool ActClick(RefPtr<NG::FrameNode>& frameNode)
     if (interceptResult == AccessibilityActionInterceptResult::ACTION_INTERCEPT) {
         return true;
     }
+    HandleWillClickAccept(frameNode);
     bool result = gesture->ActClick();
+    HandleDidClickAccept(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, result);
     auto accessibilityAction = ACTIONS.find(ACCESSIBILITY_ACTION_CLICK);
@@ -7832,5 +7858,4 @@ bool JsAccessibilityManager::CheckAccessibilityVisible(const RefPtr<NG::FrameNod
     CHECK_NULL_RETURN(node, true);
     return node->GetAccessibilityVisible();
 }
-
 } // namespace OHOS::Ace::Framework
