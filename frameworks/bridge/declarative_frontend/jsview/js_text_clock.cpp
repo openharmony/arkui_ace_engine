@@ -273,7 +273,7 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (!info[0]->IsString()) {
+    if (!info[0]->IsString() && !info[0]->IsObject()) {
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
             TextClockModel::GetInstance()->SetFormat("");
         } else {
@@ -281,8 +281,8 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
         }
         return;
     }
-
-    auto format = info[0]->ToString();
+    std::string format;
+    ParseJsString(info[0], format);
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
         std::regex pattern(
             R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)");

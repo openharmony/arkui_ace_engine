@@ -85,7 +85,7 @@ ArkUINativeModuleValue TextClockBridge::SetFormat(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     std::string format;
-    ArkTSUtils::GetStringFromJS(vm, formatArg, format);
+    ArkTSUtils::ParseJsString(vm, formatArg, format);
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (0 == format.length() || DEFAULT_STR == format) {

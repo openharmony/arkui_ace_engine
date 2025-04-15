@@ -155,6 +155,8 @@ ArkUINativeModuleValue TextTimerBridge::SetFontWeight(ArkUIRuntimeCallInfo* runt
             fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
         } else if (fontWeightArg->IsString(vm)) {
             fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
+        } else if (fontWeightArg->IsObject(vm)) {
+            ArkTSUtils::ParseJsString(vm, fontWeightArg, fontWeight);
         }
     }
     auto nodeModifiers = GetArkUINodeModifiers();
