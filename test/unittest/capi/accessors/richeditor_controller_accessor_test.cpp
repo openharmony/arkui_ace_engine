@@ -80,9 +80,18 @@ void AssignArkValue(Ark_RichEditorTextSpanOptions& dst, const OHOS::Ace::TextSpa
 {
     dst.offset = Converter::ArkValue<Opt_Number>(src.offset);
 }
+void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const OHOS::Ace::ImageSpanAttribute& src)
+{
+    dst.margin = Converter::ArkUnion<Opt_Union_Dimension_Margin, Ark_Padding>(src.marginProp);
+}
+void AssignArkValue(Ark_RichEditorImageSpanStyle& dst, const OHOS::Ace::ImageSpanAttribute& src)
+{
+    dst.layoutStyle = Converter::ArkValue<Opt_RichEditorLayoutStyle>(src);
+}
 void AssignArkValue(Ark_RichEditorImageSpanOptions& dst, const OHOS::Ace::ImageSpanOptions& src)
 {
     dst.offset = Converter::ArkValue<Opt_Number>(src.offset);
+    dst.imageStyle = Converter::ArkValue<Opt_RichEditorImageSpanStyle>(src.imageAttribute);
 }
 void AssignArkValue(Ark_RichEditorSymbolSpanOptions& dst, const OHOS::Ace::SymbolSpanOptions& src)
 {
@@ -241,6 +250,15 @@ HWTEST_F(RichEditorControllerAccessorTest, addImageSpanTest, TestSize.Level1)
 
     ImageSpanOptions imageSpanOptions;
     imageSpanOptions.offset = TEST_OFFSET;
+    ImageSpanAttribute imageSpanAttribute;
+    MarginProperty marginProperty {
+        .left = CalcLength(1.0f),
+        .top = CalcLength(2.0f),
+        .right = CalcLength(3.0f),
+        .bottom = CalcLength(4.0f)
+    };
+    imageSpanAttribute.marginProp = marginProperty;
+    imageSpanOptions.imageAttribute = imageSpanAttribute;
     auto value = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr, Ark_ResourceStr>(arkResourceStr);
     auto options = Converter::ArkValue<Opt_RichEditorImageSpanOptions>(imageSpanOptions);
 
