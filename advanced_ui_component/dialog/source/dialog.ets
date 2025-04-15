@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1452,12 +1452,19 @@ struct CustomDialogContentComponent {
       let maxButtonTextSize = vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN -
         BUTTON_HORIZONTAL_SPACE - 2 * BUTTON_HORIZONTAL_PADDING);
       this.buttons.forEach((button) => {
-        let contentSize: SizeOptions = measure.measureTextSize({
-          textContent: button.value,
-          fontSize: this.buttonMaxFontSize
-        });
-        if (Number(contentSize.width) > maxButtonTextSize) {
-          isVertical = true;
+        try {
+          let contentSize: SizeOptions = measure.measureTextSize({
+            textContent: button.value,
+            fontSize: this.buttonMaxFontSize
+          });
+          if (Number(contentSize?.width) > maxButtonTextSize) {
+            isVertical = true;
+          }
+        } catch (err) {
+          let code: number = (err as BusinessError).code;
+          let message: string = (err as BusinessError).message;
+          hilog.error(0x3900, 'Ace',
+            `Faild to dialog isVerticalAlignButton measureTextSize,cause, code: ${code}, message: ${message}`);
         }
       });
       return isVertical;
