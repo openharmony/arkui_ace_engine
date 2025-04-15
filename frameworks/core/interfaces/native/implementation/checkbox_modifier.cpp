@@ -79,6 +79,7 @@ void ContentModifier1Impl(Ark_NativePointer node, const Opt_CustomObject* value)
 void Select0Impl(Ark_NativePointer node,
                  Ark_Boolean value)
 {
+    CHECK_NULL_VOID(value);
     const auto optValue = Converter::ArkValue<Opt_Boolean, Ark_Boolean>(value);
     Select1Impl(node, &optValue);
 }
@@ -92,6 +93,7 @@ void Select1Impl(Ark_NativePointer node,
 void SelectedColor0Impl(Ark_NativePointer node,
                         const Ark_ResourceColor* value)
 {
+    CHECK_NULL_VOID(value);
     const auto optValue = Converter::ArkValue<Opt_ResourceColor, Ark_ResourceColor>(*value);
     SelectedColor1Impl(node, &optValue);
 }
@@ -100,28 +102,26 @@ void SelectedColor1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     CheckBoxModelNG::SetSelectedColor(frameNode, value ? Converter::OptConvert<Color>(*value) : std::nullopt);
 }
 void Shape0Impl(Ark_NativePointer node,
                 Ark_CheckBoxShape value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto checkBoxStyle = Converter::OptConvert<CheckBoxStyle>(value);
-    CheckBoxModelNG::SetCheckboxStyle(frameNode, checkBoxStyle);
+    CHECK_NULL_VOID(value);
+    const auto optValue = Converter::ArkValue<Opt_CheckBoxShape, Ark_CheckBoxShape>(value);
+    Shape1Impl(node, &optValue);
 }
 void Shape1Impl(Ark_NativePointer node,
                 const Opt_CheckBoxShape* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CheckboxModelNG::SetShape1(frameNode, convValue);
+    CheckBoxModelNG::SetCheckboxStyle(frameNode, value ? Converter::OptConvert<CheckBoxStyle>(*value) : std::nullopt);
 }
 void UnselectedColor0Impl(Ark_NativePointer node,
                           const Ark_ResourceColor* value)
 {
+    CHECK_NULL_VOID(value);
     const auto optValue = Converter::ArkValue<Opt_ResourceColor, Ark_ResourceColor>(*value);
     UnselectedColor1Impl(node, &optValue);
 }
@@ -130,12 +130,12 @@ void UnselectedColor1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     CheckBoxModelNG::SetUnSelectedColor(frameNode, value ? Converter::OptConvert<Color>(*value) : std::nullopt);
 }
 void Mark0Impl(Ark_NativePointer node,
                const Ark_MarkStyle* value)
 {
+    CHECK_NULL_VOID(value);
     const auto optValue = Converter::ArkValue<Opt_MarkStyle, Ark_MarkStyle>(*value);
     Mark1Impl(node, &optValue);
 }
@@ -144,7 +144,6 @@ void Mark1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto arkValue = (*value).value;
 
     if (auto color = Converter::OptConvert<Color>(arkValue.strokeColor); color) {
@@ -160,21 +159,21 @@ void Mark1Impl(Ark_NativePointer node,
 void OnChange0Impl(Ark_NativePointer node,
                    const OnCheckboxChangeCallback* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [arkCallback = CallbackHelper(*value)](const bool value) {
-        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(value));
-    };
-    CheckBoxModelNG::SetOnChange(frameNode, std::move(onEvent));
+    const auto opt = Converter::ArkValue<Opt_OnCheckboxChangeCallback, OnCheckboxChangeCallback>(*value);
+    OnChange1Impl(node, &opt);
 }
 void OnChange1Impl(Ark_NativePointer node,
                    const Opt_OnCheckboxChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CheckboxModelNG::SetOnChange1(frameNode, convValue);
+    auto optCallback = Converter::OptConvert<OnCheckboxChangeCallback>(*value);
+    CHECK_NULL_VOID(optCallback);
+    auto onEvent = [arkCallback = CallbackHelper(*optCallback)](const bool value) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(value));
+    };
+    CheckBoxModelNG::SetOnChange(frameNode, std::move(onEvent));
 }
 void ContentModifier0Impl(Ark_NativePointer node,
                           const Ark_CustomObject* value)

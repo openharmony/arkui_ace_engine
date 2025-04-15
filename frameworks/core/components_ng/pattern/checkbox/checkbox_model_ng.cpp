@@ -173,7 +173,7 @@ void CheckBoxModelNG::SetSelect(FrameNode* frameNode, const std::optional<bool> 
 
 void CheckBoxModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    if (color) {
+    if (color.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColor, color.value(), frameNode);
         ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColorFlagByUser, true, frameNode);
     } else {
@@ -184,7 +184,7 @@ void CheckBoxModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional
 
 void CheckBoxModelNG::SetUnSelectedColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    if (color) {
+    if (color.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColor, color.value(), frameNode);
         ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser, true, frameNode);
     } else {
@@ -207,7 +207,7 @@ void CheckBoxModelNG::SetCheckMarkColor(FrameNode* frameNode, const Color& color
 
 void CheckBoxModelNG::SetCheckMarkColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    if (color) {
+    if (color.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColor, color.value(), frameNode);
         ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser, true, frameNode);
     } else {
@@ -223,7 +223,7 @@ void CheckBoxModelNG::SetCheckMarkSize(FrameNode* frameNode, const Dimension& si
 
 void CheckBoxModelNG::SetCheckMarkSize(FrameNode* frameNode, const std::optional<Dimension>& size)
 {
-    if (size) {
+    if (size.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkSize, size.value(), frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkSize, frameNode);
@@ -237,7 +237,7 @@ void CheckBoxModelNG::SetCheckMarkWidth(FrameNode* frameNode, const Dimension& w
 
 void CheckBoxModelNG::SetCheckMarkWidth(FrameNode* frameNode, const std::optional<Dimension>& width)
 {
-    if (width) {
+    if (width.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkWidth, width.value(), frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkWidth, frameNode);

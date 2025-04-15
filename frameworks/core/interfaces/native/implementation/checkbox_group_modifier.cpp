@@ -61,8 +61,9 @@ void CheckboxShape1Impl(Ark_NativePointer node, const Opt_CheckBoxShape* value);
 void SelectAll0Impl(Ark_NativePointer node,
                     Ark_Boolean value)
 {
-   const auto optValue = Converter::ArkValue<Opt_Boolean, Ark_Boolean>(value);
-   SelectAll1Impl(node, &optValue);
+    CHECK_NULL_VOID(value);
+    const auto optValue = Converter::ArkValue<Opt_Boolean, Ark_Boolean>(value);
+    SelectAll1Impl(node, &optValue);
 }
 void SelectAll1Impl(Ark_NativePointer node,
                     const Opt_Boolean* value)
@@ -74,6 +75,7 @@ void SelectAll1Impl(Ark_NativePointer node,
 void SelectedColor0Impl(Ark_NativePointer node,
                         const Ark_ResourceColor* value)
 {
+    CHECK_NULL_VOID(value);
     const auto optValue = Converter::ArkValue<Opt_ResourceColor, Ark_ResourceColor>(*value);
     SelectedColor1Impl(node, &optValue);
 }
@@ -82,12 +84,12 @@ void SelectedColor1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     CheckBoxGroupModelNG::SetSelectedColor(frameNode, value ? Converter::OptConvert<Color>(*value) : std::nullopt);
 }
 void UnselectedColor0Impl(Ark_NativePointer node,
                           const Ark_ResourceColor* value)
 {
+    CHECK_NULL_VOID(value);
     const auto optValue = Converter::ArkValue<Opt_ResourceColor, Ark_ResourceColor>(*value);
     UnselectedColor1Impl(node, &optValue);
 }
@@ -96,12 +98,12 @@ void UnselectedColor1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     CheckBoxGroupModelNG::SetUnSelectedColor(frameNode, value ? Converter::OptConvert<Color>(*value) : std::nullopt);
 }
 void Mark0Impl(Ark_NativePointer node,
                const Ark_MarkStyle* value)
 {
+    CHECK_NULL_VOID(value);
     const auto optValue = Converter::ArkValue<Opt_MarkStyle, Ark_MarkStyle>(*value);
     Mark1Impl(node, &optValue);
 }
@@ -110,7 +112,6 @@ void Mark1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto arkValue = (*value).value;
 
     if (auto color = Converter::OptConvert<Color>(arkValue.strokeColor); color) {
@@ -126,6 +127,7 @@ void Mark1Impl(Ark_NativePointer node,
 void OnChange0Impl(Ark_NativePointer node,
                    const OnCheckboxGroupChangeCallback* value)
 {
+    CHECK_NULL_VOID(value);
     const auto opt = Converter::ArkValue<Opt_OnCheckboxGroupChangeCallback, OnCheckboxGroupChangeCallback>(*value);
     OnChange1Impl(node, &opt);
 }
@@ -134,18 +136,24 @@ void OnChange1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](const BaseEventInfo* info) {
-        Ark_CheckboxGroupResult result;
- //       GetFullAPI()->getEventsAPI()->getCheckboxGroupEventsReceiver()->onChange0(frameNode->GetId(), result);
+    auto optCallback = Converter::OptConvert<OnCheckboxGroupChangeCallback>(*value);
+    CHECK_NULL_VOID(optCallback);
+    auto onEvent = [arkCallback = CallbackHelper(*optCallback)](const BaseEventInfo* info) {
+        auto eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
+        CHECK_NULL_VOID(eventInfo);
+        Converter::ArkArrayHolder<Array_String> vecHolder(eventInfo->GetNameList());
+        Ark_CheckboxGroupResult result {
+            .name = vecHolder.ArkValue(),
+            .status = Converter::ArkValue<Ark_SelectStatus>(eventInfo->GetStatus())
+        };
+        arkCallback.Invoke(result);
     };
-    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnChange(std::move(onEvent));
+    CheckBoxGroupModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
 void CheckboxShape0Impl(Ark_NativePointer node,
                         Ark_CheckBoxShape value)
 {
+    CHECK_NULL_VOID(value);
     const auto optValue = Converter::ArkValue<Opt_CheckBoxShape, Ark_CheckBoxShape>(value);
     CheckboxShape1Impl(node, &optValue);
 }
