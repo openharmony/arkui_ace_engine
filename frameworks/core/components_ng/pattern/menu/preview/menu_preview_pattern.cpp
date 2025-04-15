@@ -269,6 +269,6 @@ void MenuPreviewPattern::HandleDragEnd(float offsetX, float offsetY, float veloc
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu");
-    wrapperPattern->HideMenu();
+    wrapperPattern->HideMenu(HideMenuType::PREVIEW_DRAG_END);
 }
 } // namespace OHOS::Ace::NG

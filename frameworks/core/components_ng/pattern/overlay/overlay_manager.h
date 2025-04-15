@@ -49,7 +49,26 @@
 #include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 namespace OHOS::Ace::NG {
-
+enum class HideMenuType : int32_t {
+    NORMAL = 0,
+    IS_SHOW,
+    OPEN_MENU,
+    CLOSE_MENU,
+    WRAPPER_LOSE_FOCUS,
+    WRAPPER_TOUCH_DOWN,
+    TOUCH_OUT_SIDE,
+    OPEN_OTHER_MENU,
+    MENU_TOUCH_UP,
+    SCROLL_DRAG_END,
+    ITEM_SELECT_PROCESS,
+    SELECT_SELECTED,
+    ITEM_CLOSE_MENU,
+    PREVIEW_DRAG_END,
+    MENU_DRAG_END,
+    VIEW_DRAG_END,
+    CLOSE_AI_MENU,
+    REMOVE_MENU,
+};
 struct PopupInfo {
     int32_t popupId = -1;
     WeakPtr<FrameNode> target;
@@ -175,7 +194,8 @@ public:
     }
 
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
-    void HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch = false);
+    void HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch = false,
+        const HideMenuType& reason = HideMenuType::NORMAL);
     void DeleteMenu(int32_t targetId);
     void ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId);

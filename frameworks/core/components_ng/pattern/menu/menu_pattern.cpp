@@ -540,7 +540,7 @@ void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
             auto position = OffsetF(static_cast<float>(touchGlobalLocation.GetX()),
                 static_cast<float>(touchGlobalLocation.GetY()));
             TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, position is %{public}s.", position.ToString().c_str());
-            HideMenu(true, position);
+            HideMenu(true, position, HideMenuType::MENU_TOUCH_UP);
         }
         lastTouchOffset_.reset();
     }
@@ -736,7 +736,7 @@ void MenuPattern::UpdateDividerProperty(
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position) const
+void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position, const HideMenuType& reason) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -757,7 +757,7 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position) const
         return;
     }
     if (((IsContextMenu() || (expandDisplay && isShowInSubWindow))) && (targetTag_ != V2::SELECT_ETS_TAG)) {
-        TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId_);
+        TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d. reason %{public}d", targetId_, reason);
         SubwindowManager::GetInstance()->HideMenuNG(wrapper, targetId_);
         return;
     }
@@ -769,7 +769,7 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position) const
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId_);
-    overlayManager->HideMenu(wrapper, targetId_, isMenuOnTouch);
+    overlayManager->HideMenu(wrapper, targetId_, isMenuOnTouch, reason);
     overlayManager->EraseMenuInfo(targetId_);
 }
 
@@ -1997,7 +1997,7 @@ void MenuPattern::HandleDragEnd(float offsetX, float offsetY, float velocity)
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     TAG_LOGI(AceLogTag::ACE_DRAG, "will hide menu.");
-    wrapperPattern->HideMenu();
+    wrapperPattern->HideMenu(HideMenuType::MENU_DRAG_END);
 }
 
 void MenuPattern::HandleScrollDragEnd(float offsetX, float offsetY, float velocity)
@@ -2011,7 +2011,7 @@ void MenuPattern::HandleScrollDragEnd(float offsetX, float offsetY, float veloci
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     TAG_LOGI(AceLogTag::ACE_DRAG, "will hide menu.");
-    wrapperPattern->HideMenu();
+    wrapperPattern->HideMenu(HideMenuType::SCROLL_DRAG_END);
 }
 
 void MenuPattern::DumpInfo()
