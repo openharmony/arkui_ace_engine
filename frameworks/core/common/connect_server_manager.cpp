@@ -114,13 +114,7 @@ bool ConnectServerManager::InitFunc()
     g_storeInspectorInfo = reinterpret_cast<StoreInspectorInfo>(&Toolchain::StoreInspectorInfo);
     g_waitForConnection = reinterpret_cast<WaitForConnection>(&Toolchain::WaitForConnection);
 #endif
-    if (g_sendMessage == nullptr || g_storeMessage == nullptr || g_removeMessage == nullptr) {
-        CloseConnectServerSo();
-        return false;
-    }
-
-    if (g_storeInspectorInfo == nullptr || g_setSwitchCallBack == nullptr || g_waitForConnection == nullptr ||
-        g_sendLayoutMessage == nullptr) {
+    if (!InitSuccess()) {
         CloseConnectServerSo();
         return false;
     }
@@ -152,6 +146,31 @@ void ConnectServerManager::InitConnectServer()
     g_setDebugModeCallBack([]() {
         AceApplicationInfo::GetInstance().SetNeedDebugBreakPoint(false);
     });
+}
+
+bool ConnectServerManager::InitSuccess() const
+{
+    const std::pair<const char*, void*> symbols[] = {
+        {"g_sendMessage", reinterpret_cast<void*>(g_sendMessage)},
+        {"g_storeMessage", reinterpret_cast<void*>(g_storeMessage)},
+        {"g_removeMessage", reinterpret_cast<void*>(g_removeMessage)},
+        {"g_setDebugModeCallBack", reinterpret_cast<void*>(g_setDebugModeCallBack)},
+        {"g_sendLayoutMessage", reinterpret_cast<void*>(g_sendLayoutMessage)},
+        {"g_setSwitchCallBack", reinterpret_cast<void*>(g_setSwitchCallBack)},
+        {"g_storeInspectorInfo", reinterpret_cast<void*>(g_storeInspectorInfo)},
+        {"g_waitForConnection", reinterpret_cast<void*>(g_waitForConnection)},
+    };
+
+    for (const auto& symbol : symbols) {
+        const char* name = symbol.first;
+        void* ptr = symbol.second;
+        if (ptr == nullptr) {
+            LOGE("Dynamic symbol %{public}s is null. Please check if it is correctly loaded.", name);
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void ConnectServerManager::StartConnectServerWithSocketPair(int32_t socketFd)
