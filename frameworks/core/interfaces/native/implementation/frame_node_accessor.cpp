@@ -199,6 +199,8 @@ Ark_GraphicsPosition GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
 {
     CHECK_NULL_RETURN(peer && peer->node,  Converter::ArkValue<Ark_GraphicsPosition>(OffsetF()));
     auto offset = peer->node->GetPositionToWindowWithTransform();
+    offset.SetX(PipelineBase::Px2VpWithCurrentDensity(offset.GetX()));
+    offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
     return Converter::ArkValue<Ark_GraphicsPosition>(offset);
 }
 Ark_FrameNode GetFrameNodeByKeyImpl(const Ark_String* name)
