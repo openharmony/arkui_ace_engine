@@ -207,8 +207,6 @@ public:
             if (!pattern) {
                 return;
             }
-            theme->usePickerBackgroundStyle_ = static_cast<uint32_t>(pattern->GetAttr<int>(
-                "picker_use_selected_background_style", 0));
             theme->selectedBackgroundColor_ = pattern->GetAttr<Color>(
                 "picker_selected_background_color", Color(0x0c182431));
             theme->selectedBorderRadius_ = NG::BorderRadiusProperty(
@@ -291,7 +289,6 @@ public:
 
     void cloneSelectedBackgroundStyle(RefPtr<PickerTheme> theme) const
     {
-        theme->usePickerBackgroundStyle_ = usePickerBackgroundStyle_;
         theme->selectedBackgroundColor_ = selectedBackgroundColor_;
         theme->selectedBorderRadius_ = selectedBorderRadius_;
     }
@@ -675,11 +672,6 @@ public:
         return crownSensitivity_;
     }
 
-    bool GetUsePickerBackgroundStyle() const
-    {
-        return GreatNotEqual(usePickerBackgroundStyle_, 0);
-    }
-
     const Color& GetSelectedBackgroundColor() const
     {
         return selectedBackgroundColor_;
@@ -790,7 +782,6 @@ private:
     Color selectorItemFocusBgColor_;
     Color selectorItemNormalBgColor_;
 
-    uint32_t usePickerBackgroundStyle_;
     Color selectedBackgroundColor_;
     NG::BorderRadiusProperty selectedBorderRadius_;
 };
