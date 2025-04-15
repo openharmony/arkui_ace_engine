@@ -23,6 +23,10 @@ import { LengthMetrics } from "../../Graphics"
 /** @memo:stable */
 export class ArkBaseNode extends ComponentBase implements CommonAttribute {
    
+    constructParam(...param: Object[]): this {
+        return this;
+    }
+   
     getPeer(): ArkCommonMethodPeer {
         return this.peer as ArkCommonMethodPeer;
     }
@@ -42,7 +46,6 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     mouseResponseRegion(value: Rectangle | Array<Rectangle>): this {
         return this;
     }
-    /** @memo */
     size(value: SizeOptions): this {
         return this;
     }
@@ -175,7 +178,6 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     foregroundColor(value: ResourceColor | ColoringStrategy): this {
         return this;
     }
-    /** @memo */
     onClick(event: (event: ClickEvent) => void, distanceThreshold?: number | undefined): this {
         this.getPeer().onClick0Attribute(event);
         return this;
@@ -368,7 +370,6 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     displayPriority(value: number): this {
         return this;
     }
-    /** @memo */
     zIndex(value: number): this {
         this.getPeer().zIndexAttribute(value);
         return this;
@@ -709,21 +710,18 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     keyboardShortcut(value: string | FunctionKey, keys: Array<ModifierKey>, action?: (() => void) | undefined): this {
         return this;
     }
-    /** @memo */
     width(value: Length | undefined): this {
         if (value != null) {
             this.getPeer().widthAttribute(value as Length);
         }
         return this;
     }
-    /** @memo */
     height(value: Length | undefined): this {
         if (value != null) {
             this.getPeer().heightAttribute(value as Length);
         }
         return this;
     }
-    /** @memo */
     backgroundColor(value: ResourceColor | undefined): this {
         if (value != null) {
             this.getPeer().backgroundColorAttribute( value as ResourceColor );

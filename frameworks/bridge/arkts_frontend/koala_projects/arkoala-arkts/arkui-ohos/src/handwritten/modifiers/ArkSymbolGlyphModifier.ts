@@ -240,14 +240,14 @@ export class ArkSymbolGlyphAttributeSet extends ArkCommonAttributeSet /* impleme
 
 export class SymbolGlyphModifier extends ArkSymbolGlyphAttributeSet implements AttributeModifier<SymbolGlyphAttribute> {
     _SymbolGlyphModifierStub: string = "";
-      /** @memo */
+   
       applyNormalAttribute(instance: SymbolGlyphAttribute){}
-      /** @memo */
+    
      applyPressedAttribute(instance: SymbolGlyphAttribute){}
-      /** @memo */
+     
      applyFocusedAttribute(instance: SymbolGlyphAttribute){}
-      /** @memo */
+     
      applyDisabledAttribute(instance: SymbolGlyphAttribute){}
-      /** @memo */
+   
      applySelectedAttribute(instance: SymbolGlyphAttribute){}
 }

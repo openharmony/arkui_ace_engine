@@ -56,14 +56,14 @@ export class ArkColumnAttributeSet extends ArkCommonAttributeSet /* implements C
 }
 
 export class ColumnModifier extends ArkColumnAttributeSet implements AttributeModifier<ColumnAttribute> {
-    /** @memo */
+   
     applyNormalAttribute(instance: ColumnAttribute) { this.alignItems(HorizontalAlign.End); }
-    /** @memo */
+    
     applyPressedAttribute(instance: ColumnAttribute) {}
-    /** @memo */
+   
     applyFocusedAttribute(instance: ColumnAttribute){}
-    /** @memo */
+   
     applyDisabledAttribute(instance: ColumnAttribute){}
-    /** @memo */
+   
     applySelectedAttribute(instance: ColumnAttribute){}
 }

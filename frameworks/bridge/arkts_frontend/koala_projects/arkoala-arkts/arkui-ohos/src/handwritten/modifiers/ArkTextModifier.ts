@@ -60,14 +60,14 @@ export class ArkTextAttributeSet extends ArkCommonAttributeSet /* implements Tex
 }
 
 export class TextModifier extends ArkTextAttributeSet implements AttributeModifier<TextAttribute> {
-    /** @memo */
+   
     applyNormalAttribute(instance: TextAttribute) : void {}
-    /** @memo */
+ 
     applyPressedAttribute(instance: TextAttribute) : void {}
-    /** @memo */
+  
     applyFocusedAttribute(instance: TextAttribute) : void {}
-    /** @memo */
+ 
     applyDisabledAttribute(instance: TextAttribute) : void {}
-    /** @memo */
+
     applySelectedAttribute(instance: TextAttribute) : void {}
 }
