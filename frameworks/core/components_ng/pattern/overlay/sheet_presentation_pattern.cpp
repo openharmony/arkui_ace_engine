@@ -1610,11 +1610,24 @@ float SheetPresentationPattern::GetWrapperHeight()
     CHECK_NULL_RETURN(host, 0.0f);
     auto sheetWrapper = host->GetParent();
     CHECK_NULL_RETURN(sheetWrapper, 0.0f);
-    auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetWrapper->GetParent());
+    auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetWrapper);
     CHECK_NULL_RETURN(sheetWrapperNode, 0.0f);
     auto sheetWrapperGeometryNode = sheetWrapperNode->GetGeometryNode();
     CHECK_NULL_RETURN(sheetWrapperGeometryNode, 0.0f);
     return sheetWrapperGeometryNode->GetFrameSize().Height();
+}
+
+float SheetPresentationPattern::GetWrapperWidth()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto sheetWrapper = host->GetParent();
+    CHECK_NULL_RETURN(sheetWrapper, 0.0f);
+    auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetWrapper);
+    CHECK_NULL_RETURN(sheetWrapperNode, 0.0f);
+    auto sheetWrapperGeometryNode = sheetWrapperNode->GetGeometryNode();
+    CHECK_NULL_RETURN(sheetWrapperGeometryNode, 0.0f);
+    return sheetWrapperGeometryNode->GetFrameSize().Width();
 }
 
 bool SheetPresentationPattern::SheetHeightNeedChanged()
@@ -1625,6 +1638,19 @@ bool SheetPresentationPattern::SheetHeightNeedChanged()
     CHECK_NULL_RETURN(sheetGeometryNode, false);
     if (!NearEqual(sheetGeometryNode->GetFrameSize().Height(), sheetHeight_) ||
         !NearEqual(GetWrapperHeight(), wrapperHeight_)) {
+        return true;
+    }
+    return false;
+}
+
+bool SheetPresentationPattern::SheetWidthNeedChanged()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto sheetGeometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(sheetGeometryNode, false);
+    if (!NearEqual(sheetGeometryNode->GetFrameSize().Width(), sheetWidth_) ||
+        !NearEqual(GetWrapperWidth(), wrapperWidth_)) {
         return true;
     }
     return false;
@@ -1679,41 +1705,40 @@ void SheetPresentationPattern::FireCommonCallback()
     FireOnHeightDidChange();
 }
 
+void SheetPresentationPattern::PopupSheetChanged()
+{
+    if (SheetHeightNeedChanged() || SheetWidthNeedChanged() || typeChanged_) {
+        FireCommonCallback();
+        auto renderContext = GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_), 0.0f });
+        typeChanged_ = false;
+    }
+}
+
 void SheetPresentationPattern::CheckSheetHeightChange()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto sheetGeometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(sheetGeometryNode);
-    if (isFirstInit_) {
-        sheetHeight_ = sheetGeometryNode->GetFrameSize().Height();
-        wrapperHeight_ = GetWrapperHeight();
-        isFirstInit_ = false;
-    } else {
+    if (!isFirstInit_) {
         if (typeChanged_) {
             if (sheetType_ == SheetType::SHEET_POPUP) {
                 MarkSheetPageNeedRender();
             }
             SetSheetBorderWidth();
         }
-        if (SheetHeightNeedChanged() || typeChanged_ || windowChanged_ || topSafeAreaChanged_) {
-            sheetHeight_ = sheetGeometryNode->GetFrameSize().Height();
-            wrapperHeight_ = GetWrapperHeight();
+        if (sheetType_ == SheetType::SHEET_POPUP) {
+            PopupSheetChanged();
+        } else if (SheetHeightNeedChanged() || typeChanged_ || windowChanged_ || topSafeAreaChanged_) {
             const auto& overlayManager = GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
             auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
             CHECK_NULL_VOID(layoutProperty);
             auto sheetStyle = layoutProperty->GetSheetStyleValue();
             overlayManager->ComputeSheetOffset(sheetStyle, host);
-            if (sheetType_ == SheetType::SHEET_POPUP) {
-                auto renderContext = GetRenderContext();
-                CHECK_NULL_VOID(renderContext);
-                renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_), 0.0f });
-                renderContext->UpdateOpacity(SHEET_VISIABLE_ALPHA);
-                FireCommonCallback();
-            } else {
-                overlayManager->PlaySheetTransition(host, true, false);
-            }
+            overlayManager->PlaySheetTransition(host, true, false);
             auto maskNode = overlayManager->GetSheetMask(host);
             if (maskNode) {
                 UpdateMaskBackgroundColorRender();
@@ -1723,6 +1748,11 @@ void SheetPresentationPattern::CheckSheetHeightChange()
             typeChanged_ = false;
         }
     }
+    sheetHeight_ = sheetGeometryNode->GetFrameSize().Height();
+    sheetWidth_ = sheetGeometryNode->GetFrameSize().Width();
+    wrapperHeight_ = GetWrapperHeight();
+    wrapperWidth_ = GetWrapperWidth();
+    isFirstInit_ = false;
     GetBuilderInitHeight();
 }
 
