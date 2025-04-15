@@ -973,10 +973,13 @@ void AssignArkValue(Ark_EffectDirection& dst, const OHOS::Ace::CommonSubType& sr
 
 void AssignArkValue(Ark_SelectStatus& dst, const int32_t& src)
 {
+    const int32_t VALUE_ALL = 0;
+    const int32_t VALUE_PART = 1;
+    const int32_t VALUE_NONE = 2;
     switch (src) {
-        case 0: dst = ARK_SELECT_STATUS_ALL; break;
-        case 1: dst = ARK_SELECT_STATUS_PART; break;
-        case 2: dst = ARK_SELECT_STATUS_NONE; break;
+        case VALUE_ALL: dst = ARK_SELECT_STATUS_ALL; break;
+        case VALUE_PART: dst = ARK_SELECT_STATUS_PART; break;
+        case VALUE_NONE: dst = ARK_SELECT_STATUS_NONE; break;
         default: dst = static_cast<Ark_SelectStatus>(-1);
     }
 }

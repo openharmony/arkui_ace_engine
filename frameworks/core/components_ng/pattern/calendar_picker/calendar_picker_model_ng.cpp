@@ -347,8 +347,7 @@ void CalendarPickerModelNG::SetTextStyle(FrameNode* frameNode, const std::option
     CHECK_NULL_VOID(pipeline);
     RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
-    if (textStyle.has_value())
-    {
+    if (textStyle.has_value()) {
         auto style = textStyle.value();
         if (style.fontSize.has_value() && style.fontSize->IsValid()) {
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, FontSize, style.fontSize.value(), frameNode);

@@ -89,7 +89,8 @@ void TextStyle1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CalendarPickerModelNG::SetTextStyle(frameNode, value ? Converter::OptConvert<PickerTextStyle>(*value) : std::nullopt);
+    CalendarPickerModelNG::SetTextStyle(frameNode,
+        value ? Converter::OptConvert<PickerTextStyle>(*value) : std::nullopt);
 }
 void OnChange0Impl(Ark_NativePointer node,
                    const Callback_Date_Void* value)

@@ -217,7 +217,7 @@ void CheckBoxModelNG::SetCheckMarkColor(FrameNode* frameNode, const std::optiona
 }
 
 void CheckBoxModelNG::SetCheckMarkSize(FrameNode* frameNode, const Dimension& size)
-{   
+{
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkSize, size, frameNode);
 }
 

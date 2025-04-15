@@ -162,7 +162,8 @@ void CheckboxShape1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxGroupModelNG::SetCheckboxGroupStyle(frameNode, value ? Converter::OptConvert<OHOS::Ace::CheckBoxStyle>(*value) : std::nullopt);
+    CheckBoxGroupModelNG::SetCheckboxGroupStyle(frameNode,
+        value ? Converter::OptConvert<OHOS::Ace::CheckBoxStyle>(*value) : std::nullopt);
 }
 void _onChangeEvent_selectAllImpl(Ark_NativePointer node,
                                   const Callback_Boolean_Void* callback)
