@@ -181,6 +181,7 @@ void Font1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto arkVal = value ? Converter::OptConvert<Font>(*value) : std::nullopt;
     if (arkVal.has_value()) {
+        Validator::ValidateNonNegative(arkVal->fontSize);
         SelectModelNG::SetFontSize(frameNode, arkVal->fontSize);
         SelectModelNG::SetFontWeight(frameNode, arkVal->fontWeight);
         SelectModelNG::SetFontFamily(frameNode, arkVal->fontFamilies);
@@ -239,6 +240,7 @@ void SelectedOptionFont1Impl(Ark_NativePointer node,
     auto arkVal = value ? Converter::OptConvert<Font>(*value) : std::nullopt;
     if (arkVal.has_value()) {
         auto font = Converter::Convert<Font>(arkVal.value());
+        Validator::ValidateNonNegative(arkVal->fontSize);
         SelectModelNG::SetSelectedOptionFontSize(frameNode, arkVal->fontSize);
         SelectModelNG::SetSelectedOptionFontWeight(frameNode, arkVal->fontWeight);
         SelectModelNG::SetSelectedOptionFontFamily(frameNode, arkVal->fontFamilies);
@@ -296,6 +298,7 @@ void OptionFont1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto arkVal = value ? Converter::OptConvert<Font>(*value) : std::nullopt;
     if (arkVal.has_value()) {
+        Validator::ValidateNonNegative(arkVal->fontSize);
         SelectModelNG::SetOptionFontSize(frameNode, arkVal->fontSize);
         SelectModelNG::SetOptionFontWeight(frameNode, arkVal->fontWeight);
         SelectModelNG::SetOptionFontFamily(frameNode, arkVal->fontFamilies);
@@ -415,10 +418,12 @@ void OptionWidth1Impl(Ark_NativePointer node,
         [frameNode](const Ark_OptionWidthMode& value) {
             auto fit = Converter::OptConvert<bool>(value);
             SelectModelNG::SetHasOptionWidth(frameNode, true);
-            SelectModelNG::SetOptionWidthFitTrigger(frameNode, fit.value_or(true));
+            SelectModelNG::SetOptionWidthFitTrigger(frameNode, fit);
         },
-        []() {}
-    );
+        [frameNode]() {
+            SelectModelNG::SetHasOptionWidth(frameNode, true);
+            SelectModelNG::SetOptionWidth(frameNode, std::nullopt);
+        });
 }
 void OptionHeight0Impl(Ark_NativePointer node,
                        const Ark_Length* value)

@@ -15,13 +15,6 @@
 
 #include "select_modifier_test.h"
 
-#include "core/components/select/select_theme.h"
-#include "core/components/theme/icon_theme.h"
-#include "core/components_ng/pattern/select/select_model_ng.h"
-#include "core/components_ng/pattern/select/select_pattern.h"
-
-#include "core/interfaces/native/utility/converter.h"
-
 namespace OHOS::Ace::NG {
 
 using namespace testing;
