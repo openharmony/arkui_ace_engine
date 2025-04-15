@@ -3731,14 +3731,19 @@ void TextFieldPattern::StartVibratorByLongPress()
     VibratorUtils::StartVibraFeedback("longPress.light");
 }
 
+bool TextFieldPattern::IsInResponseArea(const Offset& location)
+{
+    return cancelButtonTouched_ || IsOnUnitByPosition(location) || IsOnPasswordByPosition(location) ||
+    IsOnCleanNodeByPosition(location);
+}
+
 void TextFieldPattern::HandleLongPress(GestureEvent& info)
 {
     CHECK_NULL_VOID(!IsDragging());
     CHECK_NULL_VOID(!IsHandleDragging());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    if (!focusHub->IsFocusable() || IsOnUnitByPosition(info.GetLocalLocation()) || GetIsPreviewText() ||
-        IsOnPasswordByPosition(info.GetLocalLocation()) || IsOnCleanNodeByPosition(info.GetLocalLocation())) {
+    if (!focusHub->IsFocusable() || IsInResponseArea(info.GetLocalLocation()) || GetIsPreviewText()) {
         return;
     }
     moveCaretState_.isTouchCaret = false;
