@@ -4313,13 +4313,14 @@ void TextPattern::ResetCustomFontColor()
 
 OffsetF TextPattern::GetDragUpperLeftCoordinates()
 {
-    if (dragBoxes_.empty()) {
+    auto dragBoxes = GetTextBoxes();
+    if (dragBoxes.empty()) {
         return { 0.0f, 0.0f };
     }
-    auto startY = dragBoxes_.front().Top();
-    auto startX = dragBoxes_.front().Left();
+    auto startY = dragBoxes.front().Top();
+    auto startX = dragBoxes.front().Left();
 
-    auto endY = dragBoxes_.back().Top();
+    auto endY = dragBoxes.back().Top();
     OffsetF offset;
     if (NearEqual(startY, endY)) {
         offset = { contentRect_.GetX() + startX, startY + contentRect_.GetY() };
