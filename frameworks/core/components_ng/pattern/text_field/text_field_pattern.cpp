@@ -113,7 +113,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
- 
+
 const BorderRadiusProperty ZERO_BORDER_RADIUS_PROPERTY(0.0_vp);
 // need to be moved to TextFieldTheme
 constexpr Dimension BORDER_DEFAULT_WIDTH = 0.0_vp;
@@ -2036,26 +2036,25 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         }
         auto data = event->GetData();
         CHECK_NULL_VOID(data);
+
         std::string str;
-        auto arr = UdmfClient::GetInstance()->GetSpanStringRecord(data);
+        auto arr = UdmfClient::GetInstance()->GetSpanStringEntry(data);
         if (arr.size() > 0) {
             auto spanStr = SpanString::DecodeTlv(arr);
             str += spanStr->GetString();
         } else {
-            auto records = UdmfClient::GetInstance()->GetPlainTextRecords(data);
-            if (records.empty()) {
+            auto plainText = UdmfClient::GetInstance()->GetPlainTextEntry(data);
+            if (plainText.empty()) {
                 std::string linkUrl;
                 std::string linkTitle;
-                UdmfClient::GetInstance()->GetLinkRecord(data, linkUrl, linkTitle);
+                UdmfClient::GetInstance()->GetLinkEntry(data, linkUrl, linkTitle);
                 if (!linkTitle.empty()) {
                     str += linkTitle;
                 } else if (!linkUrl.empty()) {
                     str += linkUrl;
                 }
             }
-            for (const auto& record : records) {
-                str += record;
-            }
+            str += plainText;
         }
         pattern->dragRecipientStatus_ = DragStatus::NONE;
         if (str.empty()) {
@@ -6422,7 +6421,7 @@ void TextFieldPattern::PlayScrollBarAppearAnimation()
         scrollBar->PlayScrollBarAppearAnimation();
     }
 }
- 
+
 void TextFieldPattern::ScheduleDisappearDelayTask()
 {
     auto scrollBar = GetScrollBar();
