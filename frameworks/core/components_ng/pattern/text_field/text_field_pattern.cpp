@@ -116,7 +116,7 @@ const OffsetF DEFAULT_NEGATIVE_CARET_OFFSET {-1.0f, -1.0f};
 constexpr Dimension FLOATING_CARET_SHOW_ORIGIN_CARET_DISTANCE = 10.0_vp;
 #if defined(ENABLE_STANDARD_INPUT)
 constexpr int32_t AUTO_FILL_CANCEL = 2;
-constexpr size_t MAX_PLACEHODER_SIZE = 256;
+constexpr size_t MAX_PLACEHOLDER_SIZE = 256;
 constexpr size_t MAX_ABILITY_NAME_SIZE = 32;
 #endif
 
@@ -4538,7 +4538,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
         "node:%{public}d, RequestKeyboard set calling window id:%{public}u"
         " inputType:%{public}d, enterKeyType:%{public}d, needKeyboard:%{public}d, sourceType:%{public}u"
-        " placeholderLength:%{public}d",
+        " placeholderLength:%{public}zu",
         tmpHost->GetId(), textConfig.windowId, textConfig.inputAttribute.inputPattern,
         textConfig.inputAttribute.enterKeyType, needShowSoftKeyboard, sourceType,
         CountUtf16Chars(textConfig.inputAttribute.placeholder));
@@ -4631,7 +4631,7 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     auto textPaintOffset = GetPaintRectGlobalOffset();
     double height = selectController_->GetCaretRect().Bottom() + windowRect.Top() +
              textPaintOffset.GetY() + offset - positionY;
-    std::u16string placeholder = TruncateText(GetPlaceHolder(), MAX_PLACEHODER_SIZE);
+    std::u16string placeholder = TruncateText(GetPlaceHolder(), MAX_PLACEHOLDER_SIZE);
     std::u16string abilityName = TruncateText(UtfUtils::Str8ToStr16(AceApplicationInfo::GetInstance()
         .GetAbilityName()), MAX_ABILITY_NAME_SIZE);
 

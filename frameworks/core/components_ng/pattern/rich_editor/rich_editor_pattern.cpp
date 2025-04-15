@@ -90,7 +90,7 @@ namespace {
 constexpr float CARET_WIDTH = 1.5f;
 constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
 constexpr Dimension KEYBOARD_AVOID_OFFSET = 24.0_vp;
-constexpr size_t MAX_PLACEHODER_SIZE = 256;
+constexpr size_t MAX_PLACEHOLDER_SIZE = 256;
 constexpr size_t MAX_ABILITY_NAME_SIZE = 32;
 #endif
 constexpr int32_t IMAGE_SPAN_LENGTH = 1;
@@ -4957,7 +4957,7 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard, SourceTyp
     MiscServices::TextConfig textconfig = miscTextConfig.value();
     TAG_LOGD(
         AceLogTag::ACE_RICH_TEXT, "RequestKeyboard set calling window id is : %{public}u"
-        " RequestKeyboard set placeholder length is : %{public}d", miscTextConfig->windowId,
+        " RequestKeyboard set placeholder length is : %{public}zu", miscTextConfig->windowId,
         CountUtf16Chars(textconfig.inputAttribute.placeholder));
 #ifdef WINDOW_SCENE_SUPPORTED
     auto systemWindowId = GetSCBSystemWindowId();
@@ -5007,7 +5007,7 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
     auto caretTop = caretOffset.GetY() + parentGlobalOffset.GetY();
     double positionY = parentGlobalOffset.GetY();
     double height = caretTop + caretHeight + KEYBOARD_AVOID_OFFSET.ConvertToPx() - positionY;
-    std::u16string placeholder = TruncateText(UtfUtils::Str8ToStr16(GetPlaceHolder()), MAX_PLACEHODER_SIZE);
+    std::u16string placeholder = TruncateText(UtfUtils::Str8ToStr16(GetPlaceHolder()), MAX_PLACEHOLDER_SIZE);
     std::u16string abilityName = TruncateText(UtfUtils::Str8ToStr16(AceApplicationInfo::GetInstance()
         .GetAbilityName()), MAX_ABILITY_NAME_SIZE);
 
