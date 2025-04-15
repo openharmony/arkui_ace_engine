@@ -315,8 +315,8 @@ void HyperlinkPattern::OnMouseEvent(MouseInfo& info)
         pipeline->FreeMouseStyleHoldNode(frameId);
     } else {
         pipeline->SetMouseStyleHoldNode(frameId);
-        pipeline->ChangeMouseStyle(
-            frameId, MouseFormat::HAND_POINTING, 0, info.GetAction() == MouseAction::WINDOW_LEAVE);
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING, 0,
+            (info.GetAction() == MouseAction::WINDOW_LEAVE || info.GetAction() == MouseAction::CANCEL));
     }
 }
 } // namespace OHOS::Ace::NG
