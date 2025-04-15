@@ -3477,10 +3477,11 @@ void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& contain
 {
     auto dialogContainer = AceType::DynamicCast<Platform::DialogContainer>(container);
     if (dialogContainer) {
-        std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
         CHECK_NULL_VOID(context);
         auto resourceManager = context->GetResourceManager();
         if (resourceManager != nullptr) {
+            std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+            CHECK_NULL_VOID(resConfig);
             resourceManager->GetResConfig(*resConfig);
             if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
                 dialogContainer->SetColorMode(ColorMode::DARK);

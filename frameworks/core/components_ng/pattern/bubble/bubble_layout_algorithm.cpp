@@ -675,6 +675,7 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
     auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(bubblePattern);
     avoidKeyboard_ = bubblePattern->GetAvoidKeyboard();
+    dumpInfo_.avoidKeyboard = avoidKeyboard_;
     if (!avoidKeyboard_) {
         return;
     }
@@ -775,6 +776,7 @@ void BubbleLayoutAlgorithm::InitWrapperRect(LayoutWrapper* layoutWrapper)
     auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(bubblePattern);
     auto enableHoverMode = bubblePattern->GetEnableHoverMode();
+    dumpInfo_.enableHoverMode = enableHoverMode;
     if (!enableHoverMode) {
         isHalfFoldHover_ = false;
     }
@@ -1186,6 +1188,7 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
         if (!CheckIfNeedRemoveArrow(xMin, xMax, yMin, yMax)) {
             return OffsetF(0.0f, 0.0f);
         }
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "Popup need remove arrow");
     } else if (LessNotEqual(xMax, xMin) && isGreatWrapperWidth_) {
         auto y = std::clamp(position.GetY(), yMin, yMax);
         return OffsetF(0.0f, y + yTargetOffset);
