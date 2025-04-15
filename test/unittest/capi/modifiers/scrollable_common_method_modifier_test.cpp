@@ -412,13 +412,9 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setDigitalCrownSensitivityDefaultVa
 HWTEST_F(ScrollableCommonMethodModifierTest, setDigitalCrownSensitivityValuesTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDigitalCrownSensitivity, nullptr);
-    Opt_CrownSensitivity initValueDigitalCrownSensitivity;
-    // Initial setup
-    initValueDigitalCrownSensitivity = std::get<1>(testFixtureEnumCrownSensitivityTestPlan[0]);
-    auto checkValue = [this, &initValueDigitalCrownSensitivity](
+    auto checkValue = [this](
                         const std::string& input, const std::string& expectedStr, const Opt_CrownSensitivity& value) {
-        Opt_CrownSensitivity inputValueDigitalCrownSensitivity = initValueDigitalCrownSensitivity;
-        inputValueDigitalCrownSensitivity = value;
+        Opt_CrownSensitivity inputValueDigitalCrownSensitivity = value;
         modifier_->setDigitalCrownSensitivity(node_, &inputValueDigitalCrownSensitivity);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
@@ -430,13 +426,13 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setDigitalCrownSensitivityValuesTes
     }
 }
 #endif
-//BackToTopImpl
+
 /**
- * @tc.name: backToTop
+ * @tc.name: setBackToTopTest
  * @tc.desc: Check backToTop method of ScrollableCommonMethod modifier
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollableCommonMethodModifierTest, backToTop, TestSize.Level1)
+HWTEST_F(ScrollableCommonMethodModifierTest, setBackToTopTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBackToTop, nullptr);
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
