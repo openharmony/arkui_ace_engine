@@ -149,6 +149,7 @@ RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProper
     RefPtr<NG::FrameNode> dialog;
     if (dialogProperties.isShowInSubWindow) {
         dialog = SubwindowManager::GetInstance()->ShowDialogNGWithNode(dialogProperties, customNode);
+        CHECK_NULL_RETURN(dialog, nullptr);
         if (dialogProperties.isModal && !dialogProperties.isScenceBoardDialog && !container->IsUIExtensionWindow()) {
             DialogProperties Maskarg;
             Maskarg.isMask = true;
