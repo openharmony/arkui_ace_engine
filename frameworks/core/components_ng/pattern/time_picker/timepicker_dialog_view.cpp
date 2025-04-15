@@ -277,6 +277,7 @@ std::function<void()> TimePickerDialogView::CloseDialogEvent(const RefPtr<TimePi
 RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<void()>& timePickerSwitchEvent,
     const RefPtr<FrameNode>& timeNode, const std::vector<ButtonInfo>& buttonInfos)
 {
+    CHECK_NULL_RETURN(timeNode, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
@@ -290,6 +291,9 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     CHECK_NULL_RETURN(textNextPrevNode, nullptr);
     auto textNextPrevLayoutProperty = textNextPrevNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textNextPrevLayoutProperty, nullptr);
+    auto timePickerRowPattern = timeNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, nullptr);
+    timePickerRowPattern->SetNextPrevButtonNode(nextPrevButtonNode);
     textNextPrevLayoutProperty->UpdateContent(GetDialogAgingButtonText(true));
     textNextPrevLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textNextPrevLayoutProperty->UpdateFontSize(
@@ -359,6 +363,7 @@ std::function<void(const GestureEvent&)> TimePickerDialogView::UpdateTimePickerS
         if (textLayoutProperty->GetContent() == UtfUtils::Str8ToStr16(GetDialogAgingButtonText(true))) {
             UpdateCancelButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
             textLayoutProperty->UpdateContent(GetDialogAgingButtonText(false));
+            pickerPattern->SetIsNext(false);
         } else {
             UpdateConfirmButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
             textLayoutProperty->UpdateContent(GetDialogAgingButtonText(true));

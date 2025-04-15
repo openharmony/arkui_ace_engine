@@ -2437,7 +2437,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern023, TestSize.Level1)
 
 /**
  * @tc.name: TimePickerRowPattern024
- * @tc.desc: Test UpdateConfirmButtonMargin.
+ * @tc.desc: Test UpdateButtonMargin.
  * @tc.type: FUNC
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern024, TestSize.Level1)
@@ -2453,7 +2453,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern024, TestSize.Level1)
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     EXPECT_NE(timePickerRowPattern, nullptr);
     /**
-     * @tc.steps: step2. call UpdateConfirmButtonMargin.
+     * @tc.steps: step2. call UpdateButtonMargin.
      * @tc.expected: set api version is 10.
      */
     int32_t setApiVersion = 10;
@@ -2463,16 +2463,16 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern024, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(buttonCancelNode, nullptr);
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    timePickerRowPattern->UpdateConfirmButtonMargin(buttonCancelNode, dialogTheme);
+    timePickerRowPattern->UpdateButtonMargin(buttonCancelNode, dialogTheme, true);
     EXPECT_EQ(currApiVersion, setApiVersion);
     /**
-     * @tc.steps: step3. call UpdateConfirmButtonMargin.
+     * @tc.steps: step3. call UpdateButtonMargin.
      * @tc.expected: set api version is 16.
      */
     setApiVersion = 16;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     currApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    timePickerRowPattern->UpdateConfirmButtonMargin(buttonCancelNode, dialogTheme);
+    timePickerRowPattern->UpdateButtonMargin(buttonCancelNode, dialogTheme, true);
     EXPECT_EQ(currApiVersion, setApiVersion);
 }
 
@@ -2590,7 +2590,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern026, TestSize.Level1)
 
 /**
  * @tc.name: TimePickerRowPattern027
- * @tc.desc: Test UpdateCancelButtonMargin.
+ * @tc.desc: Test UpdateButtonMargin.
  * @tc.type: FUNC
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern027, TestSize.Level1)
@@ -2606,7 +2606,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern027, TestSize.Level1)
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     EXPECT_NE(timePickerRowPattern, nullptr);
     /**
-     * @tc.steps: step2. call UpdateCancelButtonMargin.
+     * @tc.steps: step2. call UpdateButtonMargin.
      * @tc.expected: set api version is 11.
      */
     int32_t setApiVersion = 11;
@@ -2616,16 +2616,16 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern027, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(buttonCancelNode, nullptr);
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    timePickerRowPattern->UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
+    timePickerRowPattern->UpdateButtonMargin(buttonCancelNode, dialogTheme, false);
     EXPECT_EQ(currApiVersion, setApiVersion);
     /**
-     * @tc.steps: step3. call UpdateCancelButtonMargin.
+     * @tc.steps: step3. call UpdateButtonMargin.
      * @tc.expected: set api version is 16.
      */
     setApiVersion = 16;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     currApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    timePickerRowPattern->UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
+    timePickerRowPattern->UpdateButtonMargin(buttonCancelNode, dialogTheme, false);
     EXPECT_EQ(currApiVersion, setApiVersion);
 }
 
@@ -6503,7 +6503,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogCreateNextPrevButtonNode, Test
     std::vector<ButtonInfo> buttonInfos;
     RefPtr<FrameNode> result = TimePickerDialogView::CreateNextPrevButtonNode(
         timePickerSwitchEvent, timeNode, buttonInfos);
-    ASSERT_NE(result, nullptr);
+    ASSERT_FALSE(result);
 }
 
 /**

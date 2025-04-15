@@ -1166,8 +1166,9 @@ RefPtr<FrameNode> TextPickerDialogView::CreateForwardNode(NG::DialogGestureEvent
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textForwardNode, nullptr);
     UpdateForwardButtonTextLayoutProperty(textForwardNode, pickerTheme);
-    auto textPattern = textPickerNode->GetPattern<TextPickerPattern>();
-    textPattern->SetForwardNode(buttonForwardNode);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, nullptr);
+    textPickerPattern->SetForwardNode(buttonForwardNode);
     textForwardNode->MountToParent(buttonForwardNode);
     auto eventForwardHub = buttonForwardNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventForwardHub, nullptr);
@@ -1213,8 +1214,9 @@ RefPtr<FrameNode> TextPickerDialogView::CreateBackwardNode(NG::DialogGestureEven
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textBackwardNode, nullptr);
     UpdateBackwardButtonTextLayoutProperty(textBackwardNode, pickerTheme);
-    auto textPattern = textPickerNode->GetPattern<TextPickerPattern>();
-    textPattern->SetBackwardNode(buttonBackwardNode);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, nullptr);
+    textPickerPattern->SetBackwardNode(buttonBackwardNode);
     textBackwardNode->MountToParent(buttonBackwardNode);
     auto eventBackwardHub = buttonBackwardNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventBackwardHub, nullptr);
