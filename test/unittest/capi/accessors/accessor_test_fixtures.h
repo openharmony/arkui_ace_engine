@@ -152,5 +152,23 @@ extern const std::vector<std::tuple<std::string, Ark_ImageFit, std::optional<Ima
     testFixtureObjectFitInvalidValues;
 
 extern const std::vector<std::tuple<std::string, Ark_Length, Dimension>> testFixtureDimensionAnyValidValues;
+
+// Fixture 'String' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringValidValues;
+
+// Fixture 'DimensionsNumAny' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumAnyValidValues;
+
+// Fixture 'DimensionsStrNonPerc' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonPercValidValues;
+
+// Fixture 'DimensionsNumNonNeg' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumNonNegValidValues;
+
+// Fixture 'DimensionsStrNonNegNonPct' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonNegNonPctValidValues;
+
+// Fixture 'FontFeature' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontFeatureValidValues;
 } // namespace OHOS::Ace::NG::AccessorTestFixtures
 #endif

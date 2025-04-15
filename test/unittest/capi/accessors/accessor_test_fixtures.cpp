@@ -14,6 +14,7 @@
  */
 
 #include "accessor_test_fixtures.h"
+#include "accessor_test_utils.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -268,5 +269,63 @@ const std::vector<std::tuple<std::string, Dimension, Ark_Length>> testFixtureLen
     { "0.5_pct", 0.5_pct, Converter::ArkValue<Ark_Length>(0.5_pct) },
     { "0.0_pct", 0.0_pct, Converter::ArkValue<Ark_Length>(0.0_pct) },
     { "-0.8_pct", -0.8_pct, Converter::ArkValue<Ark_Length>(-0.8_pct) },
+};
+
+// Fixture 'String' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringValidValues = {
+    { "\"abc\"", Converter::ArkValue<Ark_String>("abc"), "abc" },
+    { "\"\"", Converter::ArkValue<Ark_String>(""), "" },
+    { "\"xyz\"", Converter::ArkValue<Ark_String>("xyz"), "xyz" },
+};
+
+// Fixture 'DimensionsNumAny' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumAnyValidValues = {
+    { "123", Converter::ArkValue<Ark_Number>(123), "123.00vp" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0.00vp" },
+    { "1.23", Converter::ArkValue<Ark_Number>(1.23), "1.23vp" },
+    { "-2", Converter::ArkValue<Ark_Number>(-2), "-2.00vp" },
+    { "-3.45", Converter::ArkValue<Ark_Number>(-3.45), "-3.45vp" },
+};
+
+// Fixture 'DimensionsStrNonPerc' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonPercValidValues = {
+    { "\"123vp\"", Converter::ArkValue<Ark_String>("123vp"), "123.00vp" },
+    { "\"0_fp\"", Converter::ArkValue<Ark_String>("0_fp"), "0.00fp" },
+    { "\"1.23_fp\"", Converter::ArkValue<Ark_String>("1.23_fp"), "1.23fp" },
+};
+
+// Fixture 'DimensionsNumNonNeg' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumNonNegValidValues = {
+    { "123", Converter::ArkValue<Ark_Number>(123), "123.00vp" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0.00vp" },
+    { "1.23", Converter::ArkValue<Ark_Number>(1.23), "1.23vp" },
+};
+
+// Fixture 'DimensionsStrNonNegNonPct' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonNegNonPctValidValues = {
+    { "\"123vp\"", Converter::ArkValue<Ark_String>("123vp"), "123.00vp" },
+    { "\"0vp\"", Converter::ArkValue<Ark_String>("0vp"), "0.00vp" },
+    { "\"1.23vp\"", Converter::ArkValue<Ark_String>("1.23vp"), "1.23vp" },
+    { "\"123fp\"", Converter::ArkValue<Ark_String>("123fp"), "123.00fp" },
+    { "\"0fp\"", Converter::ArkValue<Ark_String>("0fp"), "0.00fp" },
+    { "\"1.23fp\"", Converter::ArkValue<Ark_String>("1.23fp"), "1.23fp" },
+    { "\"123px\"", Converter::ArkValue<Ark_String>("123px"), "123.00px" },
+    { "\"0px\"", Converter::ArkValue<Ark_String>("0px"), "0.00px" },
+    { "\"1.23px\"", Converter::ArkValue<Ark_String>("1.23px"), "1.23px" },
+    { "\"123lpx\"", Converter::ArkValue<Ark_String>("123lpx"), "123.00lpx" },
+    { "\"0lpx\"", Converter::ArkValue<Ark_String>("0lpx"), "0.00lpx" },
+    { "\"1.23lpx\"", Converter::ArkValue<Ark_String>("1.23lpx"), "1.23lpx" },
+};
+
+// Fixture 'FontFeature' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontFeatureValidValues = {
+    { "\"'ss01' on\"", Converter::ArkValue<Ark_String>("'ss01' on"), "'ss01' 1" },
+    { "\"'ss01' off\"", Converter::ArkValue<Ark_String>("'ss01' off"), "'ss01' 0" },
+    { "\"'ss01' 1\"", Converter::ArkValue<Ark_String>("'ss01' 1"), "'ss01' 1" },
+    { "\"'ss01' 0\"", Converter::ArkValue<Ark_String>("'ss01' 0"), "'ss01' 0" },
+    { "\"'ss01' on, 'ss02' on\"", Converter::ArkValue<Ark_String>("'ss01' on, 'ss02' on"), "'ss01' 1,'ss02' 1" },
+    { "\"'ss01' on, 'ss02' off\"", Converter::ArkValue<Ark_String>("'ss01' on, 'ss02' off"), "'ss01' 1,'ss02' 0" },
+    { "\"'ss01' on, ss02 off\"", Converter::ArkValue<Ark_String>("'ss01' on, ss02 off"), "'ss01' 1" },
+    { "\"'ss01' on\"", Converter::ArkValue<Ark_String>("'ss01' on"), "'ss01' 1" },
 };
 } // namespace OHOS::Ace::NG::AccessorTestFixtures

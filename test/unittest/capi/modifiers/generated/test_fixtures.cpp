@@ -15,7 +15,7 @@
 
 #include "test_fixtures.h"
 
-#include "test/unittest/capi/modifiers/modifiers_test_utils.h"
+#include "modifiers_test_utils.h"
 
 #include "core/components/theme/theme_style.h"
 

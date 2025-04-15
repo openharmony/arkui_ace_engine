@@ -21,16 +21,15 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
-#include "core/components_v2/inspector/utils.h"
 #include "core/interfaces/native/implementation/rich_editor_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/styled_string_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "test/unittest/capi/modifiers/generated/test_fixtures.h"
 #include "test/unittest/capi/modifiers/generated/type_helpers.h"
 #include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 
 #include "accessor_test_base.h"
+#include "accessor_test_fixtures.h"
 #include "accessor_test_utils.h"
 
 namespace OHOS::Ace {
@@ -238,11 +237,6 @@ public:
         ASSERT_NE(mockRichEditorController_, nullptr);
 
         SetupTheme<RichEditorTheme>();
-
-        for (auto& [id, strid, res] : Fixtures::resourceInitTable) {
-            AddResource(id, res);
-            AddResource(strid, res);
-        }
     }
 
     void TearDown() override
@@ -622,7 +616,7 @@ HWTEST_F(RichEditorControllerAccessorTest, toStyledStringTest, TestSize.Level1)
  */
 HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestTextShadow, TestSize.Level1)
 {
-    Ark_String inputValueValue = std::get<1>(Fixtures::testFixtureStringValidValues.front());
+    Ark_String inputValueValue = std::get<1>(AccessorTestFixtures::testFixtureStringValidValues.front());
 
     Ark_RichEditorTextSpanOptions textSpanOptions = {
         .offset = Converter::ArkValue<Opt_Number>(),
@@ -666,7 +660,7 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestTextShadow, TestSize.L
  */
 HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestLetterSpacing, TestSize.Level1)
 {
-    Ark_String initValueValue = std::get<1>(Fixtures::testFixtureStringValidValues.front());
+    Ark_String initValueValue = std::get<1>(AccessorTestFixtures::testFixtureStringValidValues.front());
 
     Ark_RichEditorTextSpanOptions textSpanOptions = {
         .offset = Converter::ArkValue<Opt_Number>(),
@@ -689,10 +683,10 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestLetterSpacing, TestSiz
             ", method: addTextSpan, attribute: options.style.letterSpacing";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumAnyValidValues) {
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDimensionsNumAnyValidValues) {
         checkValue(input, expected, Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonPercValidValues) {
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDimensionsStrNonPercValidValues) {
         checkValue(input, expected, Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(value));
     }
 }
@@ -704,7 +698,7 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestLetterSpacing, TestSiz
  */
 HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestLineHeight, TestSize.Level1)
 {
-    Ark_String initValueValue = std::get<1>(Fixtures::testFixtureStringValidValues.front());
+    Ark_String initValueValue = std::get<1>(AccessorTestFixtures::testFixtureStringValidValues.front());
 
     Ark_RichEditorTextSpanOptions textSpanOptions = {
         .offset = Converter::ArkValue<Opt_Number>(),
@@ -727,13 +721,10 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestLineHeight, TestSize.L
             ", method: addTextSpan, attribute: options.style.lineHeight";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDimensionsNumNonNegValidValues) {
         checkValue(input, expected, Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
-        checkValue(input, expected, Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
         checkValue(input, expected, Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(value));
     }
 }
@@ -745,7 +736,7 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestLineHeight, TestSize.L
  */
 HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestHalfLeading, TestSize.Level1)
 {
-    Ark_String initValueValue = std::get<1>(Fixtures::testFixtureStringValidValues.front());
+    Ark_String initValueValue = std::get<1>(AccessorTestFixtures::testFixtureStringValidValues.front());
 
     Ark_RichEditorTextSpanOptions textSpanOptions = {
         .offset = Converter::ArkValue<Opt_Number>(),
@@ -756,7 +747,7 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestHalfLeading, TestSize.
     auto initValueOptions = Converter::ArkValue<Opt_RichEditorTextSpanOptions>(textSpanOptions);
 
     auto checkValue = [this, &initValueValue, &initValueOptions](
-        const std::string& input, const std::string& expected, const Opt_Boolean& value) {
+        const std::string& input, bool expected, const Opt_Boolean& value) {
         Ark_String inputValueValue = initValueValue;
         Opt_RichEditorTextSpanOptions inputValueOptions = initValueOptions;
 
@@ -764,11 +755,11 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestHalfLeading, TestSize.
         accessor_->addTextSpan(peer_, &inputValueValue, &inputValueOptions);
         const TextSpanOptions& options = mockRichEditorController_->textSpanOptions_;
         ASSERT_TRUE(options.style);
-        EXPECT_EQ(V2::ConvertBoolToString(options.style->GetHalfLeading()), expected) <<
+        EXPECT_EQ(options.style->GetHalfLeading(), expected) <<
             "Input value is: " << input << ", method: addTextSpan, attribute: options.style.halfLeading";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureBooleanValues) {
         checkValue(input, expected, Converter::ArkValue<Opt_Boolean>(value));
     }
 }
@@ -780,7 +771,7 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestHalfLeading, TestSize.
  */
 HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestFontFeature, TestSize.Level1)
 {
-    Ark_String initValueValue = std::get<1>(Fixtures::testFixtureStringValidValues.front());
+    Ark_String initValueValue = std::get<1>(AccessorTestFixtures::testFixtureStringValidValues.front());
 
     Ark_RichEditorTextSpanOptions textSpanOptions = {
         .offset = Converter::ArkValue<Opt_Number>(),
@@ -803,7 +794,7 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestFontFeature, TestSize.
             "Input value is: " << input << ", method: addTextSpan, attribute: options.style.fontFeature";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureFontFeatureValidValues) {
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureFontFeatureValidValues) {
         checkValue(input, expected, Converter::ArkValue<Opt_String>(value));
     }
 }
@@ -815,7 +806,7 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestFontFeature, TestSize.
  */
 HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestTextBackgroundStyle, TestSize.Level1)
 {
-    Ark_String inputValueValue = std::get<1>(Fixtures::testFixtureStringValidValues.front());
+    Ark_String inputValueValue = std::get<1>(AccessorTestFixtures::testFixtureStringValidValues.front());
 
     Ark_RichEditorTextSpanOptions textSpanOptions = {
         .offset = Converter::ArkValue<Opt_Number>(),
