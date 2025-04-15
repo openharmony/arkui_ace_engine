@@ -1376,7 +1376,9 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
             navigation->CleanPopAnimations();
             for (auto iter = preNavList.rbegin(); iter != preNavList.rend(); ++iter) {
                 auto preNode = (*iter).Upgrade();
-                CHECK_NULL_VOID(preNode);
+                if (!preNode) {
+                    continue;
+                }
                 auto preNavDesNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
                 CHECK_NULL_VOID(preNavDesNode);
                 if (preNavDesNode->SystemTransitionPopCallback(preNavDesNode->GetAnimationId())) {
@@ -1487,12 +1489,16 @@ void NavigationGroupNode::TransitionWithDialogPush(const RefPtr<FrameNode>& preN
             CHECK_NULL_VOID(navigation);
             for (auto iter : prevNavList) {
                 auto preNode = iter.Upgrade();
-                CHECK_NULL_VOID(preNode);
+                if (!preNode) {
+                    continue;
+                }
                 navigation->PreNodeFinishCallback(preNode);
             }
             for (auto iter : curNavList) {
                 auto curNode = iter.Upgrade();
-                CHECK_NULL_VOID(curNode);
+                if (!curNode) {
+                    continue;
+                }
                 auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
                 CHECK_NULL_VOID(curNavDestination);
                 curNavDestination->SystemTransitionPushCallback(true, curNavDestination->GetAnimationId());
