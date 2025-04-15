@@ -487,23 +487,28 @@ void ButtonPattern::InitTouchEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    touchListener_ = [weak = WeakClaim(this)](const UIState& state) {
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto buttonPattern = weak.Upgrade();
         CHECK_NULL_VOID(buttonPattern);
-        if (state == UI_STATE_PRESSED) {
+        if (info.GetTouches().empty()) {
+            return;
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch down");
-            buttonPattern->HandlePressedStyle();
+            buttonPattern->OnTouchDown();
             buttonPattern->UpdateTexOverflow(!(buttonPattern->isPress_));
         }
-        if (state == UI_STATE_NORMAL) {
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch up");
-            buttonPattern->HandleNormalStyle();
+            buttonPattern->OnTouchUp();
             buttonPattern->UpdateTexOverflow(buttonPattern->isHover_ || buttonPattern->isFocus_);
         }
     };
-    eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, touchListener_, true);
+    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchListener_);
 }
 
 void ButtonPattern::OnAfterModifyDone()
@@ -543,7 +548,7 @@ void ButtonPattern::InitHoverEvent()
     inputHub->AddOnHoverEvent(hoverListener_);
 }
 
-void ButtonPattern::HandlePressedStyle()
+void ButtonPattern::OnTouchDown()
 {
     isPress_ = true;
     FireBuilder();
@@ -570,7 +575,7 @@ void ButtonPattern::HandlePressedStyle()
     }
 }
 
-void ButtonPattern::HandleNormalStyle()
+void ButtonPattern::OnTouchUp()
 {
     isPress_ = false;
     FireBuilder();

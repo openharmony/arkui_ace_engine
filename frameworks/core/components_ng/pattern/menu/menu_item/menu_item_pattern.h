@@ -416,7 +416,6 @@ protected:
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
     void CreateBottomDivider();
-    void RegisterOnPress();
     void OnAfterModifyDone() override;
     RefPtr<FrameNode> GetMenuWrapper();
     void InitFocusPadding();
@@ -493,7 +492,7 @@ private:
         std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart);
     bool UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo);
 
-    void OnPress(const UIState& state);
+    void OnPress(const TouchEventInfo& info);
     bool OnSelectProcess();
     void OptionOnModifyDone(const RefPtr<FrameNode>& host);
     void UpdateIconSrc();
@@ -550,11 +549,9 @@ private:
     WeakPtr<FrameNode> topDivider_ = nullptr;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> onTouchEvent_;
-    std::function<void(UIState)> onPressEvent_;
     RefPtr<InputEvent> onHoverEvent_;
     RefPtr<ClickEvent> onClickEvent_;
     bool onTouchEventSet_ = false;
-    bool onPressEventSet_ = false;
     bool onHoverEventSet_ = false;
     bool onKeyEventSet_ = false;
     bool onClickEventSet_ = false;
