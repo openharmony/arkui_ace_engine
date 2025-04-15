@@ -3245,116 +3245,116 @@ void ClickEffectImpl(Ark_NativePointer node,
 void OnDragStartImpl(Ark_NativePointer node,
                      const Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto weakNode = AceType::WeakClaim(frameNode);
-    // auto onDragStart = [callback = CallbackHelper(*value), weakNode]
-    //     (const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) -> DragDropInfo {
-    //     DragDropInfo result;
-    //     CHECK_NULL_RETURN(info, result);
-    //     auto arkDragInfo = Converter::ArkValue<Ark_DragEvent>(info);
-    //     auto arkExtraParam = Converter::ArkValue<Opt_String>(extraParams);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onDragStart = [callback = CallbackHelper(*value), weakNode]
+        (const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) -> DragDropInfo {
+        DragDropInfo result;
+        CHECK_NULL_RETURN(info, result);
+        auto arkDragInfo = Converter::ArkValue<Ark_DragEvent>(info);
+        auto arkExtraParam = Converter::ArkValue<Opt_String>(extraParams);
 
-    //     auto parseBuilder = [&result, weakNode](const CustomNodeBuilder& val) {
-    //         if (auto frameNode = weakNode.Upgrade(); frameNode) {
-    //             result.customNode = CallbackHelper(val).BuildSync(frameNode.GetRawPtr());
-    //         }
-    //     };
-    //     auto parseItemInfo = [&result, weakNode](const Ark_DragItemInfo& value) {
-    //         result.pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr);
-    //         result.extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string());
-    //         auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
-    //         if (builder) {
-    //             auto frameNode = weakNode.Upgrade();
-    //             CHECK_NULL_VOID(frameNode);
-    //             result.customNode = CallbackHelper(builder.value()).BuildSync(frameNode.GetRawPtr());
-    //         }
-    //     };
-    //     auto handler = [builder = std::move(parseBuilder), dragItemInfo = std::move(parseItemInfo)]
-    //         (const void *rawResultPtr) {
-    //         auto arkResultPtr = reinterpret_cast<const Ark_Union_CustomBuilder_DragItemInfo*>(rawResultPtr);
-    //         CHECK_NULL_VOID(arkResultPtr);
-    //         Converter::VisitUnion(*arkResultPtr, builder, dragItemInfo, []() {});
-    //     };
+        auto parseBuilder = [&result, weakNode](const CustomNodeBuilder& val) {
+            if (auto frameNode = weakNode.Upgrade(); frameNode) {
+                result.customNode = CallbackHelper(val).BuildSync(frameNode.GetRawPtr());
+            }
+        };
+        auto parseItemInfo = [&result, weakNode](const Ark_DragItemInfo& value) {
+            result.pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr);
+            result.extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string());
+            auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
+            if (builder) {
+                auto frameNode = weakNode.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                result.customNode = CallbackHelper(builder.value()).BuildSync(frameNode.GetRawPtr());
+            }
+        };
+        auto handler = [builder = std::move(parseBuilder), dragItemInfo = std::move(parseItemInfo)]
+            (const void *rawResultPtr) {
+            auto arkResultPtr = reinterpret_cast<const Ark_Union_CustomBuilder_DragItemInfo*>(rawResultPtr);
+            CHECK_NULL_VOID(arkResultPtr);
+            Converter::VisitUnion(*arkResultPtr, builder, dragItemInfo, []() {});
+        };
 
-    //     PipelineContext::SetCallBackNode(weakNode);
+        PipelineContext::SetCallBackNode(weakNode);
 
-    //     CallbackKeeper::InvokeWithResultHandler<Ark_Union_CustomBuilder_DragItemInfo,
-    //         Callback_Union_CustomBuilder_DragItemInfo_Void>(handler, callback, arkDragInfo, arkExtraParam);
-    //     return result;
-    // };
-    // ViewAbstract::SetOnDragStart(frameNode, std::move(onDragStart));
+        CallbackKeeper::InvokeWithResultHandler<Ark_Union_CustomBuilder_DragItemInfo,
+            Callback_Union_CustomBuilder_DragItemInfo_Void>(handler, callback, arkDragInfo, arkExtraParam);
+        return result;
+    };
+    ViewAbstract::SetOnDragStart(frameNode, std::move(onDragStart));
 }
 void OnDragEnterImpl(Ark_NativePointer node,
                      const Callback_DragEvent_String_Void* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto onDragEnter = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent,
-    //                                                        const std::string& extraParams) {
-    //     CHECK_NULL_VOID(dragEvent);
-    //     Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
-    //     callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
-    // };
-    // ViewAbstract::SetOnDragEnter(frameNode, std::move(onDragEnter));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onDragEnter = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent,
+                                                           const std::string& extraParams) {
+        CHECK_NULL_VOID(dragEvent);
+        Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
+        callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+    };
+    ViewAbstract::SetOnDragEnter(frameNode, std::move(onDragEnter));
 }
 void OnDragMoveImpl(Ark_NativePointer node,
                     const Callback_DragEvent_String_Void* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto onDragMove = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent,
-    //                                                       const std::string& extraParams) {
-    //     CHECK_NULL_VOID(dragEvent);
-    //     Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
-    //     callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
-    // };
-    // ViewAbstract::SetOnDragMove(frameNode, std::move(onDragMove));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onDragMove = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent,
+                                                          const std::string& extraParams) {
+        CHECK_NULL_VOID(dragEvent);
+        Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
+        callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+    };
+    ViewAbstract::SetOnDragMove(frameNode, std::move(onDragMove));
 }
 void OnDragLeaveImpl(Ark_NativePointer node,
                      const Callback_DragEvent_String_Void* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto onDragLeave = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent,
-    //                                                        const std::string& extraParams) {
-    //     CHECK_NULL_VOID(dragEvent);
-    //     Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
-    //     callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
-    // };
-    // ViewAbstract::SetOnDragLeave(frameNode, std::move(onDragLeave));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onDragLeave = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent,
+                                                           const std::string& extraParams) {
+        CHECK_NULL_VOID(dragEvent);
+        Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
+        callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+    };
+    ViewAbstract::SetOnDragLeave(frameNode, std::move(onDragLeave));
 }
 void OnDropImpl(Ark_NativePointer node,
                 const Callback_DragEvent_String_Void* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto onDrop = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent,
-    //                                                   const std::string& extraParams) {
-    //     CHECK_NULL_VOID(dragEvent);
-    //     Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
-    //     callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
-    // };
-    // ViewAbstract::SetOnDrop(frameNode, std::move(onDrop));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onDrop = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent,
+                                                      const std::string& extraParams) {
+        CHECK_NULL_VOID(dragEvent);
+        Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
+        callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+    };
+    ViewAbstract::SetOnDrop(frameNode, std::move(onDrop));
 }
 void OnDragEndImpl(Ark_NativePointer node,
                    const Callback_DragEvent_String_Void* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto onDragEnd = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent) {
-    //     CHECK_NULL_VOID(dragEvent);
-    //     Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
-    //     std::string extraParams = "";
-    //     callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
-    // };
-    // ViewAbstract::SetOnDragEnd(frameNode, std::move(onDragEnd));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onDragEnd = [callback = CallbackHelper(*value)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent) {
+        CHECK_NULL_VOID(dragEvent);
+        Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
+        std::string extraParams = "";
+        callback.Invoke(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+    };
+    ViewAbstract::SetOnDragEnd(frameNode, std::move(onDragEnd));
 }
 void AllowDropImpl(Ark_NativePointer node,
                    const Opt_Array_UniformDataType* value)
@@ -3369,48 +3369,48 @@ void AllowDropImpl(Ark_NativePointer node,
 void DraggableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto convValue = Converter::Convert<bool>(value);
-    // ViewAbstract::SetDraggable(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    ViewAbstract::SetDraggable(frameNode, convValue);
 }
 void DragPreviewImpl(Ark_NativePointer node,
                      const Ark_Union_CustomBuilder_DragItemInfo_String* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // DragDropInfo dragDropInfo;
-    // Converter::VisitUnion(*value,
-    //     [&dragDropInfo](const Ark_String& val) {
-    //         dragDropInfo.inspectorId = Converter::Convert<std::string>(val);
-    //     },
-    //     [node, frameNode, &dragDropInfo](const CustomNodeBuilder& val) {
-    //         dragDropInfo.customNode = CallbackHelper(val).BuildSync(node);
-    //     },
-    //     [node, frameNode, &dragDropInfo](const Ark_DragItemInfo& value) {
-    //         auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
-    //         if (builder) {
-    //             dragDropInfo.customNode = CallbackHelper(builder.value()).BuildSync(node);
-    //         }
-    //         dragDropInfo.extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string());
-    //         dragDropInfo.pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr);
-    //     },
-    //     []() {
-    //         LOGE("DragPreviewImpl(): Invalid union argument");
-    //     });
-    // ViewAbstract::SetDragPreview(frameNode, dragDropInfo);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    DragDropInfo dragDropInfo;
+    Converter::VisitUnion(*value,
+        [&dragDropInfo](const Ark_String& val) {
+            dragDropInfo.inspectorId = Converter::Convert<std::string>(val);
+        },
+        [node, frameNode, &dragDropInfo](const CustomNodeBuilder& val) {
+            dragDropInfo.customNode = CallbackHelper(val).BuildSync(node);
+        },
+        [node, frameNode, &dragDropInfo](const Ark_DragItemInfo& value) {
+            auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
+            if (builder) {
+                dragDropInfo.customNode = CallbackHelper(builder.value()).BuildSync(node);
+            }
+            dragDropInfo.extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string());
+            dragDropInfo.pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr);
+        },
+        []() {
+            LOGE("DragPreviewImpl(): Invalid union argument");
+        });
+    ViewAbstract::SetDragPreview(frameNode, dragDropInfo);
 }
 void OnPreDragImpl(Ark_NativePointer node,
                    const Callback_PreDragStatus_Void* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto onPreDrag = [callback = CallbackHelper(*value)](const PreDragStatus info) {
-    //     callback.Invoke(Converter::ArkValue<Ark_PreDragStatus>(info));
-    // };
-    // ViewAbstract::SetOnPreDrag(frameNode, onPreDrag);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onPreDrag = [callback = CallbackHelper(*value)](const PreDragStatus info) {
+        callback.Invoke(Converter::ArkValue<Ark_PreDragStatus>(info));
+    };
+    ViewAbstract::SetOnPreDrag(frameNode, onPreDrag);
 }
 void LinearGradientImpl(Ark_NativePointer node,
                         const Ark_Type_CommonMethod_linearGradient_value* value)
