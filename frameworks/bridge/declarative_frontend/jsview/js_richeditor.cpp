@@ -57,6 +57,7 @@ std::unique_ptr<RichEditorModel> RichEditorModel::instance_ = nullptr;
 std::mutex RichEditorModel::mutex_;
 constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+static std::atomic<int32_t> spanStringControllerStoreIndex_;
 
 RichEditorModel* RichEditorModel::GetInstance()
 {
@@ -2909,6 +2910,11 @@ void JSRichEditorStyledStringController::SetStyledString(const JSCallbackInfo& a
     auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
     CHECK_NULL_VOID(styledStringController);
     styledStringController->SetStyledString(spanStringController);
+
+    auto thisObj = args.This();
+    auto storeIndex = spanStringControllerStoreIndex_.fetch_add(1);
+    std::string storeKey = "STYLED_STRING_SPANSTRING_RICH_STORE_" + std::to_string(storeIndex);
+    thisObj->SetPropertyObject(storeKey.c_str(), args[0]);
 }
 
 void JSRichEditorStyledStringController::GetStyledString(const JSCallbackInfo& args)
