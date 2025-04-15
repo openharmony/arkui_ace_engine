@@ -1194,6 +1194,8 @@ enum ArkUIAPINodeFlags {
     CUSTOM_DRAW = 1 << 2,
     CUSTOM_FOREGROUND_DRAW = 1 << 3,
     CUSTOM_OVERLAY_DRAW = 1 << 4,
+    CUSTOM_DRAW_FRONT = 1 << 5,
+    CUSTOM_DRAW_BEHIND = 1 << 6,
 };
 
 enum ArkUIGestureDirection {
