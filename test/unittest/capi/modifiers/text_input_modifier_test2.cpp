@@ -15,10 +15,13 @@
 
 #include "test/unittest/capi/stubs/friend_class_accessor.h"
 
+#include "modifier_test_base.h"
+#include "modifiers_test_utils.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -39,12 +42,49 @@ namespace Converter {
                                    .offset = Convert<int32_t>(src.offset)};
         return previewText;
     }
+
+    template<>
+    ChangeValueInfo Convert(const Ark_EditableTextChangeValue& src)
+    {
+        /*
+        struct ChangeValueInfo {
+            std::u16string value;
+            PreviewText previewText;
+            TextRange rangeBefore;
+            TextRange rangeAfter;
+            std::u16string oldContent;
+            PreviewText oldPreviewText;
+        };
+        */
+        ChangeValueInfo changeValue;
+        changeValue.value = Converter::Convert<>
+
+        dst.content = Converter::ArkValue<Ark_String>(src.value);
+        dst.previewText = Converter::ArkValue<Opt_PreviewText>(src.previewText);
+    
+        Ark_TextChangeOptions options;
+        options.rangeBefore.start = Converter::ArkValue<Opt_Number>(src.rangeBefore.start);
+        options.rangeBefore.end = Converter::ArkValue<Opt_Number>(src.rangeBefore.end);
+        options.rangeAfter.start = Converter::ArkValue<Opt_Number>(src.rangeAfter.start);
+        options.rangeAfter.end = Converter::ArkValue<Opt_Number>(src.rangeAfter.end);
+        options.oldContent = Converter::ArkValue<Ark_String>(src.oldContent);
+        options.oldPreviewText.offset = Converter::ArkValue<Ark_Number>(src.oldPreviewText.offset);
+        options.oldPreviewText.value = Converter::ArkValue<Ark_String>(src.oldPreviewText.value);
+    
+        dst.options = Converter::ArkValue<Opt_TextChangeOptions>(options, ctx);
+    
+        return changeValue;
+    }
 } // namespace Converter
 
 namespace {
     Ark_EnterKeyType g_EventTestKey{};
     const std::string TEST_CONTENT_ONE = "ContentTestOne";
     const std::string TEST_CONTENT_TWO = "ContentTestTwo";
+    static const auto ATTRIBUTE_TEXT_OVERFLOW_NAME = "textOverflow";
+    static const auto ATTRIBUTE_TEXT_DEFAULT_VALUE = "TextOverflow.Clip";
+    static const auto ATTRIBUTE_MAX_LINES_NAME = "maxLines";
+    static const auto ATTRIBUTE_MAX_LINES_DEFAULT_STR_VALUE = "1";
 }
 
 class TextInputModifierTest2 : public ModifierTestBase<GENERATED_ArkUITextInputModifier,
@@ -291,5 +331,172 @@ HWTEST_F(TextInputModifierTest2, setEditMenuOptionsTest, TestSize.Level1)
     ASSERT_NE(selectOverlayInfo.onCreateCallback.onMenuItemClick, nullptr);
     EXPECT_TRUE(selectOverlayInfo.onCreateCallback.onMenuItemClick(params[0]));
     EXPECT_FALSE(selectOverlayInfo.onCreateCallback.onMenuItemClick(params[1]));
+}
+
+/*
+ * @tc.name: setTextOverflowTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest2, setTextOverflowTestDefaultValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setTextOverflow, nullptr);
+    auto jsonValue = GetJsonValue(node_);
+    auto resultValue = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_OVERFLOW_NAME);
+    EXPECT_EQ(resultValue, ATTRIBUTE_TEXT_DEFAULT_VALUE) << "Passed value is: " << ATTRIBUTE_TEXT_DEFAULT_VALUE;
+}
+
+/*
+ * @tc.name: setTextOverflowTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest2, setTextOverflowTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setTextOverflow, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultValue;
+
+    using TestStep = std::tuple<Ark_TextOverflow, std::string>;
+    static const std::vector<TestStep> testPlan = {
+        {ARK_TEXT_OVERFLOW_NONE, "TextOverflow.None"},
+        {ARK_TEXT_OVERFLOW_CLIP, "TextOverflow.Clip"},
+        {ARK_TEXT_OVERFLOW_ELLIPSIS, "TextOverflow.Ellipsis"},
+        {ARK_TEXT_OVERFLOW_MARQUEE, "TextOverflow.Marquee"},
+    };
+
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setTextOverflow(node_, inputValue);
+        jsonValue = GetJsonValue(node_);
+        resultValue = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_OVERFLOW_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/*
+ * @tc.name: setTextOverflowTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest2, setTextOverflowTestInvalidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setTextOverflow, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultValue = "";
+    auto invalidValue = static_cast<TextOverflow>(-1);
+
+    using TestStep = std::tuple<Ark_TextOverflow, std::string>;
+    static const std::vector<TestStep> testPlan = {
+        {Converter::ArkValue<Ark_TextOverflow>(invalidValue), ATTRIBUTE_TEXT_DEFAULT_VALUE},
+    };
+
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setTextOverflow(node_, inputValue);
+        jsonValue = GetJsonValue(node_);
+        resultValue = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_OVERFLOW_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/**
+ * @tc.name: setMaxLinesTestDefaultValues
+ * @tc.desc: Check the functionality of setMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest2, setMaxLinesTestDefaultValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaxLines, nullptr);
+    auto jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LINES_DEFAULT_STR_VALUE)
+        << "Passed value is: " << ATTRIBUTE_MAX_LINES_DEFAULT_STR_VALUE;
+}
+
+/**
+ * @tc.name: setMaxLinesTestValidValues
+ * @tc.desc: Check the functionality of setMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest2, setMaxLinesTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaxLines, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    std::string resultValue;
+
+    using OneTestStep = std::tuple<Ark_Number, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkValue<Ark_Number>(123321), "123321"},
+        {Converter::ArkValue<Ark_Number>(321123), "321123"},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setMaxLines(node_, &inputValue);
+        resultValue = GetStringAttribute(node_, ATTRIBUTE_MAX_LINES_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/**
+ * @tc.name: setMaxLinesTestInvalidValues
+ * @tc.desc: Check the functionality of setMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest2, setMaxLinesTestInvalidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaxLines, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    std::string resultValue;
+    const std::string invalidValue = "INF";
+
+    using OneTestStep = std::tuple<Ark_Number, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkValue<Ark_Number>(-1), invalidValue},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setMaxLines(node_, &inputValue);
+        resultValue = GetStringAttribute(node_, ATTRIBUTE_MAX_LINES_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/**
+ * @tc.name: OnWillChangeTest
+ * @tc.desc: setOnWillChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest2, OnWillChangeTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    struct CheckEvent {
+        int32_t resourceId;
+        ChangeValueInfo info;
+    };
+    int32_t expectedResourceId = 123321;
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_EditableTextChangeValue parameter, const Callback_Boolean_Void continuation) {
+        auto value = Converter::Convert<ChangeValueInfo>(parameter);
+        checkEvent = CheckEvent {resourceId, value};
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
+    };
+    auto func = Converter::ArkValue<Callback_EditableTextChangeValue_Boolean>(nullptr, inputCallback, expectedResourceId);
+    modifier_->setOnWillChange(node_, &func);
+
+    // RichEditorChangeValue value;
+    // TextRange rangeBefore = {.start = TEST_RANGE_START, .end = TEST_RANGE_END};
+    // value.SetRangeBefore(rangeBefore);
+    // auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
+    // ASSERT_TRUE(eventHub);
+    // auto result = eventHub->FireOnWillChange(value);
+    // ASSERT_TRUE(checkEvent);
+    // EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+    // EXPECT_TRUE(result);
+    // EXPECT_EQ(checkEvent->info.GetRangeBefore().start, TEST_RANGE_START);
+    // EXPECT_EQ(checkEvent->info.GetRangeBefore().end, TEST_RANGE_END);
 }
 } // namespace OHOS::Ace::NG

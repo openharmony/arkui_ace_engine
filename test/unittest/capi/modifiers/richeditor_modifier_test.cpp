@@ -666,7 +666,7 @@ HWTEST_F(RichEditorModifierTest, setMaxLengthTestInvalidValues, TestSize.Level1)
 
 /**
  * @tc.name: setMaxLinesTestDefaultValues
- * @tc.desc: Check the functionality of setMaxLength
+ * @tc.desc: Check the functionality of setMaxLines
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorModifierTest, setMaxLinesTestDefaultValues, TestSize.Level1)
@@ -679,7 +679,7 @@ HWTEST_F(RichEditorModifierTest, setMaxLinesTestDefaultValues, TestSize.Level1)
 
 /**
  * @tc.name: setMaxLinesTestValidValues
- * @tc.desc: Check the functionality of setMaxLength
+ * @tc.desc: Check the functionality of setMaxLines
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorModifierTest, setMaxLinesTestValidValues, TestSize.Level1)
@@ -705,7 +705,7 @@ HWTEST_F(RichEditorModifierTest, setMaxLinesTestValidValues, TestSize.Level1)
 
 /**
  * @tc.name: setMaxLinesTestInvalidValues
- * @tc.desc: Check the functionality of setMaxLength
+ * @tc.desc: Check the functionality of setMaxLines
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorModifierTest, setMaxLinesTestInvalidValues, TestSize.Level1)
