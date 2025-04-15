@@ -213,7 +213,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     }
     private getTarget_serialize(): EventTarget {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTarget(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : EventTarget = retvalDeserializer.readEventTarget()
         return returnResult
     }

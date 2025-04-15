@@ -61,7 +61,7 @@ export class BackgroundColorStyle implements MaterializedBase {
     }
     private getTextBackgroundStyle_serialize(): TextBackgroundStyle {
         const retval  = ArkUIGeneratedNativeModule._BackgroundColorStyle_getTextBackgroundStyle(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : TextBackgroundStyle = retvalDeserializer.readTextBackgroundStyle()
         return returnResult
     }

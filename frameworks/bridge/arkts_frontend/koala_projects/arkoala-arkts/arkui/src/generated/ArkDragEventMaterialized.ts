@@ -176,7 +176,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     }
     private getSummary_serialize(): Summary {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getSummary(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : Summary = retvalDeserializer.readSummary()
         return returnResult
     }
@@ -189,7 +189,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     }
     private getPreviewRect_serialize(): Rectangle {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getPreviewRect(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : Rectangle = retvalDeserializer.readRectangle()
         return returnResult
     }

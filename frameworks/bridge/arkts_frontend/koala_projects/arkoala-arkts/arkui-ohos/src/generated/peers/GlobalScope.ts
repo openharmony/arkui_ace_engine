@@ -44,7 +44,7 @@ export class GlobalScope {
         }
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_getContext(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : Context = retvalDeserializer.readContext()
         return returnResult
     }
@@ -75,7 +75,7 @@ export class GlobalScope {
         }
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_dollar_r(value, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : Resource = retvalDeserializer.readResource()
         return returnResult
     }
@@ -85,7 +85,7 @@ export class GlobalScope {
     }
     static dollar_rawfile_serialize(value: string): Resource {
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_dollar_rawfile(value)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : Resource = retvalDeserializer.readResource()
         return returnResult
     }

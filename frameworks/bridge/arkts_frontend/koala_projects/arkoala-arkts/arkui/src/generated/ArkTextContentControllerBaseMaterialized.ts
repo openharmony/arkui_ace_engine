@@ -58,13 +58,13 @@ export class TextContentControllerBase implements MaterializedBase {
     }
     private getCaretOffset_serialize(): CaretOffset {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getCaretOffset(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : CaretOffset = retvalDeserializer.readCaretOffset()
         return returnResult
     }
     private getTextContentRect_serialize(): RectResult {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getTextContentRect(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : RectResult = retvalDeserializer.readRectResult()
         return returnResult
     }

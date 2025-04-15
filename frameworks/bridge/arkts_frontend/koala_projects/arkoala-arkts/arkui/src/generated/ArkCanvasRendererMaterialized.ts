@@ -909,7 +909,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private getLineDash_serialize(): Array<number> {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getLineDash(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<number> = new Array<number>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -957,7 +957,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private measureText_serialize(text: string): TextMetrics {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_measureText(this.peer!.ptr, text)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : TextMetrics = retvalDeserializer.readTextMetrics()
         return returnResult
     }

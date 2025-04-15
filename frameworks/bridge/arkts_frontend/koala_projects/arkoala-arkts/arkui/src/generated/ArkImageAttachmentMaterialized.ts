@@ -93,7 +93,7 @@ export class ImageAttachment implements MaterializedBase {
     }
     private getSize_serialize(): SizeOptions {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getSize(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : SizeOptions = retvalDeserializer.readSizeOptions()
         return returnResult
     }
@@ -107,7 +107,7 @@ export class ImageAttachment implements MaterializedBase {
     }
     private getLayoutStyle_serialize(): ImageAttachmentLayoutStyle {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getLayoutStyle(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : ImageAttachmentLayoutStyle = retvalDeserializer.readImageAttachmentLayoutStyle()
         return returnResult
     }

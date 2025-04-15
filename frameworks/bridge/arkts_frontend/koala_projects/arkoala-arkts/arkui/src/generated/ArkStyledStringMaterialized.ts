@@ -137,7 +137,7 @@ export class StyledString implements MaterializedBase {
         }
         const retval  = ArkUIGeneratedNativeModule._StyledString_getStyles(this.peer!.ptr, start, length, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<SpanStyle> = new Array<SpanStyle>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -177,7 +177,7 @@ export class StyledString implements MaterializedBase {
     }
     private static marshalling_serialize(styledString: StyledString): NativeBuffer {
         const retval  = ArkUIGeneratedNativeModule._StyledString_marshalling(toPeerPtr(styledString))
-        return new Deserializer(retval, retval.length).readBuffer()
+        return new Deserializer(retval, retval.length as int32).readBuffer()
     }
     private static unmarshalling_serialize(buffer: NativeBuffer): Promise<StyledString> {
         const thisSerializer : Serializer = Serializer.hold()

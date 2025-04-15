@@ -106,7 +106,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         }
         const retval  = ArkUIGeneratedNativeModule._UIExtensionProxy_sendSync(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_size : int32 = retvalDeserializer.readInt32()
         let buffer : Map<string, Object> = new Map<string, Object>()
         // TODO: TS map resize

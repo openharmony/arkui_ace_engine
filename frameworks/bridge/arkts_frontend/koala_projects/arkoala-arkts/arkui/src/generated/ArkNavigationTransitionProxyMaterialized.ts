@@ -115,7 +115,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
     }
     private getFrom_serialize(): NavContentInfo {
         const retval  = ArkUIGeneratedNativeModule._NavigationTransitionProxy_getFrom(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : NavContentInfo = retvalDeserializer.readNavContentInfo()
         return returnResult
     }
@@ -127,7 +127,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
     }
     private getTo_serialize(): NavContentInfo {
         const retval  = ArkUIGeneratedNativeModule._NavigationTransitionProxy_getTo(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : NavContentInfo = retvalDeserializer.readNavContentInfo()
         return returnResult
     }
