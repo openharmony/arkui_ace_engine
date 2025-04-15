@@ -30,6 +30,17 @@ void UIExtensionProxy::SendData(const RefPtr<WantParamsWrap>& wantParams)
     sessionWrapper_->SendDataAsync(params);
 }
 
+void UIExtensionProxy::SendData(const AAFwk::WantParams& wantParams)
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->SendDataAsync(wantParams);
+}
+
+int32_t UIExtensionProxy::SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams)
+{
+    return sessionWrapper_ ? sessionWrapper_->SendDataSync(wantParams, reWantParams) : 0;
+}
+
 int32_t UIExtensionProxy::SendDataSync(const RefPtr<WantParamsWrap>& wantParams, AAFwk::WantParams& reWantParams)
 {
     auto params = DynamicCast<WantParamsWrapOhos>(wantParams)->GetWantParams();

@@ -214,6 +214,16 @@ void UIExtensionPattern::Initialize()
     hasInitialize_ = true;
 }
 
+bool UIExtensionPattern::GetIsTransferringCaller()
+{
+    return isTransferringCaller_;
+}
+
+void UIExtensionPattern::SetIsTransferringCaller(bool isTransferringCaller)
+{
+    isTransferringCaller_ = isTransferringCaller;
+}
+
 RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
 {
     return MakeRefPtr<UIExtensionLayoutAlgorithm>();
@@ -252,6 +262,13 @@ void UIExtensionPattern::OnAttachContext(PipelineContext *context)
         instanceId_ = newInstanceId;
         UpdateSessionInstanceId(newInstanceId);
     }
+
+    auto wantWrap = GetWantWrap();
+    CHECK_NULL_VOID(wantWrap);
+    UIEXT_LOGI("OnAttachContext UpdateWant, newInstanceId: %{public}d", instanceId_);
+    UpdateWant(wantWrap);
+    SetWantWrap(nullptr);
+    hasAttachContext_ = true;
 }
 
 void UIExtensionPattern::UpdateSessionInstanceId(int32_t instanceId)
@@ -305,6 +322,7 @@ void UIExtensionPattern::RegisterUIExtensionManagerEvent(int32_t instanceId)
 
 void UIExtensionPattern::OnDetachContext(PipelineContext *context)
 {
+    hasAttachContext_ = false;
     CHECK_NULL_VOID(context);
     auto instanceId = context->GetInstanceId();
     if (instanceId != instanceId_) {
@@ -1791,7 +1809,11 @@ void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidAr
 
 void UIExtensionPattern::SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
-    curWant_ = wantWrap;
+    if (hasAttachContext_) {
+        UpdateWant(wantWrap);
+    } else {
+        curWant_ = wantWrap;
+    }
 }
 
 RefPtr<OHOS::Ace::WantWrap> UIExtensionPattern::GetWantWrap()

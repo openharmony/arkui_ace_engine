@@ -40,15 +40,16 @@ import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, Gesture
 import { PixelMap } from "./ArkPixelMapMaterialized"
 import { Callback_TerminationInfo_Void, TerminationInfo, EmbeddedComponentAttribute } from "./../component/embeddedComponent"
 import { ErrorCallback, Want } from "./ArkArkuiExternalInterfaces"
+import { AbilityWant } from "#external"
 /** @memo:stable */
 export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent implements EmbeddedComponentAttribute {
     getPeer(): ArkEmbeddedComponentPeer {
         return (this.peer as ArkEmbeddedComponentPeer)
     }
     /** @memo */
-    public setEmbeddedComponentOptions(loader: Want, type: EmbeddedType): this {
+    public setEmbeddedComponentOptions(loader: AbilityWant, type: EmbeddedType): this {
         if (this.checkPriority("setEmbeddedComponentOptions")) {
-            const loader_casted = loader as (Want)
+            const loader_casted = loader as (AbilityWant)
             const type_casted = type as (EmbeddedType)
             this.getPeer()?.setEmbeddedComponentOptionsAttribute(loader_casted, type_casted)
             return this

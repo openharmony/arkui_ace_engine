@@ -12,26 +12,37 @@
 # limitations under the License.
 
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-group("ace_ani_native_package") {
-  deps = [ "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/ui_extension:arkuiuiextension_group" ]
+group("arkuiuiextension_group") {
+  deps = [ ":arkuiuiextension_ani" ]
 }
 
-ohos_shared_library("arkoala_native_ani") {
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-
+#构建ANI库
+ohos_shared_library("arkuiuiextension_ani") {
+  deps = [ "$ace_root/build:libace_compatible" ]
+  defines = []
+  include_dirs = [ "//foundation/arkui/ace_engine/frameworks" ]
   sources = [
-    "load.cpp",
-    "module.cpp",
+    "../ani_utils.cpp",
+    "native_ui_extension.cpp",
   ]
-
   external_deps = [
+    "ability_base:want",
+    "ability_runtime:ani_common",
+    "ability_runtime:runtime",
+    "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_core",
+    "ipc:ipc_single",
+    "napi:ace_napi",
     "runtime_core:ani",
   ]
 
+  defines += [ "WINDOW_SCENE_SUPPORTED" ]
   configs = [ "$ace_root:ace_config" ]
+  part_name = "ace_engine"
+  subsystem_name = "arkui"
   output_extension = "so"
 }

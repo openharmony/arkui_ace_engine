@@ -13949,8 +13949,7 @@ export class Deserializer extends DeserializerBase {
     parameter_want_type = runtimeType(parameter_want);
     _argsSerializer.writeInt8(parameter_want_type as int32);
     if ((RuntimeType.UNDEFINED) != (parameter_want_type)) {
-        const parameter_want_value  = parameter_want!;
-        _argsSerializer.writeWant(parameter_want_value);
+        // this is AbilityWant, Not support
     }
     (isSync) ? (InteropNativeModule._CallCallbackSync(-582934742, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-582934742, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
@@ -20066,14 +20065,8 @@ export class Deserializer extends DeserializerBase {
     readTerminationInfo(): TerminationInfo {
         let valueDeserializer : Deserializer = this
         const code_result : number = (valueDeserializer.readNumber() as number)
-        const want_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let want_buf : Want | undefined
-        if ((RuntimeType.UNDEFINED) != (want_buf_runtimeType))
-        {
-            want_buf = valueDeserializer.readWant()
-        }
-        const want_result : Want | undefined = want_buf
-        let value : TerminationInfo = ({code: code_result, want: want_result} as TerminationInfo)
+        // this is AbilityWant, Not support
+        let value : TerminationInfo = ({code: code_result, want: undefined} as TerminationInfo)
         return value
     }
     readCallback_TerminationInfo_Void(isSync: boolean = false): ((parameter: TerminationInfo) => void) {

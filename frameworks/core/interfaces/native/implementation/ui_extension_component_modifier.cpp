@@ -18,7 +18,7 @@
 #include "arkoala_api_generated.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
-#include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_model_adapter.h"
 #include "core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 #include "want.h"
 #endif //WINDOW_SCENE_SUPPORTED
@@ -78,19 +78,17 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
-    // auto frameNode = UIExtensionModelNG::CreateFrameNode(id);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return {};
+    auto frameNode = NG::UIExtensionAdapter::CreateFrameNode(id);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 #else
     return {};
 #endif //WINDOW_SCENE_SUPPORTED
 }
 } // UIExtensionComponentModifier
 namespace UIExtensionComponentInterfaceModifier {
-void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
-                                        const Ark_Want* want,
-                                        const Opt_UIExtensionOptions* options)
+void SetUIExtensionComponentOptionsImpl(
+    Ark_NativePointer node, const Ark_Want* want, const Opt_UIExtensionOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -119,8 +117,8 @@ void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
 }
 } // UIExtensionComponentInterfaceModifier
 namespace UIExtensionComponentAttributeModifier {
-void OnRemoteReadyImpl(Ark_NativePointer node,
-                       const Callback_UIExtensionProxy_Void* value)
+void OnRemoteReadyImpl(
+    Ark_NativePointer node, const Callback_UIExtensionProxy_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -136,19 +134,19 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
             uiExtensionProxyPeerPtr->SetProxy(proxy);
             arkCallback.Invoke(peer);
         };
-    // UIExtensionModelNG::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
+    NG::UIExtensionAdapter::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OnReceiveImpl(Ark_NativePointer node,
-                   const Ark_ReceiveCallback* value)
+void OnReceiveImpl(
+    Ark_NativePointer node, const Ark_ReceiveCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     LOGE("UIExtensionComponentInterfaceModifier::OnReceiveImpl - is not supported");
 }
-void OnResultImpl(Ark_NativePointer node,
-                  const Callback_Literal_Number_code_Want_want_Void* value)
+void OnResultImpl(
+    Ark_NativePointer node, const Callback_Literal_Number_code_Want_want_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -188,8 +186,8 @@ void OnResultImpl(Ark_NativePointer node,
     // UIExtensionModelNG::SetOnResult(frameNode, std::move(onResult));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OnReleaseImpl(Ark_NativePointer node,
-                   const Callback_Number_Void* value)
+void OnReleaseImpl(
+    Ark_NativePointer node, const Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -203,8 +201,8 @@ void OnReleaseImpl(Ark_NativePointer node,
     // UIExtensionModelNG::SetOnRelease(frameNode, std::move(onRelease));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OnErrorImpl(Ark_NativePointer node,
-                 const ErrorCallback* value)
+void OnErrorImpl(
+    Ark_NativePointer node, const ErrorCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -226,8 +224,8 @@ void OnErrorImpl(Ark_NativePointer node,
     // UIExtensionModelNG::SetOnError(frameNode, std::move(onError));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OnTerminatedImpl(Ark_NativePointer node,
-                      const Callback_TerminationInfo_Void* value)
+void OnTerminatedImpl(
+    Ark_NativePointer node, const Callback_TerminationInfo_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -13,19 +13,15 @@
  * limitations under the License.
  */
 
-export const ArkUIAniModule: any = undefined
-export const ArkUIAniUiextensionModal: any = undefined
-export const ArkUIAniUiextensionProxyModal: any = undefined
-export type AbilityWant = undefined
-export class ArkUIAniUIExtensionOptions {
-    constructor() {
-        this.isTransferringCaller = false;
-        this.dpiFollowStrategy = 0;
+import { KLong, KInt, InteropNativeModule } from "@koalaui/interop"
+export class ArkUIAniUiextensionLoadLibraryHelp {
+    static hasLoadLibrary: boolean = false;
+    public static LoadLibrary(): void {
+        if (ArkUIAniUiextensionLoadLibraryHelp.hasLoadLibrary) {
+            return;
+        }
+
+        loadLibrary("arkuiuiextension_ani")
+        ArkUIAniUiextensionLoadLibraryHelp.hasLoadLibrary = true;
     }
-
-    isTransferringCaller: boolean;
-    dpiFollowStrategy: any;
 }
-
-export type ResultCallback = any
-export type BusinessError = any
