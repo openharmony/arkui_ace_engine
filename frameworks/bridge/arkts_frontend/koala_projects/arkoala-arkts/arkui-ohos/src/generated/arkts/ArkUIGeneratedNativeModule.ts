@@ -14,7 +14,7 @@
  */
 
 import { KInt, KLong, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer, NativeBuffer, KSerializerBuffer, loadNativeModuleLibrary } from "@koalaui/interop"
-import { int32, float32 } from "@koalaui/common"
+import { int32, int64, float32 } from "@koalaui/common"
 import { Length } from "../../component/units"
 
 export class ArkUIGeneratedNativeModule {
@@ -5517,4 +5517,6 @@ export class ArkUIGeneratedNativeModule {
     native static _GlobalScope_cursorControl_restoreDefault(): void
     @ani.unsafe.Quick
     native static _GlobalScope_focusControl_requestFocus(value: KStringPtr): boolean
+    @ani.unsafe.Quick
+    native static _UIStateGet(value: KPointer): int64
 }

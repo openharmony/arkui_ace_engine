@@ -14,7 +14,7 @@
  */
 
 import { KInt, KLong, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer } from "@koalaui/interop"
-import { int32, float32 } from "@koalaui/common"
+import { int32, int64, float32 } from "@koalaui/common"
 import { Length } from "./ArkUnitsInterfaces"
 
 export class ArkUIGeneratedNativeModuleEmpty {

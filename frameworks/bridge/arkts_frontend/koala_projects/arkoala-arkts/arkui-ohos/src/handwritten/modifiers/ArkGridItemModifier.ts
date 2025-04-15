@@ -142,14 +142,14 @@ export class ArkGridItemAttributeSet extends ArkCommonAttributeSet /* implements
 }
 
 export class GridItemModifier extends ArkGridItemAttributeSet implements AttributeModifier<GridItemAttribute> {
-    /** @memo */
+   
     applyNormalAttribute(instance: GridItemAttribute){}
-     /** @memo */
+    
     applyPressedAttribute(instance: GridItemAttribute){}
-     /** @memo */
+    
     applyFocusedAttribute(instance: GridItemAttribute){}
-     /** @memo */
+    
     applyDisabledAttribute(instance: GridItemAttribute){}
-     /** @memo */
+   
     applySelectedAttribute(instance: GridItemAttribute){}
 }
