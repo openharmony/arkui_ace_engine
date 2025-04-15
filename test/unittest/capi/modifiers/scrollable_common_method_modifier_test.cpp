@@ -42,7 +42,7 @@ const auto ATTRIBUTE_BACK_TO_TOP_NAME = "backToTop";
 const auto ATTRIBUTE_BACK_TO_TOP_DEFAULT_VALUE = "false";
 #ifdef SUPPORT_DIGITAL_CROWN
 const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE = "1";
-const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME = "digitalCrownSensitivity";
+const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME = "digitCrownSensitivity";
 #endif
 static const std::string EXPECTED_TRUE("true");
 static const std::string EXPECTED_FALSE("false");
@@ -388,6 +388,8 @@ std::vector<std::tuple<std::string, Opt_CrownSensitivity, std::string>> testFixt
         ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE },
     { "Ark_Empty", Converter::ArkValue<Opt_CrownSensitivity>(static_cast<Ark_CrownSensitivity>(INT_MAX)),
         ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE },
+    { "CrownSensitivity.MEDIUM", Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_MEDIUM),
+        "1" },
 };
 /*
  * @tc.name: setDigitalCrownSensitivityDefaultValuesTest
