@@ -59,12 +59,6 @@ void IndicatorController::SetIndicatorPattern(const RefPtr<IndicatorPattern>& in
 
 void IndicatorController::SetSwiperNode(const RefPtr<FrameNode>& swiperNode)
 {
-    // The last bound swiper node needs to reset the bound indicator node.
-    if (swiperNode_.Upgrade() && swiperNode != swiperNode_) {
-        auto lastPattern = swiperNode_.Upgrade()->GetPattern<SwiperPattern>();
-        CHECK_NULL_VOID(lastPattern);
-        lastPattern->ResetIndicatorNode();
-    }
     swiperNode_ = swiperNode;
     if (indicatorPattern_.Upgrade() && swiperNode) {
         auto indicatorNode = indicatorPattern_.Upgrade()->GetHost();
@@ -89,5 +83,25 @@ void IndicatorController::ResetIndicatorControllor(
     auto lastSwiperNode = indicatorPattern->GetBindSwiperNode();
     controller->SetSwiperNode(lastSwiperNode);
     indicatorPattern->ResetJSIndicatorController();
+}
+
+void IndicatorController::UpdateIndicatorNode()
+{
+    auto indicatorPattern = indicatorPattern_.Upgrade();
+    CHECK_NULL_VOID(indicatorPattern);
+    auto dotIndicatorModifier = indicatorPattern->GetDotIndicatorModifier();
+    if (dotIndicatorModifier) {
+        dotIndicatorModifier->StopAnimation();
+    }
+    auto indicatorNode = indicatorPattern->GetHost();
+    CHECK_NULL_VOID(indicatorNode);
+    indicatorNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> IndicatorController::GetIndicatorNode()
+{
+    auto indicatorPattern = indicatorPattern_.Upgrade();
+    CHECK_NULL_RETURN(indicatorPattern, nullptr);
+    return indicatorPattern->GetHost();
 }
 } // namespace OHOS::Ace::NG
