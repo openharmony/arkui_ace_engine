@@ -141,6 +141,10 @@ void ConnectServerManager::InitConnectServer()
     StartServer startServer = reinterpret_cast<StartServer>(&ArkCompiler::Toolchain::StartServer);
 #endif // IOS_PLATFORM
     startServer(packageName_);
+    if (!g_setDebugModeCallBack) {
+        LOGE("g_setDebugModeCallBack = NULL");
+        return;
+    }
     g_setDebugModeCallBack([]() {
         AceApplicationInfo::GetInstance().SetNeedDebugBreakPoint(false);
     });
