@@ -1997,6 +1997,7 @@ void DatePickerDialogView::UpdateButtonDefaultFocus(
 RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<void()>& switchEvent,
     const RefPtr<FrameNode>& dateNode, const std::vector<ButtonInfo>& buttonInfos, const RefPtr<FrameNode>& contentRow)
 {
+    CHECK_NULL_RETURN(dateNode, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
@@ -2009,6 +2010,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
     CHECK_NULL_RETURN(textNextPrevNode, nullptr);
     auto textLayoutProperty = textNextPrevNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(datePickerPattern, nullptr);
+    datePickerPattern->SetNextPrevButtonNode(nextPrevButtonNode);
     textLayoutProperty->UpdateContent(GetDialogAgingButtonText(true));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textLayoutProperty->UpdateFontSize(
@@ -2073,6 +2077,8 @@ std::function<void(const GestureEvent&)> DatePickerDialogView::CreateNextPrevCli
         CHECK_NULL_VOID(nextPrevButtonNode);
         auto dialogTheme = dialogThemeWeak.Upgrade();
         CHECK_NULL_VOID(dialogTheme);
+        auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+        CHECK_NULL_VOID(datePickerPattern);
         auto buttonNextPrevLayoutProperty
                                 = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
         if (!switchFlag_ && isShowTime_) {
@@ -2086,6 +2092,7 @@ std::function<void(const GestureEvent&)> DatePickerDialogView::CreateNextPrevCli
             }
             UpdateCancelButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
             textLayoutProperty->UpdateContent(GetDialogAgingButtonText(false));
+            datePickerPattern->SetIsNext(false);
         } else {
             if (!isShowTime_) {
                 ShowContentRowButton(contentRow, true);

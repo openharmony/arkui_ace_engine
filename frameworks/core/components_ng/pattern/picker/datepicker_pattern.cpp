@@ -446,11 +446,11 @@ void DatePickerPattern::InitDisabled()
 }
 
 void DatePickerPattern::UpdateButtonMargin(
-    const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmNode)
+    const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmOrNextNode)
 {
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    isRtl = isConfirmNode ? isRtl : !isRtl;
+    isRtl = isConfirmOrNextNode ? isRtl : !isRtl;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
     } else {
@@ -517,6 +517,27 @@ void DatePickerPattern::UpdateDateOrder()
     SetDateOrder(dateOrder);
 }
 
+void DatePickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext)
+{
+    CHECK_NULL_VOID(buttonNode);
+    auto updateNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    CHECK_NULL_VOID(updateNode);
+    auto updateNodeLayout = updateNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(updateNodeLayout);
+
+    auto pipeline = updateNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    std::string lettersStr = isNext ? pickerTheme->GetNextText() : pickerTheme->GetPrevText();
+    updateNodeLayout->UpdateContent(lettersStr);
+
+    UpdateButtonMargin(buttonNode, dialogTheme, isNext);
+    updateNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void DatePickerPattern::OnLanguageConfigurationUpdate()
 {
     auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
@@ -527,6 +548,9 @@ void DatePickerPattern::OnLanguageConfigurationUpdate()
 
     UpdateLunarSwitch();
     UpdateDateOrder();
+
+    auto nextPrevButton = nextPrevButtonNode_.Upgrade();
+    UpdateDialogAgingButton(nextPrevButton, isNext_);
 }
 
 void DatePickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify)

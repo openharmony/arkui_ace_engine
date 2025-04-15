@@ -1827,11 +1827,11 @@ HWTEST_F(TextPickerPatternTestNg, LinearFontSize002, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateConfirmButtonMargin001
- * @tc.desc: Test TextPickerPattern UpdateConfirmButtonMargin
+ * @tc.name: UpdateButtonMargin001
+ * @tc.desc: Test TextPickerPattern UpdateButtonMargin
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerPatternTestNg, UpdateConfirmButtonMargin001, TestSize.Level1)
+HWTEST_F(TextPickerPatternTestNg, UpdateButtonMargin001, TestSize.Level1)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -1851,26 +1851,26 @@ HWTEST_F(TextPickerPatternTestNg, UpdateConfirmButtonMargin001, TestSize.Level1)
     ASSERT_NE(textPickerPattern_, nullptr);
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    textPickerPattern_->UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
+    textPickerPattern_->UpdateButtonMargin(buttonConfirmNode, dialogTheme, true);
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right, CalcLength(0.0_vp));
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
-    textPickerPattern_->UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
+    textPickerPattern_->UpdateButtonMargin(buttonConfirmNode, dialogTheme, true);
     EXPECT_EQ(layoutProperty->GetMarginProperty()->left, CalcLength(0.0_vp));
 
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    textPickerPattern_->UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
+    textPickerPattern_->UpdateButtonMargin(buttonConfirmNode, dialogTheme, true);
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right, CalcLength(0.0_vp));
 }
 
 /**
- * @tc.name: UpdateCancelButtonMargin001
- * @tc.desc: Test TextPickerPattern UpdateCancelButtonMargin
+ * @tc.name: UpdateButtonMargin002
+ * @tc.desc: Test TextPickerPattern UpdateButtonMargin
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerPatternTestNg, UpdateCancelButtonMargin001, TestSize.Level1)
+HWTEST_F(TextPickerPatternTestNg, UpdateButtonMargin002, TestSize.Level1)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -1890,17 +1890,17 @@ HWTEST_F(TextPickerPatternTestNg, UpdateCancelButtonMargin001, TestSize.Level1)
     ASSERT_NE(textPickerPattern_, nullptr);
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    textPickerPattern_->UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
+    textPickerPattern_->UpdateButtonMargin(buttonCancelNode, dialogTheme, false);
     EXPECT_EQ(layoutProperty->GetMarginProperty()->left, CalcLength(0.0_vp));
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
-    textPickerPattern_->UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
+    textPickerPattern_->UpdateButtonMargin(buttonCancelNode, dialogTheme, false);
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right, CalcLength(0.0_vp));
 
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    textPickerPattern_->UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
+    textPickerPattern_->UpdateButtonMargin(buttonCancelNode, dialogTheme, false);
     EXPECT_EQ(layoutProperty->GetMarginProperty()->left, CalcLength(0.0_vp));
 }
 
