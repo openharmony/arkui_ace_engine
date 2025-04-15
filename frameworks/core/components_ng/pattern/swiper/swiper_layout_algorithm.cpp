@@ -807,7 +807,7 @@ void SwiperLayoutAlgorithm::SetInactiveOnForward(LayoutWrapper* layoutWrapper)
     for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
         auto endPos = pos->second.endPos;
         auto index = pos->first;
-        if (swipeByGroup_) {
+        if (swipeByGroup_ && targetIndex_.has_value()) {
             auto endPageIndex = SwiperUtils::ComputePageEndIndex(index, displayCount);
             auto iter = itemPosition_.find(endPageIndex);
             if (iter != itemPosition_.end()) {
