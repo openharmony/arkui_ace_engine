@@ -320,7 +320,10 @@ namespace Converter {
     template<>
     inline ImageSourceInfo Convert(const Ark_String& value)
     {
-        return ImageSourceInfo(value.chars);
+        if (value.chars != nullptr) {
+            return ImageSourceInfo(value.chars);
+        }
+        return ImageSourceInfo("");
     }
 
     template<>
