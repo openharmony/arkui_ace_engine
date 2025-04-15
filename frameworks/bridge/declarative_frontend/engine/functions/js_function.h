@@ -56,7 +56,7 @@ public:
         return ExecuteJS(0, nullptr);
     }
     // Empty realization in JsFunctionBase
-    virtual JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv)
+    virtual JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv, bool isAnimation = false)
     {
         JSRef<JSObject> eventInfo = JSRef<JSObject>::New();
         return JSRef<JSVal>::Cast(eventInfo);
@@ -90,7 +90,7 @@ public:
     {
         return ExecuteJS(0, nullptr);
     }
-    JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv) override;
+    JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv, bool isAnimation = false) override;
 
 protected:
     JSRef<JSFunc> jsFunction_;
@@ -116,7 +116,7 @@ public:
     {
         return ExecuteJS(0, nullptr);
     }
-    JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv) override;
+    JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv, bool isAnimation = false) override;
 
 protected:
     JSWeak<JSFunc> jsWeakFunction_;
