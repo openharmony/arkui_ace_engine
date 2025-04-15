@@ -341,6 +341,35 @@ void CalendarPickerModelNG::SetTextStyle(FrameNode* frameNode, const PickerTextS
         CalendarPickerLayoutProperty, Weight, textStyle.fontWeight.value_or(FontWeight::NORMAL), frameNode);
 }
 
+void CalendarPickerModelNG::SetTextStyle(FrameNode* frameNode, const std::optional<PickerTextStyle>& textStyle)
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(calendarTheme);
+    if (textStyle.has_value())
+    {
+        auto style = textStyle.value();
+        if (style.fontSize.has_value() && style.fontSize->IsValid()) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, FontSize, style.fontSize.value(), frameNode);
+        } else {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                CalendarPickerLayoutProperty, FontSize, calendarTheme->GetEntryFontSize(), frameNode);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, Color,
+            style.textColor.value_or(calendarTheme->GetEntryFontColor()), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            CalendarPickerLayoutProperty, Weight, style.fontWeight.value_or(FontWeight::NORMAL), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, FontSize,
+            calendarTheme->GetEntryFontSize(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, Color,
+            calendarTheme->GetEntryFontColor(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, Weight,
+            FontWeight::NORMAL, frameNode);
+    }
+}
+
 void CalendarPickerModelNG::ClearBorderColor()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

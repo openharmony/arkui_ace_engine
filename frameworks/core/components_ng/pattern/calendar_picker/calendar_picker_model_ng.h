@@ -42,6 +42,7 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<FrameNode> CreateEmptyFrameNode(int32_t nodeId);
     static void SetTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyle);
+    static void SetTextStyle(FrameNode* frameNode, const std::optional<PickerTextStyle>& textStyle);
     static void SetEdgeAlign(FrameNode* frameNode, const std::optional<CalendarEdgeAlign>& alignType,
         const std::optional<DimensionOffset>& offset);
     static void SetPadding(FrameNode* frameNode, const PaddingProperty& padding);
