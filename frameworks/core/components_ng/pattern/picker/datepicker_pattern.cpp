@@ -494,11 +494,16 @@ void DatePickerPattern::UpdateLunarSwitch()
 {
     auto lunarSwitchNode = weakLunarSwitchText_.Upgrade();
     CHECK_NULL_VOID(lunarSwitchNode);
+    auto context = lunarSwitchNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
 
     auto lunarSwitchTextLayoutProperty = lunarSwitchNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(lunarSwitchTextLayoutProperty);
     lunarSwitchTextLayoutProperty->UpdateContent(
         Localization::GetInstance()->GetEntryLetters("datepicker.lunarSwitch"));
+    lunarSwitchTextLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
     lunarSwitchNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -618,6 +623,7 @@ void DatePickerPattern::OnColorConfigurationUpdate()
         titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     }
     UpdateTitleTextColor(buttonTitleNode, pickerTheme);
+    UpdateLunarSwitch();
     OnModifyDone();
 }
 
