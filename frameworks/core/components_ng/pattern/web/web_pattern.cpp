@@ -5486,6 +5486,7 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
 
     isVisible_ = isVisible;
     if (!isVisible_) {
+        OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
         CloseSelectOverlay();
         SelectCancel();
         DestroyAnalyzerOverlay();
