@@ -238,16 +238,24 @@ int32_t UIDisplaySyncManager::GetAnimatorRate()
         return INVALID_ANIMATOR_EXPECTED_RATE;
     }
 
+    bool existAnimatorNoExpectdRate = false;
     IdToDisplaySyncMap backupedMap(uiDisplaySyncMap_);
     for (const auto& [Id, weakDisplaySync] : backupedMap) {
         auto displaySync = weakDisplaySync.Upgrade();
         if (displaySync) {
-            maxAnimatorRateHap_.push(displaySync->GetAnimatorExpectedRate());
+            if (displaySync->GetAnimatorExpectedRate() == 0) {
+                existAnimatorNoExpectdRate = true;
+            } else {
+                maxAnimatorRateHap_.push(displaySync->GetAnimatorExpectedRate());
+            }
         } else {
             uiDisplaySyncMap_.erase(Id);
         }
     }
-    
+
+    if (existAnimatorNoExpectdRate) {
+        return 0;
+    }
     if (maxAnimatorRateHap_.empty()) {
         return INVALID_ANIMATOR_EXPECTED_RATE;
     }
