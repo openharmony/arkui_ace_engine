@@ -17,7 +17,8 @@
 
 #include <dirent.h>
 
-#include "frameworks/base/utils/utils.h"
+#include "base/utils/utils.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"

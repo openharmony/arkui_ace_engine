@@ -27,6 +27,7 @@
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/common/frontend.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components/picker/picker_theme.h"

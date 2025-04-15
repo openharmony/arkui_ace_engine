@@ -16,6 +16,7 @@
 #include "core/components_ng/manager/focus/focus_manager.h"
 
 #include "base/log/dump_log.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components/theme/app_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

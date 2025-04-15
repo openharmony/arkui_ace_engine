@@ -15,6 +15,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
 
 #include "base/image/pixel_map.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"

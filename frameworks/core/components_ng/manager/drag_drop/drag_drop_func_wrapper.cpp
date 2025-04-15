@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
+#include "base/subwindow/subwindow_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"

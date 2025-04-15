@@ -17,6 +17,7 @@
 
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "core/components/toast/toast_component.h"

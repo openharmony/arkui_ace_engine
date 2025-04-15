@@ -18,7 +18,7 @@
 #include "test/mock/base/mock_subwindow.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_interaction_interface.h"
-
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"

@@ -35,6 +35,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/subwindow/subwindow.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"

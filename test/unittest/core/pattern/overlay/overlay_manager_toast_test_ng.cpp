@@ -35,6 +35,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "base/window/foldable_window.h"
 #include "core/common/ace_engine.h"

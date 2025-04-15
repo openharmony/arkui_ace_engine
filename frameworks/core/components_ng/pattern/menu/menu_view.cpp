@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"

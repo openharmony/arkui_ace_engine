@@ -23,6 +23,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/referenced.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/button/button_pattern.h"

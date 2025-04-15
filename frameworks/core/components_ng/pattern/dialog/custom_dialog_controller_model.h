@@ -21,6 +21,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 namespace OHOS::Ace {
+struct DialogProperties;
 enum class DialogOperation {
     DIALOG_OPEN = 0,
     DIALOG_CLOSE,
