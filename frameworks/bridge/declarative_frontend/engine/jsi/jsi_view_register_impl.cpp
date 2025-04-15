@@ -617,10 +617,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "DatePickerDialog", JSDatePickerDialog::JSBind },
     { "PageTransitionEnter", JSPageTransition::JSBind },
     { "PageTransitionExit", JSPageTransition::JSBind },
-#ifndef ARKUI_WEARABLE
     { "RowSplit", JSRowSplit::JSBind },
     { "ColumnSplit", JSColumnSplit::JSBind },
-#endif
     { "AlphabetIndexer", JSIndexer::JSBind },
     { "Hyperlink", JSHyperlink::JSBind },
     { "Radio", JSRadio::JSBind },
