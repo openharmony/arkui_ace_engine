@@ -110,6 +110,8 @@ extern std::vector<std::tuple<std::string, Ark_FillMode>> testFixtureEnumFillMod
 extern std::vector<std::tuple<std::string, Ark_FinishCallbackType, std::string>>
     testFixtureEnumFinishCallbackTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_FinishCallbackType>> testFixtureEnumFinishCallbackTypeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_FlexAlign, std::string>> testFixtureEnumFlexAlignValidValues;
+extern std::vector<std::tuple<std::string, Ark_FlexAlign>> testFixtureEnumFlexAlignInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_FlexDirection, std::string>> testFixtureEnumFlexDirectionValidValues;
 extern std::vector<std::tuple<std::string, Ark_FlexDirection>> testFixtureEnumFlexDirectionInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_FocusDrawLevel, std::string>> testFixtureEnumFocusDrawLevelValidValues;

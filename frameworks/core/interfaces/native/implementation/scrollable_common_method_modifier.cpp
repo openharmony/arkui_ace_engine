@@ -243,11 +243,16 @@ void ClipContentImpl(Ark_NativePointer node,
             // mode cannot be nullopt, because in model created pair for lauout property
             ScrollableModelNG::SetContentClip(frameNode, mode.value_or(ContentClipMode::DEFAULT), nullptr);
         },
-        [](const auto& value) {
-            LOGE("ScrollableCommonMethodModifier::ClipContentImpl set RectShape is not supported");
+        [frameNode](const Ark_RectShape& value) {
+            if (value && value->shape) {
+                ScrollableModelNG::SetContentClip(frameNode, ContentClipMode::CUSTOM, value->shape);
+            } else {
+                ScrollableModelNG::SetContentClip(frameNode, ContentClipMode::DEFAULT, nullptr);
+            }
         },
-        []() {}
-    );
+        [frameNode]() {
+            ScrollableModelNG::SetContentClip(frameNode, ContentClipMode::DEFAULT, nullptr);
+        });
 }
 void DigitalCrownSensitivityImpl(Ark_NativePointer node,
                                  const Opt_CrownSensitivity* value)

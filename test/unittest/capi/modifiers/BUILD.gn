@@ -114,6 +114,7 @@ ace_unittest("capi_all_modifiers_test") {
     "scroll_bar_modifier_test.cpp",
     "scroll_modifier_test.cpp",
     "scrollable_common_method_modifier_test.cpp",
+    "scrollable_common_method_modifier_test_2.cpp",
     "search_modifier_callbacks_test.cpp",
     "search_modifier_resources_test.cpp",
     "search_modifier_test.cpp",
