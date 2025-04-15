@@ -159,6 +159,14 @@ BorderRadiusProperty Convert(const Ark_RichEditorLayoutStyle& src)
 }
 
 template<>
+MarginProperty Convert(const Ark_RichEditorLayoutStyle& src)
+{
+    MarginProperty ret;
+    auto margins = Converter::OptConvert<PaddingProperty>(src.margin);
+    return margins.value_or(ret);
+}
+
+template<>
 ImageSpanAttribute Convert(const Ark_RichEditorImageSpanStyle& src)
 {
     ImageSpanAttribute ret;
@@ -166,6 +174,7 @@ ImageSpanAttribute Convert(const Ark_RichEditorImageSpanStyle& src)
     ret.verticalAlign = Converter::OptConvert<VerticalAlign>(src.verticalAlign);
     ret.objectFit = Converter::OptConvert<ImageFit>(src.objectFit);
     ret.borderRadius = Converter::OptConvert<BorderRadiusProperty>(src.layoutStyle);
+    ret.marginProp = Converter::OptConvert<MarginProperty>(src.layoutStyle);
     return ret;
 }
 
