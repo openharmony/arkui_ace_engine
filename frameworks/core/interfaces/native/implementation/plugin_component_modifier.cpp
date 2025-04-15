@@ -36,7 +36,7 @@ namespace Converter {
     {
         PluginComponentOptions opt;
         opt.requestPluginInfo = OptConvert<RequestPluginInfo>(options.template_);
-        LOGE("PluginComponentModifier::Convert cannot convert data. data is Ark_CustomObject!");
+        opt.data = Convert<std::string>(options.data);
         return opt;
     }
     template<>
@@ -76,7 +76,7 @@ void SetPluginComponentOptionsImpl(Ark_NativePointer node,
 
     auto optInfoData = Converter::OptConvert<PluginComponentOptions>(*options);
     PluginModelNG::SetRequestPluginInfo(frameNode, optInfoData ? optInfoData->requestPluginInfo : std::nullopt);
-    LOGE("PluginComponentModifier::SetPluginComponentOptionsImpl setData into model isn't supported");
+    PluginModelNG::SetData(frameNode, optInfoData ? optInfoData->data : "");
 #endif
 }
 } // PluginComponentInterfaceModifier
