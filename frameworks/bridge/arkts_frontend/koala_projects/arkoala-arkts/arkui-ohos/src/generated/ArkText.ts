@@ -44,8 +44,24 @@ import { Callback_String_Void } from "./../component/gridRow"
 import { TextDataDetectorConfig, EditMenuOptions, FontSettingOptions } from "./../component/textCommon"
 import { Callback_Number_Number_Void } from "./../component/grid"
 import { SelectionMenuOptions } from "./../component/richEditor"
+import { AttributeUpdater } from "../ohos.arkui.modifier"
+import { ArkTextNode } from "../handwritten/modifiers/ArkTextNode"
+import { ArkTextAttributeSet } from "../handwritten/modifiers/ArkTextModifier"
+import { applyUIAttributes } from "../handwritten/modifiers/ArkCommonModifier"
+import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 /** @memo:stable */
 export class ArkTextComponent extends ArkCommonMethodComponent implements TextAttribute {
+    // protected _modifierHost: ArkTextNode | undefined
+    setModifierHost(value: ArkTextNode): void {
+        this._modifierHost = value
+    }
+    getModifierHost(): ArkTextNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkTextNode()
+            this._modifierHost!.setPeer(this.getPeer())
+        }
+        return this._modifierHost as ArkTextNode
+    }
     getPeer(): ArkTextPeer {
         return (this.peer as ArkTextPeer)
     }
@@ -452,6 +468,45 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
             this.getPeer()?.bindSelectionMenuAttribute(spanType_casted, content_casted, responseType_casted, options_casted)
             return this
         }
+        return this
+    }
+    attributeModifier(modifier: AttributeModifier<TextAttribute>): this {
+        let peerNode = this.getPeer()
+        if (!peerNode._attributeSet) {
+            peerNode._attributeSet = new ArkTextAttributeSet()
+        }
+        applyUIAttributes(modifier, peerNode);
+        let isAttributeUpdater: boolean = (modifier instanceof AttributeUpdater);
+        if (isAttributeUpdater) {
+            let attributeUpdater = modifier as AttributeUpdater<TextAttribute, (...params:Object[]) => TextAttribute>
+            attributeUpdater.initializeModifier(peerNode._attributeSet as object as TextAttribute);
+            attributeUpdater.attribute = this.getModifierHost() as TextAttribute
+            let modifierHost = attributeUpdater.attribute
+            attributeUpdater.updateConstructorParams = (...params:Object[]) : TextAttribute => {
+                if (params.length > 2) {
+                    throw new Error('more than 2 parameters')
+                }
+                let content_casted : string | Resource | undefined = undefined
+                let value_casted : TextOptions | undefined = undefined
+                if (params.length >= 1) {
+                    const param0_type = runtimeType(params[0])
+                    if (RuntimeType.STRING == param0_type) {
+                        content_casted = params[0] as string
+                    } else if (RuntimeType.OBJECT == param0_type) {
+                        content_casted = params[0] as Resource
+                    }
+                }
+                if (params.length == 2) {
+                    const param1_type = runtimeType(params[1])
+                    if (RuntimeType.OBJECT == param1_type) {
+                        value_casted = params[1] as TextOptions
+                    }
+                }
+                peerNode.setTextOptionsAttribute(content_casted, value_casted)
+                return modifierHost
+            };
+        }
+        peerNode._attributeSet!.applyModifierPatch(peerNode);
         return this
     }
     public applyAttributesFinish(): void {

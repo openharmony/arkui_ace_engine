@@ -244,7 +244,7 @@ class SizeModifier extends ModifierWithKey<SizeOptions> {
    constructor(value: SizeOptions) {
        super(value);
    }
-   static identity: string = 'height';
+   static identity: string = 'size';
    applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
        if (reset) {
            // commomPeerNode.resetWidthAttribute();

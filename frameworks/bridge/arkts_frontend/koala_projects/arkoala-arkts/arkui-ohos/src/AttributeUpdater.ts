@@ -15,7 +15,7 @@
 
 import { AttributeModifier } from "./";
 import { InteropNativeModule } from "@koalaui/interop"
-export type Initializer<T> = () => T;
+export type Initializer<T> = (...params:Object[]) => T;
 
 export class AttributeUpdater<T, C = Initializer<T>> implements AttributeModifier<T> {
 
@@ -38,12 +38,18 @@ export class AttributeUpdater<T, C = Initializer<T>> implements AttributeModifie
     initializeModifier(instance: T): void {
     }
     private value: T | undefined = undefined;
-    public updateConstructorParams: C | undefined = undefined;
+    private constructorParams: C | undefined = undefined;
     
     public set attribute(value: T) {
         this.value = value
     }
     public get attribute(): T {
         return this.value!
+    }
+    public get updateConstructorParams(): C {
+        return this.constructorParams!
+    }
+    public set updateConstructorParams(constructorParams: C) {
+        this.constructorParams = constructorParams
     }
 }

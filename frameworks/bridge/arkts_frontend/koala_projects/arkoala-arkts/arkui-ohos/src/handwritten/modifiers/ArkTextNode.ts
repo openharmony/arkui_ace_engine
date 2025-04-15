@@ -16,8 +16,64 @@
 import { TextAttribute, TextAlign } from "../../generated";
 import { ArkTextPeer } from "../../generated/peers/ArkTextPeer";
 import { ArkBaseNode } from "./ArkBaseNode";
+import { Resource } from "global/resource";
+import { Length, ResourceColor } from "./../../component/units";
+import { FontWeight } from "./../../component/enums";
+import { CopyOptions, CustomBuilder, DecorationStyleInterface, EditMenuOptions, EllipsisMode,
+    Font, FontSettingOptions, FontStyle, LengthMetrics, LineBreakStrategy, SelectionMenuOptions, ShadowOptions,
+    TextCase, TextDataDetectorConfig, TextHeightAdaptivePolicy, TextOptions, TextOverflowOptions, TextResponseType,
+    TextSelectableMode, TextSpanType, WordBreak } from "../../";
 
-export class ArkTextNode extends ArkBaseNode /* implements TextAttribute */ {
+/** @memo:stable */
+export class ArkTextNode extends ArkBaseNode implements TextAttribute {
+    getPeer() : ArkTextPeer {
+        return this.peer as ArkTextPeer
+    }
+    /** @memo */
+    setTextOptions(content?: string | Resource, value?: TextOptions) : this {
+        return this;
+    }
+    /** @memo */
+    font(fontValue: Font, options?: FontSettingOptions): this {
+        return this;
+    }
+    /** @memo */
+    fontColor(value: ResourceColor): this {
+        return this;
+    }
+    /** @memo */
+    fontSize(value: number | string | Resource): this {
+        return this;
+    }
+    /** @memo */
+    minFontSize(value: number | string | Resource): this {
+        return this;
+    }
+    /** @memo */
+    maxFontSize(value: number | string | Resource): this {
+        return this;
+    }
+    /** @memo */
+    minFontScale(value: number | Resource): this {
+        return this;
+    }
+    /** @memo */
+    maxFontScale(value: number | Resource): this {
+        return this;
+    }
+    /** @memo */
+    fontStyle(value: FontStyle): this {
+        return this;
+    }
+    /** @memo */
+    fontWeight(weight: number | FontWeight | string, options?: FontSettingOptions): this {
+        return this;
+    }
+    /** @memo */
+    lineSpacing(value: LengthMetrics): this {
+        return this;
+    }
+    /** @memo */
     textAlign(value : TextAlign | undefined) : this {
         if (value) {
             this.getPeer().textAlignAttribute(value);
@@ -26,7 +82,124 @@ export class ArkTextNode extends ArkBaseNode /* implements TextAttribute */ {
         }
         return this;
     }
-    getPeer() : ArkTextPeer {
-        return this.peer as ArkTextPeer
+    /** @memo */
+    lineHeight(value: number | string | Resource): this {
+        return this;
+    }
+    /** @memo */
+    textOverflow(value: TextOverflowOptions): this {
+        return this;
+    }
+    /** @memo */
+    fontFamily(value: string | Resource): this {
+        return this;
+    }
+    /** @memo */
+    maxLines(value: number): this {
+        return this;
+    }
+    /** @memo */
+    decoration(value: DecorationStyleInterface): this {
+        return this;
+    }
+    /** @memo */
+    letterSpacing(value: number | string): this {
+        return this;
+    }
+    /** @memo */
+    textCase(value: TextCase): this {
+        return this;
+    }
+    /** @memo */
+    baselineOffset(value: number | string): this {
+        return this;
+    }
+    /** @memo */
+    copyOption(value: CopyOptions): this {
+        return this;
+    }
+    /** @memo */
+    draggable(value: boolean): this {
+        return this;
+    }
+    /** @memo */
+    textShadow(value: ShadowOptions | Array<ShadowOptions>): this {
+        return this;
+    }
+    /** @memo */
+    heightAdaptivePolicy(value: TextHeightAdaptivePolicy): this {
+        return this;
+    }
+    /** @memo */
+    textIndent(value: Length): this {
+        return this;
+    }
+    /** @memo */
+    wordBreak(value: WordBreak): this {
+        return this;
+    }
+    /** @memo */
+    lineBreakStrategy(value: LineBreakStrategy): this {
+        return this;
+    }
+    /** @memo */
+    onCopy(value: ((breakpoints: string) => void)): this {
+        return this;
+    }
+    /** @memo */
+    caretColor(value: ResourceColor): this {
+        return this;
+    }
+    /** @memo */
+    selectedBackgroundColor(value: ResourceColor): this {
+        return this;
+    }
+    /** @memo */
+    ellipsisMode(value: EllipsisMode): this {
+        return this;
+    }
+    /** @memo */
+    enableDataDetector(value: boolean): this {
+        return this;
+    }
+    /** @memo */
+    dataDetectorConfig(value: TextDataDetectorConfig): this {
+        return this;
+    }
+    /** @memo */
+    onTextSelectionChange(value: ((first: number,last: number) => void)): this {
+        return this;
+    }
+    /** @memo */
+    fontFeature(value: string): this {
+        return this;
+    }
+    /** @memo */
+    privacySensitive(value: boolean): this {
+        return this;
+    }
+    /** @memo */
+    textSelectable(value: TextSelectableMode): this {
+        return this;
+    }
+    /** @memo */
+    editMenuOptions(value: EditMenuOptions): this {
+        return this;
+    }
+    /** @memo */
+    halfLeading(value: boolean): this {
+        return this;
+    }
+    /** @memo */
+    enableHapticFeedback(value: boolean): this {
+        return this;
+    }
+    /** @memo */
+    selection(selectionStart: number, selectionEnd: number): this {
+        return this;
+    }
+    /** @memo */
+    bindSelectionMenu(spanType: TextSpanType, content: CustomBuilder, responseType: TextResponseType, options?: SelectionMenuOptions): this {
+        return this;
     }
 }

@@ -19,7 +19,7 @@ export { ColumnModifier } from './handwritten/modifiers/ArkColumnModifier'
 
 export { CommonModifier } from './CommonModifier'
 
-export { TextModifier } from './handwritten/modifiers/ArkTextModifier'
+export { TextModifier } from './TextModifier'
 
 export { SymbolGlyphModifier } from "./handwritten/modifiers/ArkSymbolGlyphModifier"
 
