@@ -4792,6 +4792,7 @@ class ArkComponent {
       property.key = key;
       property.value = value;
       modifierWithKey(this._modifiersWithKeys, CustomPropertyModifier.identity, CustomPropertyModifier, property);
+      getUINativeModule().frameNode.setRemoveCustomProperties(this.nativePtr);
     }
     return this;
   }

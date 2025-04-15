@@ -1640,6 +1640,34 @@ ArkUINativeModuleValue FrameNodeBridge::SetCustomPropertyModiferByKey(ArkUIRunti
     return defaultReturnValue;
 }
 
+ArkUINativeModuleValue FrameNodeBridge::SetRemoveCustomProperties(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    auto nodeId = frameNode->GetId();
+    frameNode->SetRemoveCustomProperties([vm, nodeId]() -> void {
+        CHECK_NULL_VOID(vm);
+        panda::LocalScope scope(vm);
+        auto global = JSNApi::GetGlobalObject(vm);
+        auto removeCustomProperty =
+            global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__removeCustomProperties__"));
+        if (removeCustomProperty->IsUndefined() || !removeCustomProperty->IsFunction(vm)) {
+            return;
+        }
+        auto obj = removeCustomProperty->ToObject(vm);
+        panda::Local<panda::FunctionRef> func = obj;
+        panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, nodeId) };
+        auto function = panda::CopyableGlobal(vm, func);
+        function->Call(vm, function.ToLocal(), params, 1);
+    });
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue FrameNodeBridge::SetMeasuredSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
