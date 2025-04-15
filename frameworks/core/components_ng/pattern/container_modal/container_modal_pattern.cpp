@@ -35,6 +35,7 @@ constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0; // 5.0px
 constexpr double MOVE_POPUP_DISTANCE_X = 40.0;    // 40.0px
 constexpr double MOVE_POPUP_DISTANCE_Y = 20.0;    // 20.0px
 constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
+constexpr int8_t ALPHA_MASK_OPAQUE = -1;
 } // namespace
 
 void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
@@ -622,6 +623,9 @@ void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
     auto gestureRow = GetGestureRow();
     UpdateRowHeight(gestureRow, titleHeight_);
     CallButtonsRectChange();
+    if (titleMgr_ != nullptr) {
+        titleMgr_->UpdateTargetNodesBarMargin();
+    }
 }
 
 int32_t ContainerModalPattern::GetContainerModalTitleHeight()
@@ -808,7 +812,13 @@ void ContainerModalPattern::InitLayoutProperty()
     InitTitleRowLayoutProperty(GetCustomTitleRow(), false);
     InitTitleRowLayoutProperty(GetFloatingTitleRow(), true);
     InitButtonsLayoutProperty();
-
+    if (!IsContainerModalTransparent()) {
+        if (titleMgr_ == nullptr) {
+            auto title = GetCustomTitleRow();
+            titleMgr_ = MakeRefPtr<ContainerModalToolBar>(WeakClaim(this), title, false);
+        }
+        titleMgr_->HasExpandStackLayout();
+    }
     containerModal->MarkModifyDone();
 }
 
@@ -940,6 +950,18 @@ bool ContainerModalPattern::CanShowCustomTitle()
     CHECK_NULL_RETURN(buttonsRow, false);
     auto visibility = buttonsRow->GetLayoutProperty()->GetVisibilityValue(VisibleType::GONE);
     return visibility == VisibleType::VISIBLE;
+}
+
+bool ContainerModalPattern::IsContainerModalTransparent()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
+    auto newActiveColor = theme->GetBackGroundColor(true);
+    auto newInactiveColor = theme->GetBackGroundColor(false);
+    int8_t activeColorAlpha = newActiveColor.GetAlpha();
+    int8_t inactiveColorAlpha = newInactiveColor.GetAlpha();
+    return (activeColorAlpha == ALPHA_MASK_OPAQUE && inactiveColorAlpha == ALPHA_MASK_OPAQUE)? false : true;
 }
 
 void ContainerModalPattern::TrimFloatingWindowLayout()

@@ -767,6 +767,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg054, TestSize.Level1)
      * @tc.steps3: call AddAfterLayoutTask.
      * @tc.expected: The afterLayoutTasks_ size is 1.
      */
+    context_->taskScheduler_->afterRenderTasks_.clear();
     context_->AddAfterRenderTask([]() -> void {});
     EXPECT_EQ(context_->taskScheduler_->afterRenderTasks_.size(), 1);
 }

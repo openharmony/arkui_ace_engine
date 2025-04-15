@@ -116,12 +116,104 @@ public:
     void OnNavigationModifyDone();
     void OnSideBarModifyDone();
 
+    WeakPtr<FrameNode> GetSiderBar()
+    {
+        return siderBar_;
+    }
+
+    void SetSiderBarNode(WeakPtr<FrameNode> node)
+    {
+        siderBar_ = node;
+    }
+
+    void SetNavigationNode(WeakPtr<FrameNode> node)
+    {
+        navigation_ = node;
+    }
+
+    WeakPtr<FrameNode> GetNavigationNode()
+    {
+        return navigation_;
+    }
+
+    WeakPtr<FrameNode> GetSideBarContainerModel()
+    {
+        return sideBarContainerModel_;
+    }
+
+    void SetSideBarContainerModel(WeakPtr<FrameNode> node)
+    {
+        sideBarContainerModel_ = node;
+    }
+
+    WeakPtr<FrameNode> GetSiderBarDivider()
+    {
+        return siderBarDivider_;
+    }
+
+    void SetSiderBarDividerNode(WeakPtr<FrameNode> node)
+    {
+        siderBarDivider_ = node;
+    }
+
+    WeakPtr<FrameNode> GetNavBar()
+    {
+        return navBar_;
+    }
+
+    void SetNavBarNode(WeakPtr<FrameNode> node)
+    {
+        navBar_ = node;
+    }
+
+    WeakPtr<FrameNode> GetNavBarDivider()
+    {
+        return navBarDivider_;
+    }
+
+    void SetNavBarDividerNode(WeakPtr<FrameNode> node)
+    {
+        navBarDivider_ = node;
+    }
+
+    WeakPtr<FrameNode> GetNavDest()
+    {
+        return navDest_;
+    }
+
+    void SetNavDestNode(WeakPtr<FrameNode> node)
+    {
+        navDest_ = node;
+    }
+
+    void SetTitleHeight(Dimension height)
+    {
+        titleHeight_ = height;
+    }
+
+    Dimension GetTitleHeight()
+    {
+        return titleHeight_;
+    }
+
+    bool GetIsMoveUp()
+    {
+        return isMoveUp_;
+    }
+
+    void SetIsMoveUp(bool isMoveUp)
+    {
+        isMoveUp_ = isMoveUp;
+    }
+
 private:
     bool hasSideBar_ = false;
     bool hasNavBar_ = false;
     bool hasNavDest_ = false;
+    bool isMoveUp_ = false;
     ToolbarInfo sideBarInfo_;
     Color sideBarColor_;
+    Dimension titleHeight_ = Dimension(0.0f);
     ToolbarInfo sideBarDividerInfo_;
     ToolbarInfo navBarInfo_;
     ToolbarInfo navBarDividerInfo_;
@@ -129,6 +221,14 @@ private:
     std::list<std::function<void()>> sideBarColorChangeCallbackFunc_;
     std::list<std::function<void()>> onChangeCallbackFuncs_;
     std::list<std::function<void()>> modifyDoneCallbackFuncs_;
+
+    WeakPtr<FrameNode> navigation_;
+    WeakPtr<FrameNode> siderBar_;
+    WeakPtr<FrameNode> siderBarDivider_;
+    WeakPtr<FrameNode> sideBarContainerModel_;
+    WeakPtr<FrameNode> navBar_;
+    WeakPtr<FrameNode> navBarDivider_;
+    WeakPtr<FrameNode> navDest_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_TOOLBAR_TOOLBAR_MANAGER_H

@@ -169,6 +169,11 @@ public:
         }
     }
 
+    RefPtr<ToolbarManager> GetToolBarManager()
+    {
+        return toolbarManager_;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
