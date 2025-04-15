@@ -611,6 +611,9 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         return;
     }
 
+    // set menu window touchable
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    DragDropFuncWrapper::SetMenuSubWindowTouchable((mainPipeline != pipeline));
     // set drag drop status is moving
     DragDropGlobalController::GetInstance().UpdateDragDropInitiatingStatus(frameNode, DragDropInitiatingStatus::MOVING);
 
