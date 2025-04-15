@@ -158,6 +158,8 @@ ResourceAdapterImplV2::ResourceAdapterImplV2(
     sysResourceManager_ = resourceManager;
     if (resConfig != nullptr) {
         sysResourceManager_->UpdateResConfig(*resConfig);
+        TAG_LOGI(AceLogTag::ACE_RESOURCE, "ResourceAdapter UpdateResConfig with colorMode %{public}s",
+            (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK ? "dark" : "light"));
     }
     resConfig_ = resConfig;
     appHasDarkRes_ = resourceInfo.GetResourceConfiguration().GetAppHasDarkRes();
@@ -173,6 +175,8 @@ void ResourceAdapterImplV2::Init(const ResourceInfo& resourceInfo)
     newResMgr->AddResource(resIndexPath.c_str());
     if (resConfig != nullptr) {
         newResMgr->UpdateResConfig(*resConfig);
+        TAG_LOGI(AceLogTag::ACE_RESOURCE, "ResourceAdapter Init with colorMode %{public}s",
+            (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK ? "dark" : "light"));
     }
     sysResourceManager_ = newResMgr;
     packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
