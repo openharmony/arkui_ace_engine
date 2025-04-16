@@ -328,7 +328,7 @@ void NavigationLayoutUtil::UpdateContentSafeAreaPadding(
         toolBarNode && toolBarNode->IsVisible()) {
         auto theme = NavigationGetTheme();
         if (theme) {
-            paddingBottom = theme->GetHeight();
+            paddingBottom = theme->GetToolbarHeigth();
         }
     }
     PaddingProperty paddingProperty;
