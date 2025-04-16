@@ -28,9 +28,6 @@ using namespace OHOS::Ace::Framework;
 using namespace OHOS::Ace;
 
 namespace {
-const std::vector<ImageFit> IMAGE_FITS = { ImageFit::FILL, ImageFit::CONTAIN, ImageFit::COVER, ImageFit::NONE,
-    ImageFit::SCALE_DOWN, ImageFit::FITWIDTH };
-
 const std::vector<VerticalAlign> VERTICAL_ALIGNS = { VerticalAlign::TOP, VerticalAlign::CENTER, VerticalAlign::BOTTOM,
     VerticalAlign::BASELINE };
 } // namespace
@@ -99,11 +96,11 @@ void FfiOHOSAceFrameworkImageSpanVerticalAlign(int32_t value)
 
 void FfiOHOSAceFrameworkImageSpanObjectFit(int32_t value)
 {
-    if (!OHOS::Ace::Framework::Utils::CheckParamsValid(value, IMAGE_FITS.size())) {
-        LOGE("invalid value for image fit");
-        return;
+    auto fit = static_cast<ImageFit>(value);
+    if (fit < ImageFit::FILL || fit > ImageFit::BOTTOM_END) {
+        fit = ImageFit::COVER;
     }
-    ImageModel::GetInstance()->SetImageFit(IMAGE_FITS[value]);
+    ImageModel::GetInstance()->SetImageFit(fit);
 }
 
 void FfiOHOSAceFrameworkImageSpanTextBackgroundStyle(uint32_t color, double radius, int32_t unit)
