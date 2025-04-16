@@ -597,7 +597,11 @@ void SelectModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->SetFontColor(color);
+    if (color) {
+        pattern->SetFontColor(color);
+    } else {
+        pattern->ResetFontColor();
+    }
 }
 
 void SelectModelNG::SetSelectedOptionBgColor(FrameNode* frameNode, const std::optional<Color>& color)
