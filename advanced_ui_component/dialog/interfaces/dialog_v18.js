@@ -2788,6 +2788,13 @@ class CustomDialogContentComponent extends ViewPU {
         }, WithTheme);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Scroll.create();
+            Scroll.borderRadius({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_container_shape'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            })
             Scroll.edgeEffect(EdgeEffect.None, { alwaysEnabled: false });
             Scroll.backgroundColor(this.themeColorMode === ThemeColorMode.SYSTEM || undefined ?
             Color.Transparent : {
