@@ -115,6 +115,16 @@ void AssignTo(std::optional<TabContentAnimatedTransition>& dst, const Opt_TabCon
     ret.timeout = Converter::OptConvert<int32_t>(from.value.timeout).value_or(0);
     dst = ret;
 }
+
+template<>
+void AssignCast(std::optional<TabsCacheMode>& dst, const Ark_TabsCacheMode& src)
+{
+    switch (src) {
+        case ARK_TABS_CACHE_MODE_CACHE_BOTH_SIDE: dst = TabsCacheMode::CACHE_BOTH_SIDE; break;
+        case ARK_TABS_CACHE_MODE_CACHE_LATEST_SWITCHED: dst = TabsCacheMode::CACHE_LATEST_SWITCHED; break;
+        default: LOGE("Unexpected enum value in Ark_TabsCacheMode: %{public}d", src);
+    }
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -278,8 +288,18 @@ void OnSelectedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TabsModelNG::SetOnSelected(frameNode, convValue);
+    auto onSelected = [arkCallback = CallbackHelper(*value), node = AceType::WeakClaim(frameNode)](
+        const BaseEventInfo* info) {
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            LOGE("Tabs onSelected callback execute failed.");
+            return;
+        }
+        PipelineContext::SetCallBackNode(node);
+        auto index = Converter::ArkValue<Ark_Number>(tabsInfo->GetIndex());
+        arkCallback.Invoke(index);
+    };
+    TabsModelNG::SetOnSelected(frameNode, std::move(onSelected));
 }
 void OnTabBarClickImpl(Ark_NativePointer node,
                        const Callback_Number_Void* value)
@@ -304,8 +324,18 @@ void OnUnselectedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TabsModelNG::SetOnUnselected(frameNode, convValue);
+    auto onUnselected = [arkCallback = CallbackHelper(*value), node = AceType::WeakClaim(frameNode)](
+        const BaseEventInfo* info) {
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            LOGE("Tabs onUnselected callback execute failed.");
+            return;
+        }
+        PipelineContext::SetCallBackNode(node);
+        auto index = Converter::ArkValue<Ark_Number>(tabsInfo->GetIndex());
+        arkCallback.Invoke(index);
+    };
+    TabsModelNG::SetOnUnselected(frameNode, std::move(onUnselected));
 }
 void OnAnimationStartImpl(Ark_NativePointer node,
                           const OnTabsAnimationStartCallback* value)
@@ -505,9 +535,9 @@ void CachedMaxCountImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(count);
-    //auto convValue = Converter::OptConvert<type>(count); // for enums
-    //TabsModelNG::SetCachedMaxCount(frameNode, convValue);
+    auto countValue = count ? Converter::OptConvert<int32_t>(*count) : std::nullopt;
+    auto modeValue = Converter::OptConvert<TabsCacheMode>(mode);
+    TabsModelNG::SetCachedMaxCount(frameNode, countValue, modeValue);
 }
 void _onChangeEvent_indexImpl(Ark_NativePointer node,
                               const Callback_Number_Void* callback)
