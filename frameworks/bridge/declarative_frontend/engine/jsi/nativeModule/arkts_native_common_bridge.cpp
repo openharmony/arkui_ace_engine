@@ -6988,11 +6988,16 @@ void CommonBridge::SetGestureDistanceMap(ArkUIRuntimeCallInfo* runtimeCallInfo, 
     if (!gestureDistanceMap.IsNull() && !gestureDistanceMap->IsUndefined() && gestureDistanceMap->IsMap(vm)) {
         Local<panda::MapRef> distanceMapRef(gestureDistanceMap);
         int32_t distanceMapSize = distanceMapRef->GetSize(vm);
-        PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() } };
+        PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+            { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
         for (int32_t i = 0; i < distanceMapSize; i++) {
             SourceTool sourceTool = static_cast<SourceTool>(distanceMapRef->GetKey(vm, i)->ToNumber(vm)->Value());
             double distance = static_cast<double>(distanceMapRef->GetValue(vm, i)->ToNumber(vm)->Value());
-            distanceMap[sourceTool] = distance;
+            if (sourceTool >= SourceTool::UNKNOWN &&
+                sourceTool <= SourceTool::JOYSTICK && GreatOrEqual(distance, 0.0)) {
+                Dimension dimension = Dimension(distance, DimensionUnit::VP);
+                distanceMap[sourceTool] = dimension.ConvertToPx();
+            }
         }
         auto gesturePtr = Referenced::Claim(reinterpret_cast<PanGesture*>(gesture));
         gesturePtr->SetDistanceMap(distanceMap);
