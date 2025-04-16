@@ -1730,7 +1730,7 @@ export interface Literal_Object_object__String_name_Array_String_methodList {
 }
 export interface WebOptions {
     src: string | Resource;
-    controller: WebController | WebviewController| WebviewControllerAni;
+    controller: WebController | WebviewController | WebviewControllerAni;
     renderMode?: RenderMode;
     incognitoMode?: boolean;
     sharedRenderProcessToken?: string;

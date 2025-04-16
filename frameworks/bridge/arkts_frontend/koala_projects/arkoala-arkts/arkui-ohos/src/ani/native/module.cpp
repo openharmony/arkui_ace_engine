@@ -18,6 +18,8 @@
 #include "ani.h"
 #include "load.h"
 
+#include "web_module_methods.h"
+
 namespace OHOS::Ace::Ani {
 
 void TransferPixelMap([[maybe_unused]] ani_env* env, ani_object aniClass, ani_object node, ani_object pixelMap)
@@ -28,37 +30,6 @@ void TransferPixelMap([[maybe_unused]] ani_env* env, ani_object aniClass, ani_ob
         return;
     }
     modifier->getImageAniModifier()->setPixelMap(arkNode, nullptr);
-}
-
-void SetWebOptions(ani_env* env, ani_object aniClass, ani_object node, ani_object object)
-{
-    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier || !modifier->getWebAniModifier() || !env) {
-        return;
-    }
-    ani_ref savePtr;
-    env->GlobalReference_Create(reinterpret_cast<ani_ref>(object), &savePtr);
-    auto onNWebId = [env, object = savePtr](int32_t nwebId) {
-        if (env->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_object>(object), "_setNWebId", "D:V", static_cast<ani_double>(nwebId)) != ANI_OK) {
-            return;
-        }
-    };
-    auto onHapPath = [env, object = savePtr](const std::string& hapPath) {
-        ani_string aniHapPath = nullptr;
-        if (env->String_NewUTF8(hapPath.c_str(), hapPath.size(), &aniHapPath) != ANI_OK) {
-            env->GlobalReference_Delete(object);
-            return;
-        }
-        if (env->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_object>(object), "_setHapPath", "Lstd/core/String;:V", aniHapPath) != ANI_OK) {
-            env->GlobalReference_Delete(object);
-            return;
-        }
-        env->GlobalReference_Delete(object);
-    };
-    modifier->getWebAniModifier()->setWebOptions(arkNode, std::move(onNWebId), std::move(onHapPath));
 }
 
 } // namespace OHOS::Ace::Ani

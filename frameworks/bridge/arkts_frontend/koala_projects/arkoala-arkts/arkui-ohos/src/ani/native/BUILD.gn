@@ -22,9 +22,15 @@ ohos_shared_library("arkoala_native_ani") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 
+  include_dirs = [
+    "./",
+    "web/",
+  ]
+
   sources = [
     "load.cpp",
     "module.cpp",
+    "web/web_module_methods.cpp",
   ]
 
   external_deps = [
