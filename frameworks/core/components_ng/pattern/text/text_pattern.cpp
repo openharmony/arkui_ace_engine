@@ -3872,49 +3872,10 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
 
 void TextPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
 {
-    if (pManager_) {
-        auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProp);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        std::stringstream ssColor;
-        std::stringstream ssSize;
-        if (textStyle_.has_value()) {
-            ssColor << "[FontColor: ";
-            ssColor << textStyle_->GetTextColor().ColorToString();
-            ssColor << " pro: ";
-            ssColor << (textLayoutProp->HasTextColor() ? textLayoutProp->GetTextColorValue(Color::BLACK).ColorToString()
-                                                       : "Na");
-            ssColor << " ForegroundColor: ";
-            ssColor << (renderContext->HasForegroundColor() ? renderContext->GetForegroundColorValue().ColorToString()
-                                                            : "Na");
-            ssColor << "]";
-
-            ssSize << "[FontSize: ";
-            ssSize << textStyle_->GetFontSize().ToString();
-            ssSize << " pro: ";
-            ssSize << (textLayoutProp->HasFontSize()
-                           ? textLayoutProp->GetFontSizeValue(Dimension(0.0, DimensionUnit::FP)).ToString()
-                           : "Na");
-            ssSize << "]";
-        }
-        json->Put("TextInfo",
-            ("[content size: " + std::to_string(textLayoutProp->GetContent().value_or(u"").length()) +
-                "][contentRect :" + contentRect_.ToString() +
-                "][paragraphsInfo: size:" + std::to_string(pManager_->GetParagraphs().size()) + ",|didExc " +
-                std::to_string(pManager_->DidExceedMaxLines()) + ",|textWidth " +
-                std::to_string(pManager_->GetTextWidth()) + ",|height " + std::to_string(pManager_->GetHeight()) +
-                ",|maxwidth " + std::to_string(pManager_->GetMaxWidth()) + ",|maxIntrinsic " +
-                std::to_string(pManager_->GetMaxIntrinsicWidth()) + ",|lineCount " +
-                std::to_string(pManager_->GetLineCount()) + ",|longestLine " +
-                std::to_string(pManager_->GetLongestLine()) + ",|LineWithIndent " +
-                std::to_string(pManager_->GetLongestLineWithIndent()) +
-                "][spans size :" + std::to_string(spans_.size()) + "]" + ssColor.str() + ssSize.str())
-                .c_str());
-    } else {
-        json->Put("TextInfo", "pManager nullpter");
+    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProp);
+    if (!IsSetObscured()) {
+        json->Put("content", UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u" ")).c_str());
     }
 }
 

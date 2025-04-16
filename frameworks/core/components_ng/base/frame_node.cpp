@@ -84,7 +84,6 @@ constexpr float HIGHT_RATIO_LIMIT = 0.8;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
 constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
-constexpr int32_t DEFAULT_PRECISION = 2;
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -934,47 +933,8 @@ void FrameNode::DumpOverlayInfo()
 
 void FrameNode::DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json)
 {
-    if (geometryNode_->GetFrameRect() != RectF(0.0, 0.0, 0.0, 0.0)) {
-        json->Put("FrameRect", geometryNode_->GetFrameRect().ToString().c_str());
-    }
-    if (renderContext_->GetPaintRectWithoutTransform() != RectF(0.0, 0.0, 0.0, 0.0)) {
-        json->Put("PaintRectWithoutTransform", renderContext_->GetPaintRectWithoutTransform().ToString().c_str());
-    }
-    if (renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
-        json->Put("BackgroundColor", renderContext_->GetBackgroundColor()->ColorToString().c_str());
-    }
-    auto offset = GetOffsetRelativeToWindow();
-    if (offset != OffsetF(0.0, 0.0)) {
-        std::stringstream stream;
-        stream << std::fixed << std::setprecision(DEFAULT_PRECISION) << offset.GetX() << "," << offset.GetY();
-        json->Put("Offset", stream.str().c_str());
-    }
-    VisibleType visible = layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE);
-    if (visible != VisibleType::VISIBLE) {
-        json->Put("Visible", static_cast<int32_t>(visible));
-    }
-    DumpPadding(layoutProperty_->GetPaddingProperty(), std::string("Padding"), json);
-    DumpPadding(layoutProperty_->GetSafeAreaPaddingProperty(), std::string("SafeAreaPadding"), json);
-    DumpBorder(layoutProperty_->GetBorderWidthProperty(), std::string("Border"), json);
-    DumpPadding(layoutProperty_->GetMarginProperty(), std::string("Margin"), json);
-    if (layoutProperty_->GetLayoutRect()) {
-        json->Put("LayoutRect", layoutProperty_->GetLayoutRect().value().ToString().c_str());
-    }
-    if (layoutProperty_->GetCalcLayoutConstraint()) {
-        json->Put("UserDefinedConstraint", layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str());
-    }
-    if (layoutProperty_->GetPaddingProperty() || layoutProperty_->GetBorderWidthProperty() ||
-        layoutProperty_->GetMarginProperty() || layoutProperty_->GetCalcLayoutConstraint()) {
-        if (layoutProperty_->GetContentLayoutConstraint().has_value()) {
-            json->Put("ContentConstraint", layoutProperty_->GetContentLayoutConstraint().value().ToString().c_str());
-        }
-    }
-    if (!NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
-        json->Put("ZIndex: ", renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE));
-    }
-    if (geometryNode_->GetParentLayoutConstraint().has_value()) {
-        json->Put("ParentLayoutConstraint", geometryNode_->GetParentLayoutConstraint().value().ToString().c_str());
-    }
+    json->Put("$rect", GetTransformRectRelativeToWindow().ToBounds().c_str());
+    json->Put("$debugLine", "");
 }
 
 void FrameNode::DumpPadding(const std::unique_ptr<NG::PaddingProperty>& padding, std::string label,
@@ -1062,18 +1022,10 @@ void FrameNode::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(json);
     DumpSimplifyCommonInfo(json);
-    DumpSimplifySafeAreaInfo(json);
-    DumpSimplifyOverlayInfo(json);
     if (pattern_) {
-        pattern_->DumpSimplifyInfo(json);
-    }
-    if (pattern_ && GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
-        pattern_->DumpInfo(json);
-    }
-    if (renderContext_) {
-        auto renderContextJson = JsonUtil::Create();
-        renderContext_->DumpSimplifyInfo(renderContextJson);
-        json->PutRef("RenderContext", std::move(renderContextJson));
+        auto child = JsonUtil::Create();
+        pattern_->DumpSimplifyInfo(child);
+        json->Put("$attrs", std::move(child));
     }
 }
 

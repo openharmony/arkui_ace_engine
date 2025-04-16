@@ -150,4 +150,10 @@ int32_t UIContentServiceStubImpl::GetCurrentPageName(const EventCallback& eventC
     return NO_ERROR;
 }
 
+int32_t UIContentServiceStubImpl::GetVisibleInspectorTree(
+    const std::function<void(std::string, int32_t, bool)>& eventCallback)
+{
+    UiSessionManager::GetInstance()->GetVisibleInspectorTree();
+    return NO_ERROR;
+}
 } // namespace OHOS::Ace
