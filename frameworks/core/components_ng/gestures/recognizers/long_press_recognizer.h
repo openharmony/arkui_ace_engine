@@ -127,6 +127,8 @@ public:
 
     void RemoteRepeatTimer();
 
+    void ForceCleanRecognizer() override;
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -163,6 +165,7 @@ private:
     std::unique_ptr<GestureEventFunc> longPressRecorder_;
     bool hasRepeated_ = false;
     int32_t longPressFingerCountForSequence_ = 0;
+    bool isOnActionTriggered_ = false;
 };
 
 } // namespace OHOS::Ace::NG

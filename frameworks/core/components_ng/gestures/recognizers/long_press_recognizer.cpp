@@ -364,8 +364,15 @@ void LongPressRecognizer::SendCallbackMsg(
     const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, bool isOnAction)
 {
     auto extraHandlingResult = GestureExtraHandler::IsGestureShouldBeAbandoned(AceType::Claim(this));
-    if ((gestureInfo_ && gestureInfo_->GetDisposeTag()) || extraHandlingResult) {
+    if ((gestureInfo_ && gestureInfo_->GetDisposeTag()) || extraHandlingResult ||
+        (!isOnActionTriggered_ && !isOnAction)) {
         return;
+    }
+    if (callback == onActionCancel_ || callback == onActionEnd_) {
+        isOnActionTriggered_ = false;
+    }
+    if (isOnAction) {
+        isOnActionTriggered_ = true;
     }
     if (callback && *callback) {
         GestureEvent info;
@@ -413,6 +420,7 @@ void LongPressRecognizer::OnResetStatus()
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
     longPressFingerCountForSequence_ = 0;
+    isOnActionTriggered_ = false;
 }
 
 bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
@@ -541,6 +549,18 @@ RefPtr<DragEventActuator> LongPressRecognizer::GetDragEventActuator()
     auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureEventHub, nullptr);
     return gestureEventHub->GetDragEventActuator();
+}
+
+void LongPressRecognizer::ForceCleanRecognizer()
+{
+    MultiFingersRecognizer::ForceCleanRecognizer();
+    timer_.Cancel();
+    deadlineTimer_.Cancel();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    context->RemoveGestureTask(task_);
+    longPressFingerCountForSequence_ = 0;
+    isOnActionTriggered_ = false;
 }
 
 } // namespace OHOS::Ace::NG
