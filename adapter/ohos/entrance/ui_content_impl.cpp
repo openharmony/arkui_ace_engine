@@ -275,6 +275,7 @@ bool CloseGlobalModalUIExtension(int32_t instanceId, int32_t sessionId, const st
     auto parentNode = modalPageNode->GetParent();
     if (parentNode) {
         parentNode->RemoveChild(modalPageNode);
+        parentNode->RebuildRenderContextTree();
     }
     modalPageNode->MountToParent(globalPipeline->GetRootElement());
     auto globalOverlay = globalPipeline->GetOverlayManager();
