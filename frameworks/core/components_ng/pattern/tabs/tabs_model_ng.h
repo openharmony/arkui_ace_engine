@@ -103,6 +103,7 @@ public:
     static RefPtr<TabsControllerNG> GetSwiperController(FrameNode* frameNode);
     static void InitIndex(FrameNode* tabsNode, const std::optional<int32_t>& indexOpt);
     static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChangeEvent);
+    static void InitDivider(FrameNode* frameNode);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);
