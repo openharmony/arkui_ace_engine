@@ -76,7 +76,7 @@ void SetPluginComponentOptionsImpl(Ark_NativePointer node,
 
     auto optInfoData = Converter::OptConvert<PluginComponentOptions>(*options);
     PluginModelNG::SetRequestPluginInfo(frameNode, optInfoData ? optInfoData->requestPluginInfo : std::nullopt);
-    PluginModelNG::SetData(frameNode, optInfoData ? optInfoData->data : "");
+    PluginModelNG::SetData(frameNode, optInfoData ? std::make_optional(optInfoData->data) : std::nullopt);
 #endif
 }
 } // PluginComponentInterfaceModifier
