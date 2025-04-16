@@ -355,6 +355,14 @@ struct PromptDialogAttr {
     WeakPtr<NG::UINode> customCNode;
 };
 
+enum class PromptActionCommonState {
+    UNINITIALIZED = 0,
+    INITIALIZED = 1,
+    APPEARING = 2,
+    APPEARED = 3,
+    DISAPPEARING = 4,
+    DISAPPEARED  = 5,
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_DIALOG_PROPERTIES_H

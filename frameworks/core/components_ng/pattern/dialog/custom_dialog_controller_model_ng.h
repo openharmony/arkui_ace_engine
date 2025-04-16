@@ -34,6 +34,8 @@ public:
         RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
         std::list<DialogOperation>& dialogOperation) override;
     static void SetCloseDialogForNDK(FrameNode* dialogNode);
+    PromptActionCommonState GetState(std::vector<WeakPtr<AceType>>& dialogs) override;
+    static PromptActionCommonState GetStateWithNode(FrameNode* dialogNode);
 
 private:
     TaskExecutor::Task ParseOpenDialogTask(int32_t currentId, const WeakPtr<AceType>& controller,

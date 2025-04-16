@@ -64,6 +64,45 @@ typedef enum {
     ARKUI_IMMERSIVE_MODE_EXTEND,
 } ArkUI_ImmersiveMode;
 
+typedef enum {
+    /**
+     * @brief Uninitialized.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 18
+     */
+    DIALOG_UNINITIALIZED = 0,
+    /**
+     * @brief Initialized.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 18
+     */
+    DIALOG_INITIALIZED,
+    /**
+     * @brief Appearing.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 18
+     */
+    DIALOG_APPEARING,
+    /**
+     * @brief Appeared.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 18
+     */
+    DIALOG_APPEARED,
+    /**
+     * @brief Disappearing.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 18
+     */
+    DIALOG_DISAPPEARING,
+    /**
+     * @brief Disappeared.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 18
+     */
+    DIALOG_DISAPPEARED,
+} ArkUI_DialogState;
+
 /**
  * @brief Invoked when the dialog box is closed.
  *
@@ -592,6 +631,18 @@ typedef struct {
      * @since 18
      */
     int32_t (*setFocusable)(ArkUI_NativeDialogHandle handle, bool focusable);
+    
+    /**
+     * @brief Get state of dialog.
+     *
+     * @param handle Indicates the pointer to the custom dialog box controller.
+     * @param state Dialog state object.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     * @since 18
+     */
+    int32_t (*getState)(ArkUI_NativeDialogHandle handle, ArkUI_DialogState* state);
 } ArkUI_NativeDialogAPI_3;
 
 /**

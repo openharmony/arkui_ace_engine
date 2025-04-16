@@ -3925,3 +3925,13 @@ let AxisAction;
   AxisAction[AxisAction.END = 3] = 'END';
   AxisAction[AxisAction.CANCEL = 4] = 'CANCEL';
 })(AxisAction || (AxisAction = {}));
+
+let CommonState;
+(function (CommonState) {
+  CommonState[CommonState.UNINITIALIZED = 0] = 'UNINITIALIZED';
+  CommonState[CommonState.INITIALIZED = 1] = 'INITIALIZED';
+  CommonState[CommonState.APPEARING = 2] = 'APPEARING';
+  CommonState[CommonState.APPEARED = 3] = 'APPEARED';
+  CommonState[CommonState.DISAPPEARING = 4] = 'DISAPPEARING';
+  CommonState[CommonState.DISAPPEARED = 5] = 'DISAPPEARED';
+})(CommonState || (CommonState = {}));

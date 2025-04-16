@@ -77,6 +77,7 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseOpenDialogTask(int32_t cu
     const WeakPtr<AceType>& controller, DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
     std::function<void()>&& buildFunc, const RefPtr<OverlayManager>& overlayManager)
 {
+    SetHasBind(true);
     auto task = [currentId, controller, &dialogProperties, &dialogs, func = std::move(buildFunc),
                     weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() mutable {
         ContainerScope scope(currentId);
@@ -279,5 +280,42 @@ void CustomDialogControllerModelNG::SetCloseDialogForNDK(FrameNode* dialogNode)
         }
         overlay->CloseDialog(dialogRef);
     }
+}
+
+PromptActionCommonState CustomDialogControllerModelNG::GetState(std::vector<WeakPtr<AceType>>& dialogs)
+{
+    RefPtr<NG::FrameNode> dialog;
+    PromptActionCommonState state = PromptActionCommonState::UNINITIALIZED;
+    while (!dialogs.empty()) {
+        dialog = AceType::DynamicCast<NG::FrameNode>(dialogs.back().Upgrade());
+        if (dialog) {
+            // get the dialog not removed currently
+            break;
+        }
+        dialogs.pop_back();
+    }
+    if (!dialog) {
+        if (GetHasBind()) {
+            return PromptActionCommonState::DISAPPEARED;
+        }
+        return state;
+    }
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    if (!dialogPattern) {
+        return state;
+    }
+    state = dialogPattern->GetState();
+    return state;
+}
+
+PromptActionCommonState CustomDialogControllerModelNG::GetStateWithNode(FrameNode* dialogNode)
+{
+    PromptActionCommonState state = PromptActionCommonState::UNINITIALIZED;
+    CHECK_NULL_RETURN(dialogNode, state);
+    auto dialogRef = AceType::Claim(dialogNode);
+    auto dialogPattern = dialogRef->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(dialogPattern, state);
+    state = dialogPattern->GetState();
+    return state;
 }
 } // namespace OHOS::Ace::NG

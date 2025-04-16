@@ -2057,6 +2057,11 @@ ArkUI_Int32 SetDialogFocusable(ArkUIDialogHandle handle, ArkUI_Bool focusable)
     return CustomDialog::SetFocusable(handle, focusable);
 }
 
+ArkUI_Int32 GetDialogState(ArkUIDialogHandle handle, ArkUI_Int32* dialogState)
+{
+    return CustomDialog::GetDialogState(handle, dialogState);
+}
+
 ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void(*callback)(ArkUI_Int32 dialogId))
 {
     return CustomDialog::OpenCustomDialog(handle, callback);
@@ -2120,6 +2125,7 @@ const ArkUIDialogAPI* GetDialogAPI()
         .enableHoverMode = EnableDialogHoverMode,
         .setHoverModeArea = SetDialogHoverModeArea,
         .setFocusable = SetDialogFocusable,
+        .getState = GetDialogState,
         .openCustomDialog = OpenCustomDialog,
         .updateCustomDialog = UpdateCustomDialog,
         .closeCustomDialog = CloseCustomDialog,

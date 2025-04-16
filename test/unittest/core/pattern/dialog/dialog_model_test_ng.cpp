@@ -1654,6 +1654,81 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg039, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CustomDialogControllerGetStateTest1
+ * @tc.desc: Test CustomDialogControllerModelNG's SetOpenDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, CustomDialogControllerGetStateTest1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. mock rootNode,Dialog and FrameNode
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto dialogProps = DialogProperties {
+        .title = "Test Title",
+        .content = "Test Content",
+        .controllerId = 1001
+    };
+
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    auto dialogNode =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 2, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    dialogPattern->SetDialogProperties(dialogProps);
+    dialogPattern->SetState(PromptActionCommonState::APPEARING);
+    
+    std::vector<WeakPtr<AceType>> dialogs;
+    dialogs.emplace_back(WeakPtr<AceType>(dialogNode));
+
+    CustomDialogControllerModelNG controller;
+    PromptActionCommonState state = controller.GetState(dialogs);
+    EXPECT_EQ(state, PromptActionCommonState::APPEARING);
+
+    dialogPattern->SetState(PromptActionCommonState::APPEARED);
+    state = controller.GetState(dialogs);
+    EXPECT_EQ(state, PromptActionCommonState::APPEARED);
+}
+
+/**
+ * @tc.name: CustomDialogControllerGetStateTest2
+ * @tc.desc: Test CustomDialogControllerModelNG's SetOpenDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, CustomDialogControllerGetStateTest2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.mock rootNode,Dialog and FrameNode
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto dialogProps = DialogProperties {
+        .title = "Test Title",
+        .content = "Test Content",
+        .controllerId = 1001
+    };
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    auto dialogNode =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 2, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    dialogPattern->SetDialogProperties(dialogProps);
+    dialogPattern->SetState(PromptActionCommonState::DISAPPEARING);
+    
+    std::vector<WeakPtr<AceType>> dialogs;
+    dialogs.emplace_back(WeakPtr<AceType>(dialogNode));
+
+    CustomDialogControllerModelNG controller;
+    PromptActionCommonState state = controller.GetState(dialogs);
+    EXPECT_EQ(state, PromptActionCommonState::DISAPPEARING);
+
+    dialogPattern->SetState(PromptActionCommonState::DISAPPEARED);
+    state = controller.GetState(dialogs);
+    EXPECT_EQ(state, PromptActionCommonState::DISAPPEARED);
+}
+
+/**
  * @tc.name: ComputeInnerLayoutSizeParam001
  * @tc.desc: Test ComputeInnerLayoutSizeParam function
  * @tc.type: FUNC
