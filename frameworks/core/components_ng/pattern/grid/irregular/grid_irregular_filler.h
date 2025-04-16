@@ -82,13 +82,13 @@ public:
     int32_t FillMatrixOnly(int32_t targetIdx);
 
     /**
-     * @brief Fills the gridMatrix in forward direction until lines prior to [targetLine] are all filled.
+     * @brief Fills the gridMatrix in forward direction in range [startLine, targetLine).
      * Measure isn't performed, and lineHeightMap_ isn't updated.
      *
      * @param startingLine The starting line index.
-     * @param targetLine The target GridItem index to fill up to.
+     * @param targetLine The target line index to fill up to (exclusive).
      *
-     * @return Last item index filled to reach [targetLine].
+     * @return Last item index filled.
      */
     int32_t FillMatrixByLine(int32_t startingLine, int32_t targetLine);
 

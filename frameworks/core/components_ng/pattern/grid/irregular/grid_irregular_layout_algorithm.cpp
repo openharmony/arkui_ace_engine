@@ -17,11 +17,11 @@
 
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
+#include "core/components_ng/pattern/grid/irregular/grid_large_delta_converter.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/property/templates_parser.h"
-#include "core/components_ng/pattern/grid/irregular/grid_large_delta_converter.h"
 
 namespace OHOS::Ace::NG {
 void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -136,10 +136,17 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
 }
 
 namespace {
-inline void PrepareJumpOnReset(GridLayoutInfo& info)
+/**
+ * @return offset to apply after the jump
+ */
+inline float PrepareJumpOnReset(GridLayoutInfo& info)
 {
+    if (info.jumpIndex_ != EMPTY_JUMP_INDEX) {
+        return 0.0f;
+    }
     info.jumpIndex_ = std::min(info.startIndex_, info.childrenCount_ - 1);
     info.scrollAlign_ = ScrollAlign::START;
+    return info.currentOffset_;
 }
 inline void ResetMaps(GridLayoutInfo& info)
 {
@@ -161,8 +168,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
 {
     if (info_.IsResetted()) {
         // reset layout info_ and perform jump to current startIndex
-        postJumpOffset_ = info_.currentOffset_;
-        PrepareJumpOnReset(info_);
+        postJumpOffset_ = PrepareJumpOnReset(info_);
         ResetMaps(info_);
         ResetLayoutRange(info_);
         ResetFocusedIndex(wrapper_);
@@ -177,8 +183,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
             info_.ClearMatrixToEnd(updateIdx, it->first);
         }
         if (updateIdx <= info_.endIndex_) {
-            postJumpOffset_ = info_.currentOffset_;
-            PrepareJumpOnReset(info_);
+            postJumpOffset_ = PrepareJumpOnReset(info_);
             ResetLayoutRange(info_);
             ResetFocusedIndex(wrapper_);
         }
@@ -188,9 +193,8 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
 
     if ((wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) &&
         scrollSource_ == SCROLL_FROM_NONE) {
-        postJumpOffset_ = info_.currentOffset_;
         info_.lineHeightMap_.clear();
-        PrepareJumpOnReset(info_);
+        postJumpOffset_ = PrepareJumpOnReset(info_);
         ResetLayoutRange(info_);
         ResetFocusedIndex(wrapper_);
         return;
@@ -198,8 +202,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
 
     if (wrapper_->ConstraintChanged()) {
         // need to remeasure all items in current view
-        postJumpOffset_ = info_.currentOffset_;
-        PrepareJumpOnReset(info_);
+        postJumpOffset_ = PrepareJumpOnReset(info_);
     }
 }
 
@@ -278,7 +281,8 @@ void GridIrregularLayoutAlgorithm::MeasureBackward(float mainSize, bool toAdjust
         UpdateStartInfo(info_, res);
     }
 
-    auto [endLine, endIdx] = solver.SolveForwardForEndIdx(mainGap_, mainSize - info_.currentOffset_, info_.startMainLineIndex_);
+    auto [endLine, endIdx] =
+        solver.SolveForwardForEndIdx(mainGap_, mainSize - info_.currentOffset_, info_.startMainLineIndex_);
     info_.endMainLineIndex_ = endLine;
     info_.endIndex_ = endIdx;
 }
