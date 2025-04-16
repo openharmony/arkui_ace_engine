@@ -285,6 +285,7 @@ public:
     static void SetPositionEdges(const EdgesParam& value);
     static void SetOffsetEdges(const EdgesParam& value);
     static void MarkAnchor(const OffsetT<Dimension>& value);
+    static void MarkAnchor(FrameNode* frameNode, const std::optional<OffsetT<Dimension>>& value);
     static void ResetPosition();
 
     // render position
@@ -650,14 +651,14 @@ public:
     static void MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& value);
     static void SetVisibility(FrameNode* frameNode, VisibleType visible);
     static void SetMargin(FrameNode* frameNode, const CalcLength& value);
-    static void SetMargin(FrameNode* frameNode, const PaddingProperty& value);
+    static void SetMargin(FrameNode* frameNode, const std::optional<PaddingProperty>& value);
     static void SetPadding(FrameNode* frameNode, const CalcLength& value);
-    static void SetPadding(FrameNode* frameNode, const PaddingProperty& value);
+    static void SetPadding(FrameNode* frameNode, const std::optional<PaddingProperty>& value);
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
     static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
     static void SetAspectRatio(FrameNode* frameNode, float ratio);
     static void SetAlignSelf(FrameNode* frameNode, FlexAlign value);
-    static void SetFlexBasis(FrameNode* frameNode, const Dimension& value);
+    static void SetFlexBasis(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void ResetFlexShrink(FrameNode* frameNode);
     static void SetFlexShrink(FrameNode* frameNode, float value);
     static void SetFlexGrow(FrameNode* frameNode, float value);
@@ -863,7 +864,9 @@ public:
     static float GetLayoutWeight(FrameNode* frameNode);
     static int32_t GetDisplayIndex(FrameNode* frameNode);
     static NG::BorderWidthProperty GetOuterBorderWidth(FrameNode* frameNode);
-    static void SetBias(FrameNode* frameNode, const BiasPair& biasPair);
+    static void SetBias(FrameNode* frameNode, const std::optional<BiasPair>& biasPair);
+    static void SetBias(FrameNode* frameNode, const std::optional<float>& horisontal,
+        const std::optional<float>& vertical);
     static BiasPair GetBias(FrameNode* frameNode);
     static RenderFit GetRenderFit(FrameNode* frameNode);
     static BorderColorProperty GetOuterBorderColor(FrameNode* frameNode);
@@ -895,11 +898,15 @@ public:
     static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
     static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
     static void SetPositionLocalizedEdges(bool needLocalized);
+    static void SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void FreezeUINodeById(const std::string& id, bool isFreeze);
     static void FreezeUINodeByUniqueId(const int32_t& uniqueId, bool isFreeze);
     static void SetMarkAnchorStart(Dimension& markAnchorStart);
     static void ResetMarkAnchorStart();
+    static void SetMarkAnchorStart(FrameNode* frameNode, const std::optional<Dimension>& markAnchorStart);
+    static void ResetMarkAnchorStart(FrameNode* frameNode);
     static void SetOffsetLocalizedEdges(bool needLocalized);
+    static void SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value);
     static void RemoveCustomProperty(UINode* frameNode, const std::string& key);
     static void RegisterOEMVisualEffect(OEMVisualEffectFunc func);

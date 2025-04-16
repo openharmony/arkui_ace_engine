@@ -686,45 +686,45 @@ OHOS::Ace::SharedTransitionOption Convert(const Ark_sharedTransitionOptions& src
     return o;
 }
 
-// template<>
-// OffsetOrEdgesParam Convert(const Ark_Position& src)
-// {
-//     OffsetT<Dimension> offset;
-//     std::optional<Dimension> x = Converter::OptConvert<Dimension>(src.x);
-//     if (x) {
-//         offset.SetX(x.value());
-//     }
-//     std::optional<Dimension> y = Converter::OptConvert<Dimension>(src.y);
-//     if (y) {
-//         offset.SetY(y.value());
-//     }
-//     return offset;
-// }
+template<>
+OffsetOrEdgesParam Convert(const Ark_Position& src)
+{
+    OffsetT<Dimension> offset;
+    std::optional<Dimension> x = Converter::OptConvert<Dimension>(src.x);
+    if (x) {
+        offset.SetX(x.value());
+    }
+    std::optional<Dimension> y = Converter::OptConvert<Dimension>(src.y);
+    if (y) {
+        offset.SetY(y.value());
+    }
+    return offset;
+}
 
-// template<>
-// OffsetOrEdgesParam Convert(const Ark_Edges& src)
-// {
-//     EdgesParamOptions edgesParamOptions;
-//     edgesParamOptions.value = Converter::Convert<EdgesParam>(src);
-//     edgesParamOptions.isLocalized = false;
-//     return edgesParamOptions;
-// }
+template<>
+OffsetOrEdgesParam Convert(const Ark_Edges& src)
+{
+    EdgesParamOptions edgesParamOptions;
+    edgesParamOptions.value = Converter::Convert<EdgesParam>(src);
+    edgesParamOptions.isLocalized = false;
+    return edgesParamOptions;
+}
 
-// template<>
-// OffsetOrEdgesParam Convert(const Ark_LocalizedEdges& src)
-// {
-//     return EdgesParamOptions {
-//         .value = EdgesParam {
-//             .top = OptConvert<Dimension>(src.top),
-//             .left = OptConvert<Dimension>(src.start),
-//             .bottom = OptConvert<Dimension>(src.bottom),
-//             .right = OptConvert<Dimension>(src.end),
-//             .start = OptConvert<Dimension>(src.start),
-//             .end = OptConvert<Dimension>(src.end),
-//         },
-//         .isLocalized = true
-//     };
-// }
+template<>
+OffsetOrEdgesParam Convert(const Ark_LocalizedEdges& src)
+{
+    return EdgesParamOptions {
+        .value = EdgesParam {
+            .top = OptConvert<Dimension>(src.top),
+            .left = OptConvert<Dimension>(src.start),
+            .bottom = OptConvert<Dimension>(src.bottom),
+            .right = OptConvert<Dimension>(src.end),
+            .start = OptConvert<Dimension>(src.start),
+            .end = OptConvert<Dimension>(src.end),
+        },
+        .isLocalized = true
+    };
+}
 
 // template<>
 // Gradient Convert(const Ark_Type_CommonMethod_radialGradient_value& src)
@@ -1029,38 +1029,38 @@ BorderStyleProperty Convert(const Ark_EdgeOutlineStyles& src)
 //         .right = right.value_or(invalidValue), .bottom = bottom.value_or(invalidValue)};
 // }
 
-// template<>
-// PositionWithLocalization Convert(const Ark_Position& src)
-// {
-//     auto x = Converter::OptConvert<Dimension>(src.x);
-//     auto y = Converter::OptConvert<Dimension>(src.y);
-//     if (!x && !y) {
-//         return PositionWithLocalization {std::nullopt, false};
-//     }
-//     auto offsetOpt = std::make_optional<OffsetT<Dimension>>();
-//     if (x) {
-//         offsetOpt->SetX(*x);
-//     }
-//     if (y) {
-//         offsetOpt->SetY(*y);
-//     }
-//     return PositionWithLocalization {offsetOpt, false};
-// }
+template<>
+PositionWithLocalization Convert(const Ark_Position& src)
+{
+    auto x = Converter::OptConvert<Dimension>(src.x);
+    auto y = Converter::OptConvert<Dimension>(src.y);
+    if (!x && !y) {
+        return PositionWithLocalization {std::nullopt, false};
+    }
+    auto offsetOpt = std::make_optional<OffsetT<Dimension>>();
+    if (x) {
+        offsetOpt->SetX(*x);
+    }
+    if (y) {
+        offsetOpt->SetY(*y);
+    }
+    return PositionWithLocalization {offsetOpt, false};
+}
 
-// template<>
-// PositionWithLocalization Convert(const Ark_LocalizedPosition& src)
-// {
-//     auto start = Converter::OptConvert<Dimension>(src.start);
-//     auto top = Converter::OptConvert<Dimension>(src.top);
-//     auto offsetOpt = std::make_optional<OffsetT<Dimension>>();
-//     if (start.has_value()) {
-//         offsetOpt->SetX(start.value());
-//     }
-//     if (top.has_value()) {
-//         offsetOpt->SetY(top.value());
-//     }
-//     return PositionWithLocalization {offsetOpt, true};
-// }
+template<>
+PositionWithLocalization Convert(const Ark_LocalizedPosition& src)
+{
+    auto start = Converter::OptConvert<Dimension>(src.start);
+    auto top = Converter::OptConvert<Dimension>(src.top);
+    auto offsetOpt = std::make_optional<OffsetT<Dimension>>();
+    if (start.has_value()) {
+        offsetOpt->SetX(start.value());
+    }
+    if (top.has_value()) {
+        offsetOpt->SetY(top.value());
+    }
+    return PositionWithLocalization {offsetOpt, true};
+}
 
 template<>
 ButtonProperties Convert(const Ark_Literal_String_value_Callback_Void_action& src)
@@ -1494,28 +1494,28 @@ void AssignCast(std::optional<OHOS::Ace::ObscuredReasons>& dst, const Ark_Obscur
     }
 }
 
-// template<>
-//     void AssignCast(std::optional<uint32_t>& dst, const Ark_SafeAreaType& src)
-// {
-//     switch (src) {
-//         case ARK_SAFE_AREA_TYPE_SYSTEM: dst = SAFE_AREA_TYPE_SYSTEM; break;
-//         case ARK_SAFE_AREA_TYPE_CUTOUT: dst = SAFE_AREA_TYPE_CUTOUT; break;
-//         case ARK_SAFE_AREA_TYPE_KEYBOARD: dst = SAFE_AREA_TYPE_KEYBOARD; break;
-//         default: LOGE("Unexpected enum value in Ark_SafeAreaType: %{public}d", src);
-//     }
-// }
+template<>
+    void AssignCast(std::optional<uint32_t>& dst, const Ark_SafeAreaType& src)
+{
+    switch (src) {
+        case ARK_SAFE_AREA_TYPE_SYSTEM: dst = SAFE_AREA_TYPE_SYSTEM; break;
+        case ARK_SAFE_AREA_TYPE_CUTOUT: dst = SAFE_AREA_TYPE_CUTOUT; break;
+        case ARK_SAFE_AREA_TYPE_KEYBOARD: dst = SAFE_AREA_TYPE_KEYBOARD; break;
+        default: LOGE("Unexpected enum value in Ark_SafeAreaType: %{public}d", src);
+    }
+}
 
-// template<>
-//     void AssignCast(std::optional<uint32_t>& dst, const Ark_SafeAreaEdge& src)
-// {
-//     switch (src) {
-//         case ARK_SAFE_AREA_EDGE_TOP: dst = SAFE_AREA_EDGE_TOP; break;
-//         case ARK_SAFE_AREA_EDGE_BOTTOM: dst = SAFE_AREA_EDGE_BOTTOM; break;
-//         case ARK_SAFE_AREA_EDGE_START: dst = SAFE_AREA_EDGE_START; break;
-//         case ARK_SAFE_AREA_EDGE_END: dst = SAFE_AREA_EDGE_END; break;
-//         default: LOGE("Unexpected enum value in Ark_SafeAreaEdge: %{public}d", src);
-//     }
-// }
+template<>
+    void AssignCast(std::optional<uint32_t>& dst, const Ark_SafeAreaEdge& src)
+{
+    switch (src) {
+        case ARK_SAFE_AREA_EDGE_TOP: dst = SAFE_AREA_EDGE_TOP; break;
+        case ARK_SAFE_AREA_EDGE_BOTTOM: dst = SAFE_AREA_EDGE_BOTTOM; break;
+        case ARK_SAFE_AREA_EDGE_START: dst = SAFE_AREA_EDGE_START; break;
+        case ARK_SAFE_AREA_EDGE_END: dst = SAFE_AREA_EDGE_END; break;
+        default: LOGE("Unexpected enum value in Ark_SafeAreaEdge: %{public}d", src);
+    }
+}
 
 template<>
     void AssignCast(std::optional<RenderFit>& dst, const Ark_RenderFit& src)
@@ -1864,25 +1864,25 @@ void SizeImpl(Ark_NativePointer node,
 void ConstraintSizeImpl(Ark_NativePointer node,
                         const Ark_ConstraintSizeOptions* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto minWidth = Converter::OptConvert<CalcLength>(value->minWidth);
-    // if (minWidth) {
-    //     ViewAbstract::SetMinWidth(frameNode, minWidth.value());
-    // }
-    // auto minHeight = Converter::OptConvert<CalcLength>(value->minHeight);
-    // if (minHeight) {
-    //     ViewAbstract::SetMinHeight(frameNode, minHeight.value());
-    // }
-    // auto maxWidth = Converter::OptConvert<CalcLength>(value->maxWidth);
-    // if (maxWidth) {
-    //     ViewAbstract::SetMaxWidth(frameNode, maxWidth.value());
-    // }
-    // auto maxHeight = Converter::OptConvert<CalcLength>(value->maxHeight);
-    // if (maxHeight) {
-    //     ViewAbstract::SetMaxHeight(frameNode, maxHeight.value());
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto minWidth = Converter::OptConvert<CalcLength>(value->minWidth);
+    if (minWidth) {
+        ViewAbstract::SetMinWidth(frameNode, minWidth.value());
+    }
+    auto minHeight = Converter::OptConvert<CalcLength>(value->minHeight);
+    if (minHeight) {
+        ViewAbstract::SetMinHeight(frameNode, minHeight.value());
+    }
+    auto maxWidth = Converter::OptConvert<CalcLength>(value->maxWidth);
+    if (maxWidth) {
+        ViewAbstract::SetMaxWidth(frameNode, maxWidth.value());
+    }
+    auto maxHeight = Converter::OptConvert<CalcLength>(value->maxHeight);
+    if (maxHeight) {
+        ViewAbstract::SetMaxHeight(frameNode, maxHeight.value());
+    }
 }
 void TouchableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
@@ -1935,13 +1935,13 @@ void OnChildTouchTestImpl(Ark_NativePointer node,
 void LayoutWeightImpl(Ark_NativePointer node,
                       const Ark_Union_Number_String* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto weight = Converter::OptConvert<float>(*value);
-    // if (weight) {
-    //     ViewAbstract::SetLayoutWeight(frameNode, weight.value());
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto weight = Converter::OptConvert<float>(*value);
+    if (weight) {
+        ViewAbstract::SetLayoutWeight(frameNode, weight.value());
+    }
 }
 void ChainWeightImpl(Ark_NativePointer node,
                      const Ark_ChainWeightOptions* value)
@@ -1956,10 +1956,10 @@ void ChainWeightImpl(Ark_NativePointer node,
 void PaddingImpl(Ark_NativePointer node,
                  const Ark_Union_Padding_Length_LocalizedPadding* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // ViewAbstract::SetPadding(frameNode, Converter::OptConvert<PaddingProperty>(*value));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    ViewAbstract::SetPadding(frameNode, Converter::OptConvert<PaddingProperty>(*value));
 }
 void SafeAreaPaddingImpl(Ark_NativePointer node,
                          const Ark_Union_Padding_LengthMetrics_LocalizedPadding* value)
@@ -1987,10 +1987,10 @@ void SafeAreaPaddingImpl(Ark_NativePointer node,
 void MarginImpl(Ark_NativePointer node,
                 const Ark_Union_Margin_Length_LocalizedMargin* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // ViewAbstract::SetMargin(frameNode, Converter::OptConvert<PaddingProperty>(*value));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    ViewAbstract::SetMargin(frameNode, Converter::OptConvert<PaddingProperty>(*value));
 }
 void BackgroundColorImpl(Ark_NativePointer node,
                          const Ark_ResourceColor* value)
@@ -2011,7 +2011,9 @@ void PixelRoundImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<uint16_t>(*value);
-    ViewAbstract::SetPixelRound(frameNode, convValue);
+    if (convValue) {
+        ViewAbstract::SetPixelRound(frameNode, convValue);
+    }
 }
 void BackgroundImageSizeImpl(Ark_NativePointer node,
                              const Ark_Union_SizeOptions_ImageSize* value)
@@ -2151,77 +2153,77 @@ void OpacityImpl(Ark_NativePointer node,
 void BorderImpl(Ark_NativePointer node,
                 const Ark_BorderOptions* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto style = Converter::OptConvert<BorderStyleProperty>(value->style);
-    // if (style) {
-    //     ViewAbstract::SetBorderStyle(frameNode, style.value());
-    // }
-    // auto width = Converter::OptConvert<BorderWidthProperty>(value->width);
-    // if (width) {
-    //     ViewAbstract::SetBorderWidth(frameNode, width.value());
-    // }
-    // auto color = Converter::OptConvert<BorderColorProperty>(value->color);
-    // if (color) {
-    //     ViewAbstract::SetBorderColor(frameNode, color.value());
-    // }
-    // auto radius = Converter::OptConvert<BorderRadiusProperty>(value->radius);
-    // if (radius) {
-    //     ViewAbstract::SetBorderRadius(frameNode, radius.value());
-    // }
-    // auto dashGap = Converter::OptConvert<BorderWidthProperty>(value->dashGap);
-    // if (dashGap) {
-    //     ViewAbstract::SetDashGap(frameNode, dashGap.value());
-    // }
-    // auto dashWidth = Converter::OptConvert<BorderWidthProperty>(value->dashWidth);
-    // if (dashWidth) {
-    //     ViewAbstract::SetDashWidth(frameNode, dashWidth.value());
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto style = Converter::OptConvert<BorderStyleProperty>(value->style);
+    if (style) {
+        ViewAbstract::SetBorderStyle(frameNode, style.value());
+    }
+    auto width = Converter::OptConvert<BorderWidthProperty>(value->width);
+    if (width) {
+        ViewAbstract::SetBorderWidth(frameNode, width.value());
+    }
+    auto color = Converter::OptConvert<BorderColorProperty>(value->color);
+    if (color) {
+        ViewAbstract::SetBorderColor(frameNode, color.value());
+    }
+    auto radius = Converter::OptConvert<BorderRadiusProperty>(value->radius);
+    if (radius) {
+        ViewAbstract::SetBorderRadius(frameNode, radius.value());
+    }
+    auto dashGap = Converter::OptConvert<BorderWidthProperty>(value->dashGap);
+    if (dashGap) {
+        ViewAbstract::SetDashGap(frameNode, dashGap.value());
+    }
+    auto dashWidth = Converter::OptConvert<BorderWidthProperty>(value->dashWidth);
+    if (dashWidth) {
+        ViewAbstract::SetDashWidth(frameNode, dashWidth.value());
+    }
 }
 void BorderStyleImpl(Ark_NativePointer node,
                      const Ark_Union_BorderStyle_EdgeStyles* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto style = Converter::OptConvert<BorderStyleProperty>(*value);
-    // if (style) {
-    //     ViewAbstract::SetBorderStyle(frameNode, style.value());
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto style = Converter::OptConvert<BorderStyleProperty>(*value);
+    if (style.has_value()) {
+        ViewAbstract::SetBorderStyle(frameNode, style.value());
+    }
 }
 void BorderWidthImpl(Ark_NativePointer node,
                      const Ark_Union_Length_EdgeWidths_LocalizedEdgeWidths* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto width = Converter::OptConvert<BorderWidthProperty>(*value);
-    // if (width) {
-    //     ViewAbstract::SetBorderWidth(frameNode, width.value());
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto width = Converter::OptConvert<BorderWidthProperty>(*value);
+    if (width.has_value()) {
+        ViewAbstract::SetBorderWidth(frameNode, width.value());
+    }
 }
 void BorderColorImpl(Ark_NativePointer node,
                      const Ark_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto color = Converter::OptConvert<BorderColorProperty>(*value);
-    // if (color) {
-    //     ViewAbstract::SetBorderColor(frameNode, color.value());
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto color = Converter::OptConvert<BorderColorProperty>(*value);
+    if (color.has_value()) {
+        ViewAbstract::SetBorderColor(frameNode, color.value());
+    }
 }
 void BorderRadiusImpl(Ark_NativePointer node,
                       const Ark_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto radiuses = Converter::OptConvert<BorderRadiusProperty>(*value);
-    // if (radiuses) {
-    //     ViewAbstract::SetBorderRadius(frameNode, radiuses.value());
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto radiuses = Converter::OptConvert<BorderRadiusProperty>(*value);
+    if (radiuses) {
+        ViewAbstract::SetBorderRadius(frameNode, radiuses.value());
+    }
 }
 void BorderImageImpl(Ark_NativePointer node,
                      const Ark_BorderImageOption* value)
@@ -3049,41 +3051,41 @@ void VisibilityImpl(Ark_NativePointer node,
 void FlexGrowImpl(Ark_NativePointer node,
                   const Ark_Number* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto convValue = Converter::Convert<float>(*value);
-    // ViewAbstract::SetFlexGrow(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::Convert<float>(*value);
+    ViewAbstract::SetFlexGrow(frameNode, convValue);
 }
 void FlexShrinkImpl(Ark_NativePointer node,
                     const Ark_Number* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto convValue = Converter::Convert<float>(*value);
-    // ViewAbstract::SetFlexShrink(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::Convert<float>(*value);
+    ViewAbstract::SetFlexShrink(frameNode, convValue);
 }
 void FlexBasisImpl(Ark_NativePointer node,
                    const Ark_Union_Number_String* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto convValue = Converter::OptConvert<Dimension>(*value);
-    // Validator::ValidateNonNegative(convValue);
-    // Validator::ValidateNonPercent(convValue);
-    // ViewAbstract::SetFlexBasis(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
+    ViewAbstract::SetFlexBasis(frameNode, convValue);
 }
 void AlignSelfImpl(Ark_NativePointer node,
                    Ark_ItemAlign value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto align = Converter::OptConvert<OHOS::Ace::FlexAlign>(value);
-    // if (align) {
-    //     ViewAbstract::SetAlignSelf(frameNode, align.value());
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto align = Converter::OptConvert<OHOS::Ace::FlexAlign>(value);
+    if (align) {
+        ViewAbstract::SetAlignSelf(frameNode, align.value());
+    }
 }
 void DisplayPriorityImpl(Ark_NativePointer node,
                          const Ark_Number* value)
@@ -3110,86 +3112,86 @@ void ZIndexImpl(Ark_NativePointer node,
 void DirectionImpl(Ark_NativePointer node,
                    Ark_Direction value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto direction = Converter::OptConvert<TextDirection>(value);
-    // if (direction) {
-    //     ViewAbstract::SetLayoutDirection(frameNode, direction.value());
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto direction = Converter::OptConvert<TextDirection>(value);
+    if (direction) {
+        ViewAbstract::SetLayoutDirection(frameNode, direction.value());
+    }
 }
 void AlignImpl(Ark_NativePointer node,
                Ark_Alignment value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto alignment = Converter::OptConvert<Alignment>(value);
-    // if (alignment) {
-    //     ViewAbstract::SetAlign(frameNode, alignment.value());
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto alignment = Converter::OptConvert<Alignment>(value);
+    if (alignment) {
+        ViewAbstract::SetAlign(frameNode, alignment.value());
+    }
 }
 void PositionImpl(Ark_NativePointer node,
                   const Ark_Union_Position_Edges_LocalizedEdges* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // switch (value->selector) {
-    //     case CASE_0: {
-    //         auto x = Converter::ConvertOrDefault(value->value0.x, Dimension());
-    //         auto y = Converter::ConvertOrDefault(value->value0.y, Dimension());
-    //         ViewAbstract::SetPosition(frameNode, { x, y });
-    //         break;
-    //     }
-    //     case CASE_1: {
-    //         auto result = Converter::ConvertOrDefault(value->value1, EdgesParam());
-    //         ViewAbstract::SetPositionEdges(frameNode, result);
-    //         break;
-    //     }
-    //     case CASE_2:
-    //         LOGE("ARKOALA: LocalizedEdges is not fully support.");
-    //         ViewAbstract::SetPositionLocalizedEdges(frameNode, true);
-    //         break;
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    switch (value->selector) {
+        case CASE_0: {
+            auto x = Converter::ConvertOrDefault(value->value0.x, Dimension());
+            auto y = Converter::ConvertOrDefault(value->value0.y, Dimension());
+            ViewAbstract::SetPosition(frameNode, { x, y });
+            break;
+        }
+        case CASE_1: {
+            auto result = Converter::ConvertOrDefault(value->value1, EdgesParam());
+            ViewAbstract::SetPositionEdges(frameNode, result);
+            break;
+        }
+        case CASE_2:
+            LOGE("ARKOALA: LocalizedEdges is not fully support.");
+            ViewAbstract::SetPositionLocalizedEdges(frameNode, true);
+            break;
 
-    //     default:
-    //         LOGE("ARKOALA:PositionImpl: Unexpected value->selector: %{public}d\n", value->selector);
-    //         return;
-    // }
+        default:
+            LOGE("ARKOALA:PositionImpl: Unexpected value->selector: %{public}d\n", value->selector);
+            return;
+    }
 }
 void MarkAnchorImpl(Ark_NativePointer node,
                     const Ark_Union_Position_LocalizedPosition* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto anchorOpt = Converter::OptConvert<PositionWithLocalization>(*value);
-    // if (anchorOpt) {
-    //     if (anchorOpt->second && anchorOpt->first.has_value()) {
-    //         ViewAbstract::SetMarkAnchorStart(frameNode, anchorOpt->first->GetX());
-    //         ViewAbstract::MarkAnchor(frameNode, anchorOpt->first);
-    //         return;
-    //     }
-    //     ViewAbstract::MarkAnchor(frameNode, anchorOpt->first);
-    // } else {
-    //     ViewAbstract::MarkAnchor(frameNode, std::nullopt);
-    // }
-    // ViewAbstract::ResetMarkAnchorStart(frameNode);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto anchorOpt = Converter::OptConvert<PositionWithLocalization>(*value);
+    if (anchorOpt) {
+        if (anchorOpt->second && anchorOpt->first.has_value()) {
+            ViewAbstract::SetMarkAnchorStart(frameNode, anchorOpt->first->GetX());
+            ViewAbstract::MarkAnchor(frameNode, anchorOpt->first);
+            return;
+        }
+        ViewAbstract::MarkAnchor(frameNode, anchorOpt->first);
+    } else {
+        ViewAbstract::MarkAnchor(frameNode, std::nullopt);
+    }
+    ViewAbstract::ResetMarkAnchorStart(frameNode);
 }
 void OffsetImpl(Ark_NativePointer node,
                 const Ark_Union_Position_Edges_LocalizedEdges* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto varOpt = Converter::OptConvert<OffsetOrEdgesParam>(*value);
-    // CHECK_NULL_VOID(varOpt);
-    // if (auto offset = std::get_if<std::optional<OffsetT<Dimension>>>(&varOpt.value()); offset) {
-    //     ViewAbstract::SetOffset(frameNode, offset->value());
-    // } else if (auto edges = std::get_if<std::optional<EdgesParamOptions>>(&varOpt.value()); edges) {
-    //     ViewAbstract::SetOffsetEdges(frameNode, edges->value().value);
-    //     ViewAbstract::SetOffsetLocalizedEdges(frameNode, edges->value().isLocalized);
-    // } else {
-    //     LOGE("ARKOALA CommonMethod::OffsetImpl: incorrect value");
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto varOpt = Converter::OptConvert<OffsetOrEdgesParam>(*value);
+    CHECK_NULL_VOID(varOpt);
+    if (auto offset = std::get_if<std::optional<OffsetT<Dimension>>>(&varOpt.value()); offset) {
+        ViewAbstract::SetOffset(frameNode, offset->value());
+    } else if (auto edges = std::get_if<std::optional<EdgesParamOptions>>(&varOpt.value()); edges) {
+        ViewAbstract::SetOffsetEdges(frameNode, edges->value().value);
+        ViewAbstract::SetOffsetLocalizedEdges(frameNode, edges->value().isLocalized);
+    } else {
+        LOGE("ARKOALA CommonMethod::OffsetImpl: incorrect value");
+    }
 }
 void EnabledImpl(Ark_NativePointer node,
                  Ark_Boolean value)
@@ -3255,22 +3257,22 @@ void AlignRules1Impl(Ark_NativePointer node,
 void AspectRatioImpl(Ark_NativePointer node,
                      const Ark_Number* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto result = Converter::OptConvert<float>(*value);
-    // if (result) {
-    //     auto ratio = result.value();
-    //     if (ratio <= 0.0) {
-    //         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-    //             ViewAbstract::ResetAspectRatio(frameNode);
-    //             return;
-    //         } else {
-    //             ratio = 1.0;
-    //         }
-    //     }
-    //     ViewAbstract::SetAspectRatio(frameNode, ratio);
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto result = Converter::OptConvert<float>(*value);
+    if (result) {
+        auto ratio = result.value();
+        if (ratio <= 0.0) {
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+                ViewAbstract::ResetAspectRatio(frameNode);
+                return;
+            } else {
+                ratio = 1.0;
+            }
+        }
+        ViewAbstract::SetAspectRatio(frameNode, ratio);
+    }
 }
 void ClickEffectImpl(Ark_NativePointer node,
                      const Opt_ClickEffect* value)
@@ -4001,28 +4003,28 @@ void ExpandSafeAreaImpl(Ark_NativePointer node,
                         const Opt_Array_SafeAreaType* types,
                         const Opt_Array_SafeAreaEdge* edges)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto convTypes = Converter::OptConvert<std::vector<std::optional<uint32_t>>>(*types);
-    // auto convEdges = Converter::OptConvert<std::vector<std::optional<uint32_t>>>(*edges);
-    // SafeAreaExpandOpts opts;
-    // uint32_t safeAreaType = SAFE_AREA_TYPE_NONE;
-    // if (convTypes.has_value()) {
-    //     std::vector<std::optional<uint32_t>> vec = convTypes.value();
-    //     for (size_t i = 0; i < vec.size(); ++i) {
-    //         safeAreaType |= vec[i].value_or(0);
-    //     }
-    //     opts.type = safeAreaType;
-    // }
-    // uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
-    // if (convEdges.has_value()) {
-    //     std::vector<std::optional<uint32_t>> vec = convEdges.value();
-    //     for (size_t i = 0; i < vec.size(); ++i) {
-    //         safeAreaEdge |= vec[i].value_or(0);
-    //     }
-    //     opts.edges = safeAreaEdge;
-    // }
-    // ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convTypes = Converter::OptConvert<std::vector<std::optional<uint32_t>>>(*types);
+    auto convEdges = Converter::OptConvert<std::vector<std::optional<uint32_t>>>(*edges);
+    SafeAreaExpandOpts opts;
+    uint32_t safeAreaType = SAFE_AREA_TYPE_NONE;
+    if (convTypes.has_value()) {
+        std::vector<std::optional<uint32_t>> vec = convTypes.value();
+        for (size_t i = 0; i < vec.size(); ++i) {
+            safeAreaType |= vec[i].value_or(0);
+        }
+        opts.type = safeAreaType;
+    }
+    uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
+    if (convEdges.has_value()) {
+        std::vector<std::optional<uint32_t>> vec = convEdges.value();
+        for (size_t i = 0; i < vec.size(); ++i) {
+            safeAreaEdge |= vec[i].value_or(0);
+        }
+        opts.edges = safeAreaEdge;
+    }
+    ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
 }
 void BackgroundImpl(Ark_NativePointer node,
                     const CustomNodeBuilder* builder,

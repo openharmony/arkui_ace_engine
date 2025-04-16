@@ -4119,6 +4119,16 @@ void ViewAbstract::SetVisibility(FrameNode* frameNode, VisibleType visible)
     }
 }
 
+void ViewAbstract::MarkAnchor(FrameNode* frameNode, const std::optional<OffsetT<Dimension>>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(Anchor, *value, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Anchor, frameNode);
+    }
+}
+
 void ViewAbstract::SetPadding(FrameNode* frameNode, const CalcLength& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -4127,10 +4137,14 @@ void ViewAbstract::SetPadding(FrameNode* frameNode, const CalcLength& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding, frameNode);
 }
 
-void ViewAbstract::SetPadding(FrameNode* frameNode, const PaddingProperty& value)
+void ViewAbstract::SetPadding(FrameNode* frameNode, const std::optional<PaddingProperty>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, frameNode);
+    }
 }
 
 void ViewAbstract::SetMargin(FrameNode* frameNode, const CalcLength& value)
@@ -4141,10 +4155,14 @@ void ViewAbstract::SetMargin(FrameNode* frameNode, const CalcLength& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, margin, frameNode);
 }
 
-void ViewAbstract::SetMargin(FrameNode* frameNode, const PaddingProperty& value)
+void ViewAbstract::SetMargin(FrameNode* frameNode, const std::optional<PaddingProperty>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, frameNode);
+    }
 }
 
 void ViewAbstract::SetLayoutDirection(FrameNode* frameNode, TextDirection value)
@@ -4171,14 +4189,18 @@ void ViewAbstract::SetAlignSelf(FrameNode* frameNode, FlexAlign value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, AlignSelf, value, frameNode);
 }
 
-void ViewAbstract::SetFlexBasis(FrameNode* frameNode, const Dimension& value)
+void ViewAbstract::SetFlexBasis(FrameNode* frameNode, const std::optional<Dimension>& optValue)
 {
     CHECK_NULL_VOID(frameNode);
-    if (LessNotEqual(value.Value(), 0.0f)) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, Dimension(), frameNode);
-        return;
+    if (optValue.has_value()) {
+        if (LessNotEqual(optValue.value().Value(), 0.0f)) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, Dimension(), frameNode);
+            return;
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, frameNode);
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, value, frameNode);
 }
 
 void ViewAbstract::ResetFlexShrink(FrameNode* frameNode)
@@ -5798,9 +5820,26 @@ NG::BorderWidthProperty ViewAbstract::GetOuterBorderWidth(FrameNode* frameNode)
     return outBorderWidth.value_or(borderWidth);
 }
 
-void ViewAbstract::SetBias(FrameNode* frameNode, const BiasPair& biasPair)
+void ViewAbstract::SetBias(FrameNode* frameNode, const std::optional<BiasPair>& biasPair)
 {
     CHECK_NULL_VOID(frameNode);
+    if (biasPair.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Bias, biasPair.value(), frameNode);
+    } else {
+        ResetBias(frameNode);
+    }
+}
+
+void ViewAbstract::SetBias(FrameNode* frameNode, const std::optional<float>& horisontal,
+    const std::optional<float>& vertical)
+{
+    auto biasPair = BiasPair(0.5, 0.5);
+    if (horisontal.has_value()) {
+        biasPair.first = horisontal.value();
+    }
+    if (vertical.has_value()) {
+        biasPair.second = vertical.value();
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Bias, biasPair, frameNode);
 }
 
@@ -6056,6 +6095,13 @@ void ViewAbstract::SetPositionLocalizedEdges(bool needLocalized)
     layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
 }
 
+void ViewAbstract::SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized)
+{
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
+}
+
 void ViewAbstract::SetMarkAnchorStart(Dimension& markAnchorStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -6064,6 +6110,19 @@ void ViewAbstract::SetMarkAnchorStart(Dimension& markAnchorStart)
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateMarkAnchorStart(markAnchorStart);
 }
+
+void ViewAbstract::SetMarkAnchorStart(FrameNode* frameNode, const std::optional<Dimension>& markAnchorStart)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (markAnchorStart.has_value()) {
+        layoutProperty->UpdateMarkAnchorStart(markAnchorStart.value());
+    } else {
+        layoutProperty->ResetMarkAnchorStart();
+    }
+}
+
 
 void ViewAbstract::ResetMarkAnchorStart()
 {
@@ -6074,10 +6133,25 @@ void ViewAbstract::ResetMarkAnchorStart()
     layoutProperty->ResetMarkAnchorStart();
 }
 
+void ViewAbstract::ResetMarkAnchorStart(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetMarkAnchorStart();
+}
+
 void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
+}
+
+void ViewAbstract::SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized)
+{
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
