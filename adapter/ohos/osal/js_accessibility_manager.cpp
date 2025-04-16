@@ -4860,7 +4860,7 @@ RefPtr<PipelineBase> JsAccessibilityManager::GetPipelineByWindowId(const int32_t
     }
 }
 
-void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessibilityId(const int64_t elementId,
+RetError JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessibilityId(const int64_t elementId,
     const int32_t requestId, AccessibilityElementOperatorCallback& callback, const int32_t mode)
 {
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "ArkUI search by id: %{public}" PRId64 ", mode: %{public}d",
@@ -4875,7 +4875,7 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessib
         callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
         TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d",
             requestId);
-        return;
+        return RET_OK;
     }
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
     if (!context) {
@@ -4883,7 +4883,7 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessib
         callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
         TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d",
             requestId);
-        return;
+        return RET_OK;
     }
     auto windowId = windowId_;
     context->GetTaskExecutor()->PostTask(
@@ -4901,10 +4901,11 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessib
                 splitElementId, requestId, callback, mode, windowId);
         },
         TaskExecutor::TaskType::UI, "ArkUIAccessibilitySearchElementInfoById");
+    return RET_OK;
 }
 #ifdef WEB_SUPPORTED
 
-void JsAccessibilityManager::WebInteractionOperation::SearchElementInfoByAccessibilityId(const int64_t elementId,
+RetError JsAccessibilityManager::WebInteractionOperation::SearchElementInfoByAccessibilityId(const int64_t elementId,
     const int32_t requestId, Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode)
 {
     uint32_t realMode = mode;
@@ -4919,9 +4920,9 @@ void JsAccessibilityManager::WebInteractionOperation::SearchElementInfoByAccessi
     AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
 
     auto jsAccessibilityManager = GetHandler().Upgrade();
-    CHECK_NULL_VOID(jsAccessibilityManager);
+    CHECK_NULL_RETURN(jsAccessibilityManager, RET_OK);
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_RETURN(context, RET_OK);
     auto windowId = windowId_;
     auto web = webPattern_;
     context->GetTaskExecutor()->PostTask(
@@ -4935,6 +4936,7 @@ void JsAccessibilityManager::WebInteractionOperation::SearchElementInfoByAccessi
                 splitElementId, requestId, callback, realMode, windowId, webPattern);
         },
         TaskExecutor::TaskType::UI, "ArkWebAccessibilitySearchElementInfoById");
+    return RET_OK;
 }
 
 void JsAccessibilityManager::WebInteractionOperation::SearchElementInfosByText(const int64_t elementId,
