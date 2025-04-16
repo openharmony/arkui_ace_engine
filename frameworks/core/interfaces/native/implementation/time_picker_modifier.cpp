@@ -50,7 +50,26 @@ void SetTimePickerOptionsImpl(Ark_NativePointer node,
     }
     TimePickerModelNG::SetHasSecond(frameNode, showSeconds);
 
-    LOGE("TimePickerInterfaceModifier::SetTimePickerOptionsImpl - Ark_CustomObject isn't supported");
+    auto selected = options ?
+        Converter::OptConvert<PickerTime>(options->value.selected) :
+        std::nullopt;
+    if (selected.has_value()) {
+        TimePickerModelNG::SetSelectedTime(frameNode, selected.value());
+    }
+
+    auto start = options ?
+        Converter::OptConvert<PickerTime>(options->value.start) :
+        std::nullopt;
+    if (start.has_value()) {
+        TimePickerModelNG::SetStartTime(frameNode, start.value());
+    }
+
+    auto end = options ?
+        Converter::OptConvert<PickerTime>(options->value.end) :
+        std::nullopt;
+    if (end.has_value()) {
+        TimePickerModelNG::SetEndTime(frameNode, end.value());
+    }
 }
 } // TimePickerInterfaceModifier
 namespace TimePickerAttributeModifier {
@@ -164,8 +183,11 @@ void DateTimeOptions1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TimePickerModelNG::SetDateTimeOptions1(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    DateTimeType dateTimeOptions = Converter::OptConvert<DateTimeType>(*value).value_or(
+        DateTimeType {ZeroPrefixType::AUTO, ZeroPrefixType::AUTO, ZeroPrefixType::AUTO});
+    TimePickerModelNG::SetDateTimeOptions(frameNode, dateTimeOptions.hourType,
+        dateTimeOptions.minuteType, dateTimeOptions.secondType);
 }
 void OnChange0Impl(Ark_NativePointer node,
                    const Callback_TimePickerResult_Void* value)

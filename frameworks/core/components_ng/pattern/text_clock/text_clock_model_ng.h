@@ -62,7 +62,7 @@ public:
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetBuilderFunc(FrameNode* frameNode, TextClockMakeCallback&& jsMake);
     static void InitFontDefault(FrameNode* frameNode, const TextStyle& textStyle);
-    static void SetDateTimeOptions(FrameNode* frameNode, const ZeroPrefixType& hourType);
+    static void SetDateTimeOptions(FrameNode* frameNode, const std::optional<ZeroPrefixType>& hourType);
     static void SetJSTextClockController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
     static void SetOnDateChange(FrameNode* frameNode, std::function<void(const std::string)>&& onChange);
     static RefPtr<Referenced> GetJSTextClockController(FrameNode* frameNode);

@@ -35,6 +35,9 @@ const auto PROP_NAME_LOOP = "loop";
 const auto PROP_NAME_DISAPPEAR_TEXT_STYLE = "disappearTextStyle";
 const auto PROP_NAME_TEXT_STYLE = "textStyle";
 const auto PROP_NAME_SELECTED_TEXT_STYLE = "selectedTextStyle";
+const auto PROP_NAME_DATETIMEOPTIONS = "dateTimeOptions";
+const auto PROP_NAME_HOUR = "hour";
+const auto PROP_NAME_MINUTE = "minute";
 const auto PROP_NAME_FONT = "font";
 const auto PROP_NAME_COLOR = "color";
 const auto PROP_NAME_FONT_SIZE = "size";
@@ -58,6 +61,8 @@ const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE = COLOR_BLACK;
 const auto ATTRIBUTE_HAPTIC_FEEDBACK_DEFAULT_VALUE = true;
 const auto ATTRIBUTE_ENABLE_CASCADE_DEFAULT_VALUE = "false";
 const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE = "1";
+const auto ATTRIBUTE_DATETIMEOPTIONS_HOUR_DEFAULT_VALUE = "numeric";
+const auto ATTRIBUTE_DATETIMEOPTIONS_MINUTE_DEFAULT_VALUE = "2-digit";
 
 // Test plans
 const Ark_Float32 AFLT32_POS(1.234f);
@@ -165,6 +170,22 @@ const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), COLOR_BLACK },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_BLACK }
+};
+
+typedef std::pair<Opt_String, std::string> TimeDateTestStep;
+const std::vector<TimeDateTestStep> DATETIMEOPTIONS_HOUR_TEST_PLAN = {
+    { Converter::ArkValue<Opt_String>("numeric"), "numeric" },
+    { Converter::ArkValue<Opt_String>("2-digit"), "2-digit" },
+    { Converter::ArkValue<Opt_String>("digit"), "numeric" },
+    { Converter::ArkValue<Opt_String>("text"), "numeric" },
+    { Converter::ArkValue<Opt_String>(Ark_Empty()), "numeric" }
+};
+const std::vector<TimeDateTestStep> DATETIMEOPTIONS_MINUTE_TEST_PLAN = {
+    { Converter::ArkValue<Opt_String>("numeric"), "numeric" },
+    { Converter::ArkValue<Opt_String>("2-digit"), "2-digit" },
+    { Converter::ArkValue<Opt_String>("digit"), "2-digit" },
+    { Converter::ArkValue<Opt_String>("text"), "2-digit" },
+    { Converter::ArkValue<Opt_String>(Ark_Empty()), "2-digit" }
 };
 
 const std::vector<PickerTime> CHANGE_EVENT_TEST_PLAN = {
@@ -836,6 +857,40 @@ HWTEST_F(TimePickerModifierTest, setSelectedTextColor, TestSize.Level1)
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
         checkVal = GetAttrValue<std::string>(styleObject, PROP_NAME_COLOR);
         EXPECT_EQ(checkVal, expectVal);
+    }
+}
+
+/**
+ * @tc.name: setDateTimeOptions
+ * @tc.desc: Check the functionality of TimePickerModifierTest.DateTimeOptionsImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerModifierTest, setDateTimeOptions, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDateTimeOptions0, nullptr);
+    auto fullJson = GetJsonValue(node_);
+    auto optionsObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DATETIMEOPTIONS);
+    auto hourStr = GetAttrValue<std::string>(optionsObject, PROP_NAME_HOUR);
+    EXPECT_EQ(hourStr, ATTRIBUTE_DATETIMEOPTIONS_HOUR_DEFAULT_VALUE);
+    auto minuteStr = GetAttrValue<std::string>(optionsObject, PROP_NAME_MINUTE);
+    EXPECT_EQ(minuteStr, ATTRIBUTE_DATETIMEOPTIONS_MINUTE_DEFAULT_VALUE);
+
+    for (const auto& [val, expectVal] : DATETIMEOPTIONS_HOUR_TEST_PLAN) {
+        Ark_DateTimeOptions dateTimeOptions {.hour = val };
+        modifier_->setDateTimeOptions0(node_, &dateTimeOptions);
+        auto fullJson = GetJsonValue(node_);
+        optionsObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DATETIMEOPTIONS);
+        hourStr = GetAttrValue<std::string>(optionsObject, PROP_NAME_HOUR);
+        EXPECT_EQ(hourStr, expectVal);
+    }
+
+    for (const auto& [val, expectVal] : DATETIMEOPTIONS_MINUTE_TEST_PLAN) {
+        Ark_DateTimeOptions dateTimeOptions {.minute = val };
+        modifier_->setDateTimeOptions0(node_, &dateTimeOptions);
+        auto fullJson = GetJsonValue(node_);
+        optionsObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DATETIMEOPTIONS);
+        minuteStr = GetAttrValue<std::string>(optionsObject, PROP_NAME_MINUTE);
+        EXPECT_EQ(minuteStr, expectVal);
     }
 }
 
