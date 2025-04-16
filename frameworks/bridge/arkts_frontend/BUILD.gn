@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 group("arkts_frontend_native_package") {
-  deps = [ "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ace_ani_native_package" ]
+  deps = [ "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ace_ani_native_package" ]
 }
 
 template("arkts_frontend") {
