@@ -115,6 +115,7 @@ public:
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& gestureSwipe);
     static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
     static void SetOnContentWillChange(FrameNode* frameNode, std::function<bool(int32_t, int32_t)>&& callback);
+    static void InitDivider(FrameNode* frameNode);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);

@@ -403,7 +403,8 @@ void EnhancedImageQualityImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("Arkoala: Image.EnhancedImageQualityImpl - method not implemented");
+    auto convValue = Converter::OptConvert<AIImageQuality>(value);
+    ImageModelNG::SetEnhancedImageQuality(frameNode, convValue);
 }
 void OrientationImpl(Ark_NativePointer node,
                      Ark_ImageRotateOrientation value)

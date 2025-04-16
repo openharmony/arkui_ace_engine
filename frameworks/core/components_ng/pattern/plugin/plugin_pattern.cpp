@@ -348,10 +348,12 @@ void PluginPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     auto pluginLayoutProperty = host->GetLayoutProperty<PluginLayoutProperty>();
     auto requestPluginInfo = pluginLayoutProperty->GetRequestPluginInfo();
     auto templateJSON = JsonUtil::Create(true);
-    
+
     templateJSON->Put("source", requestPluginInfo ? requestPluginInfo->source.c_str() : "");
     templateJSON->Put("bundleName", requestPluginInfo ? requestPluginInfo->bundleName.c_str() : "");
     json->PutExtAttr("template", templateJSON, filter);
+    auto data = pluginLayoutProperty->GetData();
+    json->PutExtAttr("data", data ? data->c_str() : "", filter);
 }
 
 void PluginPattern::OnActionEvent(const std::string& action) const

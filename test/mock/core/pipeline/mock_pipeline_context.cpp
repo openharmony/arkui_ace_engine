@@ -147,7 +147,7 @@ RefPtr<MockPipelineContext> MockPipelineContext::pipeline_;
 // mock_pipeline_context =======================================================
 void MockPipelineContext::SetUp()
 {
-    pipeline_ = AceType::MakeRefPtr<MockPipelineContext>();
+    pipeline_ = AceType::MakeRefPtr<::testing::NiceMock<MockPipelineContext>>();
     pipeline_->eventManager_ = AceType::MakeRefPtr<EventManager>();
     pipeline_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
@@ -1180,7 +1180,8 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
     if (instanceId_ == IGNORE_POSITION_TRANSITION_SWITCH) {
         return nullptr;
     }
-    static RefPtr<AccessibilityManager> testAccessibilityManager = AceType::MakeRefPtr<MockAccessibilityManager>();
+    static RefPtr<AccessibilityManager> testAccessibilityManager =
+        AceType::MakeRefPtr<::testing::NiceMock<MockAccessibilityManager>>();
     return testAccessibilityManager;
 }
 

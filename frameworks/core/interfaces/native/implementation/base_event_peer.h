@@ -17,10 +17,15 @@
 
 #include "core/event/ace_events.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 struct BaseEventPeer {
+protected:
+    BaseEventPeer() = default;
     virtual ~BaseEventPeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
 
+public:
     virtual OHOS::Ace::BaseEventInfo* GetBaseInfo() = 0;
 };
 
@@ -29,10 +34,12 @@ template<typename AceInfo,
     std::enable_if_t<std::is_base_of_v<BaseEventInfo, AceInfo>, bool> = true
 >
 class SomeEventPeer : public BaseEventPeer {
+protected:
+    SomeEventPeer() = default;
+    ~SomeEventPeer() override = default;
+
 public:
     using AceEventInfo = AceInfo;
-
-    ~SomeEventPeer() override = default;
 
     BaseEventInfo* GetBaseInfo() override
     {
@@ -57,5 +64,10 @@ public:
     const std::shared_ptr<EventInfo> eventInfo = std::make_shared<EventInfo>();
 };
 
-using BaseEventPeerImpl = SomeEventPeer<BaseEventInfo>;
+struct BaseEventPeerImpl : public SomeEventPeer<BaseEventInfo> {
+protected:
+    BaseEventPeerImpl() = default;
+    ~BaseEventPeerImpl() override = default;
+    friend PeerUtils;
+};
 } // namespace OHOS::Ace::NG::GeneratedModifier

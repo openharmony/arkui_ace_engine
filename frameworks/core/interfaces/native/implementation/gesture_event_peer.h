@@ -17,7 +17,6 @@
 
 #include "core/gestures/gesture_event.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
-#include "core/interfaces/native/utility/peer_utils.h"
 
 struct GestureEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::GestureEvent> {

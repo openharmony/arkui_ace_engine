@@ -44,12 +44,16 @@ const auto ATTRIBUTE_PATH_COLOR_NAME = "pathColor";
 const auto ATTRIBUTE_PATH_COLOR_DEFAULT_VALUE = "#FF000000";
 const auto ATTRIBUTE_AUTO_RESET_NAME = "autoReset";
 const auto ATTRIBUTE_AUTO_RESET_DEFAULT_VALUE = "true";
+const auto ATTRIBUTE_SKIP_UNSELECTED_POINT = "skipUnselectedPoint";
+const auto ATTRIBUTE_SKIP_UNSELECTED_POINT_DEFAULT_VALUE = "false";
 const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_COLOR_NAME = "activeCircleColor";
-const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_COLOR_DEFAULT_VALUE = "#FF0000FF";
+const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_COLOR_DEFAULT_VALUE = "#FF000000";
 const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_RADIUS_NAME = "activeCircleRadius";
-const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_RADIUS_DEFAULT_VALUE = "0.00px";
+const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_RADIUS_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_NAME = "enableWaveEffect";
 const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_DEFAULT_VALUE = "true";
+const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_FOREGROUND_NAME = "enableForeground";
+const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_FOREGROUND_DEFAULT_VALUE = "false";
 
 const int32_t INT_NEG = -1234;
 const int32_t INT_ZERO = 0;
@@ -418,6 +422,39 @@ HWTEST_F(PatternLockModifierTest, setAutoResetTestValidValues, TestSize.Level1)
 }
 
 /*
+ * @tc.name: setSkipUnselectedPointTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockModifierTest, setSkipUnselectedPointTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SKIP_UNSELECTED_POINT);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SKIP_UNSELECTED_POINT_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setSkipUnselectedPointTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockModifierTest, setSkipUnselectedPointTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    Ark_Boolean inputValueAutoReset;
+    for (auto [passed, checkVal, expected]: autoResetValidValues) {
+        inputValueAutoReset = checkVal;
+        modifier_->setSkipUnselectedPoint(node_, inputValueAutoReset);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SKIP_UNSELECTED_POINT);
+        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+    }
+}
+
+/*
  * @tc.name: setOnPatternCompleteTest
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
@@ -519,7 +556,7 @@ HWTEST_F(PatternLockModifierTest, SetOnDotConnectTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockModifierTest, DISABLED_setActivateCircleStyleTestDefaultValues, TestSize.Level1)
+HWTEST_F(PatternLockModifierTest, setActivateCircleStyleTestDefaultValues, TestSize.Level1)
 {
     std::string resultStr;
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
@@ -532,6 +569,9 @@ HWTEST_F(PatternLockModifierTest, DISABLED_setActivateCircleStyleTestDefaultValu
     resultStr = GetAttrValue<std::string>(jsonValue,
         ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_DEFAULT_VALUE);
+    resultStr = GetAttrValue<std::string>(jsonValue,
+        ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_FOREGROUND_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_FOREGROUND_DEFAULT_VALUE);
 }
 
 // Valid values for attribute 'color' of method 'activateCircleStyle'
@@ -579,10 +619,14 @@ HWTEST_F(PatternLockModifierTest, setActivateCircleStyleTestValidValues, TestSiz
 
     for (auto [passed, checkVal, expected]: styleEnableWaveEffectValidValues) {
         realInputValue.value.enableWaveEffect = checkVal;
+        realInputValue.value.enableForeground = checkVal;
         modifier_->setActivateCircleStyle(node_, &realInputValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue,
             ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_NAME);
+        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        resultStr = GetAttrValue<std::string>(jsonValue,
+            ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_FOREGROUND_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
     }
 

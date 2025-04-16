@@ -243,19 +243,26 @@ void ClipContentImpl(Ark_NativePointer node,
             // mode cannot be nullopt, because in model created pair for lauout property
             ScrollableModelNG::SetContentClip(frameNode, mode.value_or(ContentClipMode::DEFAULT), nullptr);
         },
-        [](const auto& value) {
-            LOGE("ScrollableCommonMethodModifier::ClipContentImpl set RectShape is not supported");
+        [frameNode](const Ark_RectShape& value) {
+            if (value && value->shape) {
+                ScrollableModelNG::SetContentClip(frameNode, ContentClipMode::CUSTOM, value->shape);
+            } else {
+                ScrollableModelNG::SetContentClip(frameNode, ContentClipMode::DEFAULT, nullptr);
+            }
         },
-        []() {}
-    );
+        [frameNode]() {
+            ScrollableModelNG::SetContentClip(frameNode, ContentClipMode::DEFAULT, nullptr);
+        });
 }
 void DigitalCrownSensitivityImpl(Ark_NativePointer node,
                                  const Opt_CrownSensitivity* value)
 {
+#ifdef SUPPORT_DIGITAL_CROWN
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ScrollableCommonMethodModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt;
+    ScrollableModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
+#endif
 }
 void BackToTopImpl(Ark_NativePointer node,
                    Ark_Boolean value)
@@ -263,7 +270,7 @@ void BackToTopImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //ScrollableCommonMethodModelNG::SetBackToTop(frameNode, convValue);
+    ScrollableModelNG::SetBackToTop(frameNode, convValue);
 }
 void EdgeEffectImpl(Ark_NativePointer node,
                     Ark_EdgeEffect edgeEffect,

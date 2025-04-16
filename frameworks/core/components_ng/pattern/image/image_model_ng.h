@@ -137,7 +137,7 @@ public:
     static ImageResizableSlice GetResizableSlice(FrameNode* frameNode);
     static void SetDynamicRangeMode(FrameNode* frameNode, const std::optional<DynamicRangeMode>& dynamicRangeMode);
     static void SetHdrBrightness(FrameNode* frameNode, float hdrBrightness);
-    static void SetEnhancedImageQuality(FrameNode* frameNode, AIImageQuality imageQuality);
+    static void SetEnhancedImageQuality(FrameNode* frameNode, const std::optional<AIImageQuality>& imageQuality);
     static bool GetFitOriginalSize(FrameNode* frameNode);
     static uint32_t GetFillColor(FrameNode* frameNode);
     static void SetPixelMap(FrameNode* frameNode, void* drawableDescriptor);

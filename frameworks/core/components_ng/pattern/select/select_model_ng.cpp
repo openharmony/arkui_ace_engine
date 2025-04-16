@@ -517,7 +517,7 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
     auto select = AceType::Claim(frameNode);
     SetSelectDefaultSize(select);
     auto pattern = select->GetPattern<SelectPattern>();
-    
+
     CHECK_NULL_VOID(pattern);
     auto* pipeline = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
@@ -529,7 +529,7 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
         paddings.right = NG::CalcLength(pattern->GetSelectLeftRightMargin());
         ViewAbstract::SetPadding(frameNode, paddings);
     }
-    
+
     pattern->BuildChild();
     // create menu node
     if (!pattern->GetMenuNode()) {
@@ -649,7 +649,11 @@ void SelectModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->SetFontColor(color);
+    if (color) {
+        pattern->SetFontColor(color);
+    } else {
+        pattern->ResetFontColor();
+    }
 }
 
 void SelectModelNG::SetSelectedOptionBgColor(FrameNode* frameNode, const std::optional<Color>& color)

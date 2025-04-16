@@ -91,10 +91,10 @@ HWTEST_F(CommonMethodModifierTest14, DISABLED_gesture_Tap_Test, TestSize.Level1)
     TapGestureModelNG::SetMock(mockModel);
     EXPECT_CALL(*mockModel, Create(_, _, _)).Times(3);
 
-    TapGestureEventPeer peer;
+    auto peer = PeerUtils::CreatePeer<TapGestureEventPeer>();
     auto event = std::make_shared<TapGestureEvent>();
     event->SetFingerList({ FingerInfo() });
-    peer.SetEventInfo(event);
+    peer->SetEventInfo(event);
 
     Ark_TapGestureInterface interface = {  };
     Ark_GestureType type = Converter::ArkUnion<Ark_GestureType, Ark_TapGestureInterface>(interface);
@@ -117,10 +117,10 @@ HWTEST_F(CommonMethodModifierTest14, DISABLED_gesture_LongPress_Test, TestSize.L
     LongPressGestureModelNG::SetMock(mockModel);
     EXPECT_CALL(*mockModel, Create(_, _, _)).Times(3);
 
-    LongPressGestureEventPeer peer;
+    auto peer = PeerUtils::CreatePeer<LongPressGestureEventPeer>();
     auto event = std::make_shared<LongPressGestureEvent>();
     event->SetFingerList({ FingerInfo() });
-    peer.SetEventInfo(event);
+    peer->SetEventInfo(event);
 
     Ark_LongPressGestureInterface interface = {  };
     Ark_GestureType type = Converter::ArkUnion<Ark_GestureType, Ark_LongPressGestureInterface>(interface);
@@ -143,10 +143,10 @@ HWTEST_F(CommonMethodModifierTest14, DISABLED_gesture_Pan_Test, TestSize.Level1)
     PanGestureModelNG::SetMock(mockModel);
     EXPECT_CALL(*mockModel, Create(_, _, _)).Times(3);
 
-    PanGestureEventPeer peer;
+    auto peer = PeerUtils::CreatePeer<PanGestureEventPeer>();
     auto event = std::make_shared<PanGestureEvent>();
     event->SetFingerList({ FingerInfo(), FingerInfo() });
-    peer.SetEventInfo(event);
+    peer->SetEventInfo(event);
 
     Ark_PanGestureInterface interface = {  };
     Ark_GestureType type = Converter::ArkUnion<Ark_GestureType, Ark_PanGestureInterface>(interface);
@@ -169,10 +169,10 @@ HWTEST_F(CommonMethodModifierTest14, DISABLED_gesture_Pinch_Test, TestSize.Level
     PinchGestureModelNG::SetMock(mockModel);
     EXPECT_CALL(*mockModel, Create(_, _)).Times(3);
 
-    PinchGestureEventPeer peer;
+    auto peer = PeerUtils::CreatePeer<PinchGestureEventPeer>();
     auto event = std::make_shared<PinchGestureEvent>();
     event->SetFingerList({ FingerInfo(), FingerInfo() });
-    peer.SetEventInfo(event);
+    peer->SetEventInfo(event);
 
     Ark_PinchGestureInterface interface = {  };
     Ark_GestureType type = Converter::ArkUnion<Ark_GestureType, Ark_PinchGestureInterface>(interface);
@@ -195,10 +195,10 @@ HWTEST_F(CommonMethodModifierTest14, DISABLED_gesture_Swipe_Test, TestSize.Level
     SwipeGestureModelNG::SetMock(mockModel);
     EXPECT_CALL(*mockModel, Create(_, _, _)).Times(3);
 
-    SwipeGestureEventPeer peer;
+    auto peer = PeerUtils::CreatePeer<SwipeGestureEventPeer>();
     auto event = std::make_shared<SwipeGestureEvent>();
     event->SetFingerList({ FingerInfo() });
-    peer.SetEventInfo(event);
+    peer->SetEventInfo(event);
 
     Ark_SwipeGestureInterface interface = {  };
     Ark_GestureType type = Converter::ArkUnion<Ark_GestureType, Ark_SwipeGestureInterface>(interface);
@@ -221,11 +221,11 @@ HWTEST_F(CommonMethodModifierTest14, DISABLED_gesture_Rotation_Test, TestSize.Le
     RotationGestureModelNG::SetMock(mockModel);
     EXPECT_CALL(*mockModel, Create(_, _)).Times(3);
 
-    RotationGestureEventPeer peer;
+    auto peer = PeerUtils::CreatePeer<RotationGestureEventPeer>();
     auto event = std::make_shared<RotationGestureEvent>();
     event->SetFingerList({ FingerInfo(), FingerInfo() });
     event->SetAngle(10);
-    peer.SetEventInfo(event);
+    peer->SetEventInfo(event);
 
     Ark_RotationGestureInterface interface = {  };
     Ark_GestureType type = Converter::ArkUnion<Ark_GestureType, Ark_RotationGestureInterface>(interface);

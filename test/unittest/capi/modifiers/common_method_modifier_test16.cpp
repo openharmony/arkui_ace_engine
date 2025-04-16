@@ -325,7 +325,7 @@ public:
         event.code = KeyCode::KEY_MENU;
         event.action = KeyAction::DOWN;
         event.keyIntention = KeyIntention::INTENTION_MENU;
-        auto subwindowBind = AceType::MakeRefPtr<MockSubwindowBindTest>();
+        auto subwindowBind = AceType::MakeRefPtr<::testing::NiceMock<MockSubwindowBindTest>>();
         subwindowBind->InitContainer();
         SubwindowManager::GetInstance()->AddSubwindow(containerId, SubwindowType::TYPE_MENU, subwindowBind);
         SubwindowManager::GetInstance()->SetCurrentSubwindow(subwindowBind);

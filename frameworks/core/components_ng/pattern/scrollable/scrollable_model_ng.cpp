@@ -371,6 +371,15 @@ void ScrollableModelNG::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
     CHECK_NULL_VOID(pattern);
     pattern->SetDigitalCrownSensitivity(sensitivity);
 }
+
+void ScrollableModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode,
+                                                   const std::optional<CrownSensitivity>& valueOpt)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDigitalCrownSensitivity(valueOpt.value_or(CrownSensitivity::MEDIUM));
+}
 #endif
 
 void ScrollableModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)

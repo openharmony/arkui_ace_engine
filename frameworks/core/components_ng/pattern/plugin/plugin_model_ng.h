@@ -34,6 +34,7 @@ public:
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetRequestPluginInfo(FrameNode *frameNode, const std::optional<RequestPluginInfo>& pluginInfo);
+    static void SetData(FrameNode *frameNode, const std::optional<std::string>& data);
     static void SetOnComplete(FrameNode *frameNode, std::function<void(const std::string&)>&& OnComplete);
     static void SetOnError(FrameNode *frameNode, std::function<void(const std::string&)>&& OnError);
 };

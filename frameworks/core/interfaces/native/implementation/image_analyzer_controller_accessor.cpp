@@ -21,7 +21,6 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 
-
 namespace OHOS::Ace::NG::Converter {
 
 void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src)
@@ -70,14 +69,8 @@ Ark_NativePointer GetFinalizerImpl()
 Array_ImageAnalyzerType GetImageAnalyzerSupportTypesImpl(Ark_ImageAnalyzerController peer)
 {
     CHECK_NULL_RETURN(peer, {});
-    auto peerImpl = reinterpret_cast<ImageAnalyzerControllerPeer*>(peer);
-    CHECK_NULL_RETURN(peerImpl, {});
-
-    std::vector<ImageAnalyzerType> src = peerImpl->TriggerGetImageAnalyzerSupportTypes();
-    Array_ImageAnalyzerType dst = Converter::ArkValue<Array_ImageAnalyzerType>(src);
-
-    LOGE("ARKOALA ImageAnalyzerControllerPeer::GetImageAnalyzerSupportTypesImpl return type not implemented.");
-    return {};
+    auto types = peer->GetImageAnalyzerSupportTypes();
+    return Converter::ArkValue<Array_ImageAnalyzerType>(types, Converter::FC);
 }
 } // ImageAnalyzerControllerAccessor
 const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerControllerAccessor()

@@ -29,6 +29,7 @@ struct CircleStyleOptions {
     std::optional<Color>color;
     std::optional<Dimension> radius;
     std::optional<bool> enableWaveEffect;
+    std::optional<bool> enableForeground;
 };
 }
 }
@@ -41,6 +42,7 @@ CircleStyleOptions Convert(const Ark_CircleStyleOptions& src)
     style.color = OptConvert<Color>(src.color);
     style.radius = OptConvert<Dimension>(src.radius);
     style.enableWaveEffect = OptConvert<bool>(src.enableWaveEffect);
+    style.enableForeground = OptConvert<bool>(src.enableForeground);
     return style;
 }
 }
@@ -187,12 +189,14 @@ void ActivateCircleStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto convValue = value ? Converter::OptConvert<CircleStyleOptions>(*value) : std::nullopt;
     if (convValue) {
         PatternLockModelNG::SetActiveCircleColor(frameNode, convValue->color);
         PatternLockModelNG::SetEnableWaveEffect(frameNode, convValue->enableWaveEffect);
         PatternLockModelNG::SetActiveCircleRadius(frameNode, convValue->radius);
+        if (convValue->enableForeground) {
+            PatternLockModelNG::SetEnableForeground(frameNode, convValue->enableForeground.value());
+        }
     }
 }
 void SkipUnselectedPointImpl(Ark_NativePointer node,
@@ -201,7 +205,7 @@ void SkipUnselectedPointImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //PatternLockModelNG::SetSkipUnselectedPoint(frameNode, convValue);
+    PatternLockModelNG::SetSkipUnselectedPoint(frameNode, convValue);
 }
 } // PatternLockAttributeModifier
 const GENERATED_ArkUIPatternLockModifier* GetPatternLockModifier()

@@ -320,11 +320,12 @@ void ImageModelNG::SetEnhancedImageQuality(AIImageQuality imageQuality)
     pattern->SetImageQuality(imageQuality);
 }
 
-void ImageModelNG::SetEnhancedImageQuality(FrameNode* frameNode, AIImageQuality imageQuality)
+void ImageModelNG::SetEnhancedImageQuality(FrameNode* frameNode, const std::optional<AIImageQuality>& imageQuality)
 {
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetImageQuality(imageQuality);
+    pattern->SetImageQuality(imageQuality.value_or(AIImageQuality::NONE));
 }
 
 void ImageModelNG::SetBorder(const Border& border) {}

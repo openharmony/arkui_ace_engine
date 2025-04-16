@@ -416,4 +416,44 @@ HWTEST_F(BaseEventAccessorTest, SetDeviceIdTest, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: GetTargetDisplayIdTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseEventAccessorTest, GetTargetDisplayIdTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getTargetDisplayId, nullptr);
+    for (auto& [value, expected] : testFixtureInt32Values) {
+        baseEvent_->SetTargetDisplayId(expected);
+        Opt_Number id = accessor_->getTargetDisplayId(peer_);
+        EXPECT_EQ(Converter::OptConvert<int32_t>(id), expected);
+    }
+    Opt_Number emptyId1 = accessor_->getTargetDisplayId(nullptr);
+    EXPECT_EQ(Converter::OptConvert<int32_t>(emptyId1), std::nullopt);
+    peer_->SetEventInfo(nullptr);
+    Opt_Number emptyId2 = accessor_->getTargetDisplayId(peer_);
+    EXPECT_EQ(Converter::OptConvert<int32_t>(emptyId2), std::nullopt);
+}
+
+/**
+ * @tc.name: SetTargetDisplayIdTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseEventAccessorTest, SetTargetDisplayIdTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setTargetDisplayId, nullptr);
+    for (auto& [value, expected] : testFixtureInt32Values) {
+        accessor_->setTargetDisplayId(peer_, &value);
+        int32_t id = baseEvent_->GetTargetDisplayId();
+        EXPECT_EQ(id, expected);
+    }
+    const auto value = Converter::ArkValue<Ark_Number>(-1);
+    accessor_->setTargetDisplayId(nullptr, &value);
+    accessor_->setTargetDisplayId(peer_, nullptr);
+    int32_t id = baseEvent_->GetTargetDisplayId();
+    EXPECT_EQ(id, testFixtureInt32Values.back().second);
+}
+
 } // namespace OHOS::Ace::NG

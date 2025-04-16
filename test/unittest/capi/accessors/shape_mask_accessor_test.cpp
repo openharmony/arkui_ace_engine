@@ -23,6 +23,10 @@ using namespace testing::ext;
 
 namespace {
 const float DEFAULT_FLOAT_VALUE = 74.32f;
+const int32_t DEFAULT_COLOR = 0xFF000000;
+const float DEFAULT_WIDTH = 0.0f;
+const double FLT_PRECISION = 0.001;
+
 // test plan
 const std::vector<std::tuple<Ark_Number, Dimension>> numberTestPlan = {
     { Converter::ArkValue<Ark_Number>(100.0f), Dimension(100.0f) },
@@ -37,6 +41,20 @@ std::vector<std::tuple<Ark_String, std::string>> stringTestPlan = {
     { Converter::ArkValue<Ark_String>("123"), "123" },
     { Converter::ArkValue<Ark_String>("value %2"), "value %2" },
     { Converter::ArkValue<Ark_String>("echo(%10)"), "echo(%10)" },
+};
+const std::vector<std::tuple<Ark_Number, uint32_t>> numberUIntTestPlan = {
+    { Converter::ArkValue<Ark_Number>(100), 100 },
+    { Converter::ArkValue<Ark_Number>(0), 0 },
+    { Converter::ArkValue<Ark_Number>(10), 10 },
+    { Converter::ArkValue<Ark_Number>(12), 12 },
+    { Converter::ArkValue<Ark_Number>(56), 56 },
+};
+const std::vector<std::tuple<Ark_Number, float>> numberFloatTestPlan = {
+    { Converter::ArkValue<Ark_Number>(100.0f), 100.0f },
+    { Converter::ArkValue<Ark_Number>(0.0f), 0.0f },
+    { Converter::ArkValue<Ark_Number>(-100.0f), -100.0f },
+    { Converter::ArkValue<Ark_Number>(12.34f), 12.34f },
+    { Converter::ArkValue<Ark_Number>(-56.73f), -56.73f },
 };
 } // namespace
 class ShapeMaskAccessorTest : public AccessorTestBase<GENERATED_ArkUIShapeMaskAccessor,
@@ -379,6 +397,113 @@ HWTEST_F(ShapeMaskAccessorTest, setCommandPathTest, TestSize.Level1)
         EXPECT_EQ(peer_->roundRect, nullptr);
         EXPECT_EQ(peer_->circle, nullptr);
         EXPECT_EQ(peer_->oval, nullptr);
+    }
+}
+
+/**
+ * @tc.name: getFillColorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeMaskAccessorTest, getFillColorTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getFillColor, nullptr);
+
+    auto result = accessor_->getFillColor(peer_);
+    auto color = Converter::Convert<int32_t>(result);
+    EXPECT_EQ(color, DEFAULT_COLOR);
+
+    for (const auto& [unused, expected] : numberUIntTestPlan) {
+        peer_->fillColor = expected;
+        auto result = accessor_->getFillColor(peer_);
+        auto actual = Converter::Convert<int32_t>(result);
+        EXPECT_EQ(actual, expected);
+    }
+}
+
+/**
+ * @tc.name: setFillColorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeMaskAccessorTest, setFillColorTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setFillColor, nullptr);
+
+    for (const auto& [actual, expected] : numberUIntTestPlan) {
+        accessor_->setFillColor(peer_, &actual);
+        EXPECT_EQ(peer_->fillColor, expected);
+    }
+}
+
+/**
+ * @tc.name: getStrokeColorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeMaskAccessorTest, getStrokeColorTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getStrokeColor, nullptr);
+    auto result = accessor_->getStrokeColor(peer_);
+    auto color = Converter::Convert<int32_t>(result);
+    EXPECT_EQ(color, DEFAULT_COLOR);
+
+    for (const auto& [unused, expected] : numberUIntTestPlan) {
+        peer_->strokeColor = expected;
+        auto result = accessor_->getStrokeColor(peer_);
+
+        auto actual = Converter::Convert<int32_t>(result);
+        EXPECT_EQ(actual, expected);
+    }
+}
+
+/**
+ * @tc.name: setStrokeColorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeMaskAccessorTest, setStrokeColorTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setStrokeColor, nullptr);
+
+    for (const auto& [actual, expected] : numberUIntTestPlan) {
+        accessor_->setStrokeColor(peer_, &actual);
+        EXPECT_EQ(peer_->strokeColor, expected);
+    }
+}
+
+/**
+ * @tc.name: getStrokeWidthTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeMaskAccessorTest, getStrokeWidthTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getStrokeWidth, nullptr);
+    auto result = accessor_->getStrokeWidth(peer_);
+    auto color = Converter::Convert<int32_t>(result);
+    EXPECT_EQ(color, DEFAULT_WIDTH);
+
+    for (const auto& [unused, expected] : numberFloatTestPlan) {
+        peer_->strokeWidth = expected;
+        auto result = accessor_->getStrokeWidth(peer_);
+        auto actual = Converter::Convert<float>(result);
+        EXPECT_NEAR(actual, expected, FLT_PRECISION);
+    }
+}
+
+/**
+ * @tc.name: setStrokeWidthTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapeMaskAccessorTest, setStrokeWidthTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setStrokeWidth, nullptr);
+
+    for (const auto& [actual, expected] : numberFloatTestPlan) {
+        accessor_->setStrokeWidth(peer_, &actual);
+        EXPECT_NEAR(peer_->strokeWidth, expected, FLT_PRECISION);
     }
 }
 } // namespace OHOS::Ace::NG

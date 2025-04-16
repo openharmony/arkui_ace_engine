@@ -37,6 +37,8 @@ void AssignArkValue(Ark_TextAlign& dst, const OHOS::Ace::TextAlign& src);
 void AssignArkValue(Ark_WordBreak& dst, const OHOS::Ace::WordBreak& src);
 void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const UpdateParagraphStyle& style);
 void AssignArkValue(Ark_RichEditorRange& dst, const RangeOptions& src);
+void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const OHOS::Ace::ImageSpanAttribute& src);
+void AssignArkValue(Ark_RichEditorImageSpanStyle& dst, const OHOS::Ace::ImageSpanAttribute& src);
 } // namespace OHOS::Ace::NG::Converter
 
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_TEST_UNITTEST_CAPI_MODIFIERS_RICHEDITOR_MODIFIER_TEST_H
