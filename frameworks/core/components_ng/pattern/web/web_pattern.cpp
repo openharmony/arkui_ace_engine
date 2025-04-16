@@ -85,6 +85,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/core/components_ng/base/ui_node.h"
+#include "web_accessibility_session_adapter.h"
 #include "web_pattern.h"
 #include "nweb_handler.h"
 
@@ -6951,21 +6952,10 @@ void WebPattern::DestroyAnalyzerOverlay()
     awaitingOnTextSelected_ = false;
 }
 
-bool WebPattern::OnAccessibilityHoverEvent(const PointF& point)
+void WebPattern::OnAccessibilityHoverEvent(const PointF& point, bool isHoverEnter)
 {
-    CHECK_NULL_RETURN(delegate_, false);
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto pipelineContext = host->GetContextRefPtr();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto viewScale = pipelineContext->GetViewScale();
-    int32_t globalX = static_cast<int32_t>(point.GetX()) * viewScale;
-    int32_t globalY = static_cast<int32_t>(point.GetY()) * viewScale;
-    auto offset = GetCoordinatePoint().value_or(OffsetF());
-    globalX = static_cast<int32_t>(globalX - offset.GetX());
-    globalY = static_cast<int32_t>(globalY - offset.GetY());
-    delegate_->HandleAccessibilityHoverEvent(globalX, globalY);
-    return true;
+    CHECK_NULL_VOID(delegate_);
+    delegate_->HandleAccessibilityHoverEvent(point.GetX(), point.GetY(), isHoverEnter);
 }
 
 void WebPattern::RegisterTextBlurCallback(TextBlurCallback&& callback)
@@ -7055,6 +7045,9 @@ bool WebPattern::OnAccessibilityChildTreeRegister()
     CHECK_NULL_RETURN(pipeline, false);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_RETURN(accessibilityManager, false);
+    if (accessibilitySessionAdapter_ == nullptr) {
+        accessibilitySessionAdapter_ = AceType::MakeRefPtr<WebAccessibilitySessionAdapter>(WeakClaim(this));
+    }
     auto frameNode = frameNode_.Upgrade();
     CHECK_NULL_RETURN(frameNode, false);
     int64_t accessibilityId = frameNode->GetAccessibilityId();
@@ -7165,6 +7158,11 @@ float WebPattern::DumpGpuInfo()
 RefPtr<WebEventHub> WebPattern::GetWebEventHub()
 {
     return GetEventHub<WebEventHub>();
+}
+
+RefPtr<AccessibilitySessionAdapter> WebPattern::GetAccessibilitySessionAdapter()
+{
+    return accessibilitySessionAdapter_;
 }
 
 void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)

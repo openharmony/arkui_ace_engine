@@ -959,7 +959,7 @@ bool WebDelegate::GetPendingSizeStatus()
 {
     return false;
 }
-void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y) {}
+void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y, bool isHoverEnter) {}
 void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr) {}
 void WebDelegate::AutofillCancel(const std::string& fillContent) {}
 bool WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)

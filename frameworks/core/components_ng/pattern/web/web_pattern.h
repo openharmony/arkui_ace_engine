@@ -683,7 +683,7 @@ public:
     std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
 
     void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
-    bool OnAccessibilityHoverEvent(const PointF& point) override;
+    void OnAccessibilityHoverEvent(const PointF& point, bool isHoverEnter);
     void RegisterTextBlurCallback(TextBlurCallback&& callback);
     void UnRegisterTextBlurCallback();
     TextBlurCallback GetTextBlurCallback() const
@@ -754,6 +754,7 @@ public:
     void WebOverlayRequestFocus();
     
     std::string GetCurrentLanguage() override;
+    RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
     void RegisterSurfaceDensityCallback();
     void SetSurfaceDensity(double density);
@@ -1084,6 +1085,7 @@ private:
     bool isReceivedArkDrag_ = false;
     bool isW3cDragEvent_ = false;
     bool isDragStartFromWeb_ = false;
+    RefPtr<AccessibilitySessionAdapter> accessibilitySessionAdapter_;
 
     bool isNewDragStyle_ = false;
     std::map<std::pair<WebElementType, ResponseType>,
