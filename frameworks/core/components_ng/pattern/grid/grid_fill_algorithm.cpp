@@ -47,8 +47,8 @@ void GridFillAlgorithm::Init(const SizeF& viewport, Axis axis, int32_t totalCnt)
     info_.axis_ = axis;
     info_.childrenCount_ = totalCnt;
 
-    if (std::abs(info_.currentOffset_) > viewport.MainSize(axis)) {
-        LOGW("Koala received large delta %f in FillAlgorithm, jumpIndex = %d", info_.currentOffset_, info_.jumpIndex_);
+    if (std::abs(info_.currentOffset_) > viewport.MainSize(axis) && info_.jumpIndex_ == EMPTY_JUMP_INDEX) {
+        LOGW("Koala received large delta %f in FillAlgorithm but jump isn't pending", info_.currentOffset_);
         info_.currentOffset_ = 0.0f;
     }
     range_.startLine = info_.startMainLineIndex_;
@@ -64,7 +64,7 @@ void GridFillAlgorithm::FillMarkItem(const SizeF& viewport, Axis axis, FrameNode
     FillNext(viewport, axis, node, index);
     if (resetRangeOnJump_) {
         range_.startLine = range_.endLine = info_.GetItemPos(index).second;
-        range_.offset = 0.0f; // synced from LayoutInfo. Might contain large offset that FillAlgorithm can't handle
+        range_.offset = 0.0f;
         resetRangeOnJump_ = false;
     }
 }
@@ -169,7 +169,11 @@ void GridFillAlgorithm::OnSlidingOffsetUpdate(float delta)
 
 int32_t GridFillAlgorithm::ConvertLargeDelta(float delta) {
     GridLargeDeltaConverter converter(info_, props_.GetHost().GetRawPtr());
-    return converter.Convert(delta);
+    int jumpIndex = converter.Convert(delta);
+    if (jumpIndex == info_.childrenCount_ - 1) {
+        jumpIndex = jumpIndex - (info_.endIndex_ - info_.startIndex_); // estimate first item in the viewport
+    } 
+    return jumpIndex;
 }
 
 bool GridFillAlgorithm::OnSlidingOffsetUpdate(const SizeF& viewport, Axis axis, float delta)

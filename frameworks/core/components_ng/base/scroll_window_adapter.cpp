@@ -194,7 +194,6 @@ void ScrollWindowAdapter::Prepare(uint32_t offset)
 {
     offset_ = offset;
     filled_.clear();
-    fillAlgorithm_->PreFill(size_, axis_, totalCount_);
     if (jumpPending_) {
         if (auto scroll = container_->GetPattern<ScrollablePattern>(); scroll) {
             scroll->ScrollToIndex(markIndex_, false, jumpPending_->align, jumpPending_->extraOffset);
@@ -209,6 +208,7 @@ void ScrollWindowAdapter::Prepare(uint32_t offset)
             swiper->ChangeIndex(target_->index, true);
         }
     }
+    fillAlgorithm_->PreFill(size_, axis_, totalCount_);
 }
 
 void ScrollWindowAdapter::UpdateViewport(const SizeF& size, Axis axis)
