@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,8 +21,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SWIPER_INDEX = 0;
-constexpr int32_t DIVIDER_INDEX = 1;
-constexpr int32_t TAB_BAR_INDEX = 2;
+constexpr int32_t EFFECT_INDEX = 1;
+constexpr int32_t DIVIDER_INDEX = 2;
+constexpr int32_t TAB_BAR_INDEX = 3;
 } // namespace
 
 void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -51,6 +52,12 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (tabBarWrapper) {
         tabBarWrapper->Measure(childLayoutConstraint);
         tabBarSize = tabBarWrapper->GetGeometryNode()->GetMarginFrameSize();
+    }
+    
+    // Measure effect node.
+    auto effectWrapper = layoutWrapper->GetOrCreateChildByIndex(EFFECT_INDEX);
+    if (effectWrapper) {
+        MeasureEffectNode(layoutProperty, effectWrapper, idealSize);
     }
 
     // Measure divider.
@@ -99,65 +106,64 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     auto tabBarWrapper = layoutWrapper->GetChildByIndex(TAB_BAR_INDEX);
     auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(DIVIDER_INDEX);
+    auto effectWrapper = layoutWrapper->GetChildByIndex(EFFECT_INDEX);
     auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(SWIPER_INDEX);
-    if (!tabBarWrapper || !dividerWrapper || !swiperWrapper) {
+    if (!tabBarWrapper || !dividerWrapper || !swiperWrapper || !effectWrapper) {
         return;
     }
 
-    std::vector<OffsetF> offsetList;
+    std::vector<OffsetF> offsetList = { OffsetF(), OffsetF(), OffsetF(), OffsetF() };
     if (frameSize.IsPositive()) {
         MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), frameSize);
-        offsetList = LayoutOffsetList(layoutWrapper, tabBarWrapper, frameSize);
-    } else {
-        offsetList = { OffsetF(), OffsetF(), OffsetF() };
+        offsetList = LayoutOffsetList(layoutWrapper, tabBarWrapper, effectWrapper, frameSize);
     }
-    auto tabsWidth = geometryNode->GetFrameSize().Width();
-    if (isRTL) {
+    if (layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+        auto tabsWidth = geometryNode->GetFrameSize().Width();
         auto swiperWidth = swiperWrapper->GetGeometryNode()->GetFrameSize().Width();
-        OffsetF swiperOffset =
-            OffsetF((tabsWidth - offsetList[SWIPER_INDEX].GetX() - swiperWidth), offsetList[SWIPER_INDEX].GetY());
-        swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(swiperOffset);
-        swiperWrapper->Layout();
-
+        auto& swiperOffset = offsetList[SWIPER_INDEX];
+        swiperOffset = OffsetF((tabsWidth - swiperOffset.GetX() - swiperWidth), swiperOffset.GetY());
         auto dividerWidth = dividerWrapper->GetGeometryNode()->GetFrameSize().Width();
-        OffsetF dividerOffset =
-            OffsetF((tabsWidth - offsetList[DIVIDER_INDEX].GetX() - dividerWidth), offsetList[DIVIDER_INDEX].GetY());
-        dividerWrapper->GetGeometryNode()->SetMarginFrameOffset(dividerOffset);
-        dividerWrapper->Layout();
-
+        auto& dividerOffset = offsetList[DIVIDER_INDEX];
+        dividerOffset = OffsetF((tabsWidth - dividerOffset.GetX() - dividerWidth), dividerOffset.GetY());
+        auto effectWidth = effectWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
+        auto& effectOffset = offsetList[EFFECT_INDEX];
+        effectOffset = OffsetF((tabsWidth - effectOffset.GetX() - effectWidth), effectOffset.GetY());
         auto tabBarWidth = tabBarWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
-        OffsetF tabBarOffset =
-            OffsetF((tabsWidth - offsetList[TAB_BAR_INDEX].GetX() - tabBarWidth), offsetList[TAB_BAR_INDEX].GetY());
-        tabBarWrapper->GetGeometryNode()->SetMarginFrameOffset(tabBarOffset);
-        tabBarWrapper->Layout();
-        return;
+        auto& tabBarOffset = offsetList[TAB_BAR_INDEX];
+        tabBarOffset = OffsetF((tabsWidth - tabBarOffset.GetX() - tabBarWidth), tabBarOffset.GetY());
     }
     swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[SWIPER_INDEX]);
     swiperWrapper->Layout();
 
     dividerWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[DIVIDER_INDEX]);
     dividerWrapper->Layout();
+    
+    effectWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[EFFECT_INDEX]);
+    effectWrapper->Layout();
 
     tabBarWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[TAB_BAR_INDEX]);
     tabBarWrapper->Layout();
 }
 
 std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(
-    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& tabBarWrapper, const SizeF& frameSize) const
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& tabBarWrapper,
+    const RefPtr<LayoutWrapper>& effectNodeWrapper, const SizeF& frameSize) const
 {
     std::vector<OffsetF> offsetList;
     OffsetF tabBarOffset;
     OffsetF dividerOffset;
     OffsetF swiperOffset;
+    OffsetF effectOffset;
     auto axis = GetAxis(layoutWrapper);
     auto barPosition = GetBarPosition(layoutWrapper);
     auto divider = GetDivider(layoutWrapper);
     auto tabBarGeometryNode = tabBarWrapper->GetGeometryNode();
+    auto effectNodeGeometryNode = effectNodeWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(tabBarGeometryNode, offsetList);
     auto tabBarFrameSize = tabBarGeometryNode->GetMarginFrameSize();
+    auto effectNodeFrameSize = effectNodeGeometryNode->GetMarginFrameSize();
     auto dividerStrokeWidth = divider.isNull ? 0.0f : divider.strokeWidth.ConvertToPx();
     auto dividerStartMargin = divider.startMargin.ConvertToPx();
     auto layoutProperty = DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -167,8 +173,10 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(
 
     if (axis == Axis::HORIZONTAL) {
         float barPosX = (frameSize.MainSize(axis) - tabBarFrameSize.MainSize(axis)) / 2 + paddingOffset.GetX();
+        float effectPosX = (frameSize.MainSize(axis) - effectNodeFrameSize.MainSize(axis)) / 2 + paddingOffset.GetX();
         if (barPosition == BarPosition::START) {
             tabBarOffset = OffsetF(barPosX, paddingOffset.GetY());
+            effectOffset = OffsetF(effectPosX, paddingOffset.GetY());
             dividerOffset = OffsetF(dividerStartMargin + paddingOffset.GetX(),
                 tabBarFrameSize.CrossSize(axis) + paddingOffset.GetY());
             swiperOffset = barOverlap ? paddingOffset : OffsetF(paddingOffset.GetX(),
@@ -176,14 +184,18 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(
         } else {
             tabBarOffset = OffsetF(barPosX, frameSize.CrossSize(axis) -
                 tabBarFrameSize.CrossSize(axis) + paddingOffset.GetY());
+            effectOffset = OffsetF(effectPosX, frameSize.CrossSize(axis) -
+                effectNodeFrameSize.CrossSize(axis) + paddingOffset.GetY());
             dividerOffset = OffsetF(dividerStartMargin + paddingOffset.GetX(), frameSize.CrossSize(axis) -
                 tabBarFrameSize.CrossSize(axis) + paddingOffset.GetY() - dividerStrokeWidth);
             swiperOffset = paddingOffset;
         }
     } else {
         float barPosY = (frameSize.MainSize(axis) - tabBarFrameSize.MainSize(axis)) / 2 + paddingOffset.GetY();
+        float effectPosY = (frameSize.MainSize(axis) - effectNodeFrameSize.MainSize(axis)) / 2 + paddingOffset.GetY();
         if (barPosition == BarPosition::START) {
             tabBarOffset = OffsetF(paddingOffset.GetX(), barPosY);
+            effectOffset = OffsetF(paddingOffset.GetX(), effectPosY);
             dividerOffset = OffsetF(tabBarFrameSize.CrossSize(axis) + paddingOffset.GetX(),
                 dividerStartMargin + paddingOffset.GetY());
             swiperOffset = barOverlap ? paddingOffset : OffsetF(tabBarFrameSize.CrossSize(axis) +
@@ -191,12 +203,15 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(
         } else {
             tabBarOffset = OffsetF(frameSize.CrossSize(axis) - tabBarFrameSize.CrossSize(axis) +
                 paddingOffset.GetX(), barPosY);
+            effectOffset = OffsetF(frameSize.CrossSize(axis) - effectNodeFrameSize.CrossSize(axis) +
+                paddingOffset.GetX(), effectPosY);
             dividerOffset = OffsetF(frameSize.CrossSize(axis) - tabBarFrameSize.CrossSize(axis) +
                 paddingOffset.GetX() - dividerStrokeWidth, dividerStartMargin + paddingOffset.GetY());
             swiperOffset = paddingOffset;
         }
     }
     offsetList.emplace_back(swiperOffset);
+    offsetList.emplace_back(effectOffset);
     offsetList.emplace_back(dividerOffset);
     offsetList.emplace_back(tabBarOffset);
     return offsetList;
@@ -253,6 +268,33 @@ float TabsLayoutAlgorithm::MeasureDivider(const RefPtr<TabsLayoutProperty>& layo
     dividerWrapper->Measure(dividerLayoutConstraint);
 
     return divider.isNull ? 0.0f : dividerStrokeWidth;
+}
+
+void TabsLayoutAlgorithm::MeasureEffectNode(const RefPtr<TabsLayoutProperty>& layoutProperty,
+    const RefPtr<LayoutWrapper>& effectNodeWrapper, const SizeF& idealSize)
+{
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    
+    auto effectNodeIdealSize = CreateIdealSize(
+        constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
+    TabsEffectNodeOption defaultEffectNodeOption;
+    auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
+    auto parentWidth = idealSize.Width();
+    auto parentHeight = idealSize.Height();
+    auto effectNodeOption = layoutProperty->GetEffectNodeOption().value_or(defaultEffectNodeOption);
+    auto effectNodeWidth = effectNodeOption.strokeWidth.ConvertToPx();
+    
+    if (axis == Axis::VERTICAL) {
+        effectNodeIdealSize.SetWidth(effectNodeWidth);
+        effectNodeIdealSize.SetHeight(parentHeight);
+    } else if (axis == Axis::HORIZONTAL) {
+        effectNodeIdealSize.SetWidth(parentWidth);
+        effectNodeIdealSize.SetHeight(effectNodeWidth);
+    }
+    
+    auto effectNodeLayoutConstraint = layoutProperty->CreateChildConstraint();
+    effectNodeLayoutConstraint.selfIdealSize = OptionalSizeF(effectNodeIdealSize);
+    effectNodeWrapper->Measure(effectNodeLayoutConstraint);
 }
 
 SizeF TabsLayoutAlgorithm::MeasureSwiper(const RefPtr<TabsLayoutProperty>& layoutProperty,

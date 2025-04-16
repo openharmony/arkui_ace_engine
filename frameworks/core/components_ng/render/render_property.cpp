@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -314,19 +314,19 @@ void GradientProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
         return;
     }
     if (propLinearGradient.has_value()) {
-        json->PutExtAttr("linearGradient", propLinearGradient->LinearGradientToJson(), filter);
+        json->PutExtAttr("linearGradient", GradientJsonUtils::LinearGradientToJson(*propLinearGradient), filter);
     } else {
         json->PutExtAttr("linearGradient", JsonUtil::Create(true), filter);
     }
 
     if (propSweepGradient.has_value()) {
-        json->PutExtAttr("sweepGradient", propSweepGradient->SweepGradientToJson(), filter);
+        json->PutExtAttr("sweepGradient", GradientJsonUtils::SweepGradientToJson(*propSweepGradient), filter);
     } else {
         json->PutExtAttr("sweepGradient", JsonUtil::Create(true), filter);
     }
 
     if (propRadialGradient.has_value()) {
-        json->PutExtAttr("radialGradient", propRadialGradient->RadialGradientToJson(), filter);
+        json->PutExtAttr("radialGradient", GradientJsonUtils::RadialGradientToJson(*propRadialGradient), filter);
     } else {
         json->PutExtAttr("radialGradient", JsonUtil::Create(true), filter);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_CALC_LENGTH_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_CALC_LENGTH_H
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/utils/utils.h"
+#include "ui/properties/ng/calc_length.h"
 
 namespace OHOS::Ace {
 
@@ -52,88 +50,6 @@ struct ACE_EXPORT ScaleProperty {
     static ScaleProperty CreateScaleProperty(PipelineBase* context = nullptr);
 };
 
-class CalcLength {
-public:
-    CalcLength() = default;
-    explicit CalcLength(const std::string& value) : calcValue_(value)
-    {
-        dimension_.SetUnit(DimensionUnit::CALC);
-    }
-    ~CalcLength() = default;
-
-    explicit CalcLength(double value, DimensionUnit unit = DimensionUnit::PX) : dimension_(value, unit) {};
-    explicit CalcLength(const Dimension& dimension) : dimension_(dimension) {};
-
-    void Reset()
-    {
-        calcValue_ = "";
-        dimension_.Reset();
-    }
-
-    const std::string& CalcValue() const
-    {
-        return calcValue_;
-    }
-
-    void SetCalcValue(const std::string& value)
-    {
-        calcValue_ = value;
-    }
-
-    bool NormalizeToPx(double vpScale, double fpScale, double lpxScale, double parentLength, double& result,
-        const std::vector<std::string>& rpnexp = std::vector<std::string>()) const;
-
-    bool IsValid() const
-    {
-        if (calcValue_.empty()) {
-            return dimension_.IsNonNegative();
-        }
-        return true;
-    }
-
-    bool operator==(const CalcLength& length) const
-    {
-        if (calcValue_.empty() && length.calcValue_.empty()) {
-            return dimension_ == length.dimension_;
-        }
-        return calcValue_ == length.calcValue_;
-    }
-
-    bool operator!=(const CalcLength& length) const
-    {
-        return !(*this == length);
-    }
-
-    std::string ToString() const
-    {
-        if (calcValue_.empty()) {
-            return dimension_.ToString();
-        }
-        return calcValue_;
-    }
-
-    static CalcLength FromString(const std::string& str)
-    {
-        return CalcLength(Dimension::FromString(str));
-    }
-
-    Dimension GetDimension() const
-    {
-        if (!IsValid()) {
-            return Dimension();
-        }
-        return dimension_;
-    }
-
-    Dimension GetDimensionContainsNegative() const
-    {
-        return dimension_;
-    }
-
-private:
-    std::string calcValue_;
-    Dimension dimension_;
-};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_CALC_LENGTH_H

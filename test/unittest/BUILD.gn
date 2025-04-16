@@ -598,6 +598,8 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/text/text_emoji_processor.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/properties/property.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/frame_node_impl.cpp",
+    "$ace_root/interfaces/inner_api/ace_kit/src/view/overlay/overlay_manager_impl.cpp",
+    "$ace_root/interfaces/inner_api/ace_kit/src/view/ui_context_impl.cpp",
     "$ace_root/test/mock/core/common/mock_icon_theme.cpp",
   ]
 
