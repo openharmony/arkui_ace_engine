@@ -75,7 +75,6 @@ void SetCalendarPickerOptionsImpl(Ark_NativePointer node,
 namespace CalendarPickerAttributeModifier {
 void TextStyle1Impl(Ark_NativePointer node, const Opt_PickerTextStyle* value);
 void OnChange1Impl(Ark_NativePointer node, const Opt_Callback_Date_Void* value);
-void EdgeAlign1Impl(Ark_NativePointer node, const Opt_CalendarAlign* alignType, const Opt_Offset* offset);
 
 void TextStyle0Impl(Ark_NativePointer node,
                     const Ark_PickerTextStyle* value)
@@ -124,9 +123,14 @@ void EdgeAlign0Impl(Ark_NativePointer node,
                     Ark_CalendarAlign alignType,
                     const Opt_Offset* offset)
 {
-    CHECK_NULL_VOID(alignType);
-    const auto optValue = Converter::ArkValue<Opt_CalendarAlign, Ark_CalendarAlign>(alignType);
-    EdgeAlign1Impl(node, &optValue, offset);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<DimensionOffset> convOffset;
+    if (offset) {
+        convOffset = Converter::OptConvert<DimensionOffset>(*offset);
+    }
+    auto convAlignType = Converter::OptConvert<CalendarEdgeAlign>(alignType);
+    CalendarPickerModelNG::SetEdgeAlign(frameNode, convAlignType, convOffset);
 }
 void EdgeAlign1Impl(Ark_NativePointer node,
                     const Opt_CalendarAlign* alignType,
