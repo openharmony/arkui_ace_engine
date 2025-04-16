@@ -24,10 +24,6 @@ using namespace testing;
 using namespace testing::ext;
 using namespace AccessorTestFixtures;
 
-namespace {
-    const double EPSILON = 0.00001;
-} // namespace
-
 class HoverEventAccessorTest
     : public AccessorTestBase<GENERATED_ArkUIHoverEventAccessor,
         &GENERATED_ArkUIAccessors::getHoverEventAccessor, HoverEventPeer> {
@@ -36,6 +32,7 @@ public:
     {
         AccessorTestBase::SetUp();
         eventInfo_ = std::make_unique<HoverInfo>();
+        ASSERT_EQ(peer_->GetEventInfo(), nullptr);
         peer_->SetEventInfo(eventInfo_.get());
     }
 
@@ -73,7 +70,7 @@ HWTEST_F(HoverEventAccessorTest, setXTestValidValues, TestSize.Level1)
         accessor_->setX(peer_, &value);
         const auto location = eventInfo_->GetLocalLocation();
         const auto result = PipelineBase::Px2VpWithCurrentDensity(location.GetX());
-        EXPECT_NEAR(result, expected, EPSILON) << "Input value is: " << input;
+        EXPECT_FLOAT_EQ(result, expected) << "Input value is: " << input;
     }
 }
 
@@ -91,15 +88,15 @@ HWTEST_F(HoverEventAccessorTest, setXTestInvalidValues, TestSize.Level1)
     accessor_->setX(peer_, &value);
     auto location = eventInfo_->GetLocalLocation();
     auto result = PipelineBase::Px2VpWithCurrentDensity(location.GetX());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
     accessor_->setX(nullptr, &value2);
     location = eventInfo_->GetLocalLocation();
     result = PipelineBase::Px2VpWithCurrentDensity(location.GetX());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
     accessor_->setX(peer_, nullptr);
     location = eventInfo_->GetLocalLocation();
     result = PipelineBase::Px2VpWithCurrentDensity(location.GetX());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
 }
 
 /**
@@ -119,7 +116,7 @@ HWTEST_F(HoverEventAccessorTest, getXTestValidValues, TestSize.Level1)
         eventInfo_->SetLocalLocation(location);
         auto result = Converter::OptConvert<double>(accessor_->getX(peer_));
         ASSERT_TRUE(result.has_value());
-        EXPECT_NEAR(result.value(), expected, EPSILON) << "Input value is: " << input;
+        EXPECT_FLOAT_EQ(result.value(), expected) << "Input value is: " << input;
     }
 }
 
@@ -134,12 +131,9 @@ HWTEST_F(HoverEventAccessorTest, getXTestInvalidValues, TestSize.Level1)
     auto result = Converter::OptConvert<double>(accessor_->getX(nullptr));
     ASSERT_FALSE(result.has_value());
 
-    ASSERT_NE(accessor_->ctor, nullptr);
-    auto peer = accessor_->ctor();
-    result = Converter::OptConvert<double>(accessor_->getX(peer));
+    peer_->SetEventInfo(nullptr);
+    result = Converter::OptConvert<double>(accessor_->getX(peer_));
     ASSERT_FALSE(result.has_value());
-    ASSERT_NE(accessor_->destroyPeer, nullptr);
-    accessor_->destroyPeer(peer);
 }
 
 /**
@@ -155,7 +149,7 @@ HWTEST_F(HoverEventAccessorTest, setYTestValidValues, TestSize.Level1)
         accessor_->setY(peer_, &value);
         const auto location = eventInfo_->GetLocalLocation();
         const auto result = PipelineBase::Px2VpWithCurrentDensity(location.GetY());
-        EXPECT_NEAR(result, expected, EPSILON) << "Input value is: " << input;
+        EXPECT_FLOAT_EQ(result, expected) << "Input value is: " << input;
     }
 }
 
@@ -173,15 +167,15 @@ HWTEST_F(HoverEventAccessorTest, setYTestInvalidValues, TestSize.Level1)
     accessor_->setY(peer_, &value);
     auto location = eventInfo_->GetLocalLocation();
     auto result = PipelineBase::Px2VpWithCurrentDensity(location.GetY());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
     accessor_->setY(nullptr, &value2);
     location = eventInfo_->GetLocalLocation();
     result = PipelineBase::Px2VpWithCurrentDensity(location.GetY());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
     accessor_->setY(peer_, nullptr);
     location = eventInfo_->GetLocalLocation();
     result = PipelineBase::Px2VpWithCurrentDensity(location.GetY());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
 }
 
 /**
@@ -201,7 +195,7 @@ HWTEST_F(HoverEventAccessorTest, getYTestValidValues, TestSize.Level1)
         eventInfo_->SetLocalLocation(location);
         auto result = Converter::OptConvert<double>(accessor_->getY(peer_));
         ASSERT_TRUE(result.has_value());
-        EXPECT_NEAR(result.value(), expected, EPSILON) << "Input value is: " << input;
+        EXPECT_FLOAT_EQ(result.value(), expected) << "Input value is: " << input;
     }
 }
 
@@ -216,12 +210,9 @@ HWTEST_F(HoverEventAccessorTest, getYTestInvalidValues, TestSize.Level1)
     auto result = Converter::OptConvert<double>(accessor_->getY(nullptr));
     ASSERT_FALSE(result.has_value());
 
-    ASSERT_NE(accessor_->ctor, nullptr);
-    auto peer = accessor_->ctor();
-    result = Converter::OptConvert<double>(accessor_->getY(peer));
+    peer_->SetEventInfo(nullptr);
+    result = Converter::OptConvert<double>(accessor_->getY(peer_));
     ASSERT_FALSE(result.has_value());
-    ASSERT_NE(accessor_->destroyPeer, nullptr);
-    accessor_->destroyPeer(peer);
 }
 
 /**
@@ -237,7 +228,7 @@ HWTEST_F(HoverEventAccessorTest, setWindowXTestValidValues, TestSize.Level1)
         accessor_->setWindowX(peer_, &value);
         const auto location = eventInfo_->GetGlobalLocation();
         const auto result = PipelineBase::Px2VpWithCurrentDensity(location.GetX());
-        EXPECT_NEAR(result, expected, EPSILON) << "Input value is: " << input;
+        EXPECT_FLOAT_EQ(result, expected) << "Input value is: " << input;
     }
 }
 
@@ -255,15 +246,15 @@ HWTEST_F(HoverEventAccessorTest, setWindowXTestInvalidValues, TestSize.Level1)
     accessor_->setWindowX(peer_, &value);
     auto location = eventInfo_->GetGlobalLocation();
     auto result = PipelineBase::Px2VpWithCurrentDensity(location.GetX());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
     accessor_->setWindowX(nullptr, &value2);
     location = eventInfo_->GetGlobalLocation();
     result = PipelineBase::Px2VpWithCurrentDensity(location.GetX());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
     accessor_->setWindowX(peer_, nullptr);
     location = eventInfo_->GetGlobalLocation();
     result = PipelineBase::Px2VpWithCurrentDensity(location.GetX());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
 }
 
 /**
@@ -283,7 +274,7 @@ HWTEST_F(HoverEventAccessorTest, getWindowXTestValidValues, TestSize.Level1)
         eventInfo_->SetGlobalLocation(location);
         auto result = Converter::OptConvert<double>(accessor_->getWindowX(peer_));
         ASSERT_TRUE(result.has_value());
-        EXPECT_NEAR(result.value(), expected, EPSILON) << "Input value is: " << input;
+        EXPECT_FLOAT_EQ(result.value(), expected) << "Input value is: " << input;
     }
 }
 
@@ -298,12 +289,9 @@ HWTEST_F(HoverEventAccessorTest, getWindowXTestInvalidValues, TestSize.Level1)
     auto result = Converter::OptConvert<double>(accessor_->getWindowX(nullptr));
     ASSERT_FALSE(result.has_value());
 
-    ASSERT_NE(accessor_->ctor, nullptr);
-    auto peer = accessor_->ctor();
-    result = Converter::OptConvert<double>(accessor_->getWindowX(peer));
+    peer_->SetEventInfo(nullptr);
+    result = Converter::OptConvert<double>(accessor_->getWindowX(peer_));
     ASSERT_FALSE(result.has_value());
-    ASSERT_NE(accessor_->destroyPeer, nullptr);
-    accessor_->destroyPeer(peer);
 }
 
 /**
@@ -313,13 +301,13 @@ HWTEST_F(HoverEventAccessorTest, getWindowXTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(HoverEventAccessorTest, setWindowYTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->setY, nullptr);
+    ASSERT_NE(accessor_->setWindowY, nullptr);
 
     for (auto& [input, value, expected] : testFixtureNumberDoubleValues) {
         accessor_->setWindowY(peer_, &value);
         const auto location = eventInfo_->GetGlobalLocation();
         const auto result = PipelineBase::Px2VpWithCurrentDensity(location.GetY());
-        EXPECT_NEAR(result, expected, EPSILON) << "Input value is: " << input;
+        EXPECT_FLOAT_EQ(result, expected) << "Input value is: " << input;
     }
 }
 
@@ -330,22 +318,22 @@ HWTEST_F(HoverEventAccessorTest, setWindowYTestValidValues, TestSize.Level1)
  */
 HWTEST_F(HoverEventAccessorTest, setWindowYTestInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->setY, nullptr);
+    ASSERT_NE(accessor_->setWindowY, nullptr);
     auto value = Converter::ArkValue<Ark_Number>(5.0);
     auto value2 = Converter::ArkValue<Ark_Number>(3.0);
     auto expected = 5.0;
     accessor_->setWindowY(peer_, &value);
     auto location = eventInfo_->GetGlobalLocation();
     auto result = PipelineBase::Px2VpWithCurrentDensity(location.GetY());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
     accessor_->setWindowY(nullptr, &value2);
     location = eventInfo_->GetGlobalLocation();
     result = PipelineBase::Px2VpWithCurrentDensity(location.GetY());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
     accessor_->setWindowY(peer_, nullptr);
     location = eventInfo_->GetGlobalLocation();
     result = PipelineBase::Px2VpWithCurrentDensity(location.GetY());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
 }
 
 /**
@@ -365,7 +353,7 @@ HWTEST_F(HoverEventAccessorTest, getWindowYTestValidValues, TestSize.Level1)
         eventInfo_->SetGlobalLocation(location);
         auto result = Converter::OptConvert<double>(accessor_->getWindowY(peer_));
         ASSERT_TRUE(result.has_value());
-        EXPECT_NEAR(result.value(), expected, EPSILON) << "Input value is: " << input;
+        EXPECT_FLOAT_EQ(result.value(), expected) << "Input value is: " << input;
     }
 }
 
@@ -380,12 +368,9 @@ HWTEST_F(HoverEventAccessorTest, getWindowYTestInvalidValues, TestSize.Level1)
     auto result = Converter::OptConvert<double>(accessor_->getWindowY(nullptr));
     ASSERT_FALSE(result.has_value());
 
-    ASSERT_NE(accessor_->ctor, nullptr);
-    auto peer = accessor_->ctor();
-    result = Converter::OptConvert<double>(accessor_->getWindowY(peer));
+    peer_->SetEventInfo(nullptr);
+    result = Converter::OptConvert<double>(accessor_->getWindowY(peer_));
     ASSERT_FALSE(result.has_value());
-    ASSERT_NE(accessor_->destroyPeer, nullptr);
-    accessor_->destroyPeer(peer);
 }
 
 /**
@@ -401,7 +386,7 @@ HWTEST_F(HoverEventAccessorTest, setDisplayXTestValidValues, TestSize.Level1)
         accessor_->setDisplayX(peer_, &value);
         const auto location = eventInfo_->GetScreenLocation();
         const auto result = PipelineBase::Px2VpWithCurrentDensity(location.GetX());
-        EXPECT_NEAR(result, expected, EPSILON) << "Input value is: " << input;
+        EXPECT_FLOAT_EQ(result, expected) << "Input value is: " << input;
     }
 }
 
@@ -419,15 +404,15 @@ HWTEST_F(HoverEventAccessorTest, setDisplayXTestInvalidValues, TestSize.Level1)
     accessor_->setDisplayX(peer_, &value);
     auto location = eventInfo_->GetScreenLocation();
     auto result = PipelineBase::Px2VpWithCurrentDensity(location.GetX());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
     accessor_->setDisplayX(nullptr, &value2);
     location = eventInfo_->GetScreenLocation();
     result = PipelineBase::Px2VpWithCurrentDensity(location.GetX());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
     accessor_->setDisplayX(peer_, nullptr);
     location = eventInfo_->GetScreenLocation();
     result = PipelineBase::Px2VpWithCurrentDensity(location.GetX());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
 }
 
 /**
@@ -447,7 +432,7 @@ HWTEST_F(HoverEventAccessorTest, getDisplayXTestValidValues, TestSize.Level1)
         eventInfo_->SetScreenLocation(location);
         auto result = Converter::OptConvert<double>(accessor_->getDisplayX(peer_));
         ASSERT_TRUE(result.has_value());
-        EXPECT_NEAR(result.value(), expected, EPSILON) << "Input value is: " << input;
+        EXPECT_FLOAT_EQ(result.value(), expected) << "Input value is: " << input;
     }
 }
 
@@ -462,12 +447,9 @@ HWTEST_F(HoverEventAccessorTest, getDisplayXTestInvalidValues, TestSize.Level1)
     auto result = Converter::OptConvert<double>(accessor_->getDisplayX(nullptr));
     ASSERT_FALSE(result.has_value());
 
-    ASSERT_NE(accessor_->ctor, nullptr);
-    auto peer = accessor_->ctor();
-    result = Converter::OptConvert<double>(accessor_->getDisplayX(peer));
+    peer_->SetEventInfo(nullptr);
+    result = Converter::OptConvert<double>(accessor_->getDisplayX(peer_));
     ASSERT_FALSE(result.has_value());
-    ASSERT_NE(accessor_->destroyPeer, nullptr);
-    accessor_->destroyPeer(peer);
 }
 
 /**
@@ -477,13 +459,13 @@ HWTEST_F(HoverEventAccessorTest, getDisplayXTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(HoverEventAccessorTest, setDisplayYTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->setY, nullptr);
+    ASSERT_NE(accessor_->setDisplayY, nullptr);
 
     for (auto& [input, value, expected] : testFixtureNumberDoubleValues) {
         accessor_->setDisplayY(peer_, &value);
         const auto location = eventInfo_->GetScreenLocation();
         const auto result = PipelineBase::Px2VpWithCurrentDensity(location.GetY());
-        EXPECT_NEAR(result, expected, EPSILON) << "Input value is: " << input;
+        EXPECT_FLOAT_EQ(result, expected) << "Input value is: " << input;
     }
 }
 
@@ -494,22 +476,22 @@ HWTEST_F(HoverEventAccessorTest, setDisplayYTestValidValues, TestSize.Level1)
  */
 HWTEST_F(HoverEventAccessorTest, setDisplayYTestInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->setY, nullptr);
+    ASSERT_NE(accessor_->setDisplayY, nullptr);
     auto value = Converter::ArkValue<Ark_Number>(5.0);
     auto value2 = Converter::ArkValue<Ark_Number>(3.0);
     auto expected = 5.0;
     accessor_->setDisplayY(peer_, &value);
     auto location = eventInfo_->GetScreenLocation();
     auto result = PipelineBase::Px2VpWithCurrentDensity(location.GetY());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
     accessor_->setDisplayY(nullptr, &value2);
     location = eventInfo_->GetScreenLocation();
     result = PipelineBase::Px2VpWithCurrentDensity(location.GetY());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
     accessor_->setDisplayY(peer_, nullptr);
     location = eventInfo_->GetScreenLocation();
     result = PipelineBase::Px2VpWithCurrentDensity(location.GetY());
-    EXPECT_NEAR(result, expected, EPSILON);
+    EXPECT_FLOAT_EQ(result, expected);
 }
 
 /**
@@ -529,7 +511,7 @@ HWTEST_F(HoverEventAccessorTest, getDisplayYTestValidValues, TestSize.Level1)
         eventInfo_->SetScreenLocation(location);
         auto result = Converter::OptConvert<double>(accessor_->getDisplayY(peer_));
         ASSERT_TRUE(result.has_value());
-        EXPECT_NEAR(result.value(), expected, EPSILON) << "Input value is: " << input;
+        EXPECT_FLOAT_EQ(result.value(), expected) << "Input value is: " << input;
     }
 }
 
@@ -544,11 +526,8 @@ HWTEST_F(HoverEventAccessorTest, getDisplayYTestInvalidValues, TestSize.Level1)
     auto result = Converter::OptConvert<double>(accessor_->getDisplayY(nullptr));
     ASSERT_FALSE(result.has_value());
 
-    ASSERT_NE(accessor_->ctor, nullptr);
-    auto peer = accessor_->ctor();
-    result = Converter::OptConvert<double>(accessor_->getDisplayY(peer));
+    peer_->SetEventInfo(nullptr);
+    result = Converter::OptConvert<double>(accessor_->getDisplayY(peer_));
     ASSERT_FALSE(result.has_value());
-    ASSERT_NE(accessor_->destroyPeer, nullptr);
-    accessor_->destroyPeer(peer);
 }
 }
