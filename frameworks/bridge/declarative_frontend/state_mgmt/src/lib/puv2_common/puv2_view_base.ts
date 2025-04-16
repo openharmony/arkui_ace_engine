@@ -64,9 +64,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   // Set of elmtIds retaken by IF that need re-render
   protected dirtRetakenElementIds_: Set<number> = new Set<number>();
 
-  // Map elmtId -> Repeat instance in this ViewPU
-  protected elmtId2Repeat_: Map<number, RepeatAPI<any>> = new Map<number, RepeatAPI<any>>();
-
   protected parent_: IView | undefined = undefined;
 
   // static flag for paused rendering
