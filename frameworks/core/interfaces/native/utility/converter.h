@@ -64,6 +64,7 @@
 #include "core/interfaces/native/implementation/path_shape_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/rect_shape_peer.h"
+#include "core/interfaces/native/implementation/drawable_descriptor_peer.h"
 #include "core/interfaces/native/utility/generated/converter_generated.h"
 #include "converter_union.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
@@ -540,6 +541,7 @@ namespace Converter {
     template<> RefPtr<Gesture> Convert(const Ark_SwipeGestureInterface& src);
     template<> RefPtr<Gesture> Convert(const Ark_TapGestureInterface& src);
     template<> RefPtr<PixelMap> Convert(const Ark_PixelMap& src);
+    template<> RefPtr<DrawableDescriptor> Convert(const Ark_DrawableDescriptor& src);
     template<> RefPtr<ShapeRect> Convert(const Ark_Rect& src);
     template<> RefPtr<ShapeRect> Convert(const Ark_RoundRect& src);
     template<> ScaleOpt Convert(const Ark_ScaleOptions& src);
