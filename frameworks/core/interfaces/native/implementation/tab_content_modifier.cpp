@@ -65,9 +65,9 @@ auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& st
         LOGE("TabContentAttributeModifier.TabBar1Impl indicator style is not supported yet.");
     }
     // selectedMode
-    // TabContentModelNG::SetSelectedMode(frameNode, Converter::OptConvert<SelectedMode>(style._selectedMode));
+    TabContentModelNG::SetSelectedMode(frameNode, Converter::OptConvert<SelectedMode>(style._selectedMode));
     // board
-    // TabContentModelNG::SetBoard(frameNode, Converter::OptConvert<BoardStyle>(style._board));
+    TabContentModelNG::SetBoard(frameNode, Converter::OptConvert<BoardStyle>(style._board));
     // labelStyle
     auto labelStyle = Converter::OptConvert<Ark_LabelStyle>(style._labelStyle);
     if (labelStyle) {
@@ -85,14 +85,14 @@ auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& st
         paddingProperty.right = paddingProperty.end;
         useLocalizedPadding = true;
     }
-    // TabContentModelNG::SetPadding(frameNode, paddingProperty, true);
-    // TabContentModelNG::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
+    TabContentModelNG::SetPadding(frameNode, paddingProperty, true);
+    TabContentModelNG::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
     // id
     auto id = Converter::OptConvert<std::string>(style._id);
-    // TabContentModelNG::SetId(frameNode, id);
+    TabContentModelNG::SetId(frameNode, id);
 
-    // TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::SUBTABBATSTYLE);
-    // TabContentModelNG::SetTabBar(frameNode, content, std::nullopt, nullptr);
+    TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::SUBTABBATSTYLE);
+    TabContentModelNG::SetTabBar(frameNode, content, std::nullopt, nullptr);
 };
 
 auto g_setBottomTabBarStyle = [](FrameNode* frameNode, const Ark_BottomTabBarStyle& style) {
@@ -110,7 +110,7 @@ auto g_setBottomTabBarStyle = [](FrameNode* frameNode, const Ark_BottomTabBarSty
         []() {}
     );
     // layoutMode
-    // TabContentModelNG::SetLayoutMode(frameNode, Converter::OptConvert<LayoutMode>(style._layoutMode));
+    TabContentModelNG::SetLayoutMode(frameNode, Converter::OptConvert<LayoutMode>(style._layoutMode));
     // padding
     auto paddingProperty = Converter::OptConvert<PaddingProperty>(style._padding).value_or(PaddingProperty());
     Validator::ValidatePaddingProperty(paddingProperty);
@@ -123,25 +123,25 @@ auto g_setBottomTabBarStyle = [](FrameNode* frameNode, const Ark_BottomTabBarSty
         paddingProperty.right = paddingProperty.end;
         useLocalizedPadding = true;
     }
-    // TabContentModelNG::SetPadding(frameNode, paddingProperty, true);
-    // TabContentModelNG::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
+    TabContentModelNG::SetPadding(frameNode, paddingProperty, true);
+    TabContentModelNG::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
     // verticalAlign
-    // TabContentModelNG::SetVerticalAlign(frameNode, Converter::OptConvert<FlexAlign>(style._verticalAlign));
+    TabContentModelNG::SetVerticalAlign(frameNode, Converter::OptConvert<FlexAlign>(style._verticalAlign));
     // symmetricExtensible
-    // TabContentModelNG::SetSymmetricExtensible(frameNode, Converter::OptConvert<bool>(style._symmetricExtensible));
+    TabContentModelNG::SetSymmetricExtensible(frameNode, Converter::OptConvert<bool>(style._symmetricExtensible));
     // labelStyle
     auto labelStyle = Converter::OptConvert<Ark_LabelStyle>(style._labelStyle);
     if (labelStyle) {
         LOGE("TabContentAttributeModifier.TabBar1Impl labelStyle is not supported yet.");
     }
     // iconStyle
-    // TabContentModelNG::SetIconStyle(frameNode, Converter::OptConvert<IconStyle>(style._iconStyle));
+    TabContentModelNG::SetIconStyle(frameNode, Converter::OptConvert<IconStyle>(style._iconStyle));
     // id
     auto id = Converter::OptConvert<std::string>(style._id);
-    // TabContentModelNG::SetId(frameNode, id);
+    TabContentModelNG::SetId(frameNode, id);
 
-    // TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::BOTTOMTABBATSTYLE);
-    // TabContentModelNG::SetTabBar(frameNode, text, icon, nullptr);
+    TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::BOTTOMTABBATSTYLE);
+    TabContentModelNG::SetTabBar(frameNode, text, icon, nullptr);
 };
 
 namespace Converter {
@@ -248,7 +248,7 @@ void TabBar0Impl(Ark_NativePointer node,
     } else {
         LOGE("ARKOALA TabContentAttributeModifier.TabBar0Impl unknown value format.");
     }
-    // TabContentModelNG::SetTabBar(frameNode, label, icon, std::move(builder));
+    TabContentModelNG::SetTabBar(frameNode, label, icon, std::move(builder));
 }
 void TabBar1Impl(Ark_NativePointer node,
                  const Ark_Union_SubTabBarStyle_BottomTabBarStyle* value)

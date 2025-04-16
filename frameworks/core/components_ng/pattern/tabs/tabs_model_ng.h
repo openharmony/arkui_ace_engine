@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
+#include "core/components_ng/pattern/tabs/tabs_controller.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 
@@ -78,25 +79,25 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetWidthAuto(FrameNode* frameNode, bool isAuto);
     static void SetHeightAuto(FrameNode* frameNode, bool isAuto);
-    static void SetTabBarMode(FrameNode* frameNode, TabBarMode tabBarMode);
+    static void SetTabBarMode(FrameNode* frameNode, const std::optional<TabBarMode>& tabBarModeOpt);
     static void SetBarGridAlign(FrameNode* frameNode, const BarGridColumnOptions& BarGridColumnOptions);
     static void SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected);
-    static void SetDivider(FrameNode* frameNode, const TabsItemDivider& divider);
+    static void SetDivider(FrameNode* frameNode, const std::optional<TabsItemDivider>& dividerOpt);
     static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge);
-    static void SetBarBackgroundColor(FrameNode* frameNode, const Color& backgroundColor);
+    static void SetBarBackgroundColor(FrameNode* frameNode,  const std::optional<Color>& backgroundColorOpt);
     static void SetBarBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& styleOption);
     static void SetBarOverlap(FrameNode* frameNode, bool barOverlap);
     static void SetIsVertical(FrameNode* frameNode, bool isVertical);
-    static void SetTabBarPosition(FrameNode* frameNode, BarPosition tabBarPosition);
+    static void SetTabBarPosition(FrameNode* frameNode, const std::optional<BarPosition>& tabBarPositionOpt);
     static void SetScrollable(FrameNode* frameNode, bool scrollable);
-    static void SetTabBarWidth(FrameNode* frameNode, const Dimension& tabBarWidth);
-    static void SetTabBarHeight(FrameNode* frameNode, const Dimension& tabBarHeight);
+    static void SetTabBarWidth(FrameNode* frameNode, const std::optional<Dimension>& tabBarWidth);
+    static void SetTabBarHeight(FrameNode* frameNode, const std::optional<Dimension>& tabBarHeightOpt);
     static void SetAnimationDuration(FrameNode* frameNode, float duration);
     static void SetBarAdaptiveHeight(FrameNode* frameNode, bool barAdaptiveHeight);
     static void SetScrollableBarModeOptions(FrameNode* frameNode, const ScrollableBarModeOptions& option);
     static void SetClipEdge(FrameNode* frameNode, bool clipEdge);
-    static void SetAnimateMode(FrameNode* frameNode, TabAnimateMode mode);
-    static void SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect);
+    static void SetAnimateMode(FrameNode* frameNode, const std::optional<TabAnimateMode>& modeOpt);
+    static void SetEdgeEffect(FrameNode* frameNode, const std::optional<int32_t>& edgeEffect);
     static void SetTabBarIndex(FrameNode* frameNode, int32_t index);
     static void SetTabsController(FrameNode* frameNode, const RefPtr<SwiperController>& tabsController);
     static void SetBarBackgroundEffect(FrameNode* frameNode, const EffectOption& effectOption);
@@ -110,6 +111,10 @@ public:
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& gestureSwipe);
     static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
     static void SetOnContentWillChange(FrameNode* frameNode, std::function<bool(int32_t, int32_t)>&& callback);
+    static void SetOnCustomAnimation(FrameNode* frameNode, TabsCustomAnimationEvent&& onCustomAnimation);
+    static RefPtr<TabsControllerNG> GetSwiperController(FrameNode* frameNode);
+    static void InitIndex(FrameNode* tabsNode, const std::optional<int32_t>& indexOpt);
+    static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChangeEvent);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);
