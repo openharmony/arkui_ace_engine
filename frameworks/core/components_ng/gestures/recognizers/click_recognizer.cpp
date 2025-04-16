@@ -46,6 +46,7 @@ void ClickRecognizer::ForceCleanRecognizer()
     tapDeadlineTimer_.Cancel();
     currentTouchPointsNum_ = 0;
     responseRegionBuffer_.clear();
+    localMatrix_.clear();
     paintRect_ = RectF();
 }
 
@@ -68,7 +69,7 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
     if (!frameNode.Invalid()) {
         auto host = frameNode.Upgrade();
         CHECK_NULL_RETURN(host, false);
-        NGGestureRecognizer::Transform(localPoint, frameNode, false, isPostEventResult_, event.postEventNodeId);
+        TransformForRecognizer(localPoint, frameNode, false, isPostEventResult_, event.postEventNodeId);
         localPoint = localPoint + paintRect_.GetOffset();
         if (!host->InResponseRegionList(localPoint, responseRegionBuffer_)) {
             TAG_LOGI(AceLogTag::ACE_GESTURE,
@@ -120,7 +121,7 @@ ClickInfo ClickRecognizer::GetClickInfo()
     }
     ClickInfo info(touchPoint.id);
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+    TransformForRecognizer(localPoint, GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     info.SetTimeStamp(touchPoint.time);
@@ -177,7 +178,9 @@ void ClickRecognizer::OnAccepted()
         touchPoint = touchPoints_.begin()->second;
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
+    TransformForRecognizer(localPoint, GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     if (onClick_) {
@@ -470,7 +473,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
         }
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+    TransformForRecognizer(localPoint, GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
