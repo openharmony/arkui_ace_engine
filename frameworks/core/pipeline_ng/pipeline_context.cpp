@@ -3471,6 +3471,7 @@ void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const R
     // use mouse to collect accessibility hover target
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
+    touchRestrict.touchEvent.type = TouchType::HOVER_ENTER;
     eventManager_->AccessibilityHoverTest(scaleEvent, targerNode, touchRestrict);
     eventManager_->DispatchAccessibilityHoverEventNG(scaleEvent);
     RequestFrame();
