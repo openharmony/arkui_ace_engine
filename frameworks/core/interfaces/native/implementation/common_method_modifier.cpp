@@ -3591,23 +3591,23 @@ void MaskShapeImpl(Ark_NativePointer node,
 void KeyImpl(Ark_NativePointer node,
              const Ark_String* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto convValue = Converter::Convert<std::string>(*value);
-    // ViewAbstract::SetInspectorId(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::Convert<std::string>(*value);
+    ViewAbstract::SetInspectorId(frameNode, convValue);
 }
 void IdImpl(Ark_NativePointer node,
             const Ark_String* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // std::string id = Converter::Convert<std::string>(*value);
-    // if (id.empty()) {
-    //     return;
-    // }
-    // ViewAbstract::SetInspectorId(frameNode, id);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::string id = Converter::Convert<std::string>(*value);
+    if (id.empty()) {
+        return;
+    }
+    ViewAbstract::SetInspectorId(frameNode, id);
 }
 void GeometryTransition0Impl(Ark_NativePointer node,
                              const Ark_String* value)
