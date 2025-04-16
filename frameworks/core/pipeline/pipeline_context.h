@@ -810,6 +810,16 @@ public:
         return isDensityUpdate_;
     }
 
+    bool IsNeedReloadDensity() const override
+    {
+        return isNeedReloadDensity_;
+    }
+
+    void SetIsNeedReloadDensity(bool isNeedReloadDensity) override
+    {
+        isNeedReloadDensity_ = isNeedReloadDensity;
+    }
+
 protected:
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
@@ -962,6 +972,7 @@ private:
     bool useLiteStyle_ = false;
     bool isFirstLoaded_ = true;
     bool isDensityUpdate_ = false;
+    bool isNeedReloadDensity_ = false;
     uint64_t flushAnimationTimestamp_ = 0;
     TimeProvider timeProvider_;
     int32_t modalHeight_ = 0;

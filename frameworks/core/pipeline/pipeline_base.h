@@ -1405,6 +1405,10 @@ public:
 
     virtual bool IsDensityChanged() const = 0;
 
+    virtual bool IsNeedReloadDensity() const = 0;
+
+    virtual void SetIsNeedReloadDensity(bool isNeedReloadDensity) = 0;
+
     virtual std::string GetResponseRegion(const RefPtr<NG::FrameNode>& rootNode)
     {
         return "";
