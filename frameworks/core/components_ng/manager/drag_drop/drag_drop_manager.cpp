@@ -1375,12 +1375,6 @@ void DragDropManager::HandleStopDrag(const RefPtr<FrameNode>& dragFrameNode, con
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto windowId = container->GetWindowId();
-    auto overlayManager = GetDragAnimationOverlayManager(container->GetInstanceId());
-    if (overlayManager && !isDragFwkShow_) {
-        overlayManager->RemoveDragPixelMap();
-        overlayManager->RemoveFilter();
-        pipeline->FlushMessages();
-    }
     ExecuteStopDrag(event, dragResult, useCustomAnimation, windowId, dragBehavior, pointerEvent);
     NotifyDragFrameNode(point, DragEventType::DROP, event->GetResult());
     dragFrameNode->MarkDirtyNode();
@@ -1444,6 +1438,12 @@ void DragDropManager::ExecuteStopDrag(const RefPtr<OHOS::Ace::DragEvent>& event,
     }
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
+    auto overlayManager = GetDragAnimationOverlayManager(pipeline->GetInstanceId());
+    if (overlayManager && !isDragFwkShow_) {
+        overlayManager->RemoveDragPixelMap();
+        overlayManager->RemoveFilter();
+        pipeline->FlushMessages();
+    }
     pipeline->AddAfterRenderTask([dragResult, useCustomAnimation, windowId, dragBehavior,
                                      pointerEventId = pointerEvent.pointerEventId, weak = WeakClaim(this)]() mutable {
         auto manager = weak.Upgrade();
@@ -1467,8 +1467,13 @@ void DragDropManager::ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEve
     event->ExecuteDropAnimation();
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
-    pipeline->FlushMessages();
+    auto overlayManager = GetDragAnimationOverlayManager(pipeline->GetInstanceId());
+    if (overlayManager) {
+        overlayManager->RemoveDragPixelMap();
+        overlayManager->RemoveFilter();
+    }
     InteractionInterface::GetInstance()->SetDragWindowVisible(false);
+    pipeline->FlushMessages();
     InteractionInterface::GetInstance()->StopDrag(dragDropRet);
 }
 
