@@ -45,7 +45,11 @@ import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"
 import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
+import { ArkUIAniModule } from "arkui.ani"
+import { WebviewController as WebviewControllerAni } from "#external"
+import { WebviewController } from "./../ArkWebviewControllerMaterialized"
 export class ArkWebPeer extends ArkCommonMethodPeer {
+    private webviewController?: WebviewController
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -58,8 +62,22 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
     }
     setWebOptionsAttribute(value: WebOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeWebOptions(value)
-        ArkUIGeneratedNativeModule._WebInterface_setWebOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        if (TypeChecker.isWebController(value.controller) || TypeChecker.isWebviewController(value.controller)) {
+            thisSerializer.writeWebOptions(value)
+            ArkUIGeneratedNativeModule._WebInterface_setWebOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        } else if (TypeChecker.isWebviewControllerAni(value.controller)) {
+            this.webviewController = new WebviewController()
+            const value_casted = {
+                src: value.src,
+                controller: (this.webviewController as WebviewController),
+                renderMode: value.renderMode,
+                incognitoMode: value.incognitoMode,
+                sharedRenderProcessToken: value.sharedRenderProcessToken
+            } as (WebOptions) 
+            thisSerializer.writeWebOptions(value_casted)
+            ArkUIGeneratedNativeModule._WebInterface_setWebOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+            ArkUIAniModule._Web_SetWebOptions(this.peer.ptr, (value.controller as WebviewControllerAni))
+        }
         thisSerializer.release()
     }
     javaScriptAccessAttribute(value: boolean): void {

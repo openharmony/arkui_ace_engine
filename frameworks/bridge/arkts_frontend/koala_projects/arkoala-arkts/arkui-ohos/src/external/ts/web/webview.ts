@@ -13,16 +13,6 @@
  * limitations under the License.
  */
 
-import { KPointer } from "@koalaui/interop"
-import image from "@ohos.multimedia.image"
-import webview from "@ohos.web.webview"
-
-export class ArkUIAniModule {
-    static {
-        loadLibrary("arkoala_native_ani")
-    }
-
-    native static _Image_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
-
-    native static _Web_SetWebOptions(ptr: KPointer, webviewController: webview.WebviewController): void
+export declare class WebviewController {
+    constructor(webTag?: string);
 }

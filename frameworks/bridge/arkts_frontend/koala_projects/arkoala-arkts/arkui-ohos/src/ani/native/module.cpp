@@ -18,9 +18,11 @@
 #include "ani.h"
 #include "load.h"
 
+#include "web_module_methods.h"
+
 namespace OHOS::Ace::Ani {
 
-void TransferPixelMap([[maybe_unused]] ani_env* env, ani_object node, ani_object pixelMap)
+void TransferPixelMap([[maybe_unused]] ani_env* env, ani_object aniClass, ani_object node, ani_object pixelMap)
 {
     auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
     const auto* modifier = GetNodeAniModifier();
@@ -51,6 +53,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Image_Transfer_PixelMap",
             "JL@ohos/multimedia/image/image/PixelMap;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferPixelMap)
+        },
+        ani_native_function {
+            "_Web_SetWebOptions",
+            "JL@ohos/web/webview/webview/WebviewController;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWebOptions)
         }
     };
 

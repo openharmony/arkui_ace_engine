@@ -213,16 +213,7 @@ void SetWebOptionsImpl(Ark_NativePointer node,
             WebModelNG::SetWebController(frameNode, peerImplPtr->GetController());
         },
         [frameNode](const Ark_WebviewController& controller) {
-            WebviewControllerPeer* peerImplPtr = controller;
-            CHECK_NULL_VOID(peerImplPtr);
-            auto setWebIdCallback = [peerImplPtr](int32_t webId) {
-                peerImplPtr->nwebId = webId;
-            };
-            WebModelNG::SetWebIdCallback(frameNode, std::move(setWebIdCallback));
-            auto setHapPathCallback = [peerImplPtr](const std::string& hapPath) {
-                peerImplPtr->hapPath = hapPath;
-            };
-            WebModelNG::SetHapPathCallback(frameNode, std::move(setHapPathCallback));
+            (void)controller;
         },
         []() {}
     );
