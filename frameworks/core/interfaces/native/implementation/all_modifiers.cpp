@@ -374,6 +374,7 @@ const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor();
 const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor();
 const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorControllerAccessor();
 const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor();
+const GENERATED_ArkUIStateModifier* GetUIStateModifier();
 const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
 {
     static const GENERATED_ArkUINodeModifiers modifiersImpl = {
@@ -492,6 +493,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetWaterFlowModifier,
         GetUIExtensionComponentModifier,
         GetLinearIndicatorModifier,
+        GetUIStateModifier,
     };
     return &modifiersImpl;
 }

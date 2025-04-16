@@ -291,6 +291,7 @@ generated_sources = [
   "implementation/touch_event_accessor.cpp",
   "implementation/transition_effect_accessor.cpp",
   "implementation/ui_common_event_accessor.cpp",
+  "implementation/ui_state_modifier.cpp",
   "implementation/ui_extension_component_modifier.cpp",
   "implementation/ui_extension_proxy_accessor.cpp",
   "implementation/ui_extension_proxy_peer.cpp",

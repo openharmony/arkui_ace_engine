@@ -3403,7 +3403,7 @@ export interface Literal_Alignment_align {
 export type CustomBuilder = 
 /** @memo */
 () => void;
-export type CommonInteface = ()=>CommonAttribute
+export type CommonInteface = (...pamra:Object[])=>CommonAttribute
 export interface OverlayOptions {
     align?: Alignment;
     offset?: OverlayOffset;
@@ -3627,9 +3627,8 @@ export namespace focusControl {
 
 /** @memo:stable */
 export interface CommonMethod {
-    /** @memo */
+
     width(value: Length): this
-    /** @memo */
     height(value: Length): this
     /** @memo */
     drawModifier(value?: DrawModifier): this
@@ -3637,7 +3636,6 @@ export interface CommonMethod {
     responseRegion(value: Array<Rectangle> | Rectangle): this
     /** @memo */
     mouseResponseRegion(value: Array<Rectangle> | Rectangle): this
-    /** @memo */
     size(value: SizeOptions): this
     /** @memo */
     constraintSize(value: ConstraintSizeOptions): this
@@ -3657,7 +3655,7 @@ export interface CommonMethod {
     safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding): this
     /** @memo */
     margin(value: Margin | Length | LocalizedMargin): this
-    /** @memo */
+
     backgroundColor(value: ResourceColor): this
     /** @memo */
     pixelRound(value: PixelRoundPolicy): this
@@ -3705,7 +3703,6 @@ export interface CommonMethod {
     outlineRadius(value: Dimension | OutlineRadiuses): this
     /** @memo */
     foregroundColor(value: ResourceColor | ColoringStrategy): this
-    /** @memo */
     onClick(event: ((event: ClickEvent) => void), distanceThreshold?: number): this
     /** @memo */
     onHover(value: ((isHover: boolean,event: HoverEvent) => void)): this
@@ -3801,7 +3798,6 @@ export interface CommonMethod {
     alignSelf(value: ItemAlign): this
     /** @memo */
     displayPriority(value: number): this
-    /** @memo */
     zIndex(value: number): this
     /** @memo */
     direction(value: Direction): this
@@ -4007,15 +4003,11 @@ export interface CommonAttribute extends CommonMethod {
 
 export interface AttributeModifier<T> {
 
-    /** @memo */
+   
     applyNormalAttribute(instance: T) : void;
-    /** @memo */
     applyPressedAttribute(instance: T) : void;
-   /** @memo */
     applyFocusedAttribute(instance: T) : void;
-    /** @memo */
     applyDisabledAttribute(instance: T) : void;
-   /** @memo */
     applySelectedAttribute(instance: T) : void;
 }
 /** @memo:stable */
