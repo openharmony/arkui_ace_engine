@@ -99,13 +99,13 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
 
     auto* pendingNode = static_cast<FrameNode*>(
         direction == FillDirection::START ? container_->GetChildBefore(markItem) : container_->GetChildAfter(markItem));
-    if (!pendingNode) {
-        LOGW("fail to find pendingNode");
-        return nullptr;
-    }
     const auto markIndex = childMap_.GetKey(WeakClaim(markItem));
     if (!markIndex) {
-        LOGW("fail to find markIndex");
+        LOGW("Koala fail to find markIndex for item %p", markItem);
+        return nullptr;
+    }
+    if (!pendingNode) {
+        LOGW("Koala fail to find pendingNode at index %d", *markIndex);
         return nullptr;
     }
     auto index = direction == FillDirection::START ? *markIndex - 1 : *markIndex + 1;

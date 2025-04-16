@@ -49,7 +49,6 @@ void GridFillAlgorithm::Init(const SizeF& viewport, Axis axis, int32_t totalCnt)
 
     if (std::abs(info_.currentOffset_) > viewport.MainSize(axis) && info_.jumpIndex_ == EMPTY_JUMP_INDEX) {
         LOGW("Koala received large delta %f in FillAlgorithm but jump isn't pending", info_.currentOffset_);
-        info_.currentOffset_ = 0.0f;
     }
     range_.startLine = info_.startMainLineIndex_;
     range_.offset = info_.currentOffset_;
