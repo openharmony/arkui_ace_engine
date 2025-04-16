@@ -31,6 +31,9 @@ using namespace testing;
 using namespace testing::ext;
 using namespace Converter;
 
+const auto ATTRIBUTE_KEYBOARD_APPEARANCE_NAME = "keyboardAppearance";
+const auto ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE = "0";
+
 class SearchModifierTest2 : public ModifierTestBase<GENERATED_ArkUISearchModifier,
                                &GENERATED_ArkUINodeModifiers::getSearchModifier, GENERATED_ARKUI_SEARCH> {
 public:
@@ -96,4 +99,51 @@ HWTEST_F(SearchModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOption
     EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
 }
 
+/*
+ * @tc.name: setKeyboardAppearanceDefaultValuesTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest2, setKeyboardAppearanceDefaultValuesTest, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
+    EXPECT_EQ(resultStr,  ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE)
+        << "Default value for attribute 'keyboardAppearance'";
+}
+
+std::vector<std::tuple<std::string, Opt_KeyboardAppearance, std::string>> testFixtureEnumKeyboardAppearanceTestPlan = {
+    { "KeyboardAppearance.NONE_IMMERSIVE",
+        Converter::ArkValue<Opt_KeyboardAppearance>(ARK_KEYBOARD_APPEARANCE_NONE_IMMERSIVE), "0" },
+    { "KeyboardAppearance.IMMERSIVE",
+        Converter::ArkValue<Opt_KeyboardAppearance>(ARK_KEYBOARD_APPEARANCE_IMMERSIVE), "1" },
+    { "KeyboardAppearance.LIGHT_IMMERSIVE",
+        Converter::ArkValue<Opt_KeyboardAppearance>(ARK_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE), "2" },
+    { "-1", Converter::ArkValue<Opt_KeyboardAppearance>(static_cast<Ark_KeyboardAppearance>(-1)),
+        ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE },
+    { "INT_MAX", Converter::ArkValue<Opt_KeyboardAppearance>(static_cast<Ark_KeyboardAppearance>(INT_MAX)),
+        ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE },
+};
+
+/*
+ * @tc.name: setKeyboardAppearanceValuesTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest2, setKeyboardAppearanceValuesTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setKeyboardAppearance, nullptr);
+    auto checkValue = [this](
+                        const std::string& input, const std::string& expectedStr, const Opt_KeyboardAppearance& value) {
+        Opt_KeyboardAppearance inputValueKeyboardAppearance = value;
+        modifier_->setKeyboardAppearance(node_, &inputValueKeyboardAppearance);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
+                                        << ", method: setKeyboardAppearance, attribute: keyboardAppearance";
+    };
+    for (auto& [input, value, expected] : testFixtureEnumKeyboardAppearanceTestPlan) {
+        checkValue(input, expected, value);
+    }
+}
 } // namespace OHOS::Ace::NG

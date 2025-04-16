@@ -50,6 +50,7 @@ const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", 
     "Button__", "Divider__" };
 const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
 constexpr Dimension ICON_HEIGHT = 16.0_vp;
+const auto DEFAULT_KEYBOARD_APPERANCE = KeyboardAppearance::NONE_IMMERSIVE;
 
 void UpdateInnerInspector(FrameNode* frameNode, const std::string& key)
 {
@@ -2466,13 +2467,13 @@ void SearchModelNG::SetStopBackPress(FrameNode* frameNode, const std::optional<b
     }
 }
 
-void SearchModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value)
+void SearchModelNG::SetKeyboardAppearance(FrameNode* frameNode, const std::optional<KeyboardAppearance>& valueOpt)
 {
     CHECK_NULL_VOID(frameNode);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     CHECK_NULL_VOID(textFieldChild);
     auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetKeyboardAppearance(value);
+    pattern->SetKeyboardAppearance(valueOpt.value_or(DEFAULT_KEYBOARD_APPERANCE));
 }
 } // namespace OHOS::Ace::NG

@@ -1042,6 +1042,18 @@ void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpan
 }
 
 template<>
+void AssignCast(std::optional<KeyboardAppearance>& dst, const Ark_KeyboardAppearance& src)
+{
+    switch (src) {
+        case ARK_KEYBOARD_APPEARANCE_NONE_IMMERSIVE: dst = KeyboardAppearance::NONE_IMMERSIVE; break;
+        case ARK_KEYBOARD_APPEARANCE_IMMERSIVE: dst = KeyboardAppearance::IMMERSIVE; break;
+        case ARK_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE: dst = KeyboardAppearance::LIGHT_IMMERSIVE; break;
+        case ARK_KEYBOARD_APPEARANCE_DARK_IMMERSIVE: dst = KeyboardAppearance::DARK_IMMERSIVE; break;
+        default: LOGE("Unexpected enum value in Ark_KeyboardAppearance: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src)
 {
     switch (src) {
