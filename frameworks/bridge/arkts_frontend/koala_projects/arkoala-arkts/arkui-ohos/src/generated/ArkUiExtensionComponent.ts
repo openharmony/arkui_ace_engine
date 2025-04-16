@@ -39,7 +39,8 @@ import { AttributeModifier } from "./../component/common"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./../component/gesture"
 import { PixelMap } from "./ArkPixelMapMaterialized"
 import { Callback_UIExtensionProxy_Void, UIExtensionProxy, ReceiveCallback, Callback_Literal_Number_code_Want_want_Void, Literal_Number_code_Want_want, UIExtensionOptions, UIExtensionComponentAttribute } from "./../component/uiExtensionComponent"
-import { Want, ErrorCallback } from "./ArkArkuiExternalInterfaces"
+import { ErrorCallback } from "./ArkArkuiExternalInterfaces"
+import { AbilityWant, BusinessError } from "#external"
 import { Callback_Number_Void } from "./../component/alphabetIndexer"
 import { Callback_TerminationInfo_Void, TerminationInfo } from "./../component/embeddedComponent"
 /** @memo:stable */
@@ -48,9 +49,9 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
         return (this.peer as ArkUIExtensionComponentPeer)
     }
     /** @memo */
-    public setUIExtensionComponentOptions(want: Want, options?: UIExtensionOptions): this {
+    public setUIExtensionComponentOptions(want: AbilityWant, options?: UIExtensionOptions): this {
         if (this.checkPriority("setUIExtensionComponentOptions")) {
-            const want_casted = want as (Want)
+            const want_casted = want as (AbilityWant)
             const options_casted = options as (UIExtensionOptions | undefined)
             this.getPeer()?.setUIExtensionComponentOptionsAttribute(want_casted, options_casted)
             return this
@@ -67,9 +68,9 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
         return this
     }
     /** @memo */
-    public onReceive(value: ReceiveCallback): this {
+    public onReceive(value: (param: Record<string, Object>) => void): this {
         if (this.checkPriority("onReceive")) {
-            const value_casted = value as (ReceiveCallback)
+            const value_casted = value as ((param: Record<string, Object>) => void)
             this.getPeer()?.onReceiveAttribute(value_casted)
             return this
         }
@@ -94,9 +95,9 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
         return this
     }
     /** @memo */
-    public onError(value: ErrorCallback): this {
+    public onError(value: ((e: BusinessError) => void)): this {
         if (this.checkPriority("onError")) {
-            const value_casted = value as (ErrorCallback)
+            const value_casted = value as (((e: BusinessError) => void))
             this.getPeer()?.onErrorAttribute(value_casted)
             return this
         }

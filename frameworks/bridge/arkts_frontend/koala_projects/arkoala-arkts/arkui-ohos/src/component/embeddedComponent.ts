@@ -37,15 +37,16 @@ import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, Gesture
 import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
 import { ArkEmbeddedComponentComponent } from "./../generated/ArkEmbeddedComponent"
 import { ArkEmbeddedComponentPeer } from "./../generated/peers/ArkEmbeddedComponentPeer"
+import { AbilityWant } from "#external"
 export interface TerminationInfo {
     code: number;
-    want?: Want;
+    want?: AbilityWant;
 }
 export type Callback_TerminationInfo_Void = (parameter: TerminationInfo) => void;
 /** @memo:stable */
 export interface EmbeddedComponentAttribute extends CommonMethod {
     /** @memo */
-    setEmbeddedComponentOptions(loader: Want, type: EmbeddedType): this
+    setEmbeddedComponentOptions(loader: AbilityWant, type: EmbeddedType): this
     /** @memo */
     onTerminated(value: ((parameter: TerminationInfo) => void)): this
     /** @memo */
@@ -55,7 +56,7 @@ export interface EmbeddedComponentAttribute extends CommonMethod {
 export function EmbeddedComponent(
   /** @memo */
   style: ((attributes: EmbeddedComponentAttribute) => void) | undefined,
-  loader: Want, type: EmbeddedType, 
+  loader: AbilityWant, type: EmbeddedType,
   /** @memo */
   content_?: () => void,
 ) {

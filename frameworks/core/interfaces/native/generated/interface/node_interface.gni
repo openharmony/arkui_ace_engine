@@ -293,6 +293,7 @@ generated_sources = [
   "implementation/ui_common_event_accessor.cpp",
   "implementation/ui_extension_component_modifier.cpp",
   "implementation/ui_extension_proxy_accessor.cpp",
+  "implementation/ui_extension_proxy_peer.cpp",
   "implementation/unified_data_accessor.cpp",
   "implementation/url_style_accessor.cpp",
   "implementation/video_controller_accessor.cpp",

@@ -44,6 +44,7 @@ import { ErrorCallback, Want } from "./../ArkArkuiExternalInterfaces"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"
+import { AbilityWant } from "#external"
 import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 export class ArkEmbeddedComponentPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -56,9 +57,9 @@ export class ArkEmbeddedComponentPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setEmbeddedComponentOptionsAttribute(loader: Want, type: EmbeddedType): void {
+    setEmbeddedComponentOptionsAttribute(loader: AbilityWant, type: EmbeddedType): void {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeWant(loader)
+        // thisSerializer.writeWant(loader)
         ArkUIGeneratedNativeModule._EmbeddedComponentInterface_setEmbeddedComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length(), type.valueOf())
         thisSerializer.release()
     }

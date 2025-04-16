@@ -25,7 +25,8 @@ import { Deserializer } from "./../generated/peers/Deserializer"
 import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent, CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { Want, ErrorCallback } from "./../generated/ArkArkuiExternalInterfaces"
+import { ErrorCallback } from "./../generated/ArkArkuiExternalInterfaces"
+import { AbilityWant, BusinessError } from "#external"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
 import { LengthMetrics } from "../Graphics"
@@ -44,9 +45,10 @@ import { Callback_Number_Void } from "./alphabetIndexer"
 import { Callback_TerminationInfo_Void, TerminationInfo } from "./embeddedComponent"
 import { ArkUIExtensionComponentComponent } from "./../generated/ArkUiExtensionComponent"
 import { ArkUIExtensionComponentPeer } from "./../generated/peers/ArkUiExtensionComponentPeer"
+import { ArkUIAniUiextensionProxyModal } from "arkui.ani"
 export interface UIExtensionProxy {
-    send(data: Map<string, Object>): void
-    sendSync(data: Map<string, Object>): Map<string, Object>
+    send(data: Record<string, Object>): void
+    sendSync(data: Record<string, Object>): Record<string, Object>
     onAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
     onSyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
     offAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
@@ -68,14 +70,14 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._UIExtensionProxy_getFinalizer()
     }
-    public send(data: Map<string, Object>): void {
-        const data_casted = data as (Map<string, Object>)
-        this.send_serialize(data_casted)
+    public send(data: Record<string, Object>): void {
+        const data_casted = data as (Record<string, Object>)
+        ArkUIAniUiextensionProxyModal._Send_Data(this.peer!.ptr, data);
         return
     }
-    public sendSync(data: Map<string, Object>): Map<string, Object> {
-        const data_casted = data as (Map<string, Object>)
-        return this.sendSync_serialize(data_casted)
+    public sendSync(data: Record<string, Object>): Record<string, Object> {
+        const data_casted = data as (Record<string, Object>)
+        return ArkUIAniUiextensionProxyModal._Send_Data_Sync(this.peer!.ptr, data)
     }
     public onAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((parameter: UIExtensionProxy) => void))
@@ -196,23 +198,23 @@ export interface ReceiveCallback {
 export type Callback_UIExtensionProxy_Void = (parameter: UIExtensionProxy) => void;
 export interface Literal_Number_code_Want_want {
     code: number;
-    want?: Want;
+    want?: AbilityWant;
 }
 export type Callback_Literal_Number_code_Want_want_Void = (parameter: Literal_Number_code_Want_want) => void;
 /** @memo:stable */
 export interface UIExtensionComponentAttribute extends CommonMethod {
     /** @memo */
-    setUIExtensionComponentOptions(want: Want, options?: UIExtensionOptions): this
+    setUIExtensionComponentOptions(want: AbilityWant, options?: UIExtensionOptions): this
     /** @memo */
     onRemoteReady(value: ((parameter: UIExtensionProxy) => void)): this
     /** @memo */
-    onReceive(value: ReceiveCallback): this
+    onReceive(value: (param: Record<string, Object>) => void): this
     /** @memo */
     onResult(value: ((parameter: Literal_Number_code_Want_want) => void)): this
     /** @memo */
     onRelease(value: ((index: number) => void)): this
     /** @memo */
-    onError(value: ErrorCallback): this
+    onError(value: (e: BusinessError) => void): this
     /** @memo */
     onTerminated(value: ((parameter: TerminationInfo) => void)): this
 }
@@ -220,7 +222,7 @@ export interface UIExtensionComponentAttribute extends CommonMethod {
 export function UIExtensionComponent(
   /** @memo */
   style: ((attributes: UIExtensionComponentAttribute) => void) | undefined,
-  want: Want, options?: UIExtensionOptions | undefined, 
+  want: AbilityWant, options?: UIExtensionOptions | undefined,
   /** @memo */
   content_?: () => void,
 ) {

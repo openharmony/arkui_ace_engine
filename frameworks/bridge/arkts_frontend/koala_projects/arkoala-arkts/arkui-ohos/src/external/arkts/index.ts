@@ -14,5 +14,8 @@
  */
 
 import image from "@ohos.multimedia.image"
+import _Want from "@ohos.app.ability.Want"
+export * from "@ohos.base"
 
 export type PixelMap = image.PixelMap
+export type AbilityWant = _Want

@@ -14,3 +14,4 @@
  */
 
 export * from "./multimedia/image"
+export * from "./ui_extension/ui_extension"

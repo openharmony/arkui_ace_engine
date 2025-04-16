@@ -18245,8 +18245,7 @@ export class Serializer extends SerializerBase {
         value_want_type = runtimeType(value_want)
         valueSerializer.writeInt8(value_want_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_want_type)) {
-            const value_want_value  = value_want!
-            valueSerializer.writeWant(value_want_value)
+            // this is AbilityWant, Not support
         }
     }
     writeEllipseOptions(value: EllipseOptions): void {

@@ -456,18 +456,7 @@ export function deserializeAndCallCallback_Literal_Function_handler_Object_error
     _call(event)
 }
 export function deserializeAndCallCallback_Literal_Number_code_Want_want_Void(thisDeserializer: Deserializer): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((parameter: Literal_Number_code_Want_want) => void))
-    const parameter_buf_code : number = (thisDeserializer.readNumber() as number)
-    const parameter_buf_want_buf_runtimeType  = (thisDeserializer.readInt8() as int32)
-    let parameter_buf_want_buf : Want | undefined
-    if ((RuntimeType.UNDEFINED) != (parameter_buf_want_buf_runtimeType))
-    {
-        parameter_buf_want_buf = thisDeserializer.readWant()
-    }
-    const parameter_buf_want : undefined | Want = parameter_buf_want_buf
-    let parameter : Literal_Number_code_Want_want = ({code: parameter_buf_code, want: parameter_buf_want} as Literal_Number_code_Want_want)
-    _call(parameter)
+    // Not Support
 }
 export function deserializeAndCallCallback_Literal_Number_errcode_String_msg_Void(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
