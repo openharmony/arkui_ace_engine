@@ -1291,6 +1291,8 @@ void ScrollablePattern::SetFriction(double friction)
             auto scrollableTheme = context->GetTheme<ScrollableTheme>();
             friction = scrollableTheme->GetFriction();
         }
+        double ret = SystemProperties::GetSrollableFriction();
+        friction = !NearZero(ret) ? ret : friction;
     }
     friction_ = friction;
     CHECK_NULL_VOID(scrollableEvent_);
