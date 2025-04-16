@@ -3541,6 +3541,7 @@ void PipelineContext::UpdateLastMoveEvent(const MouseEvent& event)
     lastMouseEvent_->mockFlushEvent = event.mockFlushEvent;
     lastMouseEvent_->pointerEvent = event.pointerEvent;
     lastMouseEvent_->deviceId = event.deviceId;
+    lastMouseEvent_->sourceTool = event.sourceTool;
     lastSourceType_ = event.sourceType;
 }
 
@@ -5945,8 +5946,8 @@ void PipelineContext::FlushMouseEventInVsync()
     }
     if (lastMouseEvent_ && isTransFlag_ && (mouseEventSize == 0 || lastMouseEvent_->mockFlushEvent)) {
         FlushMouseEventForHover();
-        isTransFlag_ = false;
     }
+    isTransFlag_ = false;
     windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
 }
 
