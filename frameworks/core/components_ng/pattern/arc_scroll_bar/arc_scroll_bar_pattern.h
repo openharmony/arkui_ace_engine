@@ -69,6 +69,8 @@ public:
         return AceType::MakeRefPtr<ArcScrollBar>();
     }
 
+    void SetBarCollectClickAndLongPressTargetCallback() override {}
+
 private:
     void OnModifyDone() override;
 };

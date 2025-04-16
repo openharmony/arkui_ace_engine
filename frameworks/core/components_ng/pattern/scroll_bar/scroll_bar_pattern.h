@@ -357,6 +357,8 @@ public:
         return !hasChild_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
     }
 
+    virtual void SetBarCollectClickAndLongPressTargetCallback();
+
     void OnModifyDone() override;
 
     PositionMode GetPositionMode();
@@ -373,7 +375,6 @@ private:
     void SetInBarRegionCallback();
     void SetBarCollectTouchTargetCallback();
     void SetBarRectCollectTouchTargetCallback();
-    void SetBarCollectClickAndLongPressTargetCallback();
     void SetInBarRectRegionCallback();
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
