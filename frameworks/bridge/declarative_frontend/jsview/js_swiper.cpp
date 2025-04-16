@@ -1679,7 +1679,7 @@ void JSSwiper::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
     }
     auto sensitivity = info[0]->ToNumber<int32_t>();
     if (sensitivity < 0 || sensitivity > static_cast<int32_t>(CrownSensitivity::HIGH)) {
-        SwiperModel::GetInstance()->SetDigitalCrownSensitivity(CrownSensitivity::MEDIUM);
+        SwiperModel::GetInstance()->SetDigitalCrownSensitivity(static_cast<int32_t>(CrownSensitivity::MEDIUM));
         return;
     }
     SwiperModel::GetInstance()->SetDigitalCrownSensitivity(sensitivity);
