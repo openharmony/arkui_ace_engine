@@ -157,7 +157,7 @@ int32_t SheetManager::OpenBindSheetByUIContext(
 }
 
 int32_t SheetManager::UpdateBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode,
-    NG::SheetStyle& sheetStyle, bool isPartialUpdate, int32_t currentInstanceId)
+    const NG::SheetStyle& sheetStyle, bool isPartialUpdate, int32_t currentInstanceId)
 {
     CHECK_NULL_RETURN(sheetContentNode, ERROR_CODE_BIND_SHEET_CONTENT_ERROR);
     SheetContentKey sheetContentKey(currentInstanceId, sheetContentNode->GetId());

@@ -69,7 +69,7 @@ int32_t ViewContextModelNG::OpenBindSheet(
 }
 
 int32_t ViewContextModelNG::UpdateBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode,
-    NG::SheetStyle& sheetStyle, bool isPartialUpdate, int32_t currentInstanceId)
+    const NG::SheetStyle& sheetStyle, bool isPartialUpdate, int32_t currentInstanceId)
 {
     return SheetManager::GetInstance().UpdateBindSheetByUIContext(
         sheetContentNode, sheetStyle, isPartialUpdate, currentInstanceId);
