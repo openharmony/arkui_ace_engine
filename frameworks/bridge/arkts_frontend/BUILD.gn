@@ -79,7 +79,7 @@ ohos_shared_library("ArkoalaNative_ark") {
     "KOALA_OHOS",
     "__MUSL__",
     "KOALA_ETS_NAPI",
-    "DKOALA_USE_PANDA_VM",
+    "KOALA_USE_PANDA_VM",
   ]
 
   sources = [
