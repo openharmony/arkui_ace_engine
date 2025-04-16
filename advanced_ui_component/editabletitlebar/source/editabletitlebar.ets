@@ -652,9 +652,9 @@ struct ImageMenuItem {
     } else if (this.item.value === PUBLIC_BACK) {
       return getContext()?.resourceManager?.getStringByNameSync('icon_back');
     } else if (this.item.accessibilityText) {
-      return this.toStringFormat(this.item.accessibilityText);
+      return this.item.accessibilityText as string;
     } else if (this.item.label) {
-      return this.toStringFormat(this.item.label);
+      return this.item.label as string;
     }
     return ' ';
   }
@@ -668,7 +668,7 @@ struct ImageMenuItem {
 
   private getAccessibilityDescription(): string | undefined {
     if (this.item.accessibilityDescription && this.item.accessibilityDescription !== '') {
-      return this.toStringFormat(this.item.accessibilityDescription);
+      return this.item.accessibilityDescription as string;
     }
     return '';
   }

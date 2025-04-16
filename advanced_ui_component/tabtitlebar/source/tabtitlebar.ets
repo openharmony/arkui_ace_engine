@@ -576,7 +576,7 @@ struct TabContentItem {
                   .fontSize(TabContentItem.symbolSize)
                   .width(this.getImageLayoutWidth())
                   .height(TabContentItem.imageSize)
-                  .accessibilityText(this.toStringFormat(this.item.title))
+                  .accessibilityText(this.item.title as string)
                   .scale({
                     x: this.getImageScaleFactor(),
                     y: this.getImageScaleFactor()
@@ -592,7 +592,7 @@ struct TabContentItem {
                     .fontSize(TabContentItem.symbolSize)
                     .width(this.getImageLayoutWidth())
                     .height(TabContentItem.imageSize)
-                    .accessibilityText(this.toStringFormat(this.item.title))
+                    .accessibilityText(this.item.title as string)
                     .scale({
                       x: this.getImageScaleFactor(),
                       y: this.getImageScaleFactor()
@@ -606,7 +606,7 @@ struct TabContentItem {
                     .width(this.getImageLayoutWidth())
                     .height(TabContentItem.imageSize)
                     .objectFit(ImageFit.Fill)
-                    .accessibilityText(this.toStringFormat(this.item.title))
+                    .accessibilityText(this.item.title as string)
                     .scale({
                       x: this.getImageScaleFactor(),
                       y: this.getImageScaleFactor()
@@ -758,9 +758,9 @@ struct ImageMenuItem {
     if (this.item.value === PUBLIC_MORE) {
       return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
     } else if (this.item.accessibilityText) {
-      return this.toStringFormat(this.item.accessibilityText);
+      return this.item.accessibilityText as string;
     } else if (this.item.label) {
-      return this.toStringFormat(this.item.label);
+      return this.item.label as string;
     }
     return ' ';
   }
@@ -796,7 +796,7 @@ struct ImageMenuItem {
     }
     .accessibilityText(this.getAccessibilityReadText())
     .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
-    .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
+    .accessibilityDescription(this.item?.accessibilityDescription as string)
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
     .borderRadius(ImageMenuItem.buttonBorderRadius)
