@@ -3055,7 +3055,8 @@ void PipelineContext::DumpData(
     auto paramSize = params.size();
     auto container = Container::GetContainer(instanceId_);
     if (container && (container->IsUIExtensionWindow())) {
-        paramSize = std::distance(params.begin(), std::find(params.begin(), params.end(), PID_FLAG));
+        paramSize =
+            static_cast<uint32_t>(std::distance(params.begin(), std::find(params.begin(), params.end(), PID_FLAG)));
     }
     if (paramSize < used_id_flag) {
         node->DumpTree(depth, hasJson);
