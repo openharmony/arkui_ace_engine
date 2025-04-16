@@ -734,7 +734,7 @@ void SystemProperties::InitDeviceInfo(
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
     taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
-    formSkeletonBlurEnabled_ = system::GetBoolParameter("const.form.skeleton_view.bulr_style_enable", true);
+    formSkeletonBlurEnabled_ = system::GetBoolParameter("const.form.skeleton_view.blur_style_enable", true);
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
