@@ -888,4 +888,82 @@ HWTEST_F(InspectorTestNg, InspectorTestNg022, TestSize.Level1)
 
     Inspector::GetInspectorChildrenInfo(spanNode, treesInfos, 1, 0);
 }
+
+/**
+ * @tc.name: InspectorTestNg023
+ * @tc.desc: Test the method GetCustomNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize context and create stage/page nodes
+     * @tc.expected: Context should be valid, stage/page nodes created successfully
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    EXPECT_NE(context, nullptr);
+    auto stageId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto stageNode = FrameNode::CreateFrameNode("stage", stageId, AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto pageNode = FrameNode::CreateFrameNode("page", 100, AceType::MakeRefPtr<Pattern>(), true);
+    stageNode->AddChild(pageNode);
+
+    /**
+     * @tc.steps: step2. Build test node hierarchy
+     */
+    auto customNode = CustomNode::CreateCustomNode(101, V2::JS_VIEW_ETS_TAG);
+    customNode->UpdateInspectorId("custom_node_id");
+    customNode->extraInfo_ = { "pages", 15, 20 };
+    pageNode->AddChild(customNode);
+    auto frameNode = FrameNode::CreateFrameNode("button", 102, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->tag_ = V2::JS_VIEW_ETS_TAG;
+    customNode->AddChild(frameNode);
+    auto customNode2 = CustomNode::CreateCustomNode(103, V2::JS_VIEW_ETS_TAG);
+    frameNode->AddChild(customNode2);
+
+    /**
+     * @tc.steps: step3. Execute inspection with ID filter
+     * @tc.expected: Should return valid JSON without error flag
+     */
+    bool needThrow = false;
+    InspectorFilter filter;
+    std::string id = "custom_node_id";
+    filter.SetFilterID(id);
+    std::string result = Inspector::GetInspector(true, filter, needThrow);
+    EXPECT_FALSE(needThrow);
+
+    /**
+     * @tc.steps: step4. Verify frame node inspection data
+     * @tc.expected: Should return non-empty valid JSON
+     */
+    auto resultFrameNode = Inspector::GetInspectorOfNode(frameNode);
+    auto jsonFrameNode = JsonUtil::ParseJsonString(resultFrameNode);
+    ASSERT_NE(resultFrameNode, "");
+    EXPECT_STREQ(jsonFrameNode->GetValue(INSPECTOR_DEBUGLINE)->GetString().c_str(), "");
+
+    /**
+     * @tc.steps: step5. Verify CustomNode specific attributes
+     * @tc.expected: CustomNode should show debug info, FrameNode as build-in type
+     */
+    auto jsonValue = JsonUtil::ParseJsonString(result);
+    ASSERT_NE(jsonValue, nullptr);
+    EXPECT_STREQ(jsonValue->GetValue("type")->GetString().c_str(), "root");
+    auto content = jsonValue->GetValue("content");
+    ASSERT_FALSE(content->IsNull());
+    auto childrenArray = content->GetValue(INSPECTOR_CHILDREN);
+    ASSERT_TRUE(childrenArray->IsArray());
+    bool foundCustomNode = false;
+    for (int32_t i = 0; i < childrenArray->GetArraySize(); ++i) {
+        auto node = childrenArray->GetArrayItem(i);
+        if (node->GetValue(INSPECTOR_ID)->GetInt() == 101) {
+            auto debugLine = JsonUtil::ParseJsonString(node->GetValue(INSPECTOR_DEBUGLINE)->GetString());
+            EXPECT_STREQ("pages(15:20)", debugLine->GetValue("$line")->GetString().c_str());
+            foundCustomNode = true;
+        } else if (node->GetValue(INSPECTOR_ID)->GetInt() == 102) {
+            EXPECT_STREQ("build-in", node->GetValue("type")->GetString().c_str());
+        }
+    }
+    EXPECT_TRUE(foundCustomNode);
+    context->stageManager_ = nullptr;
+}
 } // namespace OHOS::Ace::NG
