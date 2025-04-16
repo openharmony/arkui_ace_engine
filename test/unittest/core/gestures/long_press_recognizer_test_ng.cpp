@@ -1325,7 +1325,7 @@ HWTEST_F(LongPressRecognizerTestNg, SetOnActionCancelTest001, TestSize.Level1)
     longPressRecognizer->touchPoints_[touchEvent.id] = touchEvent;
     longPressRecognizer->refereeState_ = RefereeState::SUCCEED;
     longPressRecognizer->HandleTouchCancelEvent(touchEvent);
-    EXPECT_EQ(unknownPropertyValue, 0);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
     EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::READY);
 }
 
@@ -1366,7 +1366,7 @@ HWTEST_F(LongPressRecognizerTestNg, SetOnActionCancelTest002, TestSize.Level1)
     longPressRecognizer->duration_ = 0;
     longPressRecognizer->refereeState_ = RefereeState::SUCCEED;
     auto result = longPressRecognizer->ReconcileFrom(longPressRecognizerPtr);
-    EXPECT_EQ(unknownPropertyValue, 0);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
     EXPECT_EQ(result, false);
 }
 
