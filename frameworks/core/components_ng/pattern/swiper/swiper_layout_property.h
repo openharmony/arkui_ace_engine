@@ -123,6 +123,7 @@ public:
         json->PutExtAttr("itemSpace",
             propItemSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
         json->PutExtAttr("cachedCount", propCachedCount_.value_or(1), filter);
+        json->PutExtAttr("cachedIsShown", GetCachedIsShownValue(false) ? "true" : "false", filter);
         json->PutExtAttr("displayMode",
             propDisplayMode_.value_or(SwiperDisplayMode::STRETCH) == SwiperDisplayMode::AUTO_LINEAR ?
             "SwiperDisplayMode.AutoLinear" : "SwiperDisplayMode.Stretch", filter);
