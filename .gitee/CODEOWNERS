@@ -104,6 +104,8 @@ adapter/ohos/osal/text_translation_mgr.cpp @huawei_g_five
 adapter/ohos/osal/data_detector_adapter.cpp @huawei_g_five
 adapter/ohos/osal/data_detector_loader.cpp @huawei_g_five
 adapter/ohos/osal/data_detector_mgr.cpp @huawei_g_five
+adapter/ohos/osal/display_manager_ohos.cpp @arkuilayout
+adapter/ohos/osal/display_manager_ohos.h @arkuilayout
 adapter/ohos/osal/download_manager_ohos.cpp @arkui_image
 adapter/ohos/osal/drawing_color_filter_ohos.cpp @arkui_image
 adapter/ohos/osal/drawing_color_filter_ohos.h @arkui_image
@@ -238,6 +240,7 @@ frameworks/base/base64/base64_util.cpp @arkuistatemgmt
 frameworks/base/base64/base64_util.h @arkuistatemgmt
 frameworks/base/base64/BUILD.gn @arkuistatemgmt
 frameworks/base/BUILD.gn @arkui_architecture
+frameworks/base/display_manager/display_manager.h @arkuilayout
 frameworks/base/error/error_code.h @arkuiframework
 frameworks/base/geometry/animatable_dimension.cpp @arkuiframework
 frameworks/base/geometry/animatable_dimension.h @arkuiframework
@@ -3071,6 +3074,8 @@ test/mock/core/event/ @arkuievent
 test/mock/core/accessibility/ @arkuiabilitygroup
 test/mock/core/animation/ @arkui_superman
 test/mock/core/image_provider/ @arkui_image
+test/mock/core/manager/mock_display_manager.cpp @arkuilayout
+test/mock/core/manager/mock_display_manager.h @arkuilayout
 test/mock/core/svg/ @arkui_image
 test/mock/interfaces/ @arkui_architecture
 
