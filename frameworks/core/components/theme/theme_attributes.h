@@ -90,7 +90,7 @@ extern const char THEME_PATTERN_AGING_ADAPATION_DIALOG[];
 extern const char THEME_PATTERN_SCROLLABLE[];
 extern const char THEME_PATTERN_APP[];
 extern const char THEME_PATTERN_LINEAR_INDICATOR[];
- 
+extern const char THEME_PATTERN_CORNER_MARK[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];

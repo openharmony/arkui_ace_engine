@@ -1349,6 +1349,16 @@ public:
 
     int32_t OnRecvCommand(const std::string& command) override;
 
+    const RefPtr<FrameNode>& GetCornerMarkNode() const
+    {
+        return cornerMarkNode_;
+    }
+
+    void SetCornerMarkNode(const RefPtr<FrameNode>& cornerMarkNode)
+    {
+        cornerMarkNode_ = cornerMarkNode;
+    }
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1647,6 +1657,8 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
 
     std::list<std::function<void()>> removeToolbarItemCallbacks_;
+
+    RefPtr<FrameNode> cornerMarkNode_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 
