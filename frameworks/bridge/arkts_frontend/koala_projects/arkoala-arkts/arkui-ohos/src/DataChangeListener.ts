@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { pointer, nullptr } from "@koalaui/interop";
+import { pointer } from "@koalaui/interop";
 import { DataOperation, DataOperationType, DataAddOperation, DataDeleteOperation, DataChangeOperation, DataMoveOperation, DataExchangeOperation, LazyForEachOps } from "./generated";
 import { int32 } from "@koalaui/common"
 import { MutableState } from "@koalaui/runtime";
@@ -56,36 +56,46 @@ export class InternalListener implements DataChangeListener {
     }
 
     onDataReloaded(): void {
-        this.startIndex = 0;
+        if (this.startIndex === Number.POSITIVE_INFINITY) {
+            ++this.version.value
+        }
+        this.startIndex = 0
         this.endIndex = Number.POSITIVE_INFINITY
-        ++this.version.value
     }
 
     onDataAdd(index: number): void {
         if (index < 0) return
-        this.startIndex = Math.min(this.startIndex, index);
+        if (this.startIndex === Number.POSITIVE_INFINITY) {
+            ++this.version.value
+        }
+        this.startIndex = Math.min(this.startIndex, index)
         ++this.changeCount
-        ++this.version.value
     }
 
     onDataMove(from: number, to: number): void {
         if (from < 0 || to < 0) return
-        this.startIndex = Math.min(this.startIndex, Math.min(from, to));
-        this.endIndex = Math.max(this.endIndex, Math.max(from, to));
-        ++this.version.value
+        if (this.startIndex === Number.POSITIVE_INFINITY) {
+            ++this.version.value
+        }
+        this.startIndex = Math.min(this.startIndex, Math.min(from, to))
+        this.endIndex = Math.max(this.endIndex, Math.max(from, to))
     }
 
     onDataDelete(index: number): void {
         if (index < 0) return
-        this.startIndex = Math.min(this.startIndex, index);
+        if (this.startIndex === Number.POSITIVE_INFINITY) {
+            ++this.version.value
+        }
+        this.startIndex = Math.min(this.startIndex, index)
         --this.changeCount
-        ++this.version.value
     }
 
     onDataChange(index: number): void {
         if (index < 0) return
-        this.startIndex = Math.min(this.startIndex, index);
-        ++this.version.value
+        if (this.startIndex === Number.POSITIVE_INFINITY) {
+            ++this.version.value
+        }
+        this.startIndex = Math.min(this.startIndex, index)
     }
 
     onDatasetChange(dataOperations: DataOperation[]): void {
@@ -127,7 +137,12 @@ export class InternalListener implements DataChangeListener {
                 }
             }
         }
-        this.flush(startIndex as int32) // this.flush(startIndex, endIndex, changeCount)
+        if (this.startIndex === Number.POSITIVE_INFINITY) {
+            ++this.version.value
+        }
+        this.startIndex = startIndex
+        this.endIndex = endIndex
+        this.changeCount = changeCount
     }
 
     /* deprecated */
