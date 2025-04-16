@@ -103,15 +103,14 @@ void SetScrollOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(scroller);
     RefPtr<ScrollControllerBase> positionController = ScrollModelNG::GetOrCreateController(frameNode);
-    // need check
-    // RefPtr<ScrollProxy> scrollBarProxy = ScrollModelNG::GetOrCreateScrollBarProxy(frameNode);
+    RefPtr<ScrollProxy> scrollBarProxy = ScrollModelNG::GetOrCreateScrollBarProxy(frameNode);
 
-    // auto abstPeerPtrOpt = Converter::OptConvert<Ark_Scroller>(*scroller);
-    // CHECK_NULL_VOID(abstPeerPtrOpt);
-    // auto peerImplPtr = abstPeerPtrOpt.value();
-    // CHECK_NULL_VOID(peerImplPtr);
-    // peerImplPtr->SetController(positionController);
-    // peerImplPtr->SetScrollBarProxy(scrollBarProxy);
+    auto abstPeerPtrOpt = Converter::OptConvert<Ark_Scroller>(*scroller);
+    CHECK_NULL_VOID(abstPeerPtrOpt);
+    auto peerImplPtr = abstPeerPtrOpt.value();
+    CHECK_NULL_VOID(peerImplPtr);
+    peerImplPtr->SetController(positionController);
+    peerImplPtr->SetScrollBarProxy(scrollBarProxy);
 }
 } // ScrollInterfaceModifier
 namespace ScrollAttributeModifier {
@@ -140,8 +139,7 @@ void ScrollableImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto direction = Converter::OptConvert<Axis>(value);
-    // need check
-    // ScrollModelNG::SetAxis(frameNode, direction);
+    ScrollModelNG::SetAxis(frameNode, direction);
 }
 void OnScrollImpl(Ark_NativePointer node,
                   const Callback_Number_Number_Void* value)
@@ -231,8 +229,7 @@ void OnScrollEndImpl(Ark_NativePointer node,
     auto onEvent = [arkCallback = CallbackHelper(*value)]() {
         arkCallback.Invoke();
     };
-    // need check
-    // ScrollModelNG::SetOnScrollEnd(frameNode, std::move(onEvent));
+    ScrollModelNG::SetOnScrollEnd(frameNode, std::move(onEvent));
 }
 void OnScrollStopImpl(Ark_NativePointer node,
                       const VoidCallback* value)
@@ -251,8 +248,7 @@ void ScrollBarImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto displayMode = Converter::OptConvert<DisplayMode>(value);
-    // need check
-    // ScrollModelNG::SetScrollBar(frameNode, displayMode);
+    ScrollModelNG::SetScrollBar(frameNode, displayMode);
 }
 void ScrollBarColorImpl(Ark_NativePointer node,
                         const Ark_Union_Color_Number_String* value)
@@ -261,8 +257,7 @@ void ScrollBarColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto colorVal = Converter::OptConvert<Color>(*value);
-    // need check
-    // ScrollModelNG::SetScrollBarColor(frameNode, colorVal);
+    ScrollModelNG::SetScrollBarColor(frameNode, colorVal);
 }
 void ScrollBarWidthImpl(Ark_NativePointer node,
                         const Ark_Union_Number_String* value)
@@ -273,8 +268,7 @@ void ScrollBarWidthImpl(Ark_NativePointer node,
     auto width = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(width);
     Validator::ValidateNonPercent(width);
-    // need check
-    // ScrollModelNG::SetScrollBarWidth(frameNode, width);
+    ScrollModelNG::SetScrollBarWidth(frameNode, width);
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
                             const OnScrollFrameBeginCallback* value)
@@ -305,8 +299,7 @@ void NestedScrollImpl(Ark_NativePointer node,
 
     auto forward = Converter::OptConvert<NestedScrollMode>(value->scrollForward);
     auto backward = Converter::OptConvert<NestedScrollMode>(value->scrollBackward);
-    // need check
-    // ScrollModelNG::SetNestedScroll(frameNode, forward, backward);
+    ScrollModelNG::SetNestedScroll(frameNode, forward, backward);
 }
 void EnableScrollInteractionImpl(Ark_NativePointer node,
                                  Ark_Boolean value)
@@ -322,8 +315,7 @@ void FrictionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto frictionVal = Converter::OptConvert<float>(*value);
-    // need check
-    // ScrollModelNG::SetFriction(frameNode, frictionVal);
+    ScrollModelNG::SetFriction(frameNode, frictionVal);
 }
 void ScrollSnapImpl(Ark_NativePointer node,
                     const Ark_ScrollSnapOptions* value)
@@ -374,8 +366,7 @@ void EdgeEffectImpl(Ark_NativePointer node,
 
     auto effect = Converter::OptConvert<EdgeEffect>(edgeEffect);
     auto always = Converter::OptConvert<bool>(*options);
-    // need check
-    // ScrollModelNG::SetEdgeEffect(frameNode, effect, always);
+    ScrollModelNG::SetEdgeEffect(frameNode, effect, always);
 }
 } // ScrollAttributeModifier
 const GENERATED_ArkUIScrollModifier* GetScrollModifier()
