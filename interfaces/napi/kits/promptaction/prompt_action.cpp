@@ -349,7 +349,7 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
         int32_t num = 0;
         napi_get_value_int32(env, shadowNApi, &num);
         auto style = static_cast<ShadowStyle>(num);
-        GetShadowFromTheme(style, shadowProps);
+        CHECK_EQUAL_VOID(GetShadowFromTheme(style, shadowProps), false);
     } else if (valueType == napi_object) {
         napi_value offsetXApi = nullptr;
         napi_value offsetYApi = nullptr;
@@ -385,7 +385,7 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
         isTypeStyleShadow = false;
     } else {
         auto shadowStyle = GetToastDefaultShadowStyle();
-        GetShadowFromTheme(shadowStyle, shadowProps);
+        CHECK_EQUAL_VOID(GetShadowFromTheme(shadowStyle, shadowProps), false);
     }
     shadow = shadowProps;
 }
