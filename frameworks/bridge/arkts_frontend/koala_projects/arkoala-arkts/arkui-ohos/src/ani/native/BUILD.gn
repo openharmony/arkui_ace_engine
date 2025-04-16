@@ -15,7 +15,7 @@ import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 group("ace_ani_native_package") {
-  deps = [ "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/ui_extension:arkuiuiextension_group" ]
+  deps = [ "ui_extension:arkuiuiextension_group" ]
 }
 
 ohos_shared_library("arkoala_native_ani") {
