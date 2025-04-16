@@ -1370,6 +1370,7 @@ void FormPattern::InitFormManagerDelegate()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(context);
+    CHECK_NULL_VOID(formManagerBridge_);
     formManagerBridge_->AddRenderDelegate();
     formManagerBridge_->RegisterRenderDelegateEvent();
     auto formUtils = FormManager::GetInstance().GetFormUtils();
