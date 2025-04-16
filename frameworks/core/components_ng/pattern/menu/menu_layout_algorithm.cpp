@@ -722,7 +722,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     InitCanExpandCurrentWindow(isShowInSubWindow);
     Initialize(layoutWrapper);
     if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
+        InitTargetSizeAndPosition(layoutWrapper, isContextMenu, menuPattern);
     }
     auto pipelineContext = menuNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
