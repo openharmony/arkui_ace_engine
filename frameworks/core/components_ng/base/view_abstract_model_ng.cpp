@@ -574,8 +574,6 @@ void ViewAbstractModelNG::BindContextMenuStatic(const RefPtr<FrameNode>& targetN
                         CHECK_NULL_VOID(targetNode);
                         NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                             info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-                        auto pipelineContext = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
-                        CHECK_NULL_VOID(pipelineContext);
                         if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
                             std::function<void()> previewBuildFunc;
                             NG::ViewAbstract::BindMenuWithCustomNode(
