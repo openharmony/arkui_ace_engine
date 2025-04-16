@@ -103,7 +103,7 @@ void ShapeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto checkBoxStyle = Converter::OptConvert<CheckBoxStyle>(value);
-    // CheckBoxModelNG::SetCheckboxStyle(frameNode, checkBoxStyle);
+    CheckBoxModelNG::SetCheckboxStyle(frameNode, checkBoxStyle);
 }
 void UnselectedColorImpl(Ark_NativePointer node,
                          const Ark_ResourceColor* value)
@@ -169,7 +169,7 @@ void _onChangeEvent_selectImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(value));
     };
-    // CheckBoxModelNG::SetChangeEvent(frameNode, std::move(onEvent));
+    CheckBoxModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
 } // CheckboxAttributeModifier
 const GENERATED_ArkUICheckboxModifier* GetCheckboxModifier()

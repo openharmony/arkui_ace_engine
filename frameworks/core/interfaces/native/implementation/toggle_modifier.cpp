@@ -131,12 +131,12 @@ void SwitchStyleImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<Converter::SwitchStyle>(*value);
     Validator::ValidateNonNegative(convValue.pointRadius);
     Validator::ValidateNonPercent(convValue.pointRadius);
-    // ToggleModelNG::SetPointRadius(frameNode, convValue.pointRadius);
-    // ToggleModelNG::SetUnselectedColor(frameNode, convValue.unselectedColor);
+    ToggleModelNG::SetPointRadius(frameNode, convValue.pointRadius);
+    ToggleModelNG::SetUnselectedColor(frameNode, convValue.unselectedColor);
     ToggleModelNG::SetSwitchPointColor(frameNode, convValue.pointColor);
     Validator::ValidateNonNegative(convValue.trackBorderRadius);
     Validator::ValidateNonPercent(convValue.trackBorderRadius);
-    // ToggleModelNG::SetTrackBorderRadius(frameNode, convValue.trackBorderRadius);
+    ToggleModelNG::SetTrackBorderRadius(frameNode, convValue.trackBorderRadius);
 }
 void _onChangeEvent_isOnImpl(Ark_NativePointer node,
                              const Callback_Boolean_Void* callback)
@@ -149,7 +149,7 @@ void _onChangeEvent_isOnImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(isOn));
     };
-    // ToggleModelNG::OnChangeEvent(frameNode, std::move(onEvent));
+    ToggleModelNG::OnChangeEvent(frameNode, std::move(onEvent));
 }
 } // ToggleAttributeModifier
 const GENERATED_ArkUIToggleModifier* GetToggleModifier()
