@@ -113,12 +113,12 @@ HWTEST_F(SearchModifierTest2, setKeyboardAppearanceDefaultValuesTest, TestSize.L
 }
 
 std::vector<std::tuple<std::string, Opt_KeyboardAppearance, std::string>> testFixtureEnumKeyboardAppearanceTestPlan = {
-    { "KeyboardAppearance.NONE_IMMERSIVE", Converter::ArkValue<Opt_KeyboardAppearance>(ARK_KEYBOARD_APPEARANCE_NONE_IMMERSIVE),
-        "0" },
-    { "KeyboardAppearance.IMMERSIVE", Converter::ArkValue<Opt_KeyboardAppearance>(ARK_KEYBOARD_APPEARANCE_IMMERSIVE),
-        "1" },
-    { "KeyboardAppearance.LIGHT_IMMERSIVE", Converter::ArkValue<Opt_KeyboardAppearance>(ARK_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE),
-        "2" },
+    { "KeyboardAppearance.NONE_IMMERSIVE",
+        Converter::ArkValue<Opt_KeyboardAppearance>(ARK_KEYBOARD_APPEARANCE_NONE_IMMERSIVE), "0" },
+    { "KeyboardAppearance.IMMERSIVE",
+        Converter::ArkValue<Opt_KeyboardAppearance>(ARK_KEYBOARD_APPEARANCE_IMMERSIVE), "1" },
+    { "KeyboardAppearance.LIGHT_IMMERSIVE",
+        Converter::ArkValue<Opt_KeyboardAppearance>(ARK_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE), "2" },
     { "-1", Converter::ArkValue<Opt_KeyboardAppearance>(static_cast<Ark_KeyboardAppearance>(-1)),
         ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE },
     { "INT_MAX", Converter::ArkValue<Opt_KeyboardAppearance>(static_cast<Ark_KeyboardAppearance>(INT_MAX)),
@@ -146,6 +146,4 @@ HWTEST_F(SearchModifierTest2, setKeyboardAppearanceValuesTest, TestSize.Level1)
         checkValue(input, expected, value);
     }
 }
-
-
 } // namespace OHOS::Ace::NG
