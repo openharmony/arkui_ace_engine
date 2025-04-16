@@ -34,6 +34,8 @@ const auto ATTRIBUTE_TEMPLATE_I_SOURCE_NAME = "source";
 const auto ATTRIBUTE_TEMPLATE_I_SOURCE_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_TEMPLATE_I_BUNDLE_NAME_NAME = "bundleName";
 const auto ATTRIBUTE_TEMPLATE_I_BUNDLE_NAME_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_TEMPLATE_I_DATA_NAME = "data";
+const auto ATTRIBUTE_TEMPLATE_I_DATA_DEFAULT_VALUE = "";
 
 enum ResID {
     STRING_RES_0_ID,
@@ -93,6 +95,10 @@ HWTEST_F(PluginComponentModifierTest, setPluginComponentOptionsTestDefaultValues
     resultStr = GetAttrValue<std::string>(resultTemplate, ATTRIBUTE_TEMPLATE_I_BUNDLE_NAME_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_TEMPLATE_I_BUNDLE_NAME_DEFAULT_VALUE) <<
         "Default value for attribute 'options.template.bundleName'";
+
+    resultStr = GetAttrValue<std::string>(resultTemplate, ATTRIBUTE_TEMPLATE_I_DATA_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TEMPLATE_I_DATA_DEFAULT_VALUE) <<
+        "Default value for attribute 'options.data'";
 }
 
 /*
@@ -166,14 +172,37 @@ HWTEST_F(
 }
 
 /*
- * @tc.name: setPluginComponentOptionsTestOptionsTemplateBundleNameValidValues
+ * @tc.name: setPluginComponentOptionsTestOptionsDataValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(
-    PluginComponentModifierTest, DISABLED_setPluginComponentOptionsTestOptionsTemplateDataValidValues, TestSize.Level1)
+HWTEST_F(PluginComponentModifierTest, setPluginComponentOptionsTestOptionsData, TestSize.Level1)
 {
-    // test not implemented
+    Ark_PluginComponentOptions initValueOptions;
+
+    // Initial setup
+    initValueOptions.template_.source = std::get<1>(testFixtureStringValidValues[0]);
+    initValueOptions.template_.bundleName = std::get<1>(testFixtureStringValidValues[0]);
+    initValueOptions.data = std::get<1>(testFixtureStringValidValues[0]);
+
+    auto checkValue = [this, &initValueOptions](
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
+        Ark_PluginComponentOptions inputValueOptions = initValueOptions;
+
+        // Re-create node for 'options' attribute
+        auto node = CreateNode();
+        inputValueOptions.data = value;
+        modifier_->setPluginComponentOptions(node, &inputValueOptions);
+        auto jsonValue = GetJsonValue(node);
+        auto resultString = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEMPLATE_I_DATA_NAME);
+        DisposeNode(node);
+        EXPECT_EQ(resultString, expectedStr) <<
+            "Input value is: " << input << ", method: setPluginComponentOptions, attribute: options.template.source";
+    };
+
+    for (auto& [input, value, expected] : testFixtureStringValidValues) {
+        checkValue(input, expected, value);
+    }
 }
 
 /*

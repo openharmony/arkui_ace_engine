@@ -44,6 +44,16 @@ void PluginModelNG::SetRequestPluginInfo(FrameNode *frameNode, const std::option
     }
 }
 
+void PluginModelNG::SetData(FrameNode *frameNode, const std::optional<std::string>& data)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (data) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(PluginLayoutProperty, Data, *data, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(PluginLayoutProperty, Data, frameNode);
+    }
+}
+
 void PluginModelNG::SetOnComplete(FrameNode *frameNode, std::function<void(const std::string&)>&& OnComplete)
 {
     CHECK_NULL_VOID(frameNode);
