@@ -9777,8 +9777,8 @@ void TextFieldPattern::ReportEvent()
         auto textString = GetTextValue();
         value->Put("text", textString.c_str());
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(), "event", value);
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] TextField reportComponentChangeEvent %{public}s",
-            host->GetId(), textString.c_str());
+        SEC_TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] TextField reportComponentChangeEvent %{public}d",
+            host->GetId(), textString.length());
     }
 #endif
 }

@@ -12930,14 +12930,21 @@ void RichEditorPattern::OnAccessibilityEventTextChange(const std::string& change
 
 void RichEditorPattern::ReportComponentChangeEvent() {
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    CHECK_NULL_VOID(styledString_);
-    auto textString = styledString_->ToString();
+    std::string str;
+    if (isSpanStringMode_) {
+        CHECK_NULL_VOID(styledString_);
+        str = styledString_->GetString();
+    } else {
+        std::u16string u16Str;
+        GetContentBySpans(u16Str);
+        str = UtfUtils::Str16DebugToStr8(u16Str);
+    }
     auto value = InspectorJsonUtil::Create();
     CHECK_NULL_VOID(value);
-    value->Put("text", textString.c_str());
+    value->Put("text", str.c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameId_, "event", value);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}s", frameId_,
-        textString.c_str());
+    SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}d",
+        frameId_, str.length());
 #endif
 }
 } // namespace OHOS::Ace::NG
