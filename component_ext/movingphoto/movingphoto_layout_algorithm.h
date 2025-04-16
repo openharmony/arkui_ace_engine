@@ -32,6 +32,8 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
+    void ChildMeasure(RefPtr<LayoutWrapper> layoutWrapper, SizeF contentSize,
+                     float xHeight, LayoutConstraintF layoutConstraint);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(MovingPhotoLayoutAlgorithm);
