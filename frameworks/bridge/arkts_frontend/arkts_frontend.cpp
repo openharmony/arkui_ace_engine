@@ -222,6 +222,10 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
 void ArktsFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     pipeline_ = DynamicCast<NG::PipelineContext>(context);
+    if (accessibilityManager_) {
+        accessibilityManager_->SetPipelineContext(context);
+        accessibilityManager_->InitializeCallback();
+    }
 }
 
 void* ArktsFrontend::GetShared(int32_t id)
@@ -242,5 +246,28 @@ void ArktsFrontend::Destroy()
 {
     CHECK_NULL_VOID(env_);
     env_->GlobalReference_Delete(app_);
+}
+
+ani_object ArktsFrontend::CallGetUIContextFunc()
+{
+    ani_object result = nullptr;
+    ani_status status;
+
+    ani_class uiContextClass;
+    if ((status = env_->FindClass("Larkui/ohos/arkui/UIContext/UIContext;", &uiContextClass)) != ANI_OK) {
+        LOGE("FindClass UIContext failed, %{public}d", status);
+        return result;
+    }
+    ani_method uiContextClassCtor;
+    if ((status = env_->Class_FindMethod(uiContextClass, "<ctor>", "I:V", &uiContextClassCtor)) != ANI_OK) {
+        LOGE("Class_FindMethod UIContext ctor failed, %{public}d", status);
+        return result;
+    }
+    ani_int instanceId = 100000;
+    if ((status = env_->Object_New(uiContextClass, uiContextClassCtor, &result, instanceId)) != ANI_OK) {
+        LOGE("New UIContext object failed, %{public}d", status);
+        return result;
+    }
+    return result;
 }
 } // namespace OHOS::Ace

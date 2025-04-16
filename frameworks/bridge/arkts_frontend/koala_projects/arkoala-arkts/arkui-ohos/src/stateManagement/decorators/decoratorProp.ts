@@ -19,7 +19,7 @@ import { WatchFunc, WatchFuncType } from './decoratorWatch';
 import { BackingValue } from '../base/backingValue';
 import { propDeepCopy } from '@koalaui/common';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
-import { LinkDecoratedVariable } from './decoratorLink';
+
 /** 
 * implementation of V1 @Prop
 *
@@ -49,7 +49,7 @@ function deepCopy<T>(value: T): T {
     // when object property
     return propDeepCopy<T>(value) as T;
 }
-
+ 
 export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     implements IDecoratedMutableVariable<T>, IDecoratedUpdatableVariable<T> {
     private __soruceValue: BackingValue<T>;

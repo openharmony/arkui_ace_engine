@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/property/templates_parser.h"
+#include "core/components_ng/pattern/grid/irregular/grid_large_delta_converter.h"
 
 namespace OHOS::Ace::NG {
 void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -186,7 +187,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
     }
 
     if ((wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) &&
-        scrollSource_ != SCROLL_FROM_ANIMATION_SPRING) {
+        scrollSource_ == SCROLL_FROM_NONE) {
         postJumpOffset_ = info_.currentOffset_;
         info_.lineHeightMap_.clear();
         PrepareJumpOnReset(info_);
@@ -286,16 +287,17 @@ constexpr float SKIP_THRESHOLD = 2.0f;
 
 bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
 {
-    float delta = std::abs(info_.currentOffset_ - info_.prevOffset_);
-    if (enableSkip_ && GreatNotEqual(delta, mainSize)) {
+    float delta = info_.currentOffset_ - info_.prevOffset_;
+    if (enableSkip_ && GreatNotEqual(std::abs(delta), mainSize)) {
         // a more costly check, therefore perform after comparing to [mainSize]
-        if (LessOrEqual(delta, SKIP_THRESHOLD * info_.GetTotalHeightOfItemsInView(mainGap_))) {
+        if (LessOrEqual(std::abs(delta), SKIP_THRESHOLD * info_.GetTotalHeightOfItemsInView(mainGap_))) {
             return false;
         }
-        info_.jumpIndex_ = Negative(info_.currentOffset_) ? SkipLinesForward() : SkipLinesBackward();
+
+        GridLargeDeltaConverter converter(info_, wrapper_);
+        info_.jumpIndex_ = std::clamp(converter.Convert(delta), 0, info_.GetChildrenCount() - 1);
         info_.scrollAlign_ = ScrollAlign::START;
         info_.currentOffset_ = 0.0f;
-        info_.jumpForRecompose_ = info_.jumpIndex_;
         Jump(mainSize);
         return true;
     }
@@ -565,43 +567,6 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
         default:
             break;
     }
-}
-
-namespace {
-void AddLineHeight(float& height, int32_t curLine, int32_t startLine, const std::map<int32_t, float>& lineHeights)
-{
-    auto iter = lineHeights.find(curLine);
-    if (iter != lineHeights.end()) {
-        height += iter->second;
-    } else {
-        // estimation
-        height += height / std::abs(curLine - startLine);
-    }
-}
-} // namespace
-
-int32_t GridIrregularLayoutAlgorithm::SkipLinesForward()
-{
-    int32_t line = info_.startMainLineIndex_;
-    float height = 0.0f;
-    while (LessNotEqual(height, -info_.currentOffset_)) {
-        AddLineHeight(height, line++, info_.startMainLineIndex_, info_.lineHeightMap_);
-    }
-    GridIrregularFiller filler(&info_, wrapper_);
-    return filler.FillMatrixByLine(info_.startMainLineIndex_, line);
-}
-
-int32_t GridIrregularLayoutAlgorithm::SkipLinesBackward() const
-{
-    const auto& info = info_;
-    float height = info.GetHeightInRange(info.startMainLineIndex_, info.endMainLineIndex_ + 1, 0.0f);
-
-    float target = info.currentOffset_ + height;
-    int32_t line = info.startMainLineIndex_;
-    while (LessNotEqual(height, target) && line > 0) {
-        AddLineHeight(height, --line, info.endMainLineIndex_, info.lineHeightMap_);
-    }
-    return std::max(0, info.FindEndIdx(line).itemIdx);
 }
 
 void GridIrregularLayoutAlgorithm::MeasureToTarget()

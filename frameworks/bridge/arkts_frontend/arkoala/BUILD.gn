@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 action("run_arkoala_build") {
@@ -39,11 +40,22 @@ action("run_arkoala_build") {
     # Paths: 5 es2panda path.
     rebase_path("${ets2abc_build_path}"),
 
-    # Paths: 6 arklink path.
+    # Paths: 6 ohos_ets_api_path
+    rebase_path("${ohos_ets_api_path}"),
+
+    # Paths: 7 ohos_ets_arkts_path
+    rebase_path("${ohos_ets_arkts_path}"),
+
+    # Paths: 8 arklink path.
     rebase_path("${static_linker_build_path}"),
 
-    # Paths: 7 ets stdlib path.
+    # Paths: 9 ets stdlib path.
     rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
+  ]
+
+  deps = [
+    "${ohos_ets_api_deps}",
+    "${ohos_ets_arkts_deps}",
   ]
 
   external_deps = ets2abc_build_deps

@@ -26,10 +26,12 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/frontend.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 
 typedef struct __EtsEnv ets_env; // only include ets_napi.h in .cpp files
 typedef struct __ani_env ani_env;
-typedef class __ani_ref *ani_ref;
+typedef class __ani_ref* ani_ref;
+typedef class __ani_object* ani_object;
 
 namespace OHOS::Ace {
 using InspectorFunc = std::function<void()>;
@@ -210,7 +212,7 @@ public:
 
     RefPtr<AccessibilityManager> GetAccessibilityManager() const override
     {
-        return nullptr;
+        return accessibilityManager_;
     }
     WindowConfig& GetWindowConfig() override
     {
@@ -269,6 +271,8 @@ public:
         drawCallbacks_.erase(componentId);
     }
 
+    ani_object CallGetUIContextFunc();
+
 private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;
@@ -277,6 +281,8 @@ private:
     bool foregroundFrontend_ = false;
 
     std::unordered_map<int32_t, void*> storageMap_;
+    RefPtr<Framework::AccessibilityNodeManager> accessibilityManager_
+        = Framework::AccessibilityNodeManager::Create();
 
     ACE_DISALLOW_COPY_AND_MOVE(ArktsFrontend);
     

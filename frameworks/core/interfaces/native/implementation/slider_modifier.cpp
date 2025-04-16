@@ -166,14 +166,17 @@ void TrackColorImpl(Ark_NativePointer node,
         []() {}
     );
 }
-void SelectedColorImpl(Ark_NativePointer node,
-                       const Ark_ResourceColor* value)
+void SelectedColorImpl(Ark_NativePointer node, const Ark_ResourceColor* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Color>(*value);
-    SliderModelNG::SetSelectColor(frameNode, convValue);
+    if (convValue.has_value()) {
+        SliderModelNG::SetSelectColor(frameNode, SliderModelNG::CreateSolidGradient(Color(convValue.value())), true);
+    } else {
+        SliderModelNG::ResetSelectColor(frameNode);
+    }
 }
 void MinLabelImpl(Ark_NativePointer node,
                   const Ark_String* value)

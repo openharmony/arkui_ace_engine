@@ -22,6 +22,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "frameworks/core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "frameworks/core/components_v2/list/list_properties.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
@@ -108,12 +109,14 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<>
-    ListLanesType Convert(const Ark_Number& src) {
+    ListLanesType Convert(const Ark_Number& src)
+    {
         return Converter::Convert<int>(src);
     }
 
     template<>
-    ListLanesType Convert(const Ark_LengthConstrain& src) {
+    ListLanesType Convert(const Ark_LengthConstrain& src)
+    {
         return Converter::Convert<std::pair<Dimension, Dimension>>(src);
     }
 
@@ -124,6 +127,14 @@ namespace OHOS::Ace::NG::Converter {
             .initialIndex = OptConvert<int>(src.initialIndex),
             .space = OptConvert<Dimension>(src.space),
             .scroller = OptConvert<Ark_Scroller>(src.scroller)
+        };
+    }
+
+    template<>
+    ScrollFrameResult Convert<ScrollFrameResult>(const Ark_ScrollResult& src)
+    {
+        return {
+            .offset = Convert<Dimension>(src.offsetRemain)
         };
     }
 }
@@ -369,6 +380,48 @@ void OnScrollVisibleContentChangeImpl(Ark_NativePointer node,
     };
     ListModelNG::SetOnScrollVisibleContentChange(frameNode, std::move(onScrollVisibleContentChange));
 }
+void OnWillScrollImpl(Ark_NativePointer node,
+                      const Opt_OnWillScrollCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto callValue = Converter::OptConvert<OnWillScrollCallback>(*value);
+    if (callValue.has_value()) {
+        auto modelCallback = [arkCallback = CallbackHelper(callValue.value())] (
+            const Dimension& scrollOffset,
+            const ScrollState& scrollState,
+            const ScrollSource& scrollSource) {
+            auto retVal = arkCallback.InvokeWithOptConvertResult<
+                ScrollFrameResult,
+                Ark_ScrollResult,
+                Callback_ScrollResult_Void>(
+                Converter::ArkValue<Ark_Number>(scrollOffset),
+                Converter::ArkValue<Ark_ScrollState>(scrollState),
+                Converter::ArkValue<Ark_ScrollSource>(scrollSource)
+            );
+            ScrollFrameResult scrollRes { .offset = scrollOffset };
+            return retVal.value_or(scrollRes);
+        };
+        ScrollableModelNG::SetOnWillScroll(frameNode, modelCallback);
+    } else {
+        ScrollableModelNG::SetOnWillScroll(frameNode, nullptr);
+    }
+}
+void OnDidScrollImpl(Ark_NativePointer node,
+                     const OnScrollCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onDidScroll = [arkCallback = CallbackHelper(*value)](
+        Dimension oIn, ScrollState stateIn) {
+            auto state = Converter::ArkValue<Ark_ScrollState>(stateIn);
+            auto scrollOffset = Converter::ArkValue<Ark_Number>(oIn);
+            arkCallback.Invoke(scrollOffset, state);
+    };
+    ScrollableModelNG::SetOnDidScroll(frameNode, std::move(onDidScroll));
+}
 void OnReachStartImpl(Ark_NativePointer node,
                       const Callback_Void* value)
 {
@@ -606,6 +659,8 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::OnScrollImpl,
         ListAttributeModifier::OnScrollIndexImpl,
         ListAttributeModifier::OnScrollVisibleContentChangeImpl,
+        ListAttributeModifier::OnWillScrollImpl,
+        ListAttributeModifier::OnDidScrollImpl,
         ListAttributeModifier::OnReachStartImpl,
         ListAttributeModifier::OnReachEndImpl,
         ListAttributeModifier::OnScrollStartImpl,

@@ -40,7 +40,7 @@ void SetImageSpanOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto imageSource = Converter::OptConvert<ImageSourceInfo>(*value);
     if (imageSource) {
-        // ImageSpanView::SetImageSpanSrc(frameNode, *imageSource);
+        ImageSpanView::SetImageSpanSrc(frameNode, *imageSource);
     }
 }
 } // ImageSpanInterfaceModifier
@@ -51,7 +51,7 @@ void VerticalAlignImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<VerticalAlign>(value);
-    // ImageSpanView::SetVerticalAlign(frameNode, convValue);
+    ImageSpanView::SetVerticalAlign(frameNode, convValue);
 }
 void ColorFilterImpl(Ark_NativePointer node,
                      const Ark_Union_ColorFilter_DrawingColorFilter* value)
@@ -64,7 +64,7 @@ void ObjectFitImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<ImageFit>(value);
-    // ImageSpanView::SetObjectFit(frameNode, convValue);
+    ImageSpanView::SetObjectFit(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node,
                     const ImageCompleteCallback* value)

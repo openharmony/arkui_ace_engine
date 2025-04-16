@@ -17,10 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_COL_MODEL_NG_H
 
 #include "core/components_ng/pattern/grid_col/grid_col_model.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
-
-class FrameNode;
 
 class ACE_EXPORT GridColModelNG : public GridColModel {
 public:

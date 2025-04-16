@@ -11,14 +11,14 @@ import { LazyForEachOps } from "./../ArkLazyForEachOpsMaterialized"
 import { SystemOps } from "./../ArkSystemOpsMaterialized"
 import { FocusController } from "./../ArkFocusControllerMaterialized"
 import { DrawingCanvas } from "./../ArkDrawingCanvasMaterialized"
-import { PixelMap } from "./../ArkPixelMapMaterialized"
-import { NodeController, TextModifier, RectWidthStyle, RectHeightStyle, Want, LengthUnit, WebHeader, SnapshotOptions, PerfMonitorActionType, PerfMonitorSourceType, ShapeSize, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, EffectDirection, EffectScope, SymbolEffect, ErrorCallback } from "./../ArkArkuiExternalInterfaces"
-import { FontOptions, FontInfo } from "@ohos.font.font"
-import { MeasureOptions } from "@ohos.measure"
-import { LengthMetrics } from "./../ArkLengthMetricsMaterialized"
+import { PixelMap } from "#external"
+import { NodeController, TextModifier, RectWidthStyle, RectHeightStyle, Want, WebHeader, SnapshotOptions, PerfMonitorActionType, PerfMonitorSourceType, ShapeSize, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, EffectDirection, EffectScope, SymbolEffect, ErrorCallback } from "./../ArkArkuiExternalInterfaces"
+import { FontOptions, FontInfo } from "@ohos/font/font"
+import { MeasureOptions } from "@ohos/measure"
+import { LengthMetrics, LengthUnit, LengthMetricsUnit } from "../../Graphics"
 import { Resource } from "global/resource";
 import { ColorMetrics } from "./../ArkColorMetricsMaterialized"
-import { ResourceColor, Position, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, VoidCallback, Offset, Font, LengthMetricsUnit, MarkStyle, Bias, EdgeWidth, DirectionalEdgesT, ColorFilter, LengthConstrain, DividerStyleOptions, VP, PX, LPX, TouchPoint } from "./../../component/units"
+import { ResourceColor, Position, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, VoidCallback, Offset, Font, MarkStyle, Bias, EdgeWidth, DirectionalEdgesT, ColorFilter, LengthConstrain, DividerStyleOptions, VP, PX, LPX, TouchPoint } from "./../../component/units"
 import { WebviewController } from "./../ArkWebviewControllerMaterialized"
 import { GlobalScope_ohos_arkui_componentSnapshot } from "./../ArkGlobalScopeOhosArkuiComponentSnapshotMaterialized"
 import { AsyncCallback_image_PixelMap_Void, AnimationRange_Number, onItemDragStart_event_type } from "./../SyntheticDeclarations"
@@ -43,7 +43,7 @@ import { EventEmulator } from "./../ArkEventEmulatorMaterialized"
 import { Literal_Want_want, AbilityComponentAttribute, Callback_Void } from "./../../component/abilityComponent"
 import { ResizableOptions, DrawableDescriptor, DrawingColorFilter, ResolutionQuality, DrawingLattice, ImageRenderMode, ImageContent, DynamicRangeMode, ImageInterpolation, ImageSourceSize, Type_ImageAttribute_onComplete_callback_event, ImageAttribute, Callback_Type_ImageAttribute_onComplete_callback_event_Void, ImageErrorCallback, ImageError } from "./../../component/image"
 import { FocusBoxStyle, FocusPriority } from "./../../component/focus"
-import { CustomComponent, AbstractProperty, IPropertySubscriber, ISinglePropertyChangeSubscriber, SubscribaleAbstract, NavigationAttribute, CommonTransition, PageTransitionEnterInterface, PageTransitionExitInterface } from "./../../handwritten"
+import { CustomComponent, IPropertySubscriber, ISinglePropertyChangeSubscriber, SubscribaleAbstract, NavigationAttribute, CommonTransition, PageTransitionEnterInterface, PageTransitionExitInterface } from "./../../handwritten"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask, GestureHandler, GesturePriority, PanDirection, SwipeDirection, GestureMode, GestureControl, FingerInfo, TapGestureEvent, LongPressGestureEvent, PanGestureEvent, PinchGestureEvent, RotationGestureEvent, SwipeGestureEvent, GestureEvent, GestureInterface, TapGestureParameters, TapGestureInterface, Callback_GestureEvent_Void, Literal_Number_duration_fingers_Boolean_repeat, LongPressGestureInterface, Literal_Number_distance_fingers_PanDirection_direction, PanGestureOptions, PanGestureInterface, Literal_Number_fingers_speed_SwipeDirection_direction, SwipeGestureInterface, Literal_Number_distance_fingers, PinchGestureInterface, Literal_Number_angle_fingers, RotationGestureInterface, GestureGroupInterface, TapGestureHandlerOptions, TapGestureHandler, LongPressGestureHandlerOptions, LongPressGestureHandler, PanGestureHandlerOptions, PanGestureHandler, SwipeGestureHandlerOptions, SwipeGestureHandler, PinchGestureHandlerOptions, PinchGestureHandler, RotationGestureHandlerOptions, RotationGestureHandler, GestureGroupGestureHandlerOptions, GestureRecognizerState, ScrollableTargetInfo, EventTargetInfo, GestureRecognizer, PanRecognizer } from "./../../component/gesture"
 import { SheetInfo, DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, ActionSheetOptions, Callback_DismissDialogAction_Void, ActionSheet } from "./../../component/actionSheet"
 import { DialogAlignment, DialogButtonDirection, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, TextStyle_alert_dialog, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, AlertDialog } from "./../../component/alertDialog"
@@ -191,9 +191,6 @@ export class TypeChecker {
         else {
             throw new Error("Can not discriminate value typeof AbilityComponentAttribute")
         }
-    }
-    static isAbstractProperty(value: object|string|number|undefined|null|boolean): boolean {
-        throw new Error("Can not discriminate value typeof AbstractProperty")
     }
     static isAccessibilityHoverEvent(value: object|string|number|undefined|null|boolean, duplicated_type: boolean, duplicated_x: boolean, duplicated_y: boolean, duplicated_displayX: boolean, duplicated_displayY: boolean, duplicated_windowX: boolean, duplicated_windowY: boolean): boolean {
         if ((!duplicated_type) && (value?.hasOwnProperty("type"))) {
@@ -6068,7 +6065,7 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof GradientDirection")
         }
     }
-    static isGridAttribute(value: object|string|number|undefined|null|boolean, duplicated_columnsTemplate: boolean, duplicated_rowsTemplate: boolean, duplicated_columnsGap: boolean, duplicated_rowsGap: boolean, duplicated_scrollBarWidth: boolean, duplicated_scrollBarColor: boolean, duplicated_scrollBar: boolean, duplicated_onScrollBarUpdate: boolean, duplicated_onScrollIndex: boolean, duplicated_cachedCount: boolean, duplicated_editMode: boolean, duplicated_multiSelectable: boolean, duplicated_maxCount: boolean, duplicated_minCount: boolean, duplicated_cellLength: boolean, duplicated_layoutDirection: boolean, duplicated_supportAnimation: boolean, duplicated_onItemDragStart: boolean, duplicated_onItemDragEnter: boolean, duplicated_onItemDragMove: boolean, duplicated_onItemDragLeave: boolean, duplicated_onItemDrop: boolean, duplicated_nestedScroll: boolean, duplicated_enableScrollInteraction: boolean, duplicated_friction: boolean, duplicated_alignItems: boolean, duplicated_onScroll: boolean, duplicated_onDidScroll: boolean, duplicated_onReachStart: boolean, duplicated_onReachEnd: boolean, duplicated_onScrollStart: boolean, duplicated_onScrollStop: boolean, duplicated_onScrollFrameBegin: boolean): boolean {
+    static isGridAttribute(value: object|string|number|undefined|null|boolean, duplicated_columnsTemplate: boolean, duplicated_rowsTemplate: boolean, duplicated_columnsGap: boolean, duplicated_rowsGap: boolean, duplicated_scrollBarWidth: boolean, duplicated_scrollBarColor: boolean, duplicated_scrollBar: boolean, duplicated_onScrollBarUpdate: boolean, duplicated_onScrollIndex: boolean, duplicated_cachedCount: boolean, duplicated_editMode: boolean, duplicated_multiSelectable: boolean, duplicated_maxCount: boolean, duplicated_minCount: boolean, duplicated_cellLength: boolean, duplicated_layoutDirection: boolean, duplicated_supportAnimation: boolean, duplicated_onItemDragStart: boolean, duplicated_onItemDragEnter: boolean, duplicated_onItemDragMove: boolean, duplicated_onItemDragLeave: boolean, duplicated_onItemDrop: boolean, duplicated_nestedScroll: boolean, duplicated_enableScrollInteraction: boolean, duplicated_friction: boolean, duplicated_alignItems: boolean, duplicated_onScroll: boolean, duplicated_onWillScroll: boolean, duplicated_onDidScroll: boolean, duplicated_onReachStart: boolean, duplicated_onReachEnd: boolean, duplicated_onScrollStart: boolean, duplicated_onScrollStop: boolean, duplicated_onScrollFrameBegin: boolean): boolean {
         if ((!duplicated_columnsTemplate) && (value?.hasOwnProperty("columnsTemplate"))) {
             return true
         }
@@ -6148,6 +6145,9 @@ export class TypeChecker {
             return true
         }
         else if ((!duplicated_onScroll) && (value?.hasOwnProperty("onScroll"))) {
+            return true
+        }
+        else if ((!duplicated_onWillScroll) && (value?.hasOwnProperty("onWillScroll"))) {
             return true
         }
         else if ((!duplicated_onDidScroll) && (value?.hasOwnProperty("onDidScroll"))) {
@@ -7982,7 +7982,7 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof LineOptions")
         }
     }
-    static isListAttribute(value: object|string|number|undefined|null|boolean, duplicated_alignListItem: boolean, duplicated_listDirection: boolean, duplicated_scrollBar: boolean, duplicated_contentStartOffset: boolean, duplicated_contentEndOffset: boolean, duplicated_divider: boolean, duplicated_editMode: boolean, duplicated_multiSelectable: boolean, duplicated_cachedCount: boolean, duplicated_chainAnimation: boolean, duplicated_chainAnimationOptions: boolean, duplicated_sticky: boolean, duplicated_scrollSnapAlign: boolean, duplicated_nestedScroll: boolean, duplicated_enableScrollInteraction: boolean, duplicated_friction: boolean, duplicated_childrenMainSize: boolean, duplicated_maintainVisibleContentPosition: boolean, duplicated_onScroll: boolean, duplicated_onScrollIndex: boolean, duplicated_onScrollVisibleContentChange: boolean, duplicated_onDidScroll: boolean, duplicated_onReachStart: boolean, duplicated_onReachEnd: boolean, duplicated_onScrollStart: boolean, duplicated_onScrollStop: boolean, duplicated_onItemDelete: boolean, duplicated_onItemMove: boolean, duplicated_onItemDragStart: boolean, duplicated_onItemDragEnter: boolean, duplicated_onItemDragMove: boolean, duplicated_onItemDragLeave: boolean, duplicated_onItemDrop: boolean, duplicated_onScrollFrameBegin: boolean): boolean {
+    static isListAttribute(value: object|string|number|undefined|null|boolean, duplicated_alignListItem: boolean, duplicated_listDirection: boolean, duplicated_scrollBar: boolean, duplicated_contentStartOffset: boolean, duplicated_contentEndOffset: boolean, duplicated_divider: boolean, duplicated_editMode: boolean, duplicated_multiSelectable: boolean, duplicated_cachedCount: boolean, duplicated_chainAnimation: boolean, duplicated_chainAnimationOptions: boolean, duplicated_sticky: boolean, duplicated_scrollSnapAlign: boolean, duplicated_nestedScroll: boolean, duplicated_enableScrollInteraction: boolean, duplicated_friction: boolean, duplicated_childrenMainSize: boolean, duplicated_maintainVisibleContentPosition: boolean, duplicated_onScroll: boolean, duplicated_onScrollIndex: boolean, duplicated_onScrollVisibleContentChange: boolean, duplicated_onWillScroll: boolean, duplicated_onDidScroll: boolean, duplicated_onReachStart: boolean, duplicated_onReachEnd: boolean, duplicated_onScrollStart: boolean, duplicated_onScrollStop: boolean, duplicated_onItemDelete: boolean, duplicated_onItemMove: boolean, duplicated_onItemDragStart: boolean, duplicated_onItemDragEnter: boolean, duplicated_onItemDragMove: boolean, duplicated_onItemDragLeave: boolean, duplicated_onItemDrop: boolean, duplicated_onScrollFrameBegin: boolean): boolean {
         if ((!duplicated_alignListItem) && (value?.hasOwnProperty("alignListItem"))) {
             return true
         }
@@ -8044,6 +8044,9 @@ export class TypeChecker {
             return true
         }
         else if ((!duplicated_onScrollVisibleContentChange) && (value?.hasOwnProperty("onScrollVisibleContentChange"))) {
+            return true
+        }
+        else if ((!duplicated_onWillScroll) && (value?.hasOwnProperty("onWillScroll"))) {
             return true
         }
         else if ((!duplicated_onDidScroll) && (value?.hasOwnProperty("onDidScroll"))) {
@@ -13777,7 +13780,7 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof ScrollableBarModeOptions")
         }
     }
-    static isScrollableCommonMethod(value: object|string|number|undefined|null|boolean, duplicated_scrollBar: boolean, duplicated_scrollBarColor: boolean, duplicated_scrollBarWidth: boolean, duplicated_nestedScroll: boolean, duplicated_enableScrollInteraction: boolean, duplicated_friction: boolean, duplicated_onScroll: boolean, duplicated_onWillScroll: boolean, duplicated_onReachStart: boolean, duplicated_onReachEnd: boolean, duplicated_onScrollStart: boolean, duplicated_onScrollStop: boolean, duplicated_flingSpeedLimit: boolean, duplicated_clipContent: boolean): boolean {
+    static isScrollableCommonMethod(value: object|string|number|undefined|null|boolean, duplicated_scrollBar: boolean, duplicated_scrollBarColor: boolean, duplicated_scrollBarWidth: boolean, duplicated_nestedScroll: boolean, duplicated_enableScrollInteraction: boolean, duplicated_friction: boolean, duplicated_onScroll: boolean, duplicated_onReachStart: boolean, duplicated_onReachEnd: boolean, duplicated_onScrollStart: boolean, duplicated_onScrollStop: boolean, duplicated_flingSpeedLimit: boolean, duplicated_clipContent: boolean): boolean {
         if ((!duplicated_scrollBar) && (value?.hasOwnProperty("scrollBar"))) {
             return true
         }
@@ -13797,9 +13800,6 @@ export class TypeChecker {
             return true
         }
         else if ((!duplicated_onScroll) && (value?.hasOwnProperty("onScroll"))) {
-            return true
-        }
-        else if ((!duplicated_onWillScroll) && (value?.hasOwnProperty("onWillScroll"))) {
             return true
         }
         else if ((!duplicated_onReachStart) && (value?.hasOwnProperty("onReachStart"))) {
@@ -18451,7 +18451,7 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof Want")
         }
     }
-    static isWaterFlowAttribute(value: object|string|number|undefined|null|boolean, duplicated_columnsTemplate: boolean, duplicated_itemConstraintSize: boolean, duplicated_rowsTemplate: boolean, duplicated_columnsGap: boolean, duplicated_rowsGap: boolean, duplicated_layoutDirection: boolean, duplicated_nestedScroll: boolean, duplicated_enableScrollInteraction: boolean, duplicated_friction: boolean, duplicated_cachedCount: boolean, duplicated_onDidScroll: boolean, duplicated_onReachStart: boolean, duplicated_onReachEnd: boolean, duplicated_onScrollFrameBegin: boolean, duplicated_onScrollIndex: boolean): boolean {
+    static isWaterFlowAttribute(value: object|string|number|undefined|null|boolean, duplicated_columnsTemplate: boolean, duplicated_itemConstraintSize: boolean, duplicated_rowsTemplate: boolean, duplicated_columnsGap: boolean, duplicated_rowsGap: boolean, duplicated_layoutDirection: boolean, duplicated_nestedScroll: boolean, duplicated_enableScrollInteraction: boolean, duplicated_friction: boolean, duplicated_cachedCount: boolean, duplicated_onWillScroll: boolean, duplicated_onDidScroll: boolean, duplicated_onReachStart: boolean, duplicated_onReachEnd: boolean, duplicated_onScrollFrameBegin: boolean, duplicated_onScrollIndex: boolean): boolean {
         if ((!duplicated_columnsTemplate) && (value?.hasOwnProperty("columnsTemplate"))) {
             return true
         }
@@ -18480,6 +18480,9 @@ export class TypeChecker {
             return true
         }
         else if ((!duplicated_cachedCount) && (value?.hasOwnProperty("cachedCount"))) {
+            return true
+        }
+        else if ((!duplicated_onWillScroll) && (value?.hasOwnProperty("onWillScroll"))) {
             return true
         }
         else if ((!duplicated_onDidScroll) && (value?.hasOwnProperty("onDidScroll"))) {

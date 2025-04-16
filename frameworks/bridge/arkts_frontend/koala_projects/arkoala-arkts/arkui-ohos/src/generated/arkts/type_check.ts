@@ -11,14 +11,14 @@ import { LazyForEachOps } from "./../ArkLazyForEachOpsMaterialized"
 import { SystemOps } from "./../ArkSystemOpsMaterialized"
 import { FocusController } from "./../ArkFocusControllerMaterialized"
 import { DrawingCanvas } from "./../ArkDrawingCanvasMaterialized"
-import { PixelMap } from "./../ArkPixelMapMaterialized"
-import { NodeController, TextModifier, RectWidthStyle, RectHeightStyle, Want, LengthUnit, WebHeader, SnapshotOptions, PerfMonitorActionType, PerfMonitorSourceType, ShapeSize, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, EffectDirection, EffectScope, SymbolEffect, ErrorCallback } from "./../ArkArkuiExternalInterfaces"
-import { FontOptions, FontInfo } from "@ohos.font.font"
-import { MeasureOptions } from "@ohos.measure"
-import { LengthMetrics } from "./../ArkLengthMetricsMaterialized"
+import { PixelMap } from "#external"
+import { NodeController, TextModifier, RectWidthStyle, RectHeightStyle, Want, WebHeader, SnapshotOptions, PerfMonitorActionType, PerfMonitorSourceType, ShapeSize, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, EffectDirection, EffectScope, SymbolEffect, ErrorCallback } from "./../ArkArkuiExternalInterfaces"
+import { FontOptions, FontInfo } from "@ohos/font/font"
+import { MeasureOptions } from "@ohos/measure"
+import { LengthMetrics, LengthUnit, LengthMetricsUnit } from "../../Graphics"
 import { Resource } from "global/resource";
 import { ColorMetrics } from "./../ArkColorMetricsMaterialized"
-import { ResourceColor, Position, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, VoidCallback, Offset, Font, LengthMetricsUnit, MarkStyle, Bias, EdgeWidth, DirectionalEdgesT, ColorFilter, LengthConstrain, DividerStyleOptions, VP, PX, LPX, TouchPoint } from "./../../component/units"
+import { ResourceColor, Position, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, VoidCallback, Offset, Font, MarkStyle, Bias, EdgeWidth, DirectionalEdgesT, ColorFilter, LengthConstrain, DividerStyleOptions, VP, PX, LPX, TouchPoint } from "./../../component/units"
 import { WebviewController } from "./../ArkWebviewControllerMaterialized"
 import { GlobalScope_ohos_arkui_componentSnapshot } from "./../ArkGlobalScopeOhosArkuiComponentSnapshotMaterialized"
 import { AsyncCallback_image_PixelMap_Void, AnimationRange_Number, onItemDragStart_event_type } from "./../SyntheticDeclarations"
@@ -43,7 +43,7 @@ import { EventEmulator } from "./../ArkEventEmulatorMaterialized"
 import { Literal_Want_want, AbilityComponentAttribute, Callback_Void } from "./../../component/abilityComponent"
 import { ResizableOptions, DrawableDescriptor, DrawingColorFilter, ResolutionQuality, DrawingLattice, ImageRenderMode, ImageContent, DynamicRangeMode, ImageInterpolation, ImageSourceSize, Type_ImageAttribute_onComplete_callback_event, ImageAttribute, Callback_Type_ImageAttribute_onComplete_callback_event_Void, ImageErrorCallback, ImageError } from "./../../component/image"
 import { FocusBoxStyle, FocusPriority } from "./../../component/focus"
-import {  CustomComponent, AbstractProperty, IPropertySubscriber, ISinglePropertyChangeSubscriber, SubscribaleAbstract, NavigationAttribute, CommonTransition, PageTransitionEnterInterface, PageTransitionExitInterface } from "./../../handwritten"
+import {  CustomComponent, IPropertySubscriber, ISinglePropertyChangeSubscriber, SubscribaleAbstract, NavigationAttribute, CommonTransition, PageTransitionEnterInterface, PageTransitionExitInterface } from "./../../handwritten"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask, GestureHandler, GesturePriority, PanDirection, SwipeDirection, GestureMode, GestureControl, FingerInfo, TapGestureEvent, LongPressGestureEvent, PanGestureEvent, PinchGestureEvent, RotationGestureEvent, SwipeGestureEvent, GestureEvent, GestureInterface, TapGestureParameters, TapGestureInterface, Callback_GestureEvent_Void, Literal_Number_duration_fingers_Boolean_repeat, LongPressGestureInterface, Literal_Number_distance_fingers_PanDirection_direction, PanGestureOptions, PanGestureInterface, Literal_Number_fingers_speed_SwipeDirection_direction, SwipeGestureInterface, Literal_Number_distance_fingers, PinchGestureInterface, Literal_Number_angle_fingers, RotationGestureInterface, GestureGroupInterface, TapGestureHandlerOptions, TapGestureHandler, LongPressGestureHandlerOptions, LongPressGestureHandler, PanGestureHandlerOptions, PanGestureHandler, SwipeGestureHandlerOptions, SwipeGestureHandler, PinchGestureHandlerOptions, PinchGestureHandler, RotationGestureHandlerOptions, RotationGestureHandler, GestureGroupGestureHandlerOptions, GestureRecognizerState, ScrollableTargetInfo, EventTargetInfo, GestureRecognizer, PanRecognizer } from "./../../component/gesture"
 import { SheetInfo, DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, ActionSheetOptions, Callback_DismissDialogAction_Void, ActionSheet } from "./../../component/actionSheet"
 import { DialogAlignment, DialogButtonDirection, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, TextStyle_alert_dialog, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, AlertDialog } from "./../../component/alertDialog"
@@ -183,9 +183,6 @@ export class TypeChecker {
     }
     static isAbilityComponentAttribute(value: object|string|number|undefined|null, arg0: boolean, arg1: boolean): boolean {
         return value instanceof AbilityComponentAttribute
-    }
-    static isAbstractProperty(value: object|string|number|undefined|null): boolean {
-        return value instanceof AbstractProperty
     }
     static isAccessibilityHoverEvent(value: object|string|number|undefined|null, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof AccessibilityHoverEvent
@@ -2208,9 +2205,6 @@ export class TypeChecker {
     }
     static isOnTouchIconUrlReceivedEvent(value: object|string|number|undefined|null, arg0: boolean, arg1: boolean): boolean {
         return value instanceof OnTouchIconUrlReceivedEvent
-    }
-    static isOnWillScrollCallback(value: object|string|number|undefined|null, arg0: boolean): boolean {
-        return value instanceof OnWillScrollCallback
     }
     static isOnWindowNewEvent(value: object|string|number|undefined|null, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof OnWindowNewEvent

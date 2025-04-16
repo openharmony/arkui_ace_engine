@@ -20,18 +20,26 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
+int g_defaultValue = 0;
+
 namespace OHOS::Ace::NG {
 namespace Converter {
     template<>
     V2::GridContainerSize Convert(const Ark_GridColColumnOption& value)
     {
         V2::GridContainerSize toValue;
-        toValue.lg = Converter::OptConvert<int32_t>(value.lg).value();
-        toValue.md = Converter::OptConvert<int32_t>(value.md).value();
-        toValue.sm = Converter::OptConvert<int32_t>(value.sm).value();
-        toValue.xl = Converter::OptConvert<int32_t>(value.xl).value();
-        toValue.xs = Converter::OptConvert<int32_t>(value.xs).value();
-        toValue.xxl = Converter::OptConvert<int32_t>(value.xxl).value();
+        auto optVal = Converter::OptConvert<int32_t>(value.xs);
+        toValue.xs = optVal.has_value() ? optVal.value() : g_defaultValue;
+        optVal = Converter::OptConvert<int32_t>(value.sm);
+        toValue.sm = optVal.has_value() ? optVal.value() : g_defaultValue;
+        optVal = Converter::OptConvert<int32_t>(value.md);
+        toValue.md = optVal.has_value() ? optVal.value() : g_defaultValue;
+        optVal = Converter::OptConvert<int32_t>(value.lg);
+        toValue.lg = optVal.has_value() ? optVal.value() : g_defaultValue;
+        optVal = Converter::OptConvert<int32_t>(value.xl);
+        toValue.xl = optVal.has_value() ? optVal.value() : g_defaultValue;
+        optVal = Converter::OptConvert<int32_t>(value.xxl);
+        toValue.xxl = optVal.has_value() ? optVal.value() : g_defaultValue;
         return toValue;
     }
     template<>
@@ -72,12 +80,15 @@ void SetGridColOptionsImpl(Ark_NativePointer node,
         auto optGridColOptions = Converter::OptConvert<Ark_GridColOptions>(*option);
         if (optGridColOptions) {
             Ark_GridColOptions arkGridColOptions = optGridColOptions.value();
+            g_defaultValue = 1;
             gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.span);
             Validator::ValidateNonNegative(gcSizeValue);
             GridColModelNG::SetSpan(frameNode, gcSizeValue);
+            g_defaultValue = 0;
             gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.offset);
             Validator::ValidateNonNegative(gcSizeValue);
             GridColModelNG::SetOffset(frameNode, gcSizeValue);
+            g_defaultValue = 0;
             gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(arkGridColOptions.order);
             Validator::ValidateNonNegative(gcSizeValue);
             GridColModelNG::SetOrder(frameNode, gcSizeValue);
@@ -103,6 +114,7 @@ void SpanImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     std::optional<V2::GridContainerSize> gcSizeValue {std::nullopt};
     if (value) {
+        g_defaultValue = 1;
         gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(*value);
         Validator::ValidateNonNegative(gcSizeValue);
         GridColModelNG::SetSpan(frameNode, gcSizeValue);
@@ -117,6 +129,7 @@ void GridColOffsetImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     if (value) {
+        g_defaultValue = 0;
         auto gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(*value);
         CHECK_NULL_VOID(gcSizeValue);
         Validator::ValidateNonNegative(gcSizeValue);
@@ -132,6 +145,7 @@ void OrderImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     if (value) {
+        g_defaultValue = 0;
         auto gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(*value);
         CHECK_NULL_VOID(gcSizeValue);
         Validator::ValidateNonNegative(gcSizeValue);

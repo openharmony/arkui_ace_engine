@@ -29,7 +29,7 @@ import { ResourceStr, Length, ResourceColor, SizeOptions, ConstraintSizeOptions,
 import { SubmitEvent, EnterKeyType, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from "./textInput"
 import { InsertValue, DeleteValue, CaretStyle, EditableTextOnChangeCallback, EditMenuOptions } from "./textCommon"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, CopyOptions, TextAlign } from "./enums"
-import { LengthMetrics } from "./../generated/ArkLengthMetricsMaterialized"
+import { LengthMetrics } from "../Graphics"
 import { ResizableOptions } from "./image"
 import { Resource } from "global/resource";
 import { Callback_Void } from "./abilityComponent"

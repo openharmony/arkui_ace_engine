@@ -17,6 +17,7 @@
 
 #include "irregular/grid_layout_range_solver.h"
 
+#include "core/components_ng/pattern/grid/irregular/grid_large_delta_converter.h"
 #include "base/geometry/axis.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
@@ -46,6 +47,10 @@ void GridFillAlgorithm::Init(const SizeF& viewport, Axis axis, int32_t totalCnt)
     info_.axis_ = axis;
     info_.childrenCount_ = totalCnt;
 
+    if (std::abs(info_.currentOffset_) > viewport.MainSize(axis)) {
+        LOGW("Koala received large delta %f in FillAlgorithm, jumpIndex = %d", info_.currentOffset_, info_.jumpIndex_);
+        info_.currentOffset_ = 0.0f;
+    }
     range_.startLine = info_.startMainLineIndex_;
     range_.offset = info_.currentOffset_;
     range_.endLine = info_.endMainLineIndex_;
@@ -59,9 +64,21 @@ void GridFillAlgorithm::FillMarkItem(const SizeF& viewport, Axis axis, FrameNode
     FillNext(viewport, axis, node, index);
     if (resetRangeOnJump_) {
         range_.startLine = range_.endLine = info_.GetItemPos(index).second;
+        range_.offset = 0.0f; // synced from LayoutInfo. Might contain large offset that FillAlgorithm can't handle
         resetRangeOnJump_ = false;
     }
 }
+
+namespace {
+void MeasureItem(GridIrregularFiller& filler, const GridIrregularFiller::FillParameters& params, FrameNode* node,
+    int32_t index, int32_t col, int32_t row)
+{
+    filler.MeasureItem(params, node, index, col, row);
+    // clean flag to prevent remeasure in LayoutTask
+    node->GetLayoutProperty()->CleanDirty();
+    node->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+}
+} // namespace
 
 void GridFillAlgorithm::FillNext(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
 {
@@ -71,7 +88,7 @@ void GridFillAlgorithm::FillNext(const SizeF& viewport, Axis axis, FrameNode* no
     if (!node->CheckNeedForceMeasureAndLayout() && info_.lineHeightMap_.count(pos.second)) {
         return;
     }
-    filler.MeasureItem(params_, node, index, pos.first, pos.second);
+    MeasureItem(filler, params_, node, index, pos.first, pos.second);
 }
 
 void GridFillAlgorithm::FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
@@ -82,7 +99,7 @@ void GridFillAlgorithm::FillPrev(const SizeF& viewport, Axis axis, FrameNode* no
     // matrix is ready
     GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
     const auto pos = info_.GetItemPos(index);
-    filler.MeasureItem(params_, node, index, pos.first, pos.second);
+    MeasureItem(filler, params_, node, index, pos.first, pos.second);
 }
 
 bool GridFillAlgorithm::CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx, FillDirection direction)
@@ -148,6 +165,11 @@ void GridFillAlgorithm::OnSlidingOffsetUpdate(float delta)
     if (range_.startLine == 0) {
         range_.offset = std::min(range_.offset, 0.0f);
     }
+}
+
+int32_t GridFillAlgorithm::ConvertLargeDelta(float delta) {
+    GridLargeDeltaConverter converter(info_, props_.GetHost().GetRawPtr());
+    return converter.Convert(delta);
 }
 
 bool GridFillAlgorithm::OnSlidingOffsetUpdate(const SizeF& viewport, Axis axis, float delta)

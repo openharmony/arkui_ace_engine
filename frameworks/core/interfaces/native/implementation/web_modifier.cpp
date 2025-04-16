@@ -1538,7 +1538,7 @@ void OnNativeEmbedVisibilityChangeImpl(Ark_NativePointer node,
     auto onNativeEmbedVisibilityChange = [callback = CallbackHelper(*value), instanceId](const BaseEventInfo* info) {
         OnNativeEmbedVisibilityChange(callback, instanceId, info);
     };
-    // WebModelNG::SetNativeEmbedVisibilityChangeId(frameNode, onNativeEmbedVisibilityChange);
+    WebModelNG::SetNativeEmbedVisibilityChangeId(frameNode, onNativeEmbedVisibilityChange);
 #endif // WEB_SUPPORTED
 }
 void OnNativeEmbedGestureEventImpl(Ark_NativePointer node,
@@ -1552,7 +1552,7 @@ void OnNativeEmbedGestureEventImpl(Ark_NativePointer node,
     auto onNativeEmbedGestureEvent = [callback = CallbackHelper(*value), instanceId](const BaseEventInfo* info) {
         OnNativeEmbedTouchInfo(callback, instanceId, info);
     };
-    // WebModelNG::SetNativeEmbedGestureEventId(frameNode, onNativeEmbedGestureEvent);
+    WebModelNG::SetNativeEmbedGestureEventId(frameNode, onNativeEmbedGestureEvent);
 #endif // WEB_SUPPORTED
 }
 void CopyOptionsImpl(Ark_NativePointer node,
@@ -1562,7 +1562,7 @@ void CopyOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<CopyOptions>(value);
-    // WebModelNG::SetCopyOptionMode(frameNode, convValue);
+    WebModelNG::SetCopyOptionMode(frameNode, convValue);
 #endif // WEB_SUPPORTED
 }
 void OnOverrideUrlLoadingImpl(Ark_NativePointer node,
@@ -1578,7 +1578,7 @@ void OnOverrideUrlLoadingImpl(Ark_NativePointer node,
         [callback = CallbackHelper(*value), weakNode, instanceId](const BaseEventInfo* info) -> bool {
             return OnOverrideUrlLoading(callback, weakNode, instanceId, info);
         };
-    // WebModelNG::SetOnOverrideUrlLoading(frameNode, std::move(onOverrideUrlLoading));
+    WebModelNG::SetOnOverrideUrlLoading(frameNode, std::move(onOverrideUrlLoading));
 #endif // WEB_SUPPORTED
 }
 void TextAutosizingImpl(Ark_NativePointer node,
@@ -1588,7 +1588,7 @@ void TextAutosizingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    // WebModelNG::SetTextAutosizing(frameNode, convValue);
+    WebModelNG::SetTextAutosizing(frameNode, convValue);
 #endif // WEB_SUPPORTED
 }
 void EnableNativeMediaPlayerImpl(Ark_NativePointer node,
@@ -1600,7 +1600,7 @@ void EnableNativeMediaPlayerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto enable = Converter::Convert<bool>(value->enable);
     auto shouldOverlay = Converter::Convert<bool>(value->shouldOverlay);
-    // WebModelNG::SetNativeVideoPlayerConfig(frameNode, enable, shouldOverlay);
+    WebModelNG::SetNativeVideoPlayerConfig(frameNode, enable, shouldOverlay);
 #endif // WEB_SUPPORTED
 }
 void EnableSmoothDragResizeImpl(Ark_NativePointer node,
@@ -1610,7 +1610,7 @@ void EnableSmoothDragResizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    // WebModelNG::SetSmoothDragResizeEnabled(frameNode, convValue);
+    WebModelNG::SetSmoothDragResizeEnabled(frameNode, convValue);
 #endif // WEB_SUPPORTED
 }
 void OnRenderProcessNotRespondingImpl(Ark_NativePointer node,
@@ -1626,7 +1626,7 @@ void OnRenderProcessNotRespondingImpl(Ark_NativePointer node,
         [callback = CallbackHelper(*value), weakNode, instanceId](const BaseEventInfo* info) {
             OnRenderProcessNotResponding(callback, weakNode, instanceId, info);
         };
-    // WebModelNG::SetRenderProcessNotRespondingId(frameNode, onRenderProcessNotResponding);
+    WebModelNG::SetRenderProcessNotRespondingId(frameNode, onRenderProcessNotResponding);
 #endif // WEB_SUPPORTED
 }
 void OnRenderProcessRespondingImpl(Ark_NativePointer node,
@@ -1642,7 +1642,7 @@ void OnRenderProcessRespondingImpl(Ark_NativePointer node,
         [callback = CallbackHelper(*value), weakNode, instanceId](const BaseEventInfo* info) {
             OnRenderProcessResponding(callback, weakNode, instanceId, info);
         };
-    // WebModelNG::SetRenderProcessRespondingId(frameNode, onRenderProcessResponding);
+    WebModelNG::SetRenderProcessRespondingId(frameNode, onRenderProcessResponding);
 #endif // WEB_SUPPORTED
 }
 void SelectionMenuOptionsImpl(Ark_NativePointer node,
@@ -1674,7 +1674,7 @@ void SelectionMenuOptionsImpl(Ark_NativePointer node,
         option.action = std::move(action);
         optionParam.menuOption.push_back(option);
     }
-    // WebModelNG::SetSelectionMenuOptions(frameNode, optionParam);
+    WebModelNG::SetSelectionMenuOptions(frameNode, optionParam);
 #endif // WEB_SUPPORTED
 }
 void OnViewportFitChangedImpl(Ark_NativePointer node,
@@ -1689,7 +1689,7 @@ void OnViewportFitChangedImpl(Ark_NativePointer node,
     auto onViewportFitChanged = [callback = CallbackHelper(*value), weakNode, instanceId](const BaseEventInfo* info) {
         OnViewportFitChanged(callback, weakNode, instanceId, info);
     };
-    // WebModelNG::SetViewportFitChangedId(frameNode, onViewportFitChanged);
+    WebModelNG::SetViewportFitChangedId(frameNode, onViewportFitChanged);
 #endif // WEB_SUPPORTED
 }
 void OnInterceptKeyboardAttachImpl(Ark_NativePointer node,
@@ -1705,7 +1705,7 @@ void OnInterceptKeyboardAttachImpl(Ark_NativePointer node,
         [callback = CallbackHelper(*value), weakNode, instanceId](const BaseEventInfo* info) -> WebKeyboardOption {
             return OnWebKeyboard(callback, weakNode, instanceId, info);
         };
-    // WebModelNG::SetOnInterceptKeyboardAttach(frameNode, std::move(onInterceptKeyboardAttach));
+    WebModelNG::SetOnInterceptKeyboardAttach(frameNode, std::move(onInterceptKeyboardAttach));
 #endif // WEB_SUPPORTED
 }
 void OnAdsBlockedImpl(Ark_NativePointer node,
@@ -1720,7 +1720,7 @@ void OnAdsBlockedImpl(Ark_NativePointer node,
     auto onAdsBlocked = [callback = CallbackHelper(*value), weakNode, instanceId](const BaseEventInfo* info) {
         OnAdsBlocked(callback, weakNode, instanceId, info);
     };
-    // WebModelNG::SetAdsBlockedEventId(frameNode, onAdsBlocked);
+    WebModelNG::SetAdsBlockedEventId(frameNode, onAdsBlocked);
 #endif // WEB_SUPPORTED
 }
 void KeyboardAvoidModeImpl(Ark_NativePointer node,
@@ -1730,7 +1730,7 @@ void KeyboardAvoidModeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<WebKeyboardAvoidMode>(value);
-    // WebModelNG::SetKeyboardAvoidMode(frameNode, convValue);
+    WebModelNG::SetKeyboardAvoidMode(frameNode, convValue);
 #endif // WEB_SUPPORTED
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
@@ -1749,7 +1749,7 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    // WebModelNG::SetEnabledHapticFeedback(frameNode, convValue);
+    WebModelNG::SetEnabledHapticFeedback(frameNode, convValue);
 #endif // WEB_SUPPORTED
 }
 void RegisterNativeEmbedRuleImpl(Ark_NativePointer node,
@@ -1763,7 +1763,7 @@ void RegisterNativeEmbedRuleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(type);
     auto convValueTag = Converter::Convert<std::string>(*tag);
     auto convValueType = Converter::Convert<std::string>(*type);
-    // WebModelNG::RegisterNativeEmbedRule(frameNode, convValueTag, convValueType);
+    WebModelNG::RegisterNativeEmbedRule(frameNode, convValueTag, convValueType);
 #endif // WEB_SUPPORTED
 }
 void InitCallbackParams_(FrameNode* frameNode, MenuParam& dst, const Opt_Callback_Void& onAppear,

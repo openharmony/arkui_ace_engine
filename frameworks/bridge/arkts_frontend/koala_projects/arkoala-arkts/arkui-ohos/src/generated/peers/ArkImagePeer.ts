@@ -27,7 +27,7 @@ import { ArkCommonMethodPeer, ArkCommonMethodAttributes } from "./ArkCommonPeer"
 import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, PointLightStyle } from "./../../component/common"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, ColorFilter, PX, VP, FP, LPX, Percentage } from "./../../component/units"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, ImageFit, CopyOptions } from "./../../component/enums"
-import { LengthMetrics } from "./../ArkLengthMetricsMaterialized"
+import { LengthMetrics } from "../../Graphics"
 import { ResizableOptions, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, DrawingColorFilter, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, ImageErrorCallback, ResolutionQuality, DrawableDescriptor, ImageAttribute, ImageContent } from "./../../component/image"
 import { Resource } from "global/resource";
 import { Callback_Void } from "./../../component/abilityComponent"
@@ -37,7 +37,8 @@ import { EllipseShape } from "./../ArkEllipseShapeMaterialized"
 import { PathShape } from "./../ArkPathShapeMaterialized"
 import { RectShape } from "./../ArkRectShapeMaterialized"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface } from "./../../component/gesture"
-import { PixelMap } from "./../ArkPixelMapMaterialized"
+import { PixelMap } from "#external"
+import { ArkUIAniModule } from "arkui.ani"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./../../component/imageCommon"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
@@ -59,9 +60,10 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let src_type : int32 = RuntimeType.UNDEFINED
         src_type = runtimeType(src)
         if (TypeChecker.isPixelMap(src, false, false)) {
-            thisSerializer.writeInt8(0 as int32)
             const src_0  = src as PixelMap
-            thisSerializer.writePixelMap(src_0)
+            ArkUIAniModule._Image_Transfer_PixelMap(this.peer.ptr, src_0)
+            thisSerializer.release()
+            return
         }
         else if ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) {
             thisSerializer.writeInt8(1 as int32)
@@ -92,9 +94,10 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let src_type : int32 = RuntimeType.UNDEFINED
         src_type = runtimeType(src)
         if (TypeChecker.isPixelMap(src, false, false)) {
-            thisSerializer.writeInt8(0 as int32)
             const src_0  = src as PixelMap
-            thisSerializer.writePixelMap(src_0)
+            ArkUIAniModule._Image_Transfer_PixelMap(this.peer.ptr, src_0)
+            thisSerializer.release()
+            return
         }
         else if ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) {
             thisSerializer.writeInt8(1 as int32)
@@ -130,9 +133,10 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         let src_type : int32 = RuntimeType.UNDEFINED
         src_type = runtimeType(src)
         if (TypeChecker.isPixelMap(src, false, false)) {
-            thisSerializer.writeInt8(0 as int32)
             const src_0  = src as PixelMap
-            thisSerializer.writePixelMap(src_0)
+            ArkUIAniModule._Image_Transfer_PixelMap(this.peer.ptr, src_0)
+            thisSerializer.release()
+            return
         }
         else if ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) {
             thisSerializer.writeInt8(1 as int32)
@@ -174,9 +178,10 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
             thisSerializer.writeResource(value_1)
         }
         else if (TypeChecker.isPixelMap(value, false, false)) {
-            thisSerializer.writeInt8(2 as int32)
             const value_2  = value as PixelMap
-            thisSerializer.writePixelMap(value_2)
+            ArkUIAniModule._Image_Transfer_PixelMap(this.peer.ptr, value_2)
+            thisSerializer.release()
+            return
         }
         ArkUIGeneratedNativeModule._ImageAttribute_alt(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()

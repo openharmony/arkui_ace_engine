@@ -1173,7 +1173,8 @@ ani_object UIContentImpl::GetUIAniContext()
     CHECK_NULL_RETURN(frontend, result);
     auto arktsFrontend = AceType::DynamicCast<ArktsFrontend>(frontend);
     CHECK_NULL_RETURN(arktsFrontend, result);
-    return nullptr;
+    result = arktsFrontend->CallGetUIContextFunc();
+    return result;
 }
 
 UIContentErrorCode UIContentImpl::Restore(

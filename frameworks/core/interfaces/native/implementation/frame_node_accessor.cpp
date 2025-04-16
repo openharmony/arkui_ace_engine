@@ -195,11 +195,13 @@ Ark_Number GetOpacityImpl(Ark_FrameNode peer)
     auto opacity = ViewAbstract::GetOpacity(Referenced::RawPtr(peer->node));
     return Converter::ArkValue<Ark_Number>(opacity);
 }
-Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
+Ark_GraphicsPosition GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
 {
-    CHECK_NULL_RETURN(peer && peer->node,  Converter::ArkValue<Ark_Position>(OffsetF()));
+    CHECK_NULL_RETURN(peer && peer->node,  Converter::ArkValue<Ark_GraphicsPosition>(OffsetF()));
     auto offset = peer->node->GetPositionToWindowWithTransform();
-    return Converter::ArkValue<Ark_Position>(offset);
+    offset.SetX(PipelineBase::Px2VpWithCurrentDensity(offset.GetX()));
+    offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
+    return Converter::ArkValue<Ark_GraphicsPosition>(offset);
 }
 Ark_FrameNode GetFrameNodeByKeyImpl(const Ark_String* name)
 {

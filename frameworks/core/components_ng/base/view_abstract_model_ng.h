@@ -1348,7 +1348,7 @@ public:
     void BindMenuGesture(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
 
-    void BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub);
+    static void BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub);
 
     void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
@@ -1485,7 +1485,7 @@ public:
     {
         ViewAbstract::DisableOnAxisEvent();
     }
-    
+
     void DisableOnAppear() override
     {
         ViewAbstract::DisableOnAppear();
@@ -1541,6 +1541,8 @@ public:
         ViewAbstract::SetLightPosition(positionX, positionY, positionZ);
     }
 
+    static void SetAccessibilityTextHint(FrameNode* frameNode, const std::string& text);
+    
     void SetLightIntensity(const float value) override
     {
         ViewAbstract::SetLightIntensity(value);
@@ -1643,12 +1645,29 @@ public:
     static std::string GetAccessibilityDescription(FrameNode* frameNode);
     static std::string GetAccessibilityImportance(FrameNode* frameNode);
     static bool CheckSkipMenuShow(const RefPtr<FrameNode>& targetNode);
+    static void SetAccessibilityVirtualNode(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& buildFunc);
+
+    static void BindPopup(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)
+    {
+        CHECK_NULL_VOID(targetNode);
+        ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
+    }
+    static void BindMenu(FrameNode* frameNode, std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
+        const MenuParam& menuParam);
+    static void BindMenuGesture(FrameNode* frameNode, std::vector<NG::OptionParam>&& params,
+        std::function<void()>&& buildFunc, const MenuParam& menuParam);
+    static void BindContextMenuStatic(const RefPtr<FrameNode>& targetNode, ResponseType type,
+        std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
+    static void BindDragWithContextMenuParamsStatic(FrameNode* targetNode, const NG::MenuParam& menuParam);
 
 private:
-    bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
-    void RegisterContextMenuKeyEvent(
-        const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
-
+    static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
+    static void RegisterContextMenuKeyEvent(
+        const RefPtr<FrameNode>& targetNode, std::function<void()>&& buildFunc, const MenuParam& menuParam);
+    static void CreateCustomMenuWithPreview(FrameNode* targetNode, std::function<void()>&& buildFunc,
+        const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
+    static void BindContextMenuSingle(FrameNode* targetNode, std::function<void()>&& buildFunc,
+        const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
     void CreateAnimatablePropertyFloat(
         const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent) override
     {

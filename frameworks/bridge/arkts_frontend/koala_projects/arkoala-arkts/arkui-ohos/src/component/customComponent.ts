@@ -15,7 +15,7 @@
 
 import { ArkStructBase } from "../ArkStructBase"
 import { ArkCommonMethodComponent } from "../generated/ArkCommon"
-import { UIContext } from "@ohos.arkui.UIContext"
+import { UIContext } from "@ohos/arkui/UIContext"
 import { ProvideDecoratedVariable, ConsumeDecoratedVariable, WatchFuncType } from "../stateManagement";
 
 class CustomDelegate<T extends CustomComponent<T, T_Options>, T_Options> extends
@@ -132,9 +132,10 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
         factory: () => S,
         initializers?: S_Options,
         /** @memo */
-        content?: () => void
+        content?: () => void,
+        reuseKey?: string
     ): void {
-        CustomDelegate._instantiate(undefined, () => new CustomDelegate<S, S_Options>(factory()), undefined, initializers);
+        CustomDelegate._instantiate(undefined, () => new CustomDelegate<S, S_Options>(factory()), undefined, initializers, reuseKey);
     }
 
     __initializeStruct(

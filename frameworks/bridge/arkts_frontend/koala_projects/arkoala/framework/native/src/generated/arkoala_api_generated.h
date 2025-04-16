@@ -300,6 +300,8 @@ typedef struct Array_ShadowOptions Array_ShadowOptions;
 typedef struct Opt_Array_ShadowOptions Opt_Array_ShadowOptions;
 typedef struct Ark_Position Ark_Position;
 typedef struct Opt_Position Opt_Position;
+typedef struct Ark_GraphicsPosition Ark_GraphicsPosition;
+typedef struct Opt_GraphicsPosition Opt_GraphicsPosition;
 typedef struct Ark_Union_String_Resource Ark_Union_String_Resource;
 typedef struct Opt_Union_String_Resource Opt_Union_String_Resource;
 typedef struct Ark_Union_FontWeight_Number_String Ark_Union_FontWeight_Number_String;
@@ -5802,6 +5804,14 @@ typedef struct Opt_Position {
     Ark_Tag tag;
     Ark_Position value;
 } Opt_Position;
+typedef struct Ark_GraphicsPosition {
+    Ark_Number x;
+    Ark_Number y;
+} Ark_GraphicsPosition;
+typedef struct Opt_GraphicsPosition {
+    Ark_Tag tag;
+    Ark_GraphicsPosition value;
+} Opt_GraphicsPosition;
 typedef struct Ark_Union_String_Resource {
     Ark_Int32 selector;
     union {
@@ -17150,6 +17160,8 @@ typedef struct GENERATED_ArkUIGridModifier {
                           const Opt_GridItemAlignment* value);
     void (*setOnScroll)(Ark_NativePointer node,
                         const Callback_Number_Number_Void* value);
+    void (*setOnWillScroll)(Ark_NativePointer node,
+                            const Opt_OnWillScrollCallback* value);
     void (*setOnDidScroll)(Ark_NativePointer node,
                            const OnScrollCallback* value);
     void (*setOnReachStart)(Ark_NativePointer node,
@@ -17407,6 +17419,8 @@ typedef struct GENERATED_ArkUIListModifier {
                              const Callback_Number_Number_Number_Void* value);
     void (*setOnScrollVisibleContentChange)(Ark_NativePointer node,
                                             const OnScrollVisibleContentChangeCallback* value);
+    void (*setOnWillScroll)(Ark_NativePointer node,
+                            const Opt_OnWillScrollCallback* value);
     void (*setOnDidScroll)(Ark_NativePointer node,
                            const OnScrollCallback* value);
     void (*setOnReachStart)(Ark_NativePointer node,
@@ -19530,6 +19544,8 @@ typedef struct GENERATED_ArkUIWaterFlowModifier {
     void (*setCachedCount1)(Ark_NativePointer node,
                             const Ark_Number* count,
                             Ark_Boolean show);
+    void (*setOnWillScroll)(Ark_NativePointer node,
+                            const Opt_OnWillScrollCallback* value);
     void (*setOnDidScroll)(Ark_NativePointer node,
                             const OnScrollCallback* value);
     void (*setOnReachStart)(Ark_NativePointer node,
@@ -19899,7 +19915,7 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     Ark_Int32 (*getChildrenCount)(Ark_FrameNode peer);
     void (*dispose)(Ark_FrameNode peer);
     Ark_Number (*getOpacity)(Ark_FrameNode peer);
-    Ark_Position (*getPositionToWindowWithTransform)(Ark_FrameNode peer);
+    Ark_GraphicsPosition (*getPositionToWindowWithTransform)(Ark_FrameNode peer);
     Ark_FrameNode (*getFrameNodeByKey)(const Ark_String* name);
 } GENERATED_ArkUIFrameNodeAccessor;
 

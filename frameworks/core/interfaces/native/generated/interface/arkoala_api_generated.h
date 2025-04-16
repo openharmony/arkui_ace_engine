@@ -304,6 +304,8 @@ typedef struct Array_ShadowOptions Array_ShadowOptions;
 typedef struct Opt_Array_ShadowOptions Opt_Array_ShadowOptions;
 typedef struct Ark_Position Ark_Position;
 typedef struct Opt_Position Opt_Position;
+typedef struct Ark_GraphicsPosition Ark_GraphicsPosition;
+typedef struct Opt_GraphicsPosition Opt_GraphicsPosition;
 typedef struct Ark_Union_String_Resource Ark_Union_String_Resource;
 typedef struct Opt_Union_String_Resource Opt_Union_String_Resource;
 typedef struct Ark_Union_FontWeight_Number_String Ark_Union_FontWeight_Number_String;
@@ -1041,12 +1043,16 @@ typedef struct Ark_Union_Dimension_Array_Dimension Ark_Union_Dimension_Array_Dim
 typedef struct Opt_Union_Dimension_Array_Dimension Opt_Union_Dimension_Array_Dimension;
 typedef struct ScrollOnWillScrollCallback ScrollOnWillScrollCallback;
 typedef struct Opt_ScrollOnWillScrollCallback Opt_ScrollOnWillScrollCallback;
+typedef struct OnWillScrollCallback OnWillScrollCallback;
+typedef struct Opt_OnWillScrollCallback Opt_OnWillScrollCallback;
 typedef struct Ark_RectResult Ark_RectResult;
 typedef struct Opt_RectResult Opt_RectResult;
 typedef struct Ark_ScrollToIndexOptions Ark_ScrollToIndexOptions;
 typedef struct Opt_ScrollToIndexOptions Opt_ScrollToIndexOptions;
 typedef struct Ark_OffsetResult Ark_OffsetResult;
 typedef struct Opt_OffsetResult Opt_OffsetResult;
+typedef struct Ark_ScrollResult Ark_ScrollResult;
+typedef struct Opt_ScrollResult Opt_ScrollResult;
 typedef struct Ark_Literal_Boolean_next_Axis_direction Ark_Literal_Boolean_next_Axis_direction;
 typedef struct Opt_Literal_Boolean_next_Axis_direction Opt_Literal_Boolean_next_Axis_direction;
 typedef struct Ark_ScrollPageOptions Ark_ScrollPageOptions;
@@ -1483,6 +1489,8 @@ typedef struct Callback_OnScrollFrameBeginHandlerResult_Void Callback_OnScrollFr
 typedef struct Opt_Callback_OnScrollFrameBeginHandlerResult_Void Opt_Callback_OnScrollFrameBeginHandlerResult_Void;
 typedef struct Callback_OffsetResult_Void Callback_OffsetResult_Void;
 typedef struct Opt_Callback_OffsetResult_Void Opt_Callback_OffsetResult_Void;
+typedef struct Callback_ScrollResult_Void Callback_ScrollResult_Void;
+typedef struct Opt_Callback_ScrollResult_Void Opt_Callback_ScrollResult_Void;
 typedef struct Callback_Literal_Number_offsetRemain_Void Callback_Literal_Number_offsetRemain_Void;
 typedef struct Opt_Callback_Literal_Number_offsetRemain_Void Opt_Callback_Literal_Number_offsetRemain_Void;
 typedef struct Callback_IsolatedComponentAttribute_Void Callback_IsolatedComponentAttribute_Void;
@@ -5800,6 +5808,14 @@ typedef struct Opt_Position {
     Ark_Tag tag;
     Ark_Position value;
 } Opt_Position;
+typedef struct Ark_GraphicsPosition {
+    Ark_Number x;
+    Ark_Number y;
+} Ark_GraphicsPosition;
+typedef struct Opt_GraphicsPosition {
+    Ark_Tag tag;
+    Ark_GraphicsPosition value;
+} Opt_GraphicsPosition;
 typedef struct Ark_Union_String_Resource {
     Ark_Int32 selector;
     union {
@@ -8711,6 +8727,13 @@ typedef struct Opt_OffsetResult {
     Ark_Tag tag;
     Ark_OffsetResult value;
 } Opt_OffsetResult;
+typedef struct Ark_ScrollResult {
+    Ark_Number offsetRemain;
+} Ark_ScrollResult;
+typedef struct Opt_ScrollResult {
+    Ark_Tag tag;
+    Ark_ScrollResult value;
+} Opt_ScrollResult;
 typedef struct Ark_Literal_Boolean_next_Axis_direction {
     Ark_Boolean next;
     Opt_Axis direction;
@@ -10731,6 +10754,15 @@ typedef struct Opt_Callback_OffsetResult_Void {
     Ark_Tag tag;
     Callback_OffsetResult_Void value;
 } Opt_Callback_OffsetResult_Void;
+typedef struct Callback_ScrollResult_Void {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_ScrollResult value);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ScrollResult value);
+} Callback_ScrollResult_Void;
+typedef struct Opt_Callback_ScrollResult_Void {
+    Ark_Tag tag;
+    Callback_ScrollResult_Void value;
+} Opt_Callback_ScrollResult_Void;
 typedef struct Callback_Literal_Number_offsetRemain_Void {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Literal_Number_offsetRemain value);
@@ -14690,6 +14722,15 @@ typedef struct Opt_OnScrollCallback {
     Ark_Tag tag;
     OnScrollCallback value;
 } Opt_OnScrollCallback;
+typedef struct OnWillScrollCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_ScrollResult_Void continuation);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_ScrollResult_Void continuation);
+} OnWillScrollCallback;
+typedef struct Opt_OnWillScrollCallback {
+    Ark_Tag tag;
+    OnWillScrollCallback value;
+} Opt_OnWillScrollCallback;
 typedef struct Ark_Union_ContentClipMode_RectShape {
     Ark_Int32 selector;
     union {
@@ -17123,6 +17164,10 @@ typedef struct GENERATED_ArkUIGridModifier {
                           const Opt_GridItemAlignment* value);
     void (*setOnScroll)(Ark_NativePointer node,
                         const Callback_Number_Number_Void* value);
+    void (*setOnWillScroll)(Ark_NativePointer node,
+                            const Opt_OnWillScrollCallback* value);
+    void (*setOnDidScroll)(Ark_NativePointer node,
+                           const OnScrollCallback* value);
     void (*setOnReachStart)(Ark_NativePointer node,
                             const Callback_Void* value);
     void (*setOnReachEnd)(Ark_NativePointer node,
@@ -17378,6 +17423,10 @@ typedef struct GENERATED_ArkUIListModifier {
                              const Callback_Number_Number_Number_Void* value);
     void (*setOnScrollVisibleContentChange)(Ark_NativePointer node,
                                             const OnScrollVisibleContentChangeCallback* value);
+    void (*setOnWillScroll)(Ark_NativePointer node,
+                            const Opt_OnWillScrollCallback* value);
+    void (*setOnDidScroll)(Ark_NativePointer node,
+                           const OnScrollCallback* value);
     void (*setOnReachStart)(Ark_NativePointer node,
                             const Callback_Void* value);
     void (*setOnReachEnd)(Ark_NativePointer node,
@@ -19499,6 +19548,10 @@ typedef struct GENERATED_ArkUIWaterFlowModifier {
     void (*setCachedCount1)(Ark_NativePointer node,
                             const Ark_Number* count,
                             Ark_Boolean show);
+    void (*setOnWillScroll)(Ark_NativePointer node,
+                            const Opt_OnWillScrollCallback* value);
+    void (*setOnDidScroll)(Ark_NativePointer node,
+                            const OnScrollCallback* value);
     void (*setOnReachStart)(Ark_NativePointer node,
                             const Callback_Void* value);
     void (*setOnReachEnd)(Ark_NativePointer node,
@@ -19866,7 +19919,7 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     Ark_Int32 (*getChildrenCount)(Ark_FrameNode peer);
     void (*dispose)(Ark_FrameNode peer);
     Ark_Number (*getOpacity)(Ark_FrameNode peer);
-    Ark_Position (*getPositionToWindowWithTransform)(Ark_FrameNode peer);
+    Ark_GraphicsPosition (*getPositionToWindowWithTransform)(Ark_FrameNode peer);
     Ark_FrameNode (*getFrameNodeByKey)(const Ark_String* name);
 } GENERATED_ArkUIFrameNodeAccessor;
 

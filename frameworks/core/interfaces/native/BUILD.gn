@@ -130,6 +130,11 @@ template("ace_core_interfaces_native_node") {
       "node/view_model.cpp",
     ]
 
+    sources += [
+      "ani/image_ani_modifier.cpp",
+      "ani/node_ani_modifier.cpp",
+    ]
+
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
     if (defined(config.web_components_support) &&
         config.web_components_support) {

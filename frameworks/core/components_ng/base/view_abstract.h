@@ -491,6 +491,7 @@ public:
 #endif
     static void DisableOnHover(FrameNode* frameNode);
     static void DisableOnHoverMove(FrameNode* frameNode);
+    static void DisableOnAccessibilityHover(FrameNode* frameNode);
     static void DisableOnMouse(FrameNode* frameNode);
     static void DisableOnAppear(FrameNode* frameNode);
     static void DisableOnDisappear(FrameNode* frameNode);
@@ -546,7 +547,7 @@ public:
     static void SetIlluminatedBorderWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBloom(FrameNode* frameNode, float value);
 
-    static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetWidth(FrameNode* frameNode, const CalcLength& width);
     static void SetHeight(FrameNode* frameNode, const CalcLength& height);
     static void ClearWidthOrHeight(FrameNode* frameNode, bool isWidth);
@@ -574,13 +575,13 @@ public:
     static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
     static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
     static void ResetPosition(FrameNode* frameNode);
-    static void SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix);
+    static void SetTransformMatrix(FrameNode* frameNode, const std::optional<Matrix4>& matrix);
     static void SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode);
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
-    static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption,
-        const SysOptions& sysOptions = SysOptions());
+    static void SetBackdropBlur(FrameNode* frameNode, const std::optional<Dimension>& radius,
+        const std::optional<BlurOption>& blurOption, const SysOptions& sysOptions = SysOptions());
     static void SetNodeBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption);
     static void SetInvert(FrameNode* frameNode, const InvertVariant& invert);
     static void SetSepia(FrameNode* frameNode, const Dimension& sepia);
@@ -605,34 +606,36 @@ public:
     static void SetBorderImageGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetForegroundBlurStyle(
         FrameNode* frameNode, const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions = SysOptions());
-    static void SetLinearGradientBlur(FrameNode* frameNode, const NG::LinearGradientBlurPara& blurPara);
+    static void SetLinearGradientBlur(FrameNode *frameNode, const std::optional<NG::LinearGradientBlurPara>& blurPara);
     static void SetMagnifier(FrameNode* frameNode, const MagnifierParams& magnifierOffset);
     static void ReSetMagnifier(FrameNode* frameNode);
     static void SetBackgroundBlurStyle(
         FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions());
     static void SetBackgroundImagePosition(FrameNode* frameNode, const BackgroundImagePosition& bgImgPosition);
-    static void SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize);
+    static void SetBackgroundImageSize(FrameNode* frameNode, const std::optional<BackgroundImageSize>& bgImgSize);
     static void SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src);
     static void SetBackgroundImageRepeat(FrameNode* frameNode, const ImageRepeat& imageRepeat);
     static void SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMode);
     static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
     static void SetScale(FrameNode* frameNode, const NG::VectorF& value);
-    static void SetPivot(FrameNode* frameNode, const DimensionOffset& value);
+    static void SetPivot(FrameNode* frameNode, const std::optional<DimensionOffset>& optValue);
     static void SetGeometryTransition(FrameNode* frameNode, const std::string& id,
         bool followWithoutTransition, bool doRegisterSharedTransition);
     static const std::string GetGeometryTransition(FrameNode* frameNode,
         bool* followWithoutTransition, bool* doRegisterSharedTransition);
     static void SetRotate(FrameNode* frameNode, const NG::Vector5F& value);
+    static void SetRotate(FrameNode* frameNode, const std::vector<std::optional<float>>& value);
     static void SetClipEdge(FrameNode* frameNode, bool isClip);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetPixelStretchEffect(FrameNode* frameNode, PixStretchEffectOption& option);
     static void SetLightUpEffect(FrameNode* frameNode, double radio);
     static void SetSphericalEffect(FrameNode* frameNode, double radio);
     static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
-    static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
+    static void SetRenderFit(FrameNode* frameNode, const std::optional<RenderFit>& renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
-    static void SetForegroundColor(FrameNode* frameNode, const Color& color);
-    static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
+    static void SetForegroundColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetForegroundColorStrategy(FrameNode* frameNode,
+        const std::optional<ForegroundColorStrategy>& strategy);
     static void SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath);
     static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);
     static void SetGroupDefaultFocus(FrameNode* frameNode, bool isSet);
@@ -679,7 +682,7 @@ public:
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
     static void SetMotionBlur(FrameNode* frameNode, const MotionBlurOption& motionBlurOption);
-    static void SetForegroundEffect(FrameNode* frameNode, float radius);
+    static void SetForegroundEffect(FrameNode* frameNode, const std::optional<float>& radius);
     static void SetBackgroundEffect(
         FrameNode* frameNode, const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions());
     static void SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
@@ -700,8 +703,8 @@ public:
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching);
-    static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
-    static void SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType);
+    static void SetBlendMode(FrameNode* frameNode, const std::optional<BlendMode>& blendMod);
+    static void SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType);
     static void SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender);
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
@@ -733,6 +736,7 @@ public:
     static void SetOnAxisEvent(FrameNode* frameNode, OnAxisEventFunc&& onAxisEventFunc);
     static void SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc);
     static void SetOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc &&onHoverMoveEventFunc);
+    static void SetOnAccessibilityHover(FrameNode* frameNode, OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);
     static void SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback);
     static void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyDispatchCallback);
     static void SetOnKeyEventDispatch(FrameNode* frameNode, OnKeyEventDispatchFunc&& onKeyDispatchCallback);

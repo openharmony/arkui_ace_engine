@@ -98,20 +98,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 using namespace Converter;
 
 namespace {
-// void UpdateSpansRange(std::vector<RefPtr<SpanBase>>& styles, int32_t maxLength)
-// {
-//     for (auto& style : styles) {
-//         if (style == nullptr) {
-//             continue;
-//         }
-//         if (style->GetStartIndex() < 0 || style->GetStartIndex() >= maxLength) {
-//             style->UpdateStartIndex(0);
-//         }
-//         if (style->GetEndIndex() < style->GetStartIndex() || style->GetEndIndex() >= maxLength) {
-//             style->UpdateEndIndex(maxLength);
-//         }
-//     }
-// }
+void UpdateSpansRange(std::vector<RefPtr<SpanBase>>& styles, int32_t maxLength)
+{
+    for (auto& style : styles) {
+        if (style == nullptr) {
+            continue;
+        }
+        if (style->GetStartIndex() < 0 || style->GetStartIndex() >= maxLength) {
+            style->UpdateStartIndex(0);
+        }
+        if (style->GetEndIndex() < style->GetStartIndex() || style->GetEndIndex() >= maxLength) {
+            style->UpdateEndIndex(maxLength);
+        }
+    }
+}
 } // namespace
 
 const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor();
@@ -125,33 +125,34 @@ Ark_StyledString CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* val
                           const Opt_Array_StyleOptions* styles)
 {
     auto peer = StyledStringPeer::Create();
-    // if (value) {
-    //     Converter::VisitUnion(*value,
-    //         [&peer, styles](const Ark_String& arkText) {
-    //             std::string data = Converter::Convert<std::string>(arkText);
-    //             peer->spanString = AceType::MakeRefPtr<SpanString>(data);
-    //             CHECK_NULL_VOID(!data.empty() && styles);
-    //             auto spans = Converter::OptConvert<std::vector<RefPtr<SpanBase>>>(*styles);
-    //             CHECK_NULL_VOID(spans);
-    //             UpdateSpansRange(spans.value(), StringUtils::ToWstring(data).length());
-    //             peer->spanString->BindWithSpans(spans.value());
-    //         },
-    //         [&peer](const Ark_ImageAttachment& arkImageAttachment) {
-    //             ImageAttachmentPeer* peerImageAttachment = arkImageAttachment;
-    //             CHECK_NULL_VOID(peerImageAttachment && peerImageAttachment->imageSpan);
-    //             auto options = peerImageAttachment->imageSpan->GetImageSpanOptions();
-    //             peer->spanString = AceType::MakeRefPtr<SpanString>(options);
-    //         },
-    //         [](const Ark_CustomSpan& arkCustomSpan) {
-    //             LOGE("StyledStringAccessor::CtorImpl unsupported Ark_CustomSpan");
-    //         },
-    //         []() {}
-    //     );
-    // }
+    if (value) {
+        Converter::VisitUnion(*value,
+            [&peer, styles](const Ark_String& arkText) {
+                std::string data = Converter::Convert<std::string>(arkText);
+                std::u16string u16Data = UtfUtils::Str8DebugToStr16(data);
+                peer->spanString = AceType::MakeRefPtr<SpanString>(u16Data);
+                CHECK_NULL_VOID(!u16Data.empty() && styles);
+                auto spans = Converter::OptConvert<std::vector<RefPtr<SpanBase>>>(*styles);
+                CHECK_NULL_VOID(spans);
+                UpdateSpansRange(spans.value(), u16Data.length());
+                peer->spanString->BindWithSpans(spans.value());
+            },
+            [&peer](const Ark_ImageAttachment& arkImageAttachment) {
+                ImageAttachmentPeer* peerImageAttachment = arkImageAttachment;
+                CHECK_NULL_VOID(peerImageAttachment && peerImageAttachment->imageSpan);
+                auto options = peerImageAttachment->imageSpan->GetImageSpanOptions();
+                peer->spanString = AceType::MakeRefPtr<SpanString>(options);
+            },
+            [](const Ark_CustomSpan& arkCustomSpan) {
+                LOGE("StyledStringAccessor::CtorImpl unsupported Ark_CustomSpan");
+            },
+            []() {}
+        );
+    }
     // need check
-    // if (!peer->spanString) {
-    //     peer->spanString = AceType::MakeRefPtr<SpanString>(std::string());
-    // }
+    if (!peer->spanString) {
+        peer->spanString = AceType::MakeRefPtr<SpanString>(std::u16string());
+    }
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()

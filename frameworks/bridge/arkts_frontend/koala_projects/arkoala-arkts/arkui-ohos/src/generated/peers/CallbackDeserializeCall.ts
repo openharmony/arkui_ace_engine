@@ -18,8 +18,8 @@ import { Deserializer } from "./Deserializer"
 import { int32, float32, int64 } from "@koalaui/common"
 import { ResourceHolder, KInt, KStringPtr, wrapSystemCallback, KPointer, RuntimeType, KSerializerBuffer } from "@koalaui/interop"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, AccessibilityHoverEvent, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, Callback_Boolean_HoverEvent_Void, HoverEvent, ClickEvent, Callback_ClickEvent_Void, CustomBuilder, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, DragItemInfo, Callback_DragEvent_String_Void, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, ItemDragInfo, Callback_KeyEvent_Boolean, KeyEvent, Callback_KeyEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_MouseEvent_Void, MouseEvent, Tuple_Number_Number, Callback_PreDragStatus_Void, PreDragStatus, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, SheetType, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, TouchEvent, Callback_TouchEvent_Void, GestureRecognizerJudgeBeginCallback, HoverCallback, OnMoveHandler, OnScrollCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback } from "./../../component/common"
-import { AsyncCallback_image_PixelMap_Void, Callback_Array_String_Void, Callback_ComputedBarAttribute_Void, Callback_CustomBuilder_Void, Callback_GestureJudgeResult_Void, Callback_GestureRecognizer_Void, Callback_HitTestMode_Void, Callback_IsolatedComponentAttribute_Void, Callback_Literal_Number_offsetRemain_Void, Callback_OffsetResult_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Pointer_Void, Callback_TouchResult_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_Tuple_Number_Number_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_WebKeyboardOptions_Void, Callback_WebResourceResponse_Void, Callback_WithThemeAttribute_Void, onItemDragStart_event_type } from "./../SyntheticDeclarations"
+import { AccessibilityCallback, AccessibilityHoverEvent, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, Callback_Boolean_HoverEvent_Void, HoverEvent, ClickEvent, Callback_ClickEvent_Void, CustomBuilder, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, DragItemInfo, Callback_DragEvent_String_Void, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, ItemDragInfo, Callback_KeyEvent_Boolean, KeyEvent, Callback_KeyEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_MouseEvent_Void, MouseEvent, Tuple_Number_Number, Callback_PreDragStatus_Void, PreDragStatus, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, SheetType, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, TouchEvent, Callback_TouchEvent_Void, GestureRecognizerJudgeBeginCallback, HoverCallback, OnMoveHandler, OnScrollCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, OnWillScrollCallback, ScrollResult } from "./../../component/common"
+import { AsyncCallback_image_PixelMap_Void, Callback_Array_String_Void, Callback_ComputedBarAttribute_Void, Callback_CustomBuilder_Void, Callback_GestureJudgeResult_Void, Callback_GestureRecognizer_Void, Callback_HitTestMode_Void, Callback_IsolatedComponentAttribute_Void, Callback_Literal_Number_offsetRemain_Void, Callback_OffsetResult_Void, Callback_ScrollResult_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Pointer_Void, Callback_TouchResult_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_Tuple_Number_Number_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_WebKeyboardOptions_Void, Callback_WebResourceResponse_Void, Callback_WithThemeAttribute_Void, onItemDragStart_event_type } from "./../SyntheticDeclarations"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
 import { ButtonTriggerClickCallback } from "./../../component/button"
 import { Callback_Any_Void, Callback_FormCallbackInfo_Void, FormCallbackInfo, Callback_Literal_Number_errcode_String_msg_Void, Literal_Number_errcode_String_msg } from "./../../component/formComponent"
@@ -456,18 +456,7 @@ export function deserializeAndCallCallback_Literal_Function_handler_Object_error
     _call(event)
 }
 export function deserializeAndCallCallback_Literal_Number_code_Want_want_Void(thisDeserializer: Deserializer): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((parameter: Literal_Number_code_Want_want) => void))
-    const parameter_buf_code : number = (thisDeserializer.readNumber() as number)
-    const parameter_buf_want_buf_runtimeType  = (thisDeserializer.readInt8() as int32)
-    let parameter_buf_want_buf : Want | undefined
-    if ((RuntimeType.UNDEFINED) != (parameter_buf_want_buf_runtimeType))
-    {
-        parameter_buf_want_buf = thisDeserializer.readWant()
-    }
-    const parameter_buf_want : undefined | Want = parameter_buf_want_buf
-    let parameter : Literal_Number_code_Want_want = ({code: parameter_buf_code, want: parameter_buf_want} as Literal_Number_code_Want_want)
-    _call(parameter)
+    // Not Support
 }
 export function deserializeAndCallCallback_Literal_Number_errcode_String_msg_Void(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -646,6 +635,12 @@ export function deserializeAndCallCallback_OffsetResult_Void(thisDeserializer: D
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: OffsetResult) => void))
     let value : OffsetResult = thisDeserializer.readOffsetResult()
+    _call(value)
+}
+export function deserializeAndCallCallback_ScrollResult_Void(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: ScrollResult) => void))
+    let value : ScrollResult = thisDeserializer.readScrollResult()
     _call(value)
 }
 export function deserializeAndCallCallback_OnAlertEvent_Boolean(thisDeserializer: Deserializer): void {
@@ -1646,6 +1641,16 @@ export function deserializeAndCallOnScrollEdgeCallback(thisDeserializer: Deseria
     let side : Edge = (thisDeserializer.readInt32() as Edge)
     _call(side)
 }
+export function deserializeAndCallOnWillScrollCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnWillScrollCallback)
+    let scrollOffset : number = (thisDeserializer.readNumber() as number)
+    let scrollState : ScrollState = (thisDeserializer.readInt32() as ScrollState)
+    let scrollSource : ScrollSource = (thisDeserializer.readInt32() as ScrollSource)
+    let _continuation : ((value: ScrollResult) => void) = thisDeserializer.readCallback_ScrollResult_Void(true)
+    const _callResult  = _call(scrollOffset, scrollState, scrollSource)
+    _continuation(_callResult)
+}
 export function deserializeAndCallOnScrollFrameBeginCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnScrollFrameBeginCallback)
@@ -2056,6 +2061,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case 1618565120/*CallbackKind.Kind_Callback_Number_Tuple_Number_Number_Number_Number*/: return deserializeAndCallCallback_Number_Tuple_Number_Number_Number_Number(thisDeserializer);
         case 36519084/*CallbackKind.Kind_Callback_Number_Void*/: return deserializeAndCallCallback_Number_Void(thisDeserializer);
         case 1295952075/*CallbackKind.Kind_Callback_OffsetResult_Void*/: return deserializeAndCallCallback_OffsetResult_Void(thisDeserializer);
+        case 1385252075/*CallbackKind.Kind_Callback_ScrollResult_Void*/: return deserializeAndCallCallback_ScrollResult_Void(thisDeserializer);
         case 806070428/*CallbackKind.Kind_Callback_OnAlertEvent_Boolean*/: return deserializeAndCallCallback_OnAlertEvent_Boolean(thisDeserializer);
         case -1559789631/*CallbackKind.Kind_Callback_OnAudioStateChangedEvent_Void*/: return deserializeAndCallCallback_OnAudioStateChangedEvent_Void(thisDeserializer);
         case -873162122/*CallbackKind.Kind_Callback_OnBeforeUnloadEvent_Boolean*/: return deserializeAndCallCallback_OnBeforeUnloadEvent_Boolean(thisDeserializer);
@@ -2184,6 +2190,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -1099824577/*CallbackKind.Kind_OnSafeBrowsingCheckResultCallback*/: return deserializeAndCallOnSafeBrowsingCheckResultCallback(thisDeserializer);
         case -160015401/*CallbackKind.Kind_OnScrollCallback*/: return deserializeAndCallOnScrollCallback(thisDeserializer);
         case -1259214476/*CallbackKind.Kind_OnScrollEdgeCallback*/: return deserializeAndCallOnScrollEdgeCallback(thisDeserializer);
+        case -150015401/*CallbackKind.Kind_OnWillScrollCallback*/: return deserializeAndCallOnWillScrollCallback(thisDeserializer);
         case -2133791987/*CallbackKind.Kind_OnScrollFrameBeginCallback*/: return deserializeAndCallOnScrollFrameBeginCallback(thisDeserializer);
         case 625641334/*CallbackKind.Kind_OnScrollVisibleContentChangeCallback*/: return deserializeAndCallOnScrollVisibleContentChangeCallback(thisDeserializer);
         case -399603614/*CallbackKind.Kind_OnSslErrorEventCallback*/: return deserializeAndCallOnSslErrorEventCallback(thisDeserializer);

@@ -27,8 +27,8 @@ class ACE_EXPORT GridScrollLayoutAlgorithm : public GridLayoutBaseAlgorithm {
     DECLARE_ACE_TYPE(GridScrollLayoutAlgorithm, GridLayoutBaseAlgorithm);
 
 public:
-    GridScrollLayoutAlgorithm(GridLayoutInfo gridLayoutInfo, uint32_t crossCount, uint32_t mainCount)
-        : GridLayoutBaseAlgorithm(std::move(gridLayoutInfo)), crossCount_(crossCount), mainCount_(mainCount) {};
+    GridScrollLayoutAlgorithm(GridLayoutInfo& gridLayoutInfo, uint32_t crossCount, uint32_t mainCount)
+        : GridLayoutBaseAlgorithm(gridLayoutInfo), crossCount_(crossCount), mainCount_(mainCount) {};
     ~GridScrollLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;

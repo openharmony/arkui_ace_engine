@@ -80,6 +80,52 @@ void ScrollBarModelNG::Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, b
     }
 }
 
+RefPtr<FrameNode> ScrollBarModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_RETURN(stack, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_BAR_ETS_TAG, nodeId, AceType::MakeRefPtr<ScrollBarPattern>());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    stack->Push(frameNode);
+    UpdateLayoutProperty();
+    return frameNode;
+}
+
+void ScrollBarModelNG::UpdateLayoutProperty()
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Axis, Axis::VERTICAL);
+    ACE_UPDATE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, DisplayMode, DisplayMode::AUTO);
+    ACE_UPDATE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Visibility, VisibleType::VISIBLE);
+}
+
+void ScrollBarModelNG::SetScrollBarProxy(FrameNode* frameNode, const  RefPtr<ScrollProxy>& proxy)
+{
+    CHECK_NULL_VOID(proxy);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollBarPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto scrollBarProxy = AceType::DynamicCast<NG::ScrollBarProxy>(proxy);
+    CHECK_NULL_VOID(scrollBarProxy);
+    scrollBarProxy->RegisterScrollBar(pattern);
+    pattern->SetScrollBarProxy(scrollBarProxy);
+}
+
+void ScrollBarModelNG::SetDirection(FrameNode* frameNode, std::optional<Axis> axis)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Axis, axis.value_or(Axis::VERTICAL), frameNode);
+}
+
+void ScrollBarModelNG::SetState(FrameNode* frameNode, std::optional<DisplayMode> displayMode)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        ScrollBarLayoutProperty, DisplayMode, displayMode.value_or(DisplayMode::AUTO), frameNode);
+    auto visible =
+        displayMode.value_or(DisplayMode::AUTO) == DisplayMode::OFF ? VisibleType::INVISIBLE : VisibleType::VISIBLE;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        ScrollBarLayoutProperty, Visibility, visible, frameNode);
+}
+
 void ScrollBarModelNG::SetNestedScroll(RefPtr<FrameNode>& frameNode, RefPtr<ScrollablePattern>& pattern)
 {
     CHECK_NULL_VOID(frameNode);
@@ -139,5 +185,10 @@ void ScrollBarModelNG::SetEnableNestedScroll(FrameNode* frameNode, bool enableNe
     if (enableNestedSroll == false && enableNestedSroll != enableNested) {
         UnSetNestedScroll(node, pattern);
     }
+}
+
+void ScrollBarModelNG::SetEnableNestedScroll(FrameNode* frameNode, std::optional<bool> enableNestedSroll)
+{
+    SetEnableNestedScroll(frameNode, enableNestedSroll.value_or(false));
 }
 } // namespace OHOS::Ace::NG

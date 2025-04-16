@@ -38,6 +38,7 @@ public:
     void FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) override;
 
     void OnSlidingOffsetUpdate(float delta) override;
+    int32_t ConvertLargeDelta(float delta) override;
     /* for parallel mode */
     bool OnSlidingOffsetUpdate(const SizeF& viewport, Axis axis, float delta) override;
 

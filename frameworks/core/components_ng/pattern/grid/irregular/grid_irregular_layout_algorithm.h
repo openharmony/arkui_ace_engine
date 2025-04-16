@@ -35,8 +35,8 @@ class GridIrregularLayoutAlgorithm : public GridLayoutBaseAlgorithm {
 
 public:
     explicit GridIrregularLayoutAlgorithm(
-        GridLayoutInfo info, bool canOverScrollStart = false, bool canOverScrollEnd = false)
-        : GridLayoutBaseAlgorithm(std::move(info)), canOverScrollStart_(canOverScrollStart),
+        GridLayoutInfo& info, bool canOverScrollStart = false, bool canOverScrollEnd = false)
+        : GridLayoutBaseAlgorithm(info), canOverScrollStart_(canOverScrollStart),
           canOverScrollEnd_(canOverScrollEnd) {};
 
     ~GridIrregularLayoutAlgorithm() override = default;
@@ -137,20 +137,6 @@ private:
      */
     void PrepareLineHeight(float mainSize, int32_t& jumpLineIdx);
     // ========================================== MeasureOnJump ends ===========================================
-
-    /**
-     * @brief Skip forward by currentOffset_ and fill the matrix along the way.
-     *
-     * @return item index to jump to after skipping.
-     */
-    int32_t SkipLinesForward();
-
-    /**
-     * @brief Skip backward by currentOffset_. Can assume that the matrix is already filled up to startIdx_
-     *
-     * @return item index to jump to after skipping.
-     */
-    int32_t SkipLinesBackward() const;
 
     bool IsIrregularLine(int32_t lineIndex) const override;
 

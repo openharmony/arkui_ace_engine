@@ -23,7 +23,7 @@ import { Want, ErrorCallback } from "./../generated/ArkArkuiExternalInterfaces"
 import { EmbeddedType, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
 import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
-import { LengthMetrics } from "./../generated/ArkLengthMetricsMaterialized"
+import { LengthMetrics } from "../Graphics"
 import { ResizableOptions } from "./image"
 import { Resource } from "global/resource";
 import { Callback_Void } from "./abilityComponent"
@@ -37,15 +37,16 @@ import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, Gesture
 import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
 import { ArkEmbeddedComponentComponent } from "./../generated/ArkEmbeddedComponent"
 import { ArkEmbeddedComponentPeer } from "./../generated/peers/ArkEmbeddedComponentPeer"
+import { AbilityWant } from "#external"
 export interface TerminationInfo {
     code: number;
-    want?: Want;
+    want?: AbilityWant;
 }
 export type Callback_TerminationInfo_Void = (parameter: TerminationInfo) => void;
 /** @memo:stable */
 export interface EmbeddedComponentAttribute extends CommonMethod {
     /** @memo */
-    setEmbeddedComponentOptions(loader: Want, type: EmbeddedType): this
+    setEmbeddedComponentOptions(loader: AbilityWant, type: EmbeddedType): this
     /** @memo */
     onTerminated(value: ((parameter: TerminationInfo) => void)): this
     /** @memo */
@@ -55,7 +56,7 @@ export interface EmbeddedComponentAttribute extends CommonMethod {
 export function EmbeddedComponent(
   /** @memo */
   style: ((attributes: EmbeddedComponentAttribute) => void) | undefined,
-  loader: Want, type: EmbeddedType, 
+  loader: AbilityWant, type: EmbeddedType,
   /** @memo */
   content_?: () => void,
 ) {

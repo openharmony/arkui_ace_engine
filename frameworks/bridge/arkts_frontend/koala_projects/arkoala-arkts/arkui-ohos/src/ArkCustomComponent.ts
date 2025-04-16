@@ -25,7 +25,7 @@ import {
     NavDestinationInfo,
     RouterPageInfo
 } from "./generated"
-import { UIContext } from "@ohos.arkui.UIContext"
+import { UIContext } from "@ohos/arkui/UIContext"
 
 /**
  * This is basically the CustomComponent, which doesn't extend CommonAttribute

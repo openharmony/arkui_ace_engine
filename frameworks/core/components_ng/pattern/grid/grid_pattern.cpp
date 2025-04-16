@@ -20,6 +20,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_fill_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
@@ -28,7 +29,6 @@
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
-#include "core/components_ng/pattern/grid/grid_fill_algorithm.h"
 
 namespace OHOS::Ace::NG {
 
@@ -49,6 +49,8 @@ void GridPattern::OnAttachToFrameNode()
 
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
+    prevRange_ = std::pair(info_.startIndex_, info_.endIndex_);
+
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_RETURN(gridLayoutProperty, nullptr);
     std::vector<std::string> cols;
@@ -491,22 +493,19 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto gridLayoutAlgorithm = DynamicCast<GridLayoutBaseAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(gridLayoutAlgorithm, false);
-    const auto& gridLayoutInfo = gridLayoutAlgorithm->GetGridLayoutInfo();
     auto eventhub = GetEventHub<GridEventHub>();
     CHECK_NULL_RETURN(eventhub, false);
     Dimension offset(0, DimensionUnit::VP);
-    Dimension offsetPx(gridLayoutInfo.currentOffset_, DimensionUnit::PX);
+    Dimension offsetPx(info_.currentOffset_, DimensionUnit::PX);
     auto offsetVpValue = offsetPx.ConvertToVp();
     offset.SetValue(offsetVpValue);
-    scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, offset);
-    if (!isInitialized_ || info_.startIndex_ != gridLayoutInfo.startIndex_) {
-        eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
+    scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(info_.startIndex_, offset);
+    if (!isInitialized_ || prevRange_.first != info_.startIndex_) {
+        eventhub->FireOnScrollToIndex(info_.startIndex_);
     }
 
-    bool indexChanged =
-        (gridLayoutInfo.startIndex_ != info_.startIndex_) || (gridLayoutInfo.endIndex_ != info_.endIndex_);
+    bool indexChanged = (prevRange_.first != info_.startIndex_) || (prevRange_.second != info_.endIndex_);
     bool offsetEnd = info_.offsetEnd_;
-    info_ = gridLayoutInfo;
     info_.synced_ = true;
     AnimateToTarget(scrollAlign_, layoutAlgorithmWrapper);
 
@@ -537,8 +536,6 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     MarkSelectedItems();
 
     UpdateLayoutRange(info_.axis_, !isInitialized_);
-    RequestReset(info_.jumpForRecompose_, -info_.currentOffset_);
-    info_.jumpForRecompose_ = EMPTY_JUMP_INDEX;
     isInitialized_ = true;
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);

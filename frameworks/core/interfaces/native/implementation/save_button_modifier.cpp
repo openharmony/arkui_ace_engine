@@ -53,28 +53,25 @@ void AssignCast(std::optional<SaveButtonSaveDescription>& dst, const Ark_SaveDes
         default: LOGE("Unexpected enum value in Ark_SaveDescription: %{public}d", src);
     }
 }
-// need check
-// template<>
-// SaveButtonStyle Convert(const Ark_SaveButtonOptions& src)
-// {
-//     SaveButtonStyle style;
-//     style.text = OptConvert<SaveButtonSaveDescription>(src.text);
-//     style.icon = OptConvert<SaveButtonIconStyle>(src.icon);
-//     style.backgroundType = OptConvert<ButtonType>(src.buttonType);
-//     return style;
-// }
+template<>
+SaveButtonStyle Convert(const Ark_SaveButtonOptions& src)
+{
+    SaveButtonStyle style;
+    style.text = OptConvert<SaveButtonSaveDescription>(src.text);
+    style.icon = OptConvert<SaveButtonIconStyle>(src.icon);
+    style.backgroundType = OptConvert<ButtonType>(src.buttonType);
+    return style;
+}
 } // namespace OHOS::Ace::NG::Converter
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SaveButtonModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // need check
-    // auto frameNode = SaveButtonModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = SaveButtonModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // SaveButtonModifier
 namespace SaveButtonInterfaceModifier {
@@ -82,8 +79,7 @@ void SetSaveButtonOptions0Impl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // need check
-    // SaveButtonModelNG::InitSaveButton(frameNode, SaveButtonStyle(), false);
+    SaveButtonModelNG::InitSaveButton(frameNode, SaveButtonStyle(), false);
 }
 void SetSaveButtonOptions1Impl(Ark_NativePointer node,
                                const Ark_SaveButtonOptions* options)
@@ -91,9 +87,8 @@ void SetSaveButtonOptions1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    // auto style = Converter::Convert<SaveButtonStyle>(*options);
-    // need check
-    // SaveButtonModelNG::InitSaveButton(frameNode, style, false);
+    auto style = Converter::Convert<SaveButtonStyle>(*options);
+    SaveButtonModelNG::InitSaveButton(frameNode, style, false);
 }
 } // SaveButtonInterfaceModifier
 namespace SaveButtonAttributeModifier {

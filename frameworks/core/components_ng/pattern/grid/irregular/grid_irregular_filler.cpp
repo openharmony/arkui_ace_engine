@@ -48,7 +48,10 @@ Result GridIrregularFiller::Fill(const FillParameters& params, float targetLen, 
             return { len, row, idx - 1 };
         }
 
-        MeasureItem(params, idx, posX_, posY_, false);
+        auto [itemHeight, _] = MeasureItem(params, idx, posX_, posY_, false);
+        if (Negative(itemHeight)) {
+            break; // stop filling when item isn't created
+        }
     }
 
     if (info_->lineHeightMap_.empty()) {
@@ -198,7 +201,9 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
     const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row, bool isCache)
 {
     auto child = wrapper_->GetOrCreateChildByIndex(itemIdx, !isCache, isCache);
-    CHECK_NULL_RETURN(child, {});
+    if (!child) {
+        return {-1.0f, {}};
+    }
     return MeasureItemInner(params, AceType::RawPtr(child), itemIdx, col, row);
 }
 
@@ -237,7 +242,10 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItemInner(
         constraint.parentIdealSize = OptionalSizeF(std::nullopt, crossLen);
     }
 
-    node->Measure(constraint);
+    if (constraint != node->GetGeometryNode()->GetParentLayoutConstraint() ||
+        CheckNeedMeasure(node->GetLayoutProperty()->GetPropertyChangeFlag())) {
+        node->Measure(constraint);
+    }
     SetItemInfo(node, itemIdx, row, col, itemSize);
 
     float childHeight = node->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
