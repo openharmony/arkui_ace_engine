@@ -596,7 +596,9 @@ RefPtr<SwiperPaintProperty> TabsModelNG::GetSwiperPaintProperty()
 
 void TabsModelNG::Pop()
 {
-    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     CHECK_NULL_VOID(tabsLayoutProperty);
@@ -607,32 +609,7 @@ void TabsModelNG::Pop()
 
     tabBarNode->MarkModifyDone();
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
-    CHECK_NULL_VOID(dividerNode);
-    auto layoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-
-    auto axis = layoutProperty->GetAxis().value_or((Axis::HORIZONTAL));
-    TabsItemDivider defaultDivider;
-    auto divider = layoutProperty->GetDivider().value_or(defaultDivider);
-    auto dividerColor = divider.color;
-    auto dividerStrokeWidth = divider.strokeWidth;
-
-    auto dividerHub = dividerNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(dividerHub);
-
-    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
-    CHECK_NULL_VOID(dividerRenderProperty);
-    dividerRenderProperty->UpdateDividerColor(dividerColor);
-    dividerRenderProperty->UpdateLineCap(LineCap::BUTT);
-
-    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
-    CHECK_NULL_VOID(dividerLayoutProperty);
-    dividerLayoutProperty->UpdateVertical(axis == Axis::VERTICAL);
-    dividerLayoutProperty->UpdateStrokeWidth(dividerStrokeWidth);
-    dividerLayoutProperty->UpdateStrokeWidthLimitation(false);
-    CHECK_NULL_VOID(dividerNode);
-    dividerNode->MarkModifyDone();
+    InitDivider(frameNode);
 
     swiperNode->MarkModifyDone();
     swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -819,6 +796,39 @@ void TabsModelNG::SetDivider(FrameNode* frameNode, const std::optional<TabsItemD
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, dividerOpt.value(), frameNode);
         }
     }
+}
+
+void TabsModelNG::InitDivider(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
+    CHECK_NULL_VOID(dividerNode);
+    auto layoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto axis = layoutProperty->GetAxis().value_or((Axis::HORIZONTAL));
+    TabsItemDivider defaultDivider;
+    auto divider = layoutProperty->GetDivider().value_or(defaultDivider);
+    auto dividerColor = divider.color;
+    auto dividerStrokeWidth = divider.strokeWidth;
+
+    auto dividerHub = dividerNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(dividerHub);
+
+    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+    dividerRenderProperty->UpdateDividerColor(dividerColor);
+    dividerRenderProperty->UpdateLineCap(LineCap::BUTT);
+
+    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+    CHECK_NULL_VOID(dividerLayoutProperty);
+    dividerLayoutProperty->UpdateVertical(axis == Axis::VERTICAL);
+    dividerLayoutProperty->UpdateStrokeWidth(dividerStrokeWidth);
+    dividerLayoutProperty->UpdateStrokeWidthLimitation(false);
+    CHECK_NULL_VOID(dividerNode);
+    dividerNode->MarkModifyDone();
 }
 
 void TabsModelNG::SetFadingEdge(FrameNode* frameNode, bool fadingEdge)

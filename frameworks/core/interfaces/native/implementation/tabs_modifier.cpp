@@ -372,6 +372,7 @@ void DividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<TabsItemDivider>(*value);
     TabsModelNG::SetDivider(frameNode, divider);
+    TabsModelNG::InitDivider(frameNode);
 }
 void BarOverlapImpl(Ark_NativePointer node,
                     Ark_Boolean value)
