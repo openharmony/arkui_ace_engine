@@ -970,4 +970,17 @@ void AssignArkValue(Ark_EffectDirection& dst, const OHOS::Ace::CommonSubType& sr
         default: dst = static_cast<Ark_EffectDirection>(-1);
     }
 }
+
+void AssignArkValue(Ark_SelectStatus& dst, const int32_t& src)
+{
+    const int32_t valueAll = 0;
+    const int32_t valuePart = 1;
+    const int32_t valueNone = 2;
+    switch (src) {
+        case valueAll: dst = ARK_SELECT_STATUS_ALL; break;
+        case valuePart: dst = ARK_SELECT_STATUS_PART; break;
+        case valueNone: dst = ARK_SELECT_STATUS_NONE; break;
+        default: dst = static_cast<Ark_SelectStatus>(-1);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

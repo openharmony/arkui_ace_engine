@@ -55,13 +55,18 @@ public:
     
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetSelect(FrameNode* frameNode, bool isSelected);
+    static void SetSelect(FrameNode* frameNode, const std::optional<bool> isSelected);
     static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetUnSelectedColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetUnSelectedColor(FrameNode* frameNode, const Color& color);
     static void SetWidth(FrameNode* frameNode, const Dimension& width);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetCheckMarkColor(FrameNode* frameNode, const Color& color);
+    static void SetCheckMarkColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetCheckMarkSize(FrameNode* frameNode, const Dimension& size);
+    static void SetCheckMarkSize(FrameNode* frameNode, const std::optional<Dimension>& size);
     static void SetCheckMarkWidth(FrameNode* frameNode, const Dimension& width);
+    static void SetCheckMarkWidth(FrameNode* frameNode, const std::optional<Dimension>& width);
     static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& padding);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetBuilder(FrameNode* frameNode, std::function<void(void)>&& buildFunc);
