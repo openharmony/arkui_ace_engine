@@ -155,6 +155,38 @@ HWTEST_F(GridArkoalaTest, Basic002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollBackward001
+ * @tc.desc: Test scrolling backward when lineHeights are empty and items don't exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridArkoalaTest, ScrollBackward001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    ViewAbstract::SetHeight(CalcLength(1280));
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(8.0f));
+    InitMockLazy(100);
+    CreateDone();
+    EXPECT_EQ(pattern_->info_.gridMatrix_.size(), 1);
+    IncrementAndLayout(__LINE__);
+
+    UpdateCurrentOffset(-5000.0f);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(24, 30));
+
+    frameNode_->ChildrenUpdatedFrom(5);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 12);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0.0f);
+    UpdateCurrentOffset(500.0f);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 12);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 500.0f);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(20, 28));
+    EXPECT_EQ(pattern_->info_.currentOffset_, -416);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 10);
+}
+
+/**
  * @tc.name: LargeOffset001
  * @tc.desc: Test large offset on ScrollWindowAdapter with MockKoala
  * @tc.type: FUNC
@@ -174,12 +206,12 @@ HWTEST_F(GridArkoalaTest, LargeOffset001, TestSize.Level1)
     UpdateCurrentOffset(-5000.0f);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(24, 30));
-    EXPECT_EQ(GetChildRect(frameNode_, 25).ToString(), "RectT (240.00, -86.00) - [240.00 x 450.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 25).ToString(), "RectT (240.00, 0.00) - [240.00 x 450.00]");
 
     UpdateCurrentOffset(-8000.0f);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(60, 66));
-    EXPECT_EQ(GetChildRect(frameNode_, 61).ToString(), "RectT (240.00, -86.00) - [240.00 x 450.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 61).ToString(), "RectT (240.00, 0.00) - [240.00 x 450.00]");
     EXPECT_EQ(pattern_->info_.startIndex_, 60);
 
     UpdateCurrentOffset(4000.0f);
@@ -208,20 +240,42 @@ HWTEST_F(GridArkoalaTest, LargeOffset002, TestSize.Level1)
     IncrementAndLayout(__LINE__);
     // new pipeline order: Event -> Frontend Increment -> Layout
     pattern_->UpdateCurrentOffset(-5000.0f, SCROLL_FROM_BAR);
-    EXPECT_FALSE(lazy_.NeedRecompose());
-    FlushUITasks();
-    /**
-     * Frame 2
-     * this is problematic. Currently we block offset before we handle jump in the frontend
-     * will fix after implementing jump conversion feature in FillAlgorithm
-     */
+    EXPECT_TRUE(lazy_.NeedRecompose());
+    IncrementAndLayout(__LINE__);
     pattern_->UpdateCurrentOffset(-20000.0f, SCROLL_FROM_BAR);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(24, 30));
-    EXPECT_EQ(GetChildRect(frameNode_, 25).ToString(), "RectT (240.00, -86.00) - [240.00 x 450.00]");
+    EXPECT_EQ(lazy_.GetRange(), std::pair(94, 99));
+    EXPECT_EQ(GetChildRect(frameNode_, 96).ToString(), "RectT (0.00, 458.00) - [240.00 x 450.00]");
     EXPECT_EQ(pattern_->info_.ToString(),
-        "startMainLine = 12, offset = -86.000000, endMainLine = 14, startIndex = 24, "
-        "endIndex = 29, jumpIndex = -2, gridMatrix size = 16, lineHeightMap size = 8");
+        "startMainLine = 47, offset = -0.000000, endMainLine = 49, startIndex = 94, "
+        "endIndex = 99, jumpIndex = -2, gridMatrix size = 50, lineHeightMap size = 11");
+}
+
+/**
+ * @tc.name: LargeOffset003
+ * @tc.desc: Test large offset with reset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridArkoalaTest, LargeOffset003, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    ViewAbstract::SetWidth(CalcLength(480));
+    ViewAbstract::SetHeight(CalcLength(1280));
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(8.0f));
+    InitMockLazy(100);
+    CreateDone();
+
+    IncrementAndLayout(__LINE__);
+    // new pipeline order: Event -> Frontend Increment -> Layout
+    pattern_->UpdateCurrentOffset(-10000.0f, SCROLL_FROM_BAR);
+    frameNode_->ChildrenUpdatedFrom(2);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(46, 52));
+    EXPECT_EQ(GetChildRect(frameNode_, 50).ToString(), "RectT (0.00, 916.00) - [240.00 x 450.00]");
+    EXPECT_EQ(pattern_->info_.ToString(),
+        "startMainLine = 23, offset = -0.000000, endMainLine = 25, startIndex = 46, "
+        "endIndex = 51, jumpIndex = -2, gridMatrix size = 27, lineHeightMap size = 4");
 }
 
 /**

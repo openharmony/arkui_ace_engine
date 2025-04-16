@@ -301,7 +301,7 @@ float GridIrregularFiller::MeasureBackward(const FillParameters& params, float t
         auto lineHeightIt = info_->lineHeightMap_.find(posY_);
         if (lineHeightIt == info_->lineHeightMap_.end()) {
             TAG_LOGW(AceLogTag::ACE_GRID, "line height at row %{public}d not prepared after backward measure", posY_);
-            continue;
+            return len;
         }
         len += params.mainGap + lineHeightIt->second;
     }
