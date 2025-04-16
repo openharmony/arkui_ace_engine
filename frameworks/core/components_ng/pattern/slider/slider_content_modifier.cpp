@@ -407,7 +407,7 @@ void SliderContentModifier::DrawShadow(DrawingContext& context)
 void SliderContentModifier::SetBoardColor()
 {
     CHECK_NULL_VOID(boardColor_);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
@@ -866,7 +866,7 @@ void SliderContentModifier::UpdateContentDirtyRect(const SizeF& frameSize)
     if (useContentModifier_->Get()) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);

@@ -27,6 +27,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+constexpr double DEFAULT_MAX_VALUE = 100.0;
+
 void ProgressModelNG::Create(double min, double value, double cachedValue, double max, NG::ProgressType type)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -40,7 +42,7 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, MaxValue, max);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, ProgressType, type);
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Type, type);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return;
@@ -94,11 +96,9 @@ RefPtr<FrameNode> ProgressModelNG::CreateFrameNode(int32_t nodeId, double value,
     auto frameNode = FrameNode::CreateFrameNode(V2::PROGRESS_ETS_TAG, nodeId, AceType::MakeRefPtr<ProgressPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
-    progressPaintProperty->UpdateValue(value);
-    progressPaintProperty->UpdateMaxValue(max);
-    progressPaintProperty->UpdateProgressType(type);
-    auto progressLayoutProperty = frameNode->GetLayoutProperty<NG::ProgressLayoutProperty>();
-    progressLayoutProperty->UpdateType(type);
+    ProgressModelNG::SetTotal(Referenced::RawPtr(frameNode), max);
+    ProgressModelNG::SetValue(Referenced::RawPtr(frameNode), value);
+    ProgressModelNG::SetType(Referenced::RawPtr(frameNode), type);
     return frameNode;
 }
 
@@ -323,7 +323,7 @@ void ProgressModelNG::SetItalicFontStyle(const Ace::FontStyle& value)
 
 void ProgressModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, double value, double maxValue)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -404,6 +404,9 @@ void ProgressModelNG::ResetStrokeRadius()
 
 void ProgressModelNG::SetValue(FrameNode* frameNode, double value)
 {
+    if (value < 0) {
+        value = 0;
+    }
     auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     auto maxValue = progressPaintProperty->GetMaxValue();
@@ -427,82 +430,174 @@ void ProgressModelNG::SetTotal(FrameNode* frameNode, double max)
 
 void ProgressModelNG::SetType(FrameNode* frameNode, NG::ProgressType type)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ProgressType, type, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ProgressLayoutProperty, Type, type, frameNode);
+
+    auto progressFocusNode = frameNode->GetFocusHub();
+    CHECK_NULL_VOID(progressFocusNode);
+    if (type == ProgressType::CAPSULE) {
+        progressFocusNode->SetFocusable(true);
+    } else {
+        progressFocusNode->SetFocusable(false);
+    }
+
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (type == ProgressType::CAPSULE) {
+        if (frameNode->GetChildren().empty()) {
+            auto textNode = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            textNode->SetInternal();
+            textNode->MountToParent(Referenced::Claim(frameNode));
+        }
+        auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
+        CHECK_NULL_VOID(textHost);
+        auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
+        CHECK_NULL_VOID(progressPaintProperty);
+        auto max = progressPaintProperty->GetMaxValue();
+        auto value = progressPaintProperty->GetValue();
+        SetTextDefaultStyle(textHost, value.value_or(0), max.value_or(DEFAULT_MAX_VALUE));
+        textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        eventHub->SetHoverEffect(HoverEffectType::SCALE);
+    } else {
+        if (!frameNode->GetChildren().empty()) {
+            frameNode->RemoveChildAtIndex(0);
+        }
+        eventHub->SetHoverEffect(HoverEffectType::NONE);
+    }
 }
 
-void ProgressModelNG::SetColor(FrameNode* frameNode, const Color& value)
+void ProgressModelNG::SetColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetUserInitiatedColor(true);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Color, value, frameNode);
+    pattern->SetUserInitiatedColor(value.has_value());
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Color, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, Color, frameNode);
+    }
 }
 
-void ProgressModelNG::SetGradientColor(FrameNode* frameNode, const Gradient& value)
+void ProgressModelNG::SetGradientColor(FrameNode* frameNode, const std::optional<Gradient>& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, GradientColor, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, GradientColor, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, GradientColor, frameNode);
+    }
 }
 
-void ProgressModelNG::SetSmoothEffect(FrameNode* frameNode, bool value)
+void ProgressModelNG::SetSmoothEffect(FrameNode* frameNode, const std::optional<bool>& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableSmoothEffect, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableSmoothEffect, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableSmoothEffect, frameNode);
+    }
 }
 
-void ProgressModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& value)
+void ProgressModelNG::SetStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ProgressLayoutProperty, StrokeWidth, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ProgressLayoutProperty, StrokeWidth, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ProgressLayoutProperty, StrokeWidth, frameNode);
+    }
 }
 
-void ProgressModelNG::SetLinearSweepingEffect(FrameNode* frameNode, bool value)
+void ProgressModelNG::SetLinearSweepingEffect(FrameNode* frameNode, const std::optional<bool>& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableLinearScanEffect, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableLinearScanEffect, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableLinearScanEffect, frameNode);
+    }
 }
 
-void ProgressModelNG::SetRingSweepingEffect(FrameNode* frameNode, bool value)
+void ProgressModelNG::SetRingSweepingEffect(FrameNode* frameNode, const std::optional<bool>& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableRingScanEffect, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableRingScanEffect, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableRingScanEffect, frameNode);
+    }
 }
 
-void ProgressModelNG::SetPaintShadow(FrameNode* frameNode, bool value)
+void ProgressModelNG::SetPaintShadow(FrameNode* frameNode, const std::optional<bool>& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, PaintShadow, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, PaintShadow, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, PaintShadow, frameNode);
+    }
 }
 
-void ProgressModelNG::SetProgressStatus(FrameNode* frameNode, ProgressStatus status)
+void ProgressModelNG::SetProgressStatus(FrameNode* frameNode, const std::optional<ProgressStatus>& status)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ProgressStatus, status, frameNode);
+    if (status) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ProgressStatus, status.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, ProgressStatus, frameNode);
+    }
 }
 
-void ProgressModelNG::SetScaleCount(FrameNode* frameNode, int32_t value)
+void ProgressModelNG::SetScaleCount(FrameNode* frameNode, const std::optional<int32_t>& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ScaleCount, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ScaleCount, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, ScaleCount, frameNode);
+    }
 }
 
-void ProgressModelNG::SetScaleWidth(FrameNode* frameNode, const Dimension& value)
+void ProgressModelNG::SetScaleWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ScaleWidth, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ScaleWidth, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, ScaleWidth, frameNode);
+    }
 }
 
-void ProgressModelNG::SetBorderWidth(FrameNode* frameNode, const Dimension& value)
+void ProgressModelNG::SetBorderWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderWidth, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderWidth, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderWidth, frameNode);
+    }
 }
 
-void ProgressModelNG::SetBorderColor(FrameNode* frameNode, const Color& value)
+void ProgressModelNG::SetBorderColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, frameNode);
+    }
 }
 
-void ProgressModelNG::SetSweepingEffect(FrameNode* frameNode, bool value)
+void ProgressModelNG::SetSweepingEffect(FrameNode* frameNode, const std::optional<bool>& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableScanEffect, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableScanEffect, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableScanEffect, frameNode);
+    }
 }
 
-void ProgressModelNG::SetShowText(FrameNode* frameNode, bool value)
+void ProgressModelNG::SetShowText(FrameNode* frameNode, const std::optional<bool>& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableShowText, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableShowText, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, EnableShowText, frameNode);
+    }
 }
 
 void ProgressModelNG::SetText(FrameNode* frameNode, const std::optional<std::string>& value)
@@ -539,64 +634,93 @@ void ProgressModelNG::SetText(FrameNode* frameNode, const std::optional<std::str
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Text, context, frameNode);
 }
 
-void ProgressModelNG::SetFontColor(FrameNode* frameNode, const Color& value)
+void ProgressModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
     auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
     CHECK_NULL_VOID(textHost);
     auto textLayoutProperty = textHost->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColor(value);
+    if (value) {
+        textLayoutProperty->UpdateTextColor(value.value());
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, TextColor, value.value(), frameNode);
+    } else {
+        textLayoutProperty->ResetTextColor();
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, TextColor, frameNode);
+    }
     textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, TextColor, value, frameNode);
 }
 
-void ProgressModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
+void ProgressModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
     CHECK_NULL_VOID(textHost);
     auto textLayoutProperty = textHost->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateFontSize(value);
+    if (value) {
+        textLayoutProperty->UpdateFontSize(value.value());
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, TextSize, value.value(), frameNode);
+    } else {
+        textLayoutProperty->ResetFontSize();
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, TextSize, frameNode);
+    }
     textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, TextSize, value, frameNode);
 }
 
-void ProgressModelNG::SetFontWeight(FrameNode* frameNode, const FontWeight& value)
+void ProgressModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& value)
 {
     auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
     CHECK_NULL_VOID(textHost);
     auto textLayoutProperty = textHost->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateFontWeight(value);
+    if (value) {
+        textLayoutProperty->UpdateFontWeight(value.value());
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, FontWeight, value.value(), frameNode);
+    } else {
+        textLayoutProperty->ResetFontWeight();
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, FontWeight, frameNode);
+    }
     textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, FontWeight, value, frameNode);
 }
 
-void ProgressModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
+void ProgressModelNG::SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& value)
 {
     auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
     CHECK_NULL_VOID(textHost);
     auto textLayoutProperty = textHost->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateFontFamily(value);
+    if (value) {
+        textLayoutProperty->UpdateFontFamily(value.value());
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, FontFamily, value.value(), frameNode);
+    } else {
+        textLayoutProperty->ResetFontFamily();
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, FontFamily, frameNode);
+    }
     textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, FontFamily, value, frameNode);
 }
 
-void ProgressModelNG::SetItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value)
+void ProgressModelNG::SetItalicFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value)
 {
     auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
     CHECK_NULL_VOID(textHost);
     auto textLayoutProperty = textHost->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateItalicFontStyle(value);
+    if (value) {
+        textLayoutProperty->UpdateItalicFontStyle(value.value());
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ItalicFontStyle, value.value(), frameNode);
+    } else {
+        textLayoutProperty->ResetItalicFontStyle();
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, ItalicFontStyle, frameNode);
+    }
     textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ItalicFontStyle, value, frameNode);
 }
 
-void ProgressModelNG::SetStrokeRadius(FrameNode* frameNode, const Dimension& value)
+void ProgressModelNG::SetStrokeRadius(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, StrokeRadius, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, StrokeRadius, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ProgressPaintProperty, StrokeRadius, frameNode);
+    }
 }
 
 void ProgressModelNG::ResetStrokeRadius(FrameNode* frameNode)
@@ -658,7 +782,7 @@ void ProgressModelNG::ProgressInitialize(
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, MaxValue, max, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ProgressType, type, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ProgressLayoutProperty, Type, type, frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return;
@@ -693,6 +817,16 @@ void ProgressModelNG::ProgressInitialize(
         }
         eventHub->SetHoverEffect(HoverEffectType::NONE);
     }
+}
+
+void ProgressModelNG::SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag)
+{
+    if (flag) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, IsSensitive, *flag, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
+    }
+    ViewAbstract::SetPrivacySensitive(frameNode, flag);
 }
 
 void ProgressModelNG::SetBorderRadius(const Dimension& value)

@@ -29,7 +29,9 @@ public:
     static void Rotate(TransformParam& param, double degree, double dx, double dy);
     static std::string ToString();
 };
+#ifndef ARKUI_CAPI_UNITTEST
 Matrix4 SetMatrixPolyToPoly(const Matrix4& matrix, const std::vector<OHOS::Ace::NG::PointT<int32_t>>& totalPoint);
+#endif // ARKUI_CAPI_UNITTEST
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MATRIX2D_H
 

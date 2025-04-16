@@ -292,6 +292,14 @@ void CheckBoxGroupModelNG::SetOnChange(FrameNode* frameNode, GroupChangeEvent&& 
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void CheckBoxGroupModelNG::SetChangeEvent(FrameNode* frameNode, GroupChangeEvent&& changeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetChangeEvent(std::move(changeEvent));
+}
+
 void CheckBoxGroupModelNG::ResetSelectedColor()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColor,

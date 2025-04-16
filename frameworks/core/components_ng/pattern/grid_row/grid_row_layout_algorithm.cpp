@@ -244,11 +244,17 @@ void GridRowLayoutAlgorithm::OnBreakPointChange(LayoutWrapper* layoutWrapper, co
         auto hostEventHub = host->GetEventHub<GridRowEventHub>();
         CHECK_NULL_VOID(hostEventHub);
         hostLayoutProperty->UpdateSizeType(sizeType);
-        TAG_LOGD(AceLogTag::ACE_GRIDROW,
-            "[%{public}s-%{public}d] breakpoint has changed to a new sizeType:%{public}s and breakpoint reference "
-            "%{public}d",
-            host->GetTag().c_str(), host->GetId(), sizeTypeString.c_str(),
-            hostLayoutProperty->GetBreakPointsValue().reference);
+        if (hostLayoutProperty->HasBreakPoints()) {
+            TAG_LOGD(AceLogTag::ACE_GRIDROW,
+                "[%{public}s-%{public}d] breakpoint has changed to a new sizeType:%{public}s and breakpoint reference "
+                "%{public}d",
+                host->GetTag().c_str(), host->GetId(), sizeTypeString.c_str(),
+                hostLayoutProperty->GetBreakPointsValue().reference);
+        } else {
+            TAG_LOGD(AceLogTag::ACE_GRIDROW,
+                "[%{public}s-%{public}d] breakpoint has changed to a new sizeType:%{public}s",
+                host->GetTag().c_str(), host->GetId(), sizeTypeString.c_str());
+        }
         hostEventHub->FireChangeEvent(sizeTypeString);
     };
     context->AddAfterLayoutTask(task);

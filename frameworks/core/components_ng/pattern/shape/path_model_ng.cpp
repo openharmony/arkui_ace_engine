@@ -35,6 +35,11 @@ void PathModelNG::Create()
     stack->Push(frameNode);
 }
 
+RefPtr<FrameNode> PathModelNG::CreateFrameNode(int32_t nodeId)
+{
+    return FrameNode::CreateFrameNode(V2::PATH_ETS_TAG, nodeId, AceType::MakeRefPtr<PathPattern>());
+}
+
 void PathModelNG::SetCommands(const std::string& pathCmd)
 {
     ACE_UPDATE_PAINT_PROPERTY(PathPaintProperty, Commands, pathCmd);

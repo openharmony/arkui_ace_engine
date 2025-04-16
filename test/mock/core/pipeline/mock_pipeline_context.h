@@ -32,7 +32,9 @@ public:
     static void TearDown();
     static void SetCurrentWindowRect(Rect rect);
     static RefPtr<MockPipelineContext> GetCurrent();
+    void ResetFontManager();
     void SetRootSize(double rootWidth, double rootHeight);
+    void SetDensity(double density);
     void SetInstanceId(int32_t instanceId);
     void SetContainerModalButtonsRect(bool hasModalButtonsRect);
 
@@ -45,6 +47,11 @@ public:
     {
         return isDeclarative_;
     }
+
+    virtual void SetTaskExecutor(const RefPtr<TaskExecutor> &taskExecutor)
+    {
+        PipelineBase::taskExecutor_ = taskExecutor;
+    };
 
     static RefPtr<MockPipelineContext> pipeline_;
     bool IsWindowFocused() const
@@ -84,6 +91,7 @@ protected:
     std::function<void()> backCallback_;
     RefPtr<TaskExecutor> taskExecutor_;
     bool useFlushUITasks_ = false;
+    std::list<std::function<void()>> animationClosuresList_;
 };
 } // namespace OHOS::Ace::NG
 

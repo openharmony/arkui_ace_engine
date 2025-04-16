@@ -19,6 +19,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model.h"
 #include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
@@ -75,9 +76,16 @@ public:
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
 
+    static void SetListItemTotalCount(FrameNode* frameNode, int totalCount);
+    static void SetListItemAdapterFunc(FrameNode* frameNode, std::function<void(int start, int end)>&& requestFunc);
+    static void SetListItemAdapterCallFinish(FrameNode* frameNode, int start, int end);
+    static void SetListItemGetFunc(FrameNode* frameNode, std::function<RefPtr<FrameNode>(int32_t index)>&& getFunc);
+    static RefPtr<FrameNode> CreateList(int32_t nodeId);
+
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
+    static RefPtr<ScrollProxy> GetOrCreateScrollBarProxy(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
-    static void SetInitialIndex(FrameNode* frameNode, int32_t initialIndex);
+    static void SetInitialIndex(FrameNode* frameNode, const std::optional<int32_t>& initialIndex);
     static void SetEditMode(FrameNode* frameNode, bool editMode);
     static void SetMultiSelectable(FrameNode* frameNode, bool selectable);
     static void SetChainAnimation(FrameNode* frameNode, bool chainAnimation);
@@ -88,17 +96,20 @@ public:
     static int32_t GetScrollEnabled(FrameNode* frameNode);
     static void SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction);
     static int32_t GetSticky(FrameNode* frameNode);
-    static void SetSticky(FrameNode* frameNode, int32_t stickyStyle);
-    static void SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect, bool alwaysEnabled, EffectEdge edge);
+    static void SetSticky(FrameNode* frameNode, const std::optional<int32_t>& stickyStyle);
+    static void SetEdgeEffect(FrameNode* frameNode, const std::optional<int32_t>& edgeEffect,
+        const std::optional<bool>& alwaysEnabled, EffectEdge edge = EffectEdge::ALL);
     static int32_t GetListDirection(FrameNode* frameNode);
-    static void SetListDirection(FrameNode* frameNode, int32_t axis);
+    static void SetListDirection(FrameNode* frameNode, const std::optional<int32_t>& axis);
     static float GetListFriction(FrameNode* frameNode);
-    static void SetListFriction(FrameNode* frameNode, double friction);
+    static void SetListFriction(FrameNode* frameNode, const std::optional<double>& friction);
     static void SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled);
     static bool GetListMaintainVisibleContentPosition(FrameNode* frameNode);
     static void SetListNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static void SetListNestedScroll(FrameNode* frameNode, const std::optional<NestedScrollMode>& forward,
+        const std::optional<NestedScrollMode>& backward);
     static int32_t GetListScrollBar(FrameNode* frameNode);
-    static void SetListScrollBar(FrameNode* frameNode, int32_t barState);
+    static void SetListScrollBar(FrameNode* frameNode, const std::optional<int32_t>& barState);
     static float GetScrollBarWidth(FrameNode* frameNode);
     static void SetListScrollBarWidth(FrameNode* frameNode, const std::string& value);
     static uint32_t GetScrollBarColor(FrameNode* frameNode);
@@ -110,20 +121,20 @@ public:
     static float GetLaneMinLength(FrameNode* frameNode);
     static void SetLaneMaxLength(FrameNode* frameNode, const Dimension& laneMaxLength);
     static float GetLaneMaxLength(FrameNode* frameNode);
-    static void SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutter);
+    static void SetLaneGutter(FrameNode* frameNode, const std::optional<Dimension>& laneGutter);
     static float GetLaneGutter(FrameNode* frameNode);
     static int32_t GetListItemAlign(FrameNode* frameNode);
-    static void SetListItemAlign(FrameNode* frameNode, V2::ListItemAlign listItemAlign);
+    static void SetListItemAlign(FrameNode* frameNode, const std::optional<V2::ListItemAlign>& listItemAlign);
     static float GetListSpace(FrameNode* frameNode);
-    static void SetListSpace(FrameNode* frameNode, const Dimension& space);
+    static void SetListSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
     static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
-    static void SetScrollSnapAlign(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign);
+    static void SetScrollSnapAlign(FrameNode* frameNode, const std::optional<ScrollSnapAlign>& scrollSnapAlign);
     static int32_t GetScrollSnapAlign(FrameNode* frameNode);
     static void SetContentStartOffset(FrameNode* frameNode, float startOffset);
     static float GetContentStartOffset(FrameNode* frameNode);
     static void SetContentEndOffset(FrameNode* frameNode, float endOffset);
     static float GetContentEndOffset(FrameNode* frameNode);
-    static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
+    static void SetDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider);
     static void SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options);
     static int32_t GetEdgeEffect(FrameNode* frameNode);
     static void SetListStackFromEnd(FrameNode* frameNode, bool enabled);
@@ -148,6 +159,7 @@ public:
     static void SetScrollBy(FrameNode* frameNode, double x, double y);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
+    static void SetOnItemDelete(FrameNode* frameNode, OnItemDeleteEvent&& onItemDelete);
     static void SetListChildrenMainSize(
         FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize);
     static void ResetListChildrenMainSize(FrameNode* frameNode);
@@ -161,11 +173,13 @@ public:
     static void SetOnItemDragLeave(FrameNode* frameNode, OnItemDragLeaveFunc&& onItemDragLeave);
     static void SetOnItemDragMove(FrameNode* frameNode, OnItemDragMoveFunc&& onItemDragMove);
     static void SetOnItemDrop(FrameNode* frameNode, OnItemDropFunc&& onItemDrop);
+    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(
+        FrameNode* frameNode, const std::optional<float>& defaultSize);
+    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* frameNode);
     static void ScrollToItemInGroup(
         FrameNode* frameNode, int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align);
     static void SetHeader(FrameNode* frameNode, FrameNode* headerNode);
 private:
-    void AddDragFrameNodeToManager() const;
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };
 

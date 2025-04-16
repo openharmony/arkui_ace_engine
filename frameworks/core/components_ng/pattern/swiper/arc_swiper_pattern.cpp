@@ -774,7 +774,7 @@ void ArcSwiperPattern::HandlePropertyTranslateCallback(float translate, int32_t 
             Dimension(-currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipeline) {
         pipeline->AddAfterRenderTask([weak = WeakClaim(this), info, nextIndex = GetLoopIndex(nextIndex)]() {
             auto swiper = weak.Upgrade();
@@ -1525,7 +1525,7 @@ void ArcSwiperPattern::HandleCrownActionUpdate(double degree, double mainDelta,
     info.SetMainDelta(mainDelta);
     info.SetMainVelocity(crownVelocity_);
     HandleDragUpdate(info);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(theme);
@@ -1557,7 +1557,7 @@ void ArcSwiperPattern::HandleCrownActionEnd(
     UpdateCrownVelocity(degree, mainDelta, true);
     info.SetMainDelta(mainDelta);
     info.SetMainVelocity(crownVelocity_);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(theme);
@@ -1612,7 +1612,7 @@ double ArcSwiperPattern::GetCrownRotatePx(const CrownEvent& event) const
 {
     double velocity = event.degree;
     double px = 0.0;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, 0.0);
     auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_RETURN(theme, 0.0);
@@ -1656,7 +1656,7 @@ void ArcSwiperPattern::UpdateCrownVelocity(double degree, double mainDelta, bool
     auto turnVelocity = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
                                                         ? NEW_MIN_TURN_PAGE_VELOCITY
                                                         : MIN_TURN_PAGE_VELOCITY;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(theme);

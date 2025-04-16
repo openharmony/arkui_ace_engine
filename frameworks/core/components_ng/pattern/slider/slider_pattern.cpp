@@ -639,7 +639,7 @@ void SliderPattern::SetStepPointsAccessibilityVirtualNodeEvent(
     auto gestureHub = pointNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     if (isClickAbled && !pointAccessibilityNodeEventVec_[index]) {
-        auto clickHandle = [weak = WeakClaim(this), index, reverse](GestureEvent& info) {
+        auto clickHandle = [weak = WeakClaim(this), index](GestureEvent& info) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->FireChangeEvent(SliderChangeMode::Begin);
@@ -1454,9 +1454,9 @@ void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
     const auto& content = GetHost()->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto contentOffset = content->GetRect().GetOffset();
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
+    auto theme = PipelineBase::GetCurrentContextSafelyWithCheck()->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
-    auto appTheme = PipelineBase::GetCurrentContext()->GetTheme<AppTheme>();
+    auto appTheme = PipelineBase::GetCurrentContextSafelyWithCheck()->GetTheme<AppTheme>();
     CHECK_NULL_VOID(appTheme);
     auto paintWidth = appTheme->GetFocusWidthVp();
     auto focusSideDistance = theme->GetFocusSideDistance();
@@ -1503,13 +1503,13 @@ void SliderPattern::GetInsetAndNoneInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(frameNode);
     const auto& content = frameNode->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
+    auto theme = PipelineBase::GetCurrentContextSafelyWithCheck()->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(sliderLayoutProperty);
     auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
     auto focusSideDistance = theme->GetFocusSideDistance();
-    auto appTheme = PipelineBase::GetCurrentContext()->GetTheme<AppTheme>();
+    auto appTheme = PipelineBase::GetCurrentContextSafelyWithCheck()->GetTheme<AppTheme>();
     CHECK_NULL_VOID(appTheme);
     auto paintWidth = appTheme->GetFocusWidthVp();
     auto focusDistance = paintWidth * HALF + focusSideDistance;

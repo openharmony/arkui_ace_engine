@@ -106,7 +106,7 @@ public:
         static Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
         static Dimension DEFAULT_MIN_CONTENT_WIDTH = 0.0_vp;
         constexpr static int32_t PLATFORM_VERSION_TEN = 10;
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
             DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;

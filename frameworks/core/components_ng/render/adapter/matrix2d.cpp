@@ -15,7 +15,9 @@
 
 #include "frameworks/core/components_ng/render/adapter/matrix2d.h"
 #include "include/core/SkMatrix.h"
+#ifndef ARKUI_CAPI_UNITTEST
 #include "2d_graphics/include/utils/matrix.h"
+#endif // ARKUI_CAPI_UNITTEST
 
 namespace OHOS::Ace::NG {
 constexpr double OHOS_SEMI_CIRCLE_ANGEL = 180.0;
@@ -84,7 +86,7 @@ void Matrix2D::Rotate(TransformParam& param, double degree, double rx, double ry
     skMatrix = skMatrix.preRotate(degree, rx, ry);
     ConvertToTransformParam(param, skMatrix);
 }
-
+#ifndef ARKUI_CAPI_UNITTEST
 Matrix4 SetMatrixPolyToPoly(
     const Matrix4& matrix, const std::vector<OHOS::Ace::NG::PointT<int32_t>>& totalPoint)
 {
@@ -114,5 +116,6 @@ Matrix4 SetMatrixPolyToPoly(
         matrix3d.Get(5), 0, 0, 1, 0, matrix3d.Get(6), matrix3d.Get(7), 0, matrix3d.Get(8));
     return retMatrix4;
 }
+#endif // ARKUI_CAPI_UNITTEST
 } // namespace OHOS::Ace::NG
 

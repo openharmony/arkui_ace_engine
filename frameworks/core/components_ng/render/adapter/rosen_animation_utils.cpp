@@ -108,7 +108,7 @@ void AnimationUtils::OpenImplicitAnimation(
 bool AnimationUtils::CloseImplicitAnimation()
 {
     auto animations = Rosen::RSNode::CloseImplicitAnimation();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     SetNavGroupNodeTransAnimationCallback();
     if (pipeline && !pipeline->GetOnShow()) {
         pipeline->FlushMessages();
@@ -134,7 +134,7 @@ void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallba
     auto wrappedOnRepeat = GetWrappedCallback(repeatCallback);
     Rosen::RSNode::Animate(timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback,
         wrappedOnFinish, wrappedOnRepeat);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     SetNavGroupNodeTransAnimationCallback();
     if (pipeline && !pipeline->GetOnShow()) {
         pipeline->FlushMessages();
@@ -180,7 +180,7 @@ std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const 
     auto wrappedOnRepeat = GetWrappedCallback(repeatCallback);
     animation->animations_ = Rosen::RSNode::Animate(timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()),
         callback, wrappedOnFinish, wrappedOnRepeat);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipeline && !pipeline->GetOnShow()) {
         pipeline->FlushMessages();
     }
@@ -216,7 +216,7 @@ void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animat
     for (auto& ani : animation->animations_) {
         ani->Pause();
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipeline && !pipeline->GetOnShow()) {
         pipeline->FlushMessages();
     }
@@ -228,7 +228,7 @@ void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Anima
     if (animation->animations_.empty()) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipeline) {
         pipeline->RequestFrame();
     }

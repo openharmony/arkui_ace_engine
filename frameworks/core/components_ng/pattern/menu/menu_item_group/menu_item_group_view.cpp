@@ -25,7 +25,7 @@ namespace {
 void UpdateRowPadding(const RefPtr<FrameNode>& row)
 {
     CHECK_NULL_VOID(row);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -50,6 +50,13 @@ void MenuItemGroupView::Create()
     stack->Push(menuItemGroup);
 }
 
+RefPtr<FrameNode> MenuItemGroupView::CreateFrameNode(int32_t nodeId)
+{
+    const std::function<RefPtr<Pattern>(void)>& patternCreator =
+        []() { return AceType::MakeRefPtr<MenuItemGroupPattern>(); };
+    return FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, nodeId, patternCreator);
+}
+
 void MenuItemGroupView::SetHeader(const RefPtr<UINode>& header)
 {
     CHECK_NULL_VOID(header);
@@ -67,6 +74,11 @@ void MenuItemGroupView::SetHeader(const RefPtr<UINode>& header)
 void MenuItemGroupView::SetHeader(const std::string& headerStr)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetHeader(frameNode, headerStr);
+}
+
+void MenuItemGroupView::SetHeader(FrameNode* frameNode, const std::optional<std::string>& header)
+{
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
@@ -79,8 +91,8 @@ void MenuItemGroupView::SetHeader(const std::string& headerStr)
     content->MountToParent(row);
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
-    layoutProps->UpdateContent(headerStr);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    layoutProps->UpdateContent(header.value_or(""));
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -115,6 +127,11 @@ void MenuItemGroupView::SetFooter(const RefPtr<UINode>& footer)
 void MenuItemGroupView::SetFooter(const std::string& footerStr)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetFooter(frameNode, footerStr);
+}
+
+void MenuItemGroupView::SetFooter(FrameNode* frameNode, const std::optional<std::string>& footer)
+{
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
@@ -127,8 +144,8 @@ void MenuItemGroupView::SetFooter(const std::string& footerStr)
     content->MountToParent(row);
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
-    layoutProps->UpdateContent(footerStr);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    layoutProps->UpdateContent(footer.value_or(""));
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -139,4 +156,31 @@ void MenuItemGroupView::SetFooter(const std::string& footerStr)
     pattern->AddFooterContent(content);
     pattern->AddFooter(row);
 }
+
+void MenuItemGroupView::SetHeader(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    UpdateRowPadding(row);
+    RefPtr<UINode> unitNode = builder();
+    unitNode->MountToParent(row);
+    pattern->AddHeader(row);
+}
+
+void MenuItemGroupView::SetFooter(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    UpdateRowPadding(row);
+    RefPtr<UINode> unitNode = builder();
+    unitNode->MountToParent(row);
+    pattern->AddFooter(row);
+}
+
 } // namespace OHOS::Ace::NG

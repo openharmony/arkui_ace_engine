@@ -3228,6 +3228,10 @@ void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
     }
     json->PutExtAttr("font", GetFontInJson().c_str(), filter);
     json->PutExtAttr("bindSelectionMenu", GetBindSelectionMenuInJson().c_str(), filter);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    json->PutExtAttr("draggable", host->IsDraggable() ? "true" : "false", filter);
+    json->PutExtAttr("enableHapticFeedback", isEnableHapticFeedback_, filter);
     json->PutExtAttr("caretColor", GetCaretColor().c_str(), filter);
     json->PutExtAttr("selectedBackgroundColor", GetSelectedBackgroundColor().c_str(), filter);
     json->PutExtAttr("enableHapticFeedback", isEnableHapticFeedback_ ? "true" : "false", filter);

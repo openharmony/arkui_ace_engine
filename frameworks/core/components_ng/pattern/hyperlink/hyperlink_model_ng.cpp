@@ -31,10 +31,16 @@ void HyperlinkModelNG::Create(const std::string& address, const std::string& con
     stack->Push(hyperlinkNode);
     SetTextStyle(hyperlinkNode, content, address);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto draggable = pipeline->GetDraggable<HyperlinkTheme>();
     SetDraggable(draggable);
+}
+
+RefPtr<FrameNode> HyperlinkModelNG::CreateFrameNode(int32_t nodeId)
+{
+    return FrameNode::GetOrCreateFrameNode(
+        V2::HYPERLINK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
 }
 
 void HyperlinkModelNG::SetColor(const Color& value)
@@ -50,10 +56,10 @@ void HyperlinkModelNG::SetTextStyle(
     CHECK_NULL_VOID(hyperlinkNode);
     auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto textStyle = PipelineBase::GetCurrentContext()->GetTheme<TextTheme>()->GetTextStyle();
+    auto textStyle = PipelineBase::GetCurrentContextSafelyWithCheck()->GetTheme<TextTheme>()->GetTextStyle();
     textLayoutProperty->UpdateContent(content.empty() ? address : content);
     textLayoutProperty->UpdateAddress(address);
-    auto theme = PipelineContext::GetCurrentContext()->GetTheme<HyperlinkTheme>();
+    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
@@ -65,6 +71,36 @@ void HyperlinkModelNG::SetTextStyle(
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
     hyperlinkNode->MarkModifyDone();
     hyperlinkNode->MarkDirtyNode();
+}
+
+void HyperlinkModelNG::SetTextStyle(
+    FrameNode* frameNode, const std::string& address, const std::optional<std::string>& content)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateContent(
+        (!content.has_value() || content.value().empty()) ? address : content.value());
+    textLayoutProperty->UpdateAddress(address);
+
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto textTheme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    auto textStyle = textTheme->GetTextStyle();
+    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<HyperlinkTheme>();
+    CHECK_NULL_VOID(theme);
+
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
+    textLayoutProperty->UpdateTextColor(theme->GetTextColor());
+    textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
+    textLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
+    textLayoutProperty->UpdateAdaptMinFontSize(10.0_vp);
+    textLayoutProperty->UpdateAdaptMaxFontSize(textStyle.GetFontSize());
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    frameNode->MarkModifyDone();
+    frameNode->MarkDirtyNode();
 }
 
 void HyperlinkModelNG::SetDraggable(bool draggable)
@@ -79,11 +115,17 @@ void HyperlinkModelNG::SetDraggable(bool draggable)
     frameNode->SetDraggable(draggable);
 }
 
-void HyperlinkModelNG::SetColor(FrameNode* frameNode, const Color& value)
+void HyperlinkModelNG::SetColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, value, frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, Color, value, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
+    if (value.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, value.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, Color, value.value(), frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, Color, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+    }
 }
 
 void HyperlinkModelNG::SetDraggable(FrameNode* frameNode, bool draggable)

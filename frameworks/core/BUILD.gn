@@ -666,6 +666,7 @@ template("ace_core_source_set") {
     }
 
     if (defined(config.window_scene_support) && config.window_scene_support) {
+      defines += [ "WINDOW_SCENE_SUPPORTED" ]
       deps += [
         "$ace_root/frameworks/core/components_ng/pattern/ui_extension:ace_core_components_ui_extension_pattern_ng_$platform",
         "$ace_root/frameworks/core/components_ng/pattern/window_scene:ace_core_components_window_scene_$platform",
@@ -679,6 +680,7 @@ template("ace_core_source_set") {
 
     # arkoala C interface
     deps += [ "$ace_root/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
+    deps += [ "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform" ]
 
     cflags_cc = []
     cflags_cc += invoker.cflags_cc
@@ -1091,6 +1093,7 @@ template("ace_core_ng_source_set") {
       }
     }
     if (defined(config.window_scene_support) && config.window_scene_support) {
+      defines += [ "WINDOW_SCENE_SUPPORTED" ]
       deps += [
         "$ace_root/frameworks/core/components_ng/pattern/ui_extension:ace_core_components_ui_extension_pattern_ng_$platform",
         "$ace_root/frameworks/core/components_ng/pattern/window_scene:ace_core_components_window_scene_$platform",

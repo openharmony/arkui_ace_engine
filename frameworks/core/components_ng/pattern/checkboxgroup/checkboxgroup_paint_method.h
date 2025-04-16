@@ -75,7 +75,7 @@ public:
         checkboxGroupModifier_->SetSize(size);
         checkboxGroupModifier_->SetTouchHoverAnimationType(touchHoverType_);
         checkboxGroupModifier_->UpdateAnimatableProperty();
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetHost() : nullptr;
         auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>(host ? host->GetThemeScopeId() : 0);

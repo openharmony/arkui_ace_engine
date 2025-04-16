@@ -142,7 +142,7 @@ public:
         return "nodeId:" + (host ? std::to_string(host->GetId()) : "-1");
     }
 
-    void SetId(const std::string& id)
+    void SetId(const std::optional<std::string>& id)
     {
         id_ = id;
     }
@@ -214,6 +214,12 @@ public:
     std::shared_ptr<InnerXComponentController> GetXComponentController()
     {
         return xcomponentController_;
+    }
+
+    void SetXComponentController(std::shared_ptr<InnerXComponentController> controlller)
+    {
+        xcomponentController_ = controlller;
+        OnAttachToFrameNode();
     }
 
     void SetHandlingRenderContextForSurface(const RefPtr<RenderContext>& otherRenderContext);

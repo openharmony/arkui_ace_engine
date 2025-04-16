@@ -177,7 +177,7 @@ void RadioPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(radioModifier_);
     AddIsFocusActiveUpdateEvent();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetIsFocusActive()) {
         OnIsFocusActiveUpdate(true);
@@ -201,14 +201,14 @@ void RadioPattern::AddIsFocusActiveUpdateEvent()
         };
     }
 
-    auto pipline = PipelineContext::GetCurrentContext();
+    auto pipline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipline);
     pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
 }
 
 void RadioPattern::RemoveIsFocusActiveUpdateEvent()
 {
-    auto pipline = PipelineContext::GetCurrentContext();
+    auto pipline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipline);
     pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
 }
@@ -480,7 +480,7 @@ void RadioPattern::CheckPageNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto prePageId = GetPrePageId();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
@@ -510,7 +510,7 @@ void RadioPattern::UpdateState()
     auto eventHub = host->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
@@ -1057,7 +1057,7 @@ RefPtr<GroupManager> RadioPattern::GetGroupManager()
 void RadioPattern::SetPrePageIdToLastPageId()
 {
     if (!Container::IsInSubContainer()) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto stageManager = pipelineContext->GetStageManager();
         CHECK_NULL_VOID(stageManager);

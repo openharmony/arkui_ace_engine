@@ -34,11 +34,12 @@ public:
     void SetFontFamilies(std::vector<std::string>& familyNames) override;
     void SetSymbolType(SymbolType value) override;
 
-    static void SetFontSize(FrameNode* frameNode, const Dimension& value);
-    static void SetFontWeight(FrameNode* frameNode, FontWeight value);
+    static RefPtr<UINode> CreateFrameNode(int32_t nodeId);
+    static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
+    static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& value);
     static void SetFontColor(FrameNode* frameNode, std::vector<Color>& symbolColor);
-    static void SetSymbolRenderingStrategy(FrameNode* frameNode, const uint32_t renderingStrategy);
-    static void SetSymbolEffect(FrameNode* frameNode, const uint32_t effectStrategy);
+    static void SetSymbolRenderingStrategy(FrameNode* frameNode, const std::optional<uint32_t>& renderingStrategy);
+    static void SetSymbolEffect(FrameNode* frameNode, const std::optional<uint32_t>& effectStrategy);
     static void InitialSymbol(FrameNode* frameNode, const std::uint32_t& symbolId);
     static void InitialCustomSymbol(FrameNode* frameNode, const std::uint32_t& unicode, const char* fontFamilyName);
 };

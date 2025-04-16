@@ -105,9 +105,9 @@ public:
     }
 
 private:
-    Dimension width_ = 0.0_vp;
-    Dimension height_ = 0.0_vp;
-    DimensionOffset offset_;
+    Dimension width_ = 1.00_pct;
+    Dimension height_ = 1.00_pct;
+    DimensionOffset offset_ = {0.00_vp, 0.00_vp};
 };
 
 } // namespace OHOS::Ace

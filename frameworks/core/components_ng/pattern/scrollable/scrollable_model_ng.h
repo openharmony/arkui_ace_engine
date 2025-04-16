@@ -51,10 +51,13 @@ public:
         bool fadingEdge, const Dimension& fadingEdgeLength = DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE);
     static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge,
         const Dimension& fadingEdgeLength = DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE);
+    static void SetFadingEdge(FrameNode* frameNode, const std::optional<bool>& fadingEdge,
+        const std::optional<Dimension>& fadingEdgeLength);
     static void SetContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& rect);
 
     static void SetEdgeEffect(
-        FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge = EffectEdge::ALL);
+        FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
+        EffectEdge effectEdge = EffectEdge::ALL);
     static void SetScrollBarMode(FrameNode* frameNode, int32_t displayNumber);
     static void SetScrollBarWidth(FrameNode* frameNode, const std::string& value);
     static void SetScrollBarColor(FrameNode* frameNode, const std::string& value);

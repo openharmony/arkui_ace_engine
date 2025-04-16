@@ -57,7 +57,7 @@ SwitchModifier::SwitchModifier(const SizeF& size, const OffsetF& offset, float p
 
 void SwitchModifier::InitializeParam(int32_t themeScopeId)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
@@ -91,7 +91,7 @@ float SwitchModifier::CalcActualWidth(float width, float height, double actualGa
 
 void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
@@ -204,7 +204,7 @@ void SwitchModifier::DrawFocusBoard(RSCanvas& canvas, const OffsetF& offset)
 float SwitchModifier::GetSwitchWidth(const SizeF& contentSize) const
 {
     const float switchGap = 2.0f;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
     auto actualGap = switchGap * contentSize.Height() /

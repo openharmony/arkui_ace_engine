@@ -316,7 +316,7 @@ public:
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
                 GetPatternTypeName(), T::TypeName());
         }
-        return reinterpret_cast<T*>(RawPtr(pattern_));
+        return static_cast<T*>(RawPtr(pattern_));
     }
 
     template<typename T>
@@ -340,7 +340,7 @@ public:
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
                 GetLayoutPropertyTypeName(), T::TypeName());
         }
-        return reinterpret_cast<T*>(RawPtr(layoutProperty_));
+        return static_cast<T*>(RawPtr(layoutProperty_));
     }
 
     template<typename T>
@@ -358,7 +358,7 @@ public:
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
                 GetPaintPropertyTypeName(), T::TypeName());
         }
-        return reinterpret_cast<T*>(RawPtr(paintProperty_));
+        return static_cast<T*>(RawPtr(paintProperty_));
     }
 
     template<typename T>
@@ -844,10 +844,7 @@ public:
     // Called to perform layout children.
     void Layout() override;
 
-    int32_t GetTotalChildCount() const override
-    {
-        return UINode::TotalChildCount();
-    }
+    int32_t GetTotalChildCount() const override;
 
     int32_t GetTotalChildCountWithoutExpanded() const
     {

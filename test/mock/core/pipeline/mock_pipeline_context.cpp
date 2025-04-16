@@ -14,6 +14,7 @@
  */
 
 #include "mock_pipeline_context.h"
+#include "test/mock/core/common/mock_font_manager.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -153,6 +154,7 @@ void MockPipelineContext::SetUp()
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
     pipeline_->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     pipeline_->SetupRootElement();
+    pipeline_->fontManager_ = MockFontManager::Create();
     windowRect_ = { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
     hasModalButtonsRect_ = true;
 }
@@ -171,10 +173,20 @@ RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
     return pipeline_;
 }
 
+void MockPipelineContext::ResetFontManager()
+{
+    pipeline_->fontManager_ = MockFontManager::Create();
+}
+
 void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
 {
     rootWidth_ = rootWidth;
     rootHeight_ = rootHeight;
+}
+
+void MockPipelineContext::SetDensity(double density)
+{
+    density_ = density;
 }
 
 void MockPipelineContext::SetInstanceId(int32_t instanceId)
@@ -342,6 +354,7 @@ void PipelineContext::OnIdle(int64_t deadline)
 void PipelineContext::Destroy()
 {
     dragDropManager_.Reset();
+    fontManager_.Reset();
     rootNode_.Reset();
 }
 
@@ -410,7 +423,14 @@ void PipelineContext::OnTransformHintChanged(uint32_t transform) {}
 
 void PipelineContext::SetRootRect(double width, double height, double offset) {}
 
-void PipelineContext::FlushBuild() {}
+void PipelineContext::FlushBuild()
+{
+    FlushOnceVsyncTask();
+    isRebuildFinished_ = false;
+    FlushDirtyNodeUpdate();
+    isRebuildFinished_ = true;
+    FlushBuildFinishCallbacks();
+}
 
 void PipelineContext::FlushBuildFinishCallbacks()
 {
@@ -563,7 +583,18 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
 
-void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
+void PipelineContext::AddAnimationClosure(std::function<void()>&& animation)
+{
+    animationClosuresList_.emplace_back(std::move(animation));
+}
+
+void PipelineContext::FlushAnimationClosure()
+{
+    decltype(animationClosuresList_) temp(std::move(animationClosuresList_));
+    for (const auto& animation : temp) {
+        animation();
+    }
+}
 
 void PipelineContext::SetCloseButtonStatus(bool isEnabled) {}
 
@@ -1005,6 +1036,8 @@ bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
 
 void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern) {}
 
+void PipelineContext::FlushDirtyPropertyNodes() {}
+
 int32_t PipelineContext::GetContainerModalTitleHeight()
 {
     return 0;
@@ -1147,7 +1180,8 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
     if (instanceId_ == IGNORE_POSITION_TRANSITION_SWITCH) {
         return nullptr;
     }
-    return AceType::MakeRefPtr<MockAccessibilityManager>();
+    static RefPtr<AccessibilityManager> testAccessibilityManager = AceType::MakeRefPtr<MockAccessibilityManager>();
+    return testAccessibilityManager;
 }
 
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -1215,6 +1249,29 @@ Dimension NG::PipelineContext::GetCustomTitleHeight()
 void PipelineBase::SetFontScale(float fontScale)
 {
     fontScale_ = fontScale;
+}
+
+void PipelineBase::RegisterFont(const std::string& familyName, const std::string& familySrc,
+    const std::string& bundleName, const std::string& moduleName)
+{
+    if (fontManager_) {
+        fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this), bundleName, moduleName);
+    }
+}
+
+void PipelineBase::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    if (fontManager_) {
+        fontManager_->GetSystemFontList(fontList);
+    }
+}
+
+bool PipelineBase::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    if (fontManager_) {
+        return fontManager_->GetSystemFont(fontName, fontInfo);
+    }
+    return false;
 }
 
 bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
@@ -1291,6 +1348,8 @@ RefPtr<Kit::UIContext> NG::PipelineContext::GetUIContext()
 NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
 NG::ScopedLayout::~ScopedLayout() {}
 
+void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}
 void NG::PipelineContext::SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
 {
     auto offSetPosX_ = displayWindowRectInfo_.Left() - displayWindowRectInfo.Left();

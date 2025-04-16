@@ -98,7 +98,7 @@ void HyperlinkPattern::OnModifyDone()
     auto enabled = hub->IsEnabled();
     auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
     CHECK_NULL_VOID(hyperlinkLayoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
@@ -127,7 +127,7 @@ void HyperlinkPattern::LinkToAddress()
     CHECK_NULL_VOID(host);
     auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
     CHECK_NULL_VOID(hyperlinkLayoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
@@ -189,7 +189,7 @@ void HyperlinkPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
@@ -269,7 +269,7 @@ bool HyperlinkPattern::OnKeyEvent(const KeyEvent& event)
 
 void HyperlinkPattern::OnHoverEvent(bool isHovered)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
@@ -300,7 +300,7 @@ void HyperlinkPattern::OnHoverEvent(bool isHovered)
 
 void HyperlinkPattern::OnMouseEvent(MouseInfo& info)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto frame = GetHost();
     CHECK_NULL_VOID(frame);

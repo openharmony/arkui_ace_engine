@@ -60,6 +60,7 @@ public:
     static CheckBoxStyle GetCheckboxGroupStyle(FrameNode* frameNode);
 
     static void SetOnChange(FrameNode* frameNode, GroupChangeEvent&& onChange);
+    static void SetChangeEvent(FrameNode* frameNode, GroupChangeEvent&& changeEvent);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOXGROUP_CHECKBOXGROUP_MODEL_NG_H

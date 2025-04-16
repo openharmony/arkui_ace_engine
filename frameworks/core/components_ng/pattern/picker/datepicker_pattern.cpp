@@ -747,7 +747,7 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto pickerChild = DynamicCast<FrameNode>(blendChild->GetLastChild());
     CHECK_NULL_VOID(pickerChild);
     auto columnWidth = pickerChild->GetGeometryNode()->GetFrameSize().Width();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
@@ -2760,6 +2760,19 @@ const std::string DatePickerPattern::GetFormatString(PickerDateF date)
     return "";
 }
 
+static std::string GetModeString(const DatePickerMode& datePickerMode)
+{
+    std::string ret;
+    if (datePickerMode == DatePickerMode::DATE) {
+        ret = "DatePickerMode.DATE";
+    } else if (datePickerMode == DatePickerMode::YEAR_AND_MONTH) {
+        ret = "DatePickerMode.YEAR_AND_MONTH";
+    } else if (datePickerMode == DatePickerMode::MONTH_AND_DAY) {
+        ret = "DatePickerMode.MONTH_AND_DAY";
+    }
+    return ret;
+}
+
 void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     /* no fixed attr below, just return */
@@ -2773,17 +2786,6 @@ void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         ret += std::to_string(pickerDate.GetMonth());
         ret += "-";
         ret += std::to_string(pickerDate.GetDay());
-        return ret;
-    };
-    auto GetModeString = [](const DatePickerMode& datePickerMode) {
-        std::string ret;
-        if (datePickerMode == DatePickerMode::DATE) {
-            ret = "DatePickerMode.DATE";
-        } else if (datePickerMode == DatePickerMode::YEAR_AND_MONTH) {
-            ret = "DatePickerMode.YEAR_AND_MONTH";
-        } else if (datePickerMode == DatePickerMode::MONTH_AND_DAY) {
-            ret = "DatePickerMode.MONTH_AND_DAY";
-        }
         return ret;
     };
     auto rowLayoutProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();

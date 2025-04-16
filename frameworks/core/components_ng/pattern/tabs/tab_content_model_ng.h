@@ -58,6 +58,10 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetTabBarBuilder(FrameNode* node, TabBarBuilderFunc&& builder);
     static void SetTabBarLabel(FrameNode* node, const std::string& label);
+    static void SetTabBar(FrameNode* node,
+        const std::optional<std::string>& label, const std::optional<std::string>& icon, TabBarBuilderFunc&& builder);
+    static void SetLayoutMode(FrameNode* node, const std::optional<LayoutMode>& layoutMode);
+    static void SetId(FrameNode* node, const std::optional<std::string>& id);
     void SetOnWillShow(std::function<void()>&& onWillShow) override;
     void SetOnWillHide(std::function<void()>&& onWillHide) override;
     void SetCustomStyleNode(const RefPtr<NG::FrameNode>& customStyleNode) override;
@@ -66,6 +70,15 @@ public:
     static void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive);
     static void SetOnWillShow(FrameNode* node,  std::function<void()>&& onWillShow);
     static void SetOnWillHide(FrameNode* node, std::function<void()>&& onWillHide);
+    static void SetTabBarStyle(FrameNode* node, TabBarStyle tabBarStyle);
+    static void SetSelectedMode(FrameNode* node, const std::optional<SelectedMode>& selectedMode);
+    static void SetBoard(FrameNode* node, const std::optional<BoardStyle>& board);
+    static void SetPadding(FrameNode* node, NG::PaddingProperty& padding, bool isSubTabStyle);
+    static void SetPadding(FrameNode* node, const std::optional<NG::PaddingProperty>& padding);
+    static void SetUseLocalizedPadding(FrameNode* node, bool useLocalizedPadding);
+    static void SetVerticalAlign(FrameNode* node, const std::optional<FlexAlign>& verticalAlign);
+    static void SetSymmetricExtensible(FrameNode* node, const std::optional<bool>& isExtensible);
+    static void SetIconStyle(FrameNode* node, const std::optional<IconStyle>& iconStyle);
 
 private:
     static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);

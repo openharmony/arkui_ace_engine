@@ -353,7 +353,7 @@ void VideoPattern::ResetMediaPlayerOnBg()
             return;
         }
 
-        uiTaskExecutor.PostSyncTask([weak, id] {
+        uiTaskExecutor.PostSyncTask([weak] {
             auto videoPattern = weak.Upgrade();
             CHECK_NULL_VOID(videoPattern);
             videoPattern->PrepareSurface();
@@ -449,7 +449,7 @@ void VideoPattern::RegisterMediaPlayerEvent(const WeakPtr<VideoPattern>& weak, c
         return;
     }
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     RegisterMediaPlayerEventImpl(weak, mediaPlayer, instanceId, uiTaskExecutor);
@@ -1309,7 +1309,7 @@ void VideoPattern::OnColorConfigurationUpdate()
     ContainerScope scope(instanceId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_VOID(videoTheme);
@@ -1345,7 +1345,7 @@ bool VideoPattern::NeedLift() const
 RefPtr<FrameNode> VideoPattern::CreateControlBar(int32_t nodeId)
 {
     ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
@@ -1391,7 +1391,7 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar(int32_t nodeId)
 
 RefPtr<FrameNode> VideoPattern::CreateSlider()
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
@@ -1444,7 +1444,7 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
 
 RefPtr<FrameNode> VideoPattern::CreateText(uint32_t time)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
@@ -2214,6 +2214,29 @@ void VideoPattern::OnWindowHide()
 #endif
 }
 
+void VideoPattern::SetVideoController(const RefPtr<VideoControllerV2>& videoController)
+{
+    if (videoControllerV2_) {
+        // Video Controller is already attached
+        return;
+    }
+    videoControllerV2_ = videoController;
+
+    // if pattern is attached to frame node
+    auto frameNode = frameNode_.Upgrade();
+    if (frameNode) {
+        // full screen node is not supposed to register js controller event
+        if (!InstanceOf<VideoFullScreenPattern>(this)) {
+            SetMethodCall();
+        }
+    }
+}
+
+RefPtr<VideoControllerV2> VideoPattern::GetVideoController()
+{
+    return videoControllerV2_;
+}
+
 void VideoPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     Pattern::ToJsonValue(json, filter);
@@ -2221,6 +2244,9 @@ void VideoPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
         return;
     }
 
+    json->PutExtAttr("muted", muted_ ? "true" : "false", filter);
+    json->PutExtAttr("autoPlay", autoPlay_ ? "true" : "false", filter);
+    json->PutExtAttr("loop", loop_ ? "true" : "false", filter);
     json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
     json->PutExtAttr("currentProgressRate", progressRate_, filter);
     json->PutExtAttr("surfaceBackgroundColor",

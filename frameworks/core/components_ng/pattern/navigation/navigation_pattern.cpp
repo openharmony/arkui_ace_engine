@@ -164,7 +164,7 @@ void NavigationPattern::DoAnimation(NavigationMode usrNavigationMode)
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     layoutProperty->UpdateNavigationMode(navigationMode_);
     hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -202,7 +202,7 @@ void NavigationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowStateChangedCallback(host->GetId());
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
@@ -220,7 +220,7 @@ void NavigationPattern::OnAttachToFrameNode()
 void NavigationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     auto id = frameNode->GetId();
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
@@ -340,7 +340,7 @@ void NavigationPattern::OnModifyDone()
     navBarNode->MarkModifyDone();
     isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     BuildDragBar();
 
@@ -881,7 +881,7 @@ void NavigationPattern::RefreshNavDestination()
     isChanged_ = false;
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto preTopNavPath = std::move(preTopNavPath_);
     auto preLastStandardIndex = hostNode->GetLastStandardIndex();
@@ -953,7 +953,7 @@ void NavigationPattern::CheckTopNavPathChange(
         }
         hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_HIDE);
         NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, true);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterLayoutTask([weakPattern = WeakClaim(this)]() {
             auto pattern = weakPattern.Upgrade();
@@ -976,7 +976,7 @@ void NavigationPattern::CheckTopNavPathChange(
         const int32_t replaceAnimation = 2;
         navigationStack_->UpdateReplaceValue(replaceAnimation);
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     // close the text selection menu before transition.
     auto selectOverlayManager = context->GetSelectOverlayManager();
@@ -1141,7 +1141,7 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
     int32_t standardIndex = lastStandardIndex >= 0 ? lastStandardIndex : 0;
     int32_t start = standardIndex;
     int32_t end = navigationPattern->navigationStack_->Size();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     if (isOnShow) {
@@ -1565,7 +1565,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         }
         AbortAnimation(hostNode);
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (context) {
         context->GetTaskExecutor()->PostTask(
             [weak = WeakClaim(this), navigationStackWeak = WeakPtr<NavigationStack>(navigationStack_),
@@ -2366,7 +2366,7 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
         }
     } while (0);
     hostNode->RemoveDialogDestination();
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->MarkNeedFlushMouseEvent();
 }
@@ -2527,7 +2527,7 @@ void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNav
         CHECK_NULL_VOID(preDesNodeContext);
         preDesNodeContext->UpdateZIndex(standardIndex);
         navigationContentNode->RebuildRenderContextTree();
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         context->RequestFrame();
     }
@@ -2551,7 +2551,7 @@ void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& naviga
                 return;
             }
             pattern->MarkNeedSyncWithJsStack();
-            auto context = PipelineContext::GetCurrentContext();
+            auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(context);
             context->AddBuildFinishCallBack([weakPattern]() {
                 auto pattern = weakPattern.Upgrade();
@@ -2633,7 +2633,7 @@ void NavigationPattern::DealTransitionVisibility(const RefPtr<FrameNode>& node, 
 void NavigationPattern::AddToDumpManager()
 {
     auto node = GetHost();
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (!node || !context) {
         return;
     }
@@ -2658,7 +2658,7 @@ void NavigationPattern::AddToDumpManager()
 void NavigationPattern::RemoveFromDumpManager()
 {
     auto node = GetHost();
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (!node || !context) {
         return;
     }
@@ -2827,7 +2827,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_HIDE);
     }
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_HIDE);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto navigationManager = pipeline->GetNavigationManager();
     navigationManager->FireNavigationUpdateCallback();
@@ -3012,7 +3012,7 @@ std::unique_ptr<JsonValue> NavigationPattern::GetNavdestinationJsonArray()
 
 void NavigationPattern::RestoreJsStackIfNeeded()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto navigationManager = pipeline->GetNavigationManager();
     CHECK_NULL_VOID(navigationManager);
@@ -3058,7 +3058,7 @@ void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGrou
     // fire removed navDestination lifecycle
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_DISAPPEAR);
     if (!isAnimated) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->AddAfterLayoutTask([weakNavigation = WeakClaim(this),
             weakTopDestination = WeakPtr<NavDestinationGroupNode>(topDestination)]() {

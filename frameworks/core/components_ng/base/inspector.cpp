@@ -447,7 +447,7 @@ RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key, bool notD
 
 std::string Inspector::GetInspectorNodeByKey(const std::string& key, const InspectorFilter& filter)
 {
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, "");
     auto rootNode = context->GetRootElement();
     CHECK_NULL_RETURN(rootNode, "");
@@ -567,7 +567,7 @@ std::string Inspector::GetInspector(bool isLayoutInspector, const InspectorFilte
     auto jsonRoot = JsonUtil::Create(true);
     jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
     needThrow = false;
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     if (context == nullptr) {
         needThrow = true;
         return jsonRoot->ToString();
@@ -610,7 +610,7 @@ std::string Inspector::GetInspectorOfNode(RefPtr<NG::UINode> node)
 {
     auto jsonRoot = JsonUtil::Create(true);
 
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, jsonRoot->ToString());
     GetContextInfo(context, jsonRoot);
     CHECK_NULL_RETURN(node, jsonRoot->ToString());
@@ -632,7 +632,7 @@ std::string Inspector::GetSubWindowInspector(bool isLayoutInspector)
     auto jsonRoot = JsonUtil::Create(true);
     jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
 
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, jsonRoot->ToString());
     GetContextInfo(context, jsonRoot);
     auto overlayNode = context->GetOverlayManager()->GetRootNode().Upgrade();
@@ -646,7 +646,7 @@ std::string Inspector::GetSubWindowInspector(bool isLayoutInspector)
 
 bool Inspector::SendEventByKey(const std::string& key, int action, const std::string& params)
 {
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, false);
     auto rootNode = context->GetRootElement();
     CHECK_NULL_RETURN(rootNode, false);
@@ -701,7 +701,7 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
 
 void Inspector::HideAllMenus()
 {
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -763,7 +763,7 @@ void Inspector::RecordOnePageNodes(const RefPtr<NG::UINode>& pageNode, Inspector
 void Inspector::GetRecordAllPagesNodes(InspectorTreeMap& treesInfo)
 {
     treesInfo.clear();
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
