@@ -19,7 +19,7 @@ import { WatchFunc, WatchFuncType } from './decoratorWatch';
 import { BackingValue } from '../base/backingValue';
 import { propDeepCopy } from '@koalaui/common';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
-import { LinkDecoratedVariable } from './decoratorLink';
+
 /** 
 * implementation of V1 @Prop
 *
@@ -49,7 +49,7 @@ function deepCopy<T>(value: T): T {
     // when object property
     return propDeepCopy<T>(value) as T;
 }
-
+ 
 export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     implements IDecoratedMutableVariable<T>, IDecoratedUpdatableVariable<T> {
     private __soruceValue: BackingValue<T>;
@@ -79,7 +79,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     }
 
     public set(newValue: T): void {
-        if (this.__backing.value != newValue) {
+        if (this.__backing.value !== newValue) {
             // if (this.validateValue(locanewValueInitValue) === false) {
             //     throw new Error("@State Object-type Value must be ObservedObject")
             // }
@@ -100,16 +100,27 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     // @Prop updates from parent, value from parent needs to be copied
     public update(newValue: T): void {
         this.meta_.addRef(); // TODO: is it needed?
-        if (this.__soruceValue.value != newValue) {
+        if (this.__soruceValue.value !== newValue) {
             this.unregisterWatchFromObservedObjectChanges(this.__backing.value);
             this.registerWatchForObservedObjectChanges(newValue);
-
+            // TODO: this order need to be checked again
             this.__backing.value = deepCopy<T>(newValue);
             this.__soruceValue.value = newValue;
             StateUpdateLoop.add(() => {
                 this.meta_.fireChange();
                 this.execWatchFuncs();
             });
+        }
+    }
+
+    public updateForStorage(newValue: T): void {
+        if (this.__soruceValue.value !== newValue) {
+            this.unregisterWatchFromObservedObjectChanges(this.__backing.value);
+            this.registerWatchForObservedObjectChanges(newValue);
+            this.__backing.value = deepCopy<T>(newValue);
+            this.__soruceValue.value = newValue;
+            this.meta_.fireChange();
+            this.execWatchFuncs();
         }
     }
 }

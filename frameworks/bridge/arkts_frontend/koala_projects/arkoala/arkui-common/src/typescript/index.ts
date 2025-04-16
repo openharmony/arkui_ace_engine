@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-export * from "./Storage"
 export * from "./Router"
 
 export * from "../ArkState"

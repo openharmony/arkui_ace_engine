@@ -257,7 +257,7 @@ class AppStorage {
  * @since 7
  * @systemapi
  */
-export abstract class SubscribedAbstractProperty<T> {
+abstract class SubscribedAbstractProperty<T> {
     /**
      * Returns the property name,
      * e.g. let link = AppStorage.Link("foo") then link.info() == "foo"

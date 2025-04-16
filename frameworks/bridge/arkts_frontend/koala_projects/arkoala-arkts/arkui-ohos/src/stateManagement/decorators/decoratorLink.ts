@@ -70,7 +70,7 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
 
     public set(newValue: T): void {
         const value = this.sourceGet_();
-        if (value != newValue) {
+        if (value !== newValue) {
             // if (this.validateValue(newValue) === false) {
             //     throw new Error("@Link Object-type Value must be ObservedObject")
             // }

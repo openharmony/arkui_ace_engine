@@ -43,7 +43,7 @@ import { EventEmulator } from "./../ArkEventEmulatorMaterialized"
 import { Literal_Want_want, AbilityComponentAttribute, Callback_Void } from "./../../component/abilityComponent"
 import { ResizableOptions, DrawableDescriptor, DrawingColorFilter, ResolutionQuality, DrawingLattice, ImageRenderMode, ImageContent, DynamicRangeMode, ImageInterpolation, ImageSourceSize, Type_ImageAttribute_onComplete_callback_event, ImageAttribute, Callback_Type_ImageAttribute_onComplete_callback_event_Void, ImageErrorCallback, ImageError } from "./../../component/image"
 import { FocusBoxStyle, FocusPriority } from "./../../component/focus"
-import {  CustomComponent, AbstractProperty, IPropertySubscriber, ISinglePropertyChangeSubscriber, SubscribaleAbstract, NavigationAttribute, CommonTransition, PageTransitionEnterInterface, PageTransitionExitInterface } from "./../../handwritten"
+import {  CustomComponent, IPropertySubscriber, ISinglePropertyChangeSubscriber, SubscribaleAbstract, NavigationAttribute, CommonTransition, PageTransitionEnterInterface, PageTransitionExitInterface } from "./../../handwritten"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask, GestureHandler, GesturePriority, PanDirection, SwipeDirection, GestureMode, GestureControl, FingerInfo, TapGestureEvent, LongPressGestureEvent, PanGestureEvent, PinchGestureEvent, RotationGestureEvent, SwipeGestureEvent, GestureEvent, GestureInterface, TapGestureParameters, TapGestureInterface, Callback_GestureEvent_Void, Literal_Number_duration_fingers_Boolean_repeat, LongPressGestureInterface, Literal_Number_distance_fingers_PanDirection_direction, PanGestureOptions, PanGestureInterface, Literal_Number_fingers_speed_SwipeDirection_direction, SwipeGestureInterface, Literal_Number_distance_fingers, PinchGestureInterface, Literal_Number_angle_fingers, RotationGestureInterface, GestureGroupInterface, TapGestureHandlerOptions, TapGestureHandler, LongPressGestureHandlerOptions, LongPressGestureHandler, PanGestureHandlerOptions, PanGestureHandler, SwipeGestureHandlerOptions, SwipeGestureHandler, PinchGestureHandlerOptions, PinchGestureHandler, RotationGestureHandlerOptions, RotationGestureHandler, GestureGroupGestureHandlerOptions, GestureRecognizerState, ScrollableTargetInfo, EventTargetInfo, GestureRecognizer, PanRecognizer } from "./../../component/gesture"
 import { SheetInfo, DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, ActionSheetOptions, Callback_DismissDialogAction_Void, ActionSheet } from "./../../component/actionSheet"
 import { DialogAlignment, DialogButtonDirection, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, TextStyle_alert_dialog, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, AlertDialog } from "./../../component/alertDialog"
@@ -183,9 +183,6 @@ export class TypeChecker {
     }
     static isAbilityComponentAttribute(value: object|string|number|undefined|null, arg0: boolean, arg1: boolean): boolean {
         return value instanceof AbilityComponentAttribute
-    }
-    static isAbstractProperty(value: object|string|number|undefined|null): boolean {
-        return value instanceof AbstractProperty
     }
     static isAccessibilityHoverEvent(value: object|string|number|undefined|null, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof AccessibilityHoverEvent
