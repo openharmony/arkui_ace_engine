@@ -31,23 +31,31 @@ protected:
         int counter;
         ResourceDataT data;
     };
-    
+    typedef typename std::unordered_map<Ark_Int32, ResourceData> ResourceMapType;
+    typedef typename ResourceMapType::iterator ResourceMapIteratorType;
+
     static void Hold(Ark_Int32 resourceId)
     {
         storage_[resourceId].counter++;
     }
+    static inline void Hold(ResourceMapIteratorType it)
+    {
+        ++(it->second.counter);
+    }
 
     static void Release(Ark_Int32 resourceId)
     {
-        auto it = storage_.find(resourceId);
-        if (it == storage_.end()) {
-            return;
+        if (auto it = storage_.find(resourceId); it != storage_.end()) {
+            Release(it);
         }
-        (it->second.counter)--;
-        if (it->second.counter == 0) {
+    }
+    static inline void Release(ResourceMapIteratorType it)
+    {
+        if (--(it->second.counter) == 0) {
             storage_.erase(it);
         }
     }
+
     static Ark_CallbackResource GetNextResource()
     {
         return {
@@ -57,7 +65,7 @@ protected:
         };
     }
     inline static Ark_Int32 currentId_ = 0;
-    inline static std::unordered_map<Ark_Int32, ResourceData> storage_;
+    inline static ResourceMapType storage_;
 };
 
 } // namespace OHOS::Ace::NG
