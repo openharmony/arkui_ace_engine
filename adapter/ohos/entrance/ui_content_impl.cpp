@@ -48,6 +48,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/pipeline/container_window_manager.h"
 
 #if !defined(ACE_UNITTEST)
 #include "core/components_ng/base/transparent_node_detector.h"
@@ -4728,12 +4729,13 @@ void UIContentImpl::SetContainerButtonStyle(const Rosen::DecorButtonStyle& butto
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    Ace::DecorButtonStyle decorButtonStyle;
+    ConvertDecorButtonStyle(buttonStyle, decorButtonStyle);
     taskExecutor->PostTask(
-        [container, buttonStyle]() {
+        [container, decorButtonStyle]() {
             auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
-            NG::ContainerModalViewEnhance::SetContainerButtonStyle(pipelineContext, buttonStyle.buttonBackgroundSize,
-                buttonStyle.spacingBetweenButtons, buttonStyle.closeButtonRightMargin, buttonStyle.colorMode);
+            NG::ContainerModalViewEnhance::SetContainerButtonStyle(pipelineContext, decorButtonStyle);
         },
         TaskExecutor::TaskType::UI, "SetContainerButtonStyle");
 }
@@ -5283,5 +5285,16 @@ void UIContentImpl::ChangeDisplayAvailableAreaListener(uint64_t displayId)
         listenedDisplayId_ = displayId;
         manager.RegisterAvailableAreaListener(availableAreaChangedListener_, listenedDisplayId_);
     }
+}
+
+void UIContentImpl::ConvertDecorButtonStyle(const Rosen::DecorButtonStyle& buttonStyle,
+    Ace::DecorButtonStyle& decorButtonStyle)
+{
+    decorButtonStyle.buttonBackgroundCornerRadius = buttonStyle.buttonBackgroundCornerRadius;
+    decorButtonStyle.buttonBackgroundSize = buttonStyle.buttonBackgroundSize;
+    decorButtonStyle.buttonIconSize = buttonStyle.buttonIconSize;
+    decorButtonStyle.closeButtonRightMargin = buttonStyle.closeButtonRightMargin;
+    decorButtonStyle.colorMode = buttonStyle.colorMode;
+    decorButtonStyle.spacingBetweenButtons = buttonStyle.spacingBetweenButtons;
 }
 } // namespace OHOS::Ace
