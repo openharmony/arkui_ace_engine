@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -157,7 +158,15 @@ void OnTimerImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("Arkoala method TextTimerAttributeModifier.setOnTimer not implemented");
+    auto onChange = [arkCallback = CallbackHelper(*value), node = AceType::WeakClaim(frameNode)](
+        int64_t utc, int64_t elapsedTime) {
+        PipelineContext::SetCallBackNode(node);
+        auto utcResult = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(utc));
+        auto elapsedTimeResult = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(elapsedTime));
+        LOGE("TextTimerAttributeModifier::OnTimerImpl - utc and elapsedTime values can be incorrect");
+        arkCallback.Invoke(utcResult, elapsedTimeResult);
+    };
+    TextTimerModelNG::SetOnTimer(frameNode, std::move(onChange));
 }
 void TextShadowImpl(Ark_NativePointer node,
                     const Ark_Union_ShadowOptions_Array_ShadowOptions* value)

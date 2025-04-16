@@ -1290,4 +1290,58 @@ HWTEST_F(TextTimerModifierTest, setTextShadowTestTextShadowFillInvalidValues, Te
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Boolean>());
 }
+
+/*
+ * @tc.name: setOnScrollIndexTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerModifierTest, setOnTimerTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<TextTimerEventHub>();
+
+    struct CheckEvent {
+        int32_t nodeId;
+        int32_t utc;
+        int32_t elapsedTime;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    static constexpr int32_t contextId = 123;
+    static bool isCalled = false;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Number utc, const Ark_Number elapsedTime) {
+        isCalled = true;
+        checkEvent = {
+            .nodeId = resourceId,
+            .utc = Converter::Convert<int32_t>(utc),
+            .elapsedTime = Converter::Convert<int32_t>(elapsedTime)
+        };
+    };
+
+    Callback_Number_Number_Void arkCallback =
+        Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, contextId);
+
+    modifier_->setOnTimer(node_, &arkCallback);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+
+    // first: 12, last: 10
+    isCalled = false;
+    eventHub->FireChangeEvent(12, 10);
+    ASSERT_TRUE(isCalled);
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->utc, 12);
+    EXPECT_EQ(checkEvent->elapsedTime, 10);
+
+    // first: 5, last: 25
+    isCalled = false;
+    eventHub->FireChangeEvent(5, 25);
+    ASSERT_TRUE(isCalled);
+    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, contextId);
+    EXPECT_EQ(checkEvent->utc, 5);
+    EXPECT_EQ(checkEvent->elapsedTime, 25);
+}
 } // namespace OHOS::Ace::NG
