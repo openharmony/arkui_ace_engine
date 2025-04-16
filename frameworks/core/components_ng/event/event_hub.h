@@ -269,6 +269,7 @@ public:
         const VisibleCallbackInfo& callback, const std::vector<double>& radios, bool isUser);
     void CleanVisibleAreaCallback(bool isUser, bool isThrottled = false);
     bool HasVisibleAreaCallback(bool isUser);
+    bool HasThrottledVisibleAreaCallback() const;
     void SetOnAttach(std::function<void()>&& onAttach);
     void ClearOnAttach();
     virtual void FireOnAttach();

@@ -45,7 +45,7 @@ void EventHub::OnDetachContext(PipelineContext *context)
         context->RemoveOnAreaChangeNode(host->GetId());
     }
 
-    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false)) {
+    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false) || HasThrottledVisibleAreaCallback()) {
         host->SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::DETACH_FROM_MAINTREE);
         host->TriggerVisibleAreaChangeCallback(0, true);
         context->RemoveVisibleAreaChangeNode(host->GetId());
@@ -1064,6 +1064,11 @@ bool EventHub::HasVisibleAreaCallback(bool isUser)
     } else {
         return static_cast<bool>(visibleAreaInnerCallback_.callback);
     }
+}
+
+bool EventHub::HasThrottledVisibleAreaCallback() const
+{
+    return static_cast<bool>(throttledVisibleAreaCallback_.callback);
 }
 
 void EventHub::HandleOnAreaChange(const std::unique_ptr<RectF>& lastFrameRect,
