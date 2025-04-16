@@ -86,6 +86,7 @@ public:
 
 #ifdef SUPPORT_DIGITAL_CROWN
     static void SetDigitalCrownSensitivity(CrownSensitivity sensitivity);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, const std::optional<CrownSensitivity>& sensitivity);
 #endif
     static void ResetScrollBarWidth(FrameNode* frameNode);
     static void ResetScrollBarColor(FrameNode* frameNode);
