@@ -1361,26 +1361,30 @@ struct CustomDialogContentComponent {
   buildSingleButton(index: number): void {
     if (this.isNewPropertiesHighPriority(index)) {
       Button(this.buttons?.[index].content)
-        .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, this.isAllFocusFalse, this.getDialogController())
+        .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, 
+          this.isAllFocusFalse, this.getDialogController())
         .role(this.buttons?.[index].role ?? ButtonRole.NORMAL)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else if (this.buttons?.[index].background !== undefined && this.buttons?.[index].fontColor !== undefined) {
       Button(this.buttons?.[index].content)
-        .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, this.isAllFocusFalse, this.getDialogController())
+        .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, 
+          this.isAllFocusFalse, this.getDialogController())
         .backgroundColor(this.buttons?.[index].background?.color)
         .fontColor(this.buttons?.[index].fontColor?.color)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else if (this.buttons?.[index].background !== undefined) {
       Button(this.buttons?.[index].content)
-        .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, this.isAllFocusFalse, this.getDialogController())
+        .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, 
+          this.isAllFocusFalse, this.getDialogController())
         .backgroundColor(this.buttons?.[index].background?.color)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else {
       Button(this.buttons?.[index].content)
-        .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, this.isAllFocusFalse, this.getDialogController())
+        .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, 
+          this.isAllFocusFalse, this.getDialogController())
         .fontColor(this.buttons?.[index]?.fontColor?.color)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
