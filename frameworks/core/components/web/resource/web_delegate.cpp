@@ -3171,7 +3171,9 @@ void WebDelegate::InitWebViewWithSurface()
             auto upgradeContext = context.Upgrade();
             CHECK_NULL_VOID(upgradeContext);
             auto window_id = upgradeContext->GetWindowId();
+            auto foucus_window_id = upgradeContext->GetFocusWindowId();
             delegate->nweb_->SetWindowId(window_id);
+            delegate->nweb_->SetFocusWindowId(foucus_window_id);
             delegate->SetToken();
             delegate->RegisterSurfaceOcclusionChangeFun();
             delegate->nweb_->SetDrawMode(renderMode);
