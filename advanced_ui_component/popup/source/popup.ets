@@ -19,6 +19,7 @@ import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node'
 import componentUtils from '@ohos.arkui.componentUtils';
 import { SymbolGlyphModifier, Configuration } from '@kit.ArkUI';
+import { systemDateTime } from '@kit.BasicServicesKit';
 
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
@@ -260,6 +261,7 @@ function isValidResource(context: Context | undefined, value: Resource) {
 export struct PopupComponent {
   private onClose: () => void = noop;
   private theme: PopupTheme = defaultTheme;
+  private applycontentKey: string = 'applyContent' + systemDateTime.getTime(false);
   @Prop icon: PopupIconOptions = { image: '' };
   @Prop maxWidth?: Dimension;
   @Prop messageMaxWidth?: number = 0;
@@ -542,7 +544,7 @@ export struct PopupComponent {
       this.beforeScreenStatus = this.currentScreenStatus
       return scrollMaxHeight;
     }
-    scrollMaxHeight = px2vp(componentUtils.getRectangleById('applyContent').size?.height)
+    scrollMaxHeight = px2vp(componentUtils.getRectangleById(this.applycontentKey).size?.height)
     scrollMaxHeight -= this.titleHeight
     scrollMaxHeight -= this.buttonHeight
     scrollMaxHeight -= this.theme.windows.padding.top.value
@@ -1002,7 +1004,7 @@ export struct PopupComponent {
     .padding(this.getWindowsPadding())
     .constraintSize(this.applySizeOptions)
     .constraintSize(this.getApplyMaxSize())
-    .key('applyContent')
+    .key(this.applycontentKey)
     .onAreaChange((_, rect) => {
       this.applyHeight = rect.height as number
     })
