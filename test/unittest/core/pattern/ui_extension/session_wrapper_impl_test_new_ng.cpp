@@ -1045,6 +1045,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg028, TestSize.L
     auto container = Platform::AceContainer::GetContainer(sessionWrapper->GetInstanceIdFromHost());
     info->rect_.height_ = 10;
     int32_t keyboardHeight = static_cast<int32_t>(info->rect_.height_);
+    auto displayArea = sessionWrapper->GetDisplayAreaWithWindowScene();
 
     ret = sessionWrapper->InnerNotifyOccupiedAreaChangeInfo(info, isWaitTask, occupiedAreaTime);
     EXPECT_EQ(sessionWrapper->lastOccupiedAreaTime_, occupiedAreaTime);
