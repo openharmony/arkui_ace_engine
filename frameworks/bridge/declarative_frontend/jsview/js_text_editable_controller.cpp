@@ -269,7 +269,7 @@ void JSTextEditableController::GetText(const JSCallbackInfo& info)
         std::u16string content = controller->GetText();
         const auto& textRange = info[0];
         int32_t startIndex = 0;
-        int32_t endIndex = content.length();
+        int32_t endIndex = static_cast<int32_t>(content.length());
         if (textRange->IsObject()) {
             JSRef<JSObject> rangeObj = JSRef<JSObject>::Cast(textRange);
             JSRef<JSVal> start = rangeObj->GetProperty("start");

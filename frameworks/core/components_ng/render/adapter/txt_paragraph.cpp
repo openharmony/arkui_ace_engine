@@ -306,8 +306,7 @@ int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset, bool isSel
     if (!paragrah) {
         return 0;
     }
-    int32_t index;
-    index = static_cast<int32_t>(paragrah->GetGlyphIndexByCoordinate(offset.GetX(), offset.GetY()).index);
+    int32_t index = static_cast<int32_t>(paragrah->GetGlyphIndexByCoordinate(offset.GetX(), offset.GetY()).index);
     if (isSelectionPos) {
         AdjustIndexForward(offset, true, index);
     }
