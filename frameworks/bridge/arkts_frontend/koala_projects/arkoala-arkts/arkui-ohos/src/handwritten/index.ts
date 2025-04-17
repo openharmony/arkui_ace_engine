@@ -11,6 +11,5 @@ export interface CustomComponent {}
 export interface IPropertySubscriber {}
 export interface ISinglePropertyChangeSubscriber {}
 
-export interface NavigationAttribute {}
 export interface PageTransitionEnterInterface {}
 export interface PageTransitionExitInterface {}

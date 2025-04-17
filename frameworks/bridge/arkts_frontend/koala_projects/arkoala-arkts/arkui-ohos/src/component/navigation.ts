@@ -19,21 +19,27 @@
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
+import {GlobalStateManager, StateContext, __context, memoEntry} from '@koalaui/runtime'
 import { Serializer } from "./../generated/peers/Serializer"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { Deserializer } from "./../generated/peers/Deserializer"
 import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource } from "global/resource";
-import { CustomBuilder, SymbolGlyphModifier, BlurStyle } from "./common"
+import { CustomBuilder, SymbolGlyphModifier, BlurStyle, CommonMethod } from "./common"
 import { TitleHeight } from "./enums"
 import { Length, ResourceStr, ResourceColor, Dimension } from "./units"
 import { Callback_Void } from "./abilityComponent"
 import { NavDestinationContext, NavDestinationMode } from "./navDestination"
-import { NavigationAttribute } from "./../handwritten"
 import { LengthMetrics } from "../Graphics"
 import { TextModifier } from "./../generated/ArkArkuiExternalInterfaces"
 import { Callback_Boolean_Void } from "./checkbox"
+import { NavExtender } from "../generated/ArkNavExtenderMaterialized"
+import { PixelMap } from "../generated/ArkPixelMapMaterialized"
+import {PeerNode} from "../PeerNode"
+import {ArkNavigationComponent} from '../ArkNavigation'
+import {ArkNavigationPeer} from '../peers/ArkNavigationPeer'
+import { addPartialUpdate } from "../ArkUIEntry"
 export class NavPathInfoInternal {
     public static fromPtr(ptr: KPointer): NavPathInfo {
         const obj : NavPathInfo = new NavPathInfo(undefined, undefined, undefined, undefined)
@@ -1011,3 +1017,118 @@ export interface NavContentInfo {
     param?: Object;
     navDestinationId?: string;
 }
+
+export interface NavigationAttribute extends CommonMethod {
+    /** @memo */
+    navBarWidth(value: Length): this;
+    /** @memo */
+    navBarPosition(value: NavBarPosition): this;
+    /** @memo */
+    navBarWidthRange(value: [Dimension, Dimension]): this;
+    /** @memo */
+    minContentWidth(value: Dimension): this;
+    /** @memo */
+    mode(value: NavigationMode): this;
+    /** @memo */
+    backButtonIcon(value: string | PixelMap | Resource | SymbolGlyphModifier): this;
+    /** @memo */
+    hideNavBar(value: boolean): this;
+    /** @memo */
+    subTitle(value: string): this;
+    /** @memo */
+    hideTitleBar(value: boolean, isAnimated?: boolean): this;
+    /** @memo */
+    hideBackButton(value: boolean): this;
+    /** @memo */
+    titleMode(value: NavigationTitleMode): this;
+    /** @memo */
+    menus(value: Array<NavigationMenuItem> | CustomBuilder): this;
+    /** @memo */
+    toolBar(value: Object | CustomBuilder): this;
+    /** @memo */
+    hideToolBar(hide: boolean, animated?: boolean): this;
+    /** @memo */
+    onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void)): this;
+    /** @memo */
+    onNavBarStateChange(value: ((parameter: boolean) => void)): this;
+    /** @memo */
+    onNavigationModeChange(value: ((mode: NavigationMode) => void)): this;
+    /** @memo */
+    navDestination(
+        /** @memo */
+        value: ((name: string, param: object) => void)
+    ): this;
+    /** @memo */
+    customNavContentTransition(value: ((from: NavContentInfo, to: NavContentInfo,
+        operation: NavigationOperation) => NavigationAnimatedTransition | undefined)): this;
+    /** @memo */
+    systemBarStyle(value: SystemBarStyle | undefined): this;
+    /** @memo */
+    recoverable(value: boolean| undefined): this;
+    /** @memo */
+    enableDragBar(value: boolean | undefined): this;
+    /** @memo */
+    title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle, options?: NavigationTitleOptions): this;
+}
+
+/** @memo */
+export function Navigation(
+    /** @memo */
+    style: ((attributes: ArkNavigationComponent) => void) | undefined,
+    pathInfos?: NavPathStack | undefined,
+    /** @memo */
+    content_?: (() => void),
+  ) {
+      const receiver = remember(() => {
+          return new ArkNavigationComponent()
+      })
+      //NodeAttach<ArkNavigationPeer>((): ArkNavigationPeer => ArkNavigationPeer.create(ArkUINodeType.CustomNode, receiver), (_: ArkNavigationPeer) => {
+      NodeAttach<ArkNavigationPeer>((): ArkNavigationPeer => ArkNavigationPeer.create(receiver), (_: ArkNavigationPeer) => {
+              receiver.setNavigationOptions(pathInfos)
+          style?.(receiver)
+          content_?.()
+          if (pathInfos != undefined) {
+              remember(() => {
+                  const updater: (name: string, param: object|undefined)=>PeerNode =
+                  (name: string, param: object|undefined) => {
+                      let manager = GlobalStateManager.instance
+                      let node = PeerNode.generateRootPeer();
+                      let nodeState = manager.updatableNode<PeerNode>(node, (context: StateContext) => {
+                          const frozen = manager.frozen
+                          manager.frozen = true
+                          memoEntry<void>(context, -1, () => {
+                              receiver._navDestination(name, param!);
+                          })
+                          manager.frozen = frozen
+                      })
+                      return nodeState.value
+                  }
+                  const value_casted = updater as ((name: string, param: object|undefined) => PeerNode)
+                  NavExtender.setUpdateStackCallback(pathInfos!, () => {
+                      addPartialUpdate(() => {
+                          if (!receiver.isNeedSync()) {
+                              return
+                          }
+                          let names: Array<string> = pathInfos!.getAllPathName()
+                          let size: int32 = names.length as int32
+                          for (let index: int32 = 0; index < size; index++) {
+                              if (NavExtender.checkNeedCreate(receiver.getPeer().peer.ptr, index)) {
+                                  let param = pathInfos!.getParamByIndex(index)
+                                  let node = value_casted(names[index], param)
+                                  NavExtender.setNavDestinationNode(pathInfos!, index, toPeerPtr(node))
+                              }
+                          }
+                      }, __context, (isBefore: boolean) => {
+                          if (!isBefore && receiver.isNeedSync()) {
+                              NavExtender.syncStack(pathInfos!)
+                              receiver.updateNeedSync(false)
+                              return
+                          }
+                      })
+                      receiver.updateNeedSync(true)
+                  })
+              })
+          }
+          receiver.applyAttributesFinish()
+      })
+  }

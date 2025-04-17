@@ -118,6 +118,7 @@ public:
     static void SetOnCoordScrollEndAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollEnd);
     static void SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor);
     static bool IsDoubleBindBlock(const RefPtr<NavigationPattern>& navigationPattern);
+    static void SetSubTitle(FrameNode* frameNode, const std::string& subTitle);
 
 private:
     bool CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

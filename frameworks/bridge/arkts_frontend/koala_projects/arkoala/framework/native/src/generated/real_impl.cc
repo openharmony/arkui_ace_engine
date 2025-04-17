@@ -11297,6 +11297,49 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                    Ark_NativePointer node)
     {
     }
+    void SetNavigationModeImpl(Ark_NativePointer navigation,
+                               Ark_Int32 mode)
+    {
+    }
+    void HideTitleBarImpl(Ark_NativePointer navigation,
+                          Ark_Boolean isHide,
+                          Ark_Boolean isAnimated)
+    {
+    }
+    void HideToolBarImpl(Ark_NativePointer navigation,
+                         Ark_Boolean isHide,
+                         Ark_Boolean isAnimate)
+    {
+    }
+    void HideNavBarImpl(Ark_NativePointer navigation,
+                        Ark_Boolean hide)
+    {
+    }
+    void HideBackButtonImpl(Ark_NativePointer navigation,
+                            Ark_Boolean hide)
+    {
+    }
+    void SetNavBarStateChangeImpl(Ark_NativePointer navigation,
+                                  const Callback_Boolean_Void* stateCallback)
+    {
+    }
+    void SetTitleModeChangeImpl(Ark_NativePointer navigation,
+                                const Callback_NavigationTitleMode_Void* titleCallback)
+    {
+    }
+    void SetTitleModeImpl(Ark_NativePointer navigation,
+                          Ark_NavigationTitleMode titleMode)
+    {
+    }
+    void TitleImpl(Ark_NativePointer naviagtion,
+                   const Ark_String* title,
+    Ark_Boolean hasSubTitle)
+    {
+    }
+    void SubTitleImpl(Ark_NativePointer navigation,
+                      const Ark_String* subTitle)
+    {
+    }
     } // NavExtenderAccessor
     namespace EventEmulatorAccessor {
     void EmitTextInputEventImpl(Ark_NativePointer node,
@@ -17525,6 +17568,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavExtenderAccessor::NavigationCreateImpl,
             NavExtenderAccessor::SetNavigationOptionsImpl,
             NavExtenderAccessor::SetNavDestinationNodeImpl,
+            NavExtenderAccessor::SetNavigationModeImpl,
+            NavExtenderAccessor::HideTitleBarImpl,
+            NavExtenderAccessor::HideToolBarImpl,
+            NavExtenderAccessor::HideNavBarImpl,
+            NavExtenderAccessor::HideBackButtonImpl,
+            NavExtenderAccessor::SetNavBarStateChangeImpl,
+            NavExtenderAccessor::SetTitleModeChangeImpl,
+            NavExtenderAccessor::SetTitleModeImpl,
+            NavExtenderAccessor::TitleImpl,
+            NavExtenderAccessor::SubTitleImpl,
         };
         return &NavExtenderAccessorImpl;
     }

@@ -1884,4 +1884,31 @@ bool NavigationModelNG::IsDoubleBindBlock(const RefPtr<NavigationPattern>& navig
 {
     return navBarWidthDoubleBind_ && navigationPattern->GetIsInDividerDrag();
 }
+
+void NavigationModelNG::SetSubTitle(FrameNode* frameNode, const std::string& subTitle)
+{
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigation);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigation->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetIsTitleChanged(true);
+    auto subTitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
+    if (subTitleNode) {
+        auto textLayoutProperty = subTitleNode->GetLayoutProperty<TextLayoutProperty>();
+        textLayoutProperty->UpdateContent(subTitle);
+        return;
+    }
+    subTitleNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_VOID(subTitleNode);
+    auto textLayoutProperty = subTitleNode->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateContent(subTitle);
+    titleBarPattern->SetNeedResetSubTitleProperty(true);
+    titleBarNode->SetSubtitle(subTitleNode);
+    titleBarNode->AddChild(subTitleNode);
+}
 } // namespace OHOS::Ace::NG

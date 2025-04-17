@@ -17,9 +17,9 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32 } from "@koalaui/common"
-import { KPointer } from "@koalaui/interop"
+import { KPointer, runtimeType, RuntimeType } from "@koalaui/interop"
 import { ComponentBase } from "../ComponentBase"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, ArkCommonMethodAttributes } from "./../generated/peers/ArkCommonPeer"
 import { SystemBarStyle, NavigationCommonTitle, NavigationCustomTitle, NavigationMenuItem, NavigationOperation, NavigationMode, InterceptionModeCallback, NavigationInterception, NavigationInterface, ToolbarItemStatus, ToolbarItem, BarStyle, NavigationTitleOptions, NavigationToolbarOptions, NavigationTitleMode, NavContentInfo, NavigationAnimatedTransition, NavBarPosition } from "./../component/navigation"
 import { Resource } from "global/resource";
@@ -29,6 +29,7 @@ import { NavPathStack } from "./../component/navigation"
 import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
 
 import { PeerNode } from "../PeerNode"
+import { NavExtender } from "../generated/ArkNavExtenderMaterialized"
 
 export class ArkNavigationPeer extends ArkCommonMethodPeer {
 
@@ -38,8 +39,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
 
     public static create(component?: ComponentBase, flags: int32 = 0): ArkNavigationPeer {
         const peerId = PeerNode.nextId()
-        // TODO: use Stack instead
-        const _peerPtr = ArkUIGeneratedNativeModule._Stack_construct(peerId, flags)
+        const _peerPtr = NavExtender.navigationCreate(peerId, flags)
         const _peer = new ArkNavigationPeer(_peerPtr, peerId, "Navigation", flags)
         component?.setPeer(_peer)
         return _peer
@@ -54,6 +54,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         // thisSerializer.writeNavPathStack(pathInfos)
         // NativeModule._NavigationInterface_setNavigationOptions1(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
         // thisSerializer.release()
+        NavExtender.setNavigationOptions(this.peer.ptr, pathInfos!)
     }
     navBarWidthAttribute(value: Length): void {
         console.log("Call ArkNavigationPeer.navBarWidthAttribute()")
@@ -75,11 +76,10 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
     }
     minContentWidthAttribute(value: Dimension): void {
         console.log("Call ArkNavigationPeer.minContentWidthAttribute()")
-        // NativeModule._NavigationAttribute_minContentWidth(this.peer.ptr, value)
     }
     modeAttribute(value: NavigationMode): void {
         console.log("Call ArkNavigationPeer.modeAttribute()")
-        // NativeModule._NavigationAttribute_mode(this.peer.ptr, (value.value as int32))
+        NavExtender.setNavigationMode(this.peer.ptr, value)
     }
     backButtonIconAttribute(value: string | PixelMap | Resource | SymbolGlyphModifier): void {
         console.log("Call ArkNavigationPeer.backButtonIconAttribute()")
@@ -111,27 +111,27 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
     }
     hideNavBarAttribute(value: boolean): void {
         console.log("Call ArkNavigationPeer.hideNavBarAttribute()")
-        // NativeModule._NavigationAttribute_hideNavBar(this.peer.ptr, value ? 1 : 0)
+        NavExtender.hideNavBar(this.peer.ptr, value)
     }
     subTitleAttribute(value: string): void {
         console.log("Call ArkNavigationPeer.subTitleAttribute()")
-        // NativeModule._NavigationAttribute_subTitle(this.peer.ptr, value)
+        NavExtender.subTitle(this.peer.ptr, value)
     }
     hideTitleBar0Attribute(value: boolean): void {
         console.log("Call ArkNavigationPeer.hideTitleBar0Attribute()")
-        // NativeModule._NavigationAttribute_hideTitleBar0(this.peer.ptr, value ? 1 : 0)
+        NavExtender.hideTitleBar(this.peer.ptr, value, false)
     }
     hideTitleBar1Attribute(hide: boolean, animated: boolean): void {
         console.log("Call ArkNavigationPeer.hideTitleBar1Attribute()")
-        // NativeModule._NavigationAttribute_hideTitleBar1(this.peer.ptr, hide ? 1 : 0, animated ? 1 : 0)
+        NavExtender.hideTitleBar(this.peer.ptr, hide, animated)
     }
     hideBackButtonAttribute(value: boolean): void {
         console.log("Call ArkNavigationPeer.hideBackButtonAttribute()")
-        // NativeModule._NavigationAttribute_hideBackButton(this.peer.ptr, value ? 1 : 0)
+        NavExtender.hideBackButton(this.peer.ptr, value)
     }
     titleModeAttribute(value: NavigationTitleMode): void {
         console.log("Call ArkNavigationPeer.titleModeAttribute()")
-        // NativeModule._NavigationAttribute_titleMode(this.peer.ptr, (value.value as int32))
+        NavExtender.setTitleMode(this.peer.ptr, value)
     }
     menusAttribute(value: Array<NavigationMenuItem> | CustomBuilder): void {
         console.log("Call ArkNavigationPeer.menusAttribute()")
@@ -175,39 +175,22 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
     }
     hideToolBar0Attribute(value: boolean): void {
         console.log("Call ArkNavigationPeer.hideToolBar0Attribute()")
-        // NativeModule._NavigationAttribute_hideToolBar0(this.peer.ptr, value ? 1 : 0)
+        NavExtender.hideToolBar(this.peer.ptr, value, false)
     }
     hideToolBar1Attribute(hide: boolean, animated: boolean): void {
         console.log("Call ArkNavigationPeer.hideToolBar1Attribute()")
-        // NativeModule._NavigationAttribute_hideToolBar1(this.peer.ptr, hide ? 1 : 0, animated ? 1 : 0)
+        NavExtender.hideToolBar(this.peer.ptr, hide, animated)
     }
     onTitleModeChangeAttribute(value: Function1<NavigationTitleMode,void>): void {
         console.log("Call ArkNavigationPeer.onTitleModeChangeAttribute()")
-        // const thisSerializer : Serializer = Serializer.hold()
-        // thisSerializer.holdAndWriteCallback(value)
-        // NativeModule._NavigationAttribute_onTitleModeChange(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
-        // thisSerializer.release()
+        NavExtender.setTitleModeChange(this.peer.ptr, value)
     }
     onNavBarStateChangeAttribute(value: Function1<boolean,void>): void {
         console.log("Call ArkNavigationPeer.onNavBarStateChangeAttribute()")
-        // const thisSerializer : Serializer = Serializer.hold()
-        // thisSerializer.holdAndWriteCallback(value)
-        // NativeModule._NavigationAttribute_onNavBarStateChange(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
-        // thisSerializer.release()
+        NavExtender.setNavBarStateChange(this.peer.ptr, value)
     }
     onNavigationModeChangeAttribute(value: Function1<NavigationMode,void>): void {
         console.log("Call ArkNavigationPeer.onNavigationModeChangeAttribute()")
-        // const thisSerializer : Serializer = Serializer.hold()
-        // thisSerializer.holdAndWriteCallback(value)
-        // NativeModule._NavigationAttribute_onNavigationModeChange(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
-        // thisSerializer.release()
-    }
-    navDestinationAttribute(value: Function2<string,object,void>): void {
-        console.log("Call ArkNavigationPeer.navDestinationAttribute()")
-        // const thisSerializer : Serializer = Serializer.hold()
-        // thisSerializer.holdAndWriteCallback(value)
-        // NativeModule._NavigationAttribute_navDestination(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
-        // thisSerializer.release()
     }
     customNavContentTransitionAttribute(value: Function3<NavContentInfo,NavContentInfo,NavigationOperation,NavigationAnimatedTransition | undefined>): void {
         console.log("Call ArkNavigationPeer.customNavContentTransitionAttribute()")
@@ -257,49 +240,25 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
     }
     titleAttribute(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle, options?: NavigationTitleOptions): void {
         console.log("Call ArkNavigationPeer.titleAttribute()")
-        // const thisSerializer : Serializer = Serializer.hold()
-        // let value_type : int32 = RuntimeType.UNDEFINED
-        // value_type = runtimeType(value)
-        // if (((RuntimeType.STRING == value_type)) || ((RuntimeType.OBJECT == value_type))) {
-        //     thisSerializer.writeInt8(0 as int32)
-        //     const value_0  = value as ResourceStr
-        //     let value_0_type : int32 = RuntimeType.UNDEFINED
-        //     value_0_type = runtimeType(value_0)
-        //     if (((RuntimeType.STRING == value_0_type))) {
-        //         thisSerializer.writeInt8(0 as int32)
-        //         const value_0_0  = value_0 as string
-        //         thisSerializer.writeString(value_0_0)
-        //     }
-        //     else if (((RuntimeType.OBJECT == value_0_type))) {
-        //         thisSerializer.writeInt8(1 as int32)
-        //         const value_0_1  = value_0 as Resource
-        //         thisSerializer.writeResource(value_0_1)
-        //     }
-        // }
-        // else if (((RuntimeType.FUNCTION == value_type))) {
-        //     thisSerializer.writeInt8(1 as int32)
-        //     const value_1  = value as CustomBuilder
-        //     thisSerializer.holdAndWriteCallback(value_1)
-        // }
-        // else if (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isNavigationCommonTitle(value, false, false))) {
-        //     thisSerializer.writeInt8(2 as int32)
-        //     const value_2  = value as NavigationCommonTitle
-        //     thisSerializer.writeNavigationCommonTitle(value_2)
-        // }
-        // else if (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isNavigationCustomTitle(value, false, false))) {
-        //     thisSerializer.writeInt8(3 as int32)
-        //     const value_3  = value as NavigationCustomTitle
-        //     thisSerializer.writeNavigationCustomTitle(value_3)
-        // }
-        // let options_type : int32 = RuntimeType.UNDEFINED
-        // options_type = runtimeType(options)
-        // thisSerializer.writeInt8(options_type as int32)
-        // if ((RuntimeType.UNDEFINED) != (options_type)) {
-        //     const options_value  = options!
-        //     thisSerializer.writeNavigationTitleOptions(options_value)
-        // }
-        // NativeModule._NavigationAttribute_title(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
-        // thisSerializer.release()
+        const value_type = runtimeType(value)
+        if (RuntimeType.STRING == value_type) {
+            const title_casted = value as string
+            NavExtender.title(this.peer.ptr, title_casted, false)
+        } else if (RuntimeType.OBJECT == value_type) {
+            if (TypeChecker.isNavigationCommonTitle(value, false, false)) {
+                const common_title = value as NavigationCommonTitle
+                const title = common_title.main
+                if (RuntimeType.STRING == runtimeType(title)) {
+                    const title_str = title as string
+                    NavExtender.title(this.peer.ptr, title_str, true)
+                }
+                const subTitle = common_title.sub
+                if (RuntimeType.STRING == runtimeType(subTitle)) {
+                    const subTitle_str = subTitle as (string)
+                    NavExtender.subTitle(this.peer.ptr, subTitle_str)
+                }
+            }
+        }
     }
     toolbarConfigurationAttribute(value: Array<ToolbarItem> | CustomBuilder, options?: NavigationToolbarOptions): void {
         console.log("Call ArkNavigationPeer.toolbarConfigurationAttribute()")

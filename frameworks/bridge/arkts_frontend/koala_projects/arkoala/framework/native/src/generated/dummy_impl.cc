@@ -22077,6 +22077,145 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetNavigationModeImpl(Ark_NativePointer navigation,
+        Ark_Int32 mode)
+    {
+        if (!needGroupedLog(1)){
+            return;
+        }
+        string out("setNavigationMode(");
+        WriteToString(&out, navigation);
+        out.append(", ");
+        WriteToString(&out, mode);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void HideTitleBarImpl(Ark_NativePointer navigation,
+        Ark_Boolean isHide,
+        Ark_Boolean isAnimated)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("hideTitleBar(");
+        WriteToString(&out, navigation);
+        out.append(", ");
+        WriteToString(&out, isHide);
+        out.append(", ");
+        WriteToString(&out, isAnimated);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void HideToolBarImpl(Ark_NativePointer navigation,
+                         Ark_Boolean isHide,
+                         Ark_Boolean isAnimated)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("hideToolBar(");
+        WriteToString(&out, navigation);
+        out.append(", ");
+        WriteToString(&out, isHide);
+        out.append(", ");
+        WriteToString(&out, isAnimated);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void HideNavBarImpl(Ark_NativePointer navigation,
+                        Ark_Boolean hide)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("hideNavBar(");
+        WriteToString(&out, navigation);
+        out.append(", ");
+        WriteToString(&out, hide);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void HideBackButtonImpl(Ark_NativePointer naviagtion,
+                            Ark_Boolean hide)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("hideBackButton(");
+        WriteToString(&out, naviagtion);
+        out.append(", ");
+        WriteToString(&out, hide);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetNavBarStateChangeImpl(Ark_NativePointer navigation,
+                                  const Callback_Boolean_Void* stateCallback)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setNavBarStateChange(");
+        WriteToString(&out, navigation);
+        out.append(", ");
+        WriteToString(&out, stateCallback);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetTitleModeChangeImpl(Ark_NativePointer navigation,
+                                const Callback_NavigationTitleMode_Void* titleCallback)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setTitleModeChange(");
+        WriteToString(&out, navigation);
+        out.append(", ");
+        WriteToString(&out, titleCallback);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetTitleModeImpl(Ark_NativePointer navigation,
+                          Ark_NavigationTitleMode titleMode)
+    {
+        if (needGroupedLog(1)) {
+            return;
+        }
+        string out("setTitleMode(");
+        WriteToString(&out, navigation);
+        out.append(", ");
+        WriteToString(&out, titleMode);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void TitleImpl(Ark_NativePointer navigation,
+                   const Ark_String* title,
+                   Ark_Boolean hasSubTitle)
+    {
+        if (needGroupedLog(1)) {
+            return;
+        }
+        string out("title(");
+        WriteToString(&out, navigation);
+        out.append(", ");
+        WriteToString(&out, title);
+        out.append(", ");
+        WriteToString(&out, hasSubTitle);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SubTitleImpl(Ark_NativePointer navigation,
+                      const Ark_String* subTitle)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("subTitle(");
+        WriteToString(&out, navigation);
+        out.append(", ");
+        WriteToString(&out, subTitle);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // NavExtenderAccessor
     namespace EventEmulatorAccessor {
     void EmitTextInputEventImpl(Ark_NativePointer node,
@@ -35384,6 +35523,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavExtenderAccessor::NavigationCreateImpl,
             NavExtenderAccessor::SetNavigationOptionsImpl,
             NavExtenderAccessor::SetNavDestinationNodeImpl,
+            NavExtenderAccessor::SetNavigationModeImpl,
+            NavExtenderAccessor::HideTitleBarImpl,
+            NavExtenderAccessor::HideToolBarImpl,
+            NavExtenderAccessor::HideNavBarImpl,
+            NavExtenderAccessor::HideBackButtonImpl,
+            NavExtenderAccessor::SetNavBarStateChangeImpl,
+            NavExtenderAccessor::SetTitleModeChangeImpl,
+            NavExtenderAccessor::SetTitleModeImpl,
+            NavExtenderAccessor::TitleImpl,
+            NavExtenderAccessor::SubTitleImpl,
         };
         return &NavExtenderAccessorImpl;
     }

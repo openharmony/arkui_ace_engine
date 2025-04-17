@@ -18242,6 +18242,60 @@ void impl_NavExtender_setNavDestinationNode(Ark_NativePointer peer, Ark_Int32 in
         GetAccessors()->getNavExtenderAccessor()->setNavDestinationNode(static_cast<Ark_NavPathStack>(peer), index, node);
 }
 KOALA_INTEROP_DIRECT_V3(NavExtender_setNavDestinationNode, Ark_NativePointer, Ark_Int32, Ark_NativePointer)
+void impl_NavExtender_setNavigationMode(Ark_NativePointer navigation, Ark_Int32 mode)
+{
+        GetAccessors()->getNavExtenderAccessor()->setNavigationMode(navigation, static_cast<Ark_NavigationMode>(mode));
+}
+KOALA_INTEROP_DIRECT_V2(NavExtender_setNavigationMode, Ark_NativePointer, Ark_Int32)
+void impl_NavExtender_hideTitleBar(Ark_NativePointer navigation, Ark_Boolean isHide, Ark_Boolean isAnimated)
+{
+        GetAccessors()->getNavExtenderAccessor()->hideTitleBar(navigation, isHide, isAnimated);
+}
+KOALA_INTEROP_DIRECT_V3(NavExtender_hideTitleBar, Ark_NativePointer, Ark_Boolean, Ark_Boolean)
+void impl_NavExtender_hideToolBar(Ark_NativePointer navigation, Ark_Boolean isHide, Ark_Boolean isAnimated)
+{
+        GetAccessors()->getNavExtenderAccessor()->hideToolBar(navigation, isHide, isAnimated);
+}
+KOALA_INTEROP_DIRECT_V3(NavExtender_hideToolBar, Ark_NativePointer, Ark_Boolean, Ark_Boolean)
+void impl_NavExtender_hideNavBar(Ark_NativePointer navigation, Ark_Boolean hide)
+{
+        GetAccessors()->getNavExtenderAccessor()->hideNavBar(navigation, hide);
+}
+KOALA_INTEROP_DIRECT_V2(NavExtender_hideNavBar, Ark_NativePointer, Ark_Boolean)
+void impl_NavExtender_hideBackButton(Ark_NativePointer navigation, Ark_Boolean hide)
+{
+        GetAccessors()->getNavExtenderAccessor()->hideBackButton(navigation, hide);
+}
+KOALA_INTEROP_DIRECT_V2(NavExtender_hideBackButton, Ark_NativePointer, Ark_Boolean)
+void impl_NavExtender_setNavBarStateChange(Ark_NativePointer navigation, KSerializerBuffer thisArray, int32_t thisLength)
+{
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Callback_Boolean_Void stateCallback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_Boolean isVisible)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_Boolean isVisible)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};;
+    GetAccessors()->getNavExtenderAccessor()->setNavBarStateChange(navigation, (const Callback_Boolean_Void*)&stateCallback_value);
+}
+KOALA_INTEROP_V3(NavExtender_setNavBarStateChange, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_NavExtender_setTitleModeChange(Ark_NativePointer navigation, KSerializerBuffer thisArray, int32_t thisLength)
+{
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Callback_NavigationTitleMode_Void titleChange_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_NavigationTitleMode titleMode)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_NavigationTitleMode_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_NavigationTitleMode titleMode)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_NavigationTitleMode_Void))))};;
+    GetAccessors()->getNavExtenderAccessor()->setTitleModeChange(navigation, (const Callback_NavigationTitleMode_Void*)&titleChange_value);
+}
+KOALA_INTEROP_V3(NavExtender_setTitleModeChange, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_NavExtender_setTitleMode(Ark_NativePointer navigation, Ark_Int32 titleMode)
+{
+    GetAccessors()->getNavExtenderAccessor()->setTitleMode(navigation, static_cast<Ark_NavigationTitleMode>(titleMode));
+}
+KOALA_INTEROP_DIRECT_V2(NavExtender_setTitleMode, Ark_NativePointer, Ark_Int32)
+void impl_NavExtender_title(Ark_NativePointer navigation, const KStringPtr& title, Ark_Boolean hasSubTitle)
+{
+    GetAccessors()->getNavExtenderAccessor()->title(navigation, (const Ark_String*)(&title), hasSubTitle);
+}
+KOALA_INTEROP_V3(NavExtender_title, Ark_NativePointer, KStringPtr, Ark_Boolean)
+void impl_NavExtender_subTitle(Ark_NativePointer navigation, const KStringPtr& subTitle)
+{
+    GetAccessors()->getNavExtenderAccessor()->subTitle(navigation, (const Ark_String*)(&subTitle));
+}
+KOALA_INTEROP_V2(NavExtender_subTitle, Ark_NativePointer, KStringPtr)
 void impl_EventEmulator_emitClickEvent(Ark_NativePointer node, Ark_NativePointer event) {
         GetAccessors()->getEventEmulatorAccessor()->emitClickEvent(node, static_cast<Ark_ClickEvent>(event));
 }
