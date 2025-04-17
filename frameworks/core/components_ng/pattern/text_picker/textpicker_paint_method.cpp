@@ -59,10 +59,10 @@ CanvasDrawFunction TextPickerPaintMethod::GetContentDrawFunction(PaintWrapper* p
     }
 
     return [weak = WeakClaim(this), layoutProperty, pattern = pattern_,
-        theme, children](RSCanvas& canvas) {
+        children](RSCanvas& canvas) {
             auto picker = weak.Upgrade();
             CHECK_NULL_VOID(picker);
-            if (layoutProperty->HasSelectedBackgroundColor() || theme->GetUsePickerBackgroundStyle()) {
+            if (layoutProperty->HasSelectedBackgroundColor()) {
                 picker->PaintSelectedBackgroundColor(canvas, children,
                     layoutProperty->GetSelectedBackgroundColorValue(), layoutProperty->GetSelectedBorderRadiusValue());
             }

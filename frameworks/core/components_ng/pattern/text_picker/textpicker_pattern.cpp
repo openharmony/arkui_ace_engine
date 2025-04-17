@@ -246,9 +246,8 @@ void TextPickerPattern::CalculateButtonMetrics(RefPtr<UINode> child, RefPtr<Pick
     CHECK_NULL_VOID(buttonLayoutProperty);
     buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
-    if (layoutProperty->HasSelectedBorderRadius() || pickerTheme->GetUsePickerBackgroundStyle()) {
-        buttonLayoutProperty->UpdateBorderRadius(layoutProperty->GetSelectedBorderRadius().value_or(
-            pickerTheme->GetSelectedBorderRadius()));
+    if (layoutProperty->HasSelectedBorderRadius()) {
+        buttonLayoutProperty->UpdateBorderRadius(layoutProperty->GetSelectedBorderRadiusValue());
     } else {
         buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(selectorItemRadius_));
     }
@@ -419,8 +418,8 @@ void TextPickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect, float
     focusButtonRect += OffsetF(focusButtonXOffset, 0);
     paintRect.SetRect(focusButtonRect);
     BorderRadiusProperty borderRadius;
-    if (layoutProperty->HasSelectedBorderRadius() || pickerTheme->GetUsePickerBackgroundStyle()) {
-        borderRadius = layoutProperty->GetSelectedBorderRadius().value_or(pickerTheme->GetSelectedBorderRadius());
+    if (layoutProperty->HasSelectedBorderRadius()) {
+        borderRadius = layoutProperty->GetSelectedBorderRadiusValue();
     } else {
         borderRadius.SetRadius(selectorItemRadius_);
     }
@@ -1137,13 +1136,11 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(context);
     auto layoutProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto theme = context->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
     auto childSize = static_cast<int32_t>(host->GetChildren().size());
     if (childSize == 0) {
         return;
     }
-    if (useButtonFocusArea_ || layoutProperty->HasSelectedBorderRadius() || theme->GetUsePickerBackgroundStyle()) {
+    if (useButtonFocusArea_ || layoutProperty->HasSelectedBorderRadius()) {
         auto leftTotalColumnWidth = 0.0f;
         CalcLeftTotalColumnWidth(host, leftTotalColumnWidth, childSize);
         return GetInnerFocusButtonPaintRect(paintRect, leftTotalColumnWidth);
