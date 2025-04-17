@@ -43,4 +43,9 @@ void TextShareAdapter::StartTextShareTask(
         },
         "ArkUITextInitTextShare", PriorityType::VIP);
 }
+
+uint64_t TextShareAdapter::GetMaxTextShareLength()
+{
+    return TextShareMgr::GetInstance().GetMaxTextLength();
+}
 } // namespace OHOS::Ace
