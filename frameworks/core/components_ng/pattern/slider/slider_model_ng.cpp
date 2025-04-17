@@ -546,9 +546,15 @@ void SliderModelNG::SetMinResponsiveDistance(FrameNode* frameNode, const std::op
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN
-void SliderModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, CrownSensitivity sensitivity)
+void SliderModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode,
+                                               const std::optional<CrownSensitivity>& valueOpt)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, DigitalCrownSensitivity, sensitivity, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (valueOpt) {
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, DigitalCrownSensitivity, valueOpt.value(), frameNode);
+    } else {
+        ResetDigitalCrownSensitivity(frameNode);
+    }
 }
 #endif
 
@@ -958,7 +964,7 @@ void SliderModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableH
     auto sliderPattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_VOID(sliderPattern);
     sliderPattern->SetEnableHapticFeedback(isEnableHapticFeedback);
-    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, EnableHapticFeedback, isEnableHapticFeedback);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, EnableHapticFeedback, isEnableHapticFeedback, frameNode);
 }
 
 Dimension SliderModelNG::GetThickness(FrameNode* frameNode)

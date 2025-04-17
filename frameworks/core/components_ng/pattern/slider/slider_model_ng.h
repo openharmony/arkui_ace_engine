@@ -117,7 +117,7 @@ public:
         FrameNode* frameNode, const std::string& value, const std::string& bundleName, const std::string& moduleName);
     static void SetSelectedBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value);
 #ifdef SUPPORT_DIGITAL_CROWN
-    static void SetDigitalCrownSensitivity(FrameNode* frameNode, CrownSensitivity sensitivity);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, const std::optional<CrownSensitivity>& sensitivity);
 #endif
 
     static void ResetBlockBorderColor(FrameNode* frameNode);
