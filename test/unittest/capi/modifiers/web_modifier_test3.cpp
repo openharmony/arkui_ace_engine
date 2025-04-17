@@ -38,6 +38,17 @@ using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::Ace::NG::Converter;
 
+namespace {
+class MockWebFaviconReceived : public OHOS::Ace::WebFaviconReceived {
+public:
+    MOCK_METHOD(const void*, GetData, ());
+    MOCK_METHOD(size_t, GetWidth, ());
+    MOCK_METHOD(size_t, GetHeight, ());
+    MOCK_METHOD(int, GetColorType, ());
+    MOCK_METHOD(int, GetAlphaType, ());
+};
+} // namespace
+
 namespace OHOS::Ace::NG {
 
 struct SelectionMenuOptionsExt {
@@ -243,5 +254,48 @@ HWTEST_F(WebModifierTest3, setEditMenuOptionsTest, TestSize.Level1)
     EXPECT_TRUE(selectOverlayInfo.onCreateCallback.onMenuItemClick(params[0]));
     EXPECT_FALSE(selectOverlayInfo.onCreateCallback.onMenuItemClick(params[1]));
 #endif
+}
+
+/*
+ * @tc.name: onFaviconReceivedTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest3, onFaviconReceivedTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webFaviconReceived = Referenced::MakeRefPtr<MockWebFaviconReceived>();
+
+    struct CheckEvent {
+        int32_t resourceId;
+        Ark_PixelMap pixelMapPeer;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    static constexpr int32_t contextId = 123;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnFaviconReceivedEvent parameter) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .pixelMapPeer = parameter.favicon
+        };
+    };
+
+    Callback_OnFaviconReceivedEvent_Void arkCallback =
+        Converter::ArkValue<Callback_OnFaviconReceivedEvent_Void>(checkCallback, contextId);
+
+    modifier_->setOnFaviconReceived(node_, &arkCallback);
+
+    ASSERT_EQ(checkEvent.has_value(), false);
+    EXPECT_CALL(*webFaviconReceived, GetData()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(*webFaviconReceived, GetWidth()).Times(1).WillOnce(Return(static_cast<size_t>(200)));
+    EXPECT_CALL(*webFaviconReceived, GetHeight()).Times(1).WillOnce(Return(static_cast<size_t>(300)));
+    EXPECT_CALL(*webFaviconReceived, GetColorType()).Times(1).WillOnce(Return(1));
+    EXPECT_CALL(*webFaviconReceived, GetAlphaType()).Times(1).WillOnce(Return(1));
+    webEventHub->FireOnFaviconReceivedEvent(
+        std::make_shared<FaviconReceivedEvent>(webFaviconReceived));
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    ASSERT_NE(checkEvent->pixelMapPeer, nullptr);
+    ASSERT_NE(checkEvent->pixelMapPeer->pixelMap, nullptr);
 }
 } // namespace OHOS::Ace::NG
