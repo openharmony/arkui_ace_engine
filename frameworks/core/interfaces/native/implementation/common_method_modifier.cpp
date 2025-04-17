@@ -2599,24 +2599,24 @@ void FocusableImpl(Ark_NativePointer node,
 void OnFocusImpl(Ark_NativePointer node,
                  const Callback_Void* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto onEvent = [arkCallback = CallbackHelper(*value)]() {
-    //     arkCallback.Invoke();
-    // };
-    // ViewAbstract::SetOnFocus(frameNode, std::move(onEvent));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
+    };
+    ViewAbstract::SetOnFocus(frameNode, std::move(onEvent));
 }
 void OnBlurImpl(Ark_NativePointer node,
                 const Callback_Void* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto onEvent = [arkCallback = CallbackHelper(*value)]() {
-    //     arkCallback.Invoke();
-    // };
-    // ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
+    };
+    ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
 }
 void TabIndexImpl(Ark_NativePointer node,
                   const Ark_Number* value)
@@ -2949,24 +2949,24 @@ void TransformImpl(Ark_NativePointer node,
 void OnAppearImpl(Ark_NativePointer node,
                   const Callback_Void* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto onEvent = [arkCallback = CallbackHelper(*value)]() {
-    //     arkCallback.Invoke();
-    // };
-    // ViewAbstract::SetOnAppear(frameNode, std::move(onEvent));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
+    };
+    ViewAbstract::SetOnAppear(frameNode, std::move(onEvent));
 }
 void OnDisAppearImpl(Ark_NativePointer node,
                      const Callback_Void* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto onEvent = [arkCallback = CallbackHelper(*value)]() {
-    //     arkCallback.Invoke();
-    // };
-    // ViewAbstract::SetOnDisappear(frameNode, std::move(onEvent));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onEvent = [arkCallback = CallbackHelper(*value)]() {
+        arkCallback.Invoke();
+    };
+    ViewAbstract::SetOnDisappear(frameNode, std::move(onEvent));
 }
 void OnAttachImpl(Ark_NativePointer node,
                   const Callback_Void* value)
@@ -3044,9 +3044,9 @@ void OnAreaChangeImpl(Ark_NativePointer node,
 void VisibilityImpl(Ark_NativePointer node,
                     Ark_Visibility value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // ViewAbstract::SetVisibility(frameNode, static_cast<VisibleType>(value));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetVisibility(frameNode, static_cast<VisibleType>(value));
 }
 void FlexGrowImpl(Ark_NativePointer node,
                   const Ark_Number* value)
@@ -3101,13 +3101,13 @@ void DisplayPriorityImpl(Ark_NativePointer node,
 void ZIndexImpl(Ark_NativePointer node,
                 const Ark_Number* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto result = Converter::OptConvert<int>(*value);
-    // if (result) {
-    //     ViewAbstract::SetZIndex(frameNode, result.value());
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto result = Converter::OptConvert<int>(*value);
+    if (result) {
+        ViewAbstract::SetZIndex(frameNode, result.value());
+    }
 }
 void DirectionImpl(Ark_NativePointer node,
                    Ark_Direction value)
@@ -3196,9 +3196,9 @@ void OffsetImpl(Ark_NativePointer node,
 void EnabledImpl(Ark_NativePointer node,
                  Ark_Boolean value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // ViewAbstract::SetEnabled(frameNode, static_cast<bool>(value));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetEnabled(frameNode, static_cast<bool>(value));
 }
 void UseSizeTypeImpl(Ark_NativePointer node,
                      const Ark_Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs* value)
