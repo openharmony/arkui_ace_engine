@@ -594,9 +594,12 @@ bool GridIrregularLayoutAlgorithm::IsIrregularLine(int32_t lineIndex) const
         return true;
     }
     auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
-    const auto& opts = *props->GetLayoutOptions();
-    return std::any_of(line->second.begin(), line->second.end(),
-        [opts](const auto& item) { return opts.irregularIndexes.count(std::abs(item.second)); });
+    if (props->HasLayoutOptions()) {
+        const auto& opts = *props->GetLayoutOptions();
+        return std::any_of(line->second.begin(), line->second.end(),
+            [opts](const auto& item) { return opts.irregularIndexes.count(std::abs(item.second)); });
+    }
+    return false;
 }
 
 void GridIrregularLayoutAlgorithm::SyncPreloadItems(int32_t cacheCnt)
