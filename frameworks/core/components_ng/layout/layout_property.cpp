@@ -1124,6 +1124,15 @@ void LayoutProperty::UpdateMargin(const MarginProperty& value)
     }
 }
 
+void LayoutProperty::ResetMargin()
+{
+    if (!margin_) {
+        return;
+    }
+    margin_.reset();
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+}
+
 void LayoutProperty::UpdatePadding(const PaddingProperty& value)
 {
     if (!padding_) {
@@ -1132,6 +1141,15 @@ void LayoutProperty::UpdatePadding(const PaddingProperty& value)
     if (padding_->UpdateWithCheck(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }
+}
+
+void LayoutProperty::ResetPadding()
+{
+    if (!padding_) {
+        return;
+    }
+    padding_.reset();
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
 }
 
 void LayoutProperty::UpdateSafeAreaPadding(const PaddingProperty& value)
@@ -1311,6 +1329,17 @@ void LayoutProperty::UpdateFlexBasis(const Dimension& flexBasis)
     if (flexItemProperty_->UpdateFlexBasis(flexBasis)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
+}
+
+void LayoutProperty::ResetFlexBasis()
+{
+    if (!flexItemProperty_) {
+        return;
+    }
+    if (flexItemProperty_->HasFlexBasis()) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+    flexItemProperty_->ResetFlexBasis();
 }
 
 void LayoutProperty::UpdateAlignSelf(const FlexAlign& flexAlign)
