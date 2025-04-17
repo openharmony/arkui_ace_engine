@@ -144,6 +144,7 @@ const CONTENT_FONT_WEIGHT = lazyInit<FontWeight>(() => {
   return fontWeight;
 });
 const SCROLL_BAR_OFFSET = 20;
+const SELECT_DIALOG_SCROLL_BAR_OFFSET = 4;
 
 @CustomDialog
 export struct TipsDialog {
@@ -329,11 +330,12 @@ export struct TipsDialog {
           }
         }
       }
-      .margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) })
+      .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
+      .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
     }
     .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
     .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-    .margin({ end: LengthMetrics.vp(this.marginOffset) })
+    .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) })
   }
 
   aboutToAppear() {
@@ -594,6 +596,7 @@ export struct SelectDialog {
         this.isFocus = false;
       }
     })
+    .margin({ end: LengthMetrics.vp(SELECT_DIALOG_SCROLL_BAR_OFFSET) })
   }
 
   build() {
@@ -763,11 +766,12 @@ export struct ConfirmDialog {
             })
             .width('100%')
         }
-        .margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) })
+        .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
+        .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
       }
       .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-      .margin({ end: LengthMetrics.vp(this.marginOffset) })
+      .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) })
     }
   }
 
