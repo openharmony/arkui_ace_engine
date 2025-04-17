@@ -345,35 +345,14 @@ void FlexLayoutAlgorithm::MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrappe
     }
 }
 
-void FlexLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF realSize)
+void FlexLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF& realSize)
 {
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    bool version = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SEVENTEEN);
-    if (version) {
-        auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-        MinusPaddingToNonNegativeSize(padding, realSize);
-    }
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToNonNegativeSize(padding, realSize);
     layoutConstraint.parentIdealSize.SetSize(realSize);
     for (const auto& child : layoutPolicyChildren_) {
         child->Measure(layoutConstraint);
-        if (!version) {
-            auto geometryNode = child->GetGeometryNode();
-            CHECK_NULL_CONTINUE(geometryNode);
-            auto widthLayoutPolicy =
-                AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty())->GetWidthLayoutPolicy();
-            auto heightLayoutPolicy =
-                AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty())->GetHeightLayoutPolicy();
-            if (widthLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) ==
-                static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT)) {
-                geometryNode->SetFrameWidth(realSize.Width());
-            }
-            if (heightLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) ==
-                static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT)) {
-                geometryNode->SetFrameHeight(realSize.Height());
-            }
-        }
     }
 }
 
