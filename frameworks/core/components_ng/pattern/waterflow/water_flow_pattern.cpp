@@ -29,6 +29,7 @@
 namespace OHOS::Ace::NG {
 void WaterFlowPattern::OnAttachToFrameNode()
 {
+    ScrollablePattern::OnAttachToFrameNode();
     auto* context = GetContext();
     CHECK_NULL_VOID(context);
     if (context->GetFrontendType() == FrontendType::ARK_TS) {

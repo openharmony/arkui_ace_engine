@@ -826,6 +826,7 @@ public:
     void MarkScrollBarProxyDirty();
 protected:
     void SuggestOpIncGroup(bool flag);
+    void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     RefPtr<ScrollBar> GetScrollBar() const
     {
@@ -942,7 +943,6 @@ private:
     void InitOption(AnimationOption &option, float duration, const RefPtr<Curve>& curve);
     float GetScrollDelta(float offset, bool& stopAnimation);
 
-    void OnAttachToFrameNode() override;
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void RegisterWindowStateChangedCallback();
 
