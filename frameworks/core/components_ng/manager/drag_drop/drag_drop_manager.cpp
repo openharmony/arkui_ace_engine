@@ -352,6 +352,16 @@ void DragDropManager::HideDragPreviewWindow(int32_t containerId)
     SubwindowManager::GetInstance()->HidePreviewNG();
 }
 
+void DragDropManager::HideSubwindowDragNode()
+{
+    auto subwindowOverlayManager = subwindowOverlayManager_.Upgrade();
+    CHECK_NULL_VOID(subwindowOverlayManager);
+    subwindowOverlayManager->RemovePixelMap();
+    subwindowOverlayManager->RemoveGatherNode();
+    subwindowOverlayManager->RemoveDragPixelMap();
+    subwindowOverlayManager_ = nullptr;
+}
+
 RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
     const RefPtr<UINode> parentNode, std::vector<RefPtr<FrameNode>> hitFrameNodes, bool findDrop)
 {
@@ -763,6 +773,7 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
     InteractionInterface::GetInstance()->SetDragWindowVisible(true);
     DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
     isDragFwkShow_ = true;
+    HideSubwindowDragNode();
     auto overlayManager = GetDragAnimationOverlayManager(windowContainerId);
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RemoveDragPixelMap();
@@ -1437,6 +1448,7 @@ void DragDropManager::ExecuteStopDrag(const RefPtr<OHOS::Ace::DragEvent>& event,
     }
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
+    HideSubwindowDragNode();
     auto overlayManager = GetDragAnimationOverlayManager(pipeline->GetInstanceId());
     if (overlayManager && !isDragFwkShow_) {
         overlayManager->RemoveDragPixelMap();
@@ -1471,6 +1483,7 @@ void DragDropManager::ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEve
         overlayManager->RemoveDragPixelMap();
         overlayManager->RemoveFilter();
     }
+    HideSubwindowDragNode();
     InteractionInterface::GetInstance()->SetDragWindowVisible(false);
     pipeline->FlushMessages();
     InteractionInterface::GetInstance()->StopDrag(dragDropRet);
@@ -2369,6 +2382,7 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     }
     CHECK_NULL_VOID(info_.imageNode);
     isDragFwkShow_ = false;
+    subwindowOverlayManager_ = overlayManager;
     InitDragAnimationPointerEvent(event, isDragStartPending);
     ResetPullMoveReceivedForCurrentDrag();
     Point point = { static_cast<int32_t>(event.GetGlobalLocation().GetX()),
