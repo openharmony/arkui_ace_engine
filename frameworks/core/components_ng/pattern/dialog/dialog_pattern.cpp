@@ -1314,27 +1314,27 @@ void DialogPattern::OnColorConfigurationUpdate()
 
 void DialogPattern::UpdateTitleAndContentColor()
 {
+    CHECK_NULL_VOID(dialogTheme_);
     if (!dialogProperties_.title.empty() && contentNodeMap_.find(DialogContentNode::TITLE) != contentNodeMap_.end()) {
-        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::TITLE]);
+        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::TITLE], dialogTheme_->GetTitleTextStyle());
     }
     if (!dialogProperties_.subtitle.empty() &&
         contentNodeMap_.find(DialogContentNode::SUBTITLE) != contentNodeMap_.end()) {
-        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::SUBTITLE]);
+        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::SUBTITLE],
+            dialogProperties_.title.empty() ? dialogTheme_->GetTitleTextStyle() : dialogTheme_->GetSubTitleTextStyle());
     }
     if (!dialogProperties_.content.empty() &&
         contentNodeMap_.find(DialogContentNode::MESSAGE) != contentNodeMap_.end()) {
-        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::MESSAGE]);
+        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::MESSAGE], dialogTheme_->GetContentTextStyle());
     }
 }
 
-void DialogPattern::UpdateDialogTextColor(const RefPtr<FrameNode>& textNode)
+void DialogPattern::UpdateDialogTextColor(const RefPtr<FrameNode>& textNode, const TextStyle& textStyle)
 {
     CHECK_NULL_VOID(textNode);
-    CHECK_NULL_VOID(dialogTheme_);
-    auto titleStyle = dialogTheme_->GetTitleTextStyle();
     auto textProps = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
     CHECK_NULL_VOID(textProps);
-    textProps->UpdateTextColor(titleStyle.GetTextColor());
+    textProps->UpdateTextColor(textStyle.GetTextColor());
     textNode->MarkModifyDone();
 }
 
