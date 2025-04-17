@@ -26,7 +26,7 @@
 
 using namespace testing;
 using namespace testing::ext;
- 
+
 namespace OHOS::Ace {
 namespace NG {
 
@@ -421,5 +421,35 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg140, TestSize.Level1)
     ASSERT_NE(context_->textFieldManager_, nullptr);
 }
 
+/**
+ * @tc.name: PipelineContextTestNg141
+ * @tc.desc: Test the function OnDumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg141, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
+    ASSERT_NE(ostream, nullptr);
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+    /**
+     * @tc.steps2: init a vector with some string params and
+                call OnDumpInfo with every param array.
+     * @tc.expected: The return value is same as the expectation.
+     */
+    auto testJson = R"({"cmd":"changeIndex","params":{"index":0}} 6)";
+    auto testErrorJson = R"({"cmd":"changeIndex","params":{"index":2}} -1)";
+    std::vector<std::vector<std::string>> params = { { "-injection", testJson }, { "-injection", testErrorJson } };
+    int turn = 0;
+    for (; turn < params.size(); turn++) {
+        EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
+    }
+}
 } // namespace NG
 } // namespace OHOS::Ace
