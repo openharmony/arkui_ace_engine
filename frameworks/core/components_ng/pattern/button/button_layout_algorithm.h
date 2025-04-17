@@ -37,7 +37,6 @@ public:
 private:
     void HandleAdaptiveText(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
     void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
-    void MarkNeedFlushMouseEvent(LayoutWrapper* layoutWrapper);
     bool NeedAgingMeasure(LayoutWrapper* layoutWrapper);
     static bool IsAging(LayoutWrapper* layoutWrapper);
     static void HandleChildLayoutConstraint(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
