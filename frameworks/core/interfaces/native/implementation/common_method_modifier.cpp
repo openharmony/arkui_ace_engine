@@ -128,99 +128,137 @@ namespace GeneratedModifier {
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
 }
 
-// auto g_isPopupCreated = [](FrameNode* frameNode) -> bool {
-//     auto targetId = frameNode->GetId();
-//     auto container = Container::Current();
-//     CHECK_NULL_RETURN(container, false);
-//     auto pipelineContext = container->GetPipelineContext();
-//     CHECK_NULL_RETURN(pipelineContext, false);
-//     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-//     CHECK_NULL_RETURN(context, false);
-//     auto overlayManager = context->GetOverlayManager();
-//     CHECK_NULL_RETURN(overlayManager, false);
-//     auto popupInfo = overlayManager->GetPopupInfo(targetId);
-//     if (popupInfo.popupId == -1 || !popupInfo.popupNode) {
-//         return false;
-//     }
-//     return true;
-// };
+auto g_isPopupCreated = [](FrameNode* frameNode) -> bool {
+    auto targetId = frameNode->GetId();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_RETURN(context, false);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto popupInfo = overlayManager->GetPopupInfo(targetId);
+    if (popupInfo.popupId == -1 || !popupInfo.popupNode) {
+        return false;
+    }
+    return true;
+};
 
-// auto g_onWillDismissPopup = [](
-//     const Opt_Union_Boolean_Callback_DismissPopupAction_Void& param, RefPtr<PopupParam>& popupParam) {
-//     CHECK_NULL_VOID(popupParam);
-//     Converter::VisitUnion(param,
-//         [&popupParam](const Ark_Boolean& value) {
-//             popupParam->SetInteractiveDismiss(Converter::Convert<bool>(value));
-//             popupParam->SetOnWillDismiss(nullptr);
-//         },
-//         [&popupParam](const Callback_DismissPopupAction_Void& value) {
-//             auto callback = [arkCallback = CallbackHelper(value)](int32_t reason) {
-//                 Ark_DismissPopupAction parameter;
-//                 auto reasonOpt = Converter::ArkValue<Opt_DismissReason>(
-//                     static_cast<BindSheetDismissReason>(reason));
-//                 parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
-//                     .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-//                 const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstract::DismissPopup));
-//                 parameter.dismiss = keeper.ArkValue();
-//                 arkCallback.Invoke(parameter);
-//             };
-//             popupParam->SetOnWillDismiss(std::move(callback));
-//             popupParam->SetInteractiveDismiss(true);
-//         },
-//         []() {});
-// };
+auto g_onWillDismissPopup = [](
+    const Opt_Union_Boolean_Callback_DismissPopupAction_Void& param, RefPtr<PopupParam>& popupParam) {
+    CHECK_NULL_VOID(popupParam);
+    Converter::VisitUnion(param,
+        [&popupParam](const Ark_Boolean& value) {
+            popupParam->SetInteractiveDismiss(Converter::Convert<bool>(value));
+            popupParam->SetOnWillDismiss(nullptr);
+        },
+        [&popupParam](const Callback_DismissPopupAction_Void& value) {
+            auto callback = [arkCallback = CallbackHelper(value)](int32_t reason) {
+                Ark_DismissPopupAction parameter;
+                auto reasonOpt = Converter::ArkValue<Opt_DismissReason>(
+                    static_cast<BindSheetDismissReason>(reason));
+                parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
+                    .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
+                const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstract::DismissPopup));
+                parameter.dismiss = keeper.ArkValue();
+                arkCallback.Invoke(parameter);
+            };
+            popupParam->SetOnWillDismiss(std::move(callback));
+            popupParam->SetInteractiveDismiss(true);
+        },
+        []() {});
+};
 
-// auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
-//     CHECK_NULL_VOID(popupParam);
-//     popupParam->SetEnableHoverMode(OptConvert<bool>(src.enableHoverMode).value_or(popupParam->EnableHoverMode()));
-//     popupParam->SetFollowTransformOfTarget(OptConvert<bool>(src.followTransformOfTarget)
-//         .value_or(popupParam->IsFollowTransformOfTarget()));
-//     Converter::VisitUnion(src.mask,
-//         [&popupParam](const Ark_Boolean& mask) {
-//             popupParam->SetBlockEvent(Convert<bool>(mask));
-//         },
-//         [&popupParam](const Ark_Literal_ResourceColor_color& mask) {
-//             popupParam->SetMaskColor(OptConvert<Color>(mask.color));
-//         },
-//         []() {});
-//     auto arkOnStateChange = OptConvert<Callback_Literal_Boolean_isVisible_Void>(src.onStateChange);
-//     if (arkOnStateChange) {
-//         auto onStateChangeCallback = [arkCallback = CallbackHelper(arkOnStateChange.value())](
-//             const std::string& param) {
-//             auto json = JsonUtil::Create(true);
-//             json->Put("isVisible", param.c_str());
-//             Ark_Literal_Boolean_isVisible event;
-//             event.isVisible = Converter::ArkValue<Ark_Boolean>(json->GetBool("isVisible", false));
-//             arkCallback.Invoke(event);
-//         };
-//         popupParam->SetOnStateChange(std::move(onStateChangeCallback));
-//     }
-//     auto offsetVal = OptConvert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(src.offset);
-//     if (offsetVal) {
-//         Offset popupOffset;
-//         popupOffset.SetX(offsetVal.value().first->ConvertToPx());
-//         popupOffset.SetY(offsetVal.value().second->ConvertToPx());
-//         popupParam->SetTargetOffset(popupOffset);
-//     }
-//     popupParam->SetBackgroundColor(Converter::OptConvert<Color>(src.popupColor));
-//     popupParam->SetHasAction(Converter::OptConvert<bool>(src.autoCancel).value_or(popupParam->HasAction()));
-//     auto width = Converter::OptConvert<CalcDimension>(src.width);
-//     Validator::ValidateNonNegative(width);
-//     popupParam->SetChildWidth(width);
-//     auto arrowWidth = Converter::OptConvert<CalcDimension>(src.arrowWidth);
-//     Validator::ValidateNonNegative(arrowWidth);
-//     Validator::ValidateNonPercent(arrowWidth);
-//     popupParam->SetArrowWidth(arrowWidth);
-//     auto arrowHeight = Converter::OptConvert<CalcDimension>(src.arrowHeight);
-//     Validator::ValidateNonNegative(arrowHeight);
-//     Validator::ValidateNonPercent(arrowHeight);
-//     popupParam->SetArrowHeight(arrowHeight);
-//     auto radius = Converter::OptConvert<CalcDimension>(src.radius);
-//     Validator::ValidateNonNegative(radius);
-//     popupParam->SetRadius(radius);
-//     popupParam->SetShadow(Converter::OptConvert<Shadow>(src.shadow));
-//     popupParam->SetBlurStyle(Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle));
-// };
+auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
+    CHECK_NULL_VOID(popupParam);
+    popupParam->SetEnableHoverMode(OptConvert<bool>(src.enableHoverMode).value_or(popupParam->EnableHoverMode()));
+    popupParam->SetFollowTransformOfTarget(OptConvert<bool>(src.followTransformOfTarget)
+        .value_or(popupParam->IsFollowTransformOfTarget()));
+    Converter::VisitUnion(src.mask,
+        [&popupParam](const Ark_Boolean& mask) {
+            popupParam->SetBlockEvent(Convert<bool>(mask));
+        },
+        [&popupParam](const Ark_Literal_ResourceColor_color& mask) {
+            auto maskColorOpt = OptConvert<Color>(mask.color);
+            if (maskColorOpt.has_value()) {
+                popupParam->SetMaskColor(maskColorOpt.value());
+            }
+        },
+        []() {});
+    auto arkOnStateChange = OptConvert<Callback_Literal_Boolean_isVisible_Void>(src.onStateChange);
+    if (arkOnStateChange.has_value()) {
+        auto onStateChangeCallback = [arkCallback = CallbackHelper(arkOnStateChange.value())](
+            const std::string& param) {
+            auto json = JsonUtil::Create(true);
+            json->Put("isVisible", param.c_str());
+            Ark_Literal_Boolean_isVisible event;
+            event.isVisible = Converter::ArkValue<Ark_Boolean>(json->GetBool("isVisible", false));
+            arkCallback.Invoke(event);
+        };
+        popupParam->SetOnStateChange(std::move(onStateChangeCallback));
+    }
+    auto offsetVal = OptConvert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(src.offset);
+    if (offsetVal.has_value()) {
+        Offset popupOffset;
+        popupOffset.SetX(offsetVal.value().first->ConvertToPx());
+        popupOffset.SetY(offsetVal.value().second->ConvertToPx());
+        popupParam->SetTargetOffset(popupOffset);
+    }
+    auto backgroundColorOpt = Converter::OptConvert<Color>(src.popupColor);
+    if (backgroundColorOpt.has_value()) {
+        popupParam->SetBackgroundColor(backgroundColorOpt.value());
+    }
+    popupParam->SetHasAction(Converter::OptConvert<bool>(src.autoCancel).value_or(popupParam->HasAction()));
+};
+
+auto g_popupCommonParamPart1 = [](const auto& src, RefPtr<PopupParam>& popupParam) {
+    CHECK_NULL_VOID(popupParam);
+    auto widthOpt = Converter::OptConvert<CalcDimension>(src.width);
+    Validator::ValidateNonNegative(widthOpt);
+    if (widthOpt.has_value()) {
+        popupParam->SetChildWidth(widthOpt.value());
+    }
+    auto arrowWidthOpt = Converter::OptConvert<CalcDimension>(src.arrowWidth);
+    Validator::ValidateNonNegative(arrowWidthOpt);
+    Validator::ValidateNonPercent(arrowWidthOpt);
+    if (arrowWidthOpt.has_value()) {
+        popupParam->SetArrowWidth(arrowWidthOpt.value());
+    }
+    auto arrowHeightOpt = Converter::OptConvert<CalcDimension>(src.arrowHeight);
+    Validator::ValidateNonNegative(arrowHeightOpt);
+    Validator::ValidateNonPercent(arrowHeightOpt);
+    if (arrowHeightOpt.has_value()) {
+        popupParam->SetArrowHeight(arrowHeightOpt.value());
+    }
+    auto radiusOpt = Converter::OptConvert<CalcDimension>(src.radius);
+    Validator::ValidateNonNegative(radiusOpt);
+    if (radiusOpt.has_value()) {
+        popupParam->SetRadius(radiusOpt.value());
+    }
+    auto shadowOpt = Converter::OptConvert<Shadow>(src.shadow);
+    if (shadowOpt.has_value()) {
+        popupParam->SetShadow(shadowOpt.value());
+    }
+    auto blurStyleOpt = Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle);
+    if (blurStyleOpt.has_value()) {
+        popupParam->SetBlurStyle(blurStyleOpt.value());
+    }
+    auto targetSpaceOpt = Converter::OptConvert<CalcDimension>(src.targetSpace);
+    if (targetSpaceOpt.has_value()) {
+        popupParam->SetTargetSpace(targetSpaceOpt.value());
+    }
+    bool showInSubBoolean = OptConvert<bool>(src.showInSubWindow).value_or(popupParam->IsShowInSubWindow());
+#if defined(PREVIEW)
+    showInSubBoolean = false;
+#endif
+    popupParam->SetShowInSubWindow(showInSubBoolean);
+    popupParam->SetEnableArrow(OptConvert<bool>(src.enableArrow).value_or(popupParam->EnableArrow()));
+    auto transitionOpt = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(src.transition);
+    if (transitionOpt.has_value()) {
+        popupParam->SetTransitionEffects(transitionOpt.value());
+    }
+};
 
 // auto g_contentCoverCallbacks = [](WeakPtr<FrameNode> weakNode, const Ark_ContentCoverOptions& options,
 //     std::function<void()>& onShowCallback, std::function<void()>& onDismissCallback,
@@ -270,107 +308,107 @@ const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
 //     }
 // };
 
-// auto g_bindMenuOptionsParamCallbacks = [](
-//     const auto& menuOptions, MenuParam& menuParam, WeakPtr<FrameNode> weakNode) {
-//     auto onAppearValue = OptConvert<Callback_Void>(menuOptions.onAppear);
-//     if (onAppearValue) {
-//         auto onAppear = [arkCallback = CallbackHelper(onAppearValue.value()), weakNode]() {
-//             PipelineContext::SetCallBackNode(weakNode);
-//             arkCallback.Invoke();
-//         };
-//         menuParam.onAppear = std::move(onAppear);
-//     }
-//     auto onDisappearValue = OptConvert<Callback_Void>(menuOptions.onDisappear);
-//     if (onDisappearValue) {
-//         auto onDisappear = [arkCallback = CallbackHelper(onDisappearValue.value()), weakNode]() {
-//             PipelineContext::SetCallBackNode(weakNode);
-//             arkCallback.Invoke();
-//         };
-//         menuParam.onDisappear = std::move(onDisappear);
-//     }
-//     auto aboutToAppearValue = OptConvert<Callback_Void>(menuOptions.aboutToAppear);
-//     if (aboutToAppearValue) {
-//         auto aboutToAppear = [arkCallback = CallbackHelper(aboutToAppearValue.value()), weakNode]() {
-//             PipelineContext::SetCallBackNode(weakNode);
-//             arkCallback.Invoke();
-//         };
-//         menuParam.aboutToAppear = std::move(aboutToAppear);
-//     }
-//     auto aboutToDisAppearValue = OptConvert<Callback_Void>(menuOptions.aboutToDisappear);
-//     if (aboutToDisAppearValue) {
-//         auto aboutToDisappear = [arkCallback = CallbackHelper(aboutToDisAppearValue.value()), weakNode]() {
-//             PipelineContext::SetCallBackNode(weakNode);
-//             arkCallback.Invoke();
-//         };
-//         menuParam.aboutToDisappear = std::move(aboutToDisappear);
-//     }
-// };
+auto g_bindMenuOptionsParamCallbacks = [](
+    const auto& menuOptions, MenuParam& menuParam, WeakPtr<FrameNode> weakNode) {
+    auto onAppearValue = OptConvert<Callback_Void>(menuOptions.onAppear);
+    if (onAppearValue) {
+        auto onAppear = [arkCallback = CallbackHelper(onAppearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+        menuParam.onAppear = std::move(onAppear);
+    }
+    auto onDisappearValue = OptConvert<Callback_Void>(menuOptions.onDisappear);
+    if (onDisappearValue) {
+        auto onDisappear = [arkCallback = CallbackHelper(onDisappearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+        menuParam.onDisappear = std::move(onDisappear);
+    }
+    auto aboutToAppearValue = OptConvert<Callback_Void>(menuOptions.aboutToAppear);
+    if (aboutToAppearValue) {
+        auto aboutToAppear = [arkCallback = CallbackHelper(aboutToAppearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+        menuParam.aboutToAppear = std::move(aboutToAppear);
+    }
+    auto aboutToDisAppearValue = OptConvert<Callback_Void>(menuOptions.aboutToDisappear);
+    if (aboutToDisAppearValue) {
+        auto aboutToDisappear = [arkCallback = CallbackHelper(aboutToDisAppearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+        menuParam.aboutToDisappear = std::move(aboutToDisappear);
+    }
+};
 
-// auto g_bindMenuOptionsParam = [](
-//     const auto& menuOptions, MenuParam& menuParam, WeakPtr<FrameNode> weakNode) {
-//     auto offsetVal =
-//         OptConvert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(menuOptions.offset);
-//     if (offsetVal) {
-//         menuParam.positionOffset.SetX(offsetVal.value().first->ConvertToPx());
-//         menuParam.positionOffset.SetY(offsetVal.value().second->ConvertToPx());
-//     }
-//     menuParam.placement = OptConvert<Placement>(menuOptions.placement);
-//     menuParam.enableHoverMode = OptConvert<bool>(menuOptions.enableHoverMode).value_or(menuParam.enableHoverMode);
-//     menuParam.backgroundColor = OptConvert<Color>(menuOptions.backgroundColor);
-//     auto backgroundBlurStyle = OptConvert<BlurStyle>(menuOptions.backgroundBlurStyle);
-//     menuParam.backgroundBlurStyle = backgroundBlurStyle ?
-//         std::optional<int32_t>(static_cast<int32_t>(backgroundBlurStyle.value())) : std::nullopt;
-//     g_bindMenuOptionsParamCallbacks(menuOptions, menuParam, weakNode);
-//     auto transitionOpt = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(menuOptions.transition);
-//     menuParam.transition = transitionOpt.value_or(menuParam.transition);
-//     menuParam.hasTransitionEffect = transitionOpt.has_value();
-//     menuParam.enableArrow = OptConvert<bool>(menuOptions.enableArrow);
-//     menuParam.arrowOffset = OptConvert<CalcDimension>(menuOptions.arrowOffset);
-//     // if enableArrow is true and placement not set, set placement default value to top.
-//     if (menuParam.enableArrow.has_value() && !menuParam.placement.has_value() && menuParam.enableArrow.value()) {
-//         menuParam.placement = Placement::TOP;
-//     }
-//     menuParam.borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
-//     menuParam.layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
-// };
+auto g_bindMenuOptionsParam = [](
+    const auto& menuOptions, MenuParam& menuParam, WeakPtr<FrameNode> weakNode) {
+    auto offsetVal =
+        OptConvert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(menuOptions.offset);
+    if (offsetVal) {
+        menuParam.positionOffset.SetX(offsetVal.value().first->ConvertToPx());
+        menuParam.positionOffset.SetY(offsetVal.value().second->ConvertToPx());
+    }
+    menuParam.placement = OptConvert<Placement>(menuOptions.placement);
+    menuParam.enableHoverMode = OptConvert<bool>(menuOptions.enableHoverMode).value_or(menuParam.enableHoverMode);
+    menuParam.backgroundColor = OptConvert<Color>(menuOptions.backgroundColor);
+    auto backgroundBlurStyle = OptConvert<BlurStyle>(menuOptions.backgroundBlurStyle);
+    menuParam.backgroundBlurStyle = backgroundBlurStyle ?
+        std::optional<int32_t>(static_cast<int32_t>(backgroundBlurStyle.value())) : std::nullopt;
+    g_bindMenuOptionsParamCallbacks(menuOptions, menuParam, weakNode);
+    auto transitionOpt = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(menuOptions.transition);
+    menuParam.transition = transitionOpt.value_or(menuParam.transition);
+    menuParam.hasTransitionEffect = transitionOpt.has_value();
+    menuParam.enableArrow = OptConvert<bool>(menuOptions.enableArrow);
+    menuParam.arrowOffset = OptConvert<CalcDimension>(menuOptions.arrowOffset);
+    // if enableArrow is true and placement not set, set placement default value to top.
+    if (menuParam.enableArrow.has_value() && !menuParam.placement.has_value() && menuParam.enableArrow.value()) {
+        menuParam.placement = Placement::TOP;
+    }
+    menuParam.borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
+    menuParam.layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
+};
 
-// auto g_bindContextMenuParams = [](MenuParam& menuParam, const Opt_ContextMenuOptions* options,
-//     std::function<void()>& previewBuildFunc, Ark_NativePointer node, FrameNode* frameNode) {
-//     menuParam.placement = Placement::BOTTOM_LEFT;
-//     menuParam.type = NG::MenuType::CONTEXT_MENU;
-//     auto menuOption = options ? Converter::OptConvert<Ark_ContextMenuOptions>(*options) : std::nullopt;
-//     CHECK_NULL_VOID(menuOption);
-//     auto weakNode = AceType::WeakClaim(frameNode);
-//     g_bindMenuOptionsParam(menuOption.value(), menuParam, weakNode);
-//     Converter::VisitUnion(menuOption->preview,
-//         [&menuParam, menuOption](const Ark_MenuPreviewMode& value) {
-//             auto mode = Converter::OptConvert<MenuPreviewMode>(value);
-//             if (mode && mode.value() == MenuPreviewMode::IMAGE) {
-//                 menuParam.previewMode = MenuPreviewMode::IMAGE;
-//             }
-//         },
-//         [&menuParam, menuOption, &previewBuildFunc, node, frameNode, weakNode](const CustomNodeBuilder& value) {
-//             previewBuildFunc = [callback = CallbackHelper(value), node, weakNode]() -> RefPtr<UINode> {
-//                 PipelineContext::SetCallBackNode(weakNode);
-//                 return callback.BuildSync(node);
-//             };
-//             menuParam.previewMode = MenuPreviewMode::CUSTOM;
-//         },
-//         []() {});
-//     auto optParam = options ? Converter::OptConvert<NG::MenuParam>(menuOption->previewAnimationOptions) : std::nullopt;
-//     if (optParam) {
-//         menuParam.previewAnimationOptions = optParam->previewAnimationOptions;
-//         if (menuParam.previewMode != MenuPreviewMode::CUSTOM ||
-//             optParam->hasPreviewTransitionEffect || optParam->hasTransitionEffect ||
-//             menuParam.contextMenuRegisterType == NG::ContextMenuRegisterType::CUSTOM_TYPE) {
-//             return;
-//         }
-//         menuParam.hasPreviewTransitionEffect = optParam->hasPreviewTransitionEffect;
-//         menuParam.previewTransition = optParam->previewTransition;
-//         menuParam.hoverImageAnimationOptions = optParam->hoverImageAnimationOptions;
-//         menuParam.isShowHoverImage = optParam->isShowHoverImage;
-//     }
-// };
+auto g_bindContextMenuParams = [](MenuParam& menuParam, const Opt_ContextMenuOptions* options,
+    std::function<void()>& previewBuildFunc, Ark_NativePointer node, FrameNode* frameNode) {
+    menuParam.placement = Placement::BOTTOM_LEFT;
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
+    auto menuOption = options ? Converter::OptConvert<Ark_ContextMenuOptions>(*options) : std::nullopt;
+    CHECK_NULL_VOID(menuOption);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    g_bindMenuOptionsParam(menuOption.value(), menuParam, weakNode);
+    Converter::VisitUnion(menuOption->preview,
+        [&menuParam, menuOption](const Ark_MenuPreviewMode& value) {
+            auto mode = Converter::OptConvert<MenuPreviewMode>(value);
+            if (mode && mode.value() == MenuPreviewMode::IMAGE) {
+                menuParam.previewMode = MenuPreviewMode::IMAGE;
+            }
+        },
+        [&menuParam, menuOption, &previewBuildFunc, node, frameNode, weakNode](const CustomNodeBuilder& value) {
+            previewBuildFunc = [callback = CallbackHelper(value), node, weakNode]() -> RefPtr<UINode> {
+                PipelineContext::SetCallBackNode(weakNode);
+                return callback.BuildSync(node);
+            };
+            menuParam.previewMode = MenuPreviewMode::CUSTOM;
+        },
+        []() {});
+    auto optParam = options ? Converter::OptConvert<NG::MenuParam>(menuOption->previewAnimationOptions) : std::nullopt;
+    if (optParam) {
+        menuParam.previewAnimationOptions = optParam->previewAnimationOptions;
+        if (menuParam.previewMode != MenuPreviewMode::CUSTOM ||
+            optParam->hasPreviewTransitionEffect || optParam->hasTransitionEffect ||
+            menuParam.contextMenuRegisterType == NG::ContextMenuRegisterType::CUSTOM_TYPE) {
+            return;
+        }
+        menuParam.hasPreviewTransitionEffect = optParam->hasPreviewTransitionEffect;
+        menuParam.previewTransition = optParam->previewTransition;
+        menuParam.hoverImageAnimationOptions = optParam->hoverImageAnimationOptions;
+        menuParam.isShowHoverImage = optParam->isShowHoverImage;
+    }
+};
 
 // auto g_bindSheetCallbacks1 = [](SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions) {
 //     auto onAppear = Converter::OptConvert<Callback_Void>(sheetOptions.onAppear);
@@ -543,39 +581,39 @@ const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
 // }
 // } // namespace Validator
 
-// namespace Converter {
+namespace Converter {
 
-// template<>
-// MenuPreviewAnimationOptions Convert(const Ark_AnimationRange_Number& options)
-// {
-//     return {
-//         .scaleFrom = Convert<float>(options.value0),
-//         .scaleTo = Convert<float>(options.value1)
-//     };
-// }
+template<>
+MenuPreviewAnimationOptions Convert(const Ark_AnimationRange_Number& options)
+{
+    return {
+        .scaleFrom = Convert<float>(options.value0),
+        .scaleTo = Convert<float>(options.value1)
+    };
+}
 
-// template<>
-// NG::MenuParam Convert(const Ark_ContextMenuAnimationOptions& options)
-// {
-//     NG::MenuParam menuParam;
-//     auto scale = OptConvert<MenuPreviewAnimationOptions>(options.scale);
-//     if (scale) {
-//         menuParam.previewAnimationOptions = *scale;
-//     }
-//     menuParam.hasPreviewTransitionEffect = false;
-//     auto previewTransition = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(options.transition);
-//     if (previewTransition && *previewTransition) {
-//         menuParam.hasPreviewTransitionEffect = true;
-//         menuParam.previewTransition = *previewTransition;
-//     }
-//     auto hoverScale = OptConvert<MenuPreviewAnimationOptions>(options.hoverScale);
-//     menuParam.isShowHoverImage = false;
-//     if (hoverScale) {
-//         menuParam.hoverImageAnimationOptions = *hoverScale;
-//         menuParam.isShowHoverImage = true;
-//     }
-//     return menuParam;
-// }
+template<>
+NG::MenuParam Convert(const Ark_ContextMenuAnimationOptions& options)
+{
+    NG::MenuParam menuParam;
+    auto scale = OptConvert<MenuPreviewAnimationOptions>(options.scale);
+    if (scale) {
+        menuParam.previewAnimationOptions = *scale;
+    }
+    menuParam.hasPreviewTransitionEffect = false;
+    auto previewTransition = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(options.transition);
+    if (previewTransition && *previewTransition) {
+        menuParam.hasPreviewTransitionEffect = true;
+        menuParam.previewTransition = *previewTransition;
+    }
+    auto hoverScale = OptConvert<MenuPreviewAnimationOptions>(options.hoverScale);
+    menuParam.isShowHoverImage = false;
+    if (hoverScale) {
+        menuParam.hoverImageAnimationOptions = *hoverScale;
+        menuParam.isShowHoverImage = true;
+    }
+    return menuParam;
+}
 
 // template<>
 // void AssignCast(std::optional<BackgroundImageSizeType>& dst, const Ark_ImageSize& src)
@@ -774,13 +812,13 @@ const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
 //     return imageSize;
 // }
 
-// template<>
-// std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_Position& src)
-// {
-//     auto x = OptConvert<Dimension>(src.x);
-//     auto y = OptConvert<Dimension>(src.y);
-//     return {x, y};
-// }
+template<>
+std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_Position& src)
+{
+    auto x = OptConvert<Dimension>(src.x);
+    auto y = OptConvert<Dimension>(src.y);
+    return {x, y};
+}
 
 // template<>
 // TranslateOpt Convert(const Ark_TranslateOptions& src)
@@ -1023,18 +1061,18 @@ const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
 //     return PositionWithLocalization {offsetOpt, true};
 // }
 
-// template<>
-// ButtonProperties Convert(const Ark_Literal_String_value_Callback_Void_action& src)
-// {
-//     ButtonProperties properties;
-//     properties.value = Converter::Convert<std::string>(src.value);
-//     auto clickCallback = [callback = CallbackHelper(src.action)](GestureEvent& info) {
-//         callback.Invoke();
-//     };
-//     properties.action = AceType::MakeRefPtr<NG::ClickEvent>(clickCallback);
-//     properties.showButton = true;
-//     return properties;
-// }
+template<>
+ButtonProperties Convert(const Ark_Literal_String_value_Callback_Void_action& src)
+{
+    ButtonProperties properties;
+    properties.value = Converter::Convert<std::string>(src.value);
+    auto clickCallback = [callback = CallbackHelper(src.action)](GestureEvent& info) {
+        callback.Invoke();
+    };
+    properties.action = AceType::MakeRefPtr<NG::ClickEvent>(clickCallback);
+    properties.showButton = true;
+    return properties;
+}
 
 // template<>
 // void AssignCast(std::optional<HorizontalAlign>& dst, const Ark_HorizontalAlign& src)
@@ -1592,66 +1630,72 @@ const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
 //     dst.id = ArkValue<Ark_String>(src.id);
 // }
 
-// template<>
-// RefPtr<PopupParam> Convert(const Ark_PopupOptions& src)
-// {
-//     auto popupParam = AceType::MakeRefPtr<PopupParam>();
-//     popupParam->SetMessage(Converter::Convert<std::string>(src.message));
-//     auto messageOptions = Converter::OptConvert<Ark_PopupMessageOptions>(src.messageOptions);
-//     if (messageOptions) {
-//         popupParam->SetTextColor(Converter::OptConvert<Color>(messageOptions.value().textColor));
-//         auto font = Converter::OptConvert<Ark_Font>(messageOptions.value().font);
-//         if (font) {
-//             popupParam->SetFontSize(Converter::OptConvert<CalcDimension>(font.value().size));
-//             popupParam->SetFontWeight(Converter::OptConvert<FontWeight>(font.value().weight));
-//             popupParam->SetFontStyle(Converter::OptConvert<OHOS::Ace::FontStyle>(font.value().style));
-//         }
-//     }
-//     auto primaryButton = OptConvert<ButtonProperties>(src.primaryButton);
-//     if (primaryButton) {
-//         popupParam->SetPrimaryButtonProperties(primaryButton.value());
-//     }
-//     auto secondaryButton = OptConvert<ButtonProperties>(src.secondaryButton);
-//     if (secondaryButton) {
-//         popupParam->SetSecondaryButtonProperties(secondaryButton.value());
-//     }
-//     auto offset = Converter::OptConvert<Dimension>(src.arrowOffset);
-//     auto pointPosition = Converter::OptConvert<Dimension>(src.arrowPointPosition);
-//     popupParam->SetArrowOffset(pointPosition ? pointPosition : offset);
-//     popupParam->SetTargetSpace(Converter::OptConvert<CalcDimension>(src.targetSpace));
-//     bool showInSubBoolean = OptConvert<bool>(src.showInSubWindow).value_or(popupParam->IsShowInSubWindow());
-// #if defined(PREVIEW)
-//     showInSubBoolean = false;
-// #endif
-//     popupParam->SetShowInSubWindow(showInSubBoolean);
-//     popupParam->SetPlacement(OptConvert<Placement>(src.placement).value_or(
-//         OptConvert<bool>(src.placementOnTop).value_or(false) ? Placement::TOP : Placement::BOTTOM));
-//     popupParam->SetEnableArrow(OptConvert<bool>(src.enableArrow).value_or(popupParam->EnableArrow()));
-//     popupParam->SetTransitionEffects(OptConvert<RefPtr<NG::ChainedTransitionEffect>>(src.transition));
-//     g_popupCommonParam(src, popupParam);
-//     return popupParam;
-// }
-// template<>
-// RefPtr<PopupParam> Convert(const Ark_CustomPopupOptions& src)
-// {
-//     auto popupParam = AceType::MakeRefPtr<PopupParam>();
-//     popupParam->SetFocusable(OptConvert<bool>(src.focusable).value_or(popupParam->GetFocusable()));
-//     popupParam->SetUseCustomComponent(true);
-//     auto offset = Converter::OptConvert<Dimension>(src.arrowOffset);
-//     auto pointPosition = Converter::OptConvert<Dimension>(src.arrowPointPosition);
-//     popupParam->SetArrowOffset(pointPosition ? pointPosition : offset);
-//     popupParam->SetTargetSpace(Converter::OptConvert<CalcDimension>(src.targetSpace));
-//     bool showInSubBoolean = OptConvert<bool>(src.showInSubWindow).value_or(popupParam->IsShowInSubWindow());
-// #if defined(PREVIEW)
-//     showInSubBoolean = false;
-// #endif
-//     popupParam->SetShowInSubWindow(showInSubBoolean);
-//     popupParam->SetPlacement(OptConvert<Placement>(src.placement).value_or(Placement::BOTTOM));
-//     popupParam->SetEnableArrow(OptConvert<bool>(src.enableArrow).value_or(popupParam->EnableArrow()));
-//     popupParam->SetTransitionEffects(OptConvert<RefPtr<NG::ChainedTransitionEffect>>(src.transition));
-//     g_popupCommonParam(src, popupParam);
-//     return popupParam;
-// }
+template<>
+RefPtr<PopupParam> Convert(const Ark_PopupOptions& src)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetMessage(Converter::Convert<std::string>(src.message));
+    auto messageOptions = Converter::OptConvert<Ark_PopupMessageOptions>(src.messageOptions);
+    if (messageOptions.has_value()) {
+        auto textColorOpt = Converter::OptConvert<Color>(messageOptions.value().textColor);
+        if (textColorOpt.has_value()) {
+            popupParam->SetTextColor(textColorOpt.value());
+        }
+        auto font = Converter::OptConvert<Ark_Font>(messageOptions.value().font);
+        if (font.has_value()) {
+            auto fontSizeOpt = Converter::OptConvert<CalcDimension>(font.value().size);
+            if (fontSizeOpt.has_value()) {
+                popupParam->SetFontSize(fontSizeOpt.value());
+            }
+            auto fontWeightOpt = Converter::OptConvert<FontWeight>(font.value().weight);
+            if (fontWeightOpt.has_value()) {
+                popupParam->SetFontWeight(fontWeightOpt.value());
+            }
+            auto fontStyleOpt = Converter::OptConvert<OHOS::Ace::FontStyle>(font.value().style);
+            if (fontStyleOpt.has_value()) {
+                popupParam->SetFontStyle(fontStyleOpt.value());
+            }
+        }
+    }
+    auto primaryButton = OptConvert<ButtonProperties>(src.primaryButton);
+    if (primaryButton.has_value()) {
+        popupParam->SetPrimaryButtonProperties(primaryButton.value());
+    }
+    auto secondaryButton = OptConvert<ButtonProperties>(src.secondaryButton);
+    if (secondaryButton.has_value()) {
+        popupParam->SetSecondaryButtonProperties(secondaryButton.value());
+    }
+    auto offsetOpt = Converter::OptConvert<Dimension>(src.arrowOffset);
+    auto pointPositionOpt = Converter::OptConvert<Dimension>(src.arrowPointPosition);
+    if (pointPositionOpt.has_value()) {
+        popupParam->SetArrowOffset(pointPositionOpt.value());
+    } else if (offsetOpt.has_value()) {
+        popupParam->SetArrowOffset(offsetOpt.value());
+    }
+    popupParam->SetPlacement(OptConvert<Placement>(src.placement).value_or(
+        OptConvert<bool>(src.placementOnTop).value_or(false) ? Placement::TOP : Placement::BOTTOM));
+    g_popupCommonParam(src, popupParam);
+    g_popupCommonParamPart1(src, popupParam);
+    return popupParam;
+}
+template<>
+RefPtr<PopupParam> Convert(const Ark_CustomPopupOptions& src)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetFocusable(OptConvert<bool>(src.focusable).value_or(popupParam->GetFocusable()));
+    popupParam->SetUseCustomComponent(true);
+    auto offsetOpt = Converter::OptConvert<Dimension>(src.arrowOffset);
+    auto pointPositionOpt = Converter::OptConvert<Dimension>(src.arrowPointPosition);
+    if (pointPositionOpt.has_value()) {
+        popupParam->SetArrowOffset(pointPositionOpt.value());
+    } else if (offsetOpt.has_value()) {
+        popupParam->SetArrowOffset(offsetOpt.value());
+    }
+    popupParam->SetPlacement(OptConvert<Placement>(src.placement).value_or(Placement::BOTTOM));
+    g_popupCommonParam(src, popupParam);
+    g_popupCommonParamPart1(src, popupParam);
+    return popupParam;
+}
 // template<>
 // void AssignCast(std::optional<Alignment>& dst, const Ark_Literal_Alignment_align& src)
 // {
@@ -1674,7 +1718,7 @@ const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
 //             dst = std::nullopt;
 //     }
 // }
-// } // namespace Converter
+} // namespace Converter
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
@@ -4289,72 +4333,72 @@ void BindPopupImpl(Ark_NativePointer node,
                    Ark_Boolean show,
                    const Ark_Union_PopupOptions_CustomPopupOptions* popup)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(popup);
-    // RefPtr<UINode> customNode = nullptr;
-    // RefPtr<PopupParam> popupParam = nullptr;
-    // Converter::VisitUnion(*popup,
-    //     [&popupParam](const Ark_PopupOptions& value) {
-    //         popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
-    //         CHECK_NULL_VOID(popupParam);
-    //         g_onWillDismissPopup(value.onWillDismiss, popupParam);
-    //     },
-    //     [&popupParam, &customNode, frameNode, node](const Ark_CustomPopupOptions& value) {
-    //         popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
-    //         CHECK_NULL_VOID(popupParam);
-    //         if (popupParam->IsShow() && !g_isPopupCreated(frameNode)) {
-    //             customNode = CallbackHelper(value.builder).BuildSync(node);
-    //         }
-    //         g_onWillDismissPopup(value.onWillDismiss, popupParam);
-    //     },
-    //     [&popupParam]() {
-    //         popupParam = AceType::MakeRefPtr<PopupParam>();
-    //     });
-    // CHECK_NULL_VOID(popupParam);
-    // popupParam->SetIsShow(Converter::Convert<bool>(show));
-    // ViewAbstractModelNG::BindPopup(frameNode, popupParam, customNode);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(popup);
+    RefPtr<UINode> customNode = nullptr;
+    RefPtr<PopupParam> popupParam = nullptr;
+    Converter::VisitUnion(*popup,
+        [&popupParam](const Ark_PopupOptions& value) {
+            popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
+            CHECK_NULL_VOID(popupParam);
+            g_onWillDismissPopup(value.onWillDismiss, popupParam);
+        },
+        [&popupParam, &customNode, frameNode, node](const Ark_CustomPopupOptions& value) {
+            popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
+            CHECK_NULL_VOID(popupParam);
+            if (popupParam->IsShow() && !g_isPopupCreated(frameNode)) {
+                customNode = CallbackHelper(value.builder).BuildSync(node);
+            }
+            g_onWillDismissPopup(value.onWillDismiss, popupParam);
+        },
+        [&popupParam]() {
+            popupParam = AceType::MakeRefPtr<PopupParam>();
+        });
+    CHECK_NULL_VOID(popupParam);
+    popupParam->SetIsShow(Converter::Convert<bool>(show));
+    ViewAbstractModelNG::BindPopup(frameNode, popupParam, customNode);
 }
 void BindMenuBase(Ark_NativePointer node,
     Ark_Boolean isShow,
     const Ark_Union_Array_MenuElement_CustomBuilder* content,
     const Opt_MenuOptions* options)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(content);
-    // MenuParam menuParam;
-    // menuParam.placement = Placement::BOTTOM_LEFT;
-    // menuParam.isShowInSubWindow = false;
-    // auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    // CHECK_NULL_VOID(pipeline);
-    // auto theme = pipeline->GetTheme<SelectTheme>();
-    // CHECK_NULL_VOID(theme);
-    // menuParam.isShowInSubWindow = theme->GetExpandDisplay();
-    // menuParam.setShow = true;
-    // menuParam.isShow = Converter::Convert<bool>(isShow);
-    // auto menuOptions = options ? OptConvert<Ark_MenuOptions>(*options) : std::nullopt;
-    // if (menuOptions) {
-    //     menuParam.title = OptConvert<std::string>(menuOptions->title).value_or(menuParam.title);
-    //     auto weakNode = AceType::WeakClaim(frameNode);
-    //     g_bindMenuOptionsParam(menuOptions.value(), menuParam, weakNode);
-    //     if (menuParam.isShowInSubWindow) {
-    //         menuParam.isShowInSubWindow = OptConvert<bool>(menuOptions->showInSubWindow).value_or(true);
-    //     }
-    // }
-    // Converter::VisitUnion(*content,
-    //     [frameNode, menuParam](const Array_MenuElement& value) {
-    //         auto optionsParam = Converter::Convert<std::vector<OptionParam>>(value);
-    //         ViewAbstractModelNG::BindMenu(frameNode, std::move(optionsParam), nullptr, menuParam);
-    //     },
-    //     [frameNode, node, menuParam](const CustomNodeBuilder& value) {
-    //         auto builder = [callback = CallbackHelper(value), node]() {
-    //             auto uiNode = callback.BuildSync(node);
-    //             ViewStackProcessor::GetInstance()->Push(uiNode);
-    //         };
-    //         ViewAbstractModelNG::BindMenu(frameNode, {}, std::move(builder), menuParam);
-    //     },
-    //     []() {});
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(content);
+    MenuParam menuParam;
+    menuParam.placement = Placement::BOTTOM_LEFT;
+    menuParam.isShowInSubWindow = false;
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    menuParam.isShowInSubWindow = theme->GetExpandDisplay();
+    menuParam.setShow = false;
+    menuParam.isShow = Converter::Convert<bool>(isShow);
+    auto menuOptions = options ? OptConvert<Ark_MenuOptions>(*options) : std::nullopt;
+    if (menuOptions) {
+        menuParam.title = OptConvert<std::string>(menuOptions->title).value_or(menuParam.title);
+        auto weakNode = AceType::WeakClaim(frameNode);
+        g_bindMenuOptionsParam(menuOptions.value(), menuParam, weakNode);
+        if (menuParam.isShowInSubWindow) {
+            menuParam.isShowInSubWindow = OptConvert<bool>(menuOptions->showInSubWindow).value_or(true);
+        }
+    }
+    Converter::VisitUnion(*content,
+        [frameNode, menuParam](const Array_MenuElement& value) {
+            auto optionsParam = Converter::Convert<std::vector<OptionParam>>(value);
+            ViewAbstractModelNG::BindMenu(frameNode, std::move(optionsParam), nullptr, menuParam);
+        },
+        [frameNode, node, menuParam](const CustomNodeBuilder& value) {
+            auto builder = [callback = CallbackHelper(value), node]() {
+                auto uiNode = callback.BuildSync(node);
+                ViewStackProcessor::GetInstance()->Push(uiNode);
+            };
+            ViewAbstractModelNG::BindMenu(frameNode, {}, std::move(builder), menuParam);
+        },
+        []() {});
 }
 void BindMenu0Impl(Ark_NativePointer node,
                    const Ark_Union_Array_MenuElement_CustomBuilder* content,
@@ -4367,58 +4411,58 @@ void BindMenu1Impl(Ark_NativePointer node,
                    const Ark_Union_Array_MenuElement_CustomBuilder* content,
                    const Opt_MenuOptions* options)
 {
-    // BindMenuBase(node, isShow, content, options);
+    BindMenuBase(node, isShow, content, options);
 }
 void BindContextMenu0Impl(Ark_NativePointer node,
                           const CustomNodeBuilder* content,
                           Ark_ResponseType responseType,
                           const Opt_ContextMenuOptions* options)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(content);
-    // MenuParam menuParam;
-    // auto type = Converter::OptConvert<ResponseType>(responseType).value_or(ResponseType::LONG_PRESS);
-    // auto builder = [callback = CallbackHelper(*content), node, weakNode = AceType::WeakClaim(frameNode)]() {
-    //     PipelineContext::SetCallBackNode(weakNode);
-    //     auto uiNode = callback.BuildSync(node);
-    //     ViewStackProcessor::GetInstance()->Push(uiNode);
-    // };
-    // menuParam.previewMode = MenuPreviewMode::NONE;
-    // std::function<void()> previewBuildFunc = nullptr;
-    // menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::NORMAL_TYPE;
-    // g_bindContextMenuParams(menuParam, options, previewBuildFunc, node, frameNode);
-    // if (type != ResponseType::LONG_PRESS) {
-    //     menuParam.previewMode = MenuPreviewMode::NONE;
-    //     menuParam.isShowHoverImage = false;
-    //     menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
-    // }
-    // ViewAbstractModelNG::BindContextMenuStatic(
-    //     AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
-    // ViewAbstractModelNG::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(content);
+    MenuParam menuParam;
+    auto type = Converter::OptConvert<ResponseType>(responseType).value_or(ResponseType::LONG_PRESS);
+    auto builder = [callback = CallbackHelper(*content), node, weakNode = AceType::WeakClaim(frameNode)]() {
+        PipelineContext::SetCallBackNode(weakNode);
+        auto uiNode = callback.BuildSync(node);
+        ViewStackProcessor::GetInstance()->Push(uiNode);
+    };
+    menuParam.previewMode = MenuPreviewMode::NONE;
+    std::function<void()> previewBuildFunc = nullptr;
+    menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::NORMAL_TYPE;
+    g_bindContextMenuParams(menuParam, options, previewBuildFunc, node, frameNode);
+    if (type != ResponseType::LONG_PRESS) {
+        menuParam.previewMode = MenuPreviewMode::NONE;
+        menuParam.isShowHoverImage = false;
+        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    }
+    ViewAbstractModelNG::BindContextMenuStatic(
+        AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
+    ViewAbstractModelNG::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
 }
 void BindContextMenu1Impl(Ark_NativePointer node,
                           Ark_Boolean isShown,
                           const CustomNodeBuilder* content,
                           const Opt_ContextMenuOptions* options)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(content);
-    // MenuParam menuParam;
-    // menuParam.isShow = Converter::Convert<bool>(isShown);
-    // menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
-    // ResponseType type = ResponseType::LONG_PRESS;
-    // auto builder = [callback = CallbackHelper(*content), node]() {
-    //     auto uiNode = callback.BuildSync(node);
-    //     ViewStackProcessor::GetInstance()->Push(uiNode);
-    // };
-    // menuParam.previewMode = MenuPreviewMode::NONE;
-    // std::function<void()> previewBuildFunc = nullptr;
-    // g_bindContextMenuParams(menuParam, options, previewBuildFunc, node, frameNode);
-    // ViewAbstractModelNG::BindContextMenuStatic(
-    //     AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
-    // ViewAbstractModelNG::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(content);
+    MenuParam menuParam;
+    menuParam.isShow = Converter::Convert<bool>(isShown);
+    menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
+    ResponseType type = ResponseType::LONG_PRESS;
+    auto builder = [callback = CallbackHelper(*content), node]() {
+        auto uiNode = callback.BuildSync(node);
+        ViewStackProcessor::GetInstance()->Push(uiNode);
+    };
+    menuParam.previewMode = MenuPreviewMode::NONE;
+    std::function<void()> previewBuildFunc = nullptr;
+    g_bindContextMenuParams(menuParam, options, previewBuildFunc, node, frameNode);
+    ViewAbstractModelNG::BindContextMenuStatic(
+        AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
+    ViewAbstractModelNG::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
 }
 void BindContentCover0Impl(Ark_NativePointer node,
                            const Opt_Boolean* isShow,

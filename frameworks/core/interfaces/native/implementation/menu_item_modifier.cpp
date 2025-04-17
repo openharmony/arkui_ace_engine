@@ -72,7 +72,6 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
-    return nullptr;
 }
 } // MenuItemModifier
 namespace MenuItemInterfaceModifier {
@@ -132,7 +131,7 @@ void SelectedImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // MenuItemModelNG::SetSelected(frameNode, Converter::Convert<bool>(value));
+    MenuItemModelNG::SetSelected(frameNode, Converter::Convert<bool>(value));
 }
 void SelectIconImpl(Ark_NativePointer node,
                     const Ark_Union_Boolean_ResourceStr_SymbolGlyphModifier* value)
@@ -142,14 +141,14 @@ void SelectIconImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto iconOpt = Converter::OptConvert<SelectIconType>(*value);
     if (iconOpt.has_value()) {
-        // if (auto iconPtr = std::get_if<bool>(&(*iconOpt)); iconPtr) {
-        //     MenuItemModelNG::SetSelectIcon(frameNode, *iconPtr);
-        // }
-        // if (auto iconStrPtr = std::get_if<std::optional<std::string>>(&(*iconOpt)); iconStrPtr) {
-        //     MenuItemModelNG::SetSelectIcon(frameNode, true);
-        //     MenuItemModelNG::SetSelectIconSrc(frameNode, *iconStrPtr);
-        // }
-        // LOGE("MenuItemModifier::SelectIconImpl is not implemented, Ark_CustomObject is not supported!");
+        if (auto iconPtr = std::get_if<bool>(&(*iconOpt)); iconPtr) {
+            MenuItemModelNG::SetSelectIcon(frameNode, *iconPtr);
+        }
+        if (auto iconStrPtr = std::get_if<std::optional<std::string>>(&(*iconOpt)); iconStrPtr) {
+            MenuItemModelNG::SetSelectIcon(frameNode, true);
+            MenuItemModelNG::SetSelectIconSrc(frameNode, *iconStrPtr);
+        }
+        LOGE("MenuItemModifier::SelectIconImpl is not implemented, Ark_CustomObject is not supported!");
     }
 }
 void OnChangeImpl(Ark_NativePointer node,
@@ -170,17 +169,17 @@ void ContentFontImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto fontOpt = Converter::OptConvert<Font>(*value);
-    // if (fontOpt.has_value()) {
-    //     MenuItemModelNG::SetFontSize(frameNode, fontOpt.value().fontSize);
-    //     MenuItemModelNG::SetFontWeight(frameNode, fontOpt.value().fontWeight);
-    //     MenuItemModelNG::SetFontStyle(frameNode, fontOpt.value().fontStyle);
-    //     MenuItemModelNG::SetFontFamily(frameNode, fontOpt.value().fontFamilies);
-    // } else {
-    //     MenuItemModelNG::SetFontSize(frameNode, std::nullopt);
-    //     MenuItemModelNG::SetFontWeight(frameNode, std::nullopt);
-    //     MenuItemModelNG::SetFontStyle(frameNode, std::nullopt);
-    //     MenuItemModelNG::SetFontFamily(frameNode, std::nullopt);
-    // }
+    if (fontOpt.has_value()) {
+        MenuItemModelNG::SetFontSize(frameNode, fontOpt.value().fontSize);
+        MenuItemModelNG::SetFontWeight(frameNode, fontOpt.value().fontWeight);
+        MenuItemModelNG::SetFontStyle(frameNode, fontOpt.value().fontStyle);
+        MenuItemModelNG::SetFontFamily(frameNode, fontOpt.value().fontFamilies);
+    } else {
+        MenuItemModelNG::SetFontSize(frameNode, std::nullopt);
+        MenuItemModelNG::SetFontWeight(frameNode, std::nullopt);
+        MenuItemModelNG::SetFontStyle(frameNode, std::nullopt);
+        MenuItemModelNG::SetFontFamily(frameNode, std::nullopt);
+    }
 }
 void ContentFontColorImpl(Ark_NativePointer node,
                           const Ark_ResourceColor* value)
@@ -197,17 +196,17 @@ void LabelFontImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto fontOpt = Converter::OptConvert<Font>(*value);
-    // if (fontOpt.has_value()) {
-    //     MenuItemModelNG::SetLabelFontSize(frameNode, fontOpt.value().fontSize);
-    //     MenuItemModelNG::SetLabelFontWeight(frameNode, fontOpt.value().fontWeight);
-    //     MenuItemModelNG::SetLabelFontStyle(frameNode, fontOpt.value().fontStyle);
-    //     MenuItemModelNG::SetLabelFontFamily(frameNode, fontOpt.value().fontFamilies);
-    // } else {
-    //     MenuItemModelNG::SetLabelFontSize(frameNode, std::nullopt);
-    //     MenuItemModelNG::SetLabelFontWeight(frameNode, std::nullopt);
-    //     MenuItemModelNG::SetLabelFontStyle(frameNode, std::nullopt);
-    //     MenuItemModelNG::SetLabelFontFamily(frameNode, std::nullopt);
-    // }
+    if (fontOpt.has_value()) {
+        MenuItemModelNG::SetLabelFontSize(frameNode, fontOpt.value().fontSize);
+        MenuItemModelNG::SetLabelFontWeight(frameNode, fontOpt.value().fontWeight);
+        MenuItemModelNG::SetLabelFontStyle(frameNode, fontOpt.value().fontStyle);
+        MenuItemModelNG::SetLabelFontFamily(frameNode, fontOpt.value().fontFamilies);
+    } else {
+        MenuItemModelNG::SetLabelFontSize(frameNode, std::nullopt);
+        MenuItemModelNG::SetLabelFontWeight(frameNode, std::nullopt);
+        MenuItemModelNG::SetLabelFontStyle(frameNode, std::nullopt);
+        MenuItemModelNG::SetLabelFontFamily(frameNode, std::nullopt);
+    }
 }
 void LabelFontColorImpl(Ark_NativePointer node,
                         const Ark_ResourceColor* value)
@@ -228,7 +227,7 @@ void _onChangeEvent_selectedImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(selected));
     };
-    // MenuItemModelNG::SetSelectedChangeEvent(frameNode, std::move(onEvent));
+    MenuItemModelNG::SetSelectedChangeEvent(frameNode, std::move(onEvent));
 }
 } // MenuItemAttributeModifier
 const GENERATED_ArkUIMenuItemModifier* GetMenuItemModifier()
