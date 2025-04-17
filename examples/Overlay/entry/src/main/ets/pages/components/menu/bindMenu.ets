@@ -15,35 +15,37 @@
 
 @Builder
 export function BindMenuBuilder(name: string, param: Object) {
-  BindMenuExample()
+  MenuExample()
 }
 
 @Entry
 @Component
-struct BindMenuExample {
+struct MenuExample {
   pathStack: NavPathStack = new NavPathStack()
-
-  @Builder
-  MyMenu() {
-    Menu() {
-      MenuItem({ startIcon: $r('app.media.app_icon'), content: '菜单选项' })
-      MenuItem({ startIcon: $r('app.media.app_icon'), content: '菜单选项' })
-      MenuItem({ startIcon: $r('app.media.app_icon'), content: '菜单选项' })
-    }
-  }
 
   build() {
     NavDestination() {
-      Column({ space: 5 }) {
-        Text('bindMenu')
-          .fontColor(Color.Gray)
-          .width('100%')
-          .padding(10)
-
-        Button('bindMenu')
-          .bindMenu(this.MyMenu)
-
-      }.width('100%').margin({ top: 5 })
+      Column() {
+        Text('click for Menu')
+          .fontSize('20fp')
+          .margin(100)
+          .bindMenu([
+            {
+              value: 'Menu1',
+              action: () => {
+                console.info('handle Menu1 select')
+              }
+            },
+            {
+              value: 'Menu2',
+              action: () => {
+                console.info('handle Menu2 select')
+              }
+            },
+          ])
+      }
+      .width('100%')
+      .margin({ top: 5 })
     }
     .title('BindMenu')
     .onBackPressed(() => {
