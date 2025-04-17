@@ -2590,9 +2590,9 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
 void FocusableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // ViewAbstract::SetFocusable(frameNode, static_cast<bool>(value));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetFocusable(frameNode, static_cast<bool>(value));
 }
 void OnFocusImpl(Ark_NativePointer node,
                  const Callback_Void* value)
@@ -2619,35 +2619,35 @@ void OnBlurImpl(Ark_NativePointer node,
 void TabIndexImpl(Ark_NativePointer node,
                   const Ark_Number* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto convValue = Converter::Convert<int32_t>(*value);
-    // ViewAbstract::SetTabIndex(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::Convert<int32_t>(*value);
+    ViewAbstract::SetTabIndex(frameNode, convValue);
 }
 void DefaultFocusImpl(Ark_NativePointer node,
                       Ark_Boolean value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto convValue = Converter::Convert<bool>(value);
-    // ViewAbstract::SetDefaultFocus(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    ViewAbstract::SetDefaultFocus(frameNode, convValue);
 }
 void GroupDefaultFocusImpl(Ark_NativePointer node,
                            Ark_Boolean value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto convValue = Converter::Convert<bool>(value);
-    // ViewAbstract::SetGroupDefaultFocus(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    ViewAbstract::SetGroupDefaultFocus(frameNode, convValue);
 }
 void FocusOnTouchImpl(Ark_NativePointer node,
                       Ark_Boolean value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto convValue = Converter::Convert<bool>(value);
-    // ViewAbstract::SetFocusOnTouch(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    ViewAbstract::SetFocusOnTouch(frameNode, convValue);
 }
 void FocusBoxImpl(Ark_NativePointer node,
                   const Ark_FocusBoxStyle* value)
