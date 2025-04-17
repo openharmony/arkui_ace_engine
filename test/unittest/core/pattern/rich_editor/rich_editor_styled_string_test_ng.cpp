@@ -1332,4 +1332,85 @@ HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString002, TestSize.Le
     richEditorPattern->DeleteValueInStyledString(0, 10, true, false);
     EXPECT_FALSE(richEditorPattern->previewLongPress_);
 }
+
+/**
+ * @tc.name: DeleteTextDecorationType
+ * @tc.desc: Test deleteDecorationType of DecorationSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, DeleteTextDecorationType, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize a spanString and AddSpan
+     * @tc.expected: The SpanString and style should be successfully created and applied
+     */
+    std::string buffer;
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({ TextDecoration::UNDERLINE, TextDecoration::OVERLINE }), Color::RED,
+        TextDecorationStyle::WAVY, 1.0f, std::optional<TextDecorationOptions>(), 0, 1);
+    decorationSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+    buffer.clear();
+    buffer = decorationSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("DecorationSpan"), 0);
+
+    /**
+     * @tc.steps2:remove overline to decorationSpan
+     * @tc.expected: The decorationSpan types removed Overline ,size equal 1
+     */
+    decorationSpan->RemoveTextDecorationType(TextDecoration::OVERLINE);
+    EXPECT_EQ(decorationSpan->GetTextDecorationTypes().size(), 1);
+
+    /**
+     * @tc.steps3:remove none to decorationSpan
+     * @tc.expected: The decorationSpan types can remove None, size equal 1
+     */
+    decorationSpan->RemoveTextDecorationType(TextDecoration::NONE);
+    EXPECT_EQ(decorationSpan->GetTextDecorationTypes().size(), 1);
+}
+
+/**
+ * @tc.name: TextStyleGetTextDecorationEnd
+ * @tc.desc: Test GetTextDecorationEnd of textStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, TextStyleGetTextDecorationEnd, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize a spanString and AddSpan
+     * @tc.expected: The SpanString and style should be successfully created and applied
+     */
+    std::string buffer;
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({ TextDecoration::UNDERLINE, TextDecoration::OVERLINE }), Color::RED,
+        TextDecorationStyle::WAVY, 1.0f, std::optional<TextDecorationOptions>(), 0, 1);
+    decorationSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+    buffer.clear();
+    buffer = decorationSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("DecorationSpan"), 0);
+
+    /**
+     * @tc.steps2: call GetTextDecorationEnd to textStyle
+     * @tc.expected: The last decorationSpan type is Overline
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TextStyle textStyle = richEditorPattern->GetDefaultTextStyle();
+    UseSelfStyle(spanItem->fontStyle, spanItem->textLineStyle, textStyle);
+    TextDecoration type = textStyle.GetTextDecorationEnd();
+    EXPECT_EQ(type, TextDecoration::OVERLINE);
+
+    /**
+     * @tc.steps3: remove decoration and call GetTextDecorationEnd to textStyle
+     * @tc.expected: The last decorationSpan type is None
+     */
+    spanItem->fontStyle->UpdateTextDecoration(std::vector<TextDecoration> {});
+    UseSelfStyle(spanItem->fontStyle, spanItem->textLineStyle, textStyle);
+    type = textStyle.GetTextDecorationEnd();
+    EXPECT_EQ(type, TextDecoration::NONE);
+}
 } // namespace OHOS::Ace::NG

@@ -1369,7 +1369,7 @@ void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpan
         spanNode->UpdateItalicFontStyle(textStyle.GetFontStyle());
         spanNode->UpdateFontWeight(textStyle.GetFontWeight());
         spanNode->UpdateFontFamily(textStyle.GetFontFamilies());
-        spanNode->UpdateTextDecoration(textStyle.GetTextDecoration());
+        spanNode->UpdateTextDecoration(std::vector<TextDecoration> { textStyle.GetTextDecorationEnd() });
         spanNode->UpdateTextDecorationColorWithoutCheck(textStyle.GetTextDecorationColor());
         spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
         spanNode->UpdateTextShadow(textStyle.GetTextShadows());
@@ -2629,7 +2629,8 @@ void RichEditorPattern::UpdateSelectStyledStringStyle(int32_t start, int32_t end
     case KeyCode::KEY_U: {
         auto firstDecorationSpan = DynamicCast<DecorationSpan>(styledString_->GetSpan(start, 1, SpanType::Decoration));
         isFirstSpanStylePresent =
-            firstDecorationSpan && firstDecorationSpan->GetTextDecorationFirst() == TextDecoration::UNDERLINE;
+            firstDecorationSpan &&
+            V2::HasTextDecoration(firstDecorationSpan->GetTextDecorationTypes(), TextDecoration::UNDERLINE);
         auto updateDecorationType = isFirstSpanStylePresent ? TextDecoration::NONE : TextDecoration::UNDERLINE;
         UpdateStyledStringDecorationType(start, end, updateDecorationType);
         record.AddUpdateSpanType(SpanType::Decoration);
@@ -2686,14 +2687,13 @@ void RichEditorPattern::UpdateStyledStringDecorationType(int32_t start, int32_t 
     std::optional<Color> colorOption;
     std::optional<TextDecorationStyle> styleOption;
     std::optional<TextDecorationOptions> options;
-    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({type}), colorOption, styleOption, options, start, end);
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({ type }), colorOption, styleOption, options, start, end);
     auto updateDecorationSpanFunc = [&type](const RefPtr<DecorationSpan>& oriDecorationSpan) -> RefPtr<DecorationSpan> {
         CHECK_NULL_RETURN(oriDecorationSpan, nullptr);
-        auto decorationColor = oriDecorationSpan->GetColor();
-        auto decorationStyle = oriDecorationSpan->GetTextDecorationStyle();
-        auto decorationOptions = oriDecorationSpan->GetTextDecorationOptions();
-        return AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({type}), decorationColor, decorationStyle,
-            decorationOptions, oriDecorationSpan->GetStartIndex(), oriDecorationSpan->GetEndIndex());
+        type == TextDecoration::NONE ? oriDecorationSpan->RemoveTextDecorationType(TextDecoration::UNDERLINE)
+                                     : oriDecorationSpan->AddTextDecorationType(TextDecoration::UNDERLINE);
+        return oriDecorationSpan;
     };
     UpdateSpansStyleInRange<DecorationSpan>(start, end, decorationSpan, updateDecorationSpanFunc);
 }

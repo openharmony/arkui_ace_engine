@@ -694,6 +694,11 @@ public:
             GetTextDecoration()[0] : TextDecoration::NONE;
     }
 
+    TextDecoration GetTextDecorationEnd() const
+    {
+        return GetTextDecoration().empty() ? TextDecoration::NONE : GetTextDecoration().back();
+    }
+
     const Dimension& GetParagraphSpacing() const
     {
         return paragraphSpacing_;

@@ -159,6 +159,7 @@ public:
     TextDecoration GetTextDecorationFirst() const;
     std::vector<TextDecoration> GetTextDecorationTypes() const;
     void SetTextDecorationTypes(const std::vector<TextDecoration>& types);
+    void RemoveTextDecorationType(TextDecoration value);
     void AddTextDecorationType(TextDecoration value);
     std::optional<Color> GetColor() const;
     std::optional<TextDecorationStyle> GetTextDecorationStyle() const;
