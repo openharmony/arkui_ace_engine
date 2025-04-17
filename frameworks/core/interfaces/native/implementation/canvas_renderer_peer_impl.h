@@ -144,6 +144,15 @@ public:
     void SetFont(std::string fontStr);
     void SetTextAlign(const std::string& alignStr);
     void SetTextBaseline(const std::string& baselineStr);
+    void Path2DArc(const ArcParam& params) override;
+    void Path2DArcTo(const ArcToParam& params) override;
+    void Path2DBezierCurveTo(const BezierCurveToParam& params) override;
+    void Path2DClosePath() override;
+    void Path2DEllipse(const EllipseParam& params) override;
+    void Path2DLineTo(double x, double y) override;
+    void Path2DMoveTo(double x, double y) override;
+    void Path2DQuadraticCurveTo(double cpx, double cpy, double x, double y) override;
+    void Path2DRect(double x, double y, double width, double height) override;
 
     // inheritance
     void ResetPaintState();
