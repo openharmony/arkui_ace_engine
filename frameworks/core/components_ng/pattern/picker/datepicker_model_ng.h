@@ -77,7 +77,7 @@ public:
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
     static bool GetEnableHapticFeedback(FrameNode* frameNode);
-    static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, const std::optional<bool>& isEnableHapticFeedback);
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
 private:
     static RefPtr<FrameNode> CreateStackNode();

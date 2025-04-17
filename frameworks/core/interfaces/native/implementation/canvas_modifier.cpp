@@ -39,11 +39,12 @@ template<typename T>
 void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
 {
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(context);
-
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
     CHECK_NULL_VOID(pattern);
-
+    if (!context) {
+        CanvasModelNG::DetachRenderContext(frameNode);
+        return;
+    }
     Converter::VisitUnion(*context,
         [pattern](const Ark_CanvasRenderingContext2D& peer) {
             CanvasRenderingContext2DPeerImpl* peerImplPtr = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
@@ -69,12 +70,8 @@ void SetCanvasOptions0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(context);
 
     ContextSetOptionsHelper(frameNode, context);
-
-    LOGE("ARKOALA CanvasInterfaceModifier::SetCanvasOptions0Impl - CustomObject is not supported "
-        "method DrawingRenderingContextAccessor::CtorImpl.");
 }
 void SetCanvasOptions1Impl(Ark_NativePointer node,
                            const Ark_Union_CanvasRenderingContext2D_DrawingRenderingContext* context,
