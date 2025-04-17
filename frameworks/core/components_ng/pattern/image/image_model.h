@@ -103,7 +103,6 @@ public:
     virtual void SetEnhancedImageQuality(AIImageQuality imageQuality) = 0;
     virtual void SetOrientation(ImageRotateOrientation orientation) = 0;
     virtual bool GetIsAnimation() = 0;
-
 private:
     static std::unique_ptr<ImageModel> instance_;
     static std::mutex mutex_;

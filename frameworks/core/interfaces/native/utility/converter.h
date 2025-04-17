@@ -541,7 +541,7 @@ namespace Converter {
     template<> RefPtr<Gesture> Convert(const Ark_SwipeGestureInterface& src);
     template<> RefPtr<Gesture> Convert(const Ark_TapGestureInterface& src);
     template<> RefPtr<PixelMap> Convert(const Ark_PixelMap& src);
-    template<> RefPtr<DrawableDescriptor> Convert(const Ark_DrawableDescriptor& src);
+    template<> void* Convert(const Ark_DrawableDescriptor& src);
     template<> RefPtr<ShapeRect> Convert(const Ark_Rect& src);
     template<> RefPtr<ShapeRect> Convert(const Ark_RoundRect& src);
     template<> ScaleOpt Convert(const Ark_ScaleOptions& src);

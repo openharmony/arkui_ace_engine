@@ -218,6 +218,14 @@ RefPtr<PixelMap> PixelMap::GetFromDrawable(void* ptr)
     return AceType::MakeRefPtr<PixelMapOhos>(drawable->GetPixelMap());
 }
 
+bool PixelMap::IsAnimatedDarwableDescriptor(void* ptr) const
+{
+    CHECK_NULL_RETURN(ptr, false);
+    auto* drawable = reinterpret_cast<Napi::DrawableDescriptor*>(ptr);
+    auto drawableType = drawable->GetDrawableType();
+    return drawableType == Napi::DrawableDescriptor::DrawableType::ANIMATED;
+}
+
 bool PixelMap::GetPxielMapListFromAnimatedDrawable(void* ptr, std::vector<RefPtr<PixelMap>>& pixelMaps,
     int32_t& duration, int32_t& iterations)
 {

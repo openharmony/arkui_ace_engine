@@ -126,7 +126,7 @@ void SetImageOptions0Impl(Ark_NativePointer node,
 void SetImageOptions1Impl(Ark_NativePointer node,
                           const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
     Converter::VisitUnion(*src, [frameNode](const auto& value) { SetImageOption(frameNode, value); }, []() {});
