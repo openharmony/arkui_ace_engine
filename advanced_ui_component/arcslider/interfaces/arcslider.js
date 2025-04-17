@@ -32,6 +32,7 @@ const ColorMetrics = requireNapi('arkui.node').ColorMetrics;
 const hilog = requireNapi('hilog');
 const display = requireNapi('display');
 const PathShape = requireNapi('arkui.shape').PathShape;
+const systemDateTime = requireNapi('systemDateTime');
 
 const ANGLE_TO_RADIAN = Math.PI / 180; // Common or specific numerical values
 const RADIAN_TO_ANGLE = 180 / Math.PI;
@@ -64,8 +65,7 @@ const LIMIT_RESTORE_ANIMATION_DURATION = 333;
 const RESTORE_ANIMATION_DURATION = 167;
 const DIAMETER_DEFAULT = 233;
 const VIBRATOR_TYPE_TWO = 'watchhaptic.feedback.crown.strength2'; // About crown
-const VIBRATOR_TYPE_IMPACT = 'watchhaptic.feedback.crown.impact';
-const CROWN_EVENT_FLAG = 30;
+const CROWN_TIME_FLAG = 30;
 const CROWN_CONTROL_RATIO = 2.10;
 const CROWN_SENSITIVITY_LOW = 0.5;
 const CROWN_SENSITIVITY_MEDIUM = 1;
@@ -311,6 +311,8 @@ export class ArcSlider extends ViewV2 {
         this.isReverse = false;
         this.isLargeArc = false;
         this.isFocus = false;
+        this.timePre = "timePre" in params ? params.timePre : 0;
+        this.timeCur = "timeCur" in params ? params.timeCur : 0;
         this.parameters = "parameters" in params ? params.parameters : new DrawParameters();
         this.fullModifier = "fullModifier" in params ? params.fullModifier : new MyFullDrawModifier(this.parameters);
         this.touchAnimator = "touchAnimator" in params ? params.touchAnimator : undefined;
@@ -790,24 +792,6 @@ export class ArcSlider extends ViewV2 {
         valueNow = Math.min(1, valueNow);
         valueNow = Math.max(0, valueNow);
         this.options.valueOptions.progress = valueNow * totalValue + this.options.valueOptions.min;
-        const isMaxOrMin = this.options.valueOptions.progress === this.options.valueOptions.max ||
-            this.options.valueOptions.progress === this.options.valueOptions.min;
-        if (isMaxOrMin) {
-            if (this.needVibrate) {
-                this.needVibrate = false;
-                try {
-                    this.startVibration(VIBRATOR_TYPE_IMPACT);
-                }
-                catch (error) {
-                    const e = error;
-                    hilog.error(0x3900, 'ArcSlider', `An unexpected error occurred in starting vibration.
-                    Code: ${e.code}, message: ${e.message}`);
-                }
-            }
-        }
-        else {
-            this.needVibrate = true;
-        }
         this.setLayoutOptions();
         this.updateModifier();
         this.fullModifier.invalidate();
@@ -1161,62 +1145,19 @@ export class ArcSlider extends ViewV2 {
     }
 
     onDigitalCrownEvent(event) {
-        if (event && this.isFocus) {
-            this.crownEventCounter += 1;
-            if (this.crownEventCounter % CROWN_EVENT_FLAG === 0) {
-                try {
-                    this.startVibration(VIBRATOR_TYPE_TWO);
-                }
-                catch (error) {
-                    const e = error;
-                    hilog.error(0x3900, 'ArcSlider', `An unexpected error occurred in starting vibration.
-                      Code: ${e.code}, message: ${e.message}`);
-                }
-                this.crownEventCounter = 0;
-            }
-        }
-        this.crownAction(event);
-    }
-
-    startVibration(vibratorType) {
-        const ret = vibrator.isSupportEffectSync(vibratorType);
-        if (ret) {
-            vibrator.startVibration({
-                type: 'preset',
-                effectId: vibratorType,
-                count: 1,
-            }, {
-                usage: 'unknown'
-            }, (error) => {
-                if (error) {
-                    hilog.error(0x3900, 'ArcSlider', `Failed to start vibration.
-                            Code: ${error.code}, message: ${error.message}`);
-                    this.crownEventCounter = 0;
-                    return;
-                }
-                hilog.info(0x3900, 'ArcSlider', 'Succeed in starting vibration');
-            });
-        }
-        else {
-            hilog.error(0x3900, 'ArcSlider', vibratorType + ` is not supported`);
-        }
-    }
-
-    crownAction(event) {
+        this.timeCur = systemDateTime.getTime(false);
         if (event.action === CrownAction.BEGIN && !this.isEnlarged) {
             this.clearTimeout();
             this.isEnlarged = true;
             this.startTouchAnimator();
             this.calcBlur();
-            this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
-            this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
-            this.calcCrownValue(this.crownDeltaAngle);
         }
-        else if (event.action === CrownAction.BEGIN && this.isEnlarged) {
+        else if ((event.action === CrownAction.BEGIN || CrownAction.UPDATE) && this.isEnlarged) {
             this.clearTimeout();
             this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
             this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
             this.calcCrownValue(this.crownDeltaAngle);
+            this.setVibration();
         }
         else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) && (event.action === CrownAction.UPDATE)) {
             this.clearTimeout();
@@ -1234,6 +1175,46 @@ export class ArcSlider extends ViewV2 {
                     this.calcBlur();
                 }
             }, RESTORE_TIMEOUT);
+        }
+    }
+
+    setVibration() {
+        const isMaxOrMin = this.options.valueOptions.progress === this.options.valueOptions.max ||
+            this.options.valueOptions.progress === this.options.valueOptions.min;
+        if (this.timeCur - this.timePre >= CROWN_TIME_FLAG && !isMaxOrMin) {
+            try {
+                this.startVibration();
+            }
+            catch (error) {
+                const e = error;
+                hilog.error(0x3900, 'ArcSlider', `An unexpected error occurred in starting vibration.
+                      Code: ${e.code}, message: ${e.message}`);
+            }
+            this.timePre = this.timeCur;
+        }
+    }
+
+    startVibration() {
+        const ret = vibrator.isSupportEffectSync(VIBRATOR_TYPE_TWO);
+        if (ret) {
+            vibrator.startVibration({
+                type: 'preset',
+                effectId: VIBRATOR_TYPE_TWO,
+                count: 1,
+            }, {
+                usage: 'unknown'
+            }, (error) => {
+                if (error) {
+                    hilog.error(0x3900, 'ArcSlider', `Failed to start vibration.
+                            Code: ${error.code}, message: ${error.message}`);
+                    this.timePre = this.timeCur;
+                    return;
+                }
+                hilog.info(0x3900, 'ArcSlider', 'Succeed in starting vibration');
+            });
+        }
+        else {
+            hilog.error(0x3900, 'ArcSlider', VIBRATOR_TYPE_TWO + ` is not supported`);
         }
     }
 
@@ -1276,7 +1257,9 @@ export class ArcSlider extends ViewV2 {
             Button.focusable(true);
             Button.focusOnTouch(true);
             Button.onDigitalCrown((event) => {
-                this.onDigitalCrownEvent(event);
+                if (event && this.isFocus) {
+                    this.onDigitalCrownEvent(event);
+                }
                 this.options.onChange?.(this.options.valueOptions.progress);
             });
         }, Button);
