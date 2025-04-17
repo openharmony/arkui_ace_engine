@@ -24,11 +24,10 @@ namespace ContainerSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto spanNode = SpanModelNG::CreateContainerSpanNode(id);
-    // CHECK_NULL_RETURN(spanNode, nullptr);
-    // spanNode->IncRefCount();
-    // return AceType::RawPtr(spanNode);
-    return nullptr;
+    auto spanNode = SpanModelNG::CreateContainerSpanNode(id);
+    CHECK_NULL_RETURN(spanNode, nullptr);
+    spanNode->IncRefCount();
+    return AceType::RawPtr(spanNode);
 }
 } // ContainerSpanModifier
 namespace ContainerSpanInterfaceModifier {

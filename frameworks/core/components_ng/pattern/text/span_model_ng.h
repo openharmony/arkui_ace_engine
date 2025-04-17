@@ -54,6 +54,7 @@ public:
     void SetAccessibilityImportance(const std::string& importance) override;
 
     static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId, const std::u16string& content);
+    static RefPtr<ContainerSpanNode> CreateContainerSpanNode(int32_t nodeId);
     static void InitSpan(UINode* uiNode, const std::optional<std::u16string>& content);
     static void SetFontWeight(UINode* uiNode, const std::optional<FontWeight>& value);
     static void ResetFontWeight(UINode* uiNode);
