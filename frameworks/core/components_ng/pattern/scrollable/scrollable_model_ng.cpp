@@ -226,13 +226,14 @@ void ScrollableModelNG::SetFadingEdge(FrameNode* frameNode, bool fadingEdge, con
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, FadingEdgeLength, fadingEdgeLength, frameNode);
 }
 
-void ScrollableModelNG::SetEdgeEffect(
-    FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge)
+void ScrollableModelNG::SetEdgeEffect(FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect,
+    const std::optional<bool>& alwaysEnabled, const std::optional<EffectEdge>& effectEdge)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetEdgeEffect(edgeEffect, alwaysEnabled, effectEdge);
+    pattern->SetEdgeEffect(
+        edgeEffect.value_or(EdgeEffect::NONE), alwaysEnabled.value_or(false), effectEdge.value_or(EffectEdge::ALL));
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 

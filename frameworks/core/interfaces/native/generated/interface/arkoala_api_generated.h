@@ -3793,6 +3793,15 @@ typedef struct Opt_EdgeEffect {
     Ark_Tag tag;
     Ark_EdgeEffect value;
 } Opt_EdgeEffect;
+typedef enum Ark_EffectEdge {
+    ARK_EFFECT_EDGE_START = 0,
+    ARK_EFFECT_EDGE_END = 1,
+    ARK_EFFECT_EDGE_ALL = 2,
+} Ark_EffectEdge;
+typedef struct Opt_EffectEdge {
+    Ark_Tag tag;
+    Ark_EffectEdge value;
+} Opt_EffectEdge;
 typedef enum Ark_AnimationMode {
     ARK_ANIMATION_MODE_CONTENT_FIRST = 0,
     ARK_ANIMATION_MODE_ACTION_FIRST = 1,
@@ -8677,6 +8686,7 @@ typedef struct Opt_ScrollAttribute {
 } Opt_ScrollAttribute;
 typedef struct Ark_EdgeEffectOptions {
     Ark_Boolean alwaysEnabled;
+    Ark_EffectEdge effectEdge;
 } Ark_EdgeEffectOptions;
 typedef struct Opt_EdgeEffectOptions {
     Ark_Tag tag;

@@ -155,6 +155,17 @@ void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src)
     }
 }
 
+void AssignArkValue(Ark_EffectEdge& dst, const EffectEdge& src)
+{
+    switch (src) {
+        case EffectEdge::START: dst = ARK_EFFECT_EDGE_START; break;
+        case EffectEdge::END: dst = ARK_EFFECT_EDGE_END; break;
+        case EffectEdge::ALL: dst = ARK_EFFECT_EDGE_ALL; break;
+        default: dst = static_cast<Ark_EffectEdge>(-1);
+            LOGE("Unexpected enum value in EffectEdge: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src)
 {
     switch (src) {

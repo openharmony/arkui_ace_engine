@@ -601,6 +601,17 @@ void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src)
 }
 
 template<>
+void AssignCast(std::optional<EffectEdge>& dst, const Ark_EffectEdge& src)
+{
+    switch (src) {
+        case ARK_EFFECT_EDGE_START: dst = EffectEdge::START; break;
+        case ARK_EFFECT_EDGE_END: dst = EffectEdge::END; break;
+        case ARK_EFFECT_EDGE_ALL: dst = EffectEdge::ALL; break;
+        default: LOGE("Unexpected enum value in Ark_EffectEdge: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<EllipsisMode>& dst, const Ark_EllipsisMode& src)
 {
     switch (src) {
