@@ -319,6 +319,7 @@ private:
     bool scrollable_ = true;
     bool preSpring_ = false; // true if during SyncLayoutBeforeSpring task.
     bool isSmoothScrolling_ = false;
+    bool reachedEnd_ = false;
     bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
 
     RefPtr<GridContentModifier> gridContentModifier_;

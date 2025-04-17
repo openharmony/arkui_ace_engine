@@ -50,6 +50,7 @@ void GridPattern::OnAttachToFrameNode()
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
     prevRange_ = std::pair(info_.startIndex_, info_.endIndex_);
+    reachedEnd_ = info_.offsetEnd_;
 
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_RETURN(gridLayoutProperty, nullptr);
@@ -505,7 +506,6 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
 
     bool indexChanged = (prevRange_.first != info_.startIndex_) || (prevRange_.second != info_.endIndex_);
-    bool offsetEnd = info_.offsetEnd_;
     info_.synced_ = true;
     AnimateToTarget(scrollAlign_, layoutAlgorithmWrapper);
 
@@ -516,7 +516,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     bool sizeDiminished =
         IsOutOfBoundary(true) && !NearZero(curDelta) && (info_.prevHeight_ - info_.currentHeight_ - curDelta > 0.1f);
 
-    if (!offsetEnd && info_.offsetEnd_) {
+    if (!reachedEnd_ && info_.offsetEnd_) {
         endHeight_ = info_.currentHeight_;
     }
     ProcessEvent(indexChanged, info_.currentHeight_ - info_.prevHeight_);

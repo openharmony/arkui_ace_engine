@@ -17,12 +17,12 @@
 
 #include "irregular/grid_layout_range_solver.h"
 
-#include "core/components_ng/pattern/grid/irregular/grid_large_delta_converter.h"
 #include "base/geometry/axis.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
+#include "core/components_ng/pattern/grid/irregular/grid_large_delta_converter.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
@@ -166,12 +166,13 @@ void GridFillAlgorithm::OnSlidingOffsetUpdate(float delta)
     }
 }
 
-int32_t GridFillAlgorithm::ConvertLargeDelta(float delta) {
+int32_t GridFillAlgorithm::ConvertLargeDelta(float delta)
+{
     GridLargeDeltaConverter converter(info_, props_.GetHost().GetRawPtr());
     int jumpIndex = converter.Convert(delta);
     if (jumpIndex == info_.childrenCount_ - 1) {
         jumpIndex = jumpIndex - (info_.endIndex_ - info_.startIndex_); // estimate first item in the viewport
-    } 
+    }
     return jumpIndex;
 }
 
