@@ -18,6 +18,7 @@
 #include "base/geometry/point.h"
 #include "base/geometry/rect.h"
 #include "base/log/ace_trace.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"

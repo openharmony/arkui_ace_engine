@@ -27,6 +27,9 @@
 #include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace {
+namespace NG {
+struct MenuParam;
+}
 enum class ArrowPosition {
     END = 0,
     START,
