@@ -40,6 +40,7 @@ const int32_t MAX_NUM_SIZE = 4;
 
 void GridPattern::OnAttachToFrameNode()
 {
+    ScrollablePattern::OnAttachToFrameNode();
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetFrontendType() == FrontendType::ARK_TS) {
