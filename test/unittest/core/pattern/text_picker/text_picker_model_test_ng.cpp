@@ -1125,4 +1125,33 @@ HWTEST_F(TextPickerModelTestNg, TextPickerModelNGSetDisableTextStyleAnimation001
     TextPickerModelNG::SetDisableTextStyleAnimation(AceType::RawPtr(frameNode), true);
     EXPECT_TRUE(textPickerPattern->isDisableTextStyleAnimation_);
 }
+
+/**
+ * @tc.name: SelectedBackgroundStyle001
+ * @tc.desc: Test SetSelectedBackgroundStyle and GetSelectedBackgroundStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SelectedBackgroundStyle001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    PickerBackgroundStyle pickerBgStyle;
+    PickerBackgroundStyle result1;
+    PickerBackgroundStyle result2;
+    pickerBgStyle.color = Color(0x00000000);
+    pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    TextPickerModelNG::SetSelectedBackgroundStyle(frameNode, pickerBgStyle);
+    result1.color = layoutProperty->GetSelectedBackgroundColorValue();
+    result1.borderRadius = layoutProperty->GetSelectedBorderRadiusValue();
+    result2.color = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).color;
+    result2.borderRadius = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).borderRadius;
+    EXPECT_EQ(pickerBgStyle.color, result1.color);
+    EXPECT_EQ(pickerBgStyle.borderRadius, result1.borderRadius);
+    EXPECT_EQ(pickerBgStyle.color, result2.color);
+    EXPECT_EQ(pickerBgStyle.borderRadius, result2.borderRadius);
+}
 } // namespace OHOS::Ace::NG
