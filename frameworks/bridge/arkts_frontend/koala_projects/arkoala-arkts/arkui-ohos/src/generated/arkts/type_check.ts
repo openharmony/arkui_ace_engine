@@ -5583,10 +5583,16 @@ export class TypeChecker {
         return value instanceof Array<GuideLineStyle>
     }
     static isArray_BarrierStyle(value: object|string|number|undefined|null): boolean {
-        return value instanceof Array<BarrierStyle>
+        if (value instanceof Array<BarrierStyle> && value.length ) {
+            return value[0] instanceof BarrierStyle
+        }
+        return false
     }
     static isArray_LocalizedBarrierStyle(value: object|string|number|undefined|null): boolean {
-        return value instanceof Array<LocalizedBarrierStyle>
+        if (value instanceof Array<LocalizedBarrierStyle> && value.length ) {
+            return value[0] instanceof LocalizedBarrierStyle
+        }
+        return false
     }
     static isArray_ShadowOptions(value: object|string|number|undefined|null): boolean {
         return value instanceof Array<ShadowOptions>

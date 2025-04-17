@@ -38,8 +38,8 @@ void AssignCast(std::optional<BarrierDirection>& dst, const Ark_LocalizedBarrier
     switch (src) {
         case ARK_LOCALIZED_BARRIER_DIRECTION_START: dst = BarrierDirection::START; break;
         case ARK_LOCALIZED_BARRIER_DIRECTION_END: dst = BarrierDirection::END; break;
-        // case ARK_BARRIER_DIRECTION_TOP: dst = BarrierDirection::TOP; break;
-        // case ARK_BARRIER_DIRECTION_BOTTOM: dst = BarrierDirection::BOTTOM; break;
+        case ARK_LOCALIZED_BARRIER_DIRECTION_TOP: dst = BarrierDirection::TOP; break;
+        case ARK_LOCALIZED_BARRIER_DIRECTION_BOTTOM: dst = BarrierDirection::BOTTOM; break;
         default: LOGE("Unexpected enum value in Ark_BarrierDirection: %{public}d", src);
     }
 }
@@ -81,13 +81,13 @@ BarrierInfo Convert(const Ark_BarrierStyle& src)
 template<>
 BarrierInfo Convert(const Ark_LocalizedBarrierStyle& src)
 {
-    BarrierInfo info;
-    // info.id = Convert<std::string>(src.id);
-    // info.referencedId = Convert<std::vector<std::string>>(src.referencedId);
-    // auto direction = OptConvert<BarrierDirection>(src.localizedDirection);
-    // if (direction.has_value()) {
-    //     info.direction = direction.value();
-    // }
+    LocalizedBarrierInfo info;
+    info.id = Convert<std::string>(src.id);
+    info.referencedId = Convert<std::vector<std::string>>(src.referencedId);
+    auto direction = OptConvert<BarrierDirection>(src.localizedDirection);
+    if (direction.has_value()) {
+        info.direction = direction.value();
+    }
     return info;
 }
 

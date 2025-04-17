@@ -44,6 +44,8 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr float DEFAULT_BIAS = 0.5f;
+
 void ViewAbstract::SetWidth(const CalcLength& width)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -4281,10 +4283,15 @@ void ViewAbstract::SetMaxHeight(FrameNode* frameNode, const CalcLength& maxHeigh
     layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, maxHeight));
 }
 
-void ViewAbstract::SetAlignRules(FrameNode* frameNode, const std::map<AlignDirection, AlignRule>& alignRules)
+void ViewAbstract::SetAlignRules(FrameNode* frameNode,
+    const std::optional<std::map<AlignDirection, AlignRule>>& alignRules)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules, frameNode);
+    if (alignRules.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, AlignRules, alignRules.value(), frameNode);
+    } else {
+        ResetAlignRules(frameNode);
+    }
 }
 
 std::map<AlignDirection, AlignRule> ViewAbstract::GetAlignRules(FrameNode* frameNode)
@@ -5833,7 +5840,7 @@ void ViewAbstract::SetBias(FrameNode* frameNode, const std::optional<BiasPair>& 
 void ViewAbstract::SetBias(FrameNode* frameNode, const std::optional<float>& horisontal,
     const std::optional<float>& vertical)
 {
-    auto biasPair = BiasPair(0.5, 0.5);
+    auto biasPair = BiasPair(DEFAULT_BIAS, DEFAULT_BIAS);
     if (horisontal.has_value()) {
         biasPair.first = horisontal.value();
     }

@@ -670,7 +670,8 @@ public:
     static void SetMaxWidth(FrameNode* frameNode, const CalcLength& maxWidth);
     static void SetMinHeight(FrameNode* frameNode, const CalcLength& minHeight);
     static void SetMaxHeight(FrameNode* frameNode, const CalcLength& maxHeight);
-    static void SetAlignRules(FrameNode* frameNode, const std::map<AlignDirection, AlignRule>& alignRules);
+    static void SetAlignRules(FrameNode* frameNode, const std::optional<std::map<AlignDirection,
+        AlignRule>>& alignRules);
     static void SetChainStyle(FrameNode* frameNode, const ChainInfo& chainInfo);
     static ChainInfo GetChainStyle(FrameNode* frameNode);
     static void ResetChainStyle(FrameNode* frameNode);
