@@ -63,7 +63,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
 
     public set(newValue: T): void {
         const value = this.__backing.value
-        if (value != newValue) {
+        if (value !== newValue) {
             // if (this.validateValue(locanewValueInitValue) === false) {
             //     throw new Error("@State Object-type Value must be ObservedObject")
             // }
@@ -105,7 +105,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
         const watchThis = new WatchFunc((_: string) => { });
         const watchFunc: WatchFuncType = (_: string) => {
             if (weakProp.deref()) {
-                weakProp.deref()!.update(this.get());
+                weakProp.deref()!.updateForStorage(this.get());
             } else {
                 // the prop no longer exists 
                 // note: StorageLink.prop also deleted the WatchFunc in 
