@@ -3044,9 +3044,9 @@ void OnAreaChangeImpl(Ark_NativePointer node,
 void VisibilityImpl(Ark_NativePointer node,
                     Ark_Visibility value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // ViewAbstract::SetVisibility(frameNode, static_cast<VisibleType>(value));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetVisibility(frameNode, static_cast<VisibleType>(value));
 }
 void FlexGrowImpl(Ark_NativePointer node,
                   const Ark_Number* value)

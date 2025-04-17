@@ -19,6 +19,8 @@ import { ArkComponentRootPeer } from "./generated/peers/ArkStaticComponentsPeer"
 import { ArkCustomComponent } from "./ArkCustomComponent"
 import { int32 } from "@koalaui/common"
 import { CurrentRouterTransitionState, VisibilityHiding, VisibilityShowing, WithRouterTransitionState } from "./handwritten/Router";
+import router from "../ohos.router"
+import { InteropNativeModule } from "@koalaui/interop/InteropNativeModule";
 
 let _isNeedCreate: boolean = false
 
@@ -84,7 +86,11 @@ export function ArkComponentRoot(
             )
             // Do we need it here?
             component.pageTransition()
-            if (shown.value) WithRouterTransitionState(undefined, content) // skip first frame and hide router state
+            if (shown.value) {
+                InteropNativeModule._NativeLog("AceRouter:ArkComponentRoot NodeAttach, UpdateRouter page visibility state")
+                router.UpdateVisiblePagePeerNode(node);
+                WithRouterTransitionState(undefined, content) // skip first frame and hide router state
+            }
         }
     )
 }
