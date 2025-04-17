@@ -91,7 +91,14 @@ const auto ATTRIBUTE_SLIDE_RANGE_TO_NAME = "to";
 const auto ATTRIBUTE_SLIDE_RANGE_TO_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_TRACK_COLOR_GRADIENT_COLOR_NAME = "color";
 const auto ATTRIBUTE_TRACK_COLOR_GRADIENT_OFFSET_NAME = "offset";
-
+#ifdef SUPPORT_DIGITAL_CROWN
+const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME = "digitalCrownSensitivity";
+const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE = "CrownSensitivity.MEDIUM";
+#endif
+const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME = "enableHapticFeedback";
+const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE = "true";
+static const std::string EXPECTED_TRUE("true");
+static const std::string EXPECTED_FALSE("false");
 } // namespace
 
 namespace Fixtures {
@@ -2769,5 +2776,81 @@ HWTEST_F(SliderModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
     ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->value, 10.2f, FLT_EPSILON);
+}
+#ifdef SUPPORT_DIGITAL_CROWN
+std::vector<std::tuple<std::string, Opt_CrownSensitivity, std::string>> crownSensitivityTestPlan = {
+    { "CrownSensitivity.LOW", Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_LOW),
+        "CrownSensitivity.LOW" },
+    { "CrownSensitivity.MEDIUM", Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_MEDIUM),
+        "CrownSensitivity.MEDIUM" },
+    { "CrownSensitivity.HIGH", Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_HIGH),
+        "CrownSensitivity.HIGH" },
+    { "-1", Converter::ArkValue<Opt_CrownSensitivity>(static_cast<Ark_CrownSensitivity>(-1)),
+        ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE },
+    { "INT_MAX", Converter::ArkValue<Opt_CrownSensitivity>(static_cast<Ark_CrownSensitivity>(INT_MAX)),
+        ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE },
+    { "Ark_Empty", Converter::ArkValue<Opt_CrownSensitivity>(static_cast<Ark_CrownSensitivity>(INT_MAX)),
+        ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE },
+    { "CrownSensitivity.MEDIUM", Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_MEDIUM),
+        "CrownSensitivity.MEDIUM" },
+};
+/*
+ * @tc.name: setDigitalCrownSensitivityDefaultValuesTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, setDigitalCrownSensitivityDefaultValuesTest, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE)
+        << "Default value for attribute 'digitalCrownSensitivity'";
+}
+
+/*
+ * @tc.name: setDigitalCrownSensitivityValidValuesTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, setDigitalCrownSensitivityValuesTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDigitalCrownSensitivity, nullptr);
+    auto checkValue = [this](
+                        const std::string& input, const std::string& expectedStr, const Opt_CrownSensitivity& value) {
+        Opt_CrownSensitivity inputValueDigitalCrownSensitivity = value;
+        modifier_->setDigitalCrownSensitivity(node_, &inputValueDigitalCrownSensitivity);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
+                                        << ", method: setDigitalCrownSensitivity, attribute: digitalCrownSensitivity";
+    };
+    for (auto& [input, value, expected] : crownSensitivityTestPlan) {
+        checkValue(input, expected, value);
+    }
+}
+#endif
+
+/**
+ * @tc.name: setEnableHapticFeedbackTest
+ * @tc.desc: Check backToTop method of ScrollableCommonMethod modifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, setEnableHapticFeedbackTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setEnableHapticFeedback, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE);
+    modifier_->setEnableHapticFeedback(node_, false);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, EXPECTED_FALSE);
+    modifier_->setEnableHapticFeedback(node_, true);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, EXPECTED_TRUE);
 }
 } // namespace OHOS::Ace::NG

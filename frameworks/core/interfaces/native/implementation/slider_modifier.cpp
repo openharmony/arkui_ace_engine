@@ -371,10 +371,12 @@ void SlideRangeImpl(Ark_NativePointer node,
 void DigitalCrownSensitivityImpl(Ark_NativePointer node,
                                  const Opt_CrownSensitivity* value)
 {
+#ifdef SUPPORT_DIGITAL_CROWN
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SliderModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt;
+    SliderModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
+#endif
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
                               Ark_Boolean value)
@@ -382,7 +384,7 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //SliderModelNG::SetEnableHapticFeedback(frameNode, convValue);
+    SliderModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
 void ShowTipsImpl(Ark_NativePointer node,
                   Ark_Boolean value,
