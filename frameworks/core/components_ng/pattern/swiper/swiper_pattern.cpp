@@ -336,7 +336,21 @@ void SwiperPattern::ResetOnForceMeasure()
     isVoluntarilyClear_ = true;
     jumpIndex_ = jumpIndex_.value_or(currentIndex_);
     SetLazyForEachFlag();
+    ResetTabBar();
     MarkDirtyNodeSelf();
+}
+
+void SwiperPattern::ResetTabBar()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->ResetOnForceMeasure(jumpIndex_.value_or(currentIndex_));
 }
 
 void SwiperPattern::UpdateTabBarIndicatorCurve()

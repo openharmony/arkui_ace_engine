@@ -562,6 +562,8 @@ public:
 
     void ChangeIndex(int32_t index);
 
+    void ResetOnForceMeasure(int32_t index);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
