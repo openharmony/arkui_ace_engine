@@ -21745,6 +21745,7 @@ typedef struct GENERATED_ArkUIFileSelectorParamAccessor {
     Ark_FileSelectorMode (*getMode)(Ark_FileSelectorParam peer);
     Array_String (*getAcceptType)(Ark_FileSelectorParam peer);
     Ark_Boolean (*isCapture)(Ark_FileSelectorParam peer);
+    Array_String (*getMimeTypes)(Ark_FileSelectorParam peer);
 } GENERATED_ArkUIFileSelectorParamAccessor;
 
 typedef struct GENERATED_ArkUIJsResultAccessor {

@@ -4997,6 +4997,8 @@ export class ArkUIGeneratedNativeModule {
     native static _FileSelectorParam_getAcceptType(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _FileSelectorParam_isCapture(ptr: KPointer): boolean
+    @ani.unsafe.Quick
+    native static _FileSelectorParam_getMimeTypes(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _JsResult_ctor(): KPointer
     @ani.unsafe.Direct
