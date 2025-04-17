@@ -786,6 +786,7 @@ private:
 
     std::map<int32_t, Point> fingerPointInfo_;
     bool isStartAnimationFinished_{};
+    bool isPullThrow_ = false;
 };
 } // namespace OHOS::Ace::NG
 
