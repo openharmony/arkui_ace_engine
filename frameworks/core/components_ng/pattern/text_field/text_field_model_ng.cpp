@@ -749,6 +749,11 @@ void TextFieldModelNG::SetNormalMaxViewLines(uint32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, NormalMaxViewLines, value);
 }
 
+void TextFieldModelNG::SetOverflowMode(OverflowMode value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, OverflowMode, value);
+}
+
 void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 {
     Color backgroundColor = color;

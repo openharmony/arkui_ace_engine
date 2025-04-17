@@ -43,7 +43,7 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
 
     auto isInlineStyle = pattern->IsNormalInlineState();
     if (!isInlineStyle && textFieldLayoutProperty->HasNormalMaxViewLines()) {
-        textStyle.SetMaxLines(textFieldLayoutProperty->GetNormalMaxViewLines().value());
+        UpdateTextAreaMaxLines(textStyle, textFieldLayoutProperty);
     }
 
     if (isInlineStyle && textFieldLayoutProperty->HasTextOverflow()) {
