@@ -1075,146 +1075,146 @@ ButtonProperties Convert(const Ark_Literal_String_value_Callback_Void_action& sr
     return properties;
 }
 
-// template<>
-// void AssignCast(std::optional<HorizontalAlign>& dst, const Ark_HorizontalAlign& src)
-// {
-//     switch (src) {
-//         case ARK_HORIZONTAL_ALIGN_START: dst = HorizontalAlign::START; break;
-//         case ARK_HORIZONTAL_ALIGN_END: dst = HorizontalAlign::END; break;
-//         case ARK_HORIZONTAL_ALIGN_CENTER: dst = HorizontalAlign::CENTER; break;
-//         default: LOGE("Unexpected enum value in Ark_HorizontalAlign: %{public}d", src);
-//     }
-// }
+template<>
+void AssignCast(std::optional<HorizontalAlign>& dst, const Ark_HorizontalAlign& src)
+{
+    switch (src) {
+        case ARK_HORIZONTAL_ALIGN_START: dst = HorizontalAlign::START; break;
+        case ARK_HORIZONTAL_ALIGN_END: dst = HorizontalAlign::END; break;
+        case ARK_HORIZONTAL_ALIGN_CENTER: dst = HorizontalAlign::CENTER; break;
+        default: LOGE("Unexpected enum value in Ark_HorizontalAlign: %{public}d", src);
+    }
+}
 
-// template<>
-// void AssignCast(std::optional<VerticalAlign>& dst, const Ark_VerticalAlign& src)
-// {
-//     switch (src) {
-//         case ARK_VERTICAL_ALIGN_TOP: dst = VerticalAlign::TOP; break;
-//         case ARK_VERTICAL_ALIGN_BOTTOM: dst = VerticalAlign::BOTTOM; break;
-//         case ARK_VERTICAL_ALIGN_CENTER: dst = VerticalAlign::CENTER; break;
-//         default: LOGE("Unexpected enum value in Ark_VerticalAlign: %{public}d", src);
-//     }
-// }
+template<>
+void AssignCast(std::optional<VerticalAlign>& dst, const Ark_VerticalAlign& src)
+{
+    switch (src) {
+        case ARK_VERTICAL_ALIGN_TOP: dst = VerticalAlign::TOP; break;
+        case ARK_VERTICAL_ALIGN_BOTTOM: dst = VerticalAlign::BOTTOM; break;
+        case ARK_VERTICAL_ALIGN_CENTER: dst = VerticalAlign::CENTER; break;
+        default: LOGE("Unexpected enum value in Ark_VerticalAlign: %{public}d", src);
+    }
+}
 
-// template<>
-// AlignRule Convert(const Ark_Literal_String_anchor_HorizontalAlign_align& src)
-// {
-//     AlignRule rule;
-//     rule.anchor = Convert<std::string>(src.anchor);
-//     auto align = OptConvert<HorizontalAlign>(src.align);
-//     if (align.has_value()) {
-//         rule.horizontal = align.value();
-//     }
-//     return rule;
-// }
+template<>
+AlignRule Convert(const Ark_Literal_String_anchor_HorizontalAlign_align& src)
+{
+    AlignRule rule;
+    rule.anchor = Convert<std::string>(src.anchor);
+    auto align = OptConvert<HorizontalAlign>(src.align);
+    if (align.has_value()) {
+        rule.horizontal = align.value();
+    }
+    return rule;
+}
 
-// template<>
-// AlignRule Convert(const Ark_LocalizedHorizontalAlignParam& src)
-// {
-//     AlignRule rule;
-//     rule.anchor = Convert<std::string>(src.anchor);
-//     auto align = OptConvert<HorizontalAlign>(src.align);
-//     if (align.has_value()) {
-//         rule.horizontal = align.value();
-//     }
-//     return rule;
-// }
+template<>
+AlignRule Convert(const Ark_LocalizedHorizontalAlignParam& src)
+{
+    AlignRule rule;
+    rule.anchor = Convert<std::string>(src.anchor);
+    auto align = OptConvert<HorizontalAlign>(src.align);
+    if (align.has_value()) {
+        rule.horizontal = align.value();
+    }
+    return rule;
+}
 
-// template<>
-// AlignRule Convert(const Ark_Literal_String_anchor_VerticalAlign_align& src)
-// {
-//     AlignRule rule;
-//     rule.anchor = Convert<std::string>(src.anchor);
-//     auto align = OptConvert<VerticalAlign>(src.align);
-//     if (align.has_value()) {
-//         rule.vertical = align.value();
-//     }
-//     return rule;
-// }
+template<>
+AlignRule Convert(const Ark_Literal_String_anchor_VerticalAlign_align& src)
+{
+    AlignRule rule;
+    rule.anchor = Convert<std::string>(src.anchor);
+    auto align = OptConvert<VerticalAlign>(src.align);
+    if (align.has_value()) {
+        rule.vertical = align.value();
+    }
+    return rule;
+}
 
-// template<>
-// AlignRule Convert(const Ark_LocalizedVerticalAlignParam& src)
-// {
-//     AlignRule rule;
-//     rule.anchor = Convert<std::string>(src.anchor);
-//     auto align = OptConvert<VerticalAlign>(src.align);
-//     if (align.has_value()) {
-//         rule.vertical = align.value();
-//     }
-//     return rule;
-// }
+template<>
+AlignRule Convert(const Ark_LocalizedVerticalAlignParam& src)
+{
+    AlignRule rule;
+    rule.anchor = Convert<std::string>(src.anchor);
+    auto align = OptConvert<VerticalAlign>(src.align);
+    if (align.has_value()) {
+        rule.vertical = align.value();
+    }
+    return rule;
+}
 
-// template<>
-// std::map<AlignDirection, AlignRule> Convert(const Ark_AlignRuleOption& src)
-// {
-//     std::map<AlignDirection, AlignRule> rulesMap;
-//     auto rule = OptConvert<AlignRule>(src.left);
-//     if (rule.has_value()) {
-//         rulesMap[AlignDirection::LEFT] = rule.value();
-//     }
-//     rule = OptConvert<AlignRule>(src.right);
-//     if (rule.has_value()) {
-//         rulesMap[AlignDirection::RIGHT] = rule.value();
-//     }
-//     rule = OptConvert<AlignRule>(src.middle);
-//     if (rule.has_value()) {
-//         rulesMap[AlignDirection::MIDDLE] = rule.value();
-//     }
-//     rule = OptConvert<AlignRule>(src.top);
-//     if (rule.has_value()) {
-//         rulesMap[AlignDirection::TOP] = rule.value();
-//     }
-//     rule = OptConvert<AlignRule>(src.bottom);
-//     if (rule.has_value()) {
-//         rulesMap[AlignDirection::BOTTOM] = rule.value();
-//     }
-//     rule = OptConvert<AlignRule>(src.center);
-//     if (rule.has_value()) {
-//         rulesMap[AlignDirection::CENTER] = rule.value();
-//     }
-//     return rulesMap;
-// }
+template<>
+std::map<AlignDirection, AlignRule> Convert(const Ark_AlignRuleOption& src)
+{
+    std::map<AlignDirection, AlignRule> rulesMap;
+    auto rule = OptConvert<AlignRule>(src.left);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::LEFT] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.right);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::RIGHT] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.middle);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::MIDDLE] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.top);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::TOP] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.bottom);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::BOTTOM] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.center);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::CENTER] = rule.value();
+    }
+    return rulesMap;
+}
 
-// template<>
-// std::map<AlignDirection, AlignRule> Convert(const Ark_LocalizedAlignRuleOptions& src)
-// {
-//     std::map<AlignDirection, AlignRule> rulesMap;
-//     auto rule = OptConvert<AlignRule>(src.start);
-//     if (rule.has_value()) {
-//         rulesMap[AlignDirection::START] = rule.value();
-//     }
-//     rule = OptConvert<AlignRule>(src.end);
-//     if (rule.has_value()) {
-//         rulesMap[AlignDirection::END] = rule.value();
-//     }
-//     rule = OptConvert<AlignRule>(src.middle);
-//     if (rule.has_value()) {
-//         rulesMap[AlignDirection::MIDDLE] = rule.value();
-//     }
-//     rule = OptConvert<AlignRule>(src.top);
-//     if (rule.has_value()) {
-//         rulesMap[AlignDirection::TOP] = rule.value();
-//     }
-//     rule = OptConvert<AlignRule>(src.bottom);
-//     if (rule.has_value()) {
-//         rulesMap[AlignDirection::BOTTOM] = rule.value();
-//     }
-//     rule = OptConvert<AlignRule>(src.center);
-//     if (rule.has_value()) {
-//         rulesMap[AlignDirection::CENTER] = rule.value();
-//     }
-//     return rulesMap;
-// }
+template<>
+std::map<AlignDirection, AlignRule> Convert(const Ark_LocalizedAlignRuleOptions& src)
+{
+    std::map<AlignDirection, AlignRule> rulesMap;
+    auto rule = OptConvert<AlignRule>(src.start);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::LEFT] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.end);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::RIGHT] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.middle);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::MIDDLE] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.top);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::TOP] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.bottom);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::BOTTOM] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.center);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::CENTER] = rule.value();
+    }
+    return rulesMap;
+}
 
-// template<>
-// BiasOpt Convert(const Ark_Bias& src)
-// {
-//     BiasOpt bias;
-//     bias.first = OptConvert<float>(src.horizontal);
-//     bias.second = OptConvert<float>(src.vertical);
-//     return bias;
-// }
+template<>
+BiasOpt Convert(const Ark_Bias& src)
+{
+    BiasOpt bias;
+    bias.first = OptConvert<float>(src.horizontal);
+    bias.second = OptConvert<float>(src.vertical);
+    return bias;
+}
 
 // template<>
 // void AssignCast(std::optional<uint32_t>& dst, const Ark_FocusPriority& src)
@@ -3227,32 +3227,32 @@ void UseSizeTypeImpl(Ark_NativePointer node,
 void AlignRules0Impl(Ark_NativePointer node,
                      const Ark_AlignRuleOption* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(*value);
-    // ViewAbstract::SetAlignRules(frameNode, convMapValue);
-    // auto convBiasValue = Converter::OptConvert<BiasOpt>(value->bias);
-    // if (convBiasValue.has_value()) {
-    //     ViewAbstract::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
-    // } else {
-    //     ViewAbstract::SetBias(frameNode, std::nullopt);
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(*value);
+    ViewAbstract::SetAlignRules(frameNode, convMapValue);
+    auto convBiasValue = Converter::OptConvert<BiasOpt>(value->bias);
+    if (convBiasValue.has_value()) {
+        ViewAbstract::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
+    } else {
+        ViewAbstract::SetBias(frameNode, std::nullopt);
+    }
 }
 void AlignRules1Impl(Ark_NativePointer node,
                      const Ark_LocalizedAlignRuleOptions* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(*value);
-    // ViewAbstract::SetAlignRules(frameNode, convMapValue);
-    // auto convBiasValue = Converter::OptConvert<BiasOpt>(value->bias);
-    // if (convBiasValue.has_value()) {
-    //     ViewAbstract::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
-    // } else {
-    //     ViewAbstract::SetBias(frameNode, std::nullopt);
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(*value);
+    ViewAbstract::SetAlignRules(frameNode, convMapValue);
+    auto convBiasValue = Converter::OptConvert<BiasOpt>(value->bias);
+    if (convBiasValue.has_value()) {
+        ViewAbstract::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
+    } else {
+        ViewAbstract::SetBias(frameNode, std::nullopt);
+    }
 }
 void AspectRatioImpl(Ark_NativePointer node,
                      const Ark_Number* value)
