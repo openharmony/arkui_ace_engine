@@ -174,6 +174,12 @@ inline void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_SwiperNes
         default: LOGE("Unexpected enum value in Ark_SwiperNestedScrollMode: %{public}d", src);
     }
 }
+
+template<>
+SwiperAutoPlayOptions Convert(const Ark_AutoPlayOptions& src)
+{
+    return { .stopWhenTouched = src.stopWhenTouched };
+}
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG {
@@ -284,9 +290,11 @@ void AutoPlay1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(autoPlay);
-    //auto convValue = Converter::OptConvert<type>(autoPlay); // for enums
-    //SwiperModelNG::SetAutoPlay1(frameNode, convValue);
+    CHECK_NULL_VOID(options);
+    auto autoPlayConv = Converter::Convert<bool>(autoPlay);
+    auto optionsConv = Converter::Convert<SwiperAutoPlayOptions>(*options);
+    SwiperModelNG::SetAutoPlay(frameNode, autoPlayConv);
+    SwiperModelNG::SetAutoPlayOptions(frameNode, optionsConv);
 }
 void IntervalImpl(Ark_NativePointer node,
                   const Ark_Number* value)
@@ -393,9 +401,9 @@ void CachedCount1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(count);
-    //auto convValue = Converter::OptConvert<type>(count); // for enums
-    //SwiperModelNG::SetCachedCount1(frameNode, convValue);
+    CHECK_NULL_VOID(count);
+    SwiperModelNG::SetCachedCount(frameNode, Converter::Convert<int32_t>(*count));
+    SwiperModelNG::SetCachedIsShown(frameNode, Converter::Convert<bool>(isShown));
 }
 void EffectModeImpl(Ark_NativePointer node,
                     Ark_EdgeEffect value)
