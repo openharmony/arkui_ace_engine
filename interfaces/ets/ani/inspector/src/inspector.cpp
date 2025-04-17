@@ -226,6 +226,7 @@ static ani_string AniGetInspectorByKey([[maybe_unused]] ani_env *env, ani_string
         LOGE("inspector-ani key is empty.");
         return nullptr;
     }
+    ContainerScope scope{Container::CurrentIdSafelyWithCheck()};
     std::string resultStr = NG::Inspector::GetInspectorNodeByKey(keyStr);
     if (resultStr.empty()) {
         LOGE("inspector-ani node %{public}s is empty.", keyStr.c_str());
