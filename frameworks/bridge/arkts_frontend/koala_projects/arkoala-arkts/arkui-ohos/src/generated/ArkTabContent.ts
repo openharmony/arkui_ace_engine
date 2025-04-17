@@ -53,7 +53,7 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         return this
     }
     /** @memo */
-    public tabBar(value: SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions): this {
+    public tabBar(value: string | Resource | CustomBuilder | TabBarOptions | SubTabBarStyle | BottomTabBarStyle): this {
         if (this.checkPriority("tabBar")) {
             const value_type = runtimeType(value)
             if ((((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isSubTabBarStyle(value))) || (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isBottomTabBarStyle(value)))) {
