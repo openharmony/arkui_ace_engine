@@ -806,7 +806,7 @@ FontWeightInt Convert(const Ark_FontWeight& src)
     }
     return dst;
 }
-    
+
 template<>
 FontWeightInt Convert(const Ark_Number& src)
 {
@@ -1036,11 +1036,28 @@ CheckboxSettingData Convert(const Ark_LunarSwitchStyle& src)
 }
 
 template<>
-DateTimeType Convert(const Ark_DateTimeOptions& src)
+void AssignCast(std::optional<DateTimeType>& dst, const Ark_DateTimeOptions& src)
 {
-    DateTimeType type;
-    LOGE("Convert [Ark_DateTimeOptions] to [DateTimeType] is not implemented yet");
-    return type;
+    const std::string TIMEPICKER_OPTIONS_NUMERIC_VAL = "numeric";
+    const std::string TIMEPICKER_OPTIONS_TWO_DIGIT_VAL = "2-digit";
+
+    DateTimeType type {ZeroPrefixType::AUTO, ZeroPrefixType::AUTO, ZeroPrefixType::AUTO};
+    auto hourStr = OptConvert<std::string>(src.hour);
+    if (hourStr) {
+        if (hourStr == TIMEPICKER_OPTIONS_TWO_DIGIT_VAL) {
+            type.hourType = ZeroPrefixType::SHOW;
+        } else if (hourStr == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
+            type.hourType = ZeroPrefixType::HIDE;
+        }
+    }
+    auto minuteStr = OptConvert<std::string>(src.minute);
+    if (minuteStr) {
+        type.minuteType = ZeroPrefixType::SHOW;
+        if (minuteStr == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
+            type.minuteType = ZeroPrefixType::HIDE;
+        }
+    }
+    dst = type;
 }
 
 template<>

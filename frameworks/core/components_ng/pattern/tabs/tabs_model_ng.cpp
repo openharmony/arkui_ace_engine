@@ -1272,12 +1272,16 @@ void TabsModelNG::SetCachedMaxCount(std::optional<int32_t> cachedMaxCount, TabsC
 }
 
 void TabsModelNG::SetCachedMaxCount(
-    FrameNode* frameNode, std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode)
+    FrameNode* frameNode, std::optional<int32_t> cachedMaxCount, std::optional<TabsCacheMode> cacheMode)
 {
     CHECK_NULL_VOID(frameNode);
     if (cachedMaxCount.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CachedMaxCount, cachedMaxCount.value(), frameNode);
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CacheMode, cacheMode, frameNode);
+        if (cacheMode.has_value()) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CacheMode, cacheMode.value(), frameNode);
+        } else {
+            ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CacheMode, frameNode);
+        }
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CachedMaxCount, frameNode);
         ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CacheMode, frameNode);

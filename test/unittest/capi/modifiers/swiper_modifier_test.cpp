@@ -147,6 +147,39 @@ HWTEST_F(SwiperModifierTest, setAutoPlayTest, TestSize.Level1)
     EXPECT_EQ(checkVal3, EXPECTED_FALSE);
 }
 /**
+ * @tc.name: setAutoPlay1Test
+ * @tc.desc: Check the functionality of SwiperModifier.AutoPlay1Impl
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, setAutoPlay1Test, TestSize.Level1)
+{
+    static const std::string propNameAutoPlay("autoPlay");
+    static const std::string &autoPlayDefault(EXPECTED_FALSE);
+    static const std::string propNameAutoPlayOptions("stopWhenTouched");
+    static const std::string &autoPlayOptionsDefault(EXPECTED_TRUE);
+
+    ASSERT_NE(modifier_->setAutoPlay1, nullptr);
+
+    auto checkAutoPlay = GetAttrValue<std::string>(node_, propNameAutoPlay);
+    EXPECT_EQ(checkAutoPlay, autoPlayDefault);
+    auto checkAutoPlayOptions = GetAttrValue<std::string>(node_, propNameAutoPlayOptions);
+    EXPECT_EQ(checkAutoPlayOptions, autoPlayOptionsDefault);
+
+    Ark_AutoPlayOptions options = { .stopWhenTouched = false };
+    modifier_->setAutoPlay1(node_, ABOOL_TRUE, &options);
+    checkAutoPlay = GetAttrValue<std::string>(node_, propNameAutoPlay);
+    EXPECT_EQ(checkAutoPlay, EXPECTED_TRUE);
+    checkAutoPlayOptions = GetAttrValue<std::string>(node_, propNameAutoPlayOptions);
+    EXPECT_EQ(checkAutoPlayOptions, EXPECTED_FALSE);
+
+    options = { .stopWhenTouched = true };
+    modifier_->setAutoPlay1(node_, ABOOL_FALSE, &options);
+    checkAutoPlay = GetAttrValue<std::string>(node_, propNameAutoPlay);
+    EXPECT_EQ(checkAutoPlay, EXPECTED_FALSE);
+    checkAutoPlayOptions = GetAttrValue<std::string>(node_, propNameAutoPlayOptions);
+    EXPECT_EQ(checkAutoPlayOptions, EXPECTED_TRUE);
+}
+/**
  * @tc.name: setIntervalTest
  * @tc.desc: Check the functionality of SwiperModifier.IntervalImpl
  * @tc.type: FUNC
@@ -966,6 +999,57 @@ HWTEST_F(SwiperModifierTest, setCachedCountTest, TestSize.Level1)
     modifier_->setCachedCount0(node_, &numberFltNeg);
     auto checkVal5 = GetAttrValue<int>(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, DEFAULT_VALUE);
+}
+
+/**
+ * @tc.name: setCachedCount1Test
+ * @tc.desc: Check the functionality of SwiperModifier.CachedCount1Impl
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, setCachedCount1Test, TestSize.Level1)
+{
+    static const std::string propNameCount("cachedCount");
+    static const int defaultValueCount(DEFAULT_SWIPER_CACHED_SIZE);
+    static const std::string propNameShown("cachedIsShown");
+    static const std::string &defaultValueShown(EXPECTED_FALSE);
+    ASSERT_NE(modifier_->setCachedCount1, nullptr);
+
+    auto checkCount = GetAttrValue<int>(node_, propNameCount);
+    EXPECT_EQ(checkCount, defaultValueCount);
+    auto checkShown = GetAttrValue<std::string>(node_, propNameShown);
+    EXPECT_EQ(checkShown, defaultValueShown);
+
+    Ark_Number numberInt = ArkValue<Ark_Number>(123456);
+    auto isShown = ArkValue<Ark_Boolean>(true);
+    modifier_->setCachedCount1(node_, &numberInt, isShown);
+    checkCount = GetAttrValue<int>(node_, propNameCount);
+    EXPECT_EQ(checkCount, 123456);
+    checkShown = GetAttrValue<std::string>(node_, propNameShown);
+    EXPECT_EQ(checkShown, EXPECTED_TRUE);
+
+    Ark_Number numberFlt = ArkValue<Ark_Number>(1.23456f);
+    isShown = ArkValue<Ark_Boolean>(false);
+    modifier_->setCachedCount1(node_, &numberFlt, isShown);
+    checkCount = GetAttrValue<int>(node_, propNameCount);
+    EXPECT_EQ(checkCount, 1);
+    checkShown = GetAttrValue<std::string>(node_, propNameShown);
+    EXPECT_EQ(checkShown, EXPECTED_FALSE);
+
+    Ark_Number numberIntNeg = ArkValue<Ark_Number>(-111);
+    isShown = ArkValue<Ark_Boolean>(true);
+    modifier_->setCachedCount1(node_, &numberIntNeg, isShown);
+    checkCount = GetAttrValue<int>(node_, propNameCount);
+    EXPECT_EQ(checkCount, defaultValueCount);
+    checkShown = GetAttrValue<std::string>(node_, propNameShown);
+    EXPECT_EQ(checkShown, EXPECTED_TRUE);
+
+    Ark_Number numberFltNeg = ArkValue<Ark_Number>(-1.111f);
+    isShown = ArkValue<Ark_Boolean>(false);
+    modifier_->setCachedCount1(node_, &numberFltNeg, isShown);
+    checkCount = GetAttrValue<int>(node_, propNameCount);
+    EXPECT_EQ(checkCount, defaultValueCount);
+    checkShown = GetAttrValue<std::string>(node_, propNameShown);
+    EXPECT_EQ(checkShown, EXPECTED_FALSE);
 }
 /**
  * @tc.name: setDisplayCountTestNumber

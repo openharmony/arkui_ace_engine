@@ -1795,4 +1795,98 @@ HWTEST_F(TabsModifierTest, setPageFlipModeTestInvalidValue, TestSize.Level1)
         EXPECT_EQ(swiperPattern->GetPageFlipMode(), expectedValue) << "Passed value is: " << expectedValue;
     }
 }
+
+/**
+ * @tc.name: setOnSelectedTest
+ * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setOnSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModifierTest, setOnSelectedTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto onSelected =
+        [](Ark_Int32 nodeId, const Ark_Number index) {
+            g_indexValue = Converter::Convert<int32_t>(index);
+        };
+    auto func = Converter::ArkValue<Callback_Number_Void>(onSelected, CONTEXT_ID);
+    modifier_->setOnSelected(node_, &func);
+    EXPECT_EQ(g_indexValue, 0);
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    ASSERT_NE(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    ASSERT_NE(swiperNode, nullptr);
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->FireSelectedEvent(INDEX);
+    EXPECT_EQ(g_indexValue, INDEX);
+    g_indexValue = 0;
+}
+
+/**
+ * @tc.name: setOnUnselectedTest
+ * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setOnUnselected
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModifierTest, setOnUnselectedTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto onUnselected =
+        [](Ark_Int32 nodeId, const Ark_Number index) {
+            g_indexValue = Converter::Convert<int32_t>(index);
+        };
+    auto func = Converter::ArkValue<Callback_Number_Void>(onUnselected, CONTEXT_ID);
+    modifier_->setOnUnselected(node_, &func);
+    EXPECT_EQ(g_indexValue, 0);
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    ASSERT_NE(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    ASSERT_NE(swiperNode, nullptr);
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->FireUnselectedEvent(INDEX);
+    EXPECT_EQ(g_indexValue, INDEX);
+    g_indexValue = 0;
+}
+
+/**
+ * @tc.name: setCachedMaxCountValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModifierTest, setCachedMaxCountValues, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    // default value
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    EXPECT_EQ("", GetAttrValue<std::string>(json, "cachedMaxCount"));
+
+    // new values
+    std::vector<std::tuple<std::string, Ark_TabsCacheMode, int32_t>> testMap = {
+        {"TabsCacheMode.CACHE_BOTH_SIDE", ARK_TABS_CACHE_MODE_CACHE_BOTH_SIDE, 1},
+        {"TabsCacheMode.CACHE_LATEST_SWITCHED", ARK_TABS_CACHE_MODE_CACHE_LATEST_SWITCHED, 2},
+    };
+
+    for (auto [expectedModeValue, modeValue, countValue]: testMap) {
+        auto arkCount = Converter::ArkValue<Ark_Number>(countValue);
+        modifier_->setCachedMaxCount(frameNode, &arkCount, modeValue);
+        auto json = GetJsonValue(node_);
+        ASSERT_TRUE(json);
+        auto cachedMaxCount = GetAttrValue<std::unique_ptr<JsonValue>>(json, "cachedMaxCount");
+        ASSERT_TRUE(cachedMaxCount);
+        EXPECT_EQ(expectedModeValue, GetAttrValue<std::string>(cachedMaxCount, "mode"));
+        EXPECT_EQ(countValue, GetAttrValue<int32_t>(cachedMaxCount, "count"));
+    }
+
+    modifier_->setCachedMaxCount(frameNode, nullptr, ARK_TABS_CACHE_MODE_CACHE_BOTH_SIDE);
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    EXPECT_EQ("", GetAttrValue<std::string>(json, "cachedMaxCount"));
+}
 }

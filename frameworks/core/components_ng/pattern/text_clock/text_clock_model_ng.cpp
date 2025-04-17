@@ -302,10 +302,14 @@ void TextClockModelNG::InitFontDefault(FrameNode* frameNode, const TextStyle& te
     }
 }
 
-void TextClockModelNG::SetDateTimeOptions(FrameNode* frameNode, const ZeroPrefixType& hourType)
+void TextClockModelNG::SetDateTimeOptions(FrameNode* frameNode, const std::optional<ZeroPrefixType>& hourType)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, PrefixHour, hourType, frameNode);
+    if (hourType.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, PrefixHour, hourType.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, PrefixHour, frameNode);
+    }
 }
 
 void TextClockModelNG::SetJSTextClockController(FrameNode* frameNode, const RefPtr<Referenced>& controller)

@@ -192,7 +192,7 @@ public:
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
     static void SetCustomKeyboard(FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance);
     static void SetStopBackPress(FrameNode* frameNode, const std::optional<bool>& isStopBackPress);
-    static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
+    static void SetKeyboardAppearance(FrameNode* frameNode, const std::optional<KeyboardAppearance>& value);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick);
 

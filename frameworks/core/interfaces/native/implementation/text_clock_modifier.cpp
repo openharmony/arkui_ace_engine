@@ -179,8 +179,13 @@ void DateTimeOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextClockModelNG::SetDateTimeOptions(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto dateTimeOptions = Converter::OptConvert<DateTimeType>(*value);
+    std::optional<ZeroPrefixType> hourType;
+    if (dateTimeOptions) {
+        hourType = dateTimeOptions->hourType;
+    }
+    TextClockModelNG::SetDateTimeOptions(frameNode, hourType);
 }
 } // TextClockAttributeModifier
 const GENERATED_ArkUITextClockModifier* GetTextClockModifier()

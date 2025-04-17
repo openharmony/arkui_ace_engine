@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "ace_pixelmap_stub.h"
+
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
@@ -65,5 +67,10 @@ bool SystemProperties::IsFormAnimationLimited()
 std::string SystemProperties::GetWebDebugRenderMode()
 {
     return "none";
+}
+
+RefPtr<PixelMap> PixelMap::Create(std::unique_ptr<Media::PixelMap>&& pixmap)
+{
+    return AceType::MakeRefPtr<PixelMapStub>();
 }
 } // namespace OHOS::Ace

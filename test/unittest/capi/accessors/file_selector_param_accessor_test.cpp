@@ -119,4 +119,18 @@ HWTEST_F(FileSelectorParamAccessorTest, isCaptureTest, TestSize.Level1)
     EXPECT_EQ(arkFalse, accessor_->isCapture(peer_));
 }
 
+/**
+ * @tc.name: getMimeTypesTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FileSelectorParamAccessorTest, getMimeTypesTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getMimeTypes, nullptr);
+    std::vector<std::string> mimeTypes { "item1", "item2" };
+
+    EXPECT_CALL(*mockHandler_, GetMimeType()).Times(1).WillOnce(Return(mimeTypes));
+    EXPECT_EQ(Converter::Convert<std::vector<std::string>>(accessor_->getMimeTypes(peer_)), mimeTypes);
+}
+
 } // namespace OHOS::Ace::NG
