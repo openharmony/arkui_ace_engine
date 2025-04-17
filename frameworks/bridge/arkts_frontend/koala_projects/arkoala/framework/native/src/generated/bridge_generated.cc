@@ -23964,6 +23964,18 @@ Ark_Boolean impl_FileSelectorParam_isCapture(Ark_NativePointer thisPtr) {
         return GetAccessors()->getFileSelectorParamAccessor()->isCapture(self);
 }
 KOALA_INTEROP_DIRECT_1(FileSelectorParam_isCapture, Ark_Boolean, Ark_NativePointer)
+KInteropReturnBuffer impl_FileSelectorParam_getMimeTypes(Ark_NativePointer thisPtr) {
+        Ark_FileSelectorParam self = reinterpret_cast<Ark_FileSelectorParam>(thisPtr);
+        const auto &retValue = GetAccessors()->getFileSelectorParamAccessor()->getMimeTypes(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeInt32(retValue.length);
+        for (int i = 0; i < retValue.length; i++) {
+            const Ark_String retValue_element = retValue.array[i];
+            _retSerializer.writeString(retValue_element);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FileSelectorParam_getMimeTypes, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_JsResult_ctor() {
         return GetAccessors()->getJsResultAccessor()->ctor();
 }
