@@ -3988,6 +3988,21 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::GetRsNodeByFrame(const RefPtr
     return rsnode;
 }
 
+bool RosenRenderContext::CanNodeBeDeleted(const RefPtr<FrameNode>& node) const
+{
+    CHECK_NULL_RETURN(node, false);
+    auto rsNode = GetRsNodeByFrame(node);
+    CHECK_NULL_RETURN(rsNode, false);
+    std::list <RefPtr<FrameNode>> childChildrenList;
+    node->GenerateOneDepthVisibleFrameWithTransition(childChildrenList);
+    if (rsNode->GetIsDrawn() || rsNode->GetType() != Rosen::RSUINodeType::CANVAS_NODE
+        || childChildrenList.empty() || node->GetTag() == V2::PAGE_ETS_TAG
+        || node->GetTag() == V2::STAGE_ETS_TAG) {
+        return false;
+    }
+    return true;
+}
+
 void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes)
 {
     CHECK_NULL_VOID(node);
@@ -3996,11 +4011,7 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
     CHECK_NULL_VOID(pipeline);
     node->GenerateOneDepthVisibleFrameWithTransition(childrenList);
     for (auto& child : childrenList) {
-        auto rsChild = GetRsNodeByFrame(child);
-        std::list<RefPtr<FrameNode>> childChildrenList;
-        child->GenerateOneDepthVisibleFrameWithTransition(childChildrenList);
-        if (rsChild && (rsChild->GetIsDrawn() || rsChild->GetType() != Rosen::RSUINodeType::CANVAS_NODE ||
-                           childChildrenList.empty())) {
+        if (!CanNodeBeDeleted(child)) {
             childNodes.emplace_back(child);
             if (pipeline && child->HasPositionZ()) {
                 pipeline->AddPositionZNode(child->GetId());
@@ -4021,12 +4032,7 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
     CHECK_NULL_VOID(overlayNode);
     auto property = overlayNode->GetLayoutProperty();
     if (property && property->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
-        auto rsoverlayNode = GetRsNodeByFrame(overlayNode);
-        std::list<RefPtr<FrameNode>> childChildrenList;
-        overlayNode->GenerateOneDepthVisibleFrameWithTransition(childChildrenList);
-        if (rsoverlayNode &&
-            (rsoverlayNode->GetIsDrawn() || rsoverlayNode->GetType() != Rosen::RSUINodeType::CANVAS_NODE ||
-                childChildrenList.empty())) {
+        if (!CanNodeBeDeleted(overlayNode)) {
             childNodes.emplace_back(overlayNode);
             if (pipeline && overlayNode->HasPositionZ()) {
                 pipeline->AddPositionZNode(overlayNode->GetId());
