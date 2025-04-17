@@ -1186,6 +1186,7 @@ private:
     }
 
     void ResetOnForceMeasure();
+    void ResetTabBar();
     void UpdateTabBarIndicatorCurve();
     bool CheckDragOutOfBoundary(double dragVelocity);
     void UpdateCurrentFocus();
