@@ -855,10 +855,13 @@ private:
     void PopLevelOrder(int32_t nodeId);
     RefPtr<FrameNode> GetPrevNodeWithOrder(std::optional<double> levelOrder);
     RefPtr<FrameNode> GetBottomOrderFirstNode(std::optional<double> levelOrder);
+    RefPtr<FrameNode> GetTopOrderNode();
+    int32_t GetTopOrderNodeId();
     bool GetNodeFocusable(const RefPtr<FrameNode>& node);
     RefPtr<FrameNode> GetTopFocusableNode();
     int32_t GetTopFocusableNodeId();
     void FocusNextOrderNode(int32_t topNodeId);
+    void SendAccessibilityEventToNextOrderNode(int32_t topNodeId);
     bool IsTopOrder(std::optional<double> levelOrder);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
     void RemoveMaskFromMap(const RefPtr<FrameNode>& dialogNode);
