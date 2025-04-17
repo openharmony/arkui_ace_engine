@@ -240,6 +240,20 @@ void JSForm::JsOnLoad(const JSCallbackInfo& info)
     }
 }
 
+void JSForm::JsOnUpdate(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onUpdate = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Form.onUpdate");
+            std::vector<std::string> keys = { "id", "idString" };
+            func->Execute(keys, param);
+        };
+        FormModel::GetInstance()->SetOnUpdate(std::move(onUpdate));
+    }
+}
+
 void JSForm::JsObscured(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined()) {
@@ -281,6 +295,7 @@ void JSForm::JSBind(BindingTarget globalObj)
     JSClass<JSForm>::StaticMethod("onUninstall", &JSForm::JsOnUninstall);
     JSClass<JSForm>::StaticMethod("onRouter", &JSForm::JsOnRouter);
     JSClass<JSForm>::StaticMethod("onLoad", &JSForm::JsOnLoad);
+    JSClass<JSForm>::StaticMethod("onUpdate", &JSForm::JsOnUpdate);
     JSClass<JSForm>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSForm>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSForm>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
