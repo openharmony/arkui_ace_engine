@@ -62,7 +62,7 @@ Ark_Boolean IsCaptureImpl(Ark_FileSelectorParam peer)
 Array_String GetMimeTypesImpl(Ark_FileSelectorParam peer)
 {
     CHECK_NULL_RETURN(peer && peer->handler, {});
-    auto mimeTypes = peer->handler->GetMimeTypes();
+    auto mimeTypes = peer->handler->GetMimeType();
     return Converter::ArkValue<Array_String>(mimeTypes, Converter::FC);
 }
 } // FileSelectorParamAccessor
