@@ -265,7 +265,7 @@ private:
                 crownEventNum_ = 0;
                 reachBoundary_ = false;
                 HandleCrownAction(mainDelta);
-                StartVibrateFeedback();
+                timeStampPre_ = GetCurrentTimestamp();
                 UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
                 FireChangeEvent(SliderChangeMode::Begin);
                 OpenTranslateAnimation(SliderStatus::MOVE);
@@ -397,6 +397,8 @@ private:
     double crownMovingLength_ = 0.0;
     int32_t crownEventNum_ = 0;
     bool reachBoundary_ = false;
+    int64_t timeStampCur_ = 0;
+    int64_t timeStampPre_ = 0;
 #endif
 
     RefPtr<TouchEventImpl> touchEvent_;
