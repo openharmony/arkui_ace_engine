@@ -1164,7 +1164,7 @@ void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
     TextPattern::OnDetachFromFrameNode(node);
     ScrollablePattern::OnDetachFromFrameNode(node);
     ClearOnFocusTextField(node);
-    auto context = GetContext();
+    auto context = pipeline_.Upgrade();
     IF_PRESENT(context, RemoveWindowSizeChangeCallback(frameId_));
 }
 

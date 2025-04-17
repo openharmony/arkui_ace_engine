@@ -486,37 +486,6 @@ HWTEST_F(RichEditorEditTestNg, GetSelectArea001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetPlaceholder001
- * @tc.desc: test SetPlaceholder
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, SetPlaceholder001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto host = richEditorPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_NE(layoutProperty, nullptr);
-    auto textframeNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RichEditorPattern>());
-    ASSERT_NE(textframeNode, nullptr);
-    host->AddChild(textframeNode);
-    textframeNode->SetParent(host);
-    /**
-     * @tc.steps: step1. add text and paragraph
-     */
-    std::vector<std::list<RefPtr<SpanItem>>> spanItemList;
-    richEditorPattern->spans_.clear();
-    richEditorPattern->SetPlaceholder(spanItemList);
-    EXPECT_FALSE(richEditorPattern->isShowPlaceholder_);
-}
-
-/**
  * @tc.name: RichEditorGetCrossOverHeight001
  * @tc.desc: test RichEditorGetCrossOverHeight
  * @tc.type: FUNC
@@ -1157,6 +1126,37 @@ HWTEST_F(RichEditorEditTestNg, GetLeftTextOfCursor002, TestSize.Level1)
     AddSpan(INIT_VALUE_1);
     auto ret = richEditorPattern->GetLeftTextOfCursor(3);
     EXPECT_EQ(ret, u"");
+}
+
+/**
+ * @tc.name: SetPlaceholder001
+ * @tc.desc: test SetPlaceholder
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, SetPlaceholder001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto host = richEditorPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto textframeNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RichEditorPattern>());
+    ASSERT_NE(textframeNode, nullptr);
+    host->AddChild(textframeNode);
+    textframeNode->SetParent(host);
+    /**
+     * @tc.steps: step1. add text and paragraph
+     */
+    std::vector<std::list<RefPtr<SpanItem>>> spanItemList;
+    richEditorPattern->spans_.clear();
+    richEditorPattern->SetPlaceholder(spanItemList);
+    EXPECT_FALSE(richEditorPattern->isShowPlaceholder_);
 }
 
 /**
