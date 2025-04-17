@@ -1684,6 +1684,25 @@ HWTEST_F(TextTestFiveNg, IsNeedMenuShare001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsNeedMenuShare002
+ * @tc.desc: test base_text_select_overlay.cpp IsNeedMenuShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, IsNeedMenuShare002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+    pattern->textForDisplay_ = TEXT_U16CONTENT;
+
+    EXPECT_EQ(textSelectOverlay->IsNeedMenuShare(), false);
+}
+
+/**
  * @tc.name: HandleOnShare001
  * @tc.desc: test base_text_select_overlay.cpp HandleOnShare function
  * @tc.type: FUNC
