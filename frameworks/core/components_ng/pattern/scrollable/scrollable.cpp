@@ -375,6 +375,9 @@ void Scrollable::HandleCrownEvent(const CrownEvent& event, const OffsetF& center
 
 void Scrollable::HandleCrownActionBegin(const TimeStamp& timeStamp, double mainDelta, GestureEvent& info)
 {
+    if (!isDragging_) {
+        return;
+    }
     accumulativeCrownPx_.Reset();
     crownVelocityTracker_.Reset();
     UpdateCrownVelocity(timeStamp, mainDelta, false);
