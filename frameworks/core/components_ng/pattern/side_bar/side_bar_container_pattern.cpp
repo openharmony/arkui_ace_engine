@@ -1492,7 +1492,7 @@ void SideBarContainerPattern::SetSideBarWidthToolBarManager(bool isShow, float s
 void SideBarContainerPattern::SideBarModifyDoneToolBarManager()
 {
     CHECK_NULL_VOID(toolbarManager_);
-    toolbarManager_->OnSideBarModifyDone();
+    toolbarManager_->OnToolBarManagerModifyDone();
 }
 
 void SideBarContainerPattern::UpdateSideBarColorToolBarManager(const Color& backgroudColor)

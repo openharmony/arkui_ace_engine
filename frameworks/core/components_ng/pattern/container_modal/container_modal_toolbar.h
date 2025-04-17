@@ -46,24 +46,25 @@ public:
     void SetToolbarBuilder(const RefPtr<FrameNode>& parent, std::function<RefPtr<UINode>()>& builder);
     void OnToolBarLayoutChange();
 
-    bool GetTargetNodes();
-    void ToInitTargetNode();
+    bool GetNavOrSideBarNodes();
+    void ToInitNavOrSideBarNode();
+
+    void HasExpandStackLayout();
+    void ExpandStackLayout();
+    void UpdateTargetNodesBarMargin();
+    void SetExpandStackLayout(bool isExpand)
+    {
+        CHECK_NULL_VOID(toolbarManager_);
+        toolbarManager_->SetIsMoveUp(isExpand);
+    }
+    bool GetExpandStackLayout() const
+    {
+        return toolbarManager_->GetIsMoveUp();
+    }
 
 protected:
     void UpdateTitleAfterRemove();
     void RemoveToolbarItem(const RefPtr<FrameNode>& frameNode);
-
-public:
-    void HasExpandStackLayout();
-    void ExpandStackLayout();
-    void UpdateTargetNodesBarMargin();
-    void SetExpandStackLayout(bool isExpand) {
-        CHECK_NULL_VOID(toolbarManager_);
-        toolbarManager_->SetIsMoveUp(isExpand);
-    }
-    bool GetExpandStackLayout() const {
-        return toolbarManager_->GetIsMoveUp();
-    }
 
 private:
     void ParsePlacementType();
@@ -94,20 +95,24 @@ private:
     void UpdateNavbarTitlebarMargin();
     void UpdateNavDestinationTitlebarMargin();
 
-    bool TargetNodes()
+    bool HasNavOrSideBarNodes()
     {
-        return hasTargetNodes_;
+        return hasNavOrSideBarNodes_;
     }
 
-    void setTargetNodes(bool hasTargetNodes)
+    void SetHasNavOrSideBarNodes(bool hasNavOrSideBarNodes)
     {
-        hasTargetNodes_ = hasTargetNodes;
+        hasNavOrSideBarNodes_ = hasNavOrSideBarNodes;
     }
 
     Dimension titleHeight_ = CONTAINER_TITLE_HEIGHT;
 
-private:
     std::string GetTagFromNode(RefPtr<UINode> node);
+    bool IsTragetNavigationNodeParse(const RefPtr<FrameNode>& childFrameNode, float pageWidth, float sideBarHeight,
+        bool isNavigationFound, bool isSideBarFound);
+    bool IsTragetSideBarNodeParse(
+        const RefPtr<FrameNode>& childFrameNode, float pageWidth, float& sideBarHeight, bool isSideBarFound);
+    bool GetNavOrSideBarNodesParseChildren(const RefPtr<UINode>& page, float pageWidth);
     RefPtr<ToolbarManager> toolbarManager_;
     std::map<ItemPlacementType, std::list<RefPtr<FrameNode>>> itemWillAdd_;
     std::map<RefPtr<FrameNode>, std::list<RefPtr<UINode>>> itemsWillOnTree_;
@@ -124,10 +129,10 @@ private:
     RefPtr<FrameNode> rightNavDestRow_ = nullptr;
     const RefPtr<FrameNode> title_;
     bool isFloating_;
-    RefPtr<FrameNode> sideBarNode_;
-    RefPtr<FrameNode> navigationNode_;
-    RefPtr<FrameNode> navDestNode_;
-    bool hasTargetNodes_ = false;
+    WeakPtr<FrameNode> sideBarNode_;
+    WeakPtr<FrameNode> navigationNode_;
+    WeakPtr<FrameNode> navDestNode_;
+    bool hasNavOrSideBarNodes_ = false;
     bool hasFind_ = false;
     bool hasSetOnchangeCallback_ = false;
 };

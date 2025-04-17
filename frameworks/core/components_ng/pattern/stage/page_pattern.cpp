@@ -19,6 +19,7 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/ng/entry_page_info.h"
 
@@ -1046,4 +1047,55 @@ void PagePattern::NotifyNavigationLifecycle(bool isShow, bool isFromWindow)
     navigationManager->FireNavigationLifecycle(hostNode, static_cast<int32_t>(lifecycle),
         static_cast<int32_t>(activeReason));
 }
+
+WeakPtr<FocusHub> PagePattern::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
+{
+    auto curFocus = currentFocusNode.Upgrade();
+    CHECK_NULL_RETURN(curFocus, nullptr);
+    auto curFrame = curFocus->GetFrameNode();
+    CHECK_NULL_RETURN(curFrame, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto root = context->GetRootElement();
+    CHECK_NULL_RETURN(root, nullptr);
+    auto container = AceType::DynamicCast<FrameNode>(root->GetChildren().front());
+    CHECK_NULL_RETURN(container && container->GetTag() == V2::CONTAINER_MODAL_ETS_TAG, nullptr);
+    auto pattern = container->GetPattern<NG::ContainerModalPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto toolBarRow = pattern->GetCustomTitleRow();
+    CHECK_NULL_RETURN(toolBarRow, nullptr);
+    auto toolBarRowFocusHub = toolBarRow->GetFocusHub();
+    CHECK_NULL_RETURN(toolBarRowFocusHub, nullptr);
+
+    if (step == FocusStep::UP || step == FocusStep::TAB) {
+        toolBarRowFocusHub->FocusToHeadOrTailChild(true);
+        return GetCurrentFocusView()->GetFocusHub();
+    } else if (step == FocusStep::SHIFT_TAB) {
+        toolBarRowFocusHub->FocusToHeadOrTailChild(false);
+        return GetCurrentFocusView()->GetFocusHub();
+    }
+    return nullptr;
+}
+
+ScopeFocusAlgorithm PagePattern::GetScopeFocusAlgorithm()
+{
+    auto focusAlgorithm = ScopeFocusAlgorithm(true, true, ScopeType::OTHERS);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, focusAlgorithm);
+    auto root = context->GetRootElement();
+    CHECK_NULL_RETURN(root, focusAlgorithm);
+    auto container = AceType::DynamicCast<FrameNode>(root->GetChildren().front());
+    CHECK_NULL_RETURN(container && container->GetTag() == V2::CONTAINER_MODAL_ETS_TAG, focusAlgorithm);
+    auto pattern = container->GetPattern<NG::ContainerModalPattern>();
+    CHECK_NULL_RETURN(pattern && pattern->GetIsHaveToolBar(), focusAlgorithm);
+    focusAlgorithm.getNextFocusNode = [wp = WeakClaim(this)](FocusStep step, const WeakPtr<FocusHub>& currFocusNode,
+                                          WeakPtr<FocusHub>& nextFocusNode) -> bool {
+        auto page = wp.Upgrade();
+        CHECK_NULL_RETURN(page, false);
+        nextFocusNode = page->GetNextFocusNode(step, currFocusNode);
+        return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
+    };
+    return focusAlgorithm;
+}
+
 } // namespace OHOS::Ace::NG
