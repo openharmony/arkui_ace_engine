@@ -1702,16 +1702,23 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     CHECK_NULL_VOID(textFieldPattern);
     auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
+    auto searchTextFieldPattern = DynamicCast<SearchTextFieldPattern>(textFieldPattern);
+    CHECK_NULL_VOID(searchTextFieldPattern);
 
     json->PutExtAttr("value", textFieldPattern->GetTextValue().c_str(), filter);
     json->PutExtAttr("placeholder", UtfUtils::Str16DebugToStr8(textFieldPattern->GetPlaceHolder()).c_str(), filter);
-    json->PutExtAttr("placeholderColor", textFieldPattern->GetPlaceholderColor().c_str(), filter);
-    json->PutExtAttr("placeholderFont", textFieldPattern->GetPlaceholderFont().c_str(), filter);
+    json->PutExtAttr("placeholderColor",
+        textFieldLayoutProperty->GetPlaceholderTextColorValue(searchTheme->GetPlaceholderColor())
+            .ColorToString()
+            .c_str(),
+        filter);
+    json->PutExtAttr("placeholderFont", searchTextFieldPattern->GetPlaceholderFont().c_str(), filter);
     json->PutExtAttr("textAlign", V2::ConvertWrapTextAlignToString(textFieldPattern->GetTextAlign()).c_str(), filter);
     auto textColor = textFieldLayoutProperty->GetTextColor().value_or(searchTheme->GetTextColor());
     json->PutExtAttr("fontColor", textColor.ColorToString().c_str(), filter);
     auto textFontJson = JsonUtil::Create(true);
-    textFontJson->Put("fontSize", textFieldPattern->GetFontSize().c_str());
+    textFontJson->Put(
+        "fontSize", textFieldLayoutProperty->GetFontSizeValue(searchTheme->GetFontSize()).ToString().c_str());
     textFontJson->Put("fontStyle",
         textFieldPattern->GetItalicFontStyle() == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic");
     textFontJson->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(textFieldPattern->GetFontWeight()).c_str());

@@ -3219,12 +3219,12 @@ void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
     json->PutExtAttr("selection", result.c_str(), filter);
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
-    json->PutExtAttr("fontSize", GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str(), filter);
+    json->PutExtAttr("fontSize", GetFontSizeWithThemeInJson(textLayoutProp->GetFontSize()).c_str(), filter);
     if (textStyle_.has_value() && textStyle_->GetAdaptTextSize()) {
         auto adaptedFontSize = textStyle_->GetFontSize();
         json->PutExtAttr("actualFontSize", adaptedFontSize.ToString().c_str(), filter);
     } else {
-        json->PutExtAttr("actualFontSize", GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str(), filter);
+        json->PutExtAttr("actualFontSize", GetFontSizeWithThemeInJson(textLayoutProp->GetFontSize()).c_str(), filter);
     }
     json->PutExtAttr("font", GetFontInJson().c_str(), filter);
     json->PutExtAttr("bindSelectionMenu", GetBindSelectionMenuInJson().c_str(), filter);
@@ -3254,13 +3254,24 @@ std::string TextPattern::GetFontInJson() const
     CHECK_NULL_RETURN(textLayoutProp, "");
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("style", GetFontStyleInJson(textLayoutProp->GetItalicFontStyle()).c_str());
-    jsonValue->Put("size", GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str());
+    jsonValue->Put("size", GetFontSizeWithThemeInJson(textLayoutProp->GetFontSize()).c_str());
     jsonValue->Put("weight", GetFontWeightInJson(textLayoutProp->GetFontWeight()).c_str());
     jsonValue->Put("variableFontWeight", std::to_string(textLayoutProp->GetVariableFontWeight().value_or(0)).c_str());
     jsonValue->Put("enableVariableFontWeight",
                    textLayoutProp->GetEnableVariableFontWeight().value_or(false) ? "true" : "false");
     jsonValue->Put("family", GetFontFamilyInJson(textLayoutProp->GetFontFamily()).c_str());
     return jsonValue->ToString();
+}
+
+std::string TextPattern::GetFontSizeWithThemeInJson(const std::optional<Dimension>& value) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, "");
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, "");
+    return value.value_or(theme->GetTextStyle().GetFontSize()).ToString();
 }
 
 void TextPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
