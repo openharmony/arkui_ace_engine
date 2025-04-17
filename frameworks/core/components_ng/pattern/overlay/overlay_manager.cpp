@@ -4852,6 +4852,10 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
     auto modalPositionY = modalNode->GetGeometryNode()->GetFrameRect().GetY();
     auto showHeight = rootHeight - modalPositionY;
 
+    auto pipelineContext = modalNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateOcclusionCullingStatus(true, modalNode);
+
     if (isTransitionIn) {
         PlayDefaultModalIn(modalNode, context, option, showHeight);
     } else {
@@ -4863,6 +4867,7 @@ void OverlayManager::PlayDefaultModalIn(
     const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context, AnimationOption option, float showHeight)
 {
     context->OnTransformTranslateUpdate({ 0.0f, showHeight, 0.0f });
+
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         option.SetOnFinishEvent([modalWK = WeakClaim(RawPtr(modalNode)), overlayWeak = WeakClaim(this)] {
             auto modal = modalWK.Upgrade();
@@ -4871,6 +4876,9 @@ void OverlayManager::PlayDefaultModalIn(
             modal->GetPattern<ModalPresentationPattern>()->OnAppear();
             // Fire hidden event of navdestination on the disappeared modal
             overlayManager->FireNavigationStateChange(false);
+            auto pipelineContext = modal->GetContextWithCheck();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
         });
     }
     AnimationUtils::Animate(
@@ -4891,6 +4899,7 @@ void OverlayManager::PlayDefaultModalOut(
     auto lastModalContext = lastModalNode->GetRenderContext();
     CHECK_NULL_VOID(lastModalContext);
     lastModalContext->UpdateOpacity(1.0);
+
     option.SetOnFinishEvent(
         [rootWeak = rootNodeWeak_, modalWK = WeakClaim(RawPtr(modalNode)), overlayWeak = WeakClaim(this)] {
             auto modal = modalWK.Upgrade();
@@ -4908,6 +4917,9 @@ void OverlayManager::PlayDefaultModalOut(
             root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             // Fire shown event of navdestination under the disappeared modal
             overlayManager->FireNavigationStateChange(true);
+            auto pipelineContext = modal->GetContextWithCheck();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
         });
     context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
     AnimationUtils::Animate(
@@ -5346,6 +5358,9 @@ void OverlayManager::PlaySheetTransition(
                     WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
             }
             sheetPattern->SheetTransitionAction(offset, true, isTransitionIn);
+            auto pipelineContext = sheetNode->GetContextWithCheck();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateOcclusionCullingStatus(true, sheetNode);
             if (NearZero(sheetHeight_)) {
                 return;
             }
@@ -5369,6 +5384,9 @@ void OverlayManager::PlaySheetTransition(
                 if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
                     isFirst) {
                     pattern->OnAppear();
+                    auto pipelineContext = sheetNode->GetContextWithCheck();
+                    CHECK_NULL_VOID(pipelineContext);
+                    pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
                 }
                 pattern->AvoidAiBar();
                 auto overlay = weak.Upgrade();
@@ -5402,6 +5420,9 @@ void OverlayManager::PlaySheetTransition(
                 }
                 overlayManager->FireAutoSave(sheet);
                 overlayManager->RemoveSheet(sheet);
+                auto pipelineContext = sheet->GetContextWithCheck();
+                CHECK_NULL_VOID(pipelineContext);
+                pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
             });
         float offset = sheetPattern->ComputeTransitionOffset(sheetHeight_);
         sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
@@ -5415,6 +5436,9 @@ void OverlayManager::PlaySheetTransition(
                 sheetPattern->SheetTransitionAction(offset, false, isTransitionIn);
             },
             option.GetOnFinishEvent());
+        auto pipelineContext = sheetNode->GetContextWithCheck();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateOcclusionCullingStatus(true, sheetNode);
     }
 }
 

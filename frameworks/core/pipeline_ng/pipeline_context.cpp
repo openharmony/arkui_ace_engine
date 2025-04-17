@@ -5762,6 +5762,13 @@ bool PipelineContext::CheckThreadSafe()
     return true;
 }
 
+void PipelineContext::UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode)
+{
+    auto rootContext = rootNode_->GetRenderContext();
+    CHECK_NULL_VOID(rootContext);
+    rootContext->UpdateOcclusionCullingStatus(enable, keyOcclusionNode);
+}
+
 uint64_t PipelineContext::AdjustVsyncTimeStamp(uint64_t nanoTimestamp)
 {
     auto period = window_->GetVSyncPeriod();

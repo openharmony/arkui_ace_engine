@@ -6678,6 +6678,22 @@ void RosenRenderContext::OnAttractionEffectUpdate(const AttractionEffect& effect
     RequestNextFrame();
 }
 
+void RosenRenderContext::UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& KeyOcclusionNode)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsRootNode = rsNode_->ReinterpretCastTo<Rosen::RSRootNode>();
+    CHECK_NULL_VOID(rsRootNode);
+    if (KeyOcclusionNode == nullptr) {
+        rsRootNode->UpdateOcclusionCullingStatus(enable, 0);
+        return;
+    }
+    auto rosenRenderContext = DynamicCast<RosenRenderContext>(KeyOcclusionNode->renderContext_);
+    CHECK_NULL_VOID(rosenRenderContext);
+    auto keyRsNode = rosenRenderContext->GetRSNode();
+    CHECK_NULL_VOID(keyRsNode);
+    rsRootNode->UpdateOcclusionCullingStatus(enable, keyRsNode->GetId());
+}
+
 PipelineContext* RosenRenderContext::GetPipelineContext() const
 {
     auto host = GetHost();

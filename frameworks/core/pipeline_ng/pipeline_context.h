@@ -1085,6 +1085,7 @@ public:
 
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
     bool CheckThreadSafe();
+    void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode);
 
     bool IsHoverModeChange() const
     {
