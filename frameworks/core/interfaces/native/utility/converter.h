@@ -470,7 +470,6 @@ namespace Converter {
     template<> Color Convert(const Ark_Number& src);
     template<> Color Convert(const Ark_String& src);
     template<> Corner Convert(const Ark_CornerRadius& src);
-    template<> DateTimeType Convert(const Ark_DateTimeOptions& src);
     template<> Dimension Convert(const Ark_CustomObject& src);
     template<> Dimension Convert(const Ark_Length& src);
     template<> Dimension Convert(const Ark_LengthMetrics& src);
@@ -617,6 +616,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src);
     template<> void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
     template<> void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src);
+    template<> void AssignCast(std::optional<DateTimeType>& dst, const Ark_DateTimeOptions& src);
     template<> void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src);
     template<> void AssignCast(std::optional<DialogButtonDirection>& dst, const Ark_DialogButtonDirection& src);
     template<> void AssignCast(std::optional<DialogButtonStyle>& dst, const Ark_DialogButtonStyle& src);
