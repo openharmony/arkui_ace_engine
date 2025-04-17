@@ -460,7 +460,9 @@ void MenuItemPattern::HandleFocusEvent()
     CHECK_NULL_VOID(renderContext);
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
-    auto selectTheme = context->GetTheme<SelectTheme>();
+    auto selectTheme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                           ? context->GetTheme<SelectTheme>(GetThemeScopeId())
+                           : context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
 
     if (!renderContext->HasBackgroundColor()) {
@@ -1290,7 +1292,9 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                     ? pipeline->GetTheme<SelectTheme>(GetThemeScopeId())
+                     : pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto props = GetPaintProperty<MenuItemPaintProperty>();
     CHECK_NULL_VOID(props);
@@ -1375,7 +1379,9 @@ void MenuItemPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                     ? pipeline->GetTheme<SelectTheme>(GetThemeScopeId())
+                     : pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     if (isOptionPattern_) {
         SetBgBlendColor(isHover ? theme->GetHoverColor() : Color::TRANSPARENT);
@@ -1652,7 +1658,9 @@ bool MenuItemPattern::OnKeyEvent(const KeyEvent& event)
     if (!isOptionPattern_ && event.code == KeyCode::KEY_DPAD_RIGHT && GetSubBuilder() && !isSubMenuShowed_) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, false);
-        auto theme = pipeline->GetTheme<SelectTheme>();
+        auto theme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                         ? pipeline->GetTheme<SelectTheme>(GetThemeScopeId())
+                         : pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_RETURN(theme, false);
         SetBgBlendColor(theme->GetHoverColor());
         PlayBgColorAnimation();
@@ -1797,6 +1805,8 @@ void MenuItemPattern::PlayBgColorAnimation(bool isHoverChange)
 
 void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
@@ -1808,7 +1818,9 @@ void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
         row->RemoveChild(selectIcon);
         selectIcon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-        auto selectTheme = pipeline->GetTheme<SelectTheme>();
+        auto selectTheme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                               ? pipeline->GetTheme<SelectTheme>(GetThemeScopeId())
+                               : pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(selectTheme);
         auto props = selectIcon->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(props);
@@ -1821,7 +1833,9 @@ void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
         CHECK_NULL_VOID(iconTheme);
         auto userIcon = itemProperty->GetSelectIconSrc().value_or("");
         auto iconPath = userIcon.empty() ? iconTheme->GetIconPath(InternalResource::ResourceId::MENU_OK_SVG) : userIcon;
-        auto selectTheme = pipeline->GetTheme<SelectTheme>();
+        auto selectTheme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                               ? pipeline->GetTheme<SelectTheme>(GetThemeScopeId())
+                               : pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(selectTheme);
         ImageSourceInfo imageSourceInfo;
         imageSourceInfo.SetSrc(iconPath);
@@ -1835,13 +1849,17 @@ void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
 
 void MenuItemPattern::UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto props = selectIcon->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                           ? pipeline->GetTheme<SelectTheme>(GetThemeScopeId())
+                           : pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     auto symbol = itemProperty->GetSelectSymbol();
     if (itemProperty->GetSelectIconSrc().value_or("").empty()) {
@@ -1943,7 +1961,9 @@ void MenuItemPattern::AddExpandIcon(RefPtr<FrameNode>& row)
         expandingMode_ == SubMenuExpandingMode::STACK
             ? InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG
             : InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                           ? pipeline->GetTheme<SelectTheme>(GetThemeScopeId())
+                           : pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     ImageSourceInfo imageSourceInfo(iconPath);
     auto props = expandIcon_->GetLayoutProperty<ImageLayoutProperty>();
@@ -1972,7 +1992,9 @@ void MenuItemPattern::AddClickableArea()
         CHECK_NULL_VOID(clickableArea);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<SelectTheme>();
+        auto theme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                         ? pipeline->GetTheme<SelectTheme>(GetThemeScopeId())
+                         : pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
         BorderRadiusProperty border;
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -2029,7 +2051,9 @@ void MenuItemPattern::AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode)
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                           ? pipeline->GetTheme<SelectTheme>(GetThemeScopeId())
+                           : pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
     ImageSourceInfo imageSourceInfo;
@@ -2064,9 +2088,13 @@ RefPtr<FrameNode> MenuItemPattern::GetClickableArea()
 
 void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                           ? pipeline->GetTheme<SelectTheme>(GetThemeScopeId())
+                           : pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
@@ -2110,11 +2138,15 @@ void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)
 void MenuItemPattern::UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
     std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                           ? pipeline->GetTheme<SelectTheme>(GetThemeScopeId())
+                           : pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     if (symbol) {
         // iamge -> symbol
@@ -2160,13 +2192,17 @@ bool MenuItemPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo
 void MenuItemPattern::UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
     std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto props = iconNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                           ? pipeline->GetTheme<SelectTheme>(GetThemeScopeId())
+                           : pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     if (symbol) {
         // symbol -> symbol
@@ -2190,6 +2226,8 @@ void MenuItemPattern::UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>
 
 void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
     auto content = isLabel ? itemProperty->GetLabel().value_or("") : itemProperty->GetContent().value_or("");
@@ -2214,7 +2252,9 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     renderContext->UpdateClipEdge(isTextFadeOut_);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<SelectTheme>();
+    auto theme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                           ? context->GetTheme<SelectTheme>(GetThemeScopeId())
+                           : context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto layoutDirection = textProperty->GetNonAutoLayoutDirection();
     TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());
@@ -2353,7 +2393,9 @@ void MenuItemPattern::UpdateDisabledStyle()
     CHECK_NULL_VOID(eventHub);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<SelectTheme>();
+    auto theme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                     ? context->GetTheme<SelectTheme>(GetThemeScopeId())
+                     : context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto enabled = eventHub->IsEnabled();
     auto alpha = theme->GetDisabledFontColorAlpha();
@@ -2691,7 +2733,11 @@ void MenuItemPattern::UpdateIconSrc()
     }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectTheme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                           ? pipeline->GetTheme<SelectTheme>(GetThemeScopeId())
+                           : pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     ImageSourceInfo imageSourceInfo(iconSrc_);
     bool useDefaultIcon = UseDefaultThemeIcon(imageSourceInfo);
@@ -2793,7 +2839,11 @@ Color MenuItemPattern::GetBgColor()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, Color());
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Color());
+    auto theme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                     ? pipeline->GetTheme<SelectTheme>(GetThemeScopeId())
+                     : pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, Color());
     auto bgColor = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? Color::TRANSPARENT
                                                                                       : theme->GetBackgroundColor();
@@ -2890,7 +2940,9 @@ void MenuItemPattern::OnPress(const UIState& state)
     CHECK_NULL_VOID(props);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                     ? pipeline->GetTheme<SelectTheme>(GetThemeScopeId())
+                     : pipeline->GetTheme<SelectTheme>();
     // enter press status
     if (state == UI_STATE_PRESSED) {
         // change background color, update press status
@@ -2978,11 +3030,14 @@ void MenuItemPattern::UpdatePasteFontColor(const Color& fontColor)
 
 void MenuItemPattern::OptionOnModifyDone(const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     textTheme_ = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme_);
-    selectTheme_ = context->GetTheme<SelectTheme>();
+    selectTheme_ = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                       ? context->GetTheme<SelectTheme>(GetThemeScopeId())
+                       : context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme_);
 
     auto eventHub = host->GetEventHub<MenuItemEventHub>();
@@ -3204,5 +3259,56 @@ void MenuItemPattern::ApplyOptionThemeStyles()
     SetBorderColor(GetBorderColor());
     SetBorderWidth(GetBorderWidth());
     SetBgColor(selectTheme->GetBackgroundColor());
+}
+
+bool MenuItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, result);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        return false;
+    }
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, result);
+    auto menuTheme = pipeline->GetTheme<SelectTheme>(themeScopeId);
+    CHECK_NULL_RETURN(menuTheme, result);
+    auto menu = GetMenu();
+    CHECK_NULL_RETURN(menu, result);
+    auto itemProperty = host->GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_RETURN(itemProperty, result);
+    auto labelFontColor = itemProperty->GetLabelFontColor();
+    auto contentFontColor = itemProperty->GetFontColor();
+    auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuProperty, result);
+    if (label_) {
+        if (IsDisabled()) {
+            label_->GetRenderContext()->UpdateForegroundColor(menuTheme->GetDisabledMenuFontColor());
+            result = true;
+        }
+        auto labelTextLayoutProperty = label_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(labelTextLayoutProperty, result);
+        if (!labelFontColor.has_value()) {
+            labelTextLayoutProperty->UpdateTextColor(menuTheme->GetSecondaryFontColor());
+            label_->MarkModifyDone();
+            label_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            result = true;
+        }
+    }
+    if (content_) {
+        if (IsDisabled()) {
+            content_->GetRenderContext()->UpdateForegroundColor(menuTheme->GetDisabledMenuFontColor());
+            result = true;
+        }
+        auto contentTextProperty = content_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(contentTextProperty, result);
+        if (!contentFontColor.has_value()) {
+            contentTextProperty->UpdateTextColor(menuTheme->GetFontColor());
+            content_->MarkModifyDone();
+            content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            result = true;
+        }
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG

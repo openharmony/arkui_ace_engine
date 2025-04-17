@@ -161,7 +161,7 @@ public:
             json->PutExtAttr("selectIcon", "false", filter);
         }
         auto context = PipelineBase::GetCurrentContext();
-        auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
+        RefPtr<SelectTheme> theme = GetMenuTheme(context);
         auto defaultFontSize = theme ? theme->GetMenuFontSize() : Dimension(0, DimensionUnit::FP);
         auto defaultFontColor = theme ? theme->GetMenuFontColor() : Color::BLACK;
         auto contentFontJsonObject = JsonUtil::Create(true);
@@ -186,6 +186,17 @@ public:
         json->PutExtAttr("labelFontColor",
             GetLabelFontColor().value_or(defaultLabelFontColor).ColorToString().c_str(), filter);
         json->PutFixedAttr("label", GetContent().value_or("").c_str(), filter, FIXED_ATTR_CONTENT);
+    }
+
+    RefPtr<SelectTheme> GetMenuTheme(const RefPtr<PipelineBase>& context) const
+    {
+        CHECK_NULL_RETURN(context, nullptr);
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+            return context->GetTheme<SelectTheme>(host->GetThemeScopeId());
+        }
+        return context->GetTheme<SelectTheme>();
     }
 
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override

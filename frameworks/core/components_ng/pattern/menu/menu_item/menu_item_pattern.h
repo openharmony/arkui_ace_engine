@@ -308,6 +308,7 @@ public:
     // XTS inspector functions
     std::string InspectorGetFont();
     float GetSelectOptionWidth();
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     inline void SetIcon(const std::string& src)
     {

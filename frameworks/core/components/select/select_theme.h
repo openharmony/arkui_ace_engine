@@ -657,6 +657,11 @@ public:
         return disabledFontColorAlpha_;
     }
 
+    void SetSecondaryFontColor(const Color& value)
+    {
+        secondaryFontColor_ = value;
+    }
+
     const Color& GetSecondaryFontColor() const
     {
         return secondaryFontColor_;

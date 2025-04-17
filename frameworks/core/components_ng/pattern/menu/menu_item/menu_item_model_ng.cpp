@@ -46,7 +46,7 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
         border.SetRadius(theme->GetInnerBorderRadius());
     }
     renderContext->UpdateBorderRadius(border);
-
+    UpdateLabelFontColor(menuItem);
     CHECK_NULL_VOID(customNode);
     if (!menuItem->GetChildren().empty()) {
         menuItem->Clean();
@@ -111,6 +111,7 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
 
         rightRow->MountToParent(menuItem);
     }
+    UpdateLabelFontColor(menuItem);
     auto buildFunc = menuItemProps.buildFunc;
     auto pattern = menuItem->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
@@ -119,6 +120,18 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     }
 
     UpdateMenuProperty(menuItem, menuItemProps);
+}
+
+void MenuItemModelNG::UpdateLabelFontColor(const RefPtr<NG::FrameNode>& menuItem)
+{
+    CHECK_NULL_VOID(menuItem);
+    if (menuItem->GetThemeScopeId() && menuItem->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        auto pipelineContext = menuItem->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<SelectTheme>(menuItem->GetThemeScopeId());
+        CHECK_NULL_VOID(theme);
+        ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor, theme->GetSecondaryFontColor());
+    }
 }
 
 void MenuItemModelNG::UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps)

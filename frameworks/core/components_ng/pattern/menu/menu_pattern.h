@@ -619,7 +619,7 @@ public:
     void RemoveLastNodeDivider(const RefPtr<UINode>& lastNode);
     void UpdateMenuItemDivider();
     void UpdateDividerProperty(const RefPtr<FrameNode>& dividerNode, const std::optional<V2::ItemDivider>& divider);
-
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 protected:
     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
