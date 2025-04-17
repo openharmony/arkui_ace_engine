@@ -183,7 +183,6 @@ void MenuItemPattern::OnAttachToFrameNode()
     RegisterOnKeyEvent();
     RegisterOnClick();
     RegisterOnTouch();
-    RegisterOnPress();
     RegisterOnHover();
     CreateBottomDivider();
 }
@@ -265,7 +264,6 @@ void MenuItemPattern::OnModifyDone()
         if (expandingModeSet_) {
             RegisterOnKeyEvent();
             RegisterOnTouch();
-            RegisterOnPress();
             RegisterOnHover();
             RegisterOnClick();
         }
@@ -1101,9 +1099,7 @@ void MenuItemPattern::RegisterOnTouch()
         auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            if (!pattern->IsOptionPattern()) {
-                pattern->OnTouch(info);
-            }
+            pattern->IsOptionPattern() ? pattern->OnPress(info) : pattern->OnTouch(info);
         };
         onTouchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     }
@@ -1119,28 +1115,6 @@ void MenuItemPattern::RegisterOnTouch()
     } else if (!onTouchEventSet_) {
         gestureHub->AddTouchEvent(onTouchEvent_);
         onTouchEventSet_ = true;
-    }
-}
-
-void MenuItemPattern::RegisterOnPress()
-{
-    if (!onPressEvent_) {
-        auto touchCallback = [weak = WeakClaim(this)](const UIState& state) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            if (pattern->IsOptionPattern()) {
-                pattern->OnPress(state);
-            }
-        };
-        onPressEvent_ = std::move(touchCallback);
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<MenuItemEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    if (!onPressEventSet_) {
-        eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, onPressEvent_, true);
-        onPressEventSet_ = true;
     }
 }
 
@@ -2877,7 +2851,7 @@ std::string MenuItemPattern::InspectorGetFont()
     return props->InspectorGetTextFont();
 }
 
-void MenuItemPattern::OnPress(const UIState& state)
+void MenuItemPattern::OnPress(const TouchEventInfo& info)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2885,11 +2859,15 @@ void MenuItemPattern::OnPress(const UIState& state)
     CHECK_NULL_VOID(renderContext);
     auto props = GetPaintProperty<MenuItemPaintProperty>();
     CHECK_NULL_VOID(props);
+    const auto& touches = info.GetTouches();
+    CHECK_EQUAL_VOID(touches.empty(), true);
+    auto touchType = touches.front().GetTouchType();
+
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     // enter press status
-    if (state == UI_STATE_PRESSED) {
+    if (touchType == TouchType::DOWN) {
         // change background color, update press status
         SetBgBlendColor(theme ? theme->GetClickedColor() : DEFAULT_CLICKED_COLOR);
         PlayBgColorAnimation(false);
@@ -2899,7 +2877,7 @@ void MenuItemPattern::OnPress(const UIState& state)
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         // disable next option node's divider
         UpdateNextNodeDivider(false);
-    } else if (state == UI_STATE_NORMAL) {
+    } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
         // leave press status
         if (IsHover()) {
             SetBgBlendColor(theme ? theme->GetHoverColor() : DEFAULT_HOVER_COLOR);

@@ -297,13 +297,13 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     /**
-     * @tc.steps: test buttonPattern HandlePressedStyle HandleNormalStyle function.
+     * @tc.steps: test buttonPattern OnTouchDown OnTouchUp function.
      * @tc.expected: step3. check whether the function is executed.
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    buttonPattern->HandlePressedStyle();
-    buttonPattern->HandleNormalStyle();
+    buttonPattern->OnTouchDown();
+    buttonPattern->OnTouchUp();
 
     // frameNode SetStateEffect
     auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
@@ -311,8 +311,8 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest001, TestSize.Level1)
     buttonEventHub->SetStateEffect(STATE_EFFECT);
     buttonPattern->isSetClickedColor_ = true;
     buttonPattern->clickedColor_ = FONT_COLOR;
-    buttonPattern->HandlePressedStyle();
-    buttonPattern->HandleNormalStyle();
+    buttonPattern->OnTouchDown();
+    buttonPattern->OnTouchUp();
 }
 
 /**
@@ -357,7 +357,8 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest002, TestSize.Level1)
      */
 
     // set touchEventActuator_
-    std::function<void(UIState)> touchEvent = [](const UIState& state) {};
+    auto touchCallback = [](TouchEventInfo& info) {};
+    auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     buttonPattern->touchListener_ = touchEvent;
     buttonPattern->OnModifyDone();
     auto text = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
@@ -407,7 +408,8 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest003, TestSize.Level1)
      */
 
     // set touchEventActuator_
-    std::function<void(UIState)> touchEvent = [](const UIState& state) {};
+    auto touchCallback = [](TouchEventInfo& info) {};
+    auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     buttonPattern->touchListener_ = touchEvent;
     auto text = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
     ASSERT_NE(text, nullptr);
@@ -462,7 +464,8 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest004, TestSize.Level1)
      */
 
     // set touchEventActuator_
-    std::function<void(UIState)> touchEvent = [](const UIState& state) {};
+    auto touchCallback = [](TouchEventInfo& info) {};
+    auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     buttonPattern->touchListener_ = touchEvent;
     auto text = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
     ASSERT_NE(text, nullptr);
@@ -509,7 +512,8 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest005, TestSize.Level1)
      */
 
     // set touchEventActuator_
-    std::function<void(UIState)> touchEvent = [](const UIState& state) {};
+    auto touchCallback = [](TouchEventInfo& info) {};
+    auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     buttonPattern->touchListener_ = touchEvent;
     auto text = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
     ASSERT_NE(text, nullptr);
@@ -553,10 +557,11 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest006, TestSize.Level1)
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
     buttonPattern->InitTouchEvent();
-    auto eventHub = frameNode->GetEventHub<ButtonEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    std::function<void(UIState)>& touchListener = buttonPattern->GetTouchListener();
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    auto touchListener = gesture->touchEventActuator_->touchEvents_.back();
     ASSERT_NE(touchListener, nullptr);
+    auto touchCallback = touchListener->callback_;
     /**
      * @tc.steps: step3. change button params.
      */
@@ -569,18 +574,21 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest006, TestSize.Level1)
      * @tc.steps: step4. mock touch event and call touch callback.
      * @tc.expected: step4. the button background color will change when touch down.
      */
-    UIState pressedState = UI_STATE_PRESSED;
-    eventHub->AddSupportedUIStateWithCallback(pressedState, touchListener, true);
-    buttonPattern->HandlePressedStyle();
+    TouchEventInfo info("onTouch");
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    info.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchCallback(info);
     EXPECT_EQ(buttonPattern->backgroundColor_, Color::BLUE);
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::RED);
     /**
      * @tc.steps: step5. change the touch type.
      * @tc.expected: step5. the button background color will restore when touch up.
      */
-    UIState normalState = UI_STATE_NORMAL;
-    eventHub->AddSupportedUIStateWithCallback(normalState, touchListener, true);
-    buttonPattern->HandleNormalStyle();
+    touchLocationInfo.SetTouchType(TouchType::UP);
+    info.touches_.clear();
+    info.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchCallback(info);
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLUE);
 }
 

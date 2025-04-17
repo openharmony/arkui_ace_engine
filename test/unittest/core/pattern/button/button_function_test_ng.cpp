@@ -264,7 +264,8 @@ void ButtonFunctionTestNg::CreateAndCheckTextOverflow(RefPtr<FrameNode> frameNod
      * @tc.expected: step2. check whether the properties is correct.
      */
     // set touchEventActuator_
-    std::function<void(UIState)> touchEvent = [](const UIState& state) {};
+    auto touchCallback = [](TouchEventInfo& info) {};
+    auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     buttonPattern->touchListener_ = touchEvent;
     auto text = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
     ASSERT_NE(text, nullptr);
@@ -916,7 +917,7 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest011, TestSize.Level1)
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    buttonPattern->HandlePressedStyle();
+    buttonPattern->OnTouchDown();
     auto node = [](ButtonConfiguration config) -> RefPtr<FrameNode> {
         EXPECT_EQ(CREATE_VALUE, config.label_);
         EXPECT_EQ(true, config.pressed_);
@@ -1191,7 +1192,7 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest016, TestSize.Level1)
     ASSERT_NE(buttonPattern, nullptr);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     eventHub->SetEnabled(true);
-    buttonPattern->HandlePressedStyle();
+    buttonPattern->OnTouchDown();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1260,7 +1261,7 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest018, TestSize.Level1)
     ASSERT_NE(buttonPattern, nullptr);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     eventHub->SetEnabled(true);
-    buttonPattern->HandlePressedStyle();
+    buttonPattern->OnTouchDown();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1302,7 +1303,7 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest019, TestSize.Level1)
     ASSERT_NE(buttonPattern, nullptr);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     eventHub->SetEnabled(true);
-    buttonPattern->HandlePressedStyle();
+    buttonPattern->OnTouchDown();
 
     /**
      * @tc.steps: step3. make builderFunc

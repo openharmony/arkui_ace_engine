@@ -328,10 +328,10 @@ void SelectPattern::RegisterOnHover()
 void SelectPattern::RegisterOnPress()
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<SelectEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    std::function<void(UIState)> callback = [weak = WeakClaim(this)](const UIState& state) {
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        if (info.GetTouches().empty()) {
+            return;
+        }
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
@@ -340,15 +340,16 @@ void SelectPattern::RegisterOnPress()
         CHECK_NULL_VOID(context);
         auto theme = context->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
+        auto touchType = info.GetTouches().front().GetTouchType();
         const auto& renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         // update press status, repaint background color
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select touch type %{public}zu", (size_t)state);
-        if (state == UI_STATE_PRESSED) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select touch type %{public}zu", touchType);
+        if (touchType == TouchType::DOWN) {
             pattern->SetBgBlendColor(theme->GetClickedColor());
             pattern->PlayBgColorAnimation(false);
         }
-        if (state == UI_STATE_NORMAL) {
+        if (touchType == TouchType::UP) {
             if (pattern->IsHover()) {
                 pattern->SetBgBlendColor(theme->GetHoverColor());
             } else {
@@ -357,7 +358,9 @@ void SelectPattern::RegisterOnPress()
             pattern->PlayBgColorAnimation(false);
         }
     };
-    eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, callback, true);
+    auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    gestureHub->AddTouchEvent(touchEvent);
 }
 
 void SelectPattern::CreateSelectedCallback()
