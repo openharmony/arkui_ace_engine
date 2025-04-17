@@ -143,6 +143,11 @@ AxisAction AxisInfo::GetAction() const
     return action_;
 }
 
+void AxisInfo::SetScrollStep(int32_t scrollStep)
+{
+    scrollStep_ = scrollStep;
+}
+
 int32_t AxisInfo::GetScrollStep() const
 {
     return scrollStep_;
