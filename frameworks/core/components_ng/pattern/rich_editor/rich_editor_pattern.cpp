@@ -3923,12 +3923,12 @@ bool RichEditorPattern::HandleUserDoubleClickEvent(GestureEvent& info)
 void RichEditorPattern::HandleMenuCallbackOnSelectAll(bool isShowMenu)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleMenuCallbackOnSelectAll");
-    auto textSize = GetTextContentLength();
-    textSelector_.Update(0, textSize);
-    CalculateHandleOffsetAndShowOverlay();
     if (selectOverlay_->IsUsingMouse()) {
         CloseSelectOverlay();
     }
+    auto textSize = GetTextContentLength();
+    textSelector_.Update(0, textSize);
+    CalculateHandleOffsetAndShowOverlay();
     IF_TRUE(IsSelected(), StopTwinkling());
     auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfo();
     if (selectOverlayInfo && selectOverlay_->IsUsingMouse()) {
