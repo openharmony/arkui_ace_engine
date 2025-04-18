@@ -1204,15 +1204,15 @@
         "name": "OH_ArkUI_GestureInterruptInfo_GetSystemRecognizerType"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_GestureInterruptInfo_GetTouchRecognizers"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_TouchRecognizer_GetNodeHandle"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_TouchRecognizer_CancelTouch"
     },
     {
