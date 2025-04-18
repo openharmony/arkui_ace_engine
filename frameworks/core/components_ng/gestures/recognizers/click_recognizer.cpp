@@ -32,6 +32,7 @@ constexpr int32_t MAX_THRESHOLD_MANYTAP = 60;
 constexpr int32_t MAX_TAP_FINGERS = 10;
 constexpr double MAX_THRESHOLD = 20.0;
 constexpr int32_t DEFAULT_TAP_FINGERS = 1;
+constexpr int32_t DOUBLE_CLICK_COUNT = 2;
 constexpr int32_t DEFAULT_LONGPRESS_DURATION = 800000000;
 
 } // namespace
@@ -228,6 +229,12 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         firstInputTime_ = event.time;
     }
 
+    if (count_ == DOUBLE_CLICK_COUNT) {
+        if (tappedCount_ == 0 || tappedCount_ == 1) {
+            TAG_LOGD(AceLogTag::ACE_GESTURE, "Click recognizer handle touch down event current Click is %{public}d",
+                tappedCount_);
+        }
+    }
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipeline && pipeline->IsFormRenderExceptDynamicComponent()) {
         touchDownTime_ = event.time;
