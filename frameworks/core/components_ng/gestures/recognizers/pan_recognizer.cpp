@@ -467,6 +467,23 @@ void PanRecognizer::OnFlushTouchEventsEnd()
     isFlushTouchEventsEnd_ = true;
 }
 
+void PanRecognizer::UpdateAxisDeltaTransform(const AxisEvent& event)
+{
+    if (event.sourceTool == SourceTool::MOUSE) {
+        if ((direction_.type & PanDirection::HORIZONTAL) == 0) { // Direction is vertical
+            delta_.SetX(0.0);
+        } else if ((direction_.type & PanDirection::VERTICAL) == 0) { // Direction is horizontal
+            delta_.SetY(0.0);
+        }
+    } else if (event.sourceTool == SourceTool::TOUCHPAD) {
+        PointF originPoint(lastAxisEvent_.horizontalAxis, lastAxisEvent_.verticalAxis);
+        PointF finalPoint(originPoint.GetX() + delta_.GetX(), originPoint.GetY() + delta_.GetY());
+        TransformForRecognizer(originPoint, GetAttachedNode(), false, false, -1);
+        TransformForRecognizer(finalPoint, GetAttachedNode(), false, false, -1);
+        delta_ = Offset(finalPoint.GetX(), finalPoint.GetY()) - Offset(originPoint.GetX(), originPoint.GetY());
+    }
+}
+
 void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
     isTouchEventFinished_ = false;
@@ -482,17 +499,7 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         hasDifferentDirectionGesture = pipeline->HasDifferentDirectionGesture();
     }
     delta_ = event.ConvertToOffset(isShiftKeyPressed, hasDifferentDirectionGesture);
-    if (event.sourceTool == SourceTool::MOUSE) {
-        if ((direction_.type & PanDirection::HORIZONTAL) == 0) { // Direction is vertical
-            delta_.SetX(0.0);
-        } else if ((direction_.type & PanDirection::VERTICAL) == 0) { // Direction is horizontal
-            delta_.SetY(0.0);
-        }
-    } else if (event.sourceTool == SourceTool::TOUCHPAD) {
-        PointF deltaPoint(delta_.GetX(), delta_.GetY());
-        NGGestureRecognizer::Transform(deltaPoint, GetAttachedNode(), false, false, -1);
-        delta_ = Offset(deltaPoint.GetX(), deltaPoint.GetY());
-    }
+    UpdateAxisDeltaTransform(event);
     globalPoint_ = Point(event.x, event.y);
     mainDelta_ = GetMainAxisDelta();
     averageDistance_ += delta_;
