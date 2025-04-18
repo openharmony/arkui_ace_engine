@@ -15,16 +15,19 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "drawable_descriptor_peer.h"
 #include "arkoala_api_generated.h"
+#include "pixel_map_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawableDescriptorAccessor {
 void DestroyPeerImpl(Ark_DrawableDescriptor peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_DrawableDescriptor CtorImpl()
 {
-    return nullptr;
+    return PeerUtils::CreatePeer<DrawableDescriptorPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,7 +35,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_PixelMap GetPixelMapImpl(Ark_DrawableDescriptor peer)
 {
-    return {};
+    return PixelMapPeer::Create(peer->GetPixelMap());
 }
 } // DrawableDescriptorAccessor
 const GENERATED_ArkUIDrawableDescriptorAccessor* GetDrawableDescriptorAccessor()

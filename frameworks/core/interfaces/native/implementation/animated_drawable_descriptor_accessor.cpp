@@ -15,17 +15,44 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "animated_drawable_descriptor_peer.h"
 #include "arkoala_api_generated.h"
+
+namespace OHOS::Ace::NG::Converter {
+struct AnimationOptions {
+    std::optional<int32_t> duration;
+    std::optional<int32_t> iterations;
+};
+
+template<>
+AnimationOptions Convert(const Ark_AnimationOptions& options)
+{
+    return {
+        .duration = OptConvert<int32_t>(options.duration),
+        .iterations = OptConvert<int32_t>(options.iterations),
+    };
+}
+} // namespace OHOS::Ace::NG::Converter
+
+using namespace OHOS::Ace::NG::Converter;
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AnimatedDrawableDescriptorAccessor {
 void DestroyPeerImpl(Ark_AnimatedDrawableDescriptor peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_AnimatedDrawableDescriptor CtorImpl(const Array_PixelMap* pixelMaps,
                                         const Opt_AnimationOptions* options)
 {
-    return nullptr;
+    std::vector<RefPtr<PixelMap>> arrayPixelMaps;
+    if (pixelMaps) {
+        arrayPixelMaps = Convert<std::vector<RefPtr<PixelMap>>>(*pixelMaps);
+    }
+    auto animationOptions = options ? OptConvert<AnimationOptions>(*options) : std::nullopt;
+    return PeerUtils::CreatePeer<AnimatedDrawableDescriptorPeer>(arrayPixelMaps,
+        animationOptions ? animationOptions->duration : std::nullopt,
+        animationOptions ? animationOptions->iterations : std::nullopt);
 }
 Ark_NativePointer GetFinalizerImpl()
 {

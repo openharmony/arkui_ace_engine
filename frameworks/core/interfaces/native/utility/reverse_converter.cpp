@@ -319,6 +319,11 @@ void AssignArkValue(Ark_Padding& dst, const PaddingProperty& src)
     dst = arkPadding;
 }
 
+void AssignArkValue(Ark_PixelMap& pixelMap, const RefPtr<OHOS::Ace::PixelMap>& info)
+{
+    pixelMap = PixelMapPeer::Create(info);
+}
+
 void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx)
 {
     dst.offset = ArkValue<Ark_Number>(src.offset);
