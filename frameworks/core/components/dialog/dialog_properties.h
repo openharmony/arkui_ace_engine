@@ -246,6 +246,7 @@ struct DialogProperties {
     bool isShowInSubWindow = false;
     DialogButtonDirection buttonDirection = DialogButtonDirection::AUTO;
     bool isMask = false;
+    bool isUECHostMask = false;
     bool isModal = true;
     std::optional<bool> enableHoverMode;
     bool isSceneBoardDialog = false;
@@ -353,6 +354,50 @@ struct PromptDialogAttr {
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     WeakPtr<NG::UINode> customCNode;
+};
+
+enum class UECHostMaskAction {
+    NONE = 0,
+    MOUNT,
+    UNMOUNT,
+    UPDATE,
+    CLICK,
+    PRESS_BACK,
+};
+
+enum class UECHostMaskType {
+    NONE = 0,
+    DIALOG,
+    BIND_SHEET,
+};
+
+struct UECHostMaskInfo {
+    std::string uuid;
+    int32_t instanceId = -1;
+
+    std::string overlayTag; // the tag of overlay node on UEA
+    int32_t overlayId = -1; // the id of overlay node on UEA
+
+    std::optional<Color> maskColor;
+    UECHostMaskAction maskAction = UECHostMaskAction::NONE;
+    UECHostMaskType maskType = UECHostMaskType::NONE;
+
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << "uuid: " << uuid << ", ";
+        ss << "instanceId: " << instanceId << ", ";
+        ss << "overlayTag: " << overlayTag << ", ";
+        ss << "overlayId: " << overlayId << ", ";
+        if (maskColor.has_value()) {
+            ss << "maskColor: " << maskColor.value().ToString() << ", ";
+        }
+        ss << "maskAction: " << static_cast<int32_t>(maskAction) << ", ";
+        ss << "maskType: " << static_cast<int32_t>(maskType);
+
+        std::string output = ss.str();
+        return output;
+    };
 };
 
 } // namespace OHOS::Ace

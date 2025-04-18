@@ -315,6 +315,7 @@ build_component_ng("pattern_ng") {
     "overlay/modal_presentation_pattern.cpp",
     "overlay/overlay_container_pattern.cpp",
     "overlay/overlay_manager.cpp",
+    "overlay/overlay_mask_manager.cpp",
     "overlay/popup_base_pattern.cpp",
     "overlay/sheet_drag_bar_paint_method.cpp",
     "overlay/sheet_drag_bar_pattern.cpp",
