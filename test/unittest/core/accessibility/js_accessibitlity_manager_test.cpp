@@ -1183,6 +1183,41 @@ HWTEST_F(JsAccessibilityManagerTest, FrameNodeAccessibilityVisible02, TestSize.L
 }
 
 /**
+ * @tc.name: FrameNodeAccessibilityVisible03
+ * @tc.desc: Test searching root element info when elementId is -1
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, FrameNodeAccessibilityVisible03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a pipeline context and set it as the current context.
+     */
+    auto context = NG::PipelineContext::GetCurrentContext();
+
+    /**
+     * @tc.steps: step2. create an instance of JsAccessibilityManager and set the pipeline context.
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    CHECK_NULL_VOID(jsAccessibilityManager);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    /**
+     * @tc.steps: step3. call the function SearchElementInfoByAccessibilityIdNG with an invalid elementId.
+     */
+    std::list<AccessibilityElementInfo> infos;
+    jsAccessibilityManager->SearchElementInfoByAccessibilityIdNG(-1, 1, infos, context, 0);
+
+    /**
+     * @tc.steps: step4. verify that the infos list contains elements with specific properties.
+     */
+    EXPECT_FALSE(infos.empty());
+    for (auto& info : infos) {
+        EXPECT_FALSE(info.GetAccessibilityVisible());
+    }
+}
+
+/**
  * @tc.name: JsAccessibilityManager024
  * @tc.desc: RegisterGetParentRectHandler
  * @tc.type: FUNC
