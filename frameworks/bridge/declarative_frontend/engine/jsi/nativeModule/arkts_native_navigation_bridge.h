@@ -38,6 +38,8 @@ public:
     static ArkUINativeModuleValue ResetHideTitleBar(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetEnableModeChangeAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetEnableModeChangeAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSplitPlaceholder(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSplitPlaceholder(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetNavBarPosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetNavBarPosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetNavBarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);

@@ -24697,6 +24697,10 @@ class ArkNavigationComponent extends ArkComponent {
       EnableModeChangeAnimationModifier, value);
     return this;
   }
+  splitPlaceholder(placeholder) {
+    modifierWithKey(this._modifiersWithKeys, SplitPlaceholderModifier.identity, SplitPlaceholderModifier, placeholder);
+    return this;
+  }
   hideTitleBar(isHide, animated) {
     let arkNavigationHideTitleBar = new ArkNavHideTitleBarOrToolBar();
     if (!isUndefined(isHide) && !isNull(isHide)) {
@@ -25098,6 +25102,21 @@ class EnableModeChangeAnimationModifier extends ModifierWithKey {
   }
 }
 EnableModeChangeAnimationModifier.identity = Symbol('enableModeChangeAnimation');
+
+class SplitPlaceholderModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetSplitPlaceholder(node);
+    } else {
+      getUINativeModule().navigation.setSplitPlaceholder(node, this.value);
+    }
+  }
+}
+SplitPlaceholderModifier.identity = Symbol('splitPlaceholder');
 
 class TitleModeModifier extends ModifierWithKey {
   constructor(value) {

@@ -283,6 +283,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("recoverable", &JSNavigation::SetRecoverable);
     JSClass<JSNavigation>::StaticMethod("enableDragBar", &JSNavigation::SetEnableDragBar);
     JSClass<JSNavigation>::StaticMethod("enableModeChangeAnimation", &JSNavigation::SetEnableModeChangeAnimation);
+    JSClass<JSNavigation>::StaticMethod("splitPlaceholder", &JSNavigation::SetSplitPlaceholder);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -391,6 +392,40 @@ void JSNavigation::SetEnableModeChangeAnimation(const JSCallbackInfo& info)
         return;
     }
     NavigationModel::GetInstance()->SetEnableModeChangeAnimation(true);
+}
+
+void JSNavigation::SetSplitPlaceholder(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "SplitPlaceholder is invalid");
+        return;
+    }
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        NavigationModel::GetInstance()->ResetSplitPlaceholder();
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> contentObject = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> builderNodeParam = contentObject->GetProperty("builderNode_");
+    if (!builderNodeParam->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "builderNode_ property is not an object");
+        return;
+    }
+    JSRef<JSObject> builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
+    JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+    if (nodeptr.IsEmpty()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "nodePtr_ is empty");
+        return;
+    }
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(info.GetExecutionContext());
+    const auto* vm = nodeptr->GetEcmaVM();
+    CHECK_NULL_VOID(nodeptr->GetLocalHandle()->IsNativePointer(vm));
+    auto* node = reinterpret_cast<NG::UINode*>(nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value());
+    CHECK_NULL_VOID(node);
+    RefPtr<NG::UINode> refPtrNode = AceType::Claim(node);
+    NavigationModel::GetInstance()->SetSplitPlaceholder(refPtrNode);
 }
 
 void JSNavigation::SetHideNavBar(bool hide)

@@ -85,6 +85,10 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, EnableModeChangeAnimationModifier.identity, EnableModeChangeAnimationModifier, value);
     return this;
   }
+  splitPlaceholder(placeholder: ComponentContent): NavigationAttribute {
+    modifierWithKey(this._modifiersWithKeys, SplitPlaceholderModifier.identity, SplitPlaceholderModifier, placeholder);
+    return this;
+  }
   hideTitleBar(isHide: boolean, animated?: boolean): NavigationAttribute {
     let arkNavigationHideTitleBar = new ArkNavHideTitleBarOrToolBar();
     if (!isUndefined(isHide) && !isNull(isHide)) {
@@ -541,6 +545,21 @@ class NavigationHideTitleBarModifier extends ModifierWithKey<ArkNavHideTitleBarO
       getUINativeModule().navigation.resetHideTitleBar(node);
     } else {
       getUINativeModule().navigation.setHideTitleBar(node, this.value?.isHide, this.value?.animated);
+    }
+  }
+}
+
+class SplitPlaceholderModifier extends ModifierWithKey<ComponentContent> {
+  constructor(value: ComponentContent) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('splitPlaceholder');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navigation.resetSplitPlaceholder(node);
+    } else {
+      getUINativeModule().navigation.setSplitPlaceholder(node, this.value);
     }
   }
 }
