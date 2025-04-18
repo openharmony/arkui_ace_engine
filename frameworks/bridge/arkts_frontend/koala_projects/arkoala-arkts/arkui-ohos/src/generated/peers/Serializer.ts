@@ -19157,14 +19157,14 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeResource(value_icon_value_1)
             }
         }
-        const value_symbolIcon  = value.symbolIcon
-        let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
-        value_symbolIcon_type = runtimeType(value_symbolIcon)
-        valueSerializer.writeInt8(value_symbolIcon_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_symbolIcon_type)) {
-            const value_symbolIcon_value  = value_symbolIcon!
-            valueSerializer.writeSymbolGlyphModifier(value_symbolIcon_value)
-        }
+        // const value_symbolIcon  = value.symbolIcon
+        // let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
+        // value_symbolIcon_type = runtimeType(value_symbolIcon)
+        // valueSerializer.writeInt8(value_symbolIcon_type as int32)
+        // if ((RuntimeType.UNDEFINED) != (value_symbolIcon_type)) {
+        //     const value_symbolIcon_value  = value_symbolIcon!
+        //     valueSerializer.writeSymbolGlyphModifier(value_symbolIcon_value)
+        // }
         const value_enabled  = value.enabled
         let value_enabled_type : int32 = RuntimeType.UNDEFINED
         value_enabled_type = runtimeType(value_enabled)
