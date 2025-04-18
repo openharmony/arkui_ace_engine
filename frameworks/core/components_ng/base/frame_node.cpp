@@ -471,15 +471,7 @@ FrameNode::~FrameNode()
     if (IsOnMainTree()) {
         OnDetachFromMainTree(false, GetContextWithCheck());
     }
-    if (eventHub_) {
-        eventHub_->ClearOnAreaChangedInnerCallbacks();
-        if (eventHub_->HasVisibleAreaCallback(true) || eventHub_->HasVisibleAreaCallback(false)) {
-            SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::FRAMENODE_DESTROY);
-            TriggerVisibleAreaChangeCallback(0, true);
-            CleanVisibleAreaUserCallback();
-            CleanVisibleAreaInnerCallback();
-        }
-    }
+    HandleAreaChangeDestruct();
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
@@ -2039,7 +2031,7 @@ void FrameNode::ProcessThrottledVisibleCallback(bool forceDisappear)
     auto& visibleAreaUserCallback = eventHub_->GetThrottledVisibleAreaCallback();
     CHECK_NULL_VOID(visibleAreaUserCallback.callback);
 
-    if (forceDisappear) {
+    if (forceDisappear && !NearEqual(lastThrottledVisibleCbRatio_, VISIBLE_RATIO_MIN)) {
         auto& userRatios = eventHub_->GetThrottledVisibleAreaRatios();
         ProcessAllVisibleCallback(
             userRatios, visibleAreaUserCallback, VISIBLE_RATIO_MIN, lastThrottledVisibleCbRatio_, true);
@@ -6674,5 +6666,20 @@ int32_t FrameNode::OnRecvCommand(const std::string& command)
     auto pattern = GetPattern();
     CHECK_NULL_RETURN(pattern, RET_FAILED);
     return pattern->OnRecvCommand(command);
+}
+
+void FrameNode::HandleAreaChangeDestruct()
+{
+    if (eventHub_) {
+        eventHub_->ClearOnAreaChangedInnerCallbacks();
+        if (eventHub_->HasVisibleAreaCallback(true) || eventHub_->HasVisibleAreaCallback(false) ||
+            eventHub_->HasThrottledVisibleAreaCallback()) {
+            SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::FRAMENODE_DESTROY);
+            TriggerVisibleAreaChangeCallback(0, true);
+            CleanVisibleAreaUserCallback(true);
+            CleanVisibleAreaUserCallback();
+            CleanVisibleAreaInnerCallback();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -1517,6 +1517,7 @@ private:
         TouchRestrict& touchRestrict, TouchTestResult& result, ResponseLinkResult& responseLinkResult, bool isDispatch);
 
     void ResetPredictNodes();
+    void HandleAreaChangeDestruct();
 
     const char* GetPatternTypeName() const;
     const char* GetLayoutPropertyTypeName() const;
