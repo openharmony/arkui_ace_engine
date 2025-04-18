@@ -38,19 +38,7 @@ using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::Ace::NG::Converter;
 
-namespace {
-class MockWebFaviconReceived : public OHOS::Ace::WebFaviconReceived {
-public:
-    MOCK_METHOD(const void*, GetData, ());
-    MOCK_METHOD(size_t, GetWidth, ());
-    MOCK_METHOD(size_t, GetHeight, ());
-    MOCK_METHOD(int, GetColorType, ());
-    MOCK_METHOD(int, GetAlphaType, ());
-};
-} // namespace
-
 namespace OHOS::Ace::NG {
-
 struct SelectionMenuOptionsExt {
     std::optional<Callback_Void> onAppear;
     std::optional<Callback_Void> onDisappear;
@@ -59,29 +47,89 @@ struct SelectionMenuOptionsExt {
 };
 
 namespace Converter {
-    void AssignArkValue(Ark_SelectionMenuOptionsExt& dst, const SelectionMenuOptionsExt& src,
-                        ConvContext *ctx = nullptr)
-    {
-        dst.onAppear = Converter::ArkValue<Opt_Callback_Void>(src.onAppear);
-        dst.onDisappear = Converter::ArkValue<Opt_Callback_Void>(src.onDisappear);
-        dst.preview = Converter::ArkValue<Opt_CustomNodeBuilder>(src.preview);
-        dst.menuType = Converter::ArkValue<Opt_MenuType>(src.menuType);
-    }
+void AssignArkValue(Ark_ScriptItem& dst, const std::pair<std::string, std::vector<std::string>>& src)
+{
+    dst.script = Converter::ArkValue<Ark_String>(src.first, Converter::FC);
+    dst.scriptRules = Converter::ArkValue<Array_String>(src.second, Converter::FC);
 }
+void AssignArkValue(Array_ScriptItem& dst, const ScriptItems& src)
+{
+    std::vector<std::pair<std::string, std::vector<std::string>>> scriptItems;
+    for (const auto& [key, value] : src) {
+        auto item = std::make_pair(key, value);
+        scriptItems.emplace_back(item);
+    }
+    dst = Converter::ArkValue<Array_ScriptItem>(scriptItems, Converter::FC);
+}
+void AssignArkValue(Ark_SelectionMenuOptionsExt& dst, const SelectionMenuOptionsExt& src, ConvContext* ctx = nullptr)
+{
+    dst.onAppear = Converter::ArkValue<Opt_Callback_Void>(src.onAppear);
+    dst.onDisappear = Converter::ArkValue<Opt_Callback_Void>(src.onDisappear);
+    dst.preview = Converter::ArkValue<Opt_CustomNodeBuilder>(src.preview);
+    dst.menuType = Converter::ArkValue<Opt_MenuType>(src.menuType);
+}
+} // namespace Converter
 
 namespace {
-    const auto ATTRIBUTE_BIND_SELECTION_MENU_NAME = "bindSelectionMenu";
-    const auto ATTRIBUTE_BIND_SELECTION_MENU_DEFAULT_VALUE = "";
-    const std::string TEST_CONTENT_ONE = "ContentTestOne";
-    const std::string TEST_CONTENT_TWO = "ContentTestTwo";
-#ifdef WEB_SUPPORTED
-    const auto ATTRIBUTE_DEFAULT_TEXT_ENCODING_FORMAT_NAME = "defaultTextEncodingFormat";
-    const std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringValidValues = {
-        { "\"abc\"", Converter::ArkValue<Ark_String>("abc"), "abc" },
-        { "\"\"", Converter::ArkValue<Ark_String>(""), "UTF-8" },
-        { "\"xyz\"", Converter::ArkValue<Ark_String>("xyz"), "xyz" },
-    };
-#endif // WEB_SUPPORTED
+const auto ATTRIBUTE_BIND_SELECTION_MENU_NAME = "bindSelectionMenu";
+const auto ATTRIBUTE_BIND_SELECTION_MENU_DEFAULT_VALUE = "";
+const std::string TEST_CONTENT_ONE = "ContentTestOne";
+const std::string TEST_CONTENT_TWO = "ContentTestTwo";
+const auto ATTRIBUTE_DEFAULT_TEXT_ENCODING_FORMAT_NAME = "defaultTextEncodingFormat";
+const auto ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_NAME = "blurOnKeyboardHideMode";
+const auto ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_DEFAULT_VALUE = "BlurOnKeyboardHideMode.SILENT";
+const auto ATTRIBUTE_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT_NAME = "enableFollowSystemFontWeight";
+const auto ATTRIBUTE_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT_DEFAULT_VALUE = "empty";
+const auto ATTRIBUTE_ENABLE_WEB_AVSESSION_NAME = "enableWebAVSession";
+const auto ATTRIBUTE_ENABLE_WEB_AVSESSION_DEFAULT_VALUE = "true";
+const auto ATTRIBUTE_OPTIMIZE_PARSER_BUDGET_NAME = "optimizeParserBudget";
+const auto ATTRIBUTE_OPTIMIZE_PARSER_BUDGET_DEFAULT_VALUE = "false";
+
+const std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringValidValues = {
+    { "\"abc\"", Converter::ArkValue<Ark_String>("abc"), "abc" },
+    { "\"\"", Converter::ArkValue<Ark_String>(""), "UTF-8" },
+    { "\"xyz\"", Converter::ArkValue<Ark_String>("xyz"), "xyz" },
+};
+const std::vector<std::tuple<OHOS::Ace::ScriptItems, std::vector<std::string>>> testFixtureScriptsValidValues = {
+    {
+        {
+            { "script1", { "rule11", "rule12", "rule13" } },
+            { "script2", { "rule21", "rule22", "rule23" } },
+            { "script3", { "rule31", "rule32", "rule33" } },
+        },
+        { "script1", "script2", "script3" },
+    },
+    {
+        {
+            { "script4", { "rule41", "rule42", "rule43" } },
+            { "script5", { "rule51", "rule52", "rule53" } },
+        },
+        { "script4", "script5" },
+    },
+    {
+        {
+            { "script6", { "rule61", "rule62", "rule63" } },
+        },
+        { "script6" },
+    },
+};
+const std::vector<OHOS::Ace::ScriptItems> testFixtureScriptsInvalidValues = {
+    {
+        { "", { "rule11", "rule12", "rule13" } },
+        { "script2", {} },
+    },
+    {
+        { "", {} },
+    },
+};
+class MockWebFaviconReceived : public OHOS::Ace::WebFaviconReceived {
+public:
+    MOCK_METHOD(const void*, GetData, ());
+    MOCK_METHOD(size_t, GetWidth, ());
+    MOCK_METHOD(size_t, GetHeight, ());
+    MOCK_METHOD(int, GetColorType, ());
+    MOCK_METHOD(int, GetAlphaType, ());
+};
 } // namespace
 
 class WebModifierTest3 : public ModifierTestBase<GENERATED_ArkUIWebModifier,
@@ -297,5 +345,368 @@ HWTEST_F(WebModifierTest3, onFaviconReceivedTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->resourceId, contextId);
     ASSERT_NE(checkEvent->pixelMapPeer, nullptr);
     ASSERT_NE(checkEvent->pixelMapPeer->pixelMap, nullptr);
+}
+
+/*
+ * @tc.name: setBlurOnKeyboardHideModeDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest3, setBlurOnKeyboardHideModeDefaultValues, TestSize.Level1)
+{
+#ifdef WEB_SUPPORTED
+    ASSERT_NE(modifier_->setBlurOnKeyboardHideMode, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto pattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_DEFAULT_VALUE)
+        << "Default value for attribute 'blurOnKeyboardHideMode'";
+#endif
+}
+
+/*
+ * @tc.name: setBlurOnKeyboardHideModeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest3, setBlurOnKeyboardHideValidValues, TestSize.Level1)
+{
+#ifdef WEB_SUPPORTED
+    ASSERT_NE(modifier_->setBlurOnKeyboardHideMode, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto pattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto checkValue = [this](const std::string& input, const std::string& expectedStr,
+                          const Ark_BlurOnKeyboardHideMode& value) {
+        modifier_->setBlurOnKeyboardHideMode(node_, value);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setBlurOnKeyboardHideMode, attribute: blurOnKeyboardHideMode";
+    };
+    for (auto& [input, value, expected] : Fixtures::testFixtureEnumBlurOnKeyboardHideModeValidValues) {
+        checkValue(input, expected, value);
+    }
+#endif
+}
+
+/*
+ * @tc.name: setBlurOnKeyboardHideModeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest3, setBlurOnKeyboardHideInvalidValues, TestSize.Level1)
+{
+#ifdef WEB_SUPPORTED
+    ASSERT_NE(modifier_->setBlurOnKeyboardHideMode, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto pattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto checkValue = [this](const std::string& input, const Ark_BlurOnKeyboardHideMode& value) {
+        modifier_->setBlurOnKeyboardHideMode(node_, value);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_DEFAULT_VALUE)
+            << "Input value is: " << input << ", method: setBlurOnKeyboardHideMode, attribute: blurOnKeyboardHideMode";
+    };
+    for (auto& [input, value] : Fixtures::testFixtureEnumBlurOnKeyboardHideModeInvalidValues) {
+        checkValue(input, value);
+    }
+#endif
+}
+
+/*
+ * @tc.name: setEnableFollowSystemFontWeightTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest3, setEnableFollowSystemFontWeightTest, TestSize.Level1)
+{
+#ifdef WEB_SUPPORTED
+    ASSERT_NE(modifier_->setEnableFollowSystemFontWeight, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto pattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT_DEFAULT_VALUE)
+        << "Default value for attribute 'enableFollowSystemFontWeight'";
+
+    auto checkValue = [this](const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        modifier_->setEnableFollowSystemFontWeight(node_, value);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input
+            << ", method: setEnableFollowSystemFontWeight, attribute: enableFollowSystemFontWeight";
+    };
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
+#endif
+}
+
+/*
+ * @tc.name: setEnableWebAVSessionTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest3, setEnableWebAVSessionTest, TestSize.Level1)
+{
+#ifdef WEB_SUPPORTED
+    ASSERT_NE(modifier_->setEnableWebAVSession, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto pattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_WEB_AVSESSION_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_WEB_AVSESSION_DEFAULT_VALUE)
+        << "Default value for attribute 'enableWebAVSession'";
+
+    auto checkValue = [this](const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        modifier_->setEnableWebAVSession(node_, value);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_WEB_AVSESSION_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input
+            << ", method: setEnableFollowSystemFontWeight, attribute: enableFollowSystemFontWeight";
+    };
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
+#endif
+}
+
+/*
+ * @tc.name: setOptimizeParserBudgetTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest3, setOptimizeParserBudgetTest, TestSize.Level1)
+{
+#ifdef WEB_SUPPORTED
+    ASSERT_NE(modifier_->setOptimizeParserBudget, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto pattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OPTIMIZE_PARSER_BUDGET_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_OPTIMIZE_PARSER_BUDGET_DEFAULT_VALUE)
+        << "Default value for attribute 'optimizeParserBudget'";
+
+    auto checkValue = [this](const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        modifier_->setOptimizeParserBudget(node_, value);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OPTIMIZE_PARSER_BUDGET_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input
+            << ", method: setEnableFollowSystemFontWeight, attribute: enableFollowSystemFontWeight";
+    };
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
+#endif
+}
+
+/*
+ * @tc.name: setRunJavaScriptOnDocumentStartValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest3, setRunJavaScriptOnDocumentStartValidValues, TestSize.Level1)
+{
+#ifdef WEB_SUPPORTED
+    ASSERT_NE(modifier_->setRunJavaScriptOnDocumentStart, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto pattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto scripts = pattern->GetJavaScriptOnDocumentStartScriptItems();
+    auto scriptsByOrder = pattern->GetJavaScriptOnDocumentStartSctiptItemsByOrder();
+    ASSERT_EQ(scripts, std::nullopt);
+    ASSERT_EQ(scriptsByOrder, std::nullopt);
+    EXPECT_TRUE(scripts->empty());
+    EXPECT_TRUE(scriptsByOrder->empty());
+
+    auto checkValue = [this, &pattern](const ScriptItems& value, const std::vector<std::string>& expected) {
+        Array_ScriptItem array = Converter::ArkValue<Array_ScriptItem>(value, Converter::FC);
+        modifier_->setRunJavaScriptOnDocumentStart(node_, &array);
+        auto scripts = pattern->GetJavaScriptOnDocumentStartScriptItems();
+        auto scriptsByOrder = pattern->GetJavaScriptOnDocumentStartSctiptItemsByOrder();
+        ASSERT_NE(scripts, std::nullopt);
+        ASSERT_NE(scriptsByOrder, std::nullopt);
+        EXPECT_EQ(scripts.value(), value);
+        EXPECT_EQ(scriptsByOrder.value(), expected);
+    };
+    for (auto& [value, expected] : testFixtureScriptsValidValues) {
+        checkValue(value, expected);
+    }
+#endif
+}
+
+/*
+ * @tc.name: setRunJavaScriptOnDocumentStartInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest3, setRunJavaScriptOnDocumentStartInvalidValues, TestSize.Level1)
+{
+#ifdef WEB_SUPPORTED
+    ASSERT_NE(modifier_->setRunJavaScriptOnDocumentStart, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto pattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto checkValue = [this, &pattern](const ScriptItems& value) {
+        Array_ScriptItem array = Converter::ArkValue<Array_ScriptItem>(value, Converter::FC);
+        modifier_->setRunJavaScriptOnDocumentStart(node_, &array);
+        auto scripts = pattern->GetJavaScriptOnDocumentStartScriptItems();
+        auto scriptsByOrder = pattern->GetJavaScriptOnDocumentStartSctiptItemsByOrder();
+        ASSERT_TRUE(scripts.has_value());
+        EXPECT_TRUE(scripts->empty());
+        ASSERT_TRUE(scriptsByOrder.has_value());
+        EXPECT_TRUE(scriptsByOrder->empty());
+    };
+    for (const auto& value : testFixtureScriptsInvalidValues) {
+        checkValue(value);
+    }
+#endif
+}
+
+/*
+ * @tc.name: setRunJavaScriptOnDocumentEndValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest3, setRunJavaScriptOnDocumentEndValidValues, TestSize.Level1)
+{
+#ifdef WEB_SUPPORTED
+    ASSERT_NE(modifier_->setRunJavaScriptOnDocumentEnd, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto pattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto scripts = pattern->GetJavaScriptOnDocumentEndScriptItems();
+    auto scriptsByOrder = pattern->GetJavaScriptOnDocumentEndScriptItemsByOrder();
+    ASSERT_EQ(scripts, std::nullopt);
+    ASSERT_EQ(scriptsByOrder, std::nullopt);
+    EXPECT_TRUE(scripts->empty());
+    EXPECT_TRUE(scriptsByOrder->empty());
+
+    auto checkValue = [this, &pattern](const ScriptItems& value, const std::vector<std::string>& expected) {
+        Array_ScriptItem array = Converter::ArkValue<Array_ScriptItem>(value, Converter::FC);
+        modifier_->setRunJavaScriptOnDocumentEnd(node_, &array);
+        auto scripts = pattern->GetJavaScriptOnDocumentEndScriptItems();
+        auto scriptsByOrder = pattern->GetJavaScriptOnDocumentEndScriptItemsByOrder();
+        ASSERT_NE(scripts, std::nullopt);
+        ASSERT_NE(scriptsByOrder, std::nullopt);
+        EXPECT_EQ(scripts.value(), value);
+        EXPECT_EQ(scriptsByOrder.value(), expected);
+    };
+    for (auto& [value, expected] : testFixtureScriptsValidValues) {
+        checkValue(value, expected);
+    }
+#endif
+}
+
+/*
+ * @tc.name: setRunJavaScriptOnDocumentEndInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest3, setRunJavaScriptOnDocumentEndInvalidValues, TestSize.Level1)
+{
+#ifdef WEB_SUPPORTED
+    ASSERT_NE(modifier_->setRunJavaScriptOnDocumentEnd, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto pattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto checkValue = [this, &pattern](const ScriptItems& value) {
+        Array_ScriptItem array = Converter::ArkValue<Array_ScriptItem>(value, Converter::FC);
+        modifier_->setRunJavaScriptOnDocumentEnd(node_, &array);
+        auto scripts = pattern->GetJavaScriptOnDocumentEndScriptItems();
+        auto scriptsByOrder = pattern->GetJavaScriptOnDocumentEndScriptItemsByOrder();
+        ASSERT_TRUE(scripts.has_value());
+        EXPECT_TRUE(scripts->empty());
+        ASSERT_TRUE(scriptsByOrder.has_value());
+        EXPECT_TRUE(scriptsByOrder->empty());
+    };
+    for (const auto& value : testFixtureScriptsInvalidValues) {
+        checkValue(value);
+    }
+#endif
+}
+
+/*
+ * @tc.name: setRunJavaScriptOnHeadEndValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest3, setRunJavaScriptOnHeadEndValidValues, TestSize.Level1)
+{
+#ifdef WEB_SUPPORTED
+    ASSERT_NE(modifier_->setRunJavaScriptOnHeadEnd, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto pattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto scripts = pattern->GetJavaScriptOnHeadReadyScriptItems();
+    auto scriptsByOrder = pattern->GetJavaScriptOnHeadReadyScriptItemsByOrder();
+    ASSERT_EQ(scripts, std::nullopt);
+    ASSERT_EQ(scriptsByOrder, std::nullopt);
+    EXPECT_TRUE(scripts->empty());
+    EXPECT_TRUE(scriptsByOrder->empty());
+
+    auto checkValue = [this, &pattern](const ScriptItems& value, const std::vector<std::string>& expected) {
+        Array_ScriptItem array = Converter::ArkValue<Array_ScriptItem>(value, Converter::FC);
+        modifier_->setRunJavaScriptOnHeadEnd(node_, &array);
+        auto scripts = pattern->GetJavaScriptOnHeadReadyScriptItems();
+        auto scriptsByOrder = pattern->GetJavaScriptOnHeadReadyScriptItemsByOrder();
+        ASSERT_NE(scripts, std::nullopt);
+        ASSERT_NE(scriptsByOrder, std::nullopt);
+        EXPECT_EQ(scripts.value(), value);
+        EXPECT_EQ(scriptsByOrder.value(), expected);
+    };
+    for (auto& [value, expected] : testFixtureScriptsValidValues) {
+        checkValue(value, expected);
+    }
+#endif
+}
+
+/*
+ * @tc.name: setRunJavaScriptOnHeadEndInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest3, setRunJavaScriptOnHeadEndInvalidValues, TestSize.Level1)
+{
+#ifdef WEB_SUPPORTED
+    ASSERT_NE(modifier_->setRunJavaScriptOnHeadEnd, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto pattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto checkValue = [this, &pattern](const ScriptItems& value) {
+        Array_ScriptItem array = Converter::ArkValue<Array_ScriptItem>(value, Converter::FC);
+        modifier_->setRunJavaScriptOnHeadEnd(node_, &array);
+        auto scripts = pattern->GetJavaScriptOnHeadReadyScriptItems();
+        auto scriptsByOrder = pattern->GetJavaScriptOnHeadReadyScriptItemsByOrder();
+        ASSERT_TRUE(scripts.has_value());
+        EXPECT_TRUE(scripts->empty());
+        ASSERT_TRUE(scriptsByOrder.has_value());
+        EXPECT_TRUE(scriptsByOrder->empty());
+    };
+    for (const auto& value : testFixtureScriptsInvalidValues) {
+        checkValue(value);
+    }
+#endif
 }
 } // namespace OHOS::Ace::NG

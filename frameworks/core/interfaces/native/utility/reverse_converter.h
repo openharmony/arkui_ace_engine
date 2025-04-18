@@ -34,6 +34,7 @@
 #include "core/components/image/image_event.h"
 #include "core/components/picker/picker_base_component.h"
 #include "core/components/web/web_event.h"
+#include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -299,6 +300,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const TextStyleResult& src, ConvContext *ctx);
     void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
+    void AssignArkValue(Ark_ScriptItem& dst, const std::pair<std::string, std::vector<std::string>>& src);
     void AssignArkValue(Ark_ScrollAlign& dst, const ScrollAlign& src);
     void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src);
     void AssignArkValue(Ark_ScrollSource& dst, const ScrollSource& src);
@@ -353,6 +355,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_WordBreak& dst, const WordBreak& src);
     void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src);
     void AssignArkValue(Array_Number& dst, const std::vector<double>& src);
+    void AssignArkValue(Array_ScriptItem& dst, const ScriptItems& src);
 
     // SORTED_SECTION
     template<> Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value);

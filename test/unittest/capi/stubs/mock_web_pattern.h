@@ -89,6 +89,10 @@ public:
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BlurOnKeyboardHideMode, int32_t);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebMediaAVSessionEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OptimizeParserBudgetEnabled, bool);
 
     void SetWebSrc(const std::string &webSrc);
     void SetWebData(const std::string& webData);
@@ -104,7 +108,9 @@ public:
 
     void JavaScriptOnDocumentStart(const ScriptItems&);
     void JavaScriptOnDocumentEnd(const ScriptItems&);
-
+    void JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder);
+    void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder);
+    void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder);
     void SetWebController(const RefPtr<WebController>& webController);
     RefPtr<WebController> GetWebController() const;
 
@@ -131,6 +137,35 @@ public:
         selectInfo.onCreateCallback.onMenuItemClick = onMenuItemClick_;
     }
 
+    std::optional<ScriptItems> GetJavaScriptOnDocumentStartScriptItems()
+    {
+        return onDocumentStartScriptItems_;
+    }
+    std::optional<ScriptItemsByOrder> GetJavaScriptOnDocumentStartSctiptItemsByOrder()
+    {
+        return onDocumentStartScriptItemsByOrder_;
+    }
+
+    std::optional<ScriptItems> GetJavaScriptOnDocumentEndScriptItems()
+    {
+        return onDocumentEndScriptItems_;
+    }
+
+    std::optional<ScriptItemsByOrder> GetJavaScriptOnDocumentEndScriptItemsByOrder()
+    {
+        return onDocumentEndScriptItemsByOrder_;
+    }
+
+    std::optional<ScriptItems> GetJavaScriptOnHeadReadyScriptItems()
+    {
+        return onHeadReadyScriptItems_;
+    }
+
+    std::optional<ScriptItemsByOrder> GetJavaScriptOnHeadReadyScriptItemsByOrder()
+    {
+        return onHeadReadyScriptItemsByOrder_;
+    }
+
 private:
     std::string GetMixedModeAsString() const;
     std::string GetCacheModeAsString() const;
@@ -149,6 +184,8 @@ private:
     std::string GetHorizontalScrollBarAccessEnabledAsString() const;
     std::string GetVerticalScrollBarAccessEnabledAsString() const;
     std::string GetNestedScrollModeAsString(const NestedScrollMode& scrollMode) const;
+    std::string GetBlurOnKeyboardHideModeAsString() const;
+    std::string GetEnableFollowSystemFontWeightAsString() const;
 
     void BoolWebPropertiesToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
@@ -206,6 +243,10 @@ private:
     void OnNativeEmbedRuleTypeUpdate(const std::string&) {}
     void OnNativeVideoPlayerConfigUpdate(std::tuple<bool, bool> const&) {}
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption) {}
+    void OnBlurOnKeyboardHideModeUpdate(const int32_t value) {}
+    void OnEnableFollowSystemFontWeightUpdate(bool value) {}
+    void OnWebMediaAVSessionEnabledUpdate(bool enable) {}
+    void OnOptimizeParserBudgetEnabledUpdate(bool value) {}
 
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     NestedScrollOptionsExt nestedScroll_ = {
@@ -220,6 +261,12 @@ private:
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
     OnCreateMenuCallback onCreateMenuCallback_ = nullptr;
     OnMenuItemClickCallback onMenuItemClick_ = nullptr;
+    std::optional<ScriptItems> onDocumentStartScriptItems_;
+    std::optional<ScriptItems> onDocumentEndScriptItems_;
+    std::optional<ScriptItems> onHeadReadyScriptItems_;
+    std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
+    std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
+    std::optional<ScriptItemsByOrder> onHeadReadyScriptItemsByOrder_;
 };
 } // namespace OHOS::Ace::NG
 #endif // CAPI_STUBS_MOCK_WEB_PATTERN_H

@@ -56,6 +56,8 @@ void WebPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFi
     json->PutExtAttr("keyboardAvoidMode", GetKeyboardAvoidModeAsString().c_str(), filter);
     json->PutExtAttr("enableHapticFeedback", GetEnabledHapticFeedbackAsString().c_str(), filter);
     json->PutExtAttr("blockNetwork", GetBlockNetworkAsString().c_str(), filter);
+    json->PutExtAttr("blurOnKeyboardHideMode", GetBlurOnKeyboardHideModeAsString().c_str(), filter);
+    json->PutExtAttr("enableFollowSystemFontWeight", GetEnableFollowSystemFontWeightAsString().c_str(), filter);
 
     BoolWebPropertiesToJsonValue(json, filter);
     NestedScrollExtToJsonValue(json, filter);
@@ -83,6 +85,8 @@ void WebPattern::BoolWebPropertiesToJsonValue(std::unique_ptr<JsonValue>& json, 
     json->PutExtAttr("allowWindowOpenMethod", GetAllowWindowOpenMethodValue(false) ? "true" : "false", filter);
     json->PutExtAttr("enableNativeEmbedMode", GetNativeEmbedModeEnabledValue(false) ? "true" : "false", filter);
     json->PutExtAttr("textAutosizing", GetTextAutosizingValue(true) ? "true" : "false", filter);
+    json->PutExtAttr("enableWebAVSession", GetWebMediaAVSessionEnabledValue(true) ? "true" : "false", filter);
+    json->PutExtAttr("optimizeParserBudget", GetOptimizeParserBudgetEnabledValue(false) ? "true" : "false", filter);
 }
 
 void WebPattern::NestedScrollExtToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -244,6 +248,32 @@ std::string WebPattern::GetNestedScrollModeAsString(const NestedScrollMode& scro
     return str;
 }
 
+std::string WebPattern::GetBlurOnKeyboardHideModeAsString() const
+{
+    auto mode = GetBlurOnKeyboardHideModeValue(BlurOnKeyboardHideMode::SILENT);
+    std::string str = "BlurOnKeyboardHideMode.SILENT";
+    switch (mode) {
+        case BlurOnKeyboardHideMode::SILENT:
+            str = "BlurOnKeyboardHideMode.SILENT";
+            break;
+        case BlurOnKeyboardHideMode::BLUR:
+            str = "BlurOnKeyboardHideMode.BLUR";
+            break;
+        default:
+            break;
+    }
+    return str;
+}
+
+std::string WebPattern::GetEnableFollowSystemFontWeightAsString() const
+{
+    auto opt = GetEnableFollowSystemFontWeight();
+    if (opt) {
+        return opt.value() ? "true" : "false";
+    }
+    return "empty";
+}
+
 std::string WebPattern::GetInitialScaleAsString() const
 {
     auto initialScale = GetInitialScale();
@@ -379,6 +409,26 @@ void WebPattern::JavaScriptOnDocumentStart(const ScriptItems&)
 
 void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems&)
 {
+}
+
+void WebPattern::JavaScriptOnDocumentStartByOrder(
+    const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentStartScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+}
+
+void WebPattern::JavaScriptOnDocumentEndByOrder(
+    const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+}
+void WebPattern::JavaScriptOnHeadReadyByOrder(
+    const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    onHeadReadyScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onHeadReadyScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
 }
 
 void WebPattern::SetWebController(const RefPtr<WebController>& webController)

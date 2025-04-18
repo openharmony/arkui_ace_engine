@@ -20,6 +20,7 @@
 #include "core/interfaces/native/implementation/web_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/webview_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/web_modifier_callbacks.h"
+#include "core/interfaces/native/implementation/web_modifier_extension.h"
 #endif // WEB_SUPPORTED
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -43,35 +44,8 @@ void EraseSpace(std::string& data)
 #endif // WEB_SUPPORTED
 } // namespace
 
-namespace OHOS::Ace {
-using ScriptItem = std::pair<std::string, std::vector<std::string>>;
-} // namespace OHOS::Ace
-
 namespace OHOS::Ace::NG::Converter {
 #ifdef WEB_SUPPORTED
-template<>
-ScriptItem Convert(const Ark_ScriptItem& src)
-{
-    ScriptItem item = std::make_pair(
-        Converter::Convert<std::string>(src.script),
-        Converter::Convert<std::vector<std::string>>(src.scriptRules)
-    );
-    return item;
-}
-
-template<>
-ScriptItems Convert(const Array_ScriptItem& src)
-{
-    auto items = Converter::Convert<std::vector<ScriptItem>>(src);
-    ScriptItems scriptItems;
-    for (auto item : items) {
-        if (scriptItems.find(item.first) == scriptItems.end()) {
-            scriptItems.insert(item);
-        }
-    }
-    return scriptItems;
-}
-
 template<>
 NestedScrollOptionsExt Convert(const Ark_NestedScrollOptionsExt& src)
 {
@@ -130,47 +104,6 @@ void AssignArkValue(Ark_NativeEmbedInfo& dst, const EmbedInfo& src)
     position.x = Converter::ArkValue<Opt_Length>(src.x);
     position.y = Converter::ArkValue<Opt_Length>(src.y);
     dst.position = Converter::ArkValue<Opt_Position>(position);
-}
-
-void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src)
-{
-    switch (src) {
-        case NavigationType::NAVIGATION_TYPE_UNKNOWN: dst =
-            Ark_WebNavigationType::ARK_WEB_NAVIGATION_TYPE_UNKNOWN; break;
-        case NavigationType::NAVIGATION_TYPE_MAIN_FRAME_NEW_ENTRY: dst =
-            Ark_WebNavigationType::ARK_WEB_NAVIGATION_TYPE_MAIN_FRAME_NEW_ENTRY; break;
-        case NavigationType::NAVIGATION_TYPE_MAIN_FRAME_EXISTING_ENTRY: dst =
-            Ark_WebNavigationType::ARK_WEB_NAVIGATION_TYPE_MAIN_FRAME_EXISTING_ENTRY; break;
-        case NavigationType::NAVIGATION_TYPE_NEW_SUBFRAME: dst =
-            Ark_WebNavigationType::ARK_WEB_NAVIGATION_TYPE_NAVIGATION_TYPE_NEW_SUBFRAME; break;
-        case NavigationType::NAVIGATION_TYPE_AUTO_SUBFRAME: dst =
-            Ark_WebNavigationType::ARK_WEB_NAVIGATION_TYPE_NAVIGATION_TYPE_AUTO_SUBFRAME; break;
-        default: dst = static_cast<Ark_WebNavigationType>(-1);
-            LOGE("Unexpected enum value in NavigationType: %{public}d", src);
-    }
-}
-
-void AssignArkValue(Ark_ViewportFit& dst, const ViewportFit& src)
-{
-    switch (src) {
-        case ViewportFit::AUTO: dst = ARK_VIEWPORT_FIT_AUTO; break;
-        case ViewportFit::CONTAINS: dst = ARK_VIEWPORT_FIT_CONTAINS; break;
-        case ViewportFit::COVER: dst = ARK_VIEWPORT_FIT_COVER; break;
-        default: dst = static_cast<Ark_ViewportFit>(-1);
-            LOGE("Unexpected enum value in ViewportFit: %{public}d", src);
-    }
-}
-
-void AssignArkValue(Ark_ThreatType& dst, const ThreatType& src)
-{
-    switch (src) {
-        case ThreatType::ILLEGAL: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_ILLEGAL; break;
-        case ThreatType::FRAUD: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_FRAUD; break;
-        case ThreatType::RISK: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_RISK; break;
-        case ThreatType::WARNING: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_WARNING; break;
-        default: dst = static_cast<Ark_ThreatType>(-1);
-            LOGE("Unexpected enum value in ThreatType: %{public}d", src);
-    }
 }
 #endif // WEB_SUPPORTED
 } // namespace OHOS::Ace::NG::Converter
@@ -397,11 +330,9 @@ void OverScrollModeImpl(Ark_NativePointer node,
 void BlurOnKeyboardHideModeImpl(Ark_NativePointer node,
                                 Ark_BlurOnKeyboardHideMode value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //WebModelNG::SetBlurOnKeyboardHideMode(frameNode, convValue);
+#ifdef WEB_SUPPORTED
+    WebExtensionModifier::BlurOnKeyboardHideMode(node, value);
+#endif // WEB_SUPPORTED
 }
 void TextZoomAtioImpl(Ark_NativePointer node,
                       const Ark_Number* value)
@@ -1746,53 +1677,44 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
 void EnableFollowSystemFontWeightImpl(Ark_NativePointer node,
                                       Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetEnableFollowSystemFontWeight(frameNode, convValue);
+#ifdef WEB_SUPPORTED
+    WebExtensionModifier::EnableFollowSystemFontWeight(node, value);
+#endif // WEB_SUPPORTED
 }
 void EnableWebAVSessionImpl(Ark_NativePointer node,
                             Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetEnableWebAVSession(frameNode, convValue);
+#ifdef WEB_SUPPORTED
+    WebExtensionModifier::EnableWebAVSession(node, value);
+#endif // WEB_SUPPORTED
 }
 void OptimizeParserBudgetImpl(Ark_NativePointer node,
                               Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //WebModelNG::SetOptimizeParserBudget(frameNode, convValue);
+#ifdef WEB_SUPPORTED
+    WebExtensionModifier::OptimizeParserBudget(node, value);
+#endif // WEB_SUPPORTED
 }
 void RunJavaScriptOnDocumentStartImpl(Ark_NativePointer node,
                                       const Array_ScriptItem* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetRunJavaScriptOnDocumentStart(frameNode, convValue);
+#ifdef WEB_SUPPORTED
+    WebExtensionModifier::RunJavaScriptOnDocumentStart(node, value);
+#endif // WEB_SUPPORTED
 }
 void RunJavaScriptOnDocumentEndImpl(Ark_NativePointer node,
                                     const Array_ScriptItem* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetRunJavaScriptOnDocumentEnd(frameNode, convValue);
+#ifdef WEB_SUPPORTED
+    WebExtensionModifier::RunJavaScriptOnDocumentEnd(node, value);
+#endif // WEB_SUPPORTED
 }
 void RunJavaScriptOnHeadEndImpl(Ark_NativePointer node,
                                 const Array_ScriptItem* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WebModelNG::SetRunJavaScriptOnHeadEnd(frameNode, convValue);
+#ifdef WEB_SUPPORTED
+    WebExtensionModifier::RunJavaScriptOnHeadEnd(node, value);
+#endif // WEB_SUPPORTED
 }
 void RegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                  const Ark_String* tag,
