@@ -125,7 +125,7 @@ export class XComponentController implements MaterializedBase {
     }
     private getXComponentSurfaceRect_serialize(): SurfaceRect {
         const retval  = ArkUIGeneratedNativeModule._XComponentController_getXComponentSurfaceRect(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : SurfaceRect = retvalDeserializer.readSurfaceRect()
         return returnResult
     }
@@ -137,7 +137,7 @@ export class XComponentController implements MaterializedBase {
     }
     private getXComponentSurfaceRotation_serialize(): SurfaceRotationOptions {
         const retval  = ArkUIGeneratedNativeModule._XComponentController_getXComponentSurfaceRotation(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : SurfaceRotationOptions = retvalDeserializer.readSurfaceRotationOptions()
         return returnResult
     }

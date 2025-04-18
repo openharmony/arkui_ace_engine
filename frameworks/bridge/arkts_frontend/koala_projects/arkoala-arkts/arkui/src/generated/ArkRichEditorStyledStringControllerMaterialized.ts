@@ -79,7 +79,7 @@ export class RichEditorStyledStringController extends RichEditorBaseController i
     }
     private getSelection_serialize(): RichEditorRange {
         const retval  = ArkUIGeneratedNativeModule._RichEditorStyledStringController_getSelection(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : RichEditorRange = retvalDeserializer.readRichEditorRange()
         return returnResult
     }

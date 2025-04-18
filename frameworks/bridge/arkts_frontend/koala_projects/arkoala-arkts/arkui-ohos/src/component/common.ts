@@ -512,7 +512,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     }
     private getTarget_serialize(): EventTarget {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTarget(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : EventTarget = retvalDeserializer.readEventTarget()
         return returnResult
     }
@@ -1396,7 +1396,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
     }
     private getHistoricalPoints_serialize(): Array<HistoricalPoint> {
         const retval  = ArkUIGeneratedNativeModule._TouchEvent_getHistoricalPoints(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<HistoricalPoint> = new Array<HistoricalPoint>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -1414,7 +1414,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
     }
     private getTouches_serialize(): Array<TouchObject> {
         const retval  = ArkUIGeneratedNativeModule._TouchEvent_getTouches(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<TouchObject> = new Array<TouchObject>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -1435,7 +1435,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
     }
     private getChangedTouches_serialize(): Array<TouchObject> {
         const retval  = ArkUIGeneratedNativeModule._TouchEvent_getChangedTouches(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<TouchObject> = new Array<TouchObject>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -1663,7 +1663,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     }
     private getSummary_serialize(): Summary {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getSummary(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : Summary = retvalDeserializer.readSummary()
         return returnResult
     }
@@ -1676,7 +1676,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     }
     private getPreviewRect_serialize(): Rectangle {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getPreviewRect(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : Rectangle = retvalDeserializer.readRectangle()
         return returnResult
     }
@@ -1969,7 +1969,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     }
     private getIntentionCode_serialize(): IntentionCode {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getIntentionCode(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : IntentionCode = retvalDeserializer.readIntentionCode()
         return returnResult
     }
@@ -2131,25 +2131,25 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         thisSerializer.writeConstraintSizeOptions(constraint)
         const retval  = ArkUIGeneratedNativeModule._Measurable_measure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : MeasureResult = retvalDeserializer.readMeasureResult()
         return returnResult
     }
     private getMargin_serialize(): DirectionalEdgesT {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getMargin(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }
     private getPadding_serialize(): DirectionalEdgesT {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getPadding(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }
     private getBorderWidth_serialize(): DirectionalEdgesT {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getBorderWidth(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }
@@ -2228,13 +2228,13 @@ export class TextContentControllerBase implements MaterializedBase {
     }
     private getCaretOffset_serialize(): CaretOffset {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getCaretOffset(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : CaretOffset = retvalDeserializer.readCaretOffset()
         return returnResult
     }
     private getTextContentRect_serialize(): RectResult {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getTextContentRect(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : RectResult = retvalDeserializer.readRectResult()
         return returnResult
     }

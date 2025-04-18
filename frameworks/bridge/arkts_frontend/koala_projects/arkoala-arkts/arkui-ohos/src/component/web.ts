@@ -187,7 +187,7 @@ export class FileSelectorParam implements MaterializedBase {
     }
     private getAcceptType_serialize(): Array<string> {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getAcceptType(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<string> = new Array<string>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -202,7 +202,7 @@ export class FileSelectorParam implements MaterializedBase {
     }
     private getMimeTypes_serialize(): Array<string> {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getMimeTypes(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<string> = new Array<string>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -489,7 +489,7 @@ export class PermissionRequest implements MaterializedBase {
     }
     private getAccessibleResource_serialize(): Array<string> {
         const retval  = ArkUIGeneratedNativeModule._PermissionRequest_getAccessibleResource(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<string> = new Array<string>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -914,7 +914,7 @@ export class WebResourceRequest implements MaterializedBase {
     }
     private getRequestHeader_serialize(): Array<Header> {
         const retval  = ArkUIGeneratedNativeModule._WebResourceRequest_getRequestHeader(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<Header> = new Array<Header>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -1048,7 +1048,7 @@ export class WebResourceResponse implements MaterializedBase {
     }
     private getResponseHeader_serialize(): Array<Header> {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseHeader(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<Header> = new Array<Header>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {

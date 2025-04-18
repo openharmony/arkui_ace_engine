@@ -237,7 +237,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_getSpans(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<RichEditorImageSpanResult | RichEditorTextSpanResult> = new Array<RichEditorImageSpanResult | RichEditorTextSpanResult>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -268,7 +268,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_getParagraphs(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<RichEditorParagraphResult> = new Array<RichEditorParagraphResult>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -279,13 +279,13 @@ export class RichEditorController extends RichEditorBaseController implements Ma
     }
     private getSelection_serialize(): RichEditorSelection {
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_getSelection(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : RichEditorSelection = retvalDeserializer.readRichEditorSelection()
         return returnResult
     }
     private fromStyledString_serialize(value: StyledString): Array<RichEditorSpan> {
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_fromStyledString(this.peer!.ptr, toPeerPtr(value))
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<RichEditorSpan> = new Array<RichEditorSpan>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {

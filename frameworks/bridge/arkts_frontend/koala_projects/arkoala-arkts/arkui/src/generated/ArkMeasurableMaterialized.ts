@@ -65,25 +65,25 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         thisSerializer.writeConstraintSizeOptions(constraint)
         const retval  = ArkUIGeneratedNativeModule._Measurable_measure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : MeasureResult = retvalDeserializer.readMeasureResult()
         return returnResult
     }
     private getMargin_serialize(): DirectionalEdgesT {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getMargin(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }
     private getPadding_serialize(): DirectionalEdgesT {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getPadding(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }
     private getBorderWidth_serialize(): DirectionalEdgesT {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getBorderWidth(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }

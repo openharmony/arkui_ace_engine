@@ -62,7 +62,7 @@ export class EditMenuOptionsInternal implements MaterializedBase,EditMenuOptions
         }
         const retval  = ArkUIGeneratedNativeModule._EditMenuOptions_onCreateMenu(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<TextMenuItem> = new Array<TextMenuItem>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {

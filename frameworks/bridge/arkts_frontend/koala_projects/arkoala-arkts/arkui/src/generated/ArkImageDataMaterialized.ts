@@ -79,7 +79,7 @@ export class ImageData implements MaterializedBase {
     }
     private getData_serialize(): NativeBuffer {
         const retval  = ArkUIGeneratedNativeModule._ImageData_getData(this.peer!.ptr)
-        return new Deserializer(retval, retval.length).readBuffer()
+        return new Deserializer(retval, retval.length as int32).readBuffer()
     }
     private getHeight_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._ImageData_getHeight(this.peer!.ptr)
