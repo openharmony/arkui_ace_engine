@@ -2927,9 +2927,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterCalendarPickerAttributes(object, vm);
     RegisterTabAttributes(object, vm);
     RegisterTabContentAttributes(object, vm);
-#ifndef ARKUI_WEARABLE
     RegisterStepperItemAttributes(object, vm);
-#endif
     RegisterHyperlinkAttributes(object, vm);
     RegisterMenuItemAttributes(object, vm);
     RegisterMenuAttributes(object, vm);
@@ -4648,7 +4646,6 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabs"), tabs);
 }
 
-#ifndef ARKUI_WEARABLE
 void ArkUINativeModule::RegisterStepperItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto stepperItem = panda::ObjectRef::New(vm);
@@ -4666,7 +4663,6 @@ void ArkUINativeModule::RegisterStepperItemAttributes(Local<panda::ObjectRef> ob
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperItemBridge::ResetStatus));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "stepperItem"), stepperItem);
 }
-#endif
 
 void ArkUINativeModule::RegisterTabContentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
