@@ -154,6 +154,24 @@ void RefreshModelNG::ResetOnOffsetChange()
     eventHub->ResetOnOffsetChange();
 }
 
+void RefreshModelNG::SetMaxPullDownDistance(const std::optional<float>& maxDistance)
+{
+    if (maxDistance.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, MaxPullDownDistance, maxDistance.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(RefreshLayoutProperty, MaxPullDownDistance);
+    }
+}
+
+void RefreshModelNG::SetMaxPullDownDistance(FrameNode* frameNode, const std::optional<float>& maxDistance)
+{
+    if (maxDistance.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, MaxPullDownDistance, maxDistance.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, MaxPullDownDistance, frameNode);
+    }
+}
+
 void RefreshModelNG::SetPullDownRatio(const std::optional<float>& pullDownRatio)
 {
     if (pullDownRatio.has_value()) {
@@ -246,6 +264,14 @@ void RefreshModelNG::SetRefreshOffset(FrameNode* frameNode, const Dimension& off
 void RefreshModelNG::SetPullToRefresh(FrameNode* frameNode, bool pullToRefresh)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullToRefresh, pullToRefresh, frameNode);
+}
+
+float RefreshModelNG::GetMaxPullDownDistance(FrameNode* frameNode)
+{
+    float value = std::numeric_limits<float>::infinity();
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, MaxPullDownDistance,
+        value, frameNode, value);
+    return value;
 }
 
 float RefreshModelNG::GetPullDownRatio(FrameNode* frameNode)
