@@ -590,10 +590,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollBar", JSScrollBar::JSBind },
     { "GridRow", JSGridRow::JSBind },
     { "GridCol", JSGridCol::JSBind },
-#ifndef ARKUI_WEARABLE
     { "Stepper", JSStepper::JSBind },
     { "StepperItem", JSStepperItem::JSBind },
-#endif
     { "Toggle", JSToggle::JSBind },
     { "ToolBarItem", JSToolBarItem::JSBind },
     { "Blank", JSBlank::JSBind },

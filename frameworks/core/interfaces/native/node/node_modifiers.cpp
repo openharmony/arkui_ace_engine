@@ -131,7 +131,7 @@
 
 using namespace OHOS::Ace::NG;
 
-#define MODIFIER_COUNTS 9
+#define MODIFIER_COUNTS 8
 #define BLANK_LINES 6
 
 extern "C" {
@@ -196,11 +196,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getCalendarPickerModifier = NodeModifier::GetCalendarPickerModifier,
         .getTextInputModifier = NodeModifier::GetTextInputModifier,
         .getTabsModifier = NodeModifier::GetTabsModifier,
-    #ifndef ARKUI_WEARABLE
         .getStepperItemModifier = NodeModifier::GetStepperItemModifier,
-    #else
-        .getStepperItemModifier = nullptr,
-    #endif
         .getHyperlinkModifier = NodeModifier::GetHyperlinkModifier,
         .getMarqueeModifier = NodeModifier::GetMarqueeModifier,
         .getMenuItemModifier = NodeModifier::GetMenuItemModifier,
@@ -351,11 +347,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getCalendarPickerModifier = NodeModifier::GetCJUICalendarPickerModifier,
         .getTextInputModifier = NodeModifier::GetCJUITextInputModifier,
         .getTabsModifier = NodeModifier::GetCJUITabsModifier,
-    #ifndef ARKUI_WEARABLE
         .getStepperItemModifier = NodeModifier::GetCJUIStepperItemModifier,
-    #else
-        .getStepperItemModifier = nullptr,
-    #endif
         .getHyperlinkModifier = NodeModifier::GetCJUIHyperlinkModifier,
         .getMarqueeModifier = NodeModifier::GetCJUIMarqueeModifier,
         .getMenuItemModifier = nullptr,

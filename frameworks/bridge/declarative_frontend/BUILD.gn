@@ -386,6 +386,8 @@ template("declarative_js_engine") {
       "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
       "jsview/js_state_mgmt_profiler.cpp",
+      "jsview/js_stepper.cpp",
+      "jsview/js_stepper_item.cpp",
       "jsview/js_swiper.cpp",
       "jsview/js_symbol.cpp",
       "jsview/js_symbol_span.cpp",
@@ -496,6 +498,8 @@ template("declarative_js_engine") {
       "jsview/models/sliding_panel_model_impl.cpp",
       "jsview/models/span_model_impl.cpp",
       "jsview/models/stack_model_impl.cpp",
+      "jsview/models/stepper_item_model_impl.cpp",
+      "jsview/models/stepper_model_impl.cpp",
       "jsview/models/swiper_model_impl.cpp",
       "jsview/models/tab_content_model_impl.cpp",
       "jsview/models/tabs_model_impl.cpp",
@@ -518,11 +522,7 @@ template("declarative_js_engine") {
       sources += [
         "jsview/js_folder_stack.cpp",
         "jsview/js_select.cpp",
-        "jsview/js_stepper.cpp",
-        "jsview/js_stepper_item.cpp",
         "jsview/models/select_model_impl.cpp",
-        "jsview/models/stepper_item_model_impl.cpp",
-        "jsview/models/stepper_model_impl.cpp",
       ]
     }
 
@@ -954,6 +954,8 @@ template("declarative_js_engine_ng") {
       "jsview/js_sliding_panel.cpp",
       "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
+      "jsview/js_stepper.cpp",
+      "jsview/js_stepper_item.cpp",
       "jsview/js_swiper.cpp",
       "jsview/js_symbol.cpp",
       "jsview/js_symbol_span.cpp",
@@ -993,8 +995,6 @@ template("declarative_js_engine_ng") {
       sources += [
         "jsview/js_folder_stack.cpp",
         "jsview/js_select.cpp",
-        "jsview/js_stepper.cpp",
-        "jsview/js_stepper_item.cpp",
       ]
     }
 
