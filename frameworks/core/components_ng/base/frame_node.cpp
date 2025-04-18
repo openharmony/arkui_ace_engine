@@ -2151,7 +2151,8 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     CHECK_NULL_RETURN(wrapper, std::nullopt);
     auto task = [weak = WeakClaim(this), wrapper, paintProperty = paintProperty_]() {
         auto self = weak.Upgrade();
-        ACE_SCOPED_TRACE("FrameNode[%s][id:%d]::RenderTask", self->GetTag().c_str(), self->GetId());
+        ACE_SCOPED_TRACE("FrameNode[%s][id:%d][parentId:%d]::RenderTask", self->GetTag().c_str(),
+            self->GetId(), self->GetParent()? self->GetParent()->GetId() : -1);
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline) {
             auto id = pipeline->GetInstanceId();
