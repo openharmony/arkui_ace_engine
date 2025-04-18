@@ -35,7 +35,7 @@ CanvasPattern::~CanvasPattern()
 
 void CanvasPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnDetachFromFrameNode", GetId());
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnDetachFromFrameNode", frameNode->GetId());
     DetachRenderContext();
 }
 
