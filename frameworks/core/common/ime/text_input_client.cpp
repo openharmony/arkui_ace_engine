@@ -151,7 +151,7 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     // when numLock off, KEY_NUMPAD_DOT perform as KEY_FORWARD_DEL
     { KeyComb(KeyCode::KEY_NUMPAD_DOT), [](tic* c) -> void { c->HandleOnDelete(false); } },
     { KeyComb(KeyCode::KEY_NUMPAD_DOT, KEY_CTRL), [](tic* c) -> void { c->HandleOnDeleteComb(false); } },
-    { KeyComb(KeyCode::KEY_DEL, KEY_CTRL), &tic::HandleOnExtendUndoAction },
+    { KeyComb(KeyCode::KEY_DEL, KEY_ALT), &tic::HandleOnExtendUndoAction },
 };
 
 void TextInputClient::NotifyKeyboardHeight(uint32_t height)
