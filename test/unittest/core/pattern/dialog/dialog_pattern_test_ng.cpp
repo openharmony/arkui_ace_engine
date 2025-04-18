@@ -747,6 +747,12 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgOnAttachToM
     auto parentNode = AceType::DynamicCast<FrameNode>(frameNode->GetParent());
     ASSERT_NE(parentNode, nullptr);
     parentNode->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
+
+    auto containerId = Container::CurrentId();
+    auto mockSubwindow = AceType::MakeRefPtr<MockSubwindow>();
+    mockSubwindow->isRosenWindowCreate_ = true;
+    SubwindowManager::GetInstance()->AddSubwindow(containerId, SubwindowType::TYPE_DIALOG, mockSubwindow);
+
     /**
      * @tc.steps: step2. Invoke Handle functions.
      * @tc.expected: These Dump properties are matched.

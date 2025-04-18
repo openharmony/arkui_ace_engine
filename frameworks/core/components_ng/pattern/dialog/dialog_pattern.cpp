@@ -2273,6 +2273,22 @@ void DialogPattern::OnAttachToMainTree()
     CHECK_NULL_VOID(navDestinationPattern);
     auto zIndex = navDestinationPattern->GetTitlebarZIndex();
     dialogRenderContext->UpdateZIndex(zIndex + 1);
+
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto containerId = pipeline->GetInstanceId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_DIALOG);
+    CHECK_NULL_VOID(subwindow);
+    subwindow->RegisterFreeMultiWindowSwitchCallback([containerId](bool enable) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_DIALOG);
+        CHECK_NULL_VOID(subwindow);
+        if (enable) {
+            subwindow->SetFollowParentWindowLayoutEnabled(false);
+            subwindow->ResizeWindow();
+        } else {
+            subwindow->SetFollowParentWindowLayoutEnabled(true);
+        }
+    });
 }
 
 void DialogPattern::MountMaskToUECHost()
