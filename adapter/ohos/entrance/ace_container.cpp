@@ -1309,12 +1309,13 @@ void AceContainer::InitializeCallback()
         ACE_SCOPED_TRACE("DensityChangeCallback(%lf)", density);
         auto callback = [context, density, id]() {
             context->OnSurfaceDensityChanged(density);
-            if (context->IsDensityChanged()) {
+            if (context->IsNeedReloadDensity()) {
                 auto container = Container::GetContainer(id);
                 CHECK_NULL_VOID(container);
                 auto aceContainer = DynamicCast<AceContainer>(container);
                 CHECK_NULL_VOID(aceContainer);
                 aceContainer->NotifyDensityUpdate(density);
+                context->SetIsNeedReloadDensity(false);
             }
         };
         auto taskExecutor = context->GetTaskExecutor();
