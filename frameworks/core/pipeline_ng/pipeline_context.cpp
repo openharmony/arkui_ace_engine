@@ -5993,7 +5993,10 @@ void PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
 
 void PipelineContext::OnDumpInjection(const std::vector<std::string>& params) const
 {
-    auto nodeId = std::stoi(params[PARAM_NUM]);
+    int32_t nodeId = StringUtils::StringToInt(params[PARAM_NUM], -1);
+    if (nodeId < 0) {
+        return;
+    }
     auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
     CHECK_NULL_VOID(frameNode);
     frameNode->OnRecvCommand(params[1]);
