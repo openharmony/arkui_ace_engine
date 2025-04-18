@@ -604,6 +604,42 @@ void NavigationGroupNode::ResetTransitionAnimationNodeState(
     navigationManager->SetIsNavigationOnAnimation(false);
 }
 
+void NavigationGroupNode::SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPlaceholder)
+{
+    auto prevsplitPlaceholder = splitPlaceholder_;
+    CHECK_NULL_VOID(placeholderContentNode_);
+    CHECK_NULL_VOID(splitPlaceholder);
+    auto splitPlaceholderFrameNode = AceType::DynamicCast<FrameNode>(splitPlaceholder);
+    CHECK_NULL_VOID(splitPlaceholderFrameNode);
+    auto splitPlaceholderLayoutProperty = splitPlaceholderFrameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(splitPlaceholderLayoutProperty);
+    auto&& opts = splitPlaceholderLayoutProperty->GetSafeAreaExpandOpts();
+    if (opts) {
+        splitPlaceholderLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
+    } else {
+        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+            .edges = SAFE_AREA_EDGE_ALL };
+        splitPlaceholderLayoutProperty->UpdateSafeAreaExpandOpts(opts);
+    }
+    auto spllitPlaceHolderFrameNode = AceType::DynamicCast<FrameNode>(splitPlaceholder);
+    CHECK_NULL_VOID(spllitPlaceHolderFrameNode);
+    const auto& eventHub = spllitPlaceHolderFrameNode->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(false);
+    auto focusHub = spllitPlaceHolderFrameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(false);
+    if (!prevsplitPlaceholder) {
+        splitPlaceholder->MountToParent(placeholderContentNode_);
+    } else {
+        if (splitPlaceholder != prevsplitPlaceholder) {
+            placeholderContentNode_->ReplaceChild(prevsplitPlaceholder, splitPlaceholder);
+            placeholderContentNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        }
+    }
+    splitPlaceholder_ = splitPlaceholder;
+}
+
 void NavigationGroupNode::CreateAnimationWithPop(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
     const AnimationFinishCallback finishCallback, bool isNavBar)
 {
