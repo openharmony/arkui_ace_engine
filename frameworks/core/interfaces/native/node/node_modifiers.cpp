@@ -131,7 +131,7 @@
 
 using namespace OHOS::Ace::NG;
 
-#define MODIFIER_COUNTS 8
+#define MODIFIER_COUNTS 9
 #define BLANK_LINES 6
 
 extern "C" {
@@ -193,7 +193,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getSpanModifier = NodeModifier::GetSpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetImageAnimatorModifier,
         .getSideBarContainerModifier = NodeModifier::GetSideBarContainerModifier,
+    #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCalendarPickerModifier,
+    #else
+        .getCalendarPickerModifier = nullptr,
+    #endif
         .getTextInputModifier = NodeModifier::GetTextInputModifier,
         .getTabsModifier = NodeModifier::GetTabsModifier,
         .getStepperItemModifier = NodeModifier::GetStepperItemModifier,
@@ -344,7 +348,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getSpanModifier = NodeModifier::GetCJUISpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetCJUIImageAnimatorModifier,
         .getSideBarContainerModifier = NodeModifier::GetCJUISideBarContainerModifier,
+    #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCJUICalendarPickerModifier,
+    #else
+        .getCalendarPickerModifier = nullptr,
+    #endif
         .getTextInputModifier = NodeModifier::GetCJUITextInputModifier,
         .getTabsModifier = NodeModifier::GetCJUITabsModifier,
         .getStepperItemModifier = NodeModifier::GetCJUIStepperItemModifier,
