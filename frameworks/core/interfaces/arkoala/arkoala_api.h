@@ -5277,6 +5277,8 @@ struct ArkUISpanModifier {
     void (*resetAccessibilityDescription)(ArkUINodeHandle node);
     void (*setAccessibilityLevel)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetAccessibilityLevel)(ArkUINodeHandle node);
+    void (*setSpanOnHover)(ArkUINodeHandle node, void* callback);
+    void (*resetSpanOnHover)(ArkUINodeHandle node);
 };
 
 struct ArkUISelectModifier {
