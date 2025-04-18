@@ -1318,6 +1318,13 @@ public:
 
     std::string PrintVisibilityDumpInfo() const;
 
+    void ResetLastFrameNodeRect()
+    {
+        if (lastFrameNodeRect_) {
+            lastFrameNodeRect_.reset();
+        }
+    }
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
