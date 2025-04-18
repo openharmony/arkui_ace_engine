@@ -108,7 +108,9 @@ void AnimatedImageObject::UploadToGpuForRender(
         auto codec = SkCodec::MakeFromData(skData_);
 #else
     if (!animatedPlayer_ && drawingData_) {
-        auto skData = SkData::MakeWithoutCopy(drawingData_->GetData(), drawingData_->GetSize());
+        RSDataWrapper* wrapper = new RSDataWrapper{drawingData_};
+        auto skData =
+            SkData::MakeWithProc(drawingData_->GetData(), drawingData_->GetSize(), RSDataWrapperReleaseProc, wrapper);
         auto codec = SkCodec::MakeFromData(skData);
 #endif
         int32_t dstWidth = -1;
