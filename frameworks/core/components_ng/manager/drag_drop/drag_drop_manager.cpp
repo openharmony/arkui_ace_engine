@@ -2618,6 +2618,7 @@ void DragDropManager::GetGatherPixelMap(
             pixelMapDuplicated = gatherPixelMap;
         }
 #endif
+        CHECK_NULL_VOID(pixelMapDuplicated);
         auto width = pixelMapDuplicated->GetWidth() * scale;
         auto height = pixelMapDuplicated->GetHeight() * scale;
         auto updateScale = scale;
