@@ -318,6 +318,18 @@ public:
 
     void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
     RefPtr<OverlayManager> GetEmbeddedOverlay(const RefPtr<OverlayManager>& context);
+    void MountMaskToUECHost();
+    void CloseDialog();
+    void CloseDialogByEvent(DialogDismissReason reason = DialogDismissReason::DIALOG_TOUCH_OUTSIDE);
+    void SetUECHostMaskInfo(UECHostMaskInfo maskInfo)
+    {
+        hostMaskInfo_ = maskInfo;
+    }
+
+    UECHostMaskInfo GetUECHostMaskInfo()
+    {
+        return hostMaskInfo_;
+    }
 
 private:
     bool AvoidKeyboard() const override
@@ -440,6 +452,7 @@ private:
     std::unordered_map<DialogContentNode, RefPtr<FrameNode>> contentNodeMap_;
     bool isUIExtensionSubWindow_ = false;
     RectF hostWindowRect_;
+    UECHostMaskInfo hostMaskInfo_;
 };
 } // namespace OHOS::Ace::NG
 
