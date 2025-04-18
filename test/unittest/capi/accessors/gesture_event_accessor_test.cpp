@@ -379,6 +379,24 @@ HWTEST_F(GestureEventAccessorTest, SetVelocityYTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetVelocityTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventAccessorTest, SetVelocityTest, TestSize.Level1)
+{
+    for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumber_2x_Values) {
+        accessor_->setVelocity(peer_, &value);
+        GestureEvent* event = peer_->GetEventInfo();
+        ASSERT_NE(event, nullptr);
+        EXPECT_NEAR(event->GetVelocity().GetVelocityX(), expected, EPSILON) <<
+            "Input X value is: " << input << ", method: SetVelocity";
+        EXPECT_NEAR(event->GetVelocity().GetVelocityY(), expected, EPSILON) <<
+            "Input Y value is: " << input << ", method: SetVelocity";
+    }
+}
+
+/**
  * @tc.name: GetVelocityTest
  * @tc.desc:
  * @tc.type: FUNC

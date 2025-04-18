@@ -282,7 +282,15 @@ Ark_Number GetVelocityImpl(Ark_GestureEvent peer)
 void SetVelocityImpl(Ark_GestureEvent peer,
                      const Ark_Number* velocity)
 {
-    LOGE("GestureEventAccessor::SetVelocityImpl not implemented");
+    CHECK_NULL_VOID(peer);
+    GestureEvent* event = peer->GetEventInfo();
+    CHECK_NULL_VOID(event);
+    CHECK_NULL_VOID(velocity);
+
+    auto convValue = Converter::Convert<float>(*velocity);
+    auto convVelocity = Velocity(Offset(PipelineBase::Vp2PxWithCurrentDensity(convValue),
+        PipelineBase::Vp2PxWithCurrentDensity(convValue)));
+    event->SetVelocity(convVelocity);
 }
 } // GestureEventAccessor
 const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor()
