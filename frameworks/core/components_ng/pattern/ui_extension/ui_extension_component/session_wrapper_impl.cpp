@@ -1310,10 +1310,11 @@ bool SessionWrapperImpl::InnerNotifyOccupiedAreaChangeInfo(
     auto curWindow = pipeline->GetCurrentWindowRect();
     auto container = Platform::AceContainer::GetContainer(GetInstanceIdFromHost());
     CHECK_NULL_RETURN(container, false);
-    auto displayArea = GetDisplayAreaWithWindowScene();
+    auto displayArea = displayArea_;
     if (container->IsSceneBoardWindow()) {
         Rosen::WSRect rect = GetWindowSceneRect();
         curWindow.SetRect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        displayArea = GetDisplayAreaWithWindowScene();
     }
     if (keyboardHeight > 0) {
         if (curWindow.Bottom() >= displayArea.Bottom()) {
