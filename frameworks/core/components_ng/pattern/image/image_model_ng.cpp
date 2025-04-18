@@ -675,6 +675,10 @@ void ImageModelNG::SetPixelMap(FrameNode* frameNode, void* drawableDescriptor)
     RefPtr<PixelMap> pixelMapPtr = PixelMap::GetFromDrawable(drawableDescriptor);
     auto srcInfo = CreateSourceInfo("", pixelMapPtr, "", "");
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+#else
+    CHECK_NULL_VOID(drawableDescriptor);
+    int *data = reinterpret_cast<int*>(drawableDescriptor);
+    data[2] = data[1] + data[0];
 #endif
 }
 
@@ -716,7 +720,10 @@ bool ImageModelNG::SetPixelMapArray(FrameNode* frameNode, void* animatedDrawable
     pattern->StartAnimation();
     return true;
 #else
-    return false;
+    CHECK_NULL_RETURN(animatedDrawableDescriptor, false);
+    int *data = reinterpret_cast<int*>(animatedDrawableDescriptor);
+    data[2] = data[1] - data[0];
+    return data[0] == data[1];
 #endif
 }
 
