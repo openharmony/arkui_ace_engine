@@ -2250,4 +2250,74 @@ HWTEST_F(TabBarPatternTestNg, GetNextFocusNode001, TestSize.Level1)
     tabBarPattern_->GetNextFocusNode(step);
     EXPECT_EQ(tabBarPattern_->focusIndicator_, 10.0f);
 }
+
+/**
+ * @tc.name: IndicatorOffsetTest001
+ * @tc.desc: test currentIndicatorOffset
+ * @tc.type: FUNC
+ */
+ HWTEST_F(TabBarPatternTestNg, IndicatorOffsetTest001, TestSize.Level1)
+ {
+    TabsModelNG model = CreateTabs();
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        TabContentModelNG tabContentModel = CreateTabContent();
+        tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+        tabContentModel.SetTabBar("text", std::nullopt, std::nullopt, nullptr, false);
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2.Set tabBarMode to scrollable and axis to horizontal, init child item width.
+     */
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    auto itemWidth = 300.0f;
+    for (int32_t index = 0; index < TABCONTENT_NUMBER; index++) {
+        auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
+        ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
+    }
+
+    /**
+     * @tc.steps: step3.FlushUITask, check visibleItemPosition_ and currentIndicatorOffset_.
+     */
+    FlushUITasks(tabBarNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 300.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, 600.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, 900.0f);
+    EXPECT_EQ(tabBarPattern_->currentIndicatorOffset_, 150.0f);
+
+    /**
+     * @tc.steps: step4.Click to 1, check visibleItemPosition_ and currentIndicatorOffset_.
+     */
+    HandleClick(1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, -90.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 210.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, 510.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, 810.0f);
+    EXPECT_EQ(tabBarPattern_->currentIndicatorOffset_, 360.0f);
+
+    /**
+     * @tc.steps: step5.Click to 2, check visibleItemPosition_ and currentIndicatorOffset_.
+     */
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    HandleClick(2);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(tabBarPattern_->currentIndicatorOffset_, 360.0f);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, -90.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 210.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, 510.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, 810.0f);
+    EXPECT_EQ(tabBarPattern_->currentIndicatorOffset_, 360.0f);
+}
 } // namespace OHOS::Ace::NG
