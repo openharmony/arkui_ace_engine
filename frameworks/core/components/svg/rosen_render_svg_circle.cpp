@@ -15,14 +15,6 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_circle.h"
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/core/SkImage.h"
-#include "include/core/SkPath.h"
-#include "include/core/SkPicture.h"
-#include "include/core/SkPictureRecorder.h"
-#include "include/core/SkShader.h"
-#endif
-
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components/transform/rosen_render_transform.h"
 
@@ -43,21 +35,12 @@ void RosenRenderSvgCircle::Paint(RenderContext& context, const Offset& offset)
         RosenRenderTransform::SyncTransformToRsNode(rsNode, transform);
     }
 
-#ifndef USE_ROSEN_DRAWING
-    SkAutoCanvasRestore save(canvas, false);
-    PaintMaskLayer(context, offset, offset);
-
-    SkPath path;
-    path.addCircle(ConvertDimensionToPx(cx_, LengthType::HORIZONTAL), ConvertDimensionToPx(cy_, LengthType::VERTICAL),
-        ConvertDimensionToPx(r_, LengthType::OTHER));
-#else
     RSAutoCanvasRestore save(*canvas, false);
     PaintMaskLayer(context, offset, offset);
 
     RSRecordingPath path;
     path.AddCircle(ConvertDimensionToPx(cx_, LengthType::HORIZONTAL), ConvertDimensionToPx(cy_, LengthType::VERTICAL),
         ConvertDimensionToPx(r_, LengthType::OTHER));
-#endif
 
     UpdateGradient(fillState_);
 
@@ -74,17 +57,6 @@ void RosenRenderSvgCircle::PaintDirectly(RenderContext& context, const Offset& o
         return;
     }
 
-#ifndef USE_ROSEN_DRAWING
-    SkAutoCanvasRestore save(canvas, true);
-    if (NeedTransform()) {
-        canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
-    }
-    PaintMaskLayer(context, offset, offset);
-
-    SkPath path;
-    path.addCircle(ConvertDimensionToPx(cx_, LengthType::HORIZONTAL), ConvertDimensionToPx(cy_, LengthType::VERTICAL),
-        ConvertDimensionToPx(r_, LengthType::OTHER));
-#else
     RSAutoCanvasRestore save(*canvas, true);
     if (NeedTransform()) {
         canvas->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(GetTransformMatrix4Raw()));
@@ -94,7 +66,6 @@ void RosenRenderSvgCircle::PaintDirectly(RenderContext& context, const Offset& o
     RSRecordingPath path;
     path.AddCircle(ConvertDimensionToPx(cx_, LengthType::HORIZONTAL), ConvertDimensionToPx(cy_, LengthType::VERTICAL),
         ConvertDimensionToPx(r_, LengthType::OTHER));
-#endif
     UpdateGradient(fillState_);
     RosenSvgPainter::SetFillStyle(canvas, path, fillState_, opacity_);
     RosenSvgPainter::SetStrokeStyle(canvas, path, strokeState_, opacity_);
@@ -112,19 +83,11 @@ void RosenRenderSvgCircle::UpdateMotion(const std::string& path, const std::stri
 
 Rect RosenRenderSvgCircle::GetPaintBounds(const Offset& offset)
 {
-#ifndef USE_ROSEN_DRAWING
-    SkPath path;
-    path.addCircle(ConvertDimensionToPx(cx_, LengthType::HORIZONTAL), ConvertDimensionToPx(cy_, LengthType::VERTICAL),
-        ConvertDimensionToPx(r_, LengthType::OTHER));
-    auto& bounds = path.getBounds();
-    return Rect(bounds.left(), bounds.top(), bounds.width(), bounds.height());
-#else
     RSPath path;
     path.AddCircle(ConvertDimensionToPx(cx_, LengthType::HORIZONTAL), ConvertDimensionToPx(cy_, LengthType::VERTICAL),
         ConvertDimensionToPx(r_, LengthType::OTHER));
     auto bounds = path.GetBounds();
     return Rect(bounds.GetLeft(), bounds.GetTop(), bounds.GetWidth(), bounds.GetHeight());
-#endif
 }
 
 } // namespace OHOS::Ace

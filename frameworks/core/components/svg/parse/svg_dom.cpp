@@ -350,19 +350,11 @@ void SvgDom::PaintDirectly(RenderContext& context, const Offset& offset, ImageFi
             LOGW("PaintDirectly containerSize and svgSize is null");
         }
     }
-#ifndef USE_ROSEN_DRAWING
-    canvas->save();
-    canvas->scale(static_cast<float>(scaleX * scaleViewBox), static_cast<float>(scaleY * scaleViewBox));
-    canvas->translate(static_cast<float>(tx), static_cast<float>(ty));
-    svgRoot->PaintDirectly(context, offset);
-    canvas->restore();
-#else
     canvas->Save();
     canvas->Scale(static_cast<float>(scaleX * scaleViewBox), static_cast<float>(scaleY * scaleViewBox));
     canvas->Translate(static_cast<float>(tx), static_cast<float>(ty));
     svgRoot->PaintDirectly(context, offset);
     canvas->Restore();
-#endif
 }
 #endif
 
