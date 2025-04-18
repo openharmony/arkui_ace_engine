@@ -17,7 +17,7 @@
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
-
+#include "base/log/dump_log.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
