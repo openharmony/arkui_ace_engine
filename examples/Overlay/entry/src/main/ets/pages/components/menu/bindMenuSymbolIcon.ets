@@ -13,43 +13,47 @@
  * limitations under the License.
  */
 
+import { SymbolGlyphModifier } from '@kit.ArkUI';
+
 @Builder
-export function BindContextMenuBuilder(name: string, param: Object) {
-  BindContextMenuExample()
+export function BindMenuSymbolIconBuilder(name: string, param: Object) {
+  BindMenuSymbolIconExample()
 }
 
 @Entry
 @Component
-struct BindContextMenuExample {
+struct BindMenuSymbolIconExample {
+  @State symbolIconModifier1: SymbolGlyphModifier =
+    new SymbolGlyphModifier($r('sys.symbol.ohos_photo')).fontSize('24vp');
+  @State symbolIconModifier2: SymbolGlyphModifier =
+    new SymbolGlyphModifier($r('sys.symbol.ohos_photo')).fontSize('24vp');
   pathStack: NavPathStack = new NavPathStack()
-
-  @Builder
-  MenuBuilder() {
-    Flex({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
-      Text('Test menu item 1')
-        .fontSize(20)
-        .width(100)
-        .height(50)
-        .textAlign(TextAlign.Center)
-      Divider().height(10)
-      Text('Test menu item 2')
-        .fontSize(20)
-        .width(100)
-        .height(50)
-        .textAlign(TextAlign.Center)
-    }.width(100)
-  }
 
   build() {
     NavDestination() {
       Column() {
-        Text('LongPress for menu')
+        Text('click for Menu')
       }
       .width('100%')
       .margin({ top: 5 })
-      .bindContextMenu(this.MenuBuilder, ResponseType.LongPress)
+      .bindMenu([
+        {
+          value: 'Menu1',
+          symbolIcon: this.symbolIconModifier1,
+          action: () => {
+            console.info('handle Menu1 select')
+          }
+        },
+        {
+          value: 'Menu2',
+          symbolIcon: this.symbolIconModifier2,
+          action: () => {
+            console.info('handle Menu2 select')
+          }
+        },
+      ])
     }
-    .title('BindContextMenu')
+    .title('BindMenuSymbolIcon')
     .onBackPressed(() => {
       this.pathStack.pop()
       return true

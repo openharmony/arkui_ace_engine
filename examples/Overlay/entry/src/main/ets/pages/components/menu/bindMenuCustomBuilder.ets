@@ -14,42 +14,54 @@
  */
 
 @Builder
-export function BindContextMenuBuilder(name: string, param: Object) {
-  BindContextMenuExample()
+export function BindMenuCustomBuilder(name: string, param: Object) {
+  BindMenuCustomBuilderExample()
 }
 
 @Entry
 @Component
-struct BindContextMenuExample {
+struct BindMenuCustomBuilderExample {
+  @State listData: number[] = [0, 0, 0]
   pathStack: NavPathStack = new NavPathStack()
 
   @Builder
   MenuBuilder() {
     Flex({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
-      Text('Test menu item 1')
-        .fontSize(20)
-        .width(100)
-        .height(50)
-        .textAlign(TextAlign.Center)
-      Divider().height(10)
-      Text('Test menu item 2')
-        .fontSize(20)
-        .width(100)
-        .height(50)
-        .textAlign(TextAlign.Center)
+      ForEach(this.listData, (item: number, index) => {
+        Column() {
+          Row() {
+            Image($r('app.media.app_icon')).width(20).height(20).margin({ right: 5 })
+            Text(`Menu${index as number + 1}`).fontSize(20)
+          }
+          .width('100%')
+          .height(30)
+          .justifyContent(FlexAlign.Center)
+          .align(Alignment.Center)
+          .onClick(() => {
+            console.info(`Menu${index as number + 1} Clicked!`)
+          })
+
+          if (index != this.listData.length - 1) {
+            Divider().height(10).width('80%').color('#ccc')
+          }
+        }.padding(5).height(40)
+      })
     }.width(100)
   }
 
   build() {
     NavDestination() {
       Column() {
-        Text('LongPress for menu')
+        Text('click for menu')
+          .fontSize(20)
+          .margin({ top: 20 })
+          .bindMenu(this.MenuBuilder)
       }
+      .height('100%')
       .width('100%')
-      .margin({ top: 5 })
-      .bindContextMenu(this.MenuBuilder, ResponseType.LongPress)
+      .backgroundColor('#f0f0f0')
     }
-    .title('BindContextMenu')
+    .title('BindMenuCustomBuilder')
     .onBackPressed(() => {
       this.pathStack.pop()
       return true
