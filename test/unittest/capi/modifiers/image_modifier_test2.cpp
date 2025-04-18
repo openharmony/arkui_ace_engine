@@ -150,4 +150,65 @@ HWTEST_F(ImageModifierTest2, setAlt_PixelMapUnion_Test, TestSize.Level1)
     EXPECT_EQ(resultPixelMap, expectedPixelMapRefPtr);
 }
 
+/**
+ * @tc.name: SetImageOptions_SetPixMap
+ * @tc.desc: Test ImageModifierTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest2, SetImageOptions_SetPixMap, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    Ace::RefPtr<Ace::PixelMap> expectedPixelMapRefPtr = AceType::MakeRefPtr<Ace::PixelMapStub>();
+    PixelMapPeer pixelMapPeer;
+    pixelMapPeer.pixelMap = expectedPixelMapRefPtr;
+    Ark_PixelMap expectedPixelMap = &pixelMapPeer;
+    auto inputArkPixelMap =
+        Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor,
+            Ark_PixelMap>(expectedPixelMap);
+    modifier_->setImageOptions0(frameNode, &inputArkPixelMap);
+
+    auto imageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    std::optional<ImageSourceInfo> sourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    EXPECT_TRUE(sourceInfo.has_value());
+    EXPECT_TRUE(sourceInfo->IsPixmap());
+
+    auto resultPixelMap = sourceInfo->GetPixmap();
+    EXPECT_EQ(resultPixelMap, expectedPixelMapRefPtr);
+}
+
+/**
+ * @tc.name: SetImageOptions1_SetPixMap
+ * @tc.desc: Test ImageModifierTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest2, SetImageOptions1_SetPixMap, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    Ace::RefPtr<Ace::PixelMap> expectedPixelMapRefPtr = AceType::MakeRefPtr<Ace::PixelMapStub>();
+    PixelMapPeer pixelMapPeer;
+    pixelMapPeer.pixelMap = expectedPixelMapRefPtr;
+    Ark_PixelMap expectedPixelMap = &pixelMapPeer;
+    auto inputArkPixelMap =
+        Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
+            Ark_PixelMap>(expectedPixelMap);
+    modifier_->setImageOptions1(frameNode, &inputArkPixelMap);
+
+    auto imageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    std::optional<ImageSourceInfo> sourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    EXPECT_TRUE(sourceInfo.has_value());
+    EXPECT_TRUE(sourceInfo->IsPixmap());
+
+    auto resultPixelMap = sourceInfo->GetPixmap();
+    EXPECT_EQ(resultPixelMap, expectedPixelMapRefPtr);
+}
+
+
 } // namespace OHOS::Ace::NG
