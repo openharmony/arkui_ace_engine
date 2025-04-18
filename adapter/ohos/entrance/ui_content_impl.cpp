@@ -3193,6 +3193,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
         if (rsTransaction != nullptr) {
             viewportConfigMgr_->CancelAllPromiseTaskLocked();
+        } else if (reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC) {
+            viewportConfigMgr_->CancelUselessTaskLocked();
+            viewportConfigMgr_->CancelAllPromiseTaskLocked();
         }
     } else if (rsTransaction != nullptr || !avoidAreas.empty()) {
         // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
