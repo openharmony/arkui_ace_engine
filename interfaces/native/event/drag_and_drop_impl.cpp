@@ -33,6 +33,16 @@ constexpr int32_t MAX_POINTID = 9;
 constexpr int32_t MIN_POINTID = 0;
 } // namespace
 
+ArkUI_ErrorCode OH_ArkUI_DragEvent_GetDisplayId(ArkUI_DragEvent* event, int32_t* displayId)
+{
+    if (!event || !displayId) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    *displayId = dragEvent->displayId;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, uint64_t* keys)
 {
     if (!event || !keys) {

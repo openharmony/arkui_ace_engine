@@ -1828,6 +1828,7 @@ RefPtr<OHOS::Ace::DragEvent> GestureEventHub::CreateDragEvent(const GestureEvent
     event->SetDisplayX(info.GetScreenLocation().GetX());
     event->SetDisplayY(info.GetScreenLocation().GetY());
     event->SetSourceTool(info.GetSourceTool());
+    event->SetDisplayId(info.GetTargetDisplayId());
     return event;
 }
 

@@ -454,6 +454,18 @@ float OH_ArkUI_DragEvent_GetVelocity(ArkUI_DragEvent* event);
 int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, uint64_t* keys);
 
 /**
+ * @brief Obtains the display ID of the screen for thee specified drag event.
+ *
+ * @param event Pointer to an <b>ArkUI_DragEvent</b> object.
+ * @param displayId Display ID of the event occurs in.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+ArkUI_ErrorCode OH_ArkUI_DragEvent_GetDisplayId(ArkUI_DragEvent* event, int32_t* displayId);
+
+/**
 *
 * @brief Request to start the data sync process with the sync option.
 *

@@ -130,6 +130,7 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("getModifierKeyState", &JsDragEvent::GetModifierKeyState);
     JSClass<JsDragEvent>::CustomMethod("executeDropAnimation", &JsDragEvent::ExecuteDropAnimation);
     JSClass<JsDragEvent>::CustomMethod("startDataLoading", &JsDragEvent::StartDataLoading);
+    JSClass<JsDragEvent>::CustomMethod("getDisplayId", &JsDragEvent::GetDisplayId);
     JSClass<JsDragEvent>::Bind(globalObj, &JsDragEvent::Constructor, &JsDragEvent::Destructor);
 }
 
@@ -141,6 +142,14 @@ void JsDragEvent::SetJsPasteData(const JSRef<JSObject>& jsPasteData)
 void JsDragEvent::GetJsPasteData(const JSCallbackInfo& args)
 {
     args.SetReturnValue(jsPasteData_);
+}
+
+void JsDragEvent::GetDisplayId(const JSCallbackInfo& args)
+{
+    CHECK_NULL_VOID(dragEvent_);
+    auto xValue = JSVal(ToJSValue(static_cast<int32_t>(dragEvent_->GetDisplayId())));
+    auto xValueRef = JSRef<JSVal>::Make(xValue);
+    args.SetReturnValue(xValueRef);
 }
 
 void JsDragEvent::GetScreenX(const JSCallbackInfo& args)
