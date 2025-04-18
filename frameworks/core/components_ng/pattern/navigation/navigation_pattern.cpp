@@ -1089,7 +1089,7 @@ void NavigationPattern::FireNavigationChange(const RefPtr<UINode>& node, bool is
         FireNavigationInner(node, isOnShow);
         return;
     }
-    const auto& children = node->GetChildren();
+    const auto children = node->GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
         FireNavigationInner(child, isOnShow);
@@ -1108,7 +1108,7 @@ void NavigationPattern::FireNavigationStateChange(const RefPtr<UINode>& node, bo
 void NavigationPattern::FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle)
 {
     CHECK_NULL_VOID(node);
-    const auto& children = node->GetChildren();
+    const auto children = node->GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
         auto navigation = AceType::DynamicCast<NavigationGroupNode>(child);
@@ -2491,10 +2491,22 @@ void NavigationPattern::NotifyNavDestinationSwitch(const RefPtr<NavDestinationCo
     std::string navigationId = host->GetInspectorIdValue("");
     std::optional<NavDestinationInfo> fromInfo;
     std::optional<NavDestinationInfo> toInfo;
+    RefPtr<NavPathInfo> pathInfo = nullptr;
+    if (from) {
+        pathInfo = from->GetNavPathInfo();
+    } else if (to) {
+        pathInfo = to->GetNavPathInfo();
+    }
+    if (pathInfo) {
+        pathInfo->OpenScope();
+    }
     BuildNavDestinationInfoFromContext(navigationId, NavDestinationState::ON_HIDDEN, from, true, fromInfo);
     BuildNavDestinationInfoFromContext(navigationId, NavDestinationState::ON_SHOWN, to, false, toInfo);
     UIObserverHandler::GetInstance().NotifyNavDestinationSwitch(
         std::move(fromInfo), std::move(toInfo), operation);
+    if (pathInfo) {
+        pathInfo->CloseScope();
+    }
 }
 
 void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& preDestination,
