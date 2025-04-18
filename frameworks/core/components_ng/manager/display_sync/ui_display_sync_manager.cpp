@@ -245,9 +245,8 @@ int32_t UIDisplaySyncManager::GetAnimatorRate()
         if (displaySync) {
             if (displaySync->GetAnimatorExpectedRate() == 0) {
                 existAnimatorNoExpectdRate = true;
-            } else {
-                maxAnimatorRateHap_.push(displaySync->GetAnimatorExpectedRate());
             }
+            maxAnimatorRateHap_.push(displaySync->GetAnimatorExpectedRate());
         } else {
             uiDisplaySyncMap_.erase(Id);
         }
