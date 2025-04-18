@@ -10,8 +10,8 @@ import {
 } from '../../../utils';
 import { ScrollBarStart } from './ScrollBar';
 
-export default function ScrollBar6() {
-  describe('ScrollBar6', () => {
+export default function ScrollBar8() {
+  describe('ScrollBar8', () => {
     beforeAll(async (done: Function) => {
       await ScrollBarStart(done)
     })

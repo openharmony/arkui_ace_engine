@@ -29,8 +29,8 @@ import { TabsStart } from './Tabs';
 import { Driver } from '@kit.TestKit';
 
 const driver = Driver.create();
-export default function Tabs7() {
-  describe('Tabs7', () => {
+export default function Tabs8() {
+  describe('Tabs8', () => {
     /**
      * 打开应用
      */

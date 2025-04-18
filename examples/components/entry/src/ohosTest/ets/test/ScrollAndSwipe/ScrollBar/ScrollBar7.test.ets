@@ -16,8 +16,8 @@ import { Driver } from '@kit.TestKit';
 
 const driver = Driver.create();
 
-export default function ScrollBar6() {
-  describe('ScrollBar6', () => {
+export default function ScrollBar7() {
+  describe('ScrollBar7', () => {
     beforeAll(async (done: Function) => {
       await ScrollBarStart(done)
     })
