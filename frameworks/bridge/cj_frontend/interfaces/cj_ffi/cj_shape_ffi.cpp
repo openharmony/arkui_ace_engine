@@ -179,7 +179,7 @@ void FfiOHOSAceFrameworkShapeSetMesh(VectorFloat64Handle vecValue, uint32_t colu
         return;
     }
     auto meshValue = reinterpret_cast<std::vector<double>*>(vecValue);
-    LOGI("FfiOHOSAceFrameworkShapeSetMesh mesh meshValue szie: %{public}d", meshValue->size());
+    LOGI("FfiOHOSAceFrameworkShapeSetMesh mesh meshValue szie: %{public}zu", meshValue->size());
     auto tempMeshSize = static_cast<uint64_t>(column + 1) * (row + 1) * 2;
     if (tempMeshSize != meshValue->size()) {
         ShapeModel::GetInstance()->SetBitmapMesh(std::vector<float>(), 0, 0);
