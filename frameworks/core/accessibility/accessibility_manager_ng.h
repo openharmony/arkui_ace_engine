@@ -74,7 +74,6 @@ private:
         SourceType sourceType,
         AccessibilityHoverEventType eventType,
         TimeStamp time);
-    bool DeliverAccessibilityHoverEvent(const RefPtr<FrameNode>& root, const PointF& point);
 
     void ResetHoverState();
     bool IgnoreCurrentHoveringNode(const RefPtr<FrameNode> &node);

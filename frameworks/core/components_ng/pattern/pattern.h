@@ -616,11 +616,6 @@ public:
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
 
-    virtual bool OnAccessibilityHoverEvent(const PointF& point)
-    {
-        return false;
-    }
-
     virtual uint32_t GetWindowPatternType() const
     {
         return 0;

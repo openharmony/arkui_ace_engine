@@ -923,7 +923,7 @@ public:
     {
         richtextData_ = richtextData;
     }
-    void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
+    void HandleAccessibilityHoverEvent(int32_t x, int32_t y, bool isHoverEnter);
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);

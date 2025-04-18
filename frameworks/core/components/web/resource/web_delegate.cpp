@@ -6334,11 +6334,11 @@ bool WebDelegate::GetPendingSizeStatus()
     return false;
 }
 
-void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y)
+void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y, bool isHoverEnter)
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        nweb_->SendAccessibilityHoverEvent(x, y);
+        nweb_->SendAccessibilityHoverEventV2(x, y, isHoverEnter);
     }
 }
 
