@@ -2359,7 +2359,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         safeAreaTaskKey);
 
     InitializeDisplayAvailableRect(container);
-    InitDragSummaryMap(container);
     NG::OverlayMaskManager::GetInstance().RegisterOverlayHostMaskEventCallback();
 
     // set container temp dir
@@ -2471,14 +2470,6 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
 
     if (!defaultDisplay) {
         TAG_LOGE(AceLogTag::ACE_WINDOW, "DisplayManager failed to get display by id: %{public}u", (uint32_t)displayId);
-    }
-}
-
-void UIContentImpl::InitDragSummaryMap(const RefPtr<Platform::AceContainer>& container)
-{
-    auto pipeline = container->GetPipelineContext();
-    if (pipeline && container->IsUIExtensionWindow()) {
-        pipeline->RequireSummary();
     }
 }
 
