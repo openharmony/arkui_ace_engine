@@ -6343,6 +6343,7 @@ void TextFieldPattern::AfterSelection()
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     showSelect_ = IsSelected();
+    UpdateCaretInfoToController();
 }
 
 void TextFieldPattern::HandleSelectionUp()
