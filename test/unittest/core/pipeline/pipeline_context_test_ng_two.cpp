@@ -17,7 +17,7 @@
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
-
+#include "base/log/dump_log.h"
 #include "adapter/ohos/osal/thp_extra_manager_impl.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
@@ -31,7 +31,7 @@
 
 using namespace testing;
 using namespace testing::ext;
- 
+
 namespace OHOS::Ace {
 namespace NG {
 
@@ -2049,7 +2049,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg193, TestSize.Level1)
     bool isEnable = 0;
     RefPtr<UINode> node = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>());
     context_->rootNode_->children_.push_front(node);
-    
+
     /**
      * @tc.steps2:
      * Call function EnableContainerModalGesture.
@@ -2277,6 +2277,37 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg199, TestSize.Level1)
     context_->windowModal_ = WindowModal::DIALOG_MODAL;
     context_->ContainerModalUnFocus();
     EXPECT_TRUE(context_->windowModal_ != WindowModal::CONTAINER_MODAL);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg200
+ * @tc.desc: Test the function OnDumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg200, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
+    ASSERT_NE(ostream, nullptr);
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+    /**
+     * @tc.steps2: init a vector with some string params and
+                call OnDumpInfo with every param array.
+     * @tc.expected: The return value is same as the expectation.
+     */
+    auto testJson = R"({"cmd":"changeIndex","params":{"index":0}} 6)";
+    auto testErrorJson = R"({"cmd":"changeIndex","params":{"index":2}} -1)";
+    std::vector<std::vector<std::string>> params = { { "-injection", testJson }, { "-injection", testErrorJson } };
+    int turn = 0;
+    for (; turn < params.size(); turn++) {
+        EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
+    }
 }
 } // namespace NG
 } // namespace OHOS::Ace
