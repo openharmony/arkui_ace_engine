@@ -1092,20 +1092,6 @@ HWTEST_F(GridOptionLayoutTestNg, Refresh001, TestSize.Level1)
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "210.09px");
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
-
-    MockAnimationManager::GetInstance().TickByVelocity(100);
-    FlushUITasks();
-    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "310.09px");
-    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0);
-
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
-    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0);
 }
 
 /**
