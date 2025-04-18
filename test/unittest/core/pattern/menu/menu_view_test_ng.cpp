@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -291,5 +291,56 @@ HWTEST_F(MenuViewTestNg, SkipMenuTest002, TestSize.Level1)
     overlayManger->ResumeMenuShow(TARGET_ID);
     ASSERT_TRUE(overlayManger->skipTargetIds_.empty());
     EXPECT_FALSE(overlayManger->CheckSkipMenuShow(TARGET_ID));
+}
+
+/**
+ * @tc.name: SetHasCustomOutline001
+ * @tc.desc: Verify SetHasCustomOutline function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetHasCustomOutline001, TestSize.Level1)
+{
+    MenuParam menuParam;
+    BorderWidthProperty outlineWidth;
+    outlineWidth.SetBorderWidth(Dimension(10.0));
+    menuParam.outlineWidth = outlineWidth;
+    auto menuWrapperPattern = wrapperNode_->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    MenuView::SetHasCustomOutline(wrapperNode_, menuFrameNode_, menuParam);
+    EXPECT_TRUE(menuWrapperPattern->GetHasCustomOutlineWidth());
+}
+
+/**
+ * @tc.name: SetHasCustomOutline002
+ * @tc.desc: Verify SetHasCustomOutline function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetHasCustomOutline002, TestSize.Level1)
+{
+    MenuParam menuParam;
+    BorderWidthProperty outlineWidth;
+    outlineWidth.SetBorderWidth(Dimension(-1));
+    menuParam.outlineWidth = outlineWidth;
+    auto menuWrapperPattern = wrapperNode_->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    MenuView::SetHasCustomOutline(wrapperNode_, menuFrameNode_, menuParam);
+    EXPECT_FALSE(menuWrapperPattern->GetHasCustomOutlineWidth());
+}
+
+/**
+ * @tc.name: UpdateMenuProperties001
+ * @tc.desc: Verify UpdateMenuProperties function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuProperties001, TestSize.Level1)
+{
+    MenuParam menuParam;
+    menuParam.outlineWidth->SetBorderWidth(Dimension(10));
+    menuParam.enableArrow = true;
+    auto menuWrapperPattern = wrapperNode_->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetHasCustomOutlineWidth(true);
+    MenuView::UpdateMenuProperties(wrapperNode_, menuFrameNode_, menuParam, MenuType::MENU);
+    EXPECT_EQ(menuWrapperPattern->GetMenuParam().outlineWidth->leftDimen->ToString(), "10.00px");
 }
 } // namespace OHOS::Ace::NG
