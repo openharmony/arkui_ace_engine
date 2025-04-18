@@ -2099,6 +2099,10 @@ void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
 {
+    if (node == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_DEFAULT_DOMAIN, "SetGeometryNode failed: tag:%{public}s, id:%{public}d] ",
+            GetTag().c_str(), GetId());
+    }
     geometryNode_ = node;
 }
 
