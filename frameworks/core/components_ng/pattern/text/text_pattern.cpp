@@ -995,9 +995,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
         return;
     }
 
-    if (IsSelectableAndCopy() || NeedShowAIDetect()) {
-        CheckClickedOnSpanOrText(textContentRect, info.GetLocalLocation());
-    }
+    CheckClickedOnSpanOrText(textContentRect, info.GetLocalLocation());
     if (HandleUrlClick()) {
         return;
     }
@@ -1467,9 +1465,7 @@ void TextPattern::CheckOnClickEvent(GestureEvent& info)
     textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
     PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
         info.GetLocalLocation().GetY() - textContentRect.GetY() };
-    if (IsSelectableAndCopy() || NeedShowAIDetect()) {
-        CheckClickedOnSpanOrText(textContentRect, info.GetLocalLocation());
-    }
+    CheckClickedOnSpanOrText(textContentRect, info.GetLocalLocation());
     HandleClickOnTextAndSpan(info);
 }
 
