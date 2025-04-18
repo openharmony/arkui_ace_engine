@@ -918,6 +918,10 @@ HWTEST_F(RichEditorMouseTest, HandleMouseEvent005, TestSize.Level1)
     info.SetAction(MouseAction::PRESS);
     richEditorPattern->HandleMouseEvent(info);
     EXPECT_TRUE(info.GetAction() == MouseAction::PRESS);
+
+    richEditorPattern->textResponseType_ = TextResponseType::RIGHT_CLICK;
+    richEditorPattern->selectOverlay_->ProcessOverlay({ .animation = false });
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
 }
 
 /**
