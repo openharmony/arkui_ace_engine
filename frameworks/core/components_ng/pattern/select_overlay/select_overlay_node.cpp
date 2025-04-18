@@ -582,6 +582,20 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
 
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     button->MarkModifyDone();
+    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        return button;
+    }
+    auto gestureHub = button->GetOrCreateGestureEventHub();
+    std::vector<DimensionRect> vector;
+    auto menuPadding = textOverlayTheme->GetMenuPadding();
+    auto buttonHeight = textOverlayTheme->GetMenuButtonHeight();
+    auto buttonWidth = textOverlayTheme->GetMenuButtonWidth();
+    auto top = menuPadding.Top();
+    auto responseHeight = top.Value() + menuPadding.Bottom().Value() + buttonHeight.Value();
+    auto responseWidth = 40.0_vp;
+    vector.emplace_back(DimensionRect(Dimension(responseWidth), Dimension(responseHeight, DimensionUnit::VP),
+        DimensionOffset(Dimension(-(responseWidth - buttonWidth) / 2), Dimension(-top.Value(), top.Unit()))));
+    gestureHub->SetResponseRegion(vector);
     return button;
 }
 
