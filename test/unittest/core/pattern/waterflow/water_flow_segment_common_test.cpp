@@ -1306,4 +1306,36 @@ HWTEST_F(WaterFlowSegmentCommonTest, ReachEnd001, TestSize.Level1)
     UpdateCurrentOffset(-2.0f);
     EXPECT_TRUE(reached);
 }
+
+/**
+ * @tc.name: CustomNode001
+ * @tc.desc: put empty CustomNode to waterflow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, CustomNode001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(0, [](int32_t i) { return 100.0f; });
+    CreateDone();
+
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, TOP_TO_DOWN ? 0 : Infinity<int32_t>());
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, -1);
+
+    for (int32_t i = 0; i < 10; i++) {
+        auto child = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "test");
+        frameNode_->AddChild(child);
+    }
+    frameNode_->ChildrenUpdatedFrom(0);
+    std::vector<WaterFlowSections::Section> newSection = { WaterFlowSections::Section {
+        .itemsCount = 10,
+        .crossCount = 2,
+    } };
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, newSection);
+
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, TOP_TO_DOWN ? -1 : 9);
+    EXPECT_EQ(pattern_->layoutInfo_->childrenCount_, 10);
+}
 } // namespace OHOS::Ace::NG
