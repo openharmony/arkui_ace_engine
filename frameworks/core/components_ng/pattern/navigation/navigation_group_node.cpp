@@ -744,6 +744,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto context = navigation->GetContextWithCheck();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
+            context->UpdateOcclusionCullingStatus(false, nullptr);
         };
     AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
         auto navigation = weakNavigation.Upgrade();
@@ -766,6 +767,9 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         SetNeedSetInvisible(false);
     }
     isOnAnimation_ = true;
+    auto context = GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    context->UpdateOcclusionCullingStatus(true, preNode);
 }
 
 void NavigationGroupNode::RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
@@ -989,6 +993,9 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             navigation->CleanPushAnimations();
             auto pattern = navigation->GetPattern<NavigationPattern>();
             pattern->CheckContentNeedMeasure(navigation);
+            auto context = navigation->GetContextWithCheck();
+            CHECK_NULL_VOID(context);
+            context->UpdateOcclusionCullingStatus(false, nullptr);
         };
 
     AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
@@ -1033,6 +1040,9 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode,
         curNavDestination->GetNavDestinationPathInfo());
 #endif
+    auto context = GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    context->UpdateOcclusionCullingStatus(true, curNode);
 }
 
 std::shared_ptr<AnimationUtils::Animation> NavigationGroupNode::MaskAnimation(const RefPtr<FrameNode>& node,

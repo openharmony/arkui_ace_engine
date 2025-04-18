@@ -1264,6 +1264,9 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
             pattern->OnDisappear();
             overlayManager->RemoveSheet(host);
             pattern->FireCallback("false");
+            auto pipelineContext = host->GetContextWithCheck();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
         }
     });
     StartSheetTransitionAnimation(option, isTransitionIn, offset);
@@ -2289,6 +2292,9 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
         const auto& overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->CleanSheet(host, GetSheetKey());
+        auto pipelineContext = host->GetContextWithCheck();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateOcclusionCullingStatus(true, host);
     }
 }
 
