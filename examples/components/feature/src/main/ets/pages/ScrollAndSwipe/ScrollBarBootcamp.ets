@@ -62,15 +62,19 @@ class MyModifier implements AttributeModifier<ScrollBarAttribute> {
   applyNormalAttribute(instance: ScrollBarAttribute) {
     instance.backgroundColor('#0A59F7')
   }
+
   applyPressedAttribute(instance: ScrollBarAttribute) {
     instance.backgroundColor('#ED6F21')
   }
+
   applyFocusedAttribute(instance: ScrollBarAttribute) {
     instance.backgroundColor(Color.Gray)
   }
+
   applyDisabledAttribute(instance: ScrollBarAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
+
   applySelectedAttribute(instance: ScrollBarAttribute) {
     instance.backgroundColor('#ffedea21')
   }
@@ -587,16 +591,14 @@ export struct ScrollBarBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
-
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   scroller1: Scroller = new Scroller();
+
   aboutToAppear(): void {
     AppStorage.setOrCreate('scroller', this.scroller1)
   }
-
 
   compMaskColorChange() {
     this.progress.updateColor(this.compMaskColor);
@@ -610,7 +612,7 @@ export struct ScrollBarBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time,value)
+      new BlockTag(time, value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -679,12 +681,13 @@ export struct ScrollBarBootcamp {
                 .width('95%')
                 .height(60)
             }
-          }, (item:number) => item.toString())
+          }, (item: number) => item.toString())
         }
       }
       .width('95%')
       .scrollBar(BarState.Off)
       .scrollable(ScrollDirection.Vertical)
+
       ScrollBar({
         scroller: this.scroller,
         direction: useEnabled(this.enableScrollBarDirection, this.scrollBarDirection),
@@ -1131,8 +1134,8 @@ export struct ScrollBarBootcamp {
         bottom: useEnabled(this.enableCompPixelStretchEffectOptionsBottom,
           this.compPixelStretchEffectOptionsBottom)
       })
-      .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))//part2
-      .linearGradient( {
+      .freeze(useEnabled(this.enableCompFreeze, this.compFreeze)) //part2
+      .linearGradient({
         angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
         direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
         colors: [
@@ -1210,7 +1213,7 @@ export struct ScrollBarBootcamp {
         this.compAccessibilityDescription))
       .accessibilityLevel(useEnabled(this.enableCompAccessibilityLevel, this.compAccessibilityLevel))
       .attributeModifier(useEnabled(this.enableCompAttributeModifier, this.compAttributeModifier) ?
-      this.modifier : null)//part3
+      this.modifier : null) //part3
       .gestureModifier(useEnabled(this.enableCompGestureModifier, this.compGestureModifier) ?
       this.myGestureModifier1 : this.myGestureModifier2)
       .outline({
@@ -1247,7 +1250,7 @@ export struct ScrollBarBootcamp {
           this.getUIContext().getCursorController().restoreDefault()
         }
       })
-      .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect))//compEvent
+      .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect)) //compEvent
       .onClick((event?: ClickEvent) => {
         this.compEventTriggeredLog('点击事件onClick触发');
       })
@@ -1412,6 +1415,7 @@ export struct ScrollBarBootcamp {
   }
 
   @State selection: string | null = null;
+
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -1423,7 +1427,7 @@ export struct ScrollBarBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -1444,11 +1448,12 @@ export struct ScrollBarBootcamp {
       }
     })
   }
+
   @Builder
   Generic() {
     Scroll(this.scroller1) {
       Column({ space: 8 }) {
-        List({space:8}){
+        List({ space: 8 }) {
           CompSizeBlocks({
             enableCompWidth: $enableCompWidth,
             compWidth: $compWidth,

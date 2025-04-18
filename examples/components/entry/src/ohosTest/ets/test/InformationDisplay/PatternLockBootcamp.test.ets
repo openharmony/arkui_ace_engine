@@ -30,7 +30,7 @@ const driver = Driver.create();
 export default function PatternLockBootcampTest() {
   describe('PatternLockBootcampTest', () => {
     // Defines a test suite. Two parameters are supported: test suite name and test suite function.
-    beforeAll(async(done: Function) => {
+    beforeAll(async (done: Function) => {
       // Presets an action, which is performed only once before all test cases of the test suite start.
       // This API supports only one parameter: preset action function.
       console.info('beforeAll begin');
@@ -184,7 +184,7 @@ export default function PatternLockBootcampTest() {
       await titleSearch('参数列表', 'regularColor')
 
       await buttonClick({
-        buttonClickObj:0,
+        buttonClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
@@ -297,7 +297,7 @@ export default function PatternLockBootcampTest() {
       await titleSearch('参数列表', 'activeColor')
 
       await buttonClick({
-        buttonClickObj:0,
+        buttonClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
@@ -410,7 +410,7 @@ export default function PatternLockBootcampTest() {
       await titleSearch('参数列表', 'selectedColor')
 
       await buttonClick({
-        buttonClickObj:0,
+        buttonClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
           toggleClickObj: 'selectedColor'
@@ -537,7 +537,7 @@ export default function PatternLockBootcampTest() {
       await titleSearch('参数列表', 'pathColor')
 
       await buttonClick({
-        buttonClickObj:0,
+        buttonClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
           toggleClickObj: 'pathColor'
@@ -697,7 +697,7 @@ export default function PatternLockBootcampTest() {
 
       let title = await driver.findComponent(ON.text('activateCircleStyle.color'))
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'activateCircleStyle')
 
@@ -714,7 +714,7 @@ export default function PatternLockBootcampTest() {
       await titleSearch('参数列表', 'activateCircleStyle.color')
 
       await buttonClick({
-        buttonClickObj:0,
+        buttonClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         }
@@ -728,7 +728,7 @@ export default function PatternLockBootcampTest() {
 
       let title = await driver.findComponent(ON.text('activateCircleStyle.color'))
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'activateCircleStyle')
 
@@ -745,7 +745,7 @@ export default function PatternLockBootcampTest() {
       await titleSearch('参数列表', 'activateCircleStyle.color')
 
       await buttonClick({
-        buttonClickObj:1,
+        buttonClickObj: 1,
       })
 
       done();
@@ -756,7 +756,7 @@ export default function PatternLockBootcampTest() {
 
       let title = await driver.findComponent(ON.text('activateCircleStyle.color'))
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'activateCircleStyle')
 
@@ -773,7 +773,7 @@ export default function PatternLockBootcampTest() {
       await titleSearch('参数列表', 'activateCircleStyle.color')
 
       await buttonClick({
-        buttonClickObj:2,
+        buttonClickObj: 2,
       })
 
       done();
@@ -784,7 +784,7 @@ export default function PatternLockBootcampTest() {
 
       let title = await driver.findComponent(ON.text('activateCircleStyle.color'))
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'activateCircleStyle')
 
@@ -801,7 +801,7 @@ export default function PatternLockBootcampTest() {
       await titleSearch('参数列表', 'activateCircleStyle.color')
 
       await buttonClick({
-        buttonClickObj:3,
+        buttonClickObj: 3,
       })
 
       done();
@@ -812,7 +812,7 @@ export default function PatternLockBootcampTest() {
 
       let title = await driver.findComponent(ON.text('activateCircleStyle.color'))
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'activateCircleStyle')
 
@@ -829,7 +829,7 @@ export default function PatternLockBootcampTest() {
       await titleSearch('参数列表', 'activateCircleStyle.color')
 
       await buttonClick({
-        buttonClickObj:4,
+        buttonClickObj: 4,
       })
 
       done();
@@ -840,7 +840,7 @@ export default function PatternLockBootcampTest() {
 
       let title = await driver.findComponent(ON.text('activateCircleStyle.color'))
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'activateCircleStyle')
 
@@ -857,7 +857,7 @@ export default function PatternLockBootcampTest() {
       await titleSearch('参数列表', 'activateCircleStyle.color')
 
       await buttonClick({
-        buttonClickObj:5,
+        buttonClickObj: 5,
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }

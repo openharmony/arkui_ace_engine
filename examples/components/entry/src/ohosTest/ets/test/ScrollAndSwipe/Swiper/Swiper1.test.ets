@@ -18,7 +18,15 @@ import { SwiperStart } from './Swiper'
 import { Driver } from '@kit.TestKit';
 import {
   buttonClick,
-  JsonType, KeyStruct, radioClick, Search, Slide, sliderDrag, titleSearch, ToggleClick } from '../../../utils';
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Search,
+  Slide,
+  sliderDrag,
+  titleSearch,
+  ToggleClick
+} from '../../../utils';
 
 const driver = Driver.create();
 
@@ -27,7 +35,7 @@ export default function Swiper1Test() {
     beforeAll(async (done: Function) => {
       // Presets an action, which is performed only once before all test cases of the test suite start.
       // This API supports only one parameter: preset action function.
-     await SwiperStart(done)
+      await SwiperStart(done)
 
     })
     /**
@@ -47,7 +55,6 @@ export default function Swiper1Test() {
           new KeyStruct('indicator', JsonType.obj),
         ],
         assertEqual: '{"left":"0.00vp","top":"200.00vp","right":"0.00vp","bottom":"0.00vp","fontSize":"14.00fp","fontColor":"#FF182431","fontWeight":"FontWeight.Lighter","selectedFontSize":"14.00fp","selectedFontColor":"#FF182431","selectedFontWeight":"FontWeight.Normal"}'
-
       })
 
       done();
@@ -68,7 +75,6 @@ export default function Swiper1Test() {
           new KeyStruct('indicator', JsonType.obj),
         ],
         assertEqual: '{"left":"0.00vp","top":"200.00vp","right":"0.00vp","bottom":"0.00vp","fontSize":"14.00fp","fontColor":"#FF182431","fontWeight":"FontWeight.Normal","selectedFontSize":"14.00fp","selectedFontColor":"#FF182431","selectedFontWeight":"FontWeight.Normal"}'
-
       })
 
       done();
@@ -88,7 +94,6 @@ export default function Swiper1Test() {
           new KeyStruct('indicator', JsonType.obj),
         ],
         assertEqual: '{"left":"0.00vp","top":"200.00vp","right":"0.00vp","bottom":"0.00vp","fontSize":"14.00fp","fontColor":"#FF182431","fontWeight":"FontWeight.Regular","selectedFontSize":"14.00fp","selectedFontColor":"#FF182431","selectedFontWeight":"FontWeight.Normal"}'
-
       })
 
       done();
@@ -108,7 +113,6 @@ export default function Swiper1Test() {
           new KeyStruct('indicator', JsonType.obj),
         ],
         assertEqual: '{"left":"0.00vp","top":"200.00vp","right":"0.00vp","bottom":"0.00vp","fontSize":"14.00fp","fontColor":"#FF182431","fontWeight":"FontWeight.Medium","selectedFontSize":"14.00fp","selectedFontColor":"#FF182431","selectedFontWeight":"FontWeight.Normal"}'
-
       })
 
       done();
@@ -128,7 +132,6 @@ export default function Swiper1Test() {
           new KeyStruct('indicator', JsonType.obj),
         ],
         assertEqual: '{"left":"0.00vp","top":"200.00vp","right":"0.00vp","bottom":"0.00vp","fontSize":"14.00fp","fontColor":"#FF182431","fontWeight":"FontWeight.Bold","selectedFontSize":"14.00fp","selectedFontColor":"#FF182431","selectedFontWeight":"FontWeight.Normal"}'
-
       })
 
       done();
@@ -148,7 +151,6 @@ export default function Swiper1Test() {
           new KeyStruct('indicator', JsonType.obj),
         ],
         assertEqual: '{"left":"0.00vp","top":"200.00vp","right":"0.00vp","bottom":"0.00vp","fontSize":"14.00fp","fontColor":"#FF182431","fontWeight":"FontWeight.Bolder","selectedFontSize":"14.00fp","selectedFontColor":"#FF182431","selectedFontWeight":"FontWeight.Normal"}'
-
       })
 
       done();
@@ -206,7 +208,6 @@ export default function Swiper1Test() {
 
         ],
         assertEqual: '{"left":"0.00vp","top":"200.00vp","right":"0.00vp","bottom":"0.00vp","fontSize":"14.00fp","fontColor":"#FF182431","fontWeight":"FontWeight.Normal","selectedFontSize":"14.00fp","selectedFontColor":"#FF182431","selectedFontWeight":"FontWeight.Lighter"}'
-
       })
 
       done();
@@ -226,7 +227,6 @@ export default function Swiper1Test() {
           new KeyStruct('indicator', JsonType.obj),
         ],
         assertEqual: '{"left":"0.00vp","top":"200.00vp","right":"0.00vp","bottom":"0.00vp","fontSize":"14.00fp","fontColor":"#FF182431","fontWeight":"FontWeight.Normal","selectedFontSize":"14.00fp","selectedFontColor":"#FF182431","selectedFontWeight":"FontWeight.Normal"}'
-
       })
 
       done();
@@ -246,7 +246,6 @@ export default function Swiper1Test() {
           new KeyStruct('indicator', JsonType.obj),
         ],
         assertEqual: '{"left":"0.00vp","top":"200.00vp","right":"0.00vp","bottom":"0.00vp","fontSize":"14.00fp","fontColor":"#FF182431","fontWeight":"FontWeight.Normal","selectedFontSize":"14.00fp","selectedFontColor":"#FF182431","selectedFontWeight":"FontWeight.Regular"}'
-
       })
 
       done();
@@ -266,7 +265,6 @@ export default function Swiper1Test() {
           new KeyStruct('indicator', JsonType.obj),
         ],
         assertEqual: '{"left":"0.00vp","top":"200.00vp","right":"0.00vp","bottom":"0.00vp","fontSize":"14.00fp","fontColor":"#FF182431","fontWeight":"FontWeight.Normal","selectedFontSize":"14.00fp","selectedFontColor":"#FF182431","selectedFontWeight":"FontWeight.Medium"}'
-
       })
 
       done();
@@ -286,7 +284,6 @@ export default function Swiper1Test() {
           new KeyStruct('indicator', JsonType.obj),
         ],
         assertEqual: '{"left":"0.00vp","top":"200.00vp","right":"0.00vp","bottom":"0.00vp","fontSize":"14.00fp","fontColor":"#FF182431","fontWeight":"FontWeight.Normal","selectedFontSize":"14.00fp","selectedFontColor":"#FF182431","selectedFontWeight":"FontWeight.Bold"}'
-
       })
 
       done();
@@ -306,7 +303,6 @@ export default function Swiper1Test() {
           new KeyStruct('indicator', JsonType.obj),
         ],
         assertEqual: '{"left":"0.00vp","top":"200.00vp","right":"0.00vp","bottom":"0.00vp","fontSize":"14.00fp","fontColor":"#FF182431","fontWeight":"FontWeight.Normal","selectedFontSize":"14.00fp","selectedFontColor":"#FF182431","selectedFontWeight":"FontWeight.Bolder"}'
-
       })
 
       done();

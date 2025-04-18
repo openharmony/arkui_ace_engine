@@ -61,6 +61,7 @@ export struct BindSheetBootcamp {
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
   scroller: Scroller = new Scroller();
+
   aboutToAppear(): void {
     AppStorage.setOrCreate('scroller', this.scroller)
   }

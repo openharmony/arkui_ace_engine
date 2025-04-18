@@ -1350,7 +1350,6 @@ export struct StackBootcamp {
     Text('123')
   }
 
-
   @Builder
   Parameters() {
     Scroll(this.scroller) {

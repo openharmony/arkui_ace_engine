@@ -1,14 +1,20 @@
 import { describe, beforeAll, beforeEach, afterEach, afterAll, it, expect } from '@ohos/hypium'
-import { abilityDelegatorRegistry, Driver, ON,Component } from '@kit.TestKit';
+import { abilityDelegatorRegistry, Driver, ON, Component } from '@kit.TestKit';
 import { Point } from '@ohos.UiTest';
-import { buttonClick,
+import {
+  buttonClick,
   getToggle,
-  JsonType, KeyStruct,
+  JsonType,
+  KeyStruct,
   radioClick,
   Search,
   searchParentBlock,
   searchToggle,
-  Slide, sliderDrag, titleSearch, ToggleClick } from '../../utils';
+  Slide,
+  sliderDrag,
+  titleSearch,
+  ToggleClick
+} from '../../utils';
 
 
 const TAG = 'BlankBootcamp001'
@@ -18,6 +24,7 @@ const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorReg
 
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
+
 export default function BlankBootcampTest() {
   describe('BlankBootcampTest', () => {
     /**

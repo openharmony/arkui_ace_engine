@@ -36,29 +36,29 @@ export default function ActionSheetBootcampTest() {
 
         await driver.delayMs(10000);
 
-        let ListItemGroup :Component[] = await driver.findComponents(ON.type('ListItemGroup'))
-        let width:Point = await ListItemGroup[0].getBoundsCenter()
-        let width2:Point = await ListItemGroup[4].getBoundsCenter()
+        let ListItemGroup: Component[] = await driver.findComponents(ON.type('ListItemGroup'))
+        let width: Point = await ListItemGroup[0].getBoundsCenter()
+        let width2: Point = await ListItemGroup[4].getBoundsCenter()
         await driver.swipe(width.x, width2.y, width.x, width.y, 500)
         await driver.delayMs(2000);
 
-        let atomDisplays:Component = await driver.findComponent(ON.text('弹窗'));
+        let atomDisplays: Component = await driver.findComponent(ON.text('弹窗'));
         await atomDisplays.click();
         await driver.delayMs(3000);
         await driver.swipe(width.x, width2.y, width.x, width.y, 500)
 
 
-        let ListItemGroup1 :Component[] = await driver.findComponents(ON.type('ListItem'))
-        let width3:Point = await ListItemGroup1[0].getBoundsCenter()
-        let width4:Point = await ListItemGroup1[2].getBoundsCenter()
+        let ListItemGroup1: Component[] = await driver.findComponents(ON.type('ListItem'))
+        let width3: Point = await ListItemGroup1[0].getBoundsCenter()
+        let width4: Point = await ListItemGroup1[2].getBoundsCenter()
         await driver.swipe(width3.x, width4.y, width3.x, width3.y, 500)
         await driver.delayMs(2000);
 
-        let scrollSearch:Component = await driver.findComponent(ON.text('列表选择弹窗/ActionSheet'))
+        let scrollSearch: Component = await driver.findComponent(ON.text('列表选择弹窗/ActionSheet'))
         await scrollSearch.click()
         await driver.delayMs(2000);
 
-        let Buttons:Component[] = await driver.findComponents(ON.type('Button'));
+        let Buttons: Component[] = await driver.findComponents(ON.type('Button'));
         await Buttons[1].click()
         await driver.delayMs(2000);
 
@@ -215,10 +215,9 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'isModal')
       await radioClick({
         radioClickObj: 1,
-        toggleClick:{
+        toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -227,7 +226,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundColor')
       await buttonClick({
         buttonClickObj: 0
-
       })
       done();
     })
@@ -236,7 +234,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundColor')
       await buttonClick({
         buttonClickObj: 1
-
       })
       done();
     })
@@ -245,7 +242,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundColor')
       await buttonClick({
         buttonClickObj: 2
-
       })
       done();
     })
@@ -254,7 +250,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundColor')
       await buttonClick({
         buttonClickObj: 3
-
       })
       done();
     })
@@ -263,7 +258,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundColor')
       await buttonClick({
         buttonClickObj: 4
-
       })
       done();
     })
@@ -272,10 +266,9 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundColor')
       await buttonClick({
         buttonClickObj: 5,
-        toggleClick:{
+        toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -284,7 +277,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 0
-
       })
       done();
     })
@@ -293,7 +285,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 1
-
       })
       done();
     })
@@ -302,7 +293,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 2
-
       })
       done();
     })
@@ -311,7 +301,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 3
-
       })
       done();
     })
@@ -320,7 +309,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 4
-
       })
       done();
     })
@@ -329,7 +317,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 5
-
       })
       done();
     })
@@ -338,7 +325,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 6
-
       })
       done();
     })
@@ -347,7 +333,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 7
-
       })
       done();
     })
@@ -356,7 +341,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 8
-
       })
       done();
     })
@@ -365,7 +349,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 9
-
       })
       done();
     })
@@ -374,7 +357,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 10
-
       })
       done();
     })
@@ -383,7 +365,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 11
-
       })
       done();
     })
@@ -395,7 +376,6 @@ export default function ActionSheetBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -722,7 +702,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'confirm.enabled')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -731,7 +710,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'confirm.enabled')
       await radioClick({
         radioClickObj: 1,
-
       })
       done();
     })
@@ -740,7 +718,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'confirm.defaultFocus')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -760,7 +737,6 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'confirm.style')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -904,7 +880,7 @@ export default function ActionSheetBootcampTest() {
       })
       await sliderDrag({
         slideStar: Slide.end,
-        toggleClick:{
+        toggleClick: {
           toggleClickType: ToggleClick.Close
         }
       })
@@ -918,7 +894,7 @@ export default function ActionSheetBootcampTest() {
       })
       await sliderDrag({
         slideStar: Slide.end,
-        toggleClick:{
+        toggleClick: {
           toggleClickType: ToggleClick.Close
         }
       })
@@ -929,7 +905,7 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'SuffixIcon')
       await buttonClick({
         buttonClickObj: 0,
-        toggleClick:{
+        toggleClick: {
           toggleClickObj: 'SuffixIcon',
         }
       })
@@ -940,7 +916,7 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'SuffixIcon')
       await buttonClick({
         buttonClickObj: 1,
-        toggleClick:{
+        toggleClick: {
           toggleClickObj: 'SuffixIcon',
         }
       })
@@ -951,7 +927,7 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'SuffixIcon')
       await buttonClick({
         buttonClickObj: 2,
-        toggleClick:{
+        toggleClick: {
           toggleClickObj: 'SuffixIcon',
         }
       })
@@ -962,7 +938,7 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'SuffixIcon')
       await buttonClick({
         buttonClickObj: 3,
-        toggleClick:{
+        toggleClick: {
           toggleClickObj: 'SuffixIcon',
         }
       })
@@ -973,7 +949,7 @@ export default function ActionSheetBootcampTest() {
       await Search('参数列表', 'SuffixIcon')
       await buttonClick({
         buttonClickObj: 4,
-        toggleClick:{
+        toggleClick: {
           toggleClickObj: 'SuffixIcon',
         }
       })

@@ -108,9 +108,11 @@ export struct TextPickerDialogBootcamp {
   @State enableHapticFeedback: boolean = false;
   @State hapticFeedback: boolean = true;
   scroller: Scroller = new Scroller();
+
   aboutToAppear(): void {
     AppStorage.setOrCreate('scroller', this.scroller)
   }
+
   build() {
     NavDestination() {
       Drawer({
