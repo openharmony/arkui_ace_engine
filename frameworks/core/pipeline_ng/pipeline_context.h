@@ -1200,7 +1200,7 @@ public:
 
     void UnregisterRotationEndCallback(int32_t callbackId)
     {
-        surfaceChangedCallbackMap_.erase(callbackId);
+        rotationEndCallbackMap_.erase(callbackId);
     }
 
 protected:
