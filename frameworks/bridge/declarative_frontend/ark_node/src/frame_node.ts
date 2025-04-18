@@ -29,6 +29,8 @@ enum ExpandMode {
   LAZY_EXPAND = 2,
 }
 
+declare type UIStatesChangeHandler = (currentUIStates: number) => void;
+
 class FrameNode {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
@@ -640,6 +642,16 @@ class FrameNode {
   }
   recycle(): void {
     this.triggerOnRecycle();
+  }
+  addSupportedUIStates(uistates: number, statesChangeHandler: UIStatesChangeHandler, excludeInner?: boolean): void {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.addSupportedStates(this.getNodePtr(), uistates, statesChangeHandler, excludeInner);
+    __JSScopeUtil__.restoreInstanceId();
+  }
+  removeSupportedUIStates(uiStates: number): void {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
+    __JSScopeUtil__.restoreInstanceId();
   }
 }
 

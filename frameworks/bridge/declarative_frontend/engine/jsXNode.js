@@ -743,6 +743,15 @@ var ExpandMode;
     ExpandMode[ExpandMode["EXPAND"] = 1] = "EXPAND";
     ExpandMode[ExpandMode["LAZY_EXPAND"] = 2] = "LAZY_EXPAND";
 })(ExpandMode || (ExpandMode = {}));
+
+var UIState;
+(function (UIState) {
+    UIState[UIState["NORMAL"] = 0] = "NORMAL";
+    UIState[UIState["PRESSED"] = 1 << 0] = "PRESSED";
+    UIState[UIState["FOCUSED"] = 1 << 1] = "FOCUSED";
+    UIState[UIState["DISABLED"] = 1 << 2] = "DISABLED";
+    UIState[UIState["SELECTED"] = 1 << 3] = "SELECTED";
+})(UIState || (UIState = {}));
 class FrameNode {
     constructor(uiContext, type, options) {
         if (uiContext === undefined) {
@@ -1286,6 +1295,16 @@ class FrameNode {
     }
     recycle() {
         this.triggerOnRecycle();
+    }
+    addSupportedUIStates(uistates, statesChangeHandler, excludeInner) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().frameNode.addSupportedStates(this.getNodePtr(), uistates, statesChangeHandler, excludeInner);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    removeSupportedUIStates(uiStates) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
+        __JSScopeUtil__.restoreInstanceId();
     }
 }
 class ImmutableFrameNode extends FrameNode {
@@ -2639,5 +2658,5 @@ export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
-    typeNode, NodeAdapter, ExpandMode
+    typeNode, NodeAdapter, ExpandMode, UIState
 };
