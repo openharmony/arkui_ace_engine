@@ -449,6 +449,14 @@ void FormManagerDelegate::AddLockFormCallback(LockFormCallback&& callback)
     lockFormCallback_ = std::move(callback);
 }
 
+void FormManagerDelegate::AddFormUpdateDoneCallback(UpdateFormDoneCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        return;
+    }
+    updateFormDoneCallback_ = std::move(callback);
+}
+
 void FormManagerDelegate::OnActionEventHandle(const std::string& action)
 {
     if (actionEventHandle_) {
@@ -598,6 +606,14 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
         }
     };
     renderDelegate_->SetCheckManagerDelegate(onCheckManagerDelegate);
+
+    auto &&onUpdateFormDoneEventHandler = [weak = WeakClaim(this)](const int64_t formId) {
+        auto formManagerDelegate = weak.Upgrade();
+        CHECK_NULL_VOID(formManagerDelegate);
+        TAG_LOGD(AceLogTag::ACE_FORM, "EventHandle - onUpdateFormDoneEventHandler, formId:%{public}" PRId64, formId);
+        formManagerDelegate->OnFormUpdateDone(formId);
+    };
+    renderDelegate_->SetUpdateFormEventHandler(onUpdateFormDoneEventHandler);
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)
@@ -845,6 +861,13 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
                 onFormErrorCallback_(std::to_string(externalErrorCode), errorMsg);
             }
             break;
+    }
+}
+
+void FormManagerDelegate::OnFormUpdateDone(const int64_t formId)
+{
+    if (updateFormDoneCallback_) {
+        updateFormDoneCallback_(formId);
     }
 }
 

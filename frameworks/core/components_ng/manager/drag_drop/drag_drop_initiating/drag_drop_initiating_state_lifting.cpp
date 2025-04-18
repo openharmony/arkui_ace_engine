@@ -15,6 +15,7 @@
 
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_lifting.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_machine.h"
@@ -133,20 +134,7 @@ void DragDropInitiatingStateLifting::HandleTouchEvent(const TouchEvent& touchEve
 
 void DragDropInitiatingStateLifting::HandlePanOnActionEnd(const GestureEvent& info)
 {
-    TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action end.");
-    DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    if (dragDropManager->IsAboutToPreview()) {
-        dragDropManager->ResetDragging();
-    }
-    dragDropManager->SetIsDragNodeNeedClean(false);
-    dragDropManager->SetIsDisableDefaultDropAnimation(true);
-    auto machine = GetStateMachine();
-    CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+    OnActionEnd(info);
 }
 
 void DragDropInitiatingStateLifting::HandleReStartDrag(const GestureEvent& info)

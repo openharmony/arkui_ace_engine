@@ -21,6 +21,7 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/dump_log.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "frameworks/core/accessibility/utils/accessibility_action_function_utils.h"
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 

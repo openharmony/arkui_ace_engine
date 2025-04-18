@@ -68,6 +68,7 @@ public:
     using SnapshotCallback = std::function<void(const uint32_t&)>;
     using EnableFormCallback = std::function<void(const bool enable)>;
     using LockFormCallback = std::function<void(const bool lock)>;
+    using UpdateFormDoneCallback = std::function<void(const int64_t formId)>;
 
     enum class State : char {
         WAITINGFORSIZE,
@@ -118,6 +119,7 @@ public:
     void AddSnapshotCallback(SnapshotCallback&& callback);
     void AddEnableFormCallback(EnableFormCallback&& callback);
     void AddLockFormCallback(LockFormCallback&& callback);
+    void AddFormUpdateDoneCallback(UpdateFormDoneCallback&& callback);
     void OnActionEventHandle(const std::string& action);
     void SetAllowUpdate(bool allowUpdate);
     void OnActionEvent(const std::string& action);
@@ -128,6 +130,7 @@ public:
     void OnFormError(const std::string& code, const std::string& msg);
     void OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos);
     void OnGetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo);
+    void OnFormUpdateDone(const int64_t formId);
     void ReleaseRenderer();
     void SetObscured(bool isObscured);
     void OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
@@ -198,6 +201,7 @@ private:
     SnapshotCallback snapshotCallback_;
     EnableFormCallback enableFormCallback_;
     LockFormCallback lockFormCallback_;
+    UpdateFormDoneCallback updateFormDoneCallback_;
 
     State state_ { State::WAITINGFORSIZE };
     bool isDynamic_ = true;

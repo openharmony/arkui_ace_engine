@@ -138,7 +138,11 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         }
     }
 #endif
-
+    int64_t currentTimeStamp = GetSysTimestamp();
+    extraInfo_ += "currentTimeStamp: " + std::to_string(currentTimeStamp);
+    extraInfo_ += ", curDuration: " + std::to_string(curDuration);
+    extraInfo_ += ", duration_: " + std::to_string(duration_);
+    extraInfo_ += ".";
     if (isForDrag_ && event.sourceType == SourceType::MOUSE) {
         curDuration = 0;
     }

@@ -1036,10 +1036,10 @@ class ImageMenuItem extends ViewPU {
             return getContext()?.resourceManager?.getStringByNameSync('icon_back');
         }
         else if (this.item.accessibilityText) {
-            return this.toStringFormat(this.item.accessibilityText);
+            return this.item.accessibilityText;
         }
         else if (this.item.label) {
-            return this.toStringFormat(this.item.label);
+            return this.item.label;
         }
         return ' ';
     }
@@ -1051,7 +1051,7 @@ class ImageMenuItem extends ViewPU {
     }
     getAccessibilityDescription() {
         if (this.item.accessibilityDescription && this.item.accessibilityDescription !== '') {
-            return this.toStringFormat(this.item.accessibilityDescription);
+            return this.item.accessibilityDescription;
         }
         return '';
     }

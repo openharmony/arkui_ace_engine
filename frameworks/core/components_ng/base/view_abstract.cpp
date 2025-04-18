@@ -22,7 +22,7 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/error/error_code.h"
-#include "base/subwindow/subwindow.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"

@@ -181,7 +181,7 @@ void DragDropInitiatingStateIdle::StartPreDragStatusCallback(const TouchEvent& t
     auto frameNode = params.frameNode.Upgrade();
     CHECK_NULL_VOID(frameNode);
     auto&& preDragStatusCallback = [weakNode = AceType::WeakClaim(RawPtr(frameNode))]() {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 350ms..");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 350ms");
         auto frameNode = weakNode.Upgrade();
         CHECK_NULL_VOID(frameNode);
         auto gestureHub = frameNode->GetOrCreateGestureEventHub();

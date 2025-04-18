@@ -817,7 +817,8 @@ void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, con
     option.SetAnimationDirection(AnimationDirection::NORMAL);
     auto onFinish = option.GetOnFinishEvent();
     auto levelOrder = GetLevelOrder(node, dialogProps.levelOrder);
-    bool isNeedFocus = IsTopOrder(levelOrder) && dialogProps.focusable;
+    auto isTopOrder = IsTopOrder(levelOrder);
+    bool isNeedFocus = isTopOrder && dialogProps.focusable;
     option.SetOnFinishEvent(
         [weak = WeakClaim(this), nodeWK = WeakPtr<FrameNode>(node), onFinish, isNeedFocus] {
             if (onFinish) {
@@ -849,7 +850,7 @@ void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, con
                            ? dialogPattern->GetOpenAnimation().value().GetDuration()
                            : theme->GetAnimationDurationIn());
     ctx->ScaleAnimation(option, theme->GetScaleStart(), theme->GetScaleEnd());
-    if (isNeedFocus) {
+    if (isTopOrder) {
         SendDialogAccessibilityEvent(node, AccessibilityEventType::PAGE_OPEN);
     }
 }
@@ -987,7 +988,8 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, co
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
     auto levelOrder = GetLevelOrder(node, dialogProps.levelOrder);
-    bool isNeedFocus = IsTopOrder(levelOrder) && dialogProps.focusable;
+    auto isTopOrder = IsTopOrder(levelOrder);
+    bool isNeedFocus = isTopOrder && dialogProps.focusable;
     ctx->SetTransitionInCallback(
         [weak = WeakClaim(this), nodeWK = WeakPtr<FrameNode>(node), isNeedFocus] {
             auto overlayManager = weak.Upgrade();
@@ -1010,7 +1012,7 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, co
     MountToParentWithService(root, node, levelOrder);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     BlurLowerNode(node);
-    if (isNeedFocus) {
+    if (isTopOrder) {
         SendDialogAccessibilityEvent(node, AccessibilityEventType::PAGE_OPEN);
     }
 }
@@ -1327,7 +1329,8 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "pop menu animation enter");
     CHECK_NULL_VOID(menu);
-    auto topNodeId = GetTopFocusableNodeId();
+    auto topOrderNodeId = GetTopOrderNodeId();
+    auto topFocusableNodeId = GetTopFocusableNodeId();
     PopLevelOrder(menu->GetId());
     auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
@@ -1369,7 +1372,8 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
     });
     ShowMenuClearAnimation(menu, option, showPreviewAnimation, startDrag);
-    FocusNextOrderNode(topNodeId);
+    FocusNextOrderNode(topFocusableNodeId);
+    SendAccessibilityEventToNextOrderNode(topOrderNodeId);
 }
 
 void OverlayManager::ShowMenuDisappearTransition(const RefPtr<FrameNode>& menu)
@@ -1526,8 +1530,6 @@ void OverlayManager::ShowToast(const NG::ToastInfo& toastInfo, const std::functi
 void OverlayManager::CloseToast(int32_t toastId, const std::function<void(int32_t)>& callback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "close toast enter");
-    auto topNodeId = GetTopFocusableNodeId();
-    PopLevelOrder(toastId);
     if (!callback) {
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "Parameters of CloseToast are incomplete because of no callback.");
         return;
@@ -1537,17 +1539,32 @@ void OverlayManager::CloseToast(int32_t toastId, const std::function<void(int32_
         callback(ERROR_CODE_INTERNAL_ERROR);
         return;
     }
-    for (auto [id, toastNodeWeak] : toastMap_) {
-        if (id == toastId) {
-            RemoveChildWithService(rootNode, toastNodeWeak.Upgrade());
-            rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-            toastMap_.erase(id);
-            callback(ERROR_CODE_NO_ERROR);
-            return;
-        }
+
+    auto nodeIter = toastMap_.find(toastId);
+    if (nodeIter == toastMap_.end()) {
+        callback(ERROR_CODE_TOAST_NOT_FOUND);
+        return;
     }
-    callback(ERROR_CODE_TOAST_NOT_FOUND);
-    FocusNextOrderNode(topNodeId);
+
+    auto node = nodeIter->second.Upgrade();
+    if (!node) {
+        callback(ERROR_CODE_NO_ERROR);
+        return;
+    }
+
+    auto parent = node->GetParent();
+    if (!parent) {
+        callback(ERROR_CODE_NO_ERROR);
+        return;
+    }
+
+    auto topOrderNodeId = GetTopOrderNodeId();
+    PopLevelOrder(node->GetId());
+    parent->RemoveChild(node);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    toastMap_.erase(toastId);
+    callback(ERROR_CODE_NO_ERROR);
+    SendAccessibilityEventToNextOrderNode(topOrderNodeId);
 }
 
 void OverlayManager::OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int32_t duration)
@@ -1605,7 +1622,7 @@ void OverlayManager::OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int3
 void OverlayManager::PopToast(int32_t toastId)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "pop toast enter");
-    auto topNodeId = GetTopFocusableNodeId();
+    auto topOrderNodeId = GetTopOrderNodeId();
     PopLevelOrder(toastId);
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
@@ -1680,7 +1697,7 @@ void OverlayManager::PopToast(int32_t toastId)
     toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::OFF);
     toastUnderPop->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-    FocusNextOrderNode(topNodeId);
+    SendAccessibilityEventToNextOrderNode(topOrderNodeId);
 }
 
 void OverlayManager::ClearToastInSubwindow()
@@ -2184,8 +2201,6 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
     auto focusable = popupInfo.focusable;
     auto popupNode = popupInfo.popupNode;
     CHECK_NULL_VOID(popupNode);
-    auto topNodeId = GetTopFocusableNodeId();
-    PopLevelOrder(popupNode->GetId());
     auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
@@ -2272,7 +2287,6 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
     FireAutoSave(popupNode);
     RemovePixelMapAnimation(false, 0, 0);
     RemoveGatherNodeWithAnimation();
-    FocusNextOrderNode(topNodeId);
 }
 
 RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo,
@@ -2708,7 +2722,8 @@ void OverlayManager::DeleteMenu(int32_t targetId)
     }
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "delete menu enter");
     auto node = AceType::DynamicCast<FrameNode>(it->second);
-    auto topNodeId = GetTopFocusableNodeId();
+    auto topOrderNodeId = GetTopOrderNodeId();
+    auto topFocusableNodeId = GetTopFocusableNodeId();
     PopLevelOrder(node->GetId());
     if (node->GetParent()) {
         auto id = Container::CurrentId();
@@ -2721,7 +2736,8 @@ void OverlayManager::DeleteMenu(int32_t targetId)
         }
     }
     EraseMenuInfo(targetId);
-    FocusNextOrderNode(topNodeId);
+    FocusNextOrderNode(topFocusableNodeId);
+    SendAccessibilityEventToNextOrderNode(topOrderNodeId);
 }
 
 void OverlayManager::CleanMenuInSubWindowWithAnimation()
@@ -3355,6 +3371,27 @@ RefPtr<FrameNode> OverlayManager::GetBottomOrderFirstNode(std::optional<double> 
     return nullptr;
 }
 
+RefPtr<FrameNode> OverlayManager::GetTopOrderNode()
+{
+    for (auto iter = orderNodesMap_.rbegin(); iter != orderNodesMap_.rend(); iter++) {
+        auto& nodeVector = iter->second;
+        if (nodeVector.empty()) {
+            continue;
+        }
+
+        auto nodeIter = nodeVector.rbegin();
+        return DynamicCast<FrameNode>(*nodeIter);
+    }
+    return nullptr;
+}
+
+int32_t OverlayManager::GetTopOrderNodeId()
+{
+    auto topNode = GetTopOrderNode();
+    CHECK_NULL_RETURN(topNode, -1);
+    return topNode->GetId();
+}
+
 bool OverlayManager::GetNodeFocusable(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, true);
@@ -3412,6 +3449,16 @@ void OverlayManager::FocusNextOrderNode(int32_t topNodeId)
     }
 
     FocusOverlayNode(newTopNode);
+}
+
+void OverlayManager::SendAccessibilityEventToNextOrderNode(int32_t topNodeId)
+{
+    auto newTopNode = GetTopOrderNode();
+    CHECK_NULL_VOID(newTopNode);
+    if (newTopNode->GetId() == topNodeId) {
+        return;
+    }
+
     newTopNode->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_OPEN, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
@@ -3690,7 +3737,8 @@ void OverlayManager::DeleteDialogHotAreas(const RefPtr<FrameNode>& dialogNode)
 void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
 {
     RemoveDialogFromMap(dialogNode);
-    auto topNodeId = GetTopFocusableNodeId();
+    auto topOrderNodeId = GetTopOrderNodeId();
+    auto topFocusableNodeId = GetTopFocusableNodeId();
     PopLevelOrder(dialogNode->GetId());
     if (dialogNode->IsRemoving()) {
         // already in close animation
@@ -3736,7 +3784,8 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     FireNavigationLifecycle(dialogNode, static_cast<int32_t>(NavDestinationLifecycle::ON_ACTIVE), true,
         static_cast<int32_t>(NavDestinationActiveReason::DIALOG));
     CallOnHideDialogCallback();
-    FocusNextOrderNode(topNodeId);
+    FocusNextOrderNode(topFocusableNodeId);
+    SendAccessibilityEventToNextOrderNode(topOrderNodeId);
 }
 
 bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter)
@@ -3978,10 +4027,12 @@ bool OverlayManager::RemoveNonKeyboardOverlay(const RefPtr<FrameNode>& overlay)
     CHECK_NULL_RETURN(rootNode && overlay, true);
     auto pattern = overlay->GetPattern();
     if (overlay->GetTag() != V2::SHEET_WRAPPER_TAG) {
-        auto topNodeId = GetTopFocusableNodeId();
+        auto topOrderNodeId = GetTopOrderNodeId();
+        auto topFocusableNodeId = GetTopFocusableNodeId();
         PopLevelOrder(overlay->GetId());
         rootNode->RemoveChild(overlay);
-        FocusNextOrderNode(topNodeId);
+        FocusNextOrderNode(topFocusableNodeId);
+        SendAccessibilityEventToNextOrderNode(topOrderNodeId);
     }
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     CHECK_NULL_RETURN(overlay->GetTag() == V2::MAGNIFIER_TAG, true);
@@ -5288,11 +5339,13 @@ void OverlayManager::RemoveSheet(RefPtr<FrameNode> sheetNode)
     auto wrapperParent = sheetWrapper->GetParent();
     CHECK_NULL_VOID(wrapperParent);
     if (!showInSubWindow) {
-        auto topNodeId = GetTopFocusableNodeId();
+        auto topOrderNodeId = GetTopOrderNodeId();
+        auto topFocusableNodeId = GetTopFocusableNodeId();
         PopLevelOrder(sheetWrapper->GetId());
         wrapperParent->RemoveChild(sheetWrapper);
         wrapperParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        FocusNextOrderNode(topNodeId);
+        FocusNextOrderNode(topFocusableNodeId);
+        SendAccessibilityEventToNextOrderNode(topOrderNodeId);
         return;
     }
     auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
@@ -6458,7 +6511,8 @@ void OverlayManager::CloseKeyboard(int32_t targetId)
     ACE_LAYOUT_SCOPED_TRACE("CloseKeyboard[targetId:%d]", targetId);
     auto customKeyboard = it->second;
     CHECK_NULL_VOID(customKeyboard);
-    auto topNodeId = GetTopFocusableNodeId();
+    auto topOrderNodeId = GetTopOrderNodeId();
+    auto topFocusableNodeId = GetTopFocusableNodeId();
     PopLevelOrder(customKeyboard->GetId());
     auto pipeline = customKeyboard->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -6473,7 +6527,8 @@ void OverlayManager::CloseKeyboard(int32_t targetId)
         safeAreaManager->SetKeyboardInfo(0.0f);
     }
     pipeline->OnVirtualKeyboardAreaChange(keyboardRect);
-    FocusNextOrderNode(topNodeId);
+    FocusNextOrderNode(topFocusableNodeId);
+    SendAccessibilityEventToNextOrderNode(topOrderNodeId);
 }
 
 void OverlayManager::AvoidCustomKeyboard(int32_t targetId, float safeHeight)
@@ -7364,7 +7419,7 @@ void OverlayManager::RemoveFrameNodeWithOrder(const RefPtr<NG::FrameNode>& node)
 
     auto orderOverlayNode = node->GetParent();
     CHECK_NULL_VOID(orderOverlayNode);
-    auto topNodeId = GetTopFocusableNodeId();
+    auto topFocusableNodeId = GetTopFocusableNodeId();
     PopLevelOrder(orderOverlayNode->GetId());
     orderOverlayNode->RemoveChild(node);
     orderOverlayMap_.erase(node->GetId());
@@ -7373,7 +7428,7 @@ void OverlayManager::RemoveFrameNodeWithOrder(const RefPtr<NG::FrameNode>& node)
     rootNode->RemoveChild(orderOverlayNode);
     orderOverlayNode.Reset();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-    FocusNextOrderNode(topNodeId);
+    FocusNextOrderNode(topFocusableNodeId);
 }
 
 void OverlayManager::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
@@ -8125,7 +8180,8 @@ void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, cons
 {
     CHECK_NULL_VOID(rootNode);
     CHECK_NULL_VOID(node);
-    auto topNodeId = GetTopFocusableNodeId();
+    auto topOrderNodeId = GetTopOrderNodeId();
+    auto topFocusableNodeId = GetTopFocusableNodeId();
     PopLevelOrder(node->GetId());
     auto parent = node->GetParent();
     CHECK_NULL_VOID(parent);
@@ -8136,7 +8192,8 @@ void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, cons
     if (pipelineContext->GetInstallationFree()) {
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    FocusNextOrderNode(topNodeId);
+    FocusNextOrderNode(topFocusableNodeId);
+    SendAccessibilityEventToNextOrderNode(topOrderNodeId);
 }
 
 RefPtr<UINode> OverlayManager::FindChildNodeByKey(const RefPtr<NG::UINode>& parentNode, const std::string& key)

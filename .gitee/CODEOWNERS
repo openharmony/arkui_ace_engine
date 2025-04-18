@@ -71,8 +71,8 @@ adapter/ohos/entrance/pa_container.cpp @jayleehw
 adapter/ohos/entrance/pa_container.h @jayleehw
 adapter/ohos/entrance/pa_engine/ @jayleehw
 adapter/ohos/entrance/platform_event_callback.h @arkuiframework
-adapter/ohos/entrance/plugin_utils_impl.cpp @arkuilayout
-adapter/ohos/entrance/plugin_utils_impl.h @arkuilayout
+adapter/ohos/entrance/plugin_utils_impl.cpp @arkuiabilitygroup
+adapter/ohos/entrance/plugin_utils_impl.h @arkuiabilitygroup
 adapter/ohos/entrance/subwindow/ @arkuipopupwindow
 adapter/ohos/entrance/timepicker/ @arkui_image
 adapter/ohos/entrance/touch_event_convertor.cpp @arkuievent
@@ -493,7 +493,7 @@ frameworks/bridge/common/dom/input/dom_textfield_util.cpp @huawei_g_five
 frameworks/bridge/common/dom/input/dom_textfield_util.h @huawei_g_five
 frameworks/bridge/common/manifest/ @arkuiframework
 frameworks/bridge/common/media_query/ @arkuilayout
-frameworks/bridge/common/plugin_adapter/ @arkuilayout
+frameworks/bridge/common/plugin_adapter/ @arkuiabilitygroup
 frameworks/bridge/common/utils/ @arkuiframework
 frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts @arkuiframework
 frameworks/bridge/declarative_frontend/ark_component/src/ArkAlphabetIndexer.ts @arkuiscroll
@@ -555,7 +555,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkPanel.ts @arkui_supe
 frameworks/bridge/declarative_frontend/ark_component/src/ArkParticle.ts @arkui_superman
 frameworks/bridge/declarative_frontend/ark_component/src/ArkPath.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_component/src/ArkPatternLock.ts @arkui_image
-frameworks/bridge/declarative_frontend/ark_component/src/ArkPluginComponent.ts @arkuilayout
+frameworks/bridge/declarative_frontend/ark_component/src/ArkPluginComponent.ts @arkuiabilitygroup
 frameworks/bridge/declarative_frontend/ark_component/src/ArkPolygon.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_component/src/ArkPolyline.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_component/src/ArkProgress.ts @arkui_image
@@ -647,7 +647,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/nav_router_modifier.ts @
 frameworks/bridge/declarative_frontend/ark_modifier/src/panel_modifier.ts @arkui_superman
 frameworks/bridge/declarative_frontend/ark_modifier/src/path_modifier.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_modifier/src/pattern_lock_modifier.ts @arkui_image
-frameworks/bridge/declarative_frontend/ark_modifier/src/plugin_component_modifier.ts @arkuilayout
+frameworks/bridge/declarative_frontend/ark_modifier/src/plugin_component_modifier.ts @arkuiabilitygroup
 frameworks/bridge/declarative_frontend/ark_modifier/src/polygon_modifier.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_modifier/src/polyline_modifier.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_modifier/src/progress_modifier.ts @arkui_image
@@ -1209,8 +1209,8 @@ frameworks/bridge/declarative_frontend/jsview/js_persistent.cpp @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_persistent.h @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_piece.cpp @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_piece.h @arkui_image
-frameworks/bridge/declarative_frontend/jsview/js_plugin.cpp @arkuilayout
-frameworks/bridge/declarative_frontend/jsview/js_plugin.h @arkuilayout
+frameworks/bridge/declarative_frontend/jsview/js_plugin.cpp @arkuiabilitygroup
+frameworks/bridge/declarative_frontend/jsview/js_plugin.h @arkuiabilitygroup
 frameworks/bridge/declarative_frontend/jsview/js_polygon.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_polygon.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_polyline.cpp @arkuilayout
@@ -1477,8 +1477,8 @@ frameworks/bridge/declarative_frontend/jsview/models/patternlock_model_impl.cpp 
 frameworks/bridge/declarative_frontend/jsview/models/patternlock_model_impl.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/models/picker_model_impl.cpp @arkui_image
 frameworks/bridge/declarative_frontend/jsview/models/picker_model_impl.h @arkui_image
-frameworks/bridge/declarative_frontend/jsview/models/plugin_model_impl.cpp @arkuilayout
-frameworks/bridge/declarative_frontend/jsview/models/plugin_model_impl.h @arkuilayout
+frameworks/bridge/declarative_frontend/jsview/models/plugin_model_impl.cpp @arkuiabilitygroup
+frameworks/bridge/declarative_frontend/jsview/models/plugin_model_impl.h @arkuiabilitygroup
 frameworks/bridge/declarative_frontend/jsview/models/polygon_model_impl.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/polygon_model_impl.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/preview_mock_model_impl.h @arkuistatemgmt
@@ -1655,14 +1655,14 @@ frameworks/bridge/js_frontend/js_command.cpp @arkuiframework
 frameworks/bridge/js_frontend/js_command.h @arkuiframework
 frameworks/bridge/js_frontend/js_frontend.cpp @arkuiframework
 frameworks/bridge/js_frontend/js_frontend.h @arkuiframework
-frameworks/bridge/plugin_frontend/BUILD.gn @arkuilayout
-frameworks/bridge/plugin_frontend/plugin_frontend.cpp @arkuilayout
-frameworks/bridge/plugin_frontend/plugin_frontend_delegate.cpp @arkuilayout
-frameworks/bridge/plugin_frontend/plugin_frontend_delegate.h @arkuilayout
-frameworks/bridge/plugin_frontend/plugin_frontend.h @arkuilayout
+frameworks/bridge/plugin_frontend/BUILD.gn @arkuiabilitygroup
+frameworks/bridge/plugin_frontend/plugin_frontend.cpp @arkuiabilitygroup
+frameworks/bridge/plugin_frontend/plugin_frontend_delegate.cpp @arkuiabilitygroup
+frameworks/bridge/plugin_frontend/plugin_frontend_delegate.h @arkuiabilitygroup
+frameworks/bridge/plugin_frontend/plugin_frontend.h @arkuiabilitygroup
 frameworks/bridge/test/BUILD.gn @arkui_architecture
-frameworks/bridge/test/unittest/common/pluginadapter/BUILD.gn  @arkuilayout
-frameworks/bridge/test/unittest/common/pluginadapter/plugin_adapter_test.cpp @arkuilayout
+frameworks/bridge/test/unittest/common/pluginadapter/BUILD.gn  @arkuiabilitygroup
+frameworks/bridge/test/unittest/common/pluginadapter/plugin_adapter_test.cpp @arkuiabilitygroup
 
 [Frameworks Core Old Abilities]
 frameworks/core/accessibility/ @arkuiabilitygroup
@@ -1857,9 +1857,9 @@ frameworks/core/common/platform_bridge.cpp @arkuiframework
 frameworks/core/common/platform_bridge.h @arkuiframework
 frameworks/core/common/platform_res_register.h @arkuiframework
 frameworks/core/common/platform_window.h @arkuiframework
-frameworks/core/common/plugin_manager.cpp @arkuilayout
-frameworks/core/common/plugin_manager.h @arkuilayout
-frameworks/core/common/plugin_utils.h @arkuilayout
+frameworks/core/common/plugin_manager.cpp @arkuiabilitygroup
+frameworks/core/common/plugin_manager.h @arkuiabilitygroup
+frameworks/core/common/plugin_utils.h @arkuiabilitygroup
 frameworks/core/common/recorder/ @arkuiframework
 frameworks/core/common/render_boundary_manager.cpp @arkuilayout
 frameworks/core/common/render_boundary_manager.h @arkuilayout
@@ -2874,8 +2874,8 @@ frameworks/core/interfaces/native/node/path_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/path_modifier.h @arkuilayout
 frameworks/core/interfaces/native/node/pattern_lock_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/node/pattern_lock_modifier.h @arkui_image
-frameworks/core/interfaces/native/node/plugin_modifier.cpp @arkuilayout
-frameworks/core/interfaces/native/node/plugin_modifier.h @arkuilayout
+frameworks/core/interfaces/native/node/plugin_modifier.cpp @arkuiabilitygroup
+frameworks/core/interfaces/native/node/plugin_modifier.h @arkuiabilitygroup
 frameworks/core/interfaces/native/node/polygon_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/polygon_modifier.h @arkuilayout
 frameworks/core/interfaces/native/node/polyline_modifier.cpp @arkuilayout
@@ -3094,7 +3094,7 @@ test/unittest/core/common/clipboard/ @huawei_g_five
 test/unittest/core/common/environment/ @arkuistatemgmt
 test/unittest/core/common/ime/ @huawei_g_five
 test/unittest/core/common/others/ @arkuiframework
-test/unittest/core/common/plugin/ @arkuilayout
+test/unittest/core/common/plugin/ @arkuiabilitygroup
 test/unittest/core/common/recorder/ @arkuiframework
 test/unittest/core/common/resource/ @arkuiframework
 test/unittest/core/common/rosen/ @arkuiframework

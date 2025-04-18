@@ -281,6 +281,12 @@ HWTEST_F(FormTestNg, FormModelNGTest002, TestSize.Level1)
     formNG.SetOnLoad(std::move(onLoad));
     auto frameNodeonLoad = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNodeonLoad, nullptr);
+
+    std::string onUpdateValue;
+    auto onUpdate = [&onUpdateValue](const std::string& param) { onUpdateValue = param; };
+    formNG.SetOnUpdate(std::move(onUpdate));
+    auto frameNodeonUpdate = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNodeonUpdate, nullptr);
 }
 
 /**
@@ -726,6 +732,18 @@ HWTEST_F(FormTestNg, FireOnEvent, TestSize.Level1)
      */
     eventHub->SetOnLoad([](const std::string& string) { ASSERT_EQ(string, ""); });
     pattern->FireOnLoadEvent();
+
+    /**
+     * @tc.steps: step4.Call SetOnUpdate in FormEventHub.
+     * @tc.expected: Call FireOnUpdateFormDone in FormPattern.
+     */
+    eventHub->SetOnUpdate([](const std::string& string) {
+        auto json = JsonUtil::Create(true);
+        json->Put("id", std::to_string(FORM_ID_OF_TDD).c_str());
+        json->Put("idString", FORM_ID_STRING_OF_TDD.c_str());
+        ASSERT_EQ(string, json->ToString());
+    });
+    pattern->FireOnUpdateFormDone(FORM_ID_OF_TDD);
 }
 
 /**

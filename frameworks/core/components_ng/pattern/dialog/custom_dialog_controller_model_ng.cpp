@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
+
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 

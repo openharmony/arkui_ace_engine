@@ -15,6 +15,7 @@
 
 #include "interfaces/napi/kits/promptaction/js_level_order.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"

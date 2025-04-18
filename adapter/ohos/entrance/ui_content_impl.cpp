@@ -40,9 +40,11 @@
 #include "system_ability_definition.h"
 #include "wm_common.h"
 
+#include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/ressched/ressched_report.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -276,6 +278,7 @@ bool CloseGlobalModalUIExtension(int32_t instanceId, int32_t sessionId, const st
     auto parentNode = modalPageNode->GetParent();
     if (parentNode) {
         parentNode->RemoveChild(modalPageNode);
+        parentNode->RebuildRenderContextTree();
     }
     modalPageNode->MountToParent(globalPipeline->GetRootElement());
     auto globalOverlay = globalPipeline->GetOverlayManager();

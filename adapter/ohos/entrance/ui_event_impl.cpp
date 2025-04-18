@@ -19,9 +19,11 @@
 
 #include "core/common/container.h"
 #include "core/common/recorder/event_controller.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/inspector_tree_collector.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/base/simplified_inspector.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace {
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_RegisterUIEventObserver(

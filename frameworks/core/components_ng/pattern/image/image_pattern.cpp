@@ -2004,7 +2004,7 @@ void ImagePattern::EnableAnalyzer(bool value)
     if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::IMAGE);
     }
-    RegisterVisibleAreaChange(false);
+    RegisterVisibleAreaChange(true);
 }
 
 // As an example

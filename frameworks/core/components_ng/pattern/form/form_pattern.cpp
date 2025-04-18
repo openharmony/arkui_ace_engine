@@ -1376,6 +1376,7 @@ void FormPattern::InitFormManagerDelegate()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(context);
+    CHECK_NULL_VOID(formManagerBridge_);
     formManagerBridge_->AddRenderDelegate();
     formManagerBridge_->RegisterRenderDelegateEvent();
     auto formUtils = FormManager::GetInstance().GetFormUtils();
@@ -1412,6 +1413,7 @@ void FormPattern::InitFormManagerDelegate()
     InitAddFormSurfaceChangeAndDetachCallback(instanceID);
     InitAddUnTrustAndSnapshotCallback(instanceID);
     InitOtherCallback(instanceID);
+    InitUpdateFormDoneCallback(instanceID);
     const std::function<void(bool isRotate, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback =
         [this](bool isRotate, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
             FormManager::GetInstance().NotifyIsSizeChangeByRotate(isRotate, rsTransaction);
@@ -2444,6 +2446,25 @@ void FormPattern::InitOtherCallback(int32_t instanceID)
         });
 }
 
+void FormPattern::InitUpdateFormDoneCallback(int32_t instanceID)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    formManagerBridge_->AddFormUpdateDoneCallback([weak = WeakClaim(this), instanceID, pipeline](const int64_t formId) {
+        ContainerScope scope(instanceID);
+        CHECK_NULL_VOID(pipeline);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([formId, weak, instanceID] {
+            ContainerScope scope(instanceID);
+            auto formPattern = weak.Upgrade();
+            CHECK_NULL_VOID(formPattern);
+            formPattern->FireOnUpdateFormDone(formId);
+            }, "ArkUIFormFireUpdateDoneEvent");
+    });
+}
+
 void FormPattern::enhancesSubContainer(bool hasContainer)
 {
     CHECK_NULL_VOID(subContainer_);
@@ -2614,5 +2635,19 @@ void FormPattern::ReAddStaticFormSnapshotTimer()
     std::string nodeIdStr = std::to_string(host->GetId());
     executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormTakeSurfaceCapture_" + nodeIdStr);
     HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_10S, nodeIdStr);
+}
+
+void FormPattern::FireOnUpdateFormDone(int64_t id) const
+{
+    TAG_LOGD(AceLogTag::ACE_FORM, "fire form update done:%{public}" PRId64, id);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<FormEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    int64_t onUpdateFormId = id < MAX_NUMBER_OF_JS ? id : -1;
+    auto json = JsonUtil::Create(true);
+    json->Put("id", std::to_string(onUpdateFormId).c_str());
+    json->Put("idString", std::to_string(id).c_str());
+    eventHub->FireOnUpdate(json->ToString());
 }
 } // namespace OHOS::Ace::NG
