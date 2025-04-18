@@ -589,6 +589,12 @@ public:
     void UpdateShiftFlag(const KeyEvent& keyEvent)override;
     bool HandleOnEscape() override;
     void HandleOnUndoAction() override;
+
+    void HandleOnExtendUndoAction() override
+    {
+        HandleOnUndoAction();
+    }
+
     void HandleOnRedoAction() override;
     void CursorMove(CaretMoveIntent direction) override;
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle) override;
@@ -634,6 +640,12 @@ public:
     int32_t GetParagraphEndPosition(int32_t caretPosition);
     int32_t CaretPositionSelectEmoji(CaretMoveIntent direction);
     void HandleSelect(CaretMoveIntent direction) override;
+
+    void HandleSelectExtend(CaretMoveIntent direction) override
+    {
+        HandleSelect(direction);
+    }
+
     void SetCaretPositionWithAffinity(PositionWithAffinity positionWithAffinity);
     bool SetCaretPosition(int32_t pos, bool needNotifyImf = true);
     int32_t GetCaretPosition();

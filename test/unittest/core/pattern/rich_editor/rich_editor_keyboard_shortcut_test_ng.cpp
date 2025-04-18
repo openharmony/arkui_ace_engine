@@ -247,10 +247,10 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts101, TestS
     richEditorPattern->HandleSelect(CaretMoveIntent::RightWord);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 21);
     richEditorPattern->SetCaretPosition(20);
-    richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghBegin);
+    richEditorPattern->HandleSelectExtend(CaretMoveIntent::ParagraghBegin);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
     richEditorPattern->SetCaretPosition(20);
-    richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghEnd);
+    richEditorPattern->HandleSelectExtend(CaretMoveIntent::ParagraghEnd);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), textOptions.value.length());
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->HandleSelect(CaretMoveIntent::LineBegin);
