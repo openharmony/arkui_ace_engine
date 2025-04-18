@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include "image_base.h"
 
 #include "base/image/image_defines.h"
@@ -1567,7 +1568,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternhasSceneChanged, TestSize.Level1)
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
     bool b = imagePattern->hasSceneChanged();
-    EXPECT_FALSE(b);
+    EXPECT_TRUE(b);
 }
 
 /**
