@@ -16,6 +16,8 @@
 #include "tabs_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/async_work_helper.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -52,14 +54,33 @@ void PreloadItemsImpl(Ark_VMContext vmContext,
                       const Opt_Array_Number* indices,
                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+    CHECK_NULL_VOID(asyncWorker);
     auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(indices);
-    auto indexVectOpt = Converter::OptConvert<std::vector<int32_t>>(*indices);
-    if (indexVectOpt) {
-        std::set<int32_t> indexSet(indexVectOpt->begin(), indexVectOpt->end());
-        peerImpl->TriggerPreloadItems(indexSet);
-    }
+
+    auto indexVectOpt = !indices ? std::nullopt : Converter::OptConvert<std::vector<int32_t>>(*indices);
+    auto execFunc = [peerImpl, indexVectOpt = std::move(indexVectOpt)]() {
+        CHECK_NULL_VOID(peerImpl);
+        if (indexVectOpt) {
+            std::set<int32_t> indexSet(indexVectOpt->begin(), indexVectOpt->end());
+            peerImpl->TriggerPreloadItems(indexSet);
+        } else {
+            peerImpl->TriggerPreloadItems({});
+        }
+    };
+    auto work = AsyncWorkHelper::CreateWork(vmContext, *asyncWorker, std::move(execFunc));
+
+    auto errorCbOpt = !outputArgumentForReturningPromise ? std::nullopt
+        : std::make_optional(CallbackHelper(*outputArgumentForReturningPromise));
+    auto finishFunc = [work, errorCbOpt = std::move(errorCbOpt)](const int32_t errCode, const std::string errStr) {
+        if (errorCbOpt && errCode != ERROR_CODE_NO_ERROR) {
+            std::initializer_list<std::string> initList {std::to_string(errCode), errStr};
+            Converter::ArkArrayHolder<Array_String> vectorHolder (initList);
+            errorCbOpt->InvokeSync(vectorHolder.OptValue<Opt_Array_String>());
+        }
+        AsyncWorkHelper::FinishWork(work, errCode);
+    };
+    peerImpl->TriggerSetPreloadFinishCallback(finishFunc);
 }
 void SetTabBarTranslateImpl(Ark_TabsController peer,
                             const Ark_TranslateOptions* translate)
