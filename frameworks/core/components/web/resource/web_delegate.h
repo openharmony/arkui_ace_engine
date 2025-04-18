@@ -1194,6 +1194,9 @@ public:
     void UpdateWebMediaAVSessionEnabled(bool isEnabled);
 
     std::string GetCurrentLanguage();
+    void RegisterNativeJavaScriptProxy(const std::string& obj, const std::vector<std::string>& method,
+        std::vector<std::function<void(const std::vector<std::string>&)>> callbackImpl,
+        bool isAync, const std::string& permission, bool isNeedRefresh);
 
     void RegisterWebWindowFocusChangedListener();
 

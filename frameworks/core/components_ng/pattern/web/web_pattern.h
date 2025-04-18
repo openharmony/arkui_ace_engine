@@ -755,6 +755,16 @@ public:
     void WebOverlayRequestFocus();
 
     std::string GetCurrentLanguage() override;
+    void GetTranslateTextCallback(const std::string& result);
+    void RegisterTranslateTextJavaScript();
+    void InitTranslateText();
+    void GetTranslateText(
+        std::string extraData, std::function<void(std::string)> callback, bool isContinued) override;
+    void SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids) override;
+    void SendTranslateResult(std::string results) override;
+    void EndTranslate() override;
+    void RunJsInit();
+
     RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
     void RegisterSurfaceDensityCallback();
@@ -1225,6 +1235,8 @@ private:
     bool keyboardGetready_ = false;
 
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
+    bool isRegisterJsObject_ = false;
+
     bool isRotating_ {false};
     int32_t rotationEndCallbackId_ = 0;
 protected:
