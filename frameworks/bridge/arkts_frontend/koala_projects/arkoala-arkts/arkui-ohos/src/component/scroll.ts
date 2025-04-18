@@ -167,7 +167,7 @@ export class Scroller implements MaterializedBase {
     }
     private currentOffset_serialize(): OffsetResult {
         const retval  = ArkUIGeneratedNativeModule._Scroller_currentOffset(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : OffsetResult = retvalDeserializer.readOffsetResult()
         return returnResult
     }
@@ -208,7 +208,7 @@ export class Scroller implements MaterializedBase {
     }
     private getItemRect_serialize(index: number): RectResult {
         const retval  = ArkUIGeneratedNativeModule._Scroller_getItemRect(this.peer!.ptr, index)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : RectResult = retvalDeserializer.readRectResult()
         return returnResult
     }
