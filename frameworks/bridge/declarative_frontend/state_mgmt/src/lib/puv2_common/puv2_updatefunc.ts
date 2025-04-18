@@ -135,7 +135,7 @@ class UpdateFuncsByElmtId {
   
     public debugInfoElmtId(elmtId: number): string {
       const updateFuncEntry = this.map_.get(elmtId);
-      return updateFuncEntry ? `${updateFuncEntry!.getComponentName()}[${elmtId}]` : `'unknown component type'[${elmtId}]`;
+      return updateFuncEntry ? `${updateFuncEntry!.getComponentName()}[${elmtId}]` : `unknown component type[${elmtId}]`;
     }
   } // class UpdateFuncByElmtId
   

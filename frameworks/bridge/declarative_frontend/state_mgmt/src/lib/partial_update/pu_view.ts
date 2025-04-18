@@ -266,7 +266,7 @@ abstract class ViewPU extends PUV2ViewBase
       .filter((varName: string) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
       .forEach((varName) => {
         const prop: any = Reflect.get(this, varName);
-        if ('debugInfoDecorator' in prop) {
+        if (prop && typeof prop === 'object' && 'debugInfoDecorator' in prop) {
           const observedProp = prop as ObservedPropertyAbstractPU<any>;
           result += `\n  ${observedProp.debugInfoDecorator()} '${observedProp.info()}'[${observedProp.id__()}]`;
           result += `\n  ${observedProp.debugInfoSubscribers()}`;
@@ -1143,7 +1143,7 @@ abstract class ViewPU extends PUV2ViewBase
       .filter((varName: string) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
       .forEach((varName) => {
         const prop: any = Reflect.get(this, varName);
-        if (typeof prop === 'object' && 'debugInfoDecorator' in prop) {
+        if (prop && typeof prop === 'object' && 'debugInfoDecorator' in prop) {
           const observedProp: ObservedPropertyAbstractPU<any> = prop as ObservedPropertyAbstractPU<any>;
           res.observedPropertiesInfo.push(stateMgmtDFX.getObservedPropertyInfo(observedProp, false));
         }

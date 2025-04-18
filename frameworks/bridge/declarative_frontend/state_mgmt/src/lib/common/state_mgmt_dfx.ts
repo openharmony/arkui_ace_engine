@@ -57,7 +57,7 @@ class stateMgmtDFX {
     if (arr.length > stateMgmtDFX.DUMP_MAX_LENGTH) {
       dumpArr.splice(stateMgmtDFX.DUMP_MAX_LENGTH - stateMgmtDFX.DUMP_LAST_LENGTH, stateMgmtDFX.DUMP_LAST_LENGTH, '...', ...arr.slice(-stateMgmtDFX.DUMP_LAST_LENGTH));
     }
-    return dumpArr.map(item => typeof item === 'object' ? this.getType(item) : item);
+    return dumpArr.map(item => (item && typeof item === 'object') ? this.getType(item) : item);
   }
 
   private static dumpMap(map: Map<RawValue, RawValue>): Array<DumpBuildInType> {
@@ -74,7 +74,7 @@ class stateMgmtDFX {
         .slice(0, stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT)
         .forEach((varName: string) => {
           const propertyValue = Reflect.get(value as Object, varName);
-          tempObj[varName] = typeof propertyValue === 'object' ? this.getType(propertyValue) : propertyValue;
+          tempObj[varName] = (propertyValue && typeof propertyValue === 'object') ? this.getType(propertyValue) : propertyValue;
         });
       if (properties.length > stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT) {
         tempObj['...'] = '...';
@@ -88,7 +88,7 @@ class stateMgmtDFX {
 
   private static getRawValue<T>(observedProp: ObservedPropertyAbstractPU<T>): DumpObjectType | Array<DumpBuildInType> | T | string {
     let wrappedValue: T = observedProp.getUnmonitored();
-    if (typeof wrappedValue !== 'object') {
+    if (!wrappedValue || typeof wrappedValue !== 'object') {
       return wrappedValue;
     }
     let rawObject: T = ObservedObject.GetRawObject(wrappedValue);
