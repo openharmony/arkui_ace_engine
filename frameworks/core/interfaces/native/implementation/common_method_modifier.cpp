@@ -4409,7 +4409,7 @@ void BindMenu0Impl(Ark_NativePointer node,
                    const Ark_Union_Array_MenuElement_CustomBuilder* content,
                    const Opt_MenuOptions* options)
 {
-    // BindMenuBase(node, ArkValue<Ark_Boolean>(false), content, options);
+    BindMenuBase(node, ArkValue<Ark_Boolean>(false), content, options);
 }
 void BindMenu1Impl(Ark_NativePointer node,
                    Ark_Boolean isShow,
