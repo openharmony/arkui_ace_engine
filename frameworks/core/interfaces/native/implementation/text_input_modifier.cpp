@@ -77,17 +77,17 @@ PasswordIcon Convert(const Ark_PasswordIcon& src)
 template<>
 void AssignArkValue(Ark_EditableTextChangeValue& dst, const ChangeValueInfo& src, Converter::ConvContext *ctx)
 {
-    dst.content = Converter::ArkValue<Ark_String>(src.value);
-    dst.previewText = Converter::ArkValue<Opt_PreviewText>(src.previewText);
+    dst.content = Converter::ArkValue<Ark_String>(src.value, ctx);
+    dst.previewText = Converter::ArkValue<Opt_PreviewText>(src.previewText, ctx);
 
     Ark_TextChangeOptions options;
     options.rangeBefore.start = Converter::ArkValue<Opt_Number>(src.rangeBefore.start);
     options.rangeBefore.end = Converter::ArkValue<Opt_Number>(src.rangeBefore.end);
     options.rangeAfter.start = Converter::ArkValue<Opt_Number>(src.rangeAfter.start);
     options.rangeAfter.end = Converter::ArkValue<Opt_Number>(src.rangeAfter.end);
-    options.oldContent = Converter::ArkValue<Ark_String>(src.oldContent);
+    options.oldContent = Converter::ArkValue<Ark_String>(src.oldContent, ctx);
     options.oldPreviewText.offset = Converter::ArkValue<Ark_Number>(src.oldPreviewText.offset);
-    options.oldPreviewText.value = Converter::ArkValue<Ark_String>(src.oldPreviewText.value);
+    options.oldPreviewText.value = Converter::ArkValue<Ark_String>(src.oldPreviewText.value, ctx);
 
     dst.options = Converter::ArkValue<Opt_TextChangeOptions>(options, ctx);
 }

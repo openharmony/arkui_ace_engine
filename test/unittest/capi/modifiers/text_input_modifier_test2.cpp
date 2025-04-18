@@ -46,32 +46,22 @@ namespace Converter {
     template<>
     ChangeValueInfo Convert(const Ark_EditableTextChangeValue& src)
     {
-        /*
-        struct ChangeValueInfo {
-            std::u16string value;
-            PreviewText previewText;
-            TextRange rangeBefore;
-            TextRange rangeAfter;
-            std::u16string oldContent;
-            PreviewText oldPreviewText;
-        };
-        */
+        auto optPreviewText = Converter::OptConvert<PreviewText>(src.previewText);
         ChangeValueInfo changeValue;
-        changeValue.value = Converter::Convert<>
-
-        dst.content = Converter::ArkValue<Ark_String>(src.value);
-        dst.previewText = Converter::ArkValue<Opt_PreviewText>(src.previewText);
-    
-        Ark_TextChangeOptions options;
-        options.rangeBefore.start = Converter::ArkValue<Opt_Number>(src.rangeBefore.start);
-        options.rangeBefore.end = Converter::ArkValue<Opt_Number>(src.rangeBefore.end);
-        options.rangeAfter.start = Converter::ArkValue<Opt_Number>(src.rangeAfter.start);
-        options.rangeAfter.end = Converter::ArkValue<Opt_Number>(src.rangeAfter.end);
-        options.oldContent = Converter::ArkValue<Ark_String>(src.oldContent);
-        options.oldPreviewText.offset = Converter::ArkValue<Ark_Number>(src.oldPreviewText.offset);
-        options.oldPreviewText.value = Converter::ArkValue<Ark_String>(src.oldPreviewText.value);
-    
-        dst.options = Converter::ArkValue<Opt_TextChangeOptions>(options, ctx);
+        changeValue.value = Converter::Convert<std::u16string>(src.content);
+        if (optPreviewText.has_value()) {
+            changeValue.previewText = optPreviewText.value();
+        }
+        auto optTextChangeOptions = Converter::OptConvert<Ark_TextChangeOptions>(src.options);
+        if (!optTextChangeOptions.has_value()) {
+            return changeValue;
+        }
+        
+        auto arkTextChangeOptions = optTextChangeOptions.value();
+        changeValue.rangeBefore = Converter::Convert<TextRange>(arkTextChangeOptions.rangeBefore);
+        changeValue.rangeAfter = Converter::Convert<TextRange>(arkTextChangeOptions.rangeAfter);
+        changeValue.oldContent = Converter::Convert<std::u16string>(arkTextChangeOptions.oldContent);
+        changeValue.oldPreviewText = Converter::Convert<PreviewText>(arkTextChangeOptions.oldPreviewText);
     
         return changeValue;
     }
@@ -471,32 +461,45 @@ HWTEST_F(TextInputModifierTest2, setMaxLinesTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(TextInputModifierTest2, OnWillChangeTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnWillChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
     struct CheckEvent {
         int32_t resourceId;
         ChangeValueInfo info;
     };
-    int32_t expectedResourceId = 123321;
     static std::optional<CheckEvent> checkEvent = std::nullopt;
+    int32_t expectedResourceId = 123321;
+    auto expectedChangeValueInfo = ChangeValueInfo {
+        .value = u"test content", .previewText.offset = 2, .previewText.value = u"previewText",
+        .oldPreviewText.offset = 1, .oldPreviewText.value = u"oldPreviewText", .oldContent = u"oldContent",
+        .rangeBefore.start = 1, .rangeBefore.end = 6, .rangeAfter.start = 2, .rangeAfter.end = 5};
+    
     auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_EditableTextChangeValue parameter, const Callback_Boolean_Void continuation) {
         auto value = Converter::Convert<ChangeValueInfo>(parameter);
         checkEvent = CheckEvent {resourceId, value};
         CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
     };
+    
     auto func = Converter::ArkValue<Callback_EditableTextChangeValue_Boolean>(nullptr, inputCallback, expectedResourceId);
     modifier_->setOnWillChange(node_, &func);
 
-    // RichEditorChangeValue value;
-    // TextRange rangeBefore = {.start = TEST_RANGE_START, .end = TEST_RANGE_END};
-    // value.SetRangeBefore(rangeBefore);
-    // auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
-    // ASSERT_TRUE(eventHub);
-    // auto result = eventHub->FireOnWillChange(value);
-    // ASSERT_TRUE(checkEvent);
-    // EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
-    // EXPECT_TRUE(result);
-    // EXPECT_EQ(checkEvent->info.GetRangeBefore().start, TEST_RANGE_START);
-    // EXPECT_EQ(checkEvent->info.GetRangeBefore().end, TEST_RANGE_END);
+    auto eventHub = frameNode->GetEventHub<NG::TextFieldEventHub>();
+    ASSERT_TRUE(eventHub);
+    auto result = eventHub->FireOnWillChangeEvent(expectedChangeValueInfo);
+    EXPECT_TRUE(result);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, expectedResourceId);
+    EXPECT_EQ(checkEvent->info.value, expectedChangeValueInfo.value);
+    EXPECT_EQ(checkEvent->info.previewText.offset, expectedChangeValueInfo.previewText.offset);
+    EXPECT_EQ(checkEvent->info.previewText.value, expectedChangeValueInfo.previewText.value);
+    EXPECT_EQ(checkEvent->info.oldPreviewText.offset, expectedChangeValueInfo.oldPreviewText.offset);
+    EXPECT_EQ(checkEvent->info.oldPreviewText.value, expectedChangeValueInfo.oldPreviewText.value);
+    EXPECT_EQ(checkEvent->info.oldContent, expectedChangeValueInfo.oldContent);
+    EXPECT_EQ(checkEvent->info.rangeBefore.start, expectedChangeValueInfo.rangeBefore.start);
+    EXPECT_EQ(checkEvent->info.rangeBefore.end, expectedChangeValueInfo.rangeBefore.end);
+    EXPECT_EQ(checkEvent->info.rangeAfter.start, expectedChangeValueInfo.rangeAfter.start);
+    EXPECT_EQ(checkEvent->info.rangeAfter.end, expectedChangeValueInfo.rangeAfter.end);
 }
 } // namespace OHOS::Ace::NG
