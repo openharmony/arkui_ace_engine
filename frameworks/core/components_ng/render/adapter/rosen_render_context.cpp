@@ -3499,7 +3499,7 @@ void RosenRenderContext::OnePixelRounding(uint16_t flag)
         nodeWidthI -= 1.0f;
         roundToPixelErrorX -= 1.0f;
     }
-    if (roundToPixelErrorX < -0.5f) {
+    if (roundToPixelErrorX < -0.5f && !floorLeft && !floorRight) {
         nodeWidthI += 1.0f;
         roundToPixelErrorX += 1.0f;
     }
@@ -3515,7 +3515,7 @@ void RosenRenderContext::OnePixelRounding(uint16_t flag)
         nodeHeightI -= 1.0f;
         roundToPixelErrorY -= 1.0f;
     }
-    if (roundToPixelErrorY < -0.5f) {
+    if (roundToPixelErrorY < -0.5f && !floorTop && !floorBottom) {
         nodeHeightI += 1.0f;
         roundToPixelErrorY += 1.0f;
     }
