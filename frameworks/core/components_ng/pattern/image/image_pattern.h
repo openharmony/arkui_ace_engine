@@ -53,7 +53,9 @@ class InspectorFilter;
 
 class ACE_FORCE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient {
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
-
+#ifdef UNITEST_FRIEND_CLASS
+    UNITEST_FRIEND_CLASS;
+#endif
 public:
     using OnProgressCallback = std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>;
 

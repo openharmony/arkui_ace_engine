@@ -84,6 +84,8 @@ public:
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode* frameNode, const std::string& src);
     static void ResetImage(FrameNode* frameNode);
+    static void CreateAnimation(FrameNode* frameNode,
+        const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration);
     static void SetInitialSrc(FrameNode* frameNode, const std::string& src, const std::string& bundleName,
         const std::string& moduleName, bool isUriPureNumber = false);
     static void SetInitialPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);

@@ -328,13 +328,6 @@ namespace Converter {
     }
 
     template<>
-    inline ImageSourceInfo Convert(const Ark_DrawableDescriptor& value)
-    {
-        LOGE("Convert [Ark_DrawableDescriptor] to [ImageSourceInfo] is not supported");
-        return ImageSourceInfo();
-    }
-
-    template<>
     inline void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_PixelMap& value)
     {
         auto pixelMapPeer = value;
