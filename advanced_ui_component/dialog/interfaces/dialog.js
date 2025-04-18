@@ -248,6 +248,7 @@ const CONTENT_FONT_WEIGHT = lazyInit(() => {
     return fontWeight;
 });
 const SCROLL_BAR_OFFSET = 20;
+const SELECT_DIALOG_SCROLL_BAR_OFFSET = 4;
 
 export class TipsDialog extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
@@ -729,11 +730,12 @@ export class TipsDialog extends ViewPU {
                 scrollForward: NestedScrollMode.PARALLEL,
                 scrollBackward: NestedScrollMode.PARALLEL
             });
-            Scroll.margin({ end: LengthMetrics.vp(this.marginOffset) });
+            Scroll.margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) });
         }, Scroll);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) });
+            Column.margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) });
+            Column.width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
@@ -1188,6 +1190,7 @@ export class SelectDialog extends ViewPU {
                     this.isFocus = false;
                 }
             });
+            Scroll.margin({ end: LengthMetrics.vp(SELECT_DIALOG_SCROLL_BAR_OFFSET) });
         }, Scroll);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
@@ -1854,11 +1857,12 @@ export class ConfirmDialog extends ViewPU {
                 scrollForward: NestedScrollMode.PARALLEL,
                 scrollBackward: NestedScrollMode.PARALLEL
             });
-            Scroll.margin({ end: LengthMetrics.vp(this.marginOffset) });
+            Scroll.margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) });
         }, Scroll);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) });
+            Column.margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) });
+            Column.width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.content);
