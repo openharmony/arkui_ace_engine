@@ -418,6 +418,10 @@ build_component_ng("pattern_ng") {
     "search/search_node.cpp",
     "search/search_pattern.cpp",
     "search/search_text_field.cpp",
+    "select/select_accessibility_property.cpp",
+    "select/select_layout_algorithm.cpp",
+    "select/select_model_ng.cpp",
+    "select/select_pattern.cpp",
     "select_content_overlay/select_content_overlay_pattern.cpp",
     "select_overlay/magnifier_controller.cpp",
     "select_overlay/select_overlay_content_modifier.cpp",
@@ -625,10 +629,6 @@ build_component_ng("pattern_ng") {
       "folder_stack/folder_stack_model_ng.cpp",
       "folder_stack/folder_stack_pattern.cpp",
       "folder_stack/hover_stack_node.cpp",
-      "select/select_accessibility_property.cpp",
-      "select/select_layout_algorithm.cpp",
-      "select/select_model_ng.cpp",
-      "select/select_pattern.cpp",
     ]
   }
 

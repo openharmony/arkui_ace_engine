@@ -131,7 +131,7 @@
 
 using namespace OHOS::Ace::NG;
 
-#define MODIFIER_COUNTS 8
+#define MODIFIER_COUNTS 7
 #define BLANK_LINES 6
 
 extern "C" {
@@ -151,11 +151,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getImageSpanModifier = NodeModifier::GetImageSpanModifier,
         .getBlankModifier = NodeModifier::GetBlankModifier,
         .getSearchModifier = NodeModifier::GetSearchModifier,
-    #ifndef ARKUI_WEARABLE
         .getSelectModifier = NodeModifier::GetSelectModifier,
-    #else
-        .getSelectModifier = nullptr,
-    #endif
         .getRadioModifier = NodeModifier::GetRadioModifier,
         .getCheckboxModifier = NodeModifier::GetCheckboxModifier,
         .getTimepickerModifier = NodeModifier::GetTimepickerModifier,
@@ -302,11 +298,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getImageSpanModifier = NodeModifier::GetCJUIImageSpanModifier,
         .getBlankModifier = NodeModifier::GetCJUIBlankModifier,
         .getSearchModifier = NodeModifier::GetCJUISearchModifier,
-    #ifndef ARKUI_WEARABLE
         .getSelectModifier = NodeModifier::GetCJUISelectModifier,
-    #else
-        .getSelectModifier = nullptr,
-    #endif
         .getRadioModifier = NodeModifier::GetCJUIRadioModifier,
         .getCheckboxModifier = NodeModifier::GetCJUICheckboxModifier,
         .getTimepickerModifier = NodeModifier::GetCJUITimepickerModifier,
