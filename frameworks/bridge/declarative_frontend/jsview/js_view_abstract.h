@@ -98,6 +98,7 @@ RefPtr<ResourceObject> GetResourceObjectByBundleAndModule(const JSRef<JSObject>&
 RefPtr<ResourceWrapper> CreateResourceWrapper(const JSRef<JSObject>& jsObj, RefPtr<ResourceObject>& resourceObject);
 RefPtr<ResourceWrapper> CreateResourceWrapper();
 using PopupOnWillDismiss = std::function<void(int32_t)>;
+std::function<std::string()> JsGetCustomMapFunc(panda::ecmascript::EcmaVM* vm, int32_t nodeId);
 class JSViewAbstract {
 public:
     static void SetPixelRoundMode(const JSCallbackInfo& info);

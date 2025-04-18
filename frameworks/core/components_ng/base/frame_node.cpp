@@ -86,6 +86,7 @@ constexpr float HIGHT_RATIO_LIMIT = 0.8;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
 constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
+constexpr char UPDATE_FLAG_VALUE[] = "1";
 constexpr int32_t DEFAULT_PRECISION = 2;
 } // namespace
 namespace OHOS::Ace::NG {
@@ -1220,6 +1221,15 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const 
     }
 }
 
+bool FrameNode::IsJsCustomPropertyUpdated() const
+{
+    auto iter = customPropertyMap_.find(UPDATE_FLAG_KEY);
+    if (iter != customPropertyMap_.end()) {
+        return iter->second == UPDATE_FLAG_VALUE;
+    }
+    return false;
+}
+
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     if (renderContext_) {
@@ -1245,6 +1255,17 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
     }
     json->PutFixedAttr("id", propInspectorId_.value_or("").c_str(), filter, FIXED_ATTR_ID);
     ExtraCustomPropertyToJsonValue(json, filter);
+    if (IsCNode() || !IsJsCustomPropertyUpdated()) {
+        auto jsonNode = JsonUtil::Create(true);
+        for (const auto &iter : customPropertyMap_) {
+            jsonNode->Put(iter.first.c_str(), iter.second.c_str());
+        }
+        if (!customPropertyMap_.empty()) {
+            json->Put("customProperty", jsonNode->ToString().c_str());
+        }
+    } else if (getCustomPropertyMapFunc_) {
+        json->Put("customProperty", getCustomPropertyMapFunc_().c_str());
+    }
 }
 
 void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
@@ -6392,17 +6413,21 @@ void FrameNode::ResetPredictNodes()
     }
 }
 
-void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc)
+void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc,
+    std::function<std::string()>&& getCustomPropertyMapFunc)
 {
     bool result = func();
     if (IsCNode()) {
         return;
     }
     if (result) {
-        customPropertyMap_[UPDATE_FLAG_KEY] = "1";
+        customPropertyMap_[UPDATE_FLAG_KEY] = UPDATE_FLAG_VALUE;
     }
     if (!getCustomProperty_) {
         getCustomProperty_ = getFunc;
+    }
+    if (getCustomPropertyMapFunc && (!getCustomPropertyMapFunc_)) {
+        getCustomPropertyMapFunc_ = std::move(getCustomPropertyMapFunc);
     }
 }
 

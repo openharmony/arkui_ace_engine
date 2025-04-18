@@ -475,6 +475,8 @@ public:
 
     void ChangeSensitiveStyle(bool isSensitive);
 
+    bool IsJsCustomPropertyUpdated() const;
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
@@ -1215,7 +1217,8 @@ public:
         return childrenUpdatedFrom_;
     }
 
-    void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
+    void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc,
+        std::function<std::string()>&& getCustomPropertyMapFunc = nullptr);
     bool GetJSCustomProperty(const std::string& key, std::string& value);
     bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
@@ -1523,6 +1526,7 @@ private:
     std::set<std::string> allowDrop_;
     std::function<void()> removeCustomProperties_;
     std::function<std::string(const std::string& key)> getCustomProperty_;
+    std::function<std::string()> getCustomPropertyMapFunc_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
