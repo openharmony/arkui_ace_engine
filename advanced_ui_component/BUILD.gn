@@ -75,6 +75,7 @@ group("advanced_ui_component") {
     "arcbutton/interfaces:arcbutton",
     "arcslider/interfaces:arcslider",
     "counter/interfaces:counter",
+    "counter/V12:simpCounter",
     "dialogv2/interfaces:dialogv2",
     "downloadfilebutton/interfaces:downloadfilebutton",
     "foldsplitcontainer/interfaces:foldsplitcontainer",
