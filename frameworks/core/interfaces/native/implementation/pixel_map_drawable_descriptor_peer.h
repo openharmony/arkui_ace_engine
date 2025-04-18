@@ -18,6 +18,7 @@
 #include "drawable_descriptor_peer.h"
 
 struct PixelMapDrawableDescriptorPeer : public DrawableDescriptorPeer {
+    DECLARE_ACE_TYPE(PixelMapDrawableDescriptorPeer, DrawableDescriptorPeer);
 protected:
     PixelMapDrawableDescriptorPeer() = default;
     ~PixelMapDrawableDescriptorPeer() override = default;

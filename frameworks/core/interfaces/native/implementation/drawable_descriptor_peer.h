@@ -19,22 +19,31 @@
 #include "arkoala_api_generated.h"
 
 #include "base/image/pixel_map.h"
+#include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 
 using PixelMapPtr = OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>;
 
-struct DrawableDescriptorPeer {
+struct DrawableDescriptorPeer : public virtual OHOS::Ace::AceType {
+    DECLARE_ACE_TYPE(DrawableDescriptorPeer, OHOS::Ace::AceType);
+
 public:
-    virtual PixelMapPtr GetPixelMap();
+    virtual PixelMapPtr GetPixelMap() const;
 
     void SetPixelMap(PixelMapPtr value)
     {
         pixelMap = value;
     }
-    bool HasPixelMap();
-    void ResetPixelMap();
+    inline bool HasPixelMap() const
+    {
+        return pixelMap;
+    }
+    inline void ResetPixelMap()
+    {
+        pixelMap.Reset();
+    }
 
 protected:
     DrawableDescriptorPeer() = default;

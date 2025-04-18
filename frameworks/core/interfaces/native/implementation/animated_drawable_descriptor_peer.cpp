@@ -15,15 +15,15 @@
 
 #include "animated_drawable_descriptor_peer.h"
 
-PixelMapPtr AnimatedDrawableDescriptorPeer::GetPixelMap()
+PixelMapPtr AnimatedDrawableDescriptorPeer::GetPixelMap() const
 {
     if (pixelMapList.empty()) {
         return nullptr;
     }
-    return pixelMapList.at(0);
+    return pixelMapList[0];
 }
 
-std::vector<PixelMapPtr> AnimatedDrawableDescriptorPeer::GetPixelMapList()
+std::vector<PixelMapPtr> AnimatedDrawableDescriptorPeer::GetPixelMapList() const
 {
     return pixelMapList;
 }

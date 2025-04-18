@@ -32,9 +32,9 @@ using namespace AccessorTestFixtures;
 using namespace Converter;
 
 namespace {
-const auto DEFAULT_SIZE_TEST = 0;
-const auto DEFAULT_DURATION_TEST = 0;
-const auto DEFAULT_ITERATIONS_TEST = 1;
+constexpr auto DEFAULT_SIZE_TEST = 0;
+constexpr auto DEFAULT_DURATION_TEST = 0;
+constexpr auto DEFAULT_ITERATIONS_TEST = 1;
 } // namespace
 
 class AnimatedDrawableDescriptorAccessorTest

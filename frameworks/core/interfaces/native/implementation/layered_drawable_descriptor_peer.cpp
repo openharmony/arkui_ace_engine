@@ -16,17 +16,17 @@
 
 using namespace OHOS::Ace::NG;
 
-DrawableDescriptorPeer* LayeredDrawableDescriptorPeer::GetForeground()
+DrawableDescriptorPeer* LayeredDrawableDescriptorPeer::GetForeground() const
 {
     return PeerUtils::CreatePeer<DrawableDescriptorPeer>(foreground);
 }
 
-DrawableDescriptorPeer* LayeredDrawableDescriptorPeer::GetBackground()
+DrawableDescriptorPeer* LayeredDrawableDescriptorPeer::GetBackground() const
 {
     return PeerUtils::CreatePeer<DrawableDescriptorPeer>(background);
 }
 
-DrawableDescriptorPeer* LayeredDrawableDescriptorPeer::GetMask()
+DrawableDescriptorPeer* LayeredDrawableDescriptorPeer::GetMask() const
 {
     return PeerUtils::CreatePeer<DrawableDescriptorPeer>(mask);
 }

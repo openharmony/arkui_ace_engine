@@ -23,9 +23,10 @@
 #include "core/interfaces/native/utility/peer_utils.h"
 
 struct AnimatedDrawableDescriptorPeer : public DrawableDescriptorPeer {
+    DECLARE_ACE_TYPE(AnimatedDrawableDescriptorPeer, DrawableDescriptorPeer);
 public:
-    PixelMapPtr GetPixelMap() override;
-    std::vector<PixelMapPtr> GetPixelMapList();
+    PixelMapPtr GetPixelMap() const override;
+    std::vector<PixelMapPtr> GetPixelMapList() const;
     int32_t GetDuration();
     int32_t GetIterations();
     void SetDuration(int32_t value);
@@ -47,7 +48,7 @@ protected:
     friend OHOS::Ace::NG::PeerUtils;
 
 private:
-    const int defaultDuration = 1000;
+    static constexpr int defaultDuration = 1000;
     std::vector<PixelMapPtr> pixelMapList;
     int32_t duration = -1;
     int32_t iterations = 1;

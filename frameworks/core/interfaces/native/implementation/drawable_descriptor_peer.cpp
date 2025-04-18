@@ -14,16 +14,7 @@
  */
 #include "drawable_descriptor_peer.h"
 
-PixelMapPtr DrawableDescriptorPeer::GetPixelMap()
+PixelMapPtr DrawableDescriptorPeer::GetPixelMap() const
 {
     return pixelMap;
-}
-
-bool DrawableDescriptorPeer::HasPixelMap()
-{
-    return pixelMap;
-}
-void DrawableDescriptorPeer::ResetPixelMap()
-{
-    pixelMap.Reset();
 }

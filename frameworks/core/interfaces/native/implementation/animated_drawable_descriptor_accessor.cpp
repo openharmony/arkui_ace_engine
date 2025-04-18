@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "animated_drawable_descriptor_peer.h"
 #include "arkoala_api_generated.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::Converter {
 struct AnimationOptions {
@@ -49,10 +50,12 @@ Ark_AnimatedDrawableDescriptor CtorImpl(const Array_PixelMap* pixelMaps,
     if (pixelMaps) {
         arrayPixelMaps = Convert<std::vector<RefPtr<PixelMap>>>(*pixelMaps);
     }
-    auto animationOptions = options ? OptConvert<AnimationOptions>(*options) : std::nullopt;
-    return PeerUtils::CreatePeer<AnimatedDrawableDescriptorPeer>(arrayPixelMaps,
-        animationOptions ? animationOptions->duration : std::nullopt,
-        animationOptions ? animationOptions->iterations : std::nullopt);
+    AnimationOptions animationOptions;
+    if (options) {
+        animationOptions = OptConvert<AnimationOptions>(*options).value_or(animationOptions);
+    }
+    return PeerUtils::CreatePeer<AnimatedDrawableDescriptorPeer>(
+        arrayPixelMaps, animationOptions.duration, animationOptions.iterations);
 }
 Ark_NativePointer GetFinalizerImpl()
 {

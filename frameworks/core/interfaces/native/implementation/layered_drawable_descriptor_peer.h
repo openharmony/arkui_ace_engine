@@ -23,13 +23,13 @@
 #include "core/interfaces/native/utility/peer_utils.h"
 
 struct LayeredDrawableDescriptorPeer : public DrawableDescriptorPeer {
+    DECLARE_ACE_TYPE(LayeredDrawableDescriptorPeer, DrawableDescriptorPeer);
 public:
-    DrawableDescriptorPeer* GetForeground();
-    DrawableDescriptorPeer* GetBackground();
-    DrawableDescriptorPeer* GetMask();
+    DrawableDescriptorPeer* GetForeground() const;
+    DrawableDescriptorPeer* GetBackground() const;
+    DrawableDescriptorPeer* GetMask() const;
 
 protected:
-    LayeredDrawableDescriptorPeer() = default;
     LayeredDrawableDescriptorPeer(PixelMapPtr foregroundValue, PixelMapPtr backgroundValue, PixelMapPtr maskValue)
         : foreground(foregroundValue), background(backgroundValue), mask(maskValue)
     {}
