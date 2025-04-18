@@ -1358,6 +1358,11 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
 
 RectF TextPattern::CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc)
 {
+    RectF aiRect;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, aiRect);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_RETURN(context, aiRect);
     // save information
     auto baseOffset = textSelector_.baseOffset;
     auto destinationOffset = textSelector_.destinationOffset;
@@ -1369,7 +1374,6 @@ RectF TextPattern::CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandl
     } else {
         calculateHandleFunc();
     }
-    RectF aiRect;
     if (textSelector_.firstHandle.Top() != textSelector_.secondHandle.Top()) {
         auto top = std::min(textSelector_.firstHandle.Top(), textSelector_.secondHandle.Top());
         auto bottom = std::max(textSelector_.firstHandle.Bottom(), textSelector_.secondHandle.Bottom());
@@ -1379,6 +1383,12 @@ RectF TextPattern::CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandl
         aiRect = RectT(left, top, right - left, bottom - top);
     } else {
         aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
+    }
+    RectF viewPort;
+    if (selectOverlay_->GetClipHandleViewPort(viewPort) &&
+        GreatNotEqual(aiRect.GetY() + aiRect.Height(), viewPort.GetY() + viewPort.Height()) &&
+        context->GetClipEdge().value_or(false)) {
+        aiRect = viewPort;
     }
     // restore textSelector_
     textSelector_.Update(baseOffset, destinationOffset);
