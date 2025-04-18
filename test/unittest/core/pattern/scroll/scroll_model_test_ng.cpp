@@ -55,7 +55,7 @@ HWTEST_F(ScrollModelNGTestNg, ScrollModelNGTestNg002, TestSize.Level1)
     buff->layoutSeperately_ = true;
     viewStackProcessor->Push(buff);
     auto frameNode = viewStackProcessor->GetMainFrameNode();
-    ASSERT_NE(frameNode, NULL);
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     ASSERT_NE(pattern, nullptr);
     ScrollModelNG scrollModelNG;
@@ -76,7 +76,7 @@ HWTEST_F(ScrollModelNGTestNg, ScrollModelNGTestNg003, TestSize.Level1)
     buff->layoutSeperately_ = true;
     viewStackProcessor->Push(buff);
     auto frameNode = viewStackProcessor->GetMainFrameNode();
-    ASSERT_NE(frameNode, NULL);
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     ASSERT_NE(pattern, nullptr);
     ScrollModelNG::SetEnablePaging(frameNode, true);
@@ -96,7 +96,7 @@ HWTEST_F(ScrollModelNGTestNg, ScrollModelNGTestNg004, TestSize.Level1)
     buff->layoutSeperately_ = true;
     viewStackProcessor->Push(buff);
     auto frameNode = viewStackProcessor->GetMainFrameNode();
-    ASSERT_NE(frameNode, NULL);
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     ASSERT_NE(pattern, nullptr);
     ScrollModelNG::SetEnablePaging(frameNode, false);
@@ -137,7 +137,7 @@ HWTEST_F(ScrollModelNGTestNg, ScrollModelNGTestNg006, TestSize.Level1)
     buff->layoutSeperately_ = true;
     viewStackProcessor->Push(buff);
     auto frameNode = viewStackProcessor->GetMainFrameNode();
-    ASSERT_NE(frameNode, NULL);
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     ASSERT_NE(pattern, nullptr);
     ScrollModelNG scrollModelNG;
@@ -158,7 +158,7 @@ HWTEST_F(ScrollModelNGTestNg, ScrollModelNGTestNg007, TestSize.Level1)
     buff->layoutSeperately_ = true;
     viewStackProcessor->Push(buff);
     auto frameNode = viewStackProcessor->GetMainFrameNode();
-    ASSERT_NE(frameNode, NULL);
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     ASSERT_NE(pattern, nullptr);
     ScrollModelNG::SetEnablePaging(frameNode, true);
@@ -178,7 +178,7 @@ HWTEST_F(ScrollModelNGTestNg, ScrollModelNGTestNg008, TestSize.Level1)
     buff->layoutSeperately_ = true;
     viewStackProcessor->Push(buff);
     auto frameNode = viewStackProcessor->GetMainFrameNode();
-    ASSERT_NE(frameNode, NULL);
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     ASSERT_NE(pattern, nullptr);
     ScrollModelNG::SetEnablePaging(frameNode, false);
