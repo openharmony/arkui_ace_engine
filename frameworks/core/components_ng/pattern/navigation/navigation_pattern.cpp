@@ -4296,6 +4296,6 @@ void NavigationPattern::SetNavigationWidthToolBarManager(float navBarWidth, floa
 void NavigationPattern::NavigationModifyDoneToolBarManager()
 {
     CHECK_NULL_VOID(toolbarManager_);
-    toolbarManager_->OnNavigationModifyDone();
+    toolbarManager_->OnToolBarManagerModifyDone();
 }
 } // namespace OHOS::Ace::NG

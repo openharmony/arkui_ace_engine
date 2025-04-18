@@ -64,16 +64,7 @@ void ToolbarManager::SetModifyDoneCallback(const std::function<void()>&& callbac
     modifyDoneCallbackFuncs_.emplace_back(std::move(callback));
 }
 
-void ToolbarManager::OnNavigationModifyDone()
-{
-    for (auto modifyDoneCallbackFuncCopy : modifyDoneCallbackFuncs_) {
-        if (modifyDoneCallbackFuncCopy) {
-            modifyDoneCallbackFuncCopy();
-        }
-    }
-}
-
-void ToolbarManager::OnSideBarModifyDone()
+void ToolbarManager::OnToolBarManagerModifyDone()
 {
     for (auto modifyDoneCallbackFuncCopy : modifyDoneCallbackFuncs_) {
         if (modifyDoneCallbackFuncCopy) {

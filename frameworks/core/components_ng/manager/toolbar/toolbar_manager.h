@@ -113,8 +113,7 @@ public:
     void SetToolBarChangeCallback(const std::function<void()>&& callback);
     void OnChange();
     void SetModifyDoneCallback(const std::function<void()>&& callback);
-    void OnNavigationModifyDone();
-    void OnSideBarModifyDone();
+    void OnToolBarManagerModifyDone();
 
     WeakPtr<FrameNode> GetSiderBar()
     {

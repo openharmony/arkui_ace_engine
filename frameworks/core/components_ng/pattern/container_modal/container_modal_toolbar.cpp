@@ -95,7 +95,7 @@ void ContainerModalToolBar::SetToolbarBuilder(const RefPtr<FrameNode>& parent, s
         CHECK_NULL_VOID(frameNode);
         toolbar->RemoveToolbarItem(frameNode);
     };
-    parent->SetDetachRelatedNodeCallback(std::move(callback));
+    parent->RemoveToolbarItemCallback(std::move(callback));
     InitToolBarManager();
     SetOnChangeCallback();
     auto pattern = pattern_.Upgrade();
@@ -105,10 +105,10 @@ void ContainerModalToolBar::SetToolbarBuilder(const RefPtr<FrameNode>& parent, s
     pipeline->AddAfterRenderTask([weak = WeakClaim(this), frame = WeakClaim(RawPtr(parent))]() {
         auto toolbar = weak.Upgrade();
         CHECK_NULL_VOID(toolbar);
-        if (!(toolbar->TargetNodes())) {
-            if (toolbar->GetTargetNodes()) {
-                toolbar->setTargetNodes(true);
-                toolbar->ToInitTargetNode();
+        if (!(toolbar->HasNavOrSideBarNodes())) {
+            if (toolbar->GetNavOrSideBarNodes()) {
+                toolbar->SetHasNavOrSideBarNodes(true);
+                toolbar->ToInitNavOrSideBarNode();
             } else {
                 return;
             }
@@ -300,6 +300,7 @@ bool ContainerModalToolBar::AddToolbarItemToSpecificRow(ItemPlacementType placeM
     };
     auto containermodal = pattern_.Upgrade();
     CHECK_NULL_RETURN(containermodal, ref);
+    containermodal->SetIsHaveToolBar(true);
     auto pipeline = containermodal->GetContext();
     CHECK_NULL_RETURN(pipeline, true);
     pipeline->AddAfterRenderTask(overlayTask);
@@ -422,7 +423,6 @@ void ContainerModalToolBar::AddRightNavRow()
             navbarRow_->AddChild(rightNavRow_);
             auto layout = rightNavRow_->GetLayoutProperty<LinearLayoutProperty>();
             CHECK_NULL_VOID(layout);
-            layout->UpdateFlexDirection(FlexDirection::ROW_REVERSE);
             layout->UpdateMainAxisAlign(FlexAlign::FLEX_END);
             rightNavRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         }
@@ -480,7 +480,6 @@ void ContainerModalToolBar::AddRightNavDestRow()
             navDestbarRow_->AddChild(rightNavDestRow_);
             auto layout = rightNavDestRow_->GetLayoutProperty<LinearLayoutProperty>();
             CHECK_NULL_VOID(layout);
-            layout->UpdateFlexDirection(FlexDirection::ROW_REVERSE);
             layout->UpdateMainAxisAlign(FlexAlign::FLEX_END);
             rightNavDestRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         }
@@ -514,6 +513,11 @@ void ContainerModalToolBar::RemoveToolbarRowContainers()
     RemoveIfEmpty(navDestbarRow_, title_);
     if (title_) {
         title_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    }
+    if (!navbarRow_ && !navDestbarRow_) {
+        auto containermodal = pattern_.Upgrade();
+        CHECK_NULL_VOID(containermodal);
+        containermodal->SetIsHaveToolBar(false);
     }
 }
 
@@ -662,7 +666,7 @@ void ContainerModalToolBar::SetcustomTitleRowBlurStyle(BlurStyle& blurStyle)
 
 void ContainerModalToolBar::HasExpandStackLayout()
 {
-    if (!hasTargetNodes_) {
+    if (!hasNavOrSideBarNodes_) {
         if (!hasFind_) {
             hasFind_ = true;
             auto pattern = pattern_.Upgrade();
@@ -672,10 +676,10 @@ void ContainerModalToolBar::HasExpandStackLayout()
             pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
                 auto toolbar = weak.Upgrade();
                 CHECK_NULL_VOID(toolbar);
-                if (!(toolbar->TargetNodes())) {
-                    if (toolbar->GetTargetNodes()) {
-                        toolbar->setTargetNodes(true);
-                        toolbar->ToInitTargetNode();
+                if (!(toolbar->HasNavOrSideBarNodes())) {
+                    if (toolbar->GetNavOrSideBarNodes()) {
+                        toolbar->SetHasNavOrSideBarNodes(true);
+                        toolbar->ToInitNavOrSideBarNode();
                     } else {
                         return;
                     }
@@ -794,8 +798,9 @@ std::string ContainerModalToolBar::GetTagFromNode(RefPtr<UINode> node)
 {
     std::string tag = "";
     CHECK_NULL_RETURN(node, tag);
+    auto navigationNode = navigationNode_.Upgrade();
     while (node && node->GetTag() != V2::ROOT_ETS_TAG) {
-        if (node->GetTag() == V2::NAVBAR_ETS_TAG && navigationNode_ && navigationNode_ == node->GetParent()) {
+        if (node->GetTag() == V2::NAVBAR_ETS_TAG && navigationNode && navigationNode == node->GetParent()) {
             tag = node->GetTag();
             break;
         }
@@ -805,7 +810,7 @@ std::string ContainerModalToolBar::GetTagFromNode(RefPtr<UINode> node)
                 break;
             }
             auto navDestContentNode = node->GetParent();
-            if (navDestContentNode && navigationNode_ && navigationNode_ == navDestContentNode->GetParent()) {
+            if (navDestContentNode && navigationNode && navigationNode == navDestContentNode->GetParent()) {
                 tag = node->GetTag();
                 break;
             }
@@ -835,7 +840,7 @@ std::string ContainerModalToolBar::GetTagFromNode(RefPtr<UINode> node)
  * @note The method uses a queue to perform breadth-first traversal and ensures that
  *       the search stops as soon as the required nodes are identified.
  */
-bool ContainerModalToolBar::GetTargetNodes()
+bool ContainerModalToolBar::GetNavOrSideBarNodes()
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
@@ -851,7 +856,12 @@ bool ContainerModalToolBar::GetTargetNodes()
     CHECK_NULL_RETURN(customNode, false);
     auto customGeometryNode = customNode->GetGeometryNode();
     CHECK_NULL_RETURN(customGeometryNode, false);
-    auto width = customGeometryNode->GetFrameSize().Width();
+    auto pageWidth = customGeometryNode->GetFrameSize().Width();
+    return GetNavOrSideBarNodesParseChildren(page, pageWidth);
+}
+
+bool ContainerModalToolBar::GetNavOrSideBarNodesParseChildren(const RefPtr<UINode>& page, float pageWidth)
+{
     std::queue<RefPtr<UINode>> queue {};
     bool isSideBarFound = false;
     bool isNavigationFound = false;
@@ -867,52 +877,21 @@ bool ContainerModalToolBar::GetTargetNodes()
             continue;
         }
         for (auto child : children) {
+            queue.emplace(child);
             auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
-            if (!childFrameNode) {
+            CHECK_NULL_CONTINUE(childFrameNode)
+            if (IsTragetSideBarNodeParse(childFrameNode, pageWidth, sideBarHeight, isSideBarFound)) {
+                std::queue<RefPtr<UINode>>().swap(queue);
                 queue.emplace(child);
-                continue;
-            }
-
-            std::string tag = "";
-            if (!isSideBarFound && childFrameNode->GetTag() == V2::SIDE_BAR_ETS_TAG) {
-                tag = childFrameNode->GetTag();
-                auto geometryNode = childFrameNode->GetGeometryNode();
-                CHECK_NULL_CONTINUE(geometryNode);
-                auto childWidth = geometryNode->GetFrameSize().Width();
-                sideBarHeight = geometryNode->GetFrameSize().Height();
-                if (NearEqual(width, childWidth)) {
-                    isSideBarFound = true;
-                    sideBarNode_ = childFrameNode;
-                    std::queue<RefPtr<UINode>>().swap(queue);
-                    queue.emplace(child);
-                    break;
-                }
-            } else if (!isNavigationFound && childFrameNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
-                if (!isSideBarFound) {
-                    auto geometryNode = childFrameNode->GetGeometryNode();
-                    CHECK_NULL_CONTINUE(geometryNode);
-                    auto childWidth = geometryNode->GetFrameSize().Width();
-                    if (NearEqual(width, childWidth)) {
-                        isSideBarFound = true;
-                        isNavigationFound = true;
-                        navigationNode_ = childFrameNode;
-                        std::queue<RefPtr<UINode>>().swap(queue);
-                        queue.emplace(child);
-                        break;
-                    }
-                } else {
-                    auto geometryNode = childFrameNode->GetGeometryNode();
-                    CHECK_NULL_CONTINUE(geometryNode);
-                    auto childHeight = geometryNode->GetFrameSize().Height();
-                    if (NearEqual(sideBarHeight, childHeight) || NearEqual(sideBarHeight, 0.0f)) {
-                        isSideBarFound = true;
-                        isNavigationFound = true;
-                        navigationNode_ = childFrameNode;
-                        std::queue<RefPtr<UINode>>().swap(queue);
-                        queue.emplace(child);
-                        break;
-                    }
-                }
+                isSideBarFound = true;
+                break;
+            } else if (IsTragetNavigationNodeParse(
+                childFrameNode, pageWidth, sideBarHeight, isNavigationFound, isSideBarFound)) {
+                std::queue<RefPtr<UINode>>().swap(queue);
+                queue.emplace(child);
+                isSideBarFound = true;
+                isNavigationFound = true;
+                break;
             } else if ((isSideBarFound || isNavigationFound) &&
                        childFrameNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
                 isSideBarFound = true;
@@ -923,7 +902,6 @@ bool ContainerModalToolBar::GetTargetNodes()
             if ((isSideBarFound || isNavigationFound) && isNavDestFound) {
                 break;
             }
-            queue.emplace(child);
         }
         if ((isSideBarFound || isNavigationFound) && isNavDestFound) {
             break;
@@ -935,25 +913,73 @@ bool ContainerModalToolBar::GetTargetNodes()
     return false;
 }
 
-void ContainerModalToolBar::ToInitTargetNode()
+bool ContainerModalToolBar::IsTragetSideBarNodeParse(
+    const RefPtr<FrameNode>& childFrameNode, float pageWidth, float& sideBarHeight, bool isSideBarFound)
 {
-    if (sideBarNode_) {
-        auto sideBarPattern = AceType::DynamicCast<NG::SideBarContainerPattern>(sideBarNode_->GetPattern());
-        if (sideBarPattern) {
-            sideBarPattern->InitToolBarManager();
-            sideBarNode_->MarkModifyDone();
+    CHECK_NULL_RETURN(childFrameNode, false);
+    if (!isSideBarFound && childFrameNode->GetTag() == V2::SIDE_BAR_ETS_TAG) {
+        auto geometryNode = childFrameNode->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        auto childWidth = geometryNode->GetFrameSize().Width();
+        if (NearEqual(pageWidth, childWidth)) {
+            sideBarHeight = geometryNode->GetFrameSize().Height();
+            sideBarNode_ = childFrameNode;
+            return true;
         }
     }
-    if (navigationNode_) {
-        auto navigationPattern = AceType::DynamicCast<NG::NavigationPattern>(navigationNode_->GetPattern());
+    return false;
+}
+
+bool ContainerModalToolBar::IsTragetNavigationNodeParse(const RefPtr<FrameNode>& childFrameNode, float pageWidth,
+    float sideBarHeight, bool isNavigationFound, bool isSideBarFound)
+{
+    CHECK_NULL_RETURN(childFrameNode, false);
+    if (!isNavigationFound && childFrameNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+        if (!isSideBarFound) {
+            auto geometryNode = childFrameNode->GetGeometryNode();
+            CHECK_NULL_RETURN(geometryNode, false);
+            auto childWidth = geometryNode->GetFrameSize().Width();
+            if (NearEqual(pageWidth, childWidth)) {
+                navigationNode_ = childFrameNode;
+                return true;
+            }
+        } else {
+            auto geometryNode = childFrameNode->GetGeometryNode();
+            CHECK_NULL_RETURN(geometryNode, false);
+            auto childHeight = geometryNode->GetFrameSize().Height();
+            if (NearEqual(sideBarHeight, childHeight) || NearEqual(sideBarHeight, 0.0f)) {
+                navigationNode_ = childFrameNode;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void ContainerModalToolBar::ToInitNavOrSideBarNode()
+{
+    auto sideBarNode = sideBarNode_.Upgrade();
+    CHECK_NULL_VOID(sideBarNode);
+    if (sideBarNode) {
+        auto sideBarPattern = AceType::DynamicCast<NG::SideBarContainerPattern>(sideBarNode->GetPattern());
+        if (sideBarPattern) {
+            sideBarPattern->InitToolBarManager();
+            sideBarNode->MarkModifyDone();
+        }
+    }
+    auto navigationNode = navigationNode_.Upgrade();
+    CHECK_NULL_VOID(navigationNode);
+    if (navigationNode) {
+        auto navigationPattern = AceType::DynamicCast<NG::NavigationPattern>(navigationNode->GetPattern());
         if (navigationPattern) {
             navigationPattern->InitToolBarManager();
-            navigationNode_->MarkModifyDone();
+            navigationNode->MarkModifyDone();
         }
     }
     CHECK_NULL_VOID(toolbarManager_);
     std::function<void()> getTypeOfItem = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         pattern->ParsePlacementType();
     };
     toolbarManager_->SetModifyDoneCallback(std::move(getTypeOfItem));

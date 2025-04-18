@@ -143,6 +143,13 @@ public:
         return AceType::DynamicCast<FrameNode>(stack->GetChildren().front());
     }
 
+    RefPtr<FrameNode> GetPageNode()
+    {
+        auto stageNode = GetContentNode();
+        CHECK_NULL_RETURN(stageNode, nullptr);
+        return AceType::DynamicCast<FrameNode>(stageNode->GetChildren().front());
+    }
+
     RefPtr<CustomTitleNode> GetFloatingTitleNode()
     {
         auto row = GetFloatingTitleRow();
@@ -219,6 +226,16 @@ public:
     static void EnableContainerModalCustomGesture(RefPtr<PipelineContext> pipeline, bool enable);
     void SetToolbarBuilder(const RefPtr<FrameNode>& parent, std::function<RefPtr<UINode>()>&& builder);
     virtual CalcLength GetControlButtonRowWidth();
+
+    void SetIsHaveToolBar(bool isHave)
+    {
+        isHaveToolBar_ = isHave;
+    }
+
+    bool GetIsHaveToolBar() const
+    {
+        return isHaveToolBar_;
+    }
 
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
@@ -298,6 +315,7 @@ protected:
     bool isCustomColor_;
     RefPtr<ContainerModalToolBar> titleMgr_;
     RefPtr<ContainerModalToolBar> floatTitleMgr_;
+    bool isHaveToolBar_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_H

@@ -1493,9 +1493,9 @@ void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleT
 
 void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
-    for (auto detachRelatedNodeCallbackCopy : detachRelatedNodeCallbacks_) {
-        if (detachRelatedNodeCallbackCopy) {
-            detachRelatedNodeCallbackCopy();
+    for (auto removeToolbarItemCallbackCopy : removeToolbarItemCallbacks_) {
+        if (removeToolbarItemCallbackCopy) {
+            removeToolbarItemCallbackCopy();
         }
     }
     auto focusHub = GetFocusHub();
