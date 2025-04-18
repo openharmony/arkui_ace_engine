@@ -181,7 +181,7 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
         accessibilityProperty->SetCollectionItemCounts(layoutAlgorithm->GetTotalItemCount());
     }
     auto listLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
-    return listLayoutProperty && listLayoutProperty->GetDivider().has_value() && !itemPosition_.empty();
+    return listLayoutProperty && listLayoutProperty->GetDivider().has_value();
 }
 
 float ListItemGroupPattern::GetPaddingAndMargin() const
