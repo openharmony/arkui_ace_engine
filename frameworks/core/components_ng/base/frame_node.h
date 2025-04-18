@@ -1520,6 +1520,8 @@ private:
     void TipsTouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
         TouchRestrict& touchRestrict, TouchTestResult& result, ResponseLinkResult& responseLinkResult, bool isDispatch);
 
+    RectF CheckResponseRegionForStylus(RectF& rect, const TouchEvent& touchEvent);
+
     void ResetPredictNodes();
     void HandleAreaChangeDestruct();
 
