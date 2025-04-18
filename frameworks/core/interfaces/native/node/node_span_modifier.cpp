@@ -486,6 +486,25 @@ ArkUI_CharPtr GetSpanFontFamily(ArkUINodeHandle node)
     g_strValue = families;
     return g_strValue.c_str();
 }
+
+void SetSpanOnHover(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onHover = reinterpret_cast<OnHoverFunc*>(callback);
+        SpanModelNG::SetOnHover(frameNode, std::move(*onHover));
+    } else {
+        SpanModelNG::ResetOnHover(frameNode);
+    }
+}
+
+void ResetSpanOnHover(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SpanModelNG::ResetOnHover(frameNode);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUISpanModifier* GetSpanModifier()
@@ -540,6 +559,8 @@ const ArkUISpanModifier* GetSpanModifier()
         .resetAccessibilityDescription = ResetAccessibilityDescription,
         .setAccessibilityLevel = SetAccessibilityLevel,
         .resetAccessibilityLevel = ResetAccessibilityLevel,
+        .setSpanOnHover = SetSpanOnHover,
+        .resetSpanOnHover = ResetSpanOnHover,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

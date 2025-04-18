@@ -29,10 +29,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 140
+#define ARKUI_FULL_API_VERSION 141
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 140
+#define ARKUI_NODE_API_VERSION 141
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -5271,6 +5271,8 @@ struct ArkUISpanModifier {
     void (*resetAccessibilityDescription)(ArkUINodeHandle node);
     void (*setAccessibilityLevel)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetAccessibilityLevel)(ArkUINodeHandle node);
+    void (*setSpanOnHover)(ArkUINodeHandle node, void* callback);
+    void (*resetSpanOnHover)(ArkUINodeHandle node);
 };
 
 struct ArkUISelectModifier {
