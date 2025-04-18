@@ -24,13 +24,13 @@ OneStepDragParam::OneStepDragParam(const Builder& builder, const SelectMenuParam
     menuBuilder = builder;
     onAppear = [onAppearFunc = selectMenuParam.onAppear, onMenuShowFunc = selectMenuParam.onMenuShow](
                    int32_t start, int32_t end) {
-        onAppearFunc(start, end);
-        onMenuShowFunc(start, end);
+        IF_TRUE(onAppearFunc, onAppearFunc(start, end));
+        IF_TRUE(onMenuShowFunc, onMenuShowFunc(start, end));
     };
     onDisappear = [onDisappearFunc = selectMenuParam.onDisappear, onMenuHideFunc = selectMenuParam.onMenuHide](
                       int32_t start, int32_t end) {
-        onMenuHideFunc(start, end);
-        onDisappearFunc();
+        IF_TRUE(onMenuHideFunc, onMenuHideFunc(start, end));
+        IF_TRUE(onDisappearFunc, onDisappearFunc());
     };
     menuParam.previewMode = MenuPreviewMode::IMAGE;
     menuParam.type = MenuType::CONTEXT_MENU;
@@ -42,6 +42,10 @@ OneStepDragParam::OneStepDragParam(const Builder& builder, const SelectMenuParam
 
 void OneStepDragParam::EnableDrag(const RefPtr<FrameNode>& frameNode) const
 {
+    auto hub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(hub);
+    hub->SetHitTestMode((menuBuilder != nullptr) ? HitTestMode::HTMDEFAULT : HitTestMode::HTMNONE);
+
     frameNode->SetDraggable(true);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -84,6 +88,25 @@ void OneStepDragParam::HandleDirtyNodes()
 inline void OneStepDragParam::MarkDirtyNode(const WeakPtr<FrameNode>& dirtyFrameNode)
 {
     dirtyFrameNodes.push(dirtyFrameNode);
+}
+
+template<typename T>
+void OneStepDragParam::SetEnableEventResponse(int32_t start, int32_t end, std::list<WeakPtr<T>>& nodes)
+{
+    CHECK_NULL_VOID(menuBuilder);
+    for (auto it = nodes.begin(); it != nodes.end();) {
+        auto node = it->Upgrade();
+        if (!node) {
+            it = nodes.erase(it);
+            continue;
+        }
+        ++it;
+        auto hub = node->GetOrCreateGestureEventHub();
+        CHECK_NULL_CONTINUE(hub);
+        auto spanItem = node->GetSpanItem();
+        bool enableResponse = start > spanItem->rangeStart || spanItem->position > end;
+        hub->SetHitTestMode(enableResponse ? HitTestMode::HTMDEFAULT : HitTestMode::HTMNONE);
+    }
 }
 /* end OneStepDragParam */
 
@@ -261,56 +284,15 @@ void OneStepDragController::CopyDragCallback(TextSpanType spanType, const RefPtr
     frameNodeEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(oneStepDragEnd));
 }
 
-void OneStepDragController::SetEnableEventResponse(bool isEnable)
-{
-    CHECK_NULL_VOID(imageDragParam_ || placeholderDragParam_);
-    CHECK_NULL_VOID(isEnableEventResponse_ != isEnable);
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    auto host = pattern->GetHost();
-    CHECK_NULL_VOID(host);
-
-    const auto& imageTagFilter = imageDragParam_ ? imageDragParam_->tagFilter_ : DEFAULT_FILTER;
-    const auto& placeholderTagFilter = placeholderDragParam_ ? placeholderDragParam_->tagFilter_ : DEFAULT_FILTER;
-
-    for (const auto& uiNode : host->GetChildren()) {
-        auto& tag = uiNode->GetTag();
-        CHECK_NULL_CONTINUE(imageTagFilter(tag) || placeholderTagFilter(tag));
-        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
-        CHECK_NULL_CONTINUE(frameNode);
-        auto hub = frameNode->GetOrCreateGestureEventHub();
-        CHECK_NULL_CONTINUE(hub);
-        hub->SetHitTestMode(isEnable ? HitTestMode::HTMDEFAULT : HitTestMode::HTMNONE);
-    }
-    isEnableEventResponse_ = isEnable;
-}
-
 void OneStepDragController::SetEnableEventResponse(const TextSelector& selector,
     std::list<WeakPtr<ImageSpanNode>>& imageNodes, std::list<WeakPtr<PlaceholderSpanNode>>& builderNodes)
 {
     auto start = selector.GetTextStart();
     auto end = selector.GetTextEnd();
-    IF_TRUE(imageDragParam_, SetEnableEventResponse(start, end, imageNodes));
-    IF_TRUE(placeholderDragParam_, SetEnableEventResponse(start, end, builderNodes));
+    IF_PRESENT(imageDragParam_, SetEnableEventResponse(start, end, imageNodes));
+    IF_PRESENT(placeholderDragParam_, SetEnableEventResponse(start, end, builderNodes));
 }
 
-template<typename T>
-void OneStepDragController::SetEnableEventResponse(int32_t start, int32_t end, std::list<WeakPtr<T>>& builderNodes)
-{
-    for (auto it = builderNodes.begin(); it != builderNodes.end();) {
-        auto builderNode = it->Upgrade();
-        if (!builderNode) {
-            it = builderNodes.erase(it);
-            continue;
-        }
-        ++it;
-        auto hub = builderNode->GetOrCreateGestureEventHub();
-        CHECK_NULL_CONTINUE(hub);
-        auto spanItem = builderNode->GetSpanItem();
-        bool enableResponse = start > spanItem->rangeStart || spanItem->position > end;
-        hub->SetHitTestMode(enableResponse ? HitTestMode::HTMDEFAULT : HitTestMode::HTMNONE);
-    }
-}
 
 void OneStepDragController::FillJsonValue(const std::unique_ptr<JsonValue>& jsonValue)
 {
@@ -331,19 +313,14 @@ void OneStepDragController::HandleDirtyNodes()
 
 const std::unique_ptr<OneStepDragParam>& OneStepDragController::GetDragParam(TextSpanType spanType) const
 {
-    if (spanType == TextSpanType::IMAGE) {
-        return imageDragParam_;
-    }
-    if (spanType == TextSpanType::BUILDER) {
-        return placeholderDragParam_;
-    }
+    IF_TRUE(spanType == TextSpanType::IMAGE, return imageDragParam_);
+    IF_TRUE(spanType == TextSpanType::BUILDER, return placeholderDragParam_);
     return invalidParam;
 }
 
 const std::unique_ptr<OneStepDragParam>& OneStepDragController::CreateDragParam(TextSpanType spanType,
     const Builder& builder, const SelectMenuParam& menuParam)
 {
-    CHECK_NULL_RETURN(builder, invalidParam);
     if (spanType == TextSpanType::IMAGE) {
         return imageDragParam_ = std::make_unique<ImageOneStepDragParam>(builder, menuParam);
     }

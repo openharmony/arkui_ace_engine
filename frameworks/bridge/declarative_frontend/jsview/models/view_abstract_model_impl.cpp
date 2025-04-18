@@ -215,6 +215,8 @@ void ViewAbstractModelImpl::SetHeight(const CalcDimension& height)
     }
 }
 
+void ViewAbstractModelImpl::SetToolbarBuilder(std::function<void()>&& buildFunc) {}
+
 void ViewAbstractModelImpl::SetMinWidth(const CalcDimension& minWidth)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -1441,7 +1443,7 @@ void ViewAbstractModelImpl::BindPopup(const RefPtr<PopupParam>& param, const Ref
     }
 }
 
-void ViewAbstractModelImpl::BindTips(const RefPtr<PopupParam>& param)
+void ViewAbstractModelImpl::BindTips(const RefPtr<PopupParam>& param, const RefPtr<SpanString>& spanString)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto tipsComponent = ViewStackProcessor::GetInstance()->GetPopupComponent(true);
@@ -1691,4 +1693,7 @@ void ViewAbstractModelImpl::SetAccessibilityScrollTriggerable(bool triggerable, 
 void ViewAbstractModelImpl::SetAccessibilityFocusDrawLevel(int32_t drawLevel)
 {}
 
+void ViewAbstractModelImpl::SetOnAccessibilityActionIntercept(
+    NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept)
+{}
 } // namespace OHOS::Ace::Framework

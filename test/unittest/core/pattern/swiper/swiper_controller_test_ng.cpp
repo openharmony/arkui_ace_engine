@@ -883,6 +883,20 @@ HWTEST_F(SwiperControllerTestNg, PreloadItems003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LazyForEachRequestLongPredict001
+ * @tc.desc: Test LazyForEach requestLongPredict_
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, LazyForEachNeedPredict001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateItemsInLazyForEach();
+    CreateSwiperDone();
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_TRUE(lazyForEachNode->requestLongPredict_);
+}
+
+/**
  * @tc.name: ChangeIndex001
  * @tc.desc: Test ChangeIndex with SwiperDisplayMode::AUTO_LINEAR and item invisible
  * @tc.type: FUNC

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,7 +135,7 @@ public:
         return false;
     }
     virtual bool IsAtTop() const = 0;
-    virtual bool IsAtBottom() const = 0;
+    virtual bool IsAtBottom(bool considerRepeat = false) const = 0;
     virtual bool IsAtTopWithDelta() const
     {
         return IsAtTop();
@@ -175,8 +175,8 @@ public:
     virtual bool OnScrollCallback(float offset, int32_t source);
     virtual void OnScrollStartCallback();
     virtual void FireOnScrollStart();
-    virtual void FireOnReachStart(const OnReachEvent& onReachStart) {}
-    virtual void FireOnReachEnd(const OnReachEvent& onReachEnd) {}
+    virtual void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) {}
+    virtual void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) {}
     bool ScrollableIdle()
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();
@@ -462,14 +462,6 @@ public:
 
     void SetScrollSource(int32_t scrollSource)
     {
-        if (scrollSource == SCROLL_FROM_JUMP || scrollSource == SCROLL_FROM_FOCUS_JUMP) {
-            if (scrollBar_ && scrollBar_->IsScrollable() && scrollBarOverlayModifier_) {
-                scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
-                scrollBar_->ScheduleDisappearDelayTask();
-            }
-            StopScrollBarAnimatorByProxy();
-            StartScrollBarAnimatorByProxy();
-        }
         if (scrollSource == SCROLL_FROM_NONE) {
             if (lastScrollSource_ != scrollSource_) {
                 AddScrollableFrameInfo(scrollSource_);
@@ -692,8 +684,8 @@ public:
     void GetPaintPropertyDumpInfo();
     void GetPaintPropertyDumpInfo(std::unique_ptr<JsonValue>& json);
 
-    void GetEventDumpInfo();
-    void GetEventDumpInfo(std::unique_ptr<JsonValue>& json);
+    virtual void GetEventDumpInfo();
+    virtual void GetEventDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
@@ -729,7 +721,6 @@ public:
         hotZoneScrollCallback_ = func;
     }
 
-#ifdef ARKUI_CIRCLE_FEATURE
     void SetScrollBarShape(const ScrollBarShape &shape)
     {
         if (shape == ScrollBarShape::ARC) {
@@ -738,7 +729,6 @@ public:
             isRoundScroll_ = false;
         }
     }
-#endif
 
 #ifdef SUPPORT_DIGITAL_CROWN
     bool GetCrownEventDragging() const
@@ -773,6 +763,11 @@ public:
     void SearchAndUnsetParentNestedScroll(const RefPtr<FrameNode>& node);
 
     void DeleteNestScrollBarProxy(const WeakPtr<ScrollBarProxy>& scrollBarProxy);
+
+    void SetUseTotalOffset(bool useTotalOffset)
+    {
+        useTotalOffset_ = useTotalOffset;
+    }
 
     bool GetNestedScrolling() const
     {
@@ -816,6 +811,9 @@ public:
 
     void OnStatusBarClick() override;
 
+    void GetRepeatCountInfo(
+        RefPtr<UINode> node, int32_t& repeatDifference, int32_t& firstRepeatCount, int32_t& totalChildCount);
+
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity);
     CrownSensitivity GetDigitalCrownSensitivity() const
@@ -853,7 +851,8 @@ protected:
     void FireObserverOnScrollStop();
     void FireObserverOnDidScroll(float finalOffset);
 
-    virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop);
+    virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
+    void FireOnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
 
     float FireOnWillScroll(float offset) const;
 
@@ -926,6 +925,11 @@ protected:
     void CheckScrollBarOff();
 
     void RecordScrollEvent(Recorder::EventType eventType);
+
+    bool IsBackToTopRunning() const
+    {
+        return isBackToTopRunning_;
+    }
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownEvent();
@@ -1116,7 +1120,7 @@ private:
     std::shared_ptr<AnimationUtils::Animation> curveAnimation_;
     uint64_t lastVsyncTime_ = 0;
     bool isAnimationStop_ = true; // graphic animation flag
-    bool isClickAnimationStop_ = false; // interrupt scrolling after click statubar.
+    bool isBackToTopRunning_ = false;
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;
     float finalPosition_ = 0.0f;

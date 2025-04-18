@@ -34,9 +34,11 @@ template("ace_core_interfaces_native_node") {
       "node/badge_modifier.cpp",
       "node/blank_modifier.cpp",
       "node/button_modifier.cpp",
+      "node/calendar_picker_modifier.cpp",
       "node/canvas_rendering_context_2d_modifier.cpp",
       "node/checkboxgroup_modifier.cpp",
       "node/column_modifier.cpp",
+      "node/column_split_modifier.cpp",
       "node/common_shape_modifier.cpp",
       "node/counter_modifier.cpp",
       "node/custom_dialog_model.cpp",
@@ -114,11 +116,13 @@ template("ace_core_interfaces_native_node") {
       "node/render_node_modifier.cpp",
       "node/rich_editor_modifier.cpp",
       "node/row_modifier.cpp",
+      "node/row_split_modifier.cpp",
       "node/scrollable_modifier.cpp",
       "node/scroller_modifier.cpp",
       "node/search_modifier.cpp",
       "node/shape_modifier.cpp",
       "node/side_bar_container_modifier.cpp",
+      "node/stepper_item_modifier.cpp",
       "node/swiper_controller_modifier.cpp",
       "node/tab_content_modifier.cpp",
       "node/tabs_modifier.cpp",
@@ -128,6 +132,7 @@ template("ace_core_interfaces_native_node") {
       "node/util_modifier.cpp",
       "node/video_modifier.cpp",
       "node/view_model.cpp",
+      "node/water_flow_modifier.cpp",
     ]
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
@@ -173,13 +178,8 @@ template("ace_core_interfaces_native_node") {
 
     if (!ace_engine_feature_wearable) {
       sources += [
-        "node/calendar_picker_modifier.cpp",
-        "node/column_split_modifier.cpp",
         "node/node_folder_stack_modifier.cpp",
-        "node/row_split_modifier.cpp",
         "node/select_modifier.cpp",
-        "node/stepper_item_modifier.cpp",
-        "node/water_flow_modifier.cpp",
       ]
     }
 

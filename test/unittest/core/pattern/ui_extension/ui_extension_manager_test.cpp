@@ -38,6 +38,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
     const std::string PLATFORM_PATTERN_ETS_TAG = "PlatformPattern";
+    const std::string UI_EXTENSION_COMPONENT_ETS_TAG = "UIExtensionComponent";
     const int32_t CODE = 10001;
     const std::string NAME = "Test name";
     const std::string MSG = "Test msg";
@@ -613,5 +614,143 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager011, TestSize.Level1)
     uiExtensionManager->UnregisterListenerIfNeeded();
     ASSERT_EQ(uiExtensionManager->hasRegisterListener_, true);
     #endif
+}
+
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager012, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    int32_t nodeId = 1;
+    int32_t nodeIdTwo = 2;
+    WeakPtr<UIExtensionPattern> platformPattern = pattern;
+    uiExtensionManager->NotifyUECProviderIfNeedded();
+    uiExtensionManager->AddAliveUIExtension(nodeId, platformPattern);
+    WeakPtr<UIExtensionPattern> platformPatternTwo;
+    uiExtensionManager->AddAliveUIExtension(nodeIdTwo, platformPatternTwo);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 2);
+
+    WeakPtr<SecurityUIExtensionPattern> securityUIExtensionPattern;
+    uiExtensionManager->AddAliveUIExtension(nodeId, securityUIExtensionPattern);
+    ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 1);
+
+    EXPECT_FALSE(uiExtensionManager->IsShowPlaceholder(1));
+    Rosen::AvoidArea avoidArea;
+    uint32_t type = 1;
+    uiExtensionManager->TransferOriginAvoidArea(avoidArea, type);
+    std::shared_ptr<Rosen::RSTransaction> rsTransaction;
+    uiExtensionManager->NotifySizeChangeReason(WindowSizeChangeReason::RESIZE, rsTransaction);
+    auto info = sptr<Rosen::OccupiedAreaChangeInfo>(new Rosen::OccupiedAreaChangeInfo());
+    info->rect_.height_ = 0;
+    uiExtensionManager->NotifyOccupiedAreaChangeInfo(info);
+    EXPECT_NE(pattern->sessionWrapper_, nullptr);
+    pattern->sessionWrapper_ = nullptr;
+    auto result = uiExtensionManager->NotifyOccupiedAreaChangeInfo(info);
+    EXPECT_FALSE(result);
+#endif
+}
+
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager013, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    int32_t nodeId = 1;
+    int32_t nodeIdTwo = 2;
+    WeakPtr<UIExtensionPattern> platformPattern = pattern;
+    uiExtensionManager->NotifyUECProviderIfNeedded();
+    uiExtensionManager->AddAliveUIExtension(nodeId, platformPattern);
+    WeakPtr<UIExtensionPattern> platformPatternTwo;
+    uiExtensionManager->AddAliveUIExtension(nodeIdTwo, platformPatternTwo);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 2);
+
+    auto config = std::make_shared<ViewportConfig>(1080, 1920, 2.0f);
+    uiExtensionManager->UpdateSessionViewportConfig(*config);
+    config->transform_ = 1;
+    uiExtensionManager->UpdateSessionViewportConfig(*config);
+    pattern->state_ = UIExtensionPattern::AbilityState::FOREGROUND;
+    EXPECT_TRUE(pattern->IsForeground());
+    config->orientation_ = 1;
+    uiExtensionManager->UpdateSessionViewportConfig(*config);
+
+    auto isDensityFollowHost = pattern->GetSessionViewportConfig().isDensityFollowHost_;
+    SessionViewportConfig newConfig { isDensityFollowHost, 2.0f, 1, 1, 1 };
+    pattern->SetSessionViewportConfig(newConfig);
+    EXPECT_NE(pattern->sessionWrapper_, nullptr);
+    pattern->sessionWrapper_ = nullptr;
+    uiExtensionManager->UpdateSessionViewportConfig(*config);
+    EXPECT_EQ(pattern->GetSessionViewportConfig().displayId_, 0);
+    uiExtensionManager->UpdateSessionViewportConfig(*config);
+#endif
+}
+
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager014, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    int32_t nodeId = 1;
+    int32_t nodeIdTwo = 2;
+    WeakPtr<UIExtensionPattern> platformPattern = pattern;
+    uiExtensionManager->NotifyUECProviderIfNeedded();
+    uiExtensionManager->AddAliveUIExtension(nodeId, platformPattern);
+    WeakPtr<UIExtensionPattern> platformPatternTwo;
+    uiExtensionManager->AddAliveUIExtension(nodeIdTwo, platformPatternTwo);
+    uiExtensionManager->NotifyUECProviderIfNeedded();
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 2);
+
+    WeakPtr<SecurityUIExtensionPattern> securityUIExtensionPattern;
+    uiExtensionManager->AddAliveUIExtension(nodeId, securityUIExtensionPattern);
+    ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 1);
+
+    AAFwk::Want data;
+    data.SetParam("requestPageMode", std::string("yes"));
+    UIContentBusinessCode code = UIContentBusinessCode::UNDEFINED;
+    RSSubsystemId subSystemId = RSSubsystemId::WM_UIEXT;
+    uiExtensionManager->UpdateWMSUIExtProperty(code, data, subSystemId);
+    uiExtensionManager->TransferAccessibilityRectInfo();
+    auto mode = Rosen::WindowMode::WINDOW_MODE_UNDEFINED;
+    uiExtensionManager->NotifyWindowMode(mode);
+
+    OHOS::AAFwk::Want want;
+    std::optional<OHOS::AAFwk::Want> replyData;
+    BusinessDataSendType type = BusinessDataSendType::SYNC;
+    RSSubsystemId id = RSSubsystemId::WM_UIEXT;
+    bool called = false;
+
+    UIExtBusinessDataSendCallback callback = [&](WeakPtr<FrameNode> node) {
+        called = true;
+        return std::optional<OHOS::AAFwk::Want>(want);
+    };
+    uiExtensionManager->RegisterBusinessDataSendCallback(code, type, callback, id);
+    ASSERT_EQ(uiExtensionManager->businessDataSendCallbacks_.size(), 1);
+    auto result = uiExtensionManager->TriggerBusinessDataSend(code);
+    EXPECT_FALSE(result);
+#endif
 }
 }

@@ -53,11 +53,50 @@ class ListItemSwipeActionModifier extends ModifierWithKey<SwipeActionOptions> {
   }
 }
 
+class ListItemOnSelectModifier extends ModifierWithKey<(isSelected: boolean) => void> {
+  constructor(value: (isSelected: boolean) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listItemOnSelect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().listItem.resetOnSelect(node);
+    } else {
+      getUINativeModule().listItem.setOnSelect(node, this.value!);
+    }
+  }
+}
+
+interface ListItemParam {
+  style: ListItemStyle;
+}
+
+class ListItemInitializeModifier extends ModifierWithKey<ListItemParam> {
+  constructor(value: ListItemParam) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listItemInitialize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().listItem.resetListItemInitialize(node);
+    } else {
+      getUINativeModule().listItem.setListItemInitialize(node, this.value?.style);
+    }
+  }
+}
+
 class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   initialize(value: Object[]): this {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, ListItemInitializeModifier.identity,
+        ListItemInitializeModifier, value[0] as ListItemParam);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ListItemInitializeModifier.identity,
+        ListItemInitializeModifier, undefined);
+    }
     return this;
   }
   sticky(value: Sticky): this {
@@ -79,7 +118,8 @@ class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
     return this;
   }
   onSelect(event: (isSelected: boolean) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ListItemOnSelectModifier.identity, ListItemOnSelectModifier, event);
+    return this;
   }
 }
 

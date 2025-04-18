@@ -20,6 +20,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/templates_parser.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -461,7 +462,7 @@ void LazyGridLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper, int3
     while (curIndex >= 0 && GreatNotEqual(currentStartPos, startPos_)) {
         currentEndPos = currentStartPos;
         float lineSize = 0.0f;
-        int32_t laneIdx = endIndex % lanes_;
+        int32_t laneIdx = curIndex % lanes_;
         for (int32_t i = 0; i <= laneIdx && curIndex - i >= 0; i++) {
             auto wrapper = layoutWrapper->GetOrCreateChildByIndex(curIndex - i);
             if (!wrapper) {
@@ -561,12 +562,11 @@ void LazyGridLayoutAlgorithm::LayoutCachedItems(LayoutWrapper* layoutWrapper, fl
 void LazyGridLayoutAlgorithm::LayoutCachedItemsForward(LayoutWrapper* layoutWrapper, float crossSize,
     const OffsetF& paddingOffset)
 {
+    auto iter = layoutInfo_->posMap_.begin();
     if (layoutInfo_->endIndex_ >= totalItemCount_ - 1) {
         layoutedEnd_ = totalMainSize_;
         cachedEndIndex_ = layoutInfo_->endIndex_;
-    }
-    auto iter = layoutInfo_->posMap_.begin();
-    if (layoutInfo_->endIndex_ < 0) {
+    } else if (layoutInfo_->endIndex_ < 0) {
         cachedEndIndex_ = -1;
         layoutedEnd_ = 0;
     } else {
@@ -607,12 +607,11 @@ void LazyGridLayoutAlgorithm::LayoutCachedItemsForward(LayoutWrapper* layoutWrap
 void LazyGridLayoutAlgorithm::LayoutCachedItemsBackward(LayoutWrapper* layoutWrapper, float crossSize,
     const OffsetF& paddingOffset)
 {
+    auto rIter = layoutInfo_->posMap_.rbegin();
     if (layoutInfo_->startIndex_ == 0) {
         layoutedStart_ = 0.0f;
         cachedStartIndex_ = 0;
-    }
-    auto rIter = layoutInfo_->posMap_.rbegin();
-    if (layoutInfo_->startIndex_ >= totalItemCount_) {
+    } else if (layoutInfo_->startIndex_ >= totalItemCount_) {
         layoutedStart_ = totalMainSize_;
         cachedStartIndex_ = totalItemCount_;
     } else {

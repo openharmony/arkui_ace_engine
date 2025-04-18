@@ -343,6 +343,15 @@ template("ace_core_source_set") {
       sources += [ "event/event_info_convertor.cpp" ]
     }
 
+    if (ace_engine_feature_enable_long_press_gesture_extra_handling && defined(
+            vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling)) {
+      sources += vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling
+      external_deps += vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling_deps
+    } else {
+      sources +=
+          [ "components_ng/gestures/recognizers/gestures_extra_handler.cpp" ]
+    }
+
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
@@ -862,7 +871,6 @@ template("ace_core_ng_source_set") {
       # v1 deps
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
-      "$root_out_dir/arkui/framework/core/components/theme/theme_constants_watch.cpp",
       "components/checkable/checkable_theme.cpp",
       "components/common/painter/rosen_svg_painter.cpp",
       "components/custom_paint/render_custom_paint_creator.cpp",
@@ -962,6 +970,14 @@ template("ace_core_ng_source_set") {
       external_deps += vendor_configs.ace_engine_advanced_enable_event_compatible_handling_deps
     } else {
       sources += [ "event/event_info_convertor.cpp" ]
+    }
+    if (ace_engine_feature_enable_long_press_gesture_extra_handling && defined(
+            vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling)) {
+      sources += vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling
+      external_deps += vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling_deps
+    } else {
+      sources +=
+          [ "components_ng/gestures/recognizers/gestures_extra_handler.cpp" ]
     }
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]

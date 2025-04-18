@@ -27,6 +27,9 @@
 #include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace {
+namespace NG {
+struct MenuParam;
+}
 enum class ArrowPosition {
     END = 0,
     START,
@@ -46,10 +49,6 @@ struct MenuAlign {
 enum class AvoidanceMode {
     COVER_TARGET = 0,
     AVOID_AROUND_TARGET,
-};
-
-struct Avoidance {
-    AvoidanceMode mode = AvoidanceMode::COVER_TARGET;
 };
 
 struct SelectParam {
@@ -98,7 +97,7 @@ public:
     virtual void SetSpace(const Dimension& value);
     virtual void SetArrowPosition(const ArrowPosition value);
     virtual void SetMenuAlign(const MenuAlign& menuAlign);
-    virtual void SetAvoidance(const Avoidance& avoidance);
+    virtual void SetAvoidance(AvoidanceMode mode);
     virtual void SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent);
     virtual void SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent);
     virtual void SetOptionWidth(const Dimension& value);
@@ -115,6 +114,11 @@ public:
     virtual void BackgroundColor(const Color& color) = 0;
     virtual void ResetBackgroundColor() = 0;
     virtual void ResetFontColor() {};
+    virtual void SetMenuOutline(const NG::MenuParam& menuParam);
+    virtual void SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply);
+    virtual void SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply);
+    virtual void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply);
+    virtual void SetSelectedOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply);
 
 private:
     static std::unique_ptr<SelectModel> instance_;

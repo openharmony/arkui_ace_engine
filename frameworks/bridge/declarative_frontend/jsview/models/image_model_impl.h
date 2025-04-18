@@ -72,6 +72,7 @@ public:
     void SetSmoothEdge(float value)  override {}
     void ResetImage() override {}
     void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) override {}
+    void SetHdrBrightness(float hdrBrightness) override {}
     void SetEnhancedImageQuality(AIImageQuality imageQuality) override {}
     void SetOrientation(ImageRotateOrientation orientation) override {}
     void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override {}

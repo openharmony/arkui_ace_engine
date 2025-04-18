@@ -28,6 +28,8 @@ public:
     static int32_t ClaimNodeId();
     static void Push(const RefPtr<FrameNode>& node);
     static RefPtr<FrameNode> GetTopNode();
+    static void NewScope();
+    static RefPtr<FrameNode> Finish();
 };
 } // namespace OHOS::Ace::Kit
 

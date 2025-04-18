@@ -21,6 +21,7 @@ import { ColorMetrics } from '@ohos.arkui.node';
 import hilog from '@ohos.hilog';
 import display from '@ohos.display';
 import { PathShape } from '@kit.ArkUI';
+import { systemDateTime } from '@kit.BasicServicesKit';
 
 const ANGLE_TO_RADIAN = Math.PI / 180; // Common or specific numerical values
 const RADIAN_TO_ANGLE = 180 / Math.PI;
@@ -55,8 +56,7 @@ const RESTORE_ANIMATION_DURATION = 167;
 const DIAMETER_DEFAULT = 233;
 
 const VIBRATOR_TYPE_TWO = 'watchhaptic.feedback.crown.strength2'; // About crown
-const VIBRATOR_TYPE_IMPACT = 'watchhaptic.feedback.crown.impact';
-const CROWN_EVENT_FLAG = 30;
+const CROWN_TIME_FLAG = 30;
 const CROWN_CONTROL_RATIO = 2.10;
 const CROWN_SENSITIVITY_LOW = 0.5;
 const CROWN_SENSITIVITY_MEDIUM = 1;
@@ -106,6 +106,7 @@ export interface ArcSliderOptionsConstructorOptions {
   digitalCrownSensitivity?: CrownSensitivity;
   onTouch?: Callback<TouchEvent>;
   onChange?: Callback<number>;
+  onEnlarge?: Callback<boolean>;
 }
 
 @ObservedV2
@@ -157,6 +158,7 @@ export class ArcSliderOptions {
   @Trace public digitalCrownSensitivity: CrownSensitivity;
   @Trace public onTouch: Callback<TouchEvent>;
   @Trace public onChange: Callback<number>;
+  @Trace public onEnlarge: Callback<boolean>;
 
   constructor(options?: ArcSliderOptionsConstructorOptions) {
     this.valueOptions = options?.valueOptions ?? new ArcSliderValueOptions();
@@ -166,6 +168,8 @@ export class ArcSliderOptions {
     this.onTouch = options?.onTouch ?? ((event: TouchEvent) => {
     });
     this.onChange = options?.onChange ?? ((progress: number) => {
+    });
+    this.onEnlarge = options?.onEnlarge ?? ((isEnlarged: boolean) => {
     });
   }
 }
@@ -280,6 +284,8 @@ export struct ArcSlider {
   @Local isReverse: boolean = false;
   @Local isLargeArc: boolean = false;
   @Local isFocus: boolean = false;
+  private timePre: number = 0;
+  private timeCur: number = 0;
   private parameters: DrawParameters = new DrawParameters();
   private fullModifier: MyFullDrawModifier = new MyFullDrawModifier(this.parameters);
   private touchAnimator: AnimatorResult | undefined = undefined;
@@ -374,6 +380,7 @@ export struct ArcSlider {
 
   startTouchAnimator() {
     if (this.touchAnimator) {
+      this.options.onEnlarge?.(true);
       this.touchAnimator.play();
     }
   }
@@ -461,6 +468,7 @@ export struct ArcSlider {
 
   startRestoreAnimator() {
     if (this.restoreAnimator) {
+      this.options.onEnlarge?.(false);
       this.restoreAnimator.play();
     }
   }
@@ -749,22 +757,6 @@ export struct ArcSlider {
     valueNow = Math.min(1, valueNow);
     valueNow = Math.max(0, valueNow);
     this.options.valueOptions.progress = valueNow * totalValue + this.options.valueOptions.min;
-    const isMaxOrMin: boolean = this.options.valueOptions.progress === this.options.valueOptions.max ||
-      this.options.valueOptions.progress === this.options.valueOptions.min;
-    if (isMaxOrMin) {
-      if (this.needVibrate) {
-        this.needVibrate = false;
-        try {
-          this.startVibration(VIBRATOR_TYPE_IMPACT);
-        } catch (error) {
-          const e: BusinessError = error as BusinessError;
-          hilog.error(0x3900, 'ArcSlider', `An unexpected error occurred in starting vibration.
-                    Code: ${e.code}, message: ${e.message}`);
-        }
-      }
-    } else {
-      this.needVibrate = true;
-    }
     this.setLayoutOptions();
     this.updateModifier();
     this.fullModifier.invalidate();
@@ -1100,59 +1092,18 @@ export struct ArcSlider {
   }
 
   onDigitalCrownEvent(event: CrownEvent) {
-    if (event && this.isFocus) {
-      this.crownEventCounter += 1;
-      if (this.crownEventCounter % CROWN_EVENT_FLAG === 0) {
-        try {
-          this.startVibration(VIBRATOR_TYPE_TWO);
-        } catch (error) {
-          const e: BusinessError = error as BusinessError;
-          hilog.error(0x3900, 'ArcSlider', `An unexpected error occurred in starting vibration.
-                      Code: ${e.code}, message: ${e.message}`);
-        }
-        this.crownEventCounter = 0;
-      }
-    }
-    this.crownAction(event);
-  }
-
-  startVibration(vibratorType: string) {
-    const ret = vibrator.isSupportEffectSync(vibratorType);
-    if (ret) {
-      vibrator.startVibration({
-        type: 'preset',
-        effectId: vibratorType,
-        count: 1,
-      }, {
-        usage: 'unknown'
-      }, (error: BusinessError) => {
-        if (error) {
-          hilog.error(0x3900, 'ArcSlider', `Failed to start vibration.
-                            Code: ${error.code}, message: ${error.message}`);
-          this.crownEventCounter = 0;
-          return;
-        }
-        hilog.info(0x3900, 'ArcSlider', 'Succeed in starting vibration');
-      });
-    } else {
-      hilog.error(0x3900, 'ArcSlider', vibratorType + ` is not supported`);
-    }
-  }
-
-  crownAction(event: CrownEvent) {
+    this.timeCur = systemDateTime.getTime(false);
     if (event.action === CrownAction.BEGIN && !this.isEnlarged) {
       this.clearTimeout();
       this.isEnlarged = true;
       this.startTouchAnimator();
       this.calcBlur();
-      this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
-      this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
-      this.calcCrownValue(this.crownDeltaAngle);
-    } else if (event.action === CrownAction.BEGIN && this.isEnlarged) {
+    } else if ((event.action === CrownAction.BEGIN || CrownAction.UPDATE) && this.isEnlarged) {
       this.clearTimeout();
       this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
       this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
       this.calcCrownValue(this.crownDeltaAngle);
+      this.setVibration();
     } else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) && (event.action === CrownAction.UPDATE)) {
       this.clearTimeout();
       this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
@@ -1171,13 +1122,51 @@ export struct ArcSlider {
     }
   }
 
+  setVibration() {
+    const isMaxOrMin: boolean = this.options.valueOptions.progress === this.options.valueOptions.max ||
+      this.options.valueOptions.progress === this.options.valueOptions.min;
+    if (this.timeCur - this.timePre >= CROWN_TIME_FLAG && !isMaxOrMin) {
+      try {
+        this.startVibration();
+      } catch (error) {
+        const e: BusinessError = error as BusinessError;
+        hilog.error(0x3900, 'ArcSlider', `An unexpected error occurred in starting vibration.
+                      Code: ${e.code}, message: ${e.message}`);
+      }
+      this.timePre = this.timeCur;
+    }
+  }
+
+  startVibration() {
+    const ret = vibrator.isSupportEffectSync(VIBRATOR_TYPE_TWO);
+    if (ret) {
+      vibrator.startVibration({
+        type: 'preset',
+        effectId: VIBRATOR_TYPE_TWO,
+        count: 1,
+      }, {
+        usage: 'unknown'
+      }, (error: BusinessError) => {
+        if (error) {
+          hilog.error(0x3900, 'ArcSlider', `Failed to start vibration.
+                            Code: ${error.code}, message: ${error.message}`);
+          this.timePre = this.timeCur;
+          return;
+        }
+        hilog.info(0x3900, 'ArcSlider', 'Succeed in starting vibration');
+      });
+    } else {
+      hilog.error(0x3900, 'ArcSlider', VIBRATOR_TYPE_TWO + ` is not supported`);
+    }
+  }
+
   build() {
     Stack() {
       Circle({ width: this.diameter, height: this.diameter })
         .width(this.diameter)
         .height(this.diameter)
         .fill(BLUR_COLOR_DEFAULT)
-        .backdropBlur(this.options.styleOptions.trackBlur)
+        .backdropBlur(this.options.styleOptions.trackBlur, undefined, { disableSystemAdaptation: true })
 
       Button()
         .stateEffect(false)
@@ -1199,7 +1188,9 @@ export struct ArcSlider {
         .focusable(true)
         .focusOnTouch(true)
         .onDigitalCrown((event: CrownEvent) => {
-          this.onDigitalCrownEvent(event);
+          if (event && this.isFocus) {
+            this.onDigitalCrownEvent(event);
+          }
           this.options.onChange?.(this.options.valueOptions.progress);
         })
     }

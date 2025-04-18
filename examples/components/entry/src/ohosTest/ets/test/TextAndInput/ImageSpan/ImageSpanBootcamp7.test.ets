@@ -1,0 +1,1825 @@
+/*
+ * Copyright (c) 2025 Hunan OpenValley Digital Industry Development Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { describe, beforeAll, it } from '@ohos/hypium';
+import { abilityDelegatorRegistry, Driver } from '@kit.TestKit';
+import { ON } from '@ohos.UiTest';
+import {
+    buttonClick, JsonType,
+    KeyStruct,
+    radioClick,
+    Search, Slide,
+    sliderDrag,
+    titleSearch,
+    ToggleClick
+} from '../../../utils';
+import { imageSpanBeforeAll } from './ImageSpan.test';
+
+/*获取AbilityDelegator实例,管理Ability的生命周期和事件*/
+const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
+
+/*初始化与UI元素交互的驱动对象*/
+const driver = Driver.create();
+
+export default function ImageSpanBootcampTest7() {
+  describe('ImageSpanBootcampTest7', () => {
+    /**
+     * 打开应用
+     */
+    beforeAll(async (done: Function) => {
+      imageSpanBeforeAll(done, delegator, driver);
+    })
+    // bindMenu.是否显示选中图标
+    it('ArkUI_ImageSpan_Comp_0521', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项1是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0522', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项1是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 1,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0523', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项1是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 2,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0524', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项1是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 3,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0525', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项1是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 4,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0526', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项1是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 5,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      await Search('基础属性', 'bindMenu.菜单项1是否选中', '通用属性4')
+
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+
+      done()
+    })
+
+    // bindMenu.菜单项2是否选中
+    it('ArkUI_ImageSpan_Comp_0527', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'bindMenu.菜单项2是否选中', '通用属性4')
+
+      //取不到bindMenu属性值
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0528', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'bindMenu.菜单项2是否选中', '通用属性4')
+
+      //取不到bindMenu属性值
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    // bindMenu.是否显示选中图标
+    it('ArkUI_ImageSpan_Comp_0529', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项2是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0530', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项2是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 1,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0531', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项2是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 2,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0532', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项2是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 3,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0533', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项2是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 4,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0534', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项2是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 5,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+
+      await Search('基础属性', 'bindMenu.菜单项2是否选中', '通用属性4')
+
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    // bindMenu.菜单项3是否选中
+    it('ArkUI_ImageSpan_Comp_0535', 0, async (done: Function) => {
+
+
+      await titleSearch('基础属性', 'bindMenu.菜单项3是否选中', '通用属性4')
+
+      //取不到bindMenu属性值
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      done()
+
+    })
+
+    it('ArkUI_ImageSpan_Comp_0536', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'bindMenu.菜单项3是否选中', '通用属性4')
+
+      //取不到bindMenu属性值
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    // bindMenu.是否显示选中图标
+    it('ArkUI_ImageSpan_Comp_0537', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项3是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0538', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项3是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 1,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0539', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项3是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 2,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0540', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项3是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 3,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0541', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项3是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 4,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0542', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项3是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 5,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      await Search('基础属性', 'bindMenu.菜单项3是否选中', '通用属性4')
+
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    // bindMenu.菜单项4是否选中
+    it('ArkUI_ImageSpan_Comp_0543', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'bindMenu.菜单项4是否选中', '通用属性4')
+
+      //取不到bindMenu属性值
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0544', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'bindMenu.菜单项4是否选中', '通用属性4')
+
+      //取不到bindMenu属性值
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    // bindMenu.是否显示选中图标
+    it('ArkUI_ImageSpan_Comp_0545', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项4是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0546', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项4是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 1,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0547', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项4是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 2,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0548', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项4是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 3,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0549', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项4是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 4,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0550', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
+
+      if (!title) {
+        await Search('基础属性', 'bindMenu.菜单项4是否选中', '通用属性4')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'bindMenu.是否显示选中图标', '通用属性4')
+      //取不到bindMenu属性值
+      await buttonClick({
+        buttonClickObj: 5,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      await Search('基础属性', 'bindMenu.菜单项4是否选中', '通用属性4')
+
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    // bindMenu.item中是否显示右侧图标
+    it('ArkUI_ImageSpan_Comp_0551', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'bindMenu.item中是否显示右侧图标', '通用属性4')
+
+      //取不到bindMenu属性值
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0552', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'bindMenu.item中是否显示右侧图标', '通用属性4')
+
+      //取不到bindMenu属性值
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    // bindMenu.Opacity
+    it('ArkUI_ImageSpan_Comp_0553', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'bindMenu.Opacity', '通用属性4')
+
+      //取不到bindMenu属性值
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    // bindMenu.Visibility
+    it('ArkUI_ImageSpan_Comp_0554', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'bindMenu.Visibility', '通用属性4')
+
+      //取不到bindMenu属性值
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0555', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'bindMenu.Visibility', '通用属性4')
+
+      //取不到bindMenu属性值
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+
+    })
+
+    // bindMenu.Padding
+    it('ArkUI_ImageSpan_Comp_0556', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'bindMenu.Padding', '通用属性4')
+
+      //取不到bindMenu属性值
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    // bindMenu.Margin
+    it('ArkUI_ImageSpan_Comp_0557', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'bindMenu.Margin', '通用属性4')
+
+      //取不到bindMenu属性值
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    // hoverEffect
+    it('ArkUI_ImageSpan_Comp_0558', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'hoverEffect', '通用属性4')
+
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        },
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('hoverEffect', JsonType.value)
+        ],
+        assertEqual: 'HoverEffect.Scale'
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0559', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'hoverEffect', '通用属性4')
+
+      await radioClick({
+        radioClickObj: 2,
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('hoverEffect', JsonType.value)
+        ],
+        assertEqual: 'HoverEffect.Highlight'
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0560', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'hoverEffect', '通用属性4')
+
+
+      await radioClick({
+        radioClickObj: 3,
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('hoverEffect', JsonType.value)
+        ],
+        assertEqual: 'HoverEffect.None'
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0561', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'hoverEffect', '通用属性4')
+
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        },
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('hoverEffect', JsonType.value)
+        ],
+        assertEqual: 'HoverEffect.Auto'
+      })
+
+      done()
+    })
+
+    // id
+    it('ArkUI_ImageSpan_Comp_0562', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'id', '通用属性4')
+
+      // key优先级比id高会覆盖
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      done()
+
+    })
+
+    it('ArkUI_ImageSpan_Comp_0563', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'id', '通用属性4')
+
+      // key优先级比id高会覆盖
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+
+    })
+
+    // key
+    it('ArkUI_ImageSpan_Comp_0564', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'key', '通用属性4')
+
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        },
+        id: '2',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('id', JsonType.value)
+        ],
+        assertEqual: '2'
+      })
+
+      done()
+
+    })
+
+    it('ArkUI_ImageSpan_Comp_0565', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'key', '通用属性4')
+
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        },
+        id: '1',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('id', JsonType.value)
+        ],
+        assertEqual: '1'
+      })
+
+      done()
+    })
+
+    // reuseId
+    it('ArkUI_ImageSpan_Comp_0566', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'reuseId', '通用属性4')
+
+      // 取不到reuseId属性值
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0567', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'reuseId', '通用属性4')
+
+      // 取不到reuseId属性值
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    // restoreId
+    it('ArkUI_ImageSpan_Comp_0568', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'restoreId', '通用属性4')
+
+      // 取不到restoreId属性值
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+          toggleClickObj: 'restoreId'
+        }
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0569', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'restoreId', '通用属性4')
+
+      // 取不到restoreId属性值
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+          toggleClickObj: 'restoreId'
+        }
+      })
+
+      done()
+    })
+
+    // foregroundEffect.radius
+    it('ArkUI_ImageSpan_Comp_0570', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundEffect.radius', '通用属性5')
+
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        },
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('foregroundEffect', JsonType.obj),
+          new KeyStruct('radius', JsonType.value)
+        ],
+        assertEqual: '100.000000'
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        },
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('foregroundEffect', JsonType.obj),
+          new KeyStruct('radius', JsonType.value)
+        ],
+        assertEqual: '0.000000'
+      })
+
+      done()
+    })
+
+    // foregroundBlurStyle.value
+    it('ArkUI_ImageSpan_Comp_0571', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        },
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0572', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 1,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0573', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 2,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0574', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 3,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0575', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 4,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0576', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 5,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0577', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 6,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0578', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 7,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0579', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 8,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0580', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
+
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 9,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0581', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
+
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 10,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0582', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
+
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 11,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    // foregroundBlurStyle.options.colorMode
+    it('ArkUI_ImageSpan_Comp_0583', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.options.colorMode', '通用属性5')
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0584', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.options.colorMode', '通用属性5')
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 2,
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0585', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.options.colorMode', '通用属性5')
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    // foregroundBlurStyle.options.adaptiveColor
+    it('ArkUI_ImageSpan_Comp_0586', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.options.adaptiveColor', '通用属性5')
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0587', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.options.adaptiveColor', '通用属性5')
+
+      // 取不到foregroundBlurStyle值
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    // foregroundBlurStyle.options.blurOptions
+    it('ArkUI_ImageSpan_Comp_0588', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.options.blurOptions', '通用属性5')
+
+      // 取不到foregroundBlurStyle值
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    // foregroundBlurStyle.options.scale
+    it('ArkUI_ImageSpan_Comp_0589', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'foregroundBlurStyle.options.blurOptions', '通用属性5')
+
+      // 取不到foregroundBlurStyle值
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    // motionBlur.radius
+    it('ArkUI_ImageSpan_Comp_0590', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'motionBlur.radius', '通用属性5')
+
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        },
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('motionBlur', JsonType.obj),
+          new KeyStruct('radius', JsonType.value),
+        ],
+        assertEqual: 100
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        },
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('motionBlur', JsonType.obj),
+          new KeyStruct('radius', JsonType.value),
+        ],
+        assertEqual: 0
+      })
+
+      done()
+    })
+
+    // motionBlur.anchorX
+    it('ArkUI_ImageSpan_Comp_0591', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'motionBlur.anchorX', '通用属性5')
+
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        },
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('motionBlur', JsonType.obj),
+          new KeyStruct('anchor', JsonType.obj),
+          new KeyStruct('x', JsonType.value)
+        ],
+        assertEqual: 1
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        },
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('motionBlur', JsonType.obj),
+          new KeyStruct('anchor', JsonType.obj),
+          new KeyStruct('x', JsonType.value)
+        ],
+        assertEqual: 0
+      })
+
+      done()
+    })
+
+    // motionBlur.anchorY
+    it('ArkUI_ImageSpan_Comp_0592', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'motionBlur.anchorY', '通用属性5')
+
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        },
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('motionBlur', JsonType.obj),
+          new KeyStruct('anchor', JsonType.obj),
+          new KeyStruct('y', JsonType.value)
+        ],
+        assertEqual: 1
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        },
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('motionBlur', JsonType.obj),
+          new KeyStruct('anchor', JsonType.obj),
+          new KeyStruct('y', JsonType.value)
+        ],
+        assertEqual: 0
+      })
+
+      done()
+    })
+
+    // clickEffect
+    it('ArkUI_ImageSpan_Comp_0593', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'clickEffect', '通用属性5')
+
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        }
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0594', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'clickEffect', '通用属性5')
+
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+      done()
+    })
+
+    //clickEffect.level
+    it('ArkUI_ImageSpan_Comp_0595', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('clickEffect.level'))
+
+      if (!title) {
+
+        await Search('基础属性', 'clickEffect', '通用属性5')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'clickEffect.level', '通用属性5')
+
+
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        },
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('clickEffect', JsonType.obj),
+          new KeyStruct('level', JsonType.value),
+        ],
+        assertEqual: '1'
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0596', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('clickEffect.level'))
+
+      if (!title) {
+
+        await Search('基础属性', 'clickEffect', '通用属性5')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'clickEffect.level', '通用属性5')
+
+      await radioClick({
+        radioClickObj: 2,
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('clickEffect', JsonType.obj),
+          new KeyStruct('level', JsonType.value),
+        ],
+        assertEqual: '2'
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0597', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('clickEffect.level'))
+
+      if (!title) {
+
+        await Search('基础属性', 'clickEffect', '通用属性5')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'clickEffect.level', '通用属性5')
+
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        },
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('clickEffect', JsonType.obj),
+          new KeyStruct('level', JsonType.value),
+        ],
+        assertEqual: '0'
+      })
+
+      done()
+    })
+
+    // clickEffect.scale
+    it('ArkUI_ImageSpan_Comp_0598', 0, async (done: Function) => {
+
+      let title = await driver.findComponent(ON.text('clickEffect.scale'))
+
+      if (!title) {
+
+        await Search('基础属性', 'clickEffect', '通用属性5')
+
+        await radioClick({
+          radioClickObj: 0,
+          toggleClick: {
+            toggleClickType: ToggleClick.Open,
+          }
+        })
+
+      }
+
+      await titleSearch('基础属性', 'clickEffect.scale', '通用属性5')
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        },
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('clickEffect', JsonType.obj),
+          new KeyStruct('scale', JsonType.value),
+        ],
+        assertEqual: '0.000000'
+      })
+
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        },
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('clickEffect', JsonType.obj),
+          new KeyStruct('scale', JsonType.value),
+        ],
+        assertEqual: '1.000000'
+      })
+
+      await Search('基础属性', 'clickEffect', '通用属性5')
+
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        }
+      })
+
+
+      done()
+    })
+
+    // accessibilityGroup
+    it('ArkUI_ImageSpan_Comp_0599', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'accessibilityGroup', '通用属性5')
+
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        },
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('accessibilityGroup', JsonType.value),
+        ],
+        assertEqual: true
+      })
+
+      done()
+    })
+
+    it('ArkUI_ImageSpan_Comp_0600', 0, async (done: Function) => {
+
+      await titleSearch('基础属性', 'accessibilityGroup', '通用属性5')
+
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+        },
+        id: 'ImageSpan',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('accessibilityGroup', JsonType.value),
+        ],
+        assertEqual: false
+      })
+
+      done()
+    })
+
+  })
+}

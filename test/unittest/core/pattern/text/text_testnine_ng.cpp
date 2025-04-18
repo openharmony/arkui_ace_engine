@@ -17,6 +17,7 @@
 #include "test/mock/core/render/mock_paragraph.h"
 #include "text_base.h"
 
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -363,7 +364,7 @@ HWTEST_F(TextTestNineNg, SetupMagnifier014, TestSize.Level1)
     auto pageGeoNode = pageNode->GetGeometryNode();
 
     pattern->HandleLongPress(info);
-    EXPECT_EQ(11, pattern->magnifierController_->hostViewPort_->Width());
+    EXPECT_EQ(0, pattern->magnifierController_->hostViewPort_->Width());
 }
 
 /**
@@ -390,7 +391,7 @@ HWTEST_F(TextTestNineNg, SetupMagnifier021, TestSize.Level1)
     renderContext->UpdateClipEdge(true);
 
     pattern->HandleLongPress(info);
-    EXPECT_EQ(0, pattern->magnifierController_->hostViewPort_->Width());
+    EXPECT_EQ(5, pattern->magnifierController_->hostViewPort_->Width());
 }
 
 /**
@@ -417,7 +418,7 @@ HWTEST_F(TextTestNineNg, SetupMagnifier022, TestSize.Level1)
     renderContext->UpdateClipEdge(true);
 
     pattern->HandleLongPress(info);
-    EXPECT_EQ(0, pattern->magnifierController_->hostViewPort_->Width());
+    EXPECT_EQ(5, pattern->magnifierController_->hostViewPort_->Width());
 }
 
 /**
@@ -445,6 +446,239 @@ HWTEST_F(TextTestNineNg, SetupMagnifier024, TestSize.Level1)
 
     pattern->HandleLongPress(info);
     EXPECT_EQ(0, pattern->magnifierController_->hostViewPort_->Width());
+}
+
+/**
+ * @tc.name: CheckAndAdjustHandle001
+ * @tc.desc: test text_pattern.cpp CheckAndAdjustHandle function, case clipEdge == false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, CheckAndAdjustHandle001, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    frameNode->GetRenderContext()->UpdateClipEdge(false);
+    RectF paintRect = { 0, 0, 10, 10 };
+    auto result = pattern->selectOverlay_->CheckAndAdjustHandle(paintRect);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckAndAdjustHandle002
+ * @tc.desc: test text_pattern.cpp CheckAndAdjustHandle function, case clipEdge == true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, CheckAndAdjustHandle002, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    frameNode->GetRenderContext()->UpdateClipEdge(true);
+    RectF paintRect = { 0, 0, 10, 10 };
+    auto result = pattern->selectOverlay_->CheckAndAdjustHandle(paintRect);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckAndAdjustHandle003
+ * @tc.desc: test text_pattern.cpp CheckAndAdjustHandle function, case handleLevelMode_ == HandleLevelMode::EMBED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, CheckAndAdjustHandle003, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    frameNode->GetRenderContext()->UpdateClipEdge(false);
+    RectF paintRect = { 0, 0, 10, 10 };
+    pattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
+    auto result = pattern->selectOverlay_->CheckAndAdjustHandle(paintRect);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: OnHandleMove001
+ * @tc.desc: test text_pattern.cpp OnHandleMove function, case handleLevelMode_ == HandleLevelMode::OVERLAY.
+    textPattern->HasContext == false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, OnHandleMove001, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    frameNode->GetRenderContext()->UpdateClipEdge(false);
+    RectF handleRect = { 0, 0, 10, 10 };
+    bool isFirst = true;
+    pattern->textForDisplay_ = u"";
+    pattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
+    pattern->selectOverlay_->OnHandleMove(handleRect, isFirst);
+    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+}
+
+/**
+* @tc.name: OnHandleMove002
+* @tc.desc: test text_pattern.cpp OnHandleMove function, case textPattern->HasContext == true,
+   magnifierController_ != nullptr.
+* @tc.type: FUNC
+*/
+HWTEST_F(TextTestNineNg, OnHandleMove002, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    EXPECT_EQ(-1, pattern->GetTextSelector().GetStart());
+    frameNode->GetRenderContext()->UpdateClipEdge(false);
+    RectF handleRect = { 0, 0, 10, 10 };
+    bool isFirst = true;
+    pattern->textForDisplay_ = u"1";
+    pattern->selectOverlay_->OnHandleMove(handleRect, isFirst);
+    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+}
+
+/**
+ * @tc.name: OnCloseOverlay001
+ * @tc.desc: test text_select_overlay.cpp OnCloseOverlay function, case CloseReason == CLOSE_REASON_HOLD_BY_OTHER,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, OnCloseOverlay001, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    pattern->HandleOnSelectAll();
+    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+    auto info = AceType::MakeRefPtr<OverlayInfo>();
+    pattern->selectOverlay_->OnCloseOverlay(OptionMenuType::MOUSE_MENU, CloseReason::CLOSE_REASON_HOLD_BY_OTHER, info);
+    EXPECT_EQ(-1, pattern->GetTextSelector().GetStart());
+}
+
+/**
+ * @tc.name: OnCloseOverlay002
+ * @tc.desc: test text_select_overlay.cpp OnCloseOverlay function, case CloseReason == CLOSE_REASON_TOOL_BAR,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, OnCloseOverlay002, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    pattern->HandleOnSelectAll();
+    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+    auto info = AceType::MakeRefPtr<OverlayInfo>();
+    pattern->selectOverlay_->OnCloseOverlay(OptionMenuType::MOUSE_MENU, CloseReason::CLOSE_REASON_TOOL_BAR, info);
+    EXPECT_EQ(-1, pattern->GetTextSelector().GetStart());
+}
+
+/**
+ * @tc.name: OnCloseOverlay003
+ * @tc.desc: test text_select_overlay.cpp OnCloseOverlay function, case CloseReason == CLOSE_REASON_BACK_PRESSED,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, OnCloseOverlay003, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    pattern->HandleOnSelectAll();
+    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+    auto info = AceType::MakeRefPtr<OverlayInfo>();
+    pattern->selectOverlay_->OnCloseOverlay(OptionMenuType::MOUSE_MENU, CloseReason::CLOSE_REASON_BACK_PRESSED, info);
+    EXPECT_EQ(-1, pattern->GetTextSelector().GetStart());
+}
+
+/**
+* @tc.name: OnHandleGlobalTouchEvent001
+* @tc.desc: test text_select_overlay.cpp OnHandleGlobalTouchEvent function, case sourceType == SourceType::MOUSE &&
+    touchType == TouchType::DOWN, touchInside = false
+* @tc.type: FUNC
+*/
+HWTEST_F(TextTestNineNg, OnHandleGlobalTouchEvent001, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    pattern->HandleOnSelectAll();
+    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+    pattern->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::MOUSE, TouchType::DOWN, false);
+    EXPECT_EQ(-1, pattern->GetTextSelector().GetStart());
+}
+
+/**
+* @tc.name: OnHandleGlobalTouchEvent002
+* @tc.desc: test text_select_overlay.cpp OnHandleGlobalTouchEvent function, case sourceType == SourceType::MOUSE &&
+    touchType == TouchType::DOWN, touchInside = true
+* @tc.type: FUNC
+*/
+HWTEST_F(TextTestNineNg, OnHandleGlobalTouchEvent002, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    pattern->HandleOnSelectAll();
+    pattern->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::MOUSE, TouchType::DOWN, true);
+    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+}
+
+/**
+* @tc.name: OnHandleGlobalTouchEvent003
+* @tc.desc: test text_select_overlay.cpp OnHandleGlobalTouchEvent function, case sourceType == SourceType::TOUCH &&
+    touchType == TouchType::DOWN, touchInside = false
+* @tc.type: FUNC
+*/
+HWTEST_F(TextTestNineNg, OnHandleGlobalTouchEvent003, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    pattern->HandleOnSelectAll();
+    pattern->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::TOUCH, TouchType::DOWN, false);
+    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+}
+
+/**
+* @tc.name: OnHandleGlobalTouchEvent004
+* @tc.desc: test text_select_overlay.cpp OnHandleGlobalTouchEvent function, case sourceType == SourceType::MOUSE &&
+    touchType == TouchType::UP, touchInside = false
+* @tc.type: FUNC
+*/
+HWTEST_F(TextTestNineNg, OnHandleGlobalTouchEvent004, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    pattern->HandleOnSelectAll();
+    pattern->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::MOUSE, TouchType::UP, false);
+    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+}
+
+/**
+ * @tc.name: FindScrollableParent001
+ * @tc.desc: test text_select_overlay.cpp FindScrollableParent function, case parent is page
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, FindScrollableParent001, TestSize.Level1)
+{
+    auto [textNode, pattern] = Init();
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()); });
+    textNode->SetParent(pageNode);
+
+    auto value = pattern->selectOverlay_->FindScrollableParent();
+    EXPECT_EQ(value, nullptr);
+}
+
+/**
+ * @tc.name: FindScrollableParent002
+ * @tc.desc: test text_select_overlay.cpp FindScrollableParent function, case parent is list && scrollable
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, FindScrollableParent002, TestSize.Level1)
+{
+    auto [textNode, pattern] = Init();
+    auto listNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ListPattern>(); });
+    textNode->SetParent(listNode);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    listPattern->isScrollable_ = true;
+
+    auto value = pattern->selectOverlay_->FindScrollableParent();
+    EXPECT_EQ(value, listPattern);
+}
+
+/**
+ * @tc.name: FindScrollableParent003
+ * @tc.desc: test text_select_overlay.cpp FindScrollableParent function, case parent is list && !scrollable
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, FindScrollableParent003, TestSize.Level1)
+{
+    auto [textNode, pattern] = Init();
+    auto listNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ListPattern>(); });
+    textNode->SetParent(listNode);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    listPattern->isScrollable_ = false;
+
+    auto value = pattern->selectOverlay_->FindScrollableParent();
+    EXPECT_EQ(value, nullptr);
 }
 
 } // namespace OHOS::Ace::NG

@@ -899,6 +899,10 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest002, TestSize.Level1)
         LayoutWrapperNode(textFrameNode, AceType::MakeRefPtr<GeometryNode>(), textLayoutProperty);
     auto textLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextLayoutAlgorithm>();
     LayoutConstraintF layoutConstraint;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
     textLayoutAlgorithm->ConstructTextStyles(layoutConstraint, &layoutWrapper, textStyle);
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
@@ -2027,7 +2031,7 @@ HWTEST_F(TextTestTwoNg, TextContentModifier004, TestSize.Level1)
     TextStyle textStyle;
     textStyle.SetFontSize(ADAPT_FONT_SIZE_VALUE);
     textStyle.SetTextColor(TEXT_COLOR_VALUE);
-    textContentModifier->SetDefaultAnimatablePropertyValue(textStyle);
+    textContentModifier->SetDefaultAnimatablePropertyValue(textStyle, textFrameNode);
     SizeF contentSize(TEXT_CONTENT_SIZE, TEXT_CONTENT_SIZE);
     textContentModifier->SetContentSize(contentSize);
     std::vector<RectF> drawObscuredRects;

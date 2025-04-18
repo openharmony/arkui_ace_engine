@@ -37,6 +37,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/event/pointer_event.h"
 #include "core/gestures/gesture_info.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace {
 struct DragNotifyMsg;
@@ -91,11 +92,25 @@ struct PreparedInfoForDrag {
     OffsetF dragMovePosition = { 0.0f, 0.0f };
     RefPtr<PixelMap> pixelMap;
     RefPtr<FrameNode> imageNode;
+    NG::DraggingSizeChangeEffect sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
     RefPtr<FrameNode> relativeContainerNode { nullptr };
     RefPtr<FrameNode> menuPreviewNode { nullptr };
+    RefPtr<FrameNode> textRowNode { nullptr };
     RefPtr<FrameNode> textNode { nullptr };
+    RefPtr<FrameNode> menuNode { nullptr };
+    // for menu follow animation
+    float menuPositionLeft = 0.0f;
+    float menuPositionTop = 0.0f;
+    float menuPositionRight = 0.0f;
+    float menuPositionBottom = 0.0f;
+    // for menu follow animations
+    Placement menuPosition = Placement::NONE;
+    RectF menuRect;
+    RectF frameNodeRect;
+    RefPtr<FrameNode> menuPreviewImageNode { nullptr };
+    RefPtr<FrameNode> stackNode { nullptr };
     RefPtr<FrameNode> gatherNode { nullptr };
-    RectF menuPreviewRect;
+    RectF originPreviewRect;
     RectF dragPreviewRect;
     BorderRadiusProperty borderRadius = BorderRadiusProperty(0.0_vp);
 };
@@ -172,6 +187,7 @@ public:
     void RemoveTouchEvent(const RefPtr<TouchEventImpl>& touchEvent);
     void SetFocusClickEvent(GestureEventFunc&& clickEvent);
     bool IsClickable() const;
+    bool IsComponentClickable() const;
     bool IsUserClickable() const;
     bool IsAccessibilityClickable();
     bool IsAccessibilityLongClickable();
@@ -212,7 +228,11 @@ public:
         int32_t duration = 500);
     // Set by user define, which will replace old one.
     void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
+    void SetPanEvent(
+        const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap);
     void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
+    void AddPanEvent(
+        const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap);
     void RemovePanEvent(const RefPtr<PanEvent>& panEvent);
     void SetPanEventType(GestureTypeName typeName);
     // Set by user define, which will replace old one.
@@ -335,6 +355,8 @@ public:
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event,
         DragDropInfo dragPreviewInfo, const RefPtr<PipelineContext>& pipeline);
     void HideMenu();
+    GestureEvent GetGestureEventInfo();
+    ClickInfo GetClickInfo();
 #if defined(PIXEL_MAP_SUPPORTED)
     static void PrintBuilderNode(const RefPtr<UINode>& customNode);
     static void PrintIfImageNode(
@@ -381,7 +403,9 @@ private:
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void PrepareDragStartInfo(
-        const RefPtr<FrameNode> menuWrapperNode, PreparedInfoForDrag& data);
+        RefPtr<PipelineContext>& pipeline, PreparedInfoForDrag& data, const RefPtr<FrameNode> frameNode);
+    void UpdateMenuNode(
+        const RefPtr<FrameNode> menuWrapperNode, PreparedInfoForDrag& data, const RefPtr<FrameNode> frameNode);
     void StartVibratorByDrag(const RefPtr<FrameNode>& frameNode);
     void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson, float scale,
         const PreparedInfoForDrag& dragInfoData);
@@ -405,7 +429,7 @@ private:
         int32_t& exclusiveIndex);
 
     void UpdateNodePositionBeforeStartAnimation(const RefPtr<FrameNode>& frameNode,
-        PreparedInfoForDrag& data, const OffsetF& subWindowOffset);
+        PreparedInfoForDrag& data);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;

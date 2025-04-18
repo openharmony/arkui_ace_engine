@@ -27,7 +27,6 @@
 #include "adapter/ohos/entrance/platform_event_callback.h"
 #include "base/resource/asset_manager.h"
 #include "base/subwindow/subwindow.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/task_executor.h"
 #include "core/common/ace_view.h"
 #include "core/common/js_message_dispatcher.h"
@@ -84,7 +83,7 @@ public:
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true) override;
     void ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo, int32_t appearingTime,
-        int32_t appearingTimeWithContinuousOperation) override;
+        int32_t appearingTimeWithContinuousOperation, bool isSubwindow) override;
     void HideTipsNG(int32_t targetId, int32_t disappearingTime) override;
     void HidePopupNG(int32_t targetId) override;
     void GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo) override;
@@ -226,7 +225,7 @@ private:
     bool CreateEventRunner();
     void GetToastDialogWindowProperty(
         int32_t& width, int32_t& height, int32_t& posX, int32_t& posY, float& density) const;
-    bool InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast = false);
+    bool InitToastDialogWindow(int32_t& width, int32_t& height, int32_t posX, int32_t posY, bool isToast = false);
     bool InitToastDialogView(int32_t width, int32_t height, float density);
     bool InitToastServiceConfig();
     void ShowToastForAbility(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);

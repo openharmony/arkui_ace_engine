@@ -89,7 +89,10 @@ export struct CalendarPickerDialogBootcamp {
   @State compMarkToday: boolean = false;
   @State enableCompDisabledDateRange: boolean = false;
   @State compDisabledDateRange: DateRange[] = [{ start: new Date('2020-12-10'), end: new Date('2020-12-11') }];
-
+  scroller: Scroller = new Scroller();
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
   build() {
     NavDestination() {
       Drawer({
@@ -97,6 +100,9 @@ export struct CalendarPickerDialogBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        generic: () => {
+          this.Generic()
         },
         parameters: () => {
           this.Parameters()
@@ -187,7 +193,7 @@ export struct CalendarPickerDialogBootcamp {
 
   @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
 
         RadioBlock({
@@ -524,6 +530,12 @@ export struct CalendarPickerDialogBootcamp {
       }.width('100%')
     }
     .height('52%')
+    .id('scroll')
+  }
+
+  @Builder
+  Generic() {
+
   }
 }
 

@@ -58,7 +58,7 @@ GridSizeType GridContainerUtils::ProcessGridSizeType(const V2::BreakPoints& brea
     }
     int index = 0;
     for (const auto& cur : threshold->sizeInfo) {
-        if (cur.ConvertToPx() > windowWidth) {
+        if (GreatNotEqual(cur.ConvertToPx(), windowWidth)) {
             break;
         }
         index++;

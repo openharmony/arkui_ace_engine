@@ -28,6 +28,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/render/paragraph.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace {
 

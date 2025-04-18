@@ -1916,6 +1916,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("imageAccess", &JSWeb::ImageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("mixedMode", &JSWeb::MixedMode);
     JSClass<JSWeb>::StaticMethod("enableNativeEmbedMode", &JSWeb::EnableNativeEmbedMode);
+    JSClass<JSWeb>::StaticMethod("nativeEmbedOptions", &JSWeb::NativeEmbedOptions);
     JSClass<JSWeb>::StaticMethod("registerNativeEmbedRule", &JSWeb::RegisterNativeEmbedRule);
     JSClass<JSWeb>::StaticMethod("zoomAccess", &JSWeb::ZoomAccessEnabled);
     JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
@@ -2933,7 +2934,7 @@ void JSWeb::OnAllSslErrorRequest(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebAllSslErrorEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), WebAllSslErrorEventToJSValue);
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
@@ -3342,7 +3343,7 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
         CHECK_NULL_VOID(previewBuilderFunc);
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         previewBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(previewBuilderFunc),
-                               node = frameNode]() {
+                            node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("BindSelectionMenuPreviwer");
             PipelineContext::SetCallBackNode(node);
@@ -3506,6 +3507,20 @@ void JSWeb::ZoomAccessEnabled(bool isZoomAccessEnabled)
 void JSWeb::EnableNativeEmbedMode(bool isEmbedModeEnabled)
 {
     WebModel::GetInstance()->SetNativeEmbedModeEnabled(isEmbedModeEnabled);
+}
+
+void JSWeb::NativeEmbedOptions(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(args[0]);
+    std::optional<bool> enable;
+    JSRef<JSVal> enableJsValue = paramObject->GetProperty("supportDefaultIntrinsicSize");
+    if (enableJsValue->IsBoolean()) {
+        enable = enableJsValue->ToBoolean();
+        WebModel::GetInstance()->SetIntrinsicSizeEnabled(*enable);
+    }
 }
 
 void JSWeb::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)

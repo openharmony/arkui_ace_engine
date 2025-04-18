@@ -37,11 +37,15 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+namespace OHOS::Ace {
+class SpanString;
+}
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
@@ -1295,10 +1299,10 @@ public:
         ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
     }
 
-    void BindTips(const RefPtr<PopupParam>& param) override
+    void BindTips(const RefPtr<PopupParam>& param, const RefPtr<OHOS::Ace::SpanString>& spanString) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        ViewAbstract::BindTips(param, AceType::Claim(targetNode));
+        ViewAbstract::BindTips(param, AceType::Claim(targetNode), spanString);
     }
 
     int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
@@ -1328,6 +1332,8 @@ public:
     {
         ViewAbstract::DismissPopup();
     }
+
+    void SetToolbarBuilder(std::function<void()>&& buildFunc) override;
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
 
@@ -1396,6 +1402,8 @@ public:
     void SetAccessibilityChecked(bool checked, bool resetValue) override;
     void SetAccessibilityRole(const std::string& role, bool resetValue) override;
     void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;
+    void SetOnAccessibilityActionIntercept(
+        NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) override;
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
     void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
     void ResetOnAccessibilityFocus() override;
@@ -1414,9 +1422,9 @@ public:
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
 
-    void SetForegroundEffect(float radius, const SysOptions& sysOptions) override
+    void SetForegroundEffect(float radius) override
     {
-        ViewAbstract::SetForegroundEffect(radius, sysOptions);
+        ViewAbstract::SetForegroundEffect(radius);
     }
 
     void DisableOnClick() override
@@ -1620,6 +1628,8 @@ public:
     static void SetAccessibilityRole(FrameNode* frameNode, const std::string& role, bool resetValue);
     static void SetOnAccessibilityFocus(
         FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);
+    static void SetOnAccessibilityActionIntercept(
+        FrameNode* frameNode, NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept);
     static void ResetOnAccessibilityFocus(FrameNode* frameNode);
     static void SetAccessibilityNextFocusId(FrameNode* frameNode, const std::string& nextFocusId);
     static void SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus);

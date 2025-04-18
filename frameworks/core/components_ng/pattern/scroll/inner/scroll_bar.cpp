@@ -58,9 +58,10 @@ void ScrollBar::InitTheme()
     SetMinDynamicHeight(theme->GetMinDynamicHeight());
     SetBackgroundColor(theme->GetBackgroundColor());
     SetForegroundColor(theme->GetForegroundColor());
+    SetForegroundHoverBlendColor(theme->GetForegroundHoverBlendColor());
+    SetForegroundPressedBlendColor(theme->GetForegroundPressedBlendColor());
     SetPadding(theme->GetPadding());
     SetHoverWidth(theme);
-#ifdef ARKUI_CIRCLE_FEATURE
     SetNormalBackgroundWidth(theme->GetNormalBackgroundWidth());
     SetActiveBackgroundWidth(theme->GetActiveBackgroundWidth());
     SetNormalStartAngle(theme->GetNormalStartAngle());
@@ -69,7 +70,8 @@ void ScrollBar::InitTheme()
     SetActiveMaxOffsetAngle(theme->GetActiveMaxOffsetAngle());
     SetNormalScrollBarWidth(theme->GetNormalScrollBarWidth());
     SetActiveScrollBarWidth(theme->GetActiveScrollBarWidth());
-#endif // ARKUI_CIRCLE_FEATURE
+    SetArcForegroundColor(theme->GetArcForegroundColor());
+    SetArcBackgroundColor(theme->GetArcBackgroundColor());
 }
 
 bool ScrollBar::InBarTouchRegion(const Point& point) const
@@ -132,6 +134,19 @@ void ScrollBar::UpdateScrollBarRegion(
     if (!positionModeUpdate_ && !normalWidthUpdate_ && paintOffset_ == offset && viewPortSize_ == size &&
         lastOffset_ == lastOffset && NearEqual(estimatedHeight_, estimatedHeight, 0.000001f) && !isReverseUpdate_) {
         return;
+    }
+    // When the scroll jumps without animation and is at the top or bottom before and after the jump,
+    // the scrollbar is not displayed.
+    auto checkAtEdge = (scrollSource == SCROLL_FROM_JUMP || scrollSource == SCROLL_FROM_FOCUS_JUMP) &&
+        displayMode_ == DisplayMode::AUTO && isScrollable_;
+    if (checkAtEdge) {
+        auto atTop = NearZero(GetMainOffset(lastOffset_)) && NearZero(GetMainOffset(lastOffset));
+        auto atBottom = NearEqual(GetMainOffset(lastOffset_), estimatedHeight_ - GetMainSize(viewPortSize_)) &&
+                        NearEqual(GetMainOffset(lastOffset), estimatedHeight - GetMainSize(size));
+        if (!atTop && !atBottom) {
+            opacityAnimationType_  = OpacityAnimationType::APPEAR_WITHOUT_ANIMATION;
+            ScheduleDisappearDelayTask();
+        }
     }
     if (!NearEqual(estimatedHeight_, estimatedHeight, 0.000001f) || viewPortSize_ != size) {
         needAddLayoutInfo = true;
@@ -535,7 +550,9 @@ void ScrollBar::InitPanRecognizer()
 {
     PanDirection panDirection;
     panDirection.type = positionMode_ == PositionMode::BOTTOM ? PanDirection::HORIZONTAL : PanDirection::VERTICAL;
-    panRecognizer_ = MakeRefPtr<PanRecognizer>(1, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    panRecognizer_ = MakeRefPtr<PanRecognizer>(1, panDirection, distanceMap);
     panRecognizer_->SetMouseDistance(DRAG_PAN_DISTANCE_MOUSE.ConvertToPx());
     panRecognizer_->SetOnActionUpdate([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scrollBar = weakBar.Upgrade();
@@ -955,7 +972,13 @@ void ScrollBar::DumpAdvanceInfo()
 
 Color ScrollBar::GetForegroundColor() const
 {
-    return IsPressed() ? foregroundColor_.BlendColor(PRESSED_BLEND_COLOR) : foregroundColor_;
+    if (IsPressed()) {
+        return foregroundColor_.BlendColor(foregroundPressedBlendColor_);
+    }
+    if (IsHover()) {
+        return foregroundColor_.BlendColor(foregroundHoverBlendColor_);
+    }
+    return foregroundColor_;
 }
 
 void ScrollBar::SetHoverWidth(const RefPtr<ScrollBarTheme>& theme)
@@ -1055,6 +1078,11 @@ void ScrollBar::MarkNeedRender()
 float ScrollBar::GetMainOffset(const Offset& offset) const
 {
     return positionMode_ == PositionMode::BOTTOM ? offset.GetX() : offset.GetY();
+}
+
+float ScrollBar::GetMainSize(const Size& size) const
+{
+    return positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height();
 }
 
 void ScrollBar::SetReverse(bool reverse)

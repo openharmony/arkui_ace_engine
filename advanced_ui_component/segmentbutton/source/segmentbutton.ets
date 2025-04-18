@@ -423,7 +423,7 @@ struct MultiSelectBackground {
             .height(this.buttonItemsSize[index].height)
             .backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR)
             .borderRadius(this.buttonBorderRadius[index])
-            .backgroundBlurStyle(this.options.backgroundBlurStyle)
+            .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
         }
       })
     }
@@ -950,6 +950,7 @@ struct SegmentButtonItemArrayComponent {
             .stateEffect(false)
             .hoverEffect(HoverEffect.None)
             .backgroundColor(Color.Transparent)
+            .accessibilityGroup(true);
             .accessibilityLevel(item.accessibilityLevel)
             .accessibilitySelected(this.options.multiply ? undefined : this.selectedIndexes.includes(index))
             .accessibilityChecked(this.options.multiply ? this.selectedIndexes.includes(index) : undefined)
@@ -1284,7 +1285,7 @@ export struct SegmentButton {
           .size(this.componentSize)
           .backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR)
           .borderRadius(this.options.iconTextBackgroundRadius ?? this.componentSize.height as number / 2)
-          .backgroundBlurStyle(this.options.backgroundBlurStyle)
+          .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
         }
         Stack() {
           if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {

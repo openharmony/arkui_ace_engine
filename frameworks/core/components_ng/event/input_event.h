@@ -110,6 +110,15 @@ public:
             onAccessibilityHoverFunc_(state, info);
         }
     }
+    bool GetIstips() const
+    {
+        return istips_;
+    }
+
+    void SetIstips(bool istips)
+    {
+        istips_ = istips;
+    }
 
 private:
     OnMouseEventFunc onMouseCallback_;
@@ -118,6 +127,7 @@ private:
     OnHoverMoveFunc onHoverMoveCallback_;
     OnAxisEventFunc onAxisCallback_;
     OnAccessibilityHoverFunc onAccessibilityHoverFunc_;
+    bool istips_ = false;
 };
 
 class ACE_EXPORT InputEventActuator : public virtual AceType {
@@ -227,6 +237,9 @@ public:
         TouchTestResult& result);
 
     void OnCollectHoverEvent(
+        const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result);
+
+    void OnCollectHoverEventForTips(
         const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result);
 
     void OnCollectHoverEffect(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,

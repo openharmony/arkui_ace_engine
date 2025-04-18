@@ -30,7 +30,7 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
 {}
 
 void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    MouseEvent& events, bool isScenceBoardWindow)
+    MouseEvent& events, bool isSceneBoardWindow)
 {}
 
 void ConvertCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, CrownEvent& event)

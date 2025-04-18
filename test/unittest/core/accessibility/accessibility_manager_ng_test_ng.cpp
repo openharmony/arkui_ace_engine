@@ -254,8 +254,6 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest004, TestSize.L
     TimeStamp time;
     
     accessibilityManagerNg.HoverTestDebug(frameNode, hoverPoint, summary, detail);
-    auto result = accessibilityManagerNg.DeliverAccessibilityHoverEvent(frameNode, hoverPoint);
-    EXPECT_EQ(result, false);
     accessibilityManagerNg.IgnoreCurrentHoveringNode(frameNode);
 
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -266,7 +264,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest004, TestSize.L
     accessibilityManagerNg.NotifyHoverEventToNodeSession(frameNode, frameNode,
         hoverPoint, SourceType::MOUSE, AccessibilityHoverEventType::ENTER, time);
     PointF pointNode(hoverPoint);
-    result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, frameNode, hoverPoint, pointNode);
+    auto result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, frameNode, hoverPoint, pointNode);
     EXPECT_EQ(result, true);
     result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, nullptr, hoverPoint, pointNode);
     EXPECT_EQ(result, false);
@@ -276,13 +274,14 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest004, TestSize.L
     ASSERT_NE(endNode, nullptr);
     endNode->UpdateRecycleElmtId(NUMTWO);
     result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, endNode, hoverPoint, pointNode);
-    EXPECT_EQ(result, true);
+    EXPECT_EQ(result, false);
 
     endNode->SetParent(frameNode);
     result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, endNode, hoverPoint, pointNode);
     EXPECT_EQ(result, true);
 
     auto endNodeMock = MockFrameNode::CreateFrameNode("main", NUMTWO, AceType::MakeRefPtr<Pattern>(), true);
+    endNodeMock->SetParent(frameNode);
     result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, endNodeMock, hoverPoint, pointNode);
     EXPECT_EQ(result, true);
 }

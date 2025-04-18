@@ -261,15 +261,17 @@ void ProgressModelNG::SetText(const std::optional<std::string>& value)
     if (!value.has_value()) {
         auto maxValue = progressPaintProperty->GetMaxValue();
         auto curValue = progressPaintProperty->GetValue();
-        int32_t curPercent = curValue.value() * 100 / maxValue.value();
-        std::string number = std::to_string(curPercent) + "%";
-        bool isShowText = progressPaintProperty->GetEnableShowText().value_or(false);
-        if (!isShowText) {
-            number = "";
+        if (maxValue.has_value() && curValue.has_value()) {
+            int32_t curPercent = curValue.value() * 100 / maxValue.value();
+            std::string number = std::to_string(curPercent) + "%";
+            bool isShowText = progressPaintProperty->GetEnableShowText().value_or(false);
+            if (!isShowText) {
+                number = "";
+            }
+            textLayoutProperty->UpdateContent(number);
+            context = number;
+            pattern->SetTextFromUser(false);
         }
-        textLayoutProperty->UpdateContent(number);
-        context = number;
-        pattern->SetTextFromUser(false);
     } else {
         textLayoutProperty->UpdateContent(value.value());
         context = value.value();
@@ -517,15 +519,17 @@ void ProgressModelNG::SetText(FrameNode* frameNode, const std::optional<std::str
     if (!value.has_value()) {
         auto maxValue = progressPaintProperty->GetMaxValue();
         auto curValue = progressPaintProperty->GetValue();
-        int32_t curPercent = curValue.value() * 100 / maxValue.value();
-        std::string number = std::to_string(curPercent) + "%";
-        bool isShowText = progressPaintProperty->GetEnableShowText().value_or(false);
-        if (!isShowText) {
-            number = "";
+        if (maxValue.has_value() && curValue.has_value()) {
+            int32_t curPercent = curValue.value() * 100 / maxValue.value();
+            std::string number = std::to_string(curPercent) + "%";
+            bool isShowText = progressPaintProperty->GetEnableShowText().value_or(false);
+            if (!isShowText) {
+                number = "";
+            }
+            textLayoutProperty->UpdateContent(number);
+            context = number;
+            pattern->SetTextFromUser(false);
         }
-        textLayoutProperty->UpdateContent(number);
-        context = number;
-        pattern->SetTextFromUser(false);
     } else {
         textLayoutProperty->UpdateContent(value.value());
         context = value.value();

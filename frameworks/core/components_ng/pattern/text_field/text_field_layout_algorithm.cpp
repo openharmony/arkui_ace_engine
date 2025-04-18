@@ -1059,7 +1059,7 @@ bool TextFieldLayoutAlgorithm::IsInlineFocusAdaptMinExceedLimit(const SizeF& max
     return didExceedMaxLines;
 }
 
-bool TextFieldLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::u16string& content,
+bool TextFieldLayoutAlgorithm::CreateParagraphAndLayout(TextStyle& textStyle, const std::u16string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout)
 {
     if (!CreateParagraphEx(textStyle, content, contentConstraint, layoutWrapper)) {

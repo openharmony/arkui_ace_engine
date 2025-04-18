@@ -19,6 +19,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -54,6 +55,15 @@ public:
 
     void SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
         float hoverRectHeight, bool isFocus);
+
+    virtual float GetHoverIconPadding() const
+    {
+        return 0.0f;
+    }
+
+    void SetHotZoneRect(DimensionRect& hotZoneRegion, float iconSize, float hotZoneHeight);
+
+    virtual void OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme) {}
 
 protected:
     Alignment GetStackAlignment(const TextDirection& userDirection);
@@ -105,6 +115,13 @@ public:
 
     void CreateIconRect(RoundRect& paintRect, bool isFocus) override;
 
+    float GetHoverIconPadding() const override
+    {
+        return hoverIconPadding_;
+    }
+
+    void OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme) override;
+
 private:
     void LoadImageSourceInfo();
     void AddImageEventOnError();
@@ -133,6 +150,7 @@ private:
     WeakPtr<FrameNode> passwordNode_;
     Color symbolColor_;
     float passwordHoverSize_ = 0.0f;
+    float hoverIconPadding_ = 0.0f;
 };
 
 class UnitResponseArea : public TextInputResponseArea {
@@ -196,6 +214,13 @@ public:
 
     void CreateIconRect(RoundRect& paintRect, bool isFocus) override;
 
+    float GetHoverIconPadding() const override
+    {
+        return hoverIconPadding_;
+    }
+
+    void OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme) override;
+
 private:
     bool IsShowClean() const;
     bool IsShowSymbol() const;
@@ -219,6 +244,7 @@ private:
     Color iconColor_;
     bool isShow_ = false;
     float cancelHoverSize_ = 0.0f;
+    float hoverIconPadding_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

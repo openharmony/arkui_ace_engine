@@ -52,6 +52,14 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             RegisterComponentChangeEventCallbackInner(data, reply, option);
             break;
         }
+        case SENDCOMMAND_ASYNC_EVENT: {
+            SendCommandInnerAsync(data, reply, option);
+            break;
+        }
+        case SENDCOMMAND_EVENT: {
+            SendCommandInner(data, reply, option);
+            break;
+        }
         case UNREGISTER_CLICK_EVENT: {
             UnregisterClickEventCallbackInner(data, reply, option);
             break;
@@ -112,6 +120,14 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             GetCurrentImagesShowingInner(data, reply, option);
             break;
         }
+        case GET_VISIBLE_TREE: {
+            GetVisibleInspectorTreeInner(data, reply, option);
+            break;
+        }
+        case SEND_COMMAND: {
+            SendCommandKeyCodeInner(data, reply, option);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -170,6 +186,29 @@ int32_t UiContentStub::RegisterWebUnfocusEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     reply.WriteInt32(RegisterWebUnfocusEventCallback(nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::SendCommandInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t id = data.ReadInt32();
+    std::string command = data.ReadString();
+    reply.WriteInt32(SendCommand(id, command));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::SendCommandInnerAsync(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t id = data.ReadInt32();
+    return SendCommandAsync(id, data.ReadString());
+}
+
+int32_t UiContentStub::SendCommandKeyCodeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    std::string command = data.ReadString();
+    reply.WriteInt32(SendCommand(command));
     return NO_ERROR;
 }
 
@@ -280,6 +319,12 @@ int32_t UiContentStub::GetCurrentImagesShowingInner(MessageParcel& data, Message
     int32_t processId = data.ReadInt32();
     UiSessionManager::GetInstance()->SaveProcessId("pixel", processId);
     reply.WriteInt32(GetCurrentImagesShowing(nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetVisibleInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    GetVisibleInspectorTree(nullptr);
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

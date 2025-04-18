@@ -62,12 +62,8 @@ const FADEOUT_ENABLE: string = 'true';
 
 // 'sys.float.alert_container_max_width'
 const MAX_DIALOG_WIDTH: number = getNumberByResourceId(125831042, 400);
-// 'sys.float.alert_right_padding_horizontal'
-const BUTTON_HORIZONTAL_MARGIN: number = getNumberByResourceId(125831054, 16);
 // 'sys.float.padding_level8'
 const BUTTON_HORIZONTAL_PADDING: number = getNumberByResourceId(125830927, 16);
-// 'sys.float.alert_button_horizontal_space'
-const BUTTON_HORIZONTAL_SPACE: number = getNumberByResourceId(125831051, 8);
 // 'sys.float.Body_L'
 const BODY_L = getNumberByResourceId(125830970, 16);
 // 'sys.float.Body_M'
@@ -79,6 +75,12 @@ const TITLE_S = getNumberByResourceId(125830966, 20);
 // 'sys.float.padding_level8'
 const PADDING_LEVEL_8 = getNumberByResourceId(125830927, 16);
 
+const BUTTON_HORIZONTAL_MARGIN = lazyInit<number>(() => {
+  return getLengthMetricsByResource($r('sys.float.alert_right_padding_horizontal'), 16);
+});
+const BUTTON_HORIZONTAL_SPACE = lazyInit<number>(() => {
+  return getLengthMetricsByResource($r('sys.float.alert_button_horizontal_space'), 8);
+});
 const BUTTON_MIN_FONT_SIZE = lazyInit<number>(() => {
   return getLengthMetricsByResource($r('sys.float.dialog_button_font_min_size'), 9);
 });
@@ -142,6 +144,7 @@ const CONTENT_FONT_WEIGHT = lazyInit<FontWeight>(() => {
   return fontWeight;
 });
 const SCROLL_BAR_OFFSET = 20;
+const SELECT_DIALOG_SCROLL_BAR_OFFSET = 4;
 
 @CustomDialog
 export struct TipsDialog {
@@ -327,11 +330,12 @@ export struct TipsDialog {
           }
         }
       }
-      .margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) })
+      .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
+      .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
     }
     .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
     .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-    .margin({ end: LengthMetrics.vp(this.marginOffset) })
+    .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) })
   }
 
   aboutToAppear() {
@@ -592,6 +596,7 @@ export struct SelectDialog {
         this.isFocus = false;
       }
     })
+    .margin({ end: LengthMetrics.vp(SELECT_DIALOG_SCROLL_BAR_OFFSET) })
   }
 
   build() {
@@ -761,11 +766,12 @@ export struct ConfirmDialog {
             })
             .width('100%')
         }
-        .margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) })
+        .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
+        .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
       }
       .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-      .margin({ end: LengthMetrics.vp(this.marginOffset) })
+      .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) })
     }
   }
 
@@ -1145,15 +1151,14 @@ struct CustomDialogContentComponent {
                   }
                 }.padding(this.getContentPadding())
               } else {
-                WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
-                  this.ButtonBuilder();
-                }
+                this.buildButton();
               }
             });
           }
         }
         .constraintSize({ maxHeight: this.contentMaxHeight })
-        .backgroundBlurStyle(this.customStyle ? BlurStyle.Thick : BlurStyle.NONE)
+        .backgroundBlurStyle(this.customStyle ?
+        BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true })
         .borderRadius(this.customStyle ? $r('sys.float.ohos_id_corner_radius_dialog') : 0)
         .margin(this.customStyle ? {
           start: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_start')),
@@ -1162,6 +1167,7 @@ struct CustomDialogContentComponent {
         } : { left: 0, right: 0, bottom: 0 })
         .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
       }
+      .borderRadius($r('sys.float.alert_container_shape'))
       .edgeEffect(EdgeEffect.None, { alwaysEnabled: false })
       .backgroundColor(this.themeColorMode === ThemeColorMode.SYSTEM || undefined ?
       Color.Transparent : $r('sys.color.comp_background_primary'))
@@ -1175,7 +1181,7 @@ struct CustomDialogContentComponent {
     let maxHeight: number = Number(constraint.maxHeight);
     this.fontSizeScale = this.updateFontScale();
     this.updateFontSize();
-    this.isButtonVertical = this.isVerticalAlignButton(maxWidth - BUTTON_HORIZONTAL_MARGIN * 2);
+    this.isButtonVertical = this.isVerticalAlignButton(maxWidth - BUTTON_HORIZONTAL_MARGIN() * 2);
     this.titleMinHeight = this.getTitleAreaMinHeight();
     let height: number = 0;
     children.forEach((child) => {
@@ -1193,9 +1199,15 @@ struct CustomDialogContentComponent {
   }
 
   aboutToAppear(): void {
-    let uiContext: UIContext = this.getUIContext();
-    this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
-    this.appMaxFontScale = uiContext.getMaxFontScale();
+    try {
+      let uiContext: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale();
+      this.appMaxFontScale = uiContext?.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError)?.code;
+      let message: string = (err as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}, message: ${message}`);
+    }
     this.fontSizeScale = this.updateFontScale();
     if (this.controller && this.customStyle === undefined) {
       let customController: CustomDialogControllerExtend = this.controller as CustomDialogControllerExtend;
@@ -1422,6 +1434,33 @@ struct CustomDialogContentComponent {
     .padding(this.getOperationAreaPadding());
   }
 
+  private isSetCustomButtonTheme(): boolean {
+    // is set fadeout style: now only on TV
+    if (IS_FADEOUT_ENABLE()) {
+      // has set button background color prop
+      if (this.theme?.colors?.compBackgroundTertiary || this.theme?.colors?.backgroundEmphasize) {
+        return true;
+      }
+      // has set button font color prop
+      if (this.theme?.colors?.fontEmphasize || this.theme?.colors?.fontOnPrimary || this.theme?.colors?.warning) {
+        return true;
+      }
+      return false;
+    }
+    return true;
+  }
+
+  @Builder
+  buildButton() {
+    if (this.isSetCustomButtonTheme()) {
+      WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+        this.ButtonBuilder();
+      }
+    } else {
+      this.ButtonBuilder();
+    }
+  }
+
   /**
    * get operation area padding
    *
@@ -1508,7 +1547,7 @@ struct CustomDialogContentComponent {
               .color(this.getDividerColor())
               .vertical(true)
           }
-          .width(BUTTON_HORIZONTAL_SPACE * 2)
+          .width(BUTTON_HORIZONTAL_SPACE() * 2)
           .justifyContent(FlexAlign.Center)
 
           this.buildSingleButton(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1]);
@@ -1593,15 +1632,22 @@ struct CustomDialogContentComponent {
         return true;
       }
       let isVertical: boolean = false;
-      let maxButtonTextSize = vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN -
-        BUTTON_HORIZONTAL_SPACE - 2 * BUTTON_HORIZONTAL_PADDING);
+      let maxButtonTextSize = vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN() -
+      BUTTON_HORIZONTAL_SPACE() - 2 * BUTTON_HORIZONTAL_PADDING);
       this.buttons.forEach((button) => {
-        let contentSize: SizeOptions = measure.measureTextSize({
-          textContent: button.value,
-          fontSize: this.buttonMaxFontSize
-        });
-        if (Number(contentSize.width) > maxButtonTextSize) {
-          isVertical = true;
+        try {
+          let contentSize: SizeOptions = measure.measureTextSize({
+            textContent: button.value,
+            fontSize: this.buttonMaxFontSize
+          });
+          if (Number(contentSize?.width) > maxButtonTextSize) {
+            isVertical = true;
+          }
+        } catch (err) {
+          let code: number = (err as BusinessError).code;
+          let message: string = (err as BusinessError).message;
+          hilog.error(0x3900, 'Ace',
+            `Faild to dialog isVerticalAlignButton measureTextSize,cause, code: ${code}, message: ${message}`);
         }
       });
       return isVertical;
@@ -1961,7 +2007,7 @@ export struct PopoverDialog {
       try {
         let screenSize: display.Display = display.getDefaultDisplaySync();
         let screenWidth: number = px2vp(screenSize.width);
-        if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
+        if (screenWidth - BUTTON_HORIZONTAL_MARGIN() - BUTTON_HORIZONTAL_MARGIN() > MAX_DIALOG_WIDTH) {
           this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
         } else {
           this.popover.width = this.dialogWidth;

@@ -449,6 +449,14 @@ void FormManagerDelegate::AddLockFormCallback(LockFormCallback&& callback)
     lockFormCallback_ = std::move(callback);
 }
 
+void FormManagerDelegate::AddFormUpdateDoneCallback(UpdateFormDoneCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        return;
+    }
+    updateFormDoneCallback_ = std::move(callback);
+}
+
 void FormManagerDelegate::OnActionEventHandle(const std::string& action)
 {
     if (actionEventHandle_) {
@@ -598,6 +606,14 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
         }
     };
     renderDelegate_->SetCheckManagerDelegate(onCheckManagerDelegate);
+
+    auto &&onUpdateFormDoneEventHandler = [weak = WeakClaim(this)](const int64_t formId) {
+        auto formManagerDelegate = weak.Upgrade();
+        CHECK_NULL_VOID(formManagerDelegate);
+        TAG_LOGD(AceLogTag::ACE_FORM, "EventHandle - onUpdateFormDoneEventHandler, formId:%{public}" PRId64, formId);
+        formManagerDelegate->OnFormUpdateDone(formId);
+    };
+    renderDelegate_->SetUpdateFormEventHandler(onUpdateFormDoneEventHandler);
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)
@@ -687,7 +703,12 @@ void FormManagerDelegate::DispatchPointerEvent(const
     if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN) {
         TAG_LOGI(AceLogTag::ACE_FORM, "dispatch down event to renderer");
     }
-    auto disablePanGesture = wantCache_.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_DISABLE_GESTURE_KEY, false);
+    
+    bool disablePanGesture;
+    {
+        std::lock_guard<std::mutex> wantCacheLock(wantCacheMutex_);
+        disablePanGesture = wantCache_.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_DISABLE_GESTURE_KEY, false);
+    }
     if (!disablePanGesture) {
         formRendererDispatcher_->DispatchPointerEvent(pointerEvent, serializedGesture);
         return;
@@ -820,7 +841,8 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
 {
     int32_t externalErrorCode = 0;
     std::string errorMsg;
-    OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(std::stoi(code), externalErrorCode, errorMsg);
+    int64_t parsedRequestCode = static_cast<int64_t>(StringUtils::StringToLongInt(code.c_str()));
+    OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(parsedRequestCode, externalErrorCode, errorMsg);
     TAG_LOGI(AceLogTag::ACE_FORM,
         "OnFormError, code:%{public}s, msg:%{public}s, externalErrorCode:%{public}d, errorMsg: %{public}s",
         code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
@@ -839,6 +861,13 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
                 onFormErrorCallback_(std::to_string(externalErrorCode), errorMsg);
             }
             break;
+    }
+}
+
+void FormManagerDelegate::OnFormUpdateDone(const int64_t formId)
+{
+    if (updateFormDoneCallback_) {
+        updateFormDoneCallback_(formId);
     }
 }
 

@@ -54,6 +54,7 @@
 #include "utils/camera3d.h"
 #include "utils/point3.h"
 #include "utils/scalar.h"
+#include "utils/picture_recorder.h"
 
 namespace OHOS::Ace {
 namespace RSDrawing = Rosen::Drawing;
@@ -101,6 +102,7 @@ using RSCubicResampler = Rosen::Drawing::CubicResampler;
 using RSColorSpace = Rosen::Drawing::ColorSpace;
 using RSData = Rosen::Drawing::Data;
 using RSDrawCmdList = Rosen::Drawing::DrawCmdList;
+using RSHybridRenderType = Rosen::Drawing::DrawCmdList::HybridRenderType;
 using RSFilterMode = Rosen::Drawing::FilterMode;
 using RSImageFilter = Rosen::Drawing::ImageFilter;
 using RSMipmapMode = Rosen::Drawing::MipmapMode;
@@ -149,6 +151,16 @@ using RSTextRect = Rosen::TextRect;
 using RSEllipsisMode = Rosen::EllipsisModal;
 using RSSymbolAnimation = Rosen::RSSymbolAnimation;
 using RSSymbolAnimationConfig = Rosen::TextEngine::SymbolAnimationConfig;
+using RSPictureRecorder = Rosen::Drawing::PictureRecorder;
+struct RSDataWrapper {
+    std::shared_ptr<RSData> data;
+};
+
+inline void RSDataWrapperReleaseProc(const void*, void* context)
+{
+    RSDataWrapper* wrapper = reinterpret_cast<RSDataWrapper*>(context);
+    delete wrapper;
+}
 } // namespace OHOS::Ace
 #else
 #include "core/components_ng/render/drawing_mock.h"

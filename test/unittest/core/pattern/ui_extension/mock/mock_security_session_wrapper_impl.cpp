@@ -286,4 +286,6 @@ bool SecuritySessionWrapperImpl::SendBusinessData(
 {
     return false;
 }
+
+void SecuritySessionWrapperImpl::ReDispatchWantParams() {}
 } // namespace OHOS::Ace::NG

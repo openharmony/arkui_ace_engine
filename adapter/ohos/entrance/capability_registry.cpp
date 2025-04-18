@@ -18,6 +18,7 @@
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
 #include "adapter/ohos/capability/environment/environment_proxy_impl.h"
 #include "adapter/ohos/capability/preference/storage_impl.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/environment/environment_proxy.h"
 #include "core/common/storage/storage_proxy.h"
 

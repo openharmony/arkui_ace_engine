@@ -235,6 +235,8 @@ public:
 
     void DumpEvent(NG::EventTreeType type, bool hasJson = false);
 
+    void DumpEventWithCount(const std::vector<std::string>& params, NG::EventTreeType type, bool hasJson = false);
+
     void AddGestureSnapshot(
         int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target, NG::EventTreeType type);
 
@@ -337,6 +339,9 @@ public:
     void NotifyDragTouchEventListener(const TouchEvent& dragPointerEvent);
 
     void AddToMousePendingRecognizers(const WeakPtr<NG::NGGestureRecognizer>& recognizer);
+
+    template<typename T>
+    bool CheckDifferentTargetDisplay(const std::vector<T>& historyEvents, const std::vector<T>& events);
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,

@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
+#include "base/subwindow/subwindow_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -273,10 +274,15 @@ int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkU
     int32_t ret = InteractionInterface::GetInstance()->StartDrag(dragData.value(), callback);
     if (ret != 0) {
         manager->GetDragAction()->dragState = DragAdapterState::INIT;
+        DragNotifyMsg dragNotifyMsg;
+        dragNotifyMsg.result = DragRet::DRAG_CANCEL;
+        HandleCallback(dragAction, dragNotifyMsg, DragAdapterStatus::ENDED);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "msdp start drag failed.");
         return -1;
     }
     HandleCallback(dragAction, DragNotifyMsg {}, DragAdapterStatus::STARTED);
     pipelineContext->SetIsDragging(true);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "msdp start drag successfully.");
     NG::DragDropFuncWrapper::HandleOnDragEvent(dragAction);
     return 0;
 }
@@ -626,7 +632,7 @@ bool DragDropFuncWrapper::IsExpandDisplay(const RefPtr<PipelineBase>& context)
         SubwindowManager::GetInstance()->GetParentContainerId(containerId) : containerId;
     auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_RETURN(container, false);
-    return container->IsFreeMultiWindow();
+    return container->IsFreeMultiWindow() || container->IsUIExtensionWindow();
 }
 
 OffsetF DragDropFuncWrapper::GetCurrentWindowOffset(const RefPtr<PipelineBase>& context)
@@ -1234,7 +1240,7 @@ std::shared_ptr<PixelMapInfo> DragDropFuncWrapper::GetTiledPixelMapInfo(const st
         auto gestureHub = node->GetOrCreateGestureEventHub();
         gestureHub->SetDragPreviewPixelMap(pixelMap);
         CHECK_NULL_RETURN(pixelMap, nullptr);
-        auto offset = DragDropFuncWrapper::GetPaintRectCenter(node, true);
+        auto offset = node->GetPositionToWindowWithTransform();
         minX = std::min(minX, offset.GetX());
         minY = std::min(minY, offset.GetY());
         maxX = std::max(maxX, offset.GetX() + pixelMap->GetWidth());
@@ -1264,8 +1270,9 @@ void DragDropFuncWrapper::DrawTiledPixelMap(
         CHECK_NULL_VOID(gestureHub);
         auto pixelMap = gestureHub->GetDragPreviewPixelMap();
         CHECK_NULL_VOID(pixelMap);
-        auto offsetX = DragDropFuncWrapper::GetPaintRectCenter(node, true).GetX();
-        auto offsetY = DragDropFuncWrapper::GetPaintRectCenter(node, true).GetY();
+        auto offset = node->GetPositionToWindowWithTransform();
+        auto offsetX = offset.GetX();
+        auto offsetY = offset.GetY();
         auto result =
             tiledPixelMap->WritePixels({ pixelMap->GetPixels(), pixelMap->GetByteCount(), 0, pixelMap->GetRowStride(),
                 { offsetX - pixelMapRect.GetOffset().GetX(), offsetY - pixelMapRect.GetOffset().GetY(),
@@ -1466,7 +1473,7 @@ RefPtr<DragDropManager> DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
         SubwindowManager::GetInstance()->GetParentContainerId(instanceId) : instanceId;
     auto container = Container::GetContainer(mainContainerId);
     CHECK_NULL_RETURN(container, dragDropManager);
-    if (!container->IsScenceBoardWindow()) {
+    if (!container->IsSceneBoardWindow()) {
         return dragDropManager;
     }
     CHECK_NULL_RETURN(subWindow, dragDropManager);
@@ -1475,5 +1482,13 @@ RefPtr<DragDropManager> DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
     dragDropManager = nodePipeline->GetDragDropManager();
     dragDropManager->SetPixelMapOffset(pixelMapOffset);
     return dragDropManager;
+}
+
+void DragDropFuncWrapper::SetMenuSubWindowTouchable(bool touchable)
+{
+    auto containerId = Container::CurrentId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
+    CHECK_NULL_VOID(subwindow);
+    subwindow->SetWindowTouchable(touchable);
 }
 } // namespace OHOS::Ace::NG

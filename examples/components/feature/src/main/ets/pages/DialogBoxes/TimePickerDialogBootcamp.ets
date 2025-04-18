@@ -113,7 +113,10 @@ export struct TimePickerDialogBootcamp {
   @State enableCascade: boolean = false;
   @State enableHapticFeedback: boolean = false;
   @State hapticFeedback: boolean = true;
-
+  scroller: Scroller = new Scroller();
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
   build() {
     NavDestination() {
       Drawer({
@@ -121,6 +124,9 @@ export struct TimePickerDialogBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        generic: () => {
+          this.Generic()
         },
         parameters: () => {
           this.Parameters()
@@ -234,7 +240,7 @@ export struct TimePickerDialogBootcamp {
 
   @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
         RadioBlock({
           title: 'useMilitaryTime',
@@ -605,7 +611,12 @@ export struct TimePickerDialogBootcamp {
           ]
         })
       }.width('100%')
-    }.height('50%')
+    }.height('50%').id('scroll')
+  }
+
+  @Builder
+  Generic() {
+
   }
 }
 

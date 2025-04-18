@@ -105,9 +105,10 @@ common_bin = [
     part_name = "glfw"
   },
   {
-    label = "//foundation/graphic/graphic_2d/rosen/modules/graphics_effect:libgraphics_effect"
+    label = "//foundation/graphic/graphics_effect:graphics_effect_core"
     subsystem_name = "graphic"
-    part_name = "graphic_2d"
+    part_name = "graphics_effect"
+    lib_names = [ "graphics_effect" ]
   },
   {
     label = "//third_party/jsoncpp:jsoncpp"
@@ -401,6 +402,12 @@ napi_modules = [
         lib_names = [ "dialog" ]
       },
       {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/dialogv2/interfaces:dialogv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "dialogv2" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/editabletitlebar/interfaces:editabletitlebar"
         subsystem_name = "arkui"
         part_name = "ace_engine"
@@ -443,6 +450,12 @@ napi_modules = [
         lib_names = [ "subheader" ]
       },
       {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/subheaderv2/interfaces:subheaderv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "subheaderv2" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/swiperefresher/interfaces:swiperefresher"
         subsystem_name = "arkui"
         part_name = "ace_engine"
@@ -459,6 +472,12 @@ napi_modules = [
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "toolbar" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/toolbarv2/interfaces:toolbarv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "toolbarv2" ]
       },
       {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/treeview/interfaces:treeview"

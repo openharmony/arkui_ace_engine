@@ -367,7 +367,7 @@ public:
     int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range) override;
     void FinishTextPreview() override;
     void SetPreviewTextOperation(PreviewTextInfo info);
-    void FinishTextPreviewOperation();
+    void FinishTextPreviewOperation(bool triggerOnWillChange = true);
     TextDragInfo CreateTextDragInfo() const;
 
     RefPtr<TextComponentDecorator> GetCounterDecorator() const
@@ -473,7 +473,7 @@ public:
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
     void OnHandleAreaChanged() override;
-    void OnVisibleChange(bool isVisible) override;
+
     void HandleCounterBorder();
 
     int32_t GetCaretIndex() const override
@@ -689,6 +689,7 @@ public:
     void AdjustSelectedBlankLineWidth(RectF& rect);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
+    void ToJsonValueForFontFeature(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
@@ -830,7 +831,7 @@ public:
         return contentRect_.GetY() == textRect_.GetY();
     }
 
-    bool IsAtBottom() const override
+    bool IsAtBottom(bool considerRepeat = false) const override
     {
         return contentRect_.GetY() + contentRect_.Height() == textRect_.GetY() + textRect_.Height();
     }
@@ -1592,13 +1593,12 @@ protected:
 
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
-    void OnTextGenstureSelectionEnd(const TouchLocationInfo& locationInfo) override;
+    void OnTextGestureSelectionEnd(const TouchLocationInfo& locationInfo) override;
     void DoTextSelectionTouchCancel() override;
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
     virtual bool IsNeedProcessAutoFill();
-    void UpdatePasswordIconColor(const Color& color);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     RefPtr<ContentController> contentController_;
@@ -1662,8 +1662,7 @@ private:
     void UpdatePressStyle(bool isPressed);
     void PlayAnimationHoverAndPress(const Color& color);
     void UpdateTextFieldBgColor(const Color& color);
-    void ChangeMouseState(
-        const Offset location, int32_t frameId, bool isByPass = false);
+    void ChangeMouseState(const Offset location, int32_t frameId);
     void FreeMouseStyleHoldNode(const Offset location);
     void HandleMouseEvent(MouseInfo& info);
     void FocusAndUpdateCaretByMouse(MouseInfo& info);
@@ -1677,6 +1676,7 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void StartVibratorByLongPress();
+    bool IsInResponseArea(const Offset& location);
     void HandleLongPress(GestureEvent& info);
     bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
@@ -1873,6 +1873,8 @@ private:
     void ProcessAutoFillOnFocus();
     bool IsStopEditWhenCloseKeyboard();
     void SetIsEnableSubWindowMenu();
+    void OnReportPasteEvent(const RefPtr<FrameNode>& frameNode);
+    void OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode);
 
     RectF frameRect_;
     RectF textRect_;
@@ -2072,7 +2074,7 @@ private:
     bool isPasswordSymbol_ = true;
     bool isEnableHapticFeedback_ = true;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
-    RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
+    WeakPtr<AIWriteAdapter> aiWriteAdapter_;
     std::optional<Dimension> adaptFontSize_;
     uint32_t longPressFingerNum_ = 0;
     ContentScroller contentScroller_;

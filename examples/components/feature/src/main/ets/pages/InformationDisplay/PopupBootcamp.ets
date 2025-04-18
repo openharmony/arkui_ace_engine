@@ -15,8 +15,7 @@
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { ColorBlock, IconBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
-import { Popup, PopupButtonOptions, PopupIconOptions, PopupTextOptions } from '@kit.ArkUI';
-
+import { componentUtils, Popup, PopupButtonOptions, PopupIconOptions, PopupTextOptions } from '@kit.ArkUI';
 
 @Component
 export struct PopupBootcamp {
@@ -34,7 +33,7 @@ export struct PopupBootcamp {
   @State enableIconBorderRadius: boolean = false;
   @State iconBorderRadius: number = 16;
   @State enableTitle: boolean = true;
-  @State showTitle:string='This is a popup with PopupOptions';
+  @State showTitle: string = 'This is a popup with PopupOptions';
   @State enableTitleFontWeight: boolean = false;
   @State titleFontWeight: FontWeight = FontWeight.Normal;
   @State enableTitleFontSize: boolean = false;
@@ -48,9 +47,9 @@ export struct PopupBootcamp {
   @State enableShowClose: boolean = false;
   @State showClose: boolean = false;
   @State enableButtonsConfirm: boolean = true;
-  @State showButtonsConfirmText:string='confirm';
+  @State showButtonsConfirmText: string = 'confirm';
   @State enableButtonsCancel: boolean = true;
-  @State showButtonsCancelText:string='cancel';
+  @State showButtonsCancelText: string = 'cancel';
   @State enableButtonsConfirmFontSize: boolean = false;
   @State buttonsConfirmFontSize: number = 15;
   @State enableButtonsConfirmFontColor: boolean = false;
@@ -60,6 +59,12 @@ export struct PopupBootcamp {
   @State enableButtonsCancelFontColor: boolean = false;
   @State buttonsCancelFontColor: ResourceColor = Color.Black;
   @State currentDirection: Direction = Direction.Rtl
+  @State scrollShow: number = 0
+  scroller: Scroller = new Scroller()
+
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
 
   build() {
     NavDestination() {
@@ -68,6 +73,9 @@ export struct PopupBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        generic: () => {
+          this.Generic()
         },
         parameters: () => {
           this.Parameters()
@@ -124,14 +132,22 @@ export struct PopupBootcamp {
             },
             fontSize: useEnabled(this.enableButtonsCancelFontSize, this.buttonsCancelFontSize),
             fontColor: useEnabled(this.enableButtonsCancelFontColor, this.buttonsCancelFontColor),
-          },] as [PopupButtonOptions?, PopupButtonOptions?],
+          }] as [PopupButtonOptions?, PopupButtonOptions?],
       })
     }.justifyContent(FlexAlign.Center)
   }
 
   @Builder
+  Generic() {
+    Scroll(this.scroller) {
+
+    }.height('52%')
+    .id('scroll')
+  }
+
+  @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
         IconBlock({
           title: 'icon.image',
@@ -264,6 +280,7 @@ export struct PopupBootcamp {
         })
       }.width('100%')
     }
+    .id('scroll')
     .height('52%')
   }
 }

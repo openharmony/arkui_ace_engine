@@ -49,6 +49,7 @@ constexpr int32_t DOT_INDICATOR_RIGHT = 11;
 constexpr int32_t DOT_INDICATOR_BOTTOM = 12;
 constexpr int32_t DOT_INDICATOR_MAX_DISPLAY_COUNT = 13;
 constexpr int32_t DOT_INDICATOR_SPACE = 14;
+constexpr int32_t DEFAULT_INDICATOR_COUNT = 2;
 constexpr double DEFAULT_PERCENT_VALUE = 100.0;
 
 std::string GetDimensionUnitString(DimensionUnit unit)
@@ -231,7 +232,7 @@ ArkUINativeModuleValue IndicatorComponentBridge::SetCount(ArkUIRuntimeCallInfo* 
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
     if (valueArg->IsNumber()) {
-        int32_t count = valueArg->Int32Value(vm);
+        int32_t count = std::max(DEFAULT_INDICATOR_COUNT, valueArg->Int32Value(vm));
         GetArkUINodeModifiers()->getIndicatorComponentModifier()->setCount(nativeNode, count);
     } else {
         GetArkUINodeModifiers()->getIndicatorComponentModifier()->resetCount(nativeNode);

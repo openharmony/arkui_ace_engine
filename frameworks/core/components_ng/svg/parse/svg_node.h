@@ -169,12 +169,14 @@ public:
     {
         isRootNode_ = isRoot;
     }
-    Offset CalcGlobalPivot(const std::pair<Dimension, Dimension>& transformOrigin, const Rect& baseRect);
+    Offset CalcGlobalPivot(const std::pair<Dimension, Dimension>& transformOrigin,
+        const SvgLengthScaleRule& lengthRule);
     float GetRegionLength(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
     float GetRegionPosition(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
     float GetMeasuredLength(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
     float GetMeasuredPosition(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
     Rect GetSvgContainerRect() const;
+    void ApplyTransform(RSRecordingPath& path, const SvgLengthScaleRule& contentRule);
     bool drawTraversed_ = true; // enable OnDraw, TAGS mask/defs/pattern/filter = false
 protected:
     // override as need by derived class
@@ -219,8 +221,10 @@ protected:
     template<typename T>
     void UpdateAttr(const std::string& name, const T& val);
     void UpdateAttrHelper(const std::string& name, const std::string& val);
-    SvgLengthScaleRule TransformForCurrentOBB(RSCanvas& canvas, const SvgCoordinateSystemContext& context,
-        SvgLengthScaleUnit contentUnits, float offsetX, float offsetY);
+    SvgLengthScaleRule BuildContentScaleRule(const SvgCoordinateSystemContext& parentContext,
+        SvgLengthScaleUnit contentUnits);
+    void TransformForCurrentOBB(RSCanvas& canvas, const SvgLengthScaleRule& contentRule,
+        const Size& ContainerSize, const Offset& offset);
 
     // defs gradient animation
     void InitNoneFlag()

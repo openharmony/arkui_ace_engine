@@ -303,7 +303,13 @@ public:
         needHideAfterTouch_ = needHideAfterTouch;
     }
 
-    void HideMenu(bool isMenuOnTouch = false, OffsetF position = OffsetF()) const;
+    void HideMenu(const HideMenuType& reason)
+    {
+        HideMenu(false, OffsetF(), reason);
+    }
+
+    void HideMenu(bool isMenuOnTouch = false, OffsetF position = OffsetF(),
+        const HideMenuType& reason = HideMenuType::NORMAL) const;
 
     bool HideStackExpandMenu(const OffsetF& position) const;
 
@@ -312,6 +318,7 @@ public:
     void MountOption(const RefPtr<FrameNode>& option);
 
     void RemoveOption();
+    RefPtr<FrameNode> DuplicateMenuNode(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
 
     RefPtr<FrameNode> GetMenuColumn() const;
 
@@ -683,6 +690,7 @@ private:
     RefPtr<UINode> GetIfElseMenuItem(const RefPtr<UINode>& parent, bool next);
     void HandleNextPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover);
     void HandlePrevPressed(const RefPtr<UINode>& parent, int32_t index, bool press);
+    void SetMenuBackGroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     void UpdateMenuBorderAndBackgroundBlur()
     {
         auto host = GetHost();

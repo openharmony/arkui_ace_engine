@@ -27,6 +27,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/common/container.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -426,7 +427,9 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
         PanDirection panDirection = {
             .type = axis_ == Axis::HORIZONTAL ? PanDirection::VERTICAL : PanDirection::HORIZONTAL,
         };
-        gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+        PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+            { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+        gestureHub->AddPanEvent(panEvent_, panDirection, 1, distanceMap);
 
         startNodeSize_ = 0.0f;
         endNodeSize_ = 0.0f;
@@ -1027,6 +1030,17 @@ void ListItemPattern::InitListItemCardStyleForList()
         InitHoverEvent();
         InitPressEvent();
         InitDisableEvent();
+    }
+}
+
+void ListItemPattern::SetListItemStyle(V2::ListItemStyle style)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (listItemStyle_ == V2::ListItemStyle::NONE && style == V2::ListItemStyle::CARD) {
+        listItemStyle_ = style;
+        SetListItemDefaultAttributes(host);
+        InitListItemCardStyleForList();
     }
 }
 

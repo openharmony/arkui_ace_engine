@@ -44,6 +44,16 @@ struct ButtonProperties {
     RefPtr<NG::ClickEvent> action; // button click action
 };
 
+struct PopupGradientColor {
+    Color gradientColor;
+    double gradientNumber;
+};
+
+struct PopupLinearGradientProperties {
+    GradientDirection popupDirection;
+    std::vector<PopupGradientColor> gradientColors;
+};
+
 enum class PopupKeyboardAvoidMode {
     DEFAULT,
     NONE
@@ -588,6 +598,45 @@ public:
     {
         return isTips_;
     }
+    void SetOutlineLinearGradient(const PopupLinearGradientProperties& outlineLinearGradient)
+    {
+        outlineLinearGradient_ = outlineLinearGradient;
+    }
+
+    const PopupLinearGradientProperties& GetOutlineLinearGradient() const
+    {
+        return outlineLinearGradient_;
+    }
+
+    void SetOutlineWidth(const std::optional<Dimension>& outlineWidth)
+    {
+        outlineWidth_ = outlineWidth;
+    }
+
+    const std::optional<Dimension>& GetOutlineWidth() const
+    {
+        return outlineWidth_;
+    }
+
+    void SetInnerBorderLinearGradient(const PopupLinearGradientProperties& innerBorderLinearGradient)
+    {
+        innerBorderLinearGradient_ = innerBorderLinearGradient;
+    }
+
+    const PopupLinearGradientProperties& GetInnerBorderLinearGradient() const
+    {
+        return innerBorderLinearGradient_;
+    }
+
+    void SetInnerBorderWidth(const std::optional<Dimension>& innerBorderWidth)
+    {
+        innerBorderWidth_ = innerBorderWidth;
+    }
+
+    const std::optional<Dimension>& GetInnerBorderWidth() const
+    {
+        return innerBorderWidth_;
+    }
 
 private:
     bool isShow_ = true;
@@ -646,6 +695,10 @@ private:
     RefPtr<NG::ChainedTransitionEffect> transitionEffects_ = nullptr;
     StateChangeFunc doubleBindCallback_;
     PopupKeyboardAvoidMode keyboardAvoidMode_ = PopupKeyboardAvoidMode::NONE;
+    std::optional<Dimension> outlineWidth_;
+    std::optional<Dimension> innerBorderWidth_;
+    PopupLinearGradientProperties outlineLinearGradient_;
+    PopupLinearGradientProperties innerBorderLinearGradient_;
 };
 
 } // namespace OHOS::Ace

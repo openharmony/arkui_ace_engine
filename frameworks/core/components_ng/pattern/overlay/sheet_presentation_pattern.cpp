@@ -515,13 +515,15 @@ void SheetPresentationPattern::InitPanEvent()
     panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distanceMap);
 }
 
 void SheetPresentationPattern::InitOnkeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     CHECK_NULL_VOID(focusHub);
-    focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
+    focusHub->SetOnFocusInternal([weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleFocusEvent();
@@ -573,6 +575,7 @@ void SheetPresentationPattern::HandleFocusEvent()
 void SheetPresentationPattern::HandleBlurEvent()
 {
     TAG_LOGI(AceLogTag::ACE_SHEET, "Sheet lost focus");
+    keyboardHeight_ = 0;
     SheetManager::GetInstance().SetFocusSheetId(std::nullopt);
     SetShadowStyle(false);
 }
@@ -1261,6 +1264,9 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
             pattern->OnDisappear();
             overlayManager->RemoveSheet(host);
             pattern->FireCallback("false");
+            auto pipelineContext = host->GetContextWithCheck();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
         }
     });
     StartSheetTransitionAnimation(option, isTransitionIn, offset);
@@ -1373,7 +1379,7 @@ void SheetPresentationPattern::UpdateDragBarStatus()
 
 float SheetPresentationPattern::GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme)
 {
-    auto closeIconX = sheetSize.Width() - static_cast<float>(SHEET_CLOSE_ICON_WIDTH.ConvertToPx()) -
+    auto closeIconX = sheetSize.Width() - static_cast<float>(sheetTheme->GetCloseIconButtonWidth().ConvertToPx()) -
                       static_cast<float>(sheetTheme->GetTitleTextMargin().ConvertToPx());
     if (AceApplicationInfo::GetInstance().IsRightToLeft() &&
         AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -1458,8 +1464,9 @@ void SheetPresentationPattern::UpdateTitlePadding()
 
     // The title bar area is reserved for the close button area size by default.
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto sheetCloseIconTitleSpace = sheetTheme->IsOuterBorderEnable() ? 0.0_vp : SHEET_CLOSE_ICON_TITLE_SPACE_NEW;
-        padding.end = CalcLength(showCloseIcon ? sheetCloseIconTitleSpace + SHEET_CLOSE_ICON_WIDTH : 0.0_vp);
+        auto sheetCloseIconTitleSpace = sheetTheme->GetSheetCloseIconTitleSpaceNew();
+        padding.end =
+            CalcLength(showCloseIcon ? sheetCloseIconTitleSpace + sheetTheme->GetCloseIconButtonWidth() : 0.0_vp);
     } else {
         padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
     }
@@ -1686,13 +1693,13 @@ void SheetPresentationPattern::CheckSheetHeightChange()
         wrapperHeight_ = GetWrapperHeight();
         isFirstInit_ = false;
     } else {
-        if (sheetType_ != GetSheetType()) {
+        if (typeChanged_) {
             if (sheetType_ == SheetType::SHEET_POPUP) {
                 MarkSheetPageNeedRender();
             }
             SetSheetBorderWidth();
         }
-        if (SheetHeightNeedChanged() || (sheetType_ != GetSheetType()) || windowChanged_ || topSafeAreaChanged_) {
+        if (SheetHeightNeedChanged() || typeChanged_ || windowChanged_ || topSafeAreaChanged_) {
             sheetHeight_ = sheetGeometryNode->GetFrameSize().Height();
             wrapperHeight_ = GetWrapperHeight();
             const auto& overlayManager = GetOverlayManager();
@@ -1716,6 +1723,7 @@ void SheetPresentationPattern::CheckSheetHeightChange()
             }
             windowChanged_ = false;
             topSafeAreaChanged_ = false;
+            typeChanged_ = false;
         }
     }
     GetBuilderInitHeight();
@@ -1969,6 +1977,8 @@ SheetType SheetPresentationPattern::GetSheetType()
         GetSheetTypeWithAuto(sheetType);
     } else if (sheetThemeType_ == "popup") {
         GetSheetTypeWithPopup(sheetType);
+    } else if (sheetThemeType_ == "center") {
+        GetSheetTypeWithCenter(sheetType);
     }
     return sheetType;
 }
@@ -1985,8 +1995,15 @@ void SheetPresentationPattern::InitSheetMode()
 
 void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
 {
-    auto rootHeight = PipelineContext::GetCurrentRootHeight();
-    auto rootWidth = PipelineContext::GetCurrentRootWidth();
+    double rootWidth = 0.0;
+    double rootHeight = 0.0;
+    if (windowSize_.has_value()) {
+        rootWidth = windowSize_.value().Width();
+        rootHeight = windowSize_.value().Height();
+    } else {
+        rootWidth = PipelineContext::GetCurrentRootWidth();
+        rootHeight = PipelineContext::GetCurrentRootHeight();
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
@@ -2048,6 +2065,29 @@ void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
     }
     if (sheetType == SheetType::SHEET_POPUP && !sheetKey_.hasValidTargetNode) {
         sheetType = SheetType::SHEET_CENTER;
+    }
+}
+
+void SheetPresentationPattern::GetSheetTypeWithCenter(SheetType& sheetType)
+{
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (sheetStyle.sheetType.has_value()) {
+        sheetType = sheetStyle.sheetType.value();
+        return;
+    }
+    double rootWidth = 0.0;
+    if (windowSize_.has_value()) {
+        rootWidth = windowSize_.value().Width();
+    } else {
+        rootWidth = PipelineContext::GetCurrentRootWidth();
+    }
+    if (GreatOrEqual(rootWidth, SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
+        sheetType = SheetType::SHEET_CENTER;
+    } else {
+        // SHEET_BOTTOMLANDSPACE need to adapt
+        sheetType = SheetType::SHEET_BOTTOM;
     }
 }
 
@@ -2252,6 +2292,9 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
         const auto& overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->CleanSheet(host, GetSheetKey());
+        auto pipelineContext = host->GetContextWithCheck();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateOcclusionCullingStatus(true, host);
     }
 }
 
@@ -3297,6 +3340,7 @@ void SheetPresentationPattern::UpdateSheetWhenSheetTypeChanged()
             MarkSheetPageNeedRender();
         }
         sheetType_ = sheetType;
+        typeChanged_ = true;
         SetSheetBorderWidth();
     }
 }

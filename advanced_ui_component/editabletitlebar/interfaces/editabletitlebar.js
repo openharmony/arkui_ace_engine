@@ -254,7 +254,8 @@ export class EditableTitleBar extends ViewPU {
                 alignItems: ItemAlign.Stretch,
             });
             Flex.backgroundColor(this.options.backgroundColor ?? EditableTitleBar.noneColor);
-            Flex.backgroundBlurStyle(this.options.backgroundBlurStyle ?? BlurStyle.NONE);
+            Flex.backgroundBlurStyle(
+                this.options.backgroundBlurStyle ?? BlurStyle.NONE, undefined, { disableSystemAdaptation: true });
             Flex.expandSafeArea(this.options.safeAreaTypes ? this.options.safeAreaTypes : [SafeAreaType.SYSTEM], this.options.safeAreaEdges ? this.options.safeAreaEdges : [SafeAreaEdge.TOP]);
         }, Flex);
         this.observeComponentCreation2((q66, r66) => {
@@ -1035,10 +1036,10 @@ class ImageMenuItem extends ViewPU {
             return getContext()?.resourceManager?.getStringByNameSync('icon_back');
         }
         else if (this.item.accessibilityText) {
-            return this.toStringFormat(this.item.accessibilityText);
+            return this.item.accessibilityText;
         }
         else if (this.item.label) {
-            return this.toStringFormat(this.item.label);
+            return this.item.label;
         }
         return ' ';
     }
@@ -1050,7 +1051,7 @@ class ImageMenuItem extends ViewPU {
     }
     getAccessibilityDescription() {
         if (this.item.accessibilityDescription && this.item.accessibilityDescription !== '') {
-            return this.toStringFormat(this.item.accessibilityDescription);
+            return this.item.accessibilityDescription;
         }
         return '';
     }
@@ -1398,7 +1399,7 @@ class EditableTitleBarDialog extends ViewPU {
                         Column.create();
                         Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
                         Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
-                        Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
+                        Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true });
                         Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
                         Column.borderRadius(({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }));
                     }, Column);
@@ -1489,7 +1490,7 @@ class EditableTitleBarDialog extends ViewPU {
                         Column.create();
                         Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
                         Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
-                        Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
+                        Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true });
                         Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
                         Column.borderRadius(({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }));
                         Column.justifyContent(FlexAlign.Center);

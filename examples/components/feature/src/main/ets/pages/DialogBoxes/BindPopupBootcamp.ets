@@ -126,7 +126,10 @@ export struct BindPopupBootcamp {
 
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
+  scroller: Scroller = new Scroller();
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
   //compEvent
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
@@ -159,6 +162,9 @@ export struct BindPopupBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        generic: () => {
+          this.Generic()
         },
         parameters: () => {
           this.Parameters()
@@ -323,7 +329,7 @@ export struct BindPopupBootcamp {
 
   @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
 
         RadioBlock({
@@ -741,6 +747,12 @@ export struct BindPopupBootcamp {
       }
     }
     .height('52%')
+    .id('scroll')
+  }
+
+  @Builder
+  Generic() {
+
   }
 }
 

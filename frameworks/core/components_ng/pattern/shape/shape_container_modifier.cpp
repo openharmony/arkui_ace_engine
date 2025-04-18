@@ -17,7 +17,7 @@
 
 #include "base/geometry/ng/image_mesh.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/render/adapter/rosen/drawing_painter.h"
+#include "core/components_ng/render/adapter/drawing_painter.h"
 namespace OHOS::Ace::NG {
 namespace {
 std::tuple<bool, int32_t, int32_t> CheckNeedMesh(const RefPtr<PropertyInt>& propertyRow,

@@ -16,6 +16,7 @@
 #include <gmock/gmock.h>
 
 #include "gtest/gtest.h"
+#include "test/unittest/core/pattern/web/mock_web_delegate.h"
 
 #define private public
 #include "core/components/web/resource/web_delegate.h"
@@ -24,6 +25,7 @@
 
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "base/log/dump_log.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/components_ng/base/view_stack_processor.h"
 
@@ -202,6 +204,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_001, TestSize.Level1)
     webpattern.OnAudioResumeIntervalUpdate(0);
     webpattern.OnAudioExclusiveUpdate(true);
     webpattern.OnOptimizeParserBudgetEnabledUpdate(true);
+    webpattern.OnBlurOnKeyboardHideModeUpdate(0);
 #endif
 }
 
@@ -254,6 +257,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_002, TestSize.Level1)
     webPattern->OnHorizontalScrollBarAccessEnabledUpdate(true);
     webPattern->OnVerticalScrollBarAccessEnabledUpdate(true);
     webPattern->OnOptimizeParserBudgetEnabledUpdate(true);
+    webPattern->OnWebMediaAVSessionEnabledUpdate(true);
 #endif
 }
 
@@ -793,6 +797,30 @@ HWTEST_F(WebPatternTestNg, GetAccessibilityNodeByFocusMove014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTransitionalNodeById001
+ * @tc.desc: GetTransitionalNodeById.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, GetTransitionalNodeById001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    int32_t accessibilityId = 1;
+    auto ret = webPattern->GetTransitionalNodeById(accessibilityId);
+    EXPECT_EQ(ret, nullptr);
+#endif
+}
+
+/**
  * @tc.name: ExecuteAction015
  * @tc.desc: ExecuteAction.
  * @tc.type: FUNC
@@ -1150,11 +1178,16 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_003, TestSize.Level1)
     GestureEvent event;
     event.SetScale(-2);
     webPattern->preScale_ = 0;
-    webPattern->zoomStatus_ = 2;
     webPattern->zoomErrorCount_ = 1;
-
     webPattern->HandleScaleGestureChange(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 2);
+    EXPECT_NE(webPattern->zoomErrorCount_, 0);
+    webPattern->preScale_ = 1;
+    webPattern->HandleScaleGestureChange(event);
+    EXPECT_NE(webPattern->zoomErrorCount_, 0);
+    event.SetScale(1);
+    webPattern->preScale_ = 0;
+    webPattern->HandleScaleGestureChange(event);
+    EXPECT_NE(webPattern->zoomErrorCount_, 0);
     EXPECT_NE(webPattern, nullptr);
 #endif
 }
@@ -1179,14 +1212,13 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_004, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     GestureEvent event;
-    event.SetScale(-2);
-    webPattern->zoomStatus_ = 3;
+    event.SetScale(1);
+    webPattern->zoomStatus_ = 2;
     webPattern->zoomErrorCount_ = 1;
-    webPattern->preScale_ = 4;
-    webPattern->zoomOutSwitch_ = true;
+    webPattern->preScale_ = 2;
 
     webPattern->HandleScaleGestureChange(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 0);
+    EXPECT_EQ(webPattern->zoomErrorCount_, 2);
     EXPECT_NE(webPattern, nullptr);
 #endif
 }
@@ -1211,15 +1243,138 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_005, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     GestureEvent event;
-    event.SetScale(-2);
+    event.SetScale(1);
     webPattern->zoomStatus_ = 3;
     webPattern->zoomErrorCount_ = 1;
     webPattern->preScale_ = 4;
-    webPattern->zoomOutSwitch_ = false;
 
     webPattern->HandleScaleGestureChange(event);
     EXPECT_EQ(webPattern->zoomErrorCount_, 0);
     EXPECT_NE(webPattern, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: GetNewOriginScale_001
+ * @tc.desc: GetNewOriginScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, GetNewOriginScale_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->zoomStatus_ = 1;
+    auto ret = webPattern->GetNewOriginScale(0.1);
+    EXPECT_EQ(ret, 0.1);
+    webPattern->zoomStatus_ = 2;
+    ret = webPattern->GetNewOriginScale(0.1);
+    EXPECT_EQ(ret, 5.0);
+    webPattern->zoomStatus_ = 3;
+    ret = webPattern->GetNewOriginScale(0.1);
+    EXPECT_EQ(ret, 0.0);
+#endif
+}
+/**
+ * @tc.name: HandleScaleGestureStart_001
+ * @tc.desc: HandleScaleGestureStart.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, HandleScaleGestureStart_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    GestureEvent event;
+    event.SetScale(-2);
+    webPattern->zoomStatus_ = 3;
+    webPattern->zoomErrorCount_ = 0;
+    webPattern->preScale_ = 4;
+    webPattern->zoomOutSwitch_ = false;
+
+    webPattern->HandleScaleGestureStart(event);
+    EXPECT_EQ(webPattern->zoomErrorCount_, 0);
+#endif
+}
+
+/**
+ * @tc.name: HandleScaleGestureEnd_001
+ * @tc.desc: HandleScaleGestureEnd.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, HandleScaleGestureEnd_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    GestureEvent event;
+    event.SetScale(-2);
+    webPattern->zoomStatus_ = 3;
+    webPattern->zoomErrorCount_ = 0;
+    webPattern->preScale_ = 4;
+    webPattern->zoomOutSwitch_ = false;
+
+    webPattern->HandleScaleGestureEnd(event);
+    EXPECT_EQ(webPattern->zoomErrorCount_, 0);
+#endif
+}
+
+/**
+ * @tc.name: HandleScaleGestureCancel_001
+ * @tc.desc: HandleScaleGestureCancel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, HandleScaleGestureCancel_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    GestureEvent event;
+    event.SetScale(-2);
+    webPattern->zoomStatus_ = 3;
+    webPattern->zoomErrorCount_ = 0;
+    webPattern->preScale_ = 4;
+    webPattern->zoomOutSwitch_ = false;
+
+    webPattern->HandleScaleGestureCancel(event);
+    EXPECT_EQ(webPattern->zoomErrorCount_, 0);
 #endif
 }
 
@@ -1888,6 +2043,52 @@ HWTEST_F(WebPatternTestNg, WebRequestFocus_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsCurrentFocus_001
+ * @tc.desc: IsCurrentFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, IsCurrentFocus_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->IsCurrentFocus();
+#endif
+}
+
+/**
+ * @tc.name: UpdateContentOffset_001
+ * @tc.desc: UpdateContentOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, UpdateContentOffset_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper(true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    webPattern->UpdateContentOffset(layoutWrapper);
+#endif
+}
+
+/**
  * @tc.name: HandleFocusEvent_001
  * @tc.desc: HandleFocusEvent.
  * @tc.type: FUNC
@@ -1932,6 +2133,534 @@ HWTEST_F(WebPatternTestNg, HandleFocusEvent_002, TestSize.Level1)
     webPattern->needOnFocus_ = true;
     webPattern->HandleFocusEvent();
     EXPECT_TRUE(webPattern->needOnFocus_);
+#endif
+}
+
+/**
+ * @tc.name: DumpInfo_001
+ * @tc.desc: DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, DumpInfo_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
+    ASSERT_NE(ostream, nullptr);
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+    webPattern->DumpInfo();
+    webPattern->delegate_ = nullptr;
+    webPattern->DumpGpuInfo();
+    webPattern->renderSurface_ = nullptr;
+    webPattern->DumpSurfaceInfo();
+#endif
+}
+
+/**
+ * @tc.name: OnCompleteSwapWithNewSize_001
+ * @tc.desc: OnCompleteSwapWithNewSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnCompleteSwapWithNewSize_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->isInWindowDrag_ = true;
+    webPattern->isWaiting_ = true;
+    webPattern->OnCompleteSwapWithNewSize();
+    EXPECT_FALSE(webPattern->isWaiting_);
+    webPattern->isInWindowDrag_ = false;
+    webPattern->isWaiting_ = true;
+    webPattern->OnCompleteSwapWithNewSize();
+    EXPECT_TRUE(webPattern->isWaiting_);
+    webPattern->isInWindowDrag_ = true;
+    webPattern->isWaiting_ = false;
+    webPattern->OnCompleteSwapWithNewSize();
+    EXPECT_FALSE(webPattern->isWaiting_);
+    webPattern->isInWindowDrag_ = false;
+    webPattern->isWaiting_ = false;
+    webPattern->OnCompleteSwapWithNewSize();
+    EXPECT_FALSE(webPattern->isWaiting_);
+#endif
+}
+
+/**
+ * @tc.name: OnIntrinsicSizeEnabledUpdate_001
+ * @tc.desc: OnIntrinsicSizeEnabledUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnIntrinsicSizeEnabledUpdate_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->OnIntrinsicSizeEnabledUpdate(false);
+#endif
+}
+
+/**
+ * @tc.name: OnIntrinsicSizeEnabledUpdate_002
+ * @tc.desc: OnIntrinsicSizeEnabledUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnIntrinsicSizeEnabledUpdate_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->OnIntrinsicSizeEnabledUpdate(true);
+#endif
+}
+
+/**
+ * @tc.name: OnIntrinsicSizeEnabledUpdate_003
+ * @tc.desc: OnIntrinsicSizeEnabledUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnIntrinsicSizeEnabledUpdate_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->delegate_ = nullptr;
+    webPattern->OnIntrinsicSizeEnabledUpdate(true);
+#endif
+}
+
+/**
+ * @tc.name: SetSurfaceDensity_001
+ * @tc.desc: SetSurfaceDensity.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, SetSurfaceDensity_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->SetSurfaceDensity(1);
+    EXPECT_EQ(webPattern->density_, 1);
+#endif
+}
+
+/**
+ * @tc.name: RestoreRenderFit_001
+ * @tc.desc: RestoreRenderFit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, RestoreRenderFit_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->renderContextForSurface_ = nullptr;
+    webPattern->RestoreRenderFit();
+#endif
+}
+
+/**
+ * @tc.name: RestoreRenderFit_002
+ * @tc.desc: RestoreRenderFit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, RestoreRenderFit_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->renderContextForSurface_ = RenderContext::Create();
+    webPattern->RestoreRenderFit();
+#endif
+}
+
+/**
+ * @tc.name: WindowDrag_001
+ * @tc.desc: WindowDrag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WindowDrag_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->dragWindowFlag_ = true;
+    webPattern->lastWidth_ = 0;
+    webPattern->lastHeight_ = 0;
+    webPattern->WindowDrag(1, 2);
+    EXPECT_EQ(webPattern->lastWidth_, 1);
+    EXPECT_EQ(webPattern->lastHeight_, 2);
+#endif
+}
+
+/**
+ * @tc.name: WindowDrag_002
+ * @tc.desc: WindowDrag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WindowDrag_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->dragWindowFlag_ = true;
+    webPattern->lastWidth_ = 0;
+    webPattern->lastHeight_ = 0;
+    webPattern->WindowDrag(6, 7);
+    EXPECT_EQ(webPattern->lastWidth_, 6);
+    EXPECT_EQ(webPattern->lastHeight_, 7);
+#endif
+}
+
+/**
+ * @tc.name: WindowDrag_003
+ * @tc.desc: WindowDrag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WindowDrag_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->dragWindowFlag_ = true;
+    webPattern->lastWidth_ = 1;
+    webPattern->lastHeight_ = 2;
+    webPattern->WindowDrag(7, 8);
+    EXPECT_EQ(webPattern->lastWidth_, 7);
+    EXPECT_EQ(webPattern->lastHeight_, 8);
+#endif
+}
+
+/**
+ * @tc.name: WindowDrag_004
+ * @tc.desc: WindowDrag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WindowDrag_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->delegate_ = nullptr;
+    webPattern->lastWidth_ = 1;
+    webPattern->lastHeight_ = 2;
+    webPattern->WindowDrag(3, 4);
+    EXPECT_EQ(webPattern->lastWidth_, 1);
+    EXPECT_EQ(webPattern->lastHeight_, 2);
+#endif
+}
+
+/**
+ * @tc.name: WindowDrag_005
+ * @tc.desc: WindowDrag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WindowDrag_005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->dragWindowFlag_ = false;
+    webPattern->lastWidth_ = 1;
+    webPattern->lastHeight_ = 0;
+    webPattern->WindowDrag(3, 4);
+    EXPECT_EQ(webPattern->lastWidth_, 1);
+    EXPECT_EQ(webPattern->lastHeight_, 0);
+#endif
+}
+
+/**
+ * @tc.name: WindowMaximize_001
+ * @tc.desc: WindowMaximize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WindowMaximize_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("8");
+    auto webInfoType = webPattern->GetWebInfoType();
+    EXPECT_EQ(webInfoType, WebInfoType::TYPE_2IN1);
+    webPattern->layoutMode_ = WebLayoutMode::NONE;
+    webPattern->renderMode_ = RenderMode::ASYNC_RENDER;
+    webPattern->isAttachedToMainTree_ = true;
+    webPattern->isVisible_ = true;
+    webPattern->renderContextForSurface_ = RenderContext::Create();
+    webPattern->WindowMaximize();
+#endif
+}
+
+/**
+ * @tc.name: WindowMaximize_002
+ * @tc.desc: WindowMaximize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WindowMaximize_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("-1");
+    auto webInfoType = webPattern->GetWebInfoType();
+    EXPECT_EQ(webInfoType, WebInfoType::TYPE_UNKNOWN);
+    webPattern->WindowMaximize();
+#endif
+}
+
+/**
+ * @tc.name: WindowMaximize_003
+ * @tc.desc: WindowMaximize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WindowMaximize_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("8");
+    auto webInfoType = webPattern->GetWebInfoType();
+    EXPECT_EQ(webInfoType, WebInfoType::TYPE_2IN1);
+    webPattern->layoutMode_ = WebLayoutMode::FIT_CONTENT;
+    webPattern->renderMode_ = RenderMode::ASYNC_RENDER;
+    webPattern->WindowMaximize();
+#endif
+}
+
+/**
+ * @tc.name: WindowMaximize_004
+ * @tc.desc: WindowMaximize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WindowMaximize_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("8");
+    auto webInfoType = webPattern->GetWebInfoType();
+    EXPECT_EQ(webInfoType, WebInfoType::TYPE_2IN1);
+    webPattern->layoutMode_ = WebLayoutMode::NONE;
+    webPattern->renderMode_ = RenderMode::SYNC_RENDER;
+    webPattern->WindowMaximize();
+#endif
+}
+
+/**
+ * @tc.name: WindowMaximize_005
+ * @tc.desc: WindowMaximize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WindowMaximize_005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("8");
+    auto webInfoType = webPattern->GetWebInfoType();
+    EXPECT_EQ(webInfoType, WebInfoType::TYPE_2IN1);
+    webPattern->layoutMode_ = WebLayoutMode::NONE;
+    webPattern->renderMode_ = RenderMode::ASYNC_RENDER;
+    webPattern->isAttachedToMainTree_ = false;
+    webPattern->isVisible_ = true;
+    webPattern->WindowMaximize();
+#endif
+}
+
+/**
+ * @tc.name: WindowMaximize_006
+ * @tc.desc: WindowMaximize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WindowMaximize_006, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("8");
+    auto webInfoType = webPattern->GetWebInfoType();
+    EXPECT_EQ(webInfoType, WebInfoType::TYPE_2IN1);
+    webPattern->layoutMode_ = WebLayoutMode::NONE;
+    webPattern->renderMode_ = RenderMode::ASYNC_RENDER;
+    webPattern->isAttachedToMainTree_ = true;
+    webPattern->isVisible_ = false;
+    webPattern->WindowMaximize();
+#endif
+}
+
+/**
+ * @tc.name: WindowMaximize_007
+ * @tc.desc: WindowMaximize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WindowMaximize_007, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("8");
+    auto webInfoType = webPattern->GetWebInfoType();
+    EXPECT_EQ(webInfoType, WebInfoType::TYPE_2IN1);
+    webPattern->layoutMode_ = WebLayoutMode::NONE;
+    webPattern->renderMode_ = RenderMode::ASYNC_RENDER;
+    webPattern->isAttachedToMainTree_ = true;
+    webPattern->isVisible_ = true;
+    webPattern->renderContextForSurface_ = nullptr;
+    webPattern->WindowMaximize();
 #endif
 }
 } // namespace OHOS::Ace::NG

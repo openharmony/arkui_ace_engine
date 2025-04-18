@@ -15,8 +15,10 @@
 
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 void CheckLayoutConstraint(LayoutConstraintF& constraint, const RefPtr<FrameNode>& menuWrapper)

@@ -35,6 +35,9 @@ JSRef<JSObject> JsKeyFunction::createKeyEvent(KeyEventInfo& event)
     keyEventObj->SetPropertyObject("getModifierKeyState",
         JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
     keyEventObj->SetProperty<int32_t>("intentionCode", static_cast<int32_t>(event.GetKeyIntention()));
+    keyEventObj->SetProperty<bool>("isNumLockOn", event.GetNumLock());
+    keyEventObj->SetProperty<bool>("isCapsLockOn", event.GetCapsLock());
+    keyEventObj->SetProperty<bool>("isScrollLockOn", event.GetScrollLock());
     keyEventObj->Wrap<KeyEventInfo>(&event);
     return keyEventObj;
 }

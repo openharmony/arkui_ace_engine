@@ -1073,21 +1073,22 @@ export class ChipComponent extends ViewPU {
       Button.onFocus(() => {
         if (this.isSuffixIconFocusStyleCustomized) {
           this.chipNodeInFocus = true;
-          this.chipScale = {
-            x: this.resourceToNumber(this.theme.chipNode.focusBtnScaleX, 1),
-            y: this.resourceToNumber(this.theme.chipNode.focusBtnScaleY, 1),
-          };
         }
+        this.chipZoomIn();
       });
       Button.onBlur(() => {
         if (this.isSuffixIconFocusStyleCustomized) {
           this.chipNodeInFocus = false;
-          this.chipScale = {
-            x: 1,
-            y: 1,
-          };
         }
+        this.chipZoomOut();
       });
+      Button.onHover(
+        !this.isSuffixIconFocusStyleCustomized
+          ? undefined
+          : isHover => {
+              isHover ? this.chipZoomIn() : this.chipZoomOut();
+            }
+      );
     }, Button);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Flex.create({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center });
@@ -1775,6 +1776,22 @@ export class ChipComponent extends ViewPU {
       }
     }, If);
     If.pop();
+  }
+  chipZoomOut() {
+   if (this.isSuffixIconFocusStyleCustomized) {
+    this.chipScale = {
+     x: 1,
+     y: 1,
+    };
+   }
+  }
+  chipZoomIn() {
+   if (this.isSuffixIconFocusStyleCustomized) {
+     this.chipScale = {
+      x: this.resourceToNumber(this.theme.chipNode.focusBtnScaleX, 1),
+      y: this.resourceToNumber(this.theme.chipNode.focusBtnScaleY, 1),
+     };
+    }
   }
   rerender() {
     this.updateDirtyElements();

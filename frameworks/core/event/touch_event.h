@@ -154,6 +154,7 @@ struct TouchEvent final : public PointerEvent {
     void FromJson(const std::unique_ptr<JsonValue>& json);
     Offset GetOffset() const;
     Offset GetScreenOffset() const;
+    int32_t GetTargetDisplayId() const;
     void CovertId();
     TouchEvent CreateScalePoint(float scale) const;
     TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const;

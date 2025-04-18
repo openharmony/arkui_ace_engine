@@ -26,7 +26,6 @@ ace_unittest("common_test") {
     "$ace_root/frameworks/core/common/rosen/rosen_window.cpp",
     "$ace_root/frameworks/core/common/sharedata/share_data.cpp",
     "$ace_root/frameworks/core/common/storage/storage_proxy.cpp",
-    "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
     "asset/asset_test.cpp",
     "clipboard/clipboard_test.cpp",

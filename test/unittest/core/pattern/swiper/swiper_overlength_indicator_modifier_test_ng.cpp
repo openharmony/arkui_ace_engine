@@ -753,6 +753,50 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, SwiperOverLengthIndicatorGetCo
 }
 
 /**
+ * @tc.name: CalcTargetSelectedIndexOnBackward001
+ * @tc.desc: Test CalcTargetSelectedIndexOnBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalcTargetSelectedIndexOnBackward001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.currentSelectedIndex_ = 100;
+    dotIndicatorModifier.targetSelectedIndex_ = 0;
+    dotIndicatorModifier.CalcTargetSelectedIndexOnBackward(5, 4);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 99);
+
+    dotIndicatorModifier.currentSelectedIndex_ = 100;
+    dotIndicatorModifier.targetSelectedIndex_ = 0;
+    dotIndicatorModifier.CalcTargetSelectedIndexOnBackward(5, 1);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 1);
+
+    dotIndicatorModifier.currentSelectedIndex_ = 100;
+    dotIndicatorModifier.targetSelectedIndex_ = 0;
+    dotIndicatorModifier.CalcTargetSelectedIndexOnBackward(5, -1);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, -1);
+
+    dotIndicatorModifier.currentSelectedIndex_ = 2;
+    dotIndicatorModifier.targetSelectedIndex_ = 0;
+    dotIndicatorModifier.CalcTargetSelectedIndexOnBackward(2, 10);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 2);
+
+    dotIndicatorModifier.currentSelectedIndex_ = 2;
+    dotIndicatorModifier.targetSelectedIndex_ = 0;
+    dotIndicatorModifier.CalcTargetSelectedIndexOnBackward(2, 1);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 1);
+
+    dotIndicatorModifier.currentSelectedIndex_ = 2;
+    dotIndicatorModifier.targetSelectedIndex_ = 0;
+    dotIndicatorModifier.CalcTargetSelectedIndexOnBackward(2, -1);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, -1);
+
+    dotIndicatorModifier.currentSelectedIndex_ = -1;
+    dotIndicatorModifier.targetSelectedIndex_ = 0;
+    dotIndicatorModifier.CalcTargetSelectedIndexOnBackward(2, -1);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, -1);
+}
+
+/**
  * @tc.name: StopAnimation001
  * @tc.desc: Test StopAnimation
  * @tc.type: FUNC
@@ -769,6 +813,289 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, StopAnimation001, TestSize.Lev
     EXPECT_FALSE(dotIndicatorModifier.blackPointsAnimEnd_);
     dotIndicatorModifier.StopAnimation(true);
     EXPECT_FALSE(dotIndicatorModifier.blackPointsAnimEnd_);
+}
+
+/**
+ * @tc.name: AnalysisIndexRange001
+ * @tc.desc: Test AnalysisIndexRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, AnalysisIndexRange001, TestSize.Level1)
+{
+    auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
+    paintMethod->SetMaxDisplayCount(5);
+    paintMethod->itemCount_ = 6;
+    paintMethod->realItemCount_ = 10;
+    
+    paintMethod->currentIndex_ = 0;
+    int32_t nposStation = -1;
+    paintMethod->AnalysisIndexRange(nposStation);
+    EXPECT_EQ(nposStation, 1);
+
+    paintMethod->currentIndex_ = 1;
+    nposStation = -1;
+    paintMethod->AnalysisIndexRange(nposStation);
+    EXPECT_EQ(nposStation, 1);
+
+    paintMethod->currentIndex_ = 3;
+    nposStation = -1;
+    paintMethod->AnalysisIndexRange(nposStation);
+    EXPECT_EQ(nposStation, 2);
+
+    paintMethod->currentIndex_ = 10;
+    nposStation = -1;
+    paintMethod->AnalysisIndexRange(nposStation);
+    EXPECT_EQ(nposStation, 3);
+}
+ 
+/**
+ * @tc.name: ForwardCalculation001
+ * @tc.desc: Test ForwardCalculation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, ForwardCalculation001, TestSize.Level1)
+{
+    auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
+    paintMethod->SetMaxDisplayCount(3);
+    int32_t itemCount = 5;
+    paintMethod->itemCount_ = itemCount;
+    paintMethod->IsCustomSizeValue_ = true;
+    float space = 0;
+    float margin = 0;
+    float padding = 0;
+    int32_t index = 0;
+    LinearVector<float> itemHalfSizes = { 20.f, 20.f, 20.f, 20.f };
+    paintMethod->turnPageRate_ = -1;
+    auto value = paintMethod->CalculatePointCenterX(itemHalfSizes, margin, padding, space, index);
+    EXPECT_NEAR(20.0f, value.first, 0.001f);
+    EXPECT_NEAR(20.0f, value.second, 0.001f);
+}
+ 
+/**
+ * @tc.name: ForwardCalculation002
+ * @tc.desc: Test ForwardCalculation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, ForwardCalculation002, TestSize.Level1)
+{
+    auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
+    paintMethod->SetMaxDisplayCount(3);
+    int32_t itemCount = 5;
+    paintMethod->itemCount_ = itemCount;
+    paintMethod->IsCustomSizeValue_ = true;
+    float space = 0;
+    float margin = 0;
+    float padding = 0;
+    int32_t index = 0;
+    LinearVector<float> itemHalfSizes = { 20.f, 20.f, 20.f, 20.f };
+    paintMethod->turnPageRate_ = 1;
+    auto value = paintMethod->CalculatePointCenterX(itemHalfSizes, margin, padding, space, index);
+    EXPECT_NEAR(10.0f, value.first, 0.001f);
+    EXPECT_NEAR(30.0f, value.second, 0.001f);
+}
+ 
+/**
+ * @tc.name: UpdateContentModifier001
+ * @tc.desc: Test UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, UpdateContentModifier001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
+    paintMethod->SetMaxDisplayCount(7);
+    auto geometryNode = frameNode_->GetGeometryNode();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateColor(Color::RED);
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->dotIndicatorModifier_->SetCurrentOverlongType(OverlongType::LEFT_NORMAL_RIGHT_FADEOUT);
+    paintMethod->touchBottomType_ = TouchBottomType::START;
+    paintMethod->isHover_ = true;
+    paintMethod->isPressed_ = true;
+    paintMethod->dotIndicatorModifier_->SetIsHover(true);
+    paintMethod->dotIndicatorModifier_->SetIsPressed(true);
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    auto ptrModifier = paintMethod->GetContentModifier(&paintWrapper);
+    auto overLengthModifier = AceType::DynamicCast<OverlengthDotIndicatorModifier>(ptrModifier);
+    ASSERT_NE(overLengthModifier, nullptr);
+    EXPECT_EQ(overLengthModifier->maxDisplayCount_, 7);
+    EXPECT_TRUE(overLengthModifier->isHover_);
+    EXPECT_TRUE(overLengthModifier->isPressed_);
+}
+ 
+/**
+ * @tc.name: UpdateContentModifier002
+ * @tc.desc: Test UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, UpdateContentModifier002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
+    paintMethod->SetMaxDisplayCount(7);
+    auto geometryNode = frameNode_->GetGeometryNode();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateColor(Color::RED);
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->dotIndicatorModifier_->SetCurrentOverlongType(OverlongType::LEFT_NORMAL_RIGHT_FADEOUT);
+    paintMethod->touchBottomType_ = TouchBottomType::NONE;
+    paintMethod->isHover_ = true;
+    paintMethod->isPressed_ = true;
+    paintMethod->dotIndicatorModifier_->SetIsHover(true);
+    paintMethod->dotIndicatorModifier_->SetIsPressed(true);
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    auto ptrModifier = paintMethod->GetContentModifier(&paintWrapper);
+    auto overLengthModifier = AceType::DynamicCast<OverlengthDotIndicatorModifier>(ptrModifier);
+    ASSERT_NE(overLengthModifier, nullptr);
+    EXPECT_EQ(overLengthModifier->maxDisplayCount_, 7);
+    EXPECT_TRUE(overLengthModifier->isHover_);
+    EXPECT_TRUE(overLengthModifier->isPressed_);
+}
+
+/**
+ * @tc.name: UpdateContentModifier003
+ * @tc.desc: Test UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, UpdateContentModifier003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
+    paintMethod->SetMaxDisplayCount(7);
+    auto geometryNode = frameNode_->GetGeometryNode();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateColor(Color::RED);
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->dotIndicatorModifier_->SetCurrentOverlongType(OverlongType::LEFT_NORMAL_RIGHT_FADEOUT);
+    paintMethod->touchBottomType_ = TouchBottomType::NONE;
+    paintMethod->isHover_ = true;
+    paintMethod->isPressed_ = false;
+    paintMethod->dotIndicatorModifier_->SetIsHover(true);
+    paintMethod->dotIndicatorModifier_->SetIsPressed(true);
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    auto ptrModifier = paintMethod->GetContentModifier(&paintWrapper);
+    auto overLengthModifier = AceType::DynamicCast<OverlengthDotIndicatorModifier>(ptrModifier);
+    ASSERT_NE(overLengthModifier, nullptr);
+    EXPECT_EQ(overLengthModifier->maxDisplayCount_, 7);
+    EXPECT_TRUE(overLengthModifier->isHover_);
+    EXPECT_TRUE(overLengthModifier->isPressed_);
+}
+ 
+/**
+ * @tc.name: UpdateNormalIndicator001
+ * @tc.desc: Test UpdateNormalIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, UpdateNormalIndicator001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto geometryNode = frameNode_->GetGeometryNode();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateColor(Color::RED);
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    LinearVector<float> longPointCenterX;
+    longPointCenterX.push_back(20.0f);
+    longPointCenterX.push_back(20.0f);
+    auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
+    paintMethod->SetMaxDisplayCount(7);
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->UpdateNormalIndicator(longPointCenterX, &paintWrapper);
+    EXPECT_TRUE(paintMethod->gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT);
+}
+ 
+/**
+ * @tc.name: UpdateNormalIndicator002
+ * @tc.desc: Test UpdateNormalIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, UpdateNormalIndicator002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto geometryNode = frameNode_->GetGeometryNode();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateColor(Color::RED);
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    LinearVector<float> longPointCenterX;
+    longPointCenterX.push_back(20.0f);
+    longPointCenterX.push_back(20.0f);
+    auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
+    paintMethod->SetMaxDisplayCount(7);
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    paintMethod->UpdateNormalIndicator(longPointCenterX, &paintWrapper);
+    EXPECT_TRUE(paintMethod->gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT);
+}
+ 
+/**
+ * @tc.name: CalculatePointCenterX001
+ * @tc.desc: Test CalculatePointCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalculatePointCenterX001, TestSize.Level1)
+{
+    auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
+    paintMethod->SetMaxDisplayCount(5);
+    paintMethod->itemCount_ = 6;
+    paintMethod->realItemCount_ = 10;
+    DotIndicatorPaintMethod::StarAndEndPointCenter starAndEndPointCenter { 10.0f, 20.0f, 30.0f, 40.0f };
+    LinearVector<float> startVectorBlackPointCenterX = { 1.0f, 2.0f, 3.0f };
+    LinearVector<float> endVectorBlackPointCenterX = { 4.0f, 5.0f, 6.0f };
+    paintMethod->maxDisplayCount_ = 10;
+    paintMethod->currentIndex_ = 5;
+    paintMethod->isPressed_ = false;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    auto [blackPointCenterMoveRateSecond, longPointLeftCenterMoveRateSecond, longPointRightCenterMoveRateSecond] =
+        paintMethod->GetMoveRate();
+    paintMethod->CalculatePointCenterX(
+        starAndEndPointCenter, startVectorBlackPointCenterX, endVectorBlackPointCenterX);
+    EXPECT_FALSE(paintMethod->vectorBlackPointBegCenterX_.empty());
+    EXPECT_NEAR(paintMethod->vectorBlackPointBegCenterX_[2],
+        startVectorBlackPointCenterX[2] +
+            (endVectorBlackPointCenterX[2] - startVectorBlackPointCenterX[2]) * blackPointCenterMoveRateSecond,
+        0.001f);
 }
 
 /**

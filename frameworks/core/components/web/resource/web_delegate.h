@@ -795,6 +795,7 @@ public:
     void HideWebView();
     void OnRenderToBackground();
     void OnRenderToForeground();
+    void SetSurfaceDensity(const double& density);
     void Resize(const double& width, const double& height, bool isKeyboard = false);
     int32_t GetRosenWindowId()
     {
@@ -850,6 +851,7 @@ public:
     void UpdateOverScrollMode(const int32_t overscrollModeValue);
     void UpdateBlurOnKeyboardHideMode(const int32_t isBlurOnKeyboardHideEnable);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
+    void UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled);
     void UpdateNativeEmbedRuleTag(const std::string& tag);
     void UpdateNativeEmbedRuleType(const std::string& type);
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
@@ -921,7 +923,7 @@ public:
     {
         richtextData_ = richtextData;
     }
-    void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
+    void HandleAccessibilityHoverEvent(int32_t x, int32_t y, bool isHoverEnter);
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
@@ -1192,12 +1194,19 @@ public:
     void UpdateWebMediaAVSessionEnabled(bool isEnabled);
 
     std::string GetCurrentLanguage();
+    void RegisterNativeJavaScriptProxy(const std::string& obj, const std::vector<std::string>& method,
+        std::vector<std::function<void(const std::vector<std::string>&)>> callbackImpl,
+        bool isAync, const std::string& permission, bool isNeedRefresh);
 
     void RegisterWebWindowFocusChangedListener();
 
     void UnRegisterWebWindowFocusChangedListener();
     
     void OnDragAttach();
+
+    bool IsNWebEx();
+
+    void SetNativeInnerWeb(bool isInnerWeb);
 
 private:
     void InitWebEvent();

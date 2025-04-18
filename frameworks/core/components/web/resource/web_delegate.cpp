@@ -674,12 +674,12 @@ NWebScreenLockCallbackImpl::NWebScreenLockCallbackImpl(const WeakPtr<PipelineBas
 
 void NWebScreenLockCallbackImpl::Handle(bool key)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "SetKeepScreenOn %{public}d", key);
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetViewKeepScreenOn %{public}d", key);
     auto weakContext = context_.Upgrade();
     CHECK_NULL_VOID(weakContext);
     auto window = weakContext->GetWindow();
     CHECK_NULL_VOID(window);
-    window->SetKeepScreenOn(key);
+    window->SetViewKeepScreenOn(key);
 }
 
 WebDelegateObserver::~WebDelegateObserver() {}
@@ -1164,6 +1164,65 @@ void WebDelegate::UnRegisterNativeArkJSFunction(const std::string& objName)
     }
 }
 
+class NWebJsProxyMethodImpl : public OHOS::NWeb::NWebJsProxyMethod {
+public:
+    explicit NWebJsProxyMethodImpl(int size,
+        const std::vector<std::function<void(const std::vector<std::string>&)>>& func)
+        : size_(size), funcs_(func) {}
+    ~NWebJsProxyMethodImpl() = default;
+
+    int GetSize() override
+    {
+        return size_;
+    }
+
+    void OnHandle(int number, const std::vector<std::string>& param) override
+    {
+        if (number < 0 || number >= size_) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "jsProxy callback back error number %{public}d", number);
+            return;
+        }
+        if (!funcs_[number]) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "jsProxy callback is null in number %{public}d", number);
+            return;
+        }
+        TAG_LOGD(AceLogTag::ACE_WEB, "jsProxy callback success number %{public}d", number);
+        funcs_[number](param);
+    }
+
+private:
+    int size_ = 0;
+    std::vector<std::function<void(const std::vector<std::string>&)>> funcs_;
+};
+
+void WebDelegate::RegisterNativeJavaScriptProxy(const std::string& obj, const std::vector<std::string>& method,
+    std::vector<std::function<void(const std::vector<std::string>&)>> callbackImpl,
+    bool isAync, const std::string& permission, bool isNeedRefresh)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+
+    executor->PostTask(
+        [weak = WeakClaim(this), obj, methods = method, callbacks = callbackImpl, isAync, permission, isNeedRefresh]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto nweb = delegate->GetNweb();
+            CHECK_NULL_VOID(nweb);
+
+            int len = callbacks.size();
+            TAG_LOGI(AceLogTag::ACE_WEB, "RegisterNativeJavaScriptProxy %{public}s have %{public}d callback",
+                obj.c_str(), len);
+            std::shared_ptr<NWebJsProxyMethodImpl> dataImpl = std::make_shared<NWebJsProxyMethodImpl>(len, callbacks);
+            nweb->RegisterNativeJavaScriptProxy(obj, methods, dataImpl, isAync, permission);
+            if (isNeedRefresh) {
+                nweb->Reload();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebRegisterNativeJavaScriptProxy");
+}
+    
 void WebDelegate::LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
     const std::string& encoding, const std::string& historyUrl)
 {
@@ -3190,7 +3249,7 @@ void WebDelegate::SetKeepScreenOn(bool key)
     CHECK_NULL_VOID(context);
     auto window = context->GetWindow();
     CHECK_NULL_VOID(window);
-    window->SetKeepScreenOn(key);
+    window->SetViewKeepScreenOn(key);
 }
 
 void WebDelegate::UpdateUserAgent(const std::string& userAgent)
@@ -3260,6 +3319,22 @@ void WebDelegate::UpdateLayoutMode(WebLayoutMode mode)
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateLayoutMode");
+}
+
+void WebDelegate::SetSurfaceDensity(const double& density)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), density]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                delegate->nweb_->SetSurfaceDensity(density);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetSurfaceDensity");
 }
 
 void WebDelegate::Resize(const double& width, const double& height, bool isKeyboard)
@@ -4124,6 +4199,25 @@ void WebDelegate::UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetNativeEmbedMode");
 }
 
+void WebDelegate::UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isIntrinsicSizeEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->SetIntrinsicSizeEnable(isIntrinsicSizeEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetIntrinsicSizeEnable");
+}
+
 void WebDelegate::UpdateNativeEmbedRuleTag(const std::string& tag)
 {
     auto context = context_.Upgrade();
@@ -4737,6 +4831,11 @@ void WebDelegate::OnPageFinished(const std::string& param)
             webEventHub->FireOnPageFinishedEvent(std::make_shared<LoadWebPageFinishEvent>(param));
             webPattern->OnScrollEndRecursive(std::nullopt);
             delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_END, param);
+            auto pageUrl = delegate->GetUrl();
+            if (pageUrl != "about:blank") {
+                TAG_LOGI(AceLogTag::ACE_WEB, "RunJsInit, weburl=%{public}s", pageUrl.c_str());
+                webPattern->RunJsInit();
+            }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPageFinished");
 }
@@ -6101,6 +6200,7 @@ void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, c
 void WebDelegate::WebOnMouseEvent(const std::shared_ptr<OHOS::NWeb::NWebMouseEvent>& mouseEvent)
 {
     CHECK_NULL_VOID(nweb_);
+    ACE_SCOPED_TRACE("WebDelegate::WebOnMouseEvent, web id = %d", GetWebId());
     nweb_->WebSendMouseEvent(mouseEvent);
 }
 
@@ -6298,11 +6398,11 @@ bool WebDelegate::GetPendingSizeStatus()
     return false;
 }
 
-void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y)
+void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y, bool isHoverEnter)
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        nweb_->SendAccessibilityHoverEvent(x, y);
+        nweb_->SendAccessibilityHoverEventV2(x, y, isHoverEnter);
     }
 }
 
@@ -6935,9 +7035,6 @@ void WebDelegate::OnNativeEmbedVisibilityChange(const std::string& embedId, bool
 void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> event)
 {
     if (event->GetId() == NO_NATIVE_FINGER_TYPE) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_VOID(webPattern);
-        webPattern->RequestFocus();
         return;
     }
     CHECK_NULL_VOID(taskExecutor_);
@@ -6957,11 +7054,6 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
                     std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo, param));
                 if (!param->HasSendTask()) {
                     param->SetGestureEventResult(true);
-                }
-                if (!param->GetEventResult() && type == OHOS::NWeb::TouchType::DOWN) {
-                    auto webPattern = delegate->webPattern_.Upgrade();
-                    CHECK_NULL_VOID(webPattern);
-                    webPattern->RequestFocus();
                 }
             }
         },
@@ -7619,20 +7711,22 @@ void WebDelegate::OnSafeInsetsChange()
     int left = 0;
     if (resultSafeArea.left_.IsValid() && resultSafeArea.left_.end > currentArea_.Left()) {
         left = static_cast<int>(
-            resultSafeArea.left_.start + resultSafeArea.left_.end - std::max(currentArea_.Left(), windowRect.Left()));
+            resultSafeArea.left_.start + resultSafeArea.left_.end - std::max(currentArea_.Left(), 0.0));
     }
     int top = 0;
     if (resultSafeArea.top_.IsValid() && resultSafeArea.top_.end > currentArea_.Top()) {
-        top = static_cast<int>(resultSafeArea.top_.end - std::max(windowRect.Top(), currentArea_.Top()));
+        top = static_cast<int>(resultSafeArea.top_.end -
+            std::max<double>(currentArea_.Top(), resultSafeArea.top_.start));
     }
     int right = 0;
     if (resultSafeArea.right_.IsValid() && resultSafeArea.right_.start < currentArea_.Right()) {
-        right = static_cast<int>(std::min(windowRect.Right(), currentArea_.Right()) +
-            windowRect.Right() - resultSafeArea.right_.end - resultSafeArea.right_.start);
+        right = static_cast<int>(std::min(windowRect.Width(), currentArea_.Right()) +
+            windowRect.Width() - resultSafeArea.right_.end - resultSafeArea.right_.start);
     }
     int bottom = 0;
     if (resultSafeArea.bottom_.IsValid() && resultSafeArea.bottom_.start < currentArea_.Bottom()) {
-        bottom = static_cast<int>(std::min(windowRect.Bottom(), currentArea_.Bottom()) - resultSafeArea.bottom_.start);
+        bottom = static_cast<int>(
+            std::min<double>(resultSafeArea.bottom_.end, currentArea_.Bottom()) - resultSafeArea.bottom_.start);
     }
 
     if (left < 0 || bottom < 0 || right < 0 || top < 0) {
@@ -7643,10 +7737,10 @@ void WebDelegate::OnSafeInsetsChange()
     TAG_LOGD(AceLogTag::ACE_WEB,
         "WebDelegate::OnSafeInsetsChange left:%{public}d top:%{public}d right:%{public}d bottom:%{public}d "
         "systemSafeArea:%{public}s cutoutSafeArea:%{public}s navigationIndicatorSafeArea:%{public}s "
-        "resultSafeArea:%{public}s currentArea:%{public}s", left, top, right, bottom,
+        "resultSafeArea:%{public}s currentArea:%{public}s windowRect:%{public}s", left, top, right, bottom,
         systemSafeArea_.ToString().c_str(), cutoutSafeArea_.ToString().c_str(),
         navigationIndicatorSafeArea_.ToString().c_str(), resultSafeArea.ToString().c_str(),
-        currentArea_.ToString().c_str());
+        currentArea_.ToString().c_str(), windowRect.ToString().c_str());
 
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), left, top, right, bottom]() {
@@ -7834,10 +7928,26 @@ void WebDelegate::MaximizeResize()
     }
 }
 
+void WebDelegate::SetNativeInnerWeb(bool isInnerWeb)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->SetNativeInnerWeb(isInnerWeb);
+    }
+}
+
 void WebDelegate::RestoreRenderFit()
 {
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     webPattern->RestoreRenderFit();
+}
+
+bool WebDelegate::IsNWebEx()
+{
+    if (!nweb_) {
+        return false;
+    }
+    return nweb_->IsNWebEx();
 }
 } // namespace OHOS::Ace

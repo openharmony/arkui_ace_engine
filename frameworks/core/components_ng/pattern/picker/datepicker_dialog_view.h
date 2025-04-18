@@ -180,6 +180,8 @@ private:
         const std::map<std::string, NG::DialogEvent>& dialogEvent);
     static void ToggleTitleDisplay(
         RefPtr<DatePickerPattern>& datePickerPattern, RefPtr<DatePickerPattern>& monthDaysPickerPattern);
+    static std::string GetDialogAgingButtonText(bool isNext);
+    static std::string GetDialogNormalButtonText(bool isConfirm);
     static bool switchTimePickerFlag_;
     static bool switchDatePickerFlag_;
     static bool isShowTime_;

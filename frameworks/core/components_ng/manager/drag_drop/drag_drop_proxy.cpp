@@ -15,6 +15,7 @@
 
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 
+#include "core/common/ace_engine.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -26,6 +27,28 @@ void DragDropProxy::OnTextDragStart(const std::string& extraInfo)
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
+}
+
+void HandleExtraDragMoveReporting(const RefPtr<FrameNode>& frameNode, const std::string& extraInfo)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto container = AceEngine::Get().GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    if (!container->IsSceneBoardWindow()) {
+        return;
+    }
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto actuator = gestureHub->GetDragEventActuator();
+    CHECK_NULL_VOID(actuator);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto touchDownPoint = actuator->GetTouchDownPoint();
+    auto pointerEvent = DragPointerEvent(touchDownPoint.x, touchDownPoint.y,
+        touchDownPoint.screenX, touchDownPoint.screenY);
+    dragDropManager->OnDragMove(pointerEvent, extraInfo, pipeline->GetRootElement());
 }
 
 void DragDropProxy::OnDragStart(
@@ -44,6 +67,7 @@ void DragDropProxy::OnDragStart(
     pointerEvent.UpdatePressedKeyCodes(info.GetPressedKeyCodes());
     manager->OnDragStart(point, frameNode);
     manager->SetExtraInfo(extraInfo);
+    HandleExtraDragMoveReporting(frameNode, extraInfo);
     auto container = Container::Current();
     if (!(container && container->IsUIExtensionWindow())) {
         manager->OnDragMove(pointerEvent, extraInfo);

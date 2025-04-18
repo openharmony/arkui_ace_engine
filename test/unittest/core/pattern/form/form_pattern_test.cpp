@@ -1947,4 +1947,33 @@ HWTEST_F(FormPatternTest, FormPatternTest_052, TestSize.Level1)
     pattern->SetNonTransparentAfterRecover();
     EXPECT_EQ(formNode->GetTotalChildCount(), 0);
 }
+
+/**
+ * @tc.name: FormPatternTest_053
+ * @tc.desc: FireOnUpdateFormDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_053, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    pattern->frameNode_ = nullptr;
+    int64_t id = 1;
+
+    pattern->FireOnUpdateFormDone(id);
+    EXPECT_EQ(pattern->GetHost(), nullptr);
+    pattern->frameNode_ = formNode;
+
+    auto host = pattern->GetHost();
+    auto eventHub = formNode->GetEventHub<FormEventHub>();
+    host->eventHub_ = nullptr;
+    pattern->FireOnUpdateFormDone(id);
+    EXPECT_FALSE(pattern->isSnapshot_);
+
+    host->eventHub_ = eventHub;
+    pattern->FireOnUpdateFormDone(id);
+    EXPECT_FALSE(pattern->isSnapshot_);
+}
 } // namespace OHOS::Ace::NG

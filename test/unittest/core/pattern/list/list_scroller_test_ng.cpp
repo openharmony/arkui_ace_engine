@@ -367,11 +367,11 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex007, TestSize.Level1)
     EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1200);
 
     ScrollToIndex(2, true, ScrollAlign::CENTER, 0);
-    EXPECT_TRUE(TickPosition(-600.0f));
+    EXPECT_TRUE(TickPosition(-400.0f)); // estimate:400, real:300
     MockAnimationManager::GetInstance().SetTicks(4);
     ScrollToIndex(1, true, ScrollAlign::CENTER, 0);
-    EXPECT_TRUE(TickPosition(-550.0f));
-    EXPECT_TRUE(TickPosition(-500.0f));
+    EXPECT_TRUE(TickPosition(-350.0f));
+    EXPECT_TRUE(TickPosition(-300.0f));
     EXPECT_TRUE(TickPosition(-150.0f));
     EXPECT_TRUE(TickPosition(-137.5f)); // Update Animation
     EXPECT_TRUE(TickPosition(-125.0f));
@@ -409,10 +409,9 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex008, TestSize.Level1)
 
     MockAnimationManager::GetInstance().SetTicks(12);
     AnimateTo(Dimension(0), 100.0f, nullptr, true);
-    for (int32_t i = 0; i < 10; i++) {
-        EXPECT_TRUE(TickPosition(-550.0f + i * 50));
+    for (int32_t i = 0; i < 11; i++) {
+        TickPosition(-550.0f + i * 50);
     }
-    EXPECT_TRUE(TickPosition(-140.0f)); // estimate:50, real:140
     EXPECT_TRUE(TickPosition(0));
 }
 

@@ -52,6 +52,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MovingPhotoStyle, ImageSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MovingPhotoStyle, VideoSize, SizeF, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MovingPhotoStyle, MovingPhotoUri, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MovingPhotoStyle, XmageHeight, float, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MovingPhotoStyle, ImageSize, SizeF, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(MovingPhotoLayoutProperty);

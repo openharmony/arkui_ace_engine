@@ -978,51 +978,6 @@ HWTEST_F(OverlayManagerExtendTestNg, CloseToastTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetRelativeContainerNode001
- * @tc.desc: Test GetRelativeContainerNode.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerExtendTestNg, GetRelativeContainerNode001, TestSize.Level1)
-{
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto overlayManager = pipelineContext->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-    auto rootNode = FrameNode::CreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    ASSERT_NE(rootNode, nullptr);
-    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    ASSERT_NE(columnNode, nullptr);
-    columnNode->children_.push_front(rootNode);
-    overlayManager->dragPixmapColumnNodeWeak_ = columnNode;
-    auto result = overlayManager->GetRelativeContainerNode();
-    EXPECT_NE(result, nullptr);
-}
-
-/**
- * @tc.name: GetRelativeContainerNode002
- * @tc.desc: Test GetRelativeContainerNode.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerExtendTestNg, GetRelativeContainerNode002, TestSize.Level1)
-{
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto overlayManager = pipelineContext->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-    auto rootNode = overlayManager->GetRootNode().Upgrade();
-    ASSERT_NE(rootNode, nullptr);
-    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    ASSERT_NE(columnNode, nullptr);
-    columnNode->children_.push_front(rootNode);
-    overlayManager->dragPixmapColumnNodeWeak_ = columnNode;
-    auto result = overlayManager->GetRelativeContainerNode();
-    EXPECT_EQ(result, nullptr);
-}
-
-/**
  * @tc.name: GetDragPixelMapContentNodeTest001
  * @tc.desc: Test GetDragPixelMapContentNode.
  * @tc.type: FUNC
@@ -1136,10 +1091,18 @@ HWTEST_F(OverlayManagerExtendTestNg, GetDragPixelMapBadgeNodeTest001, TestSize.L
     auto rootNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     ASSERT_NE(rootNode, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->children_.push_front(rootNode);
+    auto textRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(textRow, nullptr);
+    textRow->children_.push_front(frameNode);
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     ASSERT_NE(columnNode, nullptr);
-    columnNode->children_.push_back(rootNode);
+    columnNode->children_.push_back(textRow);
     overlayManager->dragPixmapColumnNodeWeak_ = columnNode;
     auto result = overlayManager->GetDragPixelMapBadgeNode();
     EXPECT_NE(result, nullptr);

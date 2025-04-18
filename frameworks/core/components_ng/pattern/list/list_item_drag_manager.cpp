@@ -42,6 +42,18 @@ RefPtr<FrameNode> ListItemDragManager::GetListFrameNode() const
     return nullptr;
 }
 
+OffsetF ListItemDragManager::GetParentPaddingOffset()
+{
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_RETURN(parent, OffsetF(0.0f, 0.0f));
+    auto listGeometry = parent->GetGeometryNode();
+    CHECK_NULL_RETURN(listGeometry, OffsetF(0.0f, 0.0f));
+    CHECK_NULL_RETURN(listGeometry->GetPadding(), OffsetF(0.0f, 0.0f));
+    float left = listGeometry->GetPadding()->left.value_or(0.0f);
+    float top = listGeometry->GetPadding()->top.value_or(0.0f);
+    return OffsetF(left, top);
+}
+
 void ListItemDragManager::InitDragDropEvent()
 {
     auto host = GetHost();
@@ -114,13 +126,15 @@ void ListItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
     auto geometry = host->GetGeometryNode();
     CHECK_NULL_VOID(geometry);
     dragOffset_ = geometry->GetMarginFrameOffset();
-
     auto parent = listNode_.Upgrade();
     CHECK_NULL_VOID(parent);
+    auto paddingOffset = GetParentPaddingOffset();
+    dragOffset_ = dragOffset_ - paddingOffset;
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     axis_ = pattern->GetAxis();
     lanes_ = pattern->GetLanes();
+    isStackFromEnd_ = pattern->IsStackFromEnd();
 
     auto forEach = forEachNode_.Upgrade();
     CHECK_NULL_VOID(forEach);
@@ -137,8 +151,9 @@ void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto forEach = forEachNode_.Upgrade();
-    CHECK_NULL_VOID(forEach);
-    forEach->FireOnLongPress(GetIndex());
+    if (forEach && info.GetSourceTool() != SourceTool::MOUSE) {
+        forEach->FireOnLongPress(GetIndex());
+    }
     if (renderContext->HasTransformScale()) {
         prevScale_ = renderContext->GetTransformScaleValue({ 1.0f, 1.0f });
     } else {
@@ -268,7 +283,7 @@ void ListItemDragManager::ScaleDiagonalItem(int32_t index, const RectF& rect, co
     SetNearbyNodeScale(node, scale);
 }
 
-int32_t ListItemDragManager::ScaleNearItem(int32_t index, const RectF& rect, const OffsetF& delta)
+int32_t ListItemDragManager::CalcMainNearIndex(const int32_t index, const OffsetF& delta)
 {
     int32_t nearIndex = index;
     float mainDelta = delta.GetMainOffset(axis_);
@@ -277,27 +292,54 @@ int32_t ListItemDragManager::ScaleNearItem(int32_t index, const RectF& rect, con
     } else if (Negative(mainDelta)) {
         nearIndex = index - lanes_;
     }
-    ScaleResult mainRes = { false, 1.0f };
-    if (nearIndex != index) {
-        mainRes = ScaleAxisNearItem(nearIndex, rect, delta, axis_);
-    }
+    return nearIndex;
+}
 
-    int32_t crossNearIndex = index;
+int32_t ListItemDragManager::CalcCrossNearIndex(const int32_t index, const OffsetF& delta)
+{
+    int32_t nearIndex = index;
     float crossDelta = delta.GetCrossOffset(axis_);
+    int32_t step = isStackFromEnd_ ? -1 : 1;
     if (Positive(crossDelta)) {
-        crossNearIndex = index + 1;
+        nearIndex = index + step;
     } else if (Negative(crossDelta)) {
-        crossNearIndex = index - 1;
+        nearIndex = index - step;
     }
+    return nearIndex;
+}
+
+int32_t ListItemDragManager::ScaleNearItem(int32_t index, const RectF& rect, const OffsetF& delta)
+{
+    ScaleResult mainRes = { false, 1.0f };
     ScaleResult crossRes = { false, 1.0f };
+    int32_t mainNearIndex = CalcMainNearIndex(index, delta);
+    int32_t crossNearIndex = CalcCrossNearIndex(index, delta);
+    if (mainNearIndex != index) {
+        mainRes = ScaleAxisNearItem(mainNearIndex, rect, delta, axis_);
+    }
     if (crossNearIndex != index) {
         Axis crossAxis = axis_ == Axis::VERTICAL ? Axis::HORIZONTAL : Axis::VERTICAL;
         crossRes = ScaleAxisNearItem(crossNearIndex, rect, delta, crossAxis);
     }
 
+    bool isNeedScaleDiagonal = !NearEqual(mainRes.scale, 1.0f) && !NearEqual(crossRes.scale, 1.0f);
+    if ((mainNearIndex < 0 && crossNearIndex == totalCount_) ||
+        (mainNearIndex > totalCount_ - 1 && crossNearIndex == -1)) {
+        isNeedScaleDiagonal = true;
+        int32_t crossIndexGap = mainNearIndex < 0 ? -mainNearIndex : mainNearIndex - totalCount_ + 1;
+        float mainDis = rect.GetSize().MainSize(axis_) / 2;
+        float crossDis = rect.GetSize().CrossSize(axis_) / 2 * (crossIndexGap * 2 - 1);
+        mainRes.needMove = GreatNotEqual(std::abs(delta.GetMainOffset(axis_)), mainDis);
+        crossRes.needMove = GreatNotEqual(std::abs(delta.GetCrossOffset(axis_)), crossDis);
+    }
     int32_t diagonalIndex = index;
-    if (!NearEqual(mainRes.scale, 1.0f) && !NearEqual(crossRes.scale, 1.0f)) {
-        diagonalIndex = Positive(crossDelta) ? nearIndex + 1 : nearIndex - 1;
+    if (isNeedScaleDiagonal) {
+        diagonalIndex = Positive(delta.GetCrossOffset(axis_)) ? mainNearIndex + 1 : mainNearIndex - 1;
+        if (diagonalIndex < 0) {
+            diagonalIndex = 0;
+        } else if (diagonalIndex > totalCount_ - 1) {
+            diagonalIndex = totalCount_ - 1;
+        }
         ScaleDiagonalItem(diagonalIndex, rect, delta);
     }
 
@@ -305,7 +347,7 @@ int32_t ListItemDragManager::ScaleNearItem(int32_t index, const RectF& rect, con
     if (mainRes.needMove && crossRes.needMove) {
         return diagonalIndex;
     } else if (mainRes.needMove) {
-        return nearIndex;
+        return mainNearIndex;
     } else if (crossRes.needMove) {
         return crossNearIndex;
     }
@@ -373,6 +415,9 @@ void ListItemDragManager::HandleScrollCallback()
         return;
     }
     HandleSwapAnimation(from, to);
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_VOID(forEach);
+    forEach->FireOnMoveThrough(fromIndex_, to);
 }
 
 void ListItemDragManager::SetPosition(const OffsetF& offset)
@@ -408,13 +453,14 @@ void ListItemDragManager::HandleOnItemDragUpdate(const GestureEvent& info)
     PointF point(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
     HandleAutoScroll(from, point, frameRect);
 
-    int32_t to = ScaleNearItem(from, frameRect, realOffset_ - frameRect.GetOffset());
-    auto forEach = forEachNode_.Upgrade();
-    CHECK_NULL_VOID(forEach);
+    auto paddingOffset = GetParentPaddingOffset();
+    int32_t to = ScaleNearItem(from, frameRect, realOffset_ - frameRect.GetOffset() + paddingOffset);
     if (to == from) {
         return;
     }
     HandleSwapAnimation(from, to);
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_VOID(forEach);
     forEach->FireOnMoveThrough(fromIndex_, to);
 }
 

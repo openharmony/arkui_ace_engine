@@ -58,9 +58,7 @@ void TitleBarPatternTestNg::SetUpTestSuite()
     navigationBarTheme_ = AceType::MakeRefPtr<NavigationBarTheme>();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == AgingAdapationDialogTheme::TypeId()) {
+        if (type == AgingAdapationDialogTheme::TypeId()) {
             return AceType::MakeRefPtr<AgingAdapationDialogTheme>();
         } else if (type == NavigationBarTheme::TypeId()) {
             return navigationBarTheme_;

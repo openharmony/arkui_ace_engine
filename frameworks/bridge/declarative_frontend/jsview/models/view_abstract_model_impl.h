@@ -22,6 +22,10 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/property/progress_mask_property.h"
 
+namespace OHOS::Ace {
+class SpanString;
+}
+
 namespace OHOS::Ace::Framework {
 
 class ViewAbstractModelImpl : public ViewAbstractModel {
@@ -33,6 +37,7 @@ public:
 
     void SetWidth(const CalcDimension& width) override;
     void SetHeight(const CalcDimension& height) override;
+    void SetToolbarBuilder(std::function<void()>&& buildFunc) override;
     void ClearWidthOrHeight(bool isWidth) override {};
     void SetMinWidth(const CalcDimension& minWidth) override;
     void SetMinHeight(const CalcDimension& minHeight) override;
@@ -273,7 +278,7 @@ public:
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
-    void BindTips(const RefPtr<PopupParam>& param) override;
+    void BindTips(const RefPtr<PopupParam>& param, const RefPtr<OHOS::Ace::SpanString>& sapnString) override;
     int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
     {
         return 0;
@@ -342,6 +347,8 @@ public:
     void SetAccessibilityRole(const std::string& role, bool resetValue) override;
     void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;
     void ResetOnAccessibilityFocus() override;
+    void SetOnAccessibilityActionIntercept(
+        NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) override;
     void SetAccessibilityDefaultFocus(bool isFocus) override;
     void SetAccessibilityUseSamePage(const std::string& pageMode) override;
     void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;

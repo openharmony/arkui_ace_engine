@@ -17,12 +17,16 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVDESTINATION_NODE_BASE_H
 
 #include <cstdint>
+#include <optional>
 
 #include "core/animation/page_transition_common.h"
+#include "core/common/display_info.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
+#include "interfaces/inner_api/ace/viewport_config.h"
 
 namespace OHOS::Ace::NG {
 class NavDestinationNodeBase : public GroupNode {
@@ -191,7 +195,133 @@ public:
         return nullptr;
     }
 
+    bool CustomizeExpandSafeArea();
+    void Measure(const std::optional<LayoutConstraintF>& parentConstraint) override;
+    void Layout() override;
+
+    void SetOrientation(const std::optional<Orientation>& ori)
+    {
+        orientation_ = ori;
+    }
+    const std::optional<Orientation>& GetOrientation() const
+    {
+        return orientation_;
+    }
+    std::optional<Orientation> GetEffectiveOrientation();
+    void SetPreOrientation(const std::optional<Orientation>& ori)
+    {
+        preOrientation_ = ori;
+    }
+    const std::optional<Orientation>& GetPreOrientation() const
+    {
+        return preOrientation_;
+    }
+    void SetPageViewportConfig(const RefPtr<PageViewportConfig>& config);
+    const RefPtr<PageViewportConfig>& GetPageViewportConfig() const
+    {
+        return viewportConfig_;
+    }
+    void SetPageRotateAngle(const std::optional<int32_t>& angle)
+    {
+        rotateAngle_ = angle;
+    }
+    const std::optional<int32_t>& GetPageRotateAngle() const
+    {
+        return rotateAngle_;
+    }
+    void SetIsRotated(bool rotate)
+    {
+        isRotated_ = rotate;
+    }
+    bool IsRotated() const
+    {
+        return isRotated_;
+    }
+
+    LayoutConstraintF AdjustLayoutConstarintIfNeeded(const LayoutConstraintF& originConstraint);
+
+    void AdjustRenderContextIfNeeded();
+    void RestoreRenderContext();
+
+    void SetOnStartTransitionAnimationCallback(std::function<void()>&& callback)
+    {
+        onStartTransitionAnimationCb_ = std::move(callback);
+    }
+    void OnStartOneTransitionAnimation()
+    {
+        if (onStartTransitionAnimationCb_) {
+            onStartTransitionAnimationCb_();
+        }
+    }
+    void SetOnFinishTransitionAnimationCallback(std::function<void()>&& callback)
+    {
+        onFinishTransitionAnimationCb_ = std::move(callback);
+    }
+    void OnFinishOneTransitionAnimation()
+    {
+        if (onFinishTransitionAnimationCb_) {
+            onFinishTransitionAnimationCb_();
+        }
+    }
+
+    void SetStatusBarConfig(const std::optional<std::pair<bool, bool>>& status)
+    {
+        statusBarConfig_ = status;
+    }
+    const std::optional<std::pair<bool, bool>>& GetStatusBarConfig()
+    {
+        return statusBarConfig_;
+    }
+    void SetPreStatusBarConfig(const std::optional<std::pair<bool, bool>>& status)
+    {
+        preStatusBarConfig_ = status;
+    }
+    const std::optional<std::pair<bool, bool>>& GetPreStatusBarConfig()
+    {
+        return preStatusBarConfig_;
+    }
+
+    void SetNavigationIndicatorConfig(const std::optional<bool>& navigationIndicator)
+    {
+        navigationIndicatorConfig_ = navigationIndicator;
+    }
+    const std::optional<bool>& GetNavigationIndicatorConfig()
+    {
+        return navigationIndicatorConfig_;
+    }
+    void SetPreNavigationIndicatorConfig(const std::optional<bool>& navigationIndicator)
+    {
+        preNavigationIndicatorConfig_ = navigationIndicator;
+    }
+    const std::optional<bool>& GetPreNavigationIndicatorConfig()
+    {
+        return preNavigationIndicatorConfig_;
+    }
+    void SetIsSizeMatchNavigation(bool match)
+    {
+        isSizeMatchNavigation_ = match;
+    }
+    bool IsSizeMatchNavigation() const
+    {
+        return isSizeMatchNavigation_;
+    }
+
 protected:
+    RectF CalcFullClipRectForTransition(const SizeF& frameSize);
+    RectF CalcHalfClipRectForTransition(const SizeF& frameSize);
+    // push
+    OffsetF CalcTranslateForTransitionPushStart(const SizeF& frameSize, bool transitionIn);
+    OffsetF CalcTranslateForTransitionPushEnd(const SizeF& frameSize, bool transitionIn);
+    // pop
+    OffsetF CalcTranslateForTransitionPopStart(const SizeF& frameSize, bool transitionIn);
+    OffsetF CalcTranslateForTransitionPopEnd(const SizeF& frameSize, bool transitionIn);
+    // Dialog
+    TranslateOptions CalcContentTranslateForDialog(const SizeF& frameSize);
+    // slide
+    OffsetF CalcTranslateForSlideTransition(const SizeF& frameSize, bool isRight, bool isEnter, bool isEnd);
+
+    OffsetF GetParentGlobalOffsetWithSafeArea(bool checkBoundary = false, bool checkPosition = false) const override;
+
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> menu_;
     RefPtr<UINode> toolbarMenu_;
@@ -206,6 +336,21 @@ protected:
     bool isNewToolbar_ = false;
     int32_t animationId_ = -1;
     PageTransitionType transitionType_ = PageTransitionType::NONE;
+    std::optional<Orientation> orientation_;
+    std::optional<Orientation> preOrientation_;
+    RefPtr<PageViewportConfig> viewportConfig_;
+    SafeAreaInsets safeAreaInsets_;
+    bool isRotated_ = false;
+    std::optional<int32_t> rotateAngle_;
+    bool isCustomExpandRunning_ = false;
+    std::function<void()> onStartTransitionAnimationCb_;
+    std::function<void()> onFinishTransitionAnimationCb_;
+    // pair.first -> enable, pair.second -> animated
+    std::optional<std::pair<bool, bool>> statusBarConfig_;
+    std::optional<std::pair<bool, bool>> preStatusBarConfig_;
+    std::optional<bool> navigationIndicatorConfig_;
+    std::optional<bool> preNavigationIndicatorConfig_;
+    bool isSizeMatchNavigation_ = true;
 };
 } // namespace OHOS::Ace::NG
 

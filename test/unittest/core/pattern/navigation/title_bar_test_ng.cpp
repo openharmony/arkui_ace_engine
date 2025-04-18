@@ -2177,7 +2177,7 @@ HWTEST_F(TitleBarTestNg, OnLanguageConfigurationUpdate001, TestSize.Level1)
      * @tc.expected: relative value is set successfully.
      */
     titleBarPattern_->OnLanguageConfigurationUpdate();
-    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    std::string message = theme->GetNavigationBack();
     auto accessibilityProperty = backButtonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     auto accessibilityText = accessibilityProperty->GetAccessibilityText();

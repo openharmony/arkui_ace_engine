@@ -84,6 +84,11 @@ public:
      */
     SafeAreaInsets GetSystemSafeArea() const;
 
+    SafeAreaInsets GetNavSafeArea() const
+    {
+        return navSafeArea_;
+    }
+
     /**
      * @brief Cut the incoming area with root size, then check if the result is identical to the cutout safe area.
      *
@@ -169,11 +174,6 @@ public:
     }
 
     float GetKeyboardOffset(bool withoutProcess = false) const;
-
-    float GetKeyboardOffsetDirectly() const
-    {
-        return keyboardOffset_;
-    }
 
     void SetKeyboardInfo(float height);
 

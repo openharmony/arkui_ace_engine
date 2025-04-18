@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,9 +84,13 @@ export type SubHeaderV2SelectOnSelect = (selectedIndex: number, selectedContent?
 export interface SubHeaderV2SelectOptions {
   options: SelectOption[];
   selectedIndex?: number;
-  selectedContent?: string;
+  selectedContent?: ResourceStr;
   onSelect?: SubHeaderV2SelectOnSelect;
   defaultFocus?: boolean;
+}
+
+export interface BuildSelectOptions {
+  params: SubHeaderV2Select;
 }
 
 @ObservedV2
@@ -96,7 +100,7 @@ export class SubHeaderV2Select {
   @Trace
   public selectedIndex?: number;
   @Trace
-  public selectedContent?: string;
+  public selectedContent?: ResourceStr;
   @Trace
   public onSelect?: SubHeaderV2SelectOnSelect;
   @Trace
@@ -395,9 +399,19 @@ export struct SubHeaderV2 {
     return true;
   }
 
+  @Monitor('select')
+  infoChange(monitor: IMonitor) {
+    monitor.dirty.forEach((path: string) => {
+      if ('select' === path) {
+        this.selectedIndex = (monitor.value(path)?.now as SubHeaderV2Select)?.selectedIndex;
+        this.selectedContent = (monitor.value(path)?.now as SubHeaderV2Select)?.selectedContent;
+      }
+    })
+  }
+
   @Builder
-  SelectStyle(selectParam: SubHeaderV2Select): void {
-    Select(selectParam.options)
+  SelectStyle(selectParam: BuildSelectOptions): void {
+    Select(selectParam.params.options)
       .height('auto')
       .width('auto')
       .selected(this.selectedIndex)
@@ -408,8 +422,8 @@ export struct SubHeaderV2 {
         if (value) {
           this.selectedContent = value;
         }
-        if (selectParam.onSelect) {
-          selectParam.onSelect(index, value);
+        if (selectParam.params.onSelect) {
+          selectParam.params.onSelect(index, value);
         }
       })
       .font({
@@ -486,7 +500,7 @@ export struct SubHeaderV2 {
     } else if (this.title?.secondaryTitle) {
       this.SecondTitleStyle({ content: this.title?.secondaryTitle });
     } else if (this.select) {
-      this.SelectStyle(this.select);
+      this.SelectStyle({ params: this.select });
     } else if (this.title?.primaryTitle) {
       this.PrimaryTitleStyle({ content: this.title?.primaryTitle });
     } else {

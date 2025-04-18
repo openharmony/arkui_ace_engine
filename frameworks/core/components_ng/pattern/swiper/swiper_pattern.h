@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,9 @@ constexpr SwiperHoverFlag HOVER_SWIPER = 1;
 constexpr SwiperHoverFlag HOVER_INDICATOR = 1 << 1;
 constexpr SwiperHoverFlag HOVER_ARROW = 1 << 2;
 constexpr int32_t NEW_STYLE_MIN_TURN_PAGE_VELOCITY = 780;
+constexpr float SWIPER_CURVE_MASS = 1.0f;
+constexpr float SWIPER_CURVE_STIFFNESS = 328.0f;
+constexpr float SWIPER_CURVE_DAMPING = 34.0f;
 
 class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
@@ -327,7 +330,7 @@ public:
     {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
-    
+
     void ResetIndicatorParameters()
     {
         if (GetIndicatorType() == SwiperIndicatorType::DOT) {
@@ -592,8 +595,9 @@ public:
         tabsPaddingAndBorder_ = tabsPaddingAndBorder;
     }
 
+    void InitAnimationCurve();
     RefPtr<Curve> GetCurveIncludeMotion();
-    RefPtr<Curve> GetIndicatorHeadCurve() const;
+    RefPtr<Curve> GetIndicatorHeadCurve();
     float GetMotionVelocity()
     {
         return motionVelocity_;
@@ -663,8 +667,12 @@ public:
     }
     void UpdateNodeRate();
 #ifdef SUPPORT_DIGITAL_CROWN
-    virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
-    virtual void InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub) {}
+    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
+    {
+        crownSensitivity_ = sensitivity;
+    }
+    virtual void InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub);
+    double GetCrownRotatePx(const CrownEvent& event);
     virtual bool IsCrownSpring() const { return false; }
     virtual void SetIsCrownSpring(bool isCrownSpring) {}
 #endif
@@ -765,9 +773,22 @@ public:
     void SetBindIndicator(bool bind)
     {
         isBindIndicator_ = bind;
+        // Need to reset the last independent indicator first,
+        // whether it will rebind to a new independent navigation point.
+        ResetIndicatorNode();
     }
 
-    void SetIndicatorNode(const WeakPtr<NG::UINode>& indicatorNode);
+    void SetJSIndicatorController(std::function<void()> resetFunc)
+    {
+        if (resetFunc_) {
+            resetFunc_();
+        }
+        resetFunc_ = resetFunc;
+    }
+
+    void SetIndicatorNode(const RefPtr<FrameNode>& indicatorNode);
+
+    void ResetIndicatorNode();
 
     RefPtr<FrameNode> GetIndicatorNode() const
     {
@@ -785,6 +806,8 @@ public:
     {
         gestureStatus_ = gestureStatus;
     }
+    bool HasRepeatTotalCountDifference(RefPtr<UINode> node) const;
+    int32_t OnInjectionEvent(const std::string& command) override;
 
 protected:
     void MarkDirtyNodeSelf();
@@ -912,8 +935,8 @@ private:
     virtual void ResetParentNodeColor() {};
     // ArcSwiper will implement this interface in order to achieve the function of the manual effect.
     virtual void PlayScrollAnimation(float currentDelta, float currentIndexOffset) {};
-    virtual void PlayPropertyTranslateAnimation(
-        float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
+    virtual void PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity = 0.0f,
+        bool stopAutoPlay = false, std::optional<float> pixelRoundTargetPos = std::nullopt);
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void PlayIndicatorTranslateAnimation(float translate, std::optional<int32_t> nextIndex = std::nullopt);
     void PropertyCancelAnimationFinish(bool isFinishAnimation, bool isBeforeCreateLayoutWrapper, bool isInterrupt);
@@ -1163,6 +1186,7 @@ private:
     }
 
     void ResetOnForceMeasure();
+    void ResetTabBar();
     void UpdateTabBarIndicatorCurve();
     bool CheckDragOutOfBoundary(double dragVelocity);
     void UpdateCurrentFocus();
@@ -1174,6 +1198,7 @@ private:
     bool NeedForceMeasure() const;
     void SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex = std::nullopt);
     void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
+    void SetIndicatorIsInFast(std::optional<bool> isInFast);
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
 
@@ -1186,8 +1211,6 @@ private:
     {
         return !IsLoop() && (prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_) && TotalCount() > GetDisplayCount();
     }
-
-    std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
 
     bool IsItemOverlay() const;
     void UpdateIndicatorOnChildChange();
@@ -1222,7 +1245,22 @@ private:
     void HandleTabsCachedMaxCount(int32_t startIndex, int32_t endIndex);
     void PostIdleTaskToCleanTabContent();
     std::shared_ptr<SwiperParameters> GetBindIndicatorParameters() const;
-
+    int32_t GetNodeId() const;
+    bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
+    void ReportComponentChangeEvent(
+        const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset = 0.0) const;
+    void ReportTraceOnDragEnd() const;
+    void UpdateBottomTypeOnMultiple(int32_t currentFirstIndex);
+    void UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex);
+    void CheckTargetPositon(float& correctOffset);
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownEvent(const CrownEvent& event, const OffsetF& center, const OffsetF& offset);
+    void HandleCrownActionBegin(GestureEvent& info);
+    void HandleCrownActionUpdate(double degree, double mainDelta, GestureEvent& info);
+    void HandleCrownActionEnd(GestureEvent& info);
+    void UpdateCrownVelocity(double mainDelta);
+    void StartVibraFeedback();
+#endif
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1324,6 +1362,7 @@ private:
     float endMainPos_ = 0.0f;
     float contentMainSize_ = 0.0f;
     float oldContentMainSize_ = 0.0f;
+    float contentMainSizeBeforeAni_ = 0.0f;
     float contentCrossSize_ = 0.0f;
     bool crossMatchChild_ = false;
 
@@ -1356,6 +1395,8 @@ private:
     bool prevMarginIgnoreBlank_ = false;
     float ignoreBlankOffset_ = 0.0f;
     int32_t swiperId_ = -1;
+    float animationCurveStiffness_ = SWIPER_CURVE_STIFFNESS;
+    float animationCurveDamping_ = SWIPER_CURVE_DAMPING;
 
     std::optional<int32_t> cachedCount_;
 
@@ -1398,14 +1439,21 @@ private:
     TabAnimateMode tabAnimationMode_ = TabAnimateMode::NO_ANIMATION;
     bool isFirstAxisAction_ = true;
     bool stopWhenTouched_ = true;
-    WeakPtr<NG::UINode> indicatorNode_;
+    WeakPtr<FrameNode> indicatorNode_;
     bool isBindIndicator_ = false;
+    std::function<void()> resetFunc_;
 
     SwiperHoverFlag hoverFlag_ = HOVER_NONE;
     GestureStatus gestureStatus_ = GestureStatus::INIT;
 
     std::list<int32_t> itemsLatestSwitched_;
     std::set<int32_t> itemsNeedClean_;
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
+    double crownAdjustedVelocity_ = 0.f;
+    double crownRealVelocity_ = 0.f;
+    bool isCrownActionStarted_ = false;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

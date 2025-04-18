@@ -229,7 +229,7 @@ public:
     {
         return false;
     }
-    bool IsAtBottom() const override
+    bool IsAtBottom(bool considerRepeat = false) const override
     {
         return false;
     }
@@ -251,8 +251,8 @@ public:
     }
     void OnScrollStartCallback() override {}
     void FireOnScrollStart() override {}
-    void FireOnReachStart(const OnReachEvent& onReachStart) override {}
-    void FireOnReachEnd(const OnReachEvent& onReachEnd) override {}
+    void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override {}
+    void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override {}
 
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override {}
 
@@ -370,7 +370,8 @@ protected:
 
     void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const override {}
 
-    void OnScrollStop(const OnScrollStopEvent& onScrollStop) override {}
+    void OnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop) override
+    {}
 
 private:
     void OnScrollEndCallback() override {};
@@ -419,9 +420,11 @@ HWTEST_F(WebPatternFocusTestNg, OnTextSelected_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->overlayCreating_ = false;
+    webPattern->awaitingOnTextSelected_ = true;
     webPattern->OnTextSelected();
     ASSERT_NE(webPattern->delegate_, nullptr);
     EXPECT_TRUE(webPattern->overlayCreating_);
+    EXPECT_FALSE(webPattern->awaitingOnTextSelected_);
 #endif
 }
 
@@ -524,9 +527,8 @@ HWTEST_F(WebPatternFocusTestNg, OnAccessibilityHoverEvent, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     PointF point(20.0f, 100.0f);
-    bool web = webPattern->OnAccessibilityHoverEvent(point);
+    webPattern->OnAccessibilityHoverEvent(point, true);
     ASSERT_NE(webPattern->delegate_, nullptr);
-    ASSERT_FALSE(web);
 #endif
 }
 

@@ -114,6 +114,11 @@ export struct CustomDialogBootcamp {
   @State enableAnimateParamExpectedFrameRateRangeMax: boolean = false;
   @State animateParamExpectedFrameRateRangeExpected: number = 60;
   @State enableAnimateParamExpectedFrameRateRangeExpected: boolean = false;
+  scroller: Scroller = new Scroller();
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
+
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: CustomDialogExample({
       cancel: () => {
@@ -244,6 +249,9 @@ export struct CustomDialogBootcamp {
         content: () => {
           this.Content()
         },
+        generic: () => {
+          this.Generic()
+        },
         parameters: () => {
           this.Parameters()
         }
@@ -268,7 +276,7 @@ export struct CustomDialogBootcamp {
 
   @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
         RadioBlock({
           title: 'autoCancel',
@@ -604,5 +612,11 @@ export struct CustomDialogBootcamp {
       }.width('100%')
     }
     .height('52%')
+    .id('scroll')
+  }
+
+  @Builder
+  Generic() {
+
   }
 }

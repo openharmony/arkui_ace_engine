@@ -59,7 +59,7 @@ enum class ResponseType : int32_t {
     RIGHT_CLICK = 0,
     LONG_PRESS,
 };
-
+class SpanString;
 class ACE_FORCE_EXPORT ViewAbstractModel {
 public:
     static ViewAbstractModel* GetInstance();
@@ -89,7 +89,7 @@ public:
     virtual void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice) = 0;
     virtual void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions = SysOptions())
     {}
-    virtual void SetForegroundEffect(float radius, const SysOptions& sysOptions = SysOptions()) {}
+    virtual void SetForegroundEffect(float radius) {}
     virtual void SetSphericalEffect(double radio) {}
     virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
     virtual void SetLightUpEffect(double radio) {}
@@ -374,12 +374,15 @@ public:
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
     virtual void SetPrivacySensitive(bool flag) = 0;
 
+    // toolbar
+    virtual void SetToolbarBuilder(std::function<void()>&& buildFunc) = 0;
+    
     // background
     virtual void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) = 0;
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
-    virtual void BindTips(const RefPtr<PopupParam>& param) = 0;
+    virtual void BindTips(const RefPtr<PopupParam>& param, const RefPtr<SpanString>& spanString) = 0;
     virtual int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
     virtual int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
     virtual int32_t ClosePopup(const RefPtr<NG::UINode>& customNode) = 0;
@@ -427,6 +430,8 @@ public:
     virtual void SetAccessibilityNextFocusId(const std::string& nextFocusId) = 0;
     virtual void SetAccessibilityRole(const std::string& role, bool resetValue) = 0;
     virtual void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) = 0;
+    virtual void SetOnAccessibilityActionIntercept(
+        NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) = 0;
     virtual void ResetOnAccessibilityFocus() = 0;
     virtual void SetAccessibilityDefaultFocus(bool isFocus) = 0;
     virtual void SetAccessibilityUseSamePage(const std::string& pageMode) = 0;

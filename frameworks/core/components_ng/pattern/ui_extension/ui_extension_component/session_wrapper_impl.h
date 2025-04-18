@@ -110,6 +110,7 @@ public:
         RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT) override;
 
     void NotifyHostWindowMode(int32_t mode) override;
+    void ReDispatchWantParams() override;
 
 private:
     int32_t GetFrameNodeId() const;
@@ -130,6 +131,7 @@ private:
     RefPtr<SystemWindowScene> GetWindowScene();
     int32_t GetWindowSceneId();
     Rosen::WSRect GetWindowSceneRect();
+    RectF GetDisplayAreaWithWindowScene();
     bool InnerNotifyOccupiedAreaChangeInfo(
         sptr<Rosen::OccupiedAreaChangeInfo> info, bool isWaitTask, int64_t occupiedAreaTime);
     bool RegisterDataConsumer();

@@ -175,8 +175,8 @@ HWTEST_F(OverlayManagerTestThreeNg, RemoveFrameNodeWithOrder001, TestSize.Level1
     EXPECT_NE(pipelineContext, nullptr);
     auto overlayManager = pipelineContext->overlayManager_;
     ASSERT_NE(overlayManager, nullptr);
-    overlayManager->dialogOrderMap_.emplace(3, true);
-    overlayManager->dialogOrderMap_.emplace(1, true);
+    overlayManager->nodeIdOrderMap_.emplace(3, true);
+    overlayManager->nodeIdOrderMap_.emplace(1, true);
     auto frameNode =
         FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
     ASSERT_NE(frameNode, nullptr);
@@ -226,5 +226,99 @@ HWTEST_F(OverlayManagerTestThreeNg, MountPixelMapToWindowScene001, TestSize.Leve
     EXPECT_TRUE(overlayManager->hasDragPixelMap_);
     overlayManager->MountPixelMapToWindowScene(columnNode, windowScene, false);
     EXPECT_TRUE(overlayManager->hasPixelMap_);
+}
+
+/**
+ *@tc.name:UpdateTipsStatus001
+ *@tc.desc:Test UpdateTipsStatus of OverlayManager
+ *@tc.type:FUNC
+ */
+
+HWTEST_F(OverlayManagerTestThreeNg, UpdateTipsStatus001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    int32_t targetId = 1;
+    bool isInContinus = true;
+    // check tipsStatusList_
+    EXPECT_EQ(overlayManager->tipsStatusList_.size(), 0);
+    overlayManager->UpdateTipsStatus(targetId, isInContinus);
+    EXPECT_EQ(overlayManager->tipsStatusList_.size(), 1);
+    EXPECT_EQ(overlayManager->GetTipsStatus(targetId), isInContinus);
+    isInContinus = false;
+    overlayManager->UpdateTipsStatus(targetId, isInContinus);
+    EXPECT_EQ(overlayManager->GetTipsStatus(targetId), isInContinus);
+}
+
+/**
+ *@tc.name:EraseTipsStatus001
+ *@tc.desc:Test EraseTipsStatus of OverlayManager
+ *@tc.type:FUNC
+ */
+
+HWTEST_F(OverlayManagerTestThreeNg, EraseTipsStatus001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    int32_t targetId = 1;
+    bool isInContinus = true;
+    overlayManager->UpdateTipsStatus(targetId, isInContinus);
+    EXPECT_EQ(overlayManager->tipsStatusList_.size(), 1);
+    overlayManager->EraseTipsStatus(targetId);
+    EXPECT_EQ(overlayManager->tipsStatusList_.size(), 0);
+}
+
+/**
+ *@tc.name:GetTipsStatus001
+ *@tc.desc:Test GetTipsStatus of OverlayManager
+ *@tc.type:FUNC
+ */
+
+HWTEST_F(OverlayManagerTestThreeNg, GetTipsStatus001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    int32_t targetId = 1;
+    bool isInContinus = true;
+    overlayManager->UpdateTipsStatus(targetId, isInContinus);
+    bool result = overlayManager->GetTipsStatus(targetId);
+    EXPECT_EQ(result, isInContinus);
+    int32_t nonExistentTargetId = 2;
+    result = overlayManager->GetTipsStatus(nonExistentTargetId);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: PopTipsBubble1
+ * @tc.desc: Test PopTipsBubble1 function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, PopTipsBubble1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(popupNode, nullptr);
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto overlayNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(overlayNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(overlayNode);
+    bubblePattern->PopTipsBubble();
+    EXPECT_EQ(overlayManager->GetTipsStatus(1), false);
 }
 } // namespace OHOS::Ace::NG

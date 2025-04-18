@@ -333,8 +333,9 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     const JSRef<JSVal> cleanUpIdleTask = globalObject->GetProperty("uiNodeCleanUpIdleTask");
     if (cleanUpIdleTask->IsFunction()) {
         const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
-        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
-            jsFunc->Call(globalObject);
+        const auto callback = [jsFunc = globalFunc, globalObject = globalObject](int64_t maxTimeInNs) {
+            auto params = ConvertToJSValues(maxTimeInNs / 1e6);
+            jsFunc->Call(globalObject, params.size(), params.data());
         };
         ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(callback);
     }
@@ -381,13 +382,12 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSCalendarPicker::JSBind(globalObj);
     JSCalendarPickerDialog::JSBind(globalObj);
-#endif
     JSForEach::JSBind(globalObj);
     JSRepeat::JSBind(globalObj);
     JSRepeatVirtualScroll::JSBind(globalObj);
+    JSRepeatVirtualScroll2::JSBind(globalObj);
     JSIfElse::JSBind(globalObj);
     JSDivider::JSBind(globalObj);
     JSScroll::JSBind(globalObj);
@@ -471,10 +471,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSSlider::JSBind(globalObj);
     JSGridRow::JSBind(globalObj);
     JSGridCol::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSStepper::JSBind(globalObj);
     JSStepperItem::JSBind(globalObj);
-#endif
     JSBlank::JSBind(globalObj);
     JSCalendar::JSBind(globalObj);
     JSShape::JSBind(globalObj);
@@ -488,10 +486,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSTimePicker::JSBind(globalObj);
     JSDatePicker::JSBind(globalObj);
     JSPageTransition::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSTextPickerDialog::JSBind(globalObj);
     JSTimePickerDialog::JSBind(globalObj);
     JSDatePickerDialog::JSBind(globalObj);
+#ifndef ARKUI_WEARABLE
     JSRowSplit::JSBind(globalObj);
     JSColumnSplit::JSBind(globalObj);
 #endif
@@ -533,10 +531,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSCheckbox::JSBind(globalObj);
     JSCheckboxGroup::JSBind(globalObj);
     JSRefresh::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSWaterFlow::JSBind(globalObj);
     JSWaterFlowItem::JSBind(globalObj);
-#endif
     JSCommonView::JSBind(globalObj);
     JSRecycleView::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);
@@ -611,8 +607,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRotationRecognizer::JSBind(globalObj);
 }
 
-void JsBindWorkerViews(BindingTarget globalObj, const shared_ptr<JsRuntime> runtime,
-    void* nativeEngine, const shared_ptr<JsValue> globalPtr)
+void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
 {
     JSCanvasGradient::JSBind(globalObj);
     JSCanvasPattern::JSBind(globalObj);
@@ -624,7 +619,6 @@ void JsBindWorkerViews(BindingTarget globalObj, const shared_ptr<JsRuntime> runt
     JSPath2D::JSBind(globalObj);
     JSCanvasImageData::JSBind(globalObj);
     JSMock::JSBind(globalObj);
-    JSMock::JSBind(globalObj, runtime, globalPtr);
 }
 
 } // namespace OHOS::Ace::Framework

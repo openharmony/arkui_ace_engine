@@ -29,6 +29,11 @@ public:
     {
         return -1;
     }
+
+    uint64_t GetMaxTextLength() override
+    {
+        return 0;
+    }
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_SHARE_TEXT_SHARE_DEFAULT_H

@@ -53,6 +53,11 @@ public:
         return navPathList_;
     }
 
+    NavPathList& GetPreNavPathList()
+    {
+        return preNavPathList_;
+    }
+
     virtual void SetOnStateChangedCallback(std::function<void()> callback) {}
 
     void SavePreNavList()

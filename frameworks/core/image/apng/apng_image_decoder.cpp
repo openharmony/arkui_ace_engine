@@ -554,11 +554,7 @@ static uint8_t *png_copy_frame_data_at_index(const uint8_t *data,
     return frame_data;
 }
 
-#ifndef USE_ROSEN_DRAWING
-PNGImageDecoder::PNGImageDecoder(const sk_sp<SkData> &data) : data_(data)
-#else
 PNGImageDecoder::PNGImageDecoder(const std::shared_ptr<RSData> &data) : data_(data)
-#endif
 {
 }
 

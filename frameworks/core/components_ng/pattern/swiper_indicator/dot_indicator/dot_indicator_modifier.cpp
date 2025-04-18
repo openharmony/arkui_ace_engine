@@ -122,7 +122,7 @@ void DotIndicatorModifier::PaintBackground(
     }
     float allPointSpaceSum = static_cast<float>(GetIndicatorDotItemSpace().ConvertToPx()) * (pointNumber - 1);
 
-    if (maxDisplayCount > 0 && isBindIndicator) {
+    if (maxDisplayCount > 0) {
         allPointSpaceSum = static_cast<float>(GetIndicatorDotItemSpace().ConvertToPx()) * (maxDisplayCount - 1);
         allPointDiameterSum = itemWidth * (maxDisplayCount - OVERLONG_SMALL_COUNT - 1) + selectedItemWidth +
                               itemWidth * SECOND_SMALLEST_POINT_RATIO + itemWidth * SMALLEST_POINT_RATIO;
@@ -952,6 +952,7 @@ void DotIndicatorModifier::StopAnimation(bool ifImmediately)
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
             modifier->ifNeedFinishCallback_ = false;
+            modifier->animationState_ = TouchBottomAnimationStage::STAGE_NONE;
             modifier->longPointLeftCenterX_->Set(modifier->longPointLeftCenterX_->Get());
             modifier->longPointRightCenterX_->Set(modifier->longPointRightCenterX_->Get());
         });

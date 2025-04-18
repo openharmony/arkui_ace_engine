@@ -188,7 +188,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateLunarSwitchTextNode()
     CHECK_NULL_RETURN(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("datepicker.lunarSwitch"));
+    textLayoutProperty->UpdateContent(pickerTheme->GetLunarSwitchText());
     textLayoutProperty->UpdateFontSize(ConvertFontScaleValue(pickerTheme->GetLunarSwitchTextSize()));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
     textNode->MarkModifyDone();
@@ -609,7 +609,7 @@ void DatePickerDialogView::SwitchContentRowButton(const RefPtr<FrameNode>& conte
     if (!switchFlag_) {
         if (isShowTime_ || datePickerMode_ == DatePickerMode::DATE) {
             nextButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
+            textLayoutProperty->UpdateContent(GetDialogAgingButtonText(true));
         } else {
             nextButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
             auto cancelButton = AceType::DynamicCast<FrameNode>(contentRow->GetFirstChild());
@@ -629,7 +629,7 @@ void DatePickerDialogView::SwitchContentRowButton(const RefPtr<FrameNode>& conte
         auto divideRst = UpdateButtonVisibility(divideNode);
         CHECK_NULL_VOID(divideRst);
         nextButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
+        textLayoutProperty->UpdateContent(GetDialogAgingButtonText(true));
         auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         auto dialogTheme = pipeline->GetTheme<DialogTheme>();
@@ -663,7 +663,7 @@ void DatePickerDialogView::ShowContentRowButton(const RefPtr<FrameNode>& content
         if (isShowTime_ || datePickerMode_ == DatePickerMode::DATE) {
             divideLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             nextButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
+            textLayoutProperty->UpdateContent(GetDialogAgingButtonText(true));
             textLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         } else {
             divideLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
@@ -820,7 +820,7 @@ void DatePickerDialogView::UpdateConfirmButtonTextLayoutProperty(
     const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
 {
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(GetDialogNormalButtonText(true));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     if (!NeedAdaptForAging()) {
         textLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
@@ -834,7 +834,7 @@ void DatePickerDialogView::UpdateCancelButtonTextLayoutProperty(
     const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
 {
     CHECK_NULL_VOID(textCancelLayoutProperty);
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(GetDialogNormalButtonText(false));
     textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     if (!NeedAdaptForAging()) {
         textCancelLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
@@ -847,7 +847,7 @@ void DatePickerDialogView::UpdateButtonLayoutProperty(
     const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
 {
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
-    buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    buttonConfirmLayoutProperty->UpdateLabel(GetDialogNormalButtonText(true));
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonConfirmLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
@@ -1236,9 +1236,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     buttonCancelEventHub->SetStateEffect(true);
 
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    buttonCancelLayoutProperty->UpdateLabel(GetDialogNormalButtonText(false));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (buttonCancelNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonCancelLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -1997,6 +1997,7 @@ void DatePickerDialogView::UpdateButtonDefaultFocus(
 RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<void()>& switchEvent,
     const RefPtr<FrameNode>& dateNode, const std::vector<ButtonInfo>& buttonInfos, const RefPtr<FrameNode>& contentRow)
 {
+    CHECK_NULL_RETURN(dateNode, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
@@ -2009,7 +2010,10 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
     CHECK_NULL_RETURN(textNextPrevNode, nullptr);
     auto textLayoutProperty = textNextPrevNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(datePickerPattern, nullptr);
+    datePickerPattern->SetNextPrevButtonNode(nextPrevButtonNode);
+    textLayoutProperty->UpdateContent(GetDialogAgingButtonText(true));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textLayoutProperty->UpdateFontSize(
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
@@ -2019,9 +2023,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
     CHECK_NULL_RETURN(nextPrevEventHub, nullptr);
     nextPrevEventHub->SetStateEffect(true);
     auto buttonNextPrevLayoutProperty = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonNextPrevLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.next"));
+    buttonNextPrevLayoutProperty->UpdateLabel(GetDialogAgingButtonText(true));
     buttonNextPrevLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (nextPrevButtonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -2073,6 +2077,8 @@ std::function<void(const GestureEvent&)> DatePickerDialogView::CreateNextPrevCli
         CHECK_NULL_VOID(nextPrevButtonNode);
         auto dialogTheme = dialogThemeWeak.Upgrade();
         CHECK_NULL_VOID(dialogTheme);
+        auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+        CHECK_NULL_VOID(datePickerPattern);
         auto buttonNextPrevLayoutProperty
                                 = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
         if (!switchFlag_ && isShowTime_) {
@@ -2080,19 +2086,19 @@ std::function<void(const GestureEvent&)> DatePickerDialogView::CreateNextPrevCli
         } else {
             SwitchDatePickerPage(dateNode);
         }
-        if (textLayoutProperty->GetContent() ==
-            UtfUtils::Str8ToStr16(Localization::GetInstance()->GetEntryLetters("common.next"))) {
+        if (textLayoutProperty->GetContent() == UtfUtils::Str8ToStr16(GetDialogAgingButtonText(true))) {
             if (!isShowTime_) {
                 ShowContentRowButton(contentRow, false);
             }
             UpdateCancelButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
-            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.prev"));
+            textLayoutProperty->UpdateContent(GetDialogAgingButtonText(false));
+            datePickerPattern->SetIsNext(false);
         } else {
             if (!isShowTime_) {
                 ShowContentRowButton(contentRow, true);
             }
             UpdateConfirmButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
-            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
+            textLayoutProperty->UpdateContent(GetDialogAgingButtonText(true));
         }
         if (switchFlag_ && isShowTime_) {
             UpdateNextButtonMargin(buttonNextPrevLayoutProperty);
@@ -2275,5 +2281,25 @@ DialogEvent DatePickerDialogView::GetDateChangeEvent(const RefPtr<FrameNode>& fr
         dateChangeEvent(info);
     };
     return dateChangeEvent;
+}
+
+std::string DatePickerDialogView::GetDialogAgingButtonText(bool isNext)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, "");
+    auto buttonText = isNext ? pickerTheme->GetNextText() : pickerTheme->GetPrevText();
+    return buttonText;
+}
+
+std::string DatePickerDialogView::GetDialogNormalButtonText(bool isConfirm)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, "");
+    auto buttonText = isConfirm ? dialogTheme->GetConfirmText() : dialogTheme->GetCancelText();
+    return buttonText;
 }
 } // namespace OHOS::Ace::NG

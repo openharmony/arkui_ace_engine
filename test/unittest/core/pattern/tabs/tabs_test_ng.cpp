@@ -310,6 +310,12 @@ void TabsTestNg::MockPaintRect(const RefPtr<FrameNode>& frameNode)
     mockRenderContext->paintRect_ = RectF(0.f, 0.f, TABS_WIDTH, TABS_HEIGHT);
 }
 
+void TabsTestNg::MockPaintRectSmallSize(const RefPtr<FrameNode>& frameNode)
+{
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_);
+    mockRenderContext->paintRect_ = RectF(0.f, 0.f, TABS_WIDTH, 0.f);
+}
+
 /**
  * @tc.name: InitSurfaceChangedCallback001
  * @tc.desc: test InitSurfaceChangedCallback
@@ -800,5 +806,74 @@ HWTEST_F(TabsTestNg, DragSwiper003, TestSize.Level1)
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     EXPECT_FALSE(swiperPattern_->panEvent_);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest001
+ * @tc.desc: test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, OnInjectionEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create tabs and set parameters.
+     */
+    int32_t currentIndex = 0;
+    auto event = [&currentIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (tabInfo != nullptr) {
+            currentIndex = tabInfo->GetIndex();
+        }
+    };
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(1);
+    TabsModelNG model = CreateTabs();
+    model.SetOnChange(std::move(event));
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string command = R"({"cmd":"changeIndex","params":{"index":2}})";
+    pattern->OnInjectionEvent(command);
+    EXPECT_EQ(currentIndex, 2);
+    command = R"({"cmd":"changeIndex","params":{"index":100}})";
+    pattern->OnInjectionEvent(command);
+    EXPECT_EQ(currentIndex, 0);
+    command = R"({"cmd":"changeIndex","params":{"index":-10}})";
+    pattern->OnInjectionEvent(command);
+    EXPECT_EQ(currentIndex, 0);
+}
+
+/**
+ * @tc.name: SetOnTabBarClickTest001
+ * @tc.desc: Test Tabs SetOnTabBarClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, SetOnTabBarClickTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create tabs and set parameters.
+     */
+    int32_t currentIndex = 0;
+    auto event = [&currentIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (tabInfo != nullptr) {
+            currentIndex = tabInfo->GetIndex();
+        }
+    };
+    TabsModelNG model = CreateTabs();
+    model.SetOnTabBarClick(std::move(event));
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2. Test SetOnTabBarClick function.
+     * @tc.expected:pattern_->onTabBarClickEvent_ not null.
+     */
+    EXPECT_NE(pattern_->onTabBarClickEvent_, nullptr);
+    HandleClick(1);
+    EXPECT_EQ(currentIndex, 1);
 }
 } // namespace OHOS::Ace::NG

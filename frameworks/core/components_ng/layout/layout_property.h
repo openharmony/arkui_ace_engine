@@ -297,8 +297,12 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(Visibility, VisibleType);
 
 public:
-    void UpdateVisibility(const VisibleType& value, bool allowTransition = false);
-    void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false);
+    void UpdateVisibility(const VisibleType& value, bool allowTransition = false, bool isUserSet = false);
+    void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false, bool isUserSet = false);
+    bool IsUserSetVisibility()
+    {
+        return isUserSetVisibility_;
+    }
 
     void UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty);
 
@@ -410,6 +414,8 @@ public:
 
     virtual void OnPropertyChangeMeasure() {}
 
+    std::string LayoutInfoToString();
+
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
@@ -481,6 +487,7 @@ private:
     bool needPositionLocalizedEdges_ = false;
     bool needOffsetLocalizedEdges_ = false;
     bool needLazyLayout_ = false;
+    bool isUserSetVisibility_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };

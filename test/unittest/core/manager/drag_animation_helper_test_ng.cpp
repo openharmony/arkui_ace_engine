@@ -660,4 +660,56 @@ HWTEST_F(DragAnimationHelperTestNg, DragStartAnimation, TestSize.Level1)
     TranslateOptions expectValue { 10.0f, 10.0f, 0.0f };
     EXPECT_EQ(result.x.CalcValue(), expectValue.x.CalcValue());
 }
+
+/**
+ * @tc.name: CreateBadgeTextNodeTest001
+ * @tc.desc: Test CreateBadgeTextNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CreateBadgeTextNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke CreateBadgeTextNode.
+     */
+    auto textNode = DragAnimationHelper::CreateBadgeTextNode(2);
+    EXPECT_NE(textNode, nullptr);
+}
+
+/**
+ * @tc.name: ShowMenuHideAnimation001
+ * @tc.desc: Test ShowMenuHideAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, ShowMenuHideAnimation001, TestSize.Level1)
+{
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, GetElmtId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    DragPreviewOption previewOption;
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
+    imageNode->SetDragPreviewOptions(previewOption);
+    PreparedInfoForDrag data;
+    DragAnimationHelper::ShowMenuHideAnimation(imageNode, data);
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
+    imageNode->SetDragPreviewOptions(previewOption);
+    auto menuNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_TAG, GetElmtId(), []() { return AceType::MakeRefPtr<MenuPattern>(0, "", MenuType::MENU); });
+    data.menuNode = menuNode;
+    DragAnimationHelper::ShowMenuHideAnimation(imageNode, data);
+    EXPECT_EQ(data.menuNode, menuNode);
+}
 } // namespace OHOS::Ace::NG

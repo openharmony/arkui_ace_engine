@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_modifier.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_method.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
+#include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -174,6 +175,11 @@ public:
     void OnAttachToMainTree() override;
     void UpdateCheckBoxStyle();
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void DumpInfo() override;
+
+    int32_t OnInjectionEvent(const std::string& command) override;
+    void ReportChangeEvent(bool selectStatus);
+    std::optional<bool> ParseSelectStatus(const std::string& command);
 
 private:
     void OnAttachToFrameNode() override;

@@ -157,7 +157,7 @@ void DatePickerPattern::InitFocusEvent()
     CHECK_NULL_VOID(pickerTheme);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -377,7 +377,7 @@ void DatePickerPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto datePickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(datePickerRowLayoutProperty);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         ColumnPatternInitHapticController();
         isHapticChanged_ = false;
     }
@@ -429,7 +429,7 @@ void DatePickerPattern::InitDisabled()
     if (!enabled_) {
         opacity *= DISABLE_ALPHA;
         renderContext->UpdateOpacity(opacity);
-    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    } else if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         renderContext->UpdateOpacity(opacity);
     }
 
@@ -446,11 +446,11 @@ void DatePickerPattern::InitDisabled()
 }
 
 void DatePickerPattern::UpdateButtonMargin(
-    const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmNode)
+    const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmOrNextNode)
 {
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    isRtl = isConfirmNode ? isRtl : !isRtl;
+    isRtl = isConfirmOrNextNode ? isRtl : !isRtl;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
     } else {
@@ -479,13 +479,13 @@ void DatePickerPattern::UpdateButtonNode(const RefPtr<FrameNode>& buttonNode, co
     auto updateNodeLayout = updateNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(updateNodeLayout);
 
-    std::string lettersStr = isConfirmNode ? "common.ok" : "common.cancel";
-    updateNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters(lettersStr));
-
     auto pipeline = updateNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
+    std::string lettersStr = isConfirmNode ? dialogTheme->GetConfirmText() : dialogTheme->GetCancelText();
+    updateNodeLayout->UpdateContent(lettersStr);
+
     UpdateButtonMargin(buttonNode, dialogTheme, isConfirmNode);
     updateNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -494,11 +494,14 @@ void DatePickerPattern::UpdateLunarSwitch()
 {
     auto lunarSwitchNode = weakLunarSwitchText_.Upgrade();
     CHECK_NULL_VOID(lunarSwitchNode);
-
+    auto context = lunarSwitchNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
     auto lunarSwitchTextLayoutProperty = lunarSwitchNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(lunarSwitchTextLayoutProperty);
-    lunarSwitchTextLayoutProperty->UpdateContent(
-        Localization::GetInstance()->GetEntryLetters("datepicker.lunarSwitch"));
+    lunarSwitchTextLayoutProperty->UpdateContent(pickerTheme->GetLunarSwitchText());
+    lunarSwitchTextLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
     lunarSwitchNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -514,6 +517,27 @@ void DatePickerPattern::UpdateDateOrder()
     SetDateOrder(dateOrder);
 }
 
+void DatePickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext)
+{
+    CHECK_NULL_VOID(buttonNode);
+    auto updateNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    CHECK_NULL_VOID(updateNode);
+    auto updateNodeLayout = updateNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(updateNodeLayout);
+
+    auto pipeline = updateNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    std::string lettersStr = isNext ? pickerTheme->GetNextText() : pickerTheme->GetPrevText();
+    updateNodeLayout->UpdateContent(lettersStr);
+
+    UpdateButtonMargin(buttonNode, dialogTheme, isNext);
+    updateNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void DatePickerPattern::OnLanguageConfigurationUpdate()
 {
     auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
@@ -524,6 +548,9 @@ void DatePickerPattern::OnLanguageConfigurationUpdate()
 
     UpdateLunarSwitch();
     UpdateDateOrder();
+
+    auto nextPrevButton = nextPrevButtonNode_.Upgrade();
+    UpdateDialogAgingButton(nextPrevButton, isNext_);
 }
 
 void DatePickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify)
@@ -618,6 +645,7 @@ void DatePickerPattern::OnColorConfigurationUpdate()
         titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     }
     UpdateTitleTextColor(buttonTitleNode, pickerTheme);
+    UpdateLunarSwitch();
     OnModifyDone();
 }
 
@@ -1096,27 +1124,28 @@ void DatePickerPattern::FlushMonthDaysColumn()
 bool DatePickerPattern::ReportDateChangeEvent(int32_t nodeId, const std::string& compName,
     const std::string& eventName, const std::string& eventData)
 {
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     auto dataJson = JsonUtil::ParseJsonString(eventData);
     CHECK_NULL_RETURN(dataJson, false);
-    auto value = InspectorJsonUtil::Create();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_RETURN(params, false);
+    params->Put("year", static_cast<int32_t>(dataJson->GetUInt("year")));
+    params->Put("month", static_cast<int32_t>(dataJson->GetUInt("month") + 1)); // month: 1-12
+    params->Put("day", static_cast<int32_t>(dataJson->GetUInt("day")));
+    params->Put("hour", static_cast<int32_t>(dataJson->GetUInt("hour")));
+    params->Put("minute", static_cast<int32_t>(dataJson->GetUInt("minute")));
+    auto value = JsonUtil::Create();
     CHECK_NULL_RETURN(value, false);
+    value->Put("nodeId", nodeId);
     value->Put(compName.c_str(), eventName.c_str());
-    value->Put("year", dataJson->GetUInt("year"));
-    value->Put("month", dataJson->GetUInt("month") + 1); // month: 1-12
-    value->Put("day", dataJson->GetUInt("day"));
-    value->Put("hour", dataJson->GetUInt("hour"));
-    value->Put("minute", dataJson->GetUInt("minute"));
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value);
-#endif
+    value->Put("params", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString());
     return true;
 }
 
 bool DatePickerPattern::ReportDateChangeEvent(const std::string& compName,
     const std::string& eventName, const std::string& eventData)
 {
-    auto datePickerEventHub = GetEventHub<DatePickerEventHub>();
-    if ((datePickerEventHub != nullptr) && datePickerEventHub->HasSetDialogChange()) {
+    if (GetIsShowInDialog()) {
         return false;
     }
     auto host = GetHost();
@@ -2204,7 +2233,7 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
 
     options_[dayColumn].clear();
     if (startYear == endYear && startMonth == endMonth) {
-        options_[dayColumn].resize(startDay - 1, emptyPickerDate_);
+        options_[dayColumn].resize(startDay > 0 ? startDay - 1 : 0, emptyPickerDate_);
     }
     // lunar's day start from startDay
     for (uint32_t index = startDay; index <= endDay; ++index) {

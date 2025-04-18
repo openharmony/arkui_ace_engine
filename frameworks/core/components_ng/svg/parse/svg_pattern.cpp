@@ -19,6 +19,7 @@
 #include "core/components_ng/svg/base/svg_length_scale_rule.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 
@@ -67,44 +68,25 @@ void SvgPattern::OnPatternEffect(RSCanvas& canvas, RSBrush& brush,
     auto measureY = GetRegionPosition(patternAttr_.y, patternRule, SvgLengthType::VERTICAL);
     auto measuredWidth = GetRegionLength(patternAttr_.width, patternRule, SvgLengthType::HORIZONTAL);
     auto measuredHeight = GetRegionLength(patternAttr_.height, patternRule, SvgLengthType::VERTICAL);
-    auto surface = RSSurface::MakeRasterN32Premul(measuredWidth, measuredHeight);
-    if (surface == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgPattern::OnPatternEffect surface is null");
-        return;
-    }
-    auto patternCanvas = surface->GetCanvas();
-    if (patternCanvas == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgPattern::OnPatternEffect patternCanvas is null");
-        return;
-    }
-    // Create New coordinate system
-    Rect patternContentRect(0, 0, svgCoordinateSystemContext.GetContainerRect().Width(),
-        svgCoordinateSystemContext.GetContainerRect().Height());
-    SvgCoordinateSystemContext patternContentCoordinateSystemContext(patternContentRect,
-        svgCoordinateSystemContext.GetViewPort());
-    auto patternContentRule = TransformForCurrentOBB(*patternCanvas, svgCoordinateSystemContext,
-        patternAttr_.patternContentUnits, 0.0f, 0.0f);
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "OnPatternEffect l:%{public}lf, t:%{public}lf, r:%{public}lf, b:%{public}lf ",
-        patternContentRect.Left(), patternContentRect.Top(), patternContentRect.Right(), patternContentRect.Bottom());
+    RSRect tileRect(0, 0, measuredWidth, measuredHeight);
+    auto pictureRecorder = std::make_unique<RSPictureRecorder>();
+    auto patternCanvas = pictureRecorder->BeginRecording(measuredWidth, measuredHeight);
+    auto patternContentRule = BuildContentScaleRule(svgCoordinateSystemContext, patternAttr_.patternContentUnits);
+    auto containerSize = svgCoordinateSystemContext.GetContainerRect().GetSize();
+    TransformForCurrentOBB(*patternCanvas, patternContentRule, containerSize, Offset(0.0, 0.0));
     for (auto& child : children_) {
         auto node = DynamicCast<SvgNode>(child);
         if (node) {
             node->Draw(*patternCanvas, patternContentRule);
         }
     }
-    auto image = surface->GetImageSnapshot();
-    if (!image) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgPattern::OnPatternEffect image is nullptr");
-        return ;
-    }
-    RSMatrix matrix;
-    matrix.SetMatrix(1, 0,  measureX, 0, 1,  measureY, 0, 0, 1);
-    auto shader = RSShaderEffect::CreateImageShader(*image, RSTileMode::REPEAT, RSTileMode::REPEAT,
-        RSSamplingOptions(RSFilterMode::LINEAR), matrix);
-    if (!shader) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgPattern::OnPatternEffect shader is nullptr");
-        return ;
-    }
+    RSMatrix patternMatrix;
+    RSMatrix localMatrix;
+    localMatrix.Translate(measureX, measureY);
+    patternMatrix.PreConcat(localMatrix);
+    auto picture = pictureRecorder->FinishRecordingAsPicture();
+    auto shader = RSShaderEffect::CreatePictureShader(*picture, RSTileMode::REPEAT, RSTileMode::REPEAT,
+        RSFilterMode::LINEAR, patternMatrix, tileRect);
     brush.SetShaderEffect(shader);
     canvas.Restore();
 }

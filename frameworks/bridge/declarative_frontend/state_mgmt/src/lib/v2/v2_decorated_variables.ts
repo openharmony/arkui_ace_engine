@@ -187,9 +187,10 @@ class VariableUtilV2 {
           if (val !== view[provideVarName]) {
             stateMgmtConsole.propertyAccess(`@Consumer ${consumeVarName} valueChanged`);
             view[provideVarName] = val;
-            if (this[ObserveV2.SYMBOL_REFS]) { // This condition can improve performance.
-              ObserveV2.getObserve().fireChange(this, consumeVarName);
-            }
+
+            // the bindings <*, target, propertyKey> might not have been recorded yet (!)
+            // fireChange will run idleTasks to record pending bindings, if any
+            ObserveV2.getObserve().fireChange(this, consumeVarName);
           }
         },
         enumerable: true
@@ -210,9 +211,9 @@ class VariableUtilV2 {
         set(val) {
           if (val !== this[storeProp]) {
             this[storeProp] = val;
-            if (this[ObserveV2.SYMBOL_REFS]) { // This condition can improve performance.
-              ObserveV2.getObserve().fireChange(this, consumeVarName);
-            }
+            // the bindings <*, target, propertyKey> might not have been recorded yet (!)
+            // fireChange will run idleTasks to record pending bindings, if any
+            ObserveV2.getObserve().fireChange(this, consumeVarName);
           }
         },
         enumerable: true

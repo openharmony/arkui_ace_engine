@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -344,26 +345,14 @@ void FlexLayoutAlgorithm::MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrappe
     }
 }
 
-void FlexLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, const SizeF& realSize)
+void FlexLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF& realSize)
 {
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToNonNegativeSize(padding, realSize);
     layoutConstraint.parentIdealSize.SetSize(realSize);
     for (const auto& child : layoutPolicyChildren_) {
         child->Measure(layoutConstraint);
-        auto geometryNode = child->GetGeometryNode();
-        CHECK_NULL_CONTINUE(geometryNode);
-        auto childLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(child->GetLayoutProperty());
-        CHECK_NULL_CONTINUE(childLayoutProperty);
-        auto widthLayoutPolicy = childLayoutProperty->GetWidthLayoutPolicy();
-        auto heightLayoutPolicy = childLayoutProperty->GetHeightLayoutPolicy();
-        if (widthLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) ==
-            static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT)) {
-            geometryNode->SetFrameWidth(realSize.Width());
-        }
-        if (heightLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) ==
-            static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT)) {
-            geometryNode->SetFrameHeight(realSize.Height());
-        }
     }
 }
 

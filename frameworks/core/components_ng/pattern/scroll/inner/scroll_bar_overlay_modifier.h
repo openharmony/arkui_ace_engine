@@ -34,6 +34,10 @@ enum class OpacityAnimationType {
      * run appear animation.
      */
     APPEAR,
+    /*
+     * appear without animation.
+     */
+    APPEAR_WITHOUT_ANIMATION,
 };
 
 enum class HoverAnimationType {
@@ -151,12 +155,10 @@ public:
 protected:
     std::shared_ptr<AnimationUtils::Animation> hoverAnimation_;
 
-#ifdef ARKUI_CIRCLE_FEATURE
     bool GetScrollable()
     {
         return isScrollable_;
     }
-#endif
 
 private:
     Offset GetHoverOffset(const Size& size) const;

@@ -20,6 +20,7 @@
 #include <string>
 #include <unordered_set>
 
+#include "accessibility_property_function.h"
 #include "base/memory/ace_type.h"
 #include "interfaces/native/native_type.h"
 #include "core/accessibility/accessibility_utils.h"
@@ -67,7 +68,8 @@ using OnAccessibilityHoverConsumeCheckImpl = std::function<bool(const NG::PointF
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
 
-class ACE_FORCE_EXPORT AccessibilityProperty : public virtual AceType {
+class ACE_FORCE_EXPORT AccessibilityProperty : public virtual AceType,
+    public AccessibilityPropertyInnerFunction, public AccessibilityPropertyInterfaceFunction {
     DECLARE_ACE_TYPE(AccessibilityProperty, AceType);
 
 public:
@@ -466,6 +468,8 @@ public:
     bool IsAccessibilityTextPreferred() const;
 
     void NotifyComponentChangeEvent(AccessibilityEventType eventType);
+
+    void UpdateAccessibilityNextFocusIdMap(const std::string& nextFocusInspectorKey);
 
     int32_t GetChildTreeId() const;
 

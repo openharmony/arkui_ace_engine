@@ -306,17 +306,19 @@ void HyperlinkPattern::OnMouseEvent(MouseInfo& info)
     CHECK_NULL_VOID(frame);
     auto frameId = frame->GetId();
     TouchEvent touchEvent;
+    auto frameOffset = GetHostFrameOffset();
+    CHECK_NULL_VOID(frameOffset);
 
     if (frame->IsOutOfTouchTestRegion(
-        { static_cast<float>(info.GetLocalLocation().GetX()) + GetHostFrameOffset()->GetX(),
-            static_cast<float>(info.GetLocalLocation().GetY()) + GetHostFrameOffset()->GetY() },
+        { static_cast<float>(info.GetLocalLocation().GetX()) + frameOffset->GetX(),
+            static_cast<float>(info.GetLocalLocation().GetY()) + frameOffset->GetY() },
         touchEvent)) {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         pipeline->FreeMouseStyleHoldNode(frameId);
     } else {
         pipeline->SetMouseStyleHoldNode(frameId);
-        pipeline->ChangeMouseStyle(
-            frameId, MouseFormat::HAND_POINTING, 0, info.GetAction() == MouseAction::WINDOW_LEAVE);
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING, 0,
+            (info.GetAction() == MouseAction::WINDOW_LEAVE || info.GetAction() == MouseAction::CANCEL));
     }
 }
 } // namespace OHOS::Ace::NG

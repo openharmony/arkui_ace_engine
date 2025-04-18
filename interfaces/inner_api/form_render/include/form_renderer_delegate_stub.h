@@ -55,6 +55,7 @@ private:
     int32_t HandleOnFormLinkInfoUpdate(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnGetRectRelativeToWindow(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnCheckManagerDelegate(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleOnUpdateFormDone(MessageParcel& data, MessageParcel& reply);
 
     using FormRendererDelegateFunc = int32_t (FormRendererDelegateStub::*)(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, FormRendererDelegateFunc> memberFuncMap_;

@@ -86,7 +86,7 @@ RectF GeometryTransition::GetNodeAbsFrameRect(const RefPtr<FrameNode>& node, std
     CHECK_NULL_RETURN(node, RectF());
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, RectF());
-    auto parentGlobalOffset = parentPos.value_or(node->GetPaintRectGlobalOffsetWithTranslate(true).first);
+    auto parentGlobalOffset = parentPos.value_or(node->GetPaintRectGlobalOffsetWithTranslate(true, true).first);
     auto paintRect = renderContext->GetPaintRectWithTransform();
     return RectF(parentGlobalOffset + paintRect.GetOffset(), paintRect.GetSize());
 }
@@ -95,7 +95,7 @@ void GeometryTransition::RecordOutNodeFrame()
 {
     auto outNode = outNode_.Upgrade();
     CHECK_NULL_VOID(outNode);
-    auto [val, err] = outNode->GetPaintRectGlobalOffsetWithTranslate(true);
+    auto [val, err] = outNode->GetPaintRectGlobalOffsetWithTranslate(true, true);
     outNodeParentPos_ = val;
     outNodeParentHasScales_ = err;
     auto outNodeAbsRect = GetNodeAbsFrameRect(outNode_.Upgrade(), outNodeParentPos_);
@@ -302,11 +302,11 @@ void GeometryTransition::ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& lay
     SizeF size;
     if (isNodeIn) {
         staticNodeAbsRect_ =
-            target->IsRemoving() ? std::nullopt : std::optional<RectF>(target->GetTransformRectRelativeToWindow());
+            target->IsRemoving() ? std::nullopt : std::optional<RectF>(target->GetTransformRectRelativeToWindow(true));
         size = target->IsRemoving() ? outNodeSize_ : staticNodeAbsRect_->GetSize();
     } else {
         staticNodeAbsRect_ =
-            !staticNodeAbsRect_ ? std::nullopt : std::optional<RectF>(target->GetTransformRectRelativeToWindow());
+            !staticNodeAbsRect_ ? std::nullopt : std::optional<RectF>(target->GetTransformRectRelativeToWindow(true));
         size = staticNodeAbsRect_ ? staticNodeAbsRect_->GetSize() :
             (inNodeAbsRect_ ? inNodeAbsRect_->GetSize() : targetGeometryNode->GetFrameSize());
     }
@@ -331,7 +331,8 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(renderContext && targetRenderContext && geometryNode && pipeline);
     // get own parent's global position, parent's transform is not taken into account other than translate
-    auto parentPos = self->IsRemoving() ? outNodeParentPos_ : self->GetPaintRectGlobalOffsetWithTranslate(true).first;
+    auto parentPos = self->IsRemoving() ? outNodeParentPos_ :
+        self->GetPaintRectGlobalOffsetWithTranslate(true, true).first;
     // get target's global position, target own transform is taken into account
     auto targetRect = target->IsRemoving() ? RectF(outNodePos_, outNodeSize_) :
         staticNodeAbsRect_.value_or(inNodeAbsRect_.value_or(GetNodeAbsFrameRect(target)));
@@ -545,7 +546,7 @@ void GeometryTransition::AnimateWithSandBox(const OffsetF& inNodeParentPos, bool
         if (inRenderContext->HasSandBox()) {
             auto parent = inNode->GetAncestorNodeOfFrame(false);
             if (inNodeParentHasScales && parent) {
-                inRenderContext->SetSandBox(parent->GetTransformRectRelativeToWindow().GetOffset());
+                inRenderContext->SetSandBox(parent->GetTransformRectRelativeToWindow(true).GetOffset());
             } else {
                 inRenderContext->SetSandBox(inNodeParentPos);
             }
@@ -581,12 +582,12 @@ void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const Anima
     OffsetF inNodeParentPos;
     bool inNodeParentHasScales = false;
     if (!staticNodeAbsRect_) {
-        auto [val, err] = inNode->GetPaintRectGlobalOffsetWithTranslate(true);
+        auto [val, err] = inNode->GetPaintRectGlobalOffsetWithTranslate(true, true);
         inNodeParentPos = val;
         inNodeParentHasScales = err;
     }
     auto inNodeAbsRect = staticNodeAbsRect_ || inNodeParentHasScales ?
-        inNode->GetTransformRectRelativeToWindow() : GetNodeAbsFrameRect(inNode, inNodeParentPos);
+        inNode->GetTransformRectRelativeToWindow(true) : GetNodeAbsFrameRect(inNode, inNodeParentPos);
     auto inNodeAbsRectOld = outNodeTargetAbsRect_.value();
     bool sizeChanged = GreatNotEqual(std::fabs(inNodeAbsRect.Width() - inNodeAbsRectOld.Width()), 1.0f) ||
         GreatNotEqual(std::fabs(inNodeAbsRect.Height() - inNodeAbsRectOld.Height()), 1.0f);

@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "frameworks/core/common/ace_engine.h"
+#include "base/subwindow/subwindow_manager.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -780,6 +781,34 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
+void FrontendDelegateDeclarativeNG::ParsePartialPropertiesFromAttr(
+    DialogProperties& dialogProperties, const PromptDialogAttr& dialogAttr)
+{
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    if (dialogAttr.hoverModeArea.has_value()) {
+        dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
+    }
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        dialogProperties.isSysBlurStyle = false;
+    } else {
+        if (dialogAttr.backgroundBlurStyle.has_value()) {
+            dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
+        }
+    }
+}
+
 DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr)
 {
     DialogProperties dialogProperties = {
@@ -807,29 +836,7 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
     };
-#if defined(PREVIEW)
-    if (dialogProperties.isShowInSubWindow) {
-        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
-             "emulator or a real device instead.");
-        dialogProperties.isShowInSubWindow = false;
-    }
-#endif
-    if (dialogAttr.alignment.has_value()) {
-        dialogProperties.alignment = dialogAttr.alignment.value();
-    }
-    if (dialogAttr.offset.has_value()) {
-        dialogProperties.offset = dialogAttr.offset.value();
-    }
-    if (dialogAttr.hoverModeArea.has_value()) {
-        dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
-    }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        dialogProperties.isSysBlurStyle = false;
-    } else {
-        if (dialogAttr.backgroundBlurStyle.has_value()) {
-            dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
-        }
-    }
+    ParsePartialPropertiesFromAttr(dialogProperties, dialogAttr);
     return dialogProperties;
 }
 
@@ -870,7 +877,7 @@ void FrontendDelegateDeclarativeNG::CloseCustomDialog(const int32_t dialogId)
         overlayManager->CloseCustomDialog(dialogId);
         SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     };
-    auto dialogNode = NG::FrameNode::GetFrameNode(V2::DIALOG_ETS_TAG, dialogId);
+    auto dialogNode = NG::FrameNode::GetFrameNodeOnly(V2::DIALOG_ETS_TAG, dialogId);
     auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogNode);
     MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog", currentOverlay);
     return;

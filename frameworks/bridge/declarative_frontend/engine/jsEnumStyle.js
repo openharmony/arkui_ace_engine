@@ -297,6 +297,12 @@ let PixelRoundCalcPolicy;
   PixelRoundCalcPolicy[PixelRoundCalcPolicy.FORCE_FLOOR = 2] = 'FORCE_FLOOR';
 })(PixelRoundCalcPolicy || (PixelRoundCalcPolicy = {}));
 
+let PixelRoundMode;
+(function (PixelRoundMode) {
+  PixelRoundMode[PixelRoundMode.PIXEL_ROUND_ON_LAYOUT_FINISH = 0] = 'PIXEL_ROUND_ON_LAYOUT_FINISH';
+  PixelRoundMode[PixelRoundMode.PIXEL_ROUND_AFTER_MEASURE = 1] = 'PIXEL_ROUND_AFTER_MEASURE';
+})(PixelRoundMode || (PixelRoundMode = {}));
+
 let VerticalAlign;
 (function (VerticalAlign) {
   VerticalAlign[VerticalAlign.Top = 1] = 'Top';
@@ -754,6 +760,7 @@ let FormDimension;
   FormDimension.DIMENSION_6_4 = 7;
   FormDimension.DIMENSION_2_3 = 8;
   FormDimension.DIMENSION_3_3 = 9;
+  FormDimension.DIMENSION_3_4 = 10;
 })(FormDimension || (FormDimension = {}));
 
 let FormShape;
@@ -3882,6 +3889,19 @@ let FocusDrawLevel;
   FocusDrawLevel[FocusDrawLevel.TOP = 1] = 'TOP';
 })(FocusDrawLevel || (FocusDrawLevel = {}));
 
+let AccessibilityAction;
+(function (AccessibilityAction) {
+  AccessibilityAction[AccessibilityAction.UNDEFINED_ACTION = 0] = 'UNDEFINED_ACTION';
+  AccessibilityAction[AccessibilityAction.ACCESSIBILITY_CLICK = 1] = 'ACCESSIBILITY_CLICK';
+})(AccessibilityAction || (AccessibilityAction = {}));
+
+let AccessibilityActionInterceptResult;
+(function (AccessibilityActionInterceptResult) {
+  AccessibilityActionInterceptResult[AccessibilityActionInterceptResult.ACTION_INTERCEPT = 0] = 'ACTION_INTERCEPT';
+  AccessibilityActionInterceptResult[AccessibilityActionInterceptResult.ACTION_CONTINUE = 1] = 'ACTION_CONTINUE';
+  AccessibilityActionInterceptResult[AccessibilityActionInterceptResult.ACTION_RISE = 2] = 'ACTION_RISE';
+})(AccessibilityActionInterceptResult || (AccessibilityActionInterceptResult = {}));
+
 let TextMenuShowMode;
 (function (TextMenuShowMode) {
   TextMenuShowMode[TextMenuShowMode.DEFAULT = 0] = 'DEFAULT';
@@ -3902,3 +3922,21 @@ let AxisAction;
   AxisAction[AxisAction.END = 3] = 'END';
   AxisAction[AxisAction.CANCEL = 4] = 'CANCEL';
 })(AxisAction || (AxisAction = {}));
+
+let EventQueryType;
+(function (EventQueryType) {
+  EventQueryType[EventQueryType.ON_CLICK = 0] = 'ON_CLICK';
+})(EventQueryType || (EventQueryType = {}));
+
+let RichEditorDeleteDirection;
+(function (RichEditorDeleteDirection) {
+  RichEditorDeleteDirection[RichEditorDeleteDirection.BACKWARD = 0] = 'BACKWARD';
+  RichEditorDeleteDirection[RichEditorDeleteDirection.FORWARD = 1] = 'FORWARD';
+})(RichEditorDeleteDirection || (RichEditorDeleteDirection = {}));
+
+let InteractionHand;
+(function (InteractionHand) {
+  InteractionHand[InteractionHand.NONE = 0] = 'NONE';
+  InteractionHand[InteractionHand.LEFT = 1] = 'LEFT';
+  InteractionHand[InteractionHand.RIGHT = 2] = 'RIGHT';
+})(InteractionHand || (InteractionHand = {}));

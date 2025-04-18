@@ -134,7 +134,7 @@ public:
             theme->backgroundBlurColor_ = pattern->GetAttr<Color>("background_blur_color", Color(0x19E6E6E6));
             theme->mainTitleFontColor_ = pattern->GetAttr<Color>("title_primary_color", Color(0xe5000000));
             theme->subTitleFontColor_ = pattern->GetAttr<Color>("title_subheader_color", Color(0x99000000));
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 SetToolBarTheme(pattern, theme);
                 SetNavigationTokenTheme(pattern, theme);
             }
@@ -147,13 +147,9 @@ public:
                 pattern->GetAttr<Dimension>("toolbar_item_focus_border_size_api_sixteen", 2.0_vp);
             theme->toolbarItemFocusBorderColor_ =
                 pattern->GetAttr<Color>("toolbar_item_focus_color_api_sixteen", Color(0x007dff));
-            theme->toolbarItemFontColor_ =
-                pattern->GetAttr<Color>("toolbar_item_font_color_api_sixteen", Color(0x66182431));
             theme->toolbarItemBorderRadiusValue_ =
                 pattern->GetAttr<Dimension>("toolbar_item_bg_button_border_radius_api_sixteen", 12.0_vp);
             theme->toolbarItemBorderRadius_.SetRadius(theme->toolbarItemBorderRadiusValue_);
-            theme->toolbarIconColor_ =
-                pattern->GetAttr<Color>("toolbar_item_icon_color_api_sixteen", Color(0x66182431));
             theme->toolbarActiveIconColor_ =
                 pattern->GetAttr<Color>("toolbar_item_active_icon_color_api_sixteen", Color(0xff007dff));
             theme->toolbarActiveTextColor_ =
@@ -236,6 +232,7 @@ public:
             theme->dragBarItemActiveColor_ = pattern->GetAttr<Color>("drag_bar_item_active_color", Color(0xFF007DFF));
             theme->dividerGradientLightBlue_ = pattern->GetAttr<Color>("divider_light_blue", Color(0x7FCEDEFE));
             theme->dividerGradientDarkBlue_ = pattern->GetAttr<Color>("divider_dark_blue", Color(0xFF0A59F7));
+            theme->navigationBack_ = pattern->GetAttr<std::string>("navigation_back", "");
         }
     };
 
@@ -733,7 +730,11 @@ public:
         toolbarBgColor_ = color;
         toolbarBgColorWithOpacity_ = toolbarBgColor_.BlendOpacity(toolbarBgAlpha_);
     }
-
+    const std::string& GetNavigationBack() const
+    {
+        return navigationBack_;
+    }
+    
 protected:
     NavigationBarTheme() = default;
 
@@ -801,6 +802,7 @@ private:
     Dimension toolbarItemMargin_ = 4.0_vp;
     Dimension toolbarItemSpecialMargin_ = 0.0_vp;
     std::string moreMessage_ = "";
+    std::string navigationBack_ = "";
     uint32_t toolbarLimitGridCount_ = 8;
     uint32_t dividerShadowEnable_ = 0;
     Color navigationDividerColor_;

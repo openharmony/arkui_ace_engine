@@ -115,6 +115,86 @@ ArkUI_Bool GetPullToRefresh(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, false);
     return static_cast<ArkUI_Bool>(RefreshModelNG::GetPullToRefresh(frameNode));
 }
+
+void SetRefreshOnStateChangeCallback(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onStateChangeEvent = reinterpret_cast<StateChangeEvent*>(callback);
+        RefreshModelNG::SetOnStateChange(frameNode, std::move(*onStateChangeEvent));
+    } else {
+        RefreshModelNG::SetOnStateChange(frameNode, nullptr);
+    }
+}
+
+void ResetRefreshOnStateChangeCallback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetOnStateChange(frameNode, nullptr);
+}
+
+void SetOnRefreshingCallback(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onRefreshingEvent = reinterpret_cast<RefreshingEvent*>(callback);
+        RefreshModelNG::SetOnRefreshing(frameNode, std::move(*onRefreshingEvent));
+    } else {
+        RefreshModelNG::SetOnRefreshing(frameNode, nullptr);
+    }
+}
+
+void ResetOnRefreshingCallback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetOnRefreshing(frameNode, nullptr);
+}
+
+void SetRefreshOnOffsetChangeCallback(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onOffsetChangeEvent = reinterpret_cast<OffsetChangeEvent*>(callback);
+        RefreshModelNG::SetOnOffsetChange(frameNode, std::move(*onOffsetChangeEvent));
+    } else {
+        RefreshModelNG::SetOnOffsetChange(frameNode, nullptr);
+    }
+}
+
+void ResetRefreshOnOffsetChangeCallback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetOnOffsetChange(frameNode, nullptr);
+}
+
+void SetMaxPullDownDistance(ArkUINodeHandle node, ArkUI_Float32 distance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<float> distanceValue = std::max(distance, 0.0f);
+    RefreshModelNG::SetMaxPullDownDistance(frameNode, distanceValue);
+}
+
+void ResetMaxPullDownDistance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<float> distanceValue = std::nullopt;
+    RefreshModelNG::SetMaxPullDownDistance(frameNode, distanceValue);
+}
+
+ArkUI_Float32 GetMaxPullDownDistance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return RefreshModelNG::GetMaxPullDownDistance(frameNode);
+}
 } // namespace
 namespace NodeModifier {
 
@@ -134,6 +214,15 @@ const ArkUIRefreshModifier* GetRefreshModifier()
         .getPullDownRatio = GetPullDownRatio,
         .getRefreshOffset = GetRefreshOffset,
         .getPullToRefresh = GetPullToRefresh,
+        .setRefreshOnStateChangeCallback = SetRefreshOnStateChangeCallback,
+        .resetRefreshOnStateChangeCallback = ResetRefreshOnStateChangeCallback,
+        .setOnRefreshingCallback = SetOnRefreshingCallback,
+        .resetOnRefreshingCallback = ResetOnRefreshingCallback,
+        .setRefreshOnOffsetChangeCallback = SetRefreshOnOffsetChangeCallback,
+        .resetRefreshOnOffsetChangeCallback = ResetRefreshOnOffsetChangeCallback,
+        .setMaxPullDownDistance = SetMaxPullDownDistance,
+        .resetMaxPullDownDistance = ResetMaxPullDownDistance,
+        .getMaxPullDownDistance = GetMaxPullDownDistance,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

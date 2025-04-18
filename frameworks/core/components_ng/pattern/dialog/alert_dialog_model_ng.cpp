@@ -14,13 +14,14 @@
  */
 
 #include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 void AlertDialogModelNG::SetParseButtonObj(
@@ -81,10 +82,6 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
                     Maskarg.autoCancel = arg.autoCancel;
                     Maskarg.onWillDismiss = arg.onWillDismiss;
                     Maskarg.shadow = arg.shadow;
-                    Maskarg.onWillAppear = arg.onWillAppear;
-                    Maskarg.onDidAppear = arg.onDidAppear;
-                    Maskarg.onWillDisappear = arg.onWillDisappear;
-                    Maskarg.onDidDisappear = arg.onDidDisappear;
                     auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
                     CHECK_NULL_VOID(mask);
                     overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());

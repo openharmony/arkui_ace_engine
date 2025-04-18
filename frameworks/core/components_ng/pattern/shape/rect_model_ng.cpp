@@ -76,12 +76,11 @@ void RectModelNG::UpdateRadius(const Radius& radius)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto castRectPaintProperty = frameNode->GetPaintProperty<RectPaintProperty>();
-    if (castRectPaintProperty) {
-        castRectPaintProperty->UpdateTopLeftRadius(radius);
-        castRectPaintProperty->UpdateTopRightRadius(radius);
-        castRectPaintProperty->UpdateBottomLeftRadius(radius);
-        castRectPaintProperty->UpdateBottomRightRadius(radius);
-    }
+    CHECK_NULL_VOID(castRectPaintProperty);
+    castRectPaintProperty->UpdateTopLeftRadius(radius);
+    castRectPaintProperty->UpdateTopRightRadius(radius);
+    castRectPaintProperty->UpdateBottomLeftRadius(radius);
+    castRectPaintProperty->UpdateBottomRightRadius(radius);
 }
 
 void RectModelNG::SetTopLeftRadius(const Radius& topLeftRadius)
@@ -187,12 +186,11 @@ void RectModelNG::UpdateRadius(FrameNode* frameNode, const Radius& radius)
 {
     CHECK_NULL_VOID(frameNode);
     auto castRectPaintProperty = frameNode->GetPaintProperty<RectPaintProperty>();
-    if (castRectPaintProperty) {
-        castRectPaintProperty->UpdateTopLeftRadius(radius);
-        castRectPaintProperty->UpdateTopRightRadius(radius);
-        castRectPaintProperty->UpdateBottomLeftRadius(radius);
-        castRectPaintProperty->UpdateBottomRightRadius(radius);
-    }
+    CHECK_NULL_VOID(castRectPaintProperty);
+    castRectPaintProperty->UpdateTopLeftRadius(radius);
+    castRectPaintProperty->UpdateTopRightRadius(radius);
+    castRectPaintProperty->UpdateBottomLeftRadius(radius);
+    castRectPaintProperty->UpdateBottomRightRadius(radius);
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_RECT_MODEL_NG_CPP

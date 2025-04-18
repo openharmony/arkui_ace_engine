@@ -587,6 +587,16 @@ public:
         return normalButtonFontSize_;
     }
 
+    const std::string& GetCancelText() const
+    {
+        return cancelText_;
+    }
+
+    const std::string& GetConfirmText() const
+    {
+        return confirmText_;
+    }
+
 protected:
     DialogTheme() = default;
 
@@ -695,6 +705,8 @@ private:
     Color colorBgWithBlur_;
     Color backgroundBorderColor_;
     int dialogBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
+    std::string cancelText_;
+    std::string confirmText_;
 };
 
 } // namespace OHOS::Ace

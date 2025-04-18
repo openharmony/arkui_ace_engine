@@ -699,6 +699,10 @@ public:
 
     static bool IsSuperFoldDisplayDevice();
 
+    static bool IsPageTransitionFreeze();
+
+    static bool IsFormSkeletonBlurEnabled();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -783,6 +787,8 @@ private:
     static bool taskPriorityAdjustmentEnable_;
     static int32_t dragDropFrameworkStatus_;
     static int32_t touchAccelarate_;
+    static bool pageTransitionFrzEnabled_;
+    static bool formSkeletonBlurEnabled_;
 };
 
 } // namespace OHOS::Ace

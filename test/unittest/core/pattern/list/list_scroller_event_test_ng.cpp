@@ -465,6 +465,45 @@ HWTEST_F(ListScrollerEventTestNg, Event008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListOnReachEnd001
+ * @tc.desc: Test the OnReachEnd event when the repeatDifference is different.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, ListOnReachEnd001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the OnReachEnd event.
+     */
+    bool isTrigger = false;
+    auto onReachEndEvent = [&isTrigger]() { isTrigger = true; };
+    ListModelNG model = CreateList();
+    model.SetOnReachEnd(onReachEndEvent);
+    auto totalCount = 10;
+    CreateListItems(totalCount);
+    CreateDone();
+    EXPECT_NE(pattern_, nullptr);
+    EXPECT_EQ(pattern_->repeatDifference_, 0);
+
+    /**
+     * @tc.steps: step2. Scroll down to end
+     * @tc.expected: the OnReachEnd event can be triggered.
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_TRUE(isTrigger);
+
+    /**
+     * @tc.steps: step3. Modify the repeatDifference_ of List.
+     * @tc.expected: the OnReachEnd event can not be triggered.
+     */
+    isTrigger = false;
+    pattern_->repeatDifference_ = 1;
+    EXPECT_EQ(pattern_->endIndex_, totalCount - 1);
+    EXPECT_EQ(pattern_->maxListItemIndex_, totalCount - 1);
+    pattern_->FireOnReachEnd(onReachEndEvent, nullptr);
+    EXPECT_FALSE(isTrigger);
+}
+
+/**
  * @tc.name: onWillScrollAndOnDidScroll001
  * @tc.desc: Test scroll callback
  * @tc.type: FUNC

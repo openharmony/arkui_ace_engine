@@ -14,6 +14,7 @@
  */
 #include "gtest/gtest.h"
 #include "test/unittest/core/gestures/gestures_common_test_ng.h"
+#include "ui/base/ace_type.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -45,7 +46,8 @@ HWTEST_F(RecognizerTestNgIssue, LongPressRecognizerIssue001, TestSize.Level1)
     /**
      * @tc.steps: step1. create LongPressRecognizer.
      */
-    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
 
     /**
      * @tc.steps: step2. call GetLongPressActionFunc function and compare result.
@@ -54,11 +56,11 @@ HWTEST_F(RecognizerTestNgIssue, LongPressRecognizerIssue001, TestSize.Level1)
      */
     TouchEvent downEvent;
     downEvent.SetId(0).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f).SetSourceType(SourceType::MOUSE);
-    longPressRecognizer.HandleTouchDownEvent(downEvent);
+    longPressRecognizer->HandleTouchDownEvent(downEvent);
     int64_t time = 0;
     auto onAction = [&time](GestureEvent& info) { time = info.GetTimeStamp().time_since_epoch().count(); };
-    longPressRecognizer.SetOnAction(onAction);
-    longPressRecognizer.OnAccepted();
+    longPressRecognizer->SetOnAction(onAction);
+    longPressRecognizer->OnAccepted();
     EXPECT_NE(time, 0);
 }
 
@@ -72,7 +74,8 @@ HWTEST_F(RecognizerTestNgIssue, LongPressRecognizerIssue002, TestSize.Level1)
     /**
      * @tc.steps: step1. create LongPressRecognizer.
      */
-    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, COUNT, false);
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, COUNT, false);
 
     /**
      * @tc.steps: step2. call GetLongPressActionFunc function and compare result.
@@ -81,10 +84,10 @@ HWTEST_F(RecognizerTestNgIssue, LongPressRecognizerIssue002, TestSize.Level1)
      */
     TouchEvent downEvent;
     downEvent.SetId(0).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f).SetSourceType(SourceType::TOUCH);
-    longPressRecognizer.HandleTouchDownEvent(downEvent);
+    longPressRecognizer->HandleTouchDownEvent(downEvent);
     TouchEvent downFingerOneEvent;
     downFingerOneEvent.SetId(1).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f).SetSourceType(SourceType::TOUCH);
-    longPressRecognizer.touchPoints_[1] = downFingerOneEvent;
+    longPressRecognizer->touchPoints_[1] = downFingerOneEvent;
     TouchEvent moveEvent;
     std::chrono::nanoseconds nanoseconds(GetSysTimestamp());
     moveEvent.SetId(0)
@@ -93,7 +96,7 @@ HWTEST_F(RecognizerTestNgIssue, LongPressRecognizerIssue002, TestSize.Level1)
         .SetY(100.0f)
         .SetSourceType(SourceType::TOUCH)
         .SetTime(TimeStamp(nanoseconds));
-    longPressRecognizer.HandleTouchMoveEvent(moveEvent);
+    longPressRecognizer->HandleTouchMoveEvent(moveEvent);
     int64_t touchTime = 0;
     int64_t mouseTime = 0;
     auto onAction = [&touchTime, &mouseTime](GestureEvent& info) {
@@ -103,12 +106,12 @@ HWTEST_F(RecognizerTestNgIssue, LongPressRecognizerIssue002, TestSize.Level1)
             touchTime = info.GetTimeStamp().time_since_epoch().count();
         }
     };
-    longPressRecognizer.SetOnAction(onAction);
-    longPressRecognizer.OnAccepted();
-    longPressRecognizer.ResetStatus();
+    longPressRecognizer->SetOnAction(onAction);
+    longPressRecognizer->OnAccepted();
+    longPressRecognizer->ResetStatus();
     downEvent.SetId(0).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f).SetSourceType(SourceType::MOUSE);
-    longPressRecognizer.HandleTouchDownEvent(downEvent);
-    longPressRecognizer.OnAccepted();
+    longPressRecognizer->HandleTouchDownEvent(downEvent);
+    longPressRecognizer->OnAccepted();
     EXPECT_NE(touchTime, mouseTime);
 }
 

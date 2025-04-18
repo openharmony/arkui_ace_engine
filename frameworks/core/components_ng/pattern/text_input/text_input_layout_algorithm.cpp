@@ -69,11 +69,11 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
         auto paragraphData = CreateParagraphData { disableTextAlign, fontSize };
         CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), paragraphData);
         return InlineMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper);
-    }
-    if (showPlaceHolder_) {
+    } else if (showPlaceHolder_) {
         return PlaceHolderMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
+    } else {
+        return TextInputMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
     }
-    return TextInputMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
 }
 
 bool TextInputLayoutAlgorithm::IsFontSizeNonPositive(const TextStyle& textStyle) const
@@ -97,6 +97,10 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentWidth = contentSize.Width();
         contentHeight = contentSize.Height();
     }
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
     auto defaultHeight = GetDefaultHeightByType(layoutWrapper);
 
     auto responseAreaWidth = 0.0f;
@@ -304,20 +308,33 @@ LayoutConstraintF TextInputLayoutAlgorithm::BuildLayoutConstraintWithoutResponse
     auto responseArea = pattern->GetResponseArea();
     auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
     float childWidth = 0.0f;
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, contentConstraint);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(textFieldTheme, contentConstraint);
+    float contentButtonPadding = 0.0f;
+    auto contentHoverPadding = textFieldTheme->GetContentHoverPadding().ConvertToPx();
     if (responseArea) {
         auto childIndex = frameNode->GetChildIndex(responseArea->GetFrameNode());
         childWidth += responseArea->Measure(layoutWrapper, childIndex).Width();
+        contentButtonPadding = responseArea->GetHoverIconPadding() + static_cast<float>(contentHoverPadding);
     }
     if (cleanNodeResponseArea) {
         auto childIndex = frameNode->GetChildIndex(cleanNodeResponseArea->GetFrameNode());
         childWidth += cleanNodeResponseArea->Measure(layoutWrapper, childIndex).Width();
+        contentButtonPadding = cleanNodeResponseArea->GetHoverIconPadding() + static_cast<float>(contentHoverPadding);
+    }
+
+    if (frameNode->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        contentButtonPadding = 0.0f;
     }
 
     auto newLayoutConstraint = contentConstraint;
     newLayoutConstraint.maxSize.SetWidth(std::max(newLayoutConstraint.maxSize.Width() - childWidth, 0.0f));
     newLayoutConstraint.minSize.SetWidth(std::max(newLayoutConstraint.minSize.Width() - childWidth, 0.0f));
     if (newLayoutConstraint.selfIdealSize.Width()) {
-        newLayoutConstraint.selfIdealSize.SetWidth(newLayoutConstraint.selfIdealSize.Width().value() - childWidth);
+        newLayoutConstraint.selfIdealSize.SetWidth(newLayoutConstraint.selfIdealSize.Width().value() - childWidth -
+            contentButtonPadding);
     }
     return newLayoutConstraint;
 }

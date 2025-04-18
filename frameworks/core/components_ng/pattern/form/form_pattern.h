@@ -40,6 +40,9 @@ class PointerEvent;
 namespace Ace {
 class SubContainer;
 class FormManagerDelegate;
+class DrawDelegate;
+struct SerializedGesture;
+struct AccessibilityParentRectInfo;
 
 namespace NG {
 enum class FormChildNodeType : int32_t {
@@ -167,6 +170,7 @@ private:
     void FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want);
     void FireFormSurfaceChangeCallback(float width, float height, float borderWidth = 0.0);
     void FireFormSurfaceDetachCallback();
+    void FireOnUpdateFormDone(int64_t id) const;
     void UpdateBackgroundColorWhenUnTrustForm();
 
     bool ISAllowUpdate() const;
@@ -237,12 +241,14 @@ private:
     void InitAddFormSurfaceChangeAndDetachCallback(int32_t instanceId);
     void InitAddUnTrustAndSnapshotCallback(int32_t instanceId);
     void InitOtherCallback(int32_t instanceId);
+    void InitUpdateFormDoneCallback(int32_t instanceID);
     bool IsFormBundleExempt(int64_t formId) const;
     bool IsFormBundleProtected(const std::string &bundleName, int64_t formId) const;
     void HandleLockEvent(bool isLock);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle, const RequestFormInfo& info);
     void UpdateForbiddenRootNodeStyle(const RefPtr<RenderContext> &renderContext);
+    void ReAddStaticFormSnapshotTimer();
     RefPtr<FrameNode> CreateActionNode();
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     void enhancesSubContainer(bool hasContainer);
@@ -281,6 +287,8 @@ private:
     bool isTibetanLanguage_ = false;
     bool isManuallyClick_ = false;
     bool ShouldAddChildAtReuildFrame();
+    bool isStaticFormSnaping_ = false;
+    int64_t updateFormComponentTimestamp_ = 0;
 };
 } // namespace NG
 } // namespace Ace

@@ -357,6 +357,8 @@ void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
 
 void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, Rosen::TextStyle& txtStyle)
 {
+    txtStyle.relayoutChangeBitmap = textStyle.GetReLayoutTextStyleBitmap();
+    txtStyle.textStyleUid  = textStyle.GetTextStyleUid();
     txtStyle.color = ConvertSkColor(textStyle.GetTextColor());
     txtStyle.fontWeight = ConvertTxtFontWeight(textStyle.GetFontWeight());
     txtStyle.symbol.SetSymbolType(ConvertTxtSymbolType(textStyle.GetSymbolType()));
@@ -542,6 +544,8 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
     if (txtStyle.symbol.GetSymbolType() != Rosen::SymbolType::CUSTOM) {
         txtStyle.fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
     }
+    txtStyle.symbol.SetSymbolBitmap(textStyle.GetReLayoutSymbolStyleBitmap());
+    txtStyle.symbol.SetSymbolUid(textStyle.GetSymbolUid());
 }
 
 Rect ConvertSkRect(const Rosen::Drawing::RectF& skRect)

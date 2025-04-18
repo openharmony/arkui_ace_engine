@@ -71,7 +71,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
             }
             auto rootNode = weakRoot.Upgrade();
             auto container = Container::Current();
-            if (container && container->IsScenceBoardWindow()) {
+            if (container && container->IsSceneBoardWindow()) {
                 auto root = selectOverlayManager->FindWindowScene(weakCaller.Upgrade());
                 rootNode = DynamicCast<FrameNode>(root);
             }
@@ -110,7 +110,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
 RefPtr<UINode> SelectOverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
 {
     auto container = Container::Current();
-    if (!container || !container->IsScenceBoardWindow()) {
+    if (!container || !container->IsSceneBoardWindow()) {
         return rootNodeWeak_.Upgrade();
     }
     CHECK_NULL_RETURN(targetNode, nullptr);

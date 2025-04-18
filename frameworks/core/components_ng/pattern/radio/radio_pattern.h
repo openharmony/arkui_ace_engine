@@ -20,6 +20,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/radio/radio_accessibility_property.h"
 #include "core/components_ng/pattern/radio/radio_event_hub.h"
 #include "core/components_ng/pattern/radio/radio_layout_algorithm.h"
@@ -177,6 +178,8 @@ public:
     {
         isUserSetUncheckBorderColor_ = isUserSet;
     }
+
+    void DumpInfo() override;
 
 private:
     void OnAttachToFrameNode() override;

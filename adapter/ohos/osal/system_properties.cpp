@@ -583,6 +583,9 @@ double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
 bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
 int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus();
 int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
+bool SystemProperties::pageTransitionFrzEnabled_ = false;
+bool SystemProperties::formSkeletonBlurEnabled_ = true;
+
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -719,6 +722,7 @@ void SystemProperties::InitDeviceInfo(
     downloadByNetworkEnabled_ = system::GetParameter(ENABLE_DOWNLOAD_BY_NETSTACK_KEY, "true") == "true";
     recycleImageEnabled_ = system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "true") == "true";
     animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
+    pageTransitionFrzEnabled_ = system::GetBoolParameter("const.arkui.pagetransitionfreeze", false);
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
     resourceDecoupling_ = IsResourceDecoupling();
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
@@ -730,6 +734,7 @@ void SystemProperties::InitDeviceInfo(
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
     taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
+    formSkeletonBlurEnabled_ = system::GetBoolParameter("const.form.skeleton_view.blur_style_enable", true);
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -1141,4 +1146,15 @@ bool SystemProperties::IsSuperFoldDisplayDevice()
     InitFoldScreenTypeBySystemProperty();
     return foldScreenType_ == FoldScreenType::SUPER_FOLDER;
 }
+
+bool SystemProperties::IsPageTransitionFreeze()
+{
+    return pageTransitionFrzEnabled_;
+}
+
+bool SystemProperties::IsFormSkeletonBlurEnabled()
+{
+    return formSkeletonBlurEnabled_;
+}
+
 } // namespace OHOS::Ace

@@ -37,6 +37,8 @@ enum class ArrowOfTargetOffset {
 struct BubbleDumpInfo {
     bool enableArrow = false;
     bool mask = true;
+    bool avoidKeyboard = false;
+    bool enableHoverMode = false;
     std::string targetNode;
     int32_t targetID = -1;
     OffsetF targetOffset;
@@ -253,6 +255,7 @@ private:
     std::string targetTag_;
     bool bCaretMode_ = false;
     bool useCustom_ = false;
+    bool isTips_ = false;
 
     BubbleDumpInfo dumpInfo_;
     SizeF targetSize_;

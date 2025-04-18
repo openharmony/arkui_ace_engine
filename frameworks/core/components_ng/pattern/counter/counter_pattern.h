@@ -84,7 +84,9 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        auto frameNode = GetHost();
+        CHECK_NULL_RETURN(frameNode, FocusPattern());
+        if (frameNode->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
         }
         return { FocusType::SCOPE, true, FocusStyleType::OUTER_BORDER };

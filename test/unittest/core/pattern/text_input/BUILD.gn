@@ -33,6 +33,7 @@ ace_unittest("TextInputTest") {
     "text_field_pattern_testeight.cpp",
     "text_field_pattern_testfive.cpp",
     "text_field_pattern_testfour.cpp",
+    "text_field_pattern_testnine.cpp",
     "text_field_pattern_testseven.cpp",
     "text_field_pattern_testsix.cpp",
     "text_field_pattern_testthree.cpp",

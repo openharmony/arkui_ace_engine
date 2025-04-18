@@ -1417,6 +1417,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg034, TestSize.Level1)
  HWTEST_F(DialogModelTestNg, DialogModelTestNg035, TestSize.Level1)
  {
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    CHECK_NULL_VOID(rootNode);
     AnimationOption animationOption;
     animationOption.SetDelay(10);
 
@@ -1446,9 +1447,11 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg034, TestSize.Level1)
      */
     rootNode->GetRenderContext()->UpdateChainedTransition(dialogProps.dialogTransitionEffect);
     ASSERT_NE(rootNode, nullptr);
+    CHECK_NULL_VOID(rootNode);
 
     rootNode->GetRenderContext()->UpdateChainedTransition(dialogProps.maskTransitionEffect);
     ASSERT_NE(rootNode, nullptr);
+    CHECK_NULL_VOID(rootNode);
 }
  
  /**
@@ -1748,10 +1751,10 @@ HWTEST_F(DialogModelTestNg, SetOpenDialogWithNode001, TestSize.Level1)
     controllerModel.SetOpenDialogWithNode(props, nullptr);
     props.isShowInSubWindow = true;
     props.isModal = true;
-    props.isScenceBoardDialog = true;
+    props.isSceneBoardDialog = true;
     /**
      * @tc.steps: step3. Call  SetOpenDialogWithNode.
-     * @tc.desc: Covering branch isScenceBoardDialog is true
+     * @tc.desc: Covering branch isSceneBoardDialog is true
      * @tc.expected: running result(dialog) is nullptr.
      */
     auto result = controllerModel.SetOpenDialogWithNode(props, nullptr);

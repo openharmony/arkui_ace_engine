@@ -139,17 +139,9 @@ struct ForegroundProperty {
         }
         return NearEqual(propSysOptionsForBlur.value(), sysOptions);
     }
-    bool CheckSysOptionsForEffectSame(const SysOptions& sysOptions) const
-    {
-        if (!propSysOptionsForForeEffect.has_value()) {
-            return false;
-        }
-        return NearEqual(propSysOptionsForForeEffect.value(), sysOptions);
-    }
     std::optional<BlurStyleOption> propBlurStyleOption;
     std::optional<Dimension> propBlurRadius;
     std::optional<SysOptions> propSysOptionsForBlur;
-    std::optional<SysOptions> propSysOptionsForForeEffect;
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundEffect, float);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };

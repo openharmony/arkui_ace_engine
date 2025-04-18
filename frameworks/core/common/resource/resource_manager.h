@@ -189,6 +189,10 @@ public:
         }
     }
 
+    void SetResourceCacheSize(size_t cacheSize) {
+        capacity_.store(cacheSize);
+    }
+
 private:
     ResourceManager() = default;
 

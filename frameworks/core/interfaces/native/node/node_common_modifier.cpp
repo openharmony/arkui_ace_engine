@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
@@ -2353,49 +2354,51 @@ void SetBindTips(ArkUINodeHandle node, ArkUI_CharPtr message, ArkUIBindTipsOptio
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto tipsParam = AceType::MakeRefPtr<PopupParam>();
-    std::string messageString = message;
-    tipsParam->SetMessage(messageString);
+    tipsParam->SetMessage(std::string(message));
+    tipsParam->SetShowInSubWindow(true);
     tipsParam->SetAppearingTime(timeOptions.appearingTime);
     tipsParam->SetDisappearingTime(timeOptions.disappearingTime);
     tipsParam->SetAppearingTimeWithContinuousOperation(timeOptions.appearingTimeWithContinuousOperation);
     tipsParam->SetDisappearingTimeWithContinuousOperation(timeOptions.disappearingTimeWithContinuousOperation);
     tipsParam->SetEnableArrow(arrowOptions.enableArrow);
-    if (arrowOptions.arrowPointPosition) {
-        CalcDimension offset;
+    tipsParam->SetKeyBoardAvoidMode(PopupKeyboardAvoidMode::DEFAULT);
+    if (arrowOptions.arrowPointPosition && arrowOptions.enableArrow) {
         char* pEnd = nullptr;
         std::strtod(arrowOptions.arrowPointPosition, &pEnd);
         if (pEnd != nullptr) {
             if (std::strcmp(pEnd, "Start") == 0) {
-                offset = ARROW_ZERO_PERCENT;
+                tipsParam->SetArrowOffset(ARROW_ZERO_PERCENT);
             }
             if (std::strcmp(pEnd, "Center") == 0) {
-                offset = ARROW_HALF_PERCENT;
+                tipsParam->SetArrowOffset(ARROW_HALF_PERCENT);
             }
             if (std::strcmp(pEnd, "End") == 0) {
-                offset = ARROW_ONE_HUNDRED_PERCENT;
+                tipsParam->SetArrowOffset(ARROW_ONE_HUNDRED_PERCENT);
             }
-            tipsParam->SetArrowOffset(offset);
         }
     }
-    CalcDimension arrowWidth(arrowOptions.arrowWidthValue, static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit));
-    bool setArrowWidthError = true;
-    if (arrowOptions.arrowWidthValue > 0 &&
-        static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit) != DimensionUnit::PERCENT) {
-        tipsParam->SetArrowWidth(arrowWidth);
-        setArrowWidthError = false;
+    if (arrowOptions.enableArrow) {
+        CalcDimension arrowWidth(arrowOptions.arrowWidthValue, static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit));
+        bool setArrowWidthError = true;
+        if (arrowOptions.arrowWidthValue > 0 &&
+            static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit) != DimensionUnit::PERCENT) {
+            tipsParam->SetArrowWidth(arrowWidth);
+            setArrowWidthError = false;
+        }
+        tipsParam->SetErrorArrowWidth(setArrowWidthError);
+        CalcDimension arrowHeight(
+            arrowOptions.arrowHeightValue, static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit));
+        bool setArrowHeightError = true;
+        if (arrowOptions.arrowHeightValue > 0 &&
+            static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit) != DimensionUnit::PERCENT) {
+            tipsParam->SetArrowHeight(arrowHeight);
+            setArrowHeightError = false;
+        }
+        tipsParam->SetErrorArrowHeight(setArrowHeightError);
     }
-    tipsParam->SetErrorArrowWidth(setArrowWidthError);
-    CalcDimension arrowHeight(arrowOptions.arrowHeightValue, static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit));
-    bool setArrowHeightError = true;
-    if (arrowOptions.arrowHeightValue > 0 &&
-        static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit) != DimensionUnit::PERCENT) {
-        tipsParam->SetArrowHeight(arrowHeight);
-        setArrowHeightError = false;
-    }
-    tipsParam->SetErrorArrowHeight(setArrowHeightError);
     tipsParam->SetBlockEvent(false);
     tipsParam->SetTipsFlag(true);
-    ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode));
+    ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode), nullptr);
 }
 
 void ResetBindTips(ArkUINodeHandle node)
@@ -2405,7 +2408,8 @@ void ResetBindTips(ArkUINodeHandle node)
     auto tipsParam = AceType::MakeRefPtr<PopupParam>();
     tipsParam->SetBlockEvent(false);
     tipsParam->SetTipsFlag(true);
-    ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode));
+    RefPtr<SpanString> styledString;
+    ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode), styledString);
 }
 
 void SetOffset(ArkUINodeHandle node, const ArkUI_Float32* number, const ArkUI_Int32* unit)
@@ -3607,14 +3611,12 @@ void ResetResponseRegion(ArkUINodeHandle node)
     ViewAbstract::SetResponseRegion(frameNode, region);
 }
 
-void SetForegroundEffect(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Bool disableSystemAdaptation)
+void SetForegroundEffect(ArkUINodeHandle node, ArkUI_Float32 radius)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     radius = std::max(radius, 0.0f);
-    SysOptions sysOptions;
-    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
-    ViewAbstract::SetForegroundEffect(frameNode, static_cast<float>(radius), sysOptions);
+    ViewAbstract::SetForegroundEffect(frameNode, static_cast<float>(radius));
 }
 
 void ResetForegroundEffect(ArkUINodeHandle node)
@@ -6632,6 +6634,9 @@ void DispatchKeyEvent(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent)
     keyEvent.sourceType = static_cast<SourceType>(arkUIkeyEvent->keySource);
     keyEvent.deviceId = arkUIkeyEvent->deviceId;
     keyEvent.unicode = arkUIkeyEvent->unicode;
+    keyEvent.numLock = arkUIkeyEvent->isNumLockOn;
+    keyEvent.scrollLock = arkUIkeyEvent->isScrollLockOn;
+    keyEvent.enableCapsLock = arkUIkeyEvent->isCapsLockOn;
     std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUIkeyEvent->timestamp));
     TimeStamp timeStamp(nanoseconds);
     keyEvent.timeStamp = timeStamp;
@@ -8008,6 +8013,8 @@ void SetOnClickInfo(ArkUINodeEvent& event, GestureEvent& info, bool usePx)
         usePx ? info.GetTiltX().value_or(0.0f) : PipelineBase::Px2VpWithCurrentDensity(info.GetTiltX().value_or(0.0f));
     event.clickEvent.tiltY =
         usePx ? info.GetTiltY().value_or(0.0f) : PipelineBase::Px2VpWithCurrentDensity(info.GetTiltY().value_or(0.0f));
+    // rollAngle
+    event.clickEvent.rollAngle = info.GetRollAngle().value_or(0.0f);
     //pressure
     event.clickEvent.pressure = info.GetForce();
     // sourcetool
@@ -8134,6 +8141,9 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
         }
         event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
         event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
+        event.keyEvent.isNumLockOn = info.GetNumLock();
+        event.keyEvent.isCapsLockOn = info.GetCapsLock();
+        event.keyEvent.isScrollLockOn = info.GetScrollLock();
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
@@ -8170,7 +8180,10 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
         }
         event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
         event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
-
+        event.keyEvent.isNumLockOn = info.GetNumLock();
+        event.keyEvent.isCapsLockOn = info.GetCapsLock();
+        event.keyEvent.isScrollLockOn = info.GetScrollLock();
+    
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(event.keyEvent.stopPropagation);
@@ -8206,6 +8219,9 @@ void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam)
         }
         event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
         event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
+        event.keyEvent.isNumLockOn = info.GetNumLock();
+        event.keyEvent.isCapsLockOn = info.GetCapsLock();
+        event.keyEvent.isScrollLockOn = info.GetScrollLock();
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
@@ -8381,6 +8397,8 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
                                        : eventInfo.GetTarget().area.GetWidth().ConvertToVp();
         event.touchEvent.height = usePx ? eventInfo.GetTarget().area.GetHeight().ConvertToPx()
                                         : eventInfo.GetTarget().area.GetHeight().ConvertToVp();
+        // rollAngle
+        event.touchEvent.rollAngle = eventInfo.GetRollAngle().value_or(0.0f);
         // deviceid
         event.touchEvent.deviceId = eventInfo.GetDeviceId();
         //modifierkeystates

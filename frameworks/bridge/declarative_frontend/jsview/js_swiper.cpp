@@ -29,8 +29,9 @@
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
-#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
+#include "bridge/declarative_frontend/jsview/js_indicator.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -77,7 +78,6 @@ SwiperModel* SwiperModel::GetInstance()
 
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
-WeakPtr<JSIndicatorController> JSSwiper::jSIndicatorController_;
 namespace {
 
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
@@ -221,6 +221,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("pageFlipMode", &JSSwiper::SetPageFlipMode);
     JSClass<JSSwiper>::StaticMethod("onContentWillScroll", &JSSwiper::SetOnContentWillScroll);
     JSClass<JSSwiper>::StaticMethod("onSelected", &JSSwiper::SetOnSelected);
+    JSClass<JSSwiper>::StaticMethod("digitalCrownSensitivity", &JSSwiper::SetDigitalCrownSensitivity);
     JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -861,16 +862,11 @@ void JSSwiper::SetIndicatorController(const JSCallbackInfo& info)
     if (!jsIndicatorController) {
         return;
     }
-    jSIndicatorController_ = jsIndicatorController;
     SwiperModel::GetInstance()->SetBindIndicator(true);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    jsIndicatorController->SetSwiperNode(targetNode);
-}
-
-void JSSwiper::ResetSwiperNode()
-{
-    if (jSIndicatorController_.Upgrade()) {
-        jSIndicatorController_.Upgrade()->ResetSwiperNode();
+    auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto resetFunc = jsIndicatorController->SetSwiperNodeBySwiper(targetNode);
+    if (resetFunc) {
+        SwiperModel::GetInstance()->SetJSIndicatorController(resetFunc);
     }
 }
 
@@ -888,7 +884,6 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[0]);
         SwiperModel::GetInstance()->SetIndicatorIsBoolean(false);
-        ResetSwiperNode();
 
         JSRef<JSVal> typeParam = obj->GetProperty("type");
         if (typeParam->IsString()) {
@@ -1673,5 +1668,21 @@ void JSSwiper::SetOnSelected(const JSCallbackInfo& info)
         func->Execute(*swiperInfo);
     };
     SwiperModel::GetInstance()->SetOnSelected(std::move(onSelected));
+}
+
+void JSSwiper::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (info.Length() < 1 || info[0]->IsNull() || !info[0]->IsNumber()) {
+        SwiperModel::GetInstance()->SetDigitalCrownSensitivity(static_cast<int32_t>(CrownSensitivity::MEDIUM));
+        return;
+    }
+    auto sensitivity = info[0]->ToNumber<int32_t>();
+    if (sensitivity < 0 || sensitivity > static_cast<int32_t>(CrownSensitivity::HIGH)) {
+        SwiperModel::GetInstance()->SetDigitalCrownSensitivity(static_cast<int32_t>(CrownSensitivity::MEDIUM));
+        return;
+    }
+    SwiperModel::GetInstance()->SetDigitalCrownSensitivity(sensitivity);
+#endif
 }
 } // namespace OHOS::Ace::Framework

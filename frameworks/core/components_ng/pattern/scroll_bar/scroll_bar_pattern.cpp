@@ -717,12 +717,13 @@ void ScrollBarPattern::InitPanRecognizer()
     PanDirection panDirection;
     panDirection.type = axis_ == Axis::HORIZONTAL ? PanDirection::HORIZONTAL : PanDirection::VERTICAL;
     const static int32_t PLATFORM_VERSION_TEN = 10;
-    float distance = DEFAULT_PAN_DISTANCE.Value();
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.Value() } };
     auto context = GetContext();
     if (context && (context->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN)) {
-        distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
+        distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+            { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
     }
-    panRecognizer_ = MakeRefPtr<PanRecognizer>(1, panDirection, distance);
+    panRecognizer_ = MakeRefPtr<PanRecognizer>(1, panDirection, distanceMap);
     panRecognizer_->SetOnActionUpdate([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scrollBar = weakBar.Upgrade();
         if (scrollBar) {

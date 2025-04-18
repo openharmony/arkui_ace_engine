@@ -1122,4 +1122,30 @@ HWTEST_F(WaterFlowTestNg, Footer001, TestSize.Level1)
     EXPECT_EQ(frameNode_->GetChildrenUpdated(), 0);
     EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, -1);
 }
+
+/**
+ * @tc.name: CustomNode001
+ * @tc.desc: put empty CustomNode to waterflow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, CustomNode001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(0, [](int32_t i) { return 100.0f; });
+    CreateDone();
+
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, TOP_TO_DOWN ? 0 : Infinity<int32_t>());
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, TOP_TO_DOWN ? 0 : -1);
+
+    for (int32_t i = 0; i < 10; i++) {
+        auto child = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "test");
+        frameNode_->AddChild(child);
+    }
+    frameNode_->ChildrenUpdatedFrom(0);
+
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, TOP_TO_DOWN ? 0 : 9);
+    EXPECT_EQ(pattern_->layoutInfo_->childrenCount_, 10);
+}
 } // namespace OHOS::Ace::NG

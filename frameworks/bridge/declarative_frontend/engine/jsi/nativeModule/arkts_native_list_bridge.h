@@ -74,6 +74,7 @@ public:
     static ArkUINativeModuleValue ResetInitialScroller(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
     static ArkUINativeModuleValue SetOnScrollIndex(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static Local<panda::ObjectRef> SetListItemIndex(const EcmaVM* vm, const ListItemIndex indexInfo);
     static ArkUINativeModuleValue SetOnScrollVisibleContentChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnItemMove(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnItemDragStart(ArkUIRuntimeCallInfo* runtimeCallInfo);

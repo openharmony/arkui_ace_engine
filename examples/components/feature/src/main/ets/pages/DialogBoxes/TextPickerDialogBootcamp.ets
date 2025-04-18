@@ -107,7 +107,10 @@ export struct TextPickerDialogBootcamp {
   @State dialogShadow: ShadowStyle = ShadowStyle.OUTER_FLOATING_SM;
   @State enableHapticFeedback: boolean = false;
   @State hapticFeedback: boolean = true;
-
+  scroller: Scroller = new Scroller();
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
   build() {
     NavDestination() {
       Drawer({
@@ -115,6 +118,9 @@ export struct TextPickerDialogBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        generic: () => {
+          this.Generic()
         },
         parameters: () => {
           this.Parameters()
@@ -226,7 +232,7 @@ export struct TextPickerDialogBootcamp {
 
   @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
         SliderBlock({
           title: 'defaultPickerItemHeight',
@@ -576,7 +582,12 @@ export struct TextPickerDialogBootcamp {
           ]
         })
       }.width('100%')
-    }.height('50%')
+    }.height('50%').id('scroll')
+  }
+
+  @Builder
+  Generic() {
+
   }
 }
 

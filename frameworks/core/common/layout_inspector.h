@@ -25,6 +25,7 @@ typedef struct {
     int32_t frameNodeId = 0;
     std::string nodeType;
     std::string debugline;
+    int32_t parentNodeId = -1;
 } FrameNodeInfo;
 
 typedef std::function<void(bool)> ProfilerStatusCallback;

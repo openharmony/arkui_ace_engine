@@ -802,4 +802,31 @@ HWTEST_F(SelectOverlayManagerTestTwoNg, UpdateRightClickSubWindowMenuProps001, T
     content.UpdateRightClickSubWindowMenuProps(selectoverlayNode);
     ASSERT_NE(content.selectOverlayNode_.Upgrade(), nullptr);
 }
+
+/**
+ * @tc.name: FocusFirstFocusableChildInMenu001
+ * @tc.desc: test select_content_overlay_manager.cpp FocusFirstFocusableChildInMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestTwoNg, FocusFirstFocusableChildInMenu001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init SelectContentOverlayManager
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    SelectOverlayInfo selectInfo;
+    selectInfo.enableHandleLevel = true;
+    selectInfo.menuInfo.showCut = true;
+    
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content.shareOverlayInfo_, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(content.shareOverlayInfo_);
+    ASSERT_NE(frameNode, nullptr);
+    content.menuNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(content.menuNode_.Upgrade(), nullptr);
+    content.FocusFirstFocusableChildInMenu();
+    EXPECT_TRUE(frameNode->GetContext()->taskScheduler_->afterLayoutCallbacksInImplicitAnimationTask_.empty());
+    EXPECT_TRUE(frameNode->GetContext()->taskScheduler_->afterLayoutTasks_.empty());
+}
 } // namespace OHOS::Ace::NG

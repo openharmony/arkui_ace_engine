@@ -19,10 +19,6 @@
 #include "base/geometry/size.h"
 #include "base/memory/ace_type.h"
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/core/SkStream.h"
-#include "include/core/SkImage.h"
-#endif
 
 namespace OHOS::Ace {
 /*
@@ -219,11 +215,7 @@ class PNGImageDecoder : public virtual AceType {
     DECLARE_ACE_TYPE(PNGImageDecoder, AceType);
 
 public:
-#ifndef USE_ROSEN_DRAWING
-    PNGImageDecoder(const sk_sp<SkData> &data);
-#else
     PNGImageDecoder(const std::shared_ptr<RSData> &data);
-#endif
 
     ~PNGImageDecoder() override;
 
@@ -258,11 +250,7 @@ public:
     uint8_t *GetFrameData(uint32_t index, uint32_t *size, bool oldWay = false);
     static bool IsApngSource(const std::string& src);
 private:
-#ifndef USE_ROSEN_DRAWING
-    sk_sp<SkData> data_;
-#else
     std::shared_ptr<RSData> data_;
-#endif
     PngInfo *pngInfo_ = nullptr;
     bool dataCheck_ = false;
     bool isApng_ = false;

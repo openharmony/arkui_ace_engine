@@ -235,4 +235,22 @@ HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_009, TestSize.
     EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(Return(ERR_INVALID_VALUE));
     EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(parentRectInfo), ERR_INVALID_VALUE);
 }
+
+/*
+ * @tc.name: FormRenderDelegateProxyTest_010
+ * @tc.desc: Test OnUpdateFormDone() function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_010, TestSize.Level1)
+{
+    sptr<AppExecFwk::MockFormIRemoteObject> iremoteObject = new (std::nothrow) AppExecFwk::MockFormIRemoteObject();
+    sptr<FormRendererDelegateProxy> renderDelegate =
+        new FormRendererDelegateProxy(static_cast<FormRendererDelegateProxy>(iremoteObject));
+    ASSERT_NE(renderDelegate, nullptr);
+
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(Return(ERR_OK));
+    EXPECT_EQ(renderDelegate->OnUpdateFormDone(0), ERR_OK);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(Return(ERR_INVALID_VALUE));
+    EXPECT_EQ(renderDelegate->OnUpdateFormDone(0), ERR_INVALID_VALUE);
+}
 }

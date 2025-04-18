@@ -364,4 +364,76 @@ void DragDropInitiatingStateBase::HandleTextDragCallback()
         gestureHub->SetPixelMap(nullptr);
     }
 }
+
+void DragDropInitiatingStateBase::HandleTextDragStart(const RefPtr<FrameNode>& frameNode, const GestureEvent& info)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextBase>();
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (info.GetSourceDevice() != SourceType::MOUSE) {
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->IsSelected()) {
+            dragDropManager->ResetDragging();
+            gestureHub->SetIsTextDraggable(false);
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Text is not selected, stop dragging.");
+            DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, Container::CurrentId());
+            DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::TEXT_NOT_SELECT);
+            return;
+        }
+        if (gestureHub->GetIsTextDraggable()) {
+            SetTextPixelMap();
+        } else {
+            gestureHub->SetPixelMap(nullptr);
+        }
+    } else {
+        if (gestureHub->GetTextDraggable() && pattern) {
+            if (!pattern->IsSelected() || pattern->GetMouseStatus() == MouseStatus::MOVE) {
+                dragDropManager->ResetDragging();
+                gestureHub->SetIsTextDraggable(false);
+                TAG_LOGW(AceLogTag::ACE_DRAG, "Text isSelected: %{public}d, stop dragging.", pattern->IsSelected());
+                DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, Container::CurrentId());
+                DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::TEXT_NOT_SELECT);
+                return;
+            }
+            HandleTextDragCallback();
+        }
+    }
+    auto gestureEventInfo = info;
+    gestureHub->HandleOnDragStart(gestureEventInfo);
+}
+
+void DragDropInitiatingStateBase::UpdatePointInfoForFinger(const TouchEvent& touchEvent)
+{
+    if (touchEvent.type == TouchType::MOVE) {
+        auto point = Point(touchEvent.x, touchEvent.y, touchEvent.screenX, touchEvent.screenY);
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->UpdatePointInfoForFinger(touchEvent.id, point);
+    }
+}
+
+void DragDropInitiatingStateBase::OnActionEnd(const GestureEvent& info)
+{
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action end.");
+    DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    if (dragDropManager->IsAboutToPreview()) {
+        dragDropManager->ResetDragging();
+    }
+    dragDropManager->SetIsDragNodeNeedClean(false);
+    dragDropManager->SetIsDisableDefaultDropAnimation(true);
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+}
 } // namespace OHOS::Ace::NG

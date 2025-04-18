@@ -306,10 +306,12 @@ HWTEST_F(WebPatternBranchTestUT, DumpViewDataPageNode007, TestSize.Level1)
     EXPECT_CALL(*viewDataWrap, SetPageUrl(std::string("")));
     EXPECT_CALL(*viewDataWrap, SetUserSelected(false));
     EXPECT_CALL(*viewDataWrap, SetOtherAccount(false));
+    MockPipelineContext::SetUp();
 
     auto webMsg = std::make_shared<OHOS::NWeb::NWebMessage>(NWeb::NWebValue::Type::NONE);
     webMsg->SetType(NWeb::NWebValue::Type::STRING);
-    webMsg->SetString("");
+    webMsg->SetString(std::string("{\"node\":{\"id\":1,\"name\":\"root\",\"children\":") +
+        std::string("[{\"id\":2,\"name\":\"child1\",\"123\":\"test\"},{\"id\":3,\"name\":\"child2\"}],\"obj\":null}}"));
     webPattern->HandleAutoFillEvent(webMsg);
     bool needsRecordData = true;
 
@@ -319,6 +321,7 @@ HWTEST_F(WebPatternBranchTestUT, DumpViewDataPageNode007, TestSize.Level1)
     webPattern->pageNodeInfo_.push_back(nodeWrap);
     webPattern->DumpViewDataPageNode(viewDataWrap, needsRecordData);
     EXPECT_EQ(viewDataWrap, true);
+    MockPipelineContext::TearDown();
 #endif
 }
 

@@ -71,11 +71,14 @@ private:
     void SetPosition(const OffsetF& offset);
     void ResetPrevScaleNode();
     int32_t ScaleNearItem(int32_t index, const RectF& rect, const OffsetF& delta);
+    int32_t CalcMainNearIndex(const int32_t index, const OffsetF& delta);
+    int32_t CalcCrossNearIndex(const int32_t index, const OffsetF& delta);
     int32_t GetIndex() const;
     int32_t GetLanes() const;
     bool IsInHotZone(int32_t index, const RectF& frameRect) const;
     RefPtr<FrameNode> GetListFrameNode() const;
-
+    OffsetF GetParentPaddingOffset();
+    
     OffsetF dragOffset_;
     WeakPtr<FrameNode> frameNode_;
     WeakPtr<ForEachBaseNode> forEachNode_;
@@ -86,6 +89,7 @@ private:
     Axis axis_ = Axis::VERTICAL;
     int32_t totalCount_ = -1;
     int32_t lanes_ = 1;
+    bool isStackFromEnd_ = false;
     bool scrolling_ = false;
     OffsetF realOffset_;
 

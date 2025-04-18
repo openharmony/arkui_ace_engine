@@ -61,6 +61,32 @@ enum class RootNodeType : int32_t {
     WINDOW_SCENE_ETS_TAG = 2
 };
 
+struct InteractionEventBindingInfo  {
+    bool baseEventRegistered = false;
+    bool nodeEventRegistered = false;
+    bool nativeEventRegistered = false;
+    bool builtInEventRegistered = false;
+
+    void SetModifierEventRegistered(bool isCNode, bool state)
+    {
+        if (isCNode) {
+            nativeEventRegistered = state;
+        } else {
+            baseEventRegistered = state;
+        }
+    }
+
+    void SetNodeEventRegistered(bool state)
+    {
+        nodeEventRegistered = state;
+    }
+
+    void SetBuiltInEventRegistered(bool state)
+    {
+        builtInEventRegistered = state;
+    }
+};
+
 class InspectorFilter;
 class PipelineContext;
 constexpr int32_t DEFAULT_NODE_SLOT = -1;
@@ -117,6 +143,10 @@ public:
     void DetachFromMainTree(bool recursive = false);
     virtual void FireCustomDisappear();
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
+
+    // Return value: 0 indicates successful execution, non - zero indicates failed execution.
+    virtual int32_t OnRecvCommand(const std::string& command) { return 0; }
+
     virtual void OnConfigurationUpdate(const ConfigurationChange& configurationChange) {}
 
     // process offscreen process.
@@ -149,6 +179,12 @@ public:
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
     virtual const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const
+    {
+        return children_;
+    }
+
+    // Return children for get inspector tree calling, return cache children directly
+    virtual const std::list<RefPtr<UINode>>& GetChildrenForInspector() const
     {
         return children_;
     }
@@ -916,6 +952,34 @@ public:
         return true;
     }
 
+    void SetModifierEventRegistrationState(bool isCNode, bool state) {
+        InteractionEventBindingInfo currentInfo = GetInteractionEventBindingInfo();
+        currentInfo.SetModifierEventRegistered(isCNode, state);
+        SetInteractionEventBindingInfo(currentInfo);
+    }
+
+    void SetNodeEventRegistrationState(bool state) {
+        InteractionEventBindingInfo currentInfo = GetInteractionEventBindingInfo();
+        currentInfo.SetNodeEventRegistered(state);
+        SetInteractionEventBindingInfo(currentInfo);
+    }
+
+    void SetBuiltInEventRegistrationState(bool state) {
+        InteractionEventBindingInfo currentInfo = GetInteractionEventBindingInfo();
+        currentInfo.SetBuiltInEventRegistered(state);
+        SetInteractionEventBindingInfo(currentInfo);
+    }
+
+    void SetInteractionEventBindingInfo(const InteractionEventBindingInfo &eventBindingInfo)
+    {
+        eventBindingInfo_ = eventBindingInfo;
+    }
+
+    const InteractionEventBindingInfo& GetInteractionEventBindingInfo() const
+    {
+        return eventBindingInfo_;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -1011,7 +1075,7 @@ private:
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
-    int32_t depth_ = 1;
+    int32_t depth_ = Infinity<int32_t>();
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
@@ -1032,6 +1096,7 @@ private:
     bool isAllowUseParentTheme_ = true;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RootNodeType rootNodeType_ = RootNodeType::PAGE_ETS_TAG;
+    InteractionEventBindingInfo eventBindingInfo_;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
     int32_t apiVersion_ = 0;

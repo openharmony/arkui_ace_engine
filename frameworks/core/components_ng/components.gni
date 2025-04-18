@@ -106,7 +106,7 @@ template("build_component_ng") {
           "//foundation/graphic/graphic_2d/rosen/modules/platform/utils",
           "//foundation/graphic/graphic_2d/rosen/modules/render_service_base",
           "//foundation/graphic/graphic_2d/rosen/modules/render_service_client/core",
-          "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export/rosen_text",
+          "//foundation/graphic/graphic_2d/frameworks/text/interface/export/rosen_text/export/rosen_text",
           "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics",
           "//foundation/graphic/graphic_2d/utils/color_manager/export",
           "//foundation/multimedia/image_framework/interfaces/innerkits/include",
@@ -116,7 +116,7 @@ template("build_component_ng") {
           "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
           "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
           "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include/",
-          "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
+          "//foundation/graphic/graphic_2d/frameworks/text/interface/export/rosen_text/export",
           "//third_party/bounds_checking_function/include",
           "//foundation/graphic/graphic_surface/interfaces/inner_api/surface",
         ]
@@ -143,9 +143,7 @@ template("build_component_ng") {
         if (!is_arkui_x && defined(use_rosen_drawing) && use_rosen_drawing) {
           external_deps += [ "graphic_2d:2d_graphics" ]
         } else {
-          if (enable_graphic_text_gine) {
-            external_deps += [ "graphic_2d:2d_graphics_new" ]
-          } else {
+          if (!enable_graphic_text_gine) {
             deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
           }
         }

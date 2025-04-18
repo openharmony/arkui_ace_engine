@@ -54,6 +54,9 @@ const std::vector<float> DEFAULT_COLORFILTER_MATRIX = { 1, 0, 0, 0, 0, 0, 1, 0, 
 constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
 constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
 constexpr float DEFAULT_SMOOTHEDGE_VALUE = 0.0f;
+constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
+constexpr float HDR_BRIGHTNESS_MIN = 0.0f;
+constexpr float HDR_BRIGHTNESS_MAX = 1.0f;
 constexpr uint32_t FIT_MATRIX = 16;
 constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
 constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
@@ -880,6 +883,18 @@ void JSImage::SetDynamicRangeMode(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetDynamicRangeMode(dynamicRangeMode);
 }
 
+void JSImage::SetHdrBrightness(const JSCallbackInfo& info)
+{
+    float hdrBrightness = DEFAULT_HDR_BRIGHTNESS;
+    if (info[0]->IsNumber()) {
+        auto value = info[0]->ToNumber<float>();
+        if (GreatOrEqual(value, HDR_BRIGHTNESS_MIN) && LessOrEqual(value, HDR_BRIGHTNESS_MAX)) {
+            hdrBrightness = value;
+        }
+    }
+    ImageModel::GetInstance()->SetHdrBrightness(hdrBrightness);
+}
+
 void JSImage::SetEnhancedImageQuality(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -940,6 +955,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("colorFilter", &JSImage::SetColorFilter, opt);
     JSClass<JSImage>::StaticMethod("edgeAntialiasing", &JSImage::SetSmoothEdge, opt);
     JSClass<JSImage>::StaticMethod("dynamicRangeMode", &JSImage::SetDynamicRangeMode, opt);
+    JSClass<JSImage>::StaticMethod("hdrBrightness", &JSImage::SetHdrBrightness, opt);
     JSClass<JSImage>::StaticMethod("enhancedImageQuality", &JSImage::SetEnhancedImageQuality, opt);
     JSClass<JSImage>::StaticMethod("orientation", &JSImage::SetOrientation, opt);
 
@@ -981,7 +997,7 @@ void JSImage::JSBind(BindingTarget globalObj)
 
 void JSImage::JsSetDraggable(const JSCallbackInfo& info)
 {
-    bool draggable = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY);
+    bool draggable = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         draggable = info[0]->ToBoolean();
     }

@@ -82,9 +82,9 @@ public:
         ostream_ = std::move(file);
     }
 
-    void SetSeparator(std::string separator)
+    void SetUIExtFlag(bool isUIExt)
     {
-        separator_ = separator;
+        isUIExt_ = isUIExt;
     }
 
     const std::unique_ptr<std::ostream>& GetDumpFile() const
@@ -168,7 +168,7 @@ private:
     std::vector<std::string> description_;
     std::unique_ptr<std::ostream> ostream_ { nullptr };
     std::string result_;
-    std::string separator_ = "\n";
+    bool isUIExt_ = false;
     int32_t depth_ = -1;
     ACE_DISALLOW_MOVE(DumpLog);
 };

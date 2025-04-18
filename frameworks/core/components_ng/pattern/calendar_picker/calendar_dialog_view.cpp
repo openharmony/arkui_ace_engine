@@ -468,6 +468,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
     DialogEvent changeEvent = GetChangeEvent(settingData, calendarDialogNode, dialogEvent); // do not check nullptr
     for (int32_t i = 0; i < SWIPER_MONTHS_COUNT; i++) {
         auto monthFrameNode = CreateCalendarMonthNode(calendarNodeId, settingData, changeEvent);
+        CHECK_NULL_RETURN(monthFrameNode, nullptr);
         auto monthLayoutProperty = monthFrameNode->GetLayoutProperty();
         CHECK_NULL_RETURN(monthLayoutProperty, nullptr);
         if (i == CURRENT_MONTH_INDEX) {
@@ -629,8 +630,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     CHECK_NULL_RETURN(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(
-        Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
+    textLayoutProperty->UpdateContent(isConfirm ? dialogTheme->GetConfirmText() : dialogTheme->GetCancelText());
 
     auto fontSizeScale = pipeline->GetFontScale();
     auto fontSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
@@ -679,11 +679,10 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
             buttonInfos[index].fontSize.has_value() || buttonInfos[index].fontColor.has_value() ||
             buttonInfos[index].fontWeight.has_value() || buttonInfos[index].fontStyle.has_value() ||
             buttonInfos[index].fontFamily.has_value())) {
-        buttonLayoutProperty->UpdateLabel(
-            Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
+        buttonLayoutProperty->UpdateLabel(isConfirm ? dialogTheme->GetConfirmText() : dialogTheme->GetCancelText());
     }
     buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (buttonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -1279,15 +1278,17 @@ bool CalendarDialogView::ReportChangeEvent(const RefPtr<FrameNode>& frameNode, c
 bool CalendarDialogView::ReportChangeEvent(int32_t nodeId, const std::string& compName,
     const std::string& eventName, const PickerDate& pickerDate)
 {
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    auto value = InspectorJsonUtil::Create();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_RETURN(params, false);
+    params->Put("year", static_cast<int32_t>(pickerDate.GetYear()));
+    params->Put("month", static_cast<int32_t>(pickerDate.GetMonth()));
+    params->Put("day", static_cast<int32_t>(pickerDate.GetDay()));
+    auto value = JsonUtil::Create();
     CHECK_NULL_RETURN(value, false);
+    value->Put("nodeId", nodeId);
     value->Put(compName.c_str(), eventName.c_str());
-    value->Put("year", pickerDate.GetYear());
-    value->Put("month", pickerDate.GetMonth());
-    value->Put("day", pickerDate.GetDay());
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value);
-#endif
+    value->Put("params", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString());
     return true;
 }
 

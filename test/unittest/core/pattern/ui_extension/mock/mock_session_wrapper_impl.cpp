@@ -294,4 +294,6 @@ bool SessionWrapperImpl::SendBusinessData(
 }
 
 void SessionWrapperImpl::NotifyHostWindowMode(int32_t mode) {}
+
+void SessionWrapperImpl::ReDispatchWantParams() {}
 } // namespace OHOS::Ace::NG

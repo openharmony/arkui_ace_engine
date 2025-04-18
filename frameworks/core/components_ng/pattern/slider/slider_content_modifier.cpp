@@ -230,6 +230,8 @@ void SliderContentModifier::AddStepPoint(float startX, float startY, float endX,
             endX -= stepsLengthX;
             endY -= stepsLengthY;
         }
+        endX += stepsLengthX;
+        endY += stepsLengthY;
         if (!NearEqual(endX, startX) || !NearEqual(endY, startY)) {
             stepPointVec_.emplace_back(PointF(startX, startY));
         }
@@ -240,6 +242,8 @@ void SliderContentModifier::AddStepPoint(float startX, float startY, float endX,
             startX += stepsLengthX;
             startY += stepsLengthY;
         }
+        startX -= stepsLengthX;
+        startY -= stepsLengthY;
         if (!NearEqual(startX, endX) || !NearEqual(startY, endY)) {
             stepPointVec_.emplace_back(PointF(endX, endY));
         }

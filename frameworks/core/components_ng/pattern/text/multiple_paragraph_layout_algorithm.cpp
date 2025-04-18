@@ -16,10 +16,11 @@
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 
 #include "text_layout_adapter.h"
-#include "base/utils/utf_helper.h"
+
 #include "base/geometry/dimension.h"
-#include "base/log/ace_performance_monitor.h"
 #include "base/i18n/localization.h"
+#include "base/log/ace_performance_monitor.h"
+#include "base/utils/utf_helper.h"
 #include "core/common/font_manager.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
@@ -32,6 +33,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
+const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
+const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 float GetContentOffsetY(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_RETURN(layoutWrapper, 0.0f);
@@ -57,19 +60,15 @@ float GetContentOffsetY(LayoutWrapper* layoutWrapper)
 void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle)
 {
-    bool needRemain = false;
-    ConstructTextStyles(contentConstraint, layoutWrapper, textStyle, needRemain);
-}
-
-void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle, bool& needRemain)
-{
-    if (Negative(contentConstraint.maxSize.Width()) || Negative(contentConstraint.maxSize.Height())) {
-        needRemain = true;
-        return;
-    }
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
+    textStyle.SetTextStyleUid(frameNode->GetId() + 1);
+    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        textStyle.SetSymbolUid(frameNode->GetId() + 1);
+    }
+    if (Negative(contentConstraint.maxSize.Width()) || Negative(contentConstraint.maxSize.Height())) {
+        return;
+    }
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -79,17 +78,31 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto contentModifier = pattern->GetContentModifier();
 
     auto themeScopeId = frameNode->GetThemeScopeId();
-    textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(),
-        pipeline->GetTheme<TextTheme>(themeScopeId));
+    auto content = textLayoutProperty->GetContent().value_or(u"");
+    auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
+    CHECK_NULL_VOID(textTheme);
+    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    textStyle.SetSymbolType(textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM));
+    std::vector<std::string> fontFamilies;
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
         !(textLayoutProperty->GetFontFamily().has_value())) {
-        textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
+        fontFamilies = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
+    } else {
+#ifndef OHOS_STANDARD_SYSTEM
+        const std::vector<std::string> defaultFontFamily = {"sans-serif"};
+#else
+        const std::vector<std::string> defaultFontFamily = textTheme->GetTextStyle().GetFontFamilies();
+#endif
+        fontFamilies = textLayoutProperty->GetFontFamilyValue(defaultFontFamily);
     }
+    UpdateFontFamilyWithSymbol(textStyle, fontFamilies, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    UpdateSymbolStyle(textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    auto textColor = textLayoutProperty->GetTextColorValue(textTheme->GetTextStyle().GetTextColor());
     if (contentModifier) {
         if (textLayoutProperty->GetIsAnimationNeededValue(true)) {
-            SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle);
-            contentModifier->ModifyTextStyle(textStyle);
+            SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle, frameNode, textColor);
+            contentModifier->ModifyTextStyle(textStyle, textColor);
         }
         contentModifier->SetFontReady(false);
     }
@@ -97,13 +110,43 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     SetAdaptFontSizeStepToTextStyle(textStyle, textLayoutProperty->GetAdaptFontSizeStep());
     // Register callback for fonts.
     FontRegisterCallback(frameNode, textStyle);
+    textStyle.SetTextDirection(GetTextDirection(content, layoutWrapper));
+    textStyle.SetLocale(Localization::GetInstance()->GetFontLocale());
+    UpdateTextColorIfForeground(frameNode, textStyle, textColor);
+    inheritTextStyle_ = textStyle;
+}
 
-    auto symbolType = textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM);
-    textStyle.SetSymbolType(symbolType);
+void MultipleParagraphLayoutAlgorithm::UpdateFontFamilyWithSymbol(TextStyle& textStyle,
+    std::vector<std::string>& fontFamilies, bool isSymbol)
+{
+    if (!isSymbol) {
+        textStyle.SetFontFamilies(fontFamilies);
+        return;
+    }
+    auto symbolType = textStyle.GetSymbolType();
+    std::vector<std::string> symbolFontFamilies;
+    if (symbolType == SymbolType::CUSTOM) {
+        for (auto& name : fontFamilies) {
+            if (name.find(CUSTOM_SYMBOL_SUFFIX) != std::string::npos) {
+                symbolFontFamilies.push_back(name);
+                break;
+            }
+        }
+        textStyle.SetFontFamilies(symbolFontFamilies);
+    } else {
+        symbolFontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        textStyle.SetFontFamilies(symbolFontFamilies);
+    }
+}
 
-    // Determines whether a foreground color is set or inherited.
-    UpdateTextColorIfForeground(frameNode, textStyle);
-    textStyle_ = textStyle;
+void MultipleParagraphLayoutAlgorithm::UpdateSymbolStyle(TextStyle& textStyle, bool isSymbol)
+{
+    if (!isSymbol) {
+        return;
+    }
+    textStyle.isSymbolGlyph_ = true;
+    textStyle.SetRenderStrategy(textStyle.GetRenderStrategy() < 0 ? 0 : textStyle.GetRenderStrategy());
+    textStyle.SetEffectStrategy(textStyle.GetEffectStrategy() < 0 ? 0 : textStyle.GetEffectStrategy());
 }
 
 void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -224,11 +267,7 @@ void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
     if (lineStyle->HasParagraphSpacing()) {
         pStyle.paragraphSpacing = lineStyle->GetParagraphSpacingValue();
     }
-    if (layoutWrapper) {
-        pStyle.direction = GetTextDirection(spanItem->content, layoutWrapper);
-    } else {
-        pStyle.direction = GetTextDirectionByContent(spanItem->content);
-    }
+    pStyle.direction = GetTextDirection(spanItem->content, layoutWrapper);
 }
 
 void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
@@ -271,15 +310,20 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
 }
 
 void MultipleParagraphLayoutAlgorithm::UpdateTextColorIfForeground(
-    const RefPtr<FrameNode>& frameNode, TextStyle& textStyle)
+    const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, const Color& textColor)
 {
+    // Determines whether a foreground color is set or inherited.
     auto renderContext = frameNode->GetRenderContext();
     if (renderContext->HasForegroundColor()) {
-        if (renderContext->GetForegroundColorValue().GetValue() != textStyle.GetTextColor().GetValue()) {
+        if (renderContext->GetForegroundColorValue().GetValue() != textColor.GetValue()) {
             textStyle.SetTextColor(Color::FOREGROUND);
+        } else {
+            textStyle.SetTextColor(textColor);
         }
     } else if (renderContext->HasForegroundColorStrategy()) {
         textStyle.SetTextColor(Color::FOREGROUND);
+    } else {
+        textStyle.SetTextColor(textColor);
     }
 }
 
@@ -327,7 +371,8 @@ void MultipleParagraphLayoutAlgorithm::SetDecorationPropertyToModifier(const Ref
 }
 
 void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
-    const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle)
+    const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode,
+    const Color& textColor)
 {
     SetFontSizePropertyToModifier(layoutProperty, modifier, textStyle);
     auto fontWeight = layoutProperty->GetFontWeight();
@@ -336,17 +381,19 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLa
     } else {
         modifier->SetFontWeight(textStyle.GetFontWeight(), true);
     }
-    auto textColor = layoutProperty->GetTextColor();
-    if (textColor.has_value()) {
-        modifier->SetTextColor(textColor.value());
+    auto propTextColor = layoutProperty->GetTextColor();
+    if (propTextColor.has_value()) {
+        modifier->SetTextColor(propTextColor.value());
     } else {
-        modifier->SetTextColor(textStyle.GetTextColor(), true);
+        modifier->SetTextColor(textColor, true);
     }
-    auto symbolColors = layoutProperty->GetSymbolColorList();
-    if (symbolColors && symbolColors.has_value()) {
-        modifier->SetSymbolColor(symbolColors.value());
-    } else {
-        modifier->SetSymbolColor(textStyle.GetSymbolColorList(), true);
+    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolColors = layoutProperty->GetSymbolColorList();
+        if (symbolColors && symbolColors.has_value()) {
+            modifier->SetSymbolColor(symbolColors.value());
+        } else {
+            modifier->SetSymbolColor(textStyle.GetSymbolColorList(), true);
+        }
     }
     auto textShadow = layoutProperty->GetTextShadow();
     if (textShadow.has_value()) {
@@ -413,13 +460,12 @@ void MultipleParagraphLayoutAlgorithm::SetAdaptFontSizeStepToTextStyle(
     textStyle.SetAdaptFontSizeStep(adaptFontSizeStep.value_or(Dimension(1.0, DimensionUnit::PX)));
 }
 
-ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
-    const TextStyle& textStyle, const std::u16string& content, LayoutWrapper* layoutWrapper) const
+ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle) const
 {
-    return { .direction = GetTextDirection(content, layoutWrapper),
+    return { .direction = textStyle.GetTextDirection(),
         .align = textStyle.GetTextAlign(),
         .maxLines = static_cast<int32_t>(textStyle.GetMaxLines()) < 0 ? UINT32_MAX : textStyle.GetMaxLines(),
-        .fontLocale = Localization::GetInstance()->GetFontLocale(),
+        .fontLocale = textStyle.GetLocale(),
         .wordBreak = textStyle.GetWordBreak(),
         .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
@@ -430,9 +476,12 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
         };
 }
 
-TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(const std::u16string& content,
-    LayoutWrapper* layoutWrapper)
+TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
+    const std::u16string& content, LayoutWrapper* layoutWrapper)
 {
+    if (!layoutWrapper) {
+        return GetTextDirectionByContent(content);
+    }
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
 
@@ -440,7 +489,6 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(const std::u16s
     if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
         return direction;
     }
-
     return GetTextDirectionByContent(content);
 }
 
@@ -492,8 +540,194 @@ bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF
     return true;
 }
 
-bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layoutWrapper,
-    ParagraphStyle paraStyle, double maxWidth, const TextStyle& textStyle)
+bool MultipleParagraphLayoutAlgorithm::ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle& paraStyle,
+    const TextStyle& textStyle, std::vector<TextStyle>& textStyles)
+{
+    CHECK_NULL_RETURN(!spans_.empty(), false);
+    auto spans = spans_.front();
+    ParagraphStyle spanParagraphStyle = paraStyle;
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    bool reLayout = false;
+    int32_t index = 0;
+    InheritParentTextStyle(textStyle);
+    for (const auto& child : spans) {
+        if (!child) {
+            continue;
+        }
+        TextStyle spanTextStyle;
+        needReCreateParagraph_ |= child->UpdateSpanTextStyle(inheritTextStyle_, frameNode);
+        ACE_TEXT_SCOPED_TRACE(
+            "ReLayoutParagraphBySpan[id: %d][needReCreateParagraph_:%d]", child->nodeId_, needReCreateParagraph_);
+        CHECK_NULL_RETURN(!needReCreateParagraph_, false);
+        if (child->GetTextStyle().has_value()) {
+            spanTextStyle = child->GetTextStyle().value();
+        }
+        if (index == 0) {
+            auto direction = GetTextDirection(child->content, layoutWrapper);
+            spanTextStyle.SetTextDirection(direction);
+            spanTextStyle.SetLocale(Localization::GetInstance()->GetFontLocale());
+            paraStyle = GetParagraphStyle(spanTextStyle);
+        }
+        reLayout |= spanTextStyle.NeedReLayout();
+        textStyles.emplace_back(spanTextStyle);
+        child->ResetReCreateAndReLayout();
+        index++;
+    }
+    return reLayout;
+}
+
+bool MultipleParagraphLayoutAlgorithm::ImageSpanMeasure(const RefPtr<ImageSpanItem>& imageSpanItem,
+    const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain, const TextStyle& textStyle)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, true);
+    auto id = frameNode->GetId();
+    int32_t targetId = imageSpanItem->nodeId_;
+    if (!isSpanStringMode_) {
+        CHECK_NULL_RETURN(id == targetId, true);
+    }
+    layoutWrapper->Measure(layoutConstrain);
+    PlaceholderStyle placeholderStyle;
+    auto baselineOffset = Dimension(0.0f);
+    auto imageLayoutProperty = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    if (imageLayoutProperty) {
+        placeholderStyle.verticalAlign = imageLayoutProperty->GetVerticalAlign().value_or(VerticalAlign::BOTTOM);
+        baselineOffset = imageLayoutProperty->GetBaselineOffset().value_or(Dimension(0.0f));
+    }
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, true);
+    placeholderStyle.width = geometryNode->GetMarginFrameSize().Width();
+    placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
+    placeholderStyle.baselineOffset = baselineOffset.ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    return imageSpanItem->UpdatePlaceholderRun(placeholderStyle);
+}
+
+bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(
+    const RefPtr<CustomSpanItem>& customSpanItem, LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    auto width = 0.0f;
+    auto height = 0.0f;
+    auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScale();
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutProperty);
+    auto fontSizeOpt = textLayoutProperty->GetFontSize();
+    if (fontSizeOpt.has_value()) {
+        fontSize = fontSizeOpt.value().ConvertToVp() * context->GetFontScale();
+    }
+    if (customSpanItem->onMeasure.has_value()) {
+        auto onMeasure = customSpanItem->onMeasure.value();
+        CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize });
+        width = static_cast<float>(customSpanMetrics.width * context->GetDipScale());
+        height = static_cast<float>(
+            customSpanMetrics.height.value_or(fontSize / context->GetFontScale()) * context->GetDipScale());
+    }
+    PlaceholderStyle placeholderStyle;
+    placeholderStyle.width = width;
+    placeholderStyle.height = height;
+    placeholderStyle.verticalAlign = VerticalAlign::NONE;
+    return customSpanItem->UpdatePlaceholderRun(placeholderStyle);
+}
+
+bool MultipleParagraphLayoutAlgorithm::PlaceholderSpanMeasure(const RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
+    const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, true);
+    auto id = frameNode->GetId();
+    int32_t targetId = placeholderSpanItem->placeholderSpanNodeId;
+    CHECK_NULL_RETURN(id == targetId, true);
+    // find the Corresponding ImageNode for every ImageSpanItem
+    layoutWrapper->Measure(layoutConstrain);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, true);
+    PlaceholderStyle placeholderStyle;
+    placeholderStyle.width = geometryNode->GetMarginFrameSize().Width();
+    placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
+    placeholderStyle.verticalAlign = VerticalAlign::NONE;
+    return placeholderSpanItem->UpdatePlaceholderRun(placeholderStyle);
+}
+
+void MultipleParagraphLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, const TextStyle& textStyle)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& layoutConstrain = layoutProperty->CreateChildConstraint();
+    auto placeHolderLayoutConstrain = layoutConstrain;
+    placeHolderLayoutConstrain.maxSize.SetHeight(Infinity<float>());
+    placeHolderLayoutConstrain.percentReference.SetHeight(0);
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    auto iterItems = children.begin();
+    bool needReCreateParagraph = false;
+    int32_t itemIndex = -1;
+    for (const auto& group : spans_) {
+        for (const auto& child : group) {
+            itemIndex++;
+            if (!child) {
+                needReCreateParagraph = true;
+                continue;
+            }
+            needReCreateParagraph |= child->CheckSpanNeedReCreate(itemIndex);
+            switch (child->spanItemType) {
+                case SpanItemType::NORMAL:
+                    break;
+                case SpanItemType::IMAGE: {
+                    if (iterItems == children.end() || !(*iterItems)) {
+                        continue;
+                    }
+                    auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
+                    if (!imageSpanItem) {
+                        continue;
+                    }
+                    needReCreateParagraph |= ImageSpanMeasure(imageSpanItem, (*iterItems), layoutConstrain, textStyle);
+                    ++iterItems;
+                    break;
+                }
+                case SpanItemType::CustomSpan: {
+                    auto customSpanItem = AceType::DynamicCast<CustomSpanItem>(child);
+                    if (!customSpanItem) {
+                        continue;
+                    }
+                    needReCreateParagraph |= CustomSpanMeasure(customSpanItem, layoutWrapper);
+                    if (customSpanItem->isFrameNode) {
+                        ++iterItems; // CAPI custom span is frameNode，need to move the iterator backwards
+                    }
+                    break;
+                }
+                case SpanItemType::PLACEHOLDER: {
+                    if (iterItems == children.end() || !(*iterItems)) {
+                        continue;
+                    }
+                    auto placeholderSpanItem = AceType::DynamicCast<PlaceholderSpanItem>(child);
+                    if (!placeholderSpanItem) {
+                        continue;
+                    }
+                    needReCreateParagraph |=
+                        PlaceholderSpanMeasure(placeholderSpanItem, (*iterItems), placeHolderLayoutConstrain);
+                    ++iterItems;
+                    break;
+                }
+                case SpanItemType::SYMBOL:
+                    break;
+            }
+        }
+    }
+    CHECK_NULL_VOID(needReCreateParagraph);
+    layoutProperty->OnPropertyChangeMeasure();
+}
+
+bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
+    LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, double maxWidth, const TextStyle& textStyle)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
@@ -501,10 +735,6 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, false);
     InheritParentTextStyle(textStyle);
-    const auto& layoutConstrain = layoutProperty->CreateChildConstraint();
-    auto placeHolderLayoutConstrain = layoutConstrain;
-    placeHolderLayoutConstrain.maxSize.SetHeight(Infinity<float>());
-    placeHolderLayoutConstrain.percentReference.SetHeight(0);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     auto iterItems = children.begin();
     auto pattern = frameNode->GetPattern<TextPattern>();
@@ -516,7 +746,6 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
     int32_t paragraphIndex = -1;
     preParagraphsPlaceholderCount_ = 0;
     currentParagraphPlaceholderCount_ = 0;
-    paragraphFontSize_ = paraStyle.fontSize;
     auto maxLines = static_cast<int32_t>(paraStyle.maxLines);
     for (auto groupIt = spans_.begin(); groupIt != spans_.end(); groupIt++) {
         auto& group = *(groupIt);
@@ -563,8 +792,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
                     if (!imageSpanItem) {
                         continue;
                     }
-                    AddImageToParagraph(
-                        imageSpanItem, (*iterItems), layoutConstrain, paragraph, spanTextLength, textStyle);
+                    AddImageToParagraph(imageSpanItem, (*iterItems), paragraph, spanTextLength);
                     auto imageNode = (*iterItems)->GetHostNode();
                     imageNodeList.emplace_back(WeakClaim(RawPtr(imageNode)));
                     iterItems++;
@@ -577,8 +805,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
                     }
                     CustomSpanPlaceholderInfo customSpanPlaceholder;
                     customSpanPlaceholder.paragraphIndex = paragraphIndex;
-                    UpdateParagraphByCustomSpan(
-                        customSpanItem, layoutWrapper, paragraph, spanTextLength, customSpanPlaceholder);
+                    UpdateParagraphByCustomSpan(customSpanItem, paragraph, spanTextLength, customSpanPlaceholder);
                     customSpanPlaceholderInfo.emplace_back(customSpanPlaceholder);
                     if (customSpanItem->isFrameNode) {
                         iterItems++; // CAPI custom span is frameNode，need to move the iterator backwards
@@ -593,14 +820,14 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
                     if (!placeholderSpanItem) {
                         continue;
                     }
-                    AddPlaceHolderToParagraph(
-                        placeholderSpanItem, (*iterItems), placeHolderLayoutConstrain, paragraph, spanTextLength);
+                    AddPlaceHolderToParagraph(placeholderSpanItem, (*iterItems), paragraph, spanTextLength);
                     iterItems++;
                     break;
                 }
                 case SpanItemType::SYMBOL:
                     AddSymbolSpanToParagraph(child, spanTextLength, frameNode, paragraph);
             }
+            child->ResetReCreateAndReLayout();
         }
         preParagraphsPlaceholderCount_ += currentParagraphPlaceholderCount_;
         currentParagraphPlaceholderCount_ = 0;
@@ -626,12 +853,11 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
 
 void MultipleParagraphLayoutAlgorithm::InheritParentTextStyle(const TextStyle& textStyle)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        inheritTextStyle_ = textStyle_.value_or(TextStyle());
-    } else {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         inheritTextStyle_ = textStyle;
     }
-    inheritTextStyle_.ResetTextBaseline();
+    inheritTextStyle_.SetMaxLines(textStyle.GetMaxLines());
+    inheritTextStyle_.ResetTextBaselineOffset();
 }
 
 void MultipleParagraphLayoutAlgorithm::AddSymbolSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
@@ -652,42 +878,20 @@ void MultipleParagraphLayoutAlgorithm::AddTextSpanToParagraph(const RefPtr<SpanI
     child->length = child->content.length();
     spanTextLength += static_cast<int32_t>(child->length);
     child->position = spanTextLength;
-    child->UpdateParagraph(frameNode, paragraph, inheritTextStyle_, PlaceholderStyle(), isMarquee_);
+    child->UpdateParagraph(frameNode, paragraph, inheritTextStyle_, isMarquee_);
 }
 
 void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem,
-    const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain,
-    const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength, const TextStyle& textStyle)
+    const RefPtr<LayoutWrapper>& layoutWrapper, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength)
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto id = frameNode->GetId();
-    int32_t targetId = imageSpanItem->imageNodeId;
+    int32_t targetId = imageSpanItem->nodeId_;
     if (!isSpanStringMode_) {
         CHECK_NULL_VOID(id == targetId);
     }
-    layoutWrapper->Measure(layoutConstrain);
-    PlaceholderStyle placeholderStyle;
-    auto baselineOffset = Dimension(0.0f);
-    auto imageLayoutProperty = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    if (imageLayoutProperty) {
-        placeholderStyle.verticalAlign = imageLayoutProperty->GetVerticalAlign().value_or(VerticalAlign::BOTTOM);
-        baselineOffset = imageLayoutProperty->GetBaselineOffset().value_or(Dimension(0.0f));
-    }
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    placeholderStyle.width = geometryNode->GetMarginFrameSize().Width();
-    placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
-    placeholderStyle.paragraphFontSize = Dimension(paragraphFontSize_);
-    if (NearZero(baselineOffset.Value())) {
-        imageSpanItem->placeholderIndex =
-            imageSpanItem->UpdateParagraph(frameNode, paragraph, inheritTextStyle_, placeholderStyle);
-    } else {
-        placeholderStyle.baselineOffset = baselineOffset.ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-        imageSpanItem->placeholderIndex =
-            imageSpanItem->UpdateParagraph(frameNode, paragraph, inheritTextStyle_, placeholderStyle);
-    }
+    imageSpanItem->placeholderIndex = imageSpanItem->UpdateParagraph(frameNode, paragraph, inheritTextStyle_);
     currentParagraphPlaceholderCount_++;
     imageSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
     imageSpanItem->content = u" ";
@@ -697,24 +901,15 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
 }
 
 void MultipleParagraphLayoutAlgorithm::AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
-    const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain,
-    const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength)
+    const RefPtr<LayoutWrapper>& layoutWrapper, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength)
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto id = frameNode->GetId();
     int32_t targetId = placeholderSpanItem->placeholderSpanNodeId;
     CHECK_NULL_VOID(id == targetId);
-    // find the Corresponding ImageNode for every ImageSpanItem
-    layoutWrapper->Measure(layoutConstrain);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    PlaceholderStyle placeholderStyle;
-    placeholderStyle.width = geometryNode->GetMarginFrameSize().Width();
-    placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
-    placeholderStyle.verticalAlign = VerticalAlign::NONE;
     placeholderSpanItem->placeholderIndex =
-        placeholderSpanItem->UpdateParagraph(frameNode, paragraph, inheritTextStyle_, placeholderStyle);
+        placeholderSpanItem->UpdateParagraph(frameNode, paragraph, inheritTextStyle_);
     currentParagraphPlaceholderCount_++;
     placeholderSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
     placeholderSpanItem->content = u" ";
@@ -724,37 +919,9 @@ void MultipleParagraphLayoutAlgorithm::AddPlaceHolderToParagraph(RefPtr<Placehol
 }
 
 void MultipleParagraphLayoutAlgorithm::UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>& customSpanItem,
-    LayoutWrapper* layoutWrapper, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength,
-    CustomSpanPlaceholderInfo& customSpanPlaceholder)
+    const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength, CustomSpanPlaceholderInfo& customSpanPlaceholder)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScale();
-    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutProperty);
-    auto fontSizeOpt = textLayoutProperty->GetFontSize();
-    if (fontSizeOpt.has_value()) {
-        fontSize = fontSizeOpt.value().ConvertToVp() * context->GetFontScale();
-    }
-    auto width = 0.0f;
-    auto height = 0.0f;
-    if (customSpanItem->onMeasure.has_value()) {
-        auto onMeasure = customSpanItem->onMeasure.value();
-        CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize });
-        width = static_cast<float>(customSpanMetrics.width * context->GetDipScale());
-        height = static_cast<float>(
-            customSpanMetrics.height.value_or(fontSize / context->GetFontScale()) * context->GetDipScale());
-    }
-    PlaceholderStyle placeholderStyle;
-    placeholderStyle.width = width;
-    placeholderStyle.height = height;
-    placeholderStyle.verticalAlign = VerticalAlign::NONE;
-    customSpanItem->placeholderIndex =
-        customSpanItem->UpdateParagraph(nullptr, paragraph, inheritTextStyle_, placeholderStyle);
+    customSpanItem->placeholderIndex = customSpanItem->UpdateParagraph(nullptr, paragraph, inheritTextStyle_);
     currentParagraphPlaceholderCount_++;
     customSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
     customSpanItem->content = u" ";

@@ -160,6 +160,24 @@ void FfiOHOSAceFrameworkNativeViewFinishUpdateFunc(int64_t nativeViewId, int64_t
     view->FinishUpdateFunc(elmtId);
 }
 
+int32_t FfiOHOSAceFrameworkNativeViewGetUINodeId(int64_t nativeViewId)
+{
+    auto view = FFIData::GetData<NativeView>(nativeViewId);
+    if (!view) {
+        LOGE("FfiOHOSAceFrameworkNativeViewGetUINodeId fail, no NativeView of %{public}" PRId64, nativeViewId);
+        return -1;
+    }
+    auto node = view->GetViewNode();
+    if (!node) {
+        return -1;
+    }
+    auto uiNode = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::NG::UINode>(node);
+    if (!uiNode) {
+        return -1;
+    }
+    return uiNode->GetId();
+}
+
 void FfiOHOSAceFrameworkViewDeletedElmtIdsHaveBeenPurged(int64_t nativeViewId, VectorCJInt64Handle vec)
 {
     auto view = FFIData::GetData<NativeView>(nativeViewId);

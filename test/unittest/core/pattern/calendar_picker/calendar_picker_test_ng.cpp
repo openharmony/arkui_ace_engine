@@ -2872,7 +2872,11 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest009, TestSize.Level1)
     auto eventHub = calendarDialogNode->GetOrCreateFocusHub();
     ASSERT_NE(eventHub, nullptr);
 
-    PipelineContext::GetCurrentContext()->isFocusActive_ = true;
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     eventHub->focusType_ = FocusType::NODE;
     eventHub->focusStyleType_ = FocusStyleType::CUSTOM_REGION;
     eventHub->PaintFocusState();

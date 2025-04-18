@@ -491,8 +491,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateGridProperty001, TestSize.Level1)
      */
     layoutProperty->gridProperty_ = std::make_unique<GridProperty>();
     layoutProperty->UpdateGridProperty(DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET, GridSizeType::UNDEFINED);
-    EXPECT_EQ(layoutProperty->layoutConstraint_->minSize.Width(), 0);
-    EXPECT_EQ(layoutProperty->layoutConstraint_->minSize.Height(), 0);
+    EXPECT_FALSE(layoutProperty->layoutConstraint_.has_value());
     EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_MEASURE);
 
     /**

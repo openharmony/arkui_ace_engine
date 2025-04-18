@@ -219,6 +219,11 @@ public:
         jumpIndex_ = jumpIndex;
     }
 
+    void SetIsInFast(std::optional<bool> isInFast)
+    {
+        isInFast_ = isInFast;
+    }
+
     void SetStartIndex(std::optional<int32_t> startIndex)
     {
         startIndex_ = startIndex;
@@ -254,6 +259,10 @@ public:
     virtual int32_t RealTotalCount() const;
     virtual int32_t GetCurrentIndex() const;
     void ResetDotModifier();
+    const RefPtr<DotIndicatorModifier>& GetDotIndicatorModifier() const
+    {
+        return dotIndicatorModifier_;
+    }
     
 private:
     void OnAttachToFrameNode() override;
@@ -305,6 +314,14 @@ private:
     void UpdateFocusable() const;
     void CheckDragAndUpdate(
         const RefPtr<SwiperPattern>& swiperPattern, int32_t animationStartIndex, int32_t animationEndIndex);
+    void UpdateOverlongPaintMethodWhenFast(const RefPtr<DotIndicatorPaintMethod>& paintMethodTemp,
+        int32_t& animationStartIndex, int32_t& animationEndIndex);
+    void UpdateOverlongPaintMethodWhenNormal(const RefPtr<DotIndicatorPaintMethod>& paintMethodTemp,
+        int32_t& animationStartIndex, int32_t& animationEndIndex);
+    void GetStatusForOverlongPaintMethodWhenNormal(const RefPtr<SwiperPattern>& swiperPattern,
+        const int32_t& animationStartIndex, const int32_t& animationEndIndex,
+        bool& keepStatus, bool& isSwiperTouchDown) const;
+
 
     double GetIndicatorDragAngleThreshold(bool isMaxAngle);
     RefPtr<ClickEvent> clickEvent_;
@@ -330,8 +347,10 @@ private:
     SwiperIndicatorType swiperIndicatorType_ = SwiperIndicatorType::DOT;
 
     std::optional<int32_t> jumpIndex_;
+    std::optional<bool> isInFast_;
     std::optional<int32_t> startIndex_;
     std::optional<bool> changeIndexWithAnimation_;
+    std::optional<GestureState> keepGestureState_;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
 
@@ -408,11 +427,6 @@ protected:
     void SetTouchBottomType(TouchBottomType touchBottomType)
     {
         touchBottomType_ = touchBottomType;
-    }
-
-    const RefPtr<DotIndicatorModifier>& GetDotIndicatorModifier() const
-    {
-        return dotIndicatorModifier_;
     }
  
     void SetDotIndicatorModifier(RefPtr<DotIndicatorModifier> dotIndicatorModifier)

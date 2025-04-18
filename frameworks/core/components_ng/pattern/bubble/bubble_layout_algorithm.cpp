@@ -45,6 +45,7 @@ constexpr double HALF = 2.0;
 constexpr double DOUBLE = 2.0;
 constexpr Dimension ARROW_RADIUS = 2.0_vp;
 constexpr Dimension MARGIN_SPACE = 6.0_vp;
+constexpr Dimension TIPS_MARGIN_SPACE = 8.0_vp;
 constexpr Dimension DRAW_EDGES_SPACE = 1.0_vp;
 constexpr double BUBBLE_ARROW_HALF = 2.0;
 constexpr size_t ALIGNMENT_STEP_OFFSET = 1;
@@ -261,6 +262,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(bubbleLayoutProperty);
     bool showInSubWindow = bubbleLayoutProperty->GetShowInSubWindowValue(false);
     useCustom_ = bubbleLayoutProperty->GetUseCustom().value_or(false);
+    isTips_ = bubbleLayoutProperty->GetIsTips().value_or(false);
     InitProps(bubbleProp, showInSubWindow, layoutWrapper);
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
@@ -515,7 +517,9 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto isBlock = bubbleProp->GetBlockEventValue(true);
     dumpInfo_.mask = isBlock;
     UpdateHostWindowRect();
-    SetHotAreas(showInSubWindow, isBlock, frameNode, bubblePattern->GetContainerId());
+    if (!isTips_) {
+        SetHotAreas(showInSubWindow, isBlock, frameNode, bubblePattern->GetContainerId());
+    }
     UpdateClipOffset(frameNode);
 }
 
@@ -623,7 +627,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     CHECK_NULL_VOID(pipeline);
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
-    padding_ = popupTheme->GetPadding();
+    padding_ = isTips_ ? popupTheme->GetTipsPadding() : popupTheme->GetPadding();
     CHECK_NULL_VOID(layoutProp);
     userSetTargetSpace_ = layoutProp->GetTargetSpace().value_or(Dimension(0.0f));
     borderRadius_ = layoutProp->GetRadius().value_or(popupTheme->GetRadius().GetX());
@@ -653,8 +657,8 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     top_ = safeAreaInsets.top_.Length();
     bottom_ = safeAreaInsets.bottom_.Length();
     UpdateDumpInfo();
-    marginStart_ = MARGIN_SPACE.ConvertToPx() + DRAW_EDGES_SPACE.ConvertToPx();
-    marginEnd_ = MARGIN_SPACE.ConvertToPx() + DRAW_EDGES_SPACE.ConvertToPx();
+    marginStart_ = (isTips_ ? TIPS_MARGIN_SPACE : MARGIN_SPACE + DRAW_EDGES_SPACE).ConvertToPx();
+    marginEnd_ = (isTips_ ? TIPS_MARGIN_SPACE : MARGIN_SPACE + DRAW_EDGES_SPACE).ConvertToPx();
     marginTop_ = top_ + DRAW_EDGES_SPACE.ConvertToPx();
     marginBottom_ = bottom_ + DRAW_EDGES_SPACE.ConvertToPx();
     HandleKeyboard(layoutWrapper, showInSubWindow);
@@ -675,6 +679,7 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
     auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(bubblePattern);
     avoidKeyboard_ = bubblePattern->GetAvoidKeyboard();
+    dumpInfo_.avoidKeyboard = avoidKeyboard_;
     if (!avoidKeyboard_) {
         return;
     }
@@ -775,6 +780,7 @@ void BubbleLayoutAlgorithm::InitWrapperRect(LayoutWrapper* layoutWrapper)
     auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(bubblePattern);
     auto enableHoverMode = bubblePattern->GetEnableHoverMode();
+    dumpInfo_.enableHoverMode = enableHoverMode;
     if (!enableHoverMode) {
         isHalfFoldHover_ = false;
     }
@@ -1186,6 +1192,7 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
         if (!CheckIfNeedRemoveArrow(xMin, xMax, yMin, yMax)) {
             return OffsetF(0.0f, 0.0f);
         }
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "Popup need remove arrow");
     } else if (LessNotEqual(xMax, xMin) && isGreatWrapperWidth_) {
         auto y = std::clamp(position.GetY(), yMin, yMax);
         return OffsetF(0.0f, y + yTargetOffset);

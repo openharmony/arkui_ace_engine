@@ -15,6 +15,7 @@
 
 #include "napi_utils.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Napi {
 using namespace OHOS::Ace;
@@ -625,6 +626,7 @@ bool ParseColor(napi_env env, napi_value value, Color& result)
         std::optional<std::string> colorString = GetStringFromValueUtf8(env, value);
         if (!colorString.has_value()) {
             LOGE("Parse color from string failed");
+            return false;
         }
         return Color::ParseColorString(colorString.value(), result);
     }

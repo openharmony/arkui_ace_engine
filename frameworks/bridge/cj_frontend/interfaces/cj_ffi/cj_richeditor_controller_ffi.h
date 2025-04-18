@@ -239,6 +239,13 @@ struct NativeRichEditorSelection {
     int64_t spanSize;
 };
 
+struct NativeRichEditorSelection12 {
+    int32_t selectionStart;
+    int32_t selectionEnd;
+    NativeRichEditorSpanResult12* spans;
+    int64_t spanSize;
+};
+
 struct NativeRichEditorDeleteValue {
     int32_t offset;
     int32_t direction;

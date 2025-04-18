@@ -785,9 +785,11 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest021, TestSize.Level1)
     dynamicPattern->HandleFocusEvent();
     auto pipeline = host->GetContext();
     EXPECT_NE(pipeline, nullptr);
-    pipeline->isFocusActive_ = true;
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     dynamicPattern->HandleFocusEvent();
-    EXPECT_EQ(pipeline->isFocusActive_, true);
+    EXPECT_EQ(focusManager->isFocusActive_, true);
 #endif
 }
 

@@ -95,11 +95,6 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
 
 void ToastPattern::InitUIExtensionHostWindowRect()
 {
-    if (!IsAlignedWithHostWindow()) {
-        uiExtensionHostWindowRect_ = Rect();
-        return;
-    }
-
     auto currentId = Container::CurrentId();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -476,6 +471,7 @@ void ToastPattern::OnAttachToFrameNode()
             }
         });
     UpdateHalfFoldHoverChangedCallbackId(halfFoldHoverCallbackId);
+    InitUIExtensionHostWindowRect();
 }
 
 void ToastPattern::OnDetachFromFrameNode(FrameNode* node)

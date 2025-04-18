@@ -543,6 +543,19 @@ class UIContext {
         return keyBoardAvoidMode;
     }
 
+    setPixelRoundMode(pixelRoundMode) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        JSViewAbstract.setPixelRoundMode(pixelRoundMode);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    getPixelRoundMode() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let pixelRoundMode = JSViewAbstract.getPixelRoundMode();
+        __JSScopeUtil__.restoreInstanceId();
+        return pixelRoundMode;
+    }
+
     dispatchKeyEvent(node, event) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let result = JSViewAbstract.dispatchKeyEvent(node, event);
