@@ -174,6 +174,9 @@ export class FileSelectorParam implements MaterializedBase {
     public isCapture(): boolean {
         return this.isCapture_serialize()
     }
+    public getMimeTypes(): Array<string> {
+        return this.getMimeTypes_serialize()
+    }
     private getTitle_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getTitle(this.peer!.ptr)
         return retval
@@ -196,6 +199,17 @@ export class FileSelectorParam implements MaterializedBase {
     private isCapture_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_isCapture(this.peer!.ptr)
         return retval
+    }
+    private getMimeTypes_serialize(): Array<string> {
+        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getMimeTypes(this.peer!.ptr)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const buffer_length : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<string> = new Array<string>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = (retvalDeserializer.readString() as string)
+        }
+        const returnResult : Array<string> = buffer
+        return returnResult
     }
 }
 export class JsResultInternal {
