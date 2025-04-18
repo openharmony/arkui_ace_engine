@@ -72,11 +72,7 @@ RefPtr<RenderNode> SvgEllipse::CreateRender(
     return renderBox;
 }
 
-#ifndef USE_ROSEN_DRAWING
-SkPath SvgEllipse::AsPath(const Size& viewPort) const
-#else
 RSPath SvgEllipse::AsPath(const Size& viewPort) const
-#endif
 {
     double rx = 0.0;
     if (GreatOrEqual(component_->GetRx().Value(), 0.0)) {
@@ -94,19 +90,12 @@ RSPath SvgEllipse::AsPath(const Size& viewPort) const
             ry = ConvertDimensionToPx(component_->GetRx(), viewPort, SvgLengthType::HORIZONTAL);
         }
     }
-#ifndef USE_ROSEN_DRAWING
-    SkPath path;
-    SkRect rect = SkRect::MakeXYWH(ConvertDimensionToPx(component_->GetCx(), viewPort, SvgLengthType::HORIZONTAL) - rx,
-        ConvertDimensionToPx(component_->GetCy(), viewPort, SvgLengthType::VERTICAL) - ry, rx + rx, ry + ry);
-    path.addOval(rect);
-#else
     RSPath path;
     RSRect rect = RSRect(ConvertDimensionToPx(component_->GetCx(), viewPort, SvgLengthType::HORIZONTAL) - rx,
         ConvertDimensionToPx(component_->GetCy(), viewPort, SvgLengthType::VERTICAL) - ry,
         rx + ConvertDimensionToPx(component_->GetCx(), viewPort, SvgLengthType::HORIZONTAL),
         ry + ConvertDimensionToPx(component_->GetCy(), viewPort, SvgLengthType::VERTICAL));
     path.AddOval(rect);
-#endif
     return path;
 }
 

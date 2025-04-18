@@ -43,17 +43,10 @@ void RosenRenderSvgG::PaintDirectly(RenderContext& context, const Offset& offset
         return;
     }
 
-#ifndef USE_ROSEN_DRAWING
-    SkAutoCanvasRestore save(canvas, true);
-    if (NeedTransform()) {
-        canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
-    }
-#else
     RSAutoCanvasRestore save(*canvas, true);
     if (NeedTransform()) {
         canvas->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(GetTransformMatrix4Raw()));
     }
-#endif
     PaintMaskLayer(context, offset, offset);
 
     RenderSvgBase::PaintDirectly(context, offset);
