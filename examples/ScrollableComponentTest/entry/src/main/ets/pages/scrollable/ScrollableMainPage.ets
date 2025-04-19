@@ -38,6 +38,8 @@ struct IndexPage {
     new TextList(4, 'Grid_AttributeUpdater', 'pages/Scrollable/Grid_AttributeUpdater'),
     new TextList(5, 'WaterFlow_AttributeModifier', 'pages/Scrollable/WaterFlow_AttributeModifier'),
     new TextList(6, 'WaterFlow_AttributeUpdater', 'pages/Scrollable/WaterFlow_AttributeUpdater'),
+    new TextList(7, 'StickyNestedScroll', 'pages/Scrollable/StickyNestedScroll'),
+    new TextList(8, 'EnabledScroll', 'pages/Scrollable/EnabledScroll'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
