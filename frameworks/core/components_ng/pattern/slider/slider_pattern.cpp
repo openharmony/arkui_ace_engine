@@ -793,10 +793,6 @@ bool SliderPattern::UpdateParameters()
                                         : theme->GetInsetHotBlockShadowWidth();
 
     auto direction = sliderLayoutProperty->GetDirectionValue(Axis::HORIZONTAL);
-    if (direction_ != direction && isAccessibilityOn_) {
-        ClearSliderVirtualNode();
-        direction_ = direction;
-    }
     auto blockLength = direction == Axis::HORIZONTAL ? blockSize_.Width() : blockSize_.Height();
 
     hotBlockShadowWidth_ = static_cast<float>(hotBlockShadowWidth.ConvertToPx());
@@ -1332,7 +1328,13 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         return;
     }
     if (direction_ == GetDirection() && panEvent_) return;
-    direction_ = GetDirection();
+    auto direction = GetDirection();
+    if (direction_ != direction && isAccessibilityOn_) {
+        ClearSliderVirtualNode();
+        InitAccessibilityVirtualNodeTask();
+        InitAccessibilityHoverEvent();
+    }
+    direction_ = direction;
 
     if (panEvent_) {
         gestureHub->RemovePanEvent(panEvent_);
