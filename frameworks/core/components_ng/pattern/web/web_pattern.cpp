@@ -7401,10 +7401,8 @@ void WebPattern::UninitRotationEventCallback()
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (rotationEndCallbackId_ != 0) {
-        context->UnregisterRotationEndCallback(rotationEndCallbackId_);
-        rotationEndCallbackId_ = 0;
-    }
+    context->UnregisterRotationEndCallback(rotationEndCallbackId_);
+    rotationEndCallbackId_ = 0;
 }
 
 void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
@@ -7419,7 +7417,7 @@ void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
     bool isNwebEx = delegate_->IsNWebEx();
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::AdjustRotationRenderFit, isNwebEx: %{public}d", isNwebEx);
     if (isNwebEx && SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE &&
-        isVisible_) {
+        isVisible_ && renderMode_ == RenderMode::ASYNC_RENDER) {
         isRotating_ = true;
         TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::AdjustRotationRenderFit, webId: %{public}d", GetWebId());
         if (renderContextForSurface_) {
