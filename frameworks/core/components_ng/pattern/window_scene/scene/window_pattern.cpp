@@ -552,12 +552,14 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
         snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
     } else {
-        auto context = GetContext();
-        CHECK_NULL_VOID(context);
-        auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-        auto snapshotContext = snapshotWindow_->GetRenderContext();
-        CHECK_NULL_VOID(snapshotContext);
-        snapshotContext->UpdateBackgroundColor(Color(backgroundColor));
+        if (session_->GetSystemConfig().IsPhoneWindow() && session_->GetShowRecent()) {
+            auto context = GetContext();
+            CHECK_NULL_VOID(context);
+            auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+            auto snapshotContext = snapshotWindow_->GetRenderContext();
+            CHECK_NULL_VOID(snapshotContext);
+            snapshotContext->UpdateBackgroundColor(Color(backgroundColor));
+        }
         ImageSourceInfo sourceInfo;
         auto scenePersistence = session_->GetScenePersistence();
         CHECK_NULL_VOID(scenePersistence);
