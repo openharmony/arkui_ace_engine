@@ -55,7 +55,7 @@ void FontSizeImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
-    // SymbolModelNG::SetFontSize(frameNode, convValue);
+    SymbolModelNG::SetFontSize(frameNode, convValue);
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Array_ResourceColor* value)
@@ -78,7 +78,7 @@ void FontWeightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Ace::FontWeight>(*value);
-    // SymbolModelNG::SetFontWeight(frameNode, convValue);
+    SymbolModelNG::SetFontWeight(frameNode, convValue);
 }
 void EffectStrategyImpl(Ark_NativePointer node,
                         Ark_SymbolEffectStrategy value)
@@ -94,7 +94,7 @@ void RenderingStrategyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<RenderingStrategy>(value); // for enums
-    // SymbolModelNG::SetRenderingStrategy(frameNode, EnumToInt(convValue));
+    SymbolModelNG::SetRenderingStrategy(frameNode, EnumToInt(convValue));
 }
 bool ParseSymbolEffectOptions(NG::SymbolEffectOptions& options, Ark_SymbolEffect symbolEffect)
 {

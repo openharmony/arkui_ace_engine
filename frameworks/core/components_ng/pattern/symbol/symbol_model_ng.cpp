@@ -114,23 +114,34 @@ void SymbolModelNG::SetFontColor(FrameNode* frameNode, const std::vector<Color>&
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor, frameNode);
 }
 
-void SymbolModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
+void SymbolModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
-    if (!value.IsValid()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, Dimension(), frameNode);
-        return;
+    if (value.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, FontSize, PROPERTY_UPDATE_MEASURE, frameNode);
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value, frameNode);
 }
 
-void SymbolModelNG::SetFontWeight(FrameNode* frameNode, Ace::FontWeight value)
+void SymbolModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& fontWeight)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (fontWeight.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, fontWeight.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, FontWeight, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
 }
 
-void SymbolModelNG::SetRenderingStrategy(FrameNode* frameNode, const std::uint32_t renderingStrategy)
+void SymbolModelNG::SetRenderingStrategy(FrameNode* frameNode, const std::optional<uint32_t>& renderingStrategy)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolRenderingStrategy, renderingStrategy, frameNode);
+    if (renderingStrategy.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, SymbolRenderingStrategy, renderingStrategy.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            TextLayoutProperty, SymbolRenderingStrategy, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
 }
 
 void SymbolModelNG::SetSymbolEffect(FrameNode* frameNode, const std::uint32_t effectStrategy)

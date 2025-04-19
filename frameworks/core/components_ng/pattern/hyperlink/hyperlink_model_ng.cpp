@@ -37,6 +37,12 @@ void HyperlinkModelNG::Create(const std::string& address, const std::string& con
     SetDraggable(draggable);
 }
 
+RefPtr<FrameNode> HyperlinkModelNG::CreateFrameNode(int32_t nodeId)
+{
+    return FrameNode::GetOrCreateFrameNode(
+        V2::HYPERLINK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
+}
+
 void HyperlinkModelNG::SetColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, value);
@@ -79,11 +85,17 @@ void HyperlinkModelNG::SetDraggable(bool draggable)
     frameNode->SetDraggable(draggable);
 }
 
-void HyperlinkModelNG::SetColor(FrameNode* frameNode, const Color& value)
+void HyperlinkModelNG::SetColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, value, frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, Color, value, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
+    if (value.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, value.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, Color, value.value(), frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, Color, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(RenderContext, ForegroundColor, frameNode);
+    }
 }
 
 void HyperlinkModelNG::SetDraggable(FrameNode* frameNode, bool draggable)
