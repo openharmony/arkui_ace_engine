@@ -3386,6 +3386,26 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NavExtender_setNavDestinationNode(peer: KPointer, index: KInt, node: KPointer): void
     @ani.unsafe.Direct
+    native static _NavExtender_setNavigationMode(navigation: KPointer, mode: KInt): void
+    @ani.unsafe.Direct
+    native static _NavExtender_hideTitleBar(navigation: KPointer, isHide: KInt, isAnimated: KInt): void
+    @ani.unsafe.Direct
+    native static _NavExtender_hideToolBar(navigation: KPointer, isHide: KInt, isAnimated: KInt): void
+    @ani.unsafe.Direct
+    native static _NavExtender_hideNavBar(navigation: KPointer, hide: KInt): void
+    @ani.unsafe.Direct
+    native static _NavExtender_hideBackButton(navigation: KPointer, hide: KInt): void
+    @ani.unsafe.Quick
+    native static _NavExtender_setNavBarStateChange(navigation: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _NavExtender_setTitleModeChange(navigation: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NavExtender_setTitleMode(navigation: KPointer, titleMode: KInt): void
+    @ani.unsafe.Quick
+    native static _NavExtender_title(navigation: KPointer, title: KStringPtr, hasSubTitle: KInt): void
+    @ani.unsafe.Quick
+    native static _NavExtender_subTitle(navigation: KPointer, subTitle: KStringPtr): void
+    @ani.unsafe.Direct
     native static _EventEmulator_emitClickEvent(node: KPointer, event: KPointer): void
     @ani.unsafe.Quick
     native static _EventEmulator_emitTextInputEvent(node: KPointer, text: KStringPtr): void

@@ -19952,6 +19952,29 @@ typedef struct GENERATED_ArkUINavExtenderAccessor {
     void (*setNavDestinationNode)(Ark_NavPathStack peer,
                                   Ark_Int32 index,
                                   Ark_NativePointer node);
+    void (*setNavigationMode)(Ark_NativePointer navigation,
+                              Ark_NavigationMode mode);
+    void (*hideTitleBar)(Ark_NativePointer navigation,
+                         Ark_Boolean isHide,
+                         Ark_Boolean isAnimated);
+    void (*hideToolBar)(Ark_NativePointer navigation,
+                        Ark_Boolean isHide,
+                        Ark_Boolean isAnimated);
+    void (*hideNavBar)(Ark_NativePointer navigation,
+                       Ark_Boolean hide);
+    void (*hideBackButton)(Ark_NativePointer navigation,
+                           Ark_Boolean hide);
+    void (*setNavBarStateChange)(Ark_NativePointer navigation,
+                                 const Callback_Boolean_Void* sateCallback);
+    void (*setTitleModeChange)(Ark_NativePointer navigation,
+                               const Callback_NavigationTitleMode_Void* titleCallback);
+    void (*setTitleMode)(Ark_NativePointer navigation,
+                         Ark_NavigationTitleMode titleMode);
+    void (*title)(Ark_NativePointer navigation,
+                  const Ark_String* title,
+                  Ark_Boolean hasSubTitle);
+    void (*subTitle)(Ark_NativePointer navigation,
+                     const Ark_String* subTitle);
 } GENERATED_ArkUINavExtenderAccessor;
 
 typedef struct GENERATED_ArkUIEventEmulatorAccessor {

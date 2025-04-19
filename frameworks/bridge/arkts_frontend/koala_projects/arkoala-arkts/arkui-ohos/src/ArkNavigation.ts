@@ -17,7 +17,7 @@ import { contextLocalScope, MutableState, NodeAttach, remember, rememberMutableS
 import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { ArkCommonMethodComponent } from "./generated/ArkCommon"
 import { ArkNavigationPeer } from "./peers/ArkNavigationPeer"
-import { SystemBarStyle, NavigationCommonTitle, NavigationCustomTitle, NavigationMenuItem, NavigationOperation, NavigationMode, ToolbarItem, NavigationTitleOptions, NavigationToolbarOptions, NavigationTitleMode, NavContentInfo, NavigationAnimatedTransition, NavBarPosition } from "./component/navigation"
+import { SystemBarStyle, NavigationCommonTitle, NavigationCustomTitle, NavigationMenuItem, NavigationOperation, NavigationMode, ToolbarItem, NavigationTitleOptions, NavigationToolbarOptions, NavigationTitleMode, NavContentInfo, NavigationAnimatedTransition, NavBarPosition, NavigationAttribute } from "./component/navigation"
 import { Resource } from "global/resource";
 import { CustomBuilder, SymbolGlyphModifier, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./component/common"
 import { Length, ResourceStr, Dimension } from "./component/units"
@@ -27,7 +27,8 @@ import { PathData } from "./handwritten/ArkNavPathStack"
 import { NavExtender } from "./generated/ArkNavExtenderMaterialized"
 
 /** @memo:stable */
-export class ArkNavigationComponent extends ArkCommonMethodComponent {
+export class ArkNavigationComponent extends ArkCommonMethodComponent implements NavigationAttribute {
+    private needSync: boolean = false
     getPeer(): ArkNavigationPeer {
         return (this.peer as ArkNavigationPeer)
     }
@@ -336,6 +337,14 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent {
     public applyAttributesFinish(): void {
         // we calls this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+
+    public isNeedSync(): boolean {
+        return this.needSync
+    }
+
+    public updateNeedSync(sync: boolean): void {
+        this.needSync = sync
     }
 }
 
