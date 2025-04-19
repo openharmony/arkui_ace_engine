@@ -77,7 +77,7 @@ import { NavExtender_OnUpdateStack } from "./../ArkNavigationExtenderInterfaces"
 import { OnCheckboxGroupChangeCallback, CheckboxGroupResult } from "./../../component/checkboxgroup"
 import { OnFoldStatusChangeCallback, OnFoldStatusChangeInfo, OnHoverStatusChangeCallback, HoverEventParam } from "./../../component/folderStack"
 import { OnLinearIndicatorChangeCallback } from "./../../component/linearindicator"
-import { OnNativeLoadCallback } from "./../../component/xcomponent"
+import { SurfaceRect, Callback_String_SurfaceRect_Void, OnNativeLoadCallback } from "./../../component/xcomponent"
 import { PageTransitionCallback, RouteType } from "./../../component/pageTransition"
 import { PluginErrorCallback, PluginErrorData } from "./../../component/pluginComponent"
 
@@ -1981,6 +1981,13 @@ export function deserializeAndCallWithThemeInterface(thisDeserializer: Deseriali
     const _callResult  = _call(options)
     _continuation(_callResult)
 }
+export function deserializeAndCallCallback_String_SurfaceRect_Void(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((surfaceId: string,rect: SurfaceRect) => void))
+    let surfaceId : string = (thisDeserializer.readString() as string)
+    let rect : SurfaceRect = thisDeserializer.readSurfaceRect()
+    _call(surfaceId, rect)
+}
 export function deserializeAndCallCallback(thisDeserializer: Deserializer): void {
     const kind : int32 = thisDeserializer.readInt32()
     switch (kind) {
@@ -2225,6 +2232,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -2038961969/*CallbackKind.Kind_VoidCallback*/: return deserializeAndCallVoidCallback(thisDeserializer);
         case -1829763354/*CallbackKind.Kind_WebKeyboardCallback*/: return deserializeAndCallWebKeyboardCallback(thisDeserializer);
         case 219587748/*CallbackKind.Kind_WithThemeInterface*/: return deserializeAndCallWithThemeInterface(thisDeserializer);
+        case -1736208400/*CallbackKind.Kind_Callback_String_SurfaceRect_Void*/: return deserializeAndCallCallback_String_SurfaceRect_Void(thisDeserializer);
     }
     console.log("Unknown callback kind")
 }

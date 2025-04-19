@@ -802,6 +802,7 @@ typedef struct Ark_ButtonIconOptions Ark_ButtonIconOptions;
 typedef struct Opt_ButtonIconOptions Opt_ButtonIconOptions;
 typedef struct Ark_ImageAIOptions Ark_ImageAIOptions;
 typedef struct Opt_ImageAIOptions Opt_ImageAIOptions;
+typedef struct Callback_String_SurfaceRect_Void Callback_String_SurfaceRect_Void;
 typedef struct XComponentControllerPeer XComponentControllerPeer;
 typedef struct XComponentControllerPeer* Ark_XComponentController;
 typedef struct Opt_XComponentController Opt_XComponentController;
@@ -7900,6 +7901,11 @@ typedef struct Opt_ImageAIOptions {
     Ark_Tag tag;
     Ark_ImageAIOptions value;
 } Opt_ImageAIOptions;
+typedef struct Callback_String_SurfaceRect_Void {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String surfaceId, const Ark_SurfaceRect rect);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_String surfaceId, const Ark_SurfaceRect rect);
+} Callback_String_SurfaceRect_Void;
 typedef struct Opt_XComponentController {
     Ark_Tag tag;
     Ark_XComponentController value;
@@ -22032,6 +22038,12 @@ typedef struct GENERATED_ArkUIXComponentControllerAccessor {
                                const Ark_ImageAnalyzerConfig* config,
                                const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
     void (*stopImageAnalyzer)(Ark_XComponentController peer);
+    void (*setOnSurfaceCreatedCallback)(Ark_XComponentController peer,
+        const Callback_String_Void* onSurfaceCreatedCallback);
+    void (*setOnSurfaceChangedCallback)(Ark_XComponentController peer,
+        const Callback_String_SurfaceRect_Void* onSurfaceChangedCallback);
+    void (*setOnSurfaceDestroyedCallback)(Ark_XComponentController peer,
+          const Callback_String_Void* onSurfaceDestroyedCallback);
 } GENERATED_ArkUIXComponentControllerAccessor;
 
 typedef struct GENERATED_ArkUIWaterFlowSectionsAccessor {

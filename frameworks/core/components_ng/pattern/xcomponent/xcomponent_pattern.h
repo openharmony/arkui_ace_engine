@@ -216,6 +216,12 @@ public:
         return xcomponentController_;
     }
 
+    void SetXComponentController(std::shared_ptr<InnerXComponentController> controlller)
+    {
+        xcomponentController_ = controlller;
+        InitController();
+    }
+
     void SetHandlingRenderContextForSurface(const RefPtr<RenderContext>& otherRenderContext);
 
     void RestoreHandlingRenderContextForSurface();
