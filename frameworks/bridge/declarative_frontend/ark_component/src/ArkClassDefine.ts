@@ -1109,6 +1109,19 @@ class ArkTextFieldShowCounter {
   }
 }
 
+class ArkTextFieldMaxLines {
+  value: number | undefined;
+  overflowMode?: MaxLinesMode;
+  constructor() {
+    this.value = undefined;
+    this.overflowMode = undefined;
+  }
+  isEqual(another: ArkTextFieldMaxLines): boolean {
+    return (this.value === another.value) &&
+      (this.overflowMode === another.overflowMode);
+  }
+}
+
 class ArkTextInputFilter {
   value: ResourceStr | undefined;
   error?: (value: string) => void;

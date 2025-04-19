@@ -267,15 +267,23 @@ ArkUINativeModuleValue TextAreaBridge::SetMaxLines(ArkUIRuntimeCallInfo *runtime
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> maxLinesArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> overflowModeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsNumber() && secondArg->Int32Value(vm) > 0) {
-        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaMaxLines(nativeNode, secondArg->Uint32Value(vm));
-    } else {
-        GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaMaxLines(nativeNode);
+
+    auto maxLines = 3;
+    if (maxLinesArg->IsNumber() && maxLinesArg->Int32Value(vm) > 0) {
+        maxLines = maxLinesArg->Uint32Value(vm);
     }
+
+    auto overflowMode = 0;
+
+    if (overflowModeArg->IsNumber() && (overflowModeArg->Int32Value(vm) == 0 || overflowModeArg->Int32Value(vm) == 1)) {
+        overflowMode = overflowModeArg->Uint32Value(vm);
+    }
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaMaxLines(nativeNode, maxLines, overflowMode);
     return panda::JSValueRef::Undefined(vm);
 }
 

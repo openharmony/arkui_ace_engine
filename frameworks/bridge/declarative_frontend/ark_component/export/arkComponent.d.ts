@@ -778,7 +778,7 @@ declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<
     style(value: TextContentStyle): TextAreaAttribute;
     barState(value: BarState): TextAreaAttribute;
     selectionMenuHidden(value: boolean): TextAreaAttribute;
-    maxLines(value: number): TextAreaAttribute;
+    maxLines(value: number, options?: MaxLinesOptions): TextAreaAttribute;
     customKeyboard(value: CustomBuilder): TextAreaAttribute;
     ellipsisMode(value: EllipsisMode): TextAreaAttribute;
 }
