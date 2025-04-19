@@ -126,23 +126,23 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
 
     if (dateOrder == "M-d-y") {
         if (!hasMonthNode) {
-            createMonthOrDayColumnNode(monthColumnNode, dateNode, Color::BLUE);
+            CreateDateColumn(monthColumnNode, dateNode);
         }
         if (!hasDayNode) {
-            createMonthOrDayColumnNode(dayColumnNode, dateNode, Color::GRAY);
+            CreateDateColumn(dayColumnNode, dateNode);
         }
         if (!hasYearNode) {
-            createYearColumnNode(yearColumnNode, dateNode);
+            CreateDateColumn(yearColumnNode, dateNode);
         }
     } else {
         if (!hasYearNode) {
-            createYearColumnNode(yearColumnNode, dateNode);
+            CreateDateColumn(yearColumnNode, dateNode);
         }
         if (!hasMonthNode) {
-            createMonthOrDayColumnNode(monthColumnNode, dateNode, Color::BLUE);
+            CreateDateColumn(monthColumnNode, dateNode);
         }
         if (!hasDayNode) {
-            createMonthOrDayColumnNode(dayColumnNode, dateNode, Color::GRAY);
+            CreateDateColumn(dayColumnNode, dateNode);
         }
     }
     stack->Push(dateNode);
@@ -153,24 +153,7 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
     }
 }
 
-void DatePickerModelNG::createMonthOrDayColumnNode(const RefPtr<FrameNode>& columnNode,
-    const RefPtr<FrameNode>& dateNode, Color buttonBackgroundColor)
-{
-    auto stackNode = CreateStackNode();
-    auto blendNode = CreateColumnNode();
-    auto buttonNode = CreateButtonNode();
-    buttonNode->GetRenderContext()->UpdateBackgroundColor(buttonBackgroundColor);
-    buttonNode->MountToParent(stackNode);
-    columnNode->MountToParent(blendNode);
-    blendNode->MountToParent(stackNode);
-    auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
-    layoutProperty->UpdateAlignment(Alignment::CENTER);
-    layoutProperty->UpdateLayoutWeight(1);
-    stackNode->MountToParent(dateNode);
-}
-
-void DatePickerModelNG::createYearColumnNode(const RefPtr<FrameNode>& columnNode,
-    const RefPtr<FrameNode>& dateNode)
+void DatePickerModelNG::CreateDateColumn(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode)
 {
     auto stackYearNode = CreateStackNode();
     auto blendYearNode = CreateColumnNode();
