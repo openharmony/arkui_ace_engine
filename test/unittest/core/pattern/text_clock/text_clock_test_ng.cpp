@@ -1429,11 +1429,41 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest009, TestSize.Level1)
     strDateTimeValue = "1970/01/01, 01:01.001:01";
     str = pattern->ParseDateTimeValue(strDateTimeValue);
     EXPECT_EQ(str, strVec2);
+}
 
+/**
+ * @tc.name: TextClockLayoutPropertyTest010
+ * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest010, TestSize.Level1)
+ {
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+     TestProperty testProperty;
+     testProperty.format = std::make_optional(CLOCK_FORMAT);
+     testProperty.hoursWest = std::make_optional(HOURS_WEST);
+     RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+     ASSERT_NE(frameNode, nullptr);
+ 
+     /**
+      * @tc.steps: step2. get pattern and layoutProperty.
+      * @tc.expected: step2.
+      */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textClockProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(textClockProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. ParseDateTimeValue function is called..
+     * @tc.expected: step3. check whether the properties is correct.
+     */
     std::vector<std::string> strVec3 = { "1970", "01", "01", "01", "01", "01", "001", "", "0", "70", "1", "1", "00",
         "" };
-    strDateTimeValue = "1970/01/01, 01:01:01.001";
-    str = pattern->ParseDateTimeValue(strDateTimeValue);
+    std::string strDateTimeValue = "1970/01/01, 01:01:01.001";
+    std::vector<std::string> str = pattern->ParseDateTimeValue(strDateTimeValue);
     EXPECT_EQ(str, strVec3);
 
     std::vector<std::string> strVec4 = { "1970", "01", "01", "1", "01", "01", "001", "", "0", "70", "1", "1", "00",
@@ -1452,8 +1482,6 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest009, TestSize.Level1)
     str = pattern->ParseDateTimeValue(strDateTimeValue);
     EXPECT_EQ(str, strVec5);
 }
-
-
 
 /**
  * @tc.name: TextClockLayoutAlgorithm001
@@ -1853,7 +1881,6 @@ HWTEST_F(TextClockTestNG, TextClockTest016, TestSize.Level1)
     EXPECT_EQ(textProperty->GetPropertyChangeFlag(), PROPERTY_CHANGE_FLAG_2);
 }
 
-
 /**
  * @tc.name: TextClockTest017
  * @tc.desc: Test ResetTextColor and ResetFontColor of TextClock.
@@ -1875,7 +1902,6 @@ HWTEST_F(TextClockTestNG, TextClockTest017, TestSize.Level1)
      * @tc.steps: step2. test ResetTextColor and ResetFontColor.
      * @tc.expected: step2. check whether the properties is correct.
      */
-
     model.SetTextColor(TEXT_COLOR_VALUE_1);
     EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE_1);
     model.ResetTextColor();
