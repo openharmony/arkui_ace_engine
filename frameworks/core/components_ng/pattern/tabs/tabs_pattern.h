@@ -188,7 +188,7 @@ private:
     AnimationEndEventPtr animationEndEvent_;
     std::function<bool(int32_t, int32_t)> callback_;
     bool interceptStatus_ = false;
-    BarPosition barPosition_ = BarPosition::START;
+    BarPosition barPosition_ = BarPosition::END; // default accessibilityZIndex is consistent with BarPosition::END
 };
 
 } // namespace OHOS::Ace::NG

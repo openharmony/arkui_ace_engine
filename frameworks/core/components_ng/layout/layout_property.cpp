@@ -1405,6 +1405,7 @@ void LayoutProperty::UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layout
 
 void LayoutProperty::UpdateVisibility(const VisibleType& value, bool allowTransition, bool isUserSet)
 {
+    isUserSetVisibility_ = isUserSet;
     if (propVisibility_.has_value()) {
         if (NearEqual(propVisibility_.value(), value)) {
             return;

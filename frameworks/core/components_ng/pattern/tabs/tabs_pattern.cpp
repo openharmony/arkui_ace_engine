@@ -577,7 +577,6 @@ void TabsPattern::InitAccessibilityZIndex()
     CHECK_NULL_VOID(tabsLayoutProperty);
     BarPosition barPosition = tabsLayoutProperty->GetTabBarPositionValue(BarPosition::START);
     if (barPosition != barPosition_) {
-        barPosition_ = barPosition;
         auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
         CHECK_NULL_VOID(swiperNode);
         auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
@@ -593,6 +592,7 @@ void TabsPattern::InitAccessibilityZIndex()
             swiperAccessibilityProperty->SetAccessibilityZIndex(0);
             tabBarAccessibilityProperty->SetAccessibilityZIndex(1);
         }
+        barPosition_ = barPosition;
     }
 }
 

@@ -144,6 +144,7 @@ private:
     void FireRefreshing();
     void FireChangeEvent(const std::string& value);
     void FireOnOffsetChange(float value);
+    void UpdateCustomBuilderVisibility();
     void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
     void InitProgressColumn();
     void UpdateLoadingTextOpacity(float opacity);

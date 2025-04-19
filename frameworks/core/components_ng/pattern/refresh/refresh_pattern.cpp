@@ -556,10 +556,29 @@ void RefreshPattern::FireOnOffsetChange(float value)
         value = 0.0f;
     }
     if (!NearEqual(lastScrollOffset_, value)) {
+        UpdateCustomBuilderVisibility();
         auto refreshEventHub = GetEventHub<RefreshEventHub>();
         CHECK_NULL_VOID(refreshEventHub);
         refreshEventHub->FireOnOffsetChange(Dimension(value).ConvertToVp());
         lastScrollOffset_ = value;
+    }
+}
+
+void RefreshPattern::UpdateCustomBuilderVisibility()
+{
+    if (!isCustomBuilderExist_) {
+        return;
+    }
+    CHECK_NULL_VOID(customBuilder_);
+    auto customBuilderLayoutProperty = customBuilder_->GetLayoutProperty();
+    CHECK_NULL_VOID(customBuilderLayoutProperty);
+    if (customBuilderLayoutProperty->IsUserSetVisibility()) {
+        return;
+    }
+    if (LessOrEqual(scrollOffset_, 0.0f)) {
+        customBuilderLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    } else {
+        customBuilderLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     }
 }
 
@@ -602,6 +621,7 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
     }
     customBuilder_ = AceType::DynamicCast<FrameNode>(builder);
     isCustomBuilderExist_ = true;
+    UpdateCustomBuilderVisibility();
 }
 
 void RefreshPattern::SetAccessibilityAction()
@@ -929,11 +949,20 @@ RefreshAnimationState RefreshPattern::GetLoadingProgressStatus()
 void RefreshPattern::ResetAnimation()
 {
     float currentOffset = scrollOffset_;
-    AnimationUtils::StopAnimation(animation_);
     if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
-        CHECK_NULL_VOID(offsetProperty_);
-        offsetProperty_->Set(currentOffset);
+        AnimationOption option;
+        option.SetCurve(DEFAULT_CURVE);
+        option.SetDuration(0);
+        animation_ =
+            AnimationUtils::StartAnimation(option, [weak = AceType::WeakClaim(this), offset = currentOffset]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto offsetProperty = pattern->offsetProperty_;
+                CHECK_NULL_VOID(offsetProperty);
+                offsetProperty->Set(offset);
+            });
     } else {
+        AnimationUtils::StopAnimation(animation_);
         CHECK_NULL_VOID(lowVersionOffset_);
         lowVersionOffset_->Set(currentOffset);
     }
