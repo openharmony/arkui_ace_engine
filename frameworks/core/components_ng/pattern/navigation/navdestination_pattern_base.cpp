@@ -436,10 +436,10 @@ void NavDestinationPatternBase::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(node);
     auto dividerNode = AceType::DynamicCast<FrameNode>(node->GetToolBarDividerNode());
     CHECK_NULL_VOID(dividerNode);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
     auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_VOID(dividerRenderProperty);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
     dividerRenderProperty->UpdateDividerColor(theme->GetToolBarDividerColor());
 }
 } // namespace OHOS::Ace::NG
