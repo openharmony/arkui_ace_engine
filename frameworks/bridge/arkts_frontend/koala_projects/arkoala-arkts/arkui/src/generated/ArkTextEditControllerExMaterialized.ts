@@ -81,7 +81,7 @@ export class TextEditControllerExInternal extends TextBaseControllerInternal imp
     }
     private getPreviewText_serialize(): PreviewText {
         const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_getPreviewText(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : PreviewText = retvalDeserializer.readPreviewText()
         return returnResult
     }

@@ -71,13 +71,13 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
     }
     private getGlyphPositionAtCoordinate_serialize(x: number, y: number): PositionWithAffinity {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getGlyphPositionAtCoordinate(this.peer!.ptr, x, y)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : PositionWithAffinity = retvalDeserializer.readPositionWithAffinity()
         return returnResult
     }
     private getLineMetrics_serialize(lineNumber: number): LineMetrics {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getLineMetrics(this.peer!.ptr, lineNumber)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : LineMetrics = retvalDeserializer.readLineMetrics()
         return returnResult
     }
@@ -86,7 +86,7 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         thisSerializer.writeTextRange(range)
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getRectsForRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), widthStyle.valueOf(), heightStyle.valueOf())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<TextBox> = new Array<TextBox>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {

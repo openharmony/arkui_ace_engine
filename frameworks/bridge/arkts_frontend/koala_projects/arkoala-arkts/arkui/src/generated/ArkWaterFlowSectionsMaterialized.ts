@@ -108,7 +108,7 @@ export class WaterFlowSections implements MaterializedBase {
     }
     private values_serialize(): Array<SectionOptions> {
         const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_values(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<SectionOptions> = new Array<SectionOptions>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {

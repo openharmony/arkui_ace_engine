@@ -67,7 +67,7 @@ export class WebResourceRequest implements MaterializedBase {
     }
     private getRequestHeader_serialize(): Array<Header> {
         const retval  = ArkUIGeneratedNativeModule._WebResourceRequest_getRequestHeader(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<Header> = new Array<Header>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {

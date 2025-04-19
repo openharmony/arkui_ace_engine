@@ -272,7 +272,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     }
     private getIntentionCode_serialize(): IntentionCode {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getIntentionCode(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : IntentionCode = retvalDeserializer.readIntentionCode()
         return returnResult
     }

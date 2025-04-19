@@ -52,7 +52,7 @@ export class ImageAnalyzerController implements MaterializedBase {
     }
     private getImageAnalyzerSupportTypes_serialize(): Array<ImageAnalyzerType> {
         const retval  = ArkUIGeneratedNativeModule._ImageAnalyzerController_getImageAnalyzerSupportTypes(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<ImageAnalyzerType> = new Array<ImageAnalyzerType>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {

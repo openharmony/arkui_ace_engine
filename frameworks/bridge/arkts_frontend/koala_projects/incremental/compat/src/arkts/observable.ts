@@ -257,7 +257,7 @@ class CustomArrayProxyHandler<T> extends DefaultArrayProxyHandler<T> {
         return super.set(target, name, value)
     }
 
-    override invoke(target: Array<T>, method: Method, args: NullishType[]): NullishType {
+    override invoke(target: Array<T>, method: Method, args: FixedArray<NullishType>): NullishType {
         const observable = ObservableHandler.find(target)
         if (observable) {
             const name = method.getName()
