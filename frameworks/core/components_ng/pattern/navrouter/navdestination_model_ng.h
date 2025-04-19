@@ -42,7 +42,7 @@ public:
     void SetOnWillDisAppear(std::function<void()>&& willDisAppear) override;
     void SetOnActive(std::function<void(int32_t)>&& onActive) override;
     void SetOnInactive(std::function<void(int32_t)>&& onInactive) override;
-    void SetOnPop(std::function<void(const RefPtr<NavPathInfo>&)>&& popCallback) override;
+    void SetOnPop(const std::function<void(const RefPtr<NavPathInfo>&)>& popCallback) override;
     void SetOnBackPressed(std::function<bool()>&& onBackPressed) override;
     void SetHideToolBar(bool hideToolBar, bool animated) override;
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);

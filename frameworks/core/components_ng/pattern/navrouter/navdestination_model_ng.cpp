@@ -1030,7 +1030,7 @@ void NavDestinationModelNG::UpdateBindingWithScrollable(
     callback(processor);
 }
 
-void NavDestinationModelNG::SetOnPop(std::function<void(const RefPtr<NavPathInfo>&)>&& onPop)
+void NavDestinationModelNG::SetOnPop(const std::function<void(const RefPtr<NavPathInfo>&)>& onPop)
 {
     if (!onPop) {
         return;

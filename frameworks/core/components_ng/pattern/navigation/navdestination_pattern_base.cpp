@@ -437,7 +437,7 @@ void NavDestinationPatternBase::OnColorConfigurationUpdate()
     auto dividerNode = AceType::DynamicCast<FrameNode>(node->GetToolBarDividerNode());
     CHECK_NULL_VOID(dividerNode);
     auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(dividerNode);
+    CHECK_NULL_VOID(theme);
     auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_VOID(dividerRenderProperty);
     dividerRenderProperty->UpdateDividerColor(theme->GetToolBarDividerColor());
