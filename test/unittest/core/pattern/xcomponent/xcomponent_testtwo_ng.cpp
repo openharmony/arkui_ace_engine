@@ -71,6 +71,7 @@ const uint64_t XCOMPONENT_SCREEN_ID = 12345u;
 constexpr XComponentType XCOMPONENT_SURFACE_TYPE_VALUE = XComponentType::SURFACE;
 constexpr XComponentType XCOMPONENT_TEXTURE_TYPE_VALUE = XComponentType::TEXTURE;
 constexpr XComponentType XCOMPONENT_COMPONENT_TYPE_VALUE = XComponentType::COMPONENT;
+constexpr XComponentType XCOMPONENT_NODE_TYPE_VALUE = XComponentType::NODE;
 constexpr float MAX_WIDTH = 400.0f;
 constexpr float MAX_HEIGHT = 400.0f;
 constexpr uint32_t SURFACE_WIDTH_SIZE = 200;
@@ -1544,5 +1545,116 @@ HWTEST_F(XComponentTestTwoNg, OnClearRegisterFlagTest, TestSize.Level1)
      */
     xComponentAccessibilityChildTreeCallback->OnClearRegisterFlag();
     EXPECT_FALSE(xComponentAccessibilityChildTreeCallback->isReg_);
+}
+
+/**
+ * @tc.name: EnableAnalyzerTest001
+ * @tc.desc: Test EnableAnalyzer Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, EnableAnalyzerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create XComponent when Type = Surface
+     * @tc.expected: Create XComponent Successfully
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.step2: Call EnableAnalyzer Func
+     * @tc.expected: isEnableAnalyzer_ = true;
+     */
+    XComponentModelNG::EnableAnalyzer(AceType::RawPtr(frameNode), true);
+    EXPECT_EQ(pattern->isEnableAnalyzer_, true);
+}
+
+/**
+ * @tc.name: EnableAnalyzerTest002
+ * @tc.desc: Test EnableAnalyzer Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, EnableAnalyzerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create XComponent when Type = Component
+     * @tc.expected: Create XComponent Successfully
+     */
+    g_testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.step2: Call EnableAnalyzer Func
+     * @tc.expected: isEnableAnalyzer_ = false;
+     */
+    XComponentModelNG::EnableAnalyzer(AceType::RawPtr(frameNode), true);
+    EXPECT_EQ(pattern->isEnableAnalyzer_, false);
+}
+
+/**
+ * @tc.name: EnableAnalyzerTest003
+ * @tc.desc: Test EnableAnalyzer Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, EnableAnalyzerTest003, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create XComponent when Type = Node
+     * @tc.expected: Create XComponent Successfully
+     */
+    g_testProperty.xcType = XCOMPONENT_NODE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.step2: Call EnableAnalyzer Func
+     * @tc.expected: isEnableAnalyzer_ = false;
+     */
+    XComponentModelNG::EnableAnalyzer(AceType::RawPtr(frameNode), true);
+    EXPECT_EQ(pattern->isEnableAnalyzer_, false);
+}
+
+/**
+ * @tc.name: GetXComponentSurfaceRectTest
+ * @tc.desc: Test GetXComponentSurfaceRect Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, GetXComponentSurfaceRectTest, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create XComponent when Type = Surface
+     * @tc.expected: Create XComponent Successfully
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.step2: Call GetXComponentSurfaceRect Func
+     * @tc.expected: offsetX = OFFSET_X; offsetY = OFFSET_Y;
+     * surfaceWidth = SURFACE_WIDTH_SIZE; surfaceHeight = SURFACE_HEIGHT_SIZE
+     */
+    pattern->surfaceOffset_ = OffsetF(OFFSET_X, OFFSET_Y);
+    pattern->surfaceSize_ = SizeF(SURFACE_WIDTH_SIZE, SURFACE_HEIGHT_SIZE);
+    float offsetX = 0;
+    float offsetY = 0;
+    float surfaceWidth = 0;
+    float surfaceHeight = 0;
+    XComponentModelNG::GetXComponentSurfaceRect(
+        AceType::RawPtr(frameNode), offsetX, offsetY, surfaceWidth, surfaceHeight);
+    EXPECT_EQ(offsetX, OFFSET_X);
+    EXPECT_EQ(offsetY, OFFSET_Y);
+    EXPECT_EQ(surfaceWidth, SURFACE_WIDTH_SIZE);
+    EXPECT_EQ(surfaceHeight, SURFACE_HEIGHT_SIZE);
 }
 } // namespace OHOS::Ace::NG
