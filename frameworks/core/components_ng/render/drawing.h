@@ -149,6 +149,15 @@ using RSTextRect = Rosen::TextRect;
 using RSEllipsisMode = Rosen::EllipsisModal;
 using RSSymbolAnimation = Rosen::RSSymbolAnimation;
 using RSSymbolAnimationConfig = Rosen::TextEngine::SymbolAnimationConfig;
+struct RSDataWrapper {
+    std::shared_ptr<RSData> data;
+};
+
+inline void RSDataWrapperReleaseProc(const void*, void* context)
+{
+    RSDataWrapper* wrapper = reinterpret_cast<RSDataWrapper*>(context);
+    delete wrapper;
+}
 } // namespace OHOS::Ace
 #else
 #include "core/components_ng/render/drawing_mock.h"
