@@ -812,13 +812,7 @@ void ContainerModalPattern::InitLayoutProperty()
     InitTitleRowLayoutProperty(GetCustomTitleRow(), false);
     InitTitleRowLayoutProperty(GetFloatingTitleRow(), true);
     InitButtonsLayoutProperty();
-    if (!IsContainerModalTransparent()) {
-        if (titleMgr_ == nullptr) {
-            auto title = GetCustomTitleRow();
-            titleMgr_ = MakeRefPtr<ContainerModalToolBar>(WeakClaim(this), title, false);
-        }
-        titleMgr_->HasExpandStackLayout();
-    }
+
     containerModal->MarkModifyDone();
 }
 

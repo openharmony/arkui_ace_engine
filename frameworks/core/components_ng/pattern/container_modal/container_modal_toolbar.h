@@ -49,7 +49,7 @@ public:
     bool GetNavOrSideBarNodes();
     void ToInitNavOrSideBarNode();
 
-    void HasExpandStackLayout();
+    void UpdateToolbarLayoutBasedOnTargetNodes();
     void ExpandStackLayout();
     void UpdateTargetNodesBarMargin();
     void SetExpandStackLayout(bool isExpand)
@@ -133,8 +133,8 @@ private:
     WeakPtr<FrameNode> navigationNode_;
     WeakPtr<FrameNode> navDestNode_;
     bool hasNavOrSideBarNodes_ = false;
-    bool hasFind_ = false;
     bool hasSetOnchangeCallback_ = false;
+    bool isSafeAreaOn_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_TOOLBAR_H

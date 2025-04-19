@@ -237,6 +237,8 @@ public:
         return isHaveToolBar_;
     }
 
+    bool IsContainerModalTransparent();
+
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
     {
@@ -263,7 +265,6 @@ protected:
 
     bool CanShowFloatingTitle();
     bool CanShowCustomTitle();
-    bool IsContainerModalTransparent();
     void TrimFloatingWindowLayout();
     Color GetContainerColor(bool isFocus);
 
