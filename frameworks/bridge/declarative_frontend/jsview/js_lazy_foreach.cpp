@@ -144,7 +144,7 @@ bool ParseAndVerifyParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[MAX
         return false;
     }
 
-    for (int32_t idx = PARAM_VIEW_ID; idx < std::min(info.Length(), static_cast<uint32_t>(MAX_PARAM_SIZE)); ++idx) {
+    for (uint32_t idx = PARAM_VIEW_ID; idx < std::min(info.Length(), static_cast<uint32_t>(MAX_PARAM_SIZE)); ++idx) {
         params[idx] = info[idx];
     }
     return true;

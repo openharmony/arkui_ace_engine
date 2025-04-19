@@ -1736,7 +1736,8 @@ ArkUINativeModuleValue FrameNodeBridge::LayoutNode(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(x->IsNumber(), defaultReturnValue);
     Local<JSValueRef> y = runtimeCallInfo->GetCallArgRef(2);
     CHECK_NULL_RETURN(y->IsNumber(), defaultReturnValue);
-    ArkUI_Float32 positionValue[2] = { x->ToNumber(vm)->Value(), y->ToNumber(vm)->Value() };
+    ArkUI_Float32 positionValue[2] = { static_cast<ArkUI_Float32>(x->ToNumber(vm)->Value()),
+        static_cast<ArkUI_Float32>(y->ToNumber(vm)->Value()) };
 
     ArkUIVMContext vmContext = nullptr;
     GetArkUIFullNodeAPI()->getExtendedAPI()->layoutNode(vmContext, nativeNode, &positionValue);

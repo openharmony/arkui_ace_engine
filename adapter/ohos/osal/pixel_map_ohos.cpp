@@ -427,7 +427,8 @@ RefPtr<PixelMap> PixelMapOhos::GetCropPixelMap(const Rect& srcRect)
     options.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     options.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
 
-    Media::Rect rect {srcRect.Left(), srcRect.Top(), srcRect.Width(), srcRect.Height()};
+    Media::Rect rect {static_cast<int32_t>(srcRect.Left()), static_cast<int32_t>(srcRect.Top()),
+        static_cast<int32_t>(srcRect.Width()), static_cast<int32_t>(srcRect.Height()) };
     auto resPixelmap = OHOS::Media::PixelMap::Create(*pixmap_, rect, options);
     return AceType::MakeRefPtr<PixelMapOhos>(std::move(resPixelmap));
 }
@@ -435,7 +436,8 @@ RefPtr<PixelMap> PixelMapOhos::GetCropPixelMap(const Rect& srcRect)
 uint32_t PixelMapOhos::WritePixels(const WritePixelsOptions& opts)
 {
     CHECK_NULL_RETURN(pixmap_, Media::ERR_IMAGE_WRITE_PIXELMAP_FAILED);
-    Media::Rect rect { opts.region.Left(), opts.region.Top(), opts.region.Width(), opts.region.Height() };
+    Media::Rect rect { static_cast<int32_t>(opts.region.Left()), static_cast<int32_t>(opts.region.Top()),
+        static_cast<int32_t>(opts.region.Width()), static_cast<int32_t>(opts.region.Height()) };
     Media::RWPixelsOptions options;
     options.pixels = opts.source;
     options.bufferSize = opts.bufferSize;

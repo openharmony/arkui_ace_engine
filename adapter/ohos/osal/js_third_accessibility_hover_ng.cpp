@@ -160,10 +160,12 @@ bool AccessibilityHoverManagerForThirdNG::HoverPathForThirdRecursive(
     auto [shouldSearchSelf, shouldSearchChildren]
         = GetSearchStrategyForThird(nodeInfo);
     auto rectInScreen = nodeInfo.GetRectInScreen();
-    auto left = rectInScreen.GetLeftTopXScreenPostion();
-    auto right = rectInScreen.GetLeftTopYScreenPostion();
-    auto width = rectInScreen.GetRightBottomXScreenPostion() - rectInScreen.GetLeftTopXScreenPostion();
-    auto height = rectInScreen.GetRightBottomYScreenPostion() - rectInScreen.GetLeftTopYScreenPostion();
+    auto left = static_cast<float>(rectInScreen.GetLeftTopXScreenPostion());
+    auto right = static_cast<float>(rectInScreen.GetLeftTopYScreenPostion());
+    auto width = static_cast<float>(
+        rectInScreen.GetRightBottomXScreenPostion() - rectInScreen.GetLeftTopXScreenPostion());
+    auto height = static_cast<float>(
+        rectInScreen.GetRightBottomYScreenPostion() - rectInScreen.GetLeftTopYScreenPostion());
     NG::RectF rect { left, right, width, height };
     bool hitSelf = rect.IsInnerRegion(hoverPoint);
     if (hitSelf && shouldSearchSelf) {

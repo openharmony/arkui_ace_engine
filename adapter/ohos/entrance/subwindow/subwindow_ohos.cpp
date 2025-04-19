@@ -132,7 +132,7 @@ Rosen::WindowType SubwindowOhos::GetToastRosenType(bool IsSceneBoardEnabled)
             return Rosen::WindowType::WINDOW_TYPE_TOAST;
         }
         return Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
-    } else if (toastType ==  ToastWindowType::TOAST_IN_TYPE_SYSTEM_SUB_WINDOW) {
+    } else if (toastType == ToastWindowType::TOAST_IN_TYPE_SYSTEM_SUB_WINDOW) {
         return Rosen::WindowType::WINDOW_TYPE_TOAST;
     } else if (toastType == ToastWindowType::TOAST_IN_TYPE_SYSTEM_FLOAT) {
         return Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT;
@@ -189,7 +189,6 @@ void SetSubWindowCutout(const RefPtr<PipelineBase> parentPipeline, int32_t child
     CHECK_NULL_VOID(subSafeAreaManager);
     subSafeAreaManager->SetUseCutout(parentUseCutout);
 }
-
 
 Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
 {
@@ -279,8 +278,10 @@ void SubwindowOhos::InitContainer()
         TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Parent window displayId: %{public}u width: %{public}d height: %{public}d",
             (uint32_t)displayId, defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
         auto windowSize = GetSubWindowSize(parentContainerId_, displayId);
-        windowOption->SetWindowRect({ 0, 0, windowSize.Width(), windowSize.Height() });
-        windowOption->SetWindowRect({ 0, 0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() });
+        windowOption->SetWindowRect(
+            { 0, 0, static_cast<uint32_t>(windowSize.Width()), static_cast<uint32_t>(windowSize.Height()) });
+        windowOption->SetWindowRect({ 0, 0, static_cast<uint32_t>(defaultDisplay->GetWidth()),
+            static_cast<uint32_t>(defaultDisplay->GetHeight()) });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
         SetUIExtensionSubwindowFlag(windowOption, isAppSubwindow, parentWindow);
         windowOption->SetDisplayId(displayId);
@@ -1432,7 +1433,7 @@ bool SubwindowOhos::InitToastDialogWindow(int32_t& width, int32_t& height, int32
     } else {
         windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     }
-    windowOption->SetWindowRect({ posX, posY, width, height });
+    windowOption->SetWindowRect({ posX, posY, static_cast<uint32_t>(width), static_cast<uint32_t>(height) });
     windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
     windowOption->SetFocusable(!isToast);
     int32_t dialogId = gToastDialogId.fetch_add(1, std::memory_order_relaxed);
@@ -2289,7 +2290,8 @@ void SubwindowOhos::InitializeSafeArea()
     if (theme->GetExpandDisplay() || parentContainer->IsFreeMultiWindow()) {
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(window_->GetDisplayId());
         CHECK_NULL_VOID(defaultDisplay);
-        windowRect = { 0.0, 0.0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() };
+        windowRect = { 0.0, 0.0, static_cast<float>(defaultDisplay->GetWidth()),
+            static_cast<float>(defaultDisplay->GetHeight()) };
     }
 
     auto systemSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, windowRect);

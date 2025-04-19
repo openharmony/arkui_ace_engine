@@ -575,7 +575,8 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCal
     if (!(xResult || yResult)) {
         LOGE("the position prop is illegal");
     } else {
-        child->GetGeometryNode()->SetMarginFrameOffset({ dimenX.ConvertToPx(), dimenY.ConvertToPx() });
+        child->GetGeometryNode()->SetMarginFrameOffset({ static_cast<float>(dimenX.ConvertToPx()),
+            static_cast<float>(dimenY.ConvertToPx()) });
     }
     child->Layout();
 
@@ -613,7 +614,8 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSPlaceChildren(panda::JsiRun
     if (!(xResult || yResult)) {
         LOGE("the position prop is illegal");
     } else {
-        child->GetGeometryNode()->SetMarginFrameOffset({ dimenX.ConvertToPx(), dimenY.ConvertToPx() });
+        child->GetGeometryNode()->SetMarginFrameOffset({ static_cast<float>(dimenX.ConvertToPx()),
+            static_cast<float>(dimenY.ConvertToPx()) });
     }
     child->Layout();
     return panda::JSValueRef::Undefined(vm);
