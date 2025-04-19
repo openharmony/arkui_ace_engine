@@ -651,7 +651,11 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createDatePickerNode,
     createTimePickerNode,
     createTextPickerNode,
+#ifndef ARKUI_WEARABLE
     createCalendarPickerNode,
+#else
+    nullptr,
+#endif
     createGridItemNode,
     createCustomNode,
     createWaterFlowNode,

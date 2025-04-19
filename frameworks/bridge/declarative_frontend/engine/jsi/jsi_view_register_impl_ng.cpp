@@ -382,8 +382,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
+#ifndef ARKUI_WEARABLE
     JSCalendarPicker::JSBind(globalObj);
     JSCalendarPickerDialog::JSBind(globalObj);
+#endif
     JSForEach::JSBind(globalObj);
     JSRepeat::JSBind(globalObj);
     JSRepeatVirtualScroll::JSBind(globalObj);
@@ -486,10 +488,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSTimePicker::JSBind(globalObj);
     JSDatePicker::JSBind(globalObj);
     JSPageTransition::JSBind(globalObj);
+#ifndef ARKUI_WEARABLE
     JSTextPickerDialog::JSBind(globalObj);
     JSTimePickerDialog::JSBind(globalObj);
     JSDatePickerDialog::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSRowSplit::JSBind(globalObj);
     JSColumnSplit::JSBind(globalObj);
 #endif
