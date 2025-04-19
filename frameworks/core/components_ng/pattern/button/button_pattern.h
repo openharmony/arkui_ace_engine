@@ -274,6 +274,7 @@ private:
         RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
     Shadow GetShadowFromTheme(ShadowStyle shadowStyle);
     void HandleFocusActiveStyle();
+    void SetButtonScale(RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
 };
 } // namespace OHOS::Ace::NG
 

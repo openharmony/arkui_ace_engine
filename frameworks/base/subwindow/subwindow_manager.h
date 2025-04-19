@@ -29,6 +29,7 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/common/display_info.h"
 
 namespace OHOS::Ace {
 constexpr int32_t INSTANCE_ID_BIT = 24;
@@ -118,11 +119,14 @@ public:
     void ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
     void HidePopupNG(int32_t targetId, int32_t instanceId = -1);
+    void ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo, int32_t appearingTime,
+        int32_t appearingTimeWithContinuousOperation);
+    void HideTipsNG(int32_t targetId, int32_t disappearingTime, int32_t instanceId = -1);
     bool CancelPopup(const std::string& id);
     void CloseMenu();
     void ClearMenu();
     void ClearMenuNG(int32_t instanceId = -1, int32_t targetId = -1, bool inWindow = true, bool showAnimation = false);
-    void ClearPopupInSubwindow(int32_t instanceId = -1);
+    void ClearPopupInSubwindow(int32_t instanceId = -1, bool isForceClear = false);
     ACE_FORCE_EXPORT RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
     RefPtr<NG::FrameNode> ShowDialogNGWithNode(const DialogProperties& dialogProps,
@@ -185,6 +189,7 @@ public:
 
     void OnUIExtensionWindowSizeChange(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
     void OnHostWindowSizeChanged(int32_t containerId, Rect windowRect, WindowSizeChangeReason reason);
+    void OnWaterfallModeChanged(int32_t instanceId, bool enabled) {}
     void HideSheetSubWindow(int32_t containerId);
     void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,

@@ -24,6 +24,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
+#include "frameworks/core/components/text_clock/text_clock_theme.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;

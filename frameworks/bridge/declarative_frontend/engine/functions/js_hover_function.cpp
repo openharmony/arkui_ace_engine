@@ -38,6 +38,7 @@ void JsHoverFunction::HoverExecute(bool isHover, HoverInfo& hoverInfo)
     hoverObj->SetProperty<double>("axisHorizontal", 0.0f);
     hoverObj->SetProperty<double>("tiltX", hoverInfo.GetTiltX().value_or(0.0f));
     hoverObj->SetProperty<double>("tiltY", hoverInfo.GetTiltY().value_or(0.0f));
+    hoverObj->SetProperty<double>("rollAngle", hoverInfo.GetRollAngle().value_or(0.0f));
     hoverObj->SetProperty<double>("deviceId", hoverInfo.GetDeviceId());
     hoverObj->SetProperty<int32_t>("targetDisplayId", hoverInfo.GetTargetDisplayId());
     hoverObj->SetProperty<int32_t>("pressure", 0.0f);
@@ -74,6 +75,7 @@ void JsHoverFunction::HoverMoveExecute(HoverInfo& hoverInfo)
     hoverObj->SetProperty<double>("axisHorizontal", 0.0f);
     hoverObj->SetProperty<double>("tiltX", hoverInfo.GetTiltX().value_or(0.0f));
     hoverObj->SetProperty<double>("tiltY", hoverInfo.GetTiltY().value_or(0.0f));
+    hoverObj->SetProperty<double>("rollAngle", hoverInfo.GetRollAngle().value_or(0.0f));
     hoverObj->SetProperty<double>("deviceId", hoverInfo.GetDeviceId());
     const OHOS::Ace::Offset& globalLocation = hoverInfo.GetGlobalLocation();
     const OHOS::Ace::Offset& localLocation = hoverInfo.GetLocalLocation();
@@ -109,6 +111,7 @@ void JsHoverFunction::AccessibilityHoverExecute(bool isHover, AccessibilityHover
     hoverObj->SetProperty<double>("axisHorizontal", 0.0f);
     hoverObj->SetProperty<double>("tiltX", 0.0f);
     hoverObj->SetProperty<double>("tiltY", 0.0f);
+    hoverObj->SetProperty<double>("rollAngle", 0.0f);
 
     const OHOS::Ace::Offset& globalLocation = hoverInfo.GetGlobalLocation();
     const OHOS::Ace::Offset& localLocation = hoverInfo.GetLocalLocation();

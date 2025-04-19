@@ -44,9 +44,7 @@ int32_t XComponentAccessibilityProvider::FindAccessibilityNodeInfosById(
     CHECK_NULL_RETURN(accessbilityProvider, errorCode);
     int32_t ret = accessbilityProvider->FindAccessibilityNodeInfosById(
         elementId, mode, requestId, infos);
-    if (ret == AccessibilityProviderOperatorErrorCode::NOT_REGISTERED) {
-        return errorCode;
-    }
+    CHECK_EQUAL_RETURN(ret, AccessibilityProviderOperatorErrorCode::NOT_REGISTERED, errorCode);
     return ret;
 }
 
@@ -59,9 +57,7 @@ int32_t XComponentAccessibilityProvider::FindAccessibilityNodeInfosByText(
     CHECK_NULL_RETURN(accessbilityProvider, errorCode);
     int32_t ret = accessbilityProvider->FindAccessibilityNodeInfosByText(
         elementId, text, requestId, infos);
-    if (ret == AccessibilityProviderOperatorErrorCode::NOT_REGISTERED) {
-        return errorCode;
-    }
+    CHECK_EQUAL_RETURN(ret, AccessibilityProviderOperatorErrorCode::NOT_REGISTERED, errorCode);
     return ret;
 }
 
@@ -74,9 +70,7 @@ int32_t XComponentAccessibilityProvider::FindFocusedAccessibilityNode(
     CHECK_NULL_RETURN(accessbilityProvider, errorCode);
     int32_t ret = accessbilityProvider->FindFocusedAccessibilityNode(
         elementId, focusType, requestId, info);
-    if (ret == AccessibilityProviderOperatorErrorCode::NOT_REGISTERED) {
-        return errorCode;
-    }
+    CHECK_EQUAL_RETURN(ret, AccessibilityProviderOperatorErrorCode::NOT_REGISTERED, errorCode);
     return ret;
 }
 
@@ -89,9 +83,7 @@ int32_t XComponentAccessibilityProvider::FindNextFocusAccessibilityNode(
     CHECK_NULL_RETURN(accessbilityProvider, errorCode);
     int32_t ret = accessbilityProvider->FindNextFocusAccessibilityNode(
         elementId, direction, requestId, info);
-    if (ret == AccessibilityProviderOperatorErrorCode::NOT_REGISTERED) {
-        return errorCode;
-    }
+    CHECK_EQUAL_RETURN(ret, AccessibilityProviderOperatorErrorCode::NOT_REGISTERED, errorCode);
     return ret;
 }
 
@@ -104,9 +96,7 @@ int32_t XComponentAccessibilityProvider::ExecuteAccessibilityAction(
     CHECK_NULL_RETURN(accessbilityProvider, errorCode);
     int32_t ret = accessbilityProvider->ExecuteAccessibilityAction(
         elementId, action, requestId, actionArguments);
-    if (ret == AccessibilityProviderOperatorErrorCode::NOT_REGISTERED) {
-        return errorCode;
-    }
+    CHECK_EQUAL_RETURN(ret, AccessibilityProviderOperatorErrorCode::NOT_REGISTERED, errorCode);
     return ret;
 }
 
@@ -116,9 +106,7 @@ int32_t XComponentAccessibilityProvider::ClearFocusedAccessibilityNode()
     auto accessbilityProvider = GetAccessbilityProvider(weakPattern_);
     CHECK_NULL_RETURN(accessbilityProvider, errorCode);
     int32_t ret = accessbilityProvider->ClearFocusedAccessibilityNode();
-    if (ret == AccessibilityProviderOperatorErrorCode::NOT_REGISTERED) {
-        return errorCode;
-    }
+    CHECK_EQUAL_RETURN(ret, AccessibilityProviderOperatorErrorCode::NOT_REGISTERED, errorCode);
     return ret;
 }
 
@@ -130,9 +118,7 @@ int32_t XComponentAccessibilityProvider::GetAccessibilityNodeCursorPosition(
     CHECK_NULL_RETURN(accessbilityProvider, errorCode);
     int32_t ret = accessbilityProvider->GetAccessibilityNodeCursorPosition(
         elementId, requestId, cursorPosition);
-    if (ret == AccessibilityProviderOperatorErrorCode::NOT_REGISTERED) {
-        return errorCode;
-    }
+    CHECK_EQUAL_RETURN(ret, AccessibilityProviderOperatorErrorCode::NOT_REGISTERED, errorCode);
     return ret;
 }
 

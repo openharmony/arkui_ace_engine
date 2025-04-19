@@ -74,6 +74,7 @@ group("linux_core_unittest") {
     "pattern/checkbox:checkbox_test_ng",
     "pattern/checkboxgroup:checkboxgroup_test_ng",
     "pattern/common_view:common_view_test_ng",
+    "pattern/container_modal:container_modal_pattern_enhance_test_ng",
     "pattern/container_modal:container_modal_test_ng",
     "pattern/counter:counter_test_ng",
     "pattern/custom:custom_test_ng",

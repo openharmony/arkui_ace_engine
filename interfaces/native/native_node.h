@@ -1901,7 +1901,7 @@ typedef enum {
      * .value[2].f32：width of the right edge. The unit is vp. \n
      * .value[3].f32：width of the bottom edge. The unit is vp. \n
      *
-     * @since 16
+     * @since 18
      */
     NODE_BACKGROUND_IMAGE_RESIZABLE_WITH_SLICE = 100,
     
@@ -1936,6 +1936,40 @@ typedef enum {
      *
      */
     NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO = 102,
+
+    /**
+     * @brief Defines the translate attribute, which supports for percentile translation input, and can be set, reset,
+     * and obtained as required through APIs.\n
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: distance to translate along the x-axis. The default unit is percentage.
+     * The unit is vp only if value[3] exists and value[3] is 0. The default value of value[0] is <b>0</b>.\n
+     * .value[1].f32: distance to translate along the y-axis. The default unit is percentage.
+     * The unit is vp only if value[4] exists and value[4] is 0. The default value of value[1] is <b>0</b>.\n
+     * .value[2].f32: distance to translate along the z-axis, in vp. The default value is <b>0</b>.\n
+     * .value[3]?.i32: Whether the translation distance along the x-axis is specified as a percentage.
+     *  The value can be 0 or 1. When the value is 1, it is specified as a percentage.
+     *  For example, value[0].f32=0.1 and value[3].i32=1 indicates a 10% shift in the x direction.
+     *  The default value is <b>1</b>.\n
+     * .value[4]?.i32: Whether the translation distance along the y-axis is specified as a percentage.
+     *  The value can be 0 or 1. When the value is 1, it is specified as a percentage.
+     *  For example, value[1].f32=0.1 and value[4].i32=1 indicates a 10% shift in the y direction.
+     *  The default value is <b>1</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: distance to translate along the x-axis. The unit depends on value[3].\n
+     * .value[1].f32: distance to translate along the y-axis. The unit depends on value[4].\n
+     * .value[2].f32: distance to translate along the z-axis. The unit is vp.\n
+     * .value[3].i32: Whether the unit of the X-axis translation distance is in percentage. When value[3].i32 is 0,
+     *  the unit of the X-axis translation distance is vp; when value[3].i32 is 1, the unit of the X-axis translation
+     *  distance is percentage;\n
+     * .value[4].i32: Whether the unit of the Y-axis translation distance is in percentage. When value[4].i32 is 0,
+     *  the unit of the Y-axis translation distance is vp; when value[4].i32 is 1, the unit of the Y-axis translation
+     *  distance is percentage;\n
+     *
+     * @since 20
+     */
+    NODE_TRANSLATE_WITH_PERCENT = 103,
     
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -2323,6 +2357,16 @@ typedef enum {
      * @since 15
      */
     NODE_IMMUTABLE_FONT_WEIGHT = 1030,
+
+    /**
+     * @brief Defines the text line count attribute, which can only be obtained as required through APIs.
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: line count of the node.
+     *
+     * @since 20
+     */
+    NODE_TEXT_LINE_COUNT = 1031,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -3496,12 +3540,12 @@ typedef enum {
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].i32: button type. The parameter type is {@link ArkUI_ButtonType}.
      * The default value is <b>ARKUI_BUTTON_TYPE_CAPSULE</b>. \n
-     * After api 16 the default value change to  <b>ARKUI_BUTTON_ROUNDED_RECTANGLE</b>.
+     * After api 18 the default value change to  <b>ARKUI_BUTTON_ROUNDED_RECTANGLE</b>.
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: button type. The parameter type is {@link ArkUI_ButtonType}.
      * The default value is <b>ARKUI_BUTTON_TYPE_CAPSULE</b>. \n
-     * After api 16 the default value change to  <b>ARKUI_BUTTON_ROUNDED_RECTANGLE</b>.
+     * After api 18 the default value change to  <b>ARKUI_BUTTON_ROUNDED_RECTANGLE</b>.
      *
      */
     NODE_BUTTON_TYPE,
@@ -3515,7 +3559,7 @@ typedef enum {
     * Format of the return value {@link ArkUI_AttributeItem}:\n
     * .value[0].f32: minimum font scale, in fp.
     *
-    * @since 16
+    * @since 18
     */
     NODE_BUTTON_MIN_FONT_SCALE,
 
@@ -3528,7 +3572,7 @@ typedef enum {
     * Format of the return value {@link ArkUI_AttributeItem}:\n
     * .value[0].f32: maximum font scale, in fp.
     *
-    * @since 16
+    * @since 18
     */
     NODE_BUTTON_MAX_FONT_SCALE,
 
@@ -3894,7 +3938,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * value[0].i32: the mode. The value is and enum of {@link ArkUI_DatePickerMode}.\n.
      *
-     * @since 16
+     * @since 18
      */
     NODE_DATE_PICKER_MODE = 13007,
     /**
@@ -3908,7 +3952,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * value[0].i32: whether to feedback.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_DATE_PICKER_ENABLE_HAPTIC_FEEDBACK = 13008,
     /**
@@ -4018,7 +4062,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .string: time. The default value is <b>"00:00:00"</b>.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_TIME_PICKER_START = 14005,
     /**
@@ -4031,7 +4075,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .string: time. The default value is <b>"23:59:59"</b>.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_TIME_PICKER_END = 14006,
 
@@ -4045,7 +4089,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: whether to enable cascade.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_TIME_PICKER_ENABLE_CASCADE = 14007,
 
@@ -4219,7 +4263,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * value[0].i32: whether to feedback.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_TEXT_PICKER_ENABLE_HAPTIC_FEEDBACK = 15010,
     /**
@@ -4301,7 +4345,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .string: date. \n
      *
-     * @since 16
+     * @since 18
      */
     NODE_CALENDAR_PICKER_START = 16004,
     /**
@@ -4314,7 +4358,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .string: date. \n
      *
-     * @since 16
+     * @since 18
      */
     NODE_CALENDAR_PICKER_END = 16005,
     /**
@@ -4555,9 +4599,35 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * value[0].i32: whether to feedback.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_SLIDER_ENABLE_HAPTIC_FEEDBACK = 17013,
+
+    /**
+     * @brief Sets a custom component on the leading side of the Slider component.
+     *
+     * Attribute setting method {@link ArkUI_AttributeItem} parameter format: \n
+     * .object: Parameter type {@link ArkUI_NodeHandle}.
+     *
+     * The prefix component will be placed at the start position of the Slider,
+     * typically on the left side in LTR layouts.
+	 *
+	 * @since 18
+     */
+    NODE_SLIDER_PREFIX,
+
+    /**
+     * @brief Sets a custom component on the trailing side of the Slider component.
+     *
+     * Attribute setting method {@link link ArkUI_AttributeItem} parameter format: \n
+     * .object: Parameter type {@link ArkUI_NodeHandle}.
+     *
+     * The suffix component will be placed at the end position of the Slider,
+     * typically on the right side in LTR layouts.
+	 *
+	 * @since 18
+     */
+    NODE_SLIDER_SUFFIX,
 
     /**
      * @brief Sets whether the radio button is selected.
@@ -5036,7 +5106,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0]i.32: whether the scrollable scrolls back to top when status bar is clicked. \n
      * 
-     * @since 16
+     * @since 15
      */
     NODE_SCROLL_BACK_TO_TOP = 1002021,
     
@@ -6121,7 +6191,7 @@ typedef enum {
     * ...\n
     * value[n].f32: percentage of total width.\n
     *
-    * @since 16
+    * @since 18
     */
     NODE_TEXT_PICKER_COLUMN_WIDTHS = 15009,
     /**
@@ -6582,7 +6652,7 @@ typedef enum {
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
      * 
-     * @since 16
+     * @since 15
      */
     NODE_DISPATCH_KEY_EVENT = 24,
 
@@ -6592,16 +6662,17 @@ typedef enum {
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_UIInputEvent}. \n
      * 
-     * @since 16
+     * @since 18
      */
     NODE_ON_AXIS = 25,
 
-    /* @brief Defines the event triggered when the bound component is clicked.
+    /**
+     * @brief Defines the event triggered when the bound component is clicked.
      *
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_UIInputEvent}.  \n
      *
-     * @since 16
+     * @since 18
      */
     NODE_ON_CLICK_EVENT = 26,
 
@@ -6612,7 +6683,7 @@ typedef enum {
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_UIInputEvent}. \n
      *
-     *@since 16
+     *@since 18
      */
     NODE_ON_HOVER_EVENT = 27,
 
@@ -6631,7 +6702,7 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: ratio of the component's visible area to its total area
      * when this callback is invoked. \n
      *
-     * @since 16
+     * @since 17
      */
     NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT = 28,
 
@@ -6642,7 +6713,7 @@ typedef enum {
      * within the component. \n
      * When the event callback occurs, the {@link ArkUI_NodeEvent} object can be obtained from the
      * {@link ArkUI_UIInputEvent} object. \n
-     * @since16
+     * @since15
     */
     NODE_ON_HOVER_MOVE = 29,
 
@@ -6658,6 +6729,15 @@ typedef enum {
      *
      */
     NODE_TEXT_ON_DETECT_RESULT_UPDATE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT,
+    /**
+     * @brief Defines the long press event for span
+     *
+     * The event is triggered when the span is long pressed.
+     * When the event callback occurs, the {@link ArkUI_NodeEvent} object can be obtained from the
+     * {@link ArkUI_UIInputEvent} object.\n
+     *@since 20
+     */
+    NODE_TEXT_SPAN_ON_LONG_PRESS = 1001,
     /**
      * @brief Defines the image loading success event.
      *
@@ -9160,7 +9240,7 @@ int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetPositionToParent(ArkUI_NodeHandle node, ArkUI_IntOffset* globalOffset);
 

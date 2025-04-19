@@ -2965,7 +2965,7 @@ export class Filter extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             });
             Column.opacity(b2);
-            Column.backgroundBlurStyle(BlurStyle.Thin);
+            Column.backgroundBlurStyle(BlurStyle.Thin, undefined, { disableSystemAdaptation: true });
             Column.visibility(this.isFloatShowAllFilter ? Visibility.Visible : Visibility.Hidden);
             Column.position({ x: 0, y: this.floatFilterPosition });
             Column.zIndex(2);
@@ -3010,7 +3010,7 @@ export class Filter extends ViewPU {
             });
             Row.opacity(b2);
             Row.clip(true);
-            Row.backgroundBlurStyle(BlurStyle.Thin);
+            Row.backgroundBlurStyle(BlurStyle.Thin, undefined, { disableSystemAdaptation: true });
             Row.visibility(this.isFloatBarShow ? Visibility.Visible : Visibility.Hidden);
             Row.alignItems(VerticalAlign.Bottom);
             Row.position({ x: 0, y: this.floatFilterBarPosition });

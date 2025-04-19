@@ -52,6 +52,19 @@ RefPtr<SelectContentOverlayPattern> GetSelectHandlePattern(const WeakPtr<SelectC
     auto pattern = overlayManager->GetHandlePattern();
     return AceType::DynamicCast<SelectContentOverlayPattern>(pattern);
 }
+
+RefPtr<UINode> FindAccessibleFocusNode(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    if (node->GetTag() == V2::MENU_ITEM_ETS_TAG || node->GetTag() == "SelectMenuButton" ||
+        node->GetTag() == V2::PASTE_BUTTON_ETS_TAG || node->GetTag() == V2::OPTION_ETS_TAG ||
+        node->GetTag() == V2::BUTTON_ETS_TAG) {
+        return node;
+    }
+    auto child = node->GetFirstChild();
+    CHECK_NULL_RETURN(child, nullptr);
+    return FindAccessibleFocusNode(child);
+}
 } // namespace
 
 const RefPtr<SelectContentOverlayManager> SelectContentOverlayManager::GetOverlayManager(
@@ -111,6 +124,41 @@ bool SelectContentOverlayManager::HasHolder(int32_t id)
     return selectOverlayHolder_->GetOwnerId() == id;
 }
 
+void SelectContentOverlayManager::FocusFirstFocusableChildInMenu()
+{
+    auto menuNode = menuNode_.Upgrade();
+    CHECK_NULL_VOID(menuNode);
+    auto context = menuNode->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask([weakNode = menuNode_]() {
+        auto menuNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(menuNode);
+        auto firstChild = menuNode->GetFirstChild();
+        CHECK_NULL_VOID(firstChild);
+        auto focusableNode = FindAccessibleFocusNode(firstChild);
+        CHECK_NULL_VOID(focusableNode);
+        auto frameFocusableNode = AceType::DynamicCast<FrameNode>(focusableNode);
+        CHECK_NULL_VOID(frameFocusableNode);
+        frameFocusableNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+    });
+}
+
+void SelectContentOverlayManager::NotifyAccessibilityOwner()
+{
+    auto menuNode = menuNode_.Upgrade();
+    CHECK_NULL_VOID(menuNode);
+    auto context = menuNode->GetContext();
+    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(selectOverlayHolder_);
+    auto accessibilityManager = selectOverlayHolder_->GetOwner();
+    CHECK_NULL_VOID(accessibilityManager);
+    context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(accessibilityManager))]() {
+        auto manager = weakNode.Upgrade();
+        CHECK_NULL_VOID(manager);
+        manager->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+    });
+}
+
 void SelectContentOverlayManager::Show(bool animation, int32_t requestCode)
 {
     CHECK_NULL_VOID(selectOverlayHolder_);
@@ -134,6 +182,7 @@ void SelectContentOverlayManager::Show(bool animation, int32_t requestCode)
     } else {
         CreateSelectOverlay(info, animation);
     }
+    FocusFirstFocusableChildInMenu();
 }
 
 SelectOverlayInfo SelectContentOverlayManager::BuildSelectOverlayInfo(int32_t requestCode)
@@ -695,6 +744,7 @@ bool SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     auto selectOverlayNode = selectOverlayNode_.Upgrade();
     auto menuNode = menuNode_.Upgrade();
     auto handleNode = handleNode_.Upgrade();
+    NotifyAccessibilityOwner();
     if (animation && !shareOverlayInfo_->isUsingMouse) {
         ClearAllStatus();
         DestroySelectOverlayNodeWithAnimation(selectOverlayNode);

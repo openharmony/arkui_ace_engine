@@ -89,6 +89,7 @@ public:
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override {};
     void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
     void SetSearchEnterKeyType(TextInputAction value) override {};
+    void SetSearchCapitalizationMode(AutoCapitalizationMode value) override {};
     void SetMaxLength(uint32_t value) override {};
     void ResetMaxLength() override {};
     void SetType(TextInputType type) override {};

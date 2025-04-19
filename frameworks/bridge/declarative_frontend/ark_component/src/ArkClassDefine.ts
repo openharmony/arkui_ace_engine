@@ -361,6 +361,18 @@ class ArkSharedTransition {
   }
 }
 
+class ArkBindTipsOptions {
+  message: ResourceStr | StyledString | undefined;
+  options: TipsOptions | undefined;
+  constructor() {
+    this.message = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkBindTipsOptions): boolean {
+    return (this.options === another.options) && (this.options === another.options);
+  }
+}
+
 class ArkChainMode {
   direction: Axis | undefined;
   style: ChainStyle | undefined;
@@ -436,6 +448,20 @@ class ArkMenuAlignType {
 
   isEqual(another: ArkMenuAlignType): boolean {
     return this.alignType === another.alignType && this.dx === another.dx && this.dy === another.dy;
+  }
+}
+
+class ArkPrefixOrSuffix {
+  value: CustomBuilder;
+  options: SliderCustomContentOptions;
+
+  constructor(value: CustomBuilder, options?:SliderCustomContentOptions) {
+    this.value = value;
+    this.options = options;
+  }
+
+  isEqual(another: ArkPrefixOrSuffix): boolean {
+    return this.value === another.value && this.options === another.options;
   }
 }
 
@@ -745,6 +771,20 @@ class ArkSafeAreaExpandOpts {
   edges: string | number | undefined = undefined;
   isEqual(another: ArkSafeAreaExpandOpts): boolean {
     return (this.type === another.type) && (this.edges === another.edges);
+  }
+}
+
+class ArkEnableStatusBar {
+  enable: boolean | undefined = undefined;
+  animated?: boolean | undefined = undefined;
+
+  constructor() {
+    this.enable = undefined;
+    this.animated = undefined;
+  }
+
+  isEqual(another: ArkEnableStatusBar): boolean {
+    return (this.enable === another.enable) && (this.animated === another.animated);
   }
 }
 
@@ -1369,6 +1409,39 @@ class ArkBindMenu{
   }
 }
 
+class ArkSearchAutoCapitalization{
+  autoCapitalizationMode: AutoCapitalizationMode;
+  constructor() {
+    this.autoCapitalizationMode = undefined;
+  }
+
+  isEqual(another: ArkSearchAutoCapitalization): boolean {
+    return (this.autoCapitalizationMode === another.autoCapitalizationMode);
+  }
+}
+
+class ArkTextAreaAutoCapitalization{
+  autoCapitalizationMode: AutoCapitalizationMode;
+  constructor() {
+    this.autoCapitalizationMode = undefined;
+  }
+
+  isEqual(another: ArkTextAreaAutoCapitalization): boolean {
+    return (this.autoCapitalizationMode === another.autoCapitalizationMode);
+  }
+}
+
+class ArkTextInputAutoCapitalization{
+  autoCapitalizationMode: AutoCapitalizationMode;
+  constructor() {
+    this.autoCapitalizationMode = undefined;
+  }
+
+  isEqual(another: ArkTextAreaAutoCapitalization): boolean {
+    return (this.autoCapitalizationMode === another.autoCapitalizationMode);
+  }
+}
+
 class ArkTextBackGroundStyle {
   color: ResourceColor;
   radius: Dimension | BorderRadiuses;
@@ -1601,6 +1674,19 @@ class ArkTextFont {
 
   checkObjectDiff(another: ArkTextFont): boolean {
     return !this.isEqual(another);
+  }
+}
+
+class ArkLineSpacing {
+  value: LengthMetrics;
+  onlyBetweenLines: boolean;
+  constructor() {
+    this.value = undefined;
+    this.onlyBetweenLines = undefined;
+  }
+  isEqual(another: ArkLineSpacing): boolean {
+    return this.value === another.value &&
+      this.onlyBetweenLines === another.onlyBetweenLines;
   }
 }
 

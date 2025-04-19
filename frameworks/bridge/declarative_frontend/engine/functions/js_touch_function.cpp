@@ -65,6 +65,7 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     eventObj->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsTouchPreventDefault));
     eventObj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     eventObj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
+    eventObj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
     eventObj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     eventObj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
 

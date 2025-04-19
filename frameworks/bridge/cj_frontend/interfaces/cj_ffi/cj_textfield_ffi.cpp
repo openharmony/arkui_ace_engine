@@ -34,7 +34,8 @@ const std::vector<TextInputAction> TEXT_INPUT_ACTIONS = { TextInputAction::UNSPE
     TextInputAction::PREVIOUS, TextInputAction::NEW_LINE };
 const std::vector<TextInputType> TEXT_INPUT_TYPES = { TextInputType::TEXT, TextInputType::NUMBER,
     TextInputType::EMAIL_ADDRESS, TextInputType::VISIBLE_PASSWORD, TextInputType::PHONE, TextInputType::USER_NAME,
-    TextInputType::NEW_PASSWORD, TextInputType::NUMBER_PASSWORD, TextInputType::NUMBER_DECIMAL, TextInputType::URL };
+    TextInputType::NEW_PASSWORD, TextInputType::NUMBER_PASSWORD, TextInputType::NUMBER_DECIMAL, TextInputType::URL,
+    TextInputType::ONE_TIME_CODE };
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::NONE };
 const std::function<void(std::u16string)> FormatCharFunction(void (*callback)(const char* value))
@@ -585,7 +586,7 @@ void FfiOHOSAceFrameworkTextFieldCancelButton(int32_t style, double size, int32_
         } else {
             TextFieldModel::GetInstance()->SetCancelIconColor(Color());
         }
-        TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
+        TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetCancelIconSize());
         TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
         return;
     }
@@ -594,7 +595,7 @@ void FfiOHOSAceFrameworkTextFieldCancelButton(int32_t style, double size, int32_
     if (LessNotEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
         auto theme = GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
-        iconSize = theme->GetIconSize();
+        iconSize = theme->GetCancelIconSize();
     }
     TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
     // set color

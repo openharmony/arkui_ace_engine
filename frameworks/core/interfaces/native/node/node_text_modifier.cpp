@@ -343,13 +343,20 @@ void ResetTextTextOverflow(ArkUINodeHandle node)
     TextModelNG::SetTextOverflow(frameNode, TextOverflow::NONE);
 }
 
-void SetTextDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
+void SetTextDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration,
+    ArkUI_Uint32 color, ArkUI_Int32 style, ArkUI_Float32 lineThicknessScale = 1.0f)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetTextDecoration(frameNode, static_cast<TextDecoration>(decoration));
     TextModelNG::SetTextDecorationColor(frameNode, Color(color));
     TextModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
+    TextModelNG::SetLineThicknessScale(frameNode, lineThicknessScale);
+}
+
+void SetTextDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
+{
+    SetTextDecoration(node, decoration, color, style, 1.0f); // make cj happy
 }
 
 void GetTextDecoration(ArkUINodeHandle node, ArkUITextDecorationType* decoration)
@@ -866,6 +873,13 @@ ArkUI_Int32 GetFontWeight(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(TextModelNG::GetFontWeight(frameNode));
 }
 
+ArkUI_Int32 GetLineCount(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetLineCount(frameNode));
+}
+
 ArkUI_Int32 GetItalicFontStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -950,11 +964,11 @@ ArkUI_CharPtr GetTextFontFeature(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
-void SetTextLineSpacing(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
+void SetTextLineSpacing(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, ArkUI_Bool isOnlyBetweenLines)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetLineSpacing(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+    TextModelNG::SetLineSpacing(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)), isOnlyBetweenLines);
 }
 
 float GetTextLineSpacing(ArkUINodeHandle node)
@@ -968,7 +982,7 @@ void ResetTextLineSpacing(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetLineSpacing(frameNode, DEFAULT_LINE_SPACING);
+    TextModelNG::SetLineSpacing(frameNode, DEFAULT_LINE_SPACING, false);
 }
 
 void SetTextCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
@@ -1397,6 +1411,7 @@ const ArkUITextModifier* GetTextModifier()
         .setOnMarqueeStateChange = SetOnMarqueeStateChange,
         .resetOnMarqueeStateChange = ResetOnMarqueeStateChange,
         .setImmutableFontWeight = SetImmutableFontWeight,
+        .getLineCount = GetLineCount,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

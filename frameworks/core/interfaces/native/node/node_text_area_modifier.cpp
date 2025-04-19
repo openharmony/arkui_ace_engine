@@ -881,11 +881,11 @@ void ResetTextAreaTextIndent(ArkUINodeHandle node)
     TextFieldModelNG::SetTextIndent(frameNode, CalcDimension(0, DimensionUnit::VP));
 }
 
-void SetTextAreaLineSpacing(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+void SetTextAreaLineSpacing(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Bool isOnlyBetweenLines)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetLineSpacing(frameNode, CalcDimension(value, (DimensionUnit)unit));
+    TextFieldModelNG::SetLineSpacing(frameNode, CalcDimension(value, (DimensionUnit)unit), isOnlyBetweenLines);
 }
 
 void ResetTextAreaLineSpacing(ArkUINodeHandle node)
@@ -894,7 +894,8 @@ void ResetTextAreaLineSpacing(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     CalcDimension value;
     value.Reset();
-    TextFieldModelNG::SetLineSpacing(frameNode, value);
+    bool isOnlyBetweenLines = false;
+    TextFieldModelNG::SetLineSpacing(frameNode, value, isOnlyBetweenLines);
 }
 
 ArkUI_CharPtr GetTextAreaFontFeature(ArkUINodeHandle node)
@@ -1017,6 +1018,20 @@ void ResetTextAreaEnterKeyType(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetEnterKeyType(frameNode, TextInputAction::NEW_LINE);
+}
+
+void SetTextAreaAutoCapitalizationMode(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetAutoCapitalizationMode(frameNode, static_cast<AutoCapitalizationMode>(value));
+}
+
+void ResetTextAreaAutoCapitalizationMode(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetAutoCapitalizationMode(frameNode, AutoCapitalizationMode::NONE);
 }
 
 void SetTextAreaInputFilter(ArkUINodeHandle node, ArkUI_CharPtr value, void* callback)
@@ -1969,6 +1984,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .resetTextAreaWidth = ResetTextAreaWidth,
         .setTextAreaEnableHapticFeedback = SetTextAreaEnableHapticFeedback,
         .resetTextAreaEnableHapticFeedback = ResetTextAreaEnableHapticFeedback,
+        .setTextAreAutoCapitalizationMode = SetTextAreaAutoCapitalizationMode,
+        .resetTextAreAutoCapitalizationMode = ResetTextAreaAutoCapitalizationMode,
         .getTextAreaLetterSpacing = GetTextAreaLetterSpacing,
         .getTextAreaEnablePreviewText = GetTextAreaEnablePreviewText,
         .setEllipsisMode = SetEllipsisMode,

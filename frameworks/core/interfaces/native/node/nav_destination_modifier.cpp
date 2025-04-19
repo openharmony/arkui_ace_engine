@@ -149,7 +149,9 @@ void SetTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINav
         finalOptions.bgOptions.color = Color(options.colorValue.value);
     }
     if (options.blurStyle.isSet) {
-        finalOptions.bgOptions.blurStyle = static_cast<BlurStyle>(options.blurStyle.value);
+        BlurStyleOption blurStyleOption;
+        blurStyleOption.blurStyle = static_cast<BlurStyle>(options.blurStyle.value);
+        finalOptions.bgOptions.blurStyleOption = blurStyleOption;
     }
     if (options.barStyle.isSet) {
         finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(options.barStyle.value);
@@ -343,6 +345,68 @@ void SetCustomBackButtonNode(ArkUINodeHandle node, ArkUINodeHandle backButtonNod
     NavDestinationModelNG::SetCustomBackButtonNode(frameNode, backButton);
 }
 
+void SetPreferredOrientation(ArkUINodeHandle node, ArkUI_Int32 ori)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<Orientation> orientation;
+    if (ori >= static_cast<int32_t>(Orientation::BEGIN) && ori <= static_cast<int32_t>(Orientation::END)) {
+        orientation = static_cast<Orientation>(ori);
+    }
+    NavDestinationModelNG::SetPreferredOrientation(frameNode, orientation);
+}
+
+void ResetPreferredOrientation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetPreferredOrientation(frameNode, std::nullopt);
+}
+
+void SetEnableStatusBar(ArkUINodeHandle node, ArkUIOptionalBool enable, ArkUIOptionalBool animated)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<std::pair<bool, bool>> statusBar;
+    if (enable.isSet) {
+        std::pair<bool, bool> config;
+        config.first = enable.value;
+        config.second = false;
+        if (animated.isSet) {
+            config.second = animated.value;
+        }
+        statusBar = config;
+    }
+    NavDestinationModelNG::SetEnableStatusBar(frameNode, statusBar);
+}
+
+void ResetEnableStatusBar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<std::pair<bool, bool>> statusBar;
+    NavDestinationModelNG::SetEnableStatusBar(frameNode, statusBar);
+}
+
+void SetEnableNavigationIndicator(ArkUINodeHandle node, ArkUIOptionalBool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<bool> navigationIndicator;
+    if (enable.isSet) {
+        navigationIndicator = enable.value;
+    }
+    NavDestinationModelNG::SetEnableNavigationIndicator(frameNode, navigationIndicator);
+}
+
+void ResetEnableNavigationIndicator(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<bool> navigationIndicator;
+    NavDestinationModelNG::SetEnableNavigationIndicator(frameNode, navigationIndicator);
+}
+
 namespace NodeModifier {
 const ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
@@ -377,6 +441,12 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .setNavDestinationOnCoordScrollEndAction = SetNavDestinationOnCoordScrollEndAction,
         .setNavDestinationSystemBarStyle = SetNavDestinationSystemBarStyle,
         .setCustomBackButtonNode = SetCustomBackButtonNode,
+        .setPreferredOrientation = SetPreferredOrientation,
+        .resetPreferredOrientation = ResetPreferredOrientation,
+        .setEnableStatusBar = SetEnableStatusBar,
+        .resetEnableStatusBar = ResetEnableStatusBar,
+        .setEnableNavigationIndicator = SetEnableNavigationIndicator,
+        .resetEnableNavigationIndicator = ResetEnableNavigationIndicator,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -399,6 +469,12 @@ const CJUINavDestinationModifier* GetCJUINavDestinationModifier()
         .resetIgnoreLayoutSafeArea = ResetIgnoreLayoutSafeArea,
         .setNavDestinationSystemTransition = SetNavDestinationSystemTransition,
         .resetNavDestinationSystemTransition = ResetNavDestinationSystemTransition,
+        .setPreferredOrientation = SetPreferredOrientation,
+        .resetPreferredOrientation = ResetPreferredOrientation,
+        .setEnableStatusBar = SetEnableStatusBar,
+        .resetEnableStatusBar = ResetEnableStatusBar,
+        .setEnableNavigationIndicator = SetEnableNavigationIndicator,
+        .resetEnableNavigationIndicator = ResetEnableNavigationIndicator,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

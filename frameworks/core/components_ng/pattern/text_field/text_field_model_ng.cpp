@@ -357,6 +357,13 @@ void TextFieldModelNG::SetEnterKeyType(TextInputAction value)
     pattern->UpdateTextInputAction(value);
 }
 
+void TextFieldModelNG::SetCapitalizationMode(AutoCapitalizationMode value)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateAutoCapitalizationMode(value);
+}
+
 void TextFieldModelNG::SetCaretColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, value);
@@ -742,6 +749,11 @@ void TextFieldModelNG::SetNormalMaxViewLines(uint32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, NormalMaxViewLines, value);
 }
 
+void TextFieldModelNG::SetOverflowMode(OverflowMode value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, OverflowMode, value);
+}
+
 void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 {
     Color backgroundColor = color;
@@ -992,9 +1004,14 @@ void TextFieldModelNG::SetLineSpacing(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value);
 }
 
+void TextFieldModelNG::SetIsOnlyBetweenLines(bool isOnlyBetweenLines)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsOnlyBetweenLines, isOnlyBetweenLines);
+}
+
 void TextFieldModelNG::SetTextDecoration(Ace::TextDecoration value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, {value});
 }
 
 void TextFieldModelNG::SetTextDecorationColor(const Color& value)
@@ -1316,6 +1333,13 @@ void TextFieldModelNG::SetEnterKeyType(FrameNode* frameNode, TextInputAction val
         value = pattern->IsTextArea() ? TextInputAction::NEW_LINE : TextInputAction::DONE;
     }
     pattern->UpdateTextInputAction(value);
+}
+
+void TextFieldModelNG::SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value)
+{
+    auto pattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateAutoCapitalizationMode(value);
 }
 
 void TextFieldModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
@@ -1788,7 +1812,7 @@ void TextFieldModelNG::ResetTextInputPadding(FrameNode* frameNode)
 
 void TextFieldModelNG::SetTextDecoration(FrameNode* frameNode, TextDecoration value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, {value}, frameNode);
 }
 
 void TextFieldModelNG::SetTextDecorationColor(FrameNode* frameNode, const Color& value)
@@ -1816,9 +1840,11 @@ void TextFieldModelNG::SetHalfLeading(FrameNode* frameNode, const bool& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, value, frameNode);
 }
 
-void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value)
+void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value, bool isOnlyBetweenLines)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextFieldLayoutProperty, IsOnlyBetweenLines, isOnlyBetweenLines, frameNode);
 }
 
 void TextFieldModelNG::TextFieldModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)

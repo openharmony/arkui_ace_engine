@@ -78,8 +78,9 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
     if (GreatOrEqual(position.GetX(), rootWidth) || LessNotEqual(position.GetX(), 0.0f)) {
         return;
     }
-    position_ = position; // use for keyboard avoidance, uses like caret position
-    optionalPosition_ = position;
+    auto y = std::max(0.0, position.GetY());
+    position_ = {position.GetX(), y};
+    optionalPosition_ = position_;
 }
 
 RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField)

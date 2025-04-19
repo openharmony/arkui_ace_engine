@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,10 @@
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/syntax/for_each_node.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef ARKUI_CIRCLE_FEATURE
@@ -54,7 +58,9 @@ constexpr uint32_t EVENTS_FIRED_INFO_COUNT = 50;
 constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
 constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
 constexpr double ARC_INITWIDTH_VAL = 4.0;
+#ifdef ARKUI_CIRCLE_FEATURE
 constexpr double ARC_INITWIDTH_HALF_VAL = 2.0;
+#endif
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
@@ -64,6 +70,12 @@ const std::string CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
 } // namespace
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
+
+ScrollablePattern::ScrollablePattern() = default;
+
+ScrollablePattern::ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
+    : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
+{}
 
 ScrollablePattern::~ScrollablePattern()
 {
@@ -235,6 +247,9 @@ void ScrollablePattern::SetAxis(Axis axis)
         if (scrollBarOverlayModifier_) {
             scrollBarOverlayModifier_->SetPositionMode(positionMode);
         }
+    }
+    if (useDefaultBackToTop_) {
+        ResetBackToTop();
     }
     auto gestureHub = GetGestureHub();
     CHECK_NULL_VOID(gestureHub);
@@ -546,6 +561,9 @@ void ScrollablePattern::AddScrollEvent()
         InitScrollBarClickEvent();
     }
     InitRatio();
+    if (useDefaultBackToTop_) {
+        ResetBackToTop();
+    }
 }
 
 void ScrollablePattern::SetHandleScrollCallback(const RefPtr<Scrollable>& scrollable)
@@ -893,7 +911,7 @@ bool ScrollablePattern::CanFadeEffect(float offset, bool isAtTop, bool isAtBotto
 bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size)
 {
     bool isAtTop = IsAtTop();
-    bool isAtBottom = IsAtBottom();
+    bool isAtBottom = IsAtBottom(true);
     bool isNotPositiveScrollableDistance = isAtTop && isAtBottom;
     // check edgeEffect is not springEffect
     if (scrollEffect_ && scrollEffect_->IsFadeEffect() &&
@@ -2618,17 +2636,27 @@ float ScrollablePattern::GetMainContentSize() const
 
 void ScrollablePattern::SetBackToTop(bool backToTop)
 {
-    backToTop_ = backToTop;
+    if (backToTop_ == backToTop) {
+        return;
+    }
     auto* eventProxy = StatusBarEventProxy::GetInstance();
     if (!eventProxy) {
         TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "StatusBarEventProxy is null");
         return;
     }
+    backToTop_ = backToTop;
     if (backToTop_) {
         eventProxy->Register(WeakClaim(this));
     } else {
         eventProxy->UnRegister(WeakClaim(this));
     }
+}
+
+void ScrollablePattern::ResetBackToTop()
+{
+    bool backToTop =
+        GetAxis() == Axis::VERTICAL && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
+    SetBackToTop(backToTop);
 }
 
 void ScrollablePattern::OnStatusBarClick()
@@ -2641,7 +2669,7 @@ void ScrollablePattern::OnStatusBarClick()
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!pipeline->GetOnShow() || !host->IsActive()) {
+    if (!pipeline->GetOnShow() || !host->IsActive() || !pipeline->IsWindowFocused()) {
         return;
     }
 
@@ -2910,6 +2938,7 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
             };
             taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay, "NotifyResponseRegionChanged");
         }
+        SetUiDvsyncSwitch(false);
     } else {
         ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStop, id:%d, tag:%s",
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
@@ -4089,6 +4118,31 @@ void ScrollablePattern::StopScrollableAndAnimate()
     }
 }
 
+void ScrollablePattern::GetRepeatCountInfo(
+    RefPtr<UINode> node, int32_t& repeatDifference, int32_t& firstRepeatCount, int32_t& totalChildCount)
+{
+    CHECK_NULL_VOID(node);
+    auto& children = node->GetChildren();
+    for (const auto& child : children) {
+        if (AceType::InstanceOf<RepeatVirtualScroll2Node>(child)) {
+            auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(child);
+            auto repeatRealCount = repeat2->FrameCount();
+            auto repeatVirtualCount = repeat2->GetTotalCount();
+            if (repeatVirtualCount > static_cast<uint32_t>(repeatRealCount) && firstRepeatCount == 0) {
+                firstRepeatCount = totalChildCount + repeatRealCount;
+            }
+            repeatDifference += repeatVirtualCount - repeatRealCount;
+            totalChildCount += repeatRealCount;
+        } else if (AceType::InstanceOf<FrameNode>(child) || AceType::InstanceOf<LazyForEachNode>(child) ||
+                   AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child) ||
+                   AceType::InstanceOf<CustomNode>(child)) {
+            totalChildCount += child->FrameCount();
+        } else {
+            GetRepeatCountInfo(child, repeatDifference, firstRepeatCount, totalChildCount);
+        }
+    }
+}
+
 #ifdef SUPPORT_DIGITAL_CROWN
 void ScrollablePattern::SetDigitalCrownEvent()
 {
@@ -4132,6 +4186,29 @@ void ScrollablePattern::SetOnHiddenChangeForParent()
             scrollBarOverlayModifier->SetNavDestinationShow(isShow);
         };
         navDestinationEventHub->AddOnHiddenChange(host->GetId(), std::move(onHiddenChange));
+    }
+}
+
+bool ScrollablePattern::IsRestrictBoundary()
+{
+    return !scrollEffect_ || scrollEffect_->IsRestrictBoundary();
+}
+
+bool ScrollablePattern::IsScrollableSpringEffect() const
+{
+    CHECK_NULL_RETURN(scrollEffect_, false);
+    return scrollEffect_->IsSpringEffect();
+}
+
+const RefPtr<ScrollEdgeEffect>& ScrollablePattern::GetScrollEdgeEffect() const
+{
+    return scrollEffect_;
+}
+
+void ScrollablePattern::MarkScrollBarProxyDirty()
+{
+    if (scrollBarProxy_) {
+        scrollBarProxy_->MarkScrollBarDirty();
     }
 }
 } // namespace OHOS::Ace::NG

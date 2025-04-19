@@ -37,6 +37,8 @@ const i2 = 'arkui_app_bg_color';
 const e2 = 'arkui_custom_app_bar_menu_click';
 const f2 = 'arkui_custom_app_bar_close_click';
 const g2 = 'arkui_custom_app_bar_did_build';
+const ARKUI_APP_BAR_SERVICE_PANEL = 'arkui_app_bar_service_panel';
+const ARKUI_APP_BAR_CLOSE = 'arkui_app_bar_close';
 const h2 = 10;
 class o1 {
     constructor(a2, b2) {
@@ -82,6 +84,8 @@ class e1 extends ViewPU {
         this.__contentMarginRight = new ObservedPropertySimplePU('0vp', this, "contentMarginRight");
         this.__contentMarginBottom = new ObservedPropertySimplePU('0vp', this, "contentMarginBottom");
         this.__menuMarginTop = new ObservedPropertySimplePU('10vp', this, "menuMarginTop");
+        this.__serviceMenuRead = new ObservedPropertySimplePU(this.getStringByResourceToken(ARKUI_APP_BAR_SERVICE_PANEL), this, "serviceMenuRead");
+        this.__closeRead = new ObservedPropertySimplePU(this.getStringByResourceToken(ARKUI_APP_BAR_CLOSE), this, "closeRead");
         this.isDark = true;
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
@@ -126,6 +130,12 @@ class e1 extends ViewPU {
         if (params.menuMarginTop !== undefined) {
             this.menuMarginTop = params.menuMarginTop;
         }
+        if (params.serviceMenuRead !== undefined) {
+            this.serviceMenuRead = params.serviceMenuRead;
+        }
+        if (params.closeRead !== undefined) {
+            this.closeRead = params.closeRead;
+        }
         if (params.isDark !== undefined) {
             this.isDark = params.isDark;
         }
@@ -146,6 +156,8 @@ class e1 extends ViewPU {
         this.__contentMarginRight.purgeDependencyOnElmtId(rmElmtId);
         this.__contentMarginBottom.purgeDependencyOnElmtId(rmElmtId);
         this.__menuMarginTop.purgeDependencyOnElmtId(rmElmtId);
+        this.__serviceMenuRead.purgeDependencyOnElmtId(rmElmtId);
+        this.__closeRead.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
         this.__menuResource.aboutToBeDeleted();
@@ -161,6 +173,8 @@ class e1 extends ViewPU {
         this.__contentMarginRight.aboutToBeDeleted();
         this.__contentMarginBottom.aboutToBeDeleted();
         this.__menuMarginTop.aboutToBeDeleted();
+        this.__serviceMenuRead.aboutToBeDeleted();
+        this.__closeRead.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -241,6 +255,18 @@ class e1 extends ViewPU {
     }
     set menuMarginTop(newValue) {
         this.__menuMarginTop.set(newValue);
+    }
+    get serviceMenuRead() {
+        return this.__serviceMenuRead.get();
+    }
+    set serviceMenuRead(newValue) {
+        this.__serviceMenuRead.set(newValue);
+    }
+    get closeRead() {
+        return this.__closeRead.get();
+    }
+    set closeRead(newValue) {
+        this.__closeRead.set(newValue);
     }
     parseBoolean(value) {
         if (value === 'true') {
@@ -369,6 +395,10 @@ class e1 extends ViewPU {
             });
             TapGesture.pop();
             Gesture.pop();
+            Button.accessibilityText(this.serviceMenuRead);
+            Button.onAccessibilityHover(() => {
+                this.serviceMenuRead = this.getStringByResourceToken(ARKUI_APP_BAR_SERVICE_PANEL);
+            });
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.menuResource);
@@ -404,6 +434,10 @@ class e1 extends ViewPU {
             });
             TapGesture.pop();
             Gesture.pop();
+            Button.accessibilityText(this.closeRead);
+            Button.onAccessibilityHover(() => {
+                this.closeRead = this.getStringByResourceToken(ARKUI_APP_BAR_CLOSE);
+            });
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.closeResource);
@@ -425,6 +459,16 @@ class e1 extends ViewPU {
     }
     static getEntryName() {
         return "Index";
+    }
+    getStringByResourceToken(f, ...g) {
+        if (f) {
+            try {
+                return getContext(this).resourceManager.getStringByNameSync(f, ...g);
+            } catch (h) {
+                console.error(`Ace SegmentButton getAccessibilityDescription, error: ${h.toString()}`);
+            }
+        }
+        return '';
     }
 }
 

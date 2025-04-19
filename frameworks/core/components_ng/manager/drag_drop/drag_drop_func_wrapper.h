@@ -79,6 +79,9 @@ public:
     static OffsetF GetPointRelativeToMainWindow(const Point& point);
     static void HandleOnDragEvent(const std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
     static bool IsTextCategoryComponent(const std::string& frameTag);
+    static RefPtr<DragDropManager> GetDragDropManagerForDragAnimation(const RefPtr<PipelineBase>& context,
+        const RefPtr<PipelineBase>& nodeContext, const RefPtr<Subwindow>& subWindow,
+        bool isExpandDisplay, int32_t instanceId);
 
     // multi drag
     static bool IsSelectedItemNode(const RefPtr<UINode>& uiNode);

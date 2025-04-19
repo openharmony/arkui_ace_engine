@@ -26,7 +26,7 @@ SafeAreaInsets GenerateCutOutAreaWithRoot(const SafeAreaInsets& safeArea, NG::Op
     if (cutoutArea.top_.IsValid()) {
         cutoutArea.top_.start = 0;
     }
-    if (safeArea.bottom_.IsValid()) {
+    if (cutoutArea.bottom_.IsValid()) {
         cutoutArea.bottom_.end = rootSize.Height().has_value() ? rootSize.Height().value()
                                                                : PipelineContext::GetCurrentRootHeight();
     }
@@ -72,17 +72,17 @@ bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
     return true;
 }
 
-bool SafeAreaManager::CheckNavArea(const SafeAreaInsets& safeArea)
+bool SafeAreaManager::CheckNavSafeArea(const SafeAreaInsets& safeArea)
 {
     return navSafeArea_ != safeArea;
 }
 
-bool SafeAreaManager::UpdateNavArea(const SafeAreaInsets& safeArea)
+bool SafeAreaManager::UpdateNavSafeArea(const SafeAreaInsets& safeArea)
 {
     if (navSafeArea_ == safeArea) {
         return false;
     }
-    ACE_SCOPED_TRACE("SafeAreaManager::UpdateNavArea %s", safeArea.ToString().c_str());
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateNavSafeArea %s", safeArea.ToString().c_str());
     navSafeArea_ = safeArea;
     return true;
 }

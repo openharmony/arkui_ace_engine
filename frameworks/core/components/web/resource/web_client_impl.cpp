@@ -1080,6 +1080,14 @@ void WebClientImpl::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visib
     delegate->GetVisibleRectToWeb(visibleX, visibleY, visibleWidth, visibleHeight);
 }
 
+void WebClientImpl::RestoreRenderFit()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->RestoreRenderFit();
+}
+
 void WebClientImpl::OnPopupShow(bool show)
 {
     auto delegate = webDelegate_.Upgrade();
@@ -1313,14 +1321,14 @@ bool WebClientImpl::OnSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSSslError
     return jsResult;
 }
 
-void WebClientImpl::OnAccessibilityEvent(int64_t accessibilityId, int32_t eventType)
+void WebClientImpl::OnAccessibilityEventV2(int64_t accessibilityId, int32_t eventType, const std::string& argument)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "OnAccessibilityEvent accessibilityId: %{public}" PRId64 ", eventType: %{public}d",
         accessibilityId, eventType);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
-    delegate->OnAccessibilityEvent(accessibilityId, static_cast<AccessibilityEventType>(eventType));
+    delegate->OnAccessibilityEvent(accessibilityId, static_cast<AccessibilityEventType>(eventType), argument);
 }
 
 bool WebClientImpl::IsCurrentFocus()

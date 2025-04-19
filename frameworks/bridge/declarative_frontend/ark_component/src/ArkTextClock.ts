@@ -49,7 +49,8 @@ class ArkTextClockComponent extends ArkComponent implements TextClockAttribute {
     return this;
   }
   onDateChange(event: (value: number) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextClockOnDateChangeModifier.identity, TextClockOnDateChangeModifier, event);
+    return this;
   }
   fontColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, TextClockFontColorModifier.identity, TextClockFontColorModifier, value);
@@ -327,6 +328,20 @@ class TextClockDateTimeOptionsModifier extends ModifierWithKey<DateTimeOptions> 
   }
 }
 
+declare type OnDateChangeCallback = (value: number) => void;
+class TextClockOnDateChangeModifier extends ModifierWithKey<OnDateChangeCallback> {
+  constructor(value: OnDateChangeCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textClockOnDateChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textClock.resetTextClockOnDateChange(node);
+    } else {
+      getUINativeModule().textClock.setTextClockOnDateChange(node, this.value);
+    }
+  }
+}
 // @ts-ignore
 globalThis.TextClock.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

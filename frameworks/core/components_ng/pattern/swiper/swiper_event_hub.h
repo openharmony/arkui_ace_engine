@@ -195,6 +195,11 @@ public:
 
     void FireAnimationStartEvent(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info)
     {
+        TAG_LOGI(AceLogTag::ACE_SWIPER,
+            "FireAnimationStartEvent, index: %{public}d, targetIndex: %{public}d, id:%{public}d", index, targetIndex,
+            swiperId_);
+        ACE_SCOPED_TRACE(
+            "Swiper FireAnimationStartEvent, index: %d, targetIndex %d, id: %d", index, targetIndex, swiperId_);
         if (!animationStartEvents_.empty()) {
             std::for_each(animationStartEvents_.begin(), animationStartEvents_.end(),
                 [index, targetIndex, info](const AnimationStartEventPtr& animationStartEvent) {
@@ -226,6 +231,12 @@ public:
             };
             return;
         }
+        TAG_LOGI(AceLogTag::ACE_SWIPER,
+            "FireAnimationEndEvent index: %{public}d, currentOffset: has_value %{public}d, value %{public}fvp, "
+            "isForce: %{public}d, aniStartCalledCount %{public}d, id:%{public}d",
+            index, info.currentOffset.has_value(), info.currentOffset.value_or(0.0), info.isForceStop,
+            aniStartCalledCount_, swiperId_);
+        ACE_SCOPED_TRACE("Swiper FireAnimationEndEvent, index: %d, id: %d", index, swiperId_);
         if (!animationEndEvents_.empty()) {
             std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
                 [index, info](const AnimationEndEventPtr& animationEndEvent) {
@@ -241,6 +252,9 @@ public:
 
     void FireAnimationEndOnForceEvent(int32_t index, const AnimationCallbackInfo& info)
     {
+        TAG_LOGI(AceLogTag::ACE_SWIPER,
+            "FireAnimationEndOnForceEvent index: %{public}d, aniStartCalledCount %{public}d, id:%{public}d", index,
+            aniStartCalledCount_, swiperId_);
         if (aniStartCalledCount_ <= 0) {
             delayCallback_ = [weak = WeakClaim(this), index, info]() {
                 auto hub = weak.Upgrade();
@@ -292,6 +306,11 @@ public:
         }
     }
 
+    void SetSwiperId(int32_t swiperId)
+    {
+        swiperId_ = swiperId;
+    }
+
 private:
     void FireJSChangeEvent(int32_t preIndex, int32_t index)
     {
@@ -323,6 +342,7 @@ private:
     GestureSwipeEvent gestureSwipeEvent_;
     int32_t aniStartCalledCount_ = 0;
     std::function<void()> delayCallback_;
+    int32_t swiperId_ = -1;
 };
 
 } // namespace OHOS::Ace::NG

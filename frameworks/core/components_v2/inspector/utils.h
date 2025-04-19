@@ -35,7 +35,23 @@ const char* AXIS_TYPE[] = {
     "Axis.FREE",
     "Axis.NONE",
 };
-
+const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
+    FontWeight::W100,
+    FontWeight::W200,
+    FontWeight::W300,
+    FontWeight::W400,
+    FontWeight::W500,
+    FontWeight::W600,
+    FontWeight::W700,
+    FontWeight::W800,
+    FontWeight::W900,
+    FontWeight::W700,       // FontWeight::BOLD
+    FontWeight::W400,       // FontWeight::NORMAL
+    FontWeight::W900,       // FontWeight::BOLDER,
+    FontWeight::W100,       // FontWeight::LIGHTER
+    FontWeight::W500,       // FontWeight::MEDIUM
+    FontWeight::W400,       // FontWeight::REGULAR
+};
 } // namespace
 
 inline std::string ConvertStackFitToString(StackFit stackFit)
@@ -296,6 +312,19 @@ inline std::string ConvertWrapTextDecorationToStirng(TextDecoration decoration)
     return index < 0 ? "TextDecorationType.None" : decorationTable[index].value;
 }
 
+inline std::string ConvertWrapTextDecorationToStirng(std::vector<TextDecoration> decorations)
+{
+    if (decorations.size() == 0) {
+        return ConvertWrapTextDecorationToStirng(TextDecoration::NONE);
+    }
+    std::string ret = "";
+    for (TextDecoration decoration: decorations) {
+        ret += ConvertWrapTextDecorationToStirng(decoration) + ",";
+    }
+    ret.pop_back();
+    return ret;
+}
+
 inline std::string ConvertWrapTextDecorationStyleToString(TextDecorationStyle decorationStyle)
 {
     static const LinearEnumMapNode<TextDecorationStyle, std::string> decorationStyleTable[] = {
@@ -465,6 +494,11 @@ inline std::string ConvertWrapFontStyleToStirng(FontStyle fontStyle)
 
     auto index = BinarySearchFindIndex(fontStyleTable, ArraySize(fontStyleTable), fontStyle);
     return index < 0 ? "FontStyle.Normal" : fontStyleTable[index].value;
+}
+
+inline FontWeight ConvertFontWeight(FontWeight fontWeight)
+{
+    return FONT_WEIGHT_CONVERT_MAP[static_cast<int>(fontWeight)];
 }
 
 inline std::string ConvertWrapFontWeightToStirng(FontWeight fontWeight)
@@ -676,6 +710,38 @@ inline std::string ConvertSymbolColorToString(const std::vector<Color>& colors)
     return colorStr;
 }
 
+inline bool IsValidTextDecorations(const std::vector<TextDecoration>& decorations)
+{
+    if (decorations.size() <= 0) {
+        return false;
+    }
+    for (TextDecoration decoration : decorations) {
+        if (decoration != TextDecoration::NONE) {
+            return true;
+        }
+    }
+    return false;
+}
+
+inline bool HasTextDecoration(const std::vector<TextDecoration>& decorations, TextDecoration value)
+{
+    auto iter = std::find(decorations.begin(), decorations.end(), value);
+    return iter != decorations.end();
+}
+
+inline bool IsEqualTextDecorations(
+    const std::vector<TextDecoration>& left, const std::vector<TextDecoration>& right)
+{
+    if (left.size() != right.size()) {
+        return false;
+    }
+    for (int index = 0; index < static_cast<int>(left.size()); index++) {
+        if (!HasTextDecoration(right, left[index])) {
+            return false;
+        }
+    }
+    return true;
+}
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_UTILS_H

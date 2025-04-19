@@ -606,7 +606,7 @@ void TextFieldSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFi
     CHECK_NULL_VOID(pattern);
     auto recognizer = pattern->GetMultipleClickRecognizer();
     CHECK_NULL_VOID(recognizer);
-    if (recognizer->IsRunning() && recognizer->IsValidClick(event)) {
+    if (recognizer->IsValidClick(event)) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield overlayClick multiple click recognizer is running.");
         auto overlayEvent = event;
         overlayEvent.SetLocalLocation(recognizer->GetBeginLocalLocation());

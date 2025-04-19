@@ -83,6 +83,18 @@ public:
         CHECK_NULL_RETURN(theme, bubbleMethod);
         bubbleMethod->SetOuterBorderWidth(theme->GetPopupOuterBorderWidth());
         bubbleMethod->SetInnerBorderWidth(theme->GetPopupInnerBorderWidth());
+        if (outlineWidth_.has_value()) {
+            bubbleMethod->SetOuterBorderWidthByUser(outlineWidth_.value());
+        }
+        if (innerBorderWidth_.has_value()) {
+            bubbleMethod->SetInnerBorderWidthByUser(innerBorderWidth_.value());
+        }
+        if (!outlineLinearGradient_.gradientColors.empty()) {
+            bubbleMethod->SetOutlineLinearGradient(outlineLinearGradient_);
+        }
+        if (!innerBorderLinearGradient_.gradientColors.empty()) {
+            bubbleMethod->SetInnerBorderLinearGradient(innerBorderLinearGradient_);
+        }
         return bubbleMethod;
     }
 
@@ -202,6 +214,8 @@ public:
     void CallOnWillDismiss(int32_t reason)
     {
         if (onWillDismiss_) {
+            TAG_LOGD(AceLogTag::ACE_OVERLAY,
+                "Popup CallOnWillDismiss, reason: %{public}d", reason);
             onWillDismiss_(reason);
         }
     }
@@ -279,6 +293,45 @@ public:
     {
         return customNode_.Upgrade();
     }
+    void SetOutlineLinearGradient(const PopupLinearGradientProperties& outlineLinearGradient)
+    {
+        outlineLinearGradient_ = outlineLinearGradient;
+    }
+
+    const PopupLinearGradientProperties& GetOutlineLinearGradient() const
+    {
+        return outlineLinearGradient_;
+    }
+
+    void SetOutlineWidth(const std::optional<Dimension>& outlineWidth)
+    {
+        outlineWidth_ = outlineWidth;
+    }
+
+    const std::optional<Dimension>& GetOutlineWidth() const
+    {
+        return outlineWidth_;
+    }
+
+    void SetInnerBorderLinearGradient(const PopupLinearGradientProperties& innerBorderLinearGradient)
+    {
+        innerBorderLinearGradient_ = innerBorderLinearGradient;
+    }
+
+    const PopupLinearGradientProperties& GetInnerBorderLinearGradient() const
+    {
+        return innerBorderLinearGradient_;
+    }
+
+    void SetInnerBorderWidth(const std::optional<Dimension>& innerBorderWidth)
+    {
+        innerBorderWidth_ = innerBorderWidth;
+    }
+
+    const std::optional<Dimension>& GetInnerBorderWidth() const
+    {
+        return innerBorderWidth_;
+    }
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -308,6 +361,7 @@ private:
     void ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& buttonNode);
     void ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& buttonNode);
     void PopBubble();
+    void PopTipsBubble();
     void Animation(
         RefPtr<RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve);
 
@@ -373,6 +427,10 @@ private:
     std::function<void(const std::string&)> doubleBindCallback_ = nullptr;
     RefPtr<PopupParam> popupParam_ = nullptr;
     WeakPtr<UINode> customNode_ = nullptr;
+    std::optional<Dimension> outlineWidth_;
+    std::optional<Dimension> innerBorderWidth_;
+    PopupLinearGradientProperties outlineLinearGradient_;
+    PopupLinearGradientProperties innerBorderLinearGradient_;
 };
 } // namespace OHOS::Ace::NG
 

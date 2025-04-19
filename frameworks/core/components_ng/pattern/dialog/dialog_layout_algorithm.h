@@ -92,7 +92,7 @@ private:
     void UpdateSafeArea(const RefPtr<FrameNode>& frameNode);
     void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
-    void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip);
+    void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog);
     void AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child);
     void UpdateIsScrollHeightNegative(LayoutWrapper* layoutWrapper, float height);
     void UpdateChildMaxSizeHeight(SizeT<float>& maxSize);
@@ -102,6 +102,7 @@ private:
 
     bool IsEmbeddedDialog(const RefPtr<FrameNode>& frameNode);
     float GetEmbeddedDialogOffsetY(const RefPtr<FrameNode>& frameNode);
+    float GetStackRootDialogOffsetY(const RefPtr<FrameNode>& frameNode);
 
     RectF touchRegion_;
     OffsetF topLeftPoint_;
@@ -137,6 +138,7 @@ private:
     bool isShowInFloatingWindow_ = false;
 
     float embeddedDialogOffsetY_ = 0.0f;
+    float stackRootDialogOffsetY_ = 0.0f;
     float safeAreaBottomLength_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogLayoutAlgorithm);

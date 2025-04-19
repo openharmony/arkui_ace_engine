@@ -23,6 +23,8 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_select_overlay.h"
 
 namespace OHOS::Ace::NG {
 
@@ -113,7 +115,7 @@ HWTEST_F(TextTestTwoNg, TextPaintMethodTest002, TestSize.Level1)
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
     textLayoutProperty->UpdateTextShadow({ textShadow });
     textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
-    textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
+    textLayoutProperty->UpdateTextDecoration({TextDecoration::OVERLINE});
     textLayoutProperty->UpdateBaselineOffset(ADAPT_BASE_LINE_OFFSET_VALUE);
 
     /**
@@ -899,6 +901,10 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest002, TestSize.Level1)
         LayoutWrapperNode(textFrameNode, AceType::MakeRefPtr<GeometryNode>(), textLayoutProperty);
     auto textLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextLayoutAlgorithm>();
     LayoutConstraintF layoutConstraint;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
     textLayoutAlgorithm->ConstructTextStyles(layoutConstraint, &layoutWrapper, textStyle);
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
@@ -915,7 +921,7 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest002, TestSize.Level1)
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     textPattern->BeforeCreateLayoutWrapper();
-    EXPECT_EQ(spanTextStyle.GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(spanTextStyle.GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
     EXPECT_EQ(spanTextStyle.GetTextDecorationStyle(), TextDecorationStyle::DOUBLE);
     EXPECT_EQ(spanTextStyle.GetFontSize(), Dimension(20.0));
 }
@@ -988,9 +994,9 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest003, TestSize.Level1)
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     textPattern->BeforeCreateLayoutWrapper();
-    EXPECT_EQ(spanTextStyle1.GetTextDecoration(), TextDecoration::OVERLINE);
+    EXPECT_EQ(spanTextStyle1.GetTextDecorationFirst(), TextDecoration::OVERLINE);
     EXPECT_EQ(spanTextStyle1.GetTextDecorationStyle(), TextDecorationStyle::WAVY);
-    EXPECT_EQ(spanTextStyle2.GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(spanTextStyle2.GetTextDecorationFirst(), TextDecoration::LINE_THROUGH);
     EXPECT_EQ(spanTextStyle2.GetTextDecorationStyle(), TextDecorationStyle::DOUBLE);
 }
 
@@ -1158,7 +1164,7 @@ HWTEST_F(TextTestTwoNg, UpdateChildProperty001, TestSize.Level1)
         EXPECT_EQ(spanTextStyle.GetTextColor(), TEXT_COLOR_VALUE);
         EXPECT_EQ(spanTextStyle.GetFontStyle(), ITALIC_FONT_STYLE_VALUE);
         EXPECT_EQ(spanTextStyle.GetFontWeight(), FONT_WEIGHT_VALUE);
-        EXPECT_EQ(spanTextStyle.GetTextDecoration(), TEXT_DECORATION_VALUE);
+        EXPECT_EQ(spanTextStyle.GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
         EXPECT_EQ(spanTextStyle.GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
         EXPECT_EQ(spanTextStyle.GetTextCase(), TEXT_CASE_VALUE);
         EXPECT_EQ(spanTextStyle.GetLetterSpacing(), LETTER_SPACING);
@@ -1206,7 +1212,7 @@ HWTEST_F(TextTestTwoNg, UpdateChildProperty002, TestSize.Level1)
         EXPECT_EQ(spanNode->GetTextColor().value(), TEXT_COLOR_VALUE);
         EXPECT_EQ(spanNode->GetItalicFontStyle().value(), ITALIC_FONT_STYLE_VALUE);
         EXPECT_EQ(spanNode->GetFontWeight().value(), FONT_WEIGHT_VALUE);
-        EXPECT_EQ(spanNode->GetTextDecoration().value(), TEXT_DECORATION_VALUE);
+        EXPECT_EQ(spanNode->GetTextDecorationFirst(), TEXT_DECORATION_VALUE);
         EXPECT_EQ(spanNode->GetTextDecorationColor().value(), TEXT_DECORATION_COLOR_VALUE);
         EXPECT_EQ(spanNode->GetTextCase().value(), TEXT_CASE_VALUE);
         EXPECT_EQ(spanNode->GetLetterSpacing().value(), LETTER_SPACING);
@@ -2314,5 +2320,292 @@ HWTEST_F(TextTestTwoNg, TextPaintMethodTest004, TestSize.Level1)
     auto OverlayModifier = textPaintMethod.GetOverlayModifier(AceType::RawPtr(paintWrapper));
     ASSERT_NE(OverlayModifier, nullptr);
     EXPECT_EQ(textOverlayModifier->isClip_->Get(), true);
+}
+
+/**
+ * @tc.name: TextContentModifierB001
+ * @tc.desc: test text_content_modifier.cpp ChangeDragStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextContentModifierB001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call ChangeDragStatus and expect no error.
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    textContentModifier->dragStatus_ = AceType::MakeRefPtr<PropertyBool>(false);
+    textContentModifier->ChangeDragStatus();
+    EXPECT_EQ(textContentModifier->dragStatus_, true);
+}
+
+/**
+ * @tc.name: TextContentModifierB002
+ * @tc.desc: test text_content_modifier.cpp ModifyLineHeightInTextStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextContentModifierB002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call ModifyLineHeightInTextStyle and expect no error.
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    float lineHeight = 2.0f;
+    textContentModifier->lineHeightFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(lineHeight);
+    textContentModifier->lineHeight_ = Dimension(1.0f);
+    TextStyle textStyle;
+    textContentModifier->ModifyLineHeightInTextStyle(textStyle);
+    EXPECT_EQ(textStyle.GetLineHeight(), Dimension(2.0f, DimensionUnit::PX));
+}
+
+/**
+ * @tc.name: TextContentModifierB003
+ * @tc.desc: test text_content_modifier.cpp TextColorModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextContentModifierB003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call TextColorModifier and expect no error.
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    Color color = Color::BLACK;
+    textContentModifier->TextColorModifier(color);
+    EXPECT_EQ(textContentModifier->onlyTextColorAnimation_, true);
+}
+
+/**
+ * @tc.name: TextContentModifierB004
+ * @tc.desc: test text_content_modifier.cpp ResumeAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextContentModifierB004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call ResumeAnimation and expect no error.
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    AnimationOption option = AnimationOption();
+    textContentModifier->raceAnimation_ = AnimationUtils::StartAnimation(option, [&]() {}, []() {});
+    textContentModifier->ResumeAnimation();
+    EXPECT_EQ(textContentModifier->marqueeState_, MarqueeState::IDLE);
+    textContentModifier->PauseAnimation();
+    EXPECT_EQ(textContentModifier->marqueeState_, MarqueeState::IDLE);
+}
+
+
+/**
+ * @tc.name: TextContentModifierB005
+ * @tc.desc: test text_content_modifier.cpp GetTextRaceDirectionByContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextContentModifierB005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetTextRaceDirectionByContent and expect no error.
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    auto direction = textContentModifier->GetTextRaceDirectionByContent();
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+
+/**
+ * @tc.name: TextContentModifierB006
+ * @tc.desc: test text_content_modifier.cpp ResettextRacePercent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextContentModifierB006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call ResettextRacePercent and expect no error.
+     */
+    auto layoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    textContentModifier->ResetTextRacePercent();
+    EXPECT_NE(textContentModifier->racePercentFloat_, nullptr);
+}
+
+/**
+ * @tc.name: TextContentModifierB007
+ * @tc.desc: test text_content_modifier.cpp SetIsFocused
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextContentModifierB007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetIsFocused and expect no error.
+     */
+    textContentModifier->SetIsFocused(false);
+    EXPECT_EQ(textContentModifier->marqueeFocused_, false);
+}
+ 
+/**
+ * @tc.name: TextContentModifierB008
+ * @tc.desc: test text_content_modifier.cpp AllowTextRace
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextContentModifierB008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call AllowTextRace and expect no error.
+     */
+    textContentModifier->marqueeOption_.start = false;
+    textContentModifier->ResumeTextRace(false);
+    auto isAllowTextRace = textContentModifier->AllowTextRace();
+    EXPECT_EQ(isAllowTextRace, false);
+    textContentModifier->marqueeSet_ = true;
+    textContentModifier->marqueeOption_.start = true;
+    textContentModifier->marqueeOption_.loop = 1;
+    textContentModifier->marqueeCount_ = 2;
+    isAllowTextRace = textContentModifier->AllowTextRace();
+    EXPECT_EQ(isAllowTextRace, false);
+    textContentModifier->marqueeCount_ = 0;
+    textContentModifier->marqueeOption_.startPolicy = MarqueeStartPolicy::ON_FOCUS;
+    textContentModifier->marqueeFocused_ = false;
+    textContentModifier->marqueeHovered_ = false;
+    EXPECT_EQ(isAllowTextRace, false);
+}
+
+/**
+ * @tc.name: TextContentModifierB009
+ * @tc.desc: test text_content_modifier.cpp DetermineTextRace
+ * @tc.type: FUNC
+ */
+ HWTEST_F(TextTestTwoNg, TextContentModifierB009, TestSize.Level1)
+ {
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call DetermineTextRace and expect no error.
+     */
+    textContentModifier->marqueeSet_ = false;
+    textContentModifier->DetermineTextRace();
+    textContentModifier->marqueeOption_.start = true;
+    textContentModifier->marqueeOption_.startPolicy = MarqueeStartPolicy::ON_FOCUS;
+    textContentModifier->marqueeState_ = MarqueeState::RUNNING;
+    textContentModifier->marqueeFocused_ = false;
+    textContentModifier->marqueeHovered_ = false;
+    textContentModifier->DetermineTextRace();
+    textContentModifier->marqueeHovered_ = true;
+    textContentModifier->marqueeState_ = MarqueeState::IDLE;
+    textContentModifier->DetermineTextRace();
+    EXPECT_EQ(textContentModifier->marqueeFocused_, false);
 }
 } // namespace OHOS::Ace::NG

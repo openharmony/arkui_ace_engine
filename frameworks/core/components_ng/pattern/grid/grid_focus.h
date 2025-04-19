@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_FOCUS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_FOCUS_H
 
+#include <unordered_set>
+
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"

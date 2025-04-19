@@ -327,13 +327,9 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     if (!child.second) {
         return nullptr;
     }
-    auto greatOrEqualApi16 = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
     child.second->UpdateThemeScopeId(GetThemeScopeId());
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
-        if (greatOrEqualApi16) {
-            child.second->SetHostPageId(GetPageId());
-        }
         child.second->SetJSViewActive(false, true);
         return child.second->GetFrameChildByIndex(0, needBuild);
     }
@@ -350,9 +346,6 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     tempChildren_.clear();
     tempChildren_.swap(children_);
     child.second->SetParent(WeakClaim(this));
-    if (greatOrEqualApi16) {
-        child.second->SetHostPageId(GetPageId());
-    }
     if (IsOnMainTree()) {
         child.second->AttachToMainTree(false, GetContext());
     }
@@ -479,6 +472,11 @@ void LazyForEachNode::LoadChildren(bool notDetach) const
     }
 }
 
+const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector() const
+{
+    return children_;
+}
+
 void LazyForEachNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     if (configurationChange.IsNeedUpdate() && builder_) {
@@ -500,6 +498,18 @@ void LazyForEachNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
         InitAllChilrenDragManager(false);
     }
     onMoveEvent_ = onMove;
+}
+
+void LazyForEachNode::SetItemDragHandler(std::function<void(int32_t)>&& onLongPress,
+    std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
+    std::function<void(int32_t)>&& onDrop)
+{
+    if (onMoveEvent_) {
+        onLongPressEvent_ = onLongPress;
+        onDragStartEvent_ = onDragStart;
+        onMoveThroughEvent_ = onMoveThrough;
+        onDropEvent_ = onDrop;
+    }
 }
 
 void LazyForEachNode::MoveData(int32_t from, int32_t to)

@@ -54,6 +54,10 @@ void UVTaskWrapperImpl::Call(const TaskExecutor::Task& task, uint32_t delayTime)
 
     uv_loop_t *loop = nullptr;
     napi_get_uv_event_loop(env_, &loop);
+    if (loop == nullptr) {
+        LOGW("loop is null");
+        return;
+    }
     uv_update_time(loop);
     uv_timer_t *timer = new uv_timer_t;
     uv_timer_init(loop, timer);

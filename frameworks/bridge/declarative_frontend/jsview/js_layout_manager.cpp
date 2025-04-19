@@ -210,7 +210,7 @@ Local<panda::ObjectRef> JSLayoutManager::CreateJSTextStyleResult(const TextStyle
         "letterSpacing", "wordSpacing", "heightScale", "halfLeading", "heightOnly", "ellipsisMode", "locale"};
 
     Local<JSValueRef> valuesOfFontMetrics[] = { panda::NumberRef::New(
-        vm, static_cast<int32_t>(textStyle.GetTextDecoration())),
+        vm, static_cast<int32_t>(textStyle.GetTextDecorationFirst())),
         panda::NumberRef::New(vm, textStyle.GetTextColor().GetValue()),
         panda::NumberRef::New(vm, static_cast<int32_t>(textStyle.GetFontWeight())),
         panda::NumberRef::New(vm, static_cast<int32_t>(textStyle.GetFontStyle())),

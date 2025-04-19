@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,17 +26,8 @@ class ACE_EXPORT ImageLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(ImageLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    ImageLayoutAlgorithm(
-        const WeakPtr<ImageLoadingContext>& loadingCtx, const WeakPtr<ImageLoadingContext>& altLoadingCtx = nullptr)
-        : loadingCtx_(loadingCtx), altLoadingCtx_(altLoadingCtx)
-    {}
+    ImageLayoutAlgorithm() = default;
     ~ImageLayoutAlgorithm() override = default;
-
-    void OnReset() override
-    {
-        loadingCtx_ = nullptr;
-        altLoadingCtx_ = nullptr;
-    }
 
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
@@ -49,8 +40,6 @@ public:
     static bool IsImageAnimationLayout(LayoutWrapper* layoutWrapper);
 
 private:
-    WeakPtr<ImageLoadingContext> loadingCtx_;
-    WeakPtr<ImageLoadingContext> altLoadingCtx_;
     ACE_DISALLOW_COPY_AND_MOVE(ImageLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

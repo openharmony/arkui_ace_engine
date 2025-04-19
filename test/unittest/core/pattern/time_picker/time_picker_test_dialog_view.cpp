@@ -509,7 +509,7 @@ HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest006, TestSize.Level
  */
 HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewShow044, TestSize.Level1)
 {
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     TimePickerSettingData settingData;
     settingData.properties.disappearTextStyle_.textColor = Color::RED;
     settingData.properties.disappearTextStyle_.fontSize = Dimension(0);

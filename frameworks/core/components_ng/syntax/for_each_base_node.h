@@ -34,6 +34,34 @@ public:
         }
     }
 
+    virtual void FireOnLongPress(int32_t index)
+    {
+        if (onLongPressEvent_) {
+            onLongPressEvent_(index);
+        }
+    }
+
+    virtual void FireOnDragStart(int32_t index)
+    {
+        if (onDragStartEvent_) {
+            onDragStartEvent_(index);
+        }
+    }
+
+    virtual void FireOnMoveThrough(int32_t from, int32_t through)
+    {
+        if (onMoveThroughEvent_) {
+            onMoveThroughEvent_(from, through);
+        }
+    }
+
+    virtual void FireOnDrop(int32_t index)
+    {
+        if (onDropEvent_) {
+            onDropEvent_(index);
+        }
+    }
+
     bool IsSyntaxNode() const override
     {
         return true;
@@ -41,6 +69,10 @@ public:
 
 protected:
     std::function<void(int32_t, int32_t)> onMoveEvent_;
+    std::function<void(int32_t)> onLongPressEvent_;
+    std::function<void(int32_t)> onDragStartEvent_;
+    std::function<void(int32_t, int32_t)> onMoveThroughEvent_;
+    std::function<void(int32_t)> onDropEvent_;
 };
 } // namespace OHOS::Ace::NG
 

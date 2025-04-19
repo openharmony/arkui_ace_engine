@@ -81,6 +81,7 @@ struct SelectHandleInfo {
     bool isPaintHandleWithPoints = false;
     bool isCircleShow = true;
     bool forceDraw = false;
+    bool isTouchable = true;
     // in Global coordinates.
     RectF paintRect;
     RectF localPaintRect;
@@ -186,8 +187,8 @@ struct SelectMenuInfo {
     bool showCopyAll = true;
     bool showCut = true;
     bool showTranslate = false;
-    bool showSearch = false;
     bool showShare = false;
+    bool showSearch = false;
     bool showCameraInput = false;
     bool showAIWrite = false;
     std::optional<OffsetF> menuOffset;

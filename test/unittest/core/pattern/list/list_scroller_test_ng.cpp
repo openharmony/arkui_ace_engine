@@ -1844,4 +1844,21 @@ HWTEST_F(ListScrollerTestNg, SetScrollBy002, TestSize.Level1)
     CreateDone();
     EXPECT_EQ(pattern_->GetTotalOffset(), y);
 }
+
+/**
+ * @tc.name: SetAutoScale001
+ * @tc.desc: Test List item model ng SetAutoScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, SetAutoScale001, TestSize.Level1)
+{
+    ListItemModelNG itemModel;
+    itemModel.Create([](int32_t) {}, V2::ListItemStyle::CARD, true);
+    itemModel.SetAutoScale(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    itemModel.SetAutoScale(Referenced::RawPtr(frameNode), false);
+    itemModel.CreateFrameNode(0, true);
+    EXPECT_EQ(pattern->GetListItemStyle(), V2::ListItemStyle::CARD);
+}
 } // namespace OHOS::Ace::NG

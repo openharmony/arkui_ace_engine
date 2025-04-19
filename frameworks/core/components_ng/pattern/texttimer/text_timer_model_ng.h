@@ -63,6 +63,7 @@ public:
     static void SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value);
     static void SetBuilderFunc(FrameNode* frameNode, TextTimerMakeCallback&& jsMake);
     static void SetJSTextTimerController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
+    static void SetOnTimer(FrameNode* frameNode, std::function<void(int64_t, int64_t)>&& onChange);
     static RefPtr<Referenced> GetJSTextTimerController(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG

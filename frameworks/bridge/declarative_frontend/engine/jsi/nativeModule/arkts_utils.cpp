@@ -2215,4 +2215,13 @@ Local<panda::ObjectRef> ArkTSUtils::CreateJsTextRange(const EcmaVM* vm, const NG
         panda::NumberRef::New(vm, menuItemParam.end) };
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
+
+Local<panda::ArrayRef> ArkTSUtils::ChoosePointToJSValue(const EcmaVM* vm, std::vector<int> input)
+{
+    Local<panda::ArrayRef> arr = panda::ArrayRef::New(vm);
+    for (size_t i = 0; i < input.size(); i++) {
+        arr->SetValueAt(vm, arr, i, ToJSValueWithVM(vm, input[i]));
+    }
+    return arr;
+}
 } // namespace OHOS::Ace::NG

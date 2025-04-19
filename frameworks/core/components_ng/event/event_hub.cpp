@@ -236,6 +236,7 @@ void EventHub::FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OH
         case DragFuncType::DRAG_DROP: {
             if (customerOnDrop_ != nullptr) {
                 auto customerOnDrop = customerOnDrop_;
+                ACE_SCOPED_TRACE("drag: execute user onDrop");
                 customerOnDrop(info, extraParams);
             }
             break;

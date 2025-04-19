@@ -202,7 +202,7 @@ bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension int
     // Handle on click
     auto appTheme = pipeline->GetTheme<AppTheme>();
     CHECK_NULL_RETURN(appTheme, false);
-    if (!pipeline->GetIsFocusActive() && (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ||
+    if (!pipeline->GetIsFocusActive() && (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ||
                                              !appTheme->NeedFocusHandleClick())) {
         return false;
     }

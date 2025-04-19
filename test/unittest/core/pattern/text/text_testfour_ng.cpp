@@ -21,7 +21,7 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/typed_text.h"
-
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 
@@ -74,7 +74,7 @@ HWTEST_F(TextTestFourNg, SetLineSpacing001, TestSize.Level1)
 
     textModelNG.SetLineSpacing(LINE_SPACING_VALUE);
     EXPECT_EQ(textLayoutProperty->GetLineSpacing(), LINE_SPACING_VALUE);
-    TextModelNG::SetLineSpacing(frameNode, LINE_SPACING_VALUE_1);
+    TextModelNG::SetLineSpacing(frameNode, LINE_SPACING_VALUE_1, false);
     EXPECT_EQ(textLayoutProperty->GetLineSpacing(), LINE_SPACING_VALUE_1);
 }
 

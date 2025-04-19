@@ -31,17 +31,79 @@
 #include "core/components_ng/pattern/counter/counter_theme_wrapper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "frameworks/core/interfaces/arkoala/arkoala_api.h"
+#include "frameworks/core/components_ng/pattern/text/text_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
+constexpr uint32_t TOKEN_THEME_ID = 10001;
 constexpr Dimension WIDTH = 10.0_vp;
 constexpr Dimension HEIGHT = 10.0_vp;
 const std::string FRAME_ITEM_ETS_TAG = "FrameItem";
 const Color COLOR = Color::BLUE;
 constexpr double DEFAULT_BUTTON_OPACITY = 1.0;
+struct TestProperty {
+    const ArkUI_Uint32 colors_[TokenColors::TOTAL_NUMBER] = {
+        // id for color value for test
+        125830976, /* BRAND = 0 */
+        125830979, /* WARNING = 1; */
+        125830980, /* ALERT = 2 */
+        125830981, /* CONFIRM = 3 */
+        125830982, /* FONT_PRIMARY = 4 */
+        125830983, /* FONT_SECONDARY = 5 */
+        125830984, /* FONT_TERTIARY = 6 */
+        125830985, /* FONT_FOURTH = 7 */
+        125830986, /* FONT_EMPHASIZE = 8 */
+        125830987, /* FONT_ON_PRIMARY = 9 */
+        125830988, /* FONT_ON_SECONDARY = 10 */
+        125830989, /* FONT_ON_TERTIARY = 11 */
+        125830990, /* FONT_ON_FOURTH = 12 */
+        125830991, /* ICON_PRIMARY = 13 */
+        125830992, /* ICON_SECONDARY = 14 */
+        125830993, /* ICON_TERTIARY = 15 */
+        125830994, /* ICON_FOURTH = 16 */
+        125830995, /* ICON_EMPHASIZE = 17 */
+        125830996, /* ICON_SUB_EMPHASIZE = 18 */
+        125831057, /* ICON_ON_PRIMARY = 19 */
+        125831058, /* ICON_ON_SECONDARY = 20 */
+        125831059, /* ICON_ON_TERTIARY = 21 */
+        125831060, /* ICON_ON_FOURTH = 22 */
+        125831061, /* BACKGROUND_PRIMARY = 23 */
+        125831062, /* BACKGROUND_SECONDARY = 24 */
+        125831063, /* BACKGROUND_TERTIARY = 25 */
+        125831064, /* BACKGROUND_FOURTH = 26 */
+        125831065, /* BACKGROUND_EMPHASIZE = 27 */
+        125831003, /* COMP_FOREGROUND_PRIMARY = 28 */
+        125831004, /* COMP_BACKGROUND_PRIMARY = 29 */
+        -1,        /* COMP_BACKGROUND_PRIMARY_TRAN = 30 */
+        125831005, /* COMP_BACKGROUND_PRIMARY_CONTRARY = 31 */
+        125831006, /* COMP_BACKGROUND_GRAY = 32 */
+        125831007, /* COMP_BACKGROUND_SECONDARY = 33 */
+        125831008, /* COMP_BACKGROUND_TERTIARY = 34 */
+        125831009, /* COMP_BACKGROUND_EMPHASIZE = 35 */
+        125831066, /* COMP_BACKGROUND_NEUTRAL = 36 */
+        125831011, /* COMP_EMPHASIZE_SECONDARY = 37 */
+        125831012, /* COMP_EMPHASIZE_TERTIARY = 38 */
+        125831013, /* COMP_DIVIDER = 39 */
+        125831014, /* COMP_COMMON_CONTRARY = 40 */
+        125831015, /* COMP_BACKGROUND_FOCUS = 41 */
+        125831016, /* COMP_FOCUSED_PRIMARY = 42 */
+        125831017, /* COMP_FOCUSED_SECONDARY = 43 */
+        125831018, /* COMP_FOCUSED_TERTIARY = 44 */
+        125831019, /* INTERACTIVE_HOVER = 45 */
+        125831020, /* INTERACTIVE_PRESSED = 46 */
+        125831021, /* INTERACTIVE_FOCUS = 47 */
+        125831022, /* INTERACTIVE_ACTIVE = 48 */
+        125831023, /* INTERACTIVE_SELECT = 49 */
+        125831024, /* INTERACTIVE_CLICK = 50 */
+    };
+    RefPtr<TokenColors> tokenColors_;
+};
 } // namespace
 
 class CounterTestNg : public TestNG {
@@ -62,6 +124,7 @@ public:
 void CounterTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_COUNTER);
@@ -101,7 +164,7 @@ void CounterTestNg::Create(const std::function<void(CounterModelNG)>& callback)
         callback(model);
     }
     GetInstance();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 /**
@@ -335,5 +398,130 @@ HWTEST_F(CounterTestNg, CounterLayoutAlgorithmTestNg001, TestSize.Level1)
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     counterLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_NE(layoutDirection, TextDirection::RTL);
+}
+
+/**
+ * @tc.name: CounterLayoutAlgorithmTest001
+ * @tc.desc: Test counter UpdateTextColor function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterLayoutAlgorithmTest001, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+    GetInstance();
+    auto counterPattern = AceType::DynamicCast<CounterPattern>(frameNode_->GetPattern());
+    ASSERT_NE(counterPattern, nullptr);
+    int32_t contentId = counterPattern->GetAddId();
+    auto addNode =
+        AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(contentId)));
+    ASSERT_NE(addNode, nullptr);
+    auto addTextNode = AceType::DynamicCast<FrameNode>(addNode->GetChildren().front());
+    ASSERT_NE(addTextNode, nullptr);
+    auto counterLayoutAlgorithm = AceType::DynamicCast<CounterLayoutAlgorithm>(counterPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(counterLayoutAlgorithm, nullptr);
+    counterLayoutAlgorithm->UpdateTextColor(addTextNode, COLOR);
+    auto addRenderContext = addTextNode->GetRenderContext();
+    ASSERT_NE(addRenderContext, nullptr);
+    ASSERT_EQ(addRenderContext->GetForegroundColor(), COLOR);
+}
+
+/**
+ * @tc.name: CounterLayoutPropertyTest001
+ * @tc.desc: test CounterLayoutProperty.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(CounterTestNg, CounterLayoutPropertyTest001, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+    GetInstance();
+    auto layoutProperty = pattern_->CreateLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto counterLayoutProperty = AceType::DynamicCast<CounterLayoutProperty>(layoutProperty);
+    ASSERT_NE(counterLayoutProperty, nullptr);
+    auto clone = counterLayoutProperty->Clone();
+    ASSERT_NE(clone, nullptr);
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    counterLayoutProperty->ToJsonValue(json, filter);
+    EXPECT_NE(json, nullptr);
+    counterLayoutProperty->Reset();
+    EXPECT_FALSE(counterLayoutProperty->isVertical_);
+}
+
+/**
+ * @tc.name: CounterModelNGTest001
+ * @tc.desc: test ResetBackgroundColor.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(CounterTestNg, CounterModelNGTest001, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+    GetInstance();
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_EQ(renderContext->GetBackgroundColor().has_value(), false);
+    renderContext->UpdateBackgroundColor(COLOR);
+    ASSERT_EQ(renderContext->GetBackgroundColor(), COLOR); //
+    model.ResetBackgroundColor(Referenced::RawPtr(frameNode_));
+    ASSERT_EQ(renderContext->GetBackgroundColor().has_value(), false);
+}
+
+/**
+ * @tc.name: CounterPatternTest001
+ * @tc.desc: test CreateLayoutProperty OnThemeScopeUpdate.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(CounterTestNg, CounterPatternTest001, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+    GetInstance();
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto layoutProperty = pattern_->CreateLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    EXPECT_TRUE(pattern_->OnThemeScopeUpdate(host->GetThemeScopeId()));
+    renderContext->UpdateForegroundColor(COLOR);
+    EXPECT_FALSE(pattern_->OnThemeScopeUpdate(host->GetThemeScopeId()));
+}
+
+/**
+ * @tc.name: CounterThemeWrapperTest001
+ * @tc.desc: test ApplyTokenTheme BuildWrapper.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(CounterTestNg, CounterThemeWrapperTest001, TestSize.Level1)
+{
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_COUNTER);
+    ASSERT_NE(themeConstants, nullptr);
+    auto counterThemeWrapper = CounterThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants);
+    EXPECT_NE(counterThemeWrapper, nullptr);
+    auto counterTheme = AceType::DynamicCast<CounterTheme>(counterThemeWrapper);
+    ASSERT_NE(counterTheme, nullptr);
+
+    std::vector<Color> colors;
+    TestProperty testProperty;
+    colors.reserve(TokenColors::TOTAL_NUMBER);
+    for (int i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
+        colors.push_back(Color(testProperty.colors_[i]));
+    }
+    auto themeColors = AceType::MakeRefPtr<TokenColors>();
+    themeColors->SetColors(std::move(colors));
+    testProperty.tokenColors_ = themeColors;
+    auto tokenTheme = AceType::MakeRefPtr<TokenTheme>(TOKEN_THEME_ID);
+    ASSERT_NE(tokenTheme, nullptr);
+    EXPECT_NE(counterTheme->GetContentTextStyle().GetTextColor(), colors[TokenColors::FONT_PRIMARY]);
+    tokenTheme->SetColors(testProperty.tokenColors_);
+    counterThemeWrapper->ApplyTokenTheme(*tokenTheme);
+    EXPECT_EQ(counterTheme->GetContentTextStyle().GetTextColor(), colors[TokenColors::FONT_PRIMARY]);
 }
 } // namespace OHOS::Ace::NG

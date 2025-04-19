@@ -104,7 +104,7 @@ void SvgSvg::AdjustContentAreaSvgSizeValid(RSCanvas& canvas, const Size& viewPor
     float translateY = 0.0f;
     RSRect clipRect(0.0f, 0.0f, svgSize.Width(), svgSize.Height());
     canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         scaleX = std::min(svgSize.Width() / viewBox.Width(), svgSize.Height() / viewBox.Height());
         scaleY = scaleX;
         translateX = (svgSize.Width() - viewBox.Width() * scaleX) * HALF;

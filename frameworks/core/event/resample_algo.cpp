@@ -14,6 +14,12 @@
  */
 #include "core/event/resample_algo.h"
 
+#include <algorithm>
+#include <chrono>
+#include <cinttypes>
+
+#include "core/event/touch_event.h"
+
 namespace OHOS::Ace {
 AvgPoint ResampleAlgo::GetAvgPoint(const std::vector<PointerEvent>&& events,
     bool isScreen)
@@ -120,4 +126,95 @@ ResamplePoint ResampleAlgo::GetResampleCoord(const std::vector<PointerEvent>&& h
     auto currentPoint = GetAvgPoint(std::move(current), isScreen);
     return LinearInterpolation(historyPoint, currentPoint, nanoTimeStamp);
 }
+
+inline float Lerp(float a, float b, float alpha)
+{
+    return a + alpha * (b - a);
+}
+
+template<typename T>
+typename std::vector<T>::iterator FindSampleRightBefore(std::vector<T>& events, uint64_t resampleTime)
+{
+    std::chrono::nanoseconds nanoseconds(resampleTime);
+    TimeStamp ts(nanoseconds);
+    auto iter = events.rbegin(); // events must not be empty
+    do {
+        if (iter->time < ts) {
+            return --iter.base();
+        }
+    } while (++iter != events.rend());
+    return events.end();
+}
+
+bool IsRebound(TouchEvent& prev, TouchEvent& mid, TouchEvent& next)
+{
+    float deltaXA = mid.x - prev.x;
+    float deltaXB = next.x - mid.x;
+    float deltaYA = mid.y - prev.y;
+    float deltaYB = next.y - mid.y;
+    // dot product of the recent 2 deltas
+    // if negtive, it is definitely a rebound
+    // if it is a very small positive,
+    float dotProduct = deltaXA * deltaXB + deltaYA * deltaYB;
+    return (dotProduct < 0.5f);
+}
+
+template<class T>
+bool ResampleAlgo::GetResamplePointerEvent(std::vector<T>& events,
+    uint64_t resampleTime, PointerEvent& resample, ResamplePoint& slope)
+{
+    constexpr int64_t MAX_EXTERNAL_INTERPOLATE_TIME = 8 * 1000 * 1000; // 8ms
+    constexpr int64_t MIN_DELTA_TIME = 2 * 1000 * 1000; // 2ms
+    constexpr int64_t MAX_DELTA_TIME = 20 * 1000 * 1000; // 20ms
+
+    if (events.size() < 2) { // resample need at least 2 points.
+        return false;
+    }
+    auto iter = FindSampleRightBefore(events, resampleTime);
+    if (iter == events.end()) { // no event before resample
+        return false;
+    }
+    auto nextIter = std::next(iter);
+    int64_t delta = 0;
+    uint64_t iterTime = iter->time.time_since_epoch().count();
+    if (nextIter == events.end()) {
+        // external interpolation
+        nextIter = std::prev(iter);
+        if (nextIter != events.begin()) {
+            auto prepre = std::prev(nextIter);
+            if (IsRebound(*prepre, *nextIter, *iter)) {
+                return false;
+            }
+        }
+        uint64_t nextTime = nextIter->time.time_since_epoch().count();
+        delta = iterTime - nextTime;
+        if (delta > MAX_DELTA_TIME || delta < MIN_DELTA_TIME) {
+            return false;
+        }
+        uint64_t maxPredict = std::min(delta / 2, MAX_EXTERNAL_INTERPOLATE_TIME) + iterTime;
+        resampleTime = std::min(resampleTime, maxPredict);
+        delta = -delta;
+    } else if (nextIter->time.time_since_epoch().count() == static_cast<int64_t>(resampleTime)) {
+        return false;
+    } else {
+        // internal interpolation
+        delta = std::chrono::duration_cast<std::chrono::nanoseconds>(nextIter->time - iter->time).count();
+        if (delta < MIN_DELTA_TIME) {
+            return false;
+        }
+    }
+    float alpha = (static_cast<float>(resampleTime) - iterTime) / delta;
+    resample.x = Lerp(iter->x, nextIter->x, alpha);
+    resample.y = Lerp(iter->y, nextIter->y, alpha);
+    resample.screenX = Lerp(iter->screenX, nextIter->screenX, alpha);
+    resample.screenY = Lerp(iter->screenY, nextIter->screenY, alpha);
+    std::chrono::nanoseconds nanoseconds(resampleTime);
+    resample.time = TimeStamp(nanoseconds);
+    slope.inputXDeltaSlope = (nextIter->x - iter->x) / delta;
+    slope.inputYDeltaSlope = (nextIter->y - iter->y) / delta;
+    return true;
+}
+
+template bool ResampleAlgo::GetResamplePointerEvent<TouchEvent>(
+    std::vector<TouchEvent>&, uint64_t, PointerEvent&, ResamplePoint&);
 } // namespace OHOS::Ace

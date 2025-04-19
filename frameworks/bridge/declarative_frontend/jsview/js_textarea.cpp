@@ -31,6 +31,9 @@
 namespace OHOS::Ace::Framework {
 namespace {
 constexpr uint32_t MAX_LINES = 3;
+constexpr uint32_t MAXLINESMODE_CLIP = 0;
+constexpr uint32_t MAXLINESMODE_SCROLL = 1;
+constexpr uint32_t TWO_ARGS = 2;
 }
 
 void JSTextArea::JSBind(BindingTarget globalObj)
@@ -115,6 +118,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("editMenuOptions", &JSTextField::EditMenuOptions);
     JSClass<JSTextArea>::StaticMethod("enablePreviewText", &JSTextField::SetEnablePreviewText);
     JSClass<JSTextArea>::StaticMethod("enableHapticFeedback", &JSTextField::SetEnableHapticFeedback);
+    JSClass<JSTextArea>::StaticMethod("autoCapitalizationMode", &JSTextField::SetCapitalizationMode);
     JSClass<JSTextArea>::StaticMethod("ellipsisMode", &JSTextField::SetEllipsisMode);
     JSClass<JSTextArea>::StaticMethod("stopBackPress", &JSTextField::SetStopBackPress);
     JSClass<JSTextArea>::StaticMethod("keyboardAppearance", &JSTextField::SetKeyboardAppearance);
@@ -130,6 +134,7 @@ void JSTextArea::SetMaxLines(const JSCallbackInfo& info)
 {
     auto normalMaxViewLines = Infinity<uint32_t>();
     auto inlineMaxViewLines = MAX_LINES;
+    auto overflow = MAXLINESMODE_CLIP;
     auto isValid = !(info.Length() < 1 || !info[0]->IsNumber() || info[0]->ToNumber<int32_t>() <= 0);
     if (isValid) {
         inlineMaxViewLines = info[0]->ToNumber<uint32_t>();
@@ -137,6 +142,16 @@ void JSTextArea::SetMaxLines(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetNormalMaxViewLines(normalMaxViewLines);
     TextFieldModel::GetInstance()->SetMaxViewLines(inlineMaxViewLines);
+
+    if (info.Length() == TWO_ARGS && info[1]->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(info[1]);
+        auto overflowMode = paramObject->GetProperty("overflowMode");
+        overflow = overflowMode->ToNumber<int32_t>();
+        if (overflowMode->IsUndefined() || (overflow != MAXLINESMODE_CLIP && overflow != MAXLINESMODE_SCROLL)) {
+            overflow = MAXLINESMODE_CLIP;
+        }
+    }
+    TextFieldModel::GetInstance()->SetOverflowMode(OVERFLOWS_MODE[overflow]);
 }
 
 void JSTextAreaController::JSBind(BindingTarget globalObj)

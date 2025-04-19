@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -121,7 +121,7 @@ private:
 
     // Compote position of grid item in cross axis.
     float ComputeItemCrossPosition(int32_t crossStart) const;
-    virtual void LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper, bool& hasNormalItem);
+    virtual void LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper);
     // Find next valid cell when current is not valid.
     bool GetNextGrid(int32_t& curMain, int32_t& curCross, bool reverse) const;
     // Find a valid cell to place grid item and save to grid matrix.
@@ -205,6 +205,26 @@ private:
         return std::make_pair(cachedCount * crossCount_, cachedCount * crossCount_);
     }
 
+    std::string GetReloadReasonStr(GridReloadReason reason)
+    {
+        switch (reason) {
+            case GridReloadReason::INIT:
+                return "init";
+            case GridReloadReason::CROSS_COUNT_CHANGE:
+                return "cross count change";
+            case GridReloadReason::DATA_RELOAD:
+                return "data reload";
+            case GridReloadReason::SCROLL_TO_INDEX:
+                return "scroll to index";
+            case GridReloadReason::SKIP_LARGE_OFFSET:
+                return "skip large offset";
+            default:
+                return "";
+        }
+    }
+
+    bool HasLayoutOptions(LayoutWrapper* layoutWrapper);
+
 protected:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
@@ -252,6 +272,7 @@ private:
     OffsetF childFrameOffset_;
     std::list<GridPreloadItem> predictBuildList_;
     LayoutConstraintF cachedChildConstraint_;
+    GridReloadReason reason_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };

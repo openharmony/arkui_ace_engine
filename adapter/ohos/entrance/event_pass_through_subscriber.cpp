@@ -16,9 +16,10 @@
 #include "adapter/ohos/entrance/event_pass_through_subscriber.h"
 
 namespace OHOS::Ace {
-const std::string TOUCH_EVENTS_PASS_THROUGH = "touch.events.pass.through";
 namespace {
 constexpr int32_t PUBLISHER_UID = 7800;
+const std::string TOUCH_EVENTS_PASS_THROUGH = "touch.events.pass.through";
+const std::string GAME_INFO_TO_GAME_RESAMPLE = "touch.events.game.resample";
 } // namespace
 
 void EventPassThroughSubscribeProxy::SubscribeEvent(int32_t instanceId)
@@ -29,6 +30,7 @@ void EventPassThroughSubscribeProxy::SubscribeEvent(int32_t instanceId)
         MatchingSkills matchingSkills;
         // add common events
         matchingSkills.AddEvent(TOUCH_EVENTS_PASS_THROUGH);
+        matchingSkills.AddEvent(GAME_INFO_TO_GAME_RESAMPLE);
         CommonEventSubscribeInfo subscribeInfo(matchingSkills);
         subscribeInfo.SetPublisherUid(PUBLISHER_UID);
         subscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::ThreadMode::HANDLER);
@@ -90,24 +92,35 @@ void EventPassThroughSubscriber::OnReceiveEvent(const CommonEventData& data)
         return;
     }
 
-    if (action == TOUCH_EVENTS_PASS_THROUGH) {
-        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "OnReceiveEvent touch.events.pass.through event");
-        AceApplicationInfo::GetInstance().SetTouchEventsPassThroughMode(true);
-        for (const auto& instanceId : instanceMap_) {
-            auto container = Platform::AceContainer::GetContainer(instanceId);
-            if (!container) {
-                continue;
-            }
-            auto taskExecutor = container->GetTaskExecutor();
-            CHECK_NULL_VOID(taskExecutor);
-            taskExecutor->PostTask(
-                [instanceId]() {
-                    auto container = Platform::AceContainer::GetContainer(instanceId);
-                    CHECK_NULL_VOID(container);
-                    container->SetTouchEventsPassThroughMode(true);
-                },
-                TaskExecutor::TaskType::UI, "ArkUIReceiveEventsPassThroughAsync");
+    if (action != TOUCH_EVENTS_PASS_THROUGH && action != GAME_INFO_TO_GAME_RESAMPLE) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "OnReceiveEvent %{public}s", action.c_str());
+    TouchPassMode mode =
+        (action == TOUCH_EVENTS_PASS_THROUGH) ? TouchPassMode::PASS_THROUGH : TouchPassMode::ACCELERATE;
+    AceApplicationInfo::GetInstance().SetTouchEventPassMode(mode);
+    for (const auto& instanceId : instanceMap_) {
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        if (!container) {
+            continue;
         }
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [mode, instanceId]() {
+                auto container = Platform::AceContainer::GetContainer(instanceId);
+                CHECK_NULL_VOID(container);
+                auto pipeline = container->GetPipelineContext();
+                CHECK_NULL_VOID(pipeline);
+                if (mode == TouchPassMode::PASS_THROUGH) {
+                    pipeline->SetTouchPassThrough(true);
+                    pipeline->SetTouchAccelarate(false);
+                } else {
+                    pipeline->SetTouchAccelarate(true);
+                    pipeline->SetTouchPassThrough(false);
+                }
+            },
+            TaskExecutor::TaskType::UI, "ArkUIReceiveEventsPassThroughAsync");
     }
 }
 

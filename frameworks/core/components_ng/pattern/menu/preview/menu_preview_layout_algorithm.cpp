@@ -17,7 +17,6 @@
 
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
-#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 namespace OHOS::Ace::NG {
 void MenuPreviewLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -52,12 +51,27 @@ void MenuPreviewLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (!menuPattern->HasLaid()) {
         menuLayoutAlgorithm->Measure(AceType::RawPtr(menuNode));
         menuLayoutAlgorithm->Layout(AceType::RawPtr(menuNode));
+        // This is a workaround, because sometimes the dirty will not be marked to the top menu node,
+        // the image size of the hoverScale may change. After the change, the image needs to call layout to send
+        // the measured paint to the rosen paint.
+        LayoutHoverScaleImage(menuWrapperPattern);
     }
     menuPattern->SetHasLaid(false);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Layout();
     }
     LinearLayoutAlgorithm::Layout(layoutWrapper);
+}
+
+void MenuPreviewLayoutAlgorithm::LayoutHoverScaleImage(const RefPtr<MenuWrapperPattern>& wrapperPattern)
+{
+    CHECK_NULL_VOID(wrapperPattern);
+    if (!wrapperPattern->GetIsShowHoverImage()) {
+        return;
+    }
+    auto hoverScaleImage = wrapperPattern->GetHoverImagePreview();
+    CHECK_NULL_VOID(hoverScaleImage);
+    hoverScaleImage->Layout();
 }
 
 void MenuPreviewLayoutAlgorithm::UpdateLayoutConstraintForPreview(LayoutWrapper* layoutWrapper)

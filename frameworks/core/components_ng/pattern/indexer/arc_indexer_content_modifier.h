@@ -37,6 +37,7 @@ public:
     ~ArcIndexerContentModifier() override = default;
 
     void onDraw(DrawingContext& context) override;
+    void DrawArcShadow(DrawingContext& context);
     void DrawArc(DrawingContext& context);
 
     void SetStrokeWidth(float strokeWidth)

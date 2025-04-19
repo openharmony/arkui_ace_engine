@@ -165,7 +165,7 @@ auto g_onSetActiveRange = [](int32_t from, int32_t to) {
  */
 const std::map<std::string, std::pair<bool, uint32_t>> cacheCountL24ttype = {
     {"element1", { true, 1 }},
-    {"element2", { true, 2 } },
+    {"element2", { true, 2 }},
     {"element3", { true, 3 }},
     {"element4", { true, 4 }},
     {"element5", { true, 5 }}
@@ -176,8 +176,8 @@ const std::map<std::string, std::pair<bool, uint32_t>> cacheCountL24ttype = {
  */
 const std::map<std::string, std::pair<bool, uint32_t>> templateCachedCountMap = {
     // { template, { cachedCountSpecified, cacheCount } }
-    {"elmt1", { true, 1} },
-    {"elmt2", { true, 2} }
+    {"elmt1", { true, 1 } },
+    {"elmt2", { true, 2 } }
 };
 
 RefPtr<RepeatVirtualScrollNode> RepeatNodeCacheSyntaxTest::GetOrCreateRepeatNode(bool createItems)

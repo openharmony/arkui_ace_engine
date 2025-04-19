@@ -1186,7 +1186,7 @@ HWTEST_F(EventRecorderTest, ApplyNewestConfig001, TestSize.Level1)
     builder1.SetId("hello").SetPageUrl("pages/Index").SetText("world");
     auto params = builder1.build();
     Recorder::EventController::Get().clientList_.clear();
-    Recorder::EventController::Get().ApplyNewestConfig(false, false);
+    Recorder::EventController::Get().ApplyNewestConfig(false);
     Recorder::EventController::Get().NotifyEvent(
         Recorder::EventCategory::CATEGORY_COMPONENT, Recorder::EventType::CHANGE, std::move(params));
     EXPECT_TRUE(Recorder::EventController::Get().clientList_.empty());
@@ -1284,40 +1284,12 @@ HWTEST_F(EventRecorderTest, IsPageParamRecordEnable001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SaveJavascriptItems001
- * @tc.desc: Test SaveJavascriptItems.
+ * @tc.name: FillWebJsCode001
+ * @tc.desc: Test FillWebJsCode.
  * @tc.type: FUNC
  */
-HWTEST_F(EventRecorderTest, SaveJavascriptItems001, TestSize.Level1)
+HWTEST_F(EventRecorderTest, FillWebJsCode001, TestSize.Level1)
 {
-    std::map<std::string, std::vector<std::string>> items;
-    EventRecorder::Get().SaveJavascriptItems(items);
-    std::optional<std::map<std::string, std::vector<std::string>>> input;
-    std::optional<std::vector<std::string>> orderItems;
-    EventRecorder::Get().HandleJavascriptItems(input, orderItems);
-
-    input = std::make_optional<std::map<std::string, std::vector<std::string>>>();
-    EventRecorder::Get().HandleJavascriptItems(input, orderItems);
-    EXPECT_TRUE(input.has_value());
-
-    input = std::nullopt;
-    items["hello"] = { "world" };
-    EventController::Get().hasCached_ = false;
-    EventController::Get().hasWebProcessed_ = true;
-    EventRecorder::Get().SaveJavascriptItems(items);
-    EXPECT_FALSE(Recorder::EventRecorder::Get().cacheScriptItems_.has_value());
-    EventRecorder::Get().HandleJavascriptItems(input, orderItems);
-    EXPECT_FALSE(input.has_value());
-
-    EventController::Get().hasCached_ = false;
-    EventController::Get().hasWebProcessed_ = false;
-    EventRecorder::Get().SaveJavascriptItems(items);
-    EXPECT_TRUE(EventRecorder::Get().cacheScriptItems_.has_value());
-    input = std::nullopt;
-    EventRecorder::Get().HandleJavascriptItems(input, orderItems);
-    EXPECT_TRUE(input.has_value());
-    EXPECT_FALSE(EventRecorder::Get().cacheScriptItems_.has_value());
-
     int32_t index = static_cast<int32_t>(EventCategory::CATEGORY_WEB);
     EventRecorder::Get().globalSwitch_[index] = true;
     EventRecorder::Get().eventSwitch_[index] = true;
@@ -1331,9 +1303,6 @@ HWTEST_F(EventRecorderTest, SaveJavascriptItems001, TestSize.Level1)
     scriptItems = std::make_optional<WebJsItem>();
     EventRecorder::Get().FillWebJsCode(scriptItems);
     EXPECT_TRUE(scriptItems.has_value());
-
-    EventController::Get().cacheJsCode_ = "hello";
-    EXPECT_FALSE(EventRecorder::Get().GetCacheJsCode().empty());
 
     EXPECT_TRUE(EventRecorder::Get().IsMessageValid("test", "abc"));
     EXPECT_FALSE(EventRecorder::Get().IsMessageValid("", "abc"));
@@ -1351,7 +1320,7 @@ HWTEST_F(EventRecorderTest, InspectorTreeCollectorTest001, TestSize.Level1)
      * @tc.steps: step1. call the Constructor.
      * @tc.expected: step1. Constructor success.
      */
-    InspectorTreeCollector collector([](const std::shared_ptr<std::string> tree) {});
+    InspectorTreeCollector collector([](const std::shared_ptr<std::string> tree) {}, false);
     EXPECT_TRUE(collector.root_ != nullptr);
 }
 
@@ -1362,7 +1331,7 @@ HWTEST_F(EventRecorderTest, InspectorTreeCollectorTest001, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, InspectorTreeCollectorTest002, TestSize.Level1)
 {
-    InspectorTreeCollector collector([](const std::shared_ptr<std::string> tree) {});
+    InspectorTreeCollector collector([](const std::shared_ptr<std::string> tree) {}, false);
     collector.taskNum_ = 0;
     /**
      * @tc.steps: step1. call the IncreaseTaskNum.

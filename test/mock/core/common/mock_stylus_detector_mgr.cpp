@@ -52,6 +52,11 @@ bool StylusDetectorMgr::IsNeedInterceptedTouchEvent(
     return false;
 }
 
+bool StylusDetectorMgr::IsNeedInterceptedTouchEventForWeb(float x, float y)
+{
+    return false;
+}
+
 void StylusDetectorMgr::AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& frameNode,
     const WeakPtr<NG::LayoutInfoInterface>& layoutInfo) {}
 void StylusDetectorMgr::RemoveTextFieldFrameNode(const int32_t id) {}

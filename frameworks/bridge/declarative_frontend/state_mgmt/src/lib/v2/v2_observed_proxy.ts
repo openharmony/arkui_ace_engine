@@ -124,6 +124,24 @@ class ArrayProxyHandler {
         return this.isMakeObserved_ ? RefInfo.get(obj) : obj;
     }
 
+    // return the set of elmtIds that are eligible and scheduled for fast re-layout,
+    // or undefined if none
+    private static tryFastRelayout(target: Array<unknown>, key: string, args?: Array<unknown>): Set<number> | undefined {
+        if (target[__RepeatVirtualScroll2Impl.REF_META] === undefined) {
+            return undefined;
+        }
+
+        const elmtIdSet = new Set<number>();
+        target[__RepeatVirtualScroll2Impl.REF_META]?.forEach(weakRef => {
+            const repeat = weakRef?.deref();
+            const elmtId = repeat?.repeatElmtId_;
+            repeat?.tryFastRelayout(key, args ?? []) && elmtIdSet.add(elmtId);
+        });
+
+        stateMgmtConsole.debug(`EXCLUDE Repeat elmtIds:`, ...elmtIdSet);
+        return elmtIdSet.size ? elmtIdSet : undefined;
+    }
+
     // shrinkTo and extendTo is collection.Array api.
     public static readonly arrayLengthChangingFunctions = new Set(['push', 'pop', 'shift', 'splice', 'unshift', 'shrinkTo', 'extendTo']);
     public static readonly arrayMutatingFunctions = new Set(['copyWithin', 'fill', 'reverse', 'sort']);
@@ -173,8 +191,15 @@ class ArrayProxyHandler {
             };
         } else if (ArrayProxyHandler.arrayLengthChangingFunctions.has(key)) {
             return function (...args): any {
+                const originalLength = target.length;
                 const result = ret.call(target, ...args);
-                ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
+                // To detect actual changed range, Repeat needs original length before changes
+                if (key === 'splice') {
+                    args.unshift(originalLength);
+                }
+                
+                let excludeSet = ArrayProxyHandler.tryFastRelayout(conditionalTarget, key, args);
+                ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH, excludeSet);
                 return result;
             };
         } else if (!SendableType.isArray(target)) {
@@ -213,7 +238,10 @@ class ArrayProxyHandler {
         const originalLength = target.length;
         target[key] = value;
         const arrayLenChanged = target.length !== originalLength;
-        ObserveV2.getObserve().fireChange(this.getTarget(target), arrayLenChanged ? ObserveV2.OB_LENGTH : key.toString());
+
+        let excludeSet = ArrayProxyHandler.tryFastRelayout(target, 'set', [key]);
+        ObserveV2.getObserve().fireChange(this.getTarget(target), 
+                arrayLenChanged ? ObserveV2.OB_LENGTH : key.toString(), excludeSet);
         return true;
     }
 };
@@ -302,7 +330,7 @@ class SetMapProxyHandler {
             return (): void => {
                 if (target.size > 0) {
                     target.forEach((_, prop) => {
-                        ObserveV2.getObserve().fireChange(conditionalTarget, prop.toString(), true);
+                        ObserveV2.getObserve().fireChange(conditionalTarget, prop.toString(), undefined, true);
                     });
                     target.clear();
                     ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);

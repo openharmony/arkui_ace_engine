@@ -154,6 +154,21 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
     modifierWithKey(this._modifiersWithKeys, NavDestinationRecoverableModifier.identity, NavDestinationRecoverableModifier, value);
     return this;
   }
+  preferredOrientation(orientation: Optional<number>): this {
+    modifierWithKey(this._modifiersWithKeys, PreferredOrientationModifier.identity, PreferredOrientationModifier, orientation);
+    return this;
+  }
+  enableStatusBar(enable: Optional<boolean>, animated? boolean): this {
+    let statusBar = new ArkEnableStatusBar();
+    statusBar.enable = enable;
+    statusBar.animated = animated;
+    modifierWithKey(this._modifiersWithKeys, EnableStatusBarModifier.identity, EnableStatusBarModifier, statusBar);
+    return this;
+  }
+  enableNavigationIndicator(enable: Optional<boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, EnableNavigationIndicatorModifier.identity, EnableNavigationIndicatorModifier, enable);
+    return this;
+  }
 }
 
 class NavDestinationTitleModifier extends ModifierWithKey<ArkNavigationTitle | undefined> {
@@ -310,6 +325,55 @@ class NavDestinationRecoverableModifier extends ModifierWithKey<boolean | undefi
       getUINativeModule().navDestination.resetRecoverable(node);
     } else {
       getUINativeModule().navDestination.setRecoverable(node, this.value);
+    }
+  }
+}
+
+class PreferredOrientationModifier extends ModifierWithKey<Optional<number>> {
+  constructor(value: Optional<number>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('preferredOrientation');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetPreferredOrientation(node);
+    } else {
+      getUINativeModule().navDestination.setPreferredOrientation(node, this.value);
+    }
+  }
+}
+
+class EnableStatusBarModifier extends ModifierWithKey<ArkEnableStatusBar> {
+  constructor(statusBar: ArkEnableStatusBar) {
+    super(statusBar);
+  }
+  static identity: Symbol = Symbol('enableStatusBar');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetEnableStatusBar(node);
+    } else {
+      getUINativeModule().navDestination.setEnableStatusBar(node, this.value?.enable, this.value?.animated);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return this.value.enable !== this.stageValue.enable || this.value.animated !== this.stageValue.animated;
+  }
+}
+
+class EnableNavigationIndicatorModifier extends ModifierWithKey<Optional<boolean>> {
+  constructor(navigationIndicator: Optional<boolean>) {
+    super(navigationIndicator);
+  }
+  static identity: Symbol = Symbol('enableNavigationIndicator');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetEnableNavigationIndicator(node);
+    } else {
+      getUINativeModule().navDestination.setEnableNavigationIndicator(node, this.value);
     }
   }
 }

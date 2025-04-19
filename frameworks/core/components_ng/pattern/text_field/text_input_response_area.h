@@ -52,6 +52,16 @@ public:
 
     virtual void CreateIconRect(RoundRect& paintRect, bool isFocus) {}
 
+    void SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
+        float hoverRectHeight, bool isFocus);
+
+    virtual float GetHoverIconPadding() const
+    {
+        return 0.0f;
+    }
+
+    void SetHotZoneRect(DimensionRect& hotZoneRegion, float iconSize, float hotZoneHeight);
+
 protected:
     Alignment GetStackAlignment(const TextDirection& userDirection);
     void LayoutChild(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth);
@@ -102,6 +112,11 @@ public:
 
     void CreateIconRect(RoundRect& paintRect, bool isFocus) override;
 
+    float GetHoverIconPadding() const override
+    {
+        return hoverIconPadding_;
+    }
+
 private:
     void LoadImageSourceInfo();
     void AddImageEventOnError();
@@ -130,6 +145,7 @@ private:
     WeakPtr<FrameNode> passwordNode_;
     Color symbolColor_;
     float passwordHoverSize_ = 0.0f;
+    float hoverIconPadding_ = 0.0f;
 };
 
 class UnitResponseArea : public TextInputResponseArea {
@@ -193,6 +209,11 @@ public:
 
     void CreateIconRect(RoundRect& paintRect, bool isFocus) override;
 
+    float GetHoverIconPadding() const override
+    {
+        return hoverIconPadding_;
+    }
+
 private:
     bool IsShowClean() const;
     bool IsShowSymbol() const;
@@ -216,6 +237,7 @@ private:
     Color iconColor_;
     bool isShow_ = false;
     float cancelHoverSize_ = 0.0f;
+    float hoverIconPadding_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

@@ -99,10 +99,18 @@ public:
     static void SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect);
     static void SetTabBarIndex(FrameNode* frameNode, int32_t index);
     static void SetTabsController(FrameNode* frameNode, const RefPtr<SwiperController>& tabsController);
+    static void SetBarModifier(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)>&& onApply);
     static void SetBarBackgroundEffect(FrameNode* frameNode, const EffectOption& effectOption);
     static void SetPageFlipMode(FrameNode* frameNode, int32_t options);
     static void SetCachedMaxCount(FrameNode* frameNode, std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode);
     static void SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChange);
+    static void SetOnTabBarClick(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onTabBarClick);
+    static void SetOnAnimationStart(FrameNode* frameNode, AnimationStartEvent&& onAnimationStart);
+    static void SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& onAnimationEnd);
+    static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& gestureSwipe);
+    static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
+    static void SetOnContentWillChange(FrameNode* frameNode, std::function<bool(int32_t, int32_t)>&& callback);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);
@@ -110,6 +118,7 @@ private:
         const RefPtr<SwiperController>& swiperController);
     static void InitSelectedMaskNode(const RefPtr<FrameNode>& maskNode);
     static void InitUnselectedMaskNode(const RefPtr<FrameNode>& maskNode);
+    static void InitAccessibilityZIndex(RefPtr<FrameNode>& swiperNode, RefPtr<FrameNode>& tabBarNode);
     static RefPtr<TabBarLayoutProperty> GetTabBarLayoutProperty();
     static RefPtr<TabBarPaintProperty> GetTabBarPaintProperty();
     static RefPtr<SwiperLayoutProperty> GetSwiperLayoutProperty();

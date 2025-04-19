@@ -407,4 +407,48 @@ ArkUINativeModuleValue TextTimerBridge::SetTextTimerOptions(ArkUIRuntimeCallInfo
 
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue TextTimerBridge::SetTextTimerOnTimer(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getTextTimerModifier()->resetTextTimerOnTimer(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+
+    std::function<void(int64_t, int64_t)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                         const int64_t first, const int64_t last) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+
+        panda::Local<panda::NumberRef> firstParam = panda::NumberRef::New(vm, first);
+        panda::Local<panda::NumberRef> lastParam = panda::NumberRef::New(vm, last);
+        // 2: Array length
+        panda::Local<panda::JSValueRef> params[2] = { firstParam, lastParam };
+        func->Call(vm, func.ToLocal(), params, 2); // 2: Array length
+    };
+    GetArkUINodeModifiers()->getTextTimerModifier()->setTextTimerOnTimer(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextTimerBridge::ResetTextTimerOnTimer(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextTimerModifier()->resetTextTimerOnTimer(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

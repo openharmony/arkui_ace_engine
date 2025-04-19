@@ -75,6 +75,7 @@ protected:
 private:
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnModifyDone() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     RefPtr<PanEvent> panEvent_;
     WeakPtr<FrameNode> scrollableNode_;

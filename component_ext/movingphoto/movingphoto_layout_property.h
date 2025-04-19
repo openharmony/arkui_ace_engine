@@ -18,7 +18,6 @@
 
 #include "movingphoto_styles.h"
 #include "base/geometry/ng/size_t.h"
-#include "base/geometry/size.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"

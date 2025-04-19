@@ -356,6 +356,13 @@ SizeF TextFieldLayoutAlgorithm::TextAreaMeasureContent(const LayoutConstraintF& 
                       : std::max(preferredHeight_, paragraph_->GetHeight());
 
     auto contentHeight = std::min(contentConstraint.maxSize.Height() - counterNodeHeight, height);
+    auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(textFieldLayoutProperty, SizeF());
+    auto lineCount = paragraph_->GetLineCount() != 0 ? paragraph_->GetLineCount() : 1;
+    if (textFieldLayoutProperty->HasNormalMaxViewLines() && ShouldUseInfiniteMaxLines(textFieldLayoutProperty)) {
+        auto maxline = (height / lineCount) * textFieldLayoutProperty->GetNormalMaxViewLines().value();
+        contentHeight = std::min(contentHeight, maxline);
+    }
 
     textRect_.SetSize(SizeF(GetVisualTextWidth(), paragraph_->GetHeight()));
     return SizeF(contentWidth, contentHeight);
@@ -709,7 +716,8 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
         .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
-        .fontSize = fontSize
+        .fontSize = fontSize,
+        .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines()
     };
 }
 
@@ -751,7 +759,8 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = style->GetTextOverflow(),
-        .fontSize = paragraphData.fontSize };
+        .fontSize = paragraphData.fontSize,
+        .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines() };
     if (!paragraphData.disableTextAlign) {
         paraStyle.align = style->GetTextAlign();
     }
@@ -866,38 +875,8 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     modifier->SetTextColor(textStyle.GetTextColor());
     modifier->SetFontStyle(textStyle.GetFontStyle());
     modifier->SetTextOverflow(textStyle.GetTextOverflow());
-    modifier->SetTextDecoration(textStyle.GetTextDecoration(), textStyle.GetTextDecorationColor(),
+    modifier->SetTextDecoration(textStyle.GetTextDecorationFirst(), textStyle.GetTextDecorationColor(),
         textStyle.GetTextDecorationStyle());
-}
-
-void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)
-{
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto children = frameNode->GetChildren();
-    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
-    CHECK_NULL_VOID(content);
-    auto contentSize = content->GetRect().GetSize();
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto layoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
-    if (!children.empty() && layoutProperty->GetShowUnderlineValue(false) &&
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-        CHECK_NULL_VOID(childWrapper);
-        auto textGeometryNode = childWrapper->GetGeometryNode();
-        CHECK_NULL_VOID(textGeometryNode);
-        auto childFrameSize = textGeometryNode->GetFrameSize();
-        unitWidth_ = childFrameSize.Width();
-        textGeometryNode->SetFrameOffset(
-            OffsetF({ content->GetRect().GetX() + contentSize.Width() - childFrameSize.Width(), 0.0 }));
-        if (childFrameSize.Height() < size.Height()) {
-            childWrapper->GetGeometryNode()->SetFrameSize(SizeF({ unitWidth_, size.Height() }));
-        }
-        childWrapper->Layout();
-    }
 }
 
 bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyle,
@@ -1089,7 +1068,7 @@ bool TextFieldLayoutAlgorithm::IsInlineFocusAdaptMinExceedLimit(const SizeF& max
     return didExceedMaxLines;
 }
 
-bool TextFieldLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::u16string& content,
+bool TextFieldLayoutAlgorithm::CreateParagraphAndLayout(TextStyle& textStyle, const std::u16string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout)
 {
     if (!CreateParagraphEx(textStyle, content, contentConstraint, layoutWrapper)) {
@@ -1167,6 +1146,9 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
     if (layoutProperty->HasLineSpacing()) {
         textStyle.SetLineSpacing(layoutProperty->GetLineSpacing().value());
     }
+    if (layoutProperty->HasIsOnlyBetweenLines()) {
+        textStyle.SetIsOnlyBetweenLines(layoutProperty->GetIsOnlyBetweenLines().value_or(false));
+    }
 }
 
 void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<FrameNode>& frameNode,
@@ -1226,5 +1208,25 @@ bool TextFieldLayoutAlgorithm::IsAdaptExceedLimit(const SizeF& maxSize)
         GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width()) ||
         IsAdaptFontSizeExceedLineHeight(paragraph) ||
            GreatNotEqual(paragraph->GetHeight(), maxSize.Height());
+}
+
+void TextFieldLayoutAlgorithm::UpdateTextAreaMaxLines(
+    TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty)
+{
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (ShouldUseInfiniteMaxLines(textFieldLayoutProperty)) {
+        textStyle.SetMaxLines(INT32_MAX);
+    } else {
+        textStyle.SetMaxLines(textFieldLayoutProperty->GetNormalMaxViewLines().value());
+    }
+}
+
+bool TextFieldLayoutAlgorithm::ShouldUseInfiniteMaxLines(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty)
+{
+    CHECK_NULL_RETURN(textFieldLayoutProperty, false);
+    return textFieldLayoutProperty->HasOverflowMode() &&
+           textFieldLayoutProperty->GetOverflowMode() == OverflowMode::SCROLL &&
+           (textFieldLayoutProperty->GetTextOverflow() == TextOverflow::NONE ||
+               textFieldLayoutProperty->GetTextOverflow() == TextOverflow::CLIP);
 }
 } // namespace OHOS::Ace::NG

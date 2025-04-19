@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,7 +52,6 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
     } else {
         progressFocusNode->SetFocusable(false);
     }
-
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
@@ -68,7 +67,9 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
         CHECK_NULL_VOID(textHost);
         SetTextDefaultStyle(textHost, value, max);
         textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>();
+        RefPtr<ProgressTheme> theme = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)
+                                          ? pipeline->GetTheme<ProgressTheme>(frameNode->GetThemeScopeId())
+                                          : pipeline->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(theme);
         eventHub->SetHoverEffect(static_cast<HoverEffectType>(theme->GetCapsuleHoverEffectType()));
     } else {
@@ -115,14 +116,29 @@ void ProgressModelNG::SetColor(const Color& value)
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, value);
 }
 
+void ProgressModelNG::ResetColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER);
+}
+
 void ProgressModelNG::SetGradientColor(const Gradient& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, GradientColor, value);
 }
 
+void ProgressModelNG::ResetGradientColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, GradientColor, PROPERTY_UPDATE_RENDER);
+}
+
 void ProgressModelNG::SetBackgroundColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, value);
+}
+
+void ProgressModelNG::ResetBackgroundColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER);
 }
 
 void ProgressModelNG::SetStrokeWidth(const Dimension& value)
@@ -142,13 +158,15 @@ void ProgressModelNG::SetScaleWidth(const Dimension& value)
 
 void ProgressModelNG::SetBorderColor(const Color& value)
 {
-    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
-    CHECK_NULL_VOID(progressPaintProperty);
-    auto progressType = progressPaintProperty->GetProgressTypeValue();
-    if (progressType == ProgressType::CAPSULE) {
+    if (isCapsule()) {
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, value);
+    }
+}
+
+void ProgressModelNG::ResetBorderColor()
+{
+    if (isCapsule()) {
+        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderColor, PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -186,6 +204,16 @@ void ProgressModelNG::SetFontColor(const Color& value)
     textLayoutProperty->UpdateTextColor(value);
     textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, TextColor, value);
+}
+
+void ProgressModelNG::ResetFontColor()
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
+    CHECK_NULL_VOID(textHost);
+    textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, TextColor, PROPERTY_UPDATE_RENDER);
 }
 
 void ProgressModelNG::SetText(const std::optional<std::string>& value)
@@ -273,7 +301,9 @@ void ProgressModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, dou
     auto renderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateClipEdge(false);
-    RefPtr<ProgressTheme> progressTheme = pipeline->GetTheme<ProgressTheme>();
+    RefPtr<ProgressTheme> progressTheme = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)
+                                              ? pipeline->GetTheme<ProgressTheme>(frameNode->GetThemeScopeId())
+                                              : pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
     auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
@@ -595,7 +625,9 @@ void ProgressModelNG::ProgressInitialize(
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return;
     }
-    RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>();
+    RefPtr<ProgressTheme> theme = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)
+                                      ? pipeline->GetTheme<ProgressTheme>(frameNode->GetThemeScopeId())
+                                      : pipeline->GetTheme<ProgressTheme>();
     auto progressFocusNode = frameNode->GetFocusHub();
     CHECK_NULL_VOID(progressFocusNode);
     if (type == ProgressType::CAPSULE) {
@@ -644,7 +676,56 @@ void ProgressModelNG::SetBorderRadius(FrameNode* frameNode, const Dimension& val
 
 void ProgressModelNG::ResetBorderRadius(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderRadius, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
+void ProgressModelNG::ResetColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void ProgressModelNG::ResetBackgroundColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void ProgressModelNG::ResetGradientColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, GradientColor, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void ProgressModelNG::ResetBorderColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    const auto& progressType = progressPaintProperty->GetProgressType();
+    if (progressType == ProgressType::CAPSULE) {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderColor, PROPERTY_UPDATE_RENDER, frameNode);
+    }
+}
+
+void ProgressModelNG::ResetFontColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
+    CHECK_NULL_VOID(textHost);
+    textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, TextColor, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+bool ProgressModelNG::isCapsule() const
+{
+    const bool result = false;
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, result);
+    auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
+    CHECK_NULL_RETURN(progressPaintProperty, result);
+    const auto& progressType = progressPaintProperty->GetProgressType();
+    return progressType == ProgressType::CAPSULE;
+}
 } // namespace OHOS::Ace::NG

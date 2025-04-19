@@ -147,14 +147,14 @@ float SheetPresentationPattern::GetSheetTopSafeArea()
         sheetTopSafeArea = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
     } else if ((sheetType == SheetType::SHEET_BOTTOMLANDSPACE || sheetType == SheetType::SHEET_BOTTOM ||
                 sheetType == SheetType::SHEET_BOTTOM_OFFSET) &&
-               Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+               Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         sheetTopSafeArea = GetBottomSafeArea();
     } else if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE &&
                AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         sheetTopSafeArea = 0.0f;
     }
     // before API14，ignore safeArea height when in landscape
-    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
         CHECK_NULL_RETURN(layoutProperty, 0.0f);
         auto sheetStyle = layoutProperty->GetSheetStyleValue();
@@ -906,7 +906,7 @@ void SheetPresentationPattern::InitialLayoutProps()
 
 bool SheetPresentationPattern::GetWindowButtonRect(NG::RectF& floatButtons)
 {
-    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return false;
     }
     auto host = GetHost();
@@ -1209,7 +1209,7 @@ float SheetPresentationPattern::UpdateSheetTransitionOffset()
 void SheetPresentationPattern::SetSheetAnimationOption(AnimationOption& option) const
 {
     option.SetFillMode(FillMode::FORWARDS);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         option.SetDuration(SHEET_ANIMATION_DURATION);
     }
 }
@@ -1373,7 +1373,7 @@ void SheetPresentationPattern::UpdateDragBarStatus()
 
 float SheetPresentationPattern::GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme)
 {
-    auto closeIconX = sheetSize.Width() - static_cast<float>(SHEET_CLOSE_ICON_WIDTH.ConvertToPx()) -
+    auto closeIconX = sheetSize.Width() - static_cast<float>(sheetTheme->GetCloseIconButtonWidth().ConvertToPx()) -
                       static_cast<float>(sheetTheme->GetTitleTextMargin().ConvertToPx());
     if (AceApplicationInfo::GetInstance().IsRightToLeft() &&
         AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -1396,6 +1396,40 @@ RefPtr<FrameNode> SheetPresentationPattern::GetTitleNode()
     auto operationNode = GetTitleBuilderNode();
     CHECK_NULL_RETURN(operationNode, nullptr);
     return DynamicCast<FrameNode>(operationNode->GetChildAtIndex(1));
+}
+
+void SheetPresentationPattern::UpdateTitleTextColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    auto firstChild = host->GetChildAtIndex(0);
+    CHECK_NULL_VOID(firstChild);
+    auto sheetTitleColumn = firstChild->GetChildAtIndex(1);
+    CHECK_NULL_VOID(sheetTitleColumn);
+    auto mainRow = sheetTitleColumn->GetChildAtIndex(0);
+    CHECK_NULL_VOID(mainRow);
+    auto mainTitleText = DynamicCast<FrameNode>(mainRow->GetChildAtIndex(0));
+    CHECK_NULL_VOID(mainTitleText);
+    auto mainTitleProp = mainTitleText->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(mainTitleProp);
+    mainTitleProp->UpdateTextColor(sheetTheme->GetTitleTextFontColor());
+
+    auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (sheetStyle.sheetSubtitle.has_value()) {
+        auto subRow = sheetTitleColumn->GetChildAtIndex(1);
+        CHECK_NULL_VOID(subRow);
+        auto subTitleText = DynamicCast<FrameNode>(subRow->GetChildAtIndex(0));
+        CHECK_NULL_VOID(subTitleText);
+        auto subTitleProp = subTitleText->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(subTitleProp);
+        subTitleProp->UpdateTextColor(sheetTheme->GetSubtitleTextFontColor());
+    }
 }
 
 void SheetPresentationPattern::UpdateTitlePadding()
@@ -1424,8 +1458,9 @@ void SheetPresentationPattern::UpdateTitlePadding()
 
     // The title bar area is reserved for the close button area size by default.
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto sheetCloseIconTitleSpace = sheetTheme->IsOuterBorderEnable() ? 0.0_vp : SHEET_CLOSE_ICON_TITLE_SPACE_NEW;
-        padding.end = CalcLength(showCloseIcon ? sheetCloseIconTitleSpace + SHEET_CLOSE_ICON_WIDTH : 0.0_vp);
+        auto sheetCloseIconTitleSpace = sheetTheme->GetSheetCloseIconTitleSpaceNew();
+        padding.end =
+            CalcLength(showCloseIcon ? sheetCloseIconTitleSpace + sheetTheme->GetCloseIconButtonWidth() : 0.0_vp);
     } else {
         padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
     }
@@ -1535,11 +1570,15 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
 
 void SheetPresentationPattern::OnColorConfigurationUpdate()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
-    auto sheetCloseIcon = GetSheetCloseIcon();
+
+    UpdateTitleTextColor();
+    auto sheetCloseIcon = DynamicCast<FrameNode>(host->GetChildAtIndex(2));
     CHECK_NULL_VOID(sheetCloseIcon);
     auto renderContext = sheetCloseIcon->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -1931,6 +1970,8 @@ SheetType SheetPresentationPattern::GetSheetType()
         GetSheetTypeWithAuto(sheetType);
     } else if (sheetThemeType_ == "popup") {
         GetSheetTypeWithPopup(sheetType);
+    } else if (sheetThemeType_ == "center") {
+        GetSheetTypeWithCenter(sheetType);
     }
     return sheetType;
 }
@@ -2010,6 +2051,29 @@ void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
     }
     if (sheetType == SheetType::SHEET_POPUP && !sheetKey_.hasValidTargetNode) {
         sheetType = SheetType::SHEET_CENTER;
+    }
+}
+
+void SheetPresentationPattern::GetSheetTypeWithCenter(SheetType& sheetType)
+{
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (sheetStyle.sheetType.has_value()) {
+        sheetType = sheetStyle.sheetType.value();
+        return;
+    }
+    double rootWidth = 0.0;
+    if (windowSize_.has_value()) {
+        rootWidth = windowSize_.value().Width();
+    } else {
+        rootWidth = PipelineContext::GetCurrentRootWidth();
+    }
+    if (GreatOrEqual(rootWidth, SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
+        sheetType = SheetType::SHEET_CENTER;
+    } else {
+        // SHEET_BOTTOMLANDSPACE need to adapt
+        sheetType = SheetType::SHEET_BOTTOM;
     }
 }
 
@@ -2482,7 +2546,7 @@ void SheetPresentationPattern::CalculateAloneSheetRadius(
 std::string SheetPresentationPattern::GetPopupStyleSheetClipPath(
     const SizeF& sheetSize, const BorderRadiusProperty& sheetRadius)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return GetPopupStyleSheetClipPathNew(sheetSize, sheetRadius);
     }
     auto radiusTopLeft = sheetRadius.radiusTopLeft->ConvertToPx();
@@ -3369,7 +3433,7 @@ void SheetPresentationPattern::GetArrowOffsetByPlacement(
     const RefPtr<SheetPresentationLayoutAlgorithm>& layoutAlgorithm)
 {
     CHECK_NULL_VOID(layoutAlgorithm);
-    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     finalPlacement_ = sheetPopupInfo_.finalPlacement;

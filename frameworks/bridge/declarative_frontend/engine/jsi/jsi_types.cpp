@@ -125,6 +125,15 @@ bool JsiValue::IsNull() const
     }
 }
 
+bool JsiValue::IsDate() const
+{
+    if (GetHandle().IsEmpty()) {
+        return false;
+    } else {
+        return GetHandle()->IsDate(GetEcmaVM());
+    }
+}
+
 std::string JsiValue::ToString() const
 {
     auto vm = GetEcmaVM();
@@ -154,6 +163,9 @@ std::u16string JsiValue::ToU16String() const
 
 bool JsiValue::ToBoolean() const
 {
+    if (SystemProperties::DetectJsObjTypeConvertion() && !IsBoolean()) {
+        LOGF_ABORT("bad call to ToBoolean.");
+    }
     return GetHandle()->BooleaValue(GetEcmaVM());
 }
 

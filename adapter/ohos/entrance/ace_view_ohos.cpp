@@ -326,11 +326,13 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
             finallyCallback();
         }
     };
-    if (touchPoint.type != TouchType::UNKNOWN) {
-        if (touchEventCallback_) {
-            touchEventCallback_(touchPoint, markProcess, node);
-        }
+    if (touchPoint.type == TouchType::UNKNOWN) {
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "ProcessTouchEvent pointerEvent action is unknown return.");
+        markProcess();
+        return;
     }
+    CHECK_NULL_VOID(touchEventCallback_);
+    touchEventCallback_(touchPoint, markProcess, node);
 }
 
 void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,

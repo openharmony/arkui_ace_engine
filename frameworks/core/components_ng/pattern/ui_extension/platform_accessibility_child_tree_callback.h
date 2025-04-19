@@ -16,7 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PLATFORM_ACCESSIBILITY_CHILD_TREE_CALLBACK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PLATFORM_ACCESSIBILITY_CHILD_TREE_CALLBACK_H
 
-#include "frameworks/core/components_ng/pattern/ui_extension/platform_accessibility_base.h"
+#include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/pattern/ui_extension/platform_accessibility_base.h"
 
 namespace OHOS::Ace::NG {
 

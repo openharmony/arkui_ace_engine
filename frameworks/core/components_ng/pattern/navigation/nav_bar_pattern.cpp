@@ -190,6 +190,13 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
             targetId = menuItemNode->GetId();
             targetTag = menuItemNode->GetTag();
         }
+        NavigationMenuOptions menuOptions = navBarPattern->GetMenuOptions();
+        if (menuOptions.mbOptions.bgOptions.blurStyleOption.has_value()) {
+            menuParam.backgroundBlurStyleOption = menuOptions.mbOptions.bgOptions.blurStyleOption.value();
+        }
+        if (menuOptions.mbOptions.bgOptions.effectOption.has_value()) {
+            menuParam.backgroundEffectOption = menuOptions.mbOptions.bgOptions.effectOption.value();
+        }
         auto barMenuNode = MenuView::Create(
             std::move(params), targetId, targetTag, MenuType::NAVIGATION_MENU, menuParam);
         BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, navBarNode);
@@ -509,5 +516,13 @@ float NavBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const
     auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titlePattern, 0.f);
     return titlePattern->GetTitleBarHeightLessThanMaxBarHeight();
+}
+
+bool NavBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    hostNode->AdjustRenderContextIfNeeded();
+    return false;
 }
 } // namespace OHOS::Ace::NG

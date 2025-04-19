@@ -38,9 +38,7 @@ CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, con
     contentModifier_ = contentModifier;
     // The default value of the font size in canvas is 14px.
     SetFontSize(DEFAULT_FONT_SIZE);
-    // The default value of TextAlign is TextAlign::START.
-    SetDefaultTextAlign();
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
         isPathChanged_ = false;
         isPath2dChanged_ = false;
     }
@@ -148,7 +146,7 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
         CHECK_NULL_VOID(tempPixelMap);
         RSRect rec;
         if (canvasImage.flag == DrawImageType::THREE_PARAMS &&
-            apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+            apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
             rec = RSRect(canvasImage.dx, canvasImage.dy,
                 canvasImage.dx + tempPixelMap->GetWidth(), canvasImage.dy + tempPixelMap->GetHeight());
         } else {
@@ -417,6 +415,20 @@ void CanvasPaintMethod::Reset()
     rsCanvas_->Clear(RSColor::COLOR_TRANSPARENT);
     rsCanvas_->Save();
 }
+
+TextDirection CanvasPaintMethod::GetSystemDirection()
+{
+    auto host = frameNode_.Upgrade();
+    CHECK_NULL_RETURN(host, TextDirection::AUTO);
+    auto layoutProperty = host->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_RETURN(host, TextDirection::AUTO);
+    auto direction = layoutProperty->GetLayoutDirection();
+    if (direction == TextDirection::AUTO) {
+        direction = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    }
+    return direction;
+}
+
 #ifndef ACE_UNITTEST
 void CanvasPaintMethod::ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
 {

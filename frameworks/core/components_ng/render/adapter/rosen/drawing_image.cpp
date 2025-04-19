@@ -19,6 +19,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
 #include "frameworks/core/image/sk_image_cache.h"
+#include "core/pipeline/pipeline_base.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "pipeline/rs_recording_canvas.h"
 #endif
@@ -207,7 +208,7 @@ RefPtr<CanvasImage> DrawingImage::Clone()
 
 void DrawingImage::Cache(const std::string& key)
 {
-    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    auto pipelineCtx = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineCtx);
     auto cache = pipelineCtx->GetImageCache();
     CHECK_NULL_VOID(cache);
@@ -219,7 +220,7 @@ void DrawingImage::Cache(const std::string& key)
 
 RefPtr<CanvasImage> DrawingImage::QueryFromCache(const std::string& key)
 {
-    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    auto pipelineCtx = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineCtx, nullptr);
     auto cache = pipelineCtx->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);

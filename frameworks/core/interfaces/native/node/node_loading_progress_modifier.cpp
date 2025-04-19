@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,9 @@ void ResetLoadingProgressColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        LoadingProgressModelNG::ResetColor(frameNode);
+    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<ProgressTheme>();
@@ -80,6 +82,9 @@ void ResetLoadingProgressForegroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        LoadingProgressModelNG::ResetColor(frameNode);
+    }
 }
 } // namespace
 

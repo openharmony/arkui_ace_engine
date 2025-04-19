@@ -16,13 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ANIMATION_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ANIMATION_UTILS_H
 
+#include "base/utils/macros.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/render/render_context.h"
-
-#include "foundation/arkui/ace_engine/frameworks/base/utils/macros.h"
+#include "core/pipeline/base/render_context.h"
 
 namespace OHOS::Ace {
+
+namespace NG {
+class RenderContext;
+}
 
 namespace {
 

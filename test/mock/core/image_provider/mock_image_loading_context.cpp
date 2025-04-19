@@ -156,7 +156,6 @@ bool ImageLoadingContext::NeedAlt() const
 
 void ImageLoadingContext::ResetLoading() {}
 void ImageLoadingContext::ResumeLoading() {}
-void ImageLoadingContext::DownloadImage() {}
 void ImageLoadingContext::ResizableCalcDstSize() {}
 
 const std::string ImageLoadingContext::GetCurrentLoadingState()
@@ -172,16 +171,5 @@ int32_t ImageLoadingContext::GetFrameCount() const
 bool ImageLoadingContext::Downloadable()
 {
     return true;
-}
-
-void ImageLoadingContext::PerformDownload() {}
-
-void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData) {}
-
-void ImageLoadingContext::DownloadImageFailed(const std::string& errorMessage) {}
-
-RefPtr<ImageData> ImageLoadingContext::QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
-{
-    return nullptr;
 }
 } // namespace OHOS::Ace::NG

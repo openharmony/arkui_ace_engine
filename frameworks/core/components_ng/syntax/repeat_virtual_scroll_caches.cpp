@@ -755,20 +755,8 @@ bool RepeatVirtualScrollCaches::Purge()
         // improvement idea: in addition to distance from range use the
         // scroll direction for selecting these keys
         auto safeDist = std::min(cacheCount, static_cast<uint32_t>(l2Keys.size()));
-        auto itL2Key = l2Keys.begin();
-        auto itDivider = std::next(l2Keys.begin(), safeDist);
+        auto itL2Key = std::next(l2Keys.begin(), safeDist);
 
-        while (itL2Key != itDivider) {
-            // freeze the remaining nodes in L2
-            const auto& uiNodeIter = uiNode4Key.find(*itL2Key);
-            if (uiNodeIter != uiNode4Key.end()) {
-                TAG_LOGD(AceLogTag::ACE_REPEAT,
-                    "... freezing spare node cache item old key '%{public}s' -> node %{public}s, ttype: '%{public}s'",
-                    itL2Key->c_str(), DumpUINodeWithKey(*itL2Key).c_str(), ttype.c_str());
-                uiNodeIter->second->SetJSViewActive(false);
-            }
-            itL2Key++;
-        }
         while (itL2Key != l2Keys.end()) {
             // delete remaining keys
             TAG_LOGD(AceLogTag::ACE_REPEAT,

@@ -26,6 +26,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/state_style_manager.h"
+#include "core/components_ng/event/visible_ratio_callback.h"
 
 namespace OHOS::Ace::NG {
 

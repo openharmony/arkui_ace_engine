@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
+#include "core/components_ng/pattern/container_modal/container_modal_toolbar.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 
@@ -34,6 +35,7 @@ constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0; // 5.0px
 constexpr double MOVE_POPUP_DISTANCE_X = 40.0;    // 40.0px
 constexpr double MOVE_POPUP_DISTANCE_Y = 20.0;    // 20.0px
 constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
+constexpr int8_t ALPHA_MASK_OPAQUE = -1;
 } // namespace
 
 void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
@@ -449,6 +451,11 @@ void ContainerModalPattern::SetAppTitle(const std::string& title)
     CHECK_NULL_VOID(customTitleNode);
     customTitleNode->FireAppTitleCallback(title);
 
+    // call setTitle() callback for backButton bar
+    auto controllButtonRow = GetCustomButtonNode();
+    CHECK_NULL_VOID(controllButtonRow);
+    controllButtonRow->FireAppTitleCallback(title);
+
     auto customFloatingTitleNode = GetFloatingTitleNode();
     CHECK_NULL_VOID(customFloatingTitleNode);
     customFloatingTitleNode->FireAppTitleCallback(title);
@@ -616,6 +623,9 @@ void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
     auto gestureRow = GetGestureRow();
     UpdateRowHeight(gestureRow, titleHeight_);
     CallButtonsRectChange();
+    if (titleMgr_ != nullptr) {
+        titleMgr_->UpdateTargetNodesBarMargin();
+    }
 }
 
 int32_t ContainerModalPattern::GetContainerModalTitleHeight()
@@ -799,20 +809,29 @@ void ContainerModalPattern::InitLayoutProperty()
     buttonsRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
     buttonsRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
 
-    InitTitleRowLayoutProperty(GetCustomTitleRow());
-    InitTitleRowLayoutProperty(GetFloatingTitleRow());
+    InitTitleRowLayoutProperty(GetCustomTitleRow(), false);
+    InitTitleRowLayoutProperty(GetFloatingTitleRow(), true);
     InitButtonsLayoutProperty();
-
+    if (!IsContainerModalTransparent()) {
+        if (titleMgr_ == nullptr) {
+            auto title = GetCustomTitleRow();
+            titleMgr_ = MakeRefPtr<ContainerModalToolBar>(WeakClaim(this), title, false);
+        }
+        titleMgr_->HasExpandStackLayout();
+    }
     containerModal->MarkModifyDone();
 }
 
-void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow)
+void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow, bool isFloating)
 {
     CHECK_NULL_VOID(titleRow);
     auto titleRowProperty = titleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(titleRowProperty);
     titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto rowHeight = (CONTAINER_TITLE_HEIGHT == titleHeight_) ? CONTAINER_TITLE_HEIGHT : titleHeight_;
+    auto rowHeight = CONTAINER_TITLE_HEIGHT;
+    if (!isFloating) {
+        rowHeight = (CONTAINER_TITLE_HEIGHT == titleHeight_) ? CONTAINER_TITLE_HEIGHT : titleHeight_;
+    }
     titleRowProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(rowHeight)));
     titleRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
@@ -832,10 +851,10 @@ void ContainerModalPattern::InitAllTitleRowLayoutProperty()
     CHECK_NULL_VOID(customTitleRow);
     auto floatingTitleRow = GetFloatingTitleRow();
     CHECK_NULL_VOID(floatingTitleRow);
-    InitTitleRowLayoutProperty(customTitleRow);
+    InitTitleRowLayoutProperty(customTitleRow, false);
     customTitleRow->MarkModifyDone();
     customTitleRow->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-    InitTitleRowLayoutProperty(floatingTitleRow);
+    InitTitleRowLayoutProperty(floatingTitleRow, true);
     floatingTitleRow->MarkModifyDone();
     floatingTitleRow->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
 }
@@ -933,6 +952,18 @@ bool ContainerModalPattern::CanShowCustomTitle()
     return visibility == VisibleType::VISIBLE;
 }
 
+bool ContainerModalPattern::IsContainerModalTransparent()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
+    auto newActiveColor = theme->GetBackGroundColor(true);
+    auto newInactiveColor = theme->GetBackGroundColor(false);
+    int8_t activeColorAlpha = newActiveColor.GetAlpha();
+    int8_t inactiveColorAlpha = newInactiveColor.GetAlpha();
+    return (activeColorAlpha == ALPHA_MASK_OPAQUE && inactiveColorAlpha == ALPHA_MASK_OPAQUE)? false : true;
+}
+
 void ContainerModalPattern::TrimFloatingWindowLayout()
 {
     if (windowMode_ != WindowMode::WINDOW_MODE_FLOATING) {
@@ -1019,5 +1050,22 @@ void ContainerModalPattern::EnableContainerModalCustomGesture(RefPtr<PipelineCon
     CHECK_NULL_VOID(containerPattern);
     containerPattern->SetEnableContainerModalCustomGesture(enable);
     containerPattern->InitColumnTouchTestFunc();
+}
+
+void ContainerModalPattern::SetToolbarBuilder(
+    const RefPtr<FrameNode>& parent, std::function<RefPtr<UINode>()>&& builder)
+{
+    CHECK_NULL_VOID(parent);
+    if (titleMgr_ == nullptr) {
+        auto title = GetCustomTitleRow();
+        titleMgr_ = MakeRefPtr<ContainerModalToolBar>(WeakClaim(this), title, false);
+    }
+    if (floatTitleMgr_ == nullptr) {
+        auto title = GetFloatingTitleRow();
+        floatTitleMgr_ = MakeRefPtr<ContainerModalToolBar>(WeakClaim(this), title, true);
+    }
+
+    titleMgr_->SetToolbarBuilder(parent, builder);
+    floatTitleMgr_->SetToolbarBuilder(parent, builder);
 }
 } // namespace OHOS::Ace::NG

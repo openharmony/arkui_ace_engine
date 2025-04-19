@@ -482,7 +482,7 @@ void BuildToolbarMoreMenuNodeAction(
 }
 
 bool CreateToolbarItemNodeAndMenuNode(BarItemNodeParam itemNodeParam, std::vector<OptionParam>&& params,
-    const FieldProperty& fieldProperty, RefPtr<FrameNode>& barMenuNodeOut, const RefPtr<FrameNode>& containerNode)
+    const FieldProperty& fieldProperty, const RefPtr<FrameNode>& containerNode, BarNode& barNode)
 {
     int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
@@ -493,6 +493,19 @@ bool CreateToolbarItemNodeAndMenuNode(BarItemNodeParam itemNodeParam, std::vecto
     BuildToolbarMoreItemNode(barItemNode, itemNodeParam.enabled, itemNodeParam.hideText);
     MenuParam menuParam;
     menuParam.isShowInSubWindow = false;
+    if (barNode.nodeBase) {
+        auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(barNode.nodeBase->GetToolBarNode());
+        CHECK_NULL_RETURN(toolbarNode, false);
+        auto toolBarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+        CHECK_NULL_RETURN(toolBarPattern, false);
+        MoreButtonOptions toolBarMoreButtonOptions = toolBarPattern->GetToolbarMoreButtonOptions();
+        if (toolBarMoreButtonOptions.bgOptions.blurStyleOption.has_value()) {
+            menuParam.backgroundBlurStyleOption = toolBarMoreButtonOptions.bgOptions.blurStyleOption.value();
+        }
+        if (toolBarMoreButtonOptions.bgOptions.effectOption.has_value()) {
+            menuParam.backgroundEffectOption = toolBarMoreButtonOptions.bgOptions.effectOption.value();
+        }
+    }
     auto barMenuNode = MenuView::Create(
         std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU, menuParam);
     auto toolBarItemNode = CreateToolbarMoreMenuNode(barItemNode);
@@ -503,12 +516,12 @@ bool CreateToolbarItemNodeAndMenuNode(BarItemNodeParam itemNodeParam, std::vecto
     NavigationTitleUtil::SetInnerChildId(toolBarItemNode, fieldProperty.field,
         containerNode->GetTag(), "More", fieldProperty.parentId);
     containerNode->AddChild(toolBarItemNode);
-    barMenuNodeOut = barMenuNode;
+    barNode.barMenuNode = barMenuNode;
     return true;
 }
 
 bool BuildToolBarItems(const RefPtr<NavToolbarNode>& toolBarNode, const std::vector<NG::BarItem>& toolBarItems,
-    const FieldProperty& fieldProperty, bool enabled, RefPtr<FrameNode>& barMenuNodeOut)
+    const FieldProperty& fieldProperty, bool enabled, BarNode& barNode)
 {
     CHECK_NULL_RETURN(toolBarNode, false);
     auto rowProperty = toolBarNode->GetLayoutProperty();
@@ -553,8 +566,7 @@ bool BuildToolBarItems(const RefPtr<NavToolbarNode>& toolBarNode, const std::vec
         return true;
     }
     BarItemNodeParam itemNodeParam = { enabled, isHideItemText };
-    return CreateToolbarItemNodeAndMenuNode(itemNodeParam, std::move(params), fieldProperty,
-        barMenuNodeOut, containerNode);
+    return CreateToolbarItemNodeAndMenuNode(itemNodeParam, std::move(params), fieldProperty, containerNode, barNode);
 }
 } //namespace
 
@@ -613,11 +625,12 @@ void NavigationToolbarUtil::SetToolbarConfiguration(const RefPtr<NavDestinationN
     }
     bool needMoreButton = toolBarItems.size() > MAXIMUM_TOOLBAR_ITEMS_IN_BAR;
     RefPtr<FrameNode> barMenuNode = nullptr;
-    if (!BuildToolBarItems(toolBarNode, toolBarItems, fieldProperty, enabled, barMenuNode)) {
+    BarNode barNode = { barMenuNode, nodeBase };
+    if (!BuildToolBarItems(toolBarNode, toolBarItems, fieldProperty, enabled, barNode)) {
         return;
     }
     if (needMoreButton) {
-        nodeBase->SetToolbarMenuNode(barMenuNode);
+        nodeBase->SetToolbarMenuNode(barNode.barMenuNode);
     }
     nodeBase->SetToolBarNode(toolBarNode);
     nodeBase->SetPreToolBarNode(toolBarNode);
@@ -673,6 +686,17 @@ void NavigationToolbarUtil::SetToolbarOptions(
     auto toolBarPattern = toolBarNode->GetPattern<NavToolbarPattern>();
     CHECK_NULL_VOID(toolBarPattern);
     toolBarPattern->SetToolbarOptions(std::move(opt));
+}
+
+void NavigationToolbarUtil::SetToolbarMoreButtonOptions(
+    const RefPtr<NavDestinationNodeBase>& nodeBase, MoreButtonOptions&& opt)
+{
+    CHECK_NULL_VOID(nodeBase);
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(nodeBase->GetToolBarNode());
+    CHECK_NULL_VOID(toolBarNode);
+    auto toolBarPattern = toolBarNode->GetPattern<NavToolbarPattern>();
+    CHECK_NULL_VOID(toolBarPattern);
+    toolBarPattern->SetToolbarMoreButtonOptions(std::move(opt));
 }
 
 void NavigationToolbarUtil::MountToolBar(

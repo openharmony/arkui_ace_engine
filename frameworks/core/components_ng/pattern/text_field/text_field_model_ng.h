@@ -40,6 +40,7 @@ public:
     void ResetPlaceholderColor() override;
     void SetPlaceholderFont(const Font& value) override;
     void SetEnterKeyType(TextInputAction value) override;
+    void SetCapitalizationMode(AutoCapitalizationMode value) override;
     void SetTextAlign(TextAlign value) override;
     void SetLineBreakStrategy(LineBreakStrategy value) override;
     void SetCaretColor(const Color& value) override;
@@ -85,6 +86,7 @@ public:
     void SetBarState(OHOS::Ace::DisplayMode value) override;
     void SetMaxViewLines(uint32_t value) override;
     void SetNormalMaxViewLines(uint32_t value) override;
+    void SetOverflowMode(OverflowMode value) override;
 
     void SetShowUnderline(bool showUnderLine) override;
     void SetNormalUnderlineColor(const Color& normalColor) override;
@@ -117,6 +119,7 @@ public:
     void SetLineHeight(const Dimension& value) override;
     void SetHalfLeading(bool value) override;
     void SetLineSpacing(const Dimension& value) override;
+    void SetIsOnlyBetweenLines(bool isOnlyBetweenLines) override;
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
@@ -141,7 +144,7 @@ public:
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static void SetHalfLeading(FrameNode* frameNode, const bool& value);
-    static void SetLineSpacing(FrameNode* frameNode, const Dimension& value);
+    static void SetLineSpacing(FrameNode* frameNode, const Dimension& value, bool isOnlyBetweenLines);
     void SetTextOverflow(Ace::TextOverflow value) override;
     void SetTextIndent(const Dimension& value) override;
     static void SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value);
@@ -213,6 +216,7 @@ public:
     static void SetCancelSymbolIcon(FrameNode* frameNode,
         const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value);
     static void ResetBackgroundColor(FrameNode* frameNode);
     static std::u16string GetPlaceholderText(FrameNode* frameNode);
     static std::u16string GetTextFieldText(FrameNode* frameNode);

@@ -239,7 +239,7 @@ void JSFontSpan::GetFontStyle(const JSCallbackInfo& info)
     if (!fontSpan_->GetFont().fontStyle.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)?
+    auto ret = JSRef<JSVal>::Make(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)?
         JSVal(ToJSValue(static_cast<int32_t>(fontSpan_->GetFont().fontStyle.value()))) :
         JSVal(ToJSValue(std::to_string(static_cast<int32_t>(fontSpan_->GetFont().fontStyle.value())))));
     info.SetReturnValue(ret);
@@ -253,7 +253,7 @@ void JSFontSpan::GetFontWeight(const JSCallbackInfo& info)
     if (!fontSpan_->GetFont().fontWeight.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)?
+    auto ret = JSRef<JSVal>::Make(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)?
         JSVal(ToJSValue(static_cast<int32_t>(fontSpan_->GetFont().fontWeight.value()))) :
         JSVal(ToJSValue(std::to_string(static_cast<int32_t>(fontSpan_->GetFont().fontWeight.value())))));
     info.SetReturnValue(ret);
@@ -294,6 +294,10 @@ void JSDecorationSpan::JSBind(BindingTarget globalObj)
         "color", &JSDecorationSpan::GetTextDecorationColor, &JSDecorationSpan::SetTextDecorationColor);
     JSClass<JSDecorationSpan>::CustomProperty(
         "style", &JSDecorationSpan::GetTextDecorationStyle, &JSDecorationSpan::SetTextDecorationStyle);
+    JSClass<JSDecorationSpan>::CustomProperty(
+        "thicknessScale", &JSDecorationSpan::GetLineThicknessScale, &JSDecorationSpan::SetLineThicknessScale);
+    JSClass<JSDecorationSpan>::CustomProperty(
+        "options", &JSDecorationSpan::GetTextDecorationOptions, &JSDecorationSpan::SetTextDecorationOptions);
     JSClass<JSDecorationSpan>::Bind(globalObj, JSDecorationSpan::Constructor, JSDecorationSpan::Destructor);
 }
 
@@ -306,7 +310,7 @@ void JSDecorationSpan::Constructor(const JSCallbackInfo& args)
     if (args.Length() <= 0 || !args[0]->IsObject()) {
         span = AceType::MakeRefPtr<DecorationSpan>();
     } else {
-        span = JSDecorationSpan::ParseJsDecorationSpan(JSRef<JSObject>::Cast(args[0]));
+        span = JSDecorationSpan::ParseJsDecorationSpan(args);
     }
     decorationSpan->decorationSpan_ = span;
     args.SetReturnValue(Referenced::RawPtr(decorationSpan));
@@ -319,8 +323,9 @@ void JSDecorationSpan::Destructor(JSDecorationSpan* decorationSpan)
     }
 }
 
-RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSRef<JSObject>& obj)
+RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSCallbackInfo& args)
 {
+    auto obj = JSRef<JSObject>::Cast(args[0]);
     std::optional<Color> colorOption;
     Color color;
     JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(obj->GetProperty("color"));
@@ -337,13 +342,34 @@ RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSRef<JSObj
     if (!typeObj->IsNull() && typeObj->IsNumber()) {
         type = static_cast<TextDecoration>(typeObj->ToNumber<int32_t>());
     }
-    return AceType::MakeRefPtr<DecorationSpan>(type, colorOption, styleOption);
+    float lineThicknessScale = 1.0f;
+    JSRef<JSVal> thicknessScaleValue = obj->GetProperty("thicknessScale");
+    if (thicknessScaleValue->IsNumber()) {
+        lineThicknessScale = thicknessScaleValue->ToNumber<float>();
+    }
+    std::optional<TextDecorationOptions> options;
+    if (args.Length() > 1 && args[1]->IsObject()) {
+        options = JSDecorationSpan::ParseJsDecorationOptions(JSRef<JSObject>::Cast(args[1]));
+    }
+    return AceType::MakeRefPtr<DecorationSpan>(
+        std::vector<TextDecoration>({type}), colorOption, styleOption, lineThicknessScale, options);
+}
+
+TextDecorationOptions JSDecorationSpan::ParseJsDecorationOptions(const JSRef<JSObject>& obj)
+{
+    TextDecorationOptions options;
+    JSRef<JSVal> enableMultiTypeObj = JSRef<JSVal>::Cast(obj->GetProperty("enableMultiType"));
+    if (!enableMultiTypeObj->IsNull() && enableMultiTypeObj->IsBoolean()) {
+        options.enableMultiType = enableMultiTypeObj->ToBoolean();
+    }
+    return options;
 }
 
 void JSDecorationSpan::GetTextDecorationType(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(decorationSpan_);
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(static_cast<int32_t>(decorationSpan_->GetTextDecorationType()))));
+    auto ret = JSRef<JSVal>::Make(
+        JSVal(ToJSValue(static_cast<int32_t>(decorationSpan_->GetTextDecorationFirst()))));
     info.SetReturnValue(ret);
 }
 
@@ -373,6 +399,38 @@ void JSDecorationSpan::GetTextDecorationStyle(const JSCallbackInfo& info)
 }
 
 void JSDecorationSpan::SetTextDecorationStyle(const JSCallbackInfo& info) {}
+
+void JSDecorationSpan::GetLineThicknessScale(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(decorationSpan_);
+    if (!decorationSpan_->GetLineThicknessScale().has_value()) {
+        return;
+    }
+    auto ret =
+        JSRef<JSVal>::Make(JSVal(ToJSValue(decorationSpan_->GetLineThicknessScale().value())));
+    info.SetReturnValue(ret);
+}
+
+void JSDecorationSpan::SetLineThicknessScale(const JSCallbackInfo& info) {}
+
+void JSDecorationSpan::GetTextDecorationOptions(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(decorationSpan_);
+    if (!decorationSpan_->GetTextDecorationOptions().has_value()) {
+        return;
+    }
+    auto options = decorationSpan_->GetTextDecorationOptions().value();
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> retObj = objectTemplate->NewInstance();
+    if (options.enableMultiType.has_value()) {
+        bool enableMultiType = options.enableMultiType.value_or(false);
+        retObj->SetProperty<bool>("radius", enableMultiType);
+    }
+    info.SetReturnValue(retObj);
+}
+
+void JSDecorationSpan::SetTextDecorationOptions(const JSCallbackInfo& info) {}
 
 RefPtr<DecorationSpan>& JSDecorationSpan::GetDecorationSpan()
 {
@@ -1308,6 +1366,8 @@ void JSParagraphStyleSpan::JSBind(BindingTarget globalObj)
         "wordBreak", &JSParagraphStyleSpan::GetWordBreak, &JSParagraphStyleSpan::SetWordBreak);
     JSClass<JSParagraphStyleSpan>::CustomProperty(
         "leadingMargin", &JSParagraphStyleSpan::GetLeadingMargin, &JSParagraphStyleSpan::SetLeadingMargin);
+    JSClass<JSParagraphStyleSpan>::CustomProperty(
+        "paragraphSpacing", &JSParagraphStyleSpan::GetParagraphSpacing, &JSParagraphStyleSpan::SetParagraphSpacing);
     JSClass<JSParagraphStyleSpan>::Bind(globalObj, JSParagraphStyleSpan::Constructor, JSParagraphStyleSpan::Destructor);
 }
 
@@ -1343,6 +1403,7 @@ RefPtr<ParagraphStyleSpan> JSParagraphStyleSpan::ParseJsParagraphStyleSpan(const
     ParseJsTextOverflow(obj, paragraphStyle);
     ParseJsWordBreak(obj, paragraphStyle);
     ParseJsLeadingMargin(obj, paragraphStyle);
+    ParseParagraphSpacing(obj, paragraphStyle);
     return AceType::MakeRefPtr<ParagraphStyleSpan>(paragraphStyle);
 }
 
@@ -1480,6 +1541,32 @@ void JSParagraphStyleSpan::ParseJsLeadingMargin(const JSRef<JSObject>& obj, Span
     paragraphStyle.leadingMargin = margin;
 }
 
+void JSParagraphStyleSpan::ParseParagraphSpacing(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
+{
+    if (!obj->HasProperty("paragraphSpacing")) {
+        return;
+    }
+    auto paragraphSpacing = obj->GetProperty("paragraphSpacing");
+    CalcDimension size;
+    if (!paragraphSpacing->IsNull() && paragraphSpacing->IsObject()) {
+        auto paragraphSpacingObj = JSRef<JSObject>::Cast(paragraphSpacing);
+        auto value = 0.0;
+        auto paragraphSpacingVal = paragraphSpacingObj->GetProperty("value");
+        if (!paragraphSpacingVal->IsNull() && paragraphSpacingVal->IsNumber()) {
+            value = paragraphSpacingVal->ToNumber<float>();
+        }
+        auto unit = DimensionUnit::VP;
+        auto paragraphSpacingUnit = paragraphSpacingObj->GetProperty("unit");
+        if (!paragraphSpacingUnit->IsNull() && paragraphSpacingUnit->IsNumber()) {
+            unit = static_cast<DimensionUnit>(paragraphSpacingUnit->ToNumber<int32_t>());
+        }
+        if (value >= 0 && unit != DimensionUnit::PERCENT) {
+            size = CalcDimension(value, unit);
+        }
+    }
+    paragraphStyle.paragraphSpacing = size;
+}
+
 void JSParagraphStyleSpan::ParseLeadingMarginPixelMap(const JSRef<JSObject>& leadingMarginObject,
     std::optional<NG::LeadingMargin>& margin, const JsiRef<JsiValue>& leadingMargin)
 {
@@ -1604,6 +1691,17 @@ void JSParagraphStyleSpan::GetLeadingMargin(const JSCallbackInfo& info)
 }
 
 void JSParagraphStyleSpan::SetLeadingMargin(const JSCallbackInfo& info) {}
+
+void JSParagraphStyleSpan::GetParagraphSpacing(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(paragraphStyleSpan_);
+    auto paragraphSpacing = paragraphStyleSpan_->GetParagraphStyle().paragraphSpacing;
+    CHECK_EQUAL_VOID(paragraphSpacing.has_value(), false);
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(paragraphSpacing.value().ConvertToVp())));
+    info.SetReturnValue(ret);
+}
+
+void JSParagraphStyleSpan::SetParagraphSpacing(const JSCallbackInfo& info) {}
 
 RefPtr<ParagraphStyleSpan>& JSParagraphStyleSpan::GetParagraphStyleSpan()
 {

@@ -20,15 +20,9 @@
 
 #include "base/utils/macros.h"
 #include "core/pipeline/base/sole_child_component.h"
+#include "core/components/navigator/navigator_type.h"
 
 namespace OHOS::Ace {
-
-enum class NavigatorType {
-    DEFAULT = 0,
-    PUSH,
-    REPLACE,
-    BACK
-};
 
 class ACE_EXPORT NavigatorComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(NavigatorComponent, SoleChildComponent);

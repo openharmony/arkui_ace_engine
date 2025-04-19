@@ -19,7 +19,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-
+#include "frameworks/core/components_v2/pattern_lock/pattern_lock_component.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -336,6 +336,83 @@ ArkUINativeModuleValue PatternLockBridge::ResetPatternLockSkipUnselectedPoint(Ar
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockSkipUnselectedPoint(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue PatternLockBridge::SetPatternLockOnPatternComplete(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockOnPatternComplete(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    std::function<void(const BaseEventInfo* event)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                                   const BaseEventInfo* event) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<V2::PatternCompleteEvent>(event);
+        CHECK_NULL_VOID(eventInfo);
+        panda::Local<panda::JSValueRef> params[] = { ArkTSUtils::ChoosePointToJSValue(vm, eventInfo->GetInput()) };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockOnPatternComplete(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue PatternLockBridge::ResetPatternLockOnPatternComplete(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockOnPatternComplete(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue PatternLockBridge::SetPatternLockOnDotConnect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockOnDotConnect(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    std::function<void(int32_t code)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](int32_t code) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::JSValueRef> params = ArkTSUtils::ToJSValueWithVM(vm, code);
+        func->Call(vm, func.ToLocal(), &params, 1);
+    };
+    GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockOnDotConnect(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue PatternLockBridge::ResetPatternLockOnDotConnect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockOnDotConnect(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

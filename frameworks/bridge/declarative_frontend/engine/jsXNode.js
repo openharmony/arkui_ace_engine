@@ -40,7 +40,7 @@ class BaseNode extends ViewBuildNodeBase {
         this.instanceId_ = uiContext.instanceId_;
     }
     create(builder, params, update, updateConfiguration, supportLazyBuild) {
-        return this.builderBaseNode_.create(builder.bind(this), params, update, updateConfiguration, supportLazyBuild);
+        return this.builderBaseNode_.create(builder.bind(this), params, update.bind(this), updateConfiguration.bind(this), supportLazyBuild);
     }
     finishUpdateFunc() {
         return this.builderBaseNode_.finishUpdateFunc();
@@ -297,7 +297,7 @@ class JSBuilderNode extends BaseNode {
         const _popFunc = classObject && 'pop' in classObject ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
             __JSScopeUtil__.syncInstanceId(this.instanceId_);
-            if (Utils.isApiVersionEQAbove(16)) {
+            if (Utils.isApiVersionEQAbove(18)) {
                 ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
             }
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
@@ -322,7 +322,7 @@ class JSBuilderNode extends BaseNode {
                 ObserveV2.getObserve().stopRecordDependencies();
             }
             ViewStackProcessor.StopGetAccessRecording();
-            if (Utils.isApiVersionEQAbove(16)) {
+            if (Utils.isApiVersionEQAbove(18)) {
                 ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
             }
             __JSScopeUtil__.restoreInstanceId();
@@ -2308,7 +2308,7 @@ class RenderNode {
         this.nodePtr = this._nativeRef?.getNativeHandle();
     }
     setBaseNode(baseNode) {
-        this.baseNode_ = baseNode.builderBaseNode_;
+        this.baseNode_ = baseNode;
     }
     resetNodePtr() {
         this.nodePtr = null;

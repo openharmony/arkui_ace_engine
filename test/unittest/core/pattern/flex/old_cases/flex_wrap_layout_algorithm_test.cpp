@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
-#include "base/memory/ref_counter.h"
 #include "test/unittest/core/pattern/test_ng.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "core/components_ng/pattern/flex/wrap_layout_algorithm.h"
-#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
+
 #include "base/utils/utils.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/memory/ref_counter.h"
 
 #define private public
 #define protectd public
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components_ng/pattern/flex/wrap_layout_algorithm.h"
+#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
+#include "core/components_ng/property/grid_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -18,6 +18,7 @@
 #include "core/components/image/image_component.h"
 #include "core/components/text/text_component.h"
 #include "core/pipeline/base/multi_composed_component.h"
+#include "core/pipeline/base/sole_child_component.h"
 
 namespace OHOS::Ace {
 

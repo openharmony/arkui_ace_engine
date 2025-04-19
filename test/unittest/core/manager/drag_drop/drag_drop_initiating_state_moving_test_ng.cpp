@@ -86,6 +86,7 @@ HWTEST_F(DragDropInitiatingStateMovingTestNG, DragDropInitiatingStateMovingTestN
         ASSERT_NE(handler, nullptr);
         auto machine = handler->initiatingFlow_;
         ASSERT_NE(machine, nullptr);
+        machine->InitializeState();
         machine->currentState_ = static_cast<int32_t>(testCase.originStatus);
         if (((static_cast<int32_t>(testCase.receivedInput)) & DRAG_ACTION_NONE_ARGS) != 0) {
             DragDropInitiatingStateTestNG::DoMachineAction(machine, testCase.receivedInput);

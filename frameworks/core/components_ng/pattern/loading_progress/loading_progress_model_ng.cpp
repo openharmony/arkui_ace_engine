@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,14 @@ void LoadingProgressModelNG::SetEnableLoading(bool enable)
     ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, EnableLoading, enable);
 }
 
+void LoadingProgressModelNG::ResetColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(LoadingProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorFlag);
+}
+
 uint32_t LoadingProgressModelNG::GetColor(FrameNode* frameNode)
 {
     Color value;
@@ -88,5 +96,13 @@ void LoadingProgressModelNG::SetBuilderFunc(FrameNode* frameNode, NG::LoadingPro
     auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void LoadingProgressModelNG::ResetColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(LoadingProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
 }
 } // namespace OHOS::Ace::NG

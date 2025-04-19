@@ -21,13 +21,8 @@
 #include "include/effects/Sk1DPathEffect.h"
 #include "include/effects/SkGradientShader.h"
 #endif
-#ifndef USE_GRAPHIC_TEXT_GINE
-#include "txt/paragraph_builder.h"
-#include "txt/paragraph_txt.h"
-#else
 #include "rosen_text/typography.h"
 #include "rosen_text/typography_create.h"
-#endif
 
 #include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -179,16 +174,6 @@ void RosenRenderChart::PaintText(RSCanvas* canvas, const Rect& paintRegion, cons
         LOGW("PaintText: fontCollection is null");
         return;
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
-    txt::ParagraphStyle style;
-    txt::TextStyle txtStyle;
-    txtStyle.font_size = chartData.GetTextSize();
-    txtStyle.font_families = chartData.GetFontFamily();
-    txtStyle.font_weight = txt::FontWeight::w400;
-    std::unique_ptr<txt::ParagraphBuilder> builder;
-    double paragraphSize = paintRegion.Width() / chartData.GetData().size();
-    style.max_lines = 1;
-#else
     Rosen::TypographyStyle style;
     Rosen::TextStyle txtStyle;
     txtStyle.fontSize = chartData.GetTextSize();
@@ -197,23 +182,15 @@ void RosenRenderChart::PaintText(RSCanvas* canvas, const Rect& paintRegion, cons
     std::unique_ptr<Rosen::TypographyCreate> builder;
     double paragraphSize = paintRegion.Width() / chartData.GetData().size();
     style.maxLines = 1;
-#endif
     for (const auto& point : chartData.GetData()) {
         const TextInfo& text = point.GetTextInfo();
         const PointInfo& pointInfo = point.GetPointInfo();
         Offset pointPosition = ConvertDataToPosition(paintRegion, pointInfo);
         txtStyle.color = text.GetColor().GetValue();
-#ifndef USE_GRAPHIC_TEXT_GINE
-        builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
-        builder->PushStyle(txtStyle);
-        builder->AddText(StringUtils::Str8ToStr16(text.GetTextValue()));
-        auto paragraph = builder->Build();
-#else
         builder = Rosen::TypographyCreate::Create(style, fontCollection);
         builder->PushStyle(txtStyle);
         builder->AppendText(StringUtils::Str8ToStr16(text.GetTextValue()));
         auto paragraph = builder->CreateTypography();
-#endif
         paragraph->Layout(paragraphSize);
         Size textSize = Size(paragraph->GetMinIntrinsicWidth(), paragraph->GetHeight());
         if (text.GetPlacement() == Placement::TOP) {

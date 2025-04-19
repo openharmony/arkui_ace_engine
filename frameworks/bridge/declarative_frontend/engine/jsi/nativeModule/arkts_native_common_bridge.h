@@ -117,6 +117,8 @@ public:
     static ArkUINativeModuleValue ResetRotate(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetGeometryTransition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetGeometryTransition(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetBindTips(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBindTips(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetClip(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetClip(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetClipShape(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -175,6 +177,8 @@ public:
     static ArkUINativeModuleValue ResetAccessibilityRoleType(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetAccessibilityFocusCallback(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetAccessibilityFocusCallback(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnAccessibilityActionIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnAccessibilityActionIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetConstraintSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetConstraintSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetDirection(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -312,6 +316,8 @@ public:
         uint32_t argNumber, ArkUIGesture* gesture);
     static void ParseLocalizedBorder(ArkUIRuntimeCallInfo* runtimeCallInfo, int& isLocalizedBorderWidth,
         int& isLocalizedBorderColor, int& isLocalizedBorderRadius);
+    static void ParseOuterBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
+        std::vector<ArkUI_Float32>& values, bool needLocalized = false);
     static ArkUIGesture* GetGestureGroup(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t argNumber);
     static Local<panda::ObjectRef> CreateCommonGestureEventInfo(EcmaVM* vm, GestureEvent& info);
     static Local<panda::ArrayRef> CreateFingerListArray(EcmaVM* vm, GestureEvent& info);
@@ -395,8 +401,24 @@ public:
     static ArkUINativeModuleValue ResetChainMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetPixelRound(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetPixelRound(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    /**
+     * @description: Compare whether the target api version of the application is greater than or equal to the incoming
+     * target. This interface is used for JS API.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     static ArkUINativeModuleValue GreatOrEqualAPITargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    /**
+     * @description: Compare whether the target api version of the application is less than the incoming target. This
+     * interface is used for JS API.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     static ArkUINativeModuleValue LessThanAPITargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    /**
+     * @description: Get the target api version of the application. This interface is used for JS API.
+     * @return: The target api version of the application.
+     */
     static ArkUINativeModuleValue GetApiTargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFocusBox(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetFocusBox(ArkUIRuntimeCallInfo* runtimeCallInfo);

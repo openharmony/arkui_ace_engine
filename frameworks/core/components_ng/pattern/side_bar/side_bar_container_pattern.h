@@ -159,6 +159,21 @@ public:
 
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
+    void InitToolBarManager()
+    {
+        if (!toolbarManager_) {
+            auto pipeline = GetHost()->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            toolbarManager_ = pipeline->GetToolbarManager();
+            UpdateSideBarStatus();
+        }
+    }
+
+    RefPtr<ToolbarManager> GetToolBarManager()
+    {
+        return toolbarManager_;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
@@ -208,6 +223,10 @@ private:
     void SetAccessibilityEvent();
     void InitImageErrorCallback(const RefPtr<SideBarTheme>& sideBarTheme, const RefPtr<FrameNode>& imgNode);
     void SetMouseStyle(MouseFormat format);
+    void UpdateSideBarStatus();
+    void SetSideBarWidthToolBarManager(bool isShow, float sideBarWidth, float dividerWidth);
+    void SideBarModifyDoneToolBarManager();
+    void UpdateSideBarColorToolBarManager(const Color& backgroudColor);
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;
@@ -218,6 +237,7 @@ private:
     RefPtr<CurveAnimation<float>> rightToLeftAnimation_;
     RefPtr<CurveAnimation<float>> leftToRightAnimation_;
     RefPtr<PanEvent> dragEvent_;
+    RefPtr<ToolbarManager> toolbarManager_;
 
     float currentOffset_ = 0.0f;
     float realDividerWidth_ = 0.0f;

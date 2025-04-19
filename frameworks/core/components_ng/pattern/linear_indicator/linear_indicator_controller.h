@@ -22,6 +22,8 @@
 
 namespace OHOS::Ace::NG {
 class LinearIndicatorPattern;
+class FrameNode;
+
 enum class LinearIndicatorControllerDataState { STOP, ANIMATION, INTERVAL, ANIMATION_PAUSE, INTERVAL_PAUSE };
 
 class LinearIndicatorControllerData {

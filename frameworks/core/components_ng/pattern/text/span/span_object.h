@@ -23,11 +23,8 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_model.h"
-#include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace {
@@ -41,7 +38,7 @@ enum class SpanType {
     LineHeight = 5,
     BackgroundColor = 6,
     Url = 7,
-    HalfLeading = 8,
+    HalfLeading,
     Gesture = 100,
     ParagraphStyle = 200,
     Image = 300,
@@ -56,11 +53,13 @@ struct SpanParagraphStyle {
     std::optional<TextOverflow> textOverflow;
     std::optional<NG::LeadingMargin> leadingMargin;
     std::optional<Dimension> textIndent;
+    std::optional<Dimension> paragraphSpacing;
 
     bool Equal(const SpanParagraphStyle& other) const
     {
         auto flag = align == other.align && maxLines == other.maxLines && wordBreak == other.wordBreak &&
-                    textOverflow == other.textOverflow && textIndent == other.textIndent;
+                    textOverflow == other.textOverflow && textIndent == other.textIndent &&
+                    paragraphSpacing == other.paragraphSpacing;
         if (leadingMargin.has_value() && other.leadingMargin.has_value()) {
             flag &= leadingMargin.value().CheckLeadingMargin(other.leadingMargin.value());
         } else if (!leadingMargin.has_value() && !other.textOverflow.has_value()) {
@@ -145,25 +144,44 @@ class DecorationSpan : public SpanBase {
 
 public:
     DecorationSpan() = default;
-    explicit DecorationSpan(TextDecoration type, std::optional<Color> color, std::optional<TextDecorationStyle> style);
-    DecorationSpan(TextDecoration type, std::optional<Color> color, std::optional<TextDecorationStyle> style,
+    // remove when richEditor ready
+    explicit DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+        std::optional<TextDecorationStyle> style, std::optional<TextDecorationOptions> options);
+    DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+        std::optional<TextDecorationStyle> style, std::optional<TextDecorationOptions> options,
         int32_t start, int32_t end);
-    TextDecoration GetTextDecorationType() const;
+    explicit DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+        std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale,
+        std::optional<TextDecorationOptions> options);
+    DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+        std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale,
+        std::optional<TextDecorationOptions> options, int32_t start, int32_t end);
+    TextDecoration GetTextDecorationFirst() const;
+    std::vector<TextDecoration> GetTextDecorationTypes() const;
+    void SetTextDecorationTypes(const std::vector<TextDecoration>& types);
+    void AddTextDecorationType(TextDecoration value);
     std::optional<Color> GetColor() const;
     std::optional<TextDecorationStyle> GetTextDecorationStyle() const;
+    std::optional<float> GetTextDecorationLineThicknessScale() const;
+    std::optional<TextDecorationOptions> GetTextDecorationOptions() const;
+    void SetTextDecorationOptions(const TextDecorationOptions& options);
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     SpanType GetSpanType() const override;
+    std::string DecorationTypesToString() const;
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+    std::optional<float> GetLineThicknessScale() const;
 
 private:
     void AddDecorationStyle(const RefPtr<NG::SpanItem>& spanItem) const;
     static void RemoveDecorationStyle(const RefPtr<NG::SpanItem>& spanItem);
 
-    TextDecoration type_;
+    std::vector<TextDecoration> types_;
     std::optional<Color> color_;
     std::optional<TextDecorationStyle> style_;
+    std::optional<float> lineThicknessScale_;
+    std::optional<TextDecorationOptions> options_;
 };
 
 class BaselineOffsetSpan : public SpanBase {
@@ -416,8 +434,7 @@ public:
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     SpanType GetSpanType() const override;
     std::string ToString() const override;
-    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem,
-        SpanOperation operation) const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
 private:
     void AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const;
     static void RemoveUrlStyle(const RefPtr<NG::SpanItem>& spanItem);

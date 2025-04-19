@@ -25,6 +25,7 @@
 
 namespace OHOS::Ace::NG {
 struct CanvasModifierDump;
+class RenderContext;
 class CanvasModifier : public ContentModifier {
     DECLARE_ACE_TYPE(CanvasModifier, ContentModifier)
 
@@ -35,10 +36,7 @@ public:
     std::string GetDumpInfo();
     void GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& array);
 
-    void SetRenderContext(const WeakPtr<RenderContext>& renderContext)
-    {
-        renderContext_ = renderContext;
-    }
+    void SetRenderContext(const WeakPtr<RenderContext>& renderContext);
 
     void SetNeedResetSurface()
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,7 @@ public:
         if (!progressModifier_) {
             ProgressAnimatableProperty progressAnimatableProperty{};
             InitAnimatableProperty(progressAnimatableProperty);
-            progressModifier_ = AceType::MakeRefPtr<ProgressModifier>(progressAnimatableProperty);
+            progressModifier_ = AceType::MakeRefPtr<ProgressModifier>(GetHost(), progressAnimatableProperty);
         }
         bool isRtl = progressLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
         if (isRightToLeft_ != isRtl) {
@@ -144,9 +144,12 @@ public:
     }
 
     void OnAccessibilityEvent();
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 private:
     void InitAnimatableProperty(ProgressAnimatableProperty& progressAnimatableProperty);
+    void InitColorProperty(ProgressAnimatableProperty& progressAnimatableProperty,
+        const RefPtr<ProgressTheme>& progressTheme, const RefPtr<ProgressPaintProperty>& paintProperty);
     void CalculateStrokeWidth(const SizeF& contentSize);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
@@ -180,6 +183,7 @@ private:
     void OnSensitiveStyleChange(bool isSensitive) override;
     void ObscureText(bool isSensitive);
     void FireBuilder();
+    void ReportProgressEvent();
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<ProgressMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
@@ -196,9 +200,9 @@ private:
     bool isFocusShadowSet_ = false;
     Color defaultTextColor_;
     Color focusedTextColor_;
-    Color backgroundColor_;
-    Color selectColor_;
-    Color borderColor_;
+    std::optional<Color> backgroundColorOptional_;
+    std::optional<Color> selectColorOptional_;
+    std::optional<Color> borderColorOptional_;
     Color fontColor_;
     double value_ = 0.0;
     bool initFlag_ = false;

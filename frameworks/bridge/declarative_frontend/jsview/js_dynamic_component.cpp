@@ -38,6 +38,7 @@
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 
 using namespace Commonlibrary::Concurrent::WorkerModule;
 namespace OHOS::Ace {
@@ -102,6 +103,11 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetMinHeight(DYNAMIC_COMPONENT_MIN_HEIGHT);
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NG::DynamicPattern>();
+    if (pattern && pattern->HasDynamicRenderer()) {
+        TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "dynamic renderer already exists");
+        return;
+    }
     auto hostEngine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(hostEngine);
     NativeEngine* hostNativeEngine = hostEngine->GetNativeEngine();
@@ -111,12 +117,13 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     napi_value nativeValue = hostNativeEngine->ValueToNapiValue(valueWrapper);
     Worker* worker = nullptr;
     napi_unwrap(reinterpret_cast<napi_env>(hostNativeEngine), nativeValue, reinterpret_cast<void**>(&worker));
-    if (worker == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker is nullptr");
+    if (worker == nullptr || entryPoint.empty()) {
+        TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker is nullptr or entryPoint is empty");
         NG::DynamicModelNG::GetInstance()->InitializeDynamicComponent(
             AceType::Claim(frameNode), "", "", entryPoint, nullptr);
         return;
     }
+
     TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker running=%{public}d, worker name=%{public}s",
         worker->IsRunning(), worker->GetName().c_str());
     auto instanceId = Container::CurrentId();

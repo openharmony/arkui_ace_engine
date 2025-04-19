@@ -28,7 +28,7 @@
 #include "core/gestures/gesture_type.h"
 #include "core/gestures/velocity.h"
 #include "core/gestures/velocity_tracker.h"
-#include "core/components/common/properties/common_decoration.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/shadow.h"
 
 namespace OHOS::Ace::NG {

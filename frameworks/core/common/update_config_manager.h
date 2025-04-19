@@ -32,6 +32,7 @@ class UpdateConfigManager : public virtual AceType {
 public:
     struct UpdateTask {
         CancelableCallback<void()> updateTask;
+        std::unordered_map<int32_t, CancelableCallback<void()>> promiseTaskMap;
         T target;
     };
 
@@ -47,16 +48,32 @@ public:
         task();
     }
 
+    void UpdateViewConfigTaskDone(int32_t taskId)
+    {
+        std::lock_guard<std::mutex> taskLock(updateTaskMutex_);
+        currentTask_.promiseTaskMap.erase(taskId);
+    }
+
+    void CancelAllPromiseTaskLocked()
+    {
+        std::lock_guard<std::mutex> taskLock(updateTaskMutex_);
+        for (auto it = currentTask_.promiseTaskMap.begin(); it != currentTask_.promiseTaskMap.end();) {
+            it = it->second.Cancel() ? currentTask_.promiseTaskMap.erase(it) : ++it;
+        }
+    }
+
     void UpdatePromiseConfig(const T& config, std::function<void()> &&task, const RefPtr<Container>& container,
-        const std::string& taskName, TaskExecutor::TaskType type = TaskExecutor::TaskType::PLATFORM)
+        int32_t taskId, const std::string& taskName, TaskExecutor::TaskType type = TaskExecutor::TaskType::PLATFORM)
     {
         std::lock_guard<std::mutex> taskLock(updateTaskMutex_);
         CancelUselessTaskLocked();
+        CancelableCallback<void()> promiseTask(std::move(task));
+        currentTask_.promiseTaskMap[taskId] = promiseTask;
         currentTask_.target = config;
 
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(std::move(task), type, taskName);
+        taskExecutor->PostTask(std::move(promiseTask), type, taskName);
     }
 
     void UpdateConfig(const T& config, std::function<void()> &&task, const RefPtr<Container>& container,
@@ -85,6 +102,11 @@ public:
     {
         return aceConfig_.config_ == other;
     }
+
+    int32_t MakeTaskId()
+    {
+        return nextTaskId_.fetch_add(1);
+    }
 private:
     void PostUpdateConfigTaskLocked(const T& config, CancelableCallback<void()> &&task,
         const RefPtr<Container>& container, const std::string& taskName, TaskExecutor::TaskType type)
@@ -106,6 +128,8 @@ private:
     std::mutex updateTaskMutex_;
 
     UpdateTask currentTask_;
+
+    std::atomic<int32_t> nextTaskId_ = 0;
 
     T aceConfig_;
 };

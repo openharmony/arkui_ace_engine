@@ -18,6 +18,7 @@
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/linear_split/linear_split_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {

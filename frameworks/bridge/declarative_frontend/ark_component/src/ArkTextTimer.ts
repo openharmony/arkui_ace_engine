@@ -96,7 +96,22 @@ class ArkTextTimerComponent extends ArkComponent implements TextTimerAttribute {
 
 
   onTimer(event: (utc: number, elapsedTime: number) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextTimerOnTimerModifier.identity, TextTimerOnTimerModifier, event);
+    return this;
+  }
+}
+
+class TextTimerOnTimerModifier extends ModifierWithKey<(utc: number, elapsedTime: number) => void> {
+  constructor(value: (utc: number, elapsedTime: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textTimerOnTimer');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textTimer.resetTextTimerOnTimer(node);
+    } else {
+      getUINativeModule().textTimer.setTextTimerOnTimer(node, this.value);
+    }
   }
 }
 

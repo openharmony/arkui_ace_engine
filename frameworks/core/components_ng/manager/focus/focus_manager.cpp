@@ -497,7 +497,7 @@ void FocusManager::WindowFocus(bool isFocus)
     if (!curFocusViewHub) {
         TAG_LOGW(AceLogTag::ACE_FOCUS, "Current focus view can not found!");
     } else if (curFocusView->GetIsViewHasFocused() && !curFocusViewHub->IsCurrentFocus()) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request current focus view: %{public}s/%{public}d",
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "Request current focus view: %{public}s/%{public}d",
             curFocusView->GetFrameName().c_str(), curFocusView->GetFrameId());
         if (!IsAutoFocusTransfer()) {
             SetFocusViewRootScope(curFocusView);

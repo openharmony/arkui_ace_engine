@@ -18,6 +18,12 @@
 
 #include <chrono>
 
+#ifdef ACE_UNITTEST
+#define ACE_NON_VIRTUAL virtual // support gmock in unitest
+#else
+#define ACE_NON_VIRTUAL
+#endif
+
 namespace OHOS::Ace {
 
 // nano seconds.

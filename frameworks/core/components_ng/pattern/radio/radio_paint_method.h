@@ -38,73 +38,9 @@ public:
         return radioModifier_;
     }
 
-    void UpdateUIStatus(bool checked)
-    {
-        if (checked != radioModifier_->GetIsCheck()) {
-            if (!enabled_ && !checked && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                radioModifier_->SetUIStatus(UIStatus::UNSELECTED);
-            } else {
-                radioModifier_->SetUIStatus(UIStatus::SELECTED);
-            }
-            if (!isFirstCreated_) {
-                if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                    radioModifier_->UpdateIndicatorAnimation(checked);
-                } else {
-                    radioModifier_->UpdateIsOnAnimatableProperty(checked);
-                }
-            }
-        } else if (!checked && isFirstCreated_) {
-            radioModifier_->InitOpacityScale(checked);
-        }
-    }
+    void UpdateUIStatus(bool checked);
 
-    void UpdateContentModifier(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_VOID(radioModifier_);
-        auto paintProperty = DynamicCast<RadioPaintProperty>(paintWrapper->GetPaintProperty());
-        CHECK_NULL_VOID(paintProperty);
-        bool checked = false;
-        if (paintProperty->HasRadioCheck()) {
-            checked = paintProperty->GetRadioCheckValue();
-        } else {
-            paintProperty->UpdateRadioCheck(false);
-        }
-
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto radioTheme = pipeline->GetTheme<RadioTheme>();
-        activeColor_ = paintProperty->GetRadioCheckedBackgroundColor().value_or(Color(radioTheme->GetActiveColor()));
-        inactiveColor_ = paintProperty->GetRadioUncheckedBorderColor().value_or(Color(radioTheme->GetInactiveColor()));
-        pointColor_ = paintProperty->GetRadioIndicatorColor().value_or(Color(radioTheme->GetPointColor()));
-
-        auto size = paintWrapper->GetContentSize();
-        auto offset = paintWrapper->GetContentOffset();
-        radioModifier_->InitializeParam();
-        radioModifier_->SetPointColor(pointColor_);
-        radioModifier_->SetactiveColor(activeColor_);
-        radioModifier_->SetinactiveColor(inactiveColor_);
-        radioModifier_->SetSize(size);
-        radioModifier_->SetOffset(offset);
-        radioModifier_->SetIsOnAnimationFlag(isOnAnimationFlag_);
-        radioModifier_->SetEnabled(enabled_);
-        radioModifier_->SetTotalScale(totalScale_);
-        radioModifier_->SetPointScale(pointScale_);
-        radioModifier_->SetRingPointScale(ringPointScale_);
-        UpdateUIStatus(checked);
-        radioModifier_->SetShowHoverEffect(showHoverEffect_);
-        radioModifier_->SetIsCheck(checked);
-        radioModifier_->SetTouchHoverAnimationType(touchHoverType_);
-        radioModifier_->UpdateAnimatableProperty();
-        auto horizontalPadding = radioTheme->GetHotZoneHorizontalPadding().ConvertToPx();
-        auto verticalPadding = radioTheme->GetHotZoneVerticalPadding().ConvertToPx();
-        float boundsRectOriginX = offset.GetX() - horizontalPadding;
-        float boundsRectOriginY = offset.GetY() - verticalPadding;
-        float boundsRectWidth = size.Width() + 2 * horizontalPadding;
-        float boundsRectHeight = size.Height() + 2 * verticalPadding;
-        RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
-        radioModifier_->SetBoundsRect(boundsRect);
-        radioModifier_->SetIsUserSetUncheckBorderColor(isUserSetUncheckBorderColor_);
-    }
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
     void SetHotZoneOffset(const OffsetF& hotZoneOffset)
     {

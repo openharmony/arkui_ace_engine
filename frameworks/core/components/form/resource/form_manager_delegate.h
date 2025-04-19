@@ -212,6 +212,7 @@ private:
     void OnCallActionEvent(const std::string& action);
     int64_t runningCardId_ = -1;
     std::string runningCompId_;
+    std::mutex wantCacheMutex_;
     AAFwk::Want wantCache_;
     bool hasCreated_ = false;
     std::shared_ptr<FormCallbackClient> formCallbackClient_;

@@ -81,6 +81,7 @@ protected:
 void BadgeLayoutAlgorithmTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_BADGE);
@@ -209,7 +210,7 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg001, TestSize.Lev
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
     GetInstance();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
@@ -218,7 +219,7 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg001, TestSize.Lev
     layoutProperty_->UpdateBadgePosition(BadgePosition::RIGHT_TOP);
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
     layoutProperty_->UpdateIsPositionXy(false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(layoutProperty_->GetBadgePositionValue(), BadgePosition::RIGHT_TOP);
     EXPECT_EQ(layoutProperty_->GetLayoutDirection(), TextDirection::RTL);
 }
@@ -241,7 +242,7 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg002, TestSize.Lev
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
     GetInstance();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
@@ -250,7 +251,7 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg002, TestSize.Lev
     layoutProperty_->UpdateBadgePosition(BadgePosition::RIGHT);
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
     layoutProperty_->UpdateIsPositionXy(false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(layoutProperty_->GetBadgePositionValue(), BadgePosition::RIGHT);
     EXPECT_EQ(layoutProperty_->GetLayoutDirection(), TextDirection::RTL);
 }
@@ -273,7 +274,7 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg003, TestSize.Lev
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
     GetInstance();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
@@ -282,7 +283,7 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg003, TestSize.Lev
     layoutProperty_->UpdateBadgePosition(BadgePosition::LEFT);
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
     layoutProperty_->UpdateIsPositionXy(false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(layoutProperty_->GetBadgePositionValue(), BadgePosition::LEFT);
     EXPECT_EQ(layoutProperty_->GetLayoutDirection(), TextDirection::RTL);
 }
@@ -308,7 +309,7 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg004, TestSize.Lev
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
     GetInstance();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     auto textNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_FALSE(layoutProperty_->GetFontSizeIsDefault());
@@ -320,13 +321,13 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg004, TestSize.Lev
     MockPipelineContext::GetCurrentContext()->SetFontScale(AGE_FONT_SIZE_SCALE);
 
     layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Value(), 10);
     EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Unit(), DimensionUnit::VP);
 
     layoutProperty_->SetIsDefault(true, true);
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Value(), 16);
     EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Unit(), DimensionUnit::VP);
     MockPipelineContext::GetCurrentContext()->SetFontScale(fontScale);
@@ -370,7 +371,7 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg005, TestSize.Lev
     /**
      * @tc.steps: step3. call layout and check layoutDirection.
      */
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(textLayoutProperty->GetNonAutoLayoutDirection(), TextDirection::LTR);
 }
 
@@ -412,7 +413,7 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg006, TestSize.Lev
     /**
      * @tc.steps: step3. call layout and check layoutDirection.
      */
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(textLayoutProperty->GetNonAutoLayoutDirection(), TextDirection::RTL);
 }
 

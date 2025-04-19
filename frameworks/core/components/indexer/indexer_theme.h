@@ -229,9 +229,7 @@ private:
         theme->selectedTextColor_ = indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR));
         theme->popupTextColor_ = indexerPattern->GetAttr<Color>("popup_text_color", Color(POPUP_TEXT_COLOR));
         theme->selectedBackgroundColorArc_ =
-            indexerPattern->GetAttr<Color>("selected_background_color_arc", Color(SELECT_BACKGROUD_COLOR_ARC))
-            .ChangeOpacity(
-                indexerPattern->GetAttr<double>("selected_background_color_opacity", SELECT_BACKGROUND_OPACITY));
+            indexerPattern->GetAttr<Color>("selected_background_color_arc", Color(SELECT_BACKGROUD_COLOR_ARC));
         theme->selectedBackgroundColor_ =
             indexerPattern->GetAttr<Color>("selected_background_color", Color(SELECT_BACKGROUD_COLOR)).ChangeOpacity(
                 indexerPattern->GetAttr<double>("selected_background_color_opacity", SELECT_BACKGROUND_OPACITY));

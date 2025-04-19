@@ -370,6 +370,10 @@ const char INDEXER_ETS_TAG[] = "AlphabetIndexer";
 const char SLIDER_COMPONENT_TAG[] = "SliderComponent";
 const char SLIDER_ETS_TAG[] = "Slider";
 
+// sliderTip
+const char SLIDER_TIP_NODE_COMPONENT_TAG[] = "sliderTipFrameNodeComponent";
+const char SLIDER_TIP_NODE_ETS_TAG[] = "sliderTipFrameNode";
+
 // rating
 const char RATING_COMPONENT_TAG[] = "RatingComponent";
 const char RATING_ETS_TAG[] = "Rating";
@@ -403,6 +407,12 @@ const char STEPPER_ETS_TAG[] = "Stepper";
 // stepperItem
 const char STEPPER_ITEM_COMPONENT_TAG[] = "StepperItemComponentV2";
 const char STEPPER_ITEM_ETS_TAG[] = "StepperItem";
+
+// toolbar
+const char TOOLBAR_ETS_TAG[] = "Tool_Bar";
+
+// toolbaritem
+const char TOOLBARITEM_ETS_TAG[] = "ToolBarItem";
 
 // scrollbar
 const char SCROLL_BAR_COMPONENT_TAG[] = "ScrollBarComponent";
@@ -650,4 +660,10 @@ const char ARC_INDEXER_ETS_TAG[] = "ArcAlphabetIndexer";
 
 // Magnifier
 const char MAGNIFIER_TAG[] = "Magnifier";
+
+// AccessibilityFocusPaintNode
+const char ACCESSIBILITY_FOCUS_PAINT_NODE_TAG[] = "Accessibility_focus_paint_node";
+
+// LazyVGridLayout
+const char LAZY_V_GRID_LAYOUT_ETS_TAG[] = "LazyVGridLayout";
 } // namespace OHOS::Ace::V2

@@ -32,7 +32,7 @@ enum class PickerStyle {
 
 struct ParseTextArrayParam {
     std::vector<NG::RangeContent> result;
-    uint32_t kind = 0;
+    uint32_t kind = NG::TEXT;
     uint32_t selected = 0;
     std::vector<Dimension> columnWidths;
     std::string value;
@@ -78,6 +78,7 @@ public:
     static void IsUserDefinedFontFamily(const std::string& pos);
     static void ParseDefaultTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle);
     static bool ParseColumnWidths(const JSRef<JSObject>& paramObject, ParseTextArrayParam& param);
+    static void ParsePickerBackgroundStyle(const JSRef<JSObject>& paramObj, NG::PickerBackgroundStyle& bgStyle);
 };
 
 class JSTextPicker : public JSViewAbstract {
@@ -106,6 +107,7 @@ public:
     static void SetDisableTextStyleAnimation(const JSCallbackInfo& info);
     static void SetDefaultTextStyle(const JSCallbackInfo& info);
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
+    static void SetSelectedBackgroundStyle(const JSCallbackInfo& info);
 
 private:
     static size_t ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option);

@@ -58,7 +58,7 @@ void JSShareData::JSBind(BindingTarget globalObj)
 
 void JSShareData::Constructor(const JSCallbackInfo& info)
 {
-    int argc = info.Length();
+    uint32_t argc = info.Length();
     if (argc >= 1 && info[0]->IsNumber()) {
         int32_t bufferId = info[0]->ToNumber<int32_t>();
         auto instance = AceType::MakeRefPtr<JSShareData>(bufferId);

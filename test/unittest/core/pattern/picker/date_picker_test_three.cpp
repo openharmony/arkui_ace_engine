@@ -22,6 +22,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #undef private
 #undef protected
@@ -1633,8 +1634,8 @@ HWTEST_F(DatePickerTestThree, DatePickerTest017, TestSize.Level1)
     auto pipeline = MockPipelineContext::GetCurrent();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     ASSERT_NE(pickerTheme, nullptr);
-    pickerTheme->disappearOptionStyle_.textColor_ = Color::RED;
-    pickerTheme->normalOptionStyle_.textColor_ = Color::RED;
+    pickerTheme->disappearOptionStyle_.propTextColor_ = Color::RED;
+    pickerTheme->normalOptionStyle_.propTextColor_ = Color::RED;
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();

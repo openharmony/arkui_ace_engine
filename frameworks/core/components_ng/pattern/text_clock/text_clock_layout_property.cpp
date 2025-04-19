@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 
+#include "core/common/container.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 inline constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
@@ -88,12 +91,16 @@ void TextClockLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
         return;
     }
 
-    auto host = GetHost();
-    auto themeScopeId = host ? host->GetThemeScopeId() : 0;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>(themeScopeId);
-    auto defaultColor = theme ? theme->GetTextStyleClock().GetTextColor() : Color::BLACK;
+    auto defaultColor = Color::BLACK;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto themeScopeId = host ? host->GetThemeScopeId() : 0;
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextClockTheme>(themeScopeId);
+        defaultColor = theme ? theme->GetTextStyleClock().GetTextColor() : Color::BLACK;
+    }
 
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         json->PutExtAttr("format", propFormat_.value_or(DEFAULT_FORMAT_API_ELEVEN).c_str(), filter);

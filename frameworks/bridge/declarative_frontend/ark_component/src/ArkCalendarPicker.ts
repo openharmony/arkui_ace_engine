@@ -285,7 +285,7 @@ class ArkCalendarPickerComponent extends ArkComponent implements CalendarPickerA
     return this;
   }
   onChange(callback: Callback<Date>): this {
-    modifierWithKey(this._modifiersWithKeys,CalendarPickerOnChangeModifier.identity,CalendarPickerOnChangeModifier,callback);
+    modifierWithKey(this._modifiersWithKeys, CalendarPickerOnChangeModifier.identity, CalendarPickerOnChangeModifier, callback);
     return this;
   }
   padding(value: Padding | Length): this {

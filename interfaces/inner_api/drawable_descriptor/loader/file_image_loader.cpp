@@ -20,8 +20,8 @@ namespace Ace {
 namespace Drawable {
 std::shared_ptr<ImageData> FileImageLoader::LoadImageData(const SourceInfo& src)
 {
-    return std::make_shared<ImageData>();
+    return nullptr;
 }
 } // namespace Drawable
 } // namespace Ace
-} // namespace OHOS
+} // namespace OHOS

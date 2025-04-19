@@ -137,7 +137,6 @@ void TimePickerColumnPattern::OnModifyDone()
         SetOptionShiftDistance();
     }
     InitHapticController(host);
-    GetIsStartEndTimeDefined(host);
 }
 
 void TimePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host)
@@ -175,18 +174,19 @@ void TimePickerColumnPattern::StopHaptic()
     stopHaptic_ = true;
 }
 
-void TimePickerColumnPattern::GetIsStartEndTimeDefined(const RefPtr<FrameNode>& host)
+bool TimePickerColumnPattern::IsStartEndTimeDefined()
 {
-    CHECK_NULL_VOID(host);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     auto blendNode = DynamicCast<FrameNode>(host->GetParent());
-    CHECK_NULL_VOID(blendNode);
+    CHECK_NULL_RETURN(blendNode, false);
     auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
-    CHECK_NULL_VOID(stackNode);
+    CHECK_NULL_RETURN(stackNode, false);
     auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
-    CHECK_NULL_VOID(parentNode);
+    CHECK_NULL_RETURN(parentNode, false);
     auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
-    CHECK_NULL_VOID(timePickerRowPattern);
-    isStartEndTimeDefined_ = timePickerRowPattern->IsStartEndTimeDefined();
+    CHECK_NULL_RETURN(timePickerRowPattern, false);
+    return timePickerRowPattern->IsStartEndTimeDefined();
 }
 
 void TimePickerColumnPattern::RegisterWindowStateChangedCallback()
@@ -591,8 +591,12 @@ void TimePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty)
 {
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    if (selectedMarkPaint_) {
-        textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
+    if (pickerTheme->IsCircleDial() && !isUserSetSelectColor_) {
+        if (selectedMarkPaint_) {
+            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
+        } else {
+            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(false, false).GetTextColor());
+        }
     } else {
         textLayoutProperty->UpdateTextColor(
             timePickerLayoutProperty->GetSelectedColor().value_or(
@@ -799,13 +803,7 @@ void TimePickerColumnPattern::TextPropertiesLinearAnimation(
     textLayoutProperty->UpdateFontSize(updateSize);
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, distancePercent_);
-    if (selectedMarkPaint_ && (index == (showCount / PICKER_SELECT_AVERAGE))) {
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-        CHECK_NULL_VOID(pickerTheme);
-        updateColor = pickerTheme->GetOptionStyle(true, true).GetTextColor();
-    }
+    GetAnimationColor(index, showCount, updateColor);
 
     textLayoutProperty->UpdateTextColor(updateColor);
     if (scale < FONTWEIGHT) {
@@ -1225,9 +1223,7 @@ void TimePickerColumnPattern::SetOptionShiftDistance()
 
 void TimePickerColumnPattern::UpdateToss(double offsetY)
 {
-    isTossing_ = true;
     UpdateColumnChildPosition(offsetY);
-    isTossing_ = false;
 }
 
 void TimePickerColumnPattern::UpdateFinishToss(double offsetY)
@@ -1379,9 +1375,6 @@ bool TimePickerColumnPattern::CanMove(bool isDown) const
 {
     if (wheelModeEnabled_) {
         CHECK_NULL_RETURN(NotLoopOptions(), true);
-    }
-    if (isTossing_ && isStartEndTimeDefined_ && NotLoopOptions()) {
-        return true;
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -1647,6 +1640,31 @@ void TimePickerColumnPattern::UpdateSelectedTextColor(const RefPtr<PickerTheme>&
     host->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
 }
 
+void TimePickerColumnPattern::GetAnimationColor(uint32_t index, uint32_t showCount, Color& color)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    if (pickerTheme->IsCircleDial() && (index == (showCount / PICKER_SELECT_AVERAGE)) && !isUserSetSelectColor_) {
+        if (selectedMarkPaint_) {
+            color = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+        } else {
+            color = pickerTheme->GetOptionStyle(false, false).GetTextColor();
+        }
+    }
+}
+
+void TimePickerColumnPattern::UpdateUserSetSelectColor()
+{
+    isUserSetSelectColor_ = true;
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    UpdateSelectedTextColor(pickerTheme);
+}
+
 #ifdef SUPPORT_DIGITAL_CROWN
 std::string& TimePickerColumnPattern::GetSelectedColumnId()
 {
@@ -1733,7 +1751,7 @@ void TimePickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
 
     TimePickerScrollDirection dir =
         GreatNotEqual(scrollDelta_, 0.0f) ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
-    int32_t middleIndex = GetShowCount() / MIDDLE_CHILD_INDEX;
+    auto middleIndex = static_cast<int32_t>(GetShowCount()) / MIDDLE_CHILD_INDEX;
     auto shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                 : optionProperties_[middleIndex].nextDistance;
     auto shiftThreshold = shiftDistance / MIDDLE_CHILD_INDEX;

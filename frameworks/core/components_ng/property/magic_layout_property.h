@@ -18,39 +18,16 @@
 
 #include <memory>
 
-#include "core/common/ace_application_info.h"
-#include "core/components/common/layout/constants.h"
+#include "base/json/json_util.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 struct MagicItemProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LayoutWeight, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AspectRatio, float);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
-    {
-        /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            return;
-        }
-        json->PutExtAttr("layoutWeight", propLayoutWeight.value_or(0), filter);
-        auto context = PipelineBase::GetCurrentContext();
-        // add version protection, null as default start from API 10 or higher
-        if (context && context->GetMinPlatformVersion() > static_cast<int32_t>(PlatformVersion::VERSION_NINE)) {
-            if (propAspectRatio.has_value()) {
-                json->PutExtAttr("aspectRatio",
-                    round(static_cast<double>(propAspectRatio.value()) * 100) / 100, filter);
-            } else {
-                json->PutExtAttr("aspectRatio", "", filter);
-            }
-        } else {
-            json->PutExtAttr("aspectRatio",
-                round(static_cast<double>(propAspectRatio.value_or(0.0)) * 100) / 100, filter);
-        }
-    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     inline void Reset()
     {

@@ -47,6 +47,7 @@ struct TouchPoint final {
     float force = 0.0f;
     std::optional<float> tiltX;
     std::optional<float> tiltY;
+    std::optional<float> rollAngle;
     SourceTool sourceTool = SourceTool::UNKNOWN;
     bool isPressed = false;
     int32_t originalId = 0;
@@ -73,6 +74,7 @@ struct TouchEvent final : public PointerEvent {
     float force = 0.0f;
     std::optional<float> tiltX;
     std::optional<float> tiltY;
+    std::optional<float> rollAngle;
     int64_t deviceId = 0;
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
@@ -102,13 +104,13 @@ struct TouchEvent final : public PointerEvent {
     TimeStamp pressedTime;
     int32_t width = 0;
     int32_t height = 0;
-    float targetPositionX;
-    float targetPositionY;
-    float targetGlobalPositionX;
-    float targetGlobalPositionY;
-    float widthArea;
-    float heightArea;
-    uint64_t modifierKeyState;
+    float targetPositionX = 0.0;
+    float targetPositionY = 0.0;
+    float targetGlobalPositionX = 0.0;
+    float targetGlobalPositionY = 0.0;
+    float widthArea = 0.0;
+    float heightArea = 0.0;
+    uint64_t modifierKeyState = 0;
 
     TouchEvent()
     {
@@ -127,6 +129,7 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent& SetForce(float force);
     TouchEvent& SetTiltX(std::optional<float> tiltX);
     TouchEvent& SetTiltY(std::optional<float> tiltY);
+    TouchEvent& SetRollAngle(std::optional<float> rollAngle);
     TouchEvent& SetDeviceId(int64_t deviceId);
     TouchEvent& SetTargetDisplayId(int32_t targetDisplayId);
     TouchEvent& SetSourceType(SourceType sourceType);
@@ -329,7 +332,7 @@ public:
     std::list<StateRecord> stateHistory;
 };
 
-class ACE_EXPORT TouchEventTarget : public virtual AceType {
+class ACE_FORCE_EXPORT TouchEventTarget : public virtual AceType {
     DECLARE_ACE_TYPE(TouchEventTarget, AceType);
 
 public:

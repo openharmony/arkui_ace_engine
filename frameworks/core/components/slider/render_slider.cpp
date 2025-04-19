@@ -31,7 +31,7 @@ constexpr int32_t DEFAULT_SLIDER_ANIMATION_DURATION = 150;
 constexpr int32_t SLIDER_MOVE_DURATION = 100;
 constexpr Dimension DEFAULT_SLIDER_WIDTH_DP = 260.0_vp;
 constexpr Dimension DEFAULT_SLIDER_HEIGHT_DP = 40.0_vp;
-
+constexpr double INTERMITTENT_RATIO = 0.25;
 } // namespace
 
 RenderSlider::RenderSlider() : RenderNode(true) {}
@@ -860,6 +860,17 @@ void RenderSlider::ApplyRestoreInfo()
     step_ = jsonStep->GetDouble();
 
     SetRestoreInfo("");
+}
+
+bool RenderSlider::OnRotation(const RotationEvent& event)
+{
+    double eventValue = -1 * event.value;
+    if (GreatNotEqual(eventValue, 0)) {
+        HandleScrollUpdate(INTERMITTENT_RATIO);
+    } else if (LessNotEqual(eventValue, 0)) {
+        HandleScrollUpdate(-INTERMITTENT_RATIO);
+    }
+    return true;
 }
 
 } // namespace OHOS::Ace

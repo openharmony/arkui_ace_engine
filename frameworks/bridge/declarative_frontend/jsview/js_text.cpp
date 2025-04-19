@@ -46,7 +46,6 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style_parser.h"
-#include "core/components/font/constants_converter.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
@@ -200,15 +199,16 @@ void JSText::SetFontWeight(const JSCallbackInfo& info)
     }
     JSRef<JSVal> args = info[0];
     std::string fontWeight;
+    int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
+    ParseJsInt32(args, variableFontWeight);
+    TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
+
     if (args->IsNumber()) {
         fontWeight = args->ToString();
     } else {
         ParseJsString(args, fontWeight);
     }
-    FontWeight formatFontWeight = ConvertStrToFontWeight(fontWeight);
-    TextModel::GetInstance()->SetFontWeight(formatFontWeight);
-    int32_t fontWeightValue = static_cast<int32_t>(Constants::GetVariableFontWeight(formatFontWeight));
-    TextModel::GetInstance()->SetVariableFontWeight(fontWeightValue);
+    TextModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
 
     if (info.Length() < 2) { // 2 : two args
         return;
@@ -511,6 +511,21 @@ void JSText::SetLineSpacing(const JSCallbackInfo& info)
         value.Reset();
     }
     TextModel::GetInstance()->SetLineSpacing(value);
+    if (info.Length() < 2) { // 2 : two args
+        return;
+    }
+    auto jsonValue = info[1];
+    if (!jsonValue->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(jsonValue);
+    auto param = paramObject->GetProperty("onlyBetweenLines");
+    if (!param->IsBoolean() || param->IsUndefined() || param->IsNull()) {
+        TextModel::GetInstance()->SetIsOnlyBetweenLines(false);
+    } else {
+        auto isOnlyBetweenLines = param->ToBoolean();
+        TextModel::GetInstance()->SetIsOnlyBetweenLines(isOnlyBetweenLines);
+    }
 }
 
 void JSText::SetFontFamily(const JSCallbackInfo& info)
@@ -616,6 +631,7 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     JSRef<JSVal> typeValue = obj->GetProperty("type");
     JSRef<JSVal> colorValue = obj->GetProperty("color");
     JSRef<JSVal> styleValue = obj->GetProperty("style");
+    JSRef<JSVal> thicknessScaleValue = obj->GetProperty("thicknessScale");
 
     TextDecoration textDecoration;
     if (typeValue->IsNumber()) {
@@ -623,7 +639,7 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     } else {
         auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        textDecoration = theme->GetTextStyle().GetTextDecoration();
+        textDecoration = theme->GetTextDecoration();
     }
     Color result;
     if (!ParseJsColor(colorValue, result)) {
@@ -635,17 +651,19 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
             result = theme->GetTextStyle().GetTextDecorationColor();
         }
     }
-    std::optional<TextDecorationStyle> textDecorationStyle;
+    std::optional<TextDecorationStyle> textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
     if (styleValue->IsNumber()) {
         textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
-    } else {
-        textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
     }
+    float lineThicknessScale = 1.0f;
+    if (thicknessScaleValue->IsNumber()) {
+        lineThicknessScale = thicknessScaleValue->ToNumber<float>();
+    }
+    lineThicknessScale = lineThicknessScale < 0 ? 1.0f : lineThicknessScale;
     TextModel::GetInstance()->SetTextDecoration(textDecoration);
     TextModel::GetInstance()->SetTextDecorationColor(result);
-    if (textDecorationStyle) {
-        TextModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
-    }
+    TextModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    TextModel::GetInstance()->SetLineThicknessScale(lineThicknessScale);
     info.ReturnSelf();
 }
 
@@ -1179,6 +1197,7 @@ void JSText::ParseMenuParam(
     }
     menuParam.onMenuShow = ParseMenuCallback(frameNode, menuOptions, info, "onMenuShow");
     menuParam.onMenuHide = ParseMenuCallback(frameNode, menuOptions, info, "onMenuHide");
+    menuParam.previewMenuOptions = ParsePreviewMenuOptions(menuOptions);
 }
 
 std::function<void(int32_t, int32_t)> JSText::ParseMenuCallback(const WeakPtr<NG::FrameNode>& frameNode,
@@ -1202,6 +1221,22 @@ std::function<void(int32_t, int32_t)> JSText::ParseMenuCallback(const WeakPtr<NG
         return onMenuCallback;
     }
     return nullptr;
+}
+
+NG::PreviewMenuOptions JSText::ParsePreviewMenuOptions(const JSRef<JSObject>& menuOptions)
+{
+    NG::PreviewMenuOptions previewMenuOptions;
+    auto jsPreviewMenuOp = menuOptions->GetProperty("previewMenuOptions");
+    CHECK_EQUAL_RETURN(jsPreviewMenuOp->IsObject(), false, previewMenuOptions);
+    auto jsPreviewMenuOpObj = JSRef<JSObject>::Cast(jsPreviewMenuOp);
+    CHECK_EQUAL_RETURN(jsPreviewMenuOpObj->IsUndefined(), true, previewMenuOptions);
+    JSRef<JSVal> jsHapticFeedbackMode = jsPreviewMenuOpObj->GetProperty("hapticFeedbackMode");
+    CHECK_EQUAL_RETURN(jsHapticFeedbackMode->IsNumber(), false, previewMenuOptions);
+    auto hapticFeedbackMode = static_cast<HapticFeedbackMode>(jsHapticFeedbackMode->ToNumber<int32_t>());
+    if (hapticFeedbackMode >= HapticFeedbackMode::DISABLED && hapticFeedbackMode <= HapticFeedbackMode::AUTO) {
+        previewMenuOptions.hapticFeedbackMode = hapticFeedbackMode;
+    }
+    return previewMenuOptions;
 }
 
 void JSText::SetMarqueeOptions(const JSCallbackInfo& info)

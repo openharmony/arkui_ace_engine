@@ -14,18 +14,52 @@
  */
 
 /// <reference path='./import.ts' />
+
+interface TabsOptionsParam {
+  barPosition?: BarPosition;
+  index?: number;
+  controller?: TabsController;
+  barModifier?: CommonModifier;
+}
+
 class ArkTabsComponent extends ArkComponent implements TabsAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  initialize(options: Object[]) {
+    if ((options[0] as TabsOptionsParam).barPosition !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, BarPositionModifier.identity, BarPositionModifier, options[0].barPosition);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, BarPositionModifier.identity, BarPositionModifier, undefined);
+    }
+    if ((options[0] as TabsOptionsParam).index !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsIndexModifier.identity, TabsOptionsIndexModifier, options[0].index);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsIndexModifier.identity, TabsOptionsIndexModifier, undefined);
+    }
+    if ((options[0] as TabsOptionsParam).controller !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsControllerModifier.identity, TabsOptionsControllerModifier, options[0].controller);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsControllerModifier.identity, TabsOptionsControllerModifier, undefined);
+    }
+    if ((options[0] as TabsOptionsParam).barModifier !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsBarModifierModifier.identity, TabsOptionsBarModifierModifier, options);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsBarModifierModifier.identity, TabsOptionsBarModifierModifier, undefined);
+    }
+    return this;
+  }
   onAnimationStart(handler: (index: number, targetIndex: number, event: TabsAnimationEvent) => void): TabsAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TabsAnimationStartModifier.identity, TabsAnimationStartModifier, handler);
+    return this;
   }
   onAnimationEnd(handler: (index: number, event: TabsAnimationEvent) => void): TabsAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TabsAnimationEndModifier.identity, TabsAnimationEndModifier, handler);
+    return this;
   }
   onGestureSwipe(handler: (index: number, event: TabsAnimationEvent) => void): TabsAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TabsGestureSwipeModifier.identity, TabsGestureSwipeModifier, handler);
+    return this;
   }
   vertical(value: boolean): TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, TabsVerticalModifier.identity, TabsVerticalModifier, value);
@@ -70,14 +104,16 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     return this;
   }
   onChange(event: (index: number) => void): TabsAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TabsOnChangeModifier.identity, TabsOnChangeModifier, event);
+    return this;
   }
   onSelected(event: (index: number) => void): TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, TabsOnSelectedModifier.identity, TabsOnSelectedModifier, event);
     return this;
   }
   onTabBarClick(event: (index: number) => void): TabsAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TabsOnTabBarClick.identity, TabsOnTabBarClick, event);
+    return this;
   }
   onUnselected(event: (index: number) => void): TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, TabsOnUnselectedModifier.identity, TabsOnUnselectedModifier, event);
@@ -161,6 +197,14 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     arkTabsCachedMaxCount.count = count;
     arkTabsCachedMaxCount.mode = mode;
     modifierWithKey(this._modifiersWithKeys, CachedMaxCountModifier.identity, CachedMaxCountModifier, arkTabsCachedMaxCount);
+    return this;
+  }
+  customContentTransition(delegate: (from: number, to: number) => void) : TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, TabsCustomContentTransition.identity, TabsCustomContentTransition, delegate);
+    return this;
+  }
+  onContentWillChange(handler: (currentIndex: number, targetIndex: number) => void): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, TabsOnContentWillChange.identity, TabsOnContentWillChange, handler);
     return this;
   }
 }
@@ -385,6 +429,51 @@ class BarPositionModifier extends ModifierWithKey<number> {
       getUINativeModule().tabs.resetTabBarPosition(node);
     } else {
       getUINativeModule().tabs.setTabBarPosition(node, this.value);
+    }
+  }
+}
+
+class TabsOptionsIndexModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabsOptionsIndex');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOptionsIndex(node);
+    } else {
+      getUINativeModule().tabs.setTabsOptionsIndex(node, this.value);
+    }
+  }
+}
+
+class TabsOptionsControllerModifier extends ModifierWithKey<TabsController> {
+  constructor(value: TabsController) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabsOptionsController');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOptionsController(node);
+    } else {
+      getUINativeModule().tabs.setTabsOptionsController(node, this.value);
+    }
+  }
+}
+
+class TabsOptionsBarModifierModifier extends ModifierWithKey<CommonModifier> {
+  constructor(value: CommonModifier) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabsOptionsBarModifier');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOptionsBarModifier(node);
+    } else {
+      getUINativeModule().tabs.setTabsOptionsBarModifier(node, this.value);
     }
   }
 }
@@ -614,6 +703,112 @@ class CachedMaxCountModifier extends ModifierWithKey<ArkTabsCachedMaxCount> {
     return !(this.value.count === this.stageValue.count && this.value.mode === this.stageValue.mode);
   }
 }
+
+class TabsOnChangeModifier extends ModifierWithKey<(index: number) => void> {
+  constructor(value: (index: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onChange');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetOnChange(node);
+    } else {
+      getUINativeModule().tabs.setOnChange(node, this.value);
+    }
+  }
+}
+
+class TabsOnTabBarClick extends ModifierWithKey<(index: number) => void> {
+  constructor(value: (index: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onTabBarClick');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetOnTabBarClick(node);
+    } else {
+      getUINativeModule().tabs.setOnTabBarClick(node, this.value);
+    }
+  }
+}
+
+class TabsAnimationStartModifier extends ModifierWithKey<(index: number, targetIndex: number, event: TabsAnimationEvent) => void> {
+  constructor(value: (index: number, targetIndex: number, event: TabsAnimationEvent) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAnimationStart');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetOnAnimationStart(node);
+    } else {
+      getUINativeModule().tabs.setOnAnimationStart(node, this.value);
+    }
+  }
+}    
+
+class TabsAnimationEndModifier extends ModifierWithKey<(index: number, event: TabsAnimationEvent) => void> {
+  constructor(value: (index: number, event: TabsAnimationEvent) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAnimationEnd');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetOnAnimationEnd(node);
+    } else {
+      getUINativeModule().tabs.setOnAnimationEnd(node, this.value);
+    }
+  }
+}
+
+class TabsGestureSwipeModifier extends ModifierWithKey<(index: number, event: TabsAnimationEvent) => void> {
+  constructor(value: (index: number, event: TabsAnimationEvent) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onGestureSwipe');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetOnGestureSwipe(node);
+    } else {
+      getUINativeModule().tabs.setOnGestureSwipe(node, this.value);
+    }
+  }
+}
+
+class TabsOnContentWillChange extends ModifierWithKey<(currentIndex: number, targetIndex: number) => void> {
+  constructor(value: (currentIndex: number, targetIndex: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onContentWillChange');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetOnContentWillChange(node);
+    } else {
+      getUINativeModule().tabs.setOnContentWillChange(node, this.value);
+    }
+  }
+} 
+
+class TabsCustomContentTransition extends ModifierWithKey<(from: number, to: number) => void> {
+  constructor(value: (from: number, to: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('ccustomContentTransition');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetCustomContentTransition(node);
+    } else {
+      getUINativeModule().tabs.setCustomContentTransition(node, this.value);
+    }
+  }
+} 
+
 
 // @ts-ignore
 globalThis.Tabs.attributeModifier = function (modifier: ArkComponent): void {

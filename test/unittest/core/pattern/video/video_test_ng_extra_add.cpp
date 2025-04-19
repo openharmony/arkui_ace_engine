@@ -1187,7 +1187,7 @@ HWTEST_F(VideoTestExtraAddNg, ChangePlayerStatus001, TestSize.Level1)
     videoPattern->mediaPlayer_ = mockMediaPlayer;
 
     videoPattern->duration_ = 0;
-    videoPattern->ChangePlayerStatus(true, status);
+    videoPattern->ChangePlayerStatus(status);
     EXPECT_EQ(videoPattern->duration_, 0);
 
     mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();
@@ -1195,13 +1195,13 @@ HWTEST_F(VideoTestExtraAddNg, ChangePlayerStatus001, TestSize.Level1)
     videoPattern->mediaPlayer_ = mockMediaPlayer;
 
     videoPattern->duration_ = 0;
-    videoPattern->ChangePlayerStatus(true, status);
+    videoPattern->ChangePlayerStatus(status);
     EXPECT_EQ(videoPattern->duration_, 0);
 
     videoPattern->mediaPlayer_ = nullptr;
 
     videoPattern->duration_ = 0;
-    videoPattern->ChangePlayerStatus(true, status);
+    videoPattern->ChangePlayerStatus(status);
     EXPECT_EQ(videoPattern->duration_, 0);
 }
 

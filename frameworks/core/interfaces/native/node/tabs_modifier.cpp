@@ -179,6 +179,17 @@ void SetTabsOptionsController(ArkUINodeHandle node, ArkUINodeHandle tabsControll
     TabsModelNG::SetTabsController(frameNode,
         AceType::Claim(reinterpret_cast<OHOS::Ace::SwiperController*>(tabsController)));
 }
+void SetTabsOptionsBarModifier(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onApply = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(callback);
+        TabsModelNG::SetBarModifier(frameNode, std::move(*onApply));
+    } else {
+        TabsModelNG::SetBarModifier(frameNode, nullptr);
+    }
+}
 void SetScrollable(ArkUINodeHandle node, ArkUI_Bool scrollable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -304,6 +315,13 @@ void ResetTabsOptionsIndex(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetTabBarIndex(frameNode, 0);
+}
+
+void ResetTabsOptionsBarModifier(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetBarModifier(frameNode, nullptr);
 }
 
 void ResetScrollable(ArkUINodeHandle node)
@@ -509,6 +527,134 @@ void ResetCachedMaxCount(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetCachedMaxCount(frameNode, std::nullopt, TabsCacheMode::CACHE_BOTH_SIDE);
 }
+void SetTabsOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        TabsModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        TabsModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnChange(frameNode, nullptr);
+}
+
+void SetTabsOnTabBarClick(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onTabBarClick = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        TabsModelNG::SetOnTabBarClick(frameNode, std::move(*onTabBarClick));
+    } else {
+        TabsModelNG::SetOnTabBarClick(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnTabBarClick(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnTabBarClick(frameNode, nullptr);
+}
+
+void SetTabsOnAnimationStart(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onAnimationStart =
+            reinterpret_cast<std::function<void(int32_t, int32_t, const AnimationCallbackInfo&)>*>(callback);
+        TabsModelNG::SetOnAnimationStart(frameNode, std::move(*onAnimationStart));
+    } else {
+        TabsModelNG::SetOnAnimationStart(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnAnimationStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnAnimationStart(frameNode, nullptr);
+}
+
+void SetTabsOnAnimationEnd(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onAnimationEnd = reinterpret_cast<std::function<void(int32_t, const AnimationCallbackInfo&)>*>(callback);
+        TabsModelNG::SetOnAnimationEnd(frameNode, std::move(*onAnimationEnd));
+    } else {
+        TabsModelNG::SetOnAnimationEnd(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnAnimationEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnAnimationEnd(frameNode, nullptr);
+}
+
+void SetTabsOnGestureSwipe(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onGestureSwipe = reinterpret_cast<std::function<void(int32_t, const AnimationCallbackInfo&)>*>(callback);
+        TabsModelNG::SetOnGestureSwipe(frameNode, std::move(*onGestureSwipe));
+    } else {
+        TabsModelNG::SetOnGestureSwipe(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnGestureSwipe(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnGestureSwipe(frameNode, nullptr);
+}
+
+void SetTabsOnContentWillChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onContentWillChange = reinterpret_cast<std::function<bool(int32_t, int32_t)>*>(callback);
+        TabsModelNG::SetOnContentWillChange(frameNode, std::move(*onContentWillChange));
+    } else {
+        TabsModelNG::SetOnContentWillChange(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnContentWillChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnContentWillChange(frameNode, nullptr);
+}
+
+void SetTabsIsCustomAnimation(ArkUINodeHandle node, ArkUI_Bool isCustom)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetIsCustomAnimation(frameNode, isCustom);
+}
+
+void ResetTabsIsCustomAnimation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetIsCustomAnimation(frameNode, false);
+}
 
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
@@ -528,6 +674,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .setTabBarPosition = SetTabBarPosition,
         .setTabsOptionsIndex = SetTabsOptionsIndex,
         .setTabsOptionsController = SetTabsOptionsController,
+        .setTabsOptionsBarModifier = SetTabsOptionsBarModifier,
         .setScrollable = SetScrollable,
         .setTabBarWidth = SetTabBarWidth,
         .setTabBarHeight = SetTabBarHeight,
@@ -545,6 +692,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetIsVertical = ResetIsVertical,
         .resetTabBarPosition = ResetTabBarPosition,
         .resetTabsOptionsIndex = ResetTabsOptionsIndex,
+        .resetTabsOptionsBarModifier = ResetTabsOptionsBarModifier,
         .resetScrollable = ResetScrollable,
         .resetTabBarWidth = ResetTabBarWidth,
         .resetTabBarHeight = ResetTabBarHeight,
@@ -568,6 +716,20 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetTabsOnSelected = ResetTabsOnSelected,
         .setCachedMaxCount = SetCachedMaxCount,
         .resetCachedMaxCount = ResetCachedMaxCount,
+        .setTabsOnChange = SetTabsOnChange,
+        .resetTabsOnChange = ResetTabsOnChange,
+        .setTabsOnTabBarClick = SetTabsOnTabBarClick,
+        .resetTabsOnTabBarClick = ResetTabsOnTabBarClick,
+        .setTabsOnAnimationStart = SetTabsOnAnimationStart,
+        .resetTabsOnAnimationStart = ResetTabsOnAnimationStart,
+        .setTabsOnAnimationEnd = SetTabsOnAnimationEnd,
+        .resetTabsOnAnimationEnd = ResetTabsOnAnimationEnd,
+        .setTabsOnGestureSwipe = SetTabsOnGestureSwipe,
+        .resetTabsOnGestureSwipe = ResetTabsOnGestureSwipe,
+        .setTabsOnContentWillChange = SetTabsOnContentWillChange,
+        .resetTabsOnContentWillChange = ResetTabsOnContentWillChange,
+        .setTabsIsCustomAnimation = SetTabsIsCustomAnimation,
+        .resetTabsIsCustomAnimation = ResetTabsIsCustomAnimation,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -590,6 +752,7 @@ const CJUITabsModifier* GetCJUITabsModifier()
         .setTabBarPosition = SetTabBarPosition,
         .setTabsOptionsIndex = SetTabsOptionsIndex,
         .setTabsOptionsController = SetTabsOptionsController,
+        .setTabsOptionsBarModifier = SetTabsOptionsBarModifier,
         .setScrollable = SetScrollable,
         .setTabBarWidth = SetTabBarWidth,
         .setTabBarHeight = SetTabBarHeight,
@@ -606,6 +769,7 @@ const CJUITabsModifier* GetCJUITabsModifier()
         .resetIsVertical = ResetIsVertical,
         .resetTabBarPosition = ResetTabBarPosition,
         .resetTabsOptionsIndex = ResetTabsOptionsIndex,
+        .resetTabsOptionsBarModifier = ResetTabsOptionsBarModifier,
         .resetScrollable = ResetScrollable,
         .resetTabBarWidth = ResetTabBarWidth,
         .resetTabBarHeight = ResetTabBarHeight,

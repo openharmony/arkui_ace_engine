@@ -25,6 +25,7 @@ constexpr unsigned int TOP_LEFT = 0;
 constexpr unsigned int TOP_RIGHT = 1;
 constexpr unsigned int BOTTOM_LEFT = 2;
 constexpr unsigned int BOTTOM_RIGHT = 3;
+constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -52,7 +53,7 @@ void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper, ImageDfxCo
 
     BorderRadiusArray radiusXY = BorderRadiusArray();
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         auto paintRectWidth = renderCtx->GetPaintRectWithoutTransform().Width();
         radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPxWithSize(paintRectWidth),
                          borderRadius->radiusTopLeft->ConvertToPxWithSize(paintRectWidth)),
@@ -130,6 +131,12 @@ void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)
         config.obscuredReasons_ = renderCtx->GetObscured().value_or(std::vector<ObscuredReasons>());
     }
 
+    if (renderProps->HasHdrBrightness() && canvasImage_->IsHdrPixelMap() && renderCtx) {
+        renderCtx->SetImageHDRBrightness(renderProps->GetHdrBrightnessValue(DEFAULT_HDR_BRIGHTNESS));
+        renderCtx->SetImageHDRPresent(true);
+        config.dynamicMode = DynamicRangeMode::HIGH;
+    }
+
     if (renderProps->GetNeedBorderRadiusValue(false)) {
         UpdateBorderRadius(paintWrapper, canvasImage_->GetImageDfxConfig());
     }
@@ -148,6 +155,18 @@ void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)
             matrix[3], matrix[7], matrix[11], matrix[15]);
         config.imageMatrix_ = renderProps->GetImageMatrix().value_or(defaultValue);
     }
+}
+
+void ImagePaintMethod::UpdatePaintMethod(
+    const RefPtr<CanvasImage>& canvasImage, const ImagePaintMethodConfig& imagePainterMethodConfig)
+{
+    selected_ = imagePainterMethodConfig.selected;
+    selected_ = imagePainterMethodConfig.selected;
+    sensitive_ = imagePainterMethodConfig.sensitive;
+    canvasImage_ = canvasImage;
+    interpolationDefault_ = imagePainterMethodConfig.interpolation;
+    imageOverlayModifier_ = imagePainterMethodConfig.imageOverlayModifier;
+    imageContentModifier_ = imagePainterMethodConfig.imageContentModifier;
 }
 
 RefPtr<Modifier> ImagePaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)

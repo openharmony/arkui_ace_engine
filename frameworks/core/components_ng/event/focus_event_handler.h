@@ -82,6 +82,7 @@ public:
     OnKeyCallbackFunc onJSFrameNodeKeyEventCallback_;
     OnKeyConsumeFunc onKeyPreImeCallback_;
     GestureEventFunc onClickEventCallback_;
+    GestureEventFunc onSpanLongPressEventCallback_; // used only for span
     OnFocusAxisEventFunc onFocusAxisEventCallback_;
     OnKeyEventDispatchFunc onKeyEventDispatchCallback_;
     OnCrownCallbackFunc onCrownEventCallback_;
@@ -134,6 +135,7 @@ protected:
     ACE_DEFINE_FOCUS_EVENT(OnKeyCallback, OnKeyConsumeFunc, onKeyEventCallback)
     ACE_DEFINE_FOCUS_EVENT(OnKeyPreIme, OnKeyConsumeFunc, onKeyPreImeCallback)
     ACE_DEFINE_FOCUS_EVENT(OnClickCallback, GestureEventFunc, onClickEventCallback)
+    ACE_DEFINE_FOCUS_EVENT(OnLongPressCallback, GestureEventFunc, onSpanLongPressEventCallback)
     ACE_DEFINE_FOCUS_EVENT(OnFocusAxisCallback, OnFocusAxisEventFunc, onFocusAxisEventCallback)
     ACE_DEFINE_FOCUS_EVENT(OnKeyEventDispatchCallback, OnKeyEventDispatchFunc, onKeyEventDispatchCallback)
     ACE_DEFINE_FOCUS_EVENT(OnCrownCallback, OnCrownCallbackFunc, onCrownEventCallback)

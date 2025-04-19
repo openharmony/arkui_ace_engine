@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
     delta = -FireOnWillScroll(-delta);
     layoutInfo_->UpdateOffset(delta);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    MarkScrollBarProxyDirty();
     return true;
 };
 
@@ -83,9 +84,9 @@ bool WaterFlowPattern::IsAtTop() const
 {
     return layoutInfo_->itemStart_;
 };
-bool WaterFlowPattern::IsAtBottom() const
+bool WaterFlowPattern::IsAtBottom(bool considerRepeat) const
 {
-    return layoutInfo_->offsetEnd_;
+    return considerRepeat ? (layoutInfo_->offsetEnd_ && layoutInfo_->repeatDifference_ == 0) : layoutInfo_->offsetEnd_;
 };
 bool WaterFlowPattern::IsAtTopWithDelta() const
 {
@@ -176,7 +177,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
         algorithm = MakeRefPtr<WaterFlowLayoutAlgorithm>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
     }
     algorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()));
-    algorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()));
+    algorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()) && (layoutInfo_->repeatDifference_ == 0));
     return algorithm;
 }
 
@@ -267,6 +268,10 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
     bool indexChanged = itemRange_.first != layoutInfo_->FirstIdx() || itemRange_.second != layoutInfo_->endIndex_;
     auto onScrollIndex = eventHub->GetOnScrollIndex();
     FireOnScrollIndex(indexChanged, onScrollIndex);
+    if (indexChanged) {
+        host->OnAccessibilityEvent(
+            AccessibilityEventType::SCROLLING_EVENT, layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
+    }
     auto onReachStart = eventHub->GetOnReachStart();
     FireOnReachStart(onReachStart);
     auto onReachEnd = eventHub->GetOnReachEnd();
@@ -289,7 +294,7 @@ void WaterFlowPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (layoutInfo_->ReachEnd(prevOffset_, false)) {
+    if (layoutInfo_->ReachEnd(prevOffset_, false) && layoutInfo_->repeatDifference_ == 0) {
         FireObserverOnReachEnd();
         CHECK_NULL_VOID(onReachEnd);
         ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
@@ -378,11 +383,20 @@ bool WaterFlowPattern::UpdateStartIndex(int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto childCount = host->GetTotalChildCount();
+    layoutInfo_->repeatDifference_ = 0;
+    layoutInfo_->firstRepeatCount_ = 0;
+    layoutInfo_->childrenCount_ = 0;
+    GetRepeatCountInfo(
+        host, layoutInfo_->repeatDifference_, layoutInfo_->firstRepeatCount_, layoutInfo_->childrenCount_);
+    auto childCount = layoutInfo_->GetChildrenCount();
     layoutInfo_->jumpIndex_ = (index == LAST_ITEM ? childCount - 1 : index);
     // if target index is footer, fix align because it will jump after fillViewport.
     if (layoutInfo_->footerIndex_ == 0 && layoutInfo_->jumpIndex_ == childCount - 1) {
         SetScrollAlign(ScrollAlign::END);
+    }
+    if (layoutInfo_->Mode() == LayoutMode::TOP_DOWN) {
+        // distinguish scrollToLastIndex and scrollToEdge in top-down mode.
+        layoutInfo_->jumpIndex_ = index;
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
@@ -521,6 +535,7 @@ void WaterFlowPattern::ResetSections()
     }
     sections_.Reset();
     layoutInfo_->Reset();
+    sectionChangeStartPos_.clear();
     MarkDirtyNodeSelf();
 }
 

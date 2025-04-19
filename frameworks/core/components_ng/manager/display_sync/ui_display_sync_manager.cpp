@@ -51,7 +51,7 @@ void UIDisplaySyncManager::DispatchFunc(int64_t nanoTimestamp)
                 monitorVsyncRate_ = sourceVsyncRate_;
             }
             TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "UIDisplaySyncMapSize:%{public}d Id:%{public}d"
-                "FrameRateRange: {%{public}d, %{public}d, %{public}d}",
+                " FrameRateRange: {%{public}d, %{public}d, %{public}d}",
                 static_cast<int32_t>(uiDisplaySyncMap_.size()), static_cast<int32_t>(displaySync->GetId()),
                 rateRange->min_, rateRange->max_, rateRange->preferred_);
         } else {

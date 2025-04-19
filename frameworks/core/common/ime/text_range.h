@@ -33,6 +33,29 @@ struct TextRange {
     {
         return this->start != other.start || this->end != other.end;
     }
+
+    bool IsValid() const
+    {
+        return start > -1 && end > -1;
+    }
+
+    int32_t GetLength() const
+    {
+        return std::abs(end - start);
+    }
+
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << "[start:" << start << "," << "end:" << end << "]";
+        return ss.str();
+    }
+
+    void Reset()
+    {
+        start = -1;
+        end = -1;
+    }
 };
 
 } // namespace OHOS::Ace

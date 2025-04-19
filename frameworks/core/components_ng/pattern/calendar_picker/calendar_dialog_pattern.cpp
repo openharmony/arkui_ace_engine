@@ -1472,14 +1472,10 @@ void CalendarDialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
         disabledDateRangeStr.pop_back();
     }
     json->PutExtAttr("disabledDateRange", disabledDateRangeStr.c_str(), filter);
-    if (currentSettingData_.startDate.ToDays() == PickerDate().ToDays()) {
-        json->PutExtAttr("start", "undefined", filter);
-    } else {
+    if (currentSettingData_.startDate.ToDays() != PickerDate().ToDays()) {
         json->PutExtAttr("start", currentSettingData_.startDate.ToString(false).c_str(), filter);
     }
-    if (currentSettingData_.endDate.ToDays() == PickerDate().ToDays()) {
-        json->PutExtAttr("end", "undefined", filter);
-    } else {
+    if (currentSettingData_.endDate.ToDays() != PickerDate().ToDays()) {
         json->PutExtAttr("end", currentSettingData_.endDate.ToString(false).c_str(), filter);
     }
 }

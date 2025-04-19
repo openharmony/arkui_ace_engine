@@ -56,9 +56,19 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<Nav
     CHECK_NULL_RETURN(barItemNode, false);
     auto menuItemNode = CreateMenuItemButton(theme);
     CHECK_NULL_RETURN(menuItemNode, false);
+    CHECK_NULL_RETURN(nodeBase, false);
+    auto navDestinationPattern = nodeBase->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(navDestinationPattern, false);
     MenuParam menuParam;
     menuParam.isShowInSubWindow = false;
     menuParam.placement = Placement::BOTTOM_RIGHT;
+    NavigationMenuOptions menuOptions = navDestinationPattern->GetMenuOptions();
+    if (menuOptions.mbOptions.bgOptions.blurStyleOption.has_value()) {
+        menuParam.backgroundBlurStyleOption = menuOptions.mbOptions.bgOptions.blurStyleOption.value();
+    }
+    if (menuOptions.mbOptions.bgOptions.effectOption.has_value()) {
+        menuParam.backgroundEffectOption = menuOptions.mbOptions.bgOptions.effectOption.value();
+    }
     auto barMenuNode = MenuView::Create(
         std::move(params), menuItemNode->GetId(), menuItemNode->GetTag(), MenuType::NAVIGATION_MENU, menuParam);
     BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode);
@@ -77,7 +87,6 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<Nav
     menuItemNode->MarkModifyDone();
     CHECK_NULL_RETURN(menuNode, false);
     menuNode->AddChild(menuItemNode);
-    CHECK_NULL_RETURN(nodeBase, false);
     if (isCreateLandscapeMenu) {
         nodeBase->SetLandscapeMenuNode(barMenuNode);
     } else {

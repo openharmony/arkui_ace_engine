@@ -19,6 +19,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_DRAG_MIN_DISTANCE = 4.0_vp;
 constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
+constexpr Dimension INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE = 80.0_vp;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 constexpr float DEFAULT_COUNT = 2.0f;
 } // namespace
@@ -26,28 +27,6 @@ constexpr float DEFAULT_COUNT = 2.0f;
 IndicatorPattern::IndicatorPattern()
 {
     indicatorController_ = MakeRefPtr<IndicatorController>();
-    InitIndicatorController();
-}
-
-void IndicatorPattern::InitIndicatorController()
-{
-    indicatorController_->SetShowNextImpl([weak = WeakClaim(this)]() {
-        auto indicator = weak.Upgrade();
-        CHECK_NULL_VOID(indicator);
-        indicator->ShowNext();
-    });
-
-    indicatorController_->SetShowPrevImpl([weak = WeakClaim(this)]() {
-        auto indicator = weak.Upgrade();
-        CHECK_NULL_VOID(indicator);
-        indicator->ShowPrevious();
-    });
-
-    indicatorController_->SetChangeIndexImpl([weak = WeakClaim(this)](int32_t index, bool useAnimation) {
-        auto indicator = weak.Upgrade();
-        CHECK_NULL_VOID(indicator);
-        indicator->ChangeIndex(index, useAnimation);
-    });
 }
 
 void IndicatorPattern::SetSwiperDigitalParameters(const SwiperDigitalParameters& swiperDigitalParameters)
@@ -332,6 +311,7 @@ bool IndicatorPattern::GetDigitFrameSize(RefPtr<GeometryNode>& geoNode, SizeF& f
 void IndicatorPattern::OnIndexChangeInSingleMode(int32_t index)
 {
     if (!IsLoop() || IsHover() || IsPressed()) {
+        singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
         if (index >= RealTotalCount()) {
             SetCurrentIndexInSingleMode(RealTotalCount() - 1);
             return;
@@ -352,7 +332,7 @@ void IndicatorPattern::ShowPrevious()
     }
 
     singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
-    if (GetNonAutoLayoutDirection() == TextDirection::RTL) {
+    if (IsHorizontalAndRightToLeft()) {
         singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
         if (IsLoop() && GetCurrentIndex() == 0) {
             singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
@@ -363,7 +343,10 @@ void IndicatorPattern::ShowPrevious()
             singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
         }
     }
-
+    auto dotIndicatorModifier = GetDotIndicatorModifier();
+    if (dotIndicatorModifier && !dotIndicatorModifier->GetIsBottomAnimationFinished()) {
+        dotIndicatorModifier->FinishAnimationToTargetImmediately(dotIndicatorModifier->GetTargetCenter());
+    }
     lastIndex_ = GetCurrentIndex();
     OnIndexChangeInSingleMode(GetCurrentIndex() - 1);
 }
@@ -374,7 +357,7 @@ void IndicatorPattern::ShowNext()
         return SwiperIndicatorPattern::ShowNext();
     }
     singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
-    if (GetNonAutoLayoutDirection() == TextDirection::RTL) {
+    if (IsHorizontalAndRightToLeft()) {
         singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
         if (IsLoop() && GetCurrentIndex() == (RealTotalCount() - 1)) {
             singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
@@ -385,7 +368,10 @@ void IndicatorPattern::ShowNext()
             singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
         }
     }
-
+    auto dotIndicatorModifier = GetDotIndicatorModifier();
+    if (dotIndicatorModifier && !dotIndicatorModifier->GetIsBottomAnimationFinished()) {
+        dotIndicatorModifier->FinishAnimationToTargetImmediately(dotIndicatorModifier->GetTargetCenter());
+    }
     lastIndex_ = GetCurrentIndex();
     OnIndexChangeInSingleMode(GetCurrentIndex() + 1);
 }
@@ -407,6 +393,10 @@ void IndicatorPattern::ChangeIndex(int32_t index, bool useAnimation)
         }
     } else {
         singleGestureState_ = GestureState::GESTURE_STATE_INIT;
+    }
+    auto dotIndicatorModifier = GetDotIndicatorModifier();
+    if (dotIndicatorModifier) {
+        dotIndicatorModifier->StopAnimation();
     }
     OnIndexChangeInSingleMode(index);
 }
@@ -501,10 +491,63 @@ void IndicatorPattern::SwipeTo(std::optional<int32_t> mouseClickIndex)
     }
 }
 
+bool IndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto currentIndex = GetCurrentIndex();
+    auto dragPoint =
+        PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
+    float touchBottomRate = 0.0;
+    float touchOffset = 0.0;
+    auto offset = dragPoint - GetDragStartPoint();
+    touchOffset = GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
+    touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx())
+                            ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx() : 1;
+    touchBottomRate_ = std::abs(touchBottomRate);
+    TouchBottomType touchBottomType = TouchBottomType::NONE;
+    if (currentIndex <= 0) {
+        if (IsHorizontalAndRightToLeft()) {
+            if (Positive(touchOffset)) {
+                touchBottomType = TouchBottomType::END;
+            }
+        } else {
+            if (NonPositive(touchOffset)) {
+                touchBottomType = TouchBottomType::START;
+            }
+        }
+    }
+    if (currentIndex >= RealTotalCount() - 1) {
+        if (IsHorizontalAndRightToLeft()) {
+            if (NonPositive(touchOffset)) {
+                touchBottomType = TouchBottomType::START;
+            }
+        } else {
+            if (Positive(touchOffset)) {
+                touchBottomType = TouchBottomType::END;
+            }
+        }
+    }
+    SetTouchBottomType(touchBottomType);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return touchBottomType == TouchBottomType::NONE ? false : true;
+}
+
+void IndicatorPattern::HandleDragEnd(double dragVelocity)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    SetTouchBottomType(TouchBottomType::NONE);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void IndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
 {
     if (GetBindSwiperNode()) {
         return SwiperIndicatorPattern::HandleLongDragUpdate(info);
+    }
+    if (CheckIsTouchBottom(info)) {
+        return;
     }
     float turnPageRate = 0.0;
     float turnPageRateOffset = 0.0;

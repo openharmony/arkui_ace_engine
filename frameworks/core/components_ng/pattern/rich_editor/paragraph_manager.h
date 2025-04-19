@@ -20,8 +20,8 @@
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
-#include "core/components/common/properties/text_layout_info.h"
 #include "core/components_ng/render/paragraph.h"
+
 namespace OHOS::Ace::NG {
 class ParagraphManager : public virtual AceType {
     DECLARE_ACE_TYPE(ParagraphManager, AceType);
@@ -57,8 +57,9 @@ public:
     }
     void Reset();
 
-    std::vector<RectF> GetRects(int32_t start, int32_t end,
+    virtual std::vector<RectF> GetRects(int32_t start, int32_t end,
         RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE) const;
+    ParagraphManager::ParagraphInfo GetParagrahInfo(int32_t position) const;
     std::vector<std::pair<std::vector<RectF>, TextDirection>> GetParagraphsRects(
         int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE) const;
     std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> GetTextBoxesForSelect(
@@ -111,6 +112,7 @@ private:
         CaretMetricsF secondMetrics;
         int32_t relativeStart = 0;
         int32_t relativeEnd = 0;
+        float paragraphSpacing = 0.0f;
     };
     static void MakeBlankLineRectsInParagraph(std::vector<RectF>& result, const ParagraphInfo& info,
         const SelectData& selectData);
@@ -118,6 +120,8 @@ private:
         const SelectData& selectData);
     static void RemoveBlankLineRectByHandler(std::vector<RectF>& rects, const SelectData& selectData);
     static bool IsRectOutByHandler(const RectF& rect, const SelectData& selectData);
+    static void AddParagraphPacingBlankRect(
+        std::vector<RectF>& rects, const RectF& lastRect, const SelectData& selectData);
 };
 } // namespace OHOS::Ace::NG
 #endif

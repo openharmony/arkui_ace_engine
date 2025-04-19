@@ -500,4 +500,70 @@ HWTEST_F(TextFieldPatternOnWillTest, OnWillEvent014, TestSize.Level1)
     expectOrder.onChange = 1;
     EXPECT_EQ(order, expectOrder);
 }
+
+/**
+ * @tc.name: UpdateObscure001
+ * @tc.desc: Test is textarea, UpdateObscure(), case TextInputType::UNSPECIFIED
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternOnWillTest, UpdateObscure001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::UNSPECIFIED); });
+    pattern_->textObscured_ = false;
+    pattern_->UpdateObscure(u"1", true);
+    EXPECT_EQ(pattern_->nakedCharPosition_, -1);
+}
+
+/**
+ * @tc.name: UpdateObscure002
+ * @tc.desc: Test is textarea, UpdateObscure(), case TextInputType::NEW_PASSWORD
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternOnWillTest, UpdateObscure002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::NEW_PASSWORD); });
+    pattern_->textObscured_ = false;
+    pattern_->UpdateObscure(u"1", true);
+    EXPECT_EQ(pattern_->nakedCharPosition_, -1);
+}
+
+/**
+ * @tc.name: UpdateObscure003
+ * @tc.desc: Test is textarea, UpdateObscure(), case textObscured_ = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternOnWillTest, UpdateObscure003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::NEW_PASSWORD); });
+    pattern_->textObscured_ = true;
+    pattern_->UpdateObscure(u"2", true);
+    EXPECT_EQ(pattern_->nakedCharPosition_, -1);
+}
+
+/**
+ * @tc.name: UpdateObscure004
+ * @tc.desc: Test is textarea, UpdateObscure(), case insert value not number
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternOnWillTest, UpdateObscure004, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::NUMBER_PASSWORD); });
+    pattern_->textObscured_ = true;
+    pattern_->UpdateObscure(u"a", true);
+    EXPECT_EQ(pattern_->nakedCharPosition_, -1);
+}
+
+/**
+ * @tc.name: UpdateObscure005
+ * @tc.desc: Test is textarea, UpdateObscure(), case insert value size != 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternOnWillTest, UpdateObscure005, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::NUMBER_PASSWORD); });
+    pattern_->textObscured_ = true;
+    pattern_->UpdateObscure(u"aa", true);
+    EXPECT_EQ(pattern_->nakedCharPosition_, -1);
+}
+
 } // namespace OHOS::Ace::NG

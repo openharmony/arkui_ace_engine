@@ -545,6 +545,63 @@ void ResetEnableHapticFeedback(ArkUINodeHandle node)
     IndexerModelNG::SetEnableHapticFeedback(frameNode, true);
 }
 
+void SetOnIndexerSelect(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onSelectEvent = reinterpret_cast<std::function<void(int32_t)>*>(extraParam);
+        IndexerModelNG::SetOnSelected(frameNode, std::move(*onSelectEvent));
+    } else {
+        IndexerModelNG::SetOnSelected(frameNode, nullptr);
+    }
+}
+
+void ResetOnIndexerSelect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetOnSelected(frameNode, nullptr);
+}
+
+void SetOnRequestPopupData(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onRequestPopupData = reinterpret_cast<std::function<std::vector<std::string>(int32_t)>*>(extraParam);
+        IndexerModelNG::SetOnRequestPopupData(frameNode, std::move(*onRequestPopupData));
+    } else {
+        IndexerModelNG::SetOnRequestPopupData(frameNode, nullptr);
+    }
+}
+
+void ResetOnRequestPopupData(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetOnRequestPopupData(frameNode, nullptr);
+}
+
+void SetOnPopupSelected(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onSelectEvent = reinterpret_cast<std::function<void(int32_t)>*>(extraParam);
+        IndexerModelNG::SetOnPopupSelected(frameNode, std::move(*onSelectEvent));
+    } else {
+        IndexerModelNG::SetOnPopupSelected(frameNode, nullptr);
+    }
+}
+
+void ResetOnPopupSelected(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetOnPopupSelected(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
@@ -602,6 +659,12 @@ const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         .resetAutoCollapse = ResetAutoCollapse,
         .setEnableHapticFeedback = SetEnableHapticFeedback,
         .resetEnableHapticFeedback = ResetEnableHapticFeedback,
+        .setOnIndexerSelect = SetOnIndexerSelect,
+        .resetOnIndexerSelect = ResetOnIndexerSelect,
+        .setOnRequestPopupData = SetOnRequestPopupData,
+        .resetOnRequestPopupData = ResetOnRequestPopupData,
+        .setOnPopupSelected = SetOnPopupSelected,
+        .resetOnPopupSelected = ResetOnPopupSelected,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

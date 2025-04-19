@@ -112,6 +112,7 @@ public:
     virtual void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern) = 0;
     virtual void SetBoundsOrResize(const Size& drawSize, const Offset& offset) = 0;
     virtual int GetWebId() = 0;
+    virtual void MaximizeResize() = 0;
     virtual void UpdateOptimizeParserBudgetEnabled(const bool enable) = 0;
 };
 }

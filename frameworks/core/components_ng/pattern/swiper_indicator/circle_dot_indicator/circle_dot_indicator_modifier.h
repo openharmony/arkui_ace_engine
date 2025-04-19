@@ -45,6 +45,7 @@ public:
         float containerBorderWidth = 0;
         float itemRadius = 0;
         float itemSelectWidth = 0;
+        float backgroundOffset = 0;
     };
 
     void onDraw(DrawingContext& context) override;
@@ -54,6 +55,7 @@ public:
         const LinearColor& indicatorColor);
     void PaintSelectedIndicator(RSCanvas& canvas, ContentProperty& contentProperty);
     void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty);
+    void PaintBackgroundSetAngle(int32_t itemSize, float backgroundOffset, float& startAngle);
     float GetAllPointArcAngle(int32_t itemSize, float dotPaddingAngle,
                               float dotActivePaddingAngle, float dotActiveAngle);
     void PaintIndicatorMask(DrawingContext& context, const ContentProperty& contentProperty);
@@ -171,11 +173,6 @@ public:
         headCurve_ = curve;
     }
 
-    void SetBackgroundOffset(float backgroundOffset)
-    {
-        backgroundOffset_ = backgroundOffset;
-    }
-
     void SetIndicatorStartIndex(int32_t indicatorIndex)
     {
         indicatorStartIndex_ = indicatorIndex;
@@ -229,6 +226,7 @@ private:
     RefPtr<AnimatablePropertyFloat> containerBorderWidth_;
     RefPtr<AnimatablePropertyFloat> itemRadius_;
     RefPtr<AnimatablePropertyFloat> itemSelectWidth_;
+    RefPtr<AnimatablePropertyFloat> backgroundOffset_;
     RefPtr<PropertyBool> updateMaskColor_;
     Gradient maskColor_;
 
@@ -256,7 +254,6 @@ private:
 
     int32_t currentIndex_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(CircleDotIndicatorModifier);
-    float backgroundOffset_ = 0.0;
     RefPtr<Curve> headCurve_;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
 };

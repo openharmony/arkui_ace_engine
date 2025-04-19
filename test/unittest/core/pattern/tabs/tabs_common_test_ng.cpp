@@ -482,9 +482,8 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty006, TestSize.Level1)
     FlushUITasks();
     EXPECT_TRUE(tabBarPattern_->CanScroll());
     tabBarAccessibilityProperty_->ResetSupportAction();
-    uint64_t exptectActions = 0;
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    EXPECT_EQ(GetActions(tabBarAccessibilityProperty_), exptectActions);
+    std::unordered_set<AceAction> expectedActions = { AceAction::ACTION_SCROLL_FORWARD };
+    EXPECT_EQ(tabBarAccessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**
@@ -511,9 +510,8 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty007, TestSize.Level1)
      * @tc.expected: Check actions value
      */
     tabBarAccessibilityProperty_->ResetSupportAction();
-    uint64_t exptectActions = 0;
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    EXPECT_EQ(GetActions(tabBarAccessibilityProperty_), exptectActions);
+    std::unordered_set<AceAction> expectedActions = { AceAction::ACTION_SCROLL_FORWARD };
+    EXPECT_EQ(tabBarAccessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**
@@ -540,9 +538,8 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty008, TestSize.Level1)
      * @tc.expected: Check actions value
      */
     tabBarAccessibilityProperty_->ResetSupportAction();
-    uint64_t exptectActions = 0;
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(tabBarAccessibilityProperty_), exptectActions);
+    std::unordered_set<AceAction> expectedActions = { AceAction::ACTION_SCROLL_BACKWARD };
+    EXPECT_EQ(tabBarAccessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**
@@ -568,8 +565,8 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty009, TestSize.Level1)
      * @tc.expected: Check actions value
      */
     tabBarAccessibilityProperty_->ResetSupportAction();
-    uint64_t exptectActions = 0;
-    EXPECT_EQ(GetActions(tabBarAccessibilityProperty_), exptectActions);
+    std::unordered_set<AceAction> expectedActions = {};
+    EXPECT_EQ(tabBarAccessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**
@@ -593,8 +590,8 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty010, TestSize.Level1)
      * @tc.expected: Check actions value
      */
     tabBarAccessibilityProperty_->ResetSupportAction();
-    uint64_t exptectActions = 0;
-    EXPECT_EQ(GetActions(tabBarAccessibilityProperty_), exptectActions);
+    std::unordered_set<AceAction> expectedActions = {};
+    EXPECT_EQ(tabBarAccessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**

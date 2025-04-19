@@ -45,6 +45,7 @@ public:
     static void PlayNodeResetAnimation(const RefPtr<DragEventActuator>& actuator);
     static void PlayGatherAnimation(const RefPtr<FrameNode>& frameNode, const RefPtr<OverlayManager>& overlayManager);
     static void ShowBadgeAnimation(const RefPtr<FrameNode>& textNode);
+    static void ShowMenuHideAnimation(const RefPtr<FrameNode>& imageNode, const PreparedInfoForDrag& data);
     static void CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuPattern,
         const RefPtr<OverlayManager>& manager, const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode);
     static OffsetF CalcBadgeTextOffset(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& imageNode,
@@ -68,7 +69,7 @@ public:
     static void MarkDirtyNode(const RefPtr<FrameNode>& frameNode);
     static void InitGatherNodeAttr(const RefPtr<FrameNode>& gatherNode,
         const std::vector<GatherNodeChildInfo>& gatherNodeInfo);
-    static void ShowGatherNodeAnimation(const RefPtr<FrameNode>& frameNode);
+    static bool ShowGatherNodeAnimation(const RefPtr<FrameNode>& frameNode);
     static RefPtr<FrameNode> CreateBadgeTextNode(int32_t childSize);
     static void UpdateBadgeTextNodePosition(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& textNode,
         int32_t childSize, float previewScale, OffsetF previewOffset = { 0.0f, 0.0f });
@@ -87,10 +88,12 @@ public:
     static void SetNodeVisible(const RefPtr<FrameNode>& frameNode, bool visible);
     static void DragStartAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager,
         const OffsetF& gatherNodeCenter, Point point, int32_t containerId);
+    static void InitImageNodeProperties(const RefPtr<FrameNode>& imageNode, const RefPtr<PixelMap>& pixelMap);
+    static void CreateRelativeContainerNode(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode,
+        PreparedInfoForDrag& data, const OffsetF& frameOffset, const RefPtr<PixelMap>& pixelMap);
     static void CreatePreviewNode(const RefPtr<FrameNode>& frameNode, RefPtr<FrameNode>& imageNode,
-        float dragPreviewScale, const PreparedInfoForDrag& data);
-    static void UpdatePreview(
-        const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& dragNode);
+        float dragPreviewScale, PreparedInfoForDrag& data);
+    static void MountPixelMapWithBadge(const PreparedInfoForDrag& data, const RefPtr<FrameNode>& columnNode);
     static void MountPixelMap(const RefPtr<OverlayManager>& manager, const RefPtr<GestureEventHub>& gestureHub,
         const PreparedInfoForDrag& data, bool isDragPixelMap);
     static void MountPixelMapSizeContentTransition(

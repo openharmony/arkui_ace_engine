@@ -23,6 +23,7 @@ COMMON_SRC = [
   "grid_scroller_test_ng.cpp",
   "grid_test_ng.cpp",
   "grid_cache_layout_test_ng.cpp",
+  "grid_pattern_test_ng.cpp",
 ]
 
 ace_unittest("grid_test_regular") {

@@ -419,13 +419,26 @@ ArkUINativeModuleValue TimepickerBridge::ResetDigitalCrownSensitivity(ArkUIRunti
 panda::Local<panda::ObjectRef> CreateTimePickerOnChange(EcmaVM* vm, const BaseEventInfo* info)
 {
     const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
-    Local<JSValueRef> jsonValue =
-        panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, eventInfo->GetSelectedStr().c_str()));
-    if (jsonValue->IsUndefined()) {
+    auto jsonValue = JsonUtil::Create(true);
+    std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(eventInfo->GetSelectedStr());
+    if (!argsPtr) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto timePickerResultObj = jsonValue->ToObject(vm);
-    return timePickerResultObj;
+    std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
+    for (auto iter = keys.begin(); iter != keys.end(); iter++) {
+        const std::string key = *iter;
+        const auto value = argsPtr->GetValue(key);
+        if (!value || value->ToString().empty()) {
+            continue;
+        }
+        jsonValue->Put(key.c_str(), value->ToString().c_str());
+    }
+    Local<JSValueRef> jsValue =
+        panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, jsonValue->ToString().c_str()));
+    if (jsValue->IsUndefined()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    return jsValue->ToObject(vm);
 }
 ArkUINativeModuleValue TimepickerBridge::SetTimepickerOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {

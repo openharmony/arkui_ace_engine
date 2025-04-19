@@ -52,6 +52,21 @@ namespace {
     const int32_t NUMTWO = 2;
 } // namespace
 
+constexpr int ZERO_ANGLE = 0;
+constexpr int QUARTER_ANGLE = 90;
+constexpr int HALF_ANGLE = 180;
+constexpr int THREE_QUARTER_ANGLE = 270;
+constexpr int FULL_ANGLE = 360;
+
+class MockFrameNode : public FrameNode {
+public:
+    VectorF GetTransformScale()
+    {
+        VectorF testScale {1.2f, 1.2f};
+        return testScale;
+    }
+};
+
 class AccessibilityManagerNgTestNg : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -266,6 +281,10 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest004, TestSize.L
     endNode->SetParent(frameNode);
     result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, endNode, hoverPoint, pointNode);
     EXPECT_EQ(result, true);
+
+    auto endNodeMock = MockFrameNode::CreateFrameNode("main", NUMTWO, AceType::MakeRefPtr<Pattern>(), true);
+    result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, endNodeMock, hoverPoint, pointNode);
+    EXPECT_EQ(result, true);
 }
 
 /**
@@ -457,5 +476,223 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest009, TestSize.L
 
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
     EXPECT_EQ(accessibilityManagerNg.hoverState_.idle, false);
+
+    accessibilityManagerNg.hoverState_.eventType = AccessibilityHoverEventType::MOVE;
+    auto ret = accessibilityManagerNg.IsEventTypeChangeDirectHandleHover(
+        AccessibilityHoverEventType::EXIT);
+    EXPECT_TRUE(ret);
+}
+
+/**
+* @tc.name: AccessibilityRectTest001
+* @tc.desc: AccessibilityRect
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityRectTest001, TestSize.Level1)
+{
+    AccessibilityRect rect1;
+    EXPECT_EQ(rect1.GetX(), 0);
+    EXPECT_EQ(rect1.GetY(), 0);
+    EXPECT_EQ(rect1.GetWidth(), 0);
+    EXPECT_EQ(rect1.GetHeight(), 0);
+
+    AccessibilityRect rect2(10, 20, 100, 200);
+    EXPECT_EQ(rect2.GetX(), 10);
+    EXPECT_EQ(rect2.GetY(), 20);
+    EXPECT_EQ(rect2.GetWidth(), 100);
+    EXPECT_EQ(rect2.GetHeight(), 200);
+
+    rect2.SetPosition(30, 40);
+    EXPECT_EQ(rect2.GetX(), 30);
+    EXPECT_EQ(rect2.GetY(), 40);
+
+    rect2.SetSize(50, 60);
+    EXPECT_EQ(rect2.GetWidth(), 50);
+    EXPECT_EQ(rect2.GetHeight(), 60);
+}
+
+/**
+* @tc.name: AccessibilityRectTest002
+* @tc.desc: AccessibilityRect
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityRectTest002, TestSize.Level1)
+{
+    // init x=0, y=0, width=100, height=200
+    AccessibilityRect rect(0, 0, 100, 200);
+    const float originalCenterX = 50;  // 0 + 100/2
+    const float originalCenterY = 100; // 0 + 200/2
+
+    // rotate 90
+    rect.Rotate(QUARTER_ANGLE);
+    EXPECT_EQ(rect.GetWidth(), 200);
+    EXPECT_EQ(rect.GetHeight(), 100);
+    EXPECT_EQ(rect.GetX(), originalCenterX - 200/2); // 50 - 100 = -50
+    EXPECT_EQ(rect.GetY(), originalCenterY - 100/2); // 100 - 50 = 50
+
+    // rotate 180
+    rect.Rotate(HALF_ANGLE);
+    EXPECT_EQ(rect.GetWidth(), 200);
+    EXPECT_EQ(rect.GetHeight(), 100);
+    EXPECT_EQ(rect.GetX(), -50);
+    EXPECT_EQ(rect.GetY(), 50);
+
+    // rotate 270
+    rect.Rotate(THREE_QUARTER_ANGLE);
+    EXPECT_EQ(rect.GetWidth(), 100);
+    EXPECT_EQ(rect.GetHeight(), 200);
+}
+
+/**
+* @tc.name: AccessibilityRectTest003
+* @tc.desc: AccessibilityRect
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityRectTest003, TestSize.Level1)
+{
+    // rotate center (100, 100)
+    AccessibilityRect rect(0, 0, 100, 100);
+    // rotate 90
+    rect.Rotate(0, 0, QUARTER_ANGLE);
+    EXPECT_EQ(rect.GetWidth(), 100);
+    EXPECT_EQ(rect.GetHeight(), 100);
+}
+
+/**
+* @tc.name: AccessibilityRectTest004
+* @tc.desc: AccessibilityRect
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityRectTest004, TestSize.Level1)
+{
+    AccessibilityRect rect(0, 0, 100, 200);
+
+    // 450 ≡ 90
+    rect.Rotate(450);
+    EXPECT_EQ(rect.GetWidth(), 200);
+
+    // 720 ≡ 0
+    rect.Rotate(FULL_ANGLE * 2);
+    EXPECT_EQ(rect.GetWidth(), 200);
+}
+
+/**
+* @tc.name: AccessibilityRectTest005
+* @tc.desc: AccessibilityRect
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityRectTest005, TestSize.Level1)
+{
+    AccessibilityRect rect(10, 20, 30, 40);
+    rect.Rotate(ZERO_ANGLE);
+    EXPECT_EQ(rect.GetX(), 10);
+    EXPECT_EQ(rect.GetY(), 20);
+    EXPECT_EQ(rect.GetWidth(), 30);
+    EXPECT_EQ(rect.GetHeight(), 40);
+
+    rect.Rotate(FULL_ANGLE);
+    EXPECT_EQ(rect.GetWidth(), 30);
+}
+
+/**
+* @tc.name: AccessibilityRectTest006
+* @tc.desc: AccessibilityRect
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityRectTest006, TestSize.Level1)
+{
+    AccessibilityRect rect(10, 20, 100, 200);
+    RotateTransform transform(0, 50, 60, 30, 40);
+
+    // 2x, 3y
+    rect.ApplyTransformation(transform, 2.0f, 3.0f);
+
+    // x = (10 - 30)*2 + 50 = (-20)*2 +50 = 10
+    EXPECT_EQ(rect.GetX(), 10.0f);
+    // y = (20 -40)*3 +60 = (-20)*3 +60 = 0
+    EXPECT_EQ(rect.GetY(), 0);
+    // width = 100*2 = 200
+    EXPECT_EQ(rect.GetWidth(), 200);
+    // height = 200*3 = 600
+    EXPECT_EQ(rect.GetHeight(), 600);
+}
+
+/**
+* @tc.name: IsHandlePipelineAccessibilityHoverEnter001
+* @tc.desc: IsHandlePipelineAccessibilityHoverEnter
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, IsHandlePipelineAccessibilityHoverEnter001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->context_ = nullptr;
+
+    AccessibilityManagerNG manager{};
+    bool result = manager.IsHandlePipelineAccessibilityHoverEnter(frameNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+* @tc.name: IsHandlePipelineAccessibilityHoverEnter002
+* @tc.desc: IsHandlePipelineAccessibilityHoverEnter
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, IsHandlePipelineAccessibilityHoverEnter002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    
+    AccessibilityManagerNG manager;
+    bool result = manager.IsHandlePipelineAccessibilityHoverEnter(frameNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+* @tc.name: IsHandlePipelineAccessibilityHoverEnter003
+* @tc.desc: IsHandlePipelineAccessibilityHoverEnter
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, IsHandlePipelineAccessibilityHoverEnter003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pipe = MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(pipe);
+    AccessibilityManagerNG manager;
+    bool result = manager.IsHandlePipelineAccessibilityHoverEnter(frameNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+* @tc.name: HandlePipelineAccessibilityHoverEnter001
+* @tc.desc: HandlePipelineAccessibilityHoverEnter
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, HandlePipelineAccessibilityHoverEnter001, TestSize.Level1) {
+    AccessibilityManagerNG manager;
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    TouchEvent event;
+    int32_t eventType;
+    // Case 1: Test with AccessibilityHoverEventType::ENTER
+    eventType = static_cast<int32_t>(AccessibilityHoverEventType::ENTER);
+    manager.HandlePipelineAccessibilityHoverEnter(frameNode, event, eventType);
+
+    // Case 2: Test with AccessibilityHoverEventType::MOVE
+    eventType = static_cast<int32_t>(AccessibilityHoverEventType::MOVE);
+    manager.HandlePipelineAccessibilityHoverEnter(frameNode, event, eventType);
+
+    // Case 3: Test with AccessibilityHoverEventType::EXIT
+    eventType = static_cast<int32_t>(AccessibilityHoverEventType::EXIT);
+    manager.HandlePipelineAccessibilityHoverEnter(frameNode, event, eventType);
+
+    // Case 4: Test with an invalid event type (default case)
+    eventType = -1; // Invalid type
+    manager.HandlePipelineAccessibilityHoverEnter(frameNode, event, eventType);
 }
 } // namespace OHOS::Ace::NG

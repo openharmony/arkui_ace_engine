@@ -34,6 +34,9 @@ constexpr uint32_t RAWFILE_RESOURCE_MATCH_SIZE = 2;
 RosenFontLoader::RosenFontLoader(const std::string& familyName, const std::string& familySrc)
     : FontLoader(familyName, familySrc)
 {}
+RosenFontLoader::RosenFontLoader(const std::string& familyName, const std::vector<std::string>& familySrcArray)
+    : FontLoader(familyName, familySrcArray)
+{}
 
 void RosenFontLoader::AddFont(
     const RefPtr<PipelineBase>& context, const std::string& bundleName, const std::string& moduleName)
@@ -59,7 +62,7 @@ void RosenFontLoader::AddFont(
     }
 }
 
-void RosenFontLoader::SetDefaultFontFamily(const char* fontFamily, const char* familySrc)
+void RosenFontLoader::SetDefaultFontFamily(const char* fontFamily, const std::vector<std::string>& familySrc)
 {
     RosenFontCollection::GetInstance().LoadFontFamily(fontFamily, familySrc);
 }
@@ -203,7 +206,9 @@ std::string RosenFontLoader::RemovePathHead(const std::string& uri)
         // the file uri format is like "file:///data/data...",
         // the memory uri format is like "memory://font.ttf" for example,
         // iter + 3 to get the absolutely file path substring : "/data/data..." or the font file name: "font.ttf"
-        return uri.substr(iter + 3);
+        auto startIndex = iter + 3;
+        startIndex = std::clamp(startIndex, static_cast<size_t>(0), uri.length());
+        return uri.substr(startIndex);
     }
     TAG_LOGW(AceLogTag::ACE_FONT, "Wrong scheme, not a valid File!");
     return std::string();

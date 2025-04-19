@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/toolbaritem/toolbar_row_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -116,7 +117,10 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleContainer(RefPtr<FrameNode>& con
     }
 
     CHECK_NULL_RETURN(customTitleBarNode, nullptr);
-    containerTitleRow->AddChild(customTitleBarNode);
+    auto customTitleBarRow = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(false));
+    customTitleBarRow->AddChild(customTitleBarNode);
+    containerTitleRow->AddChild(customTitleBarRow);
     return containerTitleRow;
 }
 
@@ -131,7 +135,7 @@ void ContainerModalView::RegistCustomBuilder(std::function<RefPtr<NG::FrameNode>
 RefPtr<FrameNode> ContainerModalView::BuildTitleRow(bool isFloatingTitle)
 {
     auto containerTitleRow = FrameNode::CreateFrameNode(
-        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(false));
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ToolBarRowPattern>());
     containerTitleRow->UpdateInspectorId("ContainerModalTitleRow");
     if (isFloatingTitle) {
         auto renderContext = containerTitleRow->GetRenderContext();

@@ -118,6 +118,8 @@ public:
     const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
     void LoadChildren(bool notDetach) const;
 
+    const std::list<RefPtr<UINode>>& GetChildrenForInspector() const override;
+
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override
     {
         itemConstraint_ = itemConstraint;
@@ -165,6 +167,8 @@ public:
         }
     }
 
+    void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
+        std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void MoveData(int32_t from, int32_t to) override;
     void FireOnMove(int32_t from, int32_t to) override;

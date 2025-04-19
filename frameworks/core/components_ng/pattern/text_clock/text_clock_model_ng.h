@@ -65,6 +65,7 @@ public:
     static void SetDateTimeOptions(FrameNode* frameNode, const ZeroPrefixType& hourType);
     static void SetJSTextClockController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
     static RefPtr<Referenced> GetJSTextClockController(FrameNode* frameNode);
+    static void SetOnDateChange(FrameNode* frameNode, std::function<void(const std::string)>&& onChange);
 };
 } // namespace OHOS::Ace::NG
 
