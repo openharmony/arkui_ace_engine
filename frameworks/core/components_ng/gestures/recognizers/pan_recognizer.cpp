@@ -872,7 +872,8 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
         return false;
     }
 
-    if (curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_) {
+    if (curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_ ||
+        curr->isLimitFingerCount_ != isLimitFingerCount_) {
         if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) >= fingers_) {
             SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
         }
