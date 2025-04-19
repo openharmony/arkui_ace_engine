@@ -667,11 +667,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createSearchNode,
     createGridRowNode,
     createGridColNode,
-#ifndef ARKUI_WEARABLE
     createSelectNode,
-#else
-    nullptr, // createSelectNode
-#endif
     createImageAnimatorNode,
     createCircleNode,
     createTabContentNode,

@@ -527,7 +527,6 @@ export struct GaugeBootcamp {
   @State compRadialGradientColorsNumber2: number = 0;
   @State enableCompRadialGradientRepeating: boolean = false;
   @State compRadialGradientRepeating: boolean = false;
-
   //Focus Control
   @State enableCompFocusable: boolean = false;
   @State compFocusable: boolean = false;
@@ -600,7 +599,6 @@ export struct GaugeBootcamp {
   @State compAccessibilityDescription: string = `无障碍说明`;
   @State enableCompAccessibilityLevel: boolean = false;
   @State compAccessibilityLevel: string = 'auto';
-
   @State modifier: MyModifier = new MyModifier()
   @State enableCompAttributeModifier: boolean = false;
   @State compAttributeModifier: boolean = false;
@@ -639,7 +637,6 @@ export struct GaugeBootcamp {
   // Hit Test Control
   @State enableCompHitTestBehavior: boolean = false
   @State compHitTestBehavior: HitTestMode = HitTestMode.Default
-
   // Obscuring
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
@@ -721,8 +718,6 @@ export struct GaugeBootcamp {
     }, 200)
   }
 
-
-
   @Styles
   cardPressedStyle() {
     .backgroundColor('rgba(0,0,0,0.1)')
@@ -781,12 +776,10 @@ export struct GaugeBootcamp {
     })
   }
 
-
   @Builder
   compBackground() {
     Text('123')
   }
-
 
   build() {
     NavDestination() {

@@ -21,7 +21,7 @@ const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorReg
 
 const driver = Driver.create();
 
-export async function ButtonStart(done:Function){
+export async function ButtonStart(done: Function) {
   console.info('beforeAll begin');
 
   try {
@@ -34,15 +34,15 @@ export async function ButtonStart(done:Function){
     await driver.delayMs(5000);
     console.info(TAG + 'ButtonBootcamp' + ' begin');
 
-    let atomDisplays:Component = await driver.findComponent(ON.text('按钮与选择'));
+    let atomDisplays: Component = await driver.findComponent(ON.text('按钮与选择'));
     await atomDisplays.click();
     await driver.delayMs(1000);
 
-    let scrollSearch:Component = await driver.findComponent(ON.text('按钮/Button'))
+    let scrollSearch: Component = await driver.findComponent(ON.text('按钮/Button'))
     await scrollSearch.click()
     await driver.delayMs(1000);
 
-    let Buttons:Component[] = await driver.findComponents(ON.type('Button'));
+    let Buttons: Component[] = await driver.findComponents(ON.type('Button'));
     await Buttons[1].click()
     await driver.delayMs(1000);
 

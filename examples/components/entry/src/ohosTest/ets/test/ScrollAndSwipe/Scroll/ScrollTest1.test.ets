@@ -32,19 +32,19 @@ import { ScrollTest } from './ScrollTest';
 
 export default function ScrollTest1() {
   describe('ScrollTest1', () => {
-      beforeAll(async (done: Function) => {
-        await ScrollTest(done);
-      })
+    beforeAll(async (done: Function) => {
+      await ScrollTest(done);
+    })
     it('ArkUI_scroll_001', 0, async (done: Function) => {
       await Search('参数列表', 'scrollable');
       await radioClick({
-        radioClickObj:0,
+        radioClickObj: 0,
         id: 'Scroll',
-        arr:[
-          new KeyStruct('$attrs',JsonType.obj),
-          new KeyStruct('scrollable',JsonType.value)
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('scrollable', JsonType.value)
         ],
-        assertEqual:'ScrollDirection.Vertical'
+        assertEqual: 'ScrollDirection.Vertical'
       });
 
       done();
@@ -53,14 +53,13 @@ export default function ScrollTest1() {
     it('ArkUI_scroll_002', 0, async (done: Function) => {
       await Search('参数列表', 'scrollable');
       await radioClick({
-        radioClickObj:1,
+        radioClickObj: 1,
         id: 'Scroll',
-        arr:[
-          new KeyStruct('$attrs',JsonType.obj),
-          new KeyStruct('scrollable',JsonType.value)
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('scrollable', JsonType.value)
         ],
-        assertEqual:'ScrollDirection.Horizontal'
-
+        assertEqual: 'ScrollDirection.Horizontal'
       });
 
       done();
@@ -69,17 +68,16 @@ export default function ScrollTest1() {
     it('ArkUI_scroll_003', 0, async (done: Function) => {
       await Search('参数列表', 'scrollable');
       await radioClick({
-        radioClickObj:2,
-        toggleClick:{
-          toggleClickType:ToggleClick.Close,
+        radioClickObj: 2,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
         },
         id: 'Scroll',
-        arr:[
-          new KeyStruct('$attrs',JsonType.obj),
-          new KeyStruct('scrollable',JsonType.value)
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('scrollable', JsonType.value)
         ],
-        assertEqual:'ScrollDirection.None'
-
+        assertEqual: 'ScrollDirection.None'
       });
 
       done();
@@ -90,12 +88,11 @@ export default function ScrollTest1() {
       await radioClick({
         radioClickObj: 0,
         id: 'Scroll',
-        arr:[
+        arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('scrollBar', JsonType.value)
         ],
         assertEqual: 'BarState.Off'
-
       });
       done();
     })
@@ -105,12 +102,11 @@ export default function ScrollTest1() {
       await radioClick({
         radioClickObj: 1,
         id: 'Scroll',
-        arr:[
+        arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('scrollBar', JsonType.value)
         ],
         assertEqual: 'BarState.On'
-
       });
       done();
     })
@@ -119,16 +115,15 @@ export default function ScrollTest1() {
       await Search('参数列表', 'scrollBar');
       await radioClick({
         radioClickObj: 2,
-        toggleClick:{
-          toggleClickType:ToggleClick.Close,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
         },
         id: 'Scroll',
-        arr:[
+        arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('scrollBar', JsonType.value)
         ],
         assertEqual: 'BarState.Auto'
-
       });
       done();
     })
@@ -140,7 +135,7 @@ export default function ScrollTest1() {
         id: 'Scroll',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('scrollBarColor',JsonType.value)
+          new KeyStruct('scrollBarColor', JsonType.value)
         ],
         assertEqual: '#FF0A59F7'
       });
@@ -148,7 +143,7 @@ export default function ScrollTest1() {
     })
 
     it("ArkUI_scroll_008", 0, async (done: Function) => {
-      await Search('参数列表','scrollBarColor');
+      await Search('参数列表', 'scrollBarColor');
       await buttonClick({
         buttonClickObj: 1,
         id: 'Scroll',
@@ -208,8 +203,8 @@ export default function ScrollTest1() {
       await buttonClick({
         buttonClickObj: 5,
         id: 'Scroll',
-        toggleClick:{
-          toggleClickType:ToggleClick.Close
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
         },
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
@@ -221,10 +216,10 @@ export default function ScrollTest1() {
     })
 
     it("ArkUI_scroll_013", 0, async (done: Function) => {
-      await Search('参数列表','scrollBarWidth');
+      await Search('参数列表', 'scrollBarWidth');
       await sliderDrag({
-        slideStar:Slide.start,
-        id:'Scroll',
+        slideStar: Slide.start,
+        id: 'Scroll',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('scrollBarWidth', JsonType.value)
@@ -232,11 +227,11 @@ export default function ScrollTest1() {
         assertEqual: '8.00vp'
       });
       await sliderDrag({
-        slideStar:Slide.end,
-        toggleClick:{
+        slideStar: Slide.end,
+        toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id:'Scroll',
+        id: 'Scroll',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('scrollBarWidth', JsonType.value)
@@ -292,7 +287,7 @@ export default function ScrollTest1() {
       await Search('参数列表', 'scrollSnap.snapAlign');
       await radioClick({
         radioClickObj: 3,
-        toggleClick:{
+        toggleClick: {
           toggleClickType: ToggleClick.Close
         },
         id: 'Scroll',
@@ -320,7 +315,7 @@ export default function ScrollTest1() {
 
       await sliderDrag({
         slideStar: Slide.end,
-        toggleClick:{
+        toggleClick: {
           toggleClickType: ToggleClick.Close
         },
         id: 'Scroll',
@@ -334,7 +329,7 @@ export default function ScrollTest1() {
       done();
     })
 
-    it("ArkUI_scroll_019", 0, async (done:Function) => {
+    it("ArkUI_scroll_019", 0, async (done: Function) => {
       await Search('参数列表', 'scrollSnap.enableSnapToStart');
       await radioClick({
         radioClickObj: 0,
@@ -349,7 +344,7 @@ export default function ScrollTest1() {
       done();
     })
 
-    it("ArkUI_scroll_020", 0, async (done:Function) => {
+    it("ArkUI_scroll_020", 0, async (done: Function) => {
       await Search('参数列表', 'scrollSnap.enableSnapToStart');
       await radioClick({
         radioClickObj: 1,
@@ -364,7 +359,7 @@ export default function ScrollTest1() {
       done();
     })
 
-    it("ArkUI_scroll_021", 0, async (done:Function) => {
+    it("ArkUI_scroll_021", 0, async (done: Function) => {
       await Search('参数列表', 'scrollSnap.enableSnapToEnd');
       await radioClick({
         radioClickObj: 0,
@@ -379,7 +374,7 @@ export default function ScrollTest1() {
       done();
     })
 
-    it("ArkUI_scroll_022", 0, async (done:Function) => {
+    it("ArkUI_scroll_022", 0, async (done: Function) => {
       await Search('参数列表', 'scrollSnap.enableSnapToEnd');
       await radioClick({
         radioClickObj: 1,
@@ -426,7 +421,7 @@ export default function ScrollTest1() {
       await Search('参数列表', 'edgeEffect');
       await radioClick({
         radioClickObj: 2,
-        toggleClick:{
+        toggleClick: {
           toggleClickType: ToggleClick.Close
         },
         id: 'Scroll',
@@ -440,12 +435,12 @@ export default function ScrollTest1() {
     })
 
     it("ArkUI_scroll_026", 0, async (done: Function) => {
-      await Search('参数列表','edgeEffect.options.alwaysEnabled');
+      await Search('参数列表', 'edgeEffect.options.alwaysEnabled');
       await radioClick({
         radioClickObj: 0,
         id: 'Scroll',
         arr: [
-          new KeyStruct('$attrs',JsonType.obj),
+          new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('edgeEffectOptions', JsonType.obj),
           new KeyStruct('alwaysEnabled', JsonType.value)
         ],
@@ -455,12 +450,12 @@ export default function ScrollTest1() {
     })
 
     it("ArkUI_scroll_027", 0, async (done: Function) => {
-      await Search('参数列表','edgeEffect.options.alwaysEnabled');
+      await Search('参数列表', 'edgeEffect.options.alwaysEnabled');
       await radioClick({
         radioClickObj: 1,
         id: 'Scroll',
         arr: [
-          new KeyStruct('$attrs',JsonType.obj),
+          new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('edgeEffectOptions', JsonType.obj),
           new KeyStruct('alwaysEnabled', JsonType.value)
         ],
@@ -546,7 +541,7 @@ export default function ScrollTest1() {
       await Search('参数列表', 'nestedScroll.scrollForward');
       await radioClick({
         radioClickObj: 3,
-        toggleClick:{
+        toggleClick: {
           toggleClickType: ToggleClick.Close
         },
         id: 'Scroll',
@@ -565,7 +560,7 @@ export default function ScrollTest1() {
       await radioClick({
         radioClickObj: 0,
         id: 'Scroll',
-        arr:[
+        arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('nestedScroll', JsonType.obj),
           new KeyStruct('scrollBackward', JsonType.value)
@@ -580,7 +575,7 @@ export default function ScrollTest1() {
       await radioClick({
         radioClickObj: 1,
         id: 'Scroll',
-        arr:[
+        arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('nestedScroll', JsonType.obj),
           new KeyStruct('scrollBackward', JsonType.value)
@@ -595,7 +590,7 @@ export default function ScrollTest1() {
       await radioClick({
         radioClickObj: 2,
         id: 'Scroll',
-        arr:[
+        arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('nestedScroll', JsonType.obj),
           new KeyStruct('scrollBackward', JsonType.value)
@@ -609,11 +604,11 @@ export default function ScrollTest1() {
       await Search('参数列表', 'nestedScroll.scrollBackward');
       await radioClick({
         radioClickObj: 3,
-        toggleClick:{
-          toggleClickType:ToggleClick.Close
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
         },
         id: 'Scroll',
-        arr:[
+        arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('nestedScroll', JsonType.obj),
           new KeyStruct('scrollBackward', JsonType.value)
@@ -626,9 +621,9 @@ export default function ScrollTest1() {
     it("ArkUI_scroll_038", 0, async (done: Function) => {
       await Search('参数列表', 'friction');
       await sliderDrag({
-        slideStar:Slide.start,
+        slideStar: Slide.start,
         id: 'Scroll',
-        arr:[
+        arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('friction', JsonType.value)
         ],
@@ -636,12 +631,12 @@ export default function ScrollTest1() {
       });
 
       await sliderDrag({
-        slideStar:Slide.end,
-        toggleClick:{
+        slideStar: Slide.end,
+        toggleClick: {
           toggleClickType: ToggleClick.Close
         },
         id: 'Scroll',
-        arr:[
+        arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('friction', JsonType.value)
         ],
@@ -656,9 +651,8 @@ export default function ScrollTest1() {
       await Search('参数列表', 'enablePaging');
       await radioClick({
         radioClickObj: 0,
-        toggleClick:{
-          toggleClickObj:'enablePaging'
-
+        toggleClick: {
+          toggleClickObj: 'enablePaging'
         }
       });
       done();
@@ -672,7 +666,7 @@ export default function ScrollTest1() {
         radioClickObj: 1,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-          toggleClickObj:'enablePaging'
+          toggleClickObj: 'enablePaging'
         }
       });
       done();
@@ -682,8 +676,8 @@ export default function ScrollTest1() {
       await Search('参数列表', 'initialOffset.xOffset');
       await sliderDrag({
         slideStar: Slide.start,
-        toggleClick:{
-          toggleClickObj:'initialOffset.xOffset'
+        toggleClick: {
+          toggleClickObj: 'initialOffset.xOffset'
         },
         id: 'Scroll',
         arr: [
@@ -696,7 +690,7 @@ export default function ScrollTest1() {
 
       await sliderDrag({
         slideStar: Slide.end,
-        toggleClick:{
+        toggleClick: {
           toggleClickType: ToggleClick.Close,
           toggleClickObj: 'initialOffset.xOffset',
         },
@@ -715,7 +709,7 @@ export default function ScrollTest1() {
       await Search('参数列表', 'initialOffset.yOffset');
       await sliderDrag({
         slideStar: Slide.start,
-        toggleClick:{
+        toggleClick: {
           toggleClickObj: 'initialOffset.yOffset'
         },
         id: 'Scroll',

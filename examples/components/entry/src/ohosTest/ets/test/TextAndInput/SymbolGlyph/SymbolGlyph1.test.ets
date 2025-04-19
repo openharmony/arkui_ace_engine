@@ -18,7 +18,14 @@ import { SymbolGlyphStart } from './SymbolGlyph'
 import { Component, Driver, ON } from '@kit.TestKit';
 import {
   buttonClick,
-  JsonType, KeyStruct, radioClick, Slide, sliderDrag, titleSearch, ToggleClick } from '../../../utils';
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Slide,
+  sliderDrag,
+  titleSearch,
+  ToggleClick
+} from '../../../utils';
 
 const driver = Driver.create();
 

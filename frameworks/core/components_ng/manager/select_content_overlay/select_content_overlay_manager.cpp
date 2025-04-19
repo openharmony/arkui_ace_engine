@@ -806,14 +806,12 @@ void SelectContentOverlayManager::DestroySelectOverlayNode(const RefPtr<FrameNod
         SubwindowManager::GetInstance()->DeleteSelectOverlayHotAreas(pattern->GetContainerId(), overlay->GetId());
         SubwindowManager::GetInstance()->HideSelectOverlay(pattern->GetContainerId());
     } else {
-        if (shareOverlayInfo_->isUsingMouse && !shareOverlayInfo_->menuInfo.menuBuilder) {
-            auto menuWrapperPattern = overlay->GetPattern<MenuWrapperPattern>();
-            CHECK_NULL_VOID(menuWrapperPattern);
-            if (menuWrapperPattern->GetIsSelectOverlaySubWindowWrapper()) {
-                SubwindowManager::GetInstance()->DeleteSelectOverlayHotAreas(
-                    menuWrapperPattern->GetContainerId(), overlay->GetId());
-                SubwindowManager::GetInstance()->HideSelectOverlay(menuWrapperPattern->GetContainerId());
-            }
+        auto menuWrapperPattern = overlay->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        if (menuWrapperPattern->GetIsSelectOverlaySubWindowWrapper()) {
+            SubwindowManager::GetInstance()->DeleteSelectOverlayHotAreas(
+                menuWrapperPattern->GetContainerId(), overlay->GetId());
+            SubwindowManager::GetInstance()->HideSelectOverlay(menuWrapperPattern->GetContainerId());
         }
     }
 }

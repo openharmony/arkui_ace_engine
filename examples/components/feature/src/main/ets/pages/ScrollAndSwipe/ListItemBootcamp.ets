@@ -62,15 +62,19 @@ class MyModifier implements AttributeModifier<ListItemAttribute> {
   applyNormalAttribute(instance: ListItemAttribute) {
     instance.backgroundColor('#0A59F7')
   }
+
   applyPressedAttribute(instance: ListItemAttribute) {
     instance.backgroundColor('#ED6F21')
   }
+
   applyFocusedAttribute(instance: ListItemAttribute) {
     instance.backgroundColor(Color.Gray)
   }
+
   applyDisabledAttribute(instance: ListItemAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
+
   applySelectedAttribute(instance: ListItemAttribute) {
     instance.backgroundColor('#ffedea21')
   }
@@ -334,7 +338,6 @@ export struct ListItemBootcamp {
   @State compBackgroundBrightnessRate: number = 0;
   @State enableCompBackgroundBrightnessLightUpDegree: boolean = false;
   @State compBackgroundBrightnessLightUpDegree: number = 0;
-
   // opacity
   @State enableCompOpacity: boolean = false;
   @State compOpacity: number = 1;
@@ -616,7 +619,6 @@ export struct ListItemBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
-
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
 
@@ -1215,8 +1217,8 @@ export struct ListItemBootcamp {
             bottom: useEnabled(this.enableCompPixelStretchEffectOptionsBottom,
               this.compPixelStretchEffectOptionsBottom)
           })
-          .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))//part2
-          .linearGradient( {
+          .freeze(useEnabled(this.enableCompFreeze, this.compFreeze)) //part2
+          .linearGradient({
             angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
             direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
             colors: [
@@ -1294,7 +1296,7 @@ export struct ListItemBootcamp {
             this.compAccessibilityDescription))
           .accessibilityLevel(useEnabled(this.enableCompAccessibilityLevel, this.compAccessibilityLevel))
           .attributeModifier(useEnabled(this.enableCompAttributeModifier, this.compAttributeModifier) ?
-          this.modifier : null)//part3
+          this.modifier : null) //part3
           .gestureModifier(useEnabled(this.enableCompGestureModifier, this.compGestureModifier) ?
           this.myGestureModifier1 : this.myGestureModifier2)
           .outline({
@@ -1331,7 +1333,7 @@ export struct ListItemBootcamp {
               this.getUIContext().getCursorController().restoreDefault()
             }
           })
-          .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect))//compEvent
+          .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect)) //compEvent
           .onClick((event?: ClickEvent) => {
             this.compEventTriggeredLog('点击事件onClick触发');
           })

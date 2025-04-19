@@ -1,6 +1,6 @@
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { CustomContentDialog } from '@ohos.arkui.advanced.Dialog'
-import { SelectionMenu, EditorMenuOptions} from '@ohos.arkui.advanced.SelectionMenu'
+import { SelectionMenu, EditorMenuOptions } from '@ohos.arkui.advanced.SelectionMenu'
 import { RadioBlock, ColorBlock } from 'common';
 
 @Component
@@ -15,41 +15,43 @@ export struct RichEditorSpanUrlBootcamp {
       contentBuilder: () => {
         this.buildContent();
       },
-      buttons: [{ value: 'apply', buttonStyle: ButtonStyleMode.TEXTUAL, action: () => {
-        let urlString = new UrlStyle(this.inputValue);
-        let mutableStyledString = this.richEditorStyledStringController.getStyledString();
-        mutableStyledString.setStyle({
-          start: this.selectStart,
-          length:(this.selectEnd - this.selectStart),
-          styledKey: StyledStringKey.URL,
-          styledValue: urlString
-        })
+      buttons: [{
+        value: 'apply', buttonStyle: ButtonStyleMode.TEXTUAL, action: () => {
+          let urlString = new UrlStyle(this.inputValue);
+          let mutableStyledString = this.richEditorStyledStringController.getStyledString();
+          mutableStyledString.setStyle({
+            start: this.selectStart,
+            length: (this.selectEnd - this.selectStart),
+            styledKey: StyledStringKey.URL,
+            styledValue: urlString
+          })
 
-        mutableStyledString.setStyle({
-          start: this.selectStart,
-          length:(this.selectEnd - this.selectStart),
-          styledKey: StyledStringKey.BACKGROUND_COLOR,
-          styledValue: new BackgroundColorStyle( {color: (this.enableHyperlinkBackgroundColor)? this.hyperlinkBackgroundColor : ''})
-        })
-        this.richEditorStyledStringController.setStyledString(mutableStyledString);
-      } }, { value: 'cancle', buttonStyle: ButtonStyleMode.TEXTUAL, role: ButtonRole.ERROR }],
+          mutableStyledString.setStyle({
+            start: this.selectStart,
+            length: (this.selectEnd - this.selectStart),
+            styledKey: StyledStringKey.BACKGROUND_COLOR,
+            styledValue: new BackgroundColorStyle({
+              color: (this.enableHyperlinkBackgroundColor) ? this.hyperlinkBackgroundColor : ''
+            })
+          })
+          this.richEditorStyledStringController.setStyledString(mutableStyledString);
+        }
+      }, { value: 'cancle', buttonStyle: ButtonStyleMode.TEXTUAL, role: ButtonRole.ERROR }],
     }),
   });
-
   @State showParameters: boolean = false;
   @State enablePopupType: boolean = true;
   @State popupType: number = 0;
   @State inputValue: string = '';
   @State selectStart: number = 0;
   @State selectEnd: number = 0;
-
   @State enableDisabled: boolean = false;
-  @State isEnabled:boolean = true;
+  @State isEnabled: boolean = true;
   @State enableHyperlinkBackgroundColor: boolean = false;
   @State hyperlinkBackgroundColor: ResourceColor | undefined = undefined;
   @State mutableStyledString: MutableStyledString = new MutableStyledString(this.message)
 
-build() {
+  build() {
     NavDestination() {
       Drawer({
         title: this.title,
@@ -70,15 +72,16 @@ build() {
   Content() {
     Column() {
       Column() {
-        RichEditor({ controller: this.richEditorStyledStringController }).key('mutableStyledString')
+        RichEditor({ controller: this.richEditorStyledStringController })
+          .key('mutableStyledString')
           .onReady(() => {
             this.richEditorStyledStringController.setStyledString(new StyledString(this.message))
           })
           .bindSelectionMenu(RichEditorSpanType.TEXT, this.MyMenu, RichEditorResponseType.LONG_PRESS)
           .copyOptions(CopyOptions.InApp)
           .onSelectionChange((value: RichEditorRange) => {
-            this.selectStart = (value.start == undefined)? 0: value.start;
-            this.selectEnd = (value.end == undefined)? 0: value.end;
+            this.selectStart = (value.start == undefined) ? 0 : value.start;
+            this.selectEnd = (value.end == undefined) ? 0 : value.end;
           })
           .enabled(this.isEnabled)
           .backgroundColor(0XE8E8E8)
@@ -89,10 +92,12 @@ build() {
 
   private editorMenuOptions: Array<EditorMenuOptions> =
     [
-      { icon: $r('app.media.app_icon'), action: () => {
+      {
+        icon: $r('app.media.app_icon'), action: () => {
         this.dialogController.open()
         this.richEditorStyledStringController.closeSelectionMenu()
-      }, }]
+      },
+      }]
 
   @Builder
   MyMenu() {
@@ -108,7 +113,7 @@ build() {
   @Builder
   buildContent() {
     Column() {
-      Row(){
+      Row() {
         Text('超链网址')
           .fontSize($r('sys.float.Body_M'))
           .fontColor($r('sys.color.font_secondary'))
@@ -117,7 +122,7 @@ build() {
       .padding({ left: 8, right: 8 })
       .width('100%')
 
-      Row(){
+      Row() {
         TextInput({ placeholder: 'input url', text: this.inputValue })
           .onChange((value: string) => {
             this.inputValue = value

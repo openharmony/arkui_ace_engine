@@ -63,15 +63,19 @@ class MyModifier implements AttributeModifier<StepperAttribute> {
   applyNormalAttribute(instance: StepperAttribute) {
     instance.backgroundColor('#0A59F7')
   }
+
   applyPressedAttribute(instance: StepperAttribute) {
     instance.backgroundColor('#ED6F21')
   }
+
   applyFocusedAttribute(instance: StepperAttribute) {
     instance.backgroundColor(Color.Gray)
   }
+
   applyDisabledAttribute(instance: StepperAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
+
   applySelectedAttribute(instance: StepperAttribute) {
     instance.backgroundColor('#ffedea21')
   }
@@ -576,10 +580,8 @@ export struct StepperBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
-
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   scroller: Scroller = new Scroller()
 
   aboutToAppear(): void {
@@ -598,7 +600,7 @@ export struct StepperBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time,value)
+      new BlockTag(time, value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -1112,7 +1114,7 @@ export struct StepperBootcamp {
             this.compPixelStretchEffectOptionsBottom)
         })
         .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))
-        .linearGradient( {
+        .linearGradient({
           angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
           direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
           colors: [
@@ -1227,7 +1229,7 @@ export struct StepperBootcamp {
             this.getUIContext().getCursorController().restoreDefault()
           }
         })
-        .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect))//compEvent
+        .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect)) //compEvent
         .onClick((event?: ClickEvent) => {
           this.compEventTriggeredLog('点击事件onClick触发');
         })
@@ -1334,6 +1336,7 @@ export struct StepperBootcamp {
   }
 
   @State selection: string | null = null;
+
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -1345,7 +1348,7 @@ export struct StepperBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -1366,11 +1369,12 @@ export struct StepperBootcamp {
       }
     })
   }
+
   @Builder
   Generic() {
     Scroll(this.scroller) {
       Column({ space: 8 }) {
-        List({space:8}){
+        List({ space: 8 }) {
           CompSizeBlocks({
             enableCompWidth: $enableCompWidth,
             compWidth: $compWidth,

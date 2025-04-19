@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
-import {
-  getToggle,
-  radioClick,
-  titleSearch,
-  ToggleClick } from '../../../utils';
+import { getToggle, radioClick, titleSearch, ToggleClick } from '../../../utils';
 import { CheckboxGroupStart } from './CheckboxGroup';
 
 export default function CheckboxGroup9() {

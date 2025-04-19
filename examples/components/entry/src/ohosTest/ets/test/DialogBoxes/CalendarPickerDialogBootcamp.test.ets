@@ -19,6 +19,7 @@ const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorReg
 
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
+
 export default function CalendarPickerDialogBootcampTest() {
   describe('CalendarPickerDialogBootcampTest', () => {
     beforeAll(async (done: Function) => {
@@ -35,29 +36,29 @@ export default function CalendarPickerDialogBootcampTest() {
         await driver.delayMs(10000);
 
 
-        let ListItemGroup :Component[] = await driver.findComponents(ON.type('ListItemGroup'))
-        let width:Point = await ListItemGroup[0].getBoundsCenter()
-        let width2:Point = await ListItemGroup[4].getBoundsCenter()
+        let ListItemGroup: Component[] = await driver.findComponents(ON.type('ListItemGroup'))
+        let width: Point = await ListItemGroup[0].getBoundsCenter()
+        let width2: Point = await ListItemGroup[4].getBoundsCenter()
         await driver.swipe(width.x, width2.y, width.x, width.y, 500)
         await driver.delayMs(2000);
 
-        let atomDisplays:Component = await driver.findComponent(ON.text('弹窗'));
+        let atomDisplays: Component = await driver.findComponent(ON.text('弹窗'));
         await atomDisplays.click();
         await driver.delayMs(3000);
         await driver.swipe(width.x, width2.y, width.x, width.y, 500)
 
 
-        let ListItemGroup1 :Component[] = await driver.findComponents(ON.type('ListItem'))
-        let width3:Point = await ListItemGroup1[0].getBoundsCenter()
-        let width4:Point = await ListItemGroup1[2].getBoundsCenter()
+        let ListItemGroup1: Component[] = await driver.findComponents(ON.type('ListItem'))
+        let width3: Point = await ListItemGroup1[0].getBoundsCenter()
+        let width4: Point = await ListItemGroup1[2].getBoundsCenter()
         await driver.swipe(width3.x, width4.y, width3.x, width3.y, 500)
         await driver.delayMs(2000);
 
-        let scrollSearch:Component = await driver.findComponent(ON.text('日历选择器弹窗/CalendarpickerDialog'))
+        let scrollSearch: Component = await driver.findComponent(ON.text('日历选择器弹窗/CalendarpickerDialog'))
         await scrollSearch.click()
         await driver.delayMs(2000);
 
-        let Buttons:Component[] = await driver.findComponents(ON.type('Button'));
+        let Buttons: Component[] = await driver.findComponents(ON.type('Button'));
         await Buttons[1].click()
         await driver.delayMs(2000);
 
@@ -75,7 +76,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.acceptButtonStyle.type')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -84,7 +84,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.acceptButtonStyle.type')
       await radioClick({
         radioClickObj: 1,
-
       })
       done();
     })
@@ -96,7 +95,6 @@ export default function CalendarPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -105,7 +103,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.cancelButtonStyle.type')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -114,7 +111,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.cancelButtonStyle.type')
       await radioClick({
         radioClickObj: 1,
-
       })
       done();
     })
@@ -126,7 +122,6 @@ export default function CalendarPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -135,7 +130,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.acceptButtonStyle.Style.ButtonStyleMode')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -144,7 +138,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.acceptButtonStyle.Style.ButtonStyleMode')
       await radioClick({
         radioClickObj: 1,
-
       })
       done();
     })
@@ -156,7 +149,6 @@ export default function CalendarPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -165,7 +157,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.cancelButtonStyle.Style.ButtonStyleMode')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -174,7 +165,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.cancelButtonStyle.Style.ButtonStyleMode')
       await radioClick({
         radioClickObj: 1,
-
       })
       done();
     })
@@ -186,7 +176,6 @@ export default function CalendarPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -195,7 +184,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.acceptButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 0,
-
       })
       done();
     })
@@ -204,7 +192,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.acceptButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 1,
-
       })
       done();
     })
@@ -213,7 +200,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.acceptButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 2,
-
       })
       done();
     })
@@ -222,7 +208,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.acceptButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 3,
-
       })
       done();
     })
@@ -231,7 +216,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.acceptButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 4,
-
       })
       done();
     })
@@ -243,7 +227,6 @@ export default function CalendarPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -252,7 +235,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.cancelButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 0,
-
       })
       done();
     })
@@ -261,7 +243,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.cancelButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 1,
-
       })
       done();
     })
@@ -270,7 +251,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.cancelButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 2,
-
       })
       done();
     })
@@ -279,7 +259,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.cancelButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 3,
-
       })
       done();
     })
@@ -288,7 +267,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.cancelButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 4,
-
       })
       done();
     })
@@ -300,7 +278,6 @@ export default function CalendarPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -309,7 +286,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.acceptButtonStyle.role.ButtonRole')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -321,7 +297,6 @@ export default function CalendarPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -330,7 +305,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.cancelButtonStyle.role.ButtonRole')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -342,7 +316,6 @@ export default function CalendarPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -794,7 +767,7 @@ export default function CalendarPickerDialogBootcampTest() {
       await sliderDrag({
         slideStar: Slide.start,
       })
-      await  sliderDrag({
+      await sliderDrag({
         slideStar: Slide.end,
         toggleClick: {
           toggleClickType: ToggleClick.Close
@@ -946,7 +919,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.start')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -955,7 +927,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.start')
       await radioClick({
         radioClickObj: 1,
-
       })
       done();
     })
@@ -964,7 +935,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.start')
       await radioClick({
         radioClickObj: 2,
-
       })
       done();
     })
@@ -973,7 +943,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.start')
       await radioClick({
         radioClickObj: 3,
-
       })
       done();
     })
@@ -982,7 +951,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.start')
       await radioClick({
         radioClickObj: 4,
-
       })
       done();
     })
@@ -994,7 +962,6 @@ export default function CalendarPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -1003,7 +970,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.end')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -1012,7 +978,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.end')
       await radioClick({
         radioClickObj: 1,
-
       })
       done();
     })
@@ -1021,7 +986,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.end')
       await radioClick({
         radioClickObj: 2,
-
       })
       done();
     })
@@ -1030,7 +994,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.end')
       await radioClick({
         radioClickObj: 3,
-
       })
       done();
     })
@@ -1039,7 +1002,6 @@ export default function CalendarPickerDialogBootcampTest() {
       await Search('参数列表', 'CalendarDialogOptions.end')
       await radioClick({
         radioClickObj: 4,
-
       })
       done();
     })
@@ -1051,7 +1013,6 @@ export default function CalendarPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -1063,7 +1024,6 @@ export default function CalendarPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickObj: 'CalendarDialogOptions.markToday'
         }
-
       })
       done();
     })
@@ -1076,7 +1036,6 @@ export default function CalendarPickerDialogBootcampTest() {
           toggleClickObj: 'CalendarDialogOptions.markToday',
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })

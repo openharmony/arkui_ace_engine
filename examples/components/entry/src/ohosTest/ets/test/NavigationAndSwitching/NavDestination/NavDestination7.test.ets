@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { describe, beforeAll, it} from '@ohos/hypium'
+import { describe, beforeAll, it } from '@ohos/hypium'
 import {
   JsonType,
   KeyStruct,
@@ -32,7 +32,7 @@ import { Driver, ON } from '@kit.TestKit';
 
 const driver = Driver.create();
 
-export default function NavDestination7(){
+export default function NavDestination7() {
   describe('NavDestination7', () => {
     beforeAll(async (done: Function) => {
       await NavDestination(done)

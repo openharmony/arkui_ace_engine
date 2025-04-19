@@ -1,4 +1,4 @@
-import { describe, beforeAll, it} from '@ohos/hypium'
+import { describe, beforeAll, it } from '@ohos/hypium'
 import { abilityDelegatorRegistry, Driver, Component } from '@kit.TestKit';
 import { ON, Point } from '@ohos.UiTest';
 import {
@@ -19,7 +19,7 @@ import {
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
 
-export default function NavDestinationBootcampTest(){
+export default function NavDestinationBootcampTest() {
   describe('NavDestinationBootcampTest', () => {
     /**
      * 打开应用
@@ -31,7 +31,7 @@ export default function NavDestinationBootcampTest(){
           abilityName: 'EntryAbility'
         });
         await driver.delayMs(5000);
-        
+
         let atomNavigates: Component = await driver.findComponent(ON.text('导航与切换'));
 
         await atomNavigates.click();

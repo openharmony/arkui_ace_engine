@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { describe, beforeAll, it,} from '@ohos/hypium'
+import { describe, beforeAll, it, } from '@ohos/hypium'
 import { Driver, ON } from '@kit.TestKit';
 
 import {

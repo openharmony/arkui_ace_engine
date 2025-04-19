@@ -14,7 +14,8 @@
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
 import { Driver, Component, ON } from '@kit.TestKit';
-import { buttonClick,
+import {
+  buttonClick,
   JsonType,
   KeyStruct,
   radioClick,

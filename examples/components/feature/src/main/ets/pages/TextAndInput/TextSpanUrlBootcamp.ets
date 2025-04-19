@@ -1,6 +1,12 @@
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { CustomContentDialog } from '@ohos.arkui.advanced.Dialog'
-import { SelectionMenu, EditorMenuOptions, ExpandedMenuOptions, EditorEventInfo, SelectionMenuOptions } from '@ohos.arkui.advanced.SelectionMenu'
+import {
+  SelectionMenu,
+  EditorMenuOptions,
+  ExpandedMenuOptions,
+  EditorEventInfo,
+  SelectionMenuOptions
+} from '@ohos.arkui.advanced.SelectionMenu'
 
 @Component
 export struct TextSpanUrlBootcamp {
@@ -12,25 +18,27 @@ export struct TextSpanUrlBootcamp {
       contentBuilder: () => {
         this.buildContent();
       },
-      buttons: [{ value: 'apply', buttonStyle: ButtonStyleMode.TEXTUAL, action: () => {
-        let urlString = new UrlStyle(this.inputValue);
-        let mutableStyledString = new MutableStyledString('test hello world', [{
-          start: this.selectStart,
-          length:(this.selectEnd - this.selectStart),
-          styledKey: StyledStringKey.URL,
-          styledValue: urlString,
-        }]);
-        this.controller.setStyledString(mutableStyledString);
-      } }, { value: 'cancle', buttonStyle: ButtonStyleMode.TEXTUAL, role: ButtonRole.ERROR }],
+      buttons: [{
+        value: 'apply', buttonStyle: ButtonStyleMode.TEXTUAL, action: () => {
+          let urlString = new UrlStyle(this.inputValue);
+          let mutableStyledString = new MutableStyledString('test hello world', [{
+            start: this.selectStart,
+            length: (this.selectEnd - this.selectStart),
+            styledKey: StyledStringKey.URL,
+            styledValue: urlString,
+          }]);
+          this.controller.setStyledString(mutableStyledString);
+        }
+      }, { value: 'cancle', buttonStyle: ButtonStyleMode.TEXTUAL, role: ButtonRole.ERROR }],
     }),
   });
-
   @State showParameters: boolean = false;
   @State enablePopupType: boolean = true;
   @State popupType: number = 0;
   @State inputValue: string = '';
   @State selectStart: number = 0;
   @State selectEnd: number = 0;
+
   build() {
     NavDestination() {
       Drawer({
@@ -66,10 +74,12 @@ export struct TextSpanUrlBootcamp {
 
   private editorMenuOptions: Array<EditorMenuOptions> =
     [
-      { icon: $r('app.media.app_icon'), action: () => {
+      {
+        icon: $r('app.media.app_icon'), action: () => {
         this.dialogController.open()
         this.controller.closeSelectionMenu()
-      }, }]
+      },
+      }]
 
   @Builder
   MyMenu() {

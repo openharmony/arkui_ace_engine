@@ -1832,5 +1832,5 @@ export default function Divider1() {
       done();
 
     })
-    })
+  })
 }

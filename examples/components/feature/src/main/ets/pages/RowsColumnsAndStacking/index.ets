@@ -38,17 +38,17 @@ export const rowsColumnsAndStackingRoute: RouteGroup = {
 @Builder
 export function rowsColumnsAndStackingDestination(name: string, route: Route) {
   if (name === 'RowsColumnsAndStacking/Column') {
-      ColumnBootcamp({title: route.label})
-  }else if (name === 'RowsColumnsAndStacking/Flex'){
-      FlexBootcamp({title: route.label})
-  }else if (name === 'RowsColumnsAndStacking/Row'){
-      RowBootcamp({title: route.label})
-  }else if (name === 'RowsColumnsAndStacking/Stack'){
-      StackBootcamp({title: route.label})
-  }else if (name === 'RowsColumnsAndStacking/RelativeContainer'){
-      RelativeContainerBootcamp({title: route.label})
-  }else if (name === 'RowsColumnsAndStacking/FolderStack'){
-      FolderStackBootcamp({title: route.label})
+    ColumnBootcamp({ title: route.label })
+  } else if (name === 'RowsColumnsAndStacking/Flex') {
+    FlexBootcamp({ title: route.label })
+  } else if (name === 'RowsColumnsAndStacking/Row') {
+    RowBootcamp({ title: route.label })
+  } else if (name === 'RowsColumnsAndStacking/Stack') {
+    StackBootcamp({ title: route.label })
+  } else if (name === 'RowsColumnsAndStacking/RelativeContainer') {
+    RelativeContainerBootcamp({ title: route.label })
+  } else if (name === 'RowsColumnsAndStacking/FolderStack') {
+    FolderStackBootcamp({ title: route.label })
   }
 
 }
