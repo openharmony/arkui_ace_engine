@@ -908,11 +908,9 @@ std::vector<GradientColor> SliderContentModifier::GetTrackBackgroundColor() cons
     // Fault protection processing, if gradientColors is empty, set to default colors.
 
     if (gradientColors.empty()) {
-        auto host = host_.Upgrade();
-        CHECK_NULL_RETURN(host, gradientColors);
-        auto pipeline = host->GetContext();
+        auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, gradientColors);
-        auto theme = pipeline->GetTheme<SliderTheme>(host->GetThemeScopeId());
+        auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_RETURN(theme, gradientColors);
         gradientColors = SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor()).GetColors();
     }

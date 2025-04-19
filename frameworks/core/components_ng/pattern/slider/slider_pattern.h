@@ -55,7 +55,6 @@ public:
                     CHECK_NULL_VOID(pattern);
                     pattern->UpdateImagePositionY(y);
                 });
-            sliderContentModifier_->SetHost(GetHost());
         }
         InitAccessibilityVirtualNodeTask();
         sliderContentModifier_->SetUseContentModifier(UseContentModifier());
@@ -170,7 +169,6 @@ public:
         isAccessibilityOn_ = value;
     }
     void PlayHapticFeedback(bool isShowSteps, float step, float oldValue);
-    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)

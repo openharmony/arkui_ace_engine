@@ -296,10 +296,6 @@ public:
     {
         return stepPointVec_;
     }
-    void SetHost(const WeakPtr<FrameNode>& host)
-    {
-        host_ = host;
-    }
 
 private:
     void InitializeShapeProperty();
@@ -321,7 +317,6 @@ private:
 private:
     std::function<void(float)> updateImageCenterX_;
     std::function<void(float)> updateImageCenterY_;
-    WeakPtr<FrameNode> host_;
 
     // animatable property
     RefPtr<AnimatablePropertyOffsetF> selectStart_;
