@@ -103,9 +103,19 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
     SpanModel::GetInstance()->SetFontSize(fontSize);
 }
 
-void JSSpan::SetFontWeight(const std::string& value)
+void JSSpan::SetFontWeight(const JSCallbackInfo& info)
 {
-    SpanModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
+    if (info.Length() < 1) {
+        return;
+    }
+    JSRef<JSVal> args = info[0];
+    std::string fontWeight;
+    if (args->IsNumber()) {
+        fontWeight = args->ToString();
+    } else {
+        ParseJsString(args, fontWeight);
+    }
+    SpanModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
 }
 
 void JSSpan::SetTextColor(const JSCallbackInfo& info)
@@ -196,6 +206,7 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     JSRef<JSVal> typeValue = obj->GetProperty("type");
     JSRef<JSVal> colorValue = obj->GetProperty("color");
     JSRef<JSVal> styleValue = obj->GetProperty("style");
+    JSRef<JSVal> thicknessScaleValue = obj->GetProperty("thicknessScale");
 
     std::optional<TextDecoration> textDecoration;
     if (typeValue->IsNumber()) {
@@ -203,7 +214,7 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     } else {
         auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        textDecoration = theme->GetTextStyle().GetTextDecoration();
+        textDecoration = theme->GetTextDecoration();
     }
     std::optional<TextDecorationStyle> textDecorationStyle;
     if (styleValue->IsNumber()) {
@@ -224,11 +235,15 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
             colorVal = Color::BLACK;
         }
     }
+    float lineThicknessScale = 1.0f;
+    if (thicknessScaleValue->IsNumber()) {
+        lineThicknessScale = thicknessScaleValue->ToNumber<float>();
+    }
+    lineThicknessScale = lineThicknessScale < 0 ? 1.0f : lineThicknessScale;
     SpanModel::GetInstance()->SetTextDecoration(textDecoration.value());
     SpanModel::GetInstance()->SetTextDecorationColor(colorVal.value());
-    if (textDecorationStyle) {
-        SpanModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
-    }
+    SpanModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    SpanModel::GetInstance()->SetLineThicknessScale(lineThicknessScale);
 }
 
 void JSSpan::JsOnClick(const JSCallbackInfo& info)

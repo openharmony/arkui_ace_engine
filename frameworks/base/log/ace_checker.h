@@ -29,6 +29,18 @@ public:
 
     static void InitPerformanceParameters();
 
+    static void SetPerformanceCheckStatus(bool status, const std::string& message);
+
+    static bool IsWebSocketCheckEnabled()
+    {
+        return isWebSocketCheckEnabled_;
+    }
+
+    static std::string GetCheckMessge()
+    {
+        return checkMessage_;
+    }
+
     static int32_t GetPageNodes()
     {
         return pageNodes_;
@@ -78,6 +90,9 @@ private:
     static int32_t nodeTimeout_;
     static int32_t foreachItems_;
     static int32_t flexLayouts_;
+    static std::string checkMessage_;
+    static bool isPerformanceCheckEnabled_;
+    static bool isWebSocketCheckEnabled_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_ACE_HICHECKER_H

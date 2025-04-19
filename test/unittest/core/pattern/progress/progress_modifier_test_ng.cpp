@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier001, TestSize.Level1)
     gradientColorStart.SetDimension(Dimension(1.0));
     gradient.AddColor(gradientColorStart);
 
-    ProgressModifier progressModifier;
+    ProgressModifier progressModifier(frameNode_);
     progressModifier.SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier.SetColor(linearColor);
@@ -128,7 +128,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier002, TestSize.Level1)
     gradientColorStart.SetDimension(Dimension(1.0));
     gradient.AddColor(gradientColorStart);
 
-    ProgressModifier progressModifier;
+    ProgressModifier progressModifier(frameNode_);
     progressModifier.SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier.SetColor(linearColor);
@@ -200,7 +200,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier003, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    ProgressModifier progressModifier;
+    ProgressModifier progressModifier(frameNode_);
     progressModifier.SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier.SetColor(linearColor);
@@ -276,7 +276,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier004, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    ProgressModifier progressModifier;
+    ProgressModifier progressModifier(frameNode_);
     progressModifier.SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier.SetColor(linearColor);
@@ -379,7 +379,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressPaintMethod002, TestSize.Level1)
      * @tc.steps: step3. Create ProgressPaintMethod. Call the function UpdateContentModifier and GetContentModifier.
      * @tc.expected: step3. Check the properties update before.
      */
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     ProgressPaintMethod progressPaintMethod(PROGRESS_TYPE_CAPSULE, PROGRESS_STROKE_WIDTH, progressModifier);
     progressPaintMethod.progressType_ = PROGRESS_TYPE_CAPSULE;
     progressPaintMethod.UpdateContentModifier(paintWrapper);
@@ -435,7 +435,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressPaintMethod003, TestSize.Level1)
      */
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     ProgressPaintMethod progressPaintMethod(PROGRESS_TYPE_LINEAR, PROGRESS_STROKE_WIDTH, progressModifier);
     progressPaintMethod.progressType_ = PROGRESS_TYPE_RING;
     progressPaintMethod.UpdateContentModifier(paintWrapper);
@@ -480,7 +480,7 @@ HWTEST_F(ProgressModifierTestNg, CapsuleProgressModifier001, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    ProgressModifier progressModifier;
+    ProgressModifier progressModifier(frameNode_);
     LinearColor linearColor;
     progressModifier.SetColor(linearColor);
     EXPECT_EQ(progressModifier.color_->Get(), linearColor);
@@ -552,7 +552,7 @@ HWTEST_F(ProgressModifierTestNg, CapsuleProgressModifier002, TestSize.Level1)
      */
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     LinearColor linearColor;
     progressModifier->SetColor(linearColor);
     EXPECT_EQ(progressModifier->color_->Get(), linearColor);
@@ -604,7 +604,7 @@ HWTEST_F(ProgressModifierTestNg, CapsuleProgressModifier003, TestSize.Level1)
      */
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     LinearColor linearColor;
     progressModifier->SetColor(linearColor);
     EXPECT_EQ(progressModifier->color_->Get(), linearColor);
@@ -667,7 +667,7 @@ HWTEST_F(ProgressModifierTestNg, RingProgressModifier001, TestSize.Level1)
 
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     progressModifier->SetVisible(true);
     progressModifier->SetProgressType(PROGRESS_TYPE_RING);
     progressModifier->SetProgressStatus(ProgressStatus::PROGRESSING);
@@ -780,7 +780,7 @@ HWTEST_F(ProgressModifierTestNg, RingProgressModifier003, TestSize.Level1)
 
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier->SetBackgroundColor(linearColor);
@@ -844,7 +844,7 @@ HWTEST_F(ProgressModifierTestNg, RingProgressModifier004, TestSize.Level1)
 
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier->SetBackgroundColor(linearColor);
@@ -923,7 +923,7 @@ HWTEST_F(ProgressModifierTestNg, RingProgressModifier005, TestSize.Level1)
     Gradient gradient;
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
     progressModifier->SetContentSize(contentSize);
     progressModifier->SetVisible(true);
@@ -1033,7 +1033,7 @@ HWTEST_F(ProgressModifierTestNg, RingProgressModifier006, TestSize.Level1)
     Gradient gradient;
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
     progressModifier->SetContentSize(contentSize);
     progressModifier->SetVisible(true);
@@ -1095,7 +1095,7 @@ HWTEST_F(ProgressModifierTestNg, RingProgressModifier007, TestSize.Level1)
     Gradient gradient;
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
     progressModifier->SetContentSize(contentSize);
     progressModifier->SetVisible(true);
@@ -1157,7 +1157,7 @@ HWTEST_F(ProgressModifierTestNg, RingProgressModifier008, TestSize.Level1)
     Gradient gradient;
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
     progressModifier->SetContentSize(contentSize);
     progressModifier->SetVisible(true);
@@ -1219,7 +1219,7 @@ HWTEST_F(ProgressModifierTestNg, RingProgressModifier009, TestSize.Level1)
     Gradient gradient;
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
     progressModifier->SetContentSize(contentSize);
     progressModifier->SetVisible(true);
@@ -1281,7 +1281,7 @@ HWTEST_F(ProgressModifierTestNg, RingProgressModifier010, TestSize.Level1)
     Gradient gradient;
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
     progressModifier->SetContentSize(contentSize);
     progressModifier->SetVisible(true);
@@ -1343,7 +1343,7 @@ HWTEST_F(ProgressModifierTestNg, LinearProgressModifier001, TestSize.Level1)
     float value = 50.0f;
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier->SetLinearSweepEffect(true);
@@ -1443,7 +1443,7 @@ HWTEST_F(ProgressModifierTestNg, LinearProgressModifier002, TestSize.Level1)
     float value = 50.0f;
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier->SetLinearSweepEffect(true);
@@ -1501,7 +1501,7 @@ HWTEST_F(ProgressModifierTestNg, LinearProgressModifier003, TestSize.Level1)
     float value = 50.0f;
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier->SetLinearSweepEffect(true);
@@ -1559,7 +1559,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier005, TestSize.Level1)
      */
     int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
-    auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
@@ -1617,7 +1617,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier006, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
@@ -1676,7 +1676,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier007, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     modifier->SetProgressType(PROGRESS_TYPE_CAPSULE);
     auto contentSize = SizeF(100.0f, 100.0f);
     modifier->SetContentSize(contentSize);
@@ -1724,7 +1724,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier008, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     modifier->SetProgressType(PROGRESS_TYPE_RING);
     auto contentSize = SizeF(100.0f, 100.0f);
     modifier->SetContentSize(contentSize);
@@ -1780,7 +1780,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier009, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     modifier->SetProgressType(PROGRESS_TYPE_LINEAR);
     auto contentSize = SizeF(100.0f, 100.0f);
     modifier->SetContentSize(contentSize);
@@ -1846,7 +1846,7 @@ HWTEST_F(ProgressModifierTestNg, GetContentDrawFunction, TestSize.Level1)
         geometryNode->SetContentOffset(OffsetF(0, 0));
         RefPtr<PaintWrapper> paintWrapper =
             AceType::MakeRefPtr<PaintWrapper>(RenderContext::Create(), geometryNode, paintProperty_);
-        auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+        auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
         auto progressPaintMethod = AceType::MakeRefPtr<ProgressPaintMethod>(
             progressType[i], LARG_STROKE_WIDTH.ConvertToPx(), progressModifier);
         EXPECT_NE(progressPaintMethod, nullptr);
@@ -1890,7 +1890,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressPaintMethod001, TestSize.Level1)
      */
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     ProgressPaintMethod progressPaintMethod(PROGRESS_TYPE_LINEAR, PROGRESS_STROKE_WIDTH, progressModifier);
     // progressType_ = PROGRESS_TYPE_LINEAR
     progressPaintMethod.progressType_ = PROGRESS_TYPE_LINEAR;
@@ -1948,7 +1948,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressPaintMethod004, TestSize.Level1)
      * @tc.steps: step3. Create ProgressPaintMethod. Call the function UpdateContentModifier and GetContentModifier.
      * @tc.expected: step3. Check the properties update before.
      */
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     ProgressPaintMethod progressPaintMethod(PROGRESS_TYPE_LINEAR, PROGRESS_STROKE_WIDTH, progressModifier);
     progressPaintMethod.UpdateContentModifier(paintWrapper);
     EXPECT_FLOAT_EQ(progressPaintMethod.strokeWidth_, PROGRESS_STROKE_WIDTH);
@@ -1978,7 +1978,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifierRTL001, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
@@ -2025,7 +2025,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifierRTL002, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
@@ -2078,7 +2078,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifierRTL003, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
@@ -2140,7 +2140,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifierRTL004, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.

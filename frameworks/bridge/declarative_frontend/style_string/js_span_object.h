@@ -78,6 +78,7 @@ public:
     static void ParseJsTextOverflow(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsWordBreak(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsLeadingMargin(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
+    static void ParseParagraphSpacing(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseLeadingMarginPixelMap(const JSRef<JSObject>& leadingMarginObject,
         std::optional<NG::LeadingMargin>& margin, const JsiRef<JsiValue>& leadingMargin);
     void GetTextAlign(const JSCallbackInfo& info);
@@ -92,6 +93,8 @@ public:
     void GetWordBreak(const JSCallbackInfo& info);
     void SetLeadingMargin(const JSCallbackInfo& info);
     void GetLeadingMargin(const JSCallbackInfo& info);
+    void GetParagraphSpacing(const JSCallbackInfo& info);
+    void SetParagraphSpacing(const JSCallbackInfo& info);
 
     static bool IsPixelMap(const JSRef<JSVal>& jsValue);
 
@@ -112,13 +115,18 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSDecorationSpan* decorationSpan);
     static void JSBind(BindingTarget globalObj);
-    static RefPtr<DecorationSpan> ParseJsDecorationSpan(const JSRef<JSObject>& obj);
+    static RefPtr<DecorationSpan> ParseJsDecorationSpan(const JSCallbackInfo& args);
+    static TextDecorationOptions ParseJsDecorationOptions(const JSRef<JSObject>& obj);
     void GetTextDecorationType(const JSCallbackInfo& info);
     void SetTextDecorationType(const JSCallbackInfo& info);
     void GetTextDecorationColor(const JSCallbackInfo& info);
     void SetTextDecorationColor(const JSCallbackInfo& info);
     void GetTextDecorationStyle(const JSCallbackInfo& info);
     void SetTextDecorationStyle(const JSCallbackInfo& info);
+    void GetLineThicknessScale(const JSCallbackInfo& info);
+    void SetLineThicknessScale(const JSCallbackInfo& info);
+    void GetTextDecorationOptions(const JSCallbackInfo& info);
+    void SetTextDecorationOptions(const JSCallbackInfo& info);
 
     RefPtr<DecorationSpan>& GetDecorationSpan();
     void SetDecorationSpan(const RefPtr<DecorationSpan>& decorationSpan);

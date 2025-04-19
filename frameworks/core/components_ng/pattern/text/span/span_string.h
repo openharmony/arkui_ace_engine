@@ -22,9 +22,7 @@
 #include <vector>
 
 #include "base/memory/referenced.h"
-#include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
-#include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace {
 
@@ -44,11 +42,11 @@ public:
     const std::u16string& GetU16string() const;
     int32_t GetLength() const;
     void SetString(const std::u16string& text);
-    void SetGroupId(const RefPtr<SpanBase>& span);
     void SetFramNode(const WeakPtr<NG::FrameNode>& frameNode);
     void MarkDirtyFrameNode();
     void AddCustomSpan();
     void RemoveCustomSpan();
+    void SetGroupId(const RefPtr<SpanBase>& span);
     void SetSpanItems(const std::list<RefPtr<NG::SpanItem>>&& spanItems);
     void SetSpanMap(std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>&& spansMap);
     const std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>& GetSpansMap() const;
@@ -57,9 +55,19 @@ public:
         bool includeEndHalf = true, bool rangeNeedNotChange = true) const;
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length) const;
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length, SpanType spanType) const;
+    RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
     bool operator==(const SpanString& other) const;
     std::list<RefPtr<NG::SpanItem>> GetSpanItems() const;
-    void AddSpan(const RefPtr<SpanBase>& span);
+    bool CheckMultiTypeDecorationSpan(const RefPtr<SpanBase>& span);
+    std::vector<RefPtr<SpanBase>> GetWholeSpans(int32_t start, int32_t end, SpanType spanType) const;
+    void ProcessMultiDecorationSpanForIntersection(
+        const RefPtr<SpanBase>& span, const RefPtr<SpanBase>& lastSpan,
+        std::vector<int32_t>& spanNoIntersection, int32_t start, int32_t end);
+    void ProcessMultiDecorationSpanForNoIntersection(
+        const RefPtr<SpanBase>& span, std::vector<int32_t>& spanNoIntersection,
+        int32_t start, int32_t end);
+    bool ProcessMultiDecorationSpan(const RefPtr<SpanBase>& span, int32_t start, int32_t end);
+    void AddSpan(const RefPtr<SpanBase>& span, bool processMultiDecoration = true);
     void RemoveSpan(int32_t start, int32_t length, SpanType key);
     bool CheckRange(int32_t start, int32_t length, bool allowLengthZero = false) const;
     void BindWithSpans(const std::vector<RefPtr<SpanBase>>& spans);
@@ -90,9 +98,9 @@ public:
         const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<DecorationSpan> ToDecorationSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<FontSpan> ToFontSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<UrlSpan> ToUrlSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     std::string ToString();
 protected:
-    RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
     std::list<RefPtr<SpanBase>> GetSubSpanList(
         int32_t start, int32_t length, const std::list<RefPtr<SpanBase>>& spans) const;
     void MergeIntervals(std::list<RefPtr<SpanBase>>& spans);
@@ -123,8 +131,8 @@ protected:
     std::u16string text_;
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;
     std::list<RefPtr<NG::SpanItem>> spans_;
-    int32_t groupId_ = 0;
     WeakPtr<NG::FrameNode> framNode_;
+    int32_t groupId_ = 0;
 };
 } // namespace OHOS::Ace
 

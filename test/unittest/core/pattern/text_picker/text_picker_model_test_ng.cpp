@@ -941,8 +941,8 @@ HWTEST_F(TextPickerModelTestNg, getTextPickerRange001, TestSize.Level1)
     auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(node, nullptr);
 
-    textPickerModelNG.options_.clear();
-    textPickerModelNG.rangeValue_.clear();
+    textPickerModelNG.SetCascadeColumns({});
+    textPickerModelNG.SetRange({});
     textPickerModelNG.isSingleRange_ = false;
 
     auto result = textPickerModelNG.getTextPickerRange(node);
@@ -1067,5 +1067,91 @@ HWTEST_F(TextPickerModelTestNg, TextPickerModelNGSetEnableHapticFeedback001, Tes
     EXPECT_FALSE(textPickerPattern->isEnableHaptic_);
     auto result = TextPickerModelNG::GetEnableHapticFeedback(AceType::RawPtr(frameNode));
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetIsCascade001
+ * @tc.desc: Test SetIsCascade.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetIsCascade001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    TextPickerModelNG::SetIsCascade(AceType::RawPtr(frameNode), true);
+    EXPECT_TRUE(textPickerPattern->isCascade_);
+}
+
+/**
+ * @tc.name: SetColumnKind001
+ * @tc.desc: Test SetColumnKind.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetColumnKind001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    TextPickerModelNG::SetColumnKind(AceType::RawPtr(frameNode), TEXT);
+    EXPECT_EQ(textPickerPattern->columnsKind_, TEXT);
+    TextPickerModelNG::SetColumnKind(AceType::RawPtr(frameNode), MIXTURE);
+    EXPECT_EQ(textPickerPattern->columnsKind_, MIXTURE);
+}
+
+/**
+ * @tc.name: TextPickerModelNGSetDisableTextStyleAnimation001
+ * @tc.desc: Test SetDisableTextStyleAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelNGSetDisableTextStyleAnimation001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    /**
+     * @tc.cases: case1. The default value of isDisableTextStyleAnimation_ is false.
+     */
+    EXPECT_FALSE(textPickerPattern->isDisableTextStyleAnimation_);
+
+    /**
+     * @tc.cases: case2. Set the value of isDisableTextStyleAnimation_ to true.
+     */
+    TextPickerModelNG::SetDisableTextStyleAnimation(AceType::RawPtr(frameNode), true);
+    EXPECT_TRUE(textPickerPattern->isDisableTextStyleAnimation_);
+}
+
+/**
+ * @tc.name: SelectedBackgroundStyle001
+ * @tc.desc: Test SetSelectedBackgroundStyle and GetSelectedBackgroundStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SelectedBackgroundStyle001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    PickerBackgroundStyle pickerBgStyle;
+    PickerBackgroundStyle result1;
+    PickerBackgroundStyle result2;
+    pickerBgStyle.color = Color(0x00000000);
+    pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    TextPickerModelNG::SetSelectedBackgroundStyle(frameNode, pickerBgStyle);
+    result1.color = layoutProperty->GetSelectedBackgroundColorValue();
+    result1.borderRadius = layoutProperty->GetSelectedBorderRadiusValue();
+    result2.color = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).color;
+    result2.borderRadius = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).borderRadius;
+    EXPECT_EQ(pickerBgStyle.color, result1.color);
+    EXPECT_EQ(pickerBgStyle.borderRadius, result1.borderRadius);
+    EXPECT_EQ(pickerBgStyle.color, result2.color);
+    EXPECT_EQ(pickerBgStyle.borderRadius, result2.borderRadius);
 }
 } // namespace OHOS::Ace::NG

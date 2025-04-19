@@ -73,6 +73,12 @@ ace_unittest("view_abstract_test_ng") {
   ]
 }
 
+ace_unittest("view_abstract_test_resetposition_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "view_abstract_test_resetposition_ng.cpp" ]
+}
+
 ace_unittest("view_full_update_model_ng_test") {
   type = "new"
   module_output = "basic"
@@ -109,10 +115,17 @@ ace_unittest("short_cuts_test_ng") {
   sources = [ "short_cuts_test_ng.cpp" ]
 }
 
+ace_unittest("extension_handler_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "extension_handler_test_ng.cpp" ]
+}
+
 group("core_base_unittest") {
   testonly = true
   deps = [
     ":distributed_ui_test_ng",
+    ":extension_handler_test_ng",
     ":frame_node_drop_test_ng",
     ":frame_node_test_ng",
     ":geometry_node_test_ng",

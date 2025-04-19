@@ -162,6 +162,7 @@ void TextEditingValue::SelectionAwareTextManipulation(const TextManipulation& ma
 
         std::wstring inSelection;
         if (start != end) {
+            start = std::clamp(start, 0, static_cast<int32_t>(wideText.length()));
             inSelection = wideText.substr(start, end - start);
             manipulation(inSelection);
         }
@@ -169,6 +170,7 @@ void TextEditingValue::SelectionAwareTextManipulation(const TextManipulation& ma
         std::wstring afterSelection;
         size_t lenLeft = wideText.length() - static_cast<size_t>(end);
         if (lenLeft > 0) {
+            end = std::clamp(end, 0, static_cast<int32_t>(wideText.length()));
             afterSelection = wideText.substr(end, lenLeft);
             manipulation(afterSelection);
         }
@@ -214,6 +216,7 @@ std::string TextEditingValue::GetSelectedText() const
         start = 0;
     }
     if (end > 0 && start != end) {
+        start = std::clamp(start, 0, static_cast<int32_t>(wideText.length()));
         std::wstring inSelection = wideText.substr(start, end - start);
         selectedText = StringUtils::ToString(inSelection);
     }
@@ -234,6 +237,7 @@ std::string TextEditingValue::GetSelectedText(const TextSelection& textSelection
     }
 
     if (end > 0 && start < end) {
+        start = std::clamp(start, 0, static_cast<int32_t>(wideText.length()));
         std::wstring inSelection = wideText.substr(start, end - start);
         selectedText = StringUtils::ToString(inSelection);
     }

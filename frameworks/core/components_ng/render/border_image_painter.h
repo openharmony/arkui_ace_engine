@@ -19,6 +19,7 @@
 #include <cmath>
 
 #include "base/geometry/ng/size_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/property/gradient_property.h"

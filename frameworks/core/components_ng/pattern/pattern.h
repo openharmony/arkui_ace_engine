@@ -34,7 +34,7 @@
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/event/pointer_event.h"
-
+#include "core/common/container_consts.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -124,7 +124,9 @@ public:
 
     void DetachFromFrameNode(FrameNode* frameNode)
     {
+        onDetach_ = true;
         OnDetachFromFrameNode(frameNode);
+        onDetach_ = false;
         frameNode_.Reset();
     }
 
@@ -141,7 +143,7 @@ public:
     {
         return false;
     }
-    
+
     virtual RefPtr<AccessibilityProperty> CreateAccessibilityProperty()
     {
         return MakeRefPtr<AccessibilityProperty>();
@@ -357,13 +359,16 @@ public:
 
     RefPtr<FrameNode> GetHost() const
     {
+        if (onDetach_ && SystemProperties::DetectGetHostOnDetach()) {
+            LOGF_ABORT("fatal: can't GetHost at detaching period");
+        }
         return frameNode_.Upgrade();
     }
 
     int32_t GetHostInstanceId() const
     {
         auto host = GetHost();
-        CHECK_NULL_RETURN(host, -1); // -1 means no valid id exists
+        CHECK_NULL_RETURN(host, INSTANCE_ID_UNDEFINED);
         return host->GetInstanceId();
     }
 
@@ -581,7 +586,6 @@ public:
     virtual void OnAttachContext(PipelineContext *context) {}
     virtual void OnDetachContext(PipelineContext *context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
-
     void CheckLocalized()
     {
         auto host = GetHost();
@@ -676,6 +680,16 @@ public:
     virtual void SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids) {};
     virtual void EndTranslate() {};
     virtual void SendTranslateResult(std::string results) {};
+    int32_t OnRecvCommand(const std::string& command);
+    virtual int32_t OnInjectionEvent(const std::string& command)
+    {
+        return RET_SUCCESS;
+    };
+
+    virtual bool BorderUnoccupied() const
+    {
+        return false;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}
@@ -684,6 +698,7 @@ protected:
     WeakPtr<FrameNode> frameNode_;
 
 private:
+    bool onDetach_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(Pattern);
 };
 } // namespace OHOS::Ace::NG

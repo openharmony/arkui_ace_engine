@@ -1313,6 +1313,38 @@ float OH_ArkUI_PointerEvent_GetTiltY(const ArkUI_UIInputEvent* event, uint32_t p
     return 0.0f;
 }
 
+int32_t OH_ArkUI_PointerEvent_GetRollAngle(const ArkUI_UIInputEvent* event, double* rollAngle)
+{
+    if (rollAngle == nullptr || event == nullptr) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (touchEvent && touchEvent->subKind == ON_HOVER_MOVE) {
+                *rollAngle = touchEvent->actionTouchPoint.rollAngle;
+                return ARKUI_ERROR_CODE_NO_ERROR;
+            }
+            if (!touchEvent || touchEvent->touchPointSize <= 0) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            *rollAngle = touchEvent->touchPointes[touchEvent->touchPointSize - 1].rollAngle;
+            return ARKUI_ERROR_CODE_NO_ERROR;
+        }
+        case C_HOVER_EVENT_ID: {
+            const auto* hoverEvent = reinterpret_cast<ArkUIHoverEvent*>(event->inputEvent);
+            if (!hoverEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            *rollAngle = hoverEvent->rollAngle;
+            return ARKUI_ERROR_CODE_NO_ERROR;
+        }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_PARAM_INVALID;
+}
+
 int32_t OH_ArkUI_PointerEvent_GetInteractionHand(const ArkUI_UIInputEvent *event, ArkUI_InteractionHand *hand)
 {
     if (!event || !hand) {

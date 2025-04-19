@@ -20,6 +20,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
+#include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1899,5 +1900,60 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage069, TestSi
     DragPointerEvent pointerEvent;
     auto callback = dragDropManager->GetStopDragCallBack(frameNode, pointerEvent, dragEvent, "");
     EXPECT_NE(callback, nullptr);
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage070
+ * @tc.desc: Test DoDragStartAnimation
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage070, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    RefPtr<UINode> frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(AceType::DynamicCast<FrameNode>(frameNode));
+    overlayManager->hasDragPixelMap_ = true;
+
+    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(imageNode, nullptr);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(textNode, nullptr);
+    auto textRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(textRow, nullptr);
+    textRow->children_.push_front(textNode);
+    auto relativeContainerNode =
+        FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
+    ASSERT_NE(relativeContainerNode, nullptr);
+    relativeContainerNode->children_.push_front(imageNode);
+    relativeContainerNode->children_.push_back(textRow);
+    columnNode->children_.push_back(relativeContainerNode);
+    overlayManager->dragPixmapColumnNodeWeak_ = columnNode;
+
+    GestureEvent event;
+    event.SetDeviceId(0xFFFFFFFF);
+    dragDropManager->SetIsDragWithContextMenu(true);
+    auto frameNode2 = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode2, nullptr);
+    auto guestureEventHub = frameNode2->GetOrCreateGestureEventHub();
+
+    PreparedInfoForDrag drag;
+    drag.relativeContainerNode = relativeContainerNode;
+    drag.imageNode = imageNode;
+
+    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub, drag);
+    dragDropManager->SetIsDragWithContextMenu(false);
+    event.SetDeviceId(0xFFFFEEEE);
+    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub, drag);
+    EXPECT_NE(dragDropManager->info_.textNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

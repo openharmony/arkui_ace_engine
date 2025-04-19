@@ -72,6 +72,8 @@ public:
         const SvgPreserveAspectRatio& preserveAspectRatio, float& scaleX, float& scaleY);
     static Color GetColorFromHexString(const std::string& value);
     static Color GetColorFrom4HexString(const std::string& value);
+    static void StringToDimensionWithUnitSvg(const std::string& value, Dimension& dimension);
+    static void ParseDimension(const std::string& value, Dimension& dimension, bool useVp = false);
 };
 enum class SvgFeColorMatrixType {
     MATRIX,

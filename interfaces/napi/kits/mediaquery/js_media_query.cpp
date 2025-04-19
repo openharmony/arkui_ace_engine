@@ -144,7 +144,11 @@ public:
                 listener->MediaQueryResult::NapiSerializer(listener->env_, resultArg);
 
                 napi_value result = nullptr;
-                napi_call_function(listener->env_, nullptr, cb, 1, &resultArg, &result);
+                napi_status status = napi_call_function(listener->env_, nullptr, cb, 1, &resultArg, &result);
+                if (status != napi_ok) {
+                    TAG_LOGI(AceLogTag::ACE_MEDIA_QUERY, "call faild:%{public}s status:%{public}d",
+                        listener->media_.c_str(), status);
+                }
                 napi_close_handle_scope(listener->env_, scope);
             }
         }

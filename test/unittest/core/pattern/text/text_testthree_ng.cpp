@@ -22,7 +22,9 @@
 
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
-
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_select_overlay.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1404,8 +1406,8 @@ HWTEST_F(TextTestThreeNg, InitSpanItem001, TestSize.Level1)
      * @tc.steps: step2. construct different child SpanNode.
      */
     auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto childFrameNode =
-        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, 2, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
     host->AddChild(childFrameNode);
     childFrameNode->SetParent(host);
 
@@ -1946,7 +1948,7 @@ HWTEST_F(TextTestThreeNg, TextModelNgProperty001, TestSize.Level1)
     TextModelNG::SetTextDecorationStyle(node, TextDecorationStyle::SOLID);
     TextModelNG::SetTextCase(node, TextCase::UPPERCASE);
     TextModelNG::SetMaxLines(node, 10); // 10 means maxlines.
-    TextModelNG::SetLineSpacing(node, ADAPT_LINE_SPACING_VALUE);
+    TextModelNG::SetLineSpacing(node, ADAPT_LINE_SPACING_VALUE, false);
 
     /**
      * @tc.steps: step2. test property.
@@ -1959,7 +1961,7 @@ HWTEST_F(TextTestThreeNg, TextModelNgProperty001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontSize().value(), FONT_SIZE_VALUE);
     EXPECT_EQ(layoutProperty->GetLineHeight().value(), ADAPT_LINE_HEIGHT_VALUE);
     EXPECT_EQ(layoutProperty->GetTextOverflow().value(), TextOverflow::ELLIPSIS);
-    EXPECT_EQ(layoutProperty->GetTextDecoration().value(), TextDecoration::UNDERLINE);
+    EXPECT_EQ(layoutProperty->GetTextDecorationFirst(), TextDecoration::UNDERLINE);
     EXPECT_EQ(layoutProperty->GetTextDecorationColor().value(), Color::BLACK);
     EXPECT_EQ(layoutProperty->GetTextDecorationStyle().value(), TextDecorationStyle::SOLID);
     EXPECT_EQ(layoutProperty->GetTextCase().value(), TextCase::UPPERCASE);

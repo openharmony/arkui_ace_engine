@@ -52,6 +52,7 @@ public:
     void SetAccessibilityText(const std::string& text) override;
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
+    void SetLineThicknessScale(float value) override;
 
     static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId, const std::u16string& content);
     static void InitSpan(UINode* uiNode, const std::u16string& content);
@@ -103,15 +104,17 @@ public:
     static std::vector<Shadow> GetTextShadow(UINode* uiNode);
     static void SetOnClick(UINode* uiNode, GestureEventFunc&& click);
     static void ClearOnClick(UINode* uiNode);
+    static void SetOnLongPress(UINode* uiNode, GestureEventFunc&& onLongPress);
+    static void ClearOnLongPress(UINode* uiNode);
     static void SetAccessibilityText(UINode* uiNode, const std::string& text);
     static void SetAccessibilityDescription(UINode* uiNode, const std::string& description);
     static void SetAccessibilityImportance(UINode* uiNode, const std::string& importance);
     static std::vector<std::string> GetSpanFontFamily(UINode* uiNode);
-#ifdef USE_GRAPHIC_TEXT_GINE
     // impl in render/adapter/span_model_adapter.cpp
     static RefPtr<SpanItem> CreateSpanItem(ArkUI_SpanItem* item);
     static ParagraphStyle CreateParagraphStyle(ArkUI_StyledString* styledString);
-#endif
+    static void SetLineThicknessScale(UINode *uiNode, float value);
+    static void ResetLineThicknessScale(UINode* uiNode);
 };
 } // namespace OHOS::Ace::NG
 

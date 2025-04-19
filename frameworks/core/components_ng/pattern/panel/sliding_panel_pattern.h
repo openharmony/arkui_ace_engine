@@ -20,19 +20,13 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/panel/panel_component.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/manager/focus/focus_view.h"
-#include "core/components_ng/pattern/panel/close_icon_pattern.h"
-#include "core/components_ng/pattern/panel/drag_bar_pattern.h"
-#include "core/components_ng/pattern/panel/sliding_panel_event_hub.h"
-#include "core/components_ng/pattern/panel/sliding_panel_layout_algorithm.h"
-#include "core/components_ng/pattern/panel/sliding_panel_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class SlidingPanelLayoutProperty;
+class SlidingPanelEventHub;
 
 class SlidingPanelPattern : public Pattern, public FocusView {
     DECLARE_ACE_TYPE(SlidingPanelPattern, Pattern, FocusView);
@@ -46,19 +40,9 @@ public:
         return false;
     }
 
-    RefPtr<LayoutProperty> CreateLayoutProperty() override
-    {
-        return MakeRefPtr<SlidingPanelLayoutProperty>();
-    }
+    RefPtr<LayoutProperty> CreateLayoutProperty() override;
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        auto layoutAlgorithm = MakeRefPtr<SlidingPanelLayoutAlgorithm>();
-        layoutAlgorithm->SetCurrentOffset(currentOffset_);
-        layoutAlgorithm->SetIsFirstLayout(isFirstLayout_);
-        layoutAlgorithm->SetInvisibleFlag(invisibleFlag_.value_or(false));
-        return layoutAlgorithm;
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     RefPtr<EventHub> CreateEventHub() override
     {

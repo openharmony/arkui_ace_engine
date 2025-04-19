@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,7 +55,7 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_VOID(progressModifier_);
-        GetThemeData();
+        GetThemeData(GetThemeScopeId(paintWrapper));
         auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_VOID(paintProperty);
         auto isSensitive = paintProperty->GetIsSensitive().value_or(false);
@@ -99,14 +99,14 @@ public:
             paintProperty->GetStrokeRadiusValue(Dimension(strokeWidth_ / 2.0f, DimensionUnit::VP)).ConvertToPx());
         strokeRadius = std::min(strokeWidth_ / 2, strokeRadius);
         progressModifier_->SetStrokeRadius(strokeRadius);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             progressModifier_->UpdateProgress();
         }
         SetCapsuleBorderRadius(paintWrapper);
         UpdateCapsuleProgress(paintWrapper);
     }
 
-    void GetThemeData();
+    void GetThemeData(int32_t themeScopeId);
     void CalculateStrokeWidth(const SizeF& contentSize);
 
 private:
@@ -142,6 +142,8 @@ private:
     bool isItalic_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPaintMethod);
+
+    int32_t GetThemeScopeId(PaintWrapper* paintWrapper) const;
 };
 
 } // namespace OHOS::Ace::NG

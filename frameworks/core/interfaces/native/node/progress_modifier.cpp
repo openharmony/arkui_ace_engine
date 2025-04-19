@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components/select/select_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr double DEFAULT_PROGRESS_VALUE = 0;
@@ -143,6 +144,11 @@ void ResetProgressColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        ProgressModelNG::ResetGradientColor(frameNode);
+        ProgressModelNG::ResetColor(frameNode);
+        return;
+    }
     Color endColor;
     Color beginColor;
     Color colorVal;
@@ -249,14 +255,14 @@ void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
         ProgressModelNG::SetBorderWidth(
             node, Dimension(value->borderWidthValue, static_cast<DimensionUnit>(value->borderWidthUnit)));
     }
+    ProgressModelNG::SetBorderColor(node, Color(value->borderColor));
+    ProgressModelNG::SetSweepingEffect(node, value->enableScanEffect);
+    ProgressModelNG::SetShowText(node, value->showDefaultPercentage);
     if (value->content == nullptr) {
         ProgressModelNG::SetText(node, std::nullopt);
     } else {
         ProgressModelNG::SetText(node, std::string(value->content));
     }
-    ProgressModelNG::SetBorderColor(node, Color(value->borderColor));
-    ProgressModelNG::SetSweepingEffect(node, value->enableScanEffect);
-    ProgressModelNG::SetShowText(node, value->showDefaultPercentage);
     ProgressModelNG::SetFontColor(node, Color(value->fontColor));
     ProgressModelNG::SetFontSize(node, Dimension(fontSizeNumber, static_cast<DimensionUnit>(fontSizeUnit)));
     ProgressModelNG::SetFontWeight(node, static_cast<FontWeight>(fontWeight));
@@ -327,11 +333,16 @@ void SetCapsuleStyleOptions(FrameNode* node)
     CHECK_NULL_VOID(textTheme);
     std::optional<std::string> textOpt = std::nullopt;
     ProgressModelNG::SetBorderWidth(node, Dimension(DEFAULT_BORDER_WIDTH, DimensionUnit::VP));
-    ProgressModelNG::SetBorderColor(node, Color(0x33006cde));
     ProgressModelNG::SetSweepingEffect(node, false);
     ProgressModelNG::SetShowText(node, false);
     ProgressModelNG::SetText(node, textOpt);
-    ProgressModelNG::SetFontColor(node, Color(0xff182431));
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        ProgressModelNG::SetBorderColor(node, Color(0x33006cde));
+        ProgressModelNG::SetFontColor(node, Color(0xff182431));
+    } else {
+        ProgressModelNG::ResetBorderColor(node);
+        ProgressModelNG::ResetFontColor(node);
+    }
     ProgressModelNG::SetFontSize(node, Dimension(DEFAULT_FONT_SIZE, DimensionUnit::FP));
     ProgressModelNG::SetFontWeight(node, textTheme->GetTextStyle().GetFontWeight());
     ProgressModelNG::SetFontFamily(node, textTheme->GetTextStyle().GetFontFamilies());
@@ -370,6 +381,10 @@ void ResetProgressBackgroundColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        ProgressModelNG::ResetBackgroundColor(frameNode);
+        return;
+    }
     auto progressLayoutProperty = frameNode->GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     auto progresstype = progressLayoutProperty->GetType();

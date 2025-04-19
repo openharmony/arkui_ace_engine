@@ -37,6 +37,8 @@ constexpr float DEFAULT_SIZE_24 = 24.0f;
 constexpr float DEFAULT_SIZE_32 = 32.0f;
 constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
 constexpr int EXPECTED_UPDATE_INTERVAL_VALUE = 1000;
+constexpr float DEFAULT_VISIBLE_RATIO_MIN = 0.0f;
+constexpr float DEFAULT_VISIBLE_RATIO_MAX = 1.0f;
 
 ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create()
 {
@@ -355,7 +357,7 @@ ArkUI_SwiperIndicator* OH_ArkUI_SwiperIndicator_Create(ArkUI_SwiperIndicatorType
         indicator->colorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
         indicator->selectedColorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
         indicator->maxDisplayCount = ArkUI_OptionalInt { 0, 0 };
-        indicator->dimSpace = ArkUI_OptionalFloat { 0, 0.0f };
+        indicator->dimSpace = ArkUI_OptionalFloat { 0, 8.0f };
     } else {
         return nullptr;
     }
@@ -1144,7 +1146,9 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_SetRatios(ArkUI_VisibleAreaEventOptions
     }
     option->ratios.clear();
     for (int32_t i = 0; i < size; i++) {
-        option->ratios.push_back(value[i]);
+        auto ratio = value[i];
+        ratio = std::clamp(ratio, DEFAULT_VISIBLE_RATIO_MIN, DEFAULT_VISIBLE_RATIO_MAX);
+        option->ratios.push_back(ratio);
     }
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1166,8 +1170,9 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_GetRatios(ArkUI_VisibleAreaEventOptions
     if (!option || !value || !size) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    if (option->ratios.size() > *size) {
-        *size = static_cast<int32_t>(option->ratios.size());
+    int32_t ratiosSize = static_cast<int32_t>(option->ratios.size());
+    if (*size < ratiosSize) {
+        *size = ratiosSize;
         return ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
     }
     int32_t index = 0;

@@ -35,6 +35,9 @@ public:
     static void SetTextShadow(const JSCallbackInfo& info);
     static void SetFontFeature(const JSCallbackInfo& info);
     static void SetDateTimeOptions(const JSCallbackInfo& info);
+
+protected:
+    static void SetFontDefault();
 };
 
 class JSTextClockController final : public Referenced {

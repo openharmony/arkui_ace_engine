@@ -26,4 +26,6 @@ ace_unittest("scroll_test_ng") {
     "scroll_nested_test_ng.cpp",
     "scroll_test_ng.cpp",
   ]
+
+  sources += [ "generated_scroll_test_ng.cpp" ]
 }

@@ -1088,4 +1088,5 @@ ArkThemeWhiteList.whiteList = [
     'Scroll',
     'Swiper',
     'Text',
+    'TextClock'
 ];

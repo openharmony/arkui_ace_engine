@@ -15,20 +15,27 @@
 
 #include "core/common/container.h"
 
+#include <dirent.h>
+
+#include "frameworks/base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
 
-#include <dirent.h>
-
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
 int32_t Container::CurrentId()
 {
     return ContainerScope::CurrentId();
+}
+
+NG::SafeAreaInsets Container::GetKeyboardSafeArea()
+{
+    return {};
 }
 
 int32_t Container::SafelyId()
@@ -302,24 +309,37 @@ bool Container::IsFontFileExistInPath(const std::string& path)
     return false;
 }
 
-std::string Container::GetFontFamilyName(std::string path)
+std::vector<std::string> Container::GetFontFamilyName(const std::string& path)
 {
-    std::string fontFamilyName = "";
-    DIR* dir;
-    struct dirent* ent;
-    if ((dir = opendir(path.c_str())) == nullptr) {
+    std::vector<std::string> fontFamilyName;
+    std::string manifest = "manifest.json";
+    std::string manifestContent = ReadFileToString(path, manifest);
+    auto json = JsonUtil::ParseJsonString(manifestContent);
+    if (!json || !json->IsValid()) {
+        TAG_LOGI(AceLogTag::ACE_FONT, "Json is null or Json is not Valid, manifestContentLength:%{public}zu",
+            manifestContent.length());
         return fontFamilyName;
     }
-    while ((ent = readdir(dir)) != nullptr) {
-        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
-            continue;
-        }
-        if (endsWith(ent->d_name, ".ttf")) {
-            fontFamilyName = ent->d_name;
-            break;
+    std::string ttfFileSrc = json->GetString("ttfFileSrc");
+    if (!ttfFileSrc.empty()) {
+        size_t lastSlashPos = ttfFileSrc.find_last_of("/\\");
+        std::string ttfFileName =
+            (lastSlashPos != std::string::npos) ? ttfFileSrc.substr(lastSlashPos + 1) : ttfFileSrc;
+        fontFamilyName.push_back(ttfFileName);
+    }
+    auto ttfFileSrcExtArray = json->GetValue("ttfFileSrcExt");
+    if (ttfFileSrcExtArray && ttfFileSrcExtArray->IsArray()) {
+        for (int32_t index = 0; index < ttfFileSrcExtArray->GetArraySize(); ++index) {
+            auto ttfFileSrcExtArrayItem = ttfFileSrcExtArray->GetArrayItem(index);
+            if (ttfFileSrcExtArrayItem && ttfFileSrcExtArrayItem->IsString()) {
+                std::string ttfFileSrcExt = ttfFileSrcExtArrayItem->GetString();
+                size_t lastSlashPos = ttfFileSrcExt.find_last_of("/\\");
+                std::string ttfFileExtName =
+                    (lastSlashPos != std::string::npos) ? ttfFileSrcExt.substr(lastSlashPos + 1) : ttfFileSrcExt;
+                fontFamilyName.emplace_back(ttfFileExtName);
+            }
         }
     }
-    closedir(dir);
     return fontFamilyName;
 }
 
@@ -356,5 +376,39 @@ bool Container::CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes)
     auto executor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(executor, defaultRes);
     return executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
+}
+
+Window* Container::GetWindow() const
+{
+    auto context = GetPipelineContext();
+    return context ? context->GetWindow() : nullptr;
+}
+
+bool Container::LessThanAPIVersion(PlatformVersion version)
+{
+    return static_cast<int32_t>(version) < 15
+               ? PipelineBase::GetCurrentContext() &&
+                     PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
+               : LessThanAPITargetVersion(version);
+}
+
+bool Container::GreatOrEqualAPIVersion(PlatformVersion version)
+{
+    return static_cast<int32_t>(version) < 15
+               ? PipelineBase::GetCurrentContext() &&
+                     PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
+               : GreatOrEqualAPITargetVersion(version);
+}
+
+bool Container::LessThanAPIVersionWithCheck(PlatformVersion version)
+{
+    return PipelineBase::GetCurrentContextSafelyWithCheck() &&
+           PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() < static_cast<int32_t>(version);
+}
+
+bool Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
+{
+    return PipelineBase::GetCurrentContextSafelyWithCheck() &&
+           PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
 }
 } // namespace OHOS::Ace

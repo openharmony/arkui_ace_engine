@@ -129,11 +129,13 @@ struct TextStyleResult {
     bool halfLeading = false;
     double letterSpacing = 0.0;
     double lineSpacing = 0.0;
+    std::optional<Dimension> paragraphSpacing;
     int32_t fontStyle = 0;
     int32_t fontWeight = 0;
     FONT_FEATURES_LIST fontFeature;
     std::string fontFamily;
     int32_t decorationType = 0;
+    std::vector<TextDecoration> decorationTypes;
     std::string decorationColor;
     int32_t decorationStyle = 0;
     int32_t textAlign = 0;
@@ -142,6 +144,7 @@ struct TextStyleResult {
     std::string leadingMarginSize[2] = { "0.00px", "0.00px" };
     std::vector<Shadow> textShadows;
     std::optional<TextBackgroundStyle> textBackgroundStyle;
+    float lineThicknessScale = 1.0f;
 };
 
 struct ImageStyleResult {
@@ -158,6 +161,7 @@ struct ResultObject {
     int32_t offsetInSpan[2] = { 0, 0 };
     std::u16string valueString;
     std::u16string previewText;
+    std::u16string urlAddress;
     RefPtr<PixelMap> valuePixelMap;
     TextStyleResult textStyle;
     ImageStyleResult imageStyle;
@@ -243,6 +247,8 @@ struct ParagraphInfo {
     int32_t textAlign = 0;
     int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
     int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);
+    // unit of paragraphSpacing is fp
+    std::optional<double> paragraphSpacing;
 
     std::pair<int32_t, int32_t> range;
 };

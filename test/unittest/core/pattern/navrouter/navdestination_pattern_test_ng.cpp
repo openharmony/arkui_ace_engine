@@ -1464,4 +1464,228 @@ HWTEST_F(NavDestinationPatternTestNg, ResetTitleAndToolBarState002, TestSize.Lev
     EXPECT_EQ(toolBarRenderContext->GetOpacity(), 1.0f);
     NavDestinationPatternTestNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: ShowTitleAndToolBar001
+ * @tc.desc: Branch: if (EnableTitleBarSwipe(nodeBase)) = false
+ *           Branch: if (EnableToolBarSwipe(nodeBase)) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternTestNg, ShowTitleAndToolBar001, TestSize.Level1)
+{
+    NavDestinationPatternTestNg::SetUpTestCase();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TOOL_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    navDestinationNode->toolBarNode_ = toolBarNode;
+    auto navDestinationLayoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    navDestinationLayoutProperty->propHideTitleBar_ = true;
+    navDestinationLayoutProperty->propHideToolBar_ = true;
+    auto titleBarRenderContext = AceType::DynamicCast<MockRenderContext>(titleBarNode->GetRenderContext());
+    ASSERT_NE(titleBarRenderContext, nullptr);
+    titleBarRenderContext->UpdateTransformTranslate({ 0.0f, 50.0f, 0.0f });
+    titleBarRenderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 500.0f, 400.0f));
+    titleBarRenderContext->UpdateOpacity(0.0f);
+    auto toolBarRenderContext = AceType::DynamicCast<MockRenderContext>(toolBarNode->GetRenderContext());
+    ASSERT_NE(toolBarRenderContext, nullptr);
+    toolBarRenderContext->UpdateTransformTranslate({ 0.0f, 50.0f, 0.0f });
+    toolBarRenderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 500.0f, 400.0f));
+    toolBarRenderContext->UpdateOpacity(0.0f);
+
+    navDestinationPattern->ShowTitleAndToolBar();
+    EXPECT_EQ(titleBarRenderContext->GetOpacity(), 0.0f);
+    EXPECT_EQ(toolBarRenderContext->GetOpacity(), 0.0f);
+    NavDestinationPatternTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ShowTitleAndToolBar002
+ * @tc.desc: Branch: if (EnableTitleBarSwipe(nodeBase)) = true
+ *           Branch: if (GetTitleOrToolBarTranslateAndHeight(titleBarNode, translate, barHeight)) = false
+ *           Branch: if (EnableToolBarSwipe(nodeBase)) = true
+ *           Branch: if (GetTitleOrToolBarTranslateAndHeight(toolBarNode, translate, barHeight)) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternTestNg, ShowTitleAndToolBar002, TestSize.Level1)
+{
+    NavDestinationPatternTestNg::SetUpTestCase();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TOOL_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    navDestinationNode->toolBarNode_ = toolBarNode;
+    auto navDestinationLayoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    navDestinationLayoutProperty->propHideTitleBar_ = false;
+    titleBarNode->renderContext_ = nullptr;
+    navDestinationLayoutProperty->propHideToolBar_ = false;
+    toolBarNode->renderContext_ = nullptr;
+
+    navDestinationPattern->ShowTitleAndToolBar();
+    EXPECT_EQ(titleBarNode->GetRenderContext(), nullptr);
+    EXPECT_EQ(toolBarNode->GetRenderContext(), nullptr);
+    NavDestinationPatternTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ShowTitleAndToolBar003
+ * @tc.desc: Branch: if (EnableTitleBarSwipe(nodeBase)) = true
+ *           Branch: if (GetTitleOrToolBarTranslateAndHeight(titleBarNode, translate, barHeight)) = true
+ *           Branch: if (titleBarSwipeContext_.showBarTask) = false
+ *           Branch: if (EnableToolBarSwipe(nodeBase)) = true
+ *           Branch: if (GetTitleOrToolBarTranslateAndHeight(toolBarNode, translate, barHeight)) = true
+ *           Branch: if (toolBarSwipeContext_.showBarTask) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternTestNg, ShowTitleAndToolBar003, TestSize.Level1)
+{
+    NavDestinationPatternTestNg::SetUpTestCase();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TOOL_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    navDestinationNode->toolBarNode_ = toolBarNode;
+    auto navDestinationLayoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    navDestinationLayoutProperty->propHideTitleBar_ = false;
+    auto titleBarRenderContext = AceType::DynamicCast<MockRenderContext>(titleBarNode->GetRenderContext());
+    ASSERT_NE(titleBarRenderContext, nullptr);
+    titleBarRenderContext->UpdateTransformTranslate({ 0.0f, 50.0f, 0.0f });
+    titleBarRenderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 500.0f, 400.0f));
+    titleBarRenderContext->UpdateOpacity(0.0f);
+    navDestinationPattern->titleBarSwipeContext_.showBarTask.Reset(nullptr);
+    navDestinationLayoutProperty->propHideToolBar_ = false;
+    auto toolBarRenderContext = AceType::DynamicCast<MockRenderContext>(toolBarNode->GetRenderContext());
+    ASSERT_NE(toolBarRenderContext, nullptr);
+    toolBarRenderContext->UpdateTransformTranslate({ 0.0f, 50.0f, 0.0f });
+    toolBarRenderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 500.0f, 400.0f));
+    toolBarRenderContext->UpdateOpacity(0.0f);
+    navDestinationPattern->toolBarSwipeContext_.showBarTask.Reset(nullptr);
+
+    navDestinationPattern->ShowTitleAndToolBar();
+    EXPECT_EQ(titleBarRenderContext->GetOpacity(), 1.0f);
+    EXPECT_FALSE(navDestinationPattern->titleBarSwipeContext_.showBarTask);
+    EXPECT_EQ(toolBarRenderContext->GetOpacity(), 1.0f);
+    EXPECT_FALSE(navDestinationPattern->toolBarSwipeContext_.showBarTask);
+    NavDestinationPatternTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: ShowTitleAndToolBar004
+ * @tc.desc: Branch: if (EnableTitleBarSwipe(nodeBase)) = true
+ *           Branch: if (GetTitleOrToolBarTranslateAndHeight(titleBarNode, translate, barHeight)) = true
+ *           Branch: if (titleBarSwipeContext_.showBarTask) = true
+ *           Branch: if (EnableToolBarSwipe(nodeBase)) = true
+ *           Branch: if (GetTitleOrToolBarTranslateAndHeight(toolBarNode, translate, barHeight)) = true
+ *           Branch: if (toolBarSwipeContext_.showBarTask) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternTestNg, ShowTitleAndToolBar004, TestSize.Level1)
+{
+    NavDestinationPatternTestNg::SetUpTestCase();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TOOL_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    navDestinationNode->toolBarNode_ = toolBarNode;
+    auto navDestinationLayoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    navDestinationLayoutProperty->propHideTitleBar_ = false;
+    auto titleBarRenderContext = AceType::DynamicCast<MockRenderContext>(titleBarNode->GetRenderContext());
+    ASSERT_NE(titleBarRenderContext, nullptr);
+    titleBarRenderContext->UpdateTransformTranslate({ 0.0f, 50.0f, 0.0f });
+    titleBarRenderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 500.0f, 400.0f));
+    titleBarRenderContext->UpdateOpacity(0.0f);
+    navDestinationPattern->titleBarSwipeContext_.showBarTask.Reset([] { });
+    navDestinationLayoutProperty->propHideToolBar_ = false;
+    auto toolBarRenderContext = AceType::DynamicCast<MockRenderContext>(toolBarNode->GetRenderContext());
+    ASSERT_NE(toolBarRenderContext, nullptr);
+    toolBarRenderContext->UpdateTransformTranslate({ 0.0f, 50.0f, 0.0f });
+    toolBarRenderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 500.0f, 400.0f));
+    toolBarRenderContext->UpdateOpacity(0.0f);
+    navDestinationPattern->toolBarSwipeContext_.showBarTask.Reset([] { });
+
+    navDestinationPattern->ShowTitleAndToolBar();
+    EXPECT_EQ(titleBarRenderContext->GetOpacity(), 1.0f);
+    EXPECT_FALSE(navDestinationPattern->titleBarSwipeContext_.showBarTask);
+    EXPECT_EQ(toolBarRenderContext->GetOpacity(), 1.0f);
+    EXPECT_FALSE(navDestinationPattern->toolBarSwipeContext_.showBarTask);
+    NavDestinationPatternTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: StopHideBarIfNeeded001
+ * @tc.desc: Branch: if (!ctx.isBarHiding) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternTestNg, StopHideBarIfNeeded001, TestSize.Level1)
+{
+    NavDestinationPatternTestNg::SetUpTestCase();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    auto& swipeContext = navDestinationPattern->GetSwipeContext(true);
+    swipeContext.isBarHiding = true;
+    auto titleBarRenderContext = AceType::DynamicCast<MockRenderContext>(titleBarNode->GetRenderContext());
+    ASSERT_NE(titleBarRenderContext, nullptr);
+    titleBarRenderContext->UpdateTransformTranslate({ 0.0f, 50.0f, 0.0f });
+    titleBarRenderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 500.0f, 100.0f));
+    titleBarRenderContext->UpdateOpacity(0.0f);
+
+    navDestinationPattern->StopHideBarIfNeeded(0.0f, true);
+    EXPECT_FALSE(swipeContext.isBarHiding);
+    EXPECT_EQ(titleBarRenderContext->GetOpacity(), 1.0f);
+    NavDestinationPatternTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: StopHideBarIfNeeded002
+ * @tc.desc: Branch: if (!ctx.isBarHiding) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternTestNg, StopHideBarIfNeeded002, TestSize.Level1)
+{
+    NavDestinationPatternTestNg::SetUpTestCase();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    auto& swipeContext = navDestinationPattern->GetSwipeContext(true);
+    swipeContext.isBarHiding = false;
+    auto titleBarRenderContext = AceType::DynamicCast<MockRenderContext>(titleBarNode->GetRenderContext());
+    ASSERT_NE(titleBarRenderContext, nullptr);
+    titleBarRenderContext->UpdateTransformTranslate({ 0.0f, 50.0f, 0.0f });
+    titleBarRenderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 500.0f, 100.0f));
+    titleBarRenderContext->UpdateOpacity(0.0f);
+
+    navDestinationPattern->StopHideBarIfNeeded(0.0f, true);
+    EXPECT_FALSE(swipeContext.isBarHiding);
+    EXPECT_EQ(titleBarRenderContext->GetOpacity(), 0.0f);
+    NavDestinationPatternTestNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG

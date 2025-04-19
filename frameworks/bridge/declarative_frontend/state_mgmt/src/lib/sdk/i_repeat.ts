@@ -22,6 +22,13 @@ interface RepeatItem<T> {
     readonly index?: number
 }
 
+interface ItemDragEventHandler {
+    onLongPress?: (index: number) => void;
+    onDragStart?: (index: number) => void;
+    onMoveThrough?: (from: number, to: number) => void;
+    onDrop?: (index: number) => void;
+}
+
 type RepeatItemGenFunc<T> = (i: RepeatItem<T>) => void;
 type RepeatTTypeGenFunc<T> = (item: T, index: number) => string;
 type RepeatKeyGenFunc<T> = (item: T, index?: number) => string;
@@ -55,7 +62,12 @@ interface RepeatAPI<T> {
     // when call virtualScroll, framework will use virtual scroll
     // totalCount: number of logical items, can be larger than number of loaded
     // data items of lazy loading array source, can be larger than that array.length
-    virtualScroll: (options?: { totalCount?: number, reusable?: boolean }) => RepeatAPI<T>;
+    virtualScroll: (options?: {
+        totalCount?: number,
+        onTotalCount?(): number,
+        onLazyLoading?(index: number): void,
+        reusable?: boolean
+    }) => RepeatAPI<T>;
 
     // function to decide which template to use, each template has an id
     templateId: (typeFunc: RepeatTTypeGenFunc<T>) => RepeatAPI<T>;
@@ -67,5 +79,5 @@ interface RepeatAPI<T> {
     render(isInitialRender: boolean): void;       
 
     // not used by Repeat
-    onMove: (handler: OnMoveHandler) => RepeatAPI<T>;
+    onMove: (handler: OnMoveHandler, eventHandler: ItemDragEventHandler) => RepeatAPI<T>;
 }

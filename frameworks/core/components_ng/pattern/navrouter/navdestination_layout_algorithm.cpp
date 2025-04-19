@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -215,7 +216,7 @@ float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinat
 }
 
 float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGroupNode>& hostNode,
-    const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty)
+    const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty, float decorBarHeight = 0.0f)
 {
     /**
      * When all the following conditions are met, we consider the titleBar height to be 0:
@@ -234,6 +235,7 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGr
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto geometryNode = titleBarWrapper->GetGeometryNode();
     auto offsetY = NavigationTitleUtil::CalculateTitlebarOffset(titleBarNode);
+    offsetY += decorBarHeight;
     auto navDestinationPattern = hostNode->GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(navDestinationPattern, 0.0f);
     navDestinationPattern->SetTitleBarOffsetY(offsetY);
@@ -340,6 +342,23 @@ float TransferBarHeight(const RefPtr<NavDestinationGroupNode>& hostNode, float d
         defaultBarHeight : 0.0f;
 }
 
+bool IsDestSizeMatchNavigation(const RefPtr<NavDestinationGroupNode>& destNode, const SizeF& navDestSize)
+{
+    CHECK_NULL_RETURN(destNode, false);
+    auto rotateAngle = destNode->GetPageRotateAngle();
+    if (rotateAngle.has_value() && rotateAngle.value() != ROTATION_0) {
+        return true;
+    }
+
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(destNode->GetNavigationNode());
+    CHECK_NULL_RETURN(navigationNode, false);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navigationPattern, false);
+    auto navigationSize = navigationPattern->GetNavigationSize();
+    return NearEqual(navDestSize.Width(), navigationSize.Width()) &&
+        NearEqual(navDestSize.Height(), navigationSize.Height());
+}
+
 std::optional<float> GetContainerModalTitleHeightIfNeeded(
     const RefPtr<NavDestinationPattern>& navDestPattern, const SizeF& navDestSize)
 {
@@ -406,6 +425,8 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
     auto containerModalTitleHeight = GetContainerModalTitleHeightIfNeeded(navDestinationPattern, size);
+    bool sizeMatch = IsDestSizeMatchNavigation(hostNode, size);
+    hostNode->SetIsSizeMatchNavigation(sizeMatch);
 
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
@@ -459,8 +480,19 @@ void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (edgeTopOverLayCondition || edgeBottomOverLayCondition) {
         Measure(layoutWrapper);
     }
-
-    float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty);
+    float decorBarHeight = 0.0f;
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(hostNode->GetNavigationNode());
+    if (navigationNode) {
+        auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+        if (navigationPattern) {
+            RefPtr<ToolbarManager> toolbarManager = navigationPattern->GetToolBarManager();
+            if (toolbarManager != nullptr && toolbarManager->GetIsMoveUp()) {
+                Dimension containerModelTitlebarHeight = toolbarManager->GetTitleHeight();
+                decorBarHeight = static_cast<float>(containerModelTitlebarHeight.ConvertToPx());
+            }
+        }
+    }
+    float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty, decorBarHeight);
     auto resetTitleBarHeight = TransferBarHeight(hostNode, titlebarHeight, true);
     LayoutContent(layoutWrapper, hostNode, navDestinationLayoutProperty, resetTitleBarHeight);
     float toolbarHeight = NavigationLayoutUtil::LayoutToolBar(

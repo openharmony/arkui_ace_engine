@@ -31,6 +31,12 @@ ace_unittest("accessibility_property_testtwo_ng") {
   sources = [ "accessibility_property_testtwo_ng.cpp" ]
 }
 
+ace_unittest("accessibility_property_test_three_ng") {
+  type = "new"
+  module_output = "property"
+  sources = [ "accessibility_property_test_three_ng.cpp" ]
+}
+
 ace_unittest("border_property_test_ng") {
   type = "new"
   module_output = "property"
@@ -77,6 +83,7 @@ group("core_property_unittest") {
   testonly = true
   deps = [
     ":accessibility_property_test_ng",
+    ":accessibility_property_test_three_ng",
     ":accessibility_property_testtwo_ng",
     ":border_property_test_ng",
     ":calc_length_test_ng",

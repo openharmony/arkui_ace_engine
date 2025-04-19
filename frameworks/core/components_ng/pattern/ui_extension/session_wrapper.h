@@ -157,6 +157,7 @@ public:
         RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT) = 0;
 
     virtual void NotifyHostWindowMode(int32_t mode) {}
+    virtual void ReDispatchWantParams() {}
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_H

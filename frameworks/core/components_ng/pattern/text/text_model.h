@@ -26,13 +26,10 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
-#include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
-#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
-#include "core/components_ng/pattern/text/text_menu_extension.h"
-#include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 
@@ -110,6 +107,7 @@ public:
     virtual void SetTextIndent(const Dimension& value) = 0;
     virtual void SetLineHeight(const Dimension& value) = 0;
     virtual void SetLineSpacing(const Dimension& value) = 0;
+    virtual void SetIsOnlyBetweenLines(bool isOnlyBetweenLines) = 0;
     virtual void SetTextDecoration(TextDecoration value) = 0;
     virtual void SetTextDecorationColor(const Color& value) = 0;
     virtual void SetTextDecorationStyle(TextDecorationStyle value) = 0;
@@ -152,6 +150,7 @@ public:
     virtual void SetResponseRegion(bool isUserSetResponseRegion) {};
     virtual void SetHalfLeading(bool halfLeading) = 0;
     virtual void SetEnableHapticFeedback(bool state) = 0;
+    virtual void SetLineThicknessScale(float value) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

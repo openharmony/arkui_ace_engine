@@ -563,7 +563,12 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     };
     panRecognizer_->SetOnReject(panOnReject);
     panRecognizer_->SetIsForDrag(true);
-    panRecognizer_->SetMouseDistance(DRAG_PAN_DISTANCE_MOUSE.ConvertToPx());
+    auto dragPanDistanceMouse = DRAG_PAN_DISTANCE_MOUSE;
+    auto appTheme = pipeline->GetTheme<AppTheme>();
+    if (appTheme) {
+        dragPanDistanceMouse = appTheme->GetDragPanDistanceMouse();
+    }
+    panRecognizer_->SetMouseDistance(dragPanDistanceMouse.ConvertToPx());
     actionCancel_ = actionCancel;
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
@@ -1405,6 +1410,8 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
                 callback(onPreDragStatus);
             },
             TaskExecutor::TaskType::UI, "ArkUIDragExecutePreDrag");
+    } else if (preDragStatus == PreDragStatus::PREPARING_FOR_DRAG_DETECTION) {
+        onPreDragFunc(preDragStatus);
     } else {
         onPreDragFunc(onPreDragStatus);
     }

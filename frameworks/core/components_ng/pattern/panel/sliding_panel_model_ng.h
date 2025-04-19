@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PANEL_SLIDING_PANEL_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PANEL_SLIDING_PANEL_MODEL_NG_H
 
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/panel/sliding_panel_model.h"
 
 namespace OHOS::Ace::NG {

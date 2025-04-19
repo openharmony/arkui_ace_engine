@@ -54,6 +54,7 @@ enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
 enum class MaximizeMode : uint32_t;
 class RSNode;
+class RSCanvasNode;
 class RSSurfaceNode;
 class RSTransaction;
 class Transform;
@@ -520,6 +521,12 @@ public:
     }
 
     virtual void EnableContainerModalCustomGesture(bool enable) {};
+
+    virtual void AddKeyFrameAnimateEndCallback(const std::function<void()> &callback) {};
+    virtual void AddKeyFrameCanvasNodeCallback(const std::function<
+        void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+            std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback) {};
+    virtual void LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>&) {};
 };
 
 } // namespace OHOS::Ace

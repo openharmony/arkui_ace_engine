@@ -13,12 +13,18 @@
  * limitations under the License.
  */
 
-#include "text_base.h"
-
 #include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/common/clipboard/mock_clip_board.h"
+#include "text_base.h"
+
+#include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+
+#include "core/components_ng/pattern/text/span/tlv_util.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -49,9 +55,9 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString001, TestSize.Level1)
     auto [frameNode, pattern] = Init();
     auto pipeline = PipelineContext::GetCurrentContext();
     auto mockClipboardImpl = AceType::MakeRefPtr<TextMockClipboardImpl>(pipeline->GetTaskExecutor());
-    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(1);
-    EXPECT_CALL(*mockClipboardImpl, AddTextRecord(_, _)).Times(1);
-    EXPECT_CALL(*mockClipboardImpl, AddSpanStringRecord(_, _)).Times(1);
+    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(0);
+    EXPECT_CALL(*mockClipboardImpl, AddTextRecord(_, _)).Times(0);
+    EXPECT_CALL(*mockClipboardImpl, AddSpanStringRecord(_, _)).Times(0);
     pattern->clipboard_ = mockClipboardImpl;
 
     pattern->textSelector_.Update(0, 6);
@@ -81,8 +87,8 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString002, TestSize.Level1)
     auto [frameNode, pattern] = Init();
     auto pipeline = PipelineContext::GetCurrentContext();
     auto mockClipboardImpl = AceType::MakeRefPtr<TextMockClipboardImpl>(pipeline->GetTaskExecutor());
-    EXPECT_CALL(*mockClipboardImpl, AddMultiTypeRecord(_, _)).Times(1);
-    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(1);
+    EXPECT_CALL(*mockClipboardImpl, AddMultiTypeRecord(_, _)).Times(0);
+    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(0);
     pattern->clipboard_ = mockClipboardImpl;
 
     pattern->textSelector_.Update(0, 6);
@@ -113,8 +119,8 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString003, TestSize.Level1)
     auto [frameNode, pattern] = Init();
     auto pipeline = PipelineContext::GetCurrentContext();
     auto mockClipboardImpl = AceType::MakeRefPtr<TextMockClipboardImpl>(pipeline->GetTaskExecutor());
-    EXPECT_CALL(*mockClipboardImpl, AddMultiTypeRecord(_, _)).Times(1);
-    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(1);
+    EXPECT_CALL(*mockClipboardImpl, AddMultiTypeRecord(_, _)).Times(0);
+    EXPECT_CALL(*mockClipboardImpl, SetData(_, _)).Times(0);
     pattern->clipboard_ = mockClipboardImpl;
 
     pattern->textSelector_.Update(0, 6);
@@ -170,7 +176,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString005, TestSize.Level1)
     textLayoutProperty->UpdateFontWeight(FontWeight::W400);
     textLayoutProperty->UpdateFontFamily(fontFamily);
     textLayoutProperty->UpdateFontFeature(fontFeature);
-    textLayoutProperty->UpdateTextDecoration(TextDecoration::UNDERLINE);
+    textLayoutProperty->UpdateTextDecoration({TextDecoration::UNDERLINE});
     textLayoutProperty->UpdateTextDecorationColor(Color::RED);
     textLayoutProperty->UpdateTextDecorationStyle(TextDecorationStyle::DOTTED);
     textLayoutProperty->UpdateTextCase(TextCase::LOWERCASE);
@@ -207,7 +213,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString005, TestSize.Level1)
     EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), FontWeight::W400);
     EXPECT_EQ((*it)->fontStyle->GetFontFamily().value(), fontFamily);
     EXPECT_EQ((*it)->fontStyle->GetFontFeature().value(), fontFeature);
-    EXPECT_EQ((*it)->fontStyle->GetTextDecoration().value(), TextDecoration::UNDERLINE);
+    EXPECT_EQ((*it)->fontStyle->GetTextDecorationFirst(), TextDecoration::UNDERLINE);
     EXPECT_EQ((*it)->fontStyle->GetTextDecorationColor().value(), Color::RED);
     EXPECT_EQ((*it)->fontStyle->GetTextDecorationStyle().value(), TextDecorationStyle::DOTTED);
     EXPECT_EQ((*it)->fontStyle->GetTextCase().value(), TextCase::LOWERCASE);
@@ -276,7 +282,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
     span0->fontStyle->UpdateFontWeight(FontWeight::W400);
     span0->fontStyle->UpdateFontFamily(fontFamily);
     span0->fontStyle->UpdateFontFeature(fontFeature);
-    span0->fontStyle->UpdateTextDecoration(TextDecoration::UNDERLINE);
+    span0->fontStyle->UpdateTextDecoration({TextDecoration::UNDERLINE});
     span0->fontStyle->UpdateTextDecorationColor(Color::RED);
     span0->fontStyle->UpdateTextDecorationStyle(TextDecorationStyle::DOTTED);
     span0->fontStyle->UpdateTextCase(TextCase::LOWERCASE);
@@ -325,7 +331,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
     EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), FontWeight::W400);
     EXPECT_EQ((*it)->fontStyle->GetFontFamily().value(), fontFamily);
     EXPECT_EQ((*it)->fontStyle->GetFontFeature().value(), fontFeature);
-    EXPECT_EQ((*it)->fontStyle->GetTextDecoration().value(), TextDecoration::UNDERLINE);
+    EXPECT_EQ((*it)->fontStyle->GetTextDecorationFirst(), TextDecoration::UNDERLINE);
     EXPECT_EQ((*it)->fontStyle->GetTextDecorationColor().value(), Color::RED);
     EXPECT_EQ((*it)->fontStyle->GetTextDecorationStyle().value(), TextDecorationStyle::DOTTED);
     EXPECT_EQ((*it)->fontStyle->GetTextCase().value(), TextCase::LOWERCASE);
@@ -429,7 +435,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString009, TestSize.Level1)
     span0->content = u" ";
     span0->interval.first = 0;
     span0->interval.second = 1;
-    span0->imageNodeId = 1;
+    span0->nodeId_ = 1;
     auto span1 = span0->GetSameStyleSpanItem(true);
     span1->content = u" ";
     span1->interval.first = 0;
@@ -479,7 +485,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString010, TestSize.Level1)
     span0->content = u" ";
     span0->interval.first = 0;
     span0->interval.second = 1;
-    span0->imageNodeId = 1;
+    span0->nodeId_ = 1;
     auto span1 = span0->GetSameStyleSpanItem(true);
     span1->content = u" ";
     span1->interval.first = 0;
@@ -520,17 +526,36 @@ HWTEST_F(TextTestSevenNg, InheritParentTextStyle001, TestSize.Level1)
     /**
      * @tc.steps: step1. Construct a minimal version 10.
      */
+    /**
+     * @tc.steps: step1. init
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+    LayoutConstraintF contentConstraint;
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(
         static_cast<int32_t>(PlatformVersion::VERSION_TWELVE)); // 12 means min platformVersion.
-    TextStyle textStyleBase;
-    textStyleBase.SetFontSize(ADAPT_FONT_SIZE_VALUE);
+    layoutProperty->UpdateFontSize(ADAPT_FONT_SIZE_VALUE);
     auto multipleAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
-    multipleAlgorithm->textStyle_ = textStyleBase;
+    /**
+     * @tc.steps: step3. set theme.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    TextStyle textStyle;
+    multipleAlgorithm->ConstructTextStyles(contentConstraint, AccessibilityManager::RawPtr(layoutWrapper), textStyle);
 
     /**
      * @tc.steps: step2. Construct MultipleParagraphLayoutAlgorithm and test inheritTextStyle_.
      */
-    TextStyle textStyle;
     textStyle.SetFontSize(FONT_SIZE_VALUE);
     multipleAlgorithm->InheritParentTextStyle(textStyle);
     EXPECT_EQ(multipleAlgorithm->inheritTextStyle_.GetFontSize(), ADAPT_FONT_SIZE_VALUE);
@@ -540,7 +565,7 @@ HWTEST_F(TextTestSevenNg, InheritParentTextStyle001, TestSize.Level1)
      */
     int originApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(
-        static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)); // 16 means min platformVersion.
+        static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)); // 16 means min platformVersion.
 
     textStyle.SetFontSize(FONT_SIZE_VALUE);
     multipleAlgorithm->InheritParentTextStyle(textStyle);
@@ -597,7 +622,7 @@ HWTEST_F(TextTestSevenNg, SpanBuildParagraph001, TestSize.Level1)
 
     int originApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(
-        static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)); // 16 means min platformVersion.
+        static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)); // 16 means min platformVersion.
 
     textLayoutAlgorithm->BuildParagraph(
         textStyle, textLayoutProperty, contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));

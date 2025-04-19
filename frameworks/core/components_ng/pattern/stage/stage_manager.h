@@ -132,6 +132,7 @@ protected:
     void UpdatePageNeedRemove(const RefPtr<UINode>& pageNode);
     bool CheckPageInTransition(const RefPtr<UINode>& pageNode);
     void StopPageTransition(bool needTransition);
+    std::string GetPagePath(const RefPtr<FrameNode>& pageNode);
 
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;

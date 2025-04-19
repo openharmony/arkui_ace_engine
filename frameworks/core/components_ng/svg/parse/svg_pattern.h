@@ -37,7 +37,6 @@ public:
     {
         boundingBoxRect_ = boundingBoxRect;
     }
-
 private:
     SvgPatternAttribute patternAttr_;
     Rect boundingBoxRect_;

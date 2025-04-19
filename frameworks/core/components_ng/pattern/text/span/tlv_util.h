@@ -23,11 +23,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/image/pixel_map.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/shadow.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/render/paragraph.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace {
 
@@ -139,6 +135,11 @@ constexpr uint8_t TLV_SPAN_BACKGROUND_GROUPID = 0x96;
 
 constexpr uint8_t TLV_CUSTOM_MARSHALL_BUFFER_START = 0x97;
 
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_PARAGRAPH_SPACING = 0x98;
+
+constexpr uint8_t TLV_SPAN_FONT_STYLE_LineThicknessScale = 0x99;
+constexpr uint8_t TLV_FLOAT_TAG = 0x9A;
+
 #define TLV_DEFINE_ENUM_TYPE(type, tag) \
 public:                                                                     \
     static void Write##type(std::vector<uint8_t>& buff, type value)         \
@@ -243,6 +244,10 @@ public:
     static ImageSpanAttribute ReadImageSpanAttribute(std::vector<uint8_t>& buff, int32_t& cursor);
     static void WriteLeadingMargin(std::vector<uint8_t>& buff, NG::LeadingMargin& value);
     static NG::LeadingMargin ReadLeadingMargin(std::vector<uint8_t>& buff, int32_t& cursor);
+    static void WriteTextDecorations(std::vector<uint8_t>& buff, const std::vector<TextDecoration>& values);
+    static std::vector<TextDecoration> ReadTextDecorations(std::vector<uint8_t>& buff, int32_t& cursor);
+    static void WriteFloat(std::vector<uint8_t>& buff, float value);
+    static float ReadFloat(std::vector<uint8_t>& buff, int32_t& cursor);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_TLV_UTIL_H

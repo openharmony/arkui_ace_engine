@@ -17,6 +17,7 @@
 
 #include "bridge/cj_frontend/cppview/render_image.h"
 #include "core/image/image_source_info.h"
+#include "core/pipeline/pipeline_base.h"
 
 using namespace OHOS;
 
@@ -98,5 +99,11 @@ double CJRenderImage::GetWidth()
 {
     double density = !NearZero(GetDensity()) ? GetDensity() : 1.0;
     return width_ / density;
+}
+
+double CJRenderImage::GetDensity()
+{
+    double density = PipelineBase::GetCurrentDensity();
+    return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
 }
 } // namespace OHOS::Ace::Framework

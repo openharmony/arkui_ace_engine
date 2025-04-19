@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,21 +33,18 @@ ProgressType g_progressType = ProgressType::LINEAR;
 
 ProgressModel* ProgressModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ProgressModelNG());
+    static NG::ProgressModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::ProgressModelNG());
-            } else {
-                instance_.reset(new Framework::ProgressModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::ProgressModelNG instance;
+        return &instance;
+    } else {
+        static Framework::ProgressModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
@@ -97,7 +94,9 @@ void JSProgress::Create(const JSCallbackInfo& info)
     }
 
     ProgressModel::GetInstance()->Create(0.0, value, 0.0, total, static_cast<NG::ProgressType>(g_progressType));
-    JSProgressTheme::ApplyTheme(progressStyle);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        JSProgressTheme::ApplyTheme(progressStyle);
+    }
 }
 
 void JSProgress::JSBind(BindingTarget globalObj)
@@ -144,12 +143,15 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
         Color endColor;
         Color beginColor;
         if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
-            endColor = theme->GetRingProgressEndSideColor();
-            beginColor = theme->GetRingProgressBeginSideColor();
-            if (g_progressType == ProgressType::CAPSULE) {
-                colorVal = theme->GetCapsuleSelectColor();
+            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+                endColor = theme->GetRingProgressEndSideColor();
+                beginColor = theme->GetRingProgressBeginSideColor();
+                colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleSelectColor()
+                                                                     : theme->GetTrackSelectedColor();
             } else {
-                colorVal = theme->GetTrackSelectedColor();
+                ProgressModel::GetInstance()->ResetGradientColor();
+                ProgressModel::GetInstance()->ResetColor();
+                return;
             }
         } else {
             endColor = colorVal;
@@ -303,14 +305,19 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
 {
     Color colorVal;
     if (!CheckColor(info[0], colorVal, V2::PROGRESS_ETS_TAG, V2::ATTRS_COMMON_BACKGROUND_COLOR)) {
-        RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
-        CHECK_NULL_VOID(theme);
-        if (g_progressType == ProgressType::CAPSULE) {
-            colorVal = theme->GetCapsuleBgColor();
-        } else if (g_progressType == ProgressType::RING) {
-            colorVal = theme->GetRingProgressBgColor();
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+            ProgressModel::GetInstance()->ResetBackgroundColor();
+            return;
         } else {
-            colorVal = theme->GetTrackBgColor();
+            RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+            CHECK_NULL_VOID(theme);
+            if (g_progressType == ProgressType::CAPSULE) {
+                colorVal = theme->GetCapsuleBgColor();
+            } else if (g_progressType == ProgressType::RING) {
+                colorVal = theme->GetRingProgressBgColor();
+            } else {
+                colorVal = theme->GetTrackBgColor();
+            }
         }
     }
 
@@ -342,10 +349,16 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
 
     auto jsBorderColor = paramObject->GetProperty("borderColor");
     Color colorVal;
-    if (!ParseJsColor(jsBorderColor, colorVal)) {
-        colorVal = theme->GetBorderColor();
+    if (ParseJsColor(jsBorderColor, colorVal)) {
+        ProgressModel::GetInstance()->SetBorderColor(colorVal);
+    } else {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+            ProgressModel::GetInstance()->ResetBorderColor();
+        } else {
+            colorVal = theme->GetBorderColor();
+            ProgressModel::GetInstance()->SetBorderColor(colorVal);
+        }
     }
-    ProgressModel::GetInstance()->SetBorderColor(colorVal);
 
     auto jsSweepingEffect = paramObject->GetProperty("enableScanEffect");
     bool sweepingEffect = false;
@@ -390,14 +403,19 @@ void JSProgress::JsSetFontStyle(const JSCallbackInfo& info)
 {
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
-    RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
     auto jsFontColor = paramObject->GetProperty("fontColor");
     Color fontColorVal;
-    if (!ParseJsColor(jsFontColor, fontColorVal)) {
-        fontColorVal = theme->GetTextColor();
+    if (ParseJsColor(jsFontColor, fontColorVal)) {
+        ProgressModel::GetInstance()->SetFontColor(fontColorVal);
+    } else {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+            ProgressModel::GetInstance()->ResetFontColor();
+        } else {
+            fontColorVal = theme->GetTextColor();
+            ProgressModel::GetInstance()->SetFontColor(fontColorVal);
+        }
     }
-
-    ProgressModel::GetInstance()->SetFontColor(fontColorVal);
 
     auto textStyle = paramObject->GetProperty("font");
     if (!textStyle->IsObject()) {

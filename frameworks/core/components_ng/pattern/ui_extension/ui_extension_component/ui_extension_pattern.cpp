@@ -516,6 +516,12 @@ UIExtensionUsage UIExtensionPattern::GetUIExtensionUsage(const AAFwk::Want& want
     return UIExtensionUsage::EMBEDDED;
 }
 
+void UIExtensionPattern::ReDispatchWantParams()
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->ReDispatchWantParams();
+}
+
 void UIExtensionPattern::OnConnect()
 {
     CHECK_RUN_ON(UI);
@@ -563,10 +569,10 @@ void UIExtensionPattern::OnConnect()
     if (isFocused || (usage_ == UIExtensionUsage::MODAL)) {
         uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
     }
+    ReDispatchWantParams();
     InitializeAccessibility();
     ReDispatchDisplayArea();
     InitBusinessDataHandleCallback();
-    RegisterReplyPageModeCallback();
     NotifyHostWindowMode();
 }
 
@@ -574,6 +580,7 @@ void UIExtensionPattern::InitBusinessDataHandleCallback()
 {
     RegisterEventProxyFlagCallback();
     RegisterGetAvoidInfoCallback();
+    RegisterReplyPageModeCallback();
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()
@@ -1995,7 +2002,7 @@ bool UIExtensionPattern::SendBusinessData(
     UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
     CHECK_NULL_RETURN(sessionWrapper_, false);
-    UIEXT_LOGI("SendBusinessData businessCode=%{public}u.", code);
+    UIEXT_LOGD("SendBusinessData businessCode=%{public}u.", code);
     return sessionWrapper_->SendBusinessData(code, data, type, subSystemId);
 }
 
@@ -2098,50 +2105,19 @@ AccessibilityParentRectInfo UIExtensionPattern::GetAccessibilityRectInfo() const
     AccessibilityParentRectInfo rectInfo;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, rectInfo);
-    auto rect = host->GetTransformRectRelativeToWindow(true);
-    VectorF finalScale = host->GetTransformScaleRelativeToWindow();
-    
-    rectInfo.left = static_cast<int32_t>(rect.Left());
-    rectInfo.top = static_cast<int32_t>(rect.Top());
-    rectInfo.scaleX = finalScale.x;
-    rectInfo.scaleY = finalScale.y;
     auto pipeline = host->GetContextRefPtr();
     if (pipeline) {
         auto accessibilityManager = pipeline->GetAccessibilityManager();
         if (accessibilityManager) {
-            auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
-            auto rectFinal = accessibilityManager->GetFinalRealRectInfo(host);
-            rectInfo.left = static_cast<int32_t>(rectFinal.Left());
-            rectInfo.top = static_cast<int32_t>(rectFinal.Top());
-            RotateTransform rotateData;
-            RotateTransform windowRotateData = windowInfo.rotateTransform;
-            rotateData.rotateDegree = host->GetTransformRotateRelativeToWindow();
-            AccessibilityRect rotateRect(rectFinal.Left(), rectFinal.Top(),
-                rectFinal.Width(), rectFinal.Height());
-            if (windowRotateData.rotateDegree) {
-                rotateRect.Rotate(windowRotateData.innerCenterX, windowRotateData.innerCenterY,
-                    windowRotateData.rotateDegree);
-                rotateRect.ApplyTransformation(windowRotateData, windowInfo.scaleX, windowInfo.scaleY);
-                rotateData.rotateDegree += windowRotateData.rotateDegree;
-            } else {
-                RotateTransform roateDataTemp(0, windowInfo.left, windowInfo.top, 0, 0);
-                rotateRect.ApplyTransformation(roateDataTemp, windowInfo.scaleX, windowInfo.scaleY);
-            }
-            rectInfo.left = rotateRect.GetX();
-            rectInfo.top = rotateRect.GetY();
-            rectInfo.scaleX *= windowInfo.scaleX;
-            rectInfo.scaleY *= windowInfo.scaleY;
-            if (rotateData.rotateDegree) {
-                rotateData.centerX = static_cast<int32_t>(rotateRect.GetWidth()) * 0.5f + rotateRect.GetX();
-                rotateData.centerY = static_cast<int32_t>(rotateRect.GetHeight()) * 0.5f + rotateRect.GetY();
-                auto renderContext = host->GetRenderContext();
-                CHECK_NULL_RETURN(renderContext, rectInfo);
-                auto rectOrigin = renderContext->GetPaintRectWithoutTransform();
-                rotateData.innerCenterX = rectOrigin.Width() * 0.5f;
-                rotateData.innerCenterY = rectOrigin.Height() * 0.5f;
-            }
+            return accessibilityManager->GetTransformRectInfoRelativeToWindow(host, pipeline);
         }
     }
+    auto rect = host->GetTransformRectRelativeToWindow(true);
+    VectorF finalScale = host->GetTransformScaleRelativeToWindow();
+    rectInfo.left = static_cast<int32_t>(rect.Left());
+    rectInfo.top = static_cast<int32_t>(rect.Top());
+    rectInfo.scaleX = finalScale.x;
+    rectInfo.scaleY = finalScale.y;
     return rectInfo;
 }
 
@@ -2163,8 +2139,8 @@ void UIExtensionPattern::TransferAccessibilityRectInfo(bool isForce)
     data.SetParam("innerCenterY", parentRectInfo.rotateTransform.innerCenterY);
     data.SetParam("rotateDegree", parentRectInfo.rotateTransform.rotateDegree);
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-        "UEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f].",
-        parentRectInfo.scaleX, parentRectInfo.scaleY);
+        "UEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f], rotateDegree: %{public}d.",
+        parentRectInfo.scaleX, parentRectInfo.scaleY, parentRectInfo.rotateTransform.rotateDegree);
     SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, data, BusinessDataSendType::ASYNC);
 }
 

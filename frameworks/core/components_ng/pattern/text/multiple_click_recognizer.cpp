@@ -52,6 +52,19 @@ void MultipleClickRecognizer::Start(const GestureEvent& event)
         clickCountTask_, TaskExecutor::TaskType::UI, maxIntervalTime_, "MultipleClickRecognizerCountTask");
 }
 
+void MultipleClickRecognizer::StartCounting(const GestureEvent& event)
+{
+    if (IsValidClick(event)) {
+        clickTimes_++;
+    } else {
+        clickTimes_ = SINGLE_CLICK_TIME;
+        beginGlobalLocation_ = event.GetGlobalLocation();
+        beginLocalLocation_ = event.GetLocalLocation();
+    }
+    lastClickTimeStamp_ = event.GetTimeStamp();
+    lastClickPosition_ = event.GetGlobalLocation();
+}
+
 bool MultipleClickRecognizer::IsValidClick(const GestureEvent& event) const
 {
     TimeStamp clickTimeStamp = event.GetTimeStamp();

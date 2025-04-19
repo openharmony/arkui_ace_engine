@@ -312,7 +312,9 @@ public:
     }
 
     bool IsShowInFreeMultiWindow();
+    bool IsWaterfallWindowMode();
     bool IsShowInFloatingWindow();
+    void AddExtraMaskNode(const DialogProperties& props);
 
     void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
     RefPtr<OverlayManager> GetEmbeddedOverlay(const RefPtr<OverlayManager>& context);

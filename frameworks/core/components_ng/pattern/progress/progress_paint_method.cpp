@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,11 @@
 #include "core/components_ng/pattern/progress/progress_paint_method.h"
 
 namespace OHOS::Ace::NG {
-void ProgressPaintMethod::GetThemeData()
+void ProgressPaintMethod::GetThemeData(int32_t themeScopeId)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>(themeScopeId);
     CHECK_NULL_VOID(progressTheme);
     color_ = progressTheme->GetTrackSelectedColor();
     if (progressType_ == ProgressType::CAPSULE) {
@@ -105,7 +105,8 @@ void ProgressPaintMethod::UpdateCapsuleProgress(PaintWrapper* paintWrapper)
     bool isInprogress = LessNotEqual(0.0f, value_) && LessNotEqual(value_, maxValue_);
 
     if (!paintProperty->HasBackgroundColor()) {
-        bgColor_ = isInprogress ? capsuleInprogressBgColor_ : bgColor_;
+        bgColor_ = (isInprogress || Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY))
+                       ? capsuleInprogressBgColor_ : bgColor_;
         bgColor_ = isFocused ? capsuleBgFocusedColor_ : bgColor_;
     }
     bgColor_ = progressModifier_->CalculateHoverPressColor(bgColor_);
@@ -117,7 +118,8 @@ void ProgressPaintMethod::UpdateCapsuleProgress(PaintWrapper* paintWrapper)
     color_ = progressModifier_->CalculateHoverPressColor(color_);
     progressModifier_->SetColor(LinearColor(color_));
 
-    if (paintProperty->GetBorderColorValue(defaultBorderColor_) == defaultBorderColor_ && isInprogress) {
+    if (paintProperty->GetBorderColorValue(defaultBorderColor_) == defaultBorderColor_ &&
+        (isInprogress || Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY))) {
         borderColor_ = capsuleInprogressBorderColor_;
     }
     borderColor_ = progressModifier_->CalculateHoverPressColor(borderColor_);
@@ -144,4 +146,14 @@ void ProgressPaintMethod::SetCapsuleBorderRadius(PaintWrapper* paintWrapper)
     progressModifier_->SetCapsuleBorderRadius(std::min(contentMinHalf, borderRadius));
 }
 
+int32_t ProgressPaintMethod::GetThemeScopeId(PaintWrapper* paintWrapper) const
+{
+    const int32_t defaultValue = 0;
+    CHECK_NULL_RETURN(paintWrapper, defaultValue);
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defaultValue);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_RETURN(host, defaultValue);
+    return host->GetThemeScopeId();
+}
 } // namespace OHOS::Ace::NG

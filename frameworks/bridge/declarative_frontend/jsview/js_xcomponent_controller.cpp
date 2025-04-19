@@ -29,6 +29,19 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 
 namespace OHOS::Ace::Framework {
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetXComponentController(void* jsController, void* controller)
+{
+    auto* jsXComponentController = static_cast<Framework::JSXComponentController*>(jsController);
+    if (!jsXComponentController) {
+        return;
+    }
+    auto xComponentController = reinterpret_cast<std::shared_ptr<InnerXComponentController>*>(controller);
+    if (!xComponentController) {
+        return;
+    }
+    *xComponentController = jsXComponentController->GetController();
+}
+
 struct XComponentAsyncCxt {
     napi_env env = nullptr;
     napi_deferred deferred = nullptr;

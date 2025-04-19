@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/panel/drag_bar_layout_algorithm.h"
 
+#include "core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension DRAG_ICON_WIDTH = 64.0_vp;

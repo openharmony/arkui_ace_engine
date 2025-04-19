@@ -30,7 +30,8 @@ enum DCResultCode : int32_t {
     DC_WORKER_HAS_USED_ERROR = 10012,
     DC_ONLY_RUN_ON_SCB = 10013,
     DC_PARAM_ERROE = 10014,
-    DC_NOT_SUPPORT_UI_CONTENT_TYPE = 10015
+    DC_NOT_SUPPORT_UI_CONTENT_TYPE = 10015,
+    DC_WORKER_EXCEED_MAX_NUM = 10016
 };
 
 struct DynamicDumpInfo {
@@ -81,9 +82,15 @@ public:
     void OnWindowShow() override;
     void OnWindowHide() override;
 
+    bool HasDynamicRenderer() const
+    {
+        return dynamicComponentRenderer_ != nullptr;
+    }
+
 private:
     void InitializeRender(void* runtime);
     DCResultCode CheckConstraint();
+    bool CheckDynamicRendererConstraint(void* runtime);
     void HandleErrorCallback(DCResultCode resultCode);
 
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;

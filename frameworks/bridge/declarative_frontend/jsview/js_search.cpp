@@ -162,6 +162,7 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("onDidDelete", &JSSearch::OnDidDelete);
     JSClass<JSSearch>::StaticMethod("enablePreviewText", &JSSearch::SetEnablePreviewText);
     JSClass<JSSearch>::StaticMethod("enableHapticFeedback", &JSSearch::SetEnableHapticFeedback);
+    JSClass<JSSearch>::StaticMethod("autoCapitalizationMode", &JSSearch::SetCapitalizationMode);
     JSClass<JSSearch>::StaticMethod("stopBackPress", &JSSearch::SetStopBackPress);
     JSClass<JSSearch>::StaticMethod("keyboardAppearance", &JSSearch::SetKeyboardAppearance);
     JSClass<JSSearch>::StaticMethod("onWillChange", &JSSearch::SetOnWillChange);
@@ -305,6 +306,8 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
     std::string buttonValue = "";
     if (info[0]->IsString()) {
         buttonValue = info[0]->ToString();
+    } else {
+        ParseJsString(info[0], buttonValue);
     }
     SearchModel::GetInstance()->SetSearchButton(buttonValue);
     // set font color
@@ -1233,6 +1236,24 @@ void JSSearch::SetEnterKeyType(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetSearchEnterKeyType(textInputAction);
 }
 
+void JSSearch::SetCapitalizationMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    auto autoCapitalizationMode = AutoCapitalizationMode::NONE;
+    if (jsValue->IsUndefined() || !jsValue->IsNumber() || jsValue->IsNull()) {
+        SearchModel::GetInstance()->SetSearchCapitalizationMode(autoCapitalizationMode);
+        return;
+    }
+    if (jsValue->IsNumber()) {
+        auto emunNumber = jsValue->ToNumber<int32_t>();
+        autoCapitalizationMode = CastToAutoCapitalizationMode(emunNumber);
+    }
+    SearchModel::GetInstance()->SetSearchCapitalizationMode(autoCapitalizationMode);
+}
+
 void JSSearch::SetMaxLength(const JSCallbackInfo& info)
 {
     int32_t maxLength = 0;
@@ -1273,7 +1294,7 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<SearchTheme>();
         CHECK_NULL_VOID(theme);
-        TextDecoration textDecoration = theme->GetTextStyle().GetTextDecoration();
+        TextDecoration textDecoration = theme->GetTextDecoration();
         if (typeValue->IsNumber()) {
             textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
         }

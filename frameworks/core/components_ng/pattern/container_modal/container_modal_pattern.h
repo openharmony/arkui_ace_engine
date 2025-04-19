@@ -21,6 +21,7 @@
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_modal/container_modal_accessibility_property.h"
+#include "core/components_ng/pattern/container_modal/container_modal_toolbar.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -123,7 +124,9 @@ public:
     {
         auto row = GetCustomTitleRow();
         CHECK_NULL_RETURN(row, nullptr);
-        return AceType::DynamicCast<CustomTitleNode>(row->GetChildren().front());
+        auto title = row->GetChildren().front();
+        CHECK_NULL_RETURN(title, nullptr);
+        return AceType::DynamicCast<CustomTitleNode>(title->GetChildren().front());
     }
 
     RefPtr<FrameNode> GetStackNode()
@@ -140,11 +143,20 @@ public:
         return AceType::DynamicCast<FrameNode>(stack->GetChildren().front());
     }
 
+    RefPtr<FrameNode> GetPageNode()
+    {
+        auto stageNode = GetContentNode();
+        CHECK_NULL_RETURN(stageNode, nullptr);
+        return AceType::DynamicCast<FrameNode>(stageNode->GetChildren().front());
+    }
+
     RefPtr<CustomTitleNode> GetFloatingTitleNode()
     {
         auto row = GetFloatingTitleRow();
         CHECK_NULL_RETURN(row, nullptr);
-        return AceType::DynamicCast<CustomTitleNode>(row->GetChildren().front());
+        auto title = row->GetChildren().front();
+        CHECK_NULL_RETURN(title, nullptr);
+        return AceType::DynamicCast<CustomTitleNode>(title->GetChildren().front());
     }
 
     RefPtr<FrameNode> GetGestureRow()
@@ -212,6 +224,18 @@ public:
     }
     
     static void EnableContainerModalCustomGesture(RefPtr<PipelineContext> pipeline, bool enable);
+    void SetToolbarBuilder(const RefPtr<FrameNode>& parent, std::function<RefPtr<UINode>()>&& builder);
+    virtual CalcLength GetControlButtonRowWidth();
+
+    void SetIsHaveToolBar(bool isHave)
+    {
+        isHaveToolBar_ = isHave;
+    }
+
+    bool GetIsHaveToolBar() const
+    {
+        return isHaveToolBar_;
+    }
 
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
@@ -239,6 +263,7 @@ protected:
 
     bool CanShowFloatingTitle();
     bool CanShowCustomTitle();
+    bool IsContainerModalTransparent();
     void TrimFloatingWindowLayout();
     Color GetContainerColor(bool isFocus);
 
@@ -251,13 +276,22 @@ protected:
     Dimension titleHeight_ = CONTAINER_TITLE_HEIGHT;
     Color activeColor_;
     Color inactiveColor_;
-    void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow);
+    void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow, bool isFloating);
+
+    RefPtr<FrameNode> sideBarDivider_ = nullptr;
+    RefPtr<FrameNode> navbarRow_ = nullptr;
+    RefPtr<FrameNode> leftNavRow_ = nullptr;
+    RefPtr<FrameNode> rightNavRow_ = nullptr;
+    RefPtr<FrameNode> navBarDivider_ = nullptr;
+    RefPtr<FrameNode> navDestbarRow_ = nullptr;
+    RefPtr<FrameNode> leftNavDestRow_ = nullptr;
+    RefPtr<FrameNode> rightNavDestRow_ = nullptr;
+
 protected:
     void WindowFocus(bool isFocus);
     void SetTitleButtonHide(
         const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize,
             bool hideClose);
-    virtual CalcLength GetControlButtonRowWidth();
     void InitTitle();
     void InitContainerEvent();
     void InitLayoutProperty();
@@ -279,6 +313,9 @@ protected:
     bool enableContainerModalCustomGesture_ = false;
     RRect windowPaintRect_;
     bool isCustomColor_;
+    RefPtr<ContainerModalToolBar> titleMgr_;
+    RefPtr<ContainerModalToolBar> floatTitleMgr_;
+    bool isHaveToolBar_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_H

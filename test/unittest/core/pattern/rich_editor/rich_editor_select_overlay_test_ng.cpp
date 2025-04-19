@@ -83,20 +83,6 @@ HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectArea, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnMenuItemAction
- * @tc.desc: test OnMenuItemAction
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnMenuItemAction, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::AI_WRITE, OptionMenuType::MOUSE_MENU);
-    EXPECT_NE(richEditorPattern->aiWriteAdapter_, nullptr);
-}
-
-/**
  * @tc.name: OnHandleMoveStart001
  * @tc.desc: test OnHandleMoveStart
  * @tc.type: FUNC
@@ -267,38 +253,6 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick004, TestSize.Level1)
     richEditorPattern->selectOverlay_->isSingleHandle_ = true;
     richEditorPattern->selectOverlay_->OnOverlayClick(event, true);
     EXPECT_FALSE(richEditorPattern->selectOverlay_->needRefreshMenu_);
-}
-
-/**
- * @tc.name: OnHandleMouseEvent001
- * @tc.desc: test OnHandleMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMouseEvent001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    MouseInfo event;
-    event.SetAction(MouseAction::PRESS);
-    richEditorPattern->selectOverlay_->OnHandleMouseEvent(event);
-    EXPECT_EQ(event.GetAction(), MouseAction::PRESS);
-}
-
-/**
- * @tc.name: OnHandleMouseEvent002
- * @tc.desc: test OnHandleMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMouseEvent002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    MouseInfo event;
-    event.SetAction(MouseAction::RELEASE);
-    richEditorPattern->selectOverlay_->OnHandleMouseEvent(event);
-    EXPECT_EQ(event.GetAction(), MouseAction::RELEASE);
 }
 
 /**

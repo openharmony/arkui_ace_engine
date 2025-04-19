@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,14 +72,19 @@ void JSLoadingProgress::JSBind(BindingTarget globalObj)
 void JSLoadingProgress::Create()
 {
     LoadingProgressModel::GetInstance()->Create();
-    JSLoadingProgressTheme::ApplyTheme();
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        JSLoadingProgressTheme::ApplyTheme();
+    }
 }
 
 void JSLoadingProgress::SetColor(const JSCallbackInfo& info)
 {
     Color progressColor;
     if (!ParseJsColor(info[0], progressColor)) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+            LoadingProgressModel::GetInstance()->ResetColor();
+            return;
+        } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             RefPtr<ProgressTheme> progressTheme = GetTheme<ProgressTheme>();
             CHECK_NULL_VOID(progressTheme);
             progressColor = progressTheme->GetLoadingColor();
@@ -100,6 +105,9 @@ void JSLoadingProgress::SetForegroundColor(const JSCallbackInfo& info)
     }
     Color progressColor;
     if (!ParseJsColor(info[0], progressColor)) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+            LoadingProgressModel::GetInstance()->ResetColor();
+        }
         return;
     }
     LoadingProgressModel::GetInstance()->SetColor(progressColor);

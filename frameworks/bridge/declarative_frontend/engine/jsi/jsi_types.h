@@ -53,12 +53,6 @@ public:
     JsiType& operator=(const JsiType& rhs);
     JsiType& operator=(JsiType&& rhs);
 
-    template<typename S>
-    static JsiType<T> Cast(const JsiType<S>& that)
-    {
-        return JsiType<T>(that.GetHandle());
-    }
-
     template<class... Args>
     static JsiType<T> New(Args &&... args);
 
@@ -77,7 +71,7 @@ private:
     panda::CopyableGlobal<T> handle_;
 };
 
-class JsiValue : public JsiType<panda::JSValueRef> {
+class ACE_FORCE_EXPORT JsiValue : public JsiType<panda::JSValueRef> {
 public:
     JsiValue() = default;
     explicit JsiValue(const panda::CopyableGlobal<panda::JSValueRef>& val);
@@ -96,6 +90,7 @@ public:
     bool IsUint8ClampedArray() const;
     bool IsUndefined() const;
     bool IsNull() const;
+    bool IsDate() const;
     std::string ToString() const;
     std::u16string ToU16String() const;
     bool ToBoolean() const;
@@ -107,6 +102,12 @@ public:
     static JsiRef<JsiValue> Null();
     static JsiRef<JsiValue> True();
     static JsiRef<JsiValue> False();
+
+    template<typename S>
+    static auto Cast(const JsiType<S>& that)
+    {
+        return JsiValue(that.GetHandle());
+    }
 
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiValue)
 };
@@ -124,6 +125,15 @@ public:
 
     static panda::Local<panda::StringRef> New(const char* str);
     static panda::Local<panda::StringRef> New(const std::string& str);
+    template<typename S>
+    static auto Cast(const JsiType<S>& that)
+    {
+        if (ACE_UNLIKELY(SystemProperties::DetectJsObjTypeConvertion() &&
+            !JsiValue::Cast(that)->IsString())) {
+            LOGF_ABORT("bad cast to JsiString.");
+        }
+        return JsiString(that.GetHandle());
+    }
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiString)
 };
 
@@ -145,6 +155,15 @@ public:
     size_t Length() const;
     void SetLength(size_t length) const;
     bool IsArray() const;
+    template<typename S>
+    static auto Cast(const JsiType<S>& that)
+    {
+        if (ACE_UNLIKELY(SystemProperties::DetectJsObjTypeConvertion() &&
+            !JsiValue::Cast(that)->IsArray())) {
+            LOGF_ABORT("bad cast to JsiArray.");
+        }
+        return JsiArray(that.GetHandle());
+    }
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiArray)
 };
 
@@ -162,6 +181,15 @@ public:
     void Detach() const;
     bool IsDetach() const;
     ~JsiArrayBuffer() override = default;
+    template<typename S>
+    static auto Cast(const JsiType<S>& that)
+    {
+        if (ACE_UNLIKELY(SystemProperties::DetectJsObjTypeConvertion() &&
+            !JsiValue::Cast(that)->IsArrayBuffer())) {
+            LOGF_ABORT("bad cast to JsiArrayBuffer.");
+        }
+        return JsiArrayBuffer(that.GetHandle());
+    }
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiArrayBuffer)
 };
 
@@ -176,6 +204,15 @@ public:
     explicit JsiUint8ClampedArray(const panda::CopyableGlobal<panda::Uint8ClampedArrayRef>& val);
     ~JsiUint8ClampedArray() override = default;
     JsiRef<JsiArrayBuffer> GetArrayBuffer() const;
+    template<typename S>
+    static auto Cast(const JsiType<S>& that)
+    {
+        if (ACE_UNLIKELY(SystemProperties::DetectJsObjTypeConvertion() &&
+            !JsiValue::Cast(that)->IsUint8ClampedArray())) {
+            LOGF_ABORT("bad cast to JsiUint8ClampedArray.");
+        }
+        return JsiUint8ClampedArray(that.GetHandle());
+    }
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiUint8ClampedArray)
 };
 
@@ -219,6 +256,15 @@ public:
     void SetProperty(const char* prop, const T value) const;
     void SetPropertyJsonObject(const char* prop, const char* value) const;
     void SetPropertyObject(const char* prop, JsiRef<JsiValue> value) const;
+    template<typename S>
+    static auto Cast(const JsiType<S>& that)
+    {
+        if (ACE_UNLIKELY(SystemProperties::DetectJsObjTypeConvertion() &&
+            !JsiValue::Cast(that)->IsObject())) {
+            LOGF_ABORT("bad cast to JsiObject.");
+        }
+        return JsiObject(that.GetHandle());
+    }
 
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiObject)
 };
@@ -237,6 +283,15 @@ public:
 
     JsiRef<JsiValue> Call(JsiRef<JsiValue> thisVal, int argc = 0, JsiRef<JsiValue> argv[] = nullptr) const;
     static panda::Local<panda::FunctionRef> New(JsiFunctionCallback func);
+    template<typename S>
+    static auto Cast(const JsiType<S>& that)
+    {
+        if (ACE_UNLIKELY(SystemProperties::DetectJsObjTypeConvertion() &&
+            !JsiValue::Cast(that)->IsFunction())) {
+            LOGF_ABORT("bad cast to JsiFunction.");
+        }
+        return JsiFunction(that.GetHandle());
+    }
 
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiFunction)
 };
@@ -251,6 +306,15 @@ public:
     void SetInternalFieldCount(int32_t count) const;
     JsiRef<JsiObject> NewInstance() const;
     static panda::Local<panda::JSValueRef> New();
+    template<typename S>
+    static auto Cast(const JsiType<S>& that)
+    {
+        if (ACE_UNLIKELY(SystemProperties::DetectJsObjTypeConvertion() &&
+            !JsiValue::Cast(that)->IsObject())) {
+            LOGF_ABORT("bad cast to JsiObjTemplate.");
+        }
+        return JsiObjTemplate(that.GetHandle());
+    }
 
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiObjTemplate)
 };
@@ -338,6 +402,15 @@ public:
     ~JsiDate() override = default;
 
     static JsiRef<JsiValue> New(double value);
+    template<typename S>
+    static auto Cast(const JsiType<S>& that)
+    {
+        if (ACE_UNLIKELY(SystemProperties::DetectJsObjTypeConvertion() &&
+            !JsiValue::Cast(that)->IsDate())) {
+            LOGF_ABORT("bad cast to JsiDate.");
+        }
+        return JsiDate(that.GetHandle());
+    }
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiDate)
 };
 

@@ -100,7 +100,7 @@ public:
     const std::vector<std::string>& GetFontNames() const;
     void AddFontNode(const WeakPtr<RenderNode>& node);
     void RemoveFontNode(const WeakPtr<RenderNode>& node);
-    void SetFontFamily(const char* familyName, const char* familySrc);
+    void SetFontFamily(const char* familyName, const std::vector<std::string>& familySrc);
     void RebuildFontNode();
     void RebuildFontNodeNG();
     void UpdateFontWeightScale();

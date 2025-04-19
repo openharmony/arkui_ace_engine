@@ -76,8 +76,8 @@ class TextAreaLetterSpacingModifier extends ModifierWithKey<number | string> {
   }
 }
 
-class TextAreaLineSpacingModifier extends ModifierWithKey<LengthMetrics> {
-  constructor(value: LengthMetrics) {
+class TextAreaLineSpacingModifier extends ModifierWithKey<ArkLineSpacing> {
+  constructor(value: ArkLineSpacing) {
     super(value);
   }
   static identity: Symbol = Symbol('textAreaLineSpacing');
@@ -87,7 +87,8 @@ class TextAreaLineSpacingModifier extends ModifierWithKey<LengthMetrics> {
     } else if (!isObject(this.value)) {
       getUINativeModule().textArea.resetLineSpacing(node);
     } else {
-      getUINativeModule().textArea.setLineSpacing(node, this.value.value, this.value.unit);
+      getUINativeModule().textArea.setLineSpacing(node, this.value.value, this.value.value.unit,
+        this.value.onlyBetweenLines);
     }
   }
 
@@ -338,8 +339,8 @@ class TextAreaFontColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
-class TextAreaFontWeightModifier extends ModifierWithKey<number | FontWeight | string> {
-  constructor(value: number | FontWeight | string) {
+class TextAreaFontWeightModifier extends ModifierWithKey<number | FontWeight | string | Resource> {
+  constructor(value: number | FontWeight | string | Resource) {
     super(value);
   }
   static identity: Symbol = Symbol('textAreaFontWeight');
@@ -1309,7 +1310,7 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaFontStyleModifier.identity, TextAreaFontStyleModifier, value);
     return this;
   }
-  fontWeight(value: number | FontWeight | string): TextAreaAttribute {
+  fontWeight(value: number | FontWeight | string | Resource): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaFontWeightModifier.identity, TextAreaFontWeightModifier, value);
     return this;
   }
@@ -1420,8 +1421,12 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaHalfLeadingModifier.identity, TextAreaHalfLeadingModifier, value);
     return this;
   }
-  lineSpacing(value: LengthMetrics): this {
-    modifierWithKey(this._modifiersWithKeys, TextAreaLineSpacingModifier.identity, TextAreaLineSpacingModifier, value);
+  lineSpacing(value: LengthMetrics, options?: LineSpacingOptions): this {
+    let arkLineSpacing = new ArkLineSpacing();
+    arkLineSpacing.value = value;
+    arkLineSpacing.onlyBetweenLines = options.onlyBetweenLines;
+    modifierWithKey(this._modifiersWithKeys, TextAreaLineSpacingModifier.identity, TextAreaLineSpacingModifier,
+      arkLineSpacing);
     return this;
   }
   wordBreak(value: WordBreak): this {

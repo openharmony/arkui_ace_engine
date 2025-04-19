@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,6 +106,11 @@ public:
         return maxListItemIndex_;
     }
 
+    int32_t GetMaxIndexByRepeat() const
+    {
+        return maxListItemIndex_ + repeatDifference_;
+    }
+
     int32_t GetStartIndexInItemPosition() const
     {
         return itemPosition_.empty() ? -1 : itemPosition_.begin()->first;
@@ -139,7 +144,7 @@ public:
     void NotifyDataChange(int32_t index, int32_t count) override;
 
     bool IsAtTop() const override;
-    bool IsAtBottom() const override;
+    bool IsAtBottom(bool considerRepeat = false) const override;
     void OnTouchDown(const TouchEventInfo& info) override;
     OverScrollOffset GetOutBoundaryOffset(float delta, bool useChainDelta = true) const;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
@@ -398,6 +403,11 @@ public:
         return isStackFromEnd_;
     }
 
+    void SetRepeatDifference(int32_t repeatDifference)
+    {
+        repeatDifference_ = repeatDifference;
+    }
+
 protected:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -418,10 +428,11 @@ protected:
     {
         return ScrollAlign::AUTO;
     }
-    virtual void OnMidIndexChanged(int32_t lastIndex, int32_t curIndex) {}
+    virtual void OnMidIndexChanged();
     virtual float GetStartOverScrollOffset(float offset, float startMainPos) const;
     virtual float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const;
-
+    void SetLayoutAlgorithmParams(
+        const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty);
 
     bool isFadingEdge_ = false;
     int32_t maxListItemIndex_ = 0;
@@ -489,6 +500,8 @@ private:
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
     bool IsScrollSnapAlignCenter() const;
+    void SetLayoutAlgorithmJumpAlign(
+        const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty);
     void SetLayoutAlgorithmSnapParam(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm);
     void SetChainAnimationCallback();
     bool NeedScrollSnapAlignEffect() const;
@@ -567,6 +580,7 @@ private:
     ListItemIndex startInfo_ = {-1, -1, -1};
     ListItemIndex endInfo_ = {-1, -1, -1};
     bool isNeedDividerAnimation_ = true;
+    int32_t repeatDifference_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

@@ -79,6 +79,8 @@ bool MockNavigationStack::CreateNodeByIndex(int32_t index, const OHOS::Ace::Weak
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(frameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
     pattern->SetName(name);
+    auto navDestinationId = std::to_string(pattern->GetNavDestinationId());
+    mockPathArray_[index]->SetNavDestinationId(navDestinationId);
     return true;
 }
 
@@ -313,5 +315,23 @@ int32_t MockNavigationStack::MockMoveToTop(const std::string& name)
 void MockNavigationStack::SetIsEntryByIndex(int32_t index, bool isEntry)
 {
     mockIsEntryMap_[index] = isEntry;
+}
+
+std::vector<RefPtr<MockNavPathInfo>> MockNavigationStack::MockGetPathStack()
+{
+    std::vector<RefPtr<MockNavPathInfo>> pathArray;
+    for (int32_t index = 0; index < static_cast<int32_t>(mockPathArray_.size()); ++index) {
+        pathArray.push_back(mockPathArray_[index]);
+    }
+    return pathArray;
+}
+
+void MockNavigationStack::MockSetPathStack(std::vector<RefPtr<MockNavPathInfo>>& setPathArray, bool animated)
+{
+    Clear();
+    for (int32_t index = 0; index < static_cast<int32_t>(setPathArray.size()); ++index) {
+        mockPathArray_.push_back(setPathArray[index]);
+    }
+    animated_ = animated;
 }
 } // namespace OHOS::Ace::NG

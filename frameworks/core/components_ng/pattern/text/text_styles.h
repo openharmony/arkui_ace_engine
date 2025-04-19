@@ -16,13 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H
 
+#include "base/image/drawing_color_filter.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
-#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace {
 
@@ -50,6 +50,26 @@ struct UserGestureOptions {
 
 struct UserMouseOptions {
     OnHoverFunc onHover;
+};
+
+struct TextDecorationOptions {
+    std::optional<bool> enableMultiType;
+
+    bool IsEqual(const TextDecorationOptions& other) const
+    {
+        return this->enableMultiType.has_value() == other.enableMultiType.has_value() &&
+            this->enableMultiType.value_or(false) == other.enableMultiType.value_or(false);
+    }
+
+    bool operator==(const TextDecorationOptions& other) const
+    {
+        return IsEqual(other);
+    }
+
+    bool operator!=(const TextDecorationOptions& other) const
+    {
+        return !IsEqual(other);
+    }
 };
 
 struct ImageSpanSize {
@@ -166,6 +186,7 @@ struct ImageSpanOptions : SpanOptionBase {
 };
 } // namespace OHOS::Ace
 namespace OHOS::Ace::NG {
+class TextLayoutProperty;
 constexpr Dimension TEXT_DEFAULT_FONT_SIZE = 16.0_fp;
 using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 struct FontStyle {
@@ -178,9 +199,10 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableVariableFontWeight, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFeature, FONT_FEATURES_LIST);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, TextDecoration);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, std::vector<TextDecoration>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationStyle, TextDecorationStyle);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationOptions, TextDecorationOptions);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextCase, TextCase);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMinFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMaxFontSize, Dimension);
@@ -193,8 +215,19 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
 
     void UpdateColorByResourceId();
+
+    TextDecoration GetTextDecorationFirst() const
+    {
+        auto decorations = GetTextDecoration();
+        if (!decorations.has_value()) {
+            return TextDecoration::NONE;
+        }
+        return decorations.value().size() > 0 ?
+            decorations.value()[0] : TextDecoration::NONE;
+    }
 };
 
 struct TextLineStyle {
@@ -205,16 +238,19 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextAlign, TextAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLength, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLines, uint32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(OverflowMode, OverflowMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HeightAdaptivePolicy, TextHeightAdaptivePolicy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextIndent, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LeadingMargin, LeadingMargin);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WordBreak, WordBreak);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EllipsisMode, EllipsisMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineSpacing, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(IsOnlyBetweenLines, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NumberOfLines, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineBreakStrategy, LineBreakStrategy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HalfLeading, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AllowScale, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ParagraphSpacing, Dimension);
 };
 
 struct HandleInfoNG {
@@ -233,7 +269,6 @@ struct HandleInfoNG {
 
     bool operator==(const HandleInfoNG& handleInfo) const
     {
-
         return rect == handleInfo.rect && index == handleInfo.index;
     }
 
@@ -248,14 +283,17 @@ struct HandleInfoNG {
 };
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
-    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme);
+    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol = false,
+    bool isRichEditor = false);
 
-TextStyle CreateTextStyleUsingThemeWithText(const RefPtr<FrameNode> frameNode,
-    const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
-    const RefPtr<TextTheme>& textTheme);
+void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
+    TextStyle& textStyle, bool isSymbol = false, bool isRichEditor = false);
 
-void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
-    const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle);
+void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
+    TextStyle& textStyle, bool isSymbol = false, bool isRichEditor = false);
+
+void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
+    const RefPtr<TextTheme>& textTheme, bool isSymbol = false, bool isRichEditor = false);
 
 std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value);
 std::string GetFontStyleInJson(const std::optional<Ace::FontStyle>& value);

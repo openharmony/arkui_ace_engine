@@ -97,6 +97,7 @@ public:
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
     virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false);
     virtual void SetSearchEnterKeyType(TextInputAction value);
+    virtual void SetSearchCapitalizationMode(AutoCapitalizationMode value);
     virtual void SetMaxLength(uint32_t value);
     virtual void ResetMaxLength();
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;

@@ -40,12 +40,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Dimension TIME_FOCUS_PAINT_WIDTH = 2.0_vp;
-
-enum class TimeFormatChange {
-    HOUR_CHANGE,
-    HOUR_UNCHANGE,
-    UNKNOWN
-};
 }
 
 class TimePickerRowPattern : public LinearLayoutPattern {
@@ -246,6 +240,9 @@ public:
     {
         isForceUpdate_ = value != hour24_;
         hour24_ = value;
+        if (!isClearFocus_) {
+            isClearFocus_ = isForceUpdate_;
+        }
     }
 
     bool GetHour24() const
@@ -654,10 +651,10 @@ public:
     void ColumnPatternStopHaptic();
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
     bool IsStartEndTimeDefined();
-
+    void UpdateUserSetSelectColor();
 private:
     void SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,
-        const std::string &id, bool focus, const std::function<void(const std::string&)>& call);
+        const std::string &id, bool& focus, const std::function<void(const std::string&)>& call);
     void ClearFocus();
     void SetDefaultFocus();
     bool IsCircle();
@@ -796,6 +793,8 @@ private:
     std::string oldHourValue_;
     std::string oldMinuteValue_;
     std::string selectedColumnId_;
+    bool isUserSetSelectColor_ = false;
+    bool isClearFocus_ = true;
 };
 } // namespace OHOS::Ace::NG
 

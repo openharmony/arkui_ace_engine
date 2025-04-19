@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/web/transitional_node_info.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/event/event_info_convertor.h"
 #include "nweb_handler.h"
 
 namespace OHOS::Ace::NG {
@@ -253,7 +254,11 @@ void WebSelectOverlay::UpdateTouchHandleForOverlay(bool fromOverlay)
         CheckHandles(firstHandleInfo, insertHandle_);
         firstHandleInfo.needLayout = true;
         webSelectInfo_.firstHandle = firstHandleInfo;
-        UpdateFirstHandleOffset();
+        if (SelectOverlayIsOn()) {
+            UpdateFirstHandleOffset();
+        } else {
+            ProcessOverlay({ .animation = true });
+        }
     } else {
         if (selectTemporarilyHidden_ || selectTemporarilyHiddenByScroll_) {
             return;
@@ -269,6 +274,7 @@ void WebSelectOverlay::UpdateTouchHandleForOverlay(bool fromOverlay)
         }
         webSelectInfo_.handleReverse = false;
         if (SelectOverlayIsOn()) {
+            UpdateSelectMenuOptions();
             UpdateAllHandlesOffset();
         } else {
             ProcessOverlay({ .animation = true });
@@ -315,8 +321,15 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
     } else {
         selectInfo.menuInfo.showCopyAll = true;
     }
-    selectInfo.menuInfo.showTranslate = true;
-    selectInfo.menuInfo.showSearch = false;
+    auto value = GetSelectedText();
+    auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
+    if (!queryWord.empty()) {
+        selectInfo.menuInfo.showSearch = true;
+        selectInfo.menuInfo.showTranslate = true;
+    } else {
+        selectInfo.menuInfo.showSearch = false;
+        selectInfo.menuInfo.showTranslate = false;
+    }
 }
 
 void WebSelectOverlay::HideHandleAndQuickMenuIfNecessary(bool hide, bool isScroll)
@@ -783,7 +796,7 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
             break;
         case OptionMenuActionId::CUT:
             quickMenuCallback_->Continue(
-                OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY, OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+                OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT, OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
             pattern->CloseSelectOverlay();
             break;
         case OptionMenuActionId::PASTE:
@@ -797,6 +810,11 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
             break;
         case OptionMenuActionId::TRANSLATE:
             HandleOnTranslate();
+            pattern->CloseSelectOverlay();
+            SelectCancel();
+            return;
+        case OptionMenuActionId::SEARCH:
+            HandleOnSearch();
             pattern->CloseSelectOverlay();
             SelectCancel();
             return;
@@ -980,10 +998,13 @@ void WebSelectOverlay::OnHandleReverse(bool isReverse)
 
 void WebSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
-    auto pattern = GetPattern<WebPattern>();
-    CHECK_NULL_VOID(pattern);
-    SelectCancel();
-    pattern->CloseSelectOverlay();
+    if (EventInfoConvertor::MatchCompatibleCondition() && IsMouseClickDown(sourceType, touchType)) {
+        return;
+    }
+    if (IsMouseClickDown(sourceType, touchType) || IsTouchUp(sourceType, touchType)) {
+        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+        SelectCancel();
+    }
 }
 
 void WebSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo &selectInfo, int32_t requestCode)
@@ -1032,5 +1053,25 @@ void WebSelectOverlay::OnAfterSelectOverlayShow(bool isCreated)
         OnHandleReverse(true);
         needResetHandleReverse_ = false;
     }
+}
+
+void WebSelectOverlay::UpdateSelectMenuOptions()
+{
+    auto value = GetSelectedText();
+    auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
+    if (!queryWord.empty()) {
+        webSelectInfo_.menuInfo.showSearch = true;
+        webSelectInfo_.menuInfo.showTranslate = true;
+    } else {
+        webSelectInfo_.menuInfo.showSearch = false;
+        webSelectInfo_.menuInfo.showTranslate = false;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebSelectInfo MenuInfo ShowSearch is %{public}d", webSelectInfo_.menuInfo.showSearch);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebSelectInfo MenuInfo ShowTranslate is %{public}d",
+        webSelectInfo_.menuInfo.showTranslate);
+    OnUpdateMenuInfo(webSelectInfo_.menuInfo, DIRTY_FIRST_HANDLE);
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM);
 }
 } // namespace OHOS::Ace::NG

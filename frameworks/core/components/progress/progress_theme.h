@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ public:
     class Builder {
     public:
         Builder() = default;
-        ~Builder() = default;
+        virtual ~Builder() = default;
 
         RefPtr<ProgressTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -48,12 +48,15 @@ public:
                 return theme;
             }
             // Read style from system.
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ProgressTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ProgressTheme>& theme) const
         {
+            CHECK_NULL_VOID(themeConstants);
+            CHECK_NULL_VOID(theme);
+            auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle) {
                 return;
             }
@@ -428,7 +431,6 @@ public:
 protected:
     ProgressTheme() = default;
 
-private:
     Dimension trackThickness_;
     Dimension trackWidth_;
     Color trackBgColor_;

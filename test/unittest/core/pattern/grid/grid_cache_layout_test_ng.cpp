@@ -683,4 +683,44 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem002, TestSize.Level1)
     EXPECT_EQ(pattern_->info_.endIndex_, 7);
     EXPECT_EQ(pattern_->info_.endMainLineIndex_, 3);
 }
+
+/**
+ * @tc.name: ShowCache007
+ * @tc.desc: change dataSource when overScroll at bottom.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, ShowCache007, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(1, true);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(7);
+    CreateDone();
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 6);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 3);
+
+    UpdateCurrentOffset(-300.0f);
+    frameNode_->RemoveChildAtIndex(0);
+    frameNode_->ChildrenUpdatedFrom(0);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 4);
+    EXPECT_EQ(pattern_->info_.endIndex_, 5);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 3);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 3);
+    decltype(pattern_->info_.gridMatrix_) cmp = { {2, { {0, 2}, {1, 3} }}, {3, { {0, 4}, {1, 5} }} };
+    EXPECT_EQ(pattern_->info_.gridMatrix_, cmp);
+
+    // FillNewLineForward in syncPreload.
+    UpdateCurrentOffset(100.0f);
+    EXPECT_EQ(pattern_->info_.startIndex_, 2);
+    EXPECT_EQ(pattern_->info_.endIndex_, 5);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 2);
+    cmp = { {0, { {0, 0}, {1, 1} }}, {1, { {0, 2}, {1, 3} }}, {2, { {0, 4}, {1, 5} }} };
+    EXPECT_EQ(pattern_->info_.gridMatrix_, cmp);
+}
 } // namespace OHOS::Ace::NG

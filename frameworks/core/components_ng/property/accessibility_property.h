@@ -20,6 +20,7 @@
 #include <string>
 #include <unordered_set>
 
+#include "accessibility_property_function.h"
 #include "base/memory/ace_type.h"
 #include "interfaces/native/native_type.h"
 #include "core/accessibility/accessibility_utils.h"
@@ -67,7 +68,8 @@ using OnAccessibilityHoverConsumeCheckImpl = std::function<bool(const NG::PointF
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
 
-class ACE_FORCE_EXPORT AccessibilityProperty : public virtual AceType {
+class ACE_FORCE_EXPORT AccessibilityProperty : public virtual AceType,
+    public AccessibilityPropertyInnerFunction, public AccessibilityPropertyInterfaceFunction {
     DECLARE_ACE_TYPE(AccessibilityProperty, AceType);
 
 public:
@@ -451,6 +453,8 @@ public:
 
     void SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription);
 
+    void OnAccessibilityDetachFromMainTree();
+
     bool IsMatchAccessibilityResponseRegion(bool isAccessibilityVirtualNode);
 
     bool IsAccessibilityCompInResponseRegion(const RectF& rect, const RectF& origRect);
@@ -464,6 +468,8 @@ public:
     bool IsAccessibilityTextPreferred() const;
 
     void NotifyComponentChangeEvent(AccessibilityEventType eventType);
+
+    void UpdateAccessibilityNextFocusIdMap(const std::string& nextFocusInspectorKey);
 
     int32_t GetChildTreeId() const;
 
@@ -648,6 +654,10 @@ public:
     void SetFocusDrawLevel(int32_t drawLevel);
     int32_t GetFocusDrawLevel();
 
+
+    void SetAccessibilityZIndex(const int32_t& accessibilityZIndex);
+    int32_t GetAccessibilityZIndex() const;
+
 private:
     // node should be not-null
     static bool HoverTestRecursive(
@@ -749,6 +759,9 @@ protected:
     std::optional<int32_t> rangeCurrentValue_;
     std::optional<std::string> textValue_;
     FocusDrawLevel focusDrawLevel_ = FocusDrawLevel::SELF;
+    // used to modify the hierarchical relation ship between sibling nodes the same level in barrierfree tree
+    // only affects the barrierfree tree presentation, does not affect the zindex in barrierfree hover
+    int32_t accessibilityZIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

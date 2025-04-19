@@ -1156,13 +1156,14 @@ HWTEST_F(SwiperArrowTestNg, InitButtonEventCallBack002, TestSize.Level1)
     auto buttonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
     ASSERT_NE(buttonNode, nullptr);
     auto arrowGestureHub = buttonNode->GetOrCreateGestureEventHub();
+    auto leftArrowGestureHub = leftArrowNode_->GetOrCreateGestureEventHub();
     /**
      * @tc.steps: step1 trigger click event.
      */
     ChangeIndex(2);
     GestureEvent info;
     info.SetSourceDevice(SourceType::KEYBOARD);
-    auto actuatorClick = arrowGestureHub->clickEventActuator_;
+    auto actuatorClick = leftArrowGestureHub->clickEventActuator_;
     auto eventsClick = actuatorClick->clickEvents_;
     ASSERT_FALSE(eventsClick.empty());
     auto event = eventsClick.front();
@@ -1325,9 +1326,7 @@ HWTEST_F(SwiperArrowTestNg, Arrow005, TestSize.Level1)
     ASSERT_NE(indicatorPattern, nullptr);
     auto controller = indicatorPattern->GetIndicatorController();
     ASSERT_NE(controller, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    controller->SetSwiperNode(targetNode, indicatorNode);
+    controller->SetSwiperNode(frameNode_);
     EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameRect(), RectF(0.f, 0.f, 0.f, 0.f)));
     indicatorPattern->SaveDotIndicatorProperty();
     FlushUITasks();

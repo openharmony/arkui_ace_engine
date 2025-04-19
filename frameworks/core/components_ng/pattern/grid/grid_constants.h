@@ -22,5 +22,15 @@ enum class GridItemAlignment : uint32_t {
     DEFAULT = 0,
     STRETCH = 1
 };
+
+enum class GridReloadReason : uint32_t {
+    INIT = 0,
+    CROSS_COUNT_CHANGE,
+    DATA_RELOAD,
+    SCROLL_TO_INDEX,
+    SKIP_LARGE_OFFSET
+};
+
+constexpr int32_t GRID_CHECK_INTERVAL = 30;
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_CONSTANTS_H

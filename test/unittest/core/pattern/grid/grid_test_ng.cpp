@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,6 +80,7 @@ void GridTestNg::TearDown()
     pattern_ = nullptr;
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
+    paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
     positionController_ = nullptr;
     ClearOldNodes(); // Each testCase will create new list at begin
@@ -97,6 +98,7 @@ void GridTestNg::GetGrid()
     eventHub_ = frameNode_->GetEventHub<GridEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<GridLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<GridAccessibilityProperty>();
+    paintProperty_ = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
     positionController_ = pattern_->GetOrCreatePositionController();
 }
 

@@ -113,7 +113,7 @@ void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interf
                 option.GetDuration());
         } else {
             TAG_LOGI(AceLogTag::ACE_ANIMATION,
-                "%{public}s iteration is infinite, remember to stop it. duration:%{public}d, curve:%{public}s",
+                "%{public}s iteration is infinite. duration:%{public}d, curve:%{public}s",
                 animationInterfaceName, option.GetDuration(), option.GetCurve()->ToString().c_str());
         }
         return;
@@ -197,7 +197,7 @@ void FlushDirtyNodesWhenExist(const RefPtr<PipelineBase>& pipelineContext,
     bool isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
     while (!isDirtyNodesEmpty || (!isDirtyLayoutNodesEmpty && !pipelineContext->IsLayouting())) {
         if (flushCount >= MAX_FLUSH_COUNT || option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "%{public}s, option:%{public}s, finish cnt:%{public}d,"
+            TAG_LOGD(AceLogTag::ACE_ANIMATION, "%{public}s, option:%{public}s, finish cnt:%{public}d,"
                 "dirtyNodes is empty:%{public}d, dirtyLayoutNodes is empty:%{public}d",
                 animationInterfaceName, option.ToString().c_str(), count.value_or(-1),
                 isDirtyNodesEmpty, isDirtyLayoutNodesEmpty);
@@ -690,7 +690,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
         // this case usually means there is no foreground container, need to figure out the reason.
         const char* funcName = immediately ? "animateToImmediately" : "animateTo";
         TAG_LOGW(AceLogTag::ACE_ANIMATION,
-            "can not find currnet context ,%{pubic}s faild, please use uiContext.%{public}s to specify the context",
+            "can not find current context ,%{public}s faild, please use uiContext.%{public}s to specify the context",
             funcName, funcName);
         return;
     }
@@ -777,7 +777,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
         if (usingSharedRuntime) {
             if (GetAnyContextIsLayouting(pipelineContext)) {
                 TAG_LOGW(AceLogTag::ACE_ANIMATION,
-                    "pipeline is layouting, post animateTo, duration:%{public}d, curve:%{public}s",
+                    "Pipeline layouting, post animateTo, dur:%{public}d, curve:%{public}s",
                     option.GetDuration(), option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
                 pipelineContext->GetTaskExecutor()->PostTask(
                     [id = Container::CurrentIdSafely(), option, func = JSRef<JSFunc>::Cast(info[1]), count,

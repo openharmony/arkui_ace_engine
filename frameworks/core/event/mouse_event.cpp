@@ -57,6 +57,9 @@ bool HoverEventTarget::HandlePenHoverEvent(bool isHovered, const TouchEvent& eve
     if (event.tiltY.has_value()) {
         hoverInfo.SetTiltY(event.tiltY.value_or(0.0f));
     }
+    if (event.rollAngle.has_value()) {
+        hoverInfo.SetRollAngle(event.rollAngle.value_or(0.0f));
+    }
     NG::PointF lastLocalPoint(event.x, event.y);
     NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
         isPostEventResult_, event.postEventNodeId);
@@ -87,6 +90,9 @@ bool HoverEventTarget::HandlePenHoverMoveEvent(const TouchEvent& event)
     }
     if (event.tiltY.has_value()) {
         hoverInfo.SetTiltY(event.tiltY.value_or(0.0f));
+    }
+    if (event.rollAngle.has_value()) {
+        hoverInfo.SetRollAngle(event.rollAngle.value_or(0.0f));
     }
     NG::PointF lastLocalPoint(event.x, event.y);
     NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
@@ -167,7 +173,7 @@ bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
     info.SetAction(event.action);
     info.SetPullAction(event.pullAction);
     info.SetGlobalLocation(event.GetOffset());
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
         NG::PointF localPoint(event.x, event.y);
         NG::NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
         auto localX = static_cast<float>(localPoint.GetX());

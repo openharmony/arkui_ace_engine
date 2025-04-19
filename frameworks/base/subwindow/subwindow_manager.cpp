@@ -22,6 +22,7 @@ namespace OHOS::Ace {
 namespace {
 constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
 constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
+constexpr int32_t TIPS_TIME_MAX = 4000; // ms
 } // namespace
 std::mutex SubwindowManager::instanceMutex_;
 std::shared_ptr<SubwindowManager> SubwindowManager::instance_;
@@ -198,7 +199,7 @@ const RefPtr<Subwindow> SubwindowManager::GetSubwindowById(int32_t subinstanceId
         return result->second;
     }
 
-    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in instanceSubwindowMap_, subinstanceId is %{public}d",
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in instanceSubwindowMap_, subinstanceId is %{public}d",
         subinstanceId);
     return nullptr;
 }
@@ -406,7 +407,7 @@ void SubwindowManager::ClearMenuNG(int32_t instanceId, int32_t targetId, bool in
     }
 }
 
-void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId)
+void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId, bool isForceClear)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear popup in subwindow enter");
     RefPtr<Subwindow> subwindow;
@@ -417,7 +418,7 @@ void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId)
         subwindow = GetCurrentWindow();
     }
     if (subwindow) {
-        subwindow->ClearPopupNG();
+        subwindow->ClearPopupNG(isForceClear);
     }
 }
 
@@ -489,6 +490,70 @@ void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool dis
             subwindow->ShowPopup(newComponent, disableTouchEvent);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowPopup");
+}
+
+void SubwindowManager::ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
+    int32_t appearingTime, int32_t appearingTimeWithContinuousOperation)
+{
+    CHECK_NULL_VOID(targetNode);
+    auto pipelineContext = targetNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto containerId = pipelineContext->GetInstanceId();
+    if (containerId >= MIN_SUBCONTAINER_ID && !GetIsExpandDisplay()) {
+        return;
+    }
+    auto targetId = targetNode->GetId();
+    auto manager = SubwindowManager::GetInstance();
+    CHECK_NULL_VOID(manager);
+    auto subwindow = manager->GetSubwindowByType(containerId, SubwindowType::TYPE_POPUP);
+    if (!IsSubwindowExist(subwindow)) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
+        manager->AddSubwindow(containerId, SubwindowType::TYPE_POPUP, subwindow);
+    }
+    auto overlayManager = subwindow->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    overlayManager->UpdateTipsEnterAndLeaveInfoBool(targetId);
+    auto duration = appearingTime;
+    if (overlayManager->TipsInfoListIsEmpty()) {
+        overlayManager->UpdateTipsStatus(targetId, false);
+        duration = appearingTime;
+    } else {
+        overlayManager->UpdateTipsStatus(targetId, true);
+        overlayManager->UpdatePreviousDisappearingTime(targetId);
+        duration = appearingTimeWithContinuousOperation;
+    }
+    if (duration > TIPS_TIME_MAX) {
+        duration = TIPS_TIME_MAX;
+    }
+    overlayManager->UpdateTipsEnterAndLeaveInfo(targetId);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    bool isSubwindow = true;
+    auto times = overlayManager->GetTipsEnterAndLeaveInfo(targetId);
+    taskExecutor->PostDelayedTask(
+        [subwindow, targetId, popupInfo, appearingTime, times, isSubwindow] {
+            CHECK_NULL_VOID(subwindow);
+            subwindow->ShowTipsNG(targetId, popupInfo, appearingTime, times, isSubwindow);
+        },
+        TaskExecutor::TaskType::UI, duration, "ArkUIOverlayContinuousTips");
+}
+
+void SubwindowManager::HideTipsNG(int32_t targetId, int32_t disappearingTime, int32_t instanceId)
+{
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+
+    if (subwindow) {
+        subwindow->HideTipsNG(targetId, disappearingTime);
+    }
 }
 
 bool SubwindowManager::CancelPopup(const std::string& id)
@@ -1008,6 +1073,7 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindowNG(int32_t containerId
         }
         subwindow->SetToastWindowType(windowType);
         subwindow->SetMainWindowId(mainWindowId);
+        subwindow->InitContainer();
         AddToastSubwindow(containerId, subwindow);
     }
     return subwindow;
@@ -1141,7 +1207,7 @@ void SubwindowManager::CloseDialog(int32_t instanceId)
             subwindow->Close();
             return;
         }
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get dialog subwindow failed.");
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "get dialog subwindow failed.");
         return;
     }
     auto subContainerId = GetSubContainerId(instanceId);
@@ -1288,7 +1354,7 @@ void SubwindowManager::HideSystemTopMostWindow()
     if (subwindow) {
         subwindow->HideSubWindowNG();
     } else {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "can not find systemTopMost window when hide window");
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "can not find systemTopMost window when hide window");
     }
 }
 
@@ -1303,7 +1369,7 @@ void SubwindowManager::ClearToastInSystemSubwindow()
         }
     }
     RefPtr<Subwindow> subwindow;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (containerId != -1 && containerId < MIN_SUBCONTAINER_ID) {
             subwindow = GetSystemToastWindow(containerId);
         }
@@ -1315,7 +1381,7 @@ void SubwindowManager::ClearToastInSystemSubwindow()
     if (subwindow) {
         subwindow->ClearToast();
     } else {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "can not find systemTopMost window when clear system toast");
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "can not find systemTopMost window when clear system toast");
     }
 }
 
@@ -1432,7 +1498,7 @@ SubwindowKey SubwindowManager::GetCurrentSubwindowKey(int32_t instanceId, Subwin
         displayId = container->GetCurrentDisplayId();
         searchKey.foldStatus =
             isSuperFoldDisplayDevice_ && (displayId == DEFAULT_DISPLAY_ID || displayId == VIRTUAL_DISPLAY_ID)
-                ? container->GetCurrentFoldStatus()
+                ? container->GetFoldStatusFromListener()
                 : FoldStatus::UNKNOWN;
     }
 
@@ -1588,7 +1654,8 @@ bool SubwindowManager::IsWindowEnableSubWindowMenu(
 
 const RefPtr<Subwindow> SubwindowManager::GetSubwindowByType(int32_t instanceId, SubwindowType windowType)
 {
-    if (instanceId >= MIN_SUBCONTAINER_ID) {
+    if (instanceId >= MIN_SUBCONTAINER_ID && windowType != SubwindowType::TYPE_SYSTEM_TOP_MOST_TOAST &&
+        windowType != SubwindowType::TYPE_TOP_MOST_TOAST) {
         return GetSubwindowById(instanceId);
     }
 

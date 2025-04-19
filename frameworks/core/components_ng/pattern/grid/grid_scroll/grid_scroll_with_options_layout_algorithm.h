@@ -31,7 +31,7 @@ private:
     void SkipLargeOffset(float mainSize, LayoutWrapper* layoutWrapper) override;
     void SkipIrregularLines(LayoutWrapper* layoutWrapper, bool forward) override;
 
-    void LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper, bool& hasNormalItem) override;
+    void LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper) override;
 
     void GetTargetIndexInfoWithBenchMark(
         LayoutWrapper* layoutWrapper, bool isTargetBackward, int32_t targetIndex) override;

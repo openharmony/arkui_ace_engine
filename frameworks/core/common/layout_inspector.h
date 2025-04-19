@@ -48,7 +48,7 @@ public:
     static bool GetStateProfilerStatus();
     static void SetStateProfilerStatus(bool status);
     static void TriggerJsStateProfilerStatusCallback(bool status);
-    static void SendStateProfilerMessage(const std::string& message);
+    static void SendMessage(const std::string& message);
     static void SetJsStateProfilerStatusCallback(ProfilerStatusCallback&& callback);
 
     // rs profiler

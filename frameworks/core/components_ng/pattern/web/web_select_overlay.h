@@ -153,6 +153,7 @@ public:
     void OnAfterSelectOverlayShow(bool isCreated) override;
     // override SelectOverlayCallback end
 private:
+    void UpdateSelectMenuOptions();
     bool isShowHandle_ = false;
     bool needResetHandleReverse_ = false;
     SelectOverlayInfo webSelectInfo_;

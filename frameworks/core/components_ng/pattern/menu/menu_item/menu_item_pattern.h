@@ -281,7 +281,7 @@ public:
     {
         return embeddedMenu_;
     }
-    void HideEmbedded();
+    void HideEmbedded(bool isNeedAnimation = true);
     void OnHover(bool isHover);
     void NotifyPressStatus(bool isPress);
     void SetBgColor(const Color& color);
@@ -411,6 +411,14 @@ public:
     }
     void AttachBottomDivider();
     void RemoveBottomDivider();
+    void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply);
+    void SetSelectedOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply);
+    std::function<void(WeakPtr<NG::FrameNode>)>& GetOptionTextModifier();
+    std::function<void(WeakPtr<NG::FrameNode>)>& GetSelectedOptionTextModifier();
+    void ApplyTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply);
+    void ResetSelectTextProps();
+    void ApplyOptionThemeStyles();
+    void ApplySelectedThemeStyles();
 
 protected:
     void RegisterOnKeyEvent();
@@ -463,7 +471,7 @@ private:
     void ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu);
     void HideSubMenu();
     void OnExpandChanged(const RefPtr<FrameNode>& expandableNode);
-    void HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
+    void HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode, bool isNeedAnimation = true);
     void ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
     void SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expandableNode);
     void UpdatePreviewPosition(SizeF oldMenuSize, SizeF menuSize);
@@ -535,6 +543,8 @@ private:
     int32_t index_ = 0;
 
     std::function<void()> subBuilderFunc_ = nullptr;
+    std::function<void(WeakPtr<NG::FrameNode>)> optionApply_ = nullptr;
+    std::function<void(WeakPtr<NG::FrameNode>)> optionSelectedApply_ = nullptr;
 
     int32_t subMenuId_ = -1;
     RefPtr<FrameNode> subMenu_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,8 +106,7 @@ private:
     inline bool IsDynamicComponent()
     {
         auto container = Container::Current();
-        return container && container->IsDynamicRender() &&
-               container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+        return container && container->IsDynamicRender();
     }
     // no Animatable
     RefPtr<PropertyBool> enableLoading_;

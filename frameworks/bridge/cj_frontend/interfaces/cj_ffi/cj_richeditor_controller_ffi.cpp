@@ -71,11 +71,11 @@ std::vector<MarginType> MARGIN_TYPES = {
     MarginType::MARGIN_PLACEHOLDER
 };
 
-std::function<void(const GestureEvent& event)> FormatGestureEvenFunction(void (*callback)(CJGestureEvent info))
+std::function<void(const GestureEvent& event)> FormatGestureEvenFunction(void (*callback)(CJGestureEventV2 info))
 {
     std::function<void(const GestureEvent& event)> result = [ffiOnAction = CJLambda::Create(callback)](
                                                                 const GestureEvent& event) -> void {
-        CJGestureEvent ffiGestureEvent {};
+        CJGestureEventV2 ffiGestureEvent {};
         CJEventTarget ffiEventTarget {};
         CJArea ffiArea {};
         CJPosition ffiPosition {};
@@ -178,7 +178,7 @@ void NativeRichEditorController::ParseTextStyleResult(
         index++;
     }
     nativeTextStyle.textShadow = nativbeTextShadow;
-    nativeTextStyle.textShadowSize = textShadows.size();
+    nativeTextStyle.textShadowSize = static_cast<int64_t>(textShadows.size());
     nativeTextStyle.free = NativeShaowOptionsFree;
     nativeTextStyle.lineHeight = textStyle.lineHeight;
     nativeTextStyle.letterSpacing = textStyle.letterSpacing;
@@ -225,7 +225,7 @@ void NativeRichEditorController::ParseTypingStyleResult(
         index++;
     }
     nativeTextStyle.textShadow = nativbeTextShadow;
-    nativeTextStyle.textShadowSize = textShadows.size();
+    nativeTextStyle.textShadowSize = static_cast<int64_t>(textShadows.size());
     nativeTextStyle.free = NativeShaowOptionsFree;
     nativeTextStyle.lineHeight = typingStyle.updateLineHeight.value().ConvertToVp();
     nativeTextStyle.letterSpacing = typingStyle.updateLetterSpacing.value().ConvertToVp();
@@ -474,7 +474,7 @@ void NativeRichEditorController::ParseRichEditorAbstractTextStyleResult(
         index++;
     }
     nativeTextStyle.textShadow = nativbeTextShadow;
-    nativeTextStyle.textShadowSize = textShadows.size();
+    nativeTextStyle.textShadowSize = static_cast<int64_t>(textShadows.size());
     nativeTextStyle.free = NativeShaowOptionsFree;
     nativeTextStyle.lineHeight = spanObject.GetTextStyle().lineHeight;
     nativeTextStyle.letterSpacing = spanObject.GetTextStyle().letterSpacing;
@@ -772,7 +772,7 @@ void NativeRichEditorController::ParseUserGesture(const NativeRichEditorGesture&
 
 void NativeRichEditorController::ParseTextShadow(VectorNativeTextShadows nativeShadows, std::vector<Shadow>& shadows)
 {
-    auto nativeTextShadowVec = *reinterpret_cast<std::vector<NativeTextShadow>*>(nativeShadows);
+    auto nativeTextShadowVec = *reinterpret_cast<std::vector<NativeTextShadowV2>*>(nativeShadows);
     for (size_t i = 0; i < nativeTextShadowVec.size(); i++) {
         Dimension dOffsetX(nativeTextShadowVec[i].offsetX, DimensionUnit::VP);
         Dimension dOffsetY(nativeTextShadowVec[i].offsetY, DimensionUnit::VP);

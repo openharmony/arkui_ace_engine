@@ -580,6 +580,15 @@ void GestureEventHub::BindMenu(GestureEventFunc&& showMenu)
     AddClickEvent(showMenu_);
 }
 
+void GestureEventHub::RegisterMenuOnTouch(TouchEventFunc&& callback)
+{
+    if (bindMenuTouch_) {
+        RemoveTouchEvent(bindMenuTouch_);
+    }
+    bindMenuTouch_ = MakeRefPtr<TouchEventImpl>(std::move(callback));
+    AddTouchEvent(bindMenuTouch_);
+}
+
 OnAccessibilityEventFunc GestureEventHub::GetOnAccessibilityEventFunc()
 {
     auto callback = [weak = WeakClaim(this)](AccessibilityEventType eventType) {
@@ -1038,6 +1047,11 @@ bool GestureEventHub::IsClickable() const
     return clickEventActuator_ != nullptr;
 }
 
+bool GestureEventHub::IsComponentClickable() const
+{
+    return clickEventActuator_ && clickEventActuator_->IsComponentClickable();
+}
+
 bool GestureEventHub::IsUserClickable() const
 {
     return clickEventActuator_ != nullptr && clickEventActuator_->IsUserClickable();
@@ -1256,5 +1270,30 @@ void GestureEventHub::DumpVelocityInfoFroPanEvent(int32_t fingerId)
 {
     CHECK_NULL_VOID(panEventActuator_);
     panEventActuator_->DumpVelocityInfo(fingerId);
+}
+
+GestureEvent GestureEventHub::GetGestureEventInfo()
+{
+    RefPtr<ClickRecognizer> clickRecognizer;
+    if (clickEventActuator_) {
+        clickRecognizer = clickEventActuator_->GetClickRecognizer();
+    } else {
+        clickRecognizer = GetAccessibilityRecognizer<ClickRecognizer>();
+    }
+    GestureEvent info;
+    CHECK_NULL_RETURN(clickRecognizer, info);
+    return clickRecognizer->GetGestureEventInfo();
+}
+
+ClickInfo GestureEventHub::GetClickInfo()
+{
+    RefPtr<ClickRecognizer> clickRecognizer;
+    if (clickEventActuator_) {
+        clickRecognizer = clickEventActuator_->GetClickRecognizer();
+    } else {
+        clickRecognizer = GetAccessibilityRecognizer<ClickRecognizer>();
+    }
+    CHECK_NULL_RETURN(clickRecognizer, ClickInfo(-1));
+    return clickRecognizer->GetClickInfo();
 }
 } // namespace OHOS::Ace::NG

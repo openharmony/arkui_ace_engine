@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,9 +15,10 @@ import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 config("drawable_config") {
+  visibility = [ ":*" ]
   include_dirs = [
     "$ace_root/interfaces/inner_api",
-    "${ace_root}/interfaces/inner_api/drawable_descriptor",
+    "$ace_root/interfaces/inner_api/drawable_descriptor",
   ]
   if (current_os != "ohos") {
     include_dirs += [
@@ -26,6 +27,7 @@ config("drawable_config") {
     ]
   }
 }
+
 if (is_arkui_x) {
   import("//foundation/graphic/graphic_2d/graphic_config.gni")
   import("//foundation/multimedia/image_framework/ide/image_decode_config.gni")
@@ -51,7 +53,6 @@ if (is_arkui_x) {
 
     sources = [
       "drawable_descriptor.cpp",
-      "image_converter.cpp",
       "js_drawable_descriptor.cpp",
     ]
     if (use_clang_android) {
@@ -76,37 +77,58 @@ if (is_arkui_x) {
     public_configs = [ ":drawable_config" ]
     branch_protector_ret = "pac_ret"
 
-    configs = [
-      "$ace_root:ace_config",
-      "$ace_root:ace_coverage_config",
-    ]
+    configs = [ "$ace_root:ace_config" ]
 
     sources = [
+      "base/source_info.cpp",
+      "core/pixelmap_drawable_descriptor.cpp",
       "drawable_descriptor.cpp",
-      "image_converter.cpp",
-      "js_drawable_descriptor.cpp",
+      "loader/file_image_loader.cpp",
+      "loader/image_loader.cpp",
+      "loader/resource_image_loader.cpp",
+      "new_js_drawable_descriptor.cpp",
+      "utils/napi_utils.cpp",
+      "utils/resource_manager.cpp",
     ]
 
-    defines = []
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "cJSON:cjson",
+      "graphic_2d:2d_graphics",
+      "graphic_2d:librender_service_base",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
       "napi:ace_napi",
     ]
 
+    defines = []
     if (current_os == "ohos") {
-      external_deps += [
-        "graphic_2d:2d_graphics",
-        "image_framework:image",
-        "resource_management:global_resmgr",
+      sources += [
+        "adapter/ohos/file_uri_utils_impl.cpp",
+        "adapter/ohos/image_data_impl.cpp",
+        "adapter/ohos/pixel_map_impl.cpp",
+        "adapter/ohos/resource_adapter_impl.cpp",
+        "adapter/ohos/task_pool_impl.cpp",
       ]
-      public_external_deps = [
-        "graphic_2d:color_manager",
+      external_deps += [
+        "ability_base:zuri",
+        "ability_runtime:app_context",
+        "app_file_service:fileuri_native",
+        "ffrt:libffrt",
+        "image_framework:image",
         "image_framework:image_native",
+        "resource_management:global_resmgr",
       ]
     } else {
       defines += [ "PREVIEW" ]
+
+      sources += [
+        "adapter/preview/file_uri_utils_preview.cpp",
+        "adapter/preview/image_data_preview.cpp",
+        "adapter/preview/pixel_map_preview.cpp",
+        "adapter/preview/resource_adapter_preview.cpp",
+        "adapter/preview/task_pool_preview.cpp",
+      ]
       if (use_mingw_win) {
         defines += [ "WINDOWS_PLATFORM" ]
         external_deps += [ "resource_management:win_resmgr" ]
@@ -123,6 +145,7 @@ if (is_arkui_x) {
       }
     }
 
+    cflags = [ "-Wno-inconsistent-dllimport" ]
     subsystem_name = ace_engine_subsystem
     innerapi_tags = [ "platformsdk" ]
     part_name = ace_engine_part

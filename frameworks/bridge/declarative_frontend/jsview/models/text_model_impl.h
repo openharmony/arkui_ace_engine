@@ -51,6 +51,7 @@ public:
     void SetTextIndent(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
     void SetLineSpacing(const Dimension& value) override;
+    void SetIsOnlyBetweenLines(bool isOnlyBetweenLines) override;
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;
@@ -80,6 +81,7 @@ public:
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetHalfLeading(bool halfLeading) override;
     void SetEnableHapticFeedback(bool state) override {};
+    void SetLineThicknessScale(float value) override {};
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

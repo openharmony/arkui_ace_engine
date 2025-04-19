@@ -14,6 +14,7 @@
  */
 
 #include "html_to_span.h"
+#include <sstream>
 
 #include "core/text/html_utils.h"
 
@@ -99,25 +100,33 @@ TextDecorationStyle StringToTextDecorationStyle(const std::string& textDecoratio
     return TextDecorationStyle::SOLID;
 }
 
-TextDecoration StringToTextDecoration(const std::string& textDecoration)
+std::vector<TextDecoration> StringToTextDecoration(const std::string& textDecoration)
 {
-    std::string value = StringUtils::TrimStr(textDecoration);
-    if (value == "inherit") {
-        return TextDecoration::INHERIT;
+    std::istringstream ss(textDecoration);
+    std::string tmp;
+    std::vector<std::string> decorations;
+    while (std::getline(ss, tmp, ' ')) {
+        decorations.emplace_back(tmp);
     }
-    if (value == "line-through") {
-        return TextDecoration::LINE_THROUGH;
+    std::vector<TextDecoration> result;
+    for (const auto &its : decorations) {
+        std::string value = StringUtils::TrimStr(its);
+        TextDecoration decoration;
+        if (value == "inherit") {
+            decoration = TextDecoration::INHERIT;
+        }
+        if (value == "line-through") {
+            decoration = TextDecoration::LINE_THROUGH;
+        }
+        if (value == "overline") {
+            decoration = TextDecoration::OVERLINE;
+        }
+        if (value == "underline") {
+            decoration = TextDecoration::UNDERLINE;
+        }
+        result.push_back(decoration);
     }
-    if (value == "none") {
-        return TextDecoration::NONE;
-    }
-    if (value == "overline") {
-        return TextDecoration::OVERLINE;
-    }
-    if (value == "underline") {
-        return TextDecoration::UNDERLINE;
-    }
-    return TextDecoration::NONE;
+    return result;
 }
 
 ImageFit ConvertStrToFit(const std::string& fit)
@@ -199,8 +208,10 @@ Dimension HtmlToSpan::FromString(const std::string& str)
 
     for (int32_t i = static_cast<int32_t>(str.length()) - 1; i >= 0; --i) {
         if (str[i] >= '0' && str[i] <= '9') {
-            value = StringUtils::StringToDouble(str.substr(0, i + 1));
-            auto subStr = str.substr(i + 1);
+            auto startIndex = i + 1;
+            value = StringUtils::StringToDouble(str.substr(0, startIndex));
+            startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(str.length()));
+            auto subStr = str.substr(startIndex);
             if (subStr == "pt") {
                 value = static_cast<int>(value * PT_TO_PX + ROUND_TO_INT);
                 break;
@@ -325,7 +336,7 @@ void HtmlToSpan::InitDecoration(
         decoration->decorationSytle = StringToTextDecorationStyle(value);
     } else if (key == "text-decoration-color") {
         decoration->color = ToSpanColor(value);
-    } else if (key == "text-decoration-thickness") { // not support
+    } else if (key == "text-decoration-thickness") { // not supported: html has unit while lineThicknessScale is float
     } else if (key == "text-decoration") {
         std::istringstream ss1(value);
         std::string word;
@@ -396,9 +407,10 @@ Color HtmlToSpan::ToSpanColor(const std::string& value)
     std::string color = value;
     std::string tmp = value;
     tmp.erase(std::remove(tmp.begin(), tmp.end(), ' '), tmp.end());
-    auto regStr = Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+    auto regStr = Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY) ?
         "#[0-9A-Fa-f]{6,8}" : "#[0-9A-Fa-f]{7,8}";
-    if (std::regex_match(tmp, matches, std::regex(regStr))) {
+    constexpr auto tmpLeastLength = 3;
+    if (std::regex_match(tmp, matches, std::regex(regStr)) && tmp.length() >= tmpLeastLength) {
         auto rgb = tmp.substr(1);
         // remove last 2 character rgba -> argb
         rgb.erase(rgb.length() - 2, 2);
@@ -1062,9 +1074,11 @@ RefPtr<SpanBase> HtmlToSpan::MakeDimensionSpan(const SpanInfo& info, StyleValue&
 RefPtr<SpanBase> HtmlToSpan::MakeDecorationSpan(const SpanInfo& info, StyleValue& value)
 {
     auto style = Get<DecorationSpanParam>(&value);
+    std::optional<TextDecorationOptions> options;
     if (style != nullptr) {
         return AceType::MakeRefPtr<DecorationSpan>(
-            style->decorationType, style->color, style->decorationSytle, info.start, info.end);
+            std::vector<TextDecoration>({style->decorationType}), style->color,
+            style->decorationSytle, 1.0f, options, info.start, info.end);
     }
 
     return nullptr;

@@ -30,6 +30,20 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr double HALF = 0.5;
+constexpr float FRAME_WIDTH = 300.0f;
+constexpr float FRAME_HEIGHT = 400.0f;
+constexpr float REMOVE_CLIP_SIZE = 100000.0f;
+
+RefPtr<NavDestinationNodeBase> CreateNavDestinationNodeBase()
+{
+    auto pattern = AceType::MakeRefPtr<NavDestinationPatternBase>();
+    if (pattern) {
+        return AceType::MakeRefPtr<NavDestinationNodeBase>(V2::NAVDESTINATION_VIEW_ETS_TAG, 0, pattern);
+    }
+    return nullptr;
+}
+
 RefPtr<NavigationGroupNode> CreateNavigationWithTitle(const RefPtr<MockNavigationStack>& stack,
     NavigationTitlebarOptions options, NavigationTitleMode titleMode = NavigationTitleMode::FREE,
     std::optional<std::string> mainTitle = std::nullopt, std::optional<std::string> subTitle = std::nullopt)
@@ -561,5 +575,197 @@ HWTEST_F(NavDestinationBaseTestNg, UpdateToolBarAndDividerTranslateAndOpacityTes
     float toolBarDividerHeight = 2.0;
     navBarPattern->UpdateToolBarAndDividerTranslateAndOpacity(
         hide, toolBarNode, toolBarHeight, toolbarDividerNode, toolBarDividerHeight);
+}
+
+/**
+ * @tc.name: SetToolBarMenuOptionsTest001
+ * @tc.desc: Branch: if (options_.bgOptions.color.has_value()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, SetToolBarMenuOptionsTest001, TestSize.Level1)
+{
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationMenuOptions opt;
+    opt.mbOptions.bgOptions.color = std::make_optional(Color(0xff0000ff));
+    NavigationTitlebarOptions options;
+    options.brOptions.barStyle = BarStyle::STANDARD;
+    NavigationTitleMode currentMode = NavigationTitleMode::MINI;
+    auto navigationNode = CreateNavigationWithTitle(mockNavPathStack, options, currentMode, "navigation", "subtitle");
+    ASSERT_NE(navigationNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavDestinationNodeBase>(navigationNode->GetNavBarNode());
+    auto navBarPattern = navBarNode->GetPattern<NavDestinationPatternBase>();
+    ASSERT_NE(navBarPattern, nullptr);
+    navBarPattern->SetToolBarMenuOptions(opt);
+    EXPECT_EQ(navBarPattern->GetToolBarMenuOptions().mbOptions.bgOptions.color.value(), Color(0xff0000ff));
+}
+
+/**
+ * @tc.name: SetMenuOptionsTest001
+ * @tc.desc: Branch: if (options_.bgOptions.color.has_value()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, SetMenuOptionsTest001, TestSize.Level1)
+{
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationMenuOptions opt;
+    opt.mbOptions.bgOptions.color = std::make_optional(Color(0xff0000ff));
+    NavigationTitlebarOptions options;
+    options.brOptions.barStyle = BarStyle::STANDARD;
+    NavigationTitleMode currentMode = NavigationTitleMode::MINI;
+    auto navigationNode = CreateNavigationWithTitle(mockNavPathStack, options, currentMode, "navigation", "subtitle");
+    ASSERT_NE(navigationNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavDestinationNodeBase>(navigationNode->GetNavBarNode());
+    auto navBarPattern = navBarNode->GetPattern<NavDestinationPatternBase>();
+    ASSERT_NE(navBarPattern, nullptr);
+    navBarPattern->SetMenuOptions(std::move(opt));
+    EXPECT_EQ(navBarPattern->GetMenuOptions().mbOptions.bgOptions.color.value(), Color(0xff0000ff));
+}
+
+/**
+ * @tc.name: CalcFullClipRectForTransitionTest001
+ * @tc.desc: Branch: rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                   rotateAngle_.has_value() => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcFullClipRectForTransitionTest001, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_FALSE(angle.has_value());
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto rect = node->CalcFullClipRectForTransition(frameSize);
+    auto offset = rect.GetOffset();
+    auto size = rect.GetSize();
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(size, SizeF(FRAME_WIDTH, REMOVE_CLIP_SIZE));
+}
+
+/**
+ * @tc.name: CalcFullClipRectForTransitionTest002
+ * @tc.desc: Branch: rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                   rotateAngle_.has_value() => true
+ *
+ *           Branch: if (angle == ROTATION_90 || angle == ROTATION_270) {
+ *                   angle == ROTATION_90 => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcFullClipRectForTransitionTest002, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->SetPageRotateAngle(ROTATION_90);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_90);
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto rect = node->CalcFullClipRectForTransition(frameSize);
+    auto offset = rect.GetOffset();
+    auto size = rect.GetSize();
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(size, SizeF(REMOVE_CLIP_SIZE, FRAME_HEIGHT));
+}
+
+/**
+ * @tc.name: CalcFullClipRectForTransitionTest003
+ * @tc.desc: Branch: rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                   rotateAngle_.has_value() => true
+ *
+ *           Branch: if (angle == ROTATION_90 || angle == ROTATION_270) {
+ *                   angle == ROTATION_270 => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcFullClipRectForTransitionTest003, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->SetPageRotateAngle(ROTATION_270);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_270);
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto rect = node->CalcFullClipRectForTransition(frameSize);
+    auto offset = rect.GetOffset();
+    auto size = rect.GetSize();
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(size, SizeF(REMOVE_CLIP_SIZE, FRAME_HEIGHT));
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPushStartTest001
+ * @tc.desc: Branch: if (!transitionIn) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushStartTest001, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto offset = node->CalcTranslateForTransitionPushStart(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPushStartTest002
+ * @tc.desc: Branch: auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                   rotateAngle_.has_value() => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushStartTest002, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_FALSE(angle.has_value());
+    auto isRTL = AceApplicationInfo::GetInstance().IsRightToLeft() ? -1.0f : 1.0f;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto offset = node->CalcTranslateForTransitionPushStart(frameSize, true);
+    EXPECT_EQ(offset, OffsetF(FRAME_WIDTH * HALF * isRTL, 0.0f));
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPushStartTest003
+ * @tc.desc: Branch: if (angle == ROTATION_90 || angle == ROTATION_270) {
+ *                   angle == ROTATION_90 => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushStartTest003, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->SetPageRotateAngle(ROTATION_90);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_90);
+    auto isRTL = AceApplicationInfo::GetInstance().IsRightToLeft() ? -1.0f : 1.0f;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto offset = node->CalcTranslateForTransitionPushStart(frameSize, true);
+    EXPECT_EQ(offset, OffsetF(FRAME_HEIGHT * HALF * isRTL, 0.0f));
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPushStartTest004
+ * @tc.desc: Branch: if (angle == ROTATION_90 || angle == ROTATION_270) {
+ *                   angle == ROTATION_270 => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushStartTest004, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->SetPageRotateAngle(ROTATION_270);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_270);
+    auto isRTL = AceApplicationInfo::GetInstance().IsRightToLeft() ? -1.0f : 1.0f;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto offset = node->CalcTranslateForTransitionPushStart(frameSize, true);
+    EXPECT_EQ(offset, OffsetF(FRAME_HEIGHT * HALF * isRTL, 0.0f));
 }
 } // namespace OHOS::Ace::NG

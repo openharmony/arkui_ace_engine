@@ -21,6 +21,7 @@
 
 #include "base/image/pixel_map.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -299,9 +300,7 @@ void MovingPhotoPattern::UpdateImageNode()
     CHECK_NULL_VOID(movingPhoto);
     auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
     CHECK_NULL_VOID(image);
-    DynamicRangeModeConvert(dynamicRangeMode_);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode_, image);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode_, image);
+    UpdateImageHdrMode(image);
     auto imagePattern = image->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
     imagePattern->SetOrientation(ImageRotateOrientation::AUTO);
@@ -335,6 +334,18 @@ void MovingPhotoPattern::UpdateImageNode()
         image->MarkModifyDone();
     }
     RegisterImageEvent();
+}
+
+void MovingPhotoPattern::UpdateImageHdrMode(const RefPtr<FrameNode>& imageNode)
+{
+    if (dynamicRangeMode_ == DynamicRangeMode::STANDARD) {
+        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, imageNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, DynamicRangeMode, imageNode);
+    } else {
+        DynamicRangeModeConvert(dynamicRangeMode_);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode_, imageNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode_, imageNode);
+    }
 }
 
 void MovingPhotoPattern::MovingPhotoFormatConvert(MovingPhotoFormat format)
@@ -436,7 +447,7 @@ void MovingPhotoPattern::PrepareMediaPlayer()
         return;
     }
     if (layoutProperty->GetMovingPhotoUri().value() == uri_ &&
-        layoutProperty->GetVideoSource().value() == fd_) {
+        layoutProperty->GetVideoSource().value() == fd_.GetValue()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer source has not changed.");
         return;
     }
@@ -483,7 +494,7 @@ void MovingPhotoPattern::ResetMediaPlayer()
                 auto mediaPlayer = weak.Upgrade();
                 CHECK_NULL_VOID(mediaPlayer);
                 mediaPlayer->ResetMediaPlayer();
-                if (!mediaPlayer->SetSourceByFd(fd)) {
+                if (!mediaPlayer->SetSourceByFd(fd.GetValue())) {
                     TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "set source for MediaPlayer Async failed.");
                 }
             },
@@ -491,7 +502,7 @@ void MovingPhotoPattern::ResetMediaPlayer()
     } else {
         mediaPlayer_->ResetMediaPlayer();
         RegisterMediaPlayerEvent();
-        if (!mediaPlayer_->SetSourceByFd(fd_)) {
+        if (!mediaPlayer_->SetSourceByFd(fd_.GetValue())) {
             TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "set source for MediaPlayer failed.");
             auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
             uiTaskExecutor.PostTask(
@@ -502,14 +513,13 @@ void MovingPhotoPattern::ResetMediaPlayer()
                     pattern->FireMediaPlayerError();
                 },
                 "ArkUIMovingPhotoResetMediaPlayer");
-            return;
         }
     }
 }
 
 void MovingPhotoPattern::RegisterMediaPlayerEvent()
 {
-    if (fd_ == -1 || !mediaPlayer_) {
+    if (fd_.GetValue() == -1 || !mediaPlayer_) {
         return;
     }
     ContainerScope scope(instanceId_);
@@ -1158,11 +1168,8 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     src.SetSrc(imageSrc);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSourceInfo, src, host);
     UpdateImageNode();
-    if (fd_ > 0) {
-        close(fd_);
-    }
     fd_ = dataProvider->ReadMovingPhotoVideo(uri_);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_, host);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_.GetValue(), host);
     isRefreshMovingPhoto_ = true;
     isSetAutoPlayPeriod_ = false;
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
@@ -1872,9 +1879,6 @@ MovingPhotoPattern::~MovingPhotoPattern()
     if (IsSupportImageAnalyzer()) {
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "~MovingPhotoPattern DestroyAnalyzerOverlay.");
         DestroyAnalyzerOverlay();
-    }
-    if (fd_ > 0) {
-        close(fd_);
     }
 }
 } // namespace OHOS::Ace::NG

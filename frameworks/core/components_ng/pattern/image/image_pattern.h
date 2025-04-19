@@ -21,13 +21,13 @@
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 #include "base/geometry/offset.h"
+#include "base/image/drawable_descriptor.h"
 #include "base/image/image_defines.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
-#include "core/animation/animator.h"
 #include "core/animation/picture_animation.h"
+#include "core/common/clipboard/clipboard.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
@@ -37,10 +37,13 @@
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_overlay_modifier.h"
+#include "core/components_ng/pattern/image/image_paint_method.h"
+#include "core/components_ng/pattern/image/image_properties.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_source_info.h"
+#include "core/animation/animator.h"
 
 namespace OHOS::Ace {
 class ImageAnalyzerManager;
@@ -53,6 +56,8 @@ class ACE_FORCE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
+    using OnProgressCallback = std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>;
+
     ImagePattern();
     ~ImagePattern() override;
 
@@ -75,7 +80,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx_, altLoadingCtx_);
+        return MakeRefPtr<ImageLayoutAlgorithm>();
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -86,14 +91,7 @@ public:
     // Called on main thread to check if need rerender of the content.
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    FocusPattern GetFocusPattern() const override
-    {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-            return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
-        } else {
-            return { FocusType::NODE, false };
-        }
-    }
+    FocusPattern GetFocusPattern() const override;
 
     const RefPtr<CanvasImage>& GetCanvasImage()
     {
@@ -273,12 +271,12 @@ public:
 
     void StartAnimation()
     {
-        status_ = Animator::Status::RUNNING;
+        status_ = AnimatorStatus::RUNNING;
     }
 
     void StopAnimation()
     {
-        status_ = Animator::Status::STOPPED;
+        status_ = AnimatorStatus::STOPPED;
         OnAnimatedModifyDone();
     }
 
@@ -294,7 +292,7 @@ public:
 
     bool GetIsAnimation() const
     {
-        return imageType_ == ImageType::ANIMATION;
+        return imageType_ == ImageType::ANIMATED_DRAWABLE;
     }
 
     bool IsAtomicNode() const override
@@ -304,29 +302,9 @@ public:
 
     bool AllowVisibleAreaCheck() const override;
 
-    void OnInActive() override
-    {
-        if (status_ == Animator::Status::RUNNING) {
-            animator_->Pause();
-        }
-    }
+    void OnInActive() override;
 
-    void OnActive() override
-    {
-        if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            if (!animator_->HasScheduler()) {
-                auto context = host->GetContextRefPtr();
-                if (context) {
-                    animator_->AttachScheduler(context);
-                } else {
-                    TAG_LOGW(AceLogTag::ACE_IMAGE, "pipelineContext is null.");
-                }
-            }
-            animator_->Forward();
-        }
-    }
+    void OnActive() override;
 
     void SetDuration(int32_t duration);
     void SetIteration(int32_t iteration);
@@ -394,6 +372,19 @@ public:
     }
     void AddPixelMapToUiManager();
 
+    void SetDrawable(const RefPtr<DrawableDescriptor>& drawable)
+    {
+        drawable_ = drawable;
+    }
+
+    // this method for measure content
+    std::optional<SizeF> GetImageSizeForMeasure();
+
+    // this method for on complete callback execute after measuring
+    void FinishMeasureForOnComplete();
+
+    void DrawDrawable(RSCanvas& canvas);
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
@@ -422,7 +413,14 @@ private:
     void OnDetachFromMainTree() override;
 
     void OnModifyDone() override;
+    void OnPixelMapDrawableModifyDone();
+    ImagePaintConfig CreatePaintConfig();
+    void Validate();
+    void RegisterDrawableRedrawCallback();
     void UpdateGestureAndDragWhenModify();
+    bool CheckImagePrivacyForCopyOption();
+    void UpdateOffsetForImageAnalyzerOverlay();
+    void SetFrameOffsetForOverlayNode();
 
     void OnLanguageConfigurationUpdate() override;
 
@@ -510,6 +508,8 @@ private:
     void ControlAnimation(int32_t index);
     void SetObscured();
     void OnKeyEvent();
+    void ReportComponentChangeEvent(const std::string& value);
+
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
     bool needLoadAlt_ = true;
@@ -519,6 +519,7 @@ private:
     RefPtr<CanvasImage> image_;
     RectF dstRect_;
     RectF srcRect_;
+    RefPtr<ImagePaintMethod> imagePaintMethod_ = nullptr;
 
     RefPtr<CanvasImage> obscuredImage_;
 
@@ -539,6 +540,7 @@ private:
     bool enableDrag_ = false;
 
     std::function<bool(const KeyEvent& event)> keyEventCallback_ = nullptr;
+    OnProgressCallback onProgressCallback_ = nullptr;
     bool syncLoad_ = false;
     bool needBorderRadius_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
@@ -557,14 +559,20 @@ private:
     OffsetF parentGlobalOffset_;
     bool isSelected_ = false;
 
+    // The component has an internal encapsulation class drawable of the image.
+    // The internal drawable has an external raw pointer.
+    RefPtr<DrawableDescriptor> drawable_;
+    bool isRegisterRedrawCallback_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 
-    // animation
+    // After the animated drawable descriptor code goes online, need to
+    // remove all the following codes.
     ImageType imageType_ = ImageType::BASE;
     RefPtr<Animator> animator_;
     std::vector<ImageProperties> images_;
     std::list<CacheImageStruct> cacheImages_;
-    Animator::Status status_ = Animator::Status::IDLE;
+    AnimatorStatus status_ = AnimatorStatus::IDLE;
     int32_t durationTotal_ = 0;
     int32_t nowImageIndex_ = 0;
     uint64_t repeatCallbackId_ = 0;
@@ -582,8 +590,6 @@ private:
     bool isSrcUndefined_ = false;
     bool isComponentSnapshotNode_ = false;
     bool isNeedReset_ = false;
-
-    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG

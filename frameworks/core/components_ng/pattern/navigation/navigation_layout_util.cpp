@@ -34,11 +34,8 @@ bool NavigationLayoutUtil::CheckWhetherNeedToHideToolbar(
 
     auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(nodeBase->GetToolBarNode());
     CHECK_NULL_RETURN(toolbarNode, false);
-    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(nodeBase->GetParent());
-    CHECK_NULL_RETURN(hostNode, false);
-    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    if (!toolbarNode->GetEnableToolBarAdaptation()) {
+
+    if (!EnableToolBarAdaptation(nodeBase)) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "The toolbar adaptation has been closed");
         return false;
     }
@@ -74,6 +71,18 @@ bool NavigationLayoutUtil::CheckWhetherNeedToHideToolbar(
         }
     }
     return false;
+}
+
+bool NavigationLayoutUtil::EnableToolBarAdaptation(const RefPtr<NavDestinationNodeBase>& nodeBase)
+{
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(nodeBase->GetNavigationNode());
+    if (navigationNode) {
+        auto navigatonLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+        if (navigatonLayoutProperty) {
+            return navigatonLayoutProperty->GetEnableToolBarAdaptationValue(true);
+        }
+    }
+    return true;
 }
 
 void NavigationLayoutUtil::UpdateTitleBarMenuNode(

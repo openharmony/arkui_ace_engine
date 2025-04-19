@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/tabs/tabs_layout_algorithm.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {

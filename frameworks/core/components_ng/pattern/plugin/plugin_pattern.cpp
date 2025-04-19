@@ -21,6 +21,7 @@
 #include "os_account_manager.h"
 #endif // OS_ACCOUNT_EXISTS
 
+#include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/common/plugin_manager.h"
@@ -183,8 +184,21 @@ void PluginPattern::InitPluginManagerDelegate()
         });
 }
 
+void PluginPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("pluginInfo: ").append(pluginInfo_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("data: ").append(data_));
+}
+
+void PluginPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("pluginInfo: ", pluginInfo_.ToString().c_str());
+    json->Put("data: ", data_.c_str());
+}
+
 void PluginPattern::CreatePluginSubContainer()
 {
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "CreatePluginSubContainer.");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContextRefPtr();
@@ -199,6 +213,7 @@ void PluginPattern::CreatePluginSubContainer()
 
     if (pluginSubContainer_) {
         auto currentId = pluginSubContainer_->GetInstanceId();
+        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "destory old pluginSubContainer: %{public}d.", currentId);
         PluginManager::GetInstance().RemovePluginSubContainer(currentId);
         PluginManager::GetInstance().RemovePluginParentContainer(currentId);
         pluginSubContainer_->Destroy();
@@ -230,6 +245,7 @@ void PluginPattern::CreatePluginSubContainer()
             CHECK_NULL_VOID(pluginPattern);
             auto pluginSubContainer = pluginPattern->GetPluginSubContainer();
             RequestPluginInfo info = pluginPattern->GetPluginRequestInfo();
+            TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "requestPluginInfo: %{public}s.", info.ToString().c_str());
             CHECK_NULL_VOID(pluginSubContainer);
             auto packagePathStr = pluginPattern->GetPackagePath(weak, info);
             if (packagePathStr.empty()) {
@@ -251,6 +267,7 @@ void PluginPattern::CreatePluginSubContainer()
             }
         },
         "ArkUIPluginRun");
+        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "CreatePluginSubContainer end.");
 }
 
 void PluginPattern::ReplaceAll(std::string& str, const std::string& pattern, const std::string& newPattern)
@@ -293,6 +310,7 @@ std::unique_ptr<DrawDelegate> PluginPattern::GetDrawDelegate()
 
 void PluginPattern::FireOnCompleteEvent() const
 {
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "FireOnCompleteEvent.");
     if (loadFialState_) {
         return;
     }
@@ -307,7 +325,7 @@ void PluginPattern::FireOnCompleteEvent() const
 void PluginPattern::FireOnErrorEvent(const std::string& code, const std::string& msg)
 {
     loadFialState_ = true;
-    TAG_LOGD(AceLogTag::ACE_PLUGIN_COMPONENT, "code: %{public}s, msg: %{public}s", code.c_str(), msg.c_str());
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "code: %{public}s, msg: %{public}s", code.c_str(), msg.c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<PluginEventHub>();
@@ -320,7 +338,7 @@ void PluginPattern::FireOnErrorEvent(const std::string& code, const std::string&
 
 void PluginPattern::OnActionEvent(const std::string& action) const
 {
-    TAG_LOGD(AceLogTag::ACE_PLUGIN_COMPONENT, "action: %{public}s", action.c_str());
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "action: %{public}s", action.c_str());
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
         return;

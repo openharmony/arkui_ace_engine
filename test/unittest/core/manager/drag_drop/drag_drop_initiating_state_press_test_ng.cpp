@@ -28,55 +28,81 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 struct DragDropInitiatingStatePressTestCase : public DragDropInitiatingStateTestCase {
     bool isMenuShow = false;
-    bool isDragging = false;
+    bool isGatherWithNode = false;
+    bool hasGatherNode = false;
     bool isDragNodeNeedClean = false;
     PreDragStatus preDragStatus = PreDragStatus::ACTION_DETECTING_STATUS;
     SourceType sourceType = SourceType::TOUCH;
     DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput receivedInput,
-        DragDropInitiatingStatus expectStatus, bool isMenuShow, bool isDragging, bool isDragNodeNeedClean,
-        PreDragStatus preDragStatus, SourceType sourceType)
+        DragDropInitiatingStatus expectStatus, bool isMenuShow, bool isGatherWithNode, bool hasGatherNode,
+        bool isDragNodeNeedClean, PreDragStatus preDragStatus, SourceType sourceType)
         : DragDropInitiatingStateTestCase(DragDropInitiatingStatus::PRESS, receivedInput, expectStatus),
-          isMenuShow(isMenuShow), isDragging(isDragging), isDragNodeNeedClean(isDragNodeNeedClean),
-          preDragStatus(preDragStatus), sourceType(sourceType)
+          isMenuShow(isMenuShow), isGatherWithNode(isGatherWithNode), hasGatherNode(hasGatherNode),
+          isDragNodeNeedClean(isDragNodeNeedClean), preDragStatus(preDragStatus), sourceType(sourceType)
     {}
 };
 
 const std::vector<DragDropInitiatingStatePressTestCase> DRAG_DROP_INITIATING_STATE_PRESS_IMAGE_TEST_CASES = {
     DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
-        DragDropInitiatingStatus::PRESS, false, false, false, PreDragStatus::ACTION_DETECTING_STATUS,
+        DragDropInitiatingStatus::PRESS, false, false, false, false, PreDragStatus::ACTION_DETECTING_STATUS,
         SourceType::TOUCH),
     DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
-        DragDropInitiatingStatus::PRESS, false, false, true, PreDragStatus::ACTION_DETECTING_STATUS, SourceType::TOUCH),
+        DragDropInitiatingStatus::PRESS, false, false, false, false, PreDragStatus::ACTION_DETECTING_STATUS,
+        SourceType::TOUCH),
     DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
-        DragDropInitiatingStatus::PRESS, false, true, false, PreDragStatus::ACTION_DETECTING_STATUS, SourceType::TOUCH),
-    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
-        DragDropInitiatingStatus::PRESS, false, true, true, PreDragStatus::ACTION_DETECTING_STATUS, SourceType::TOUCH),
-    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
-        DragDropInitiatingStatus::PRESS, true, false, false, PreDragStatus::ACTION_DETECTING_STATUS, SourceType::TOUCH),
-    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
-        DragDropInitiatingStatus::PRESS, true, false, true, PreDragStatus::ACTION_DETECTING_STATUS, SourceType::TOUCH),
-    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
-        DragDropInitiatingStatus::PRESS, true, true, false, PreDragStatus::ACTION_DETECTING_STATUS, SourceType::TOUCH),
-    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
-        DragDropInitiatingStatus::PRESS, true, true, true, PreDragStatus::ACTION_DETECTING_STATUS, SourceType::TOUCH),
-
-    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
-        DragDropInitiatingStatus::PRESS, false, false, false, PreDragStatus::ACTION_DETECTING_STATUS,
+        DragDropInitiatingStatus::PRESS, false, false, false, false, PreDragStatus::ACTION_DETECTING_STATUS,
         SourceType::MOUSE),
-    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
-        DragDropInitiatingStatus::PRESS, false, false, true, PreDragStatus::ACTION_DETECTING_STATUS, SourceType::MOUSE),
-    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
-        DragDropInitiatingStatus::PRESS, false, true, false, PreDragStatus::ACTION_DETECTING_STATUS, SourceType::MOUSE),
-    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
-        DragDropInitiatingStatus::PRESS, false, true, true, PreDragStatus::ACTION_DETECTING_STATUS, SourceType::MOUSE),
-    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
-        DragDropInitiatingStatus::PRESS, true, false, false, PreDragStatus::ACTION_DETECTING_STATUS, SourceType::MOUSE),
-    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
-        DragDropInitiatingStatus::PRESS, true, false, true, PreDragStatus::ACTION_DETECTING_STATUS, SourceType::MOUSE),
-    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
-        DragDropInitiatingStatus::PRESS, true, true, false, PreDragStatus::ACTION_DETECTING_STATUS, SourceType::MOUSE),
-    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
-        DragDropInitiatingStatus::PRESS, true, true, true, PreDragStatus::ACTION_DETECTING_STATUS, SourceType::MOUSE),
+
+    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandlePreviewLongPressOnAction,
+        DragDropInitiatingStatus::LIFTING, true, true, false, true, PreDragStatus::ACTION_DETECTING_STATUS,
+        SourceType::TOUCH),
+
+    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleSequenceOnActionCancel,
+        DragDropInitiatingStatus::IDLE, false, true, false, true, PreDragStatus::ACTION_DETECTING_STATUS,
+        SourceType::TOUCH),
+    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleSequenceOnActionCancel,
+        DragDropInitiatingStatus::PRESS, true, true, false, true, PreDragStatus::ACTION_DETECTING_STATUS,
+        SourceType::TOUCH),
+
+    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandlePanOnActionStart,
+        DragDropInitiatingStatus::PRESS, false, false, false, false, PreDragStatus::ACTION_DETECTING_STATUS,
+        SourceType::TOUCH),
+    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandlePanOnActionStart,
+        DragDropInitiatingStatus::PRESS, false, false, false, true, PreDragStatus::ACTION_DETECTING_STATUS,
+        SourceType::TOUCH),
+    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandlePanOnActionStart,
+        DragDropInitiatingStatus::PRESS, false, false, false, false, PreDragStatus::ACTION_DETECTING_STATUS,
+        SourceType::MOUSE),
+    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandlePanOnActionStart,
+        DragDropInitiatingStatus::PRESS, false, false, false, true, PreDragStatus::ACTION_DETECTING_STATUS,
+        SourceType::MOUSE),
+
+    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandlePanOnReject,
+        DragDropInitiatingStatus::PRESS, false, false, false, false, PreDragStatus::ACTION_DETECTING_STATUS,
+        SourceType::TOUCH),
+    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandlePanOnReject,
+        DragDropInitiatingStatus::PRESS, false, false, true, false, PreDragStatus::ACTION_DETECTING_STATUS,
+        SourceType::TOUCH),
+    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandlePanOnReject,
+        DragDropInitiatingStatus::PRESS, false, true, false, false, PreDragStatus::ACTION_DETECTING_STATUS,
+        SourceType::TOUCH),
+    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandlePanOnReject,
+        DragDropInitiatingStatus::PRESS, false, true, true, false, PreDragStatus::ACTION_DETECTING_STATUS,
+        SourceType::TOUCH),
+    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandlePanOnReject,
+        DragDropInitiatingStatus::PRESS, false, false, true, false, PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION,
+        SourceType::TOUCH),
+
+    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandleTouchEvent,
+        DragDropInitiatingStatus::PRESS, false, false, true, false, PreDragStatus::ACTION_DETECTING_STATUS,
+        SourceType::TOUCH),
+
+    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandlePanOnActionEnd,
+        DragDropInitiatingStatus::IDLE, true, false, false, false, PreDragStatus::ACTION_DETECTING_STATUS,
+        SourceType::TOUCH),
+    DragDropInitiatingStatePressTestCase(DragDropInitiatingReceivedInput::HandlePanOnActionEnd,
+        DragDropInitiatingStatus::IDLE, true, false, false, false, PreDragStatus::ACTION_DETECTING_STATUS,
+        SourceType::TOUCH),
 };
 
 void DragDropInitiatingStatePressTestNG::SetUpTestCase()
@@ -99,6 +125,12 @@ void DragDropInitiatingStatePressTestNG::TearDownTestCase()
 HWTEST_F(DragDropInitiatingStatePressTestNG, DragDropInitiatingStatePressTestNG001, TestSize.Level1)
 {
     int32_t caseNum = 0;
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
     for (const auto& testCase : DRAG_DROP_INITIATING_STATE_PRESS_IMAGE_TEST_CASES) {
         /**
          * @tc.steps: step1. create DragDropEventActuator.
@@ -118,7 +150,13 @@ HWTEST_F(DragDropInitiatingStatePressTestNG, DragDropInitiatingStatePressTestNG0
         ASSERT_NE(handler, nullptr);
         auto machine = handler->initiatingFlow_;
         ASSERT_NE(machine, nullptr);
+        machine->InitializeState();
         machine->currentState_ = static_cast<int32_t>(testCase.originStatus);
+        overlayManager->SetIsGatherWithMenu(testCase.isGatherWithNode);
+        machine->dragDropInitiatingParams_.hasGatherNode = testCase.hasGatherNode;
+        dragDropManager->isDragNodeNeedClean_ = testCase.isDragNodeNeedClean;
+        DragDropGlobalController::GetInstance().UpdateMenuShowingStatus(testCase.isMenuShow);
+        DragDropGlobalController::GetInstance().SetPreDragStatus(testCase.preDragStatus);
         if (((static_cast<int32_t>(testCase.receivedInput)) & DRAG_ACTION_NONE_ARGS) != 0) {
             DragDropInitiatingStateTestNG::DoMachineAction(machine, testCase.receivedInput);
         } else if (((static_cast<int32_t>(testCase.receivedInput)) & DRAG_ACTION_DRAG_POINTER_EVENT_ARGS) != 0) {
@@ -126,6 +164,7 @@ HWTEST_F(DragDropInitiatingStatePressTestNG, DragDropInitiatingStatePressTestNG0
             DragDropInitiatingStateTestNG::DoMachineAction(machine, testCase.receivedInput, dragPointerEvent);
         } else if (((static_cast<int32_t>(testCase.receivedInput)) & DRAG_ACTION_TOUCH_EVENT_ARGS) != 0) {
             TouchEvent touchEvent;
+            touchEvent.type = TouchType::MOVE;
             touchEvent.sourceType = testCase.sourceType;
             DragDropInitiatingStateTestNG::DoMachineAction(machine, testCase.receivedInput, touchEvent);
         } else if (((static_cast<int32_t>(testCase.receivedInput)) & DRAG_ACTION_GESTURE_EVENT_ARGS) != 0) {
@@ -138,5 +177,4 @@ HWTEST_F(DragDropInitiatingStatePressTestNG, DragDropInitiatingStatePressTestNG0
         caseNum++;
     }
 }
-
 } // namespace OHOS::Ace::NG

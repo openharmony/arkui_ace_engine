@@ -13,13 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/text/text_base.h"
-#include "core/text/text_emoji_processor.h"
 #include <cstdint>
+
+#include "core/components_ng/pattern/text/text_base.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const Dimension SELECTED_BLANK_LINE_WIDTH = 2.0_vp;
+constexpr size_t UTF16_SURROGATE_PAIR_LENGTH = 2;
+constexpr size_t UTF16_SINGLE_CHAR_LENGTH = 1;
 }; // namespace
 
 void TextBase::SetSelectionNode(const SelectedByMouseInfo& info)
@@ -69,15 +73,11 @@ void TextBase::CalculateSelectedRect(std::vector<RectF>& selectedRect, float lon
     float lastLineBottom = firstRect.Top();
     auto end = *(lineGroup.rbegin());
     for (const auto& line : lineGroup) {
-        if (line == end) {
-            break;
-        }
-        auto rect = RectF(line.second.Left(), lastLineBottom, longestLine - line.second.Left(),
-                line.second.Bottom() - lastLineBottom);
+        auto width = (line == end) ? line.second.Width() : longestLine - line.second.Left();
+        auto rect = RectF(line.second.Left(), lastLineBottom, width, line.second.Bottom() - lastLineBottom);
         selectedRect.emplace_back(rect);
         lastLineBottom = line.second.Bottom();
     }
-    selectedRect.emplace_back(RectF(end.second.Left(), lastLineBottom, end.second.Width(), end.second.Height()));
 }
 
 float TextBase::GetSelectedBlankLineWidth()
@@ -243,6 +243,35 @@ std::u16string TextBase::ConvertStr8toStr16(const std::string& value)
     return result;
 }
 
+std::u16string TextBase::TruncateText(const std::u16string& text, const size_t& length) const
+{
+    const size_t maxLength = length;
+    size_t charCount = 0;
+    size_t byteIndex = 0;
+
+    while (byteIndex < text.size() && charCount < maxLength) {
+        charCount++;
+        byteIndex += (text[byteIndex] >= 0xD800 && text[byteIndex] <= 0xDBFF) ?
+            UTF16_SURROGATE_PAIR_LENGTH : UTF16_SINGLE_CHAR_LENGTH;
+    }
+
+    if (charCount >= maxLength) {
+        return text.substr(0, byteIndex);
+    }
+    return text;
+}
+
+size_t TextBase::CountUtf16Chars(const std::u16string& s)
+{
+    size_t charCount = 0;
+    size_t i = 0;
+    while (i < s.size()) {
+        charCount++;
+        i += (s[i] >= 0xD800 && s[i] <= 0xDBFF) ? UTF16_SURROGATE_PAIR_LENGTH : UTF16_SINGLE_CHAR_LENGTH;
+    }
+    return charCount;
+}
+
 void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
 {
     if (!isStarted_ || info.GetChangedTouches().empty()) {
@@ -280,5 +309,23 @@ void TextGestureSelector::DoTextSelectionTouchMove(const TouchEventInfo& info)
     auto start = std::min(index, start_);
     auto end = std::max(index, end_);
     OnTextGestureSelectionUpdate(start, end, info);
+}
+
+void TextGestureSelector::StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset)
+{
+    start_ = start;
+    end_ = end;
+    isStarted_ = start_ <= end_;
+    startOffset_ = startOffset;
+}
+
+void TextGestureSelector::ResetGestureSelection()
+{
+    start_ = -1;
+    end_ = -1;
+    isStarted_ = false;
+    startOffset_.Reset();
+    isSelecting_ = false;
+    selectingFingerId_ = -1;
 }
 }

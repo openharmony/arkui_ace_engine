@@ -107,6 +107,7 @@ bool ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endInde
     FormatIndex(startIndex, endIndex);
     auto tmp = PreprocessString(startIndex, endIndex, value);
     auto str = content_;
+    endIndex = std::clamp(endIndex, 0, static_cast<int32_t>(content_.length()));
     content_ = content_.substr(0, startIndex) + tmp +
                content_.substr(endIndex, static_cast<int32_t>(content_.length()) - endIndex);
     auto len = content_.length();
@@ -122,6 +123,7 @@ bool ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endInde
 std::u16string ContentController::GetSelectedValue(int32_t startIndex, int32_t endIndex)
 {
     FormatIndex(startIndex, endIndex);
+    startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(content_.length()));
     auto selectedValue = content_.substr(startIndex, endIndex - startIndex);
     if (selectedValue.empty()) {
         selectedValue = TextEmojiProcessor::SubU16string(startIndex, endIndex - startIndex, content_);
@@ -270,6 +272,7 @@ std::u16string ContentController::RemoveErrorTextFromValue(const std::u16string&
         valuePtr++;
         errorTextPtr++;
     }
+    valuePtr = std::clamp(valuePtr, 0, static_cast<int32_t>(value.length()));
     result += value.substr(valuePtr);
     return result;
 }
@@ -327,7 +330,7 @@ bool ContentController::FilterWithAscii(std::u16string& result)
     if (errorText.empty()) {
         textChange = false;
     } else {
-        LOGI("FilterWithAscii Error text size %{publc}zu", UtfUtils::Str16DebugToStr8(errorText).size());
+        LOGI("FilterWithAscii Error text size %{public}zu", UtfUtils::Str16DebugToStr8(errorText).size());
     }
     return textChange;
 }

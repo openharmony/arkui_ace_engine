@@ -90,7 +90,9 @@ public:
     static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
 
     static void SetBackToTop(bool backToTop);
+    static void ResetBackToTop();
     static void SetBackToTop(FrameNode* frameNode, bool backToTop);
+    static void ResetBackToTop(FrameNode* frameNode);
     static bool GetBackToTop(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG

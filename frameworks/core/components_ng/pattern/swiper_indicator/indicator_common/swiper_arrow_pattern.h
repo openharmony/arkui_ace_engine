@@ -95,6 +95,7 @@ private:
     RefPtr<SwiperPattern> GetSwiperPattern() const;
 
     RefPtr<ClickEvent> buttonClickListener_;
+    RefPtr<ClickEvent> arrowClickListener_;
     RefPtr<TouchEventImpl> buttonTouchListener_;
     RefPtr<InputEvent> buttonOnHoverListener_;
     std::shared_ptr<ChangeEvent> swiperChangeEvent_;

@@ -382,8 +382,13 @@ void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
-    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto node = frameNode.Upgrade();
+    if (node && node->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        JSViewAbstract::JsOnDragStart(info);
+        return;
+    }
+    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc),
                            targetNode = frameNode](
                            const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
@@ -467,11 +472,7 @@ void JSListItem::JSBind(BindingTarget globalObj)
     JSClass<JSListItem>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSListItem>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSListItem>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
-        JSClass<JSListItem>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
-    } else {
-        JSClass<JSListItem>::StaticMethod("onDragStart", &JSListItem::JsOnDragStart);
-    }
+    JSClass<JSListItem>::StaticMethod("onDragStart", &JSListItem::JsOnDragStart);
     JSClass<JSListItem>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

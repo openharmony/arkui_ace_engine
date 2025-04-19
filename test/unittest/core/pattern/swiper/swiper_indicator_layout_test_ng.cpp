@@ -138,4 +138,39 @@ HWTEST_F(SwiperIndicatorLayoutTestNg, CircleDotIndicatorFlushLayoutTask001, Test
     EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameSize(), SizeF(300.f, 500.f)));
     EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f)));
 }
+
+/**
+ * @tc.name: SwiperIndicatorSize001
+ * @tc.desc: Test swiper indicator size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorLayoutTestNg, SwiperIndicatorSize001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    RefPtr<DotIndicatorLayoutAlgorithm> algorithm =
+        AceType::DynamicCast<DotIndicatorLayoutAlgorithm>(indicatorPattern->CreateLayoutAlgorithm());
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
+    algorithm->isBindIndicator_ = false;
+    algorithm->Measure(&layoutWrapper);
+    auto indicatorWidth = algorithm->indicatorWidth_;
+
+    algorithm->isBindIndicator_ = true;
+    algorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(indicatorWidth, algorithm->indicatorWidth_);
+
+    algorithm->indicatorInteractive_ = false;
+    algorithm->Measure(&layoutWrapper);
+    EXPECT_NE(indicatorWidth, algorithm->indicatorWidth_);
+
+    algorithm->indicatorInteractive_ = true;
+    algorithm->maxDisplayCount_ = 6;
+    algorithm->Measure(&layoutWrapper);
+    EXPECT_NE(indicatorWidth, algorithm->indicatorWidth_);
+}
 } // namespace OHOS::Ace::NG

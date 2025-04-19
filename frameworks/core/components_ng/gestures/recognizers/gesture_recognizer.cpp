@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "gesture_recognizer.h"
 
 #include "core/components_ng/base/observer_handler.h"
 
@@ -584,22 +583,6 @@ void NGGestureRecognizer::SetIsNeedResetRecognizer(bool isNeedResetRecognizerSta
 bool NGGestureRecognizer::IsNeedResetRecognizerState()
 {
     return isNeedResetRecognizerState_;
-}
-
-void NGGestureRecognizer::UpdateCallbackState(const std::unique_ptr<GestureEventFunc>& callback)
-{
-    if (callback == onActionStart_) {
-        callbackState_ = CallbackState::START;
-    }
-    if (callback == onActionUpdate_) {
-        callbackState_ = CallbackState::UPDATE;
-    }
-    if (callback == onActionEnd_) {
-        callbackState_ = CallbackState::END;
-    }
-    if (callback == onActionCancel_) {
-        callbackState_ = CallbackState::CANCEL;
-    }
 }
 
 void NGGestureRecognizer::CheckPendingRecognizerIsInAttachedNode(const TouchEvent& event)

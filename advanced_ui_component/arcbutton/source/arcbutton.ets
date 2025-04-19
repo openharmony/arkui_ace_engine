@@ -497,7 +497,7 @@ export struct ArcButton {
         .rotate({ angle: !this.isUp ? 0 : 180 })
         .clipShape(new Path({ commands: this.pathString }))
         .backgroundColor(this.btnColor.color)
-        .backgroundBlurStyle(this.options.backgroundBlurStyle)
+        .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
         .shadow(this.getShadow())
       if (this.isExceed) {
         this.TextBuilderIsExceed()

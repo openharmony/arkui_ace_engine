@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
+#include "native_type.h"
 
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -24,7 +26,11 @@ constexpr int32_t SIZE_OF_THREE = 3;
 constexpr int32_t POS_0 = 0;
 constexpr int32_t POS_1 = 1;
 constexpr int32_t POS_2 = 2;
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
+constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
+constexpr int NUM_4 = 4;
 constexpr int32_t DEFAULT_GROUP_DIVIDER_VALUES_COUNT = 3;
 const char DEFAULT_DELIMITER = '|';
 const int32_t ERROR_INT_CODE = -1;
@@ -304,6 +310,68 @@ ArkUI_Int32 GetTextPickerSingleRange(ArkUINodeHandle node)
     return TextPickerModelNG::GetTextPickerRangeType(frameNode);
 }
 
+void SetTextCascadePickChildrenRangeContent(
+    std::vector<NG::TextCascadePickerOptions>& multiResult, ArkUITextCascadePickerRangeContentArray arry)
+{
+    for (int index = 0; index < arry->rangeContentArraySize; index++) {
+        NG::TextCascadePickerOptions option;
+        if (arry[index].text == nullptr) {
+            continue;
+        }
+        option.rangeResult.push_back(arry[index].text);
+
+        if (arry[index].children != nullptr) {
+            SetTextCascadePickChildrenRangeContent(option.children, arry[index].children);
+        }
+        multiResult.push_back(option);
+    }
+}
+
+void SetTextCascadePickRangeContent(
+    ArkUINodeHandle node, ArkUITextCascadePickerRangeContentArray arry, ArkUI_Int32 rangeType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<NG::TextCascadePickerOptions> multiResult;
+
+    SetTextCascadePickChildrenRangeContent(multiResult, arry);
+    TextPickerModelNG::SetHasSelectAttr(frameNode, true);
+    TextPickerModelNG::SetIsCascade(frameNode, true);
+    TextPickerModelNG::SetColumns(frameNode, multiResult);
+
+    std::vector<std::string> values;
+    for (int index = 0; index < arry->rangeContentArraySize; index++) {
+        if (arry[index].text == nullptr) {
+            continue;
+        }
+        values.emplace_back(arry[index].text);
+    }
+    TextPickerModelNG::SetValues(frameNode, values);
+    TextPickerModelNG::SetTextPickerRangeType(frameNode, rangeType);
+}
+
+void SetTextPickerIconRangeStr(
+    ArkUINodeHandle node, ArkUITextPickerRangeContentArray arry, ArkUI_Bool isSingleRange, ArkUI_Int32 rangeType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetTextPickerSingeRange(static_cast<bool>(isSingleRange));
+    std::vector<NG::RangeContent> result;
+    for (int i = 0; i < arry->rangeContentArraySize; i++) {
+        NG::RangeContent content;
+        if (arry->rangeContent[i].text != nullptr) {
+            content.text_ = arry->rangeContent[i].text;
+        }
+        if (arry->rangeContent[i].icon != nullptr) {
+            content.icon_ = arry->rangeContent[i].icon;
+        }
+        result.emplace_back(content);
+    }
+    TextPickerModelNG::SetColumnKind(frameNode, MIXTURE);
+    TextPickerModelNG::SetRange(frameNode, result);
+    TextPickerModelNG::SetTextPickerRangeType(frameNode, rangeType);
+}
+
 void SetTextPickerRangeStr(
     ArkUINodeHandle node, ArkUI_CharPtr rangeStr, ArkUI_Bool isSingleRange, ArkUI_Int32 rangeType)
 {
@@ -320,6 +388,7 @@ void SetTextPickerRangeStr(
             content.text_ = text;
             result.emplace_back(content);
         }
+        TextPickerModelNG::SetColumnKind(frameNode, TEXT);
         TextPickerModelNG::SetRange(frameNode, result);
     } else {
         std::vector<NG::TextCascadePickerOptions> multiResult;
@@ -664,6 +733,66 @@ void ResetTextPickerOnScrollStop(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextPickerModelNG::SetOnScrollStop(frameNode, nullptr);
 }
+
+void SetTextPickerSelectedBackgroundStyle(ArkUINodeHandle node, ArkUI_Bool* getValue, ArkUI_Uint32 color,
+    ArkUI_Float32* value, ArkUI_Int32* unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    PickerBackgroundStyle pickerBgStyle;
+    pickerBgStyle.color = theme->GetSelectedBackgroundColor();
+    pickerBgStyle.borderRadius = theme->GetSelectedBorderRadius();
+    if (getValue[NUM_0]) {
+        pickerBgStyle.color = Color(color);
+    }
+    if (getValue[NUM_1]) {
+        pickerBgStyle.borderRadius->radiusTopLeft = Dimension(
+            value[NUM_0], static_cast<DimensionUnit>(unit[NUM_0]));
+    }
+    if (getValue[NUM_2]) {
+        pickerBgStyle.borderRadius->radiusTopRight = Dimension(
+            value[NUM_1], static_cast<DimensionUnit>(unit[NUM_1]));
+    }
+    if (getValue[NUM_3]) {
+        pickerBgStyle.borderRadius->radiusBottomLeft = Dimension(
+            value[NUM_2], static_cast<DimensionUnit>(unit[NUM_2]));
+    }
+    if (getValue[NUM_4]) {
+        pickerBgStyle.borderRadius->radiusBottomRight = Dimension(
+            value[NUM_3], static_cast<DimensionUnit>(unit[NUM_3]));
+    }
+    TextPickerModelNG::SetSelectedBackgroundStyle(frameNode, pickerBgStyle);
+}
+
+void GetTextPickerSelectedBackgroundStyle(ArkUINodeHandle node, ArkUINumberValue* result)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pickerBgStyle = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode);
+    result[NUM_0].u32 = pickerBgStyle.color->GetValue();
+    result[NUM_1].f32 = pickerBgStyle.borderRadius->radiusTopLeft->Value();
+    result[NUM_2].f32 = pickerBgStyle.borderRadius->radiusTopRight->Value();
+    result[NUM_3].f32 = pickerBgStyle.borderRadius->radiusBottomLeft->Value();
+    result[NUM_4].f32 = pickerBgStyle.borderRadius->radiusBottomRight->Value();
+}
+
+void ResetTextPickerSelectedBackgroundStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    PickerBackgroundStyle pickerBgStyle;
+    pickerBgStyle.color = theme->GetSelectedBackgroundColor();
+    pickerBgStyle.borderRadius = theme->GetSelectedBorderRadius();
+    TextPickerModelNG::SetSelectedBackgroundStyle(frameNode, pickerBgStyle);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -719,6 +848,11 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         .resetTextPickerOnChange = ResetTextPickerOnChange,
         .setTextPickerOnScrollStop = SetTextPickerOnScrollStopExt,
         .resetTextPickerOnScrollStop = ResetTextPickerOnScrollStop,
+        .setTextPickerIconRangeStr = SetTextPickerIconRangeStr,
+        .setTextCascadePickRangeContent = SetTextCascadePickRangeContent,
+        .setTextPickerSelectedBackgroundStyle = SetTextPickerSelectedBackgroundStyle,
+        .getTextPickerSelectedBackgroundStyle = GetTextPickerSelectedBackgroundStyle,
+        .resetTextPickerSelectedBackgroundStyle = ResetTextPickerSelectedBackgroundStyle,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

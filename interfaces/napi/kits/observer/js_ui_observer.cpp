@@ -63,6 +63,22 @@ static constexpr uint32_t ON_BACK_PRESS = 4;
 static constexpr uint32_t ON_SHOW = 0;
 static constexpr uint32_t ON_HIDE = 1;
 
+static constexpr uint32_t TAP_GESTURE = 0;
+static constexpr uint32_t LONG_PRESS_GESTURE = 1;
+static constexpr uint32_t PAN_GESTURE = 2;
+static constexpr uint32_t PINCH_GESTURE = 3;
+static constexpr uint32_t SWIPE_GESTURE = 4;
+static constexpr uint32_t ROTATION_GESTURE = 5;
+static constexpr uint32_t DRAG = 6;
+static constexpr uint32_t CLICK = 7;
+
+static constexpr uint32_t READY = 0;
+static constexpr uint32_t DETECTING = 1;
+static constexpr uint32_t PENDING = 2;
+static constexpr uint32_t BLOCKED = 3;
+static constexpr uint32_t SUCCESSFUL = 4;
+static constexpr uint32_t FAILED = 5;
+
 constexpr char NAVDESTINATION_UPDATE[] = "navDestinationUpdate";
 constexpr char ROUTERPAGE_UPDATE[] = "routerPageUpdate";
 constexpr char SCROLL_EVENT[] = "scrollEvent";
@@ -73,6 +89,10 @@ constexpr char NAVDESTINATION_SWITCH[] = "navDestinationSwitch";
 constexpr char WILLCLICK_UPDATE[] = "willClick";
 constexpr char DIDCLICK_UPDATE[] = "didClick";
 constexpr char TAB_CONTENT_STATE[] = "tabContentUpdate";
+constexpr char BEFORE_PAN_START[] = "beforePanStart";
+constexpr char BEFORE_PAN_END[] = "beforePanEnd";
+constexpr char AFTER_PAN_START[] = "afterPanStart";
+constexpr char AFTER_PAN_END[] = "afterPanEnd";
 
 bool IsUIAbilityContext(napi_env env, napi_value context)
 {
@@ -319,6 +339,10 @@ ObserverProcess::ObserverProcess()
         { WILLCLICK_UPDATE, &ObserverProcess::ProcessWillClickRegister },
         { DIDCLICK_UPDATE, &ObserverProcess::ProcessDidClickRegister },
         { TAB_CONTENT_STATE, &ObserverProcess::ProcessTabContentStateRegister },
+        { BEFORE_PAN_START, &ObserverProcess::ProcessBeforePanStartRegister },
+        { AFTER_PAN_START, &ObserverProcess::ProcessAfterPanStartRegister },
+        { BEFORE_PAN_END, &ObserverProcess::ProcessBeforePanEndRegister },
+        { AFTER_PAN_END, &ObserverProcess::ProcessAfterPanEndRegister },
     };
     unregisterProcessMap_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationUnRegister },
@@ -331,6 +355,10 @@ ObserverProcess::ObserverProcess()
         { WILLCLICK_UPDATE, &ObserverProcess::ProcessWillClickUnRegister },
         { DIDCLICK_UPDATE, &ObserverProcess::ProcessDidClickUnRegister },
         { TAB_CONTENT_STATE, &ObserverProcess::ProcessTabContentStateUnRegister },
+        { BEFORE_PAN_START, &ObserverProcess::ProcessBeforePanStartUnRegister },
+        { AFTER_PAN_START, &ObserverProcess::ProcessAfterPanStartUnRegister },
+        { BEFORE_PAN_END, &ObserverProcess::ProcessBeforePanEndUnRegister },
+        { AFTER_PAN_END, &ObserverProcess::ProcessAfterPanEndUnRegister },
     };
 }
 
@@ -988,6 +1016,294 @@ napi_value ObserverProcess::ProcessTabContentStateUnRegister(napi_env env, napi_
     return result;
 }
 
+napi_value ObserverProcess::ProcessBeforePanStartRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (!isPanGestureHandleFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetPanGestureHandleFunc(&UIObserver::HandlePanGestureAccept);
+        isPanGestureHandleFuncSetted_ = true;
+    }
+
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
+        UIObserver::RegisterBeforePanStartCallback(0, listener);
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        auto context = argv[PARAM_INDEX_ONE];
+        if (context) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::RegisterBeforePanStartCallback(env, context, listener);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::RegisterBeforePanStartCallback(uiContextInstanceId, listener);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessBeforePanStartUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (argc == PARAM_SIZE_ONE) {
+        UIObserver::UnRegisterBeforePanStartCallback(0, nullptr);
+    }
+
+    if (argc == PARAM_SIZE_TWO) {
+        if (MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+            UIObserver::UnRegisterBeforePanStartCallback(0, argv[PARAM_INDEX_ONE]);
+        } else if (MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)) {
+            napi_value context = argv[PARAM_INDEX_ONE];
+            if (!context) {
+                return nullptr;
+            }
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::UnRegisterBeforePanStartCallback(env, context, nullptr);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::UnRegisterBeforePanStartCallback(uiContextInstanceId, nullptr);
+            }
+        }
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        napi_value context = argv[PARAM_INDEX_ONE];
+        if (context) {
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::UnRegisterBeforePanStartCallback(env, context, argv[PARAM_INDEX_TWO]);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::UnRegisterBeforePanStartCallback(uiContextInstanceId, argv[PARAM_INDEX_TWO]);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessBeforePanEndRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (!isPanGestureHandleFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetPanGestureHandleFunc(&UIObserver::HandlePanGestureAccept);
+        isPanGestureHandleFuncSetted_ = true;
+    }
+
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
+        UIObserver::RegisterBeforePanEndCallback(0, listener);
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        auto context = argv[PARAM_INDEX_ONE];
+        if (context) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::RegisterBeforePanEndCallback(env, context, listener);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::RegisterBeforePanEndCallback(uiContextInstanceId, listener);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessBeforePanEndUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (argc == PARAM_SIZE_ONE) {
+        UIObserver::UnRegisterBeforePanEndCallback(0, nullptr);
+    }
+
+    if (argc == PARAM_SIZE_TWO) {
+        if (MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+            UIObserver::UnRegisterBeforePanEndCallback(0, argv[PARAM_INDEX_ONE]);
+        } else if (MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)) {
+            napi_value context = argv[PARAM_INDEX_ONE];
+            if (!context) {
+                return nullptr;
+            }
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::UnRegisterBeforePanEndCallback(env, context, nullptr);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::UnRegisterBeforePanEndCallback(uiContextInstanceId, nullptr);
+            }
+        }
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        napi_value context = argv[PARAM_INDEX_ONE];
+        if (context) {
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::UnRegisterBeforePanEndCallback(env, context, argv[PARAM_INDEX_TWO]);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::UnRegisterBeforePanEndCallback(uiContextInstanceId, argv[PARAM_INDEX_TWO]);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessAfterPanStartRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (!isPanGestureHandleFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetPanGestureHandleFunc(&UIObserver::HandlePanGestureAccept);
+        isPanGestureHandleFuncSetted_ = true;
+    }
+
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
+        UIObserver::RegisterAfterPanStartCallback(0, listener);
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        auto context = argv[PARAM_INDEX_ONE];
+        if (context) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::RegisterAfterPanStartCallback(env, context, listener);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::RegisterAfterPanStartCallback(uiContextInstanceId, listener);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessAfterPanStartUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (argc == PARAM_SIZE_ONE) {
+        UIObserver::UnRegisterBeforePanStartCallback(0, nullptr);
+    }
+
+    if (argc == PARAM_SIZE_TWO) {
+        if (MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+            UIObserver::UnRegisterAfterPanStartCallback(0, argv[PARAM_INDEX_ONE]);
+        } else if (MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)) {
+            napi_value context = argv[PARAM_INDEX_ONE];
+            if (!context) {
+                return nullptr;
+            }
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::UnRegisterAfterPanStartCallback(env, context, nullptr);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::UnRegisterAfterPanStartCallback(uiContextInstanceId, nullptr);
+            }
+        }
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        napi_value context = argv[PARAM_INDEX_ONE];
+        if (context) {
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::UnRegisterAfterPanStartCallback(env, context, argv[PARAM_INDEX_TWO]);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::UnRegisterAfterPanStartCallback(uiContextInstanceId, argv[PARAM_INDEX_TWO]);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessAfterPanEndRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (!isPanGestureHandleFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetPanGestureHandleFunc(&UIObserver::HandlePanGestureAccept);
+        isPanGestureHandleFuncSetted_ = true;
+    }
+
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
+        UIObserver::RegisterAfterPanEndCallback(0, listener);
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        auto context = argv[PARAM_INDEX_ONE];
+        if (context) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::RegisterAfterPanEndCallback(env, context, listener);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::RegisterAfterPanEndCallback(uiContextInstanceId, listener);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessAfterPanEndUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (argc == PARAM_SIZE_ONE) {
+        UIObserver::UnRegisterAfterPanEndCallback(0, nullptr);
+    }
+
+    if (argc == PARAM_SIZE_TWO) {
+        if (MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+            UIObserver::UnRegisterAfterPanEndCallback(0, argv[PARAM_INDEX_ONE]);
+        } else if (MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)) {
+            napi_value context = argv[PARAM_INDEX_ONE];
+            if (!context) {
+                return nullptr;
+            }
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::UnRegisterAfterPanEndCallback(env, context, nullptr);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::UnRegisterAfterPanEndCallback(uiContextInstanceId, nullptr);
+            }
+        }
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        napi_value context = argv[PARAM_INDEX_ONE];
+        if (context) {
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::UnRegisterAfterPanEndCallback(env, context, argv[PARAM_INDEX_TWO]);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::UnRegisterAfterPanEndCallback(uiContextInstanceId, argv[PARAM_INDEX_TWO]);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 napi_value ObserverOn(napi_env env, napi_callback_info info)
 {
     return ObserverProcess::GetInstance().ProcessRegister(env, info);
@@ -1070,6 +1386,50 @@ napi_value AddToTabContentState(napi_env env)
     return tabContentState;
 }
 
+napi_value AddToGestureType(napi_env env)
+{
+    napi_value gestureType = nullptr;
+    napi_value prop = nullptr;
+    napi_create_object(env, &gestureType);
+    napi_create_uint32(env, TAP_GESTURE, &prop);
+    napi_set_named_property(env, gestureType, "TAP_GESTURE", prop);
+    napi_create_uint32(env, LONG_PRESS_GESTURE, &prop);
+    napi_set_named_property(env, gestureType, "LONG_PRESS_GESTURE", prop);
+    napi_create_uint32(env, PAN_GESTURE, &prop);
+    napi_set_named_property(env, gestureType, "PAN_GESTURE", prop);
+    napi_create_uint32(env, PINCH_GESTURE, &prop);
+    napi_set_named_property(env, gestureType, "PINCH_GESTURE", prop);
+    napi_create_uint32(env, SWIPE_GESTURE, &prop);
+    napi_set_named_property(env, gestureType, "SWIPE_GESTURE", prop);
+    napi_create_uint32(env, ROTATION_GESTURE, &prop);
+    napi_set_named_property(env, gestureType, "ROTATION_GESTURE", prop);
+    napi_create_uint32(env, DRAG, &prop);
+    napi_set_named_property(env, gestureType, "DRAG", prop);
+    napi_create_uint32(env, CLICK, &prop);
+    napi_set_named_property(env, gestureType, "CLICK", prop);
+    return gestureType;
+}
+
+napi_value AddToGestureRecognizerState(napi_env env)
+{
+    napi_value gestureRecognizerState = nullptr;
+    napi_value prop = nullptr;
+    napi_create_object(env, &gestureRecognizerState);
+    napi_create_uint32(env, READY, &prop);
+    napi_set_named_property(env, gestureRecognizerState, "READY", prop);
+    napi_create_uint32(env, DETECTING, &prop);
+    napi_set_named_property(env, gestureRecognizerState, "DETECTING", prop);
+    napi_create_uint32(env, PENDING, &prop);
+    napi_set_named_property(env, gestureRecognizerState, "PENDING", prop);
+    napi_create_uint32(env, BLOCKED, &prop);
+    napi_set_named_property(env, gestureRecognizerState, "BLOCKED", prop);
+    napi_create_uint32(env, SUCCESSFUL, &prop);
+    napi_set_named_property(env, gestureRecognizerState, "SUCCESSFUL", prop);
+    napi_create_uint32(env, FAILED, &prop);
+    napi_set_named_property(env, gestureRecognizerState, "FAILED", prop);
+    return gestureRecognizerState;
+}
+
 static napi_value UIObserverExport(napi_env env, napi_value exports)
 {
     napi_value navDestinationState = CreateNavDestinationState(env);
@@ -1083,6 +1443,12 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
     napi_value tabContentState = nullptr;
     tabContentState = AddToTabContentState(env);
 
+    napi_value gestureType = nullptr;
+    gestureType = AddToGestureType(env);
+
+    napi_value gestureRecognizerState = nullptr;
+    gestureRecognizerState = AddToGestureRecognizerState(env);
+
     napi_property_descriptor uiObserverDesc[] = {
         DECLARE_NAPI_FUNCTION("on", ObserverOn),
         DECLARE_NAPI_FUNCTION("off", ObserverOff),
@@ -1090,6 +1456,8 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("ScrollEventType", scrollEventType),
         DECLARE_NAPI_PROPERTY("RouterPageState", routerPageState),
         DECLARE_NAPI_PROPERTY("TabContentState", tabContentState),
+        DECLARE_NAPI_PROPERTY("GestureType", gestureType),
+        DECLARE_NAPI_PROPERTY("GestureRecognizerState", gestureRecognizerState),
     };
     NAPI_CALL(
         env, napi_define_properties(env, exports, sizeof(uiObserverDesc) / sizeof(uiObserverDesc[0]), uiObserverDesc));

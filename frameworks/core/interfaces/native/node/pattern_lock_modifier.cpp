@@ -223,6 +223,44 @@ void ResetPatternLockSkipUnselectedPoint(ArkUINodeHandle node)
     PatternLockModelNG::SetSkipUnselectedPoint(frameNode, false);
 }
 
+void SetPatternLockOnPatternComplete(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onPatternComplete = reinterpret_cast<NG::PatternLockCompleteEvent*>(callback);
+        PatternLockModelNG::SetPatternComplete(frameNode, std::move(*onPatternComplete));
+    } else {
+        PatternLockModelNG::SetPatternComplete(frameNode, nullptr);
+    }
+}
+
+void ResetPatternLockOnPatternComplete(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PatternLockModelNG::SetPatternComplete(frameNode, nullptr);
+}
+
+void SetPatternLockOnDotConnect(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onDotConnect = reinterpret_cast<std::function<void(int32_t)>*>(callback);
+        PatternLockModelNG::SetDotConnect(frameNode, std::move(*onDotConnect));
+    } else {
+        PatternLockModelNG::SetDotConnect(frameNode, nullptr);
+    }
+}
+
+void ResetPatternLockOnDotConnect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PatternLockModelNG::SetDotConnect(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIPatternLockModifier* GetPatternLockModifier()
 {
@@ -254,6 +292,10 @@ const ArkUIPatternLockModifier* GetPatternLockModifier()
         .resetPatternLockEnableForeground = ResetPatternLockEnableForeground,
         .setPatternLockSkipUnselectedPoint = SetPatternLockSkipUnselectedPoint,
         .resetPatternLockSkipUnselectedPoint = ResetPatternLockSkipUnselectedPoint,
+        .setPatternLockOnPatternComplete = SetPatternLockOnPatternComplete,
+        .resetPatternLockOnPatternComplete = ResetPatternLockOnPatternComplete,
+        .setPatternLockOnDotConnect = SetPatternLockOnDotConnect,
+        .resetPatternLockOnDotConnect = ResetPatternLockOnDotConnect,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

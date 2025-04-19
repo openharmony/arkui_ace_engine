@@ -46,12 +46,18 @@ void MenuDividerPaintMethod::UpdateModfierParams(PaintWrapper* paintWrapper)
     GetDividerMargin(startMargin, endMargin, paintProperty, size);
     dividerModifier_->SetLeftMargin(isRtl ? endMargin : startMargin);
     dividerModifier_->SetRightMargin(isRtl ? startMargin : endMargin);
-    if (paintProperty->HasStrokeWidth()) {
+    auto strokeWidth = paintProperty->GetStrokeWidthValue(Dimension(0, DimensionUnit::INVALID));
+    if (strokeWidth.Unit() != DimensionUnit::INVALID) {
         dividerModifier_->SetStrokeWidth(paintProperty->GetStrokeWidthValue().ConvertToPx());
     } else {
         dividerModifier_->SetStrokeWidth(themeStrokeWidth_);
     }
-    dividerModifier_->SetDividerColor(paintProperty->GetDividerColorValue(themeDividerColor_));
+    auto dividerColor = paintProperty->GetDividerColorValue(themeDividerColor_);
+    if (!isOption_ && dividerColor == Color::FOREGROUND) {
+        dividerModifier_->SetDividerColor(themeDividerColor_);
+    } else {
+        dividerModifier_->SetDividerColor(dividerColor);
+    }
     dividerModifier_->SetDefaultShow(defaultShowDivider_);
     auto selected = paintProperty->GetTopSelectedValue(false) || paintProperty->GetBottomSelectedValue(false);
     auto hover = paintProperty->GetTopHoverValue(false) || paintProperty->GetBottomHoverValue(false);

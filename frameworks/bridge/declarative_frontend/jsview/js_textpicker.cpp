@@ -225,6 +225,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTextPicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextPicker>::StaticMethod("enableHapticFeedback", &JSTextPicker::SetEnableHapticFeedback);
+    JSClass<JSTextPicker>::StaticMethod("selectedBackgroundStyle", &JSTextPicker::SetSelectedBackgroundStyle);
     JSClass<JSTextPicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1030,6 +1031,34 @@ void JSTextPickerParser::ParseTextStyle(
     }
 }
 
+void JSTextPickerParser::ParsePickerBackgroundStyle(const JSRef<JSObject>& paramObj, NG::PickerBackgroundStyle& bgStyle)
+{
+    auto color = paramObj->GetProperty("color");
+    auto borderRadius = paramObj->GetProperty("borderRadius");
+    if (!color->IsUndefined() && !color->IsNull()) {
+        Color buttonBgColor;
+        if (ParseJsColor(color, buttonBgColor)) {
+            bgStyle.color = buttonBgColor;
+        }
+    }
+    if (!borderRadius->IsUndefined() && !borderRadius->IsNull()) {
+        CalcDimension calcDimension;
+        NG::BorderRadiusProperty borderRadiusProperty;
+        if (ParseLengthMetricsToDimension(borderRadius, calcDimension)) {
+            if (GreatOrEqual(calcDimension.Value(), 0.0f)) {
+                bgStyle.borderRadius = NG::BorderRadiusProperty(calcDimension);
+            }
+        } else if (ParseBindSheetBorderRadiusProps(borderRadius, borderRadiusProperty)) {
+            if (!borderRadiusProperty.radiusTopLeft->IsNegative() &&
+                !borderRadiusProperty.radiusTopRight->IsNegative() &&
+                !borderRadiusProperty.radiusBottomLeft->IsNegative() &&
+                !borderRadiusProperty.radiusBottomRight->IsNegative()) {
+                bgStyle.borderRadius = borderRadiusProperty;
+            }
+        }
+    }
+}
+
 void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1122,6 +1151,9 @@ void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
     }
     TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    if (textStyle.textColor.has_value() && theme->IsCircleDial()) {
+        TextPickerModel::GetInstance()->UpdateUserSetSelectColor();
+    }
 }
 
 void JSTextPicker::ProcessCascadeSelected(
@@ -1438,6 +1470,22 @@ void JSTextPicker::SetEnableHapticFeedback(const JSCallbackInfo& info)
         isEnableHapticFeedback = info[0]->ToBoolean();
     }
     TextPickerModel::GetInstance()->SetEnableHapticFeedback(isEnableHapticFeedback);
+}
+
+void JSTextPicker::SetSelectedBackgroundStyle(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined()) {
+        return;
+    }
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    NG::PickerBackgroundStyle backgroundStyle;
+    backgroundStyle.color = theme->GetSelectedBackgroundColor();
+    backgroundStyle.borderRadius = theme->GetSelectedBorderRadius();
+    if (info[0]->IsObject()) {
+        JSTextPickerParser::ParsePickerBackgroundStyle(info[0], backgroundStyle);
+    }
+    TextPickerModel::GetInstance()->SetSelectedBackgroundStyle(backgroundStyle);
 }
 
 void JSTextPickerDialog::JSBind(BindingTarget globalObj)
@@ -1821,6 +1869,13 @@ bool JSTextPickerDialog::ParseShowDataAttribute(
     }
     settingData.height = height;
     ParseTextProperties(paramObject, settingData.properties);
+    auto selectedBackgroundStyle = paramObject->GetProperty("selectedBackgroundStyle");
+    if (selectedBackgroundStyle->IsObject()) {
+        JSTextPickerParser::ParsePickerBackgroundStyle(selectedBackgroundStyle, settingData.pickerBgStyle);
+    } else {
+        settingData.pickerBgStyle.color = Color::TRANSPARENT;
+        settingData.pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    }
     return true;
 }
 

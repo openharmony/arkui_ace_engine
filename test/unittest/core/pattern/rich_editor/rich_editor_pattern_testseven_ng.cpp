@@ -28,6 +28,7 @@
 
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text/span/tlv_util.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -171,229 +172,6 @@ HWTEST_F(RichEditorPatternTestSevenNg, GetTextBoxes004, TestSize.Level1)
     richEditorPattern->paragraphs_.AddParagraph(std::move(paragraphInfoOne));
     auto textBoxes = richEditorPattern->GetTextBoxes();
     EXPECT_NE(textBoxes.size(), 0);
-}
-
-/**
- * @tc.name: HandleOnDragDropStyledString001
- * @tc.desc: test HandleOnDragDropStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    ASSERT_NE(event, nullptr);
-    RefPtr<MockUnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-
-    ASSERT_NE(unifiedData, nullptr);
-    std::vector<uint8_t> expectedReturnUnint8_t = { 1, 2, 3 };
-
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_CONTENT);
-    TLVUtil::WriteString(expectedReturnUnint8_t, "Some string content");
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_SPANS);
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_CONTENT);
-    TLVUtil::WriteString(expectedReturnUnint8_t, "Some string content");
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_SPANS);
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_END);
-
-    UdmfClient* client = UdmfClient::GetInstance();
-    MockUdmfClient* mockClient = static_cast<MockUdmfClient*>(client);
-    EXPECT_CALL(*mockClient, GetSpanStringRecord(_)).WillRepeatedly(Return(expectedReturnUnint8_t));
-
-    std::string selectedStr = "test123";
-    OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
-    event->SetData(unifiedData);
-    richEditorPattern->isSpanStringMode_ = false;
-    richEditorPattern->HandleOnDragDropStyledString(event);
-    auto host = richEditorPattern->GetHost();
-    EXPECT_TRUE(host->isRestoreInfoUsed_);
-}
-
-/**
- * @tc.name: HandleOnDragDropStyledString002
- * @tc.desc: test HandleOnDragDropStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    ASSERT_NE(event, nullptr);
-    RefPtr<MockUnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-
-    ASSERT_NE(unifiedData, nullptr);
-    std::vector<uint8_t> expectedReturnUnint8_t = { 1, 2, 3 };
-
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_CONTENT);
-    TLVUtil::WriteString(expectedReturnUnint8_t, "Some string content");
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_SPANS);
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_CONTENT);
-    TLVUtil::WriteString(expectedReturnUnint8_t, "Some string content");
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_SPANS);
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_END);
-
-    UdmfClient* client = UdmfClient::GetInstance();
-    MockUdmfClient* mockClient = static_cast<MockUdmfClient*>(client);
-    EXPECT_CALL(*mockClient, GetSpanStringRecord(_)).WillRepeatedly(Return(expectedReturnUnint8_t));
-
-    std::string selectedStr = "test123";
-    OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
-    event->SetData(unifiedData);
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->HandleOnDragDropStyledString(event);
-    EXPECT_NE(event->GetData(), nullptr);
-    auto host = richEditorPattern->GetHost();
-    EXPECT_FALSE(host->isRestoreInfoUsed_);
-}
-
-/**
- * @tc.name: HandleOnDragDropStyledString003
- * @tc.desc: test HandleOnDragDropStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    ASSERT_NE(event, nullptr);
-    RefPtr<MockUnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-
-    ASSERT_NE(unifiedData, nullptr);
-    std::vector<uint8_t> expectedReturnUnint8_t = { 1, 2, 3 };
-
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_CONTENT);
-    TLVUtil::WriteString(expectedReturnUnint8_t, "Some string content");
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_SPANS);
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_END);
-
-    UdmfClient* client = UdmfClient::GetInstance();
-    MockUdmfClient* mockClient = static_cast<MockUdmfClient*>(client);
-    EXPECT_CALL(*mockClient, GetSpanStringRecord(_)).WillRepeatedly(Return(expectedReturnUnint8_t));
-
-    std::string selectedStr = "test123";
-    OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
-    event->SetData(unifiedData);
-    richEditorPattern->isSpanStringMode_ = false;
-    richEditorPattern->HandleOnDragDropStyledString(event);
-    EXPECT_NE(event->GetData(), nullptr);
-    auto host = richEditorPattern->GetHost();
-    EXPECT_FALSE(host->isRestoreInfoUsed_);
-}
-
-/**
- * @tc.name: HandleOnDragDropStyledString004
- * @tc.desc: test HandleOnDragDropStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString004, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    ASSERT_NE(event, nullptr);
-    RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-    ASSERT_NE(unifiedData, nullptr);
-    std::vector<uint8_t> expectedReturnUnint8_t = { 1, 2, 3 };
-    std::vector<std::string> expectedReturnString = { "some", "string", "content" };
-
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_CONTENT);
-    TLVUtil::WriteString(expectedReturnUnint8_t, "Some string content");
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_SPANS);
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_END);
-
-    UdmfClient* client = UdmfClient::GetInstance();
-    MockUdmfClient* mockClient = static_cast<MockUdmfClient*>(client);
-    EXPECT_CALL(*mockClient, GetSpanStringRecord(_)).WillRepeatedly(Return(expectedReturnUnint8_t));
-    EXPECT_CALL(*mockClient, GetPlainTextRecords(_)).WillRepeatedly(Return(expectedReturnString));
-
-    std::string selectedStr = "test123";
-    OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
-    event->SetData(unifiedData);
-    richEditorPattern->isSpanStringMode_ = false;
-    richEditorPattern->HandleOnDragDropStyledString(event);
-    EXPECT_NE(event->GetData(), nullptr);
-    auto host = richEditorPattern->GetHost();
-    EXPECT_FALSE(host->isRestoreInfoUsed_);
-}
-
-/**
- * @tc.name: HandleOnDragDropStyledString005
- * @tc.desc: test HandleOnDragDropStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString005, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    ASSERT_NE(event, nullptr);
-    RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-    ASSERT_NE(unifiedData, nullptr);
-    std::vector<uint8_t> expectedReturnUnint8_t = { 1, 2, 3 };
-    std::vector<std::string> expectedReturnString = { "some", "string", "content" };
-
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_CONTENT);
-    TLVUtil::WriteString(expectedReturnUnint8_t, "Some string content");
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_SPANS);
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_END);
-
-    UdmfClient* client = UdmfClient::GetInstance();
-    MockUdmfClient* mockClient = static_cast<MockUdmfClient*>(client);
-    EXPECT_CALL(*mockClient, GetSpanStringRecord(_)).WillRepeatedly(Return(expectedReturnUnint8_t));
-    EXPECT_CALL(*mockClient, GetPlainTextRecords(_)).WillRepeatedly(Return(expectedReturnString));
-
-    std::string selectedStr = "test123";
-    OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
-    event->SetData(unifiedData);
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->HandleOnDragDropStyledString(event);
-    auto host = richEditorPattern->GetHost();
-    EXPECT_TRUE(host->isRestoreInfoUsed_);
-}
-
-/**
- * @tc.name: HandleOnDragDsropStyledString006
- * @tc.desc: test HandleOnDragDropStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString006, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    ASSERT_NE(event, nullptr);
-    RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-    ASSERT_NE(unifiedData, nullptr);
-    std::vector<uint8_t> expectedReturnUnint8_t = { 1, 2, 3 };
-    std::vector<std::string> expectedReturnString = { "" };
-
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_CONTENT);
-    TLVUtil::WriteString(expectedReturnUnint8_t, "Some string content");
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_SPANS);
-    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_END);
-
-    UdmfClient* client = UdmfClient::GetInstance();
-    MockUdmfClient* mockClient = static_cast<MockUdmfClient*>(client);
-    EXPECT_CALL(*mockClient, GetSpanStringRecord(_)).WillRepeatedly(Return(expectedReturnUnint8_t));
-    EXPECT_CALL(*mockClient, GetPlainTextRecords(_)).WillRepeatedly(Return(expectedReturnString));
-
-    std::string selectedStr = "test123";
-    OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
-    event->SetData(unifiedData);
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->HandleOnDragDropStyledString(event);
-    EXPECT_NE(event->GetData(), nullptr);
-    auto host = richEditorPattern->GetHost();
-    EXPECT_FALSE(host->isRestoreInfoUsed_);
 }
 
 /**
@@ -644,26 +422,50 @@ HWTEST_F(RichEditorPatternTestSevenNg, ShiftMultipleSelection001, TestSize.Level
 }
 
 /**
- * @tc.name: PageScrollTest001
- * @tc.desc: test richEditor pageup and pagedown function
+ * @tc.name: ProvidePlaceHolderText001
+ * @tc.desc: test provide placeholder information to inputmethod function
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPatternTestSevenNg, PageScrollTest001, TestSize.Level1)
+HWTEST_F(RichEditorPatternTestSevenNg, ProvidePlaceHolderText, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto geometryNode = richEditorNode_->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    geometryNode->SetFrameSize(SizeF(150.0f, 150.0f));
-    richEditorPattern->richTextRect_ = RectF(0, 0, 150.0f, 400.0f);
-    richEditorPattern->contentRect_ = RectF(0, 0, 150.0f, 150.0f);
-
-    richEditorPattern->HandleOnPageDown();
-    EXPECT_EQ(richEditorPattern->scrollOffset_, -150.0f);
-    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), -150.0f);
-    richEditorPattern->HandleOnPageUp();
-    EXPECT_EQ(richEditorPattern->scrollOffset_, 0);
-    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), 0);
+#if defined(ENABLE_STANDARD_INPUT)
+    auto miscTextConfig = richEditorPattern->GetMiscTextConfig();
+    auto textconfig = miscTextConfig.value();
+    auto placeholder = UtfUtils::Str16ToStr8(textconfig.inputAttribute.placeholder).c_str();
+    size_t count = 0;
+    size_t i = 0;
+    while (i < placeholder.size()) {
+        count++;
+        i += (placeholder[i] >= 0xD800 && placeholder[i] <= 0xDBFF) ? 2 : 1;
+    }
+    EXPECT_NE(count, 0);
+#endif
 }
+/**
+ * @tc.name: ProvideabilityNameText001
+ * @tc.desc: test provide abilityName information to inputmethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, ProvideabilityNameText, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+#if defined(ENABLE_STANDARD_INPUT)
+    auto miscTextConfig = richEditorPattern->GetMiscTextConfig();
+    auto textconfig = miscTextConfig.value();
+    auto abilityName = UtfUtils::Str16ToStr8(textconfig.inputAttribute.abilityName).c_str();
+    size_t count = 0;
+    size_t i = 0;
+    while (i < abilityName.size()) {
+        count++;
+        i += (abilityName[i] >= 0xD800 && abilityName[i] <= 0xDBFF) ? 2 : 1;
+    }
+    EXPECT_NE(count, 0);
+#endif
+}
+
 } // namespace OHOS::Ace::NG

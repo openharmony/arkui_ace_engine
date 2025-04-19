@@ -103,12 +103,17 @@ export struct FullScreenLaunchComponent {
   async checkAbility() {
     this.resetOptions()
     try {
-      const res: boolean = await abilityManager.isEmbeddedOpenAllowed(this.context, this.appId)
-      if (res) {
-        this.isShow = true;
-        hilog.info(0x3900, 'FullScreenLaunchComponent', ' EmbeddedOpen is Allowed!')
+      const res = await abilityManager.queryAtomicServiceStartupRule(this.context, this.appId)
+      if (res.isOpenAllowed) {
+        if (res.isEmbeddedAllowed) {
+          this.isShow = true;
+          hilog.info(0x3900, 'FullScreenLaunchComponent', 'EmbeddedOpen is Allowed!')
+        } else {
+          this.popUp()
+          hilog.info(0x3900, 'FullScreenLaunchComponent', 'popUp is Allowed!');
+        }
       } else {
-        this.popUp()
+        hilog.info(0x3900, 'FullScreenLaunchComponent', 'is not allowed open!')
       }
     } catch (e) {
       hilog.error(0x3900, 'FullScreenLaunchComponent', 'isEmbeddedOpenAllowed called error!%{public}s', e.message)

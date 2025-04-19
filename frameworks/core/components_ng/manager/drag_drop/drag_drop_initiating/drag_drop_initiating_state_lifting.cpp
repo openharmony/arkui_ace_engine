@@ -54,10 +54,16 @@ void DragDropInitiatingStateLifting::HandleOnDragStart(RefPtr<FrameNode> frameNo
     if (!CheckStatusForPanActionBegin(frameNode, info)) {
         return;
     }
+    dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (gestureHub->GetTextDraggable()) {
+        HandleTextDragStart(frameNode, info);
+        return;
+    }
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
     auto params = machine->GetDragDropInitiatingParams();
-    dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
     DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(frameNode->GetId());
     if (info.GetSourceDevice() != SourceType::MOUSE) {
         HideEventColumn();
@@ -69,8 +75,6 @@ void DragDropInitiatingStateLifting::HandleOnDragStart(RefPtr<FrameNode> frameNo
         HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
         UpdateDragPreviewOptionFromModifier();
     }
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
     auto gestureEvent = info;
     gestureHub->HandleOnDragStart(gestureEvent);
 }
@@ -91,7 +95,10 @@ void DragDropInitiatingStateLifting::HandlePanOnReject()
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    if (manager->IsGatherWithMenu()) {
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    if (manager->IsGatherWithMenu() || !params.hasGatherNode) {
         return;
     }
     manager->RemoveGatherNodeWithAnimation();
@@ -107,7 +114,7 @@ void DragDropInitiatingStateLifting::HandleSequenceOnActionCancel(const GestureE
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     if (!gestureHub->GetBindMenuStatus().IsNotNeedShowPreview()) {
-        machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+        machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
     }
 }
 
@@ -139,7 +146,7 @@ void DragDropInitiatingStateLifting::HandlePanOnActionEnd(const GestureEvent& in
     dragDropManager->SetIsDisableDefaultDropAnimation(true);
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
 }
 
 void DragDropInitiatingStateLifting::HandleReStartDrag(const GestureEvent& info)
@@ -211,7 +218,8 @@ bool DragDropInitiatingStateLifting::CheckDoShowPreview(const RefPtr<FrameNode>&
     CHECK_NULL_RETURN(frameNode, false);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
-    if (gestureHub->GetBindMenuStatus().IsNotNeedShowPreview()) {
+    bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
+    if (gestureHub->GetBindMenuStatus().IsNotNeedShowPreview() || isMenuShow) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Not need to show drag preview because of bind context menu");
         return false;
     }
@@ -431,8 +439,7 @@ void DragDropInitiatingStateLifting::BindClickEvent(const RefPtr<FrameNode>& col
         CHECK_NULL_VOID(stateLift);
         auto machine = stateLift->GetStateMachine();
         CHECK_NULL_VOID(machine);
-        machine->RequestStatusTransition(
-            AceType::Claim(RawPtr(stateLift)), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+        machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
     };
     auto columnGestureHub = columnNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(columnGestureHub);

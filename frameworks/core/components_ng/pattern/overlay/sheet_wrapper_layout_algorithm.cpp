@@ -199,7 +199,7 @@ void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
     sheetPopupInfo_.placementOnTarget = sheetStyle.placementOnTarget.value_or(true);
     windowGlobalRect_ = pipeline->GetDisplayWindowRectInfo();
     windowEdgeWidth_ = WINDOW_EDGE_SPACE.ConvertToPx();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         // global rect need to reduce the top and bottom safe area
         windowGlobalRect_ = pipeline->GetCurrentWindowRect();
         auto safeArea = pipeline->GetSafeArea();
@@ -236,7 +236,7 @@ void SheetWrapperLayoutAlgorithm::GetSheetPageSize(LayoutWrapper* layoutWrapper)
 
 void SheetWrapperLayoutAlgorithm::DecreaseArrowHeightWhenArrowIsShown(const RefPtr<FrameNode>& sheetNode)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
 
@@ -292,7 +292,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetPopupStyleSheetOffset(LayoutWrapper* lay
     auto geometryNode = targetNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, OffsetF());
     auto targetSize = geometryNode->GetFrameSize();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         targetSize = targetNode->GetPaintRectWithTransform().GetSize();
     }
     auto targetOffset = targetNode->GetPaintRectOffset();
@@ -302,7 +302,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetPopupStyleSheetOffset(LayoutWrapper* lay
 OffsetF SheetWrapperLayoutAlgorithm::GetOffsetInAvoidanceRule(
     LayoutWrapper* layoutWrapper, const SizeF& targetSize, const OffsetF& targetOffset)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         sheetPopupInfo_.finalPlacement = AvoidanceRuleOfPlacement(layoutWrapper, targetSize, targetOffset);
     } else {
         // before api 16, only placement bottom is used
@@ -566,7 +566,7 @@ SizeF SheetWrapperLayoutAlgorithm::GetLeftSpaceWithPlacement(
 OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithBottom(
     const SizeF& targetSize, const OffsetF& targetOffset)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         sheetPopupInfo_.arrowOffsetX = sheetWidth_ / DOUBLE_SIZE;
         return OffsetF(targetOffset.GetX() + (targetSize.Width() - sheetWidth_) / DOUBLE_SIZE,
             targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());
@@ -592,7 +592,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithBottom(
 OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithBottomLeft(
     const SizeF& targetSize, const OffsetF& targetOffset)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         sheetPopupInfo_.arrowOffsetX = targetSize.Width() / DOUBLE_SIZE;
         auto sheetOffset =
             OffsetF(targetOffset.GetX(), targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());
@@ -633,7 +633,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithBottomLeft(
 OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithBottomRight(
     const SizeF& targetSize, const OffsetF& targetOffset)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         sheetPopupInfo_.arrowOffsetX = sheetWidth_ - targetSize.Width() / DOUBLE_SIZE;
         auto sheetOffset = OffsetF(targetOffset.GetX() + targetSize.Width() - sheetWidth_,
             targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());

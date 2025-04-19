@@ -97,6 +97,7 @@ private:
     void UpdateTranslateOffsetWithPlacement(OffsetF& translate);
     void AddArrowHeightToSheetSize();
     void RemeasureForPopup(const RefPtr<LayoutWrapper>& layoutWrapper);
+    float GetCenterDefaultWidth(const RefPtr<FrameNode>& host) const;
 
     float sheetHeight_ = 0.0f;
     float sheetWidth_ = 0.0f;

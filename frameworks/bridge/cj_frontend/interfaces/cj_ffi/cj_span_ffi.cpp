@@ -68,7 +68,7 @@ extern "C" {
 VectorNativeTextShadows FFICJCreateVectorNativeTextShadows(int64_t size)
 {
     LOGI("Create NativeTextShadows Vector");
-    return new std::vector<NativeTextShadow>(size);
+    return new std::vector<NativeTextShadows>(size);
 }
 
 void FFICJVectorNativeTextShadowsSetElement(VectorNativeTextShadows vec, int64_t index, NativeTextShadows textShadow)
@@ -200,7 +200,7 @@ void FfiOHOSAceFrameworkSpanSetFont(const char* family, double size, int32_t uni
 
 void FfiOHOSAceFrameworkSpanSetTextShadow(VectorStringPtr vecContent)
 {
-    auto nativeTextShadowVec = *reinterpret_cast<std::vector<NativeTextShadow>*>(vecContent);
+    auto nativeTextShadowVec = *reinterpret_cast<std::vector<NativeTextShadows>*>(vecContent);
     std::vector<Shadow> shadows(nativeTextShadowVec.size());
     for (size_t i = 0; i < nativeTextShadowVec.size(); i++) {
         Dimension dOffsetX(nativeTextShadowVec[i].offsetX, DimensionUnit::VP);

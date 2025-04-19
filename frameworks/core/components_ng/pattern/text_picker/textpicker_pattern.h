@@ -520,6 +520,12 @@ public:
     }
 
     void ColumnPatternInitHapticController();
+    void UpdateUserSetSelectColor();
+    std::string GetTextPickerRange() const;
+    inline void SetSingleRange(bool isSingleRange)
+    {
+        isSingleRange_ = isSingleRange;
+    }
 
 private:
     void OnModifyDone() override;
@@ -557,6 +563,7 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState();
     void SetButtonIdeaSize();
+    void CalculateButtonMetrics(RefPtr<UINode> child, RefPtr<PickerTheme> pickerTheme);
     std::string GetRangeStr() const;
     std::string GetOptionsMultiStr() const;
     std::string GetOptionsMultiStrInternal() const;
@@ -648,6 +655,7 @@ private:
     bool isEnableHaptic_ = true;
     bool isHapticChanged_ = false;
     int32_t selectedColumnId_ = INVALID_SELECTED_COLUMN_INDEX;
+    bool isSingleRange_ = true;
 };
 } // namespace OHOS::Ace::NG
 

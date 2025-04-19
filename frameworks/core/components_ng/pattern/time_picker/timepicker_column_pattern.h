@@ -312,7 +312,7 @@ public:
     }
 
     void InitHapticController(const RefPtr<FrameNode>& host);
-    void GetIsStartEndTimeDefined(const RefPtr<FrameNode>& host);
+    bool IsStartEndTimeDefined();
 
     void StopHaptic();
     uint32_t GetEnterIndex() const
@@ -347,6 +347,7 @@ public:
     void SetSelectedMarkListener(const std::function<void(const std::string& selectedColumnId)>& listener);
     void SetSelectedMark(bool focus = true, bool notify = true, bool reRender = true);
     void SetSelectedMarkId(const std::string &strColumnId);
+    void UpdateUserSetSelectColor();
 #ifdef SUPPORT_DIGITAL_CROWN
     std::string& GetSelectedColumnId();
     bool IsCrownEventEnded();
@@ -372,6 +373,7 @@ private:
     bool HandleDirectionKey(KeyCode code);
     void SetSelectedMarkPaint(bool paint);
     void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme);
+    void GetAnimationColor(uint32_t index, uint32_t showCount, Color& color);
 #ifdef SUPPORT_DIGITAL_CROWN
     void HandleCrownBeginEvent(const CrownEvent& event);
     void HandleCrownMoveEvent(const CrownEvent& event);
@@ -488,8 +490,6 @@ private:
     bool isEnableHaptic_ = true;
     bool stopHaptic_ = false;
     bool isTossReadyToStop_ = false;
-    bool isStartEndTimeDefined_ = false;
-    bool isTossing_ = false;
 
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
@@ -499,6 +499,7 @@ private:
     std::string selectedColumnId_ = "";
     bool selectedMarkPaint_ = false;
     std::function<void(std::string& selectedColumnId)> focusedListerner_ = nullptr;
+    bool isUserSetSelectColor_ = false;
 #ifdef SUPPORT_DIGITAL_CROWN
     bool isCrownEventEnded_ = true;
     int32_t crownSensitivity_ = INVALID_CROWNSENSITIVITY;

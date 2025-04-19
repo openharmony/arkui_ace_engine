@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,10 +45,14 @@ public:
         CHECK_NULL_VOID(loadingProgressModifier_);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto progressTheme = pipeline->GetTheme<ProgressTheme>();
-        CHECK_NULL_VOID(progressTheme);
         auto paintProperty = DynamicCast<LoadingProgressPaintProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_VOID(paintProperty);
+        auto host = paintProperty->GetHost();
+        auto themeScopeId = host ? host->GetThemeScopeId() : 0;
+        auto progressTheme = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                                 ? pipeline->GetTheme<ProgressTheme>(themeScopeId)
+                                 : pipeline->GetTheme<ProgressTheme>();
+        CHECK_NULL_VOID(progressTheme);
         loadingProgressModifier_->SetEnableLoading(paintProperty->GetEnableLoadingValue(true));
         loadingProgressModifier_->SetContentOffset(paintWrapper->GetContentOffset());
         loadingProgressModifier_->SetContentSize(paintWrapper->GetContentSize());

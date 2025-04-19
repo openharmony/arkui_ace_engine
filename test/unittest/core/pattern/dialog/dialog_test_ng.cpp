@@ -255,9 +255,10 @@ void DialogPatternTestNg::CheckTextMarquee(RefPtr<FrameNode> buttonNode)
 HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator004, TestSize.Level1)
 {
     auto dialogEventHub = AceType::MakeRefPtr<DialogEventHub>();
-    dialogEventHub->onCancel_ = nullptr;
+    bool isCalled = false;
+    dialogEventHub->SetOnCancel([&isCalled]() { isCalled = true; });
     dialogEventHub->FireCancelEvent();
-    EXPECT_EQ(dialogEventHub->onCancel_ == nullptr, true);
+    EXPECT_EQ(true, isCalled);
 }
 
 /**
@@ -281,10 +282,11 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator005, TestSize.Level1)
  */
 HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator006, TestSize.Level1)
 {
+    bool isCalled = false;
     auto dialogEventHub = AceType::MakeRefPtr<DialogEventHub>();
-    dialogEventHub->onSuccess_ = nullptr;
-    dialogEventHub->FireSuccessEvent(buttonIdx);
-    EXPECT_EQ(dialogEventHub->onSuccess_ == nullptr, true);
+    dialogEventHub->SetOnSuccess([&isCalled](int32_t, int32_t) { isCalled = true; });
+    dialogEventHub->FireSuccessEvent(0);
+    EXPECT_TRUE(isCalled);
 }
 
 /**

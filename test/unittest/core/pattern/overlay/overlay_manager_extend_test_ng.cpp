@@ -1136,10 +1136,18 @@ HWTEST_F(OverlayManagerExtendTestNg, GetDragPixelMapBadgeNodeTest001, TestSize.L
     auto rootNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     ASSERT_NE(rootNode, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->children_.push_front(rootNode);
+    auto textRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(textRow, nullptr);
+    textRow->children_.push_front(frameNode);
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     ASSERT_NE(columnNode, nullptr);
-    columnNode->children_.push_back(rootNode);
+    columnNode->children_.push_back(textRow);
     overlayManager->dragPixmapColumnNodeWeak_ = columnNode;
     auto result = overlayManager->GetDragPixelMapBadgeNode();
     EXPECT_NE(result, nullptr);

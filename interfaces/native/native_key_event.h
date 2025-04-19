@@ -562,7 +562,7 @@ void OH_ArkUI_KeyEvent_SetConsumed(const ArkUI_UIInputEvent* event, bool isConsu
  *
  * @param node Indicates the pointer to a component node.
  * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_KeyEvent_Dispatch(ArkUI_NodeHandle node, const ArkUI_UIInputEvent* event);
 #ifdef __cplusplus

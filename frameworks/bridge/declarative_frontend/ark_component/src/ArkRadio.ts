@@ -42,7 +42,7 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
     return this;
   }
   onChange(callback: (isChecked: boolean) => void): this {
-    modifierWithKey(this._modifiersWithKeys, RadioOnChangeModifier.identity, RadioOnChangeModifier,callback);
+    modifierWithKey(this._modifiersWithKeys, RadioOnChangeModifier.identity, RadioOnChangeModifier, callback);
     return this;
   }
   radioStyle(value: RadioStyle): this {

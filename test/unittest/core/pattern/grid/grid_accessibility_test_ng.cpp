@@ -64,9 +64,8 @@ HWTEST_F(GridAccessibilityTestNg, SetSpecificSupportAction001, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsAtTop());
     EXPECT_FALSE(pattern_->IsAtBottom());
     accessibilityProperty_->ResetSupportAction();
-    uint64_t expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    std::unordered_set<AceAction> expectedActions = { AceAction::ACTION_SCROLL_FORWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.steps: step2. Grid is at middle.
@@ -76,10 +75,8 @@ HWTEST_F(GridAccessibilityTestNg, SetSpecificSupportAction001, TestSize.Level1)
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_FALSE(pattern_->IsAtBottom());
     accessibilityProperty_->ResetSupportAction();
-    expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    expectedActions = { AceAction::ACTION_SCROLL_FORWARD, AceAction::ACTION_SCROLL_BACKWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.steps: step3. Grid is at bottom.
@@ -89,9 +86,8 @@ HWTEST_F(GridAccessibilityTestNg, SetSpecificSupportAction001, TestSize.Level1)
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_TRUE(pattern_->IsAtBottom());
     accessibilityProperty_->ResetSupportAction();
-    expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    expectedActions = { AceAction::ACTION_SCROLL_BACKWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**
@@ -116,10 +112,8 @@ HWTEST_F(GridAccessibilityTestNg, GridItemAccessibilityTest001, TestSize.Level1)
     EXPECT_FALSE(info.heading);
 
     itemAccessibility->ResetSupportAction();
-    uint64_t expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
-    EXPECT_EQ(GetActions(itemAccessibility), expectActions);
+    std::unordered_set<AceAction> expectedActions = { AceAction::ACTION_SELECT, AceAction::ACTION_CLEAR_SELECTION };
+    EXPECT_EQ(itemAccessibility->GetSupportAction(), expectedActions);
 }
 
 /**
@@ -266,7 +260,7 @@ HWTEST_F(GridAccessibilityTestNg, UnScrollableGrid003, TestSize.Level1)
     EXPECT_FALSE(accessibilityProperty_->IsScrollable());
 
     accessibilityProperty_->ResetSupportAction();
-    uint64_t expectActions = 0;
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    std::unordered_set<AceAction> expectedActions = {};
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 }
 } // namespace OHOS::Ace::NG

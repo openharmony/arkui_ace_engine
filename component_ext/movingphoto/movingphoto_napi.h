@@ -21,6 +21,7 @@
 
 namespace OHOS::Ace {
 napi_value JsCreate(napi_env env, napi_callback_info info);
+napi_value SetWaterMask(napi_env env, napi_value object);
 napi_value JsMuted(napi_env env, napi_callback_info info);
 napi_value JsObjectFit(napi_env env, napi_callback_info info);
 napi_value JsOnComplete(napi_env env, napi_callback_info info);

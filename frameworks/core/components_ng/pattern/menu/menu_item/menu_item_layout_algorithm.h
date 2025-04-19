@@ -70,6 +70,7 @@ private:
     std::pair<float, float> MeasureRightRow(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint);
     void CalcContentExpandWidth(std::optional<LayoutConstraintF>& layoutConstraint,
         float contentWidth, float leftRowWidth, float rightRowWidth);
+    float CalcSelfHeight(float itemHeight, float bordersHeight);
 
     float horInterval_ = 0.0f;
     float verInterval_ = 0.0f;

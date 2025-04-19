@@ -417,7 +417,7 @@ class RenderNode {
   private shadowRadiusValue: number;
   private transformValue: Transform;
   private translationValue: Vector2;
-  private baseNode_: __JSBaseNode__;
+  private baseNode_: BaseNode;
   private borderStyleValue: EdgeStyles;
   private borderWidthValue: EdgeWidths;
   private borderColorValue: EdgeColors;
@@ -775,7 +775,7 @@ class RenderNode {
   }
 
   setBaseNode(baseNode: BaseNode | null) {
-    this.baseNode_ = baseNode.builderBaseNode_;
+    this.baseNode_ = baseNode;
   }
   resetNodePtr(): void {
     this.nodePtr = null;

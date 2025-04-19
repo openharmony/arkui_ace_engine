@@ -18,6 +18,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -161,7 +162,7 @@ LayoutConstraintF ToastLayoutAlgorithm::GetTextLayoutConstraint(LayoutWrapper* l
             }
         }
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && GreatNotEqual(keyboardInset, 0) &&
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && GreatNotEqual(keyboardInset, 0) &&
         (toastPattern->IsDefaultToast() || toastPattern->IsTopMostToast())) {
         auto maxHeight = keyboardOffset - toastPattern->GetLimitPos().Value() - LIMIT_SPACING.ConvertToPx();
         layoutConstraint.maxSize.SetHeight(maxHeight);
