@@ -2173,17 +2173,18 @@ void JsAccessibilityManager::UpdateVirtualNodeInfo(std::list<AccessibilityElemen
     AccessibilityElementInfo& nodeInfo, const RefPtr<NG::UINode>& uiVirtualNode, const CommonProperty& commonProperty,
     const RefPtr<NG::PipelineContext>& ngPipeline)
 {
-    for (const auto& item : uiVirtualNode->GetChildren(true)) {
+    auto frameParentNode = AceType::DynamicCast<NG::FrameNode>(uiVirtualNode);
+    CHECK_NULL_VOID(frameParentNode);
+    std::list<RefPtr<NG::FrameNode>> children;
+
+    GetChildrenFromFrameNode(frameParentNode, children, commonProperty);
+    for (const auto& frameNodeChild : children) {
         AccessibilityElementInfo virtualInfo;
-        auto frameNodeChild = AceType::DynamicCast<NG::FrameNode>(item);
-        if (frameNodeChild == nullptr) {
-            continue;
-        }
         UpdateVirtualNodeChildAccessibilityElementInfo(frameNodeChild, commonProperty,
             nodeInfo, virtualInfo, ngPipeline);
         virtualInfo.SetParent(uiVirtualNode->GetAccessibilityId());
         nodeInfo.AddChild(frameNodeChild->GetAccessibilityId());
-        UpdateVirtualNodeInfo(infos, virtualInfo, item, commonProperty, ngPipeline);
+        UpdateVirtualNodeInfo(infos, virtualInfo, frameNodeChild, commonProperty, ngPipeline);
         infos.push_back(virtualInfo);
     }
 }
