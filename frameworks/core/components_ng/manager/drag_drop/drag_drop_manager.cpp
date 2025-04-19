@@ -1889,6 +1889,7 @@ void DragDropManager::UpdateDragEvent(
     event->SetPreviewRect(GetDragWindowRect(point));
     event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes);
     event->SetSourceTool(pointerEvent.sourceTool);
+    event->SetDisplayId(pointerEvent.displayId);
 }
 
 std::string DragDropManager::GetExtraInfo()

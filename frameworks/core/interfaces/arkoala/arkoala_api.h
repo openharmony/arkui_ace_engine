@@ -382,6 +382,7 @@ struct ArkUIDragEvent {
     ArkUI_CharPtr key;
     ArkUI_Int32 requestId;
     bool isDragEndPending;
+    ArkUI_Int32 displayId;
 };
 
 struct ArkUIFocusAxisEvent {
