@@ -751,7 +751,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(target);
-    auto eventHub = target->GetEventHub<NG::EventHub>();
+    auto eventHub = target->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -768,7 +768,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     imageNode->GetPattern<ImagePattern>()->SetSyncLoad(true);
     SetAccessibilityPixelMap(target, imageNode);
-    auto hub = imageNode->GetEventHub<EventHub>();
+    auto hub = imageNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto imageGestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(imageGestureHub);
@@ -865,7 +865,7 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
     const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(targetNode);
-    auto eventHub = targetNode->GetEventHub<EventHub>();
+    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureEventHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -1348,7 +1348,7 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
 
 void MenuView::UpdatePreviewInfo(const RefPtr<FrameNode>& targetNode, MenuParam& menuParam)
 {
-    auto eventHub = targetNode->GetEventHub<EventHub>();
+    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureEventHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -1603,7 +1603,7 @@ void MenuView::CreateOption(bool optionsHasIcon, std::vector<OptionParam>& param
     pattern->SetTextNode(textNode);
     pattern->SetBlockClick(params[index].disableSystemClick);
 
-    auto eventHub = option->GetEventHub<MenuItemEventHub>();
+    auto eventHub = option->GetOrCreateEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetMenuOnClick(params[index].action);
 }
@@ -1623,7 +1623,7 @@ void MenuView::CreateOption(bool optionsHasIcon, const std::string& value, const
     row->MarkModifyDone();
     pattern->SetTextNode(textNode);
 
-    auto eventHub = option->GetEventHub<MenuItemEventHub>();
+    auto eventHub = option->GetOrCreateEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetMenuOnClick(onClickFunc);
 }
@@ -1701,7 +1701,7 @@ void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPt
         CHECK_NULL_VOID(menuPattern);
         menuPattern->AddOptionNode(optionNode);
         auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
-        auto eventHub = optionNode->GetEventHub<EventHub>();
+        auto eventHub = optionNode->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetEnabled(params[i].enabled);
         auto focusHub = optionNode->GetFocusHub();
@@ -1758,7 +1758,7 @@ void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& o
     pasteNode->MarkModifyDone();
     row->MountToParent(option);
     row->MarkModifyDone();
-    auto eventHub = option->GetEventHub<MenuItemEventHub>();
+    auto eventHub = option->GetOrCreateEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     pasteNode->GetOrCreateGestureEventHub()->SetUserOnClick([onClickFunc](GestureEvent& info) {
         if (!PasteButtonModelNG::GetInstance()->IsClickResultSuccess(info)) {

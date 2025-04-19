@@ -724,7 +724,7 @@ void TextPickerPattern::FireChangeEvent(bool refresh)
             value.emplace_back(currentValue);
         }
     }
-    auto textPickerEventHub = GetEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(textPickerEventHub);
     textPickerEventHub->FireChangeEvent(value, index);
     textPickerEventHub->FireDialogChangeEvent(GetSelectedObject(true, 1));
@@ -766,7 +766,7 @@ void TextPickerPattern::FireScrollStopEvent(bool refresh)
             value.emplace_back(currentValue);
         }
     }
-    auto textPickerEventHub = GetEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(textPickerEventHub);
     textPickerEventHub->FireScrollStopEvent(value, index);
     textPickerEventHub->FireDialogScrollStopEvent(GetSelectedObject(true, 1));
@@ -805,7 +805,7 @@ void TextPickerPattern::FireEnterSelectedAreaEvent(bool refresh)
             value.emplace_back(enterValue);
         }
     }
-    auto textPickerEventHub = GetEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(textPickerEventHub);
     textPickerEventHub->FireEnterSelectedAreaEvent(value, index);
     textPickerEventHub->FireDialogEnterSelectedAreaEvent(GetSelectedObject(true, 1, true));
@@ -815,7 +815,7 @@ void TextPickerPattern::InitDisabled()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     enabled_ = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();

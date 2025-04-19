@@ -253,7 +253,7 @@ public:
     {
         if (!changeEvent_) {
             changeEvent_ = std::make_shared<ChangeEvent>(event);
-            auto eventHub = GetEventHub<SwiperEventHub>();
+            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddOnChangeEvent(changeEvent_);
         } else {
@@ -265,7 +265,7 @@ public:
     {
         if (!onIndexChangeEvent_) {
             onIndexChangeEvent_ = std::make_shared<ChangeEvent>(event);
-            auto eventHub = GetEventHub<SwiperEventHub>();
+            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddOnChangeEvent(onIndexChangeEvent_);
         } else {
@@ -277,7 +277,7 @@ public:
     {
         if (!animationStartEvent_) {
             animationStartEvent_ = std::make_shared<AnimationStartEvent>(event);
-            auto eventHub = GetEventHub<SwiperEventHub>();
+            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddAnimationStartEvent(animationStartEvent_);
         } else {
@@ -289,7 +289,7 @@ public:
     {
         if (!animationEndEvent_) {
             animationEndEvent_ = std::make_shared<AnimationEndEvent>(event);
-            auto eventHub = GetEventHub<SwiperEventHub>();
+            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddAnimationEndEvent(animationEndEvent_);
         } else {
@@ -301,7 +301,7 @@ public:
     {
         if (!selectedEvent_) {
             selectedEvent_ = std::make_shared<ChangeEvent>(event);
-            auto eventHub = GetEventHub<SwiperEventHub>();
+            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddOnSlectedEvent(selectedEvent_);
         } else {
@@ -313,7 +313,7 @@ public:
     {
         if (!unselectedEvent_) {
             unselectedEvent_ = std::make_shared<ChangeEvent>(event);
-            auto eventHub = GetEventHub<SwiperEventHub>();
+            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddOnUnselectedEvent(unselectedEvent_);
         } else {

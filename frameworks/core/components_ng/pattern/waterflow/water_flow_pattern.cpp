@@ -251,7 +251,7 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WaterFlowEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(eventHub);
     float delta = layoutInfo_->GetDelta(prevOffset_);
     PrintOffsetLog(AceLogTag::ACE_WATERFLOW, host->GetId(), delta);
@@ -875,7 +875,7 @@ void WaterFlowPattern::GetEventDumpInfo()
     ScrollablePattern::GetEventDumpInfo();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<WaterFlowEventHub>();
+    auto hub = host->GetOrCreateEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollIndex = hub->GetOnScrollIndex();
     onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
@@ -890,7 +890,7 @@ void WaterFlowPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     ScrollablePattern::GetEventDumpInfo(json);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<WaterFlowEventHub>();
+    auto hub = host->GetOrCreateEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollIndex = hub->GetOnScrollIndex();
     json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");

@@ -280,7 +280,7 @@ void SheetPresentationPattern::CheckBuilderChange()
     CHECK_NULL_VOID(host);
     auto builderNode = GetFirstFrameNodeOfBuilder();
     CHECK_NULL_VOID(builderNode);
-    auto eventHub = builderNode->GetEventHub<EventHub>();
+    auto eventHub = builderNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onBuilderAreaChangedFunc = [sheetNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
                                                      const OffsetF& /* oldOrigin */, const RectF& /* rect */,
@@ -362,7 +362,7 @@ void SheetPresentationPattern::OnAttachToFrameNode()
             sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
-    auto eventHub = targetNode->GetEventHub<EventHub>();
+    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 
@@ -385,7 +385,7 @@ void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* sheetNode)
     pipeline->RemoveWindowSizeChangeCallback(sheetNode->GetId());
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
-    auto eventHub = targetNode->GetEventHub<EventHub>();
+    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->RemoveInnerOnAreaChangedCallback(sheetNode->GetId());
     if (HasHoverModeChangedCallbackId()) {
@@ -477,7 +477,7 @@ void SheetPresentationPattern::InitPanEvent()
         return;
     }
 
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -2277,7 +2277,7 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
     } else {
         host->OnAccessibilityEvent(
             AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-        sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+        sheetParent->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
             HitTestMode::HTMTRANSPARENT);
         animation_ = AnimationUtils::StartAnimation(
             option,

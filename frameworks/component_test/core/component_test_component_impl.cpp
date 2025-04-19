@@ -264,7 +264,7 @@ bool GetTextByPattern(const RefPtr<NG::FrameNode>& frameNode, std::string& text)
 }
 bool GetTextByEventHub(const RefPtr<NG::FrameNode>& frameNode, std::string& text)
 {
-    const RefPtr<NG::EventHub>& eventHub = frameNode->GetEventHub<NG::EventHub>();
+    const RefPtr<NG::EventHub>& eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     if (AceType::InstanceOf<NG::CheckBoxEventHub>(eventHub)) {
         auto checkBoxEventHub = AceType::DynamicCast<NG::CheckBoxEventHub>(eventHub);
@@ -449,7 +449,7 @@ bool ComponentTestComponentImpl::IsEnabledImpl(ErrInfo& errInfo) const
         errInfo = QueryRetMsg(ErrCode::RET_ERR_COMPONENT_INVISIBLE_OR_DESTROYED);
         return false;
     }
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     return eventHub && eventHub->IsEnabled();
 }
 

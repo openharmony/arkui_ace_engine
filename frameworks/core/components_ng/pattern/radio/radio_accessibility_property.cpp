@@ -36,7 +36,7 @@ std::string RadioAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
-    auto radioEventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto radioEventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     auto value = radioEventHub ? radioEventHub->GetValue() : "";
     return value;
 }

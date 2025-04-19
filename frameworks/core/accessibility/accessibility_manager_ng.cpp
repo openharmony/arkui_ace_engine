@@ -230,7 +230,7 @@ void AccessibilityManagerNG::NotifyHoverEventToNodeSession(const RefPtr<FrameNod
     const RefPtr<FrameNode>& rootNode, const PointF& pointRoot,
     SourceType sourceType, AccessibilityHoverEventType eventType, TimeStamp time)
 {
-    auto eventHub = node->GetEventHub<EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<EventHub>();
     if (!eventHub->IsEnabled()) {
         // If the host component is disabled, do not transfer hover event.
         return;

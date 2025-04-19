@@ -127,7 +127,7 @@ void XComponentModelNG::SetOnLoad(LoadEvent&& onLoad)
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnLoad(std::move(onLoad));
 }
@@ -147,7 +147,7 @@ void XComponentModelNG::SetOnLoad(FrameNode* frameNode, LoadEvent&& onLoad)
         onLoad(xcPattern->GetId());
         return;
     }
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnLoad(std::move(onLoad));
 }
@@ -160,7 +160,7 @@ void XComponentModelNG::SetOnDestroy(DestroyEvent&& onDestroy)
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDestroy(std::move(onDestroy));
 }
@@ -173,7 +173,7 @@ void XComponentModelNG::SetOnDestroy(FrameNode* frameNode, DestroyEvent&& onDest
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDestroy(std::move(onDestroy));
 }
@@ -186,7 +186,7 @@ void XComponentModelNG::RegisterOnCreate(const RefPtr<AceType>& node, LoadEvent&
     if (!layoutProperty || layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
         return;
     }
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnLoad(std::move(onLoad));
 }
@@ -199,7 +199,7 @@ void XComponentModelNG::RegisterOnDestroy(const RefPtr<AceType>& node, DestroyEv
     if (!layoutProperty || layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
         return;
     }
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDestroy(std::move(onDestroy));
 }
@@ -219,7 +219,7 @@ void XComponentModelNG::SetDetachCallback(DetachCallback&& onDetach)
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDetachEvent(std::move(onDetach));
 }
@@ -232,7 +232,7 @@ void XComponentModelNG::SetControllerOnCreated(SurfaceCreatedEvent&& onCreated)
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetControllerCreatedEvent(std::move(onCreated));
 }
@@ -245,7 +245,7 @@ void XComponentModelNG::SetControllerOnChanged(SurfaceChangedEvent&& onChanged)
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetControllerChangedEvent(std::move(onChanged));
 }
@@ -258,7 +258,7 @@ void XComponentModelNG::SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestr
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetControllerDestroyedEvent(std::move(onDestroyed));
 }
@@ -487,7 +487,7 @@ void XComponentModelNG::SetControllerOnCreated(FrameNode* frameNode, SurfaceCrea
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetControllerCreatedEvent(std::move(onCreated));
 }
@@ -500,7 +500,7 @@ void XComponentModelNG::SetControllerOnChanged(FrameNode* frameNode, SurfaceChan
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetControllerChangedEvent(std::move(onChanged));
 }
@@ -513,7 +513,7 @@ void XComponentModelNG::SetControllerOnDestroyed(FrameNode* frameNode, SurfaceDe
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetControllerDestroyedEvent(std::move(onDestroyed));
 }
@@ -526,7 +526,7 @@ void XComponentModelNG::SetDetachCallback(FrameNode* frameNode, DetachCallback&&
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
-    auto eventHub = node->GetEventHub<XComponentEventHub>();
+    auto eventHub = node->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDetachEvent(std::move(onDetach));
 }

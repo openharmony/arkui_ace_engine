@@ -241,7 +241,7 @@ void SideBarContainerModelNG::SetOnChange(std::function<void(const bool)>&& onCh
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -259,7 +259,7 @@ void SideBarContainerModelNG::SetOnChangeEvent(std::function<void(const bool)>&&
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
@@ -268,7 +268,7 @@ void SideBarContainerModelNG::SetOnSideBarWidthChangeEvent(OnSideBarWidthChangeE
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSideBarWidthChangeEvent(std::move(event));
 }

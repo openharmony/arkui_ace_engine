@@ -778,7 +778,7 @@ std::string TextClockPattern::CheckDateTimeElement(const std::vector<std::string
 
 void TextClockPattern::FireChangeEvent() const
 {
-    auto textClockEventHub = GetEventHub<TextClockEventHub>();
+    auto textClockEventHub = GetOrCreateEventHub<TextClockEventHub>();
     CHECK_NULL_VOID(textClockEventHub);
     textClockEventHub->FireChangeEvent(std::to_string(GetMilliseconds() / MICROSECONDS_OF_MILLISECOND));
 }
@@ -871,7 +871,7 @@ RefPtr<FrameNode> TextClockPattern::BuildContentModifierNode()
     auto timeValue = static_cast<int64_t>(GetMilliseconds() / MICROSECONDS_OF_MILLISECOND);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto eventHub = host->GetEventHub<TextClockEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextClockEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     TextClockConfiguration textClockConfiguration(timeZoneOffset, started, timeValue, enabled);
