@@ -281,5 +281,228 @@ HWTEST_F(ResourceParserTest, ResourceParserTestTest014, TestSize.Level1)
     result = ResourceParser::GetBoolean(info, value);
     EXPECT_TRUE(result);
 }
-} // namespace OHOS::Ace
 
+/**
+ * @tc.name: ResourceParserTestTest015
+ * @tc.desc: Test GetIntArray when different states of resource
+ * @tc.type: Func
+ */
+HWTEST_F(ResourceParserTest, ResourceParserTestTest015, TestSize.Level1)
+{
+    Kit::ResourceInfo info;
+    std::vector<uint32_t> value;
+    auto result = ResourceParser::GetIntArray(info, value);
+    EXPECT_FALSE(result);
+    info.bundleName = "bundle";
+    info.moduleName = "module";
+    info.resId = 1;
+    result = ResourceParser::GetIntArray(info, value);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(value.size(), 0);
+    info.resId = UNKNOWN_RESOURCE_ID;
+    result = ResourceParser::GetIntArray(info, value);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(value.size(), 0);
+}
+
+/**
+ * @tc.name: ResourceParserTestTest016
+ * @tc.desc: Test GetStringArray when different states of resource
+ * @tc.type: Func
+ */
+HWTEST_F(ResourceParserTest, ResourceParserTestTest016, TestSize.Level1)
+{
+    Kit::ResourceInfo info;
+    std::vector<std::string> value;
+    auto result = ResourceParser::GetStringArray(info, value);
+    EXPECT_FALSE(result);
+    info.bundleName = "bundle";
+    info.moduleName = "module";
+    info.resId = 1;
+    result = ResourceParser::GetStringArray(info, value);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(value.size(), 0);
+    info.resId = UNKNOWN_RESOURCE_ID;
+    result = ResourceParser::GetStringArray(info, value);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(value.size(), 0);
+}
+
+/**
+ * @tc.name: ResourceParserTestTest017
+ * @tc.desc: Test GetMediaPath when ResourceAdapter is null
+ * @tc.type: Func
+ */
+HWTEST_F(ResourceParserTest, ResourceParserTestTest017, TestSize.Level1)
+{
+    Kit::ResourceInfo info;
+    info.resId = UNKNOWN_RESOURCE_ID;
+
+    std::string mediaPath;
+    bool result = ResourceParser::GetMediaPath(info, mediaPath);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ResourceParserTestTest018
+ * @tc.desc: Test GetMediaPath when resId is unknown
+ * @tc.type: Func
+ */
+HWTEST_F(ResourceParserTest, ResourceParserTestTest018, TestSize.Level1)
+{
+    Kit::ResourceInfo info;
+    info.resId = UNKNOWN_RESOURCE_ID;
+    info.params = {"param"};
+
+    std::string mediaPath;
+    bool result = ResourceParser::GetMediaPath(info, mediaPath);
+
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(mediaPath.empty());
+}
+
+/**
+ * @tc.name: ResourceParserTestTest019
+ * @tc.desc: Test GetMediaPath when resId is known
+ * @tc.type: Func
+ */
+HWTEST_F(ResourceParserTest, ResourceParserTestTest019, TestSize.Level1)
+{
+    Kit::ResourceInfo info;
+    info.resId = 123;
+
+    std::string mediaPath;
+    bool result = ResourceParser::GetMediaPath(info, mediaPath);
+
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(mediaPath.empty());
+}
+
+/**
+ * @tc.name: ResourceParserTestTest020
+ * @tc.desc: Test if GetInt gets an integer by name when resource ID is unknown
+ * @tc.type: Func
+ */
+HWTEST_F(ResourceParserTest, ResourceParserTestTest020, TestSize.Level1)
+{
+    Kit::ResourceInfo info;
+    info.resId = UNKNOWN_RESOURCE_ID;
+    info.params = {"paramName"};
+    int32_t intRes;
+    bool result = ResourceParser::GetInt(info, intRes);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ResourceParserTestTest021
+ * @tc.desc: Test if GetInt gets an integer by name when resource ID is known
+ * @tc.type: Func
+ */
+HWTEST_F(ResourceParserTest, ResourceParserTestTest021, TestSize.Level1)
+{
+    Kit::ResourceInfo info;
+    info.resId = 123;
+    int32_t intRes;
+    bool result = ResourceParser::GetInt(info, intRes);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ResourceParserTestTest022
+ * @tc.desc: Test GetDouble when resourceWrapper is null
+ * @tc.type: Func
+ */
+HWTEST_F(ResourceParserTest, ResourceParserTestTest022, TestSize.Level1)
+{
+    Kit::ResourceInfo info;
+    info.bundleName = "";
+    info.moduleName = "";
+    info.resId = 1;
+
+    double doubleRes;
+    EXPECT_TRUE(ResourceParser::GetDouble(info, doubleRes));
+}
+
+/**
+ * @tc.name: ResourceParserTestTest023
+ * @tc.desc: Test GetDouble when resourceId is unknown
+ * @tc.type: Func
+ */
+HWTEST_F(ResourceParserTest, ResourceParserTestTest023, TestSize.Level1)
+{
+    Kit::ResourceInfo info;
+    info.bundleName = "bundle";
+    info.bundleName = "module";
+    info.resId = UNKNOWN_RESOURCE_ID;
+    info.params = {"paramName"};
+
+    double doubleRes;
+    EXPECT_FALSE(ResourceParser::GetDouble(info, doubleRes));
+}
+
+/**
+ * @tc.name: ResourceParserTestTest024
+ * @tc.desc: Test GetDouble when resourceId is known
+ * @tc.type: Func
+ */
+HWTEST_F(ResourceParserTest, ResourceParserTestTest024, TestSize.Level1)
+{
+    Kit::ResourceInfo info;
+    info.bundleName = "bundle";
+    info.bundleName = "module";
+    info.resId = 1;
+
+    double doubleRes;
+    EXPECT_FALSE(ResourceParser::GetDouble(info, doubleRes));
+}
+
+/**
+ * @tc.name: ResourceParserTestTest025
+ * @tc.desc: Test GetPluralString when ResourceAdapter is null
+ * @tc.type: Func
+ */
+HWTEST_F(ResourceParserTest, ResourceParserTestTest025, TestSize.Level1)
+{
+    Kit::ResourceInfo info;
+    info.resId = UNKNOWN_RESOURCE_ID;
+
+    std::string str;
+    bool result = ResourceParser::GetPluralString(info, 2, str);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ResourceParserTestTest026
+ * @tc.desc: Test GetPluralString when resId is UNKNOWN_RESOURCE_ID
+ * @tc.type: Func
+ */
+HWTEST_F(ResourceParserTest, ResourceParserTestTest026, TestSize.Level1)
+{
+    Kit::ResourceInfo info;
+    info.resId = UNKNOWN_RESOURCE_ID;
+    info.params = {"param"};
+
+    std::string str;
+    bool result = ResourceParser::GetPluralString(info, 2, str);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ResourceParserTestTest027
+ * @tc.desc: Test GetPluralString when resId is known
+ * @tc.type: Func
+ */
+HWTEST_F(ResourceParserTest, ResourceParserTestTest027, TestSize.Level1)
+{
+    Kit::ResourceInfo info;
+    info.resId = 123;
+
+    std::string str;
+    bool result = ResourceParser::GetPluralString(info, 2, str);
+
+    EXPECT_FALSE(result);
+}
+} // namespace OHOS::Ace
