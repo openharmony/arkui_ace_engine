@@ -57,6 +57,9 @@
             ],
             "global/resource": [
                 "./global/resource/resource.ts"
+            ],
+            "@ohos.router": [ 
+                "./ohos.router.ts"
             ]
         },
         "rootDir": "."
@@ -67,7 +70,8 @@
         "./ohos.font.ts",
         "./ohos.arkui.UIContext.ts",
         "./ohos.animator.ts",
-        "./global/**/*.ts"
+        "./global/**/*.ts",
+        "./ohos.router.ts"
     ],
     "exclude": [
         "./src/generated/arkts",

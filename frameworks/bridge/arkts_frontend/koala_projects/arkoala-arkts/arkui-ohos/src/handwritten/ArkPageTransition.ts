@@ -81,7 +81,7 @@ export function ArkPageTransitionExit(
     const receiver = remember(() => new ArkPageTransitionExitComponent(params))
     style?.(receiver)
     const state = CurrentRouterTransitionState()
-        if (state !== undefined && state.visibility == RouterTransitionVisibility.Hiding) {
-            NotifyPageTransition(state.pageId, receiver, RouterTransitionVisibility.Hiding)
+    if (state !== undefined && state.visibility == RouterTransitionVisibility.Hiding) {
+        NotifyPageTransition(state.pageId, receiver, RouterTransitionVisibility.Hiding)
     }
 }

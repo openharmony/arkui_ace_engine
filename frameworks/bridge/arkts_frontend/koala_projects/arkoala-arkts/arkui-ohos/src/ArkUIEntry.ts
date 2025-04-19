@@ -28,6 +28,7 @@ import { enterForeignContext, leaveForeignContext } from "./handwritten"
 import { wrapSystemCallback, KUint8ArrayPtr } from "@koalaui/interop"
 import { deserializeAndCallCallback } from "./generated/peers/CallbackDeserializeCall"
 import { Deserializer } from "./generated/peers/Deserializer"
+import { Routed } from "./handwritten/Router"
 import { StateUpdateLoop } from "./stateManagement"
 
 setCustomEventsChecker(checkArkoalaCallbacks)
@@ -150,25 +151,31 @@ export class Application {
     private exitApp: boolean = false
     private userView?: UserView
     private entryPoint?: EntryPoint
+    private moduleName: string
 
     private withLog = false
     private useNativeLog = true
 
-    constructor(useNativeLog: boolean, userView?: UserView, entryPoint?: EntryPoint) {
+    constructor(useNativeLog: boolean, moduleName: string, userView?: UserView, entryPoint?: EntryPoint) {
         this.useNativeLog = useNativeLog
+        this.moduleName = moduleName
         this.userView = userView
         this.entryPoint = entryPoint
     }
 
     static createMemoRootState(manager: StateManager,
         /** @memo */
-        builder: UserViewBuilder
+        builder: UserViewBuilder,
+        moduleName: string
     ): ComputableState<PeerNode> {
         const peer = PeerNode.generateRootPeer()
         return manager.updatableNode<PeerNode>(peer, (context: StateContext) => {
             const frozen = manager.frozen
             manager.frozen = true
-            memoEntry<void>(context, 0, builder)
+            memoEntry<void>(context, 0, () => {
+                InteropNativeModule._NativeLog("AceRouter:createMemoRootState set Routed")
+                Routed(builder, moduleName)
+            })
             manager.frozen = frozen
         })
     }
@@ -199,7 +206,7 @@ export class Application {
             } else {
                 throw new Error("Invalid EntryPoint")
             }
-            this.rootState = Application.createMemoRootState(this.manager!, builder)
+            this.rootState = Application.createMemoRootState(this.manager!, builder, this.moduleName)
             root = this.computeRoot()
         } catch (e) {
             if (e instanceof Error) {
@@ -364,7 +371,7 @@ export class Application {
         return "0"
     }
 
-    static createApplication(appUrl: string, params: string, useNativeLog: boolean, userView?: UserView, entryPoint?: EntryPoint): Application {
+    static createApplication(appUrl: string, params: string, useNativeLog: boolean, moduleName: string, userView?: UserView, entryPoint?: EntryPoint): Application {
         if (!userView && !entryPoint) {
             throw new Error(`Invalid EntryPoint`)
         }
@@ -373,7 +380,7 @@ export class Application {
         registerNativeModuleLibraryName("ArkUIGeneratedNativeModule", "ArkoalaNative_ark.z")
         registerNativeModuleLibraryName("TestNativeModule", "ArkoalaNative_ark.z")
         registerSyncCallbackProcessor()
-        return new Application(useNativeLog, userView, entryPoint)
+        return new Application(useNativeLog, moduleName, userView, entryPoint)
     }
 }
 

@@ -35,7 +35,8 @@ setCustomEventsChecker(checkArkoalaCallbacks)
 enum EventType {
     Click = 0,
     Text = 1,
-    ExitApp = 2
+    ExitApp = 2,
+    SyncNeeded = 6
 }
 
 class PartialUpdateRecord {
@@ -79,13 +80,13 @@ let detachedRoots: Map<KPointer, ComputableState<PeerNode>> = new Map<KPointer, 
 export function createUiDetachedRoot(
     peerFactory: () => PeerNode,
     /** @memo */
-    builder: () => void
+    builder: UserViewBuilder
 ): PeerNode {
     const manager = GlobalStateManager.instance
     const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
         const frozen = manager.frozen
         manager.frozen = true
-        memoEntry<void>(context, 0, () => { Routed(builder) } )
+        memoEntry<void>(context, 0, () => { Routed(builder, "") } )
         manager.frozen = frozen
     })
     detachedRoots.set(node.value.peer.ptr, node)
@@ -150,24 +151,27 @@ export class Application {
     private enableDumpTree = false
     private exitApp: boolean = false
     private userView: UserView | undefined = undefined
+    private moduleName: string
 
     private withLog = false
     private useNativeLog = true
 
-    constructor(userView: UserView, useNativeLog: boolean) {
+    constructor(userView: UserView, useNativeLog: boolean, moduleName: string) {
         this.userView = userView
         this.useNativeLog = useNativeLog
+        this.moduleName = moduleName
     }
 
     static createMemoRootState(manager: StateManager,
         /** @memo */
-        builder: UserViewBuilder
+        builder: UserViewBuilder,
+        moduleName: string
     ): ComputableState<PeerNode> {
         const peer = PeerNode.generateRootPeer()
         return manager.updatableNode<PeerNode>(peer, (context: StateContext) => {
             const frozen = manager.frozen
             manager.frozen = true
-            memoEntry<void>(context, 0, () => { Routed(builder) } )
+            memoEntry<void>(context, 0, () => { Routed(builder, moduleName) } )
             manager.frozen = frozen
         })
     }
@@ -195,7 +199,7 @@ export class Application {
             /** @memo */
             let builder = this.userView!.getBuilder()
             console.warn("Application start 333")
-            this.rootState = Application.createMemoRootState(this.manager!, builder)
+            this.rootState = Application.createMemoRootState(this.manager!, builder, this.moduleName)
             console.warn("Application start 444")
             root = this.computeRoot()
         } catch (e) {
@@ -358,6 +362,9 @@ export class Application {
                         this.exitApp = true
                         break
                     }
+                    case EventType.SyncNeeded: {
+                        return GlobalStateManager.instance.isUpdateNeeded() ? "true" : "false"
+                    }
                     default: {
                         InteropNativeModule._NativeLog("ARKTS: [emitEvent] type = " + type + " is unknown.")
                         break
@@ -372,7 +379,7 @@ export class Application {
         return "0"
     }
 
-    static createApplication(appUrl: string, params: string, useNativeLog: boolean, vmKind: int32): Application {
+    static createApplication(appUrl: string, params: string, useNativeLog: boolean, moduleName: string, vmKind: int32): Application {
         let suffix = vmKind == 4 ? "_ani" : "_ark"
         registerNativeModuleLibraryName("InteropNativeModule", `ArkoalaNative${suffix}`)
         registerNativeModuleLibraryName("ArkUINativeModule", `ArkoalaNative${suffix}`)
@@ -381,7 +388,7 @@ export class Application {
         registerSyncCallbackProcessor()
         const userView = ArkUINativeModule._LoadUserView(appUrl, params)
         if (userView == undefined) throw new Error("Cannot load user view");
-        return new Application(userView as UserView, useNativeLog)
+        return new Application(userView as UserView, useNativeLog, moduleName)
     }
 }
 
