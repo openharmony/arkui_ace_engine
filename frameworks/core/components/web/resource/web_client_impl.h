@@ -290,7 +290,7 @@ public:
     void OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility) override;
 
     bool CloseImageOverlaySelection() override;
-    
+
     bool OnSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
         OHOS::NWeb::SslError error, const std::vector<std::string>& certChainData) override;
 
@@ -303,6 +303,9 @@ public:
     void OnScrollStart(const float x, const float y) override;
 
     void RestoreRenderFit() override;
+    bool OnBeforeUnloadByJSV2(const std::string& url, const std::string& message, bool isReload,
+        std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
+
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;
