@@ -377,6 +377,7 @@ template("declarative_js_engine") {
       "jsview/js_scroller.cpp",
       "jsview/js_search.cpp",
       "jsview/js_sec_button_base.cpp",
+      "jsview/js_select.cpp",
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
       "jsview/js_sheet.cpp",
@@ -491,6 +492,7 @@ template("declarative_js_engine") {
       "jsview/models/scroll_bar_model_impl.cpp",
       "jsview/models/scroll_model_impl.cpp",
       "jsview/models/search_model_impl.cpp",
+      "jsview/models/select_model_impl.cpp",
       "jsview/models/shape_abstract_model_impl.cpp",
       "jsview/models/shape_model_impl.cpp",
       "jsview/models/side_bar_container_model_impl.cpp",
@@ -519,11 +521,7 @@ template("declarative_js_engine") {
     ]
 
     if (!ace_engine_feature_wearable) {
-      sources += [
-        "jsview/js_folder_stack.cpp",
-        "jsview/js_select.cpp",
-        "jsview/models/select_model_impl.cpp",
-      ]
+      sources += [ "jsview/js_folder_stack.cpp" ]
     }
 
     if (ace_engine_feature_enable_digital_crown) {
@@ -947,6 +945,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_scroller.cpp",
       "jsview/js_search.cpp",
       "jsview/js_sec_button_base.cpp",
+      "jsview/js_select.cpp",
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
       "jsview/js_side_bar.cpp",
@@ -992,10 +991,7 @@ template("declarative_js_engine_ng") {
     ]
 
     if (!ace_engine_feature_wearable) {
-      sources += [
-        "jsview/js_folder_stack.cpp",
-        "jsview/js_select.cpp",
-      ]
+      sources += [ "jsview/js_folder_stack.cpp" ]
     }
 
     if (ace_engine_feature_enable_digital_crown) {

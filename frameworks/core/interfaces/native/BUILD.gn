@@ -120,6 +120,7 @@ template("ace_core_interfaces_native_node") {
       "node/scrollable_modifier.cpp",
       "node/scroller_modifier.cpp",
       "node/search_modifier.cpp",
+      "node/select_modifier.cpp",
       "node/shape_modifier.cpp",
       "node/side_bar_container_modifier.cpp",
       "node/stepper_item_modifier.cpp",
@@ -177,10 +178,7 @@ template("ace_core_interfaces_native_node") {
     }
 
     if (!ace_engine_feature_wearable) {
-      sources += [
-        "node/node_folder_stack_modifier.cpp",
-        "node/select_modifier.cpp",
-      ]
+      sources += [ "node/node_folder_stack_modifier.cpp" ]
     }
 
     external_deps = [
