@@ -112,7 +112,7 @@ void GridItemModelNG::SetSelected(bool selected)
     auto pattern = frameNode->GetPattern<GridItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(selected);
-    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
 }
@@ -121,7 +121,7 @@ void GridItemModelNG::SetSelectChangeEvent(std::function<void(bool)>&& changeEve
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetSelectChangeEvent(std::move(changeEvent));
 }
@@ -130,7 +130,7 @@ void GridItemModelNG::SetOnSelect(SelectFunc&& onSelect)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(onSelect));
 }
@@ -157,7 +157,7 @@ void GridItemModelNG::SetSelected(FrameNode* frameNode, bool selected)
     auto pattern = frameNode->GetPattern<GridItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(selected);
-    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
 }
@@ -193,7 +193,7 @@ void GridItemModelNG::SetGridItemStyle(FrameNode* frameNode, GridItemStyle gridI
 void GridItemModelNG::SetOnSelect(FrameNode* frameNode, SelectFunc&& onSelect)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(onSelect));
 }

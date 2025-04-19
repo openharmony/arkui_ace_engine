@@ -66,7 +66,7 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -448,7 +448,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto columnEventHub = host->GetEventHub<EventHub>();
+    auto columnEventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(columnEventHub);
     RefPtr<TouchEventImpl> touchListener = CreateItemTouchEventListener();
     CHECK_NULL_VOID(touchListener);
@@ -460,7 +460,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
     auto midSize = childSize / 2;
     middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(midSize));
     CHECK_NULL_VOID(middleChild);
-    auto eventHub = middleChild->GetEventHub<EventHub>();
+    auto eventHub = middleChild->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ParseMouseEvent();
@@ -477,7 +477,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
         param->instance = childNode;
         param->itemIndex = i;
         param->itemTotalCounts = childSize;
-        auto eventHub = childNode->GetEventHub<EventHub>();
+        auto eventHub = childNode->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         if (i != midSize) {
             RefPtr<ClickEvent> clickListener = CreateItemClickEventListener(param);

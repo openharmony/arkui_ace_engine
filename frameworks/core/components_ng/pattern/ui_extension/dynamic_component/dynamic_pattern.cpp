@@ -192,7 +192,7 @@ void DynamicPattern::InitializeRender(void* runtime)
         accessibilitySessionAdapter_ =
             AceType::MakeRefPtr<AccessibilitySessionAdapterIsolatedComponent>(dynamicComponentRenderer_);
         SetContainerHostPattern(WeakClaim(this));
-        auto eventHub = host->GetEventHub<EventHub>();
+        auto eventHub = host->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         OnAreaChangedFunc onAreaChangedFunc = [renderer = dynamicComponentRenderer_](
             const RectF& oldRect,

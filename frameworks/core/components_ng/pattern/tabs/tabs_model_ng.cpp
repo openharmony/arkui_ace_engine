@@ -443,7 +443,7 @@ void TabsModelNG::SetOnGestureSwipe(GestureSwipeEvent&& onGestureSwipe)
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetGestureSwipeEvent(std::move(onGestureSwipe));
 }
@@ -566,7 +566,7 @@ void TabsModelNG::Pop()
     auto dividerColor = divider.color;
     auto dividerStrokeWidth = divider.strokeWidth;
 
-    auto dividerHub = dividerNode->GetEventHub<EventHub>();
+    auto dividerHub = dividerNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(dividerHub);
 
     auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
@@ -1172,7 +1172,7 @@ void TabsModelNG::SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& ge
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetGestureSwipeEvent(std::move(gestureSwipe));
 }

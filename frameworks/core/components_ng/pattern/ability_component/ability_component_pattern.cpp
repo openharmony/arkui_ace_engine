@@ -55,7 +55,7 @@ void AbilityComponentPattern::OnModifyDone()
         Pattern::OnModifyDone();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto hub = host->GetEventHub<EventHub>();
+        auto hub = host->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(hub);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -97,7 +97,7 @@ void AbilityComponentPattern::FireConnect()
     auto pipeline = PipelineBase::GetCurrentContext();
     TransferFocusState(IsCurrentFocus());
 
-    auto abilityComponentEventHub = GetEventHub<AbilityComponentEventHub>();
+    auto abilityComponentEventHub = GetOrCreateEventHub<AbilityComponentEventHub>();
     CHECK_NULL_VOID(abilityComponentEventHub);
     abilityComponentEventHub->FireOnConnect();
 }
@@ -105,7 +105,7 @@ void AbilityComponentPattern::FireConnect()
 void AbilityComponentPattern::FireDisConnect()
 {
     hasConnectionToAbility_ = false;
-    auto abilityComponentEventHub = GetEventHub<AbilityComponentEventHub>();
+    auto abilityComponentEventHub = GetOrCreateEventHub<AbilityComponentEventHub>();
     CHECK_NULL_VOID(abilityComponentEventHub);
     abilityComponentEventHub->FireOnDisConnect();
 }

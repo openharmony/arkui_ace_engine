@@ -113,7 +113,7 @@ void RefreshModelNG::SetOnStateChange(StateChangeEvent&& stateChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStateChange(std::move(stateChange));
 }
@@ -122,7 +122,7 @@ void RefreshModelNG::SetOnRefreshing(RefreshingEvent&& refreshing)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRefreshing(std::move(refreshing));
 }
@@ -131,7 +131,7 @@ void RefreshModelNG::SetChangeEvent(RefreshChangeEvent&& changeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
@@ -140,7 +140,7 @@ void RefreshModelNG::SetOnOffsetChange(OffsetChangeEvent&& dragOffset)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnOffsetChange(std::move(dragOffset));
 }
@@ -149,7 +149,7 @@ void RefreshModelNG::ResetOnOffsetChange()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ResetOnOffsetChange();
 }
@@ -215,7 +215,7 @@ void RefreshModelNG::SetCustomBuilder(FrameNode* frameNode, FrameNode* customBui
 void RefreshModelNG::SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& stateChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStateChange(std::move(stateChange));
 }
@@ -223,7 +223,7 @@ void RefreshModelNG::SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& s
 void RefreshModelNG::SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& refreshing)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRefreshing(std::move(refreshing));
 }
@@ -231,7 +231,7 @@ void RefreshModelNG::SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& ref
 void RefreshModelNG::SetOnOffsetChange(FrameNode* frameNode, OffsetChangeEvent&& dragOffset)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnOffsetChange(std::move(dragOffset));
 }
@@ -239,7 +239,7 @@ void RefreshModelNG::SetOnOffsetChange(FrameNode* frameNode, OffsetChangeEvent&&
 void RefreshModelNG::ResetOnOffsetChange(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ResetOnOffsetChange();
 }
@@ -298,7 +298,7 @@ bool RefreshModelNG::GetPullToRefresh(FrameNode* frameNode)
 void RefreshModelNG::SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent&& changeEvent)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }

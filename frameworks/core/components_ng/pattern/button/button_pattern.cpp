@@ -152,7 +152,7 @@ void ButtonPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
                                                                                                   : "FontStyle.Italic",
         filter);
     json->PutExtAttr("label", layoutProperty->GetLabelValue("").c_str(), filter);
-    auto eventHub = host->GetEventHub<ButtonEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     json->PutExtAttr("stateEffect", eventHub->GetStateEffect() ? "true" : "false", filter);
 
@@ -549,7 +549,7 @@ void ButtonPattern::InitTouchEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<ButtonEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     touchListener_ = [weak = WeakClaim(this)](const UIState& state) {
         auto buttonPattern = weak.Upgrade();
@@ -588,7 +588,7 @@ void ButtonPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<ButtonEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<ButtonEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     auto hoverEffect = inputHub->GetHoverEffect();
     inputHub->SetHoverEffect(hoverEffect == HoverEffectType::BOARD ? HoverEffectType::AUTO : hoverEffect);
@@ -616,7 +616,7 @@ void ButtonPattern::HandlePressedStyle()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto buttonEventHub = GetEventHub<ButtonEventHub>();
+    auto buttonEventHub = GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
@@ -643,7 +643,7 @@ void ButtonPattern::HandleNormalStyle()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto buttonEventHub = GetEventHub<ButtonEventHub>();
+    auto buttonEventHub = GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     auto toggleButtonPattern = host->GetPattern<ToggleButtonPattern>();
     if (toggleButtonPattern) {
@@ -670,7 +670,7 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
     isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto inputEventHub = host->GetOrCreateInputEventHub();
@@ -906,7 +906,7 @@ void ButtonPattern::DumpSubInfo(RefPtr<ButtonLayoutProperty> layoutProperty)
         DumpLog::GetInstance().AddDesc("BorderRadius: " + layoutProperty->GetBorderRadiusValue().ToString());
     }
 
-    auto eventHub = GetEventHub<ButtonEventHub>();
+    auto eventHub = GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     DumpLog::GetInstance().AddDesc("StateEffect: " + std::string(eventHub->GetStateEffect() ? "true" : "false"));
 }
@@ -954,7 +954,7 @@ void ButtonPattern::HandleEnabled()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -992,7 +992,7 @@ void ButtonPattern::SetButtonPress(double xPos, double yPos)
     CHECK_NULL_VOID(contentModifierNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -1064,7 +1064,7 @@ RefPtr<FrameNode> ButtonPattern::BuildContentModifierNode()
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto label = layoutProperty->GetLabel().value_or("");
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     ButtonConfiguration buttonConfiguration(label, isPress_, enabled);

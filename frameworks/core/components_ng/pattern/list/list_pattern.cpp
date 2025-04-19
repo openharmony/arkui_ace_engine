@@ -449,7 +449,7 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listEventHub = host->GetEventHub<ListEventHub>();
+    auto listEventHub = host->GetOrCreateEventHub<ListEventHub>();
     CHECK_NULL_VOID(listEventHub);
     paintStateFlag_ = !NearZero(finalOffset) && !isJump;
     isFramePaintStateValid_ = true;
@@ -3001,7 +3001,7 @@ void ListPattern::GetEventDumpInfo()
     ScrollablePattern::GetEventDumpInfo();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ListEventHub>();
+    auto hub = host->GetOrCreateEventHub<ListEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollIndex = hub->GetOnScrollIndex();
     onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
@@ -3023,7 +3023,7 @@ void ListPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     ScrollablePattern::GetEventDumpInfo(json);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ListEventHub>();
+    auto hub = host->GetOrCreateEventHub<ListEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollIndex = hub->GetOnScrollIndex();
     json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");

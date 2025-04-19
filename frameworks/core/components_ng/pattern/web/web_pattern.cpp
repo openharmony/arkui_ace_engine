@@ -903,7 +903,7 @@ void WebPattern::InitEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
@@ -1463,7 +1463,7 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto mouseEventCallback = eventHub->GetOnMouseEvent();
     CHECK_NULL_VOID(mouseEventCallback);
@@ -1544,7 +1544,7 @@ void WebPattern::ResetDragAction()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     frameNode->SetDraggable(false);
-    auto eventHub = frameNode->GetEventHub<WebEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -1778,7 +1778,7 @@ void WebPattern::InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureH
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<WebEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     isDisableDrag_ = false;
@@ -1943,7 +1943,7 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
     isDragging_ = true;
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, false);
-    auto eventHub = frameNode->GetEventHub<WebEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
@@ -1981,7 +1981,7 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto userOnDragStartFunc = eventHub->GetOnDragStart();
@@ -2035,7 +2035,7 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
         frameNode->SetDraggable(false);
-        auto eventHub = frameNode->GetEventHub<WebEventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
         CHECK_NULL_VOID(eventHub);
         auto gestureHub = eventHub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -2050,7 +2050,7 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
     if (!isDragStartFromWeb_ && isMouseEvent_) {
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
-        auto eventHub = frameNode->GetEventHub<WebEventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
         CHECK_NULL_VOID(eventHub);
         auto gestureHub = eventHub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -2242,7 +2242,7 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
         delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_END);
     }
     if (isSetMouseDragMonitorState) {
-        auto eventHub = host->GetEventHub<WebEventHub>();
+        auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
         CHECK_NULL_VOID(eventHub);
         auto gestureHub = eventHub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -2377,7 +2377,7 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ret);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_RETURN(eventHub, ret);
 
     KeyEventInfo info(keyEvent);
@@ -2490,7 +2490,7 @@ void WebPattern::WebRequestFocus()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -4910,7 +4910,7 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
     CHECK_NULL_VOID(callback);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -5206,7 +5206,7 @@ void WebPattern::InitSelectPopupMenuViewOption(const std::vector<RefPtr<FrameNod
             optionPattern->UpdateNextNodeDivider(false);
             optionPaintProperty->UpdateNeedDivider(false);
         }
-        auto hub = option->GetEventHub<MenuItemEventHub>();
+        auto hub = option->GetOrCreateEventHub<MenuItemEventHub>();
         CHECK_NULL_VOID(hub);
         if (optionIndex >= 0 && static_cast<uint32_t>(optionIndex) < items.size()) {
             hub->SetEnabled(items[optionIndex]->GetIsEnabled());
@@ -6533,7 +6533,7 @@ void WebPattern::OnShowAutofillPopup(
         };
         auto optionNode = AceType::DynamicCast<FrameNode>(option);
         if (optionNode) {
-            auto hub = optionNode->GetEventHub<MenuItemEventHub>();
+            auto hub = optionNode->GetOrCreateEventHub<MenuItemEventHub>();
             auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
             if (!hub || !optionPattern) {
                 continue;
@@ -6586,7 +6586,7 @@ void WebPattern::OnShowAutofillPopupV2(
         };
         auto optionNode = AceType::DynamicCast<FrameNode>(option);
         if (optionNode) {
-            auto hub = optionNode->GetEventHub<MenuItemEventHub>();
+            auto hub = optionNode->GetOrCreateEventHub<MenuItemEventHub>();
             auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
             if (!hub || !optionPattern) {
                 continue;
@@ -6886,7 +6886,7 @@ bool WebPattern::IsCurrentFocus()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
@@ -7192,7 +7192,7 @@ void WebPattern::DumpSurfaceInfo()
 
 RefPtr<WebEventHub> WebPattern::GetWebEventHub()
 {
-    return GetEventHub<WebEventHub>();
+    return GetOrCreateEventHub<WebEventHub>();
 }
 
 RefPtr<AccessibilitySessionAdapter> WebPattern::GetAccessibilitySessionAdapter()

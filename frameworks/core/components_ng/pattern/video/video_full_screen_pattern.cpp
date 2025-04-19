@@ -28,7 +28,7 @@ void VideoFullScreenPattern::InitFullScreenParam(const RefPtr<VideoPattern>& vid
     RecoverState(videoPattern);
     auto video = videoPattern->GetHost();
     CHECK_NULL_VOID(video);
-    SetEventHub(video->GetEventHub<EventHub>());
+    SetEventHub(video->GetOrCreateEventHub<EventHub>());
 }
 
 void VideoFullScreenPattern::SetEventHub(const RefPtr<EventHub>& eventHub)

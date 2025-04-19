@@ -365,7 +365,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -626,7 +626,7 @@ void TextPattern::HandleOnCopy()
     CHECK_NULL_VOID(!value.empty());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<TextEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnCopy(value);
 }
@@ -807,7 +807,7 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto context = host->GetContext();
     if (context) {
@@ -1242,7 +1242,7 @@ void TextPattern::InitUrlMouseEvent()
     CHECK_NULL_VOID(!urlMouseEventInitialized_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -1448,7 +1448,7 @@ void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -1519,7 +1519,7 @@ void TextPattern::InitAISpanHoverEvent()
     CHECK_NULL_VOID(!aiSpanHoverEventInitialized_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -1600,7 +1600,7 @@ void TextPattern::InitMouseEvent()
     CHECK_NULL_VOID(!mouseEventInitialized_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -1693,7 +1693,7 @@ void TextPattern::InitHoverEvent()
     CHECK_NULL_VOID(!hoverInitialized_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -1730,7 +1730,7 @@ void TextPattern::RecoverCopyOption()
     }
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     if (copyOption_ == CopyOptions::None && !textDetectEnable_ && !textLayoutProperty->GetTextOverflow() &&
         !onClick_ && !longPressEvent_) { // performance prune
@@ -2275,7 +2275,7 @@ bool TextPattern::IsDraggable(const Offset& offset)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     bool draggable = eventHub->HasOnDragStart();
     return draggable && LocalOffsetInSelectedArea(offset);
 }
@@ -2288,7 +2288,7 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
     if (overlayMod_) {
         overlayMod_->ClearSelectedForegroundColorAndRects();
     }
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     auto selectStart = textSelector_.GetTextStart();
     auto selectEnd = textSelector_.GetTextEnd();
@@ -2407,7 +2407,7 @@ DragDropInfo TextPattern::OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event
     DragDropInfo itemInfo;
     auto pattern = weakPtr.Upgrade();
     auto host = pattern->GetHost();
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, itemInfo);
     if (!gestureHub->GetIsTextDraggable()) {
@@ -2558,7 +2558,7 @@ void TextPattern::InitDragEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -2570,7 +2570,7 @@ void TextPattern::InitDragEvent()
         NG::DragDropInfo itemInfo;
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_RETURN(pattern, itemInfo);
-        auto eventHub = pattern->GetEventHub<EventHub>();
+        auto eventHub = pattern->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, itemInfo);
         pattern->SetCurrentDragTool(event->GetSourceTool());
         if (pattern->spans_.empty() && !pattern->isSpanStringMode_) {
@@ -2608,7 +2608,7 @@ void TextPattern::ClearDragEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -3367,7 +3367,7 @@ Color TextPattern::GetUrlSpanColor()
     auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, Color());
 
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, Color());
 
     if (eventHub && !eventHub->IsEnabled()) {
@@ -4478,7 +4478,7 @@ void TextPattern::RemoveAreaChangeInner()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto eventHub = host->GetEventHub<TextEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (eventHub->HasOnAreaChanged()) {
         return;
@@ -4645,7 +4645,7 @@ void TextPattern::FireOnSelectionChange(int32_t start, int32_t end)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<TextEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnSelectionChange(start, end);
 }
@@ -4654,7 +4654,7 @@ void TextPattern::FireOnMarqueeStateChange(const TextMarqueeState& state)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<TextEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnMarqueeStateChange(static_cast<int32_t>(state));
 
@@ -5141,7 +5141,7 @@ void TextPattern::OnTextOverflowChanged()
     }
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto eventHub = host->GetEventHub<TextEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto hasInnerCallabck = eventHub->HasVisibleAreaCallback(false);
     if (!hasInnerCallabck) {

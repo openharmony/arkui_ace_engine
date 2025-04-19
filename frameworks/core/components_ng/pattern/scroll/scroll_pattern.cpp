@@ -116,7 +116,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto eventHub = host->GetEventHub<ScrollEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     PrintOffsetLog(AceLogTag::ACE_SCROLL, host->GetId(), prevOffset_ - currentOffset_);
     FireOnDidScroll(prevOffset_ - currentOffset_);
@@ -237,7 +237,7 @@ void ScrollPattern::OnScrollEndCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<ScrollEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto scrollEndEvent = eventHub->GetScrollEndEvent();
     if (scrollEndEvent) {
@@ -386,7 +386,7 @@ void ScrollPattern::ValidateOffset(int32_t source)
 
 void ScrollPattern::HandleScrollPosition(float scroll)
 {
-    auto eventHub = GetEventHub<ScrollEventHub>();
+    auto eventHub = GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onScroll = eventHub->GetOnScrollEvent();
     CHECK_NULL_VOID(onScroll);
@@ -405,7 +405,7 @@ void ScrollPattern::HandleScrollPosition(float scroll)
 
 float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
 {
-    auto eventHub = GetEventHub<ScrollEventHub>();
+    auto eventHub = GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_RETURN(eventHub, scroll);
     auto onScroll = eventHub->GetOnWillScrollEvent();
     auto onJsFrameNodeScroll = eventHub->GetJSFrameNodeOnScrollWillScroll();
@@ -440,7 +440,7 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
 void ScrollPattern::FireOnDidScroll(float scroll)
 {
     FireObserverOnDidScroll(scroll);
-    auto eventHub = GetEventHub<ScrollEventHub>();
+    auto eventHub = GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onScroll = eventHub->GetOnDidScrollEvent();
     auto onJSFrameNodeDidScroll = eventHub->GetJSFrameNodeOnScrollDidScroll();
@@ -550,7 +550,7 @@ void ScrollPattern::HandleCrashTop()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     const auto& onScrollEdge = eventHub->GetScrollEdgeEvent();
     CHECK_NULL_VOID(onScrollEdge);
@@ -568,7 +568,7 @@ void ScrollPattern::HandleCrashBottom()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     const auto& onScrollEdge = eventHub->GetScrollEdgeEvent();
     CHECK_NULL_VOID(onScrollEdge);
@@ -1318,7 +1318,7 @@ void ScrollPattern::DumpAdvanceInfo()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ScrollEventHub>();
+    auto hub = host->GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(hub);
     ScrollablePattern::DumpAdvanceInfo();
     DumpLog::GetInstance().AddDesc(std::string("currentOffset: ").append(std::to_string(currentOffset_)));
@@ -1487,7 +1487,7 @@ void ScrollPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ScrollEventHub>();
+    auto hub = host->GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(hub);
     ScrollablePattern::DumpAdvanceInfo(json);
     json->Put("currentOffset", std::to_string(currentOffset_).c_str());
