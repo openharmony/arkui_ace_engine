@@ -30,7 +30,9 @@ import {
   getToggle
 } from '../../../utils';
 import { RatingTest } from './RatingTest.test'
+
 const driver = Driver.create();
+
 export default function RatingTest5() {
   describe('RatingTest5', () => {
     beforeAll(async (done: Function) => {

@@ -70,15 +70,19 @@ class MyModifier implements AttributeModifier<HyperlinkAttribute> {
   applyNormalAttribute(instance: HyperlinkAttribute) {
     instance.backgroundColor('#0A59F7')
   }
+
   applyPressedAttribute(instance: HyperlinkAttribute) {
     instance.backgroundColor('#ED6F21')
   }
+
   applyFocusedAttribute(instance: HyperlinkAttribute) {
     instance.backgroundColor(Color.Gray)
   }
+
   applyDisabledAttribute(instance: HyperlinkAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
+
   applySelectedAttribute(instance: HyperlinkAttribute) {
     instance.backgroundColor('#ffedea21')
   }
@@ -117,7 +121,6 @@ export struct HyperlinkBootcamp {
   @State content: string | Resource = 'Go to the developer website';
   @State enableImage: boolean = false;
   @State image: ResourceStr = $r('app.media.startIcon');
-
   @State enableCompWidth: boolean = false;
   @State compWidth: Length = 300;
   @State enableCompHeight: boolean = false;
@@ -593,7 +596,6 @@ export struct HyperlinkBootcamp {
   @State compCursorControl: pointer.PointerStyle = pointer.PointerStyle.DEFAULT
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
-
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
   @State selection: string | null = null;
@@ -610,7 +612,7 @@ export struct HyperlinkBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time,value)
+      new BlockTag(time, value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -632,8 +634,9 @@ export struct HyperlinkBootcamp {
   }
 
   aboutToAppear(): void {
-    AppStorage.setOrCreate('scroller',this.scroller)
+    AppStorage.setOrCreate('scroller', this.scroller)
   }
+
   build() {
     NavDestination() {
       Drawer({
@@ -659,13 +662,12 @@ export struct HyperlinkBootcamp {
     Text('123')
   }
 
-
   @Builder
   Content() {
     Column() {
-      Row(){
+      Row() {
         Hyperlink('') {
-          Image(useEnabled(this.enableImage,this.image))
+          Image(useEnabled(this.enableImage, this.image))
             .width(200)
             .height(100)
         }
@@ -1093,7 +1095,7 @@ export struct HyperlinkBootcamp {
             this.compPixelStretchEffectOptionsBottom)
         })
         .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))
-        .linearGradient( {
+        .linearGradient({
           angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
           direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
           colors: [
@@ -1317,10 +1319,10 @@ export struct HyperlinkBootcamp {
         })
       }
 
-      Row(){
+      Row() {
         Hyperlink(useEnabled(this.enableAddress, this.address), useEnabled(this.enableContent, this.content)) {
         }
-          .color(useEnabled(this.enableColor,this.color))
+        .color(useEnabled(this.enableColor, this.color))
         .width(useEnabled(this.enableCompWidth, this.compWidth))
         .height(useEnabled(this.enableCompHeight, this.compHeight))
         .padding(useEnabled(this.enableCompPadding, this.compPadding))
@@ -1745,7 +1747,7 @@ export struct HyperlinkBootcamp {
             this.compPixelStretchEffectOptionsBottom)
         })
         .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))
-        .linearGradient( {
+        .linearGradient({
           angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
           direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
           colors: [
@@ -2015,6 +2017,7 @@ export struct HyperlinkBootcamp {
     .height('52%')
     .id('scroll')
   }
+
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -2026,7 +2029,7 @@ export struct HyperlinkBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -2047,7 +2050,6 @@ export struct HyperlinkBootcamp {
       }
     })
   }
-
 
   @Builder
   Generic() {

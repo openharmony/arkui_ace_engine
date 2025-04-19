@@ -1077,8 +1077,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'localizedTextPadding.end.unit')
       await radioClick({
         radioClickObj: 4,
-        toggleClick:{
-          toggleClickType:ToggleClick.Close
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
         }
       })
       done();
@@ -1145,8 +1145,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'localizedTextPadding.bottom.unit')
       await radioClick({
         radioClickObj: 4,
-        toggleClick:{
-          toggleClickType:ToggleClick.Close
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
         }
       })
       done();
@@ -1213,8 +1213,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'localizedTextPadding.start.unit')
       await radioClick({
         radioClickObj: 4,
-        toggleClick:{
-          toggleClickType:ToggleClick.Close
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
         }
       })
       done();
@@ -1241,8 +1241,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'Direction')
       await radioClick({
         radioClickObj: 0,
-        toggleClick:{
-          toggleClickObj:'Direction'
+        toggleClick: {
+          toggleClickObj: 'Direction'
         }
       })
       done();
@@ -1254,8 +1254,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'Direction')
       await radioClick({
         radioClickObj: 1,
-        toggleClick:{
-          toggleClickObj:'Direction'
+        toggleClick: {
+          toggleClickObj: 'Direction'
         }
       })
       done();
@@ -1267,9 +1267,9 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'Direction')
       await radioClick({
         radioClickObj: 2,
-        toggleClick:{
-          toggleClickType:ToggleClick.Close,
-          toggleClickObj:'Direction'
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+          toggleClickObj: 'Direction'
         }
       })
       done();
@@ -1283,8 +1283,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 0,
-        toggleClick:{
-          toggleClickObj:'backgroundBlurStyle'
+        toggleClick: {
+          toggleClickObj: 'backgroundBlurStyle'
         }
       })
       done();
@@ -1297,8 +1297,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 1,
-        toggleClick:{
-          toggleClickObj:'backgroundBlurStyle'
+        toggleClick: {
+          toggleClickObj: 'backgroundBlurStyle'
         }
       })
       done();
@@ -1311,8 +1311,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 2,
-        toggleClick:{
-          toggleClickObj:'backgroundBlurStyle'
+        toggleClick: {
+          toggleClickObj: 'backgroundBlurStyle'
         }
       })
       done();
@@ -1325,8 +1325,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 3,
-        toggleClick:{
-          toggleClickObj:'backgroundBlurStyle'
+        toggleClick: {
+          toggleClickObj: 'backgroundBlurStyle'
         }
       })
       done();
@@ -1339,8 +1339,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 4,
-        toggleClick:{
-          toggleClickObj:'backgroundBlurStyle'
+        toggleClick: {
+          toggleClickObj: 'backgroundBlurStyle'
         }
       })
       done();
@@ -1353,8 +1353,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 5,
-        toggleClick:{
-          toggleClickObj:'backgroundBlurStyle'
+        toggleClick: {
+          toggleClickObj: 'backgroundBlurStyle'
         }
       })
       done();
@@ -1367,8 +1367,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 6,
-        toggleClick:{
-          toggleClickObj:'backgroundBlurStyle'
+        toggleClick: {
+          toggleClickObj: 'backgroundBlurStyle'
         }
       })
       done();
@@ -1381,8 +1381,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 7,
-        toggleClick:{
-          toggleClickObj:'backgroundBlurStyle'
+        toggleClick: {
+          toggleClickObj: 'backgroundBlurStyle'
         }
       })
       done();
@@ -1395,8 +1395,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 8,
-        toggleClick:{
-          toggleClickObj:'backgroundBlurStyle'
+        toggleClick: {
+          toggleClickObj: 'backgroundBlurStyle'
         }
       })
       done();
@@ -1409,8 +1409,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 9,
-        toggleClick:{
-          toggleClickObj:'backgroundBlurStyle'
+        toggleClick: {
+          toggleClickObj: 'backgroundBlurStyle'
         }
       })
       done();
@@ -1423,8 +1423,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 10,
-        toggleClick:{
-          toggleClickObj:'backgroundBlurStyle'
+        toggleClick: {
+          toggleClickObj: 'backgroundBlurStyle'
         }
       })
       done();
@@ -1437,8 +1437,8 @@ export default function SegmentButtonBootcampTest() {
       await Search('参数列表', 'backgroundBlurStyle')
       await radioClick({
         radioClickObj: 11,
-        toggleClick:{
-          toggleClickObj:'backgroundBlurStyle'
+        toggleClick: {
+          toggleClickObj: 'backgroundBlurStyle'
         }
       })
       done();
@@ -1452,7 +1452,7 @@ export default function SegmentButtonBootcampTest() {
       await radioClick({
         radioClickObj: 12,
         toggleClick: {
-          toggleClickObj:'backgroundBlurStyle',
+          toggleClickObj: 'backgroundBlurStyle',
           toggleClickType: ToggleClick.Close
         }
       })

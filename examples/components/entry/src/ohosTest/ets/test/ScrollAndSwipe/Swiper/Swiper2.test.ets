@@ -18,7 +18,15 @@ import { SwiperStart } from './Swiper'
 import { Component, Driver, ON } from '@kit.TestKit';
 import {
   buttonClick,
-  JsonType, KeyStruct, radioClick, Search, Slide, sliderDrag, titleSearch, ToggleClick } from '../../../utils';
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Search,
+  Slide,
+  sliderDrag,
+  titleSearch,
+  ToggleClick
+} from '../../../utils';
 
 const driver = Driver.create();
 

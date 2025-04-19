@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import { describe, beforeAll, it} from '@ohos/hypium'
+import { describe, beforeAll, it } from '@ohos/hypium'
 import { Driver } from '@kit.TestKit';
-import { ON,} from '@ohos.UiTest';
+import { ON, } from '@ohos.UiTest';
 import {
   buttonClick,
   JsonType,

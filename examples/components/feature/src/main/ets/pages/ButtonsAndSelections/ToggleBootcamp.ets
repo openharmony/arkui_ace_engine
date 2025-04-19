@@ -70,15 +70,19 @@ class MyModifier implements AttributeModifier<ToggleAttribute> {
   applyNormalAttribute(instance: ToggleAttribute) {
     instance.backgroundColor('#0A59F7')
   }
+
   applyPressedAttribute(instance: ToggleAttribute) {
     instance.backgroundColor('#ED6F21')
   }
+
   applyFocusedAttribute(instance: ToggleAttribute) {
     instance.backgroundColor(Color.Gray)
   }
+
   applyDisabledAttribute(instance: ToggleAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
+
   applySelectedAttribute(instance: ToggleAttribute) {
     instance.backgroundColor('#ffedea21')
   }
@@ -125,7 +129,6 @@ export struct ToggleBootcamp {
   @State toggleSwitchStylePointColor: ResourceColor = $r('sys.color.ohos_id_color_foreground_contrary');
   @State enabledToggleSwitchStyleTrackBorderRadius: boolean = false;
   @State toggleSwitchStyleTrackBorderRadius: number = 0;
-
   // size
   @State enableCompWidth: boolean = false;
   @State compWidth: Length = 300;
@@ -647,11 +650,9 @@ export struct ToggleBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
-
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
 
@@ -671,7 +672,7 @@ export struct ToggleBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time,value)
+      new BlockTag(time, value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -1285,15 +1286,14 @@ export struct ToggleBootcamp {
         margin: useEnabled(this.enableCompFocusBoxMargin, this.compFocusBoxMargin) ?
         LengthMetrics.vp(useEnabled(this.enableCompFocusBoxMargin, this.compFocusBoxMargin)) : null,
         strokeColor: useEnabled(this.enableCompFocusBoxStrokeColor, this.compFocusBoxStrokeColor) ?
-        ColorMetrics.
-        resourceColor(useEnabled(this.enableCompFocusBoxStrokeColor, this.compFocusBoxStrokeColor)) :
+        ColorMetrics.resourceColor(useEnabled(this.enableCompFocusBoxStrokeColor, this.compFocusBoxStrokeColor)) :
           null,
         strokeWidth: useEnabled(this.enableCompFocusBoxStrokeWidth, this.compFocusBoxStrokeWidth) ?
         LengthMetrics.vp(useEnabled(this.enableCompFocusBoxStrokeWidth,
           this.compFocusBoxStrokeWidth)) : null,
       })
       .id(useEnabled(this.enableCompId, this.compId) ? useEnabled(this.enableCompId, this.compId) : null)
-      .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) :'Toggle')
+      .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : 'Toggle')
       .focusScopePriority(
         useEnabled(this.enableCompFocusScopePriorityScopeId, this.compFocusScopePriorityScopeId),
         useEnabled(this.enableCompFocusScopePriorityPriority, this.compFocusScopePriorityPriority)
@@ -2154,7 +2154,6 @@ export struct ToggleBootcamp {
     .height('52%')
     .id('scroll')
   }
-
 }
 
 @Preview

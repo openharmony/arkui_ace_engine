@@ -23,7 +23,7 @@ import {
   sliderDrag,
   titleSearch,
   ToggleClick
-  } from '../../../utils';
+} from '../../../utils';
 
 export default function Swiper6Test() {
   describe('Swiper6Test', () => {

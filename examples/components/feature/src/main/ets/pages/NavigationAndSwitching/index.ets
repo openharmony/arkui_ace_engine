@@ -38,16 +38,16 @@ export const navigationAndSwitchingRoute: RouteGroup = {
 @Builder
 export function navigationAndSwitchingDestination(name: string, route: Route) {
   if (name === 'NavigationAndSwitching/Navigation') {
-    NavigationBootcamp({title: route.label})
-  }else if (name === 'NavigationAndSwitching/NavDestination'){
-    NavDestinationBootcamp({title: route.label})
-  }else if (name === 'NavigationAndSwitching/Stepper'){
-    StepperBootcamp({title: route.label})
-  }else if (name === 'NavigationAndSwitching/TabContent'){
-    TabContentBootcamp({title: route.label})
-  }else if (name === 'NavigationAndSwitching/Tabs'){
-    TabsBootcamp({title: route.label})
-  }else if (name == 'NavigationAndSwitching/StepperItem') {
+    NavigationBootcamp({ title: route.label })
+  } else if (name === 'NavigationAndSwitching/NavDestination') {
+    NavDestinationBootcamp({ title: route.label })
+  } else if (name === 'NavigationAndSwitching/Stepper') {
+    StepperBootcamp({ title: route.label })
+  } else if (name === 'NavigationAndSwitching/TabContent') {
+    TabContentBootcamp({ title: route.label })
+  } else if (name === 'NavigationAndSwitching/Tabs') {
+    TabsBootcamp({ title: route.label })
+  } else if (name == 'NavigationAndSwitching/StepperItem') {
     StepperItemBootcamp({ title: route.label })
   }
 

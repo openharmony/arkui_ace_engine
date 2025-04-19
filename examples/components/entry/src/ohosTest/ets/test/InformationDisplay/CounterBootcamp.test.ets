@@ -26,6 +26,7 @@ const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorReg
 
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
+
 export default function CounterBootcampTest() {
 
   describe('CounterBootcampTest', () => {
@@ -81,7 +82,7 @@ export default function CounterBootcampTest() {
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
-          toggleClickObj:'enableInc'
+          toggleClickObj: 'enableInc'
         }
       })
 
@@ -94,8 +95,8 @@ export default function CounterBootcampTest() {
       await radioClick({
         radioClickObj: 1,
         toggleClick: {
-           toggleClickType: ToggleClick.Close,
-          toggleClickObj:'enableInc'
+          toggleClickType: ToggleClick.Close,
+          toggleClickObj: 'enableInc'
         }
       })
 
@@ -110,7 +111,7 @@ export default function CounterBootcampTest() {
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
-          toggleClickObj:'enableDec'
+          toggleClickObj: 'enableDec'
         }
       })
 
@@ -124,7 +125,7 @@ export default function CounterBootcampTest() {
         radioClickObj: 1,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-          toggleClickObj:'enableDec'
+          toggleClickObj: 'enableDec'
         }
       })
 

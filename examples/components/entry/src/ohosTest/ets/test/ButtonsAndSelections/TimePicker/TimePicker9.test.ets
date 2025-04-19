@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
-import {
-  getToggle,
-  JsonType, KeyStruct, radioClick,
-  titleSearch,
-  ToggleClick } from '../../../utils';
+import { getToggle, JsonType, KeyStruct, radioClick, titleSearch, ToggleClick } from '../../../utils';
 import { TimePickerStart } from './TimePicker';
 
 export default function TimePicker9() {

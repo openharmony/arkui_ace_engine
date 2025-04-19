@@ -14,7 +14,7 @@
  */
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { RadioBlock, SliderBlock, useEnabled} from 'common';
+import { RadioBlock, SliderBlock, useEnabled } from 'common';
 import { SymbolGlyphModifier } from '@kit.ArkUI';
 
 @Component
@@ -80,7 +80,6 @@ export struct ToolBarBootcamp {
       }
     }
   ]
-
   @State toolItems0: Array<ToolbarItem> = [
     {
       value: '通话',
@@ -132,7 +131,6 @@ export struct ToolBarBootcamp {
       }
     }
   ]
-
   @Require @Prop title: ResourceStr;
   @State navigationMode: NavigationMode = NavigationMode.Stack;
   @State enableToolBarAdaptation: boolean = false;
@@ -234,8 +232,8 @@ export struct ToolBarBootcamp {
           )
           .title('一级页面')
           .hideTitleBar(false)
-        }else{
-          NavDestination(){
+        } else {
+          NavDestination() {
             Column() {
               Text('我是NavDestination主页面内容')
             }

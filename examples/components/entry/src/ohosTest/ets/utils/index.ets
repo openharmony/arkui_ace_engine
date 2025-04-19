@@ -245,7 +245,7 @@ export async function Search(category: string, compText: string, listText?: stri
     let title: Component = await scrolls.scrollSearch(ON.text(compText));
     titleRect = await title.getBounds();
     if (title) {
-     await scroll(titleRect.top)
+      await scroll(titleRect.top)
     }
   } else {
     let textSearch: Component = await driver.findComponent(ON.text('基础属性'))
@@ -262,13 +262,13 @@ export async function Search(category: string, compText: string, listText?: stri
       console.log('---1' + title)
       if (title) {
         titleRect = await title.getBounds();
-       await scroll(titleRect.top)
+        await scroll(titleRect.top)
       }
     } else {
       let title: Component = await scrolls.scrollSearch(ON.text(compText))
       titleRect = await title.getBounds();
       if (title) {
-       await scroll(titleRect.top)
+        await scroll(titleRect.top)
       }
     }
   }

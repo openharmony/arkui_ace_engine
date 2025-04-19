@@ -628,7 +628,6 @@ export struct TextInputBootcamp {
   @State compAccessibilityDescription: string = `无障碍说明`;
   @State enableCompAccessibilityLevel: boolean = false;
   @State compAccessibilityLevel: string = 'auto';
-
   @State modifier: MyModifier = new MyModifier()
   @State enableCompAttributeModifier: boolean = false;
   @State compAttributeModifier: boolean = false;
@@ -662,7 +661,6 @@ export struct TextInputBootcamp {
   @State compResponseRegionValueHeight: Length = '100%'
   @State enableCompHitTestBehavior: boolean = false
   @State compHitTestBehavior: HitTestMode = HitTestMode.Default
-
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
   @State enableCompDraggable: boolean = false
@@ -784,7 +782,6 @@ export struct TextInputBootcamp {
       }.maxCount(3).columnsGap(10).rowsGap(10).padding(5)
     }.backgroundColor(Color.Gray)
   }
-
 
   @Builder
   ListItemGroupHeaders(str: string) {

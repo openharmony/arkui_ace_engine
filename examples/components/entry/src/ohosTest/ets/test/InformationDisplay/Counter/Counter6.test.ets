@@ -567,7 +567,6 @@ export default function Counter6() {
     })
 
 
-
   })
 }
 

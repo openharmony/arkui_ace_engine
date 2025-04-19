@@ -1397,7 +1397,7 @@ export struct DividerBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
-    }.padding({left:10, right:10})
+    }.padding({ left: 10, right: 10 })
   }
 
   @Builder

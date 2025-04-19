@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { buttonClick,
+import {
+  buttonClick,
   JsonType,
   KeyStruct,
   radioClick,

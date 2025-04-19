@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { describe, beforeAll, it} from '@ohos/hypium'
+import { describe, beforeAll, it } from '@ohos/hypium'
 import { Driver, Component } from '@kit.TestKit';
 import { ON } from '@ohos.UiTest';
 import {
@@ -28,6 +28,7 @@ import {
   Search,
 } from '../../../utils';
 import { RefreshStart } from './Refresh';
+
 const driver = Driver.create();
 
 export default function Refresh1() {

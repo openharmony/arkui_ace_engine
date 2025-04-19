@@ -885,6 +885,6 @@ export default function TextTimer9() {
       })
       done();
     })
-    })
+  })
 
 }
