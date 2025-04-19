@@ -593,8 +593,9 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
     auto top = menuPadding.Top();
     auto responseHeight = top.Value() + menuPadding.Bottom().Value() + buttonHeight.Value();
     auto responseWidth = 40.0_vp;
+    constexpr int32_t CENTER_DIVIDER = 2;
     vector.emplace_back(DimensionRect(Dimension(responseWidth), Dimension(responseHeight, DimensionUnit::VP),
-        DimensionOffset(Dimension(-(responseWidth - buttonWidth) / 2), Dimension(-top.Value(), top.Unit()))));
+        DimensionOffset(Dimension(-(responseWidth - buttonWidth) / CENTER_DIVIDER), Dimension(-top.Value(), top.Unit()))));
     gestureHub->SetResponseRegion(vector);
     return button;
 }
