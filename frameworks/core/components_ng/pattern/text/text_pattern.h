@@ -394,6 +394,7 @@ public:
     std::string GetFontInJson() const;
     std::string GetBindSelectionMenuInJson() const;
     virtual void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const {}
+    std::string GetFontSizeWithThemeInJson(const std::optional<Dimension>& value) const;
 
     const std::vector<std::u16string>& GetDragContents() const
     {
