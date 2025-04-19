@@ -21,7 +21,6 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/slider/slider_style.h"
 #include "core/components_ng/render/paint_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 // PaintProperty are used to set render properties.
@@ -34,7 +33,6 @@ public:
     {
         auto value = MakeRefPtr<SliderPaintProperty>();
         value->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
-        value->PaintProperty::UpdatePaintPropertyHost(DynamicCast<PaintProperty>(this));
         value->propSliderPaintStyle_ = CloneSliderPaintStyle();
         value->propSliderTipStyle_ = CloneSliderTipStyle();
         return value;
@@ -57,11 +55,9 @@ public:
             }
             return GradientToJson(colors);
         }
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, "");
-        auto pipeline = host->GetContext();
+        auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, "");
-        auto theme = pipeline->GetTheme<SliderTheme>(host->GetThemeScopeId());
+        auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_RETURN(theme, "");
         return theme->GetTrackBgColor().ColorToString();
     }
@@ -118,11 +114,9 @@ public:
                 return GradientToJson(colors);
             }
         }
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, "");
-        auto pipeline = host->GetContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_RETURN(pipeline, "");
-        auto theme = pipeline->GetTheme<SliderTheme>(host->GetThemeScopeId());
+        auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_RETURN(theme, "");
         return GetSelectColor().value_or(theme->GetTrackSelectedColor()).ColorToString();
     }
@@ -137,11 +131,9 @@ public:
             }
             return;
         }
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContext();
+        auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<SliderTheme>(host->GetThemeScopeId());
+        auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(theme);
         auto jsonConstructor = JsonUtil::Create(true);
         jsonConstructor->Put("value", std::to_string(GetValue().value_or(0.0f)).c_str());

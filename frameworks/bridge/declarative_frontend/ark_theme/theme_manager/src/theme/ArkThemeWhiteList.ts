@@ -30,6 +30,7 @@ class ArkThemeWhiteList {
         'QRCode',
         'Radio',
         'Scroll',
+        'Slider',
         'Swiper',
         'Text',
     ];
