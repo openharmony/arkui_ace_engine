@@ -112,7 +112,10 @@ bool DynamicComponentRendererImpl::GetBackgroundTransparent() const
     return true;
 }
 
-bool DynamicComponentRendererImpl::CheckWorkerMaxConstraint() { return true; }
+bool DynamicComponentRendererImpl::CheckWorkerMaxConstraint()
+{
+    return true;
+}
 
 void DynamicComponentRendererImpl::OnDestroyContent() {}
 

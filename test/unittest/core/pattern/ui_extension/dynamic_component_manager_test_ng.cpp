@@ -106,13 +106,16 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg001, TestSize.L
 HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. test method HandleDynamicRenderOnAreaChange
+     * @tc.steps: step1. test method TriggerOnAreaChangeCallback
      */
     auto frameNodeRef = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(frameNodeRef, nullptr);
     FrameNode* frameNode = &(*frameNodeRef);
     DynamicComponentManager::TriggerOnAreaChangeCallback(frameNode, 1);
 
+    /**
+     * @tc.steps: step2. test method HandleDynamicRenderOnAreaChange
+     */
     auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_FALSE(eventHub->HasInnerOnAreaChanged());
