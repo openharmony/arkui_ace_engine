@@ -266,13 +266,15 @@ bool GridPattern::IsItemSelected(float offsetX, float offsetY)
     return itemPattern->IsSelected();
 }
 
-void GridPattern::FireOnScrollStart()
+void GridPattern::FireOnScrollStart(bool withPerfMonitor)
 {
     ScrollablePattern::RecordScrollEvent(Recorder::EventType::SCROLL_START);
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
     SuggestOpIncGroup(true);
-    PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+    if (withPerfMonitor) {
+        PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+    }
     if (GetScrollAbort()) {
         return;
     }

@@ -80,8 +80,6 @@ ScrollablePattern::~ScrollablePattern()
         if (scrollable) {
             auto nodeId = scrollable->GetNodeId();
             auto nodeTag = scrollable->GetNodeTag();
-            AceAsyncTraceEnd(nodeId,
-                (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(nodeId) + std::string(" ") + nodeTag).c_str());
             AceAsyncTraceEndCommercial(
                 nodeId, (TRAILING_ANIMATION + std::to_string(nodeId) + std::string(" ") + nodeTag).c_str());
         }
@@ -1423,7 +1421,7 @@ void ScrollablePattern::AnimateTo(
         PlayCurveAnimation(position, duration, curve, canOverScroll);
     }
     if (!GetIsDragging()) {
-        FireOnScrollStart();
+        FireOnScrollStart(false);
     }
     PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::SCROLLER_ANIMATION, PerfActionType::FIRST_MOVE, "");
@@ -2735,7 +2733,7 @@ void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velo
     host->AddFRCSceneInfo(scene, velocity, sceneStatus);
 }
 
-void ScrollablePattern::FireOnScrollStart()
+void ScrollablePattern::FireOnScrollStart(bool withPerfMonitor)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2748,7 +2746,9 @@ void ScrollablePattern::FireOnScrollStart()
     RecordScrollEvent(Recorder::EventType::SCROLL_START);
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
-    PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+    if (withPerfMonitor) {
+        PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+    }
     if (GetScrollAbort()) {
         ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStart, id:%d, tag:%s",
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
@@ -3439,9 +3439,7 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (AnimateRunning()) {
-        StopAnimate();
-    }
+    StopScrollableAndAnimate();
 
     if (!animator_) {
         auto context = host->GetContextRefPtr();
@@ -3451,11 +3449,7 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnAnimateStop();
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
-            AceAsyncTraceEnd(host->GetAccessibilityId(),
-                (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") +
-                    host->GetTag()).c_str());
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::SCROLLER_ANIMATION, false);
         });
     }
 
@@ -3484,11 +3478,9 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
         fixedVelocityMotion_->Init();
         fixedVelocityMotion_->SetVelocity(velocity);
     }
-    AceAsyncTraceBegin(
-        host->GetAccessibilityId(), (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(host->GetAccessibilityId()) +
-                                        std::string(" ") + host->GetTag()).c_str());
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::SCROLLER_ANIMATION, PerfActionType::FIRST_MOVE, "");
     animator_->PlayMotion(fixedVelocityMotion_);
-    FireOnScrollStart();
+    FireOnScrollStart(false);
 }
 
 void ScrollablePattern::CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling)
