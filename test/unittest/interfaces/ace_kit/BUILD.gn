@@ -161,6 +161,7 @@ ohos_unittest("ace_kit_test") {
     "aging_adapation_dialog_util_test.cpp",
     "animation_kit_test.cpp",
     "box_layout_algorithm_test.cpp",
+    "color_test.cpp",
     "content_modifier_test.cpp",
     "dimension_test.cpp",
     "frame_node_test.cpp",
