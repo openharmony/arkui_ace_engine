@@ -237,6 +237,7 @@ private:
     void SetBubbleRadius();
     void UpdateHostWindowRect();
     void HandleKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow);
+    void FitAvaliableRect(LayoutWrapper* layoutWrapper, bool showInSubWindow);
 
     OffsetF GetChildPosition(
         const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset);
