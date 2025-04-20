@@ -144,18 +144,15 @@ void CanvasRenderingContext2DPeerImpl::StartImageAnalyzer(const Ark_ImageAnalyze
             arkCallback.Invoke(arkEmptyMessage);
         }
     };
-
     if (isImageAnalyzing_) {
         auto error = PeerUtils::CreateAIError(ImageAnalyzerState::ONGOING);
         onError(error);
         return;
     }
-
     auto vectorIATypes = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
     std::set<ImageAnalyzerType> types(vectorIATypes.begin(), vectorIATypes.end());
     config_.types = std::move(types);
     void* aceConfig = reinterpret_cast<void*>(&config_);
-
     OnAnalyzedCallback onAnalyzed = [weakCtx = WeakClaim(this),
         callback = std::move(onError)](ImageAnalyzerState state) -> void {
         auto ctx = weakCtx.Upgrade();
@@ -164,7 +161,6 @@ void CanvasRenderingContext2DPeerImpl::StartImageAnalyzer(const Ark_ImageAnalyze
         callback(error);
         ctx->isImageAnalyzing_ = false;
     };
-
     auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasRenderingContext2DModel);
     isImageAnalyzing_ = true;

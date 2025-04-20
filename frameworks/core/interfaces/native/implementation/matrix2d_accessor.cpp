@@ -67,11 +67,9 @@ Ark_Matrix2D Rotate1Impl(Ark_Matrix2D peer,
 {
     CHECK_NULL_RETURN(peer, {});
     CHECK_NULL_RETURN(degree, {});
-    CHECK_NULL_RETURN(rx, {});
-    CHECK_NULL_RETURN(ry, {});
-    auto angle = static_cast<double>(Converter::Convert<float>(*degree));
-    auto optX = Converter::OptConvert<float>(*rx);
-    auto optY = Converter::OptConvert<float>(*ry);
+    auto angle = Converter::Convert<float>(*degree);
+    auto optX = rx ? Converter::OptConvert<float>(*rx) : std::nullopt;
+    auto optY = ry ? Converter::OptConvert<float>(*ry) : std::nullopt;
     peer->Rotate(angle, optX, optY);
     return peer;
 }
@@ -80,10 +78,8 @@ Ark_Matrix2D TranslateImpl(Ark_Matrix2D peer,
                            const Opt_Number* ty)
 {
     CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(tx, {});
-    CHECK_NULL_RETURN(ty, {});
-    auto optX = Converter::OptConvert<float>(*tx);
-    auto optY = Converter::OptConvert<float>(*ty);
+    auto optX = tx ? Converter::OptConvert<float>(*tx) : std::nullopt;
+    auto optY = ty ? Converter::OptConvert<float>(*ty) : std::nullopt;
     peer->Translate(optX, optY);
     return peer;
 }
@@ -92,10 +88,8 @@ Ark_Matrix2D ScaleImpl(Ark_Matrix2D peer,
                        const Opt_Number* sy)
 {
     CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(sx, {});
-    CHECK_NULL_RETURN(sy, {});
-    auto optX = Converter::OptConvert<float>(*sx);
-    auto optY = Converter::OptConvert<float>(*sy);
+    auto optX = sx ? Converter::OptConvert<float>(*sx) : std::nullopt;
+    auto optY = sy ? Converter::OptConvert<float>(*sy) : std::nullopt;
     peer->Scale(optX, optY);
     return peer;
 }
@@ -141,7 +135,7 @@ void SetRotateXImpl(Ark_Matrix2D peer,
 Opt_Number GetScaleYImpl(Ark_Matrix2D peer)
 {
     CHECK_NULL_RETURN(peer, ERROR_VALUE);
-    return Converter::ArkValue<Opt_Number>(peer->GetScaleX());
+    return Converter::ArkValue<Opt_Number>(peer->GetScaleY());
 }
 void SetScaleYImpl(Ark_Matrix2D peer,
                    const Ark_Number* scaleY)
