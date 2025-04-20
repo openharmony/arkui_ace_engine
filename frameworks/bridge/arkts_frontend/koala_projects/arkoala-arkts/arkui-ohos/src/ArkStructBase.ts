@@ -102,7 +102,9 @@ export abstract class ArkStructBase<T, T_Options> extends ArkCustomComponentImpl
             });
             node.setOnReuse(
                 () => {
-                    if (arg2) component.aboutToReuse(component.__toRecord(arg2!! as Object))
+                    let map: Record<string, Object> = {} // not written as "const map = arg2 ? {} : ..." due to compiler bug
+                    if (arg2) map = component.__toRecord(arg2! as Object)
+                    component.aboutToReuse(map)
                 }
             )
             component._buildWrapper(attributes, arg1, arg2);
