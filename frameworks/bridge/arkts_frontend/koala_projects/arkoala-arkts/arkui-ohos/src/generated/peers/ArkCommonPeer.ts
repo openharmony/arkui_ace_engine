@@ -2371,153 +2371,153 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_focusScopePriority(this.peer.ptr, scopeId, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    gestureAttribute(gesture: GestureType, mask?: GestureMask): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let gesture_type : int32 = RuntimeType.UNDEFINED
-        gesture_type = runtimeType(gesture)
-        if (TypeChecker.isTapGestureInterface(gesture)) {
-            thisSerializer.writeInt8(0 as int32)
-            const gesture_0  = gesture as TapGestureInterface
-            thisSerializer.writeTapGestureInterface(gesture_0)
-        }
-        else if (TypeChecker.isLongPressGestureInterface(gesture)) {
-            thisSerializer.writeInt8(1 as int32)
-            const gesture_1  = gesture as LongPressGestureInterface
-            thisSerializer.writeLongPressGestureInterface(gesture_1)
-        }
-        else if (TypeChecker.isPanGestureInterface(gesture)) {
-            thisSerializer.writeInt8(2 as int32)
-            const gesture_2  = gesture as PanGestureInterface
-            thisSerializer.writePanGestureInterface(gesture_2)
-        }
-        else if (TypeChecker.isPinchGestureInterface(gesture)) {
-            thisSerializer.writeInt8(3 as int32)
-            const gesture_3  = gesture as PinchGestureInterface
-            thisSerializer.writePinchGestureInterface(gesture_3)
-        }
-        else if (TypeChecker.isSwipeGestureInterface(gesture)) {
-            thisSerializer.writeInt8(4 as int32)
-            const gesture_4  = gesture as SwipeGestureInterface
-            thisSerializer.writeSwipeGestureInterface(gesture_4)
-        }
-        else if (TypeChecker.isRotationGestureInterface(gesture)) {
-            thisSerializer.writeInt8(5 as int32)
-            const gesture_5  = gesture as RotationGestureInterface
-            thisSerializer.writeRotationGestureInterface(gesture_5)
-        }
-        else if (TypeChecker.isGestureGroupInterface(gesture)) {
-            thisSerializer.writeInt8(6 as int32)
-            const gesture_6  = gesture as GestureGroupInterface
-            thisSerializer.writeGestureGroupInterface(gesture_6)
-        }
-        let mask_type : int32 = RuntimeType.UNDEFINED
-        mask_type = runtimeType(mask)
-        thisSerializer.writeInt8(mask_type as int32)
-        if ((RuntimeType.UNDEFINED) != (mask_type)) {
-            const mask_value  = (mask as GestureMask)
-            thisSerializer.writeInt32(mask_value.valueOf())
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_gesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    priorityGestureAttribute(gesture: GestureType, mask?: GestureMask): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let gesture_type : int32 = RuntimeType.UNDEFINED
-        gesture_type = runtimeType(gesture)
-        if (TypeChecker.isTapGestureInterface(gesture)) {
-            thisSerializer.writeInt8(0 as int32)
-            const gesture_0  = gesture as TapGestureInterface
-            thisSerializer.writeTapGestureInterface(gesture_0)
-        }
-        else if (TypeChecker.isLongPressGestureInterface(gesture)) {
-            thisSerializer.writeInt8(1 as int32)
-            const gesture_1  = gesture as LongPressGestureInterface
-            thisSerializer.writeLongPressGestureInterface(gesture_1)
-        }
-        else if (TypeChecker.isPanGestureInterface(gesture)) {
-            thisSerializer.writeInt8(2 as int32)
-            const gesture_2  = gesture as PanGestureInterface
-            thisSerializer.writePanGestureInterface(gesture_2)
-        }
-        else if (TypeChecker.isPinchGestureInterface(gesture)) {
-            thisSerializer.writeInt8(3 as int32)
-            const gesture_3  = gesture as PinchGestureInterface
-            thisSerializer.writePinchGestureInterface(gesture_3)
-        }
-        else if (TypeChecker.isSwipeGestureInterface(gesture)) {
-            thisSerializer.writeInt8(4 as int32)
-            const gesture_4  = gesture as SwipeGestureInterface
-            thisSerializer.writeSwipeGestureInterface(gesture_4)
-        }
-        else if (TypeChecker.isRotationGestureInterface(gesture)) {
-            thisSerializer.writeInt8(5 as int32)
-            const gesture_5  = gesture as RotationGestureInterface
-            thisSerializer.writeRotationGestureInterface(gesture_5)
-        }
-        else if (TypeChecker.isGestureGroupInterface(gesture)) {
-            thisSerializer.writeInt8(6 as int32)
-            const gesture_6  = gesture as GestureGroupInterface
-            thisSerializer.writeGestureGroupInterface(gesture_6)
-        }
-        let mask_type : int32 = RuntimeType.UNDEFINED
-        mask_type = runtimeType(mask)
-        thisSerializer.writeInt8(mask_type as int32)
-        if ((RuntimeType.UNDEFINED) != (mask_type)) {
-            const mask_value  = (mask as GestureMask)
-            thisSerializer.writeInt32(mask_value.valueOf())
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_priorityGesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    parallelGestureAttribute(gesture: GestureType, mask?: GestureMask): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let gesture_type : int32 = RuntimeType.UNDEFINED
-        gesture_type = runtimeType(gesture)
-        if (TypeChecker.isTapGestureInterface(gesture)) {
-            thisSerializer.writeInt8(0 as int32)
-            const gesture_0  = gesture as TapGestureInterface
-            thisSerializer.writeTapGestureInterface(gesture_0)
-        }
-        else if (TypeChecker.isLongPressGestureInterface(gesture)) {
-            thisSerializer.writeInt8(1 as int32)
-            const gesture_1  = gesture as LongPressGestureInterface
-            thisSerializer.writeLongPressGestureInterface(gesture_1)
-        }
-        else if (TypeChecker.isPanGestureInterface(gesture)) {
-            thisSerializer.writeInt8(2 as int32)
-            const gesture_2  = gesture as PanGestureInterface
-            thisSerializer.writePanGestureInterface(gesture_2)
-        }
-        else if (TypeChecker.isPinchGestureInterface(gesture)) {
-            thisSerializer.writeInt8(3 as int32)
-            const gesture_3  = gesture as PinchGestureInterface
-            thisSerializer.writePinchGestureInterface(gesture_3)
-        }
-        else if (TypeChecker.isSwipeGestureInterface(gesture)) {
-            thisSerializer.writeInt8(4 as int32)
-            const gesture_4  = gesture as SwipeGestureInterface
-            thisSerializer.writeSwipeGestureInterface(gesture_4)
-        }
-        else if (TypeChecker.isRotationGestureInterface(gesture)) {
-            thisSerializer.writeInt8(5 as int32)
-            const gesture_5  = gesture as RotationGestureInterface
-            thisSerializer.writeRotationGestureInterface(gesture_5)
-        }
-        else if (TypeChecker.isGestureGroupInterface(gesture)) {
-            thisSerializer.writeInt8(6 as int32)
-            const gesture_6  = gesture as GestureGroupInterface
-            thisSerializer.writeGestureGroupInterface(gesture_6)
-        }
-        let mask_type : int32 = RuntimeType.UNDEFINED
-        mask_type = runtimeType(mask)
-        thisSerializer.writeInt8(mask_type as int32)
-        if ((RuntimeType.UNDEFINED) != (mask_type)) {
-            const mask_value  = (mask as GestureMask)
-            thisSerializer.writeInt32(mask_value.valueOf())
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_parallelGesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
+    // gestureAttribute(gesture: GestureType, mask?: GestureMask): void {
+    //     const thisSerializer : Serializer = Serializer.hold()
+    //     let gesture_type : int32 = RuntimeType.UNDEFINED
+    //     gesture_type = runtimeType(gesture)
+    //     if (TypeChecker.isTapGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(0 as int32)
+    //         const gesture_0  = gesture as TapGestureInterface
+    //         thisSerializer.writeTapGestureInterface(gesture_0)
+    //     }
+    //     else if (TypeChecker.isLongPressGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(1 as int32)
+    //         const gesture_1  = gesture as LongPressGestureInterface
+    //         thisSerializer.writeLongPressGestureInterface(gesture_1)
+    //     }
+    //     else if (TypeChecker.isPanGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(2 as int32)
+    //         const gesture_2  = gesture as PanGestureInterface
+    //         thisSerializer.writePanGestureInterface(gesture_2)
+    //     }
+    //     else if (TypeChecker.isPinchGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(3 as int32)
+    //         const gesture_3  = gesture as PinchGestureInterface
+    //         thisSerializer.writePinchGestureInterface(gesture_3)
+    //     }
+    //     else if (TypeChecker.isSwipeGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(4 as int32)
+    //         const gesture_4  = gesture as SwipeGestureInterface
+    //         thisSerializer.writeSwipeGestureInterface(gesture_4)
+    //     }
+    //     else if (TypeChecker.isRotationGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(5 as int32)
+    //         const gesture_5  = gesture as RotationGestureInterface
+    //         thisSerializer.writeRotationGestureInterface(gesture_5)
+    //     }
+    //     else if (TypeChecker.isGestureGroupInterface(gesture)) {
+    //         thisSerializer.writeInt8(6 as int32)
+    //         const gesture_6  = gesture as GestureGroupInterface
+    //         thisSerializer.writeGestureGroupInterface(gesture_6)
+    //     }
+    //     let mask_type : int32 = RuntimeType.UNDEFINED
+    //     mask_type = runtimeType(mask)
+    //     thisSerializer.writeInt8(mask_type as int32)
+    //     if ((RuntimeType.UNDEFINED) != (mask_type)) {
+    //         const mask_value  = (mask as GestureMask)
+    //         thisSerializer.writeInt32(mask_value.valueOf())
+    //     }
+    //     ArkUIGeneratedNativeModule._CommonMethod_gesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+    //     thisSerializer.release()
+    // }
+    // priorityGestureAttribute(gesture: GestureType, mask?: GestureMask): void {
+    //     const thisSerializer : Serializer = Serializer.hold()
+    //     let gesture_type : int32 = RuntimeType.UNDEFINED
+    //     gesture_type = runtimeType(gesture)
+    //     if (TypeChecker.isTapGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(0 as int32)
+    //         const gesture_0  = gesture as TapGestureInterface
+    //         thisSerializer.writeTapGestureInterface(gesture_0)
+    //     }
+    //     else if (TypeChecker.isLongPressGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(1 as int32)
+    //         const gesture_1  = gesture as LongPressGestureInterface
+    //         thisSerializer.writeLongPressGestureInterface(gesture_1)
+    //     }
+    //     else if (TypeChecker.isPanGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(2 as int32)
+    //         const gesture_2  = gesture as PanGestureInterface
+    //         thisSerializer.writePanGestureInterface(gesture_2)
+    //     }
+    //     else if (TypeChecker.isPinchGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(3 as int32)
+    //         const gesture_3  = gesture as PinchGestureInterface
+    //         thisSerializer.writePinchGestureInterface(gesture_3)
+    //     }
+    //     else if (TypeChecker.isSwipeGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(4 as int32)
+    //         const gesture_4  = gesture as SwipeGestureInterface
+    //         thisSerializer.writeSwipeGestureInterface(gesture_4)
+    //     }
+    //     else if (TypeChecker.isRotationGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(5 as int32)
+    //         const gesture_5  = gesture as RotationGestureInterface
+    //         thisSerializer.writeRotationGestureInterface(gesture_5)
+    //     }
+    //     else if (TypeChecker.isGestureGroupInterface(gesture)) {
+    //         thisSerializer.writeInt8(6 as int32)
+    //         const gesture_6  = gesture as GestureGroupInterface
+    //         thisSerializer.writeGestureGroupInterface(gesture_6)
+    //     }
+    //     let mask_type : int32 = RuntimeType.UNDEFINED
+    //     mask_type = runtimeType(mask)
+    //     thisSerializer.writeInt8(mask_type as int32)
+    //     if ((RuntimeType.UNDEFINED) != (mask_type)) {
+    //         const mask_value  = (mask as GestureMask)
+    //         thisSerializer.writeInt32(mask_value.valueOf())
+    //     }
+    //     ArkUIGeneratedNativeModule._CommonMethod_priorityGesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+    //     thisSerializer.release()
+    // }
+    // parallelGestureAttribute(gesture: GestureType, mask?: GestureMask): void {
+    //     const thisSerializer : Serializer = Serializer.hold()
+    //     let gesture_type : int32 = RuntimeType.UNDEFINED
+    //     gesture_type = runtimeType(gesture)
+    //     if (TypeChecker.isTapGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(0 as int32)
+    //         const gesture_0  = gesture as TapGestureInterface
+    //         thisSerializer.writeTapGestureInterface(gesture_0)
+    //     }
+    //     else if (TypeChecker.isLongPressGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(1 as int32)
+    //         const gesture_1  = gesture as LongPressGestureInterface
+    //         thisSerializer.writeLongPressGestureInterface(gesture_1)
+    //     }
+    //     else if (TypeChecker.isPanGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(2 as int32)
+    //         const gesture_2  = gesture as PanGestureInterface
+    //         thisSerializer.writePanGestureInterface(gesture_2)
+    //     }
+    //     else if (TypeChecker.isPinchGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(3 as int32)
+    //         const gesture_3  = gesture as PinchGestureInterface
+    //         thisSerializer.writePinchGestureInterface(gesture_3)
+    //     }
+    //     else if (TypeChecker.isSwipeGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(4 as int32)
+    //         const gesture_4  = gesture as SwipeGestureInterface
+    //         thisSerializer.writeSwipeGestureInterface(gesture_4)
+    //     }
+    //     else if (TypeChecker.isRotationGestureInterface(gesture)) {
+    //         thisSerializer.writeInt8(5 as int32)
+    //         const gesture_5  = gesture as RotationGestureInterface
+    //         thisSerializer.writeRotationGestureInterface(gesture_5)
+    //     }
+    //     else if (TypeChecker.isGestureGroupInterface(gesture)) {
+    //         thisSerializer.writeInt8(6 as int32)
+    //         const gesture_6  = gesture as GestureGroupInterface
+    //         thisSerializer.writeGestureGroupInterface(gesture_6)
+    //     }
+    //     let mask_type : int32 = RuntimeType.UNDEFINED
+    //     mask_type = runtimeType(mask)
+    //     thisSerializer.writeInt8(mask_type as int32)
+    //     if ((RuntimeType.UNDEFINED) != (mask_type)) {
+    //         const mask_value  = (mask as GestureMask)
+    //         thisSerializer.writeInt32(mask_value.valueOf())
+    //     }
+    //     ArkUIGeneratedNativeModule._CommonMethod_parallelGesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+    //     thisSerializer.release()
+    // }
     blurAttribute(value: number, options?: BlurOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         let options_type : int32 = RuntimeType.UNDEFINED

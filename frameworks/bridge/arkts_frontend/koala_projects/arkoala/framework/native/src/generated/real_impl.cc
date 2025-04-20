@@ -10510,6 +10510,135 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // SystemOpsAccessor
+    namespace GestureOpsAccessor {
+    Ark_NativePointer CreateTapGestureImpl(const Ark_Number* fingers,
+                                           const Ark_Number* count,
+                                           const Ark_Number* distanceThreshold,
+                                           Ark_Boolean isFingerCountLimited)
+    {
+        return {};
+    }
+    Ark_NativePointer CreateLongPressGestureImpl(const Ark_Number* fingers,
+                                                 Ark_Boolean repeat,
+                                                 const Ark_Number* duration,
+                                                 Ark_Boolean isFingerCountLimited)
+    {
+        return {};
+    }
+    Ark_NativePointer CreatePanGestureImpl(const Ark_Number* fingers,
+                                           Ark_PanDirection direction,
+                                           const Ark_Number* distance,
+                                           Ark_Boolean isFingerCountLimited)
+    {
+        return {};
+    }
+    Ark_NativePointer CreatePinchGestureImpl(const Ark_Number* fingers,
+                                             const Ark_Number* distance,
+                                             Ark_Boolean isFingerCountLimited)
+    {
+        return {};
+    }
+    Ark_NativePointer CreateRotationGestureImpl(const Ark_Number* fingers,
+                                                const Ark_Number* angle,
+                                                Ark_Boolean isFingerCountLimited)
+    {
+        return {};
+    }
+    Ark_NativePointer CreateSwipeGestureImpl(const Ark_Number* fingers,
+                                             Ark_SwipeDirection direction,
+                                             const Ark_Number* speed,
+                                             Ark_Boolean isFingerCountLimited)
+    {
+        return {};
+    }
+    Ark_NativePointer CreateGestureGroupImpl(Ark_GestureMode mode)
+    {
+        return {};
+    }
+    void SetOnActionImpl(Ark_NativePointer gesture,
+                         const Callback_GestureEvent_Void* onAction)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(gesture);
+        //auto convValue = Converter::OptConvert<type>(gesture); // for enums
+        //undefinedModelNG::SetSetOnAction(frameNode, convValue);
+    }
+    void SetOnActionStartImpl(Ark_NativePointer gesture,
+                              const Callback_GestureEvent_Void* onActionStart)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(gesture);
+        //auto convValue = Converter::OptConvert<type>(gesture); // for enums
+        //undefinedModelNG::SetSetOnActionStart(frameNode, convValue);
+    }
+    void SetOnActionUpdateImpl(Ark_NativePointer gesture,
+                               const Callback_GestureEvent_Void* onActionUpdate)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(gesture);
+        //auto convValue = Converter::OptConvert<type>(gesture); // for enums
+        //undefinedModelNG::SetSetOnActionUpdate(frameNode, convValue);
+    }
+    void SetOnActionEndImpl(Ark_NativePointer gesture,
+                            const Callback_GestureEvent_Void* onActionEnd)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(gesture);
+        //auto convValue = Converter::OptConvert<type>(gesture); // for enums
+        //undefinedModelNG::SetSetOnActionEnd(frameNode, convValue);
+    }
+    void SetOnActionCancelImpl(Ark_NativePointer gesture,
+                               const Callback_Void* onActionCancel)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(gesture);
+        //auto convValue = Converter::OptConvert<type>(gesture); // for enums
+        //undefinedModelNG::SetSetOnActionCancel(frameNode, convValue);
+    }
+    void SetGestureTagImpl(Ark_NativePointer gesture,
+                           const Ark_String* tag)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(gesture);
+        //auto convValue = Converter::OptConvert<type>(gesture); // for enums
+        //undefinedModelNG::SetSetGestureTag(frameNode, convValue);
+    }
+    void SetAllowedTypesImpl(Ark_NativePointer gesture,
+                             const Array_SourceTool* types)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(gesture);
+        //auto convValue = Converter::OptConvert<type>(gesture); // for enums
+        //undefinedModelNG::SetSetAllowedTypes(frameNode, convValue);
+    }
+    void AddGestureToNodeImpl(Ark_NativePointer node,
+                              const Ark_Number* priority,
+                              Ark_GestureMask mask,
+                              Ark_NativePointer gesture)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetAddGestureToNode(frameNode, convValue);
+    }
+    void AddGestureToGroupImpl(Ark_NativePointer group,
+                               Ark_NativePointer gesture)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(group);
+        //auto convValue = Converter::OptConvert<type>(group); // for enums
+        //undefinedModelNG::SetAddGestureToGroup(frameNode, convValue);
+    }
+    } // GestureOpsAccessor
     namespace FocusControllerAccessor {
     void RequestFocusImpl(const Ark_String* key)
     {
@@ -17259,6 +17388,36 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &DrawingCanvasAccessorImpl;
     }
 
+    const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor()
+    {
+        static const GENERATED_ArkUIGestureOpsAccessor GestureOpsAccessorImpl {
+            GestureOpsAccessor::DestroyPeerImpl,
+            GestureOpsAccessor::CtorImpl,
+            GestureOpsAccessor::GetFinalizerImpl,
+            GestureOpsAccessor::CreateTapGestureImpl,
+            GestureOpsAccessor::CreateLongPressGestureImpl,
+            GestureOpsAccessor::CreatePanGestureImpl,
+            GestureOpsAccessor::CreatePinchGestureImpl,
+            GestureOpsAccessor::CreateRotationGestureImpl,
+            GestureOpsAccessor::CreateSwipeGestureImpl,
+            GestureOpsAccessor::CreateGestureGroupImpl,
+            GestureOpsAccessor::SetOnActionImpl,
+            GestureOpsAccessor::SetOnActionStartImpl,
+            GestureOpsAccessor::SetOnActionUpdateImpl,
+            GestureOpsAccessor::SetOnActionEndImpl,
+            GestureOpsAccessor::SetOnActionCancelImpl,
+            GestureOpsAccessor::SetGestureTagImpl,
+            GestureOpsAccessor::SetAllowedTypesImpl,
+            GestureOpsAccessor::AddGestureToNodeImpl,
+            GestureOpsAccessor::AddGestureToGroupImpl,
+        };
+        return &GestureOpsAccessorImpl;
+    }
+
+    struct GestureOpsPeer {
+        virtual ~GestureOpsPeer() = default;
+    };
+
     struct DrawingCanvasPeer {
         virtual ~DrawingCanvasPeer() = default;
     };
@@ -20210,6 +20369,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetUnifiedDataAccessor,
             GetLazyForEachOpsAccessor,
             GetSystemOpsAccessor,
+            GetGestureOpsAccessor,
             GetFocusControllerAccessor,
             GetDrawableDescriptorAccessor,
             GetLayeredDrawableDescriptorAccessor,

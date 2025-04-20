@@ -3141,6 +3141,38 @@ export class ArkUIGeneratedNativeModule {
     native static _SystemOps_restoreInstanceId(): void
     @ani.unsafe.Quick
     native static _SystemOps_getResourceId(bundleName: KStringPtr, moduleName: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Direct
+    native static _GestureOps_createTapGesture(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _GestureOps_createLongPressGesture(fingers: number, repeat: KInt, duration: number, isFingerCountLimited: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _GestureOps_createPanGesture(fingers: number, direction: KInt, distance: number, isFingerCountLimited: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _GestureOps_createPinchGesture(fingers: number, distance: number, isFingerCountLimited: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _GestureOps_createRotationGesture(fingers: number, angle: number, isFingerCountLimited: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _GestureOps_createSwipeGesture(fingers: number, direction: KInt, speed: number, isFingerCountLimited: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _GestureOps_createGestureGroup(mode: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _GestureOps_setOnAction(gesture: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _GestureOps_setOnActionStart(gesture: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _GestureOps_setOnActionUpdate(gesture: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _GestureOps_setOnActionEnd(gesture: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _GestureOps_setOnActionCancel(gesture: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _GestureOps_setGestureTag(gesture: KPointer, tag: KStringPtr): void
+    @ani.unsafe.Direct
+    native static _GestureOps_setAllowedTypes(gesture: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _GestureOps_addGestureToNode(node: KPointer, priority: number, mask: KInt, gesture: KPointer): void
+    @ani.unsafe.Direct
+    native static _GestureOps_addGestureToGroup(group: KPointer, gesture: KPointer): void
     @ani.unsafe.Quick
     native static _FocusController_requestFocus(key: KStringPtr): void
     @ani.unsafe.Direct

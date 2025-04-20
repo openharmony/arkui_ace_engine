@@ -205,6 +205,7 @@ const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor();
 const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor();
+const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor();
 const GENERATED_ArkUIFocusControllerAccessor* GetFocusControllerAccessor();
 const GENERATED_ArkUIDrawableDescriptorAccessor* GetDrawableDescriptorAccessor();
 const GENERATED_ArkUILayeredDrawableDescriptorAccessor* GetLayeredDrawableDescriptorAccessor();
@@ -504,6 +505,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetUnifiedDataAccessor,
         GetLazyForEachOpsAccessor,
         GetSystemOpsAccessor,
+        GetGestureOpsAccessor,
         GetFocusControllerAccessor,
         GetDrawableDescriptorAccessor,
         GetLayeredDrawableDescriptorAccessor,

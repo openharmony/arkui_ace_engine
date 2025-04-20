@@ -37,6 +37,7 @@ import { PathShape } from "./ArkPathShapeMaterialized"
 import { RectShape } from "./ArkRectShapeMaterialized"
 import { AttributeModifier } from "./../component/common" 
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./../component/gesture"
+import { Gesture, GestureGroup } from "./../component/gesture"
 import { PixelMap } from "./ArkPixelMapMaterialized"
 import { Callback_Number_Number_Void } from "./../component/grid"
 import { ScrollOnWillScrollCallback, ScrollOnScrollCallback } from "./../component/scroll"
@@ -1568,19 +1569,28 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     /** @memo */
     public gesture(gesture: GestureType, mask?: GestureMask): this {
         if (this.checkPriority("gesture")) {
-            const gesture_casted = gesture as (GestureType)
-            const mask_casted = mask as (GestureMask | undefined)
-            this.getPeer()?.gestureAttribute(gesture_casted, mask_casted)
-            return this
+            if (gesture instanceof Gesture) {
+                let singleGesture = gesture as Gesture;
+                singleGesture.setGesture(0, this.getPeer(), mask);
+                return this;
+            } else {
+                let gestureGroup = gesture as GestureGroup;
+                gestureGroup.addGestureGroupToNode(0, this.getPeer(), mask)
+            }
         }
         return this
     }
     /** @memo */
     public priorityGesture(gesture: GestureType, mask?: GestureMask): this {
         if (this.checkPriority("priorityGesture")) {
-            const gesture_casted = gesture as (GestureType)
-            const mask_casted = mask as (GestureMask | undefined)
-            this.getPeer()?.priorityGestureAttribute(gesture_casted, mask_casted)
+            if (gesture instanceof Gesture) {
+                let singleGesture = gesture as Gesture;
+                singleGesture.setGesture(1, this.getPeer(), mask);
+                return this;
+            } else {
+                let gestureGroup = gesture as GestureGroup;
+                gestureGroup.addGestureGroupToNode(1, this.getPeer(), mask)
+            }
             return this
         }
         return this
@@ -1588,9 +1598,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     /** @memo */
     public parallelGesture(gesture: GestureType, mask?: GestureMask): this {
         if (this.checkPriority("parallelGesture")) {
-            const gesture_casted = gesture as (GestureType)
-            const mask_casted = mask as (GestureMask | undefined)
-            this.getPeer()?.parallelGestureAttribute(gesture_casted, mask_casted)
+            if (gesture instanceof Gesture) {
+                let singleGesture = gesture as Gesture;
+                singleGesture.setGesture(2, this.getPeer(), mask);
+                return this;
+            } else {
+                let gestureGroup = gesture as GestureGroup;
+                gestureGroup.addGestureGroupToNode(2, this.getPeer(), mask)
+            }
             return this
         }
         return this

@@ -20350,6 +20350,247 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return 0;
     }
     } // SystemOpsAccessor
+    namespace GestureOpsAccessor {
+    Ark_NativePointer CreateTapGestureImpl(const Ark_Number* fingers,
+                                           const Ark_Number* count,
+                                           const Ark_Number* distanceThreshold,
+                                           Ark_Boolean isFingerCountLimited)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("createTapGesture(");
+        WriteToString(&out, fingers);
+        out.append(", ");
+        WriteToString(&out, count);
+        out.append(", ");
+        WriteToString(&out, distanceThreshold);
+        out.append(", ");
+        WriteToString(&out, isFingerCountLimited);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer CreateLongPressGestureImpl(const Ark_Number* fingers,
+                                                 Ark_Boolean repeat,
+                                                 const Ark_Number* duration,
+                                                 Ark_Boolean isFingerCountLimited)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("createLongPressGesture(");
+        WriteToString(&out, fingers);
+        out.append(", ");
+        WriteToString(&out, repeat);
+        out.append(", ");
+        WriteToString(&out, duration);
+        out.append(", ");
+        WriteToString(&out, isFingerCountLimited);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer CreatePanGestureImpl(const Ark_Number* fingers,
+                                           Ark_PanDirection direction,
+                                           const Ark_Number* distance,
+                                           Ark_Boolean isFingerCountLimited)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("createPanGesture(");
+        WriteToString(&out, fingers);
+        out.append(", ");
+        WriteToString(&out, direction);
+        out.append(", ");
+        WriteToString(&out, distance);
+        out.append(", ");
+        WriteToString(&out, isFingerCountLimited);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer CreatePinchGestureImpl(const Ark_Number* fingers,
+                                             const Ark_Number* distance,
+                                             Ark_Boolean isFingerCountLimited)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("createPinchGesture(");
+        WriteToString(&out, fingers);
+        out.append(", ");
+        WriteToString(&out, distance);
+        out.append(", ");
+        WriteToString(&out, isFingerCountLimited);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer CreateRotationGestureImpl(const Ark_Number* fingers,
+                                                const Ark_Number* angle,
+                                                Ark_Boolean isFingerCountLimited)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("createRotationGesture(");
+        WriteToString(&out, fingers);
+        out.append(", ");
+        WriteToString(&out, angle);
+        out.append(", ");
+        WriteToString(&out, isFingerCountLimited);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer CreateSwipeGestureImpl(const Ark_Number* fingers,
+                                             Ark_SwipeDirection direction,
+                                             const Ark_Number* speed,
+                                             Ark_Boolean isFingerCountLimited)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("createSwipeGesture(");
+        WriteToString(&out, fingers);
+        out.append(", ");
+        WriteToString(&out, direction);
+        out.append(", ");
+        WriteToString(&out, speed);
+        out.append(", ");
+        WriteToString(&out, isFingerCountLimited);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer CreateGestureGroupImpl(Ark_GestureMode mode)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("createGestureGroup(");
+        WriteToString(&out, mode);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    void SetOnActionImpl(Ark_NativePointer gesture,
+                         const Callback_GestureEvent_Void* onAction)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setOnAction(");
+        WriteToString(&out, gesture);
+        out.append(", ");
+        WriteToString(&out, onAction);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnActionStartImpl(Ark_NativePointer gesture,
+                              const Callback_GestureEvent_Void* onActionStart)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setOnActionStart(");
+        WriteToString(&out, gesture);
+        out.append(", ");
+        WriteToString(&out, onActionStart);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnActionUpdateImpl(Ark_NativePointer gesture,
+                               const Callback_GestureEvent_Void* onActionUpdate)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setOnActionUpdate(");
+        WriteToString(&out, gesture);
+        out.append(", ");
+        WriteToString(&out, onActionUpdate);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnActionEndImpl(Ark_NativePointer gesture,
+                            const Callback_GestureEvent_Void* onActionEnd)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setOnActionEnd(");
+        WriteToString(&out, gesture);
+        out.append(", ");
+        WriteToString(&out, onActionEnd);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnActionCancelImpl(Ark_NativePointer gesture,
+                               const Callback_Void* onActionCancel)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setOnActionCancel(");
+        WriteToString(&out, gesture);
+        out.append(", ");
+        WriteToString(&out, onActionCancel);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetGestureTagImpl(Ark_NativePointer gesture,
+                           const Ark_String* tag)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setGestureTag(");
+        WriteToString(&out, gesture);
+        out.append(", ");
+        WriteToString(&out, tag);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetAllowedTypesImpl(Ark_NativePointer gesture,
+                             const Array_SourceTool* types)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setAllowedTypes(");
+        WriteToString(&out, gesture);
+        out.append(", ");
+        WriteToString(&out, types);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void AddGestureToNodeImpl(Ark_NativePointer node,
+                              const Ark_Number* priority,
+                              Ark_GestureMask mask,
+                              Ark_NativePointer gesture)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("addGestureToNode(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, priority);
+        out.append(", ");
+        WriteToString(&out, mask);
+        out.append(", ");
+        WriteToString(&out, gesture);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void AddGestureToGroupImpl(Ark_NativePointer group,
+                               Ark_NativePointer gesture)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("addGestureToGroup(");
+        WriteToString(&out, group);
+        out.append(", ");
+        WriteToString(&out, gesture);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // GestureOpsAccessor
     namespace FocusControllerAccessor {
     void RequestFocusImpl(const Ark_String* key)
     {
@@ -35138,6 +35379,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &SystemOpsAccessorImpl;
     }
 
+    const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor()
+    {
+        static const GENERATED_ArkUIGestureOpsAccessor GestureOpsAccessorImpl {
+            GestureOpsAccessor::CreateTapGestureImpl,
+            GestureOpsAccessor::CreateLongPressGestureImpl,
+            GestureOpsAccessor::CreatePanGestureImpl,
+            GestureOpsAccessor::CreatePinchGestureImpl,
+            GestureOpsAccessor::CreateRotationGestureImpl,
+            GestureOpsAccessor::CreateSwipeGestureImpl,
+            GestureOpsAccessor::CreateGestureGroupImpl,
+            GestureOpsAccessor::SetOnActionImpl,
+            GestureOpsAccessor::SetOnActionStartImpl,
+            GestureOpsAccessor::SetOnActionUpdateImpl,
+            GestureOpsAccessor::SetOnActionEndImpl,
+            GestureOpsAccessor::SetOnActionCancelImpl,
+            GestureOpsAccessor::SetGestureTagImpl,
+            GestureOpsAccessor::SetAllowedTypesImpl,
+            GestureOpsAccessor::AddGestureToNodeImpl,
+            GestureOpsAccessor::AddGestureToGroupImpl,
+        };
+        return &GestureOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUIFocusControllerAccessor* GetFocusControllerAccessor()
     {
         static const GENERATED_ArkUIFocusControllerAccessor FocusControllerAccessorImpl {
@@ -38165,6 +38429,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetUnifiedDataAccessor,
             GetLazyForEachOpsAccessor,
             GetSystemOpsAccessor,
+            GetGestureOpsAccessor,
             GetFocusControllerAccessor,
             GetDrawableDescriptorAccessor,
             GetLayeredDrawableDescriptorAccessor,

@@ -107,6 +107,7 @@ generated_sources = [
   "implementation/gesture_event_accessor.cpp",
   "implementation/gesture_group_interface_accessor.cpp",
   "implementation/gesture_modifier_accessor.cpp",
+  "implementation/gesture_ops_accessor.cpp",
   "implementation/gesture_recognizer_accessor.cpp",
   "implementation/gesture_style_accessor.cpp",
   "implementation/global_scope_accessor.cpp",

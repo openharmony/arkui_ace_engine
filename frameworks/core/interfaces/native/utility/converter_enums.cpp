@@ -251,6 +251,17 @@ void AssignCast(std::optional<GestureMask>& dst, const Ark_GestureMask& src)
 }
 
 template<>
+void AssignCast(std::optional<GestureMode>& dst, const Ark_GestureMode& src)
+{
+    switch (src) {
+        case ARK_GESTURE_MODE_SEQUENCE: dst = GestureMode::Sequence; break;
+        case ARK_GESTURE_MODE_PARALLEL: dst = GestureMode::Parallel; break;
+        case ARK_GESTURE_MODE_EXCLUSIVE: dst = GestureMode::Exclusive; break;
+        default: LOGE("Unexpected enum value in Ark_GestureMode: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<ImageAnalyzerType>& dst, const Ark_ImageAnalyzerType& src)
 {
     switch (src) {
