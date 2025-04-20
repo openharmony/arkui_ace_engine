@@ -636,6 +636,10 @@ void AssignArkValue(Ark_ImageSpanAlignment& dst, const VerticalAlign& src)
             LOGE("Unexpected enum value in Ark_ImageSpanAlignment: %{public}d", static_cast<int>(src));
     }
 }
+void AssignArkValue(Ark_Int64& dst, const int32_t& src)
+{
+    dst = src;
+}
 
 void AssignArkValue(Ark_ImageFit& dst, const ImageFit& src)
 {

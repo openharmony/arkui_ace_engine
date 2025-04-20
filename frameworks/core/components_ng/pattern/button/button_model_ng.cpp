@@ -511,16 +511,26 @@ void ButtonModelNG::SetType(FrameNode* frameNode, const std::optional<int> value
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, static_cast<ButtonType>(value.value()), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, frameNode);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            // undefined use ROUNDED_RECTANGLE type.
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::ROUNDED_RECTANGLE, frameNode);
+        } else {
+            // undefined use capsule type.
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::CAPSULE, frameNode);
+        }
     }
 }
 
-void ButtonModelNG::SetStateEffect(FrameNode* frameNode, const bool stateEffect)
+void ButtonModelNG::SetStateEffect(FrameNode* frameNode, const std::optional<bool> stateEffect)
 {
     CHECK_NULL_VOID(frameNode);
     auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
-    buttonEventHub->SetStateEffect(stateEffect);
+    if (stateEffect) {
+        buttonEventHub->SetStateEffect(stateEffect.value());
+    } else {
+        buttonEventHub->SetStateEffect(false);
+    }
 }
 
 void ButtonModelNG::SetLabelStyle(FrameNode* frameNode, const std::optional<ButtonParameters>& buttonParameters)

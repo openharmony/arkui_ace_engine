@@ -16,44 +16,27 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HierarchicalSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_HierarchicalSymbolEffect peer)
 {
-    delete peer;
 }
 Ark_HierarchicalSymbolEffect CtorImpl(const Opt_EffectFillStyle* fillStyle)
 {
-    std::optional<OHOS::Ace::FillStyle> optFillStyle;
-    if (fillStyle) {
-        optFillStyle = Converter::OptConvert<OHOS::Ace::FillStyle>(*fillStyle);
-    }
-    return new HierarchicalSymbolEffectPeer(optFillStyle);
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_EffectFillStyle GetFillStyleImpl(Ark_HierarchicalSymbolEffect peer)
+Opt_EffectFillStyle GetFillStyleImpl(Ark_HierarchicalSymbolEffect peer)
 {
-    CHECK_NULL_RETURN(peer, ARK_EFFECT_FILL_STYLE_CUMULATIVE);
-    CHECK_NULL_RETURN(peer->fillStyle, ARK_EFFECT_FILL_STYLE_CUMULATIVE);
-    switch (peer->fillStyle.value()) {
-        case OHOS::Ace::FillStyle::CUMULATIVE:
-            return ARK_EFFECT_FILL_STYLE_CUMULATIVE;
-        case OHOS::Ace::FillStyle::ITERATIVE:
-            return ARK_EFFECT_FILL_STYLE_ITERATIVE;
-        default:
-            return ARK_EFFECT_FILL_STYLE_CUMULATIVE;
-    }
+    return {};
 }
 void SetFillStyleImpl(Ark_HierarchicalSymbolEffect peer,
                       Ark_EffectFillStyle fillStyle)
 {
-    CHECK_NULL_VOID(peer);
-    peer->fillStyle = Converter::OptConvert<OHOS::Ace::FillStyle>(fillStyle);
 }
 } // HierarchicalSymbolEffectAccessor
 const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor()
@@ -67,4 +50,8 @@ const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffe
     };
     return &HierarchicalSymbolEffectAccessorImpl;
 }
+
+struct HierarchicalSymbolEffectPeer {
+    virtual ~HierarchicalSymbolEffectPeer() = default;
+};
 }

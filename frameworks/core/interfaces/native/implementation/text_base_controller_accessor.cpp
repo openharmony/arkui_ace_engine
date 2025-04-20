@@ -13,21 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/implementation/text_base_controller_peer.h"
-#include "core/interfaces/native/implementation/layout_manager_peer_impl.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 namespace TextBaseControllerAccessor {
 void DestroyPeerImpl(Ark_TextBaseController peer)
 {
-    delete peer;
 }
 Ark_TextBaseController CtorImpl()
 {
-    LOGE("TextBaseControllerPeer is an abstract class.");
     return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -39,24 +35,13 @@ void SetSelectionImpl(Ark_TextBaseController peer,
                       const Ark_Number* selectionEnd,
                       const Opt_SelectionOptions* options)
 {
-    CHECK_NULL_VOID(peer && selectionStart && selectionEnd);
-    auto selectionStartConv = Converter::Convert<int32_t>(*selectionStart);
-    auto selectionEndConv = Converter::Convert<int32_t>(*selectionEnd);
-    auto optionsConv = options ? Converter::OptConvert<SelectionOptions>(*options) : std::nullopt;
-    peer->SetSelection(selectionStartConv, selectionEndConv, optionsConv);
 }
 void CloseSelectionMenuImpl(Ark_TextBaseController peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->CloseSelectionMenu();
 }
 Ark_LayoutManager GetLayoutManagerImpl(Ark_TextBaseController peer)
 {
-    CHECK_NULL_RETURN(peer && GetLayoutManagerAccessor(), nullptr);
-    auto layoutManagerPeer = reinterpret_cast<LayoutManagerPeer*>(GetLayoutManagerAccessor()->ctor());
-    CHECK_NULL_RETURN(layoutManagerPeer, nullptr);
-    layoutManagerPeer->handler = peer->GetLayoutInfoInterface();
-    return layoutManagerPeer;
+    return {};
 }
 } // TextBaseControllerAccessor
 const GENERATED_ArkUITextBaseControllerAccessor* GetTextBaseControllerAccessor()

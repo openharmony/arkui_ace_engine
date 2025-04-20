@@ -14,38 +14,77 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/implementation/hover_event_peer.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HoverEventAccessor {
 void DestroyPeerImpl(Ark_HoverEvent peer)
 {
-    delete peer;
 }
 Ark_HoverEvent CtorImpl()
 {
-    return new HoverEventPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+Opt_Number GetXImpl(Ark_HoverEvent peer)
+{
+    return {};
+}
+void SetXImpl(Ark_HoverEvent peer,
+              const Ark_Number* x)
+{
+}
+Opt_Number GetYImpl(Ark_HoverEvent peer)
+{
+    return {};
+}
+void SetYImpl(Ark_HoverEvent peer,
+              const Ark_Number* y)
+{
+}
+Opt_Number GetWindowXImpl(Ark_HoverEvent peer)
+{
+    return {};
+}
+void SetWindowXImpl(Ark_HoverEvent peer,
+                    const Ark_Number* windowX)
+{
+}
+Opt_Number GetWindowYImpl(Ark_HoverEvent peer)
+{
+    return {};
+}
+void SetWindowYImpl(Ark_HoverEvent peer,
+                    const Ark_Number* windowY)
+{
+}
+Opt_Number GetDisplayXImpl(Ark_HoverEvent peer)
+{
+    return {};
+}
+void SetDisplayXImpl(Ark_HoverEvent peer,
+                     const Ark_Number* displayX)
+{
+}
+Opt_Number GetDisplayYImpl(Ark_HoverEvent peer)
+{
+    return {};
+}
+void SetDisplayYImpl(Ark_HoverEvent peer,
+                     const Ark_Number* displayY)
+{
+}
 Callback_Void GetStopPropagationImpl(Ark_HoverEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
-        HoverInfo* info = peer->GetEventInfo();
-        CHECK_NULL_VOID(info);
-        info->SetStopPropagation(true);
-    });
-    return callback;
+    return {};
 }
 void SetStopPropagationImpl(Ark_HoverEvent peer,
                             const Callback_Void* stopPropagation)
 {
-    LOGE("HoverEventAccessor::SetStopPropagationImpl we can only GET stopPropagation callback");
 }
 } // HoverEventAccessor
 const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()
@@ -54,9 +93,25 @@ const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()
         HoverEventAccessor::DestroyPeerImpl,
         HoverEventAccessor::CtorImpl,
         HoverEventAccessor::GetFinalizerImpl,
+        HoverEventAccessor::GetXImpl,
+        HoverEventAccessor::SetXImpl,
+        HoverEventAccessor::GetYImpl,
+        HoverEventAccessor::SetYImpl,
+        HoverEventAccessor::GetWindowXImpl,
+        HoverEventAccessor::SetWindowXImpl,
+        HoverEventAccessor::GetWindowYImpl,
+        HoverEventAccessor::SetWindowYImpl,
+        HoverEventAccessor::GetDisplayXImpl,
+        HoverEventAccessor::SetDisplayXImpl,
+        HoverEventAccessor::GetDisplayYImpl,
+        HoverEventAccessor::SetDisplayYImpl,
         HoverEventAccessor::GetStopPropagationImpl,
         HoverEventAccessor::SetStopPropagationImpl,
     };
     return &HoverEventAccessorImpl;
 }
+
+struct HoverEventPeer {
+    virtual ~HoverEventPeer() = default;
+};
 }

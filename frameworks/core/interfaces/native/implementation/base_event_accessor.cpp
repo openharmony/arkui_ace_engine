@@ -13,12 +13,9 @@
  * limitations under the License.
  */
 
-#include <vector>
-
 #include "core/components_ng/base/frame_node.h"
-#include "core/event/ace_events.h"
-#include "core/interfaces/native/utility/accessor_utils.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
@@ -51,11 +48,13 @@ void AssignCast(std::optional<SourceTool>& dst, const Ark_SourceTool& src)
 } // namespace Converter
 
 namespace GeneratedModifier {
+
 namespace BaseEventAccessor {
 
 namespace {
 const Ark_Boolean DefaultValueBoolean = Converter::ArkValue<Ark_Boolean>(false);
 const Ark_Number DefaultValueArkNumber = Converter::ArkValue<Ark_Number>(0);
+const Ark_Int64 DefaultValueArkInt = Converter::ArkValue<Ark_Int64>(0);
 }  // namespace
 
 void DestroyPeerImpl(Ark_BaseEvent peer)
@@ -74,11 +73,7 @@ Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
                                     Ark_BaseEvent peer,
                                     const Array_String* keys)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueBoolean);
-    CHECK_NULL_RETURN(keys, DefaultValueBoolean);
-    auto eventKeys = peer->GetBaseInfo()->GetPressedKeyCodes();
-    auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
-    return Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
+    return {};
 }
 Ark_EventTarget GetTargetImpl(Ark_BaseEvent peer)
 {
@@ -88,25 +83,22 @@ Ark_EventTarget GetTargetImpl(Ark_BaseEvent peer)
 void SetTargetImpl(Ark_BaseEvent peer,
                    const Ark_EventTarget* target)
 {
-    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
-    CHECK_NULL_VOID(target);
-    peer->GetBaseInfo()->SetTarget(Converter::Convert<EventTarget>(*target));
 }
-Ark_Number GetTimestampImpl(Ark_BaseEvent peer)
+Ark_Int64 GetTimestampImpl(Ark_BaseEvent peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkInt);
     auto tstamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
         peer->GetBaseInfo()->GetTimeStamp().time_since_epoch()).count();
-    LOGE("BaseEventAccessor.GetTimestampImpl returns Ark_Int32");
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(tstamp));
+    LOGE("BaseEventAccessor.GetTimestampImpl returns Ark_Int64");
+    return Converter::ArkValue<Ark_Int64>(static_cast<int32_t>(tstamp));
 }
 void SetTimestampImpl(Ark_BaseEvent peer,
-                      const Ark_Number* timestamp)
+                      Ark_Int64 timestamp)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(timestamp);
-    LOGE("BaseEventAccessor.SetTimestampImpl uses Ark_Number");
-    int64_t value = Converter::Convert<int32_t>(*timestamp);
+    LOGE("BaseEventAccessor.SetTimestampImpl uses Ark_Int64");
+    int64_t value = Converter::Convert<int64_t>(timestamp);
     std::chrono::high_resolution_clock::duration duration = std::chrono::nanoseconds(value);
     std::chrono::time_point<std::chrono::high_resolution_clock> time_point(duration);
     peer->GetBaseInfo()->SetTimeStamp(time_point);
@@ -126,7 +118,7 @@ void SetSourceImpl(Ark_BaseEvent peer,
         peer->GetBaseInfo()->SetSourceDevice(*value);
     }
 }
-Ark_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
+Opt_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
 {
     LOGE("BaseEventAccessor.GetAxisHorizontalImpl does nothing");
     return {};
@@ -136,7 +128,7 @@ void SetAxisHorizontalImpl(Ark_BaseEvent peer,
 {
     LOGE("BaseEventAccessor.SetAxisHorizontalImpl does nothing");
 }
-Ark_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
+Opt_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
 {
     LOGE("BaseEventAccessor.GetAxisVerticalImpl does nothing");
     return {};
@@ -184,6 +176,14 @@ void SetTiltYImpl(Ark_BaseEvent peer,
     CHECK_NULL_VOID(tiltY);
     peer->GetBaseInfo()->SetTiltY(Converter::Convert<float>(*tiltY));
 }
+Opt_Number GetRollAngleImpl(Ark_BaseEvent peer)
+{
+    return {};
+}
+void SetRollAngleImpl(Ark_BaseEvent peer,
+                      const Ark_Number* rollAngle)
+{
+}
 Ark_SourceTool GetSourceToolImpl(Ark_BaseEvent peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), static_cast<Ark_SourceTool>(-1));
@@ -199,10 +199,9 @@ void SetSourceToolImpl(Ark_BaseEvent peer,
         peer->GetBaseInfo()->SetSourceTool(*value);
     }
 }
-Ark_Number GetDeviceIdImpl(Ark_BaseEvent peer)
+Opt_Number GetDeviceIdImpl(Ark_BaseEvent peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(peer->GetBaseInfo()->GetDeviceId()));
+    return {};
 }
 void SetDeviceIdImpl(Ark_BaseEvent peer,
                      const Ark_Number* deviceId)
@@ -211,8 +210,15 @@ void SetDeviceIdImpl(Ark_BaseEvent peer,
     CHECK_NULL_VOID(deviceId);
     peer->GetBaseInfo()->SetDeviceId(Converter::Convert<int>(*deviceId));
 }
+Opt_Number GetTargetDisplayIdImpl(Ark_BaseEvent peer)
+{
+    return {};
+}
+void SetTargetDisplayIdImpl(Ark_BaseEvent peer,
+                            const Ark_Number* targetDisplayId)
+{
+}
 } // BaseEventAccessor
-
 const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
 {
     static const GENERATED_ArkUIBaseEventAccessor BaseEventAccessorImpl {
@@ -236,12 +242,20 @@ const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
         BaseEventAccessor::SetTiltXImpl,
         BaseEventAccessor::GetTiltYImpl,
         BaseEventAccessor::SetTiltYImpl,
+        BaseEventAccessor::GetRollAngleImpl,
+        BaseEventAccessor::SetRollAngleImpl,
         BaseEventAccessor::GetSourceToolImpl,
         BaseEventAccessor::SetSourceToolImpl,
         BaseEventAccessor::GetDeviceIdImpl,
         BaseEventAccessor::SetDeviceIdImpl,
+        BaseEventAccessor::GetTargetDisplayIdImpl,
+        BaseEventAccessor::SetTargetDisplayIdImpl,
     };
     return &BaseEventAccessorImpl;
 }
+
+struct BaseEventPeer {
+    virtual ~BaseEventPeer() = default;
+};
 }
 }

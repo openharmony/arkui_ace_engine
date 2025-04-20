@@ -14,25 +14,17 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/tap_gesture_interface_peer.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TapGestureInterfaceAccessor {
 void DestroyPeerImpl(Ark_TapGestureInterface peer)
 {
-    CHECK_NULL_VOID(peer);
-    delete peer;
 }
-Ark_TapGestureInterface CtorImpl()
+Ark_TapGestureInterface CtorImpl(const Opt_TapGestureParameters* value)
 {
-    auto peer = new TapGestureInterfacePeer();
-    peer->gesture = Referenced::MakeRefPtr<TapGesture>();
-    return peer;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -41,16 +33,7 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_TapGestureInterface OnActionImpl(Ark_TapGestureInterface peer,
                                      const Callback_GestureEvent_Void* event)
 {
-    CHECK_NULL_RETURN(peer, peer);
-    CHECK_NULL_RETURN(event, peer);
-    CHECK_NULL_RETURN(peer->gesture, peer);
-
-    auto onAction = [arkCallback = CallbackHelper(*event)](GestureEvent& event) -> void {
-        auto arkEvent = Converter::ArkGestureEventSync(event);
-        arkCallback.InvokeSync(arkEvent.ArkValue());
-    };
-    peer->gesture->SetOnActionId(std::move(onAction));
-    return peer;
+    return {};
 }
 } // TapGestureInterfaceAccessor
 const GENERATED_ArkUITapGestureInterfaceAccessor* GetTapGestureInterfaceAccessor()
@@ -64,4 +47,7 @@ const GENERATED_ArkUITapGestureInterfaceAccessor* GetTapGestureInterfaceAccessor
     return &TapGestureInterfaceAccessorImpl;
 }
 
+struct TapGestureInterfacePeer {
+    virtual ~TapGestureInterfacePeer() = default;
+};
 }

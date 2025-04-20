@@ -60,11 +60,6 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent {
     public setXComponentOptions(value: Type_XComponentInterface_value | XComponentOptions): this {
         if (this.checkPriority("setXComponentOptions")) {
             const value_type = runtimeType(value)
-            if (TypeChecker.isXComponentOptions(value, true, true, false)) {
-                const options_casted = value as (XComponentOptions)
-                this.getPeer()?.setXComponentOptions2Attribute(options_casted)
-                return this
-            }
             if (RuntimeType.OBJECT == value_type) {
                 const value_casted = value as (Type_XComponentInterface_value)
                 this.getPeer()?.setXComponentOptions0Attribute(value_casted)
@@ -73,6 +68,11 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent {
             if (RuntimeType.OBJECT == value_type) {
                 const value_casted = value as (Type_XComponentInterface_value)
                 this.getPeer()?.setXComponentOptions1Attribute(value_casted)
+                return this
+            }
+            if (TypeChecker.isXComponentOptions(value, true, true, false)) {
+                const options_casted = value as (XComponentOptions)
+                this.getPeer()?.setXComponentOptions2Attribute(options_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")

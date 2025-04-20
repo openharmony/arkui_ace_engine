@@ -17,8 +17,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct LinearIndicatorControllerPeer {};
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LinearIndicatorControllerAccessor {
 void DestroyPeerImpl(Ark_LinearIndicatorController peer)

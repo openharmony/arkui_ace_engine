@@ -25,7 +25,7 @@ import {
     ArkPageTransitionEnterComponent,
     ArkPageTransitionExitComponent,
 } from "./ArkPageTransitionData"
-import { PageTransitionOptions } from "../generated"
+import { PageTransitionOptions } from "../component"
 
 // TODO: import it when panda is fixed.
 enum RouterTransitionVisibility {
@@ -81,7 +81,7 @@ export function ArkPageTransitionExit(
     const receiver = remember(() => new ArkPageTransitionExitComponent(params))
     style?.(receiver)
     const state = CurrentRouterTransitionState()
-    if (state !== undefined && state.visibility == RouterTransitionVisibility.Hiding) {
-        NotifyPageTransition(state.pageId, receiver, RouterTransitionVisibility.Hiding)
+        if (state !== undefined && state.visibility == RouterTransitionVisibility.Hiding) {
+            NotifyPageTransition(state.pageId, receiver, RouterTransitionVisibility.Hiding)
     }
 }

@@ -15,20 +15,16 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/implementation/text_timer_controller_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextTimerControllerAccessor {
 void DestroyPeerImpl(Ark_TextTimerController peer)
 {
-    if (peer) {
-        delete peer;
-    }
 }
 Ark_TextTimerController CtorImpl()
 {
-    return new TextTimerControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -36,21 +32,12 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void StartImpl(Ark_TextTimerController peer)
 {
-    auto peerImpl = reinterpret_cast<TextTimerControllerPeer*>(peer);
-    CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
-    peerImpl->GetController()->Start();
 }
 void PauseImpl(Ark_TextTimerController peer)
 {
-    auto peerImpl = reinterpret_cast<TextTimerControllerPeer*>(peer);
-    CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
-    peerImpl->GetController()->Pause();
 }
 void ResetImpl(Ark_TextTimerController peer)
 {
-    auto peerImpl = reinterpret_cast<TextTimerControllerPeer*>(peer);
-    CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
-    peerImpl->GetController()->Reset();
 }
 } // TextTimerControllerAccessor
 const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor()

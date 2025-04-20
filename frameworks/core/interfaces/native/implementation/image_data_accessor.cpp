@@ -13,11 +13,8 @@
  * limitations under the License.
  */
 
-#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/image_data_peer.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -29,22 +26,7 @@ Ark_ImageData CtorImpl(const Ark_Number* width,
                        const Ark_Number* height,
                        const Opt_Buffer* data)
 {
-    CHECK_NULL_RETURN(width && height, nullptr);
-    auto widthConv = Converter::Convert<int32_t>(*width);
-    auto heightConv = Converter::Convert<int32_t>(*height);
-    if (Negative(widthConv) || Negative(heightConv)) {
-        return nullptr;
-    }
-
-    OHOS::Ace::ImageData imgData = {.dirtyWidth = widthConv, .dirtyHeight = heightConv};
-    if (data != nullptr) {
-        auto dataOpt = Converter::OptConvert<std::vector<uint32_t>>(*data);
-        auto size = dataOpt.has_value() ? dataOpt.value().size() : 0;
-        if (size > 0) {
-            imgData.data = std::move(dataOpt.value());
-        }
-    }
-    return ImageDataPeer::Create(imgData);
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -56,13 +38,11 @@ Ark_Buffer GetDataImpl(Ark_ImageData peer)
 }
 Ark_Number GetHeightImpl(Ark_ImageData peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
-    return Converter::ArkValue<Ark_Number>(peer->value.dirtyHeight);
+    return {};
 }
 Ark_Number GetWidthImpl(Ark_ImageData peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
-    return Converter::ArkValue<Ark_Number>(peer->value.dirtyWidth);
+    return {};
 }
 } // ImageDataAccessor
 const GENERATED_ArkUIImageDataAccessor* GetImageDataAccessor()

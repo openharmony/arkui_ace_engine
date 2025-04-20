@@ -26,7 +26,7 @@ Ark_FrictionMotion CtorImpl(const Ark_Number* friction,
                             const Ark_Number* position,
                             const Ark_Number* velocity)
 {
-    return {};
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

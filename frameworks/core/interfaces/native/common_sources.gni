@@ -25,7 +25,7 @@ common_sources = [
   "implementation/image_bitmap_peer_impl.cpp",
   "implementation/image_common_methods.cpp",
   "implementation/matrix2d_peer_impl.cpp",
-  "implementation/navigation_context.cpp",
+  # "implementation/navigation_context.cpp",
   "implementation/offscreen_canvas_peer.cpp",
   "implementation/offscreen_canvas_rendering_context2d_peer_impl.cpp",
   "implementation/scroller_peer_impl.cpp",

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <cstdint>
 #include "bridge/common/utils/utils.h"
 #include "converter.h"
 #include "reverse_converter.h"
@@ -30,9 +29,6 @@
 #include "core/interfaces/native/utility/validators.h"
 
 namespace {
-    const int32_t ARK_UNION_NUMBER_STRING_RESOURCE_SELECT_NUMBER = 0;
-    const int32_t ARK_UNION_NUMBER_STRING_RESOURCE_SELECT_STRING = 1;
-    const int32_t ARK_UNION_NUMBER_STRING_RESOURCE_SELECT_RESOURCE = 2;
     constexpr int32_t NUM_0 = 0;
     constexpr int32_t NUM_1 = 1;
     constexpr int32_t NUM_2 = 2;
@@ -219,10 +215,10 @@ void AssignArkValue(Ark_TouchObject& touch, const OHOS::Ace::TouchLocationInfo& 
 
 void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src)
 {
-    AssignArkValue(dst.touchObject, src);
-    dst.size = ArkValue<Ark_Number>(src.GetSize());
-    dst.force = ArkValue<Ark_Number>(src.GetForce());
-    dst.timestamp = ArkValue<Ark_Number>(src.GetTimeStamp().time_since_epoch().count());
+    // AssignArkValue(dst.touchObject, src);
+    // dst.size = ArkValue<Ark_Number>(src.GetSize());
+    // dst.force = ArkValue<Ark_Number>(src.GetForce());
+    // dst.timestamp = ArkValue<Ark_Number>(src.GetTimeStamp().time_since_epoch().count());
 }
 
 void AssignArkValue(Ark_Date& dst, const PickerDate& src)
@@ -484,8 +480,6 @@ std::optional<uint32_t> ResourceConverter::ToSymbol()
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
     if (id_ == -1 && !params_.empty()) {
         return themeConstants_->GetSymbolByName(params_.front().c_str());
-    } else if (id_ != -1) {
-        return themeConstants_->GetSymbolById(id_);
     }
     return std::nullopt;
 }
@@ -1466,24 +1460,6 @@ void AssignCast(std::optional<float>& dst, const Ark_String& src)
     double result;
     if (StringUtils::StringToDouble(value, result)) {
         dst = result;
-    }
-}
-
-template<>
-void AssignCast(std::optional<Dimension>& dst, const Ark_Union_Number_String_Resource& src)
-{
-    auto selector = src.selector;
-    switch (selector) {
-        case ARK_UNION_NUMBER_STRING_RESOURCE_SELECT_NUMBER:
-            dst = OptConvert<Dimension>(src.value0);
-            break;
-        case ARK_UNION_NUMBER_STRING_RESOURCE_SELECT_STRING:
-            dst = OptConvert<Dimension>(src.value1);
-            break;
-        case ARK_UNION_NUMBER_STRING_RESOURCE_SELECT_RESOURCE:
-            ResourceConverter conveter(src.value2);
-            dst = conveter.ToDimension();
-            break;
     }
 }
 

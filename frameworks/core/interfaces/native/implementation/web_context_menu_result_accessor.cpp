@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/web_context_menu_result_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -22,13 +21,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebContextMenuResultAccessor {
 void DestroyPeerImpl(Ark_WebContextMenuResult peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
-    delete peer;
 }
 Ark_WebContextMenuResult CtorImpl()
 {
-    return new WebContextMenuResultPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -36,33 +32,21 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void CloseContextMenuImpl(Ark_WebContextMenuResult peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->Cancel();
 }
 void CopyImageImpl(Ark_WebContextMenuResult peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->CopyImage();
 }
 void CopyImpl(Ark_WebContextMenuResult peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->Copy();
 }
 void PasteImpl(Ark_WebContextMenuResult peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->Paste();
 }
 void CutImpl(Ark_WebContextMenuResult peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->Cut();
 }
 void SelectAllImpl(Ark_WebContextMenuResult peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->SelectAll();
 }
 } // WebContextMenuResultAccessor
 const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccessor()

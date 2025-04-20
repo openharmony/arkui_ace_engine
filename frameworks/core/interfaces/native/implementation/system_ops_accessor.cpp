@@ -14,12 +14,13 @@
  */
 #include <numeric>
 
+#include "arkoala_api_generated.h"
+
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
 
 static thread_local std::vector<int32_t> restoreInstanceIds_;
 
@@ -47,9 +48,7 @@ void RestoreInstanceIdImpl()
     ContainerScope::UpdateCurrent(restoreInstanceIds_.back());
     restoreInstanceIds_.pop_back();
 }
-Ark_Int32 GetResourceIdImpl(const Ark_String* bundleName,
-                            const Ark_String* moduleName,
-                            const Array_String* params)
+Ark_Int32 GetResourceIdImpl(const Ark_String* bundleName, const Ark_String* moduleName, const Array_String* params)
 {
     auto valueBundleName = Converter::Convert<std::string>(*bundleName);
     auto valueModuleName = Converter::Convert<std::string>(*moduleName);
@@ -65,7 +64,7 @@ Ark_Int32 GetResourceIdImpl(const Ark_String* bundleName,
     uint32_t resId = resourceAdapter->GetResId(resourceStr);
     return resId;
 }
-} // SystemOpsAccessor
+} // namespace SystemOpsAccessor
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
 {
     static const GENERATED_ArkUISystemOpsAccessor SystemOpsAccessorImpl {
@@ -78,4 +77,4 @@ const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
     return &SystemOpsAccessorImpl;
 }
 
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

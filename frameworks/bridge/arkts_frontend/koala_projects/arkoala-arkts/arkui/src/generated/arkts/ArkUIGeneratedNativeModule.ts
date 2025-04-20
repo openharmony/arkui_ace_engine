@@ -5328,12 +5328,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _XComponentController_stopImageAnalyzer(ptr: KPointer): void
     @ani.unsafe.Direct
-    native static _XComponentController_setOnSurfaceCreatedCallback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _XComponentController_setOnSurfaceChangedCallback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _XComponentController_setOnSurfaceDestroyedCallback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _WaterFlowSections_ctor(): KPointer
     @ani.unsafe.Direct
     native static _WaterFlowSections_getFinalizer(): KPointer

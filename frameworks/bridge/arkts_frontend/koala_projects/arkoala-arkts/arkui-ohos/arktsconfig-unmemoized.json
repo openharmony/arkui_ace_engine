@@ -5,7 +5,7 @@
         "baseUrl": "./build/unmemoized/src",
         "paths": {
             "#components": [
-                "./generated/arkts"
+                "./component/arkts"
             ],
             "#arkcompat/*": [
                 "../../../../../arkoala/arkui-common/build/unmemoized/src/arkts/*"
@@ -57,9 +57,6 @@
             ],
             "global/resource": [
                 "../global/resource/resource.ts"
-            ],
-            "@ohos/router": [
-                "../ohos.router.ts"
             ]
         }
     },
@@ -70,13 +67,12 @@
         "build/unmemoized/ohos.measure.ts",
         "build/unmemoized/ohos.font.ts",
         "build/unmemoized/ohos.animator.ts",
-        "src/ani/**/*.ts",
-        "build/unmemoized/ohos.router.ts"
+        "src/ani/**/*.ts"
     ],
     "exclude": [
         "**/index.ts",
-        "build/unmemoized/src/generated/ts/*.ts",
-        "build/unmemoized/generated/main.ts",
+        "build/unmemoized/src/component/ts/*.ts",
+        "build/unmemoized/src/component/main.ts",
         "build/unmemoized/src/external/ts/**/*.ts",
         "build/unmemoized/src/ani/ts/**/*.ts"
     ]

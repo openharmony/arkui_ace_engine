@@ -16,17 +16,15 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "drawing_canvas_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawingCanvasAccessor {
 void DestroyPeerImpl(Ark_DrawingCanvas peer)
 {
-    delete peer;
 }
 Ark_DrawingCanvas CtorImpl(Ark_PixelMap pixelmap)
 {
-    return new DrawingCanvasPeer(pixelmap->pixelMap);
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -38,14 +36,6 @@ void DrawRectImpl(Ark_DrawingCanvas peer,
                   const Ark_Number* right,
                   const Ark_Number* bottom)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(left && top && right && bottom);
-    float x = Converter::Convert<float>(*left);
-    float y = Converter::Convert<float>(*top);
-    float w = Converter::Convert<float>(*right) - x;
-    float h = Converter::Convert<float>(*bottom) - y;
-    Rect rect(x, y, w, h);
-    peer->FillRect(rect);
 }
 } // DrawingCanvasAccessor
 const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor()
@@ -59,4 +49,7 @@ const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor()
     return &DrawingCanvasAccessorImpl;
 }
 
+struct DrawingCanvasPeer {
+    virtual ~DrawingCanvasPeer() = default;
+};
 }

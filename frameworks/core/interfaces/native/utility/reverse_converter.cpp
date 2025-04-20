@@ -20,7 +20,7 @@
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+// #include "core/interfaces/native/generated/interface/node_api.h"
 #include "validators.h"
 
 namespace OHOS::Ace {
@@ -75,10 +75,10 @@ void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src)
 
 void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
 {
-    const auto peer = reinterpret_cast<GeneratedModifier::BaseGestureEventPeerImpl*>(
-        GeneratedModifier::GetFullAPI()->getAccessors()->getBaseGestureEventAccessor()->ctor());
-    peer->SetEventInfo(src);
-    dst = peer;
+    // const auto peer = reinterpret_cast<GeneratedModifier::BaseGestureEventPeerImpl*>(
+    //     GeneratedModifier::GetFullAPI()->getAccessors()->getBaseGestureEventAccessor()->ctor());
+    // peer->SetEventInfo(src);
+    // dst = peer;
 }
 
 void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src)
@@ -90,9 +90,9 @@ void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src)
 
 void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info)
 {
-    const auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getDragEventAccessor()->ctor();
-    peer->dragInfo = info;
-    dragEvent = peer;
+    // const auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getDragEventAccessor()->ctor();
+    // peer->dragInfo = info;
+    // dragEvent = peer;
 }
 
 void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
@@ -414,11 +414,11 @@ void AssignArkValue(Ark_Position& dst, const OffsetF& src)
     dst.y = Converter::ArkValue<Opt_Length>(src.GetY());
 }
 
-void AssignArkValue(Ark_GraphicsPosition& dst, const OffsetF& src)
-{
-    dst.x = Converter::ArkValue<Ark_Number>(src.GetX());
-    dst.y = Converter::ArkValue<Ark_Number>(src.GetY());
-}
+// void AssignArkValue(Ark_GraphicsPosition& dst, const OffsetF& src)
+// {
+//     dst.x = Converter::ArkValue<Ark_Number>(src.GetX());
+//     dst.y = Converter::ArkValue<Ark_Number>(src.GetY());
+// }
 
 void AssignArkValue(Ark_FontInfo& dst, const FontInfo& src)
 {

@@ -189,6 +189,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_ImageFit& dst, const ImageFit& src);
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
     void AssignArkValue(Ark_ImageSpanAlignment& dst, const VerticalAlign& src);
+    void AssignArkValue(Ark_Int64& dst, const int32_t& src);
     void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src);
     void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvContext *ctx);
     void AssignArkValue(Ark_KeyEvent& dst, const OHOS::Ace::KeyEventInfo& src);
@@ -232,7 +233,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_PanelMode& dst, const PanelMode& src);
     void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src);
     void AssignArkValue(Ark_Position& dst, const OffsetF& src);
-    void AssignArkValue(Ark_GraphicsPosition& dst, const OffsetF& src);
+    // void AssignArkValue(Ark_GraphicsPosition& dst, const OffsetF& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewTextInfo& src, ConvContext *ctx);

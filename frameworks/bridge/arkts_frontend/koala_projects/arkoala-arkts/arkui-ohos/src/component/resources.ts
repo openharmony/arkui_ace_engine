@@ -1,7 +1,7 @@
 import { Resource } from "global/resource";
 import { int32 } from "@koalaui/common";
 import { ArkUIGeneratedNativeModule } from "#components";
-import { Serializer } from "../generated/peers/Serializer";
+import { Serializer } from "./peers/Serializer";
 import { asArray } from "@koalaui/common";
 import { RuntimeType, runtimeType } from "@koalaui/interop";
 

@@ -32,10 +32,10 @@
                 "../../arkoala/arkui-common/src/arkts/*"
             ],
             "@ohos/arkui": [
-                "./src/generated"
+                "./src/component"
             ],
             "#components": [
-                "./src/generated/ts"
+                "./src/component/ts"
             ],
             "#external": [
                 "./src/external/ts",
@@ -57,9 +57,6 @@
             ],
             "global/resource": [
                 "./global/resource/resource.ts"
-            ],
-            "@ohos.router": [ 
-                "./ohos.router.ts"
             ]
         },
         "rootDir": "."
@@ -70,14 +67,13 @@
         "./ohos.font.ts",
         "./ohos.arkui.UIContext.ts",
         "./ohos.animator.ts",
-        "./global/**/*.ts",
-        "./ohos.router.ts"
+        "./global/**/*.ts"
     ],
     "exclude": [
-        "./src/generated/arkts",
-        "./src/generated/common.ts",
-        "./src/generated/test_utils.ts",
-        "./src/generated/main.ts",
+        "./src/component/arkts",
+        "./src/component/arkts/ArkUIGeneratedNativeModule.ts",
+        "./src/component/test_utils.ts",
+        "./src/component/main.ts",
         "./src/external/arkts",
         "./src/ani/arkts",
     ],

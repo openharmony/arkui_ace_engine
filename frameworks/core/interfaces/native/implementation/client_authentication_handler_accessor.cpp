@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/client_authentication_handler_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -22,13 +21,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ClientAuthenticationHandlerAccessor {
 void DestroyPeerImpl(Ark_ClientAuthenticationHandler peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
-    delete peer;
 }
 Ark_ClientAuthenticationHandler CtorImpl()
 {
-    return new ClientAuthenticationHandlerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -38,31 +34,16 @@ void Confirm0Impl(Ark_ClientAuthenticationHandler peer,
                   const Ark_String* priKeyFile,
                   const Ark_String* certChainFile)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    CHECK_NULL_VOID(priKeyFile);
-    CHECK_NULL_VOID(certChainFile);
-    std::string priKeyFileStr = Converter::Convert<std::string>(*priKeyFile);
-    std::string certChainFileStr = Converter::Convert<std::string>(*certChainFile);
-    peer->handler->HandleConfirm(priKeyFileStr, certChainFileStr);
 }
 void Confirm1Impl(Ark_ClientAuthenticationHandler peer,
                   const Ark_String* authUri)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    CHECK_NULL_VOID(authUri);
-    std::string priKeyFileStr = Converter::Convert<std::string>(*authUri);
-    std::string certChainFileStr;
-    peer->handler->HandleConfirm(priKeyFileStr, certChainFileStr);
 }
 void CancelImpl(Ark_ClientAuthenticationHandler peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->HandleCancel();
 }
 void IgnoreImpl(Ark_ClientAuthenticationHandler peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->HandleIgnore();
 }
 } // ClientAuthenticationHandlerAccessor
 const GENERATED_ArkUIClientAuthenticationHandlerAccessor* GetClientAuthenticationHandlerAccessor()

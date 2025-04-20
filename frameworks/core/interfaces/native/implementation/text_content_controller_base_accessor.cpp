@@ -13,21 +13,18 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/implementation/text_content_controller_base_peer.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextContentControllerBaseAccessor {
 void DestroyPeerImpl(Ark_TextContentControllerBase peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->controller_ = nullptr;
-    delete peer;
 }
 Ark_TextContentControllerBase CtorImpl()
 {
-    return new TextContentControllerBasePeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -35,21 +32,37 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_CaretOffset GetCaretOffsetImpl(Ark_TextContentControllerBase peer)
 {
-    CHECK_NULL_RETURN(peer && peer->controller_, {});
-    auto offset = peer->controller_->GetCaretPosition();
-    return Converter::ArkValue<Ark_CaretOffset>(offset);
+    return {};
 }
 Ark_RectResult GetTextContentRectImpl(Ark_TextContentControllerBase peer)
 {
-    CHECK_NULL_RETURN(peer && peer->controller_, {});
-    auto rect = peer->controller_->GetTextContentRect();
-    return Converter::ArkValue<Ark_RectResult>(rect);
+    return {};
 }
 Ark_Number GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer && peer->controller_, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->controller_->GetTextContentLinesNum());
+    return {};
+}
+Ark_Number AddTextImpl(Ark_TextContentControllerBase peer,
+                       const Ark_String* text,
+                       const Opt_TextContentControllerOptions* textOperationOptions)
+{
+    return {};
+}
+void DeleteTextImpl(Ark_TextContentControllerBase peer,
+                    const Opt_TextRange* range)
+{
+}
+Ark_TextRange GetSelectionImpl(Ark_TextContentControllerBase peer)
+{
+    return {};
+}
+void ClearPreviewTextImpl(Ark_TextContentControllerBase peer)
+{
+}
+Ark_String GetTextImpl(Ark_TextContentControllerBase peer,
+                       const Opt_TextRange* range)
+{
+    return {};
 }
 } // TextContentControllerBaseAccessor
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()
@@ -61,6 +74,11 @@ const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentController
         TextContentControllerBaseAccessor::GetCaretOffsetImpl,
         TextContentControllerBaseAccessor::GetTextContentRectImpl,
         TextContentControllerBaseAccessor::GetTextContentLineCountImpl,
+        TextContentControllerBaseAccessor::AddTextImpl,
+        TextContentControllerBaseAccessor::DeleteTextImpl,
+        TextContentControllerBaseAccessor::GetSelectionImpl,
+        TextContentControllerBaseAccessor::ClearPreviewTextImpl,
+        TextContentControllerBaseAccessor::GetTextImpl,
     };
     return &TextContentControllerBaseAccessorImpl;
 }

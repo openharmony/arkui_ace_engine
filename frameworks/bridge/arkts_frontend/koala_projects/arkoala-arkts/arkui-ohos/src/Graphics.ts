@@ -16,15 +16,12 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-// import { LengthUnit } from "./generated/ArkArkuiExternalInterfaces"
-import { Resource } from "global/resource";
+// import { LengthUnit } from "./component/ArkArkuiExternalInterfaces"
+import { Resource } from "global/resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
-import { Serializer } from "./generated/peers/Serializer"
-import { CallbackKind } from "./generated/peers/CallbackKind"
-import { Deserializer } from "./generated/peers/Deserializer"
-import { CallbackTransformer } from "./generated/peers/CallbackTransformer"
+import { Serializer } from "./component"
 export interface Size {
     width: number;
     height: number;

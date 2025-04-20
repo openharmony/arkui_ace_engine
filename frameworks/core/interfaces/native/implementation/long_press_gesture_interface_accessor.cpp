@@ -14,28 +14,17 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/long_press_gesture_interface_peer.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LongPressGestureInterfaceAccessor {
-namespace {
-    constexpr bool DEFAULT_REPEAT = false;
-    constexpr int32_t DEFAULT_FINGERS = 1;
-    constexpr int32_t DEFAULT_DURATION = 500;
-}
 void DestroyPeerImpl(Ark_LongPressGestureInterface peer)
 {
-    delete peer;
 }
-Ark_LongPressGestureInterface CtorImpl()
+Ark_LongPressGestureInterface CtorImpl(const Opt_Literal_Number_duration_fingers_Boolean_repeat* value)
 {
-    auto peer = new LongPressGestureInterfacePeer();
-    peer->gesture = AceType::MakeRefPtr<LongPressGesture>(DEFAULT_FINGERS, DEFAULT_REPEAT, DEFAULT_DURATION);
-    return peer;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -44,34 +33,22 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_LongPressGestureInterface OnActionImpl(Ark_LongPressGestureInterface peer,
                                            const Callback_GestureEvent_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto onAction = [arkCallback = CallbackHelper(*event)](GestureEvent& aceEvent) {
-        auto arkEvent = Converter::ArkGestureEventSync(aceEvent);
-        arkCallback.InvokeSync(arkEvent.ArkValue());
-    };
-    peer->gesture->SetOnActionId(std::move(onAction));
-    return peer;
+    return {};
 }
 Ark_LongPressGestureInterface OnActionEndImpl(Ark_LongPressGestureInterface peer,
                                               const Callback_GestureEvent_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto onActionEnd = [arkCallback = CallbackHelper(*event)](GestureEvent& aceEvent) {
-        auto arkEvent = Converter::ArkGestureEventSync(aceEvent);
-        arkCallback.InvokeSync(arkEvent.ArkValue());
-    };
-    peer->gesture->SetOnActionEndId(std::move(onActionEnd));
-    return peer;
+    return {};
 }
-Ark_LongPressGestureInterface OnActionCancelImpl(Ark_LongPressGestureInterface peer,
-                                                 const Callback_Void* event)
+Ark_LongPressGestureInterface OnActionCancel0Impl(Ark_LongPressGestureInterface peer,
+                                                  const Callback_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto onActionCancel = [arkCallback = CallbackHelper(*event)]() {
-        arkCallback.Invoke();
-    };
-    // peer->gesture->SetOnActionCancelId(std::move(onActionCancel));
-    return peer;
+    return {};
+}
+Ark_LongPressGestureInterface OnActionCancel1Impl(Ark_LongPressGestureInterface peer,
+                                                  const Callback_GestureEvent_Void* event)
+{
+    return {};
 }
 } // LongPressGestureInterfaceAccessor
 const GENERATED_ArkUILongPressGestureInterfaceAccessor* GetLongPressGestureInterfaceAccessor()
@@ -82,7 +59,8 @@ const GENERATED_ArkUILongPressGestureInterfaceAccessor* GetLongPressGestureInter
         LongPressGestureInterfaceAccessor::GetFinalizerImpl,
         LongPressGestureInterfaceAccessor::OnActionImpl,
         LongPressGestureInterfaceAccessor::OnActionEndImpl,
-        LongPressGestureInterfaceAccessor::OnActionCancelImpl,
+        LongPressGestureInterfaceAccessor::OnActionCancel0Impl,
+        LongPressGestureInterfaceAccessor::OnActionCancel1Impl,
     };
     return &LongPressGestureInterfaceAccessorImpl;
 }

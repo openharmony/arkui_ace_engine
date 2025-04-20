@@ -13,58 +13,35 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LoadingProgressModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = LoadingProgressModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // LoadingProgressModifier
 namespace LoadingProgressInterfaceModifier {
 void SetLoadingProgressOptionsImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(undefined);
-    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
-    //LoadingProgressModelNG::SetSetLoadingProgressOptions(frameNode, convValue);
 }
 } // LoadingProgressInterfaceModifier
 namespace LoadingProgressAttributeModifier {
 void ColorImpl(Ark_NativePointer node,
-               const Ark_ResourceColor* value)
+               const Opt_ResourceColor* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto color = Converter::OptConvert<Color>(*value);
-    LoadingProgressModelNG::SetColor(frameNode, color);
 }
 void EnableLoadingImpl(Ark_NativePointer node,
-                       Ark_Boolean value)
+                       const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetEnableLoading(frameNode, Converter::Convert<bool>(value));
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* value)
+                         const Opt_ContentModifier* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //LoadingProgressModelNG::SetContentModifier(frameNode, convValue);
-    LOGE("ARKOALA LoadingProgressAttributeModifier::ContentModifierImpl -> Method is not implemented");
 }
 } // LoadingProgressAttributeModifier
 const GENERATED_ArkUILoadingProgressModifier* GetLoadingProgressModifier()

@@ -20,6 +20,7 @@ export type UserViewBuilder =
 () => void
 
 export class UserView {
+    constructor() {}
     getBuilder(): UserViewBuilder {
         throw new Error("User must override this method");
     }

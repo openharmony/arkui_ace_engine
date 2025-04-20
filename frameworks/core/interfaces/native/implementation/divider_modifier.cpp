@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -23,57 +22,31 @@ namespace DividerModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = DividerModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // DividerModifier
 namespace DividerInterfaceModifier {
 void SetDividerOptionsImpl(Ark_NativePointer node)
 {
-    // Nothing to implement
 }
 } // DividerInterfaceModifier
-
 namespace DividerAttributeModifier {
 void VerticalImpl(Ark_NativePointer node,
-                  Ark_Boolean value)
+                  const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    DividerModelNG::SetVertical(frameNode, Converter::Convert<bool>(value));
 }
-
 void ColorImpl(Ark_NativePointer node,
-               const Ark_ResourceColor* value)
+               const Opt_ResourceColor* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    DividerModelNG::SetDividerColor(frameNode, Converter::OptConvert<Color>(*value));
 }
-
 void StrokeWidthImpl(Ark_NativePointer node,
-                     const Ark_Union_Number_String* value)
+                     const Opt_Union_Number_String* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto optValue = Converter::OptConvert<Dimension>(*value);
-    if (optValue && (optValue.value().Unit() == DimensionUnit::PERCENT)) {
-        optValue.reset();
-    }
-    DividerModelNG::StrokeWidth(frameNode, optValue);
 }
-
 void LineCapImpl(Ark_NativePointer node,
-                 Ark_LineCapStyle value)
+                 const Opt_LineCapStyle* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    DividerModelNG::LineCap(frameNode, Converter::OptConvert<LineCap>(value));
 }
-
 } // DividerAttributeModifier
 const GENERATED_ArkUIDividerModifier* GetDividerModifier()
 {

@@ -13,28 +13,18 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LetterSpacingStyleAccessor {
 void DestroyPeerImpl(Ark_LetterSpacingStyle peer)
 {
-    delete peer;
 }
 Ark_LetterSpacingStyle CtorImpl(Ark_LengthMetrics value)
 {
-    std::optional<Dimension> spacing;
-    Dimension defaultSpacing = Dimension(0, DimensionUnit::VP);
-    if (value) {
-        spacing = Converter::OptConvert<Dimension>(value);
-        Validator::ValidateNonPercent(spacing);
-    }
-    RefPtr<LetterSpacingSpan> span = AceType::MakeRefPtr<LetterSpacingSpan>(spacing.value_or(defaultSpacing));
-    return new LetterSpacingStylePeer{ .span = span };
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -42,10 +32,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetLetterSpacingImpl(Ark_LetterSpacingStyle peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(peer->span, {});
-    auto value = Converter::ArkValue<Ark_Number>(peer->span->GetLetterSpacing().ConvertToVp());
-    return value;
+    return {};
 }
 } // LetterSpacingStyleAccessor
 const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor()
@@ -59,4 +46,7 @@ const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor()
     return &LetterSpacingStyleAccessorImpl;
 }
 
+struct LetterSpacingStylePeer {
+    virtual ~LetterSpacingStylePeer() = default;
+};
 }

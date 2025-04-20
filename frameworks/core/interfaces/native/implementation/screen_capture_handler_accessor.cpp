@@ -14,22 +14,17 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/screen_capture_handler_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScreenCaptureHandlerAccessor {
 void DestroyPeerImpl(Ark_ScreenCaptureHandler peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
-    delete peer;
 }
 Ark_ScreenCaptureHandler CtorImpl()
 {
-    return new ScreenCaptureHandlerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -37,22 +32,14 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String GetOriginImpl(Ark_ScreenCaptureHandler peer)
 {
-    std::string result = "";
-    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
-    result = peer->handler->GetOrigin();
-    return Converter::ArkValue<Ark_String>(result, Converter::FC);
+    return {};
 }
 void GrantImpl(Ark_ScreenCaptureHandler peer,
                const Ark_ScreenCaptureConfig* config)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    CHECK_NULL_VOID(config);
-    peer->handler->Grant();
 }
 void DenyImpl(Ark_ScreenCaptureHandler peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->Deny();
 }
 } // ScreenCaptureHandlerAccessor
 const GENERATED_ArkUIScreenCaptureHandlerAccessor* GetScreenCaptureHandlerAccessor()

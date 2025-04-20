@@ -21,10 +21,7 @@ import { Position as Position } from "./Graphics"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
-import { Serializer } from "./generated/peers/Serializer"
-import { CallbackKind } from "./generated/peers/CallbackKind"
-import { Deserializer } from "./generated/peers/Deserializer"
-import { CallbackTransformer } from "./generated/peers/CallbackTransformer"
+import { Serializer } from "./component"
 export class FrameNodeInternal {
     public static fromPtr(ptr: KPointer): FrameNode {
         const obj : FrameNode = new FrameNode(undefined)
@@ -40,9 +37,9 @@ export class FrameNode implements MaterializedBase {
     static ctor_framenode(uiContext: UIContext): KPointer {
         const thisSerializer : Serializer = Serializer.hold()
         // thisSerializer.writeUIContext(uiContext)
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_ctor(thisSerializer.asBuffer(), thisSerializer.length())
+        // const retval  = ArkUIGeneratedNativeModule._FrameNode_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        return retval
+        return 0
     }
     constructor(uiContext?: UIContext) {
         if ((uiContext) !== (undefined))
@@ -163,10 +160,10 @@ export class FrameNode implements MaterializedBase {
         return retval
     }
     private getPositionToWindowWithTransform_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindowWithTransform(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : Position = retvalDeserializer.readGraphicsPosition()
-        return returnResult
+        // const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindowWithTransform(this.peer!.ptr)
+        // let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // const returnResult : Position = retvalDeserializer.readGraphicsPosition()
+        return {x: 0, y: 0};
     }
     private static getFrameNodeByKey_serialize(name: string): FrameNode {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByKey(name)

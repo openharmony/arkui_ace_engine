@@ -16,17 +16,15 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "pixel_map_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PixelMapAccessor {
 void DestroyPeerImpl(Ark_PixelMap peer)
 {
-    PixelMapPeer::Destroy(peer);
 }
 Ark_PixelMap CtorImpl()
 {
-    return PixelMapPeer::Create({});
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -63,4 +61,7 @@ const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor()
     return &PixelMapAccessorImpl;
 }
 
+struct PixelMapPeer {
+    virtual ~PixelMapPeer() = default;
+};
 }
