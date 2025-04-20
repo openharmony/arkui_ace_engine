@@ -616,7 +616,8 @@ NestedScrollOptions ListModelNG::GetListNestedScroll(FrameNode* frameNode)
 int32_t ListModelNG::GetListScrollBar(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    return static_cast<int32_t>(frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarMode().value());
+    return static_cast<int32_t>(
+        frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarMode().value_or(DisplayMode::AUTO));
 }
 
 void ListModelNG::SetListScrollBar(FrameNode* frameNode, int32_t barState)
