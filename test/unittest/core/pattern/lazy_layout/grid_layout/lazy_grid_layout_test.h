@@ -53,6 +53,7 @@ public:
     RefPtr<LazyGridLayoutPattern> pattern_;
     RefPtr<LazyGridLayoutProperty> layoutProperty_;
     RefPtr<ScrollablePattern> scrollablePattern_;
+    RefPtr<FrameNode> scrollableFrameNode_;
 };
 } // namespace OHOS::Ace::NG
 
