@@ -53,7 +53,7 @@ public:
 
     void InitDragDropEvent();
     void DeInitDragDropEvent();
-    void SetDragState(ListItemDragState dragState);
+    void SetIsNeedDividerAnimation(bool isNeedDividerAnimation);
 
 private:
     void HandleOnItemLongPress(const GestureEvent& info);
@@ -91,6 +91,7 @@ private:
     int32_t lanes_ = 1;
     bool isStackFromEnd_ = false;
     bool scrolling_ = false;
+    bool isSwapAnimationStopped_ = true;
     OffsetF realOffset_;
 
     int32_t fromIndex_ = -1;
