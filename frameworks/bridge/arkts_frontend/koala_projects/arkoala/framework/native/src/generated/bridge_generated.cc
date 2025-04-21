@@ -14,6 +14,7 @@
  */
 #include <vector>
 #include <string>
+#include "callback_kind.h"
 
 #define KOALA_INTEROP_MODULE ArkUIGeneratedNativeModule
 #include "common-interop.h"
@@ -9874,6 +9875,26 @@ void impl_DatePickerAttribute__onChangeEvent_selected(Ark_NativePointer thisPtr,
         GetNodeModifiers()->getDatePickerModifier()->set_onChangeEvent_selected(self, (const Callback_Date_Void*)&callback_value);
 }
 KOALA_INTEROP_DIRECT_V3(DatePickerAttribute__onChangeEvent_selected, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_NodeContainerInterface_addNodeContainerRootNode(Ark_NativePointer thisPtr, Ark_NativePointer childPtr) {
+    Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+    Ark_NodeHandle child = reinterpret_cast<Ark_NodeHandle>(childPtr);
+    GetNodeModifiers()->getNodeContainerModifier()->addNodeContainerRootNode(self, child);
+}
+KOALA_INTEROP_DIRECT_V2(NodeContainerInterface_addNodeContainerRootNode, Ark_NativePointer, Ark_NativePointer)
+void impl_NodeContainerInterface_setAboutToAppear(
+Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength)
+{
+    Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Callback_Void value_value = { thisDeserializer.readCallbackResource(),
+        reinterpret_cast<void (*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(
+            reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))),
+        reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(
+            thisDeserializer.readPointerOrDefault(
+                reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void)))) };
+    GetNodeModifiers()->getNodeContainerModifier()->setAboutToAppear(self, (const Callback_Void*)&value_value);
+}
+KOALA_INTEROP_DIRECT_V3(NodeContainerInterface_setAboutToAppear, Ark_NativePointer, KSerializerBuffer, Ark_Int32)
 Ark_NativePointer impl_Divider_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getDividerModifier()->construct(id, flags);
 }
@@ -22302,6 +22323,10 @@ void impl_SwiperAttribute_onAnimationEnd(Ark_NativePointer thisPtr, KSerializerB
         }
         Opt_OnSwiperAnimationEndCallback value_value = value_value_buf;;
         GetNodeModifiers()->getSwiperModifier()->setOnAnimationEnd(self, (const Opt_OnSwiperAnimationEndCallback*)&value_value);
+    }
+KOALA_INTEROP_DIRECT_V2(ReplaceSymbolEffect_setScope, Ark_NativePointer, Ark_Int32)
+Ark_NativePointer impl_FrameNode_ctor(KSerializerBuffer thisArray, int32_t thisLength) {
+        return GetAccessors()->getFrameNodeAccessor()->ctor();
 }
 KOALA_INTEROP_DIRECT_V3(SwiperAttribute_onAnimationEnd, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_SwiperAttribute_onGestureSwipe(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {

@@ -1702,6 +1702,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NodeContainerInterface_setNodeContainerOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _NodeContainerInterface_addNodeContainerRootNode(thisPtr: KPointer, ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _NodeContainerInterface_setAboutToAppear(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _Panel_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _PanelInterface_setPanelOptions(ptr: KPointer, show: KInt): void

@@ -22,20 +22,16 @@
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FrameNodeAccessor {
-void DestroyPeerImpl(Ark_FrameNode peer)
-{
-    FrameNodePeer::Destroy(peer);
 }
-Ark_FrameNode CtorImpl(Ark_UIContext uiContext)
+Ark_FrameNode CtorImpl()
 {
-    auto peer = FrameNodePeer::Create(&uiContext);
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    peer->node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
-    peer->node->SetExclusiveEventForChild(true);
-    peer->node->SetIsArkTsFrameNode(true);
+    auto customFrameNode = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+    customFrameNode->SetExclusiveEventForChild(true);
+    customFrameNode->SetIsArkTsFrameNode(true);
+    auto peer = FrameNodePeer::Create(customFrameNode);
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()

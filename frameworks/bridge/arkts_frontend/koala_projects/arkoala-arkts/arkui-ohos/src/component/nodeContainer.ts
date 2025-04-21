@@ -23,11 +23,12 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
-import { NodeController } from "./ohos.arkui.node"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-
+import { NodeController } from "../NodeController"
+import { UIContext } from "@ohos/arkui/UIContext"
+import { FrameNode } from "../FrameNode"
 export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -43,6 +44,15 @@ export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeNodeController(controller)
         ArkUIGeneratedNativeModule._NodeContainerInterface_setNodeContainerOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    addNodeContainerRootNode(child: FrameNode) {
+        ArkUIGeneratedNativeModule._NodeContainerInterface_addNodeContainerRootNode(this.peer.ptr, child.getPeer()?.ptr as pointer)
+    }
+    aboutToAppearAttribute(value: (() => void)) {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._NodeContainerInterface_setAboutToAppear(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -61,9 +71,15 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
     /** @memo */
     public setNodeContainerOptions(controller: NodeController): this {
         if (this.checkPriority("setNodeContainerOptions")) {
-            const controller_casted = controller as (NodeController)
-            this.getPeer()?.setNodeContainerOptionsAttribute(controller_casted)
-            return this
+            this.controller = controller
+            // makeNode
+            const makeNodeFunc = controller.__makeNode__
+            const child = makeNodeFunc(new UIContext(100000))
+            this.getPeer().addNodeContainerRootNode(child!)
+
+            // aboutToAppear
+            const aboutToAppearFunc = controller.aboutToAppear
+            this.getPeer().aboutToAppearAttribute(aboutToAppearFunc)
         }
         return this
     }

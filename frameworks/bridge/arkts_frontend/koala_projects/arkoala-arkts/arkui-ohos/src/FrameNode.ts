@@ -31,20 +31,21 @@ export class FrameNodeInternal {
 }
 export class FrameNode implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
+    uiContext: UIContext | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    static ctor_framenode(uiContext: UIContext): KPointer {
+    static ctor_framenode(): KPointer {
         const thisSerializer : Serializer = Serializer.hold()
-        // thisSerializer.writeUIContext(uiContext)
-        // const retval  = ArkUIGeneratedNativeModule._FrameNode_ctor(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        return 0
+        return retval
     }
     constructor(uiContext?: UIContext) {
         if ((uiContext) !== (undefined))
         {
-            const ctorPtr : KPointer = FrameNode.ctor_framenode((uiContext)!)
+            this.uiContext = uiContext
+            const ctorPtr : KPointer = FrameNode.ctor_framenode()
             this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
         }
     }
