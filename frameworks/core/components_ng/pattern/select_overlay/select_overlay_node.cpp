@@ -843,7 +843,7 @@ void SetPasteNodeProperties(const RefPtr<FrameNode>& pasteNode, const RefPtr<Sel
     pasteLayoutProperty->UpdateFontSize(theme->GetMenuFontSize());
     pasteLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
     pastePaintProperty->UpdateFontColor(theme->GetMenuFontColor());
-    pasteLayoutProperty->UpdateStateEffect(false);
+    pasteLayoutProperty->UpdateStateEffect(true);
     auto horInterval = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
                        static_cast<float>(theme->GetOutPadding().ConvertToPx());
     auto pasteButtonRenderContext = pasteNode->GetRenderContext();
