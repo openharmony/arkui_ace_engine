@@ -550,4 +550,138 @@ void JSSecurityUIExtension::Create(const JSCallbackInfo& info)
 }
 
 void JSSecurityUIExtension::Mock(const JSCallbackInfo& info) {}
+
+void JSAbilityComponent::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSAbilityComponent>::Declare("AbilityComponent");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSAbilityComponent>::StaticMethod("create", &JSAbilityComponent::Create, opt);
+    JSClass<JSAbilityComponent>::StaticMethod("onReady", &JSAbilityComponent::Mock, opt);
+    JSClass<JSAbilityComponent>::StaticMethod("onDestroy", &JSAbilityComponent::Mock, opt);
+    JSClass<JSAbilityComponent>::StaticMethod("onAbilityCreated", &JSAbilityComponent::Mock, opt);
+    JSClass<JSAbilityComponent>::StaticMethod("onAbilityMoveToFront", &JSAbilityComponent::Mock, opt);
+    JSClass<JSAbilityComponent>::StaticMethod("onAbilityWillRemove", &JSAbilityComponent::Mock, opt);
+    JSClass<JSAbilityComponent>::StaticMethod("onConnect", &JSAbilityComponent::Mock, opt);
+    JSClass<JSAbilityComponent>::StaticMethod("onDisconnect", &JSAbilityComponent::Mock, opt);
+    JSClass<JSAbilityComponent>::StaticMethod("width", &JSAbilityComponent::Mock, opt);
+    JSClass<JSAbilityComponent>::StaticMethod("height", &JSAbilityComponent::Mock, opt);
+    JSClass<JSAbilityComponent>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSAbilityComponent::Create(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    CreateMockComponent("AbilityComponent");
+}
+
+void JSAbilityComponent::Mock(const JSCallbackInfo& info) {}
+
+void JSSceneView::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSSceneView>::Declare("Component3D");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSSceneView>::StaticMethod("create", &JSSceneView::Create, opt);
+    JSClass<JSSceneView>::StaticMethod("gestureAccess", &JSSceneView::Mock);
+    JSClass<JSSceneView>::StaticMethod("environment", &JSSceneView::Mock);
+    JSClass<JSSceneView>::StaticMethod("customRender", &JSSceneView::Mock);
+    JSClass<JSSceneView>::StaticMethod("shader", &JSSceneView::Mock);
+    JSClass<JSSceneView>::StaticMethod("renderWidth", &JSSceneView::Mock);
+    JSClass<JSSceneView>::StaticMethod("renderHeight", &JSSceneView::Mock);
+    JSClass<JSSceneView>::StaticMethod("renderFrameRateHint", &JSSceneView::Mock);
+    JSClass<JSSceneView>::StaticMethod("shaderImageTexture", &JSSceneView::Mock);
+    JSClass<JSSceneView>::StaticMethod("shaderInputBuffer", &JSSceneView::Mock);
+    JSClass<JSSceneView>::StaticMethod("OnError", &JSSceneView::Mock);
+    JSClass<JSSceneView>::StaticMethod("onAttach", &JSSceneView::Mock);
+    JSClass<JSSceneView>::StaticMethod("onAppear", &JSSceneView::Mock);
+    JSClass<JSSceneView>::StaticMethod("onDetach", &JSSceneView::Mock);
+    JSClass<JSSceneView>::StaticMethod("onDisAppear", &JSSceneView::Mock);
+    JSClass<JSSceneView>::StaticMethod("onClick", &JSSceneView::Mock);
+    JSClass<JSSceneView>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSSceneView::Create(const JSCallbackInfo& info)
+{
+    CreateMockComponent("Component3D");
+}
+
+void JSSceneView::Mock(const JSCallbackInfo& info) {}
+
+void JSEmbeddedComponent::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSEmbeddedComponent>::Declare("EmbeddedComponent");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSEmbeddedComponent>::StaticMethod("create", &JSEmbeddedComponent::Create, opt);
+    JSClass<JSEmbeddedComponent>::StaticMethod("onTerminated", &JSEmbeddedComponent::Mock);
+    JSClass<JSEmbeddedComponent>::StaticMethod("onError", &JSEmbeddedComponent::Mock);
+    JSClass<JSEmbeddedComponent>::StaticMethod("width", &JSEmbeddedComponent::Mock);
+    JSClass<JSEmbeddedComponent>::StaticMethod("height", &JSEmbeddedComponent::Mock);
+    JSClass<JSEmbeddedComponent>::StaticMethod("constraintSize", &JSEmbeddedComponent::Mock);
+    JSClass<JSEmbeddedComponent>::StaticMethod("aspectRatio", &JSEmbeddedComponent::Mock);
+    JSClass<JSEmbeddedComponent>::StaticMethod("layoutWeight", &JSEmbeddedComponent::Mock);
+    JSClass<JSEmbeddedComponent>::StaticMethod("flexBasis", &JSEmbeddedComponent::Mock);
+    JSClass<JSEmbeddedComponent>::StaticMethod("flexGrow", &JSEmbeddedComponent::Mock);
+    JSClass<JSEmbeddedComponent>::StaticMethod("flexShrink", &JSEmbeddedComponent::Mock);
+    JSClass<JSEmbeddedComponent>::StaticMethod("opacity", &JSEmbeddedComponent::Mock);
+    JSClass<JSEmbeddedComponent>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSEmbeddedComponent::Create(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+    CreateMockComponent("EmbeddedComponent");
+}
+
+void JSEmbeddedComponent::Mock(const JSCallbackInfo& info) {}
+
+void JSIsolatedComponent::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSIsolatedComponent>::Declare("IsolatedComponent");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSIsolatedComponent>::StaticMethod("create", &JSIsolatedComponent::Create, opt);
+    JSClass<JSIsolatedComponent>::StaticMethod("onError", &JSIsolatedComponent::Mock, opt);
+    JSClass<JSIsolatedComponent>::StaticMethod("onAppear", &JSIsolatedComponent::Mock);
+    JSClass<JSIsolatedComponent>::StaticMethod("onDisAppear", &JSIsolatedComponent::Mock);
+    JSClass<JSIsolatedComponent>::StaticMethod("width", &JSIsolatedComponent::Mock, opt);
+    JSClass<JSIsolatedComponent>::StaticMethod("height", &JSIsolatedComponent::Mock, opt);
+    JSClass<JSIsolatedComponent>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSIsolatedComponent::Create(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+    CreateMockComponent("IsolatedComponent");
+}
+
+void JSIsolatedComponent::Mock(const JSCallbackInfo& info) {}
+
+void JSRemoteWindow::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSRemoteWindow>::Declare("RemoteWindow");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSRemoteWindow>::StaticMethod("create", &JSRemoteWindow::Create, opt);
+
+    JSClass<JSRemoteWindow>::StaticMethod("onTouch", &JSRemoteWindow::Mock);
+    JSClass<JSRemoteWindow>::StaticMethod("onHover", &JSRemoteWindow::Mock);
+    JSClass<JSRemoteWindow>::StaticMethod("onKeyEvent", &JSRemoteWindow::Mock);
+    JSClass<JSRemoteWindow>::StaticMethod("onDeleteEvent", &JSRemoteWindow::Mock);
+    JSClass<JSRemoteWindow>::StaticMethod("onClick", &JSRemoteWindow::Mock);
+
+    JSClass<JSRemoteWindow>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSRemoteWindow::Create(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    CreateMockComponent("RemoteWindow");
+}
+
+void JSRemoteWindow::Mock(const JSCallbackInfo& info) {}
 } // namespace OHOS::Ace::Framework

@@ -76,7 +76,9 @@
 #include "bridge/declarative_frontend/jsview/js_image_span.h"
 #include "bridge/declarative_frontend/jsview/js_indexer.h"
 #include "bridge/declarative_frontend/jsview/js_indicator.h"
+#if defined(DYNAMIC_COMPONENT_SUPPORT)
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
+#endif
 #include "bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
@@ -754,9 +756,14 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LinearGradient", JSLinearGradient::JSBind },
     { "ImageSpan", JSImageSpan::JSBind },
 #ifdef PREVIEW
+    { "AbilityComponent", JSAbilityComponent::JSBind },
+    { "Component3D", JSSceneView::JSBind },
+    { "EmbeddedComponent", JSEmbeddedComponent::JSBind },
     { "FormComponent", JSForm::JSBind },
+    { "IsolatedComponent", JSIsolatedComponent::JSBind },
     { "XComponent", JSXComponent::JSBind },
     { "XComponentController", JSXComponentController::JSBind },
+    { "RemoteWindow", JSRemoteWindow::JSBind },
     { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
