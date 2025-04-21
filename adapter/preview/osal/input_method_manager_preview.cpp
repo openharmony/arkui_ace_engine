@@ -40,7 +40,7 @@ bool InputMethodManager::NeedSoftKeyboard() const
     return false;
 }
 
-void InputMethodManager::CloseKeyboard() {}
+void InputMethodManager::CloseKeyboard(bool disableNeedToRequestKeyboard) {}
 
 void InputMethodManager::CloseKeyboardInProcess() {}
 
