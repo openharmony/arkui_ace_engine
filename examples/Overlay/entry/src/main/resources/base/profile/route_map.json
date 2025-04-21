@@ -151,6 +151,41 @@
       "buildFunction": "PopupBuilder"
     },
     {
+      "name": "popupPositionTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupPositionTest.ets",
+      "buildFunction": "PopupPositionBuilder"
+    },
+    {
+      "name": "PopupStyleBuilder",
+      "pageSourceFile": "src/main/ets/pages/components/popup/PopupStyleTest.ets",
+      "buildFunction": "PopupStyleBuilder"
+    },
+    {
+      "name": "PopupDismissTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupDismissTets.ets",
+      "buildFunction": "PopupDismissBuilder"
+    },
+    {
+      "name": "PopupAdvancedTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupAdvancedTest.ets",
+      "buildFunction": "PopupAdvancedBuilder"
+    },
+    {
+      "name": "PopupAnimateTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupAnimateTest.ets",
+      "buildFunction": "PopupAnimateBuilder"
+    },
+    {
+      "name": "PopupTipTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupTipTest.ets",
+      "buildFunction": "PopupTipBuilder"
+    },
+    {
+      "name": "PopupDragTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupDragTest.ets",
+      "buildFunction": "PopupDragBuilder"
+    },
+    {
       "name": "ToastIndex",
       "pageSourceFile": "src/main/ets/pages/components/toast/Index.ets",
       "buildFunction": "ToastIndexBuilder"
@@ -159,6 +194,16 @@
       "name": "Toast",
       "pageSourceFile": "src/main/ets/pages/components/toast/toast.ets",
       "buildFunction": "ToastBuilder"
+    },
+    {
+      "name": "showToastTest",
+      "pageSourceFile": "src/main/ets/pages/components/toast/showToastTest.ets",
+      "buildFunction": "ShowToastBuilder"
+    },
+    {
+      "name": "toastPositionTest",
+      "pageSourceFile": "src/main/ets/pages/components/toast/toastPositionTest.ets",
+      "buildFunction": "ToastPositionBuilder"
     }
   ]
 }
