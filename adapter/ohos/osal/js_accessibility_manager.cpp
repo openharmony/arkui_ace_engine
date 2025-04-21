@@ -3370,19 +3370,66 @@ void JsAccessibilityManager::SendCacheAccessibilityEventForHost(const int32_t pa
     }
 }
 
-void JsAccessibilityManager::ReleaseCacheAccessibilityEvent(const int32_t pageId)
+bool JsAccessibilityManager::CheckPageEventValidInCache()
 {
-    if (pageIdEventMap_.count(pageId) && pageIdEventMap_[pageId].has_value()) {
-        auto event = pageIdEventMap_[pageId].value();
-        SendAccessibilityAsyncEventInner(event);
-        pageIdEventMap_.erase(pageId);
+    for (auto it = pageIdEventMap_.begin(); it !=  pageIdEventMap_.end();) {
+        if (it->second.has_value()) {
+            return true;
+        } else {
+            ++it;
+        }
+    }
+    return false;
+}
+
+bool JsAccessibilityManager::CheckPageEventByPageInCache(int32_t pageId)
+{
+    for (auto it = pageIdEventMap_.begin(); it !=  pageIdEventMap_.end();++it) {
+        if (it->second.has_value()) {
+            if (it->first == pageId) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void JsAccessibilityManager::ReleaseAllCacheAccessibilityEvent()
+{
+    for (auto it = pageIdEventMap_.begin(); it !=  pageIdEventMap_.end();) {
+        if (it->second.has_value()) {
+            auto event = it->second.value();
+            SendAccessibilityAsyncEventInner(event);
+            it = pageIdEventMap_.erase(it);
+        } else {
+            ++it;
+        }
     }
 }
 
-void JsAccessibilityManager::ReleasePageEvent(const RefPtr<NG::FrameNode>& node, bool deleteController)
+void JsAccessibilityManager::ReleaseCacheAccessibilityEvent(const int32_t pageId)
+{
+    auto it = pageIdEventMap_.find(pageId);
+    if (it != pageIdEventMap_.end() && it->second.has_value()) {
+        auto event = it->second.value();
+        SendAccessibilityAsyncEventInner(event);
+        pageIdEventMap_.erase(it);
+    }
+
+    if ((pageId == 0) || (pageId == -1)) {
+        ReleaseAllCacheAccessibilityEvent();
+    }
+}
+
+void JsAccessibilityManager::ReleasePageEvent(const RefPtr<NG::FrameNode>& node, bool deleteController, bool releaseAll)
 {
     if (pageController_.CheckNode(node, deleteController)) {
         ReleaseCacheAccessibilityEvent(node->GetPageId());
+    }
+
+    if (releaseAll) {
+        pageController_.DeleteInstanceNodeAll(node);
+        ReleaseAllCacheAccessibilityEvent();
     }
 }
 
@@ -3390,6 +3437,21 @@ void JsAccessibilityManager::AddToPageEventController(const RefPtr<NG::FrameNode
 {
     pageController_.Add(node);
 }
+
+bool JsAccessibilityManager::CheckPageEventCached(const RefPtr<NG::FrameNode>& node, bool onlyCurrentPage)
+{
+    if (onlyCurrentPage == false) {
+        return CheckPageEventValidInCache();
+    }
+    CHECK_NULL_RETURN(node, false);
+
+    auto pageId = node->GetPageId();
+    if ((pageId == 0) || (pageId == -1)) {
+        return CheckPageEventValidInCache();
+    }
+    return CheckPageEventByPageInCache(pageId);
+}
+
 
 void JsAccessibilityManager::AddFrameNodeToUecStatusVec(const RefPtr<NG::FrameNode>& node)
 {
