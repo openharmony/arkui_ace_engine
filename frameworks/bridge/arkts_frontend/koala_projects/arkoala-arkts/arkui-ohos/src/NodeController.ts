@@ -43,11 +43,13 @@ export abstract class NodeController {
         }
     }
     aboutToResize(size: Size) { }
-    aboutToAppear() {}
-    aboutToDisappear() {}
+    aboutToAppear() { }
+    aboutToDisappear() { }
     // onTouchEvent(event: TouchEvent) {}
-    onAttach() {}
-    onDetach() {}
-    onBind() {}
-    onUnBind() {}
+    onAttach() { }
+    onDetach() { }
+    onBind() { }
+    onUnBind() { }
+    onWillBind() { }
+    onWillUnBind() { }
 }

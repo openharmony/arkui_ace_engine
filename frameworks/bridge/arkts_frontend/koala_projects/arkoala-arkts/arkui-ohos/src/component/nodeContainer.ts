@@ -29,6 +29,7 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { NodeController } from "../NodeController"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { FrameNode } from "../FrameNode"
+import { Size } from "../Graphics"
 export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -53,6 +54,54 @@ export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
         const thisSerializer: Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
         ArkUIGeneratedNativeModule._NodeContainerInterface_setAboutToAppear(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    aboutToDisappearAttribute(value: (() => void)) {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._NodeContainerInterface_setAboutToDisappear(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    aboutToResizeAttribute(value: ((size: Size) => void)) {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._NodeContainerInterface_setAboutToResize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onAttachAttribute(value: (() => void)) {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._NodeContainerInterface_setOnAttach(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDetachAttribute(value: (() => void)) {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._NodeContainerInterface_setOnDetach(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onBindAttribute(value: (() => void)) {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._NodeContainerInterface_setOnBind(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onUnBindAttribute(value: (() => void)) {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._NodeContainerInterface_setOnUnBind(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onWillBindAttribute(value: (() => void)) {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._NodeContainerInterface_setOnWillBind(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onWillUnBindAttribute(value: (() => void)) {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._NodeContainerInterface_setOnWillUnBind(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -80,6 +129,38 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
             // aboutToAppear
             const aboutToAppearFunc = controller.aboutToAppear
             this.getPeer().aboutToAppearAttribute(aboutToAppearFunc)
+
+            // aboutToDisappear
+            const aboutToDisappearFunc = controller.aboutToDisappear
+            this.getPeer().aboutToDisappearAttribute(aboutToDisappearFunc)
+
+            // aboutToResize
+            const aboutToResizeFunc = controller.aboutToResize
+            this.getPeer().aboutToResizeAttribute(aboutToResizeFunc)
+
+            // onAttach
+            const onAttach = controller.onAttach
+            this.getPeer().onAttachAttribute(onAttach)
+
+            // onDetach
+            const onDetach = controller.onDetach
+            this.getPeer().onDetachAttribute(onDetach)
+
+            // onBind
+            const onBind = controller.onBind
+            this.getPeer().onBindAttribute(onBind)
+
+            // onUnBind
+            const onUnBind = controller.onUnBind
+            this.getPeer().onUnBindAttribute(onUnBind)
+
+            // onWillBind
+            const onWillBind = controller.onWillBind
+            this.getPeer().onWillBindAttribute(onWillBind)
+
+            // onWillUnBind
+            const onWillUnBind = controller.onWillUnBind
+            this.getPeer().onWillUnBindAttribute(onWillUnBind)
         }
         return this
     }
