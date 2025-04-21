@@ -63,6 +63,7 @@ public:
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) = 0;
     virtual void SetScrollEnabled(bool scrollEnabled) = 0;
     virtual void SetFriction(double friction) = 0;
+    virtual void SetFocusWrapMode(const std::optional<FocusWrapMode>& focusWrapMode) {}
     virtual void SetAlignItems(GridItemAlignment itemAlign) = 0;
     virtual void SetOnScrollToIndex(std::function<void(const BaseEventInfo*)>&& value) = 0;
     virtual void SetOnScrollBarUpdate(

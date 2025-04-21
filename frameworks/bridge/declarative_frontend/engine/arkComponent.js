@@ -6695,6 +6695,10 @@ class ArkGridComponent extends ArkScrollable {
     modifierWithKey(this._modifiersWithKeys, GridFrictionModifier.identity, GridFrictionModifier, value);
     return this;
   }
+  focusWrapMode(value) {
+    modifierWithKey(this._modifiersWithKeys, GridFocusWrapModeModifier.identity, GridFocusWrapModeModifier, value);
+    return this;
+  }
   onScroll(event) {
     throw new Error('Method not implemented.');
   }
@@ -6980,6 +6984,20 @@ class GridFrictionModifier extends ModifierWithKey {
   }
 }
 GridFrictionModifier.identity = Symbol('gridFriction');
+class GridFocusWrapModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetFocusWrapMode(node);
+    }
+    else {
+      getUINativeModule().grid.setFocusWrapMode(node, this.value);
+    }
+  }
+}
+GridFocusWrapModeModifier.identity = Symbol('gridFocusWrapMode');
 class GridOnScrollFrameBeginModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

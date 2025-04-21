@@ -55,6 +55,7 @@ public:
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetScrollEnabled(bool scrollEnabled) override;
     void SetFriction(double friction) override;
+    void SetFocusWrapMode(const std::optional<FocusWrapMode>& focusWrapMode) override;
     void SetAlignItems(GridItemAlignment itemAlign) override;
     void SetOnScrollToIndex(ScrollToIndexFunc&& value) override;
     void SetOnScrollBarUpdate(ScrollBarUpdateFunc&& value) override;
@@ -103,6 +104,7 @@ public:
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
     static void SetFriction(FrameNode* frameNode, const std::optional<double>& value);
+    static void SetFocusWrapMode(FrameNode* frameNode, const std::optional<FocusWrapMode>& focusWrapMode);
     static void SetAlignItems(FrameNode* frameNode, const std::optional<GridItemAlignment>& itemAlign);
     static std::string GetColumnsTemplate(FrameNode* frameNode);
     static std::string GetRowsTemplate(FrameNode* frameNode);

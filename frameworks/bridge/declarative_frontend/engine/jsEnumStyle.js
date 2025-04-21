@@ -507,6 +507,12 @@ let EffectEdge;
   EffectEdge[EffectEdge.ALL = 3] = 'ALL';
 })(EffectEdge || (EffectEdge = {}));
 
+let FocusWrapMode;
+(function (FocusWrapMode) {
+  FocusWrapMode[FocusWrapMode.DEFAULT = 0] = 'DEFAULT';
+  FocusWrapMode[FocusWrapMode.WRAP_WITH_ARROW = 1] = 'WRAP_WITH_ARROW';
+})(FocusWrapMode || (FocusWrapMode = {}));
+
 let SwipeEdgeEffect;
 (function (SwipeEdgeEffect) {
   SwipeEdgeEffect[SwipeEdgeEffect.Spring = 0] = 'Spring';

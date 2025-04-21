@@ -581,6 +581,11 @@ enum class EffectEdge {
     ALL = 3,
 };
 
+enum class FocusWrapMode {
+    DEFAULT = 0,
+    WRAP_WITH_ARROW,
+};
+
 enum class BorderStyle {
     SOLID,
     DASHED,

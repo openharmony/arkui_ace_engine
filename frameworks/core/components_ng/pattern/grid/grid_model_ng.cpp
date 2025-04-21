@@ -218,6 +218,15 @@ void GridModelNG::SetFriction(double friction)
     pattern->SetFriction(friction);
 }
 
+void GridModelNG::SetFocusWrapMode(const std::optional<FocusWrapMode>& focusWrapMode)
+{
+    if (focusWrapMode) {
+        ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, FocusWrapMode, focusWrapMode.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(GridLayoutProperty, FocusWrapMode);
+    }
+}
+
 void GridModelNG::SetAlignItems(GridItemAlignment itemAlign)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, AlignItems, itemAlign);
@@ -555,6 +564,15 @@ void GridModelNG::SetFriction(FrameNode* frameNode, const std::optional<double>&
         friction.reset();
     }
     pattern->SetFriction(friction.value_or(-1.0f));
+}
+
+void GridModelNG::SetFocusWrapMode(FrameNode* frameNode, const std::optional<FocusWrapMode>& focusWrapMode)
+{
+    if (focusWrapMode) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, FocusWrapMode, focusWrapMode.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, FocusWrapMode, frameNode);
+    }
 }
 
 void GridModelNG::SetAlignItems(FrameNode* frameNode, const std::optional<GridItemAlignment>& itemAlign)
