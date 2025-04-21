@@ -220,16 +220,6 @@ struct StyleOptionsKeeper {
 
     void TearDown()
     {
-        GeneratedModifier::GetTextStyle_styled_stringAccessor()->destroyPeer(peerTextStyle);
-        GeneratedModifier::GetDecorationStyleAccessor()->destroyPeer(decorationStylePeer);
-        GeneratedModifier::GetBaselineOffsetStyleAccessor()->destroyPeer(peerBaselineOffsetStyle);
-        GeneratedModifier::GetLetterSpacingStyleAccessor()->destroyPeer(peerLetterSpacingStyle);
-        GeneratedModifier::GetTextShadowStyleAccessor()->destroyPeer(peerTextShadowStyle);
-        GeneratedModifier::GetLineHeightStyleAccessor()->destroyPeer(peerLineHeightStyle);
-        GeneratedModifier::GetBackgroundColorStyleAccessor()->destroyPeer(peerBackgroundColorStyle);
-        GeneratedModifier::GetUrlStyleAccessor()->destroyPeer(peerUrlStyle);
-        GeneratedModifier::GetParagraphStyleAccessor()->destroyPeer(peerParagraphStyle);
-        GeneratedModifier::GetParagraphStyleAccessor()->destroyPeer(peerParagraphStylePM);
         while (!lengthMetrics.empty()) {
             auto item = lengthMetrics.back();
             lengthMetrics.pop_back();
@@ -428,10 +418,7 @@ struct StyledStringUnionImageAttachment {
         return &value;
     }
     Opt_Array_StyleOptions* Styles() { return nullptr; }
-    void TearDown()
-    {
-        GeneratedModifier::GetImageAttachmentAccessor()->destroyPeer(peer);
-    }
+    void TearDown() {}
 private:
     ImageAttachmentPeer* peer = nullptr;
 };

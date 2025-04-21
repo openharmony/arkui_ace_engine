@@ -20,6 +20,9 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
+#include "core/interfaces/native/implementation/background_color_style_peer.h"
+#include "core/interfaces/native/implementation/decoration_style_peer.h"
+#include "core/interfaces/native/implementation/text_style_styled_string_peer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -37,7 +40,7 @@ namespace {
 struct StyleTestPlan {
     int32_t start;
     int32_t length;
-    Ark_Color color;
+    Color color;
 };
 } // namespace
 
@@ -171,7 +174,7 @@ HWTEST_F(MutableStyledStringAccessorTest, removeStringInvalidTest, TestSize.Leve
  * The conversion of all spans is checked in the tests for StyledStringAccessor ctor.
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, DISABLED_replaceStyleTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorTest, replaceStyleTest, TestSize.Level1)
 {
     peer_->spanString = AceType::MakeRefPtr<MutableSpanString>(u"replaceStyleTest");
     const std::vector<RefPtr<SpanBase>> spans {
@@ -182,27 +185,20 @@ HWTEST_F(MutableStyledStringAccessorTest, DISABLED_replaceStyleTest, TestSize.Le
     peer_->spanString->BindWithSpans(spans);
 
     const std::vector<StyleTestPlan> testPlan {
-        { 0, 7, ARK_COLOR_BLACK },
-        { 7, 5, ARK_COLOR_GRAY },
-        { 12, 4, ARK_COLOR_WHITE },
+        { 0, 7, Color::BLACK },
+        { 7, 5, Color::GRAY },
+        { 12, 4, Color::WHITE },
     };
     for (const auto& plan : testPlan) {
-#ifdef WRON_TYPE
-        const Ark_TextStyle_styled_string arkStyle {
-            .fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(plan.color),
-            .fontFamily = Converter::ArkValue<Opt_String>(Ark_Empty()),
-            .fontSize = Converter::ArkValue<Opt_Number>(Ark_Empty()),
-            .fontWeight = Converter::ArkValue<Opt_Number>(Ark_Empty()),
-            .fontStyle = Converter::ArkValue<Opt_FontStyle>(Ark_Empty())
-        };
-#endif
+        auto arkStyle = PeerUtils::CreatePeer<TextStyle_styled_stringPeer>();
+        arkStyle->span = Referenced::MakeRefPtr<FontSpan>(Font {
+            .fontColor = plan.color
+        });
         const Ark_SpanStyle arkSpan {
             .start = Converter::ArkValue<Ark_Number>(plan.start),
             .length = Converter::ArkValue<Ark_Number>(plan.length),
             .styledKey = ARK_STYLED_STRING_KEY_FONT,
-#ifdef  WRON_TYPE
             .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_TextStyle_styled_string>(arkStyle)
-#endif
         };
         accessor_->replaceStyle(vmContext_, peer_, &arkSpan);
         ASSERT_NE(peer_->spanString, nullptr);
@@ -210,7 +206,7 @@ HWTEST_F(MutableStyledStringAccessorTest, DISABLED_replaceStyleTest, TestSize.Le
         ASSERT_EQ(currentSpans.size(), 1);
         const auto fontSpan = AceType::DynamicCast<FontSpan>(currentSpans.front());
         ASSERT_NE(fontSpan, nullptr);
-        EXPECT_EQ(fontSpan->GetFont().fontColor, Converter::OptConvert<Color>(plan.color).value_or(Color::TRANSPARENT));
+        EXPECT_EQ(fontSpan->GetFont().fontColor, plan.color);
     }
     EXPECT_EQ(peer_->spanString->GetU16string(), u"replaceStyleTest");
 }
@@ -232,22 +228,14 @@ HWTEST_F(MutableStyledStringAccessorTest, replaceStyleInvalidTest, TestSize.Leve
     peer_->spanString->BindWithSpans(spans);
 
     accessor_->replaceStyle(vmContext_, peer_, nullptr);
-#ifdef WRONG_TYPE
-    const Ark_TextStyle_styled_string arkStyle {
-        .fontColor = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
-        .fontFamily = Converter::ArkValue<Opt_String>(Ark_Empty()),
-        .fontSize = Converter::ArkValue<Opt_Number>(Ark_Empty()),
-        .fontWeight = Converter::ArkValue<Opt_Number>(Ark_Empty()),
-        .fontStyle = Converter::ArkValue<Opt_FontStyle>(Ark_Empty())
-    };
-#endif
+
+    auto arkStyle = PeerUtils::CreatePeer<TextStyle_styled_stringPeer>();
+    arkStyle->span = Referenced::MakeRefPtr<FontSpan>();
     Ark_SpanStyle arkSpan {
         .start = Converter::ArkValue<Ark_Number>(0),
         .length = Converter::ArkValue<Ark_Number>(-7),
         .styledKey = ARK_STYLED_STRING_KEY_FONT,
-#ifdef WRONG_TYPE
         .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_TextStyle_styled_string>(arkStyle)
-#endif
     };
     accessor_->replaceStyle(vmContext_, peer_, &arkSpan);
     arkSpan.start = Converter::ArkValue<Ark_Number>(-7);
@@ -268,30 +256,24 @@ HWTEST_F(MutableStyledStringAccessorTest, replaceStyleInvalidTest, TestSize.Leve
  * The conversion of all spans is checked in the tests for StyledStringAccessor ctor.
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, DISABLED_setStyleTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorTest, setStyleTest, TestSize.Level1)
 {
     peer_->spanString = AceType::MakeRefPtr<MutableSpanString>(u"setStyleTest");
     const std::vector<StyleTestPlan> testPlan {
-        { 0, 3, ARK_COLOR_RED },
-        { 3, 5, ARK_COLOR_GREEN },
-        { 8, 4, ARK_COLOR_BLUE },
+        { 0, 3, Color::RED },
+        { 3, 5, Color::GREEN },
+        { 8, 4, Color::BLUE },
     };
     for (const auto& plan : testPlan) {
-#ifdef WRONG_TYPE
-        Ark_BackgroundColorStyle arkStyle {
-            .textBackgroundStyle {
-                .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(plan.color),
-                .radius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(Ark_Empty())
-            },
-        };
-#endif
+        auto arkStyle = PeerUtils::CreatePeer<BackgroundColorStylePeer>();
+        arkStyle->span = Referenced::MakeRefPtr<BackgroundColorSpan>(TextBackgroundStyle {
+            .backgroundColor = plan.color
+        });
         const Ark_SpanStyle arkSpan {
             .start = Converter::ArkValue<Ark_Number>(plan.start),
             .length = Converter::ArkValue<Ark_Number>(plan.length),
             .styledKey = ARK_STYLED_STRING_KEY_BACKGROUND_COLOR,
-#ifdef WRONG_TYPE
             .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_BackgroundColorStyle>(arkStyle)
-#endif
         };
         accessor_->setStyle(vmContext_, peer_, &arkSpan);
         ASSERT_NE(peer_->spanString, nullptr);
@@ -301,7 +283,7 @@ HWTEST_F(MutableStyledStringAccessorTest, DISABLED_setStyleTest, TestSize.Level1
         ASSERT_NE(backgroundColorSpan, nullptr);
         const auto backgroundColor = backgroundColorSpan->GetBackgroundColor().backgroundColor;
         ASSERT_TRUE(backgroundColor.has_value());
-        EXPECT_EQ(backgroundColor.value(), Converter::OptConvert<Color>(plan.color).value_or(Color::TRANSPARENT));
+        EXPECT_EQ(backgroundColor.value(), plan.color);
     }
     EXPECT_EQ(peer_->spanString->GetU16string(), u"setStyleTest");
 }
@@ -322,20 +304,13 @@ HWTEST_F(MutableStyledStringAccessorTest, setStyleInvalidTest, TestSize.Level1)
     peer_->spanString->BindWithSpans(spans);
 
     accessor_->setStyle(vmContext_, peer_, nullptr);
-#ifdef WRONG_TYPE
-    const Ark_DecorationStyle arkStyle {
-        .type = ARK_TEXT_DECORATION_TYPE_OVERLINE,
-        .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
-        .style = Converter::ArkValue<Opt_TextDecorationStyle>(Ark_Empty())
-    };
-#endif
+    auto arkStyle = PeerUtils::CreatePeer<DecorationStylePeer>();
+    arkStyle->span = Referenced::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, std::nullopt, std::nullopt);
     Ark_SpanStyle arkSpan {
         .start = Converter::ArkValue<Ark_Number>(-1),
         .length = Converter::ArkValue<Ark_Number>(7),
         .styledKey = ARK_STYLED_STRING_KEY_DECORATION,
-#ifdef WRONG_TYPE
         .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_DecorationStyle>(arkStyle)
-#endif
     };
     accessor_->setStyle(vmContext_, peer_, &arkSpan);
     arkSpan.start = Converter::ArkValue<Ark_Number>(0);
