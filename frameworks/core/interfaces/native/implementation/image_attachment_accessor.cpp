@@ -108,13 +108,11 @@ namespace ImageAttachmentAccessor {
 using namespace Converter;
 void DestroyPeerImpl(Ark_ImageAttachment peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->span = nullptr;
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_ImageAttachment CtorImpl(const Ark_ImageAttachmentInterface* value)
 {
-    auto peer = new ImageAttachmentPeer();
+    auto peer = PeerUtils::CreatePeer<ImageAttachmentPeer>();
     CHECK_NULL_RETURN(value, peer);
     auto imageSpan = OptConvert<RefPtr<ImageSpan>>(*value);
     CHECK_NULL_RETURN(imageSpan, peer);

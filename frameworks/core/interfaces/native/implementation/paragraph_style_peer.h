@@ -17,8 +17,13 @@
 
 #include "core/gestures/gesture_event.h"
 #include "frameworks/core/components_ng/pattern/text/span/span_object.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
-struct ParagraphStylePeer {
-    virtual ~ParagraphStylePeer() = default;
+struct ParagraphStylePeer final {
     OHOS::Ace::RefPtr<OHOS::Ace::ParagraphStyleSpan> span;
+
+protected:
+    ParagraphStylePeer() = default;
+    ~ParagraphStylePeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };

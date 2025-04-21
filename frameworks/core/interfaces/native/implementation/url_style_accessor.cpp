@@ -23,16 +23,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UrlStyleAccessor {
 void DestroyPeerImpl(Ark_UrlStyle peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_UrlStyle CtorImpl(const Ark_String* url)
 {
+    auto peer = PeerUtils::CreatePeer<UrlStylePeer>();
     std::string urlAddress;
     if (url) {
         urlAddress = Converter::Convert<std::string>(*url);
     }
-    auto span = AceType::MakeRefPtr<OHOS::Ace::UrlSpan>(urlAddress);
-    return new UrlStylePeer{ .span = span };
+    peer->span = AceType::MakeRefPtr<OHOS::Ace::UrlSpan>(urlAddress);
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

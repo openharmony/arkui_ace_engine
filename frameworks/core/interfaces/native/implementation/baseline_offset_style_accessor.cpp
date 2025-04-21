@@ -23,18 +23,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaselineOffsetStyleAccessor {
 void DestroyPeerImpl(Ark_BaselineOffsetStyle peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_BaselineOffsetStyle CtorImpl(Ark_LengthMetrics value)
 {
+    auto peer = PeerUtils::CreatePeer<BaselineOffsetStylePeer>();
     std::optional<Dimension> offset;
     Dimension defaultOffset = Dimension(0, DimensionUnit::VP);
     if (value) {
         offset = Converter::OptConvert<Dimension>(value);
         Validator::ValidateNonPercent(offset);
     }
-    RefPtr<BaselineOffsetSpan> span = AceType::MakeRefPtr<BaselineOffsetSpan>(offset.value_or(defaultOffset));
-    return new BaselineOffsetStylePeer{ .span = span };
+    peer->span = AceType::MakeRefPtr<BaselineOffsetSpan>(offset.value_or(defaultOffset));
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

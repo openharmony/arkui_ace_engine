@@ -59,12 +59,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ParagraphStyleAccessor {
 void DestroyPeerImpl(Ark_ParagraphStyle peer)
 {
-    CHECK_NULL_VOID(peer);
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_ParagraphStyle CtorImpl(const Opt_ParagraphStyleInterface* value)
 {
-    auto peer = new ParagraphStylePeer();
+    auto peer = PeerUtils::CreatePeer<ParagraphStylePeer>();
     CHECK_NULL_RETURN(value, peer);
 
     SpanParagraphStyle paragraph = Converter::OptConvert<SpanParagraphStyle>(*value).value_or(SpanParagraphStyle());

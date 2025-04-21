@@ -25,17 +25,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureStyleAccessor {
 void DestroyPeerImpl(Ark_GestureStyle peer)
 {
-    CHECK_NULL_VOID(peer);
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_GestureStyle CtorImpl(const Opt_GestureStyleInterface* value)
 {
-    auto peer = new GestureStylePeer();
+    auto peer = PeerUtils::CreatePeer<GestureStylePeer>();
     CHECK_NULL_RETURN(value, peer);
 
     auto onClickOpt = Converter::OptConvert<Callback_ClickEvent_Void>(value->value.onClick);
     auto onLongClickOpt = Converter::OptConvert<Callback_GestureEvent_Void>(value->value.onLongPress);
-    GestureStyle gestureInfo;
+    GestureStyle gestureInfo {};
     if (onClickOpt) {
         auto onClick = [arkCallback = CallbackHelper(*onClickOpt)](GestureEvent& info) -> void {
             const auto event = Converter::ArkClickEventSync(info);
