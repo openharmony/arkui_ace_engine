@@ -34,7 +34,7 @@ namespace OHOS::Ace::NG {
 FocusPattern ArcListItemPattern::GetFocusPattern() const
 {
     if (listItemStyle_ == V2::ListItemStyle::CARD) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, FocusPattern());
         auto listItemTheme = pipelineContext->GetTheme<ArcListItemTheme>();
         CHECK_NULL_RETURN(listItemTheme, FocusPattern());

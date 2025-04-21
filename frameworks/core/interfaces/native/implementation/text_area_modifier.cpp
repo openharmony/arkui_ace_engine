@@ -55,11 +55,6 @@ void SetTextAreaOptionsImpl(Ark_NativePointer node,
             peerPtr = controller.value();
         }
     }
-
-    auto controller = TextFieldModelNG::GetController(frameNode, placeholder, text);
-    if (peerPtr) {
-        peerPtr->SetController(controller);
-    }
 }
 } // TextAreaInterfaceModifier
 namespace TextAreaAttributeModifier {

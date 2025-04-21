@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/event/touch_event.h"
 #include "core/components/theme/app_theme.h"
 
@@ -1699,6 +1700,8 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
+    auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(searchLayoutProperty);
     auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
 
@@ -1716,6 +1719,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     textFontJson->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(textFieldPattern->GetFontWeight()).c_str());
     textFontJson->Put("fontFamily", textFieldPattern->GetFontFamily().c_str());
     json->PutExtAttr("textFont", textFontJson->ToString().c_str(), filter);
+    json->PutExtAttr("selectionMenuHidden", textFieldLayoutProperty->GetSelectionMenuHidden().value_or(false), filter);
     json->PutExtAttr("copyOption",
         ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::Local)).c_str(), filter);
     auto maxLength = GetMaxLength();
@@ -1729,6 +1733,9 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
         "lineHeight", textFieldLayoutProperty->GetLineHeight().value_or(0.0_vp).ToString().c_str(), filter);
     json->PutExtAttr("halfLeading", textFieldLayoutProperty->GetHalfLeading().value_or(false), filter);
     auto jsonDecoration = JsonUtil::Create(true);
+    json->PutExtAttr(
+        "enterKeyType", TextInputActionToString(
+            textFieldPattern->GetTextInputAction().value_or(TextInputAction::SEARCH)).c_str(), filter);
     std::string type = V2::ConvertWrapTextDecorationToStirng(
         textFieldLayoutProperty->GetTextDecoration().value_or(TextDecoration::NONE));
     jsonDecoration->Put("type", type.c_str());
@@ -1753,8 +1760,39 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr("enablePreviewText", textFieldPattern->GetSupportPreviewText(), filter);
     textFieldPattern->ToJsonValueSelectOverlay(json, filter);
     json->PutExtAttr("stopBackPress", textFieldLayoutProperty->GetStopBackPressValue(true), filter);
+    json->PutExtAttr("enableKeyboardOnFocus", textFieldPattern->NeedToRequestKeyboardOnFocus(), filter);
+    auto fontFeature = searchLayoutProperty->GetFontFeature();
+    std::string fontFeatureStr;
+    if (fontFeature) {
+        fontFeatureStr = UnParseFontFeatureSetting(fontFeature.value());
+    }
+    json->PutExtAttr("fontFeature", fontFeatureStr.c_str(), filter);
+    json->PutExtAttr("enableHapticFeedback", textFieldPattern->GetEnableHapticFeedback(), filter);
+    json->PutExtAttr("halfLeading", textFieldLayoutProperty->GetHalfLeading().value_or(false), filter);
     json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(textFieldPattern->GetKeyboardAppearance()), filter);
     json->PutExtAttr("enableHapticFeedback", textFieldPattern->GetEnableHapticFeedback() ? "true" : "false", filter);
+}
+
+std::string SearchPattern::TextInputActionToString(TextInputAction action) const
+{
+    switch (action) {
+        case TextInputAction::GO:
+            return "EnterKeyType.Go";
+        case TextInputAction::SEARCH:
+            return "EnterKeyType.Search";
+        case TextInputAction::SEND:
+            return "EnterKeyType.Send";
+        case TextInputAction::NEXT:
+            return "EnterKeyType.Next";
+        case TextInputAction::DONE:
+            return "EnterKeyType.Done";
+        case TextInputAction::PREVIOUS:
+            return "EnterKeyType.PREVIOUS";
+        case TextInputAction::NEW_LINE:
+            return "EnterKeyType.NEW_LINE";
+        default:
+            return "EnterKeyType.Search";
+    }
 }
 
 std::string SearchPattern::SearchTypeToString() const
@@ -2568,6 +2606,7 @@ void SearchPattern::UpdateImageIconNode(int32_t index)
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
         auto iconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
+        CHECK_NULL_VOID(iconFrameNode);
         UpdateImageIconProperties(iconFrameNode, index);
         iconFrameNode->MarkModifyDone();
         iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

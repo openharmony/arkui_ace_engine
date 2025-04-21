@@ -80,50 +80,11 @@ void ScrollBarModelNG::Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, b
     }
 }
 
-RefPtr<FrameNode> ScrollBarModelNG::CreateFrameNode(int32_t nodeId)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    CHECK_NULL_RETURN(stack, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::SCROLL_BAR_ETS_TAG, nodeId, AceType::MakeRefPtr<ScrollBarPattern>());
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    stack->Push(frameNode);
-    UpdateLayoutProperty();
-    return frameNode;
-}
-
 void ScrollBarModelNG::UpdateLayoutProperty()
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Axis, Axis::VERTICAL);
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, DisplayMode, DisplayMode::AUTO);
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Visibility, VisibleType::VISIBLE);
-}
-
-void ScrollBarModelNG::SetScrollBarProxy(FrameNode* frameNode, const  RefPtr<ScrollProxy>& proxy)
-{
-    CHECK_NULL_VOID(proxy);
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ScrollBarPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto scrollBarProxy = AceType::DynamicCast<NG::ScrollBarProxy>(proxy);
-    CHECK_NULL_VOID(scrollBarProxy);
-    scrollBarProxy->RegisterScrollBar(pattern);
-    pattern->SetScrollBarProxy(scrollBarProxy);
-}
-
-void ScrollBarModelNG::SetDirection(FrameNode* frameNode, std::optional<Axis> axis)
-{
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Axis, axis.value_or(Axis::VERTICAL), frameNode);
-}
-
-void ScrollBarModelNG::SetState(FrameNode* frameNode, std::optional<DisplayMode> displayMode)
-{
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-        ScrollBarLayoutProperty, DisplayMode, displayMode.value_or(DisplayMode::AUTO), frameNode);
-    auto visible =
-        displayMode.value_or(DisplayMode::AUTO) == DisplayMode::OFF ? VisibleType::INVISIBLE : VisibleType::VISIBLE;
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-        ScrollBarLayoutProperty, Visibility, visible, frameNode);
 }
 
 void ScrollBarModelNG::SetNestedScroll(RefPtr<FrameNode>& frameNode, RefPtr<ScrollablePattern>& pattern)
@@ -165,9 +126,53 @@ void ScrollBarModelNG::SetEnableNestedScroll(bool enableNestedSroll)
     }
 }
 
-void ScrollBarModelNG::SetEnableNestedScroll(FrameNode* frameNode, bool enableNestedSroll)
+RefPtr<FrameNode> ScrollBarModelNG::CreateFrameNode(int32_t nodeId)
+{
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SCROLL_BAR_ETS_TAG, nodeId);
+    return FrameNode::GetOrCreateFrameNode(
+        V2::SCROLL_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ScrollBarPattern>(); });
+}
+
+RefPtr<ScrollProxy> ScrollBarModelNG::SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollProxy>& proxy)
+{
+    auto scrollBarProxy = AceType::DynamicCast<NG::ScrollBarProxy>(proxy);
+    if (!scrollBarProxy) {
+        scrollBarProxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+    }
+    auto pattern = AceType::DynamicCast<NG::ScrollBarPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(pattern, scrollBarProxy);
+    scrollBarProxy->RegisterScrollBar(pattern);
+    pattern->SetScrollBarProxy(scrollBarProxy);
+    return scrollBarProxy;
+}
+
+void ScrollBarModelNG::SetDirection(FrameNode* frameNode, const std::optional<Axis>& direction)
+{
+    if (direction) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Axis, direction.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ScrollBarLayoutProperty, Axis, PROPERTY_UPDATE_RENDER, frameNode);
+    }
+}
+
+void ScrollBarModelNG::SetState(FrameNode* frameNode, const std::optional<DisplayMode>& state)
+{
+    if (state) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, DisplayMode, state.value(), frameNode);
+        const auto visible = (state.value() == DisplayMode::OFF) ? VisibleType::INVISIBLE : VisibleType::VISIBLE;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Visibility, visible, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            ScrollBarLayoutProperty, DisplayMode, PROPERTY_UPDATE_RENDER, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            ScrollBarLayoutProperty, Visibility, PROPERTY_UPDATE_RENDER, frameNode);
+    }
+}
+
+void ScrollBarModelNG::SetEnableNestedScroll(FrameNode* frameNode, const std::optional<bool>& enable)
 {
     CHECK_NULL_VOID(frameNode);
+    const auto enableNestedSroll = enable.value_or(false);
     auto scrollBarPattern = frameNode->GetPattern<ScrollBarPattern>();
     CHECK_NULL_VOID(scrollBarPattern);
     auto enableNested = scrollBarPattern->GetEnableNestedSorll();
@@ -185,10 +190,5 @@ void ScrollBarModelNG::SetEnableNestedScroll(FrameNode* frameNode, bool enableNe
     if (enableNestedSroll == false && enableNestedSroll != enableNested) {
         UnSetNestedScroll(node, pattern);
     }
-}
-
-void ScrollBarModelNG::SetEnableNestedScroll(FrameNode* frameNode, std::optional<bool> enableNestedSroll)
-{
-    SetEnableNestedScroll(frameNode, enableNestedSroll.value_or(false));
 }
 } // namespace OHOS::Ace::NG

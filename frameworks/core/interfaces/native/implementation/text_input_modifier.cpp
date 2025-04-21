@@ -101,10 +101,6 @@ void SetTextInputOptionsImpl(Ark_NativePointer node,
             peerPtr = controller.value();
         }
     }
-    auto controller = TextFieldModelNG::GetController(frameNode, placeholder, text);
-    if (peerPtr) {
-        peerPtr->SetController(controller);
-    }
 }
 } // TextInputInterfaceModifier
 namespace TextInputAttributeModifier {

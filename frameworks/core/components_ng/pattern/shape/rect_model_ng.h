@@ -35,7 +35,6 @@ public:
     static void SetRadiusHeight(FrameNode* frameNode, const Dimension& value);
     static void SetRadiusValue(FrameNode* frameNode, const Dimension& radiusX, const Dimension& radiusY, int32_t index);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-
 private:
     static void SetTopLeftRadius(const Radius& topLeftRadius);
     static void SetTopRightRadius(const Radius& topRightRadius);

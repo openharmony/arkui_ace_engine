@@ -52,7 +52,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef XCOMPONENT_SUPPORTED
-    auto frameNode = XComponentModelNG::CreateFrameNodePeer(id, std::nullopt, XComponentType::SURFACE, std::nullopt);
+    auto frameNode = XComponentModelNG::CreateFrameNode(id, std::nullopt, XComponentType::SURFACE, std::nullopt);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 #else

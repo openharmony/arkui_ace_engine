@@ -45,12 +45,17 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetHeader(FrameNode* frameNode, FrameNode* headerNode);
     static void SetFooter(FrameNode* frameNode, FrameNode* footerNode);
+    static void SetHeader(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
+    static void SetFooter(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
     static void SetListChildrenMainSize(
         FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize);
     static void ResetListChildrenMainSize(FrameNode* frameNode);
     static V2::ItemDivider GetDivider(FrameNode* frameNode);
-    static void SetSpace(FrameNode* frameNode, const Dimension& space);
-    static void SetStyle(FrameNode* frameNode, V2::ListItemGroupStyle style);
+    static void SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
+    static void SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemGroupStyle>& style);
+    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(
+        FrameNode* frameNode, const std::optional<float>& defaultSize);
+    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* frameNode);
     static void RemoveHeader(FrameNode* frameNode);
     static void RemoveFooter(FrameNode* frameNode);
     static bool HasFooter(FrameNode* frameNode);

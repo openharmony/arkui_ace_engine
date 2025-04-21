@@ -145,6 +145,11 @@ public:
         return static_cast<int32_t>(images_.size());
     }
 
+    const ImageProperties& GetImage(int32_t index)
+    {
+        return images_[index];
+    }
+
     bool CheckIfNeedVisibleAreaChange()
     {
         return isAutoMonitorInvisibleArea_;

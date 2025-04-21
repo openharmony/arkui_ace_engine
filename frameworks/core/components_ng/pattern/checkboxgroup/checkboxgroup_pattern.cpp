@@ -43,7 +43,7 @@ void CheckBoxGroupPattern::OnModifyDone()
     UpdateState();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(checkBoxTheme);
@@ -485,7 +485,7 @@ void CheckBoxGroupPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
             return;
         }
     }
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);
@@ -504,7 +504,7 @@ void CheckBoxGroupPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 
 void CheckBoxGroupPattern::InnerFocusPaintCircle(RoundRect& paintRect)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(radioTheme);
@@ -523,7 +523,7 @@ void CheckBoxGroupPattern::InnerFocusPaintCircle(RoundRect& paintRect)
 
 FocusPattern CheckBoxGroupPattern::GetFocusPattern() const
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, FocusPattern());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, FocusPattern());
@@ -563,7 +563,7 @@ void CheckBoxGroupPattern::RemoveLastHotZoneRect() const
 
 void CheckBoxGroupPattern::InitializeModifierParam(CheckBoxGroupModifier::Parameters& paintParameters)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);

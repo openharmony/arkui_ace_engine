@@ -32,7 +32,20 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     auto layoutProps = menuItem->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);
     layoutProps->UpdateAlignment(Alignment::CENTER_LEFT);
-    UpdateRadius(menuItem);
+    // set border radius
+    auto renderContext = menuItem->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    BorderRadiusProperty border;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        border.SetRadius(theme->GetMenuDefaultInnerRadius());
+    } else {
+        border.SetRadius(theme->GetInnerBorderRadius());
+    }
+    renderContext->UpdateBorderRadius(border);
 
     CHECK_NULL_VOID(customNode);
     if (menuItem->GetChildren().empty()) {
@@ -130,26 +143,12 @@ void MenuItemModelNG::UpdateRadius(const RefPtr<NG::FrameNode>& menuItem)
     renderContext->UpdateBorderRadius(border);
 }
 
- void MenuItemModelNG::UpdateMenuProperty(FrameNode* frameNode, const MenuItemProperties& menuItemProps)
- {
-     CHECK_NULL_VOID(frameNode);
-    auto menuProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
-    CHECK_NULL_VOID(menuProperty);
-
-    menuProperty->UpdateStartIcon(menuItemProps.startIcon.value_or(ImageSourceInfo("")));
-    menuProperty->UpdateContent(menuItemProps.content);
-    menuProperty->UpdateEndIcon(menuItemProps.endIcon.value_or(ImageSourceInfo("")));
-    menuProperty->UpdateLabel(menuItemProps.labelInfo.value_or(""));
-    menuProperty->SetStartSymbol(menuItemProps.startApply);
-    menuProperty->SetEndSymbol(menuItemProps.endApply);
-}
-
 void MenuItemModelNG::AddRowChild(FrameNode* frameNode, const MenuItemProperties& menuItemProps)
 {
     CHECK_NULL_VOID(frameNode);
     auto menuItem = AceType::Claim<FrameNode>(frameNode);
     CHECK_NULL_VOID(menuItem);
-    
+
     UpdateRadius(menuItem);
     DoMountRow(menuItem);
     auto buildFunc = menuItemProps.buildFunc;
@@ -158,6 +157,12 @@ void MenuItemModelNG::AddRowChild(FrameNode* frameNode, const MenuItemProperties
     if (buildFunc.has_value()) {
         pattern->SetSubBuilder(buildFunc.value_or(nullptr));
     }
+}
+
+void MenuItemModelNG::UpdateMenuProperty(FrameNode* frameNode, const MenuItemProperties& menuItemProps)
+{
+    CHECK_NULL_VOID(frameNode);
+    UpdateMenuProperty(frameNode, menuItemProps);
 }
 
 RefPtr<FrameNode> MenuItemModelNG::CreateFrameNode(int32_t nodeId)
@@ -326,6 +331,7 @@ void MenuItemModelNG::SetSelected(FrameNode* frameNode, const std::optional<bool
 
 void MenuItemModelNG::SetLabelFontColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
+    CHECK_NULL_VOID(frameNode);
     if (color.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor, color.value(), frameNode);
     } else {
@@ -335,6 +341,7 @@ void MenuItemModelNG::SetLabelFontColor(FrameNode* frameNode, const std::optiona
 
 void MenuItemModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
+    CHECK_NULL_VOID(frameNode);
     if (color.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontColor, color.value(), frameNode);
     } else {

@@ -68,16 +68,17 @@ public:
     static void SetCustomTabBar(FrameNode* node, FrameNode* tabBar);
     static void UpdateDefaultSymbol(RefPtr<TabTheme>& tabTheme, RefPtr<TextLayoutProperty> symbolProperty);
     static void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive);
+    static void SetOnWillShow(FrameNode* node, std::function<void()>&& onWillShow);
+    static void SetOnWillHide(FrameNode* node, std::function<void()>&& onWillHide);
     static void SetTabBarStyle(FrameNode* node, TabBarStyle tabBarStyle);
     static void SetSelectedMode(FrameNode* node, const std::optional<SelectedMode>& selectedMode);
     static void SetBoard(FrameNode* node, const std::optional<BoardStyle>& board);
     static void SetPadding(FrameNode* node, NG::PaddingProperty& padding, bool isSubTabStyle);
+    static void SetPadding(FrameNode* node, const std::optional<NG::PaddingProperty>& padding);
     static void SetUseLocalizedPadding(FrameNode* node, bool useLocalizedPadding);
     static void SetVerticalAlign(FrameNode* node, const std::optional<FlexAlign>& verticalAlign);
     static void SetSymmetricExtensible(FrameNode* node, const std::optional<bool>& isExtensible);
     static void SetIconStyle(FrameNode* node, const std::optional<IconStyle>& iconStyle);
-    static void SetOnWillShow(FrameNode* node, std::function<void()>&& onWillShow);
-    static void SetOnWillHide(FrameNode* node, std::function<void()>&& onWillHide);
 
 private:
     static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);

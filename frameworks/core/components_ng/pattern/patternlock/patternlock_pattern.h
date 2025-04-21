@@ -98,7 +98,7 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         FocusPaintParam focusPaintParams;
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, FocusPattern());
         auto patternLockTheme = pipelineContext->GetTheme<V2::PatternLockTheme>();
         CHECK_NULL_RETURN(patternLockTheme, FocusPattern());

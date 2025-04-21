@@ -91,7 +91,7 @@ public:
     static void SetTabBarPosition(FrameNode* frameNode, const std::optional<BarPosition>& tabBarPositionOpt);
     static void SetScrollable(FrameNode* frameNode, bool scrollable);
     static void SetTabBarWidth(FrameNode* frameNode, const std::optional<Dimension>& tabBarWidth);
-    static void SetTabBarHeight(FrameNode* frameNode, const std::optional<Dimension>& tabBarHeightOpt);
+    static void SetTabBarHeight(FrameNode* frameNode, const std::optional<Dimension>& tabBarHeight);
     static void SetAnimationDuration(FrameNode* frameNode, float duration);
     static void SetBarAdaptiveHeight(FrameNode* frameNode, bool barAdaptiveHeight);
     static void SetScrollableBarModeOptions(FrameNode* frameNode, const ScrollableBarModeOptions& option);
@@ -102,7 +102,12 @@ public:
     static void SetTabsController(FrameNode* frameNode, const RefPtr<SwiperController>& tabsController);
     static void SetBarBackgroundEffect(FrameNode* frameNode, const EffectOption& effectOption);
     static void SetPageFlipMode(FrameNode* frameNode, int32_t options);
-    static void SetCachedMaxCount(FrameNode* frameNode, std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode);
+    static void SetCachedMaxCount(FrameNode* frameNode, std::optional<int32_t> cachedMaxCount,
+        std::optional<TabsCacheMode> cacheMode);
+    static void SetOnCustomAnimation(FrameNode* frameNode, TabsCustomAnimationEvent&& onCustomAnimation);
+    static RefPtr<TabsControllerNG> GetSwiperController(FrameNode* frameNode);
+    static void InitIndex(FrameNode* tabsNode, const std::optional<int32_t>& indexOpt);
+    static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChangeEvent);
     static void SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChange);
     static void SetOnTabBarClick(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onTabBarClick);
@@ -111,10 +116,7 @@ public:
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& gestureSwipe);
     static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
     static void SetOnContentWillChange(FrameNode* frameNode, std::function<bool(int32_t, int32_t)>&& callback);
-    static void SetOnCustomAnimation(FrameNode* frameNode, TabsCustomAnimationEvent&& onCustomAnimation);
-    static RefPtr<TabsControllerNG> GetSwiperController(FrameNode* frameNode);
-    static void InitIndex(FrameNode* tabsNode, const std::optional<int32_t>& indexOpt);
-    static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChangeEvent);
+    static void InitDivider(FrameNode* frameNode);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);

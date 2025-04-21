@@ -61,7 +61,7 @@ std::optional<SizeF> CheckBoxGroupLayoutAlgorithm::MeasureContent(
 
 void CheckBoxGroupLayoutAlgorithm::InitializeParam(uint32_t themeScopeId)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(themeScopeId);
     CHECK_NULL_VOID(checkBoxTheme);

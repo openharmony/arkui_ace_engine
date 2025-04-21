@@ -20,7 +20,7 @@
 #include "core/components_ng/pattern/security_component/security_component_model_ng.h"
 
 namespace OHOS::Ace::NG {
-struct LocationButtonStyle {
+    struct LocationButtonStyle {
     inline static const auto DEFAULT_ICON = LocationButtonIconStyle::ICON_LINE;
     inline static const auto DEFAULT_TEXT = LocationButtonLocationDescription::CURRENT_LOCATION;
     inline static const auto DEFAULT_BACKGROUND_TYPE = ButtonType::CAPSULE;
@@ -36,6 +36,7 @@ struct LocationButtonStyle {
     std::optional<LocationButtonIconStyle> icon;
     std::optional<ButtonType> backgroundType;
 };
+
 class ACE_EXPORT LocationButtonModelNG : public SecurityComponentModelNG {
 public:
     static LocationButtonModelNG* GetInstance();

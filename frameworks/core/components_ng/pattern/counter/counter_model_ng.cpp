@@ -29,15 +29,22 @@ void CounterModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    auto counterNode = CounterModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_VOID(counterNode);
+    stack->Push(counterNode);
+}
+
+RefPtr<FrameNode> CounterModelNG::CreateFrameNode(int32_t nodeId)
+{
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::COUNTER_ETS_TAG, nodeId);
     auto counterNode = CounterNode::GetOrCreateCounterNode(
         V2::COUNTER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CounterPattern>(); });
     auto counterPattern = counterNode->GetPattern<CounterPattern>();
-    CHECK_NULL_VOID(counterPattern);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(counterPattern, counterNode);
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, counterNode);
     auto counterTheme = pipeline->GetTheme<CounterTheme>();
-    CHECK_NULL_VOID(counterTheme);
+    CHECK_NULL_RETURN(counterTheme, counterNode);
     counterNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(counterTheme->GetWidth()), CalcLength(counterTheme->GetHeight())));
     counterNode->GetRenderContext()->SetClipToFrame(true);
@@ -61,7 +68,7 @@ void CounterModelNG::Create()
         auto addNode = CreateButtonChild(addId, ADD, counterTheme);
         addNode->MountToParent(counterNode);
     }
-    stack->Push(counterNode);
+    return counterNode;
 }
 
 RefPtr<FrameNode> CounterModelNG::CreateButtonChild(
@@ -126,7 +133,7 @@ void CounterModelNG::SetEnableDec(bool enableDec)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(enableDec);
     if (!eventHub->IsEnabled()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
         CHECK_NULL_VOID(counterTheme);
@@ -148,7 +155,7 @@ void CounterModelNG::SetEnableInc(bool enableInc)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(enableInc);
     if (!eventHub->IsEnabled()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
         CHECK_NULL_VOID(counterTheme);
@@ -254,7 +261,7 @@ void CounterModelNG::SetEnableDec(FrameNode* frameNode, bool enableDec)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(enableDec);
     if (!eventHub->IsEnabled()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
         CHECK_NULL_VOID(counterTheme);
@@ -274,7 +281,7 @@ void CounterModelNG::SetEnableInc(FrameNode* frameNode, bool enableInc)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(enableInc);
     if (!eventHub->IsEnabled()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
         CHECK_NULL_VOID(counterTheme);
@@ -285,49 +292,62 @@ void CounterModelNG::SetEnableInc(FrameNode* frameNode, bool enableInc)
 }
 void CounterModelNG::SetHeight(FrameNode* frameNode, const Dimension& value)
 {
+    auto height = CalcLength(value);
+    CounterModelNG::SetHeight(frameNode, height);
+}
+
+void CounterModelNG::SetHeight(FrameNode* frameNode, const CalcLength& height)
+{
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
 
     int32_t subId = frameNode->GetPattern<CounterPattern>()->GetSubId();
     auto subNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId)));
     CHECK_NULL_VOID(subNode);
     auto subLayoutProperty = subNode->GetLayoutProperty();
-    subLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
+    subLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
     auto subTextNode = AceType::DynamicCast<FrameNode>(subNode->GetFirstChild());
     CHECK_NULL_VOID(subTextNode);
     auto subTextLayoutProperty = subTextNode->GetLayoutProperty();
-    subTextLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
+    subTextLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
 
     int32_t contentId = frameNode->GetPattern<CounterPattern>()->GetContentId();
     auto contentNode =
         AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(contentId)));
     CHECK_NULL_VOID(contentNode);
     auto contentLayoutProperty = contentNode->GetLayoutProperty();
-    contentLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
+    contentLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
 
     int32_t addId = frameNode->GetPattern<CounterPattern>()->GetAddId();
     auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
     CHECK_NULL_VOID(addNode);
     auto addLayoutProperty = addNode->GetLayoutProperty();
-    addLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
+    addLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
     auto addTextNode = AceType::DynamicCast<FrameNode>(addNode->GetFirstChild());
     CHECK_NULL_VOID(addTextNode);
     auto addTextLayoutProperty = addTextNode->GetLayoutProperty();
-    addTextLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
+    addTextLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
 }
 
 void CounterModelNG::SetWidth(FrameNode* frameNode, const Dimension& value)
 {
+    auto width = CalcLength(value);
+    CounterModelNG::SetWidth(frameNode, width);
+}
+
+void CounterModelNG::SetWidth(FrameNode* frameNode, const CalcLength& width)
+{
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(value), std::nullopt));
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, std::nullopt));
 }
 
 void CounterModelNG::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
+    CHECK_NULL_VOID(frameNode);
     if (color) {
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color.value(), frameNode);
     } else {

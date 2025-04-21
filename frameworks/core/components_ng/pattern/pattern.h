@@ -143,7 +143,7 @@ public:
     {
         return false;
     }
-    
+
     virtual RefPtr<AccessibilityProperty> CreateAccessibilityProperty()
     {
         return MakeRefPtr<AccessibilityProperty>();
@@ -241,7 +241,7 @@ public:
                     childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
                     childRenderContext->ResetForegroundColorStrategy();
                     childRenderContext->UpdateForegroundColorFlag(false);
-                } else {
+                } else if (renderContext->HasForegroundColorStrategy()) {
                     childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
                     childRenderContext->ResetForegroundColor();
                     childRenderContext->UpdateForegroundColorFlag(false);
@@ -257,7 +257,7 @@ public:
                     childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
                     childRenderContext->ResetForegroundColorStrategy();
                     childRenderContext->UpdateForegroundColorFlag(false);
-                } else {
+                } else if (renderContext->HasForegroundColorStrategy()) {
                     childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
                     childRenderContext->ResetForegroundColor();
                     childRenderContext->UpdateForegroundColorFlag(false);
@@ -592,9 +592,6 @@ public:
         return nullptr;
     }
 
-    /**
-     * @brief To override FrameNode::GetTotalChildCount in Arkoala
-     */
     virtual int32_t GetTotalChildCount() const
     {
         return -1;

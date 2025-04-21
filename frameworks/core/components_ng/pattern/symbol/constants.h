@@ -31,7 +31,6 @@ enum class SymbolEffectType {
     REPLACE,
 };
 
-// need check
 enum class RenderingStrategy {
     SINGLE = 0,
     MULTIPLE_COLOR,

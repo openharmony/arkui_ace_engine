@@ -131,7 +131,7 @@ int AnimatedImage::GenerateIteration(const std::unique_ptr<SkCodec>& codec)
     if (iteration == 0) {
         iteration = INT_MAX;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, 1);
     if (pipeline->IsFormRenderExceptDynamicComponent()) {
         iteration = FORM_REPEAT_COUNT;
@@ -294,7 +294,7 @@ void AnimatedSkImage::CacheFrame(const std::string& key)
 void AnimatedRSImage::CacheFrame(const std::string& key)
 #endif
 {
-    auto ctx = PipelineContext::GetCurrentContext();
+    auto ctx = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(ctx);
     auto cache = ctx->GetImageCache();
     CHECK_NULL_VOID(cache);
@@ -371,7 +371,7 @@ void AnimatedPixmap::DecodeImpl(uint32_t idx)
 
 void AnimatedPixmap::CacheFrame(const std::string& key)
 {
-    auto ctx = PipelineContext::GetCurrentContext();
+    auto ctx = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(ctx);
     auto cache = ctx->GetImageCache();
     CHECK_NULL_VOID(cache);

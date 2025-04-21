@@ -1034,7 +1034,7 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
         CHECK_NULL_VOID(menuGeometryNode);
         auto oldMenuSize = menuGeometryNode->GetFrameSize();
 
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
 
@@ -1370,7 +1370,7 @@ void MenuItemPattern::OnHover(bool isHover)
     SetIsHover(isHover);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -1647,7 +1647,7 @@ bool MenuItemPattern::OnKeyEvent(const KeyEvent& event)
         return true;
     }
     if (!isOptionPattern_ && event.code == KeyCode::KEY_DPAD_RIGHT && GetSubBuilder() && !isSubMenuShowed_) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, false);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_RETURN(theme, false);
@@ -1760,7 +1760,7 @@ bool MenuItemPattern::IsInHoverRegions(double x, double y)
 
 void MenuItemPattern::PlayBgColorAnimation(bool isHoverChange)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -1794,7 +1794,7 @@ void MenuItemPattern::PlayBgColorAnimation(bool isHoverChange)
 
 void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
@@ -1832,7 +1832,7 @@ void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
 
 void MenuItemPattern::UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto props = selectIcon->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
@@ -1932,7 +1932,7 @@ void MenuItemPattern::AddExpandIcon(RefPtr<FrameNode>& row)
             V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_VOID(expandIcon_);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -1967,7 +1967,7 @@ void MenuItemPattern::AddClickableArea()
         auto clickableArea = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(false));
         CHECK_NULL_VOID(clickableArea);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
@@ -2022,7 +2022,7 @@ void MenuItemPattern::AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode)
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -2061,7 +2061,7 @@ RefPtr<FrameNode> MenuItemPattern::GetClickableArea()
 
 void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
@@ -2107,7 +2107,7 @@ void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)
 void MenuItemPattern::UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
     std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
@@ -2157,7 +2157,7 @@ bool MenuItemPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo
 void MenuItemPattern::UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
     std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto props = iconNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
@@ -2209,7 +2209,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateClipEdge(isTextFadeOut_);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -2581,45 +2581,64 @@ RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const PointF& pos
     return menuItem;
 }
 
-void MenuItemPattern::SetBgColor(const Color& color)
+void MenuItemPattern::SetBgColor(const std::optional<Color>& color)
 {
     auto renderContext = GetHost()->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(color);
+    if (color) {
+        renderContext->UpdateBackgroundColor(color.value());
+    } else {
+        renderContext->ResetBackgroundColor();
+    }
     bgColor_ = color;
 }
 
-void MenuItemPattern::SetFontColor(const Color& color)
+void MenuItemPattern::SetFontColor(const std::optional<Color>& color)
 {
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
-    props->UpdateTextColor(color);
     auto context = text_->GetRenderContext();
     CHECK_NULL_VOID(context);
-    context->UpdateForegroundColor(color);
+    if (color) {
+        auto value = color.value();
+        props->UpdateTextColor(value);
+        context->UpdateForegroundColor(value);
+    } else {
+        props->ResetTextColor();
+        context->ResetForegroundColor();
+    }
     context->UpdateForegroundColorFlag(false);
     context->ResetForegroundColorStrategy();
 }
 
-void MenuItemPattern::SetFontSize(const Dimension& value)
+void MenuItemPattern::SetFontSize(const std::optional<Dimension>& value)
 {
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
     CHECK_NULL_VOID(selectTheme_);
-    props->UpdateFontSize(value.IsNegative() ? selectTheme_->GetMenuFontSize() : value);
+    if (value) {
+        Dimension fontSize = value.value();
+        props->UpdateFontSize(fontSize.IsNegative() ? selectTheme_->GetMenuFontSize() : fontSize);
+    } else {
+        props->ResetFontSize();
+    }
 }
 
-void MenuItemPattern::SetFontWeight(const FontWeight& value)
+void MenuItemPattern::SetFontWeight(const std::optional<FontWeight>& value)
 {
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
-    props->UpdateFontWeight(value);
+    if (value) {
+        props->UpdateFontWeight(value.value());
+    } else {
+        props->ResetFontWeight();
+    }
 }
 
 void MenuItemPattern::SetFontFamily(const std::vector<std::string>& value)
@@ -2631,13 +2650,17 @@ void MenuItemPattern::SetFontFamily(const std::vector<std::string>& value)
     props->UpdateFontFamily(value);
 }
 
-void MenuItemPattern::SetItalicFontStyle(const Ace::FontStyle& value)
+void MenuItemPattern::SetItalicFontStyle(const std::optional<Ace::FontStyle>& value)
 {
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
-    props->UpdateItalicFontStyle(value);
+    if (value) {
+        props->UpdateItalicFontStyle(value.value());
+    } else {
+        props->ResetItalicFontStyle();
+    }
 }
 
 void MenuItemPattern::SetSelected(int32_t selected)
@@ -2686,7 +2709,7 @@ void MenuItemPattern::UpdateIconSrc()
     if (icon_ == nullptr || iconSrc_.empty()) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
@@ -2770,7 +2793,7 @@ void MenuItemPattern::UpdateIcon(const std::string& src, const std::function<voi
             return;
         }
     }
-  
+
     row->RemoveChild(icon_); // it's safe even if icon_ is nullptr
     row->MarkModifyDone();
     row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -2788,7 +2811,7 @@ Ace::FontStyle MenuItemPattern::GetItalicFontStyle()
 
 Color MenuItemPattern::GetBgColor()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, Color());
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, Color());
@@ -2826,7 +2849,7 @@ float MenuItemPattern::GetSelectOptionWidth()
     auto optionNode = GetHost();
     CHECK_NULL_RETURN(optionNode, MIN_OPTION_WIDTH.ConvertToPx());
     float finalWidth = MIN_OPTION_WIDTH.ConvertToPx();
-    
+
     if (IsWidthModifiedBySelect()) {
         auto optionPatintProperty = optionNode->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_RETURN(optionPatintProperty, MIN_OPTION_WIDTH.ConvertToPx());
@@ -2835,7 +2858,7 @@ float MenuItemPattern::GetSelectOptionWidth()
     } else {
         finalWidth = defaultWidth;
     }
-    
+
     if (finalWidth < MIN_OPTION_WIDTH.ConvertToPx()) {
         finalWidth = defaultWidth;
     }
@@ -2866,7 +2889,7 @@ std::string MenuItemPattern::GetText()
     CHECK_NULL_RETURN(text_, std::string());
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, std::string());
-    return UtfUtils::Str16ToStr8(textProps->GetContentValue());
+    return UtfUtils::Str16ToStr8(textProps->GetContentValue(std::u16string()));
 }
 
 std::string MenuItemPattern::InspectorGetFont()
@@ -2885,7 +2908,7 @@ void MenuItemPattern::OnPress(const UIState& state)
     CHECK_NULL_VOID(renderContext);
     auto props = GetPaintProperty<MenuItemPaintProperty>();
     CHECK_NULL_VOID(props);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     // enter press status
@@ -2934,7 +2957,7 @@ bool MenuItemPattern::OnSelectProcess()
     }
     host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     // hide menu when option is clicked
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
@@ -2975,7 +2998,7 @@ void MenuItemPattern::UpdatePasteFontColor(const Color& fontColor)
 
 void MenuItemPattern::OptionOnModifyDone(const RefPtr<FrameNode>& host)
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     textTheme_ = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme_);
@@ -3071,5 +3094,10 @@ void MenuItemPattern::UpdateDividerPressStatus(bool isPress)
         topPaintProperty->UpdateTopPress(isPress);
         topDivider->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+}
+
+void MenuItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    json->PutExtAttr("selected", IsSelected(), filter);
 }
 } // namespace OHOS::Ace::NG

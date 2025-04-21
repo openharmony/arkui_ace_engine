@@ -58,7 +58,7 @@ OffsetF GetDisplayWindowRectOffset(int32_t popupNodeId)
 
 RefPtr<PopupTheme> GetPopupTheme()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, nullptr);
@@ -85,7 +85,7 @@ Dimension GetMaxWith()
 Dimension GetAgeFontSize(const std::optional<Dimension>& originalFontSize)
 {
     auto fontSize = Dimension(originalFontSize->Value(), originalFontSize->Unit());
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, fontSize);
     auto fontSizeScale = pipeline->GetFontScale();
     auto fontScale = fontSizeScale > AGE_FONT_MAX_SIZE_SCALE ? AGE_FONT_MAX_SIZE_SCALE : fontSizeScale;
@@ -333,6 +333,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     layoutProps->UpdatePlacement(param->GetPlacement());
     layoutProps->UpdateShowInSubWindow(param->IsShowInSubWindow());
     layoutProps->UpdateBlockEvent(param->IsBlockEvent());
+    layoutProps->UpdateEnableHoverMode(param->EnableHoverMode());
     if (param->GetArrowHeight().has_value()) {
         layoutProps->UpdateArrowHeight(param->GetArrowHeight().value());
     }
@@ -512,7 +513,7 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     auto secondaryButton = param->GetSecondaryButtonProperties();
     if (!(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
         if (primaryButton.showButton || secondaryButton.showButton) {
-            auto pipelineContext = PipelineBase::GetCurrentContext();
+            auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(pipelineContext);
             float popupMaxWidth = 0.0f;
             float popupMaxHeight = 0.0f;
@@ -800,7 +801,7 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
     textLayoutProps->UpdateAlignSelf(FlexAlign::FLEX_START);
     UpdateTextProperties(param, textLayoutProps);
     message->MarkModifyDone();
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     float popupMaxWidth = 0.0f;
     float popupMaxHeight = 0.0f;
@@ -898,7 +899,7 @@ void UpdateButtonFontSize(RefPtr<TextLayoutProperty>& textLayoutProps)
 {
     auto popupTheme = GetPopupTheme();
     CHECK_NULL_VOID(popupTheme);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     auto fontSize = popupTheme->GetButtonFontSize();
     auto fontSizeScale = pipeline->GetFontScale();
     auto fontScale = fontSizeScale > AGE_FONT_MAX_SIZE_SCALE ? AGE_FONT_MAX_SIZE_SCALE : fontSizeScale;
@@ -917,7 +918,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     if (!buttonParam.showButton) {
         return nullptr;
     }
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(buttonTheme, nullptr);

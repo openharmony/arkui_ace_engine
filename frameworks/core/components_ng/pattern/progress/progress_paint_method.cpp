@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG {
 void ProgressPaintMethod::GetThemeData(int32_t themeScopeId)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>(themeScopeId);
     CHECK_NULL_VOID(progressTheme);

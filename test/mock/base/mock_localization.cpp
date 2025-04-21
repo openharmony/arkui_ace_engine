@@ -75,6 +75,12 @@ const std::string Localization::FormatDateTime(DateTime dateTime, DateTimeStyle 
 
 std::string Localization::GetEntryLetters(const std::string& lettersIndex)
 {
+    if (lettersIndex.compare("stepper.back") == 0) {
+        return "Back";
+    }
+    if (lettersIndex.compare("stepper.next") == 0) {
+        return "Next";
+    }
     return "";
 }
 

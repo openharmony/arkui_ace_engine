@@ -57,7 +57,7 @@ void ArcIndexerContentModifier::onDraw(DrawingContext& context)
 
 void ArcIndexerContentModifier::DrawArcShadow(DrawingContext& context)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);

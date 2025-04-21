@@ -30,4 +30,16 @@ void FormLinkModelNG::Create(const std::string& action)
     pattern->SetAction(action);
     stack->Push(frameNode);
 }
+
+RefPtr<FrameNode> FormLinkModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::FORM_LINK_ETS_TAG, nodeId, AceType::MakeRefPtr<FormLinkPattern>());
+    return frameNode;
+}
+
+void FormLinkModelNG::SetAction(FrameNode* frameNode, const std::string& action)
+{
+    auto pattern = frameNode->GetPattern<FormLinkPattern>();
+    pattern->SetAction(action);
+}
 } // namespace OHOS::Ace::NG

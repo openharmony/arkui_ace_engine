@@ -60,11 +60,9 @@ public:
         auto theme = pipelineContext->GetTheme<DividerTheme>(host->GetThemeScopeId());
         CHECK_NULL_VOID(theme);
         json->PutExtAttr("color", propDividerColor_.value_or(theme->GetColor()).ColorToString().c_str(), filter);
+        auto lineCap = propLineCap_.value_or(LineCap::BUTT);
         json->PutExtAttr("lineCap",
-            propLineCap_.value_or(LineCap::SQUARE) == LineCap::BUTT
-                ? "BUTT"
-                : (propLineCap_.value_or(LineCap::SQUARE) == LineCap::ROUND ? "ROUND" : "SQUARE"),
-            filter);
+            lineCap == LineCap::BUTT ? "BUTT" : (lineCap == LineCap::ROUND ? "ROUND" : "SQUARE"), filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override

@@ -503,7 +503,7 @@ HWTEST_F(ListCommonTestNg, FocusStep007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. when List has unFocusable item
-     * @tc.expected: The unFocusable item would be skiped.
+     * @tc.expected: The unFocusable item would be skipped.
      */
     CreateList();
     CreateFocusableListItems(4);
@@ -1963,8 +1963,8 @@ HWTEST_F(ListCommonTestNg, SetDigitalCrownSensitivity001, TestSize.Level1)
     RefPtr<FrameNode> frameNode =
         FrameNode::GetOrCreateFrameNode(tag, nodeId, []() { return AceType::MakeRefPtr<ListPattern>(); });
 
-    model.SetDigitalCrownSensitivity(frameNode.GetRawPtr(), sensitivity);
-    EXPECT_EQ(model.GetDigitalCrownSensitivity(frameNode.GetRawPtr()), CrownSensitivity::MEDIUM);
+    model.SetDigitalCrownSensitivity(Referenced::RawPtr(frameNode), sensitivity);
+    EXPECT_EQ(model.GetDigitalCrownSensitivity(Referenced::RawPtr(frameNode)), CrownSensitivity::MEDIUM);
 }
 
 /**

@@ -62,7 +62,6 @@ void SetCheckboxOptionsImpl(Ark_NativePointer node,
                 ViewStackProcessor::GetInstance()->Push(uiNode);
             };
             std::optional<std::function<void(void)>> buildFunc = std::make_optional(customBuilder);
-            CheckBoxModelNG::SetBuilder(frameNode, buildFunc);
         }
     }
 }

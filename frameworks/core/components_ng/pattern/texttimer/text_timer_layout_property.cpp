@@ -51,6 +51,7 @@ inline std::unique_ptr<JsonValue> ConvertShadowToJson(const Shadow& shadow)
     jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
     jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
     jsonShadow->Put("type", std::to_string(static_cast<int32_t>(shadow.GetShadowType())).c_str());
+    jsonShadow->Put("fill", shadow.GetIsFilled() ? "true" : "false");
     return jsonShadow;
 }
 

@@ -74,7 +74,8 @@ public:
 
     RefPtr<FrameNode> GetMenu();
 
-    std::u16string GetHeaderContent();
+    std::u16string GetHeaderContent() const;
+    std::u16string GetFooterContent() const;
 
     bool HasSelectIcon() const
     {
@@ -91,6 +92,7 @@ public:
     void OnExtItemPressed(bool press, bool beforeGroup);
     void OnIntItemPressed(int32_t index, bool press);
     void ModifyDivider();
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 protected:
     void OnMountToParentDone() override;

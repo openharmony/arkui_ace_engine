@@ -44,6 +44,12 @@ public:
     }
     ~PinchGesture() override = default;
 
+#ifdef ARKUI_CAPI_UNITTEST
+    double GetDistance()
+    {
+        return distance_;
+    }
+#endif // ARKUI_CAPI_UNITTEST
 protected:
     RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 

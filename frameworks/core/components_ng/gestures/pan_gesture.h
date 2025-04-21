@@ -64,6 +64,22 @@ public:
 
     virtual int32_t Deserialize(const char* buff) override;
 
+#ifdef ARKUI_CAPI_UNITTEST
+    double GetDistance()
+    {
+        return distance_;
+    }
+
+    RefPtr<PanGestureOption> GetGestureOptions()
+    {
+        return panGestureOption_;
+    }
+
+    PanDirection GetDirection()
+    {
+        return direction_;
+    }
+#endif // ARKUI_CAPI_UNITTEST
 protected:
     RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 

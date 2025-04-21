@@ -39,15 +39,21 @@ public:
     void ResetUnSelectedColor() override;
     void ResetCheckMarkColor() override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetSelectAll(FrameNode* frameNode, const std::optional<bool>& isSelected);
+    static void SetSelectAll(FrameNode* frameNode, bool isSelected);
     static void SetSelectedColor(FrameNode* frameNode, const Color& color);
     static void SetUnSelectedColor(FrameNode* frameNode, const Color& color);
+    static void SetSelectAll(FrameNode* frameNode, const std::optional<bool> isSelected);
+    static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetUnSelectedColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetWidth(FrameNode* frameNode, const Dimension& width);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetCheckMarkColor(FrameNode* frameNode, const Color& color);
     static void SetCheckMarkSize(FrameNode* frameNode, const Dimension& size);
     static void SetCheckMarkWidth(FrameNode* frameNode, const Dimension& width);
-    static void SetCheckboxGroupStyle(FrameNode* frameNode,  const std::optional<CheckBoxStyle>& checkboxGroupStyle);
+    static void SetCheckMarkColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetCheckMarkSize(FrameNode* frameNode, const std::optional<Dimension>& size);
+    static void SetCheckMarkWidth(FrameNode* frameNode, const std::optional<Dimension>& width);
+    static void SetCheckboxGroupStyle(FrameNode* frameNode, const std::optional<CheckBoxStyle>& checkboxGroupStyle);
     static void SetCheckboxGroupName(FrameNode* frameNode, const std::optional<std::string>& groupName);
 
     static std::string GetCheckboxGroupName(FrameNode* frameNode);

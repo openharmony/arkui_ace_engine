@@ -28,7 +28,7 @@ void DialogEventHub::FireCancelEvent() const
 void DialogEventHub::FireSuccessEvent(int32_t buttonIdx)
 {
     CHECK_NULL_VOID(onSuccess_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->GetTaskExecutor()->PostTask(
         [onSuccess = onSuccess_, buttonIdx] { onSuccess(0, buttonIdx); },

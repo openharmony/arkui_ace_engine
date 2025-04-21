@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
-
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -117,10 +117,18 @@ RefPtr<FrameNode> MenuItemGroupPattern::GetMenu()
     return nullptr;
 }
 
-std::u16string MenuItemGroupPattern::GetHeaderContent()
+std::u16string MenuItemGroupPattern::GetHeaderContent() const
 {
     CHECK_NULL_RETURN(headerContent_, u"");
     auto content = headerContent_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(content, u"");
+    return content->GetContentValue(u"");
+}
+
+std::u16string MenuItemGroupPattern::GetFooterContent() const
+{
+    CHECK_NULL_RETURN(footerContent_, u"");
+    auto content = footerContent_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(content, u"");
     return content->GetContentValue(u"");
 }
@@ -211,5 +219,11 @@ void MenuItemGroupPattern::OnIntItemPressed(int32_t index, bool press)
             pattern->OnExtItemPressed(press, true); // hide common divider for 2 group if another group after
         }
     }
+}
+
+void MenuItemGroupPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    json->PutExtAttr("header", UtfUtils::Str16ToStr8(GetHeaderContent()).c_str(), filter);
+    json->PutExtAttr("footer", UtfUtils::Str16ToStr8(GetFooterContent()).c_str(), filter);
 }
 } // namespace OHOS::Ace::NG

@@ -545,25 +545,6 @@ void TabContentModelNG::SetTabBar(const std::optional<std::string>& text, const 
     frameNodePattern->SetTabBarWithContent(nullptr);
 }
 
-void TabContentModelNG::SetTabBar(FrameNode* node, const std::optional<std::string>& label,
-    const std::optional<std::string>& icon, TabBarBuilderFunc&& builder)
-{
-    CHECK_NULL_VOID(node);
-    if (icon) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Icon, icon.value(), node);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Icon, node);
-    }
-    if (label) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, label.value(), node);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, node);
-    }
-    auto frameNodePattern = node->GetPattern<TabContentPattern>();
-    CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetTabBar(label.value_or(""), icon.value_or(""), std::nullopt, std::move(builder));
-}
-
 void TabContentModelNG::SetTabBarWithContent(const RefPtr<NG::UINode>& content)
 {
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
@@ -574,14 +555,6 @@ void TabContentModelNG::SetTabBarWithContent(const RefPtr<NG::UINode>& content)
 void TabContentModelNG::SetTabBarStyle(TabBarStyle tabBarStyle)
 {
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
-    CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetTabBarStyle(tabBarStyle);
-}
-
-void TabContentModelNG::SetTabBarStyle(FrameNode* node, TabBarStyle tabBarStyle)
-{
-    CHECK_NULL_VOID(node);
-    auto frameNodePattern = node->GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetTabBarStyle(tabBarStyle);
 }
@@ -610,27 +583,11 @@ void TabContentModelNG::SetBoard(const BoardStyle& board)
     frameNodePattern->SetBoardStyle(board);
 }
 
-void TabContentModelNG::SetBoard(FrameNode* node, const std::optional<BoardStyle>& board)
-{
-    CHECK_NULL_VOID(node);
-    auto frameNodePattern = node->GetPattern<TabContentPattern>();
-    CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetBoardStyle(board.value_or(BoardStyle()));
-}
-
 void TabContentModelNG::SetSelectedMode(SelectedMode selectedMode)
 {
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetSelectedMode(selectedMode);
-}
-
-void TabContentModelNG::SetSelectedMode(FrameNode* node, const std::optional<SelectedMode>& selectedMode)
-{
-    CHECK_NULL_VOID(node);
-    auto frameNodePattern = node->GetPattern<TabContentPattern>();
-    CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetSelectedMode(selectedMode.value_or(SelectedMode::INDICATOR));
 }
 
 void TabContentModelNG::SetLabelStyle(const LabelStyle& labelStyle)
@@ -647,56 +604,9 @@ void TabContentModelNG::SetIconStyle(const IconStyle& iconStyle)
     frameNodePattern->SetIconStyle(iconStyle);
 }
 
-void TabContentModelNG::SetIconStyle(FrameNode* node, const  std::optional<IconStyle>& iconStyle)
-{
-    CHECK_NULL_VOID(node);
-    auto frameNodePattern = node->GetPattern<TabContentPattern>();
-    CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetIconStyle(iconStyle.value_or(IconStyle()));
-}
-
 void TabContentModelNG::SetPadding(const PaddingProperty& padding)
 {
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
-    CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetPadding(padding);
-}
-
-void TabContentModelNG::SetPadding(FrameNode* node, PaddingProperty& padding, bool isSubTabStyle)
-{
-    CHECK_NULL_VOID(node);
-    auto pipelineContext = node->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
-    if (isSubTabStyle) {
-        if (padding.top) {
-            padding.top = NG::CalcLength(tabTheme->GetSubTabTopPadding());
-        }
-        if (padding.bottom) {
-            padding.bottom = NG::CalcLength(tabTheme->GetSubTabBottomPadding());
-        }
-        if (padding.left) {
-            padding.left = NG::CalcLength(tabTheme->GetSubTabHorizontalPadding());
-        }
-        if (padding.right) {
-            padding.right = NG::CalcLength(tabTheme->GetSubTabHorizontalPadding());
-        }
-    } else {
-        if (padding.top) {
-            padding.top = NG::CalcLength(0.0_vp);
-        }
-        if (padding.bottom) {
-            padding.bottom = NG::CalcLength(0.0_vp);
-        }
-        if (padding.left) {
-            padding.left = NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
-        }
-        if (padding.right) {
-            padding.right = NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
-        }
-    }
-    auto frameNodePattern = node->GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetPadding(padding);
 }
@@ -708,27 +618,11 @@ void TabContentModelNG::SetUseLocalizedPadding(bool useLocalizedPadding)
     frameNodePattern->SetUseLocalizedPadding(useLocalizedPadding);
 }
 
-void TabContentModelNG::SetUseLocalizedPadding(FrameNode* node, bool useLocalizedPadding)
-{
-    CHECK_NULL_VOID(node);
-    auto frameNodePattern = node->GetPattern<TabContentPattern>();
-    CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetUseLocalizedPadding(useLocalizedPadding);
-}
-
 void TabContentModelNG::SetLayoutMode(LayoutMode layoutMode)
 {
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetLayoutMode(layoutMode);
-}
-
-void TabContentModelNG::SetLayoutMode(FrameNode* node, const std::optional<LayoutMode>& layoutMode)
-{
-    CHECK_NULL_VOID(node);
-    auto frameNodePattern = node->GetPattern<TabContentPattern>();
-    CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetLayoutMode(layoutMode.value_or(LayoutMode::VERTICAL));
 }
 
 void TabContentModelNG::SetVerticalAlign(FlexAlign verticalAlign)
@@ -738,14 +632,6 @@ void TabContentModelNG::SetVerticalAlign(FlexAlign verticalAlign)
     frameNodePattern->SetVerticalAlign(verticalAlign);
 }
 
-void TabContentModelNG::SetVerticalAlign(FrameNode* node, const std::optional<FlexAlign>& verticalAlign)
-{
-    CHECK_NULL_VOID(node);
-    auto frameNodePattern = node->GetPattern<TabContentPattern>();
-    CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetVerticalAlign(verticalAlign.value_or(FlexAlign::CENTER));
-}
-
 void TabContentModelNG::SetSymmetricExtensible(bool isExtensible)
 {
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
@@ -753,27 +639,11 @@ void TabContentModelNG::SetSymmetricExtensible(bool isExtensible)
     frameNodePattern->SetSymmetricExtensible(isExtensible);
 }
 
-void TabContentModelNG::SetSymmetricExtensible(FrameNode* node, const std::optional<bool>& isExtensible)
-{
-    CHECK_NULL_VOID(node);
-    auto frameNodePattern = node->GetPattern<TabContentPattern>();
-    CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetSymmetricExtensible(isExtensible.value_or(false));
-}
-
 void TabContentModelNG::SetId(const std::string& id)
 {
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetId(id);
-}
-
-void TabContentModelNG::SetId(FrameNode* node, const std::optional<std::string>& id)
-{
-    CHECK_NULL_VOID(node);
-    auto frameNodePattern = node->GetPattern<TabContentPattern>();
-    CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetId(id.value_or(""));
 }
 
 void TabContentModelNG::UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty)
@@ -835,27 +705,11 @@ void TabContentModelNG::SetOnWillShow(std::function<void()>&& onWillShow)
     tabContentEventHub->SetOnWillShow(onWillShow);
 }
 
-void TabContentModelNG::SetOnWillShow(FrameNode* node, std::function<void()>&& onWillShow)
-{
-    CHECK_NULL_VOID(node);
-    auto tabContentEventHub = node->GetEventHub<TabContentEventHub>();
-    CHECK_NULL_VOID(tabContentEventHub);
-    tabContentEventHub->SetOnWillShow(onWillShow);
-}
-
 void TabContentModelNG::SetOnWillHide(std::function<void()>&& onWillHide)
 {
     auto tabContentNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabContentNode);
     auto tabContentEventHub = tabContentNode->GetEventHub<TabContentEventHub>();
-    CHECK_NULL_VOID(tabContentEventHub);
-    tabContentEventHub->SetOnWillHide(onWillHide);
-}
-
-void TabContentModelNG::SetOnWillHide(FrameNode* node, std::function<void()>&& onWillHide)
-{
-    CHECK_NULL_VOID(node);
-    auto tabContentEventHub = node->GetEventHub<TabContentEventHub>();
     CHECK_NULL_VOID(tabContentEventHub);
     tabContentEventHub->SetOnWillHide(onWillHide);
 }
@@ -883,5 +737,158 @@ void TabContentModelNG::SetTabBarLabel(FrameNode* node, const std::string& label
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetTabBar(label, "", std::nullopt, nullptr);
     frameNodePattern->SetTabBarWithContent(nullptr);
+}
+
+void TabContentModelNG::SetOnWillShow(FrameNode* tabContentNode, std::function<void()>&& onWillShow)
+{
+    CHECK_NULL_VOID(tabContentNode);
+    auto tabContentEventHub = tabContentNode->GetEventHub<TabContentEventHub>();
+    CHECK_NULL_VOID(tabContentEventHub);
+    tabContentEventHub->SetOnWillShow(onWillShow);
+}
+void TabContentModelNG::SetOnWillHide(FrameNode* tabContentNode, std::function<void()>&& onWillHide)
+{
+    CHECK_NULL_VOID(tabContentNode);
+    auto tabContentEventHub = tabContentNode->GetEventHub<TabContentEventHub>();
+    CHECK_NULL_VOID(tabContentEventHub);
+    tabContentEventHub->SetOnWillHide(onWillHide);
+}
+
+void TabContentModelNG::SetTabBar(FrameNode* node, const std::optional<std::string>& label,
+    const std::optional<std::string>& icon, TabBarBuilderFunc&& builder)
+{
+    CHECK_NULL_VOID(node);
+    if (icon) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Icon, icon.value(), node);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Icon, node);
+    }
+    if (label) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, label.value(), node);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, node);
+    }
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetTabBar(label.value_or(""), icon.value_or(""), std::nullopt, std::move(builder));
+}
+
+void TabContentModelNG::SetLayoutMode(FrameNode* node, const std::optional<LayoutMode>& layoutMode)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetLayoutMode(layoutMode.value_or(LayoutMode::VERTICAL));
+}
+
+void TabContentModelNG::SetId(FrameNode* node, const std::optional<std::string>& id)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetId(id.value_or(""));
+}
+
+void TabContentModelNG::SetTabBarStyle(FrameNode* node, TabBarStyle tabBarStyle)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetTabBarStyle(tabBarStyle);
+}
+
+void TabContentModelNG::SetSelectedMode(FrameNode* node, const std::optional<SelectedMode>& selectedMode)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetSelectedMode(selectedMode.value_or(SelectedMode::INDICATOR));
+}
+
+void TabContentModelNG::SetBoard(FrameNode* node, const std::optional<BoardStyle>& board)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetBoardStyle(board.value_or(BoardStyle()));
+}
+
+void TabContentModelNG::SetPadding(FrameNode* node, PaddingProperty& padding, bool isSubTabStyle)
+{
+    CHECK_NULL_VOID(node);
+    auto pipelineContext = node->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    if (isSubTabStyle) {
+        if (padding.top) {
+            padding.top = NG::CalcLength(tabTheme->GetSubTabTopPadding());
+        }
+        if (padding.bottom) {
+            padding.bottom = NG::CalcLength(tabTheme->GetSubTabBottomPadding());
+        }
+        if (padding.left) {
+            padding.left = NG::CalcLength(tabTheme->GetSubTabHorizontalPadding());
+        }
+        if (padding.right) {
+            padding.right = NG::CalcLength(tabTheme->GetSubTabHorizontalPadding());
+        }
+    } else {
+        if (padding.top) {
+            padding.top = NG::CalcLength(0.0_vp);
+        }
+        if (padding.bottom) {
+            padding.bottom = NG::CalcLength(0.0_vp);
+        }
+        if (padding.left) {
+            padding.left = NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
+        }
+        if (padding.right) {
+            padding.right = NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
+        }
+    }
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetPadding(padding);
+}
+
+void TabContentModelNG::SetPadding(FrameNode* node, const std::optional<PaddingProperty>& padding)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPadding(padding.value_or(PaddingProperty()));
+}
+
+void TabContentModelNG::SetUseLocalizedPadding(FrameNode* node, bool useLocalizedPadding)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetUseLocalizedPadding(useLocalizedPadding);
+}
+
+void TabContentModelNG::SetVerticalAlign(FrameNode* node, const std::optional<FlexAlign>& verticalAlign)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetVerticalAlign(verticalAlign.value_or(FlexAlign::CENTER));
+}
+
+void TabContentModelNG::SetSymmetricExtensible(FrameNode* node, const std::optional<bool>& isExtensible)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetSymmetricExtensible(isExtensible.value_or(false));
+}
+
+void TabContentModelNG::SetIconStyle(FrameNode* node, const  std::optional<IconStyle>& iconStyle)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetIconStyle(iconStyle.value_or(IconStyle()));
 }
 } // namespace OHOS::Ace::NG

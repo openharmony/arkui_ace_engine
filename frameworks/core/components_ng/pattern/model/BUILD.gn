@@ -21,6 +21,7 @@ build_component_ng("model_pattern_ng") {
     "model_pattern.cpp",
     "model_touch_handler.cpp",
     "model_view_ng.cpp",
+    "model_view_static_ng.cpp",
   ]
 
   if (is_ohos_standard_system) {
