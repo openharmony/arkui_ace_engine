@@ -183,7 +183,7 @@ export class FileSelectorParam implements MaterializedBase {
     }
     private getMode_serialize(): FileSelectorMode {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getMode(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        return TypeChecker.FileSelectorMode_FromNumeric(retval)
     }
     private getAcceptType_serialize(): Array<string> {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getAcceptType(this.peer!.ptr)
@@ -719,7 +719,7 @@ export class WebContextMenuParam implements MaterializedBase {
     }
     private getMediaType_serialize(): ContextMenuMediaType {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getMediaType(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        return TypeChecker.ContextMenuMediaType_FromNumeric(retval)
     }
     private getSelectionText_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getSelectionText(this.peer!.ptr)
@@ -727,11 +727,11 @@ export class WebContextMenuParam implements MaterializedBase {
     }
     private getSourceType_serialize(): ContextMenuSourceType {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getSourceType(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        return TypeChecker.ContextMenuSourceType_FromNumeric(retval)
     }
     private getInputFieldType_serialize(): ContextMenuInputFieldType {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getInputFieldType(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        return TypeChecker.ContextMenuInputFieldType_FromNumeric(retval)
     }
     private isEditable_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_isEditable(this.peer!.ptr)
