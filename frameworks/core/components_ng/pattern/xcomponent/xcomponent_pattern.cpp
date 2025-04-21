@@ -51,6 +51,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_utils.h"
 #include "core/event/event_info_convertor.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -60,111 +61,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
-
-std::string XComponentRenderFitToString(RenderFit renderFit)
-{
-    static const std::string renderFitStyles[] = { "RenderFit.CENTER", "RenderFit.TOP", "RenderFit.BOTTOM",
-        "RenderFit.LEFT", "RenderFit.RIGHT", "RenderFit.TOP_LEFT", "RenderFit.TOP_RIGHT", "RenderFit.BOTTOM_LEFT",
-        "RenderFit.BOTTOM_RIGHT", "RenderFit.RESIZE_FILL", "RenderFit.RESIZE_CONTAIN",
-        "RenderFit.RESIZE_CONTAIN_TOP_LEFT", "RenderFit.RESIZE_CONTAIN_BOTTOM_RIGHT", "RenderFit.RESIZE_COVER",
-        "RenderFit.RESIZE_COVER_TOP_LEFT", "RenderFit.RESIZE_COVER_BOTTOM_RIGHT" };
-    return renderFitStyles[static_cast<int>(renderFit)];
-}
-
-OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const TouchType& touchType)
-{
-    switch (touchType) {
-        case TouchType::DOWN:
-            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_DOWN;
-        case TouchType::UP:
-            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UP;
-        case TouchType::MOVE:
-            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_MOVE;
-        case TouchType::CANCEL:
-            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_CANCEL;
-        default:
-            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UNKNOWN;
-    }
-}
-
-OH_NativeXComponent_TouchPointToolType ConvertNativeXComponentTouchToolType(const SourceTool& toolType)
-{
-    switch (toolType) {
-        case SourceTool::FINGER:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_FINGER;
-        case SourceTool::PEN:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_PEN;
-        case SourceTool::RUBBER:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_RUBBER;
-        case SourceTool::BRUSH:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_BRUSH;
-        case SourceTool::PENCIL:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_PENCIL;
-        case SourceTool::AIRBRUSH:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_AIRBRUSH;
-        case SourceTool::MOUSE:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_MOUSE;
-        case SourceTool::LENS:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_LENS;
-        default:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_UNKNOWN;
-    }
-}
-
-OH_NativeXComponent_KeyAction ConvertNativeXComponentKeyAction(const KeyAction& keyAction)
-{
-    switch (keyAction) {
-        case KeyAction::DOWN:
-            return OH_NativeXComponent_KeyAction::OH_NATIVEXCOMPONENT_KEY_ACTION_DOWN;
-        case KeyAction::UP:
-            return OH_NativeXComponent_KeyAction::OH_NATIVEXCOMPONENT_KEY_ACTION_UP;
-        default:
-            return OH_NativeXComponent_KeyAction::OH_NATIVEXCOMPONENT_KEY_ACTION_UNKNOWN;
-    }
-}
-
-OH_NativeXComponent_EventSourceType ConvertNativeXComponentEventSourceType(const SourceType& sourceType)
-{
-    switch (sourceType) {
-        case SourceType::MOUSE:
-            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_MOUSE;
-        case SourceType::TOUCH:
-            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_TOUCHSCREEN;
-        case SourceType::TOUCH_PAD:
-            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_TOUCHPAD;
-        case SourceType::KEYBOARD:
-            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_KEYBOARD;
-        default:
-            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_UNKNOWN;
-    }
-}
-
-OH_NativeXComponent_KeyEvent ConvertNativeXComponentKeyEvent(const KeyEvent& event)
-{
-    OH_NativeXComponent_KeyEvent nativeKeyEvent;
-    nativeKeyEvent.action = ConvertNativeXComponentKeyAction(event.action);
-    nativeKeyEvent.code = static_cast<OH_NativeXComponent_KeyCode>(event.code);
-    nativeKeyEvent.sourceType = ConvertNativeXComponentEventSourceType(event.sourceType);
-    nativeKeyEvent.deviceId = event.deviceId;
-    nativeKeyEvent.timestamp = event.timeStamp.time_since_epoch().count();
-    return nativeKeyEvent;
-}
-
-ArkUI_XComponent_ImageAnalyzerState ConvertNativeXComponentAnalyzerStatus(const ImageAnalyzerState state)
-{
-    switch (state) {
-        case ImageAnalyzerState::UNSUPPORTED:
-            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_UNSUPPORTED;
-        case ImageAnalyzerState::ONGOING:
-            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_ONGOING;
-        case ImageAnalyzerState::STOPPED:
-            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_STOPPED;
-        case ImageAnalyzerState::FINISHED:
-            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_FINISHED;
-        default:
-            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_DISABLED;
-    }
-}
 } // namespace
 
 XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComponentType type,
@@ -472,13 +368,8 @@ void XComponentPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
-    auto bkColor = renderContext->GetBackgroundColor();
-    if (bkColor.has_value()) {
-        bool isTransparent = bkColor.value().GetAlpha() < UINT8_MAX;
-        handlingSurfaceRenderContext_->UpdateBackgroundColor(isTransparent ? Color::TRANSPARENT : bkColor.value());
-    } else {
-        handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::BLACK);
-    }
+    auto bkColor = renderContext->GetBackgroundColor().value_or(Color::BLACK);
+    handlingSurfaceRenderContext_->UpdateBackgroundColor((bkColor.GetAlpha() < UINT8_MAX) ? Color::TRANSPARENT : bkColor);
 }
 
 void XComponentPattern::OnAreaChangedInner()
@@ -667,7 +558,7 @@ void XComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("enableTransparentLayer", isTransparentLayer_ ? "true" : "false", filter);
     json->PutExtAttr("screenId", screenId_.has_value() ? std::to_string(screenId_.value()).c_str() : "", filter);
     if (type_ == XComponentType::SURFACE) {
-        json->PutExtAttr("renderFit", XComponentRenderFitToString(GetSurfaceRenderFit()).c_str(), filter);
+        json->PutExtAttr("renderFit", XComponentUtils::XComponentRenderFitToString(GetSurfaceRenderFit()).c_str(), filter);
     }
 }
 
@@ -1106,7 +997,7 @@ bool XComponentPattern::HandleKeyEvent(const KeyEvent& event)
     CHECK_NULL_RETURN(nativeXComponent_, false);
     CHECK_NULL_RETURN(nativeXComponentImpl_, false);
 
-    OH_NativeXComponent_KeyEvent keyEvent = ConvertNativeXComponentKeyEvent(event);
+    OH_NativeXComponent_KeyEvent keyEvent = XComponentUtils::ConvertNativeXComponentKeyEvent(event);
     nativeXComponentImpl_->SetKeyEvent(keyEvent);
 
     auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
@@ -1232,7 +1123,7 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     const auto timeStamp = info.GetTimeStamp().time_since_epoch().count();
     touchEventPoint_.timeStamp = timeStamp;
     auto touchType = touchInfoList.front().GetTouchType();
-    touchEventPoint_.type = ConvertNativeXComponentTouchEvent(touchType);
+    touchEventPoint_.type = XComponentUtils::ConvertNativeXComponentTouchEvent(touchType);
     TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "HandleTouchEvent[%{public}f,%{public}f,%{public}d,%{public}zu,%{public}u]",
         localOffset.GetX(), localOffset.GetY(), touchInfo.GetFingerId(), touchInfoList.front().GetTouchType(),
         static_cast<uint32_t>(touchInfo.GetSize()));
@@ -1241,7 +1132,7 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (nativeXComponent_ && nativeXComponentImpl_) {
         nativeXComponentImpl_->SetHistoricalPoint(SetHistoryPoint(info.GetHistory()));
         nativeXComponentImpl_->SetCurrentSourceType(
-            { touchInfo.GetFingerId(), ConvertNativeXComponentEventSourceType(info.GetSourceDevice()) });
+            { touchInfo.GetFingerId(), XComponentUtils::ConvertNativeXComponentEventSourceType(info.GetSourceDevice()) });
     }
     NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
 
@@ -1259,43 +1150,8 @@ void XComponentPattern::HandleMouseEvent(const MouseInfo& info)
     mouseEventPoint.y = static_cast<float>(info.GetLocalLocation().GetY());
     mouseEventPoint.screenX = static_cast<float>(info.GetScreenLocation().GetX());
     mouseEventPoint.screenY = static_cast<float>(info.GetScreenLocation().GetY());
-    switch (info.GetAction()) {
-        case MouseAction::PRESS:
-            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_PRESS;
-            break;
-        case MouseAction::RELEASE:
-            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_RELEASE;
-            break;
-        case MouseAction::MOVE:
-            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_MOVE;
-            break;
-        case MouseAction::CANCEL:
-            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_CANCEL;
-            break;
-        default:
-            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_NONE;
-            break;
-    }
-    switch (info.GetButton()) {
-        case MouseButton::LEFT_BUTTON:
-            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_LEFT_BUTTON;
-            break;
-        case MouseButton::RIGHT_BUTTON:
-            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_RIGHT_BUTTON;
-            break;
-        case MouseButton::MIDDLE_BUTTON:
-            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_MIDDLE_BUTTON;
-            break;
-        case MouseButton::BACK_BUTTON:
-            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_BACK_BUTTON;
-            break;
-        case MouseButton::FORWARD_BUTTON:
-            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_FORWARD_BUTTON;
-            break;
-        default:
-            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_NONE_BUTTON;
-            break;
-    }
+    mouseEventPoint.action = XComponentUtils::ConvertNativeXComponentMouseEventAction(info.GetAction());
+    mouseEventPoint.button = XComponentUtils::ConvertNativeXComponentMouseEventButton(info.GetButton());
     mouseEventPoint.timestamp = info.GetTimeStamp().time_since_epoch().count();
     NativeXComponentDispatchMouseEvent(mouseEventPoint);
 }
@@ -1361,7 +1217,7 @@ void XComponentPattern::SetTouchPoint(
         ohTouchPoint.screenY = static_cast<float>(pointWindowOffset.GetY());
         ohTouchPoint.x = static_cast<float>(pointLocalOffset.GetX());
         ohTouchPoint.y = static_cast<float>(pointLocalOffset.GetY());
-        ohTouchPoint.type = ConvertNativeXComponentTouchEvent(touchType);
+        ohTouchPoint.type = XComponentUtils::ConvertNativeXComponentTouchEvent(touchType);
         ohTouchPoint.size = pointTouchInfo.GetSize();
         ohTouchPoint.force = pointTouchInfo.GetForce();
         ohTouchPoint.timeStamp = timeStamp;
@@ -1375,7 +1231,7 @@ void XComponentPattern::SetTouchPoint(
         xcomponentTouchPoint.windowY = static_cast<float>(pointWindowOffset.GetY());
         xcomponentTouchPoint.displayX = static_cast<float>(pointDisplayOffset.GetX());
         xcomponentTouchPoint.displayY = static_cast<float>(pointDisplayOffset.GetY());
-        xcomponentTouchPoint.sourceToolType = ConvertNativeXComponentTouchToolType(pointTouchInfo.GetSourceTool());
+        xcomponentTouchPoint.sourceToolType = XComponentUtils::ConvertNativeXComponentTouchToolType(pointTouchInfo.GetSourceTool());
         nativeXComponentTouchPoints_.emplace_back(xcomponentTouchPoint);
     }
     while (index < OH_MAX_TOUCH_POINTS_NUMBER) {
@@ -2047,7 +1903,6 @@ void XComponentPattern::UpdateAnalyzerOverlay()
 void XComponentPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
     if (IsSupportImageAnalyzerFeature()) {
-        CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
     }
 }
@@ -2242,7 +2097,7 @@ void XComponentPattern::NativeStartImageAnalyzer(std::function<void(int32_t)>& c
         CHECK_NULL_VOID(callback);
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto statusCode = ConvertNativeXComponentAnalyzerStatus(state);
+        auto statusCode = XComponentUtils::ConvertNativeXComponentAnalyzerStatus(state);
         callback(statusCode);
         pattern->isNativeImageAnalyzing_ = false;
     };

@@ -20,6 +20,7 @@ ace_unittest("xcomponent_test_ng") {
     "xcomponent_property_test_ng.cpp",
     "xcomponent_test_ng.cpp",
     "xcomponent_testtwo_ng.cpp",
+    "xcomponent_utils_test_ng.cpp",
     "xcomponent_v2_test_ng.cpp",
   ]
 
