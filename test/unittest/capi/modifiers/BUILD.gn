@@ -123,6 +123,7 @@ ace_unittest("capi_all_modifiers_test") {
     "security_component_method_modifier_test_2.cpp",
     "select_modifier_test.cpp",
     "select_modifier_test_1.cpp",
+    "select_modifier_test_2.cpp",
     "shape_modifier_test.cpp",
     "side_bar_container_modifier_test.cpp",
     "slider_modifier_test.cpp",
