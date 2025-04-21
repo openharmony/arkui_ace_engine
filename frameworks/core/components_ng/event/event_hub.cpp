@@ -47,7 +47,7 @@ void EventHub::OnDetachContext(PipelineContext *context)
         context->RemoveOnAreaChangeNode(host->GetId());
     }
 
-    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false)) {
+    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false) || HasThrottledVisibleAreaCallback()) {
         host->SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::DETACH_FROM_MAINTREE);
         host->TriggerVisibleAreaChangeCallback(0, true);
         context->RemoveVisibleAreaChangeNode(host->GetId());
@@ -587,5 +587,10 @@ void EventHub::SetDisableDataPrefetch(bool disableDataPrefetch)
 bool EventHub::GetDisableDataPrefetch() const
 {
     return disableDataPrefetch_;
+}
+
+bool EventHub::HasThrottledVisibleAreaCallback() const
+{
+    return static_cast<bool>(throttledVisibleAreaCallback_.callback);
 }
 } // namespace OHOS::Ace::NG
