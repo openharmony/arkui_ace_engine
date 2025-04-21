@@ -304,7 +304,7 @@ void ImageModelNG::CreateAnimation(FrameNode* frameNode,
     frameNode->SetDraggable(draggable);
     pattern->SetSrcUndefined(false);
     pattern->StopAnimation();
-    pattern->SetImageType(ImageType::ANIMATION);
+    pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
     std::vector<ImageProperties> images = imageList;
     pattern->SetImages(std::move(images));
     pattern->SetDuration(duration);
