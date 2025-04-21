@@ -809,6 +809,36 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool 
     safeAreaManager_->UpdateNavSafeArea(navSafeArea);
 }
 
+void PipelineContext::UpdateSystemSafeAreaWithoutAnimation(
+    const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbSystemSafeArea(systemSafeArea);
+        return;
+    }
+    safeAreaManager_->UpdateSystemSafeArea(systemSafeArea);
+}
+
+void PipelineContext::UpdateCutoutSafeAreaWithoutAnimation(
+    const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbCutoutSafeArea(cutoutSafeArea);
+        return;
+    }
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
+}
+
+void PipelineContext::UpdateNavSafeAreaWithoutAnimation(
+    const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbNavSafeArea(navSafeArea);
+        return;
+    }
+    safeAreaManager_->UpdateNavSafeArea(navSafeArea);
+}
+
 KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
 {
     return KeyBoardAvoidMode::OFFSET;

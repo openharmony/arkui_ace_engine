@@ -1072,6 +1072,15 @@ public:
 
     virtual void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow = false) {}
 
+    virtual void UpdateSystemSafeAreaWithoutAnimation(const SafeAreaInsets& systemSafeArea,
+        bool checkSceneBoardWindow = false) {}
+
+    virtual void UpdateCutoutSafeAreaWithoutAnimation(const SafeAreaInsets& cutoutSafeArea,
+        bool checkSceneBoardWindow = false) {}
+
+    virtual void UpdateNavSafeAreaWithoutAnimation(const SafeAreaInsets& navSafeArea,
+        bool checkSceneBoardWindow = false) {}
+
     virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
     virtual void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {}

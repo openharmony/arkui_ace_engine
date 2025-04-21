@@ -73,7 +73,6 @@ template("ace_base_source_set") {
       "ressched/ressched_report.cpp",
       "subwindow/subwindow_manager.cpp",
       "thread/background_task_executor.cpp",
-      "thread/task_dependency_manager.cpp",
       "utils/base_id.cpp",
       "utils/date_util.cpp",
       "utils/lifecycle_checkable.cpp",
