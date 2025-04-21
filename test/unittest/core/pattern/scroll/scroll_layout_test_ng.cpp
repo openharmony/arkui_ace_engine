@@ -742,4 +742,79 @@ HWTEST_F(ScrollLayoutTestNg, ScrollAdjustOffset001, TestSize.Level1)
     EXPECT_GT(pattern_->currentOffset_, 1000.f);
     EXPECT_LT(pattern_->currentOffset_, 1100.f);
 }
+
+/**
+ * @tc.name: UseInitialOffset001
+ * @tc.desc: Test Scroll UseInitialOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, UseInitialOffset001, TestSize.Level1)
+{
+    auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(1.0f);
+    auto axis = Axis::VERTICAL;
+    auto selfSize = SizeF(1.0f, 1.0f);
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto scrollNode = layoutWrapper->GetHostNode();
+    ASSERT_NE(scrollNode, nullptr);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    scrollPattern->isInitialized_ = false;
+    LayoutWrapper* rawPtr = &(*layoutWrapper);
+    ASSERT_NE(rawPtr, nullptr);
+    scrollLayoutAlgorithm->UseInitialOffset(axis, selfSize, rawPtr);
+    EXPECT_EQ(scrollLayoutAlgorithm->GetCurrentOffset(), 1.0f);
+}
+
+/**
+ * @tc.name: UseInitialOffset002
+ * @tc.desc: Test Scroll UseInitialOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, UseInitialOffset002, TestSize.Level1)
+{
+    auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(1.0f);
+    auto axis = Axis::NONE;
+    auto selfSize = SizeF(1.0f, 1.0f);
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto scrollNode = layoutWrapper->GetHostNode();
+    ASSERT_NE(scrollNode, nullptr);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    scrollPattern->isInitialized_ = false;
+    LayoutWrapper* rawPtr = &(*layoutWrapper);
+    ASSERT_NE(rawPtr, nullptr);
+    scrollLayoutAlgorithm->UseInitialOffset(axis, selfSize, rawPtr);
+    EXPECT_EQ(scrollLayoutAlgorithm->GetCurrentOffset(), 1.0f);
+}
+
+/**
+ * @tc.name: UseInitialOffset003
+ * @tc.desc: Test Scroll UseInitialOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, UseInitialOffset003, TestSize.Level1)
+{
+    auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(1.0f);
+    auto axis = Axis::NONE;
+    auto selfSize = SizeF(1.0f, 1.0f);
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto scrollNode = layoutWrapper->GetHostNode();
+    ASSERT_NE(scrollNode, nullptr);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    scrollPattern->isInitialized_ = true;
+    LayoutWrapper* rawPtr = &(*layoutWrapper);
+    ASSERT_NE(rawPtr, nullptr);
+    scrollLayoutAlgorithm->UseInitialOffset(axis, selfSize, rawPtr);
+    EXPECT_EQ(scrollLayoutAlgorithm->GetCurrentOffset(), 1.0f);
+}
 } // namespace OHOS::Ace::NG

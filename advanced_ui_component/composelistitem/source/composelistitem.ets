@@ -150,9 +150,7 @@ const IS_SUPPORT_SUBCOMPONENT_EVENT: boolean =
 const RECOVER_ITEM_SCALE: number = 1;
 const CLEAR_SHADOW: ShadowStyle = -1;
 const OPERATE_ITEM_RADIUS: number = 50;
-const OPERATE_ITEM_BACKGROUND_COLOR: ResourceColor = '#33000000';
 const DEFUALT_RADIO_CHECKBOX_BORDER_COLOR: ResourceColor = $r('sys.color.ohos_id_color_switch_outline_off');
-const OPERATE_ITEM_COLOR: ResourceColor = '#99000000';
 const TEXT_SUPPORT_MARQUEE: number = 1;
 const IS_MARQUEE_OR_ELLIPSIS: number = LengthMetrics.resource($r('sys.float.composeListItem_right_textOverflow')).value;
 const UNUSUAL: number = -1;
@@ -432,6 +430,15 @@ class CreateIconParam {
   public icon?: OperateIcon;
 }
 
+class OperateItemStructController {
+  public changeRadioState = () => {
+  };
+  public changeCheckboxState = () => {
+  };
+  public changeSwitchState = () => {
+  };
+}
+
 @Component
 struct OperateItemStruct {
   @Prop @Watch('onPropChange') arrow: OperateIcon | null = null;
@@ -463,7 +470,7 @@ struct OperateItemStruct {
   @State secondaryTextSize: Length = $r('sys.float.ohos_id_text_size_body2');
   @State secondaryTextColors: ResourceColor = $r('sys.color.font_secondary');
   @State iconColor: ResourceColor = $r('sys.color.composeListItem_right_icon_normal_color');
-  @Link @Watch('onPropChange') isChecked: boolean;
+  private controller: OperateItemStructController = new OperateItemStructController();
 
   onWillApplyTheme(theme: Theme): void {
     this.secondaryTextColor = theme.colors.fontSecondary;
@@ -483,13 +490,13 @@ struct OperateItemStruct {
 
   onPropChange(): void {
     if (this.switch != null) {
-      this.switchState = IS_SUPPORT_SUBCOMPONENT_EVENT ? this.switch.isCheck as boolean : this.isChecked;
+      this.switchState = this.switch.isCheck as boolean;
     }
     if (this.radio != null) {
-      this.radioState = IS_SUPPORT_SUBCOMPONENT_EVENT ? this.radio.isCheck as boolean : this.isChecked;
+      this.radioState = this.radio.isCheck as boolean;
     }
     if (this.checkBox != null) {
-      this.checkBoxState = IS_SUPPORT_SUBCOMPONENT_EVENT ? this.checkBox.isCheck as boolean : this.isChecked;
+      this.checkBoxState = this.checkBox.isCheck as boolean;
     }
 
     if ((this.button == null && this.image == null && this.symbolStyle == null && this.text != null) &&
@@ -500,26 +507,25 @@ struct OperateItemStruct {
     }
   }
 
-  getUnselectedColor(): ResourceColor {
-    if (IS_SUPPORT_SUBCOMPONENT_EVENT) {
-      return DEFUALT_RADIO_CHECKBOX_BORDER_COLOR;
-    }
-    return this.isFocus ? OPERATE_ITEM_COLOR : DEFUALT_RADIO_CHECKBOX_BORDER_COLOR;
-  }
-
   aboutToAppear(): void {
-    if (this.switch !== null) {
-      this.isChecked = this.switch.isCheck as boolean;
-    }
-    if (this.radio !== null) {
-      this.isChecked = this.radio.isCheck as boolean;
-    }
-    if (this.checkBox !== null) {
-      this.isChecked = this.checkBox.isCheck as boolean;
-    }
     this.onPropChange();
     this.onFocusChange();
+    if (this.controller) {
+      this.controller.changeRadioState = this.changeRadioState;
+      this.controller.changeCheckboxState = this.changeCheckboxState;
+      this.controller.changeSwitchState = this.changeSwitchState;
+    }
   }
+
+  changeRadioState = () => {
+    this.radioState = !this.radioState;
+  };
+  changeCheckboxState = () => {
+    this.checkBoxState = !this.checkBoxState;
+  };
+  changeSwitchState = () => {
+    this.switchState = !this.switchState;
+  };
 
   @Builder
   createButton() {
@@ -740,15 +746,13 @@ struct OperateItemStruct {
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .checked(this.radioState)
       .radioStyle({
-        uncheckedBorderColor: this.getUnselectedColor()
+        uncheckedBorderColor: DEFUALT_RADIO_CHECKBOX_BORDER_COLOR
       })
-      .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
-      Color.Transparent)
+      .backgroundColor(Color.Transparent)
       .borderRadius(OPERATE_ITEM_RADIUS)
       .onChange((isCheck: boolean) => {
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
           this.radioState = isCheck;
-          this.isChecked = isCheck;
         }
         if (this.radio?.onChange) {
           this.radio?.onChange(isCheck);
@@ -784,15 +788,13 @@ struct OperateItemStruct {
   createCheckBox() {
     Checkbox()
       .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS)
-      .unselectedColor(this.getUnselectedColor())
-      .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
-      Color.Transparent)
+      .unselectedColor(DEFUALT_RADIO_CHECKBOX_BORDER_COLOR)
+      .backgroundColor(Color.Transparent)
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .select(this.checkBoxState)
       .onChange((isCheck: boolean) => {
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
           this.checkBoxState = isCheck;
-          this.isChecked = isCheck;
         }
         if (this.checkBox?.onChange) {
           this.checkBox?.onChange(isCheck);
@@ -829,15 +831,9 @@ struct OperateItemStruct {
     Row() {
       Toggle({ type: ToggleType.Switch, isOn: this.switchState })
         .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS)
-        .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
-        Color.Transparent)
-        .switchPointColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus && !this.switchState ? OPERATE_ITEM_COLOR :
-          UNUSUAL)
+        .backgroundColor(Color.Transparent)
         .onChange((isCheck: boolean) => {
           this.switchState = isCheck;
-          if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-            this.isChecked = isCheck;
-          }
           if (this.switch?.onChange) {
             this.switch?.onChange(isCheck);
           }
@@ -1140,9 +1136,9 @@ export struct ComposeListItem {
   private callbackId: number | undefined = undefined;
   @State accessibilityTextBuilder: string = '';
   @State isFocus: boolean = false;
-  @State isChecked: boolean = false;
   @State @Watch('onWrapChange') isWrapText: boolean = false;
   @State listScale: ScaleOptions = { x: 1, y: 1 };
+  private operateItemStructRef = new OperateItemStructController();
 
   onWillApplyTheme(theme: Theme): void {
     this.hoveringColor = theme.colors.interactiveHover;
@@ -1443,7 +1439,7 @@ export struct ComposeListItem {
             rightWidth: this.calculatedRightWidth(),
             parentDirection: this.containerDirection,
             isFocus: this.isFocus,
-            isChecked: this.isChecked,
+            controller: this.operateItemStructRef
           })
             .flexShrink(0)
             .onFocus(() => {
@@ -1519,7 +1515,6 @@ export struct ComposeListItem {
     })
     .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : $r('sys.float.composeListItem_radius'))
     .onClick(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : () => {
-      this.isChecked = this.operateItem?.radio ? true : !this.isChecked;
       if (this.operateItem?.icon && this.operateItem.icon?.action) {
         this.operateItem.icon.action();
       }
@@ -1528,6 +1523,15 @@ export struct ComposeListItem {
       }
       if (this.operateItem?.arrow && this.operateItem.arrow?.action) {
         this.operateItem.arrow.action();
+      }
+      if (this.operateItem?.radio) {
+        this.operateItemStructRef.changeRadioState();
+      }
+      if (this.operateItem?.checkbox) {
+        this.operateItemStructRef.changeCheckboxState();
+      }
+      if (this.operateItem?.switch) {
+        this.operateItemStructRef.changeSwitchState();
       }
     })
     .scale(this.listScale)

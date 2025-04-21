@@ -26,11 +26,19 @@
 #include "core/common/ai/data_detector_adapter.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/render/paragraph.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_v2/inspector/utils.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
+#include "core/components_ng/property/accessibility_property.h"
 
 #define DEFINE_SPAN_FONT_STYLE_ITEM_GET(name, type)                          \
 public:                                                                      \
@@ -115,7 +123,12 @@ public:                                                           \
     void Reset##name()                                            \
     {                                                             \
         if (spanItem_->fontStyle) {                               \
-            return spanItem_->fontStyle->Reset##name();           \
+            spanItem_->fontStyle->Reset##name();                  \
+        }                                                         \
+        if (changeflag == ChangeFlag::RE_CREATE) {                \
+            spanItem_->MarkDirty();                               \
+        } else {                                                  \
+            spanItem_->MarkReLayoutParagraph();                   \
         }                                                         \
         spanItem_->MarkReCreateParagraph();                       \
     }                                                             \
@@ -173,7 +186,12 @@ public:                                                                         
     void Reset##name()                                                           \
     {                                                                            \
         if (spanItem_->textLineStyle) {                                          \
-            return spanItem_->textLineStyle->Reset##name();                      \
+            spanItem_->textLineStyle->Reset##name();                             \
+        }                                                                        \
+        if (changeflag == ChangeFlag::RE_CREATE) {                               \
+            spanItem_->MarkDirty();                                              \
+        } else {                                                                 \
+            spanItem_->MarkReLayoutParagraph();                                  \
         }                                                                        \
     }                                                                            \
     void Update##name##WithoutFlushDirty(const type& value)                      \
@@ -277,7 +295,7 @@ public:
     virtual bool UpdateSpanTextStyle(const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode);
     bool CheckSpanNeedReCreate(int32_t index);
     void UpdateReLayoutTextStyle(
-        TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol, bool isRichEditor);
+        TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(const std::u16string& content, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, const TextStyle& aiSpanStyle);
@@ -530,9 +548,28 @@ public:
         return spanItem_;
     }
 
-    void UpdateContent(const uint32_t& unicode);
+    void UpdateContent(const uint32_t& unicode)
+    {
+        spanItem_->spanItemType = SpanItemType::SYMBOL;
+        if (spanItem_->unicode == unicode) {
+            return;
+        }
+        spanItem_->unicode = unicode;
+        spanItem_->MarkDirty();
+        spanItem_->MarkReCreateParagraph();
+        RequestTextFlushDirty(true);
+    }
 
-    void UpdateContent(const std::u16string& content);
+    void UpdateContent(const std::u16string& content)
+    {
+        if (spanItem_->content == content) {
+            return;
+        }
+        spanItem_->content = content;
+        spanItem_->MarkDirty();
+        spanItem_->MarkReCreateParagraph();
+        RequestTextFlushDirty(true);
+    }
 
     void UpdateOnClickEvent(GestureEventFunc&& onClick)
     {
@@ -549,7 +586,13 @@ public:
         spanItem_->description = desc;
     }
 
-    void UpdateColorByResourceId();
+    void UpdateColorByResourceId()
+    {
+        spanItem_->fontStyle->UpdateColorByResourceId();
+        if (spanItem_->backgroundStyle) {
+            spanItem_->backgroundStyle->UpdateColorByResourceId();
+        }
+    }
 
     void UpdateTextColorWithoutCheck(Color color)
     {
@@ -631,7 +674,21 @@ public:
         RequestTextFlushDirty();
     }
 
-    void UpdateSpanTextColor(Color color);
+    void UpdateSpanTextColor(Color color)
+    {
+        if (!spanItem_->fontStyle) {
+            spanItem_->fontStyle = std::make_unique<FontStyle>();
+        }
+        if (spanItem_->fontStyle->CheckTextColor(color)) {
+            return;
+        }
+        spanItem_->fontStyle->UpdateTextColor(color);
+        auto parent = GetParent();
+        CHECK_NULL_VOID(parent);
+        if (!spanItem_->UpdateSpanTextColor(color)) {
+            RequestTextFlushDirty();
+        }
+    }
 
 protected:
     void DumpInfo() override;
@@ -705,7 +762,16 @@ class ACE_EXPORT PlaceholderSpanNode : public FrameNode {
 
 public:
     static RefPtr<PlaceholderSpanNode> GetOrCreateSpanNode(
-        const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+        const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+    {
+        auto frameNode = GetFrameNode(tag, nodeId);
+        CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<PlaceholderSpanNode>(frameNode));
+        auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
+        auto placeholderSpanNode = AceType::MakeRefPtr<PlaceholderSpanNode>(tag, nodeId, pattern);
+        placeholderSpanNode->InitializePatternAndContext();
+        ElementRegister::GetInstance()->AddUINode(placeholderSpanNode);
+        return placeholderSpanNode;
+    }
 
     PlaceholderSpanNode(const std::string& tag, int32_t nodeId) : FrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>())
     {
@@ -783,9 +849,25 @@ class ACE_EXPORT CustomSpanNode : public FrameNode {
     DECLARE_ACE_TYPE(CustomSpanNode, FrameNode);
 
 public:
-    static RefPtr<CustomSpanNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<CustomSpanNode> CreateFrameNode(int32_t nodeId)
+    {
+        auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(V2::CUSTOM_SPAN_NODE_ETS_TAG, nodeId);
+        customSpanNode->InitializePatternAndContext();
+        ElementRegister::GetInstance()->AddUINode(customSpanNode);
+        customSpanNode->customSpanItem_->isFrameNode = true;
+        return customSpanNode;
+    }
 
-    static RefPtr<CustomSpanNode> GetOrCreateSpanNode(const std::string& tag, int32_t nodeId);
+    static RefPtr<CustomSpanNode> GetOrCreateSpanNode(const std::string& tag, int32_t nodeId)
+    {
+        auto frameNode = GetFrameNode(tag, nodeId);
+        CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<CustomSpanNode>(frameNode));
+        auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(tag, nodeId);
+        customSpanNode->InitializePatternAndContext();
+        ElementRegister::GetInstance()->AddUINode(customSpanNode);
+        customSpanNode->customSpanItem_->isFrameNode = true;
+        return customSpanNode;
+    }
 
     CustomSpanNode(const std::string& tag, int32_t nodeId) : FrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>())
     {
@@ -851,7 +933,16 @@ class ACE_EXPORT ImageSpanNode : public FrameNode {
 
 public:
     static RefPtr<ImageSpanNode> GetOrCreateSpanNode(
-        const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+        const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+    {
+        auto frameNode = GetFrameNode(tag, nodeId);
+        CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<ImageSpanNode>(frameNode));
+        auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
+        auto imageSpanNode = AceType::MakeRefPtr<ImageSpanNode>(tag, nodeId, pattern);
+        imageSpanNode->InitializePatternAndContext();
+        ElementRegister::GetInstance()->AddUINode(imageSpanNode);
+        return imageSpanNode;
+    }
 
     ImageSpanNode(const std::string& tag, int32_t nodeId) : FrameNode(tag, nodeId, AceType::MakeRefPtr<ImagePattern>())
     {
@@ -895,7 +986,17 @@ class ACE_EXPORT ContainerSpanNode : public UINode, public BaseSpan {
     DECLARE_ACE_TYPE(ContainerSpanNode, UINode, BaseSpan);
 
 public:
-    static RefPtr<ContainerSpanNode> GetOrCreateSpanNode(int32_t nodeId);
+    static RefPtr<ContainerSpanNode> GetOrCreateSpanNode(int32_t nodeId)
+    {
+        auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById<ContainerSpanNode>(nodeId);
+        if (spanNode) {
+            spanNode->SetHasTextBackgroundStyle(false);
+            return spanNode;
+        }
+        spanNode = MakeRefPtr<ContainerSpanNode>(nodeId);
+        ElementRegister::GetInstance()->AddUINode(spanNode);
+        return spanNode;
+    }
 
     explicit ContainerSpanNode(int32_t nodeId) : UINode(V2::CONTAINER_SPAN_ETS_TAG, nodeId), BaseSpan(nodeId) {}
     ~ContainerSpanNode() override = default;

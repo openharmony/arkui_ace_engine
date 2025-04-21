@@ -27,6 +27,7 @@
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/common/frontend.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components/picker/picker_theme.h"
@@ -1074,8 +1075,24 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation, TestSize.Level1)
     EXPECT_NE(contentNode_, nullptr);
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     overlayManager->OpenDialogAnimation(dialogNode_, props);
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step3. create dialog mask node
+     */
+    DialogProperties maskProps {
+        .isMask = true,
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto maskNode_ = DialogView::CreateDialogNode(props, nullptr);
+    EXPECT_NE(maskNode_, nullptr);
+    overlayManager->OpenDialogAnimation(maskNode_, maskProps);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 }
 
@@ -1109,7 +1126,7 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation002, TestSize.Level1)
     EXPECT_NE(contentNode_, nullptr);
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     overlayManager->OpenDialogAnimation(dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 
@@ -1117,7 +1134,7 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation002, TestSize.Level1)
     EXPECT_NE(contentNode1_, nullptr);
     auto dialogNode1_ = DialogView::CreateDialogNode(props, contentNode1_);
     EXPECT_NE(dialogNode1_, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     props.levelOrder = std::make_optional(1.0);
     overlayManager->OpenDialogAnimation(dialogNode1_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
@@ -1153,7 +1170,7 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation003, TestSize.Level1)
     EXPECT_NE(contentNode_, nullptr);
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     overlayManager->OpenDialogAnimation(dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 
@@ -1161,7 +1178,7 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation003, TestSize.Level1)
     EXPECT_NE(contentNode1_, nullptr);
     auto dialogNode1_ = DialogView::CreateDialogNode(props, contentNode1_);
     EXPECT_NE(dialogNode1_, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     props.levelOrder = std::make_optional(1.0);
     overlayManager->OpenDialogAnimation(dialogNode1_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
@@ -1205,7 +1222,7 @@ HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect, TestSize.Level1)
     EXPECT_NE(contentNode_, nullptr);
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     overlayManager->SetDialogTransitionEffect(dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 }
@@ -1240,7 +1257,7 @@ HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect002, TestSize.Level1)
     EXPECT_NE(contentNode_, nullptr);
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     overlayManager->SetDialogTransitionEffect(dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 
@@ -1283,7 +1300,7 @@ HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect003, TestSize.Level1)
     EXPECT_NE(contentNode_, nullptr);
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     overlayManager->SetDialogTransitionEffect(dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 
@@ -1336,12 +1353,12 @@ HWTEST_F(OverlayManagerTwoTestNg, PutLevelOrder001, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
     overlayManager->PutLevelOrder(dialogNode_, std::nullopt);
-    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 0);
-    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 0);
+    EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 0);
+    EXPECT_EQ(overlayManager->orderNodesMap_.size(), 0);
 }
 
 /**
@@ -1375,12 +1392,12 @@ HWTEST_F(OverlayManagerTwoTestNg, PutLevelOrder002, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
     overlayManager->PutLevelOrder(dialogNode_, std::make_optional(0.0));
-    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 1);
-    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->orderNodesMap_.size(), 1);
 }
 
 /**
@@ -1414,12 +1431,12 @@ HWTEST_F(OverlayManagerTwoTestNg, PopLevelOrder001, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
-    overlayManager->PopLevelOrder(dialogNode_);
-    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 0);
-    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 0);
+    overlayManager->PopLevelOrder(dialogNode_->GetId());
+    EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 0);
+    EXPECT_EQ(overlayManager->orderNodesMap_.size(), 0);
 }
 
 /**
@@ -1453,17 +1470,17 @@ HWTEST_F(OverlayManagerTwoTestNg, PopLevelOrder002, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
-    overlayManager->dialogOrderMap_[dialogNode_->GetId()] = 0.0;
-    overlayManager->PopLevelOrder(dialogNode_);
-    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 0);
+    overlayManager->nodeIdOrderMap_[dialogNode_->GetId()] = 0.0;
+    overlayManager->PopLevelOrder(dialogNode_->GetId());
+    EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 0);
 
-    overlayManager->dialogOrderMap_[dialogNode_->GetId()] = 0.0;
-    overlayManager->PopLevelOrder(dialogNode_);
-    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 0);
-    overlayManager->dialogOrderMap_.erase(dialogNode_->GetId());
+    overlayManager->nodeIdOrderMap_[dialogNode_->GetId()] = 0.0;
+    overlayManager->PopLevelOrder(dialogNode_->GetId());
+    EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 0);
+    overlayManager->nodeIdOrderMap_.erase(dialogNode_->GetId());
 }
 
 /**
@@ -1497,24 +1514,24 @@ HWTEST_F(OverlayManagerTwoTestNg, PopLevelOrder003, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
-    overlayManager->PopLevelOrder(dialogNode_);
-    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 0);
-    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 0);
+    overlayManager->PopLevelOrder(dialogNode_->GetId());
+    EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 0);
+    EXPECT_EQ(overlayManager->orderNodesMap_.size(), 0);
 
-    overlayManager->dialogOrderMap_[dialogNode_->GetId()] = 0.0;
-    overlayManager->PopLevelOrder(dialogNode_);
-    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 0);
-    overlayManager->dialogOrderMap_.erase(dialogNode_->GetId());
+    overlayManager->nodeIdOrderMap_[dialogNode_->GetId()] = 0.0;
+    overlayManager->PopLevelOrder(dialogNode_->GetId());
+    EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 0);
+    overlayManager->nodeIdOrderMap_.erase(dialogNode_->GetId());
 
     overlayManager->PutLevelOrder(dialogNode_, std::make_optional(0.0));
-    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 1);
-    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 1);
-    overlayManager->PopLevelOrder(dialogNode_);
-    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 0);
-    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 0);
+    EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->orderNodesMap_.size(), 1);
+    overlayManager->PopLevelOrder(dialogNode_->GetId());
+    EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 0);
+    EXPECT_EQ(overlayManager->orderNodesMap_.size(), 0);
 }
 
 /**
@@ -1548,13 +1565,13 @@ HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder001, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
-    overlayManager->dialogLevelOrderMap_[0.0] = {};
+    overlayManager->orderNodesMap_[0.0] = {};
     auto prevNode = overlayManager->GetPrevNodeWithOrder(std::nullopt);
     EXPECT_EQ(prevNode, nullptr);
-    overlayManager->dialogLevelOrderMap_.erase(0.0);
+    overlayManager->orderNodesMap_.erase(0.0);
 }
 
 /**
@@ -1588,13 +1605,13 @@ HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder002, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
     auto levelOrder1 = std::make_optional(1.0);
     overlayManager->PutLevelOrder(dialogNode_, levelOrder1);
-    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 1);
-    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->orderNodesMap_.size(), 1);
     auto prevNode1 = overlayManager->GetPrevNodeWithOrder(levelOrder1);
     EXPECT_EQ(prevNode1->GetId(), dialogNode_->GetId());
 }
@@ -1630,13 +1647,13 @@ HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder003, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
     auto levelOrder1 = std::make_optional(1.0);
     overlayManager->PutLevelOrder(dialogNode_, levelOrder1);
-    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 1);
-    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->orderNodesMap_.size(), 1);
     auto prevNode1 = overlayManager->GetPrevNodeWithOrder(levelOrder1);
     EXPECT_EQ(prevNode1->GetId(), dialogNode_->GetId());
 
@@ -1647,8 +1664,8 @@ HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder003, TestSize.Level1)
 
     auto levelOrder2 = std::make_optional(2.0);
     overlayManager->PutLevelOrder(dialogNode2_, levelOrder2);
-    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 2);
-    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 2);
+    EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 2);
+    EXPECT_EQ(overlayManager->orderNodesMap_.size(), 2);
     auto prevNode2 = overlayManager->GetPrevNodeWithOrder(levelOrder1);
     EXPECT_EQ(prevNode2->GetId(), dialogNode_->GetId());
 }
@@ -1684,18 +1701,18 @@ HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder004, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
-    overlayManager->dialogLevelOrderMap_[0.0] = {};
+    overlayManager->orderNodesMap_[0.0] = {};
     auto prevNode = overlayManager->GetPrevNodeWithOrder(std::nullopt);
     EXPECT_EQ(prevNode, nullptr);
-    overlayManager->dialogLevelOrderMap_.erase(0.0);
+    overlayManager->orderNodesMap_.erase(0.0);
 
     auto levelOrder1 = std::make_optional(1.0);
     overlayManager->PutLevelOrder(dialogNode_, levelOrder1);
-    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 1);
-    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 1);
+    EXPECT_EQ(overlayManager->orderNodesMap_.size(), 1);
     auto prevNode1 = overlayManager->GetPrevNodeWithOrder(levelOrder1);
     EXPECT_EQ(prevNode1->GetId(), dialogNode_->GetId());
 
@@ -1706,38 +1723,38 @@ HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder004, TestSize.Level1)
 
     auto levelOrder2 = std::make_optional(2.0);
     overlayManager->PutLevelOrder(dialogNode2_, levelOrder2);
-    EXPECT_EQ(overlayManager->dialogOrderMap_.size(), 2);
-    EXPECT_EQ(overlayManager->dialogLevelOrderMap_.size(), 2);
+    EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 2);
+    EXPECT_EQ(overlayManager->orderNodesMap_.size(), 2);
     auto prevNode2 = overlayManager->GetPrevNodeWithOrder(levelOrder1);
     EXPECT_EQ(prevNode2->GetId(), dialogNode_->GetId());
 }
 
 /**
- * @tc.name: OverlayManagerTwoTestNg_IsNeedChangeFocus001
- * @tc.desc: Test OverlayManager::IsNeedChangeFocus.
+ * @tc.name: OverlayManagerTwoTestNg_IsTopOrder001
+ * @tc.desc: Test OverlayManager::IsTopOrder.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTwoTestNg, IsNeedChangeFocus001, TestSize.Level1)
+HWTEST_F(OverlayManagerTwoTestNg, IsTopOrder001, TestSize.Level1)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     EXPECT_NE(pipelineContext, nullptr);
     auto overlayManager = pipelineContext->overlayManager_;
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
-    bool needFocus = overlayManager->IsNeedChangeFocus(std::nullopt);
+    bool needFocus = overlayManager->IsTopOrder(std::nullopt);
     EXPECT_TRUE(needFocus);
-    needFocus = overlayManager->IsNeedChangeFocus(std::make_optional(1.0));
+    needFocus = overlayManager->IsTopOrder(std::make_optional(1.0));
     EXPECT_TRUE(needFocus);
 }
 
 /**
- * @tc.name: OverlayManagerTwoTestNg_IsNeedChangeFocus002
- * @tc.desc: Test OverlayManager::IsNeedChangeFocus.
+ * @tc.name: OverlayManagerTwoTestNg_IsTopOrder002
+ * @tc.desc: Test OverlayManager::IsTopOrder.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTwoTestNg, IsNeedChangeFocus002, TestSize.Level1)
+HWTEST_F(OverlayManagerTwoTestNg, IsTopOrder002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create target node
@@ -1763,17 +1780,17 @@ HWTEST_F(OverlayManagerTwoTestNg, IsNeedChangeFocus002, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
-    auto needFocus = overlayManager->IsNeedChangeFocus(std::make_optional(1.0));
+    auto needFocus = overlayManager->IsTopOrder(std::make_optional(1.0));
     EXPECT_TRUE(needFocus);
 
     overlayManager->PutLevelOrder(dialogNode_, std::make_optional(0.0));
-    needFocus = overlayManager->IsNeedChangeFocus(std::make_optional(1.0));
+    needFocus = overlayManager->IsTopOrder(std::make_optional(1.0));
     EXPECT_TRUE(needFocus);
 
-    needFocus = overlayManager->IsNeedChangeFocus(std::make_optional(-1.0));
+    needFocus = overlayManager->IsTopOrder(std::make_optional(-1.0));
     EXPECT_FALSE(needFocus);
 }
 
@@ -1788,16 +1805,16 @@ HWTEST_F(OverlayManagerTwoTestNg, GetTopOrder001, TestSize.Level1)
     EXPECT_NE(pipelineContext, nullptr);
     auto overlayManager = pipelineContext->overlayManager_;
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
     auto topOrder = overlayManager->GetTopOrder();
     EXPECT_EQ(topOrder, std::nullopt);
 
-    overlayManager->dialogLevelOrderMap_[0.0] = {};
+    overlayManager->orderNodesMap_[0.0] = {};
     topOrder = overlayManager->GetTopOrder();
     EXPECT_EQ(topOrder, std::nullopt);
-    overlayManager->dialogLevelOrderMap_.erase(0.0);
+    overlayManager->orderNodesMap_.erase(0.0);
 }
 
 /**
@@ -1831,8 +1848,8 @@ HWTEST_F(OverlayManagerTwoTestNg, GetTopOrder002, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
     overlayManager->PutLevelOrder(dialogNode_, std::make_optional(0.0));
     auto topOrder = overlayManager->GetTopOrder();
@@ -1870,8 +1887,8 @@ HWTEST_F(OverlayManagerTwoTestNg, GetTopOrder003, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
     overlayManager->PutLevelOrder(dialogNode_, std::make_optional(0.0));
     auto topOrder = overlayManager->GetTopOrder();
@@ -1898,16 +1915,16 @@ HWTEST_F(OverlayManagerTwoTestNg, GetBottomOrder001, TestSize.Level1)
     EXPECT_NE(pipelineContext, nullptr);
     auto overlayManager = pipelineContext->overlayManager_;
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
     auto bottomOrder = overlayManager->GetBottomOrder();
     EXPECT_EQ(bottomOrder, std::nullopt);
 
-    overlayManager->dialogLevelOrderMap_[0.0] = {};
+    overlayManager->orderNodesMap_[0.0] = {};
     bottomOrder = overlayManager->GetBottomOrder();
     EXPECT_EQ(bottomOrder, std::nullopt);
-    overlayManager->dialogLevelOrderMap_.erase(0.0);
+    overlayManager->orderNodesMap_.erase(0.0);
 }
 
 /**
@@ -1941,8 +1958,8 @@ HWTEST_F(OverlayManagerTwoTestNg, GetBottomOrder002, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
     overlayManager->PutLevelOrder(dialogNode_, std::make_optional(0.0));
     auto bottomOrder = overlayManager->GetBottomOrder();
@@ -1980,8 +1997,8 @@ HWTEST_F(OverlayManagerTwoTestNg, GetBottomOrder003, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
 
-    overlayManager->dialogOrderMap_.clear();
-    overlayManager->dialogLevelOrderMap_.clear();
+    overlayManager->nodeIdOrderMap_.clear();
+    overlayManager->orderNodesMap_.clear();
 
     overlayManager->PutLevelOrder(dialogNode_, std::make_optional(0.0));
     auto bottomOrder = overlayManager->GetBottomOrder();

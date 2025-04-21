@@ -70,6 +70,8 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string TEXT_TAG = "text";
 constexpr int32_t TARGET_ID = 100;
+constexpr int32_t NODE_ID = 1;
+constexpr float ZERO = 0.0f;
 constexpr float ONE = 1.0f;
 constexpr float TWO = 2.0f;
 constexpr float FIVE = 5.0f;
@@ -86,6 +88,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     void InitMenuTestNg();
+    void InitMenuWrapperNode();
     void MockPipelineContextGetTheme();
     int32_t GetNodeId();
     RefPtr<FrameNode> menuFrameNode_;
@@ -93,6 +96,7 @@ public:
     RefPtr<FrameNode> menuItemFrameNode_;
     RefPtr<FrameNode> subMenuParent_;
     RefPtr<FrameNode> subMenu_;
+    RefPtr<FrameNode> menuWrapperNode_;
     RefPtr<MenuItemPattern> menuItemPattern_;
     int32_t nodeId_ = 1;
     bool isSubMenuBuilded_ = false;
@@ -190,6 +194,13 @@ void MenuViewTestNg::InitMenuTestNg()
     auto subMenuPattern = subMenu_->GetPattern<MenuPattern>();
     ASSERT_NE(subMenuPattern, nullptr);
     subMenuPattern->SetParentMenuItem(subMenuParent_);
+}
+
+void MenuViewTestNg::InitMenuWrapperNode()
+{
+    std::vector<SelectParam> selectParams;
+    selectParams.push_back({ "MenuItem1", "Icon1" });
+    menuWrapperNode_ = MenuView::Create(std::move(selectParams), NODE_ID, "");
 }
 
 /**
@@ -827,5 +838,222 @@ HWTEST_F(MenuViewTestNg, UpdateSelectOverlayMenuMinWidth002, TestSize.Level1)
     auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
     EXPECT_TRUE(algorithm->UpdateSelectOverlayMenuMinWidth(multiPattern, columnInfo));
     MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: UpdateMenuDefaultConstraintByDevice001
+ * @tc.desc: Verify UpdateMenuDefaultConstraintByDevice.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuDefaultConstraintByDevice001, TestSize.Level1)
+{
+    InitMenuWrapperNode();
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode_->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(NODE_ID, TEXT_TAG, MenuType::MENU));
+    frameNode->MountToParent(menuNode);
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
+    LayoutConstraintF childConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+        .selfIdealSize = { ONE, FIVE },
+    };
+    float paddingWidth = FIVE;
+    std::optional<LayoutConstraintF> layoutConstraint = std::make_optional<LayoutConstraintF>();
+    layoutConstraint->minSize = SizeF { ONE, TWO };
+    layoutConstraint->maxSize = SizeF { ONE_HUNDRED, TWO_HUNDRED };
+    layoutConstraint->percentReference = SizeF { TEN, TWENTY };
+    layoutConstraint->parentIdealSize = OptionalSize<float> { TEN, TWENTY };
+    layoutConstraint->selfIdealSize = OptionalSize<float> { TEN, TWENTY };
+    bool idealSizeHasVal = true;
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    algorithm->UpdateMenuDefaultConstraintByDevice(
+        menuPattern, childConstraint, paddingWidth, layoutConstraint, idealSizeHasVal);
+    EXPECT_EQ(layoutConstraint->selfIdealSize.width_, ZERO);
+}
+
+/**
+ * @tc.name: UpdateMenuDefaultConstraintByDevice002
+ * @tc.desc: Verify UpdateMenuDefaultConstraintByDevice.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuDefaultConstraintByDevice002, TestSize.Level1)
+{
+    InitMenuWrapperNode();
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode_->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(NODE_ID, TEXT_TAG, MenuType::MENU));
+    frameNode->MountToParent(menuNode);
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
+    LayoutConstraintF childConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+        .selfIdealSize = { ONE, FIVE },
+    };
+    float paddingWidth = FIVE;
+    std::optional<LayoutConstraintF> layoutConstraint = std::make_optional<LayoutConstraintF>();
+    layoutConstraint->minSize = SizeF { ONE, TWO };
+    layoutConstraint->maxSize = SizeF { ONE_HUNDRED, TWO_HUNDRED };
+    layoutConstraint->percentReference = SizeF { TEN, TWENTY };
+    layoutConstraint->parentIdealSize = OptionalSize<float> { TEN, TWENTY };
+    layoutConstraint->selfIdealSize = OptionalSize<float> { TEN, TWENTY };
+    bool idealSizeHasVal = false;
+    menuPattern->GetMainMenuPattern()->type_ = MenuType::CONTEXT_MENU;
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    algorithm->UpdateMenuDefaultConstraintByDevice(
+        menuPattern, childConstraint, paddingWidth, layoutConstraint, idealSizeHasVal);
+    EXPECT_EQ(layoutConstraint->selfIdealSize.width_, TEN);
+}
+
+/**
+ * @tc.name: UpdateMenuDefaultConstraintByDevice003
+ * @tc.desc: Verify UpdateMenuDefaultConstraintByDevice.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuDefaultConstraintByDevice003, TestSize.Level1)
+{
+    InitMenuWrapperNode();
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode_->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(NODE_ID, TEXT_TAG, MenuType::MENU));
+    frameNode->MountToParent(menuNode);
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
+    LayoutConstraintF childConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+        .selfIdealSize = { ONE, FIVE },
+    };
+    float paddingWidth = FIVE;
+    std::optional<LayoutConstraintF> layoutConstraint = std::make_optional<LayoutConstraintF>();
+    layoutConstraint->minSize = SizeF { ONE, TWO };
+    layoutConstraint->maxSize = SizeF { ONE_HUNDRED, TWO_HUNDRED };
+    layoutConstraint->percentReference = SizeF { TEN, TWENTY };
+    layoutConstraint->parentIdealSize = OptionalSize<float> { TEN, TWENTY };
+    layoutConstraint->selfIdealSize = OptionalSize<float> { TEN, TWENTY };
+    bool idealSizeHasVal = true;
+    menuPattern->GetMainMenuPattern()->type_ = MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU;
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    algorithm->UpdateMenuDefaultConstraintByDevice(
+        menuPattern, childConstraint, paddingWidth, layoutConstraint, idealSizeHasVal);
+    EXPECT_EQ(layoutConstraint->selfIdealSize.width_, ZERO);
+}
+
+/**
+ * @tc.name: UpdateMenuDefaultConstraintByDevice004
+ * @tc.desc: Verify UpdateMenuDefaultConstraintByDevice.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuDefaultConstraintByDevice004, TestSize.Level1)
+{
+    InitMenuWrapperNode();
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode_->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(NODE_ID, TEXT_TAG, MenuType::MENU));
+    frameNode->MountToParent(menuNode);
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
+    LayoutConstraintF childConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+        .selfIdealSize = { ONE, FIVE },
+    };
+    float paddingWidth = FIVE;
+    std::optional<LayoutConstraintF> layoutConstraint = std::make_optional<LayoutConstraintF>();
+    layoutConstraint->minSize = SizeF { ONE, TWO };
+    layoutConstraint->maxSize = SizeF { ONE_HUNDRED, TWO_HUNDRED };
+    layoutConstraint->percentReference = SizeF { TEN, TWENTY };
+    layoutConstraint->parentIdealSize = OptionalSize<float> { TEN, TWENTY };
+    layoutConstraint->selfIdealSize = OptionalSize<float> { TEN, TWENTY };
+    bool idealSizeHasVal = true;
+    menuPattern->GetMainMenuPattern()->type_ = MenuType::SUB_MENU;
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    algorithm->UpdateMenuDefaultConstraintByDevice(
+        menuPattern, childConstraint, paddingWidth, layoutConstraint, idealSizeHasVal);
+    EXPECT_EQ(layoutConstraint->selfIdealSize.width_, TEN);
+}
+
+/**
+ * @tc.name: SetHasCustomOutline001
+ * @tc.desc: Verify SetHasCustomOutline.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetHasCustomOutline001, TestSize.Level1)
+{
+    InitMenuWrapperNode();
+    MenuView menuView;
+    MenuParam menuParam;
+    BorderWidthProperty borderWidthPropertyOne = { 0.0_px, 0.0_px, 0.0_px, 0.0_px };
+    BorderWidthProperty borderWidthPropertyTwo = { -1.0_px, 0.0_px, 0.0_px, 0.0_px };
+    BorderWidthProperty borderWidthPropertyThree = { 0.0_px, -1.0_px, 0.0_px, 0.0_px };
+    BorderWidthProperty borderWidthPropertyFour = { 0.0_px, 0.0_px, -1.0_px, 0.0_px };
+    BorderWidthProperty borderWidthPropertyFive = { 0.0_px, 0.0_px, 0.0_px, -1.0_px };
+    menuView.SetHasCustomOutline(menuWrapperNode_, menuFrameNode_, menuParam);
+    auto menuWrapperPattern = menuWrapperNode_->GetPattern<MenuWrapperPattern>();
+    EXPECT_FALSE(menuWrapperPattern->hasCustomOutlineWidth_);
+    menuParam.outlineWidth = borderWidthPropertyOne;
+    menuView.SetHasCustomOutline(menuWrapperNode_, menuFrameNode_, menuParam);
+    EXPECT_TRUE(menuWrapperPattern->hasCustomOutlineWidth_);
+    menuParam.outlineWidth = borderWidthPropertyTwo;
+    menuView.SetHasCustomOutline(menuWrapperNode_, menuFrameNode_, menuParam);
+    EXPECT_FALSE(menuWrapperPattern->hasCustomOutlineWidth_);
+    menuParam.outlineWidth = borderWidthPropertyThree;
+    menuView.SetHasCustomOutline(menuWrapperNode_, menuFrameNode_, menuParam);
+    EXPECT_FALSE(menuWrapperPattern->hasCustomOutlineWidth_);
+    menuParam.outlineWidth = borderWidthPropertyFour;
+    menuView.SetHasCustomOutline(menuWrapperNode_, menuFrameNode_, menuParam);
+    EXPECT_FALSE(menuWrapperPattern->hasCustomOutlineWidth_);
+    menuParam.outlineWidth = borderWidthPropertyFive;
+    menuView.SetHasCustomOutline(menuWrapperNode_, menuFrameNode_, menuParam);
+    EXPECT_FALSE(menuWrapperPattern->hasCustomOutlineWidth_);
+}
+
+/**
+ * @tc.name: UpdateMenuNodeByAnimation001
+ * @tc.desc: Verify UpdateMenuNodeByAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuNodeByAnimation001, TestSize.Level1)
+{
+    InitMenuWrapperNode();
+    MenuView menuView;
+    PreparedInfoForDrag data;
+    menuView.UpdateMenuNodeByAnimation(menuFrameNode_, data);
+    EXPECT_EQ(menuFrameNode_->GetRenderContext()->GetTransformScale()->x, 0.4f);
+    EXPECT_EQ(menuFrameNode_->GetRenderContext()->GetTransformScale()->y, 0.4f);
 }
 } // namespace OHOS::Ace::NG

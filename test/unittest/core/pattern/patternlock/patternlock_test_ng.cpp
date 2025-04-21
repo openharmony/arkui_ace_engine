@@ -546,7 +546,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest011, TestSize.Level1)
      * @tc.steps: step4. Call HandleFocusEvent function.
      */
     ASSERT_NE(focushub->onFocusInternal_, nullptr);
-    focushub->onFocusInternal_();
+    focushub->onFocusInternal_(focushub->focusReason_);
     EXPECT_TRUE(pattern_->isMoveEventValid_);
     EXPECT_TRUE(pattern_->choosePoint_.empty());
     EXPECT_EQ(pattern_->cellCenter_, OffsetF(0.0f, 0.0f));

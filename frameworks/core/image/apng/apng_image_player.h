@@ -83,11 +83,7 @@ typedef struct {
     ImageBlendOperation blend  = ImageBlendNone;
     bool isFullSize = false;          ///< Whether frame fill the canvas.
     uint32_t blendFromIndex = 0;  ///< Blend from frame index to current frame.
-#ifndef USE_ROSEN_DRAWING
-    sk_sp<SkImage> image = nullptr;
-#else
     std::shared_ptr<RSImage> image = nullptr;
-#endif
 } APngAnimatedFrameInfo;
 
 
@@ -148,13 +144,8 @@ private:
     /**
      * Use a blank canvas draw each frame to get frame image
      **/
-#ifndef USE_ROSEN_DRAWING
-    SkBitmap bitmap_;
-    SkCanvas *blendCanvas_ = nullptr;
-#else
     RSBitmap bitmap_;
     RSCanvas *blendCanvas_ = nullptr;
-#endif
     RefPtr<Scheduler> scheduler_;
     RefPtr<APngImageAnimation> pictureAnimation_;
 
@@ -173,24 +164,10 @@ private:
     /**
      * Copy bitmap to a dst bitmap
      **/
-#ifndef USE_ROSEN_DRAWING
-    static bool CopyTo(SkBitmap *dst, const SkBitmap &src);
-#else
     static bool CopyTo(RSBitmap *dst, const RSBitmap &src);
-#endif
 
     float DelayToSeconds(uint16_t num, uint16_t den);
 
-#ifndef USE_ROSEN_DRAWING
-    SkCanvas *CreateBlendCanvas();
-
-    /**
-     * Get frame image with index or frameinfo
-     **/
-    sk_sp<SkImage> GetImage(const int32_t &index, bool extendToCanvas);
-
-    sk_sp<SkImage> GetImage(const APngAnimatedFrameInfo *frameInfo);
-#else
     RSCanvas *CreateBlendCanvas();
 
     /**
@@ -199,7 +176,6 @@ private:
     std::shared_ptr<RSImage> GetImage(const int32_t &index, bool extendToCanvas);
 
     std::shared_ptr<RSImage> GetImage(const APngAnimatedFrameInfo *frameInfo);
-#endif
 
     /**
      * Before render image in backgroud thread predecode image all frames
@@ -218,11 +194,7 @@ private:
      * */
     void DrawTest();
 
-#ifndef USE_ROSEN_DRAWING
-    void DrawTestBorder(SkRect &rect);
-#else
     void DrawTestBorder(RSRect &rect);
-#endif
 };
 
 } // namespace OHOS::Ace

@@ -798,4 +798,368 @@ HWTEST_F(ScrollBarTestNg, ScrollPositionCallback001, TestSize.Level1)
     scrollBarPattern->ScrollPositionCallback(2.0f, SCROLL_FROM_START, true);
     EXPECT_TRUE(scrollBarPattern->isScrolling_);
 }
+
+/**
+ * @tc.name: ToJsonValue001
+ * @tc.desc: Test ScrollBarPattern ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ToJsonValue001, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    InspectorFilter filter;
+    filter.filterFixed = 3;
+    scrollBarPattern->enableNestedSorll_ = true;
+    scrollBarPattern->ToJsonValue(json, filter);
+    EXPECT_NE(json->GetString("enableNestedScroll"), "true");
+}
+
+/**
+ * @tc.name: ToJsonValue002
+ * @tc.desc: Test ScrollBarPattern ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ToJsonValue002, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    InspectorFilter filter;
+    filter.filterFixed = 0;
+    scrollBarPattern->enableNestedSorll_ = true;
+    scrollBarPattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("enableNestedScroll"), "true");
+}
+
+/**
+ * @tc.name: GetPositionMode001
+ * @tc.desc: Test ScrollBarPattern GetPositionMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetPositionMode001, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    ASSERT_NE(scrollBarPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, scrollBarPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollBarPattern->frameNode_ = frameNode;
+    auto result = scrollBarPattern->GetPositionMode();
+    EXPECT_EQ(result, PositionMode::LEFT);
+}
+
+/**
+ * @tc.name: GetPositionMode002
+ * @tc.desc: Test ScrollBarPattern GetPositionMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetPositionMode002, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    ASSERT_NE(scrollBarPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, scrollBarPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::LTR;
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollBarPattern->frameNode_ = frameNode;
+    auto result = scrollBarPattern->GetPositionMode();
+    EXPECT_EQ(result, PositionMode::RIGHT);
+}
+
+/**
+ * @tc.name: GetPositionMode003
+ * @tc.desc: Test ScrollBarPattern GetPositionMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetPositionMode003, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    ASSERT_NE(scrollBarPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, scrollBarPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollBarPattern->frameNode_ = frameNode;
+    auto result = scrollBarPattern->GetPositionMode();
+    EXPECT_EQ(result, PositionMode::RIGHT);
+}
+
+/**
+ * @tc.name: UpdateScrollBarRegion001
+ * @tc.desc: Test ScrollBarPattern UpdateScrollBarRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, UpdateScrollBarRegion001, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    ASSERT_NE(scrollBarPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, scrollBarPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollBarPattern->frameNode_ = frameNode;
+    Size viewPort(4.0F, 2.0F);
+    Offset viewOffset(4.0F, 6.0F);
+    OffsetF scrollOffset(2.0F, 2.0F);
+    SizeF scrollSize(2.0F, 2.0F);
+    scrollBarPattern->scrollBarOverlayModifier_ =
+        AceType::MakeRefPtr<ScrollBarOverlayModifier>(scrollOffset, scrollSize);
+    scrollBarPattern->UpdateScrollBarRegion(2.0f, 2.0f, viewPort, viewOffset, SCROLL_FROM_START);
+    EXPECT_NE(scrollBarPattern->scrollBarOverlayModifier_->GetOpacity(), 0);
+}
+
+/**
+ * @tc.name: SetEnableNestedScroll001
+ * @tc.desc: Test SetEnableNestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create main frame node and push into view abstract.
+     */
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function SetEnableNestedScroll.
+     * @tc.expected: Related functions run ok.
+     */
+    CreateStack();
+    CreateScroll();
+    auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
+    ScrollBarModelNG scrollBarModel;
+    int32_t directionValue = static_cast<int>(Axis::VERTICAL);
+    scrollBarModel.Create(scrollBarProxy, true, true, directionValue, static_cast<int>(DisplayMode::ON));
+    GetScrollBar();
+    pattern_->SetEnableNestedSorll(true);
+    scrollBarModel.SetEnableNestedScroll(false);
+    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+}
+
+/**
+ * @tc.name: SetEnableNestedScroll002
+ * @tc.desc: Test SetEnableNestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create main frame node and push into view abstract.
+     */
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function SetEnableNestedScroll.
+     * @tc.expected: Related functions run ok.
+     */
+    CreateStack();
+    CreateScroll();
+    auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
+    ScrollBarModelNG scrollBarModel;
+    int32_t directionValue = static_cast<int>(Axis::VERTICAL);
+    scrollBarModel.Create(scrollBarProxy, true, true, directionValue, static_cast<int>(DisplayMode::ON));
+    GetScrollBar();
+    pattern_->SetEnableNestedSorll(true);
+    scrollBarModel.SetEnableNestedScroll(true);
+    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+}
+
+/**
+ * @tc.name: SetEnableNestedScroll003
+ * @tc.desc: Test SetEnableNestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create main frame node and push into view abstract.
+     */
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function SetEnableNestedScroll.
+     * @tc.expected: Related functions run ok.
+     */
+    CreateStack();
+    CreateScroll();
+    auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
+    ScrollBarModelNG scrollBarModel;
+    int32_t directionValue = static_cast<int>(Axis::VERTICAL);
+    scrollBarModel.Create(scrollBarProxy, true, true, directionValue, static_cast<int>(DisplayMode::ON));
+    GetScrollBar();
+    pattern_->SetEnableNestedSorll(false);
+    scrollBarModel.SetEnableNestedScroll(true);
+    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+}
+
+/**
+ * @tc.name: SetEnableNestedScroll004
+ * @tc.desc: Test SetEnableNestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create main frame node and push into view abstract.
+     */
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function SetEnableNestedScroll.
+     * @tc.expected: Related functions run ok.
+     */
+    CreateStack();
+    CreateScroll();
+    auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
+    ScrollBarModelNG scrollBarModel;
+    int32_t directionValue = static_cast<int>(Axis::VERTICAL);
+    scrollBarModel.Create(scrollBarProxy, true, true, directionValue, static_cast<int>(DisplayMode::ON));
+    GetScrollBar();
+    pattern_->SetEnableNestedSorll(false);
+    scrollBarModel.SetEnableNestedScroll(false);
+    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+}
+
+/**
+ * @tc.name: SetEnableNestedScroll005
+ * @tc.desc: Test SetEnableNestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create main frame node and push into view abstract.
+     */
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function SetEnableNestedScroll.
+     * @tc.expected: Related functions run ok.
+     */
+    CreateStack();
+    CreateScroll();
+    auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
+    ScrollBarModelNG scrollBarModel;
+    int32_t directionValue = static_cast<int>(Axis::VERTICAL);
+    scrollBarModel.Create(scrollBarProxy, true, true, directionValue, static_cast<int>(DisplayMode::ON));
+    GetScrollBar();
+    pattern_->SetEnableNestedSorll(true);
+    scrollBarModel.SetEnableNestedScroll(frameNode, false);
+    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+}
+
+/**
+ * @tc.name: SetEnableNestedScroll006
+ * @tc.desc: Test SetEnableNestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create main frame node and push into view abstract.
+     */
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function SetEnableNestedScroll.
+     * @tc.expected: Related functions run ok.
+     */
+    CreateStack();
+    CreateScroll();
+    auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
+    ScrollBarModelNG scrollBarModel;
+    int32_t directionValue = static_cast<int>(Axis::VERTICAL);
+    scrollBarModel.Create(scrollBarProxy, true, true, directionValue, static_cast<int>(DisplayMode::ON));
+    GetScrollBar();
+    pattern_->SetEnableNestedSorll(true);
+    scrollBarModel.SetEnableNestedScroll(frameNode, true);
+    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+}
+
+/**
+ * @tc.name: SetEnableNestedScroll007
+ * @tc.desc: Test SetEnableNestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create main frame node and push into view abstract.
+     */
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function SetEnableNestedScroll.
+     * @tc.expected: Related functions run ok.
+     */
+    CreateStack();
+    CreateScroll();
+    auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
+    ScrollBarModelNG scrollBarModel;
+    int32_t directionValue = static_cast<int>(Axis::VERTICAL);
+    scrollBarModel.Create(scrollBarProxy, true, true, directionValue, static_cast<int>(DisplayMode::ON));
+    GetScrollBar();
+    pattern_->SetEnableNestedSorll(false);
+    scrollBarModel.SetEnableNestedScroll(frameNode, true);
+    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+}
+
+/**
+ * @tc.name: SetEnableNestedScroll008
+ * @tc.desc: Test SetEnableNestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, SetEnableNestedScroll008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create main frame node and push into view abstract.
+     */
+    const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(mainNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function SetEnableNestedScroll.
+     * @tc.expected: Related functions run ok.
+     */
+    CreateStack();
+    CreateScroll();
+    auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
+    ScrollBarModelNG scrollBarModel;
+    int32_t directionValue = static_cast<int>(Axis::VERTICAL);
+    scrollBarModel.Create(scrollBarProxy, true, true, directionValue, static_cast<int>(DisplayMode::ON));
+    GetScrollBar();
+    pattern_->SetEnableNestedSorll(false);
+    scrollBarModel.SetEnableNestedScroll(frameNode, false);
+    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+}
 } // namespace OHOS::Ace::NG

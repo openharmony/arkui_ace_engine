@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
-#include "test/mock/base/mock_task_executor.h"
 #include "test/unittest/core/base/view_abstract_test_ng.h"
+
+#include "base/subwindow/subwindow_manager.h"
+#include "test/mock/base/mock_task_executor.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -1318,8 +1321,10 @@ HWTEST_F(ViewAbstractTestNg, FocusActivateTest001, TestSize.Level1)
     auto instanceId = context->GetInstanceId();
 
     ViewAbstract::FocusActivate(instanceId, false, true);
-    ASSERT_FALSE(context->isFocusActive_);
-    ASSERT_TRUE(context->autoFocusInactive_);
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    ASSERT_FALSE(focusManager->isFocusActive_);
+    ASSERT_TRUE(focusManager->autoFocusInactive_);
 }
 
 /**

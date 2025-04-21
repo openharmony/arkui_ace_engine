@@ -2567,6 +2567,101 @@ HWTEST_F(ListCommonTestNg, RepeatNodeItemDragEventHandler003, TestSize.Level1)
     EXPECT_EQ(actualOnDropIndex, -1);
 }
 
+/**
+ * @tc.name: ChainAnimation001
+ * @tc.desc: The SpaceDelta will be cleared before the layout list crosses the boundary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ChainAnimation001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetChainAnimation(true);
+    model.SetChainAnimationOptions({ Dimension(0), Dimension(20), 0, 1, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
+    CreateListItems(5);
+    CreateDone();
+
+    pattern_->chainAnimation_->SetEdgeEffectIntensity(1);
+    pattern_->chainAnimation_->SetDelta(0, 10);
+
+    EXPECT_EQ(pattern_->GetChainDelta(1), -10);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetChainDelta(1), 0);
+}
+
+/**
+ * @tc.name: ChainAnimation002
+ * @tc.desc: When the list is layout from the end, The SpaceDelta will be cleared before
+ * the layout list crosses the boundary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ChainAnimation002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetChainAnimation(true);
+    model.SetChainAnimationOptions({ Dimension(0), Dimension(20), 0, 1, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
+    model.SetStackFromEnd(true);
+    CreateListItems(5);
+    CreateDone();
+
+    pattern_->chainAnimation_->SetEdgeEffectIntensity(1);
+    pattern_->chainAnimation_->SetDelta(0, 10);
+
+    EXPECT_EQ(pattern_->GetChainDelta(1), -10);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetChainDelta(1), 0);
+}
+
+/**
+ * @tc.name: ChainAnimation003
+ * @tc.desc: When the screen is not full, the SpaceDelta will be cleared before the layout list crosses the boundary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ChainAnimation003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetChainAnimation(true);
+    model.SetChainAnimationOptions({ Dimension(0), Dimension(20), 0, 1, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateListItems(2);
+    CreateDone();
+
+    pattern_->chainAnimation_->SetEdgeEffectIntensity(1);
+    pattern_->chainAnimation_->SetDelta(0, 10);
+
+    EXPECT_EQ(pattern_->GetChainDelta(1), -10);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetChainDelta(1), 0);
+}
+
+/**
+ * @tc.name: ChainAnimation004
+ * @tc.desc: When the screen is not full and the list is layout from the end, the SpaceDelta will
+ * be cleared before the layout list crosses the boundary.
+ * repeat and itemDragEvents are null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ChainAnimation004, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetChainAnimation(true);
+    model.SetChainAnimationOptions({ Dimension(0), Dimension(20), 0, 1, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetStackFromEnd(true);
+    CreateListItems(2);
+    CreateDone();
+
+    pattern_->chainAnimation_->SetEdgeEffectIntensity(1);
+    pattern_->chainAnimation_->SetDelta(0, 10);
+
+    EXPECT_EQ(pattern_->GetChainDelta(1), -10);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetChainDelta(1), 0);
+}
+
 void ListCommonTestNg::MapEventInLazyForEachForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,
     int32_t* actualOnLongPressIndex, int32_t* actualonMoveThroughFrom, int32_t* actualonMoveThroughTo)
 {

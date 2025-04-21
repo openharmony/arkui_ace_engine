@@ -19,7 +19,7 @@ import { ON, Point } from '@ohos.UiTest';
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
 
-export async function SteeperItemStart(done:Function) {
+export async function SteeperItemStart(done: Function) {
   await delegator.startAbility({
     bundleName: 'cn.ohos.components',
     abilityName: 'EntryAbility'
@@ -27,7 +27,7 @@ export async function SteeperItemStart(done:Function) {
 
   await driver.delayMs(5000);
 
-  let atomDisplays: Component = await driver.findComponent(ON.text('导航类'));
+  let atomDisplays: Component = await driver.findComponent(ON.text('导航与切换'));
   await atomDisplays.click();
   await driver.delayMs(3500);
 

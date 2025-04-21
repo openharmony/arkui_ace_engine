@@ -20,7 +20,6 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/pattern/canvas/canvas_paint_op.h"
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 
@@ -39,22 +38,7 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     void UpdateRecordingCanvas(float width, float height);
 
-#ifndef USE_FAST_TASKPOOL
     void PushTask(const TaskFunc& task);
-#else
-    template <typename T, typename... Args>
-    void PushTask(Args&&... args)
-    {
-        CHECK_NULL_VOID(fastTaskPool_);
-        fastTaskPool_->Push<T>(0, std::forward<Args>(args)...);
-        if (needMarkDirty_) {
-            needMarkDirty_ = false;
-            auto host = frameNode_.Upgrade();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        }
-    }
-#endif
     bool HasTask() const;
     void FlushTask();
 
@@ -116,15 +100,11 @@ public:
     void SetHostCustomNodeName();
     void GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json);
 private:
+    int32_t GetId() const;
 #ifndef ACE_UNITTEST
     void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle) override;
 #endif
-#ifndef USE_FAST_TASKPOOL
     std::list<TaskFunc> tasks_;
-#else
-    friend class CanvasPattern;
-    std::unique_ptr<CanvasPaintOp> fastTaskPool_ = std::make_unique<CanvasPaintOp>();
-#endif
 
 #ifndef ACE_UNITTEST
     RefPtr<Ace::ImageObject> imageObj_ = nullptr;

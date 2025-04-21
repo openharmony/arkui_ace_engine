@@ -43,20 +43,20 @@ export const gridAndColumnLayoutRoute: RouteGroup = {
 @Builder
 export function gridAndColumnLayoutDestination(name: string, route: Route) {
   if (name === 'GridAndColumnLayout/GridRow') {
-      GridRowBootcamp({title: route.label})
-  }else if (name === 'GridAndColumnLayout/GridCol'){
-      GridColBootcamp({title: route.label})
-  }else if (name === 'GridAndColumnLayout/ColumnSplit'){
-      ColumnSplitBootcamp({title: route.label})
-  }else if (name === 'GridAndColumnLayout/RowSplit'){
-      RowSplitBootcamp({title: route.label})
-  }else if (name === 'GridAndColumnLayout/FoldSplitContainer'){
-      FoldSplitContainerBootcamp({title: route.label})
-  }else if (name === 'GridAndColumnLayout/SideBarContainer'){
-      SideBarContainerBootcamp({title: route.label})
-  }else if (name === 'GridAndColumnLayout/ToolBar'){
-    ToolBarBootcamp({title: route.label})
-  }else if (name === 'GridAndColumnLayout/TitleBar') {
+    GridRowBootcamp({ title: route.label })
+  } else if (name === 'GridAndColumnLayout/GridCol') {
+    GridColBootcamp({ title: route.label })
+  } else if (name === 'GridAndColumnLayout/ColumnSplit') {
+    ColumnSplitBootcamp({ title: route.label })
+  } else if (name === 'GridAndColumnLayout/RowSplit') {
+    RowSplitBootcamp({ title: route.label })
+  } else if (name === 'GridAndColumnLayout/FoldSplitContainer') {
+    FoldSplitContainerBootcamp({ title: route.label })
+  } else if (name === 'GridAndColumnLayout/SideBarContainer') {
+    SideBarContainerBootcamp({ title: route.label })
+  } else if (name === 'GridAndColumnLayout/ToolBar') {
+    ToolBarBootcamp({ title: route.label })
+  } else if (name === 'GridAndColumnLayout/TitleBar') {
     TitleBarBootcamp({ title: route.label })
   }
 }

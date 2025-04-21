@@ -959,7 +959,7 @@ bool WebDelegate::GetPendingSizeStatus()
 {
     return false;
 }
-void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y) {}
+void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y, bool isHoverEnter) {}
 void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr) {}
 void WebDelegate::AutofillCancel(const std::string& fillContent) {}
 bool WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
@@ -1213,6 +1213,10 @@ void WebDelegate::RegisterNativeArkJSFunction(const std::string& objName,
     const std::vector<std::pair<std::string, NativeMethodCallback>>& methodList, bool isNeedRefresh)
 {}
 void WebDelegate::UnRegisterNativeArkJSFunction(const std::string& objName) {}
+void WebDelegate::RegisterNativeJavaScriptProxy(const std::string& obj, const std::vector<std::string>& method,
+    std::vector<std::function<void(const std::vector<std::string>&)>> callbackImpl,
+    bool isAync, const std::string& permission, bool isNeedRefresh)
+{}
 void WebDelegate::UpdateEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) {}
 bool WebDelegate::IsActivePolicyDisable()
 {
@@ -1232,4 +1236,6 @@ std::string WebDelegate::GetCurrentLanguage()
 void WebDelegate::RegisterWebWindowFocusChangedListener() {}
 void WebDelegate::UnRegisterWebWindowFocusChangedListener() {}
 void WebDelegate::OnDragAttach() {}
+bool WebDelegate::IsNWebEx() { return false; }
+void WebDelegate::SetNativeInnerWeb(bool isInnerWeb) {}
 } // namespace OHOS::Ace

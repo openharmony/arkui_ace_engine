@@ -34,6 +34,7 @@ struct IndexPage {
   @State arr: TextList[] = [
     new TextList(1, 'Back', 'pages/Index'),
     new TextList(2, 'childrenMainSize', 'pages/List/childrenMainSize/ListItemGroupScenario'),
+    new TextList(3, 'RepeatList1', 'pages/List/RepeatList/RepeatList1'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

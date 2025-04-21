@@ -454,7 +454,7 @@ void JSNavDestination::SetMenus(const JSCallbackInfo& info)
     }
 
     NG::NavigationMenuOptions options;
-    if (info.Length() > 1) {
+    if (info.Length() > 1 && info[1]->IsObject()) {
         auto optObj = JSRef<JSObject>::Cast(info[1]);
         auto moreButtonProperty = optObj->GetProperty(MORE_BUTTON_OPTIONS_PROPERTY);
         JSNavigationUtils::ParseMenuOptions(moreButtonProperty, options);
@@ -618,7 +618,7 @@ void JSNavDestination::SetToolBarConfiguration(const JSCallbackInfo& info)
                 targetNode, info, JSRef<JSArray>::Cast(info[0]), toolBarItems);
         }
         NG::MoreButtonOptions toolbarMoreButtonOptions;
-        if (info.Length() > 1) {
+        if (info.Length() > 1 && info[1]->IsObject()) {
             auto optObj = JSRef<JSObject>::Cast(info[1]);
             auto moreButtonProperty = optObj->GetProperty(MORE_BUTTON_OPTIONS_PROPERTY);
             JSNavigationUtils::ParseToolBarMoreButtonOptions(moreButtonProperty, toolbarMoreButtonOptions);

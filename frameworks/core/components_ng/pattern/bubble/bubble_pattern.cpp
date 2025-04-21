@@ -113,7 +113,7 @@ void BubblePattern::OnAttachToFrameNode()
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     hasOnAreaChange_ = pipelineContext->HasOnAreaChangeNode(targetNode->GetId());
-    auto eventHub = targetNode->GetEventHub<EventHub>();
+    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host), weak = WeakClaim(this)](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
@@ -164,7 +164,7 @@ void BubblePattern::InitTouchEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -467,15 +467,16 @@ void BubblePattern::StartEnteringTransitionEffects(
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
     auto isBlock = layoutProp->GetBlockEventValue(true);
     auto& renderContext = popupNode->GetRenderContext();
+    auto isTips = layoutProp->GetIsTips().value_or(false);
     renderContext->SetTransitionInCallback(
-        [weak = WeakClaim(this), finish, showInSubWindow, popupId, isBlock]() {
+        [weak = WeakClaim(this), finish, showInSubWindow, popupId, isBlock, isTips]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (pattern->transitionStatus_ != TransitionStatus::ENTERING) {
                 return;
             }
             pattern->transitionStatus_ = TransitionStatus::NORMAL;
-            if (showInSubWindow) {
+            if (showInSubWindow && !isTips) {
                 std::vector<Rect> rects;
                 if (!isBlock) {
                     auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
@@ -572,6 +573,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
     auto isBlock = layoutProp->GetBlockEventValue(true);
+    auto isTips = layoutProp->GetIsTips().value_or(false);
     AnimationUtils::Animate(
         optionAlpha,
         [weak = WeakClaim(this)]() {
@@ -582,14 +584,14 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(VISIABLE_ALPHA);
         },
-        [weak = WeakClaim(this), finish, showInSubWindow, popupId, isBlock]() {
+        [weak = WeakClaim(this), finish, showInSubWindow, popupId, isBlock, isTips]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (pattern->transitionStatus_ != TransitionStatus::ENTERING) {
                 return;
             }
             pattern->transitionStatus_ = TransitionStatus::NORMAL;
-            if (showInSubWindow) {
+            if (showInSubWindow && !isTips) {
                 std::vector<Rect> rects;
                 if (!isBlock) {
                     auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
@@ -824,6 +826,8 @@ void BubblePattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("targetSpace: " + dumpInfo_.targetSpace.ToString());
     DumpLog::GetInstance().AddDesc("originPlacement: " + dumpInfo_.originPlacement);
     DumpLog::GetInstance().AddDesc("finalPlacement: " + dumpInfo_.finalPlacement);
+    DumpLog::GetInstance().AddDesc("enableHoverMode: " + std::to_string(dumpInfo_.enableHoverMode));
+    DumpLog::GetInstance().AddDesc("avoidKeyboard: " + std::to_string(dumpInfo_.avoidKeyboard));
 }
 
 void BubblePattern::UpdateBubbleText()
@@ -848,6 +852,21 @@ void BubblePattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     colorMode_ = context->GetColorMode();
     UpdateBubbleText();
+    if (isTips_) {
+        auto host = GetHost();
+        auto popupTheme = GetPopupTheme();
+        auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+        CHECK_NULL_VOID(childNode);
+        auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
+        auto renderContext = childNode->GetRenderContext();
+        CHECK_NULL_VOID(popupTheme);
+        auto defaultBGcolor = popupTheme->GetDefaultBGColor();
+        auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(defaultBGcolor);
+        renderContext->UpdateBackgroundColor(backgroundColor);
+        BlurStyleOption styleOption;
+        styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
+        renderContext->UpdateBackBlurStyle(styleOption);
+    }
 }
 
 void BubblePattern::UpdateAgingTextSize()

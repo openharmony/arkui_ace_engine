@@ -23,9 +23,6 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
-#include "core/components_ng/pattern/text/span/tlv_util.h"
-#include "core/components_ng/pattern/text/text_layout_algorithm.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 class TextMockClipboardImpl : public MockClipboardImpl {
@@ -593,7 +590,7 @@ HWTEST_F(TextTestSevenNg, SpanBuildParagraph001, TestSize.Level1)
     selectSpanItems.emplace_back(span0);
     auto pManager_ = AceType::MakeRefPtr<ParagraphManager>();
     ASSERT_NE(pManager_, nullptr);
-    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>(selectSpanItems, pManager_, true);
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>(selectSpanItems, pManager_, true, TextStyle());
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();

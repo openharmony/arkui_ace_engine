@@ -23,7 +23,6 @@
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "pointer_event.h"
 #endif
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -520,7 +519,7 @@ void SecurityComponentPattern::HandleEnabled()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -541,7 +540,7 @@ void SecurityComponentPattern::UpdateButtonProperty(RefPtr<FrameNode>& scNode, R
     auto buttonLayoutProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     const auto& buttonRender = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(buttonRender);
-    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    auto buttonEventHub = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
 
     if (scLayoutProp->GetBackgroundBorderWidth().has_value()) {
@@ -630,7 +629,7 @@ void SecurityComponentPattern::InitAppearCallback(RefPtr<FrameNode>& frameNode)
     if (isAppearCallback_) {
         return;
     }
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto context = frameNode->GetContextRefPtr();

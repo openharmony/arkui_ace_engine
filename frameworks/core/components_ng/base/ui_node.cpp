@@ -19,7 +19,6 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1063,13 +1062,20 @@ void UINode::DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json)
 
 void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current)
 {
-    current->Put("ID", nodeId_);
-    current->Put("Type", tag_.c_str());
+    current->Put("$type", tag_.c_str());
+    current->Put("$ID", nodeId_);
+    if (InstanceOf<CustomNode>(this)) {
+        current->Put("type", "custom");
+    } else {
+        current->Put("type", "build-in");
+    }
     auto nodeChildren = GetChildren();
     DumpSimplifyInfo(current);
+    if (!CheckVisibleOrActive()) {
+        return;
+    }
     bool hasChildren = !nodeChildren.empty() || !disappearingChildren_.empty();
     if (hasChildren) {
-        current->Put("ChildrenSize", static_cast<int32_t>(nodeChildren.size()));
         auto array = JsonUtil::CreateArray();
         if (!nodeChildren.empty()) {
             for (const auto& item : nodeChildren) {
@@ -1085,13 +1091,7 @@ void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current
                 array->PutRef(std::move(child));
             }
         }
-        current->PutRef("Children", std::move(array));
-    }
-    auto frameNode = AceType::DynamicCast<FrameNode>(this);
-    if (frameNode && frameNode->GetOverlayNode()) {
-        auto overlay = JsonUtil::Create();
-        frameNode->GetOverlayNode()->DumpSimplifyTree(depth + 1, overlay);
-        current->PutRef("Overlay", std::move(overlay));
+        current->PutRef("$children", std::move(array));
     }
 }
 

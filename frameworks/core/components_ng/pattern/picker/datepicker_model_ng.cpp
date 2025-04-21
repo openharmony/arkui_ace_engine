@@ -126,23 +126,23 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
 
     if (dateOrder == "M-d-y") {
         if (!hasMonthNode) {
-            createMonthOrDayColumnNode(monthColumnNode, dateNode, Color::BLUE);
+            CreateDateColumn(monthColumnNode, dateNode);
         }
         if (!hasDayNode) {
-            createMonthOrDayColumnNode(dayColumnNode, dateNode, Color::GRAY);
+            CreateDateColumn(dayColumnNode, dateNode);
         }
         if (!hasYearNode) {
-            createYearColumnNode(yearColumnNode, dateNode);
+            CreateDateColumn(yearColumnNode, dateNode);
         }
     } else {
         if (!hasYearNode) {
-            createYearColumnNode(yearColumnNode, dateNode);
+            CreateDateColumn(yearColumnNode, dateNode);
         }
         if (!hasMonthNode) {
-            createMonthOrDayColumnNode(monthColumnNode, dateNode, Color::BLUE);
+            CreateDateColumn(monthColumnNode, dateNode);
         }
         if (!hasDayNode) {
-            createMonthOrDayColumnNode(dayColumnNode, dateNode, Color::GRAY);
+            CreateDateColumn(dayColumnNode, dateNode);
         }
     }
     stack->Push(dateNode);
@@ -153,24 +153,7 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
     }
 }
 
-void DatePickerModelNG::createMonthOrDayColumnNode(const RefPtr<FrameNode>& columnNode,
-    const RefPtr<FrameNode>& dateNode, Color buttonBackgroundColor)
-{
-    auto stackNode = CreateStackNode();
-    auto blendNode = CreateColumnNode();
-    auto buttonNode = CreateButtonNode();
-    buttonNode->GetRenderContext()->UpdateBackgroundColor(buttonBackgroundColor);
-    buttonNode->MountToParent(stackNode);
-    columnNode->MountToParent(blendNode);
-    blendNode->MountToParent(stackNode);
-    auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
-    layoutProperty->UpdateAlignment(Alignment::CENTER);
-    layoutProperty->UpdateLayoutWeight(1);
-    stackNode->MountToParent(dateNode);
-}
-
-void DatePickerModelNG::createYearColumnNode(const RefPtr<FrameNode>& columnNode,
-    const RefPtr<FrameNode>& dateNode)
+void DatePickerModelNG::CreateDateColumn(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode)
 {
     auto stackYearNode = CreateStackNode();
     auto blendYearNode = CreateColumnNode();
@@ -383,7 +366,7 @@ void DatePickerModelNG::SetOnChange(DateChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -391,7 +374,7 @@ void DatePickerModelNG::SetOnChange(DateChangeEvent&& onChange)
 void DatePickerModelNG::SetOnChange(FrameNode* frameNode, DateChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -400,7 +383,7 @@ void DatePickerModelNG::SetOnDateChange(DateChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDateChange(std::move(onChange));
 }
@@ -408,7 +391,7 @@ void DatePickerModelNG::SetOnDateChange(DateChangeEvent&& onChange)
 void DatePickerModelNG::SetOnDateChange(FrameNode* frameNode, DateChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDateChange(std::move(onChange));
 }
@@ -680,7 +663,7 @@ void DatePickerModelNG::SetChangeEvent(DateChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
 }
@@ -940,8 +923,11 @@ DatePickerMode DatePickerModelNG::getMode(FrameNode* frameNode)
 uint32_t DatePickerModelNG::getBackgroundColor(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarColor();
-    return value->GetValue();
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, 0);
+    auto color = paintProperty->GetScrollBarColor();
+    CHECK_NULL_RETURN(color, 0);
+    return color->GetValue();
 }
 
 const Dimension DatePickerModelNG::ConvertFontScaleValue(const Dimension& fontSizeValue)

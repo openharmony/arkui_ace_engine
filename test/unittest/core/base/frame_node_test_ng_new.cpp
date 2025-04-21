@@ -1855,6 +1855,63 @@ HWTEST_F(FrameNodeTestNg, FrameNodeJSCustomProperty, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodeJSCustomProperty001
+ * @tc.desc: Test JSCustomProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeJSCustomProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. set isCNode false
+     * @tc.expected: expect result updateFlag is false.
+     */
+    frameNode->setIsCNode(false);
+    std::function<bool()> func = []() -> bool { return true; };
+    std::function<std::string(const std::string&)> getFuncAFromJS = [](const std::string& key) -> std::string {
+        return "getFuncAFromJS";
+    };
+    std::function<std::string()> getFuncBFromJS = []() -> std::string { return "getFuncBFromJS"; };
+    frameNode->SetJSCustomProperty(func, getFuncAFromJS, std::move(getFuncBFromJS));
+
+    InspectorFilter filter;
+    auto jsonValue = JsonUtil::Create(true);
+    frameNode->ToJsonValue(jsonValue, filter);
+    EXPECT_EQ(jsonValue->GetString("customProperty"), "getFuncBFromJS");
+
+    /**
+     * @tc.steps: step3. set isCNode ture
+     * @tc.expected: expect result updateFlag is false.
+     */
+    frameNode->setIsCNode(true);
+    frameNode->SetJSCustomProperty(func, getFuncAFromJS, std::move(getFuncBFromJS));
+    std::string flagValue;
+    bool updateFlagValue1 = frameNode->GetCapiCustomProperty("updateFlag", flagValue);
+    auto jsonValueIsCNode = JsonUtil::Create(true);
+    frameNode->ToJsonValue(jsonValueIsCNode, filter);
+    EXPECT_EQ(updateFlagValue1, true);
+    EXPECT_EQ(flagValue, "1");
+    EXPECT_NE(jsonValueIsCNode->GetString("customProperty"), "getFuncBFromJS");
+
+    /**
+     * @tc.steps: step4. Remove updateFlag value and set isCNode false. Then add custom property.
+     * @tc.expected: expect the custom property can be set.
+     */
+    frameNode->RemoveCustomProperty("updateFlag");
+    frameNode->setIsCNode(false);
+    frameNode->AddCustomProperty("key", "value1");
+    bool result = frameNode->GetCapiCustomProperty("key", flagValue);
+    EXPECT_EQ(result, false);
+    result = frameNode->GetCustomPropertyByKey("key", flagValue);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(flagValue, "value1");
+}
+
+/**
  * @tc.name: FrameNodeCapiCustomProperty
  * @tc.desc: Test CapiCustomProperty.
  * @tc.type: FUNC

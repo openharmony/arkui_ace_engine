@@ -31,7 +31,7 @@ const driver = Driver.create();
 export default function LoadingProgressBootcampTest() {
   describe('LoadingProgressBootcampTest', () => {
     // Defines a test suite. Two parameters are supported: test suite name and test suite function.
-    beforeAll(async (done:Function) => {
+    beforeAll(async (done: Function) => {
       // Presets an action, which is performed only once before all test cases of the test suite start.
       // This API supports only one parameter: preset action function.
       console.info('beforeAll begin');
@@ -186,7 +186,7 @@ export default function LoadingProgressBootcampTest() {
         radioClickObj: 1,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
-          toggleClickObj:'enableLoading'
+          toggleClickObj: 'enableLoading'
         },
         id: 'LoadingProgress',
         arr: [
@@ -206,7 +206,7 @@ export default function LoadingProgressBootcampTest() {
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-          toggleClickObj:'enableLoading'
+          toggleClickObj: 'enableLoading'
         },
         id: 'LoadingProgress',
         arr: [
@@ -226,7 +226,7 @@ export default function LoadingProgressBootcampTest() {
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
-          toggleClickObj:'contentModifier'
+          toggleClickObj: 'contentModifier'
         }
       })
 
@@ -240,7 +240,7 @@ export default function LoadingProgressBootcampTest() {
         radioClickObj: 1,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-          toggleClickObj:'contentModifier'
+          toggleClickObj: 'contentModifier'
         }
       })
 

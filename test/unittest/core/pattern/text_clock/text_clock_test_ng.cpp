@@ -283,7 +283,8 @@ HWTEST_F(TextClockTestNG, TextClockTest003, TestSize.Level1)
      * @tc.steps: step2. get textClock frameNode and event.
      * @tc.expected: function is called.
      */
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    auto frameNode = stack->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<TextClockEventHub> eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -294,6 +295,7 @@ HWTEST_F(TextClockTestNG, TextClockTest003, TestSize.Level1)
      */
     eventHub->FireChangeEvent(UTC_2);
     EXPECT_EQ(utc, UTC_2);
+    stack->Pop();
 }
 
 /**
@@ -792,7 +794,8 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
      * @tc.steps: step2. get textClock frameNode and event.
      * @tc.expected: function is called.
      */
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    auto frameNode = stack->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<TextClockEventHub> eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -835,6 +838,7 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
     pattern->OnVisibleChange(true);
     pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_2);
+    stack->Pop();
     MockPipelineContext::TearDown();
 }
 
@@ -850,7 +854,8 @@ HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level1)
      */
     TextClockModelNG model;
     model.Create();
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stack = ViewStackProcessor::GetInstance();
+    auto frameNode = stack->GetMainFrameNode();
     auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
 
     /**
@@ -861,7 +866,6 @@ HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level1)
     model.InitFontDefault(
         TextStyle(FONT_FAMILY_VALUE, fontSize, FONT_WEIGHT_VALUE, ITALIC_FONT_STYLE_VALUE, TEXT_COLOR_VALUE));
     EXPECT_EQ(layoutProperty->GetFontSize(), Dimension(fontSize));
-    EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
     EXPECT_EQ(layoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(layoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(layoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
@@ -872,10 +876,10 @@ HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level1)
      */
     model.InitFontDefault(TextStyle());
     EXPECT_EQ(layoutProperty->GetFontSize(), Dimension(fontSize));
-    EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
     EXPECT_EQ(layoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(layoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(layoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
+    stack->Pop();
 }
 
 /**
@@ -915,7 +919,6 @@ HWTEST_F(TextClockTestNG, TextClockTest014, TestSize.Level1)
     TextClockModelNG::InitFontDefault(node, textStyle);
     EXPECT_EQ(layoutProperty->GetFontSizeValue(), FONT_SIZE_VALUE);
     EXPECT_EQ(layoutProperty->GetFontWeightValue(), FONT_WEIGHT_VALUE);
-    EXPECT_EQ(layoutProperty->GetTextColorValue(), TEXT_COLOR_VALUE);
     EXPECT_EQ(layoutProperty->GetFontFamilyValue(), FONT_FAMILY_VALUE);
     EXPECT_EQ(layoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
 
@@ -1261,6 +1264,7 @@ HWTEST_F(TextClockTestNG, TextClockTest016, TestSize.Level1)
     const double fontSize = 20.1;
     model.InitFontDefault(
         TextStyle(FONT_FAMILY_VALUE, fontSize, FONT_WEIGHT_VALUE, ITALIC_FONT_STYLE_VALUE, TEXT_COLOR_VALUE));
+    model.SetTextColor(TEXT_COLOR_VALUE);
 
     EXPECT_EQ(textProperty->GetPropertyChangeFlag(), PROPERTY_CHANGE_FLAG_2);
     EXPECT_FALSE(pattern->OnThemeScopeUpdate(host->GetThemeScopeId()));

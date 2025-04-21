@@ -41,6 +41,8 @@
 #include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/focus_event_handler.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/flex_property.h"
@@ -398,6 +400,8 @@ public:
         PopupInfo& tipsInfo, bool showInSubWindow, const RefPtr<SpanString>& spanString);
     static void AddHoverEventForTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
         PopupInfo& tipsInfo, bool showInSubWindow);
+    static void UpdateTipsInfo(PopupInfo& tipsInfo, int32_t popupId, const RefPtr<FrameNode>& popupNode,
+        const RefPtr<PopupParam>& param, bool isAvoidKeyboard);
     static RefPtr<OverlayManager> GetCurOverlayManager(const RefPtr<UINode>& node);
     static bool GetTargetNodeIsInSubwindow(const RefPtr<UINode>& targetNode);
     static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
@@ -901,6 +905,34 @@ public:
     static void RemoveCustomProperty(UINode* frameNode, const std::string& key);
     static void RegisterOEMVisualEffect(OEMVisualEffectFunc func);
     static void SetPrivacySensitive(FrameNode* frameNode, bool flag);
+
+    static void SetJSFrameNodeOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
+    static void ClearJSFrameNodeOnReachStart(FrameNode* frameNode);
+    static void SetJSFrameNodeOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
+    static void ClearJSFrameNodeOnReachEnd(FrameNode* frameNode);
+    static void SetJSFrameNodeOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
+    static void ClearJSFrameNodeOnScrollStart(FrameNode* frameNode);
+    static void SetJSFrameNodeOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
+    static void ClearJSFrameNodeOnScrollStop(FrameNode* frameNode);
+    static void SetJSFrameNodeOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
+    static void ClearJSFrameNodeOnScrollFrameBegin(FrameNode* frameNode);
+    static void SetJSFrameNodeOnWillScroll(FrameNode* frameNode, OnWillScrollEvent&& onWillScroll);
+    static void ClearJSFrameNodeOnWillScroll(FrameNode* frameNode);
+    static void SetJSFrameNodeOnDidScroll(FrameNode* frameNode, OnScrollEvent&& onDidScroll);
+    static void ClearJSFrameNodeOnDidScroll(FrameNode* frameNode);
+    static void SetJSFrameNodeOnListScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex);
+    static void ClearJSFrameNodeOnListScrollIndex(FrameNode* frameNode);
+    static void SetJSFrameNodeOnScrollVisibleContentChange(
+        FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange);
+    static void ClearJSFrameNodeOnScrollVisibleContentChange(FrameNode* frameNode);
+    static void SetJSFrameNodeOnScrollWillScroll(FrameNode* frameNode, ScrollEventWithReturn&& onWillScroll);
+    static void ClearJSFrameNodeOnScrollWillScroll(FrameNode* frameNode);
+    static void SetJSFrameNodeOnScrollDidScroll(FrameNode* frameNode, ScrollEventWithState&& onDidScroll);
+    static void ClearJSFrameNodeOnScrollDidScroll(FrameNode* frameNode);
+    static void SetJSFrameNodeOnGridScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex);
+    static void ClearJSFrameNodeOnGridScrollIndex(FrameNode* frameNode);
+    static void SetJSFrameNodeOnWaterFlowScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex);
+    static void ClearJSFrameNodeOnWaterFlowScrollIndex(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();

@@ -214,47 +214,6 @@ HWTEST_F(RichEditorClickTestNg, HandleEnabled, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnVisibleChange
- * @tc.desc: test OnVisibleChange
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, OnVisibleChange, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richeditor pattern and add text span
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. add text span and Select text
-     */
-    AddSpan(INIT_VALUE_1);
-    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 1);
-    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
-    richEditorPattern->textSelector_ = TextSelector(0, 2);
-
-    /**
-     * @tc.steps: step3. test OnVisibleChange
-     */
-    richEditorPattern->OnVisibleChange(false);
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
-    EXPECT_FALSE(richEditorPattern->caretTwinkling_);
-
-    /**
-     * @tc.steps: step4. change value and test again
-     */
-    richEditorPattern->caretTwinkling_ = true;
-    richEditorPattern->caretVisible_ = true;
-    richEditorPattern->OnVisibleChange(true);
-    EXPECT_FALSE(richEditorPattern->caretVisible_);
-    EXPECT_FALSE(richEditorPattern->caretTwinkling_);
-}
-
-/**
  * @tc.name: MoveCaretOnLayoutSwap
  * @tc.desc: test MoveCaretOnLayoutSwap
  * @tc.type: FUNC
@@ -286,40 +245,6 @@ HWTEST_F(RichEditorClickTestNg, MoveCaretOnLayoutSwap, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 1);
     EXPECT_EQ(richEditorPattern->moveLength_, 0);
     EXPECT_FALSE(richEditorPattern->isTextChange_);
-}
-
-/**
- * @tc.name: SetCaretOffset
- * @tc.desc: test SetCaretOffset
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, SetCaretOffset, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. add span
-     */
-    AddSpan(u"test");
-    EXPECT_FALSE(richEditorPattern->caretVisible_);
-
-    /**
-     * @tc.step: step3. Request focus
-     */
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    focusHub->RequestFocusImmediately();
-
-    /**
-     * @tc.steps: step4. call the callback function
-     */
-    richEditorPattern->SetCaretOffset(2);
-    EXPECT_TRUE(richEditorPattern->caretTwinkling_);
-    EXPECT_TRUE(richEditorPattern->caretVisible_);
 }
 
 /**

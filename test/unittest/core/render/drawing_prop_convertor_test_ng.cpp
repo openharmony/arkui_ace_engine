@@ -359,7 +359,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg011, TestSize.Lev
      * @tc.expected: the return retTextStyle is expected.
      */
     textStyle.propTextOverflow_ = TextOverflow::ELLIPSIS;
-    textStyle.propWordSpacing_ = WORD_SPACING_PX;
+    textStyle.propWordSpacing_.value = WORD_SPACING_PX;
     retTextStyle = ToRSTextStyle(context, textStyle);
     EXPECT_EQ(retTextStyle.ellipsis, StringUtils::Str8ToStr16(StringUtils::ELLIPSIS));
     EXPECT_EQ(retTextStyle.fontSize, FONT_SIZE);
@@ -370,7 +370,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg011, TestSize.Lev
      * @tc.steps4: call ToRSTextStyle and set input textStyle.lineHeight_ is not equal to textStyle.fontSize_.
      * @tc.expected: retTextStyle.heightScale is expected value.
      */
-    textStyle.lineHeight_ = LINE_HIGHT_PX;
+    textStyle.lineHeight_.value = LINE_HIGHT_PX;
     retTextStyle = ToRSTextStyle(context, textStyle);
     EXPECT_EQ(retTextStyle.heightScale, LINE_HIGHT_PX.value_ / FONT_SIZE);
 
@@ -378,8 +378,8 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg011, TestSize.Lev
      * @tc.steps5: call ToRSTextStyle and set input textStyle.wordSpacing_ is WORD_SPACING_PERCENT.
      * @tc.expected: retTextStyle.heightScale is equal to LINE_HIGHT_PERCENT.value_.
      */
-    textStyle.propWordSpacing_ = WORD_SPACING_PERCENT;
-    textStyle.lineHeight_ = LINE_HIGHT_PERCENT;
+    textStyle.propWordSpacing_.value = WORD_SPACING_PERCENT;
+    textStyle.lineHeight_.value = LINE_HIGHT_PERCENT;
     retTextStyle = ToRSTextStyle(context, textStyle);
     EXPECT_EQ(retTextStyle.wordSpacing, WORD_SPACING_PERCENT.value_ * FONT_SIZE);
     EXPECT_EQ(retTextStyle.heightScale, LINE_HIGHT_PERCENT.value_);
@@ -403,9 +403,9 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg012, TestSize.Lev
      * @tc.steps2: call ToRSTextStyle and set values of textStyle.
      * @tc.expected: retTextSty is expected and retTextStyle.letterSpacing_ is equal to WORD_SPACING_PX.value_.
      */
-    textStyle.propLetterSpacing_ = LETTER_SPACING;
-    textStyle.propWordSpacing_ = WORD_SPACING_PX;
-    textStyle.lineHeight_ = LINE_HIGHT_PX;
+    textStyle.propLetterSpacing_.value = LETTER_SPACING;
+    textStyle.propWordSpacing_.value = WORD_SPACING_PX;
+    textStyle.lineHeight_.value = LINE_HIGHT_PX;
     RSTextStyle retTextStyle = ToRSTextStyle(pipelineContext, textStyle);
     EXPECT_EQ(retTextStyle.fontSize, FONT_SIZE * pipelineContext->fontScale_);
     EXPECT_EQ(retTextStyle.letterSpacing, LETTER_SPACING.value_);
@@ -424,7 +424,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg012, TestSize.Lev
      * @tc.steps4: call ToRSTextStyle and set textStyle.fontSize_ is FONT_SIZE_FP.
      * @tc.expected: retTextStyle.fontSize is equal to FONT_SIZE.
      */
-    textStyle.fontSize_ = FONT_SIZE_FP;
+    textStyle.fontSize_.value = FONT_SIZE_FP;
     retTextStyle = ToRSTextStyle(pipelineContext, textStyle);
     EXPECT_EQ(retTextStyle.fontSize, FONT_SIZE_FP.value_);
 }
@@ -446,7 +446,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg013, TestSize.Lev
      * @tc.steps2: call ToRSTextStyle and set input textStyle.lineHeight_ is LINE_HIGHT_PX.
      * @tc.expected: retTextStyle.height_ is equal to 1.0.
      */
-    textStyle.lineHeight_ = LINE_HIGHT_PX;
+    textStyle.lineHeight_.value = LINE_HIGHT_PX;
     RSTextStyle retTextStyle = ToRSTextStyle(context, textStyle);
     EXPECT_EQ(retTextStyle.heightScale, 1.0);
 
@@ -454,7 +454,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg013, TestSize.Lev
      * @tc.steps3: call ToRSTextStyle and set input textStyle.fontSize_ is FONT_SIZE_PX_0.
      * @tc.expected: retTextStyle.height_ is equal to 1.0.
      */
-    textStyle.fontSize_ = FONT_SIZE_PX_0;
+    textStyle.fontSize_.value = FONT_SIZE_PX_0;
     retTextStyle = ToRSTextStyle(context, textStyle);
     EXPECT_EQ(retTextStyle.heightScale, 1.0);
 }
@@ -484,8 +484,8 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg014, TestSize.Lev
      * @tc.steps3: call ToRSTextStyle and set testTextStyle.fontSize_ is FONT_SIZE_PX_5.
      * @tc.expected: retTextStyle.hasHeightOverride_ is false.
      */
-    testTextStyle.fontSize_ = FONT_SIZE_PX_5;
-    testTextStyle.lineHeight_ = LINE_HIGHT_PX;
+    testTextStyle.fontSize_.value = FONT_SIZE_PX_5;
+    testTextStyle.lineHeight_.value = LINE_HIGHT_PX;
     retTextStyle = ToRSTextStyle(pipelineContext, testTextStyle);
     EXPECT_FALSE(retTextStyle.heightOnly);
 }

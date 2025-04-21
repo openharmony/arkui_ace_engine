@@ -23,13 +23,21 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
+#include "core/common/font_manager.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/span/tlv_util.h"
+#include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/property/property.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/paragraph.h"
+#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/text/text_emoji_processor.h"
-#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -70,9 +78,13 @@ std::unique_ptr<JsonValue> ConvertShadowsToJson(const std::vector<Shadow>& shado
 
 std::string SpanItem::GetFont() const
 {
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, "");
+    auto textPattern = DynamicCast<TextPattern>(pattern);
+    CHECK_NULL_RETURN(textPattern, "");
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("style", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str());
-    jsonValue->Put("size", GetFontSizeInJson(fontStyle->GetFontSize()).c_str());
+    jsonValue->Put("size", textPattern->GetFontSizeWithThemeInJson(fontStyle->GetFontSize()).c_str());
     jsonValue->Put("weight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str());
     jsonValue->Put("family", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str());
     return jsonValue->ToString();
@@ -86,9 +98,13 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
         return;
     }
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textPattern = DynamicCast<TextPattern>(pattern);
+    CHECK_NULL_VOID(textPattern);
     if (fontStyle) {
         json->PutExtAttr("font", GetFont().c_str(), filter);
-        json->PutExtAttr("fontSize", GetFontSizeInJson(fontStyle->GetFontSize()).c_str(), filter);
+        json->PutExtAttr("fontSize", textPattern->GetFontSizeWithThemeInJson(fontStyle->GetFontSize()).c_str(), filter);
         json->PutExtAttr("decoration", GetDeclaration(fontStyle->GetTextDecorationColor(),
             fontStyle->GetTextDecoration(), fontStyle->GetTextDecorationStyle()).c_str(), filter);
         json->PutExtAttr("letterSpacing",
@@ -340,7 +356,7 @@ int32_t SpanItem::UpdateParagraph(
     auto pipelineContext = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, -1);
     auto spanTextStyle = textStyle;
-    UseSelfStyle(fontStyle, textLineStyle, spanTextStyle, false, frameNode->GetTag() == V2::RICH_EDITOR_ETS_TAG);
+    UseSelfStyle(fontStyle, textLineStyle, spanTextStyle, false);
     if (fontStyle && fontStyle->HasFontWeight()) {
         spanTextStyle.SetEnableVariableFontWeight(false);
     }
@@ -376,8 +392,7 @@ bool SpanItem::UpdateSpanTextStyle(const TextStyle& textStyle, const RefPtr<Fram
     auto pipelineContext = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, false);
     CHECK_NULL_RETURN(textStyle_.has_value(), true);
-    UpdateReLayoutTextStyle(
-        textStyle_.value(), textStyle, unicode != 0, frameNode->GetTag() == V2::RICH_EDITOR_ETS_TAG);
+    UpdateReLayoutTextStyle(textStyle_.value(), textStyle, unicode != 0);
     if (fontStyle && fontStyle->HasFontWeight()) {
         textStyle_.value().SetEnableVariableFontWeight(false);
     } else {
@@ -423,42 +438,20 @@ bool SpanItem::CheckSpanNeedReCreate(int32_t index)
         }                                                              \
     } while (false)
 
-#define UPDATE_TEXT_STYLE_DIMENSION_TYPE(group, name, styleName)                                              \
-    do {                                                                                                       \
-        Dimension value;                                                                                       \
-        if (group) {                                                                                           \
-            value = (group)->prop##name.value_or(textStyle.Get##styleName());                                  \
-        } else {                                                                                               \
-            value = textStyle.Get##styleName();                                                                \
-        }                                                                                                      \
-        if (value.Unit() != DimensionUnit::PERCENT) {                                                          \
-            spanTextStyle.Set##styleName(Dimension(value.ConvertToPxDistribute(textStyle.GetMinFontScale(),    \
-                                                       textStyle.GetMaxFontScale(), textStyle.IsAllowScale()), \
-                DimensionUnit::PX));                                                                           \
-        } else {                                                                                               \
-            spanTextStyle.Set##styleName(value);                                                               \
-        }                                                                                                      \
-    } while (false)
-
 void SpanItem::UpdateReLayoutTextStyle(
-    TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol, bool isRichEditor)
+    TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol)
 {
     // The setting of AllowScale, MinFontScale, MaxFontScale must be done before any Dimension-type properties that
     // depend on its value.
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, AllowScale, AllowScale);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, MinFontScale, MinFontScale);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, MaxFontScale, MaxFontScale);
-    if (!isRichEditor) {
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, FontSize, FontSize);
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, LetterSpacing, LetterSpacing);
-    } else {
-        UPDATE_SPAN_TEXT_STYLE(fontStyle, FontSize, FontSize);
-        UPDATE_SPAN_TEXT_STYLE(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
-        UPDATE_SPAN_TEXT_STYLE(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
-        UPDATE_SPAN_TEXT_STYLE(fontStyle, LetterSpacing, LetterSpacing);
-    }
+
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, FontSize, FontSize);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, LetterSpacing, LetterSpacing);
+
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextColor, TextColor);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextShadow, TextShadows);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, ItalicFontStyle, FontStyle);
@@ -480,15 +473,10 @@ void SpanItem::UpdateReLayoutTextStyle(
         UPDATE_SPAN_TEXT_STYLE(fontStyle, FontFamily, FontFamilies);
     }
 
-    if (!isRichEditor) {
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE(textLineStyle, LineHeight, LineHeight);
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE(textLineStyle, BaselineOffset, BaselineOffset);
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE(textLineStyle, LineSpacing, LineSpacing);
-    } else {
-        UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineHeight, LineHeight);
-        UPDATE_SPAN_TEXT_STYLE(textLineStyle, BaselineOffset, BaselineOffset);
-        UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineSpacing, LineSpacing);
-    }
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineHeight, LineHeight);
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, BaselineOffset, BaselineOffset);
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineSpacing, LineSpacing);
+
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, HalfLeading, HalfLeading);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextBaseline, TextBaseline);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextOverflow, TextOverflow);
@@ -678,8 +666,8 @@ void SpanItem::UpdateTextStyle(const std::u16string& content, const RefPtr<Parag
         // for content such as Hellow Wrold, update text style for three parts:
         // [0, selStart), [selStart, selEnd), [selEnd, content.length) through UpdateContentTextStyle
         auto contentLength = static_cast<int32_t>(content.length());
-        CHECK_NULL_VOID(selEnd > 0);
         selStart = selStart < 0 ? 0: selStart;
+        selEnd = selEnd < 0 ? 0 : selEnd;
         selEnd = selEnd > contentLength ? contentLength : selEnd;
         if (content.empty()) {
             builder->PushStyle(textStyle);
@@ -1373,7 +1361,7 @@ int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNo
 bool PlaceholderSpanItem::UpdateSpanTextStyle(const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_RETURN(textStyle_.has_value(), true);
-    UpdateReLayoutTextStyle(textStyle_.value(), textStyle, false, frameNode->GetTag() == V2::RICH_EDITOR_ETS_TAG);
+    UpdateReLayoutTextStyle(textStyle_.value(), textStyle, false);
     textStyle_->SetTextDecoration(TextDecoration::NONE);
     textStyle_->SetTextBackgroundStyle(backgroundStyle);
     textStyle_->SetTextStyleUid(nodeId_);
@@ -1483,106 +1471,5 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
         json->Put("SymbolEffect",
             spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString().c_str());
     }
-}
-
-void SpanNode::UpdateContent(const uint32_t& unicode)
-{
-    spanItem_->spanItemType = SpanItemType::SYMBOL;
-    if (spanItem_->unicode == unicode) {
-        return;
-    }
-    spanItem_->unicode = unicode;
-    spanItem_->MarkDirty();
-    RequestTextFlushDirty(true);
-}
-
-void SpanNode::UpdateContent(const std::u16string& content)
-{
-    if (spanItem_->content == content) {
-        return;
-    }
-    spanItem_->content = content;
-    spanItem_->MarkDirty();
-    RequestTextFlushDirty(true);
-}
-
-void SpanNode::UpdateColorByResourceId()
-{
-    spanItem_->fontStyle->UpdateColorByResourceId();
-    if (spanItem_->backgroundStyle) {
-        spanItem_->backgroundStyle->UpdateColorByResourceId();
-    }
-}
-
-void SpanNode::UpdateSpanTextColor(Color color)
-{
-    if (!spanItem_->fontStyle) {
-        spanItem_->fontStyle = std::make_unique<FontStyle>();
-    }
-    if (spanItem_->fontStyle->CheckTextColor(color)) {
-        return;
-    }
-    spanItem_->fontStyle->UpdateTextColor(color);
-    auto parent = GetParent();
-    CHECK_NULL_VOID(parent);
-    if (!spanItem_->UpdateSpanTextColor(color)) {
-        RequestTextFlushDirty();
-    }
-}
-
-RefPtr<PlaceholderSpanNode> PlaceholderSpanNode::GetOrCreateSpanNode(
-    const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
-{
-    auto frameNode = GetFrameNode(tag, nodeId);
-    CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<PlaceholderSpanNode>(frameNode));
-    auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
-    auto placeholderSpanNode = AceType::MakeRefPtr<PlaceholderSpanNode>(tag, nodeId, pattern);
-    placeholderSpanNode->InitializePatternAndContext();
-    ElementRegister::GetInstance()->AddUINode(placeholderSpanNode);
-    return placeholderSpanNode;
-}
-
-RefPtr<CustomSpanNode> CustomSpanNode::CreateFrameNode(int32_t nodeId)
-{
-    auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(V2::CUSTOM_SPAN_NODE_ETS_TAG, nodeId);
-    customSpanNode->InitializePatternAndContext();
-    ElementRegister::GetInstance()->AddUINode(customSpanNode);
-    customSpanNode->customSpanItem_->isFrameNode = true;
-    return customSpanNode;
-}
-
-RefPtr<CustomSpanNode> CustomSpanNode::GetOrCreateSpanNode(const std::string& tag, int32_t nodeId)
-{
-    auto frameNode = GetFrameNode(tag, nodeId);
-    CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<CustomSpanNode>(frameNode));
-    auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(tag, nodeId);
-    customSpanNode->InitializePatternAndContext();
-    ElementRegister::GetInstance()->AddUINode(customSpanNode);
-    customSpanNode->customSpanItem_->isFrameNode = true;
-    return customSpanNode;
-}
-
-RefPtr<ImageSpanNode> ImageSpanNode::GetOrCreateSpanNode(
-    const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
-{
-    auto frameNode = GetFrameNode(tag, nodeId);
-    CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<ImageSpanNode>(frameNode));
-    auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
-    auto imageSpanNode = AceType::MakeRefPtr<ImageSpanNode>(tag, nodeId, pattern);
-    imageSpanNode->InitializePatternAndContext();
-    ElementRegister::GetInstance()->AddUINode(imageSpanNode);
-    return imageSpanNode;
-}
-
-RefPtr<ContainerSpanNode> ContainerSpanNode::GetOrCreateSpanNode(int32_t nodeId)
-{
-    auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById<ContainerSpanNode>(nodeId);
-    if (spanNode) {
-        spanNode->SetHasTextBackgroundStyle(false);
-        return spanNode;
-    }
-    spanNode = MakeRefPtr<ContainerSpanNode>(nodeId);
-    ElementRegister::GetInstance()->AddUINode(spanNode);
-    return spanNode;
 }
 } // namespace OHOS::Ace::NG

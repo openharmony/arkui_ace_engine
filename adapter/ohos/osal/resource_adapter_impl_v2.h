@@ -90,6 +90,7 @@ public:
         const ResourceConfiguration& config, const ConfigurationChange& configurationChange) override;
 
 private:
+    std::unordered_map<std::string, uint32_t> patternNameMap_;
     std::string GetActualResourceName(const std::string& resName) const;
     bool NeedUpdateResConfig(const std::shared_ptr<Global::Resource::ResConfig>& oldResConfig,
         const std::shared_ptr<Global::Resource::ResConfig>& newResConfig);
@@ -106,6 +107,7 @@ private:
     bool appHasDarkRes_ = false;
     std::mutex updateResConfigMutex_;
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImplV2);
+    void PreloadTheme(int32_t themeId, RefPtr<ResourceThemeStyle> theme);
 };
 } // namespace OHOS::Ace
 

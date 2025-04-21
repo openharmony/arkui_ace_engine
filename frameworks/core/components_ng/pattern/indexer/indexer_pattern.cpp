@@ -446,7 +446,9 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(onActionStart), std::move(onActionUpdate), std::move(onActionEnd), std::move(onActionCancel));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distanceMap);
 }
 
 void IndexerPattern::OnHover(bool isHover)
@@ -541,7 +543,9 @@ void IndexerPattern::InitPopupPanEvent()
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
     auto panEvent = MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
-    gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, distanceMap);
 }
 
 void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
@@ -1015,7 +1019,7 @@ void IndexerPattern::UpdateBubbleList(std::vector<std::string>& currentListData)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
+    auto indexerEventHub = host->GetOrCreateEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     auto popListData = indexerEventHub->GetOnRequestPopupData();
     CHECK_NULL_VOID(popListData);
@@ -1391,7 +1395,7 @@ void IndexerPattern::UpdatePopupListGradientView(int32_t popupSize, int32_t maxI
     CHECK_NULL_VOID(listNode);
     if (popupSize > maxItemsSize) {
         DrawPopupListGradient(PopupListGradientStatus::BOTTOM);
-        auto listEventHub = listNode->GetEventHub<ListEventHub>();
+        auto listEventHub = listNode->GetOrCreateEventHub<ListEventHub>();
         CHECK_NULL_VOID(listEventHub);
         auto onScroll = [weak = WeakClaim(this)](Dimension offset, ScrollState state) {
             auto pattern = weak.Upgrade();
@@ -1556,19 +1560,17 @@ void IndexerPattern::UpdateBubbleListItemContext(
     CHECK_NULL_VOID(listItemNode);
     auto listItemContext = listItemNode->GetRenderContext();
     CHECK_NULL_VOID(listItemContext);
+    auto popupItemBackground =
+            paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor());
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto popupItemRadius = paintProperty->GetPopupItemBorderRadius().has_value()
                                     ? paintProperty->GetPopupItemBorderRadiusValue()
                                     : Dimension(BUBBLE_ITEM_RADIUS, DimensionUnit::VP);
         listItemContext->UpdateBorderRadius({ popupItemRadius, popupItemRadius, popupItemRadius, popupItemRadius });
-        auto popupItemBackground =
-            paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor());
         listItemContext->UpdateBackgroundColor(static_cast<int32_t>(pos) == popupClickedIndex_
                                                    ? (indexerTheme->GetPopupClickedBgAreaColor())
                                                    : popupItemBackground);
     } else {
-        auto popupItemBackground =
-            paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupBackgroundColor());
         listItemContext->UpdateBackgroundColor(
             static_cast<int32_t>(pos) == popupClickedIndex_ ? Color(POPUP_LISTITEM_CLICKED_BG) : popupItemBackground);
     }
@@ -1598,9 +1600,7 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
     auto popupUnselectedTextColor =
         paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetPopupUnselectedTextColor());
     auto popupItemBackground =
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
-            ? paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor())
-            : paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupBackgroundColor());
+        paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor());
     auto listNode = popupNode_->GetLastChild()->GetFirstChild();
     auto currentIndex = 0;
     for (auto child : listNode->GetChildren()) {
@@ -1683,7 +1683,7 @@ void IndexerPattern::OnListItemClick(int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
+    auto indexerEventHub = host->GetOrCreateEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
     ReportPoupSelectEvent();
@@ -1994,7 +1994,7 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
+    auto indexerEventHub = host->GetOrCreateEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     int32_t actualIndex = GetActualIndex(selectIndex);
     if (fromPress || lastIndexFromPress_ == fromPress || lastFireSelectIndex_ != selectIndex) {

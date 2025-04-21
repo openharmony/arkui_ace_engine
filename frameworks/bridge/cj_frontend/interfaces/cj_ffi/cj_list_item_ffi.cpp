@@ -18,6 +18,7 @@
 #include "cj_lambda.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "core/components_ng/pattern/list/list_item_model.h"
+#include <core/components_ng/base/view_stack_model.h>
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -33,6 +34,17 @@ extern "C" {
 void FfiOHOSAceFrameworkListItemCreate()
 {
     ListItemModel::GetInstance()->Create();
+}
+
+void FfiOHOSAceFrameworkListItemLazyCreate(void (*callback)(int32_t nodeId), int32_t styleId)
+{
+    auto lambda = CJLambda::Create(callback);
+    auto style = V2::ListItemStyle::NONE;
+    if (styleId >= 0) {
+        style = static_cast<V2::ListItemStyle>(styleId);
+    }
+    ListItemModel::GetInstance()->Create(std::move(lambda), style);
+    ListItemModel::GetInstance()->SetIsLazyCreating(true);
 }
 
 void FfiOHOSAceFrameworkListItemCreateWithOptions(int32_t style)

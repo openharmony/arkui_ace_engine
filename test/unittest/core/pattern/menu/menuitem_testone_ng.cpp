@@ -509,11 +509,10 @@ HWTEST_F(MenuItemTestOneNg, CalcItemHeight001, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
     auto props = layoutWrapper.GetLayoutProperty();
-    menuItemLayoutAlgorithm_->userSetPadding_ = true;
     menuItemLayoutAlgorithm_->userHeight_ = 48.0f;
     menuItemLayoutAlgorithm_->padding_ = props->CreatePaddingAndBorderWithDefault(12.0f, 4.0f, 0.0f, 0.0f);
 
-    EXPECT_EQ(menuItemLayoutAlgorithm_->CalcItemHeight(30.0f, 30.0f), 40.0f);
+    EXPECT_EQ(menuItemLayoutAlgorithm_->CalcItemHeight(30.0f, 30.0f), 38.0f);
 
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
@@ -541,11 +540,10 @@ HWTEST_F(MenuItemTestOneNg, CalcItemHeight002, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
     auto props = layoutWrapper.GetLayoutProperty();
-    menuItemLayoutAlgorithm_->userSetPadding_ = true;
     menuItemLayoutAlgorithm_->userHeight_ = 0.0f;
     menuItemLayoutAlgorithm_->padding_ = props->CreatePaddingAndBorderWithDefault(12.0f, 4.0f, 0.0f, 0.0f);
 
-    EXPECT_EQ(menuItemLayoutAlgorithm_->CalcItemHeight(30.0f, 32.0f), 32.0f);
+    EXPECT_EQ(menuItemLayoutAlgorithm_->CalcItemHeight(30.0f, 32.0f), 40.0f);
 
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
@@ -573,11 +571,10 @@ HWTEST_F(MenuItemTestOneNg, CalcItemHeight003, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
     auto props = layoutWrapper.GetLayoutProperty();
-    menuItemLayoutAlgorithm_->userSetPadding_ = false;
     menuItemLayoutAlgorithm_->userHeight_ = 48.0f;
     menuItemLayoutAlgorithm_->padding_ = props->CreatePaddingAndBorderWithDefault(12.0f, 4.0f, 0.0f, 0.0f);
 
-    EXPECT_EQ(menuItemLayoutAlgorithm_->CalcItemHeight(30.0f, 32.0f), 48.0f);
+    EXPECT_EQ(menuItemLayoutAlgorithm_->CalcItemHeight(30.0f, 32.0f), 40.0f);
 
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
@@ -605,7 +602,6 @@ HWTEST_F(MenuItemTestOneNg, CalcItemHeight004, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
     auto props = layoutWrapper.GetLayoutProperty();
-    menuItemLayoutAlgorithm_->userSetPadding_ = false;
     menuItemLayoutAlgorithm_->userHeight_ = 0.0f;
     menuItemLayoutAlgorithm_->padding_ = props->CreatePaddingAndBorderWithDefault(12.0f, 4.0f, 0.0f, 0.0f);
 
@@ -640,7 +636,6 @@ HWTEST_F(MenuItemTestOneNg, CalcContentExpandWidth001, TestSize.Level1)
     auto layoutConstraint = props->GetLayoutConstraint();
 
     menuItemLayoutAlgorithm_->minRowWidth_ = 50.0f;
-    menuItemLayoutAlgorithm_->userSetPadding_ = true;
     menuItemLayoutAlgorithm_->padding_ = props->CreatePaddingAndBorderWithDefault(12.0f, 4.0f, 0.0f, 0.0f);
     menuItemLayoutAlgorithm_->CalcContentExpandWidth(layoutConstraint, 49.0f, 32.0f, 32.0f);
 
@@ -759,7 +754,6 @@ HWTEST_F(MenuItemTestOneNg, MeasureClickableArea001, TestSize.Level1)
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(18);
     ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
-    menuItemLayoutAlgorithm_->userSetPadding_ = true;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper(itemNode, geometryNode, itemNode->GetLayoutProperty());
     menuItemLayoutAlgorithm_->MeasureClickableArea(&layoutWrapper);

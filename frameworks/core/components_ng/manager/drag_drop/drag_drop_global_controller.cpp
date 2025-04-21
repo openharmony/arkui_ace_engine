@@ -44,7 +44,7 @@ void DragDropGlobalController::PublishMenuStatusWithNode(bool isShowing, const R
     }
     auto frameNode = menuLiftingTargetNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureHub);

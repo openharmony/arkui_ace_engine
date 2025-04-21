@@ -29,41 +29,6 @@ public:
     BackgroundModifier() = default;
     ~BackgroundModifier() override = default;
 
-#ifndef USE_ROSEN_DRAWING
-    void Draw(Rosen::RSDrawingContext& context) const override
-    {
-        auto host = host_.Upgrade();
-        CHECK_NULL_VOID(host);
-        auto curSize = host->GetGeometryNode()->GetFrameSize();
-        auto curWidth = curSize.Width();
-        auto curHeight = curSize.Height();
-        CHECK_NULL_VOID(pixelMap_);
-        std::shared_ptr<Media::PixelMap> mediaPixelMap = pixelMap_->GetPixelMapSharedPtr();
-        CHECK_NULL_VOID(context.canvas);
-        std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /* unused */) {} };
-        auto* recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(skCanvas.get());
-        SkSamplingOptions samplingOptions;
-        SkPaint paint;
-
-        SizeF desSize(initialNodeWidth_, initialNodeHeight_);
-        SizeF srcSize(mediaPixelMap->GetWidth(), mediaPixelMap->GetHeight());
-        NG::OffsetF offset1 = Alignment::GetAlignPosition(srcSize, desSize, align_);
-        NG::OffsetF offset2 = Alignment::GetAlignPosition(desSize, srcSize, align_);
-        SkRect srcSKRect = SkRect::MakeXYWH(offset1.GetX(), offset1.GetY(), srcSize.Width(), srcSize.Height());
-        SkRect desSKRect = SkRect::MakeXYWH(offset2.GetX() * curWidth / initialNodeWidth_,
-            offset2.GetY() * curHeight / initialNodeHeight_, srcSize.Width() * curWidth / initialNodeWidth_,
-            srcSize.Height() * curHeight / initialNodeHeight_);
-        if (srcSize.Width() > desSize.Width()) {
-            srcSKRect.fRight = offset1.GetX() + desSize.Width();
-            desSKRect.fRight = curWidth;
-        }
-        if (srcSize.Height() > desSize.Height()) {
-            srcSKRect.fBottom = offset1.GetY() + desSize.Height();
-            desSKRect.fBottom = curHeight;
-        }
-        recordingCanvas->DrawPixelMapRect(mediaPixelMap, srcSKRect, desSKRect, samplingOptions, &paint);
-    }
-#else
     void Draw(Rosen::RSDrawingContext& context) const override
     {
         auto host = host_.Upgrade();
@@ -101,7 +66,6 @@ public:
         recordingCanvas.DrawPixelMapRect(mediaPixelMap, srcRSRect, desRSRect, samplingOptions);
         recordingCanvas.DetachBrush();
     }
-#endif
 
     void SetPixelMap(const RefPtr<PixelMap>& pixelMap)
     {

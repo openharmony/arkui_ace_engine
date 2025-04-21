@@ -21,6 +21,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
@@ -127,6 +128,8 @@ public:
 
     void RemoteRepeatTimer();
 
+    void ForceCleanRecognizer() override;
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -137,7 +140,7 @@ private:
     void DeadlineTimer(int32_t time, bool isCatchMode);
     void DoRepeat();
     void StartRepeatTimer();
-    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, bool isOnAction = false);
+    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, GestureCallbackType type);
     GestureJudgeResult TriggerGestureJudgeCallback();
     void OnResetStatus() override;
     double ConvertPxToVp(double offset) const;
@@ -163,6 +166,7 @@ private:
     std::unique_ptr<GestureEventFunc> longPressRecorder_;
     bool hasRepeated_ = false;
     int32_t longPressFingerCountForSequence_ = 0;
+    bool isOnActionTriggered_ = false;
 };
 
 } // namespace OHOS::Ace::NG

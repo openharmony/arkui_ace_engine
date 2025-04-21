@@ -1,15 +1,20 @@
 import { describe, beforeAll, it } from '@ohos/hypium'
 import { abilityDelegatorRegistry, Component, Driver, ON } from '@kit.TestKit';
-import { buttonClick,
+import {
+  buttonClick,
   getToggle,
-  JsonType, KeyStruct, radioClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
   Search,
   searchParentBlock,
   searchToggle,
-  Slide, sliderDrag,
+  Slide,
+  sliderDrag,
   titleSearch,
-  ToggleClick } from '../../utils';
-import {  Point } from '@ohos.UiTest';
+  ToggleClick
+} from '../../utils';
+import { Point } from '@ohos.UiTest';
 
 const TAG = 'TimePickerBootcamp'
 

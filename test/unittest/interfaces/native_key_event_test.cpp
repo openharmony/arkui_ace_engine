@@ -531,4 +531,157 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0014, TestSize.Level1)
     NodeModel::DisposeNode(node);
     EXPECT_EQ(flag, false);
 }
+
+/**
+* @tc.name: NativeKeyEventTest0015
+* @tc.desc: Test OH_ArkUI_KeyEvent_IsNumLockOn function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    nodeAPI->registerNodeEvent(node, NODE_ON_KEY_EVENT, 0, nullptr);
+
+    /**
+     * @tc.steps: step2.create null UIInputEvent, returnValue is ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.keyEvent.isNumLockOn = true;
+    uiInputEvent.inputEvent = &event.keyEvent;
+    uiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = nullptr;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    bool isNumLockOnState = false;
+    auto returnValue = OH_ArkUI_KeyEvent_IsNumLockOn(inputEvent, &isNumLockOnState);
+    EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step2.create null KeyEvent, returnValue is ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    uiInputEvent.inputEvent = nullptr;
+    nodeEvent.origin = &uiInputEvent;
+    inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    returnValue = OH_ArkUI_KeyEvent_IsNumLockOn(inputEvent, &isNumLockOnState);
+    EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step3.create inputEvent and KeyEvent, returnValue is ARKUI_ERROR_CODE_NO_ERROR.
+     */
+    uiInputEvent.inputEvent = &event.keyEvent;
+    uiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    returnValue = OH_ArkUI_KeyEvent_IsNumLockOn(inputEvent, &isNumLockOnState);
+    EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+* @tc.name: NativeKeyEventTest0016
+* @tc.desc: Test OH_ArkUI_KeyEvent_IsCapsLockOn function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    nodeAPI->registerNodeEvent(node, NODE_ON_KEY_EVENT, 0, nullptr);
+
+    /**
+     * @tc.steps: step2.create null UIInputEvent, returnValue is ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.keyEvent.isNumLockOn = true;
+    uiInputEvent.inputEvent = &event.keyEvent;
+    uiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = nullptr;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    bool isNumLockOnState = false;
+    auto returnValue = OH_ArkUI_KeyEvent_IsCapsLockOn(inputEvent, &isNumLockOnState);
+    EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step2.create null KeyEvent, returnValue is ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    uiInputEvent.inputEvent = nullptr;
+    nodeEvent.origin = &uiInputEvent;
+    inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    returnValue = OH_ArkUI_KeyEvent_IsCapsLockOn(inputEvent, &isNumLockOnState);
+    EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step3.create inputEvent and KeyEvent, returnValue is ARKUI_ERROR_CODE_NO_ERROR.
+     */
+    uiInputEvent.inputEvent = &event.keyEvent;
+    uiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    returnValue = OH_ArkUI_KeyEvent_IsCapsLockOn(inputEvent, &isNumLockOnState);
+    EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+* @tc.name: NativeKeyEventTest0017
+* @tc.desc: Test OH_ArkUI_KeyEvent_IsCapsLockOn function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    nodeAPI->registerNodeEvent(node, NODE_ON_KEY_EVENT, 0, nullptr);
+
+    /**
+     * @tc.steps: step2.create null UIInputEvent, returnValue is ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.keyEvent.isNumLockOn = true;
+    uiInputEvent.inputEvent = &event.keyEvent;
+    uiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = nullptr;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    bool isNumLockOnState = false;
+    auto returnValue = OH_ArkUI_KeyEvent_IsCapsLockOn(inputEvent, &isNumLockOnState);
+    EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step2.create null KeyEvent, returnValue is ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    uiInputEvent.inputEvent = nullptr;
+    nodeEvent.origin = &uiInputEvent;
+    inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    returnValue = OH_ArkUI_KeyEvent_IsCapsLockOn(inputEvent, &isNumLockOnState);
+    EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step3.create inputEvent and KeyEvent, returnValue is ARKUI_ERROR_CODE_NO_ERROR.
+     */
+    uiInputEvent.inputEvent = &event.keyEvent;
+    uiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    returnValue = OH_ArkUI_KeyEvent_IsCapsLockOn(inputEvent, &isNumLockOnState);
+    EXPECT_EQ(returnValue, ARKUI_ERROR_CODE_NO_ERROR);
+}
 } // namespace OHOS::Ace

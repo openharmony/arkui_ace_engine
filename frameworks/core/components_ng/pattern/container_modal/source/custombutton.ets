@@ -37,6 +37,8 @@ const EVENT_NAME_BUTTON_SIZE_CHANGE: string = 'arkui_button_size_change'
 const EVENT_NAME_BUTTON_SPACING_CHANGE: string = 'arkui_button_spacing_change'
 const EVENT_NAME_COLOR_MODE_LOCKED: string = 'arkui_color_mode_locked'
 const EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE: string = 'arkui_button_right_offset_change'
+const EVENT_NAME_BUTTON_ICON_SIZE_CHANGE: string = 'arkui_button_icon_size_change'
+const EVENT_NAME_BUTTON_BACKGROUND_CORNER_RADIUS_CHANGE: string = 'arkui_button_background_corner_radius_change'
 
 const maximizeNormalResource: Resource = {
   bundleName: '',
@@ -217,6 +219,10 @@ struct custombutton {
   @State buttonRightOffset: number = 20;
   // lock the current color mode
   colorConfigurationLocked: boolean = false;
+  // button icon size 20-24vp
+  @State buttonIconSize: number = 20;
+  // button background corner radius 4-8vp
+  @State buttonBackgroundCornerRadius: number = 4;
 
   isFocused: boolean = true;
   isDark: boolean = false;
@@ -267,6 +273,10 @@ struct custombutton {
       this.setButtonRightOffset(param);
     } else if (eventName === EVENT_NAME_BUTTON_SIZE_CHANGE) {
       this.setButtonButtonSize(param);
+    } else if (eventName === EVENT_NAME_BUTTON_ICON_SIZE_CHANGE) {
+        this.setButtonIconSize(param);
+    } else if (eventName === EVENT_NAME_BUTTON_BACKGROUND_CORNER_RADIUS_CHANGE) {
+        this.setButtonBackgroundCornerRadius(param);
     }
   }
 
@@ -309,16 +319,19 @@ struct custombutton {
     }
     return resource;
   }
+  setButtonIconSize(param:string) {
+      this.buttonIconSize = parseInt(param);
+  }
+
+  setButtonBackgroundCornerRadius(param:string) {
+      this.buttonBackgroundCornerRadius = parseInt(param);
+  }
 
   onMaximizeButtonClick() {
     this.onCancelMenuTimer()
-    this.onHoverMaximizeButton(false)
-    this.maximizeScale = 1.0
   }
 
   onMinimizeButtonClick() {
-    this.onHoverMinimizeButton(false)
-    this.minimizeScale = 1.0
   }
 
   onCloseButtonClick() {
@@ -555,8 +568,8 @@ struct custombutton {
       Row({space: this.buttonSpacing}) {
         Button() {
           Image(this.maximizeResource)
-            .width(IMAGE_SIZE)
-            .height(IMAGE_SIZE)
+            .width(this.buttonIconSize + 'vp')
+            .height(this.buttonIconSize + 'vp')
             .fillColor(this.maximizeFillColor)
             .draggable(false)
             .interpolation(ImageInterpolation.High)
@@ -567,7 +580,7 @@ struct custombutton {
         .width(this.buttonSize + 'vp')
         .height(this.buttonSize + 'vp')
         .type(ButtonType.Normal)
-        .borderRadius('4vp')
+        .borderRadius(this.buttonBackgroundCornerRadius + 'vp')
         .hoverEffect(HoverEffect.None)
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
@@ -610,8 +623,8 @@ struct custombutton {
 
         Button() {
           Image(this.minimizeResource)
-            .width(IMAGE_SIZE)
-            .height(IMAGE_SIZE)
+            .width(this.buttonIconSize + 'vp')
+            .height(this.buttonIconSize + 'vp')
             .fillColor(this.minimizeFillColor)
             .draggable(false)
             .interpolation(ImageInterpolation.High)
@@ -622,7 +635,7 @@ struct custombutton {
         .width(this.buttonSize + 'vp')
         .height(this.buttonSize + 'vp')
         .type(ButtonType.Normal)
-        .borderRadius('4vp')
+        .borderRadius(this.buttonBackgroundCornerRadius + 'vp')
         .hoverEffect(HoverEffect.None)
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
@@ -647,8 +660,8 @@ struct custombutton {
 
         Button() {
           Image(this.closeResource)
-            .width(IMAGE_SIZE)
-            .height(IMAGE_SIZE)
+            .width(this.buttonIconSize + 'vp')
+            .height(this.buttonIconSize + 'vp')
             .fillColor(this.closeFillColor)
             .draggable(false)
             .interpolation(ImageInterpolation.High)
@@ -659,7 +672,7 @@ struct custombutton {
         .width(this.buttonSize + 'vp')
         .height(this.buttonSize + 'vp')
         .type(ButtonType.Normal)
-        .borderRadius('4vp')
+        .borderRadius(this.buttonBackgroundCornerRadius + 'vp')
         .hoverEffect(HoverEffect.None)
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,

@@ -95,7 +95,7 @@ float GetIconOffsetY(const RefPtr<BarItemNode>& hostNode)
     if (hostNode->IsHideText()) {
         return theme->GetToolbarItemIconHideTextTopPadding().ConvertToPx();
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return theme->GetToolbarItemIconTopPadding().ConvertToPx();
     }
     return 0.0f;
@@ -144,7 +144,7 @@ void BarItemLayoutAlgorithm::LayoutText(LayoutWrapper* layoutWrapper, const RefP
     auto textWidth = geometryNode->GetFrameSize().Width();
     auto offsetX = (constraint->maxSize.Width() - textWidth) / 2;
 
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (!hostNode->IsBarItemUsedInToolbarConfiguration()) {
             offsetX = 0.0f;
         }

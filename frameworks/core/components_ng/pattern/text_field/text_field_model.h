@@ -139,6 +139,7 @@ enum class CleanNodeStyle {
 };
 
 enum class MenuPolicy { DEFAULT = 0, HIDE, SHOW };
+enum class HandlePolicy { DEFAULT = 0, HIDE, SHOW };
 
 enum class CancelButtonStyle {
     CONSTANT,
@@ -148,6 +149,7 @@ enum class CancelButtonStyle {
 
 struct SelectionOptions {
     MenuPolicy menuPolicy = MenuPolicy::DEFAULT;
+    HandlePolicy handlePolicy = HandlePolicy::DEFAULT;
 };
 
 enum class PreviewTextStyle {

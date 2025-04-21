@@ -303,9 +303,13 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         stateMgmtConsole.debug(`${this.constructor.name}: aboutToBeDeletedInternal `);
 
         // purge the elmtIds owned by this ViewV2 from the updateFuncByElmtId and also the state variable dependent elmtIds
-        Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId: number) => {
-            // FIXME split View: enable delete  this purgeDeleteElmtId(elmtId);
+        this.updateFuncByElmtId.forEach((_updateFun: UpdateFuncRecord, elmtId: number) => {
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(elmtId);
+            ObserveV2.getObserve().clearBinding(elmtId);
+            delete ObserveV2.getObserve().id2cmp_[elmtId];
         });
+
+        delete ObserveV2.getObserve().id2cmp_[this.id_];
 
         // unregistration of ElementIDs
         stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID`);

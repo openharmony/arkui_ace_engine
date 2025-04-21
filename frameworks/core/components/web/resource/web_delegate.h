@@ -923,7 +923,7 @@ public:
     {
         richtextData_ = richtextData;
     }
-    void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
+    void HandleAccessibilityHoverEvent(int32_t x, int32_t y, bool isHoverEnter);
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
@@ -1194,12 +1194,19 @@ public:
     void UpdateWebMediaAVSessionEnabled(bool isEnabled);
 
     std::string GetCurrentLanguage();
+    void RegisterNativeJavaScriptProxy(const std::string& obj, const std::vector<std::string>& method,
+        std::vector<std::function<void(const std::vector<std::string>&)>> callbackImpl,
+        bool isAync, const std::string& permission, bool isNeedRefresh);
 
     void RegisterWebWindowFocusChangedListener();
 
     void UnRegisterWebWindowFocusChangedListener();
     
     void OnDragAttach();
+
+    bool IsNWebEx();
+
+    void SetNativeInnerWeb(bool isInnerWeb);
 
 private:
     void InitWebEvent();
@@ -1425,7 +1432,6 @@ private:
     double dragResize_preHight_ = 0.0;
     double dragResize_preWidth_ = 0.0;
     bool enableFollowSystemFontWeight_ = false;
-    Offset windowRelativeOffset_;
 #endif
 };
 

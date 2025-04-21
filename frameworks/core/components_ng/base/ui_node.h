@@ -36,6 +36,7 @@
 #include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/event/touch_event.h"
 #include "core/event/mouse_event.h"
 
@@ -58,6 +59,32 @@ enum class RootNodeType : int32_t {
     PAGE_ETS_TAG = 0,
     NAVDESTINATION_VIEW_ETS_TAG = 1,
     WINDOW_SCENE_ETS_TAG = 2
+};
+
+struct InteractionEventBindingInfo  {
+    bool baseEventRegistered = false;
+    bool nodeEventRegistered = false;
+    bool nativeEventRegistered = false;
+    bool builtInEventRegistered = false;
+
+    void SetModifierEventRegistered(bool isCNode, bool state)
+    {
+        if (isCNode) {
+            nativeEventRegistered = state;
+        } else {
+            baseEventRegistered = state;
+        }
+    }
+
+    void SetNodeEventRegistered(bool state)
+    {
+        nodeEventRegistered = state;
+    }
+
+    void SetBuiltInEventRegistered(bool state)
+    {
+        builtInEventRegistered = state;
+    }
 };
 
 class InspectorFilter;
@@ -925,6 +952,34 @@ public:
         return true;
     }
 
+    void SetModifierEventRegistrationState(bool isCNode, bool state) {
+        InteractionEventBindingInfo currentInfo = GetInteractionEventBindingInfo();
+        currentInfo.SetModifierEventRegistered(isCNode, state);
+        SetInteractionEventBindingInfo(currentInfo);
+    }
+
+    void SetNodeEventRegistrationState(bool state) {
+        InteractionEventBindingInfo currentInfo = GetInteractionEventBindingInfo();
+        currentInfo.SetNodeEventRegistered(state);
+        SetInteractionEventBindingInfo(currentInfo);
+    }
+
+    void SetBuiltInEventRegistrationState(bool state) {
+        InteractionEventBindingInfo currentInfo = GetInteractionEventBindingInfo();
+        currentInfo.SetBuiltInEventRegistered(state);
+        SetInteractionEventBindingInfo(currentInfo);
+    }
+
+    void SetInteractionEventBindingInfo(const InteractionEventBindingInfo &eventBindingInfo)
+    {
+        eventBindingInfo_ = eventBindingInfo;
+    }
+
+    const InteractionEventBindingInfo& GetInteractionEventBindingInfo() const
+    {
+        return eventBindingInfo_;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -1041,6 +1096,7 @@ private:
     bool isAllowUseParentTheme_ = true;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RootNodeType rootNodeType_ = RootNodeType::PAGE_ETS_TAG;
+    InteractionEventBindingInfo eventBindingInfo_;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
     int32_t apiVersion_ = 0;

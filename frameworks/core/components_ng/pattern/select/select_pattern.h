@@ -231,6 +231,7 @@ public:
     void ResetLastSelectedOptionFlags(const RefPtr<MenuItemPattern>& optionPattern);
     void UpdateOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern);
     void UpdateSelectedOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern);
+    void DumpInfo() override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -310,6 +311,7 @@ private:
     void UpdateOptionsWidth(float selectWidth);
     void UpdateTargetSize();
     bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
+    void ShowScrollBar();
 
     std::vector<RefPtr<FrameNode>> options_;
     RefPtr<FrameNode> menuWrapper_ = nullptr;

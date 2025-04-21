@@ -177,7 +177,7 @@ HWTEST_F(FormRenderDelegateStubTest, FormRenderDelegateStubTest_005, TestSize.Le
 /*
  * @tc.name: FormRenderDelegateStubTest_006
  * @tc.desc: Test HandleOnSurfaceDetach(), HandleOnActionEvent(), HandleOnError, HandleOnSurfaceChange(),
- *           HandleOnFormLinkInfoUpdate(), HandleOnGetRectRelativeToWindow() function.
+ *           HandleOnFormLinkInfoUpdate(), HandleOnGetRectRelativeToWindow() HandleOnUpdateFormDone() function.
  * @tc.type: FUNC
  */
 HWTEST_F(FormRenderDelegateStubTest, FormRenderDelegateStubTest_006, TestSize.Level1)
@@ -193,6 +193,7 @@ HWTEST_F(FormRenderDelegateStubTest, FormRenderDelegateStubTest_006, TestSize.Le
     EXPECT_EQ(renderDelegate.HandleOnSurfaceChange(data, reply), ERR_OK);
     EXPECT_EQ(renderDelegate.HandleOnFormLinkInfoUpdate(data, reply), ERR_OK);
     EXPECT_EQ(renderDelegate.HandleOnGetRectRelativeToWindow(data, reply), ERR_OK);
+    EXPECT_EQ(renderDelegate.HandleOnUpdateFormDone(data, reply), ERR_OK);
     GTEST_LOG_(INFO) << "FormRenderDelegateStubTest_006 end";
 }
 }

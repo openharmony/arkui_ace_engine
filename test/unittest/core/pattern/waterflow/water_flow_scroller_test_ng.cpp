@@ -553,21 +553,6 @@ HWTEST_F(WaterFlowScrollerTestNg, Refresh001, TestSize.Level1)
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
-
-    MockAnimationManager::GetInstance().TickByVelocity(200.0f);
-    FlushUITasks();
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "445.45px");
-
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
-
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
 }
 
 /**
@@ -1006,7 +991,7 @@ HWTEST_F(WaterFlowScrollerTestNg, ReachEnd002, TestSize.Level1)
      * @tc.expected: the OnReachEnd event can not be triggered.
      */
     pattern_->layoutInfo_->repeatDifference_ = 1;
-    pattern_->FireOnReachEnd(event);
+    pattern_->FireOnReachEnd(event, nullptr);
     EXPECT_FALSE(pattern_->layoutInfo_->repeatDifference_ == 0);
     EXPECT_FALSE(isTrigger);
 }

@@ -31,7 +31,7 @@ void DynamicComponentManager::TriggerOnAreaChangeCallback(FrameNode* frameNode, 
         // in first load case, wait for window size
         return;
     }
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     auto renderContext = frameNode->GetRenderContext();
     if ((eventHub->HasOnAreaChanged() || eventHub->HasInnerOnAreaChanged())
         && frameNode->GetLastHostParentOffsetToWindow()) {
@@ -75,7 +75,7 @@ void DynamicComponentManager::HandleDynamicRenderOnAreaChange(FrameNode* frameNo
     const OffsetF& currParentOffset, const OffsetF& currHostParentOffset)
 {
     ACE_SCOPED_TRACE("DynamicComponent HandleDynamicRenderOnAreaChange");
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     auto lastHostParentOffsetToWindow = frameNode->GetLastHostParentOffsetToWindow();
     if (eventHub->HasInnerOnAreaChanged()) {
         eventHub->FireInnerOnAreaChanged(frameNode->GetLastFrameRect(),

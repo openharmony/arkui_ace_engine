@@ -1191,14 +1191,17 @@ HWTEST_F(TabBarEventTestNg, TabBarFocusTest002, TestSize.Level1)
      * @tc.expected: expect The function is run ok.
      */
     auto pipeline = frameNode_->GetContext();
-    pipeline->isFocusActive_ = false;
+    ASSERT_NE(pipeline, nullptr);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = false;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode0, nullptr));
 
     /**
      * @tc.steps: step3. Set isFocusActive_ to true, call scopeFocusAlgorithm.getNextFocusNode use different FocusStep
      * @tc.expected: expect The function is run ok.
      */
-    pipeline->isFocusActive_ = true;
+    focusManager->isFocusActive_ = true;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode0, childNode1));
     EXPECT_EQ(tabBarPattern_->focusIndicator_, 1);
     EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 0);
@@ -1260,7 +1263,10 @@ HWTEST_F(TabBarEventTestNg, TabBarFocusTest003, TestSize.Level1)
      * @tc.expected: expect The function is run ok.
      */
     auto pipeline = frameNode_->GetContext();
-    pipeline->isFocusActive_ = true;
+    ASSERT_NE(pipeline, nullptr);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode0, childNode1));
     EXPECT_EQ(tabBarPattern_->focusIndicator_, 1);
     EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 0);
@@ -1310,7 +1316,10 @@ HWTEST_F(TabBarEventTestNg, TabBarFocusTest004, TestSize.Level1)
      * @tc.expected: expect The function is run ok.
      */
     auto pipeline = frameNode_->GetContext();
-    pipeline->isFocusActive_ = true;
+    ASSERT_NE(pipeline, nullptr);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode0, childNode1));
     EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 1);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode1, nullptr));
@@ -1380,7 +1389,10 @@ HWTEST_F(TabBarEventTestNg, TabBarFocusTest005, TestSize.Level1)
      * @tc.expected: expect The function is run ok.
      */
     auto pipeline = frameNode_->GetContext();
-    pipeline->isFocusActive_ = true;
+    ASSERT_NE(pipeline, nullptr);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode0, childNode1));
     EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 1);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode1, nullptr));
@@ -1431,7 +1443,10 @@ HWTEST_F(TabBarEventTestNg, TabBarFocusTest006, TestSize.Level1)
      * @tc.expected: expect The function is run ok.
      */
     auto pipeline = frameNode_->GetContext();
-    pipeline->isFocusActive_ = true;
+    ASSERT_NE(pipeline, nullptr);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode0, childNode0));
     EXPECT_TRUE(isTrigger);
     EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 0);

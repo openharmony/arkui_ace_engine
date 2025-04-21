@@ -410,15 +410,6 @@ protected:
     virtual TextDirection GetSystemDirection() = 0;
     void DrawImageInternal(const Ace::CanvasImage& canvasImage, const std::shared_ptr<RSImage>& image);
 
-    RSBitmapFormat GetBitmapFormat()
-    {
-        if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-            return RSBitmapFormat { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_PREMUL };
-        } else {
-            return RSBitmapFormat { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
-        }
-    }
-
     // PaintHolder includes fillState, strokeState, globalState and shadow for save
     PaintHolder state_;
     std::vector<PaintHolder> saveStates_;

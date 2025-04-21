@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { describe, beforeAll, it} from '@ohos/hypium'
+import { describe, beforeAll, it } from '@ohos/hypium'
 import { Driver, Component } from '@kit.TestKit';
 import { ON } from '@ohos.UiTest';
 import {
@@ -1534,6 +1534,7 @@ export default function Navigation1() {
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
+          toggleClickObj: 'minContentWidth'
         },
         id: 'Navigation',
         arr: [
@@ -1547,6 +1548,7 @@ export default function Navigation1() {
         slideStar: Slide.end,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
+          toggleClickObj: 'minContentWidth'
         },
         id: 'Navigation',
         arr: [
@@ -1568,6 +1570,7 @@ export default function Navigation1() {
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
+          toggleClickObj: 'ignoreLayoutSafeArea.types'
         },
       })
       done();

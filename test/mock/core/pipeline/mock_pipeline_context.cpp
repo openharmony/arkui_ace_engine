@@ -428,6 +428,8 @@ void PipelineContext::FlushMessages() {}
 
 void PipelineContext::FlushModifier() {}
 
+void PipelineContext::FlushDirtyNodeUpdate() {}
+
 void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
 {
     if (!MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
@@ -1280,6 +1282,8 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
 }
 
 void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
+
+void NG::PipelineContext::UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode) {}
 
 RefPtr<Kit::UIContext> NG::PipelineContext::GetUIContext()
 {

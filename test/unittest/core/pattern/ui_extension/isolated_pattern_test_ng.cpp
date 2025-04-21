@@ -656,7 +656,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest013, TestSize.Level1)
     ASSERT_FALSE(isolatedPattern->GetHost()->GetContext()->GetIsFocusActive());
     isolatedPattern->HandleFocusEvent();
 
-    isolatedPattern->GetHost()->context_->isFocusActive_ = true;
+    isolatedPattern->GetHost()->context_->GetOrCreateFocusManager()->isFocusActive_ = true;
     ASSERT_TRUE(isolatedPattern->GetHost()->GetContext()->GetIsFocusActive());
     isolatedPattern->HandleFocusEvent();
 }

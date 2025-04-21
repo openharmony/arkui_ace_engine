@@ -105,6 +105,8 @@ void ToolBarTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+
+    buttonTheme_ = nullptr;
 }
 
 void ToolBarTestNg::SetUp()

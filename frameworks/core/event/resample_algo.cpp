@@ -186,8 +186,8 @@ bool ResampleAlgo::GetResamplePointerEvent(std::vector<T>& events,
                 return false;
             }
         }
-        uint64_t nextTime = nextIter->time.time_since_epoch().count();
-        delta = iterTime - nextTime;
+        int64_t nextTime = nextIter->time.time_since_epoch().count();
+        delta = static_cast<int64_t>(iterTime) - nextTime;
         if (delta > MAX_DELTA_TIME || delta < MIN_DELTA_TIME) {
             return false;
         }

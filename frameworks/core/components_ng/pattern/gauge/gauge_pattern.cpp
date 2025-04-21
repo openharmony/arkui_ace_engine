@@ -109,7 +109,7 @@ RefPtr<FrameNode> GaugePattern::BuildContentModifierNode()
     auto min = gaugePaintProperty->GetMin().value_or(0.0f);
     auto max = gaugePaintProperty->GetMax().value_or(100.0f);
     auto value = gaugePaintProperty->GetValue().value_or(min);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     GaugeConfiguration gaugeConfiguration(value, min, max, enabled);

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 
+#include "base/log/dump_log.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -72,7 +73,7 @@ void SwitchPattern::OnModifyDone()
     InitClickEvent();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -97,7 +98,7 @@ void SwitchPattern::InitFocusEvent()
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch button handle focus event");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -214,7 +215,7 @@ void SwitchPattern::HandleEnabled()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -326,7 +327,7 @@ void SwitchPattern::MarkIsSelected(bool isSelected)
         return;
     }
     isOn_ = isSelected;
-    auto eventHub = GetEventHub<SwitchEventHub>();
+    auto eventHub = GetOrCreateEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateChangeEvent(isSelected);
     auto host = GetHost();
@@ -395,7 +396,7 @@ float SwitchPattern::GetSwitchContentOffsetX() const
 
 void SwitchPattern::UpdateChangeEvent() const
 {
-    auto switchEventHub = GetEventHub<SwitchEventHub>();
+    auto switchEventHub = GetOrCreateEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(switchEventHub);
     switchEventHub->UpdateChangeEvent(isOn_.value());
 }
@@ -521,7 +522,9 @@ void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distanceMap);
 }
 
 void SwitchPattern::InitClickEvent()
@@ -576,7 +579,7 @@ void SwitchPattern::InitMouseEvent()
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto eventHub = GetHost()->GetEventHub<SwitchEventHub>();
+    auto eventHub = GetHost()->GetOrCreateEventHub<SwitchEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
 
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
@@ -788,11 +791,36 @@ bool SwitchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     return result;
 }
 
+void SwitchPattern::DumpInfo()
+{
+    auto paintProperty = GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->HasIsOn()) {
+        DumpLog::GetInstance().AddDesc("IsOn: " + std::string(paintProperty->GetIsOn().value() ? "true" : "false"));
+    }
+    if (paintProperty->HasSelectedColor()) {
+        DumpLog::GetInstance().AddDesc("SelectedColor: " + paintProperty->GetSelectedColor().value().ToString());
+    }
+    if (paintProperty->HasUnselectedColor()) {
+        DumpLog::GetInstance().AddDesc("UnselectedColor: " + paintProperty->GetUnselectedColor().value().ToString());
+    }
+    if (paintProperty->HasSwitchPointColor()) {
+        DumpLog::GetInstance().AddDesc("SwitchPointColor: " + paintProperty->GetSwitchPointColor().value().ToString());
+    }
+    if (paintProperty->HasPointRadius()) {
+        DumpLog::GetInstance().AddDesc("PointRadius: " + paintProperty->GetPointRadius().value().ToString());
+    }
+    if (paintProperty->HasTrackBorderRadius()) {
+        DumpLog::GetInstance().AddDesc(
+            "TrackBorderRadius: " + paintProperty->GetTrackBorderRadius().value().ToString());
+    }
+}
+
 void SwitchPattern::SetSwitchIsOn(bool ison)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -843,7 +871,7 @@ RefPtr<FrameNode> SwitchPattern::BuildContentModifierNode()
     CHECK_NULL_RETURN(host, nullptr);
     auto paintProperty = host->GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, nullptr);
-    auto eventHub = host->GetEventHub<SwitchEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<SwitchEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     bool isOn = false;

@@ -22,10 +22,15 @@
 #include <unordered_map>
 #include <utility>
 
+#include "base/geometry/dimension.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_adapt_font_sizer.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
@@ -45,7 +50,7 @@ class ACE_EXPORT TextLayoutAlgorithm : public MultipleParagraphLayoutAlgorithm, 
 public:
     TextLayoutAlgorithm();
     explicit TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> paragraphManager_,
-        bool isSpanStringMode, bool isMarquee = false);
+        bool isSpanStringMode, const TextStyle& textStyle, const bool isMarquee = false);
     ~TextLayoutAlgorithm() override = default;
 
     void OnReset() override;
@@ -63,7 +68,7 @@ public:
 
     size_t GetLineCount() const;
 
-    std::optional<TextStyle> GetTextStyle() const;
+    const TextStyle& GetTextStyle() const;
 
     RefPtr<Paragraph> GetParagraph() const override
     {

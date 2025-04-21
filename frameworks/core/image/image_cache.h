@@ -29,10 +29,15 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/lru/count_limit_lru.h"
+#include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace {
 
-struct CachedImage;
+struct CachedImage {
+    explicit CachedImage(const std::shared_ptr<RSImage>& image) : imagePtr(image) {}
+    std::shared_ptr<RSImage> imagePtr;
+    uint32_t uniqueId = 0;
+};
 class ImageObject;
 
 namespace NG {

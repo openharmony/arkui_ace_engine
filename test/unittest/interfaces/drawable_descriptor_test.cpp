@@ -828,4 +828,57 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0035, TestSize.Level1)
     auto foregroundRes2 = layeredDrawable.GetForeground();
     EXPECT_NE(foregroundRes2, nullptr);
 }
+
+/**
+ * @tc.name: DrawableDescTest0036
+ * @tc.desc: test LayeredDrawableDescriptor::GetMask()
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layeredDrawableDescriptor and call GetMask when layeredPixelMap is empty
+     * @tc.expected: return nullptr
+     */
+    std::unique_ptr<uint8_t[]> jsonBuf;
+    size_t len = 0;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
+    ASSERT_NE(resourceMgr, nullptr);
+    auto layeredDrawableDescriptor = Napi::LayeredDrawableDescriptor(std::move(jsonBuf), len, std::move(resourceMgr));
+    /**
+     * @tc.steps: step2. call SetDecodeSize
+     * @tc.expected: return rightly
+     */
+    int32_t width = 500;
+    int32_t height = 500;
+    layeredDrawableDescriptor.SetDecodeSize(width, height);
+    Napi::OptionalDecodeSize res = layeredDrawableDescriptor.GetDecodeSize();
+    std::optional<std::pair<int, int>> param = std::make_pair(width, height);
+    EXPECT_EQ(res, param);
+}
+
+/**
+ * @tc.name: DrawableDescTest0037
+ * @tc.desc: test LayeredDrawableDescriptor::GetMask()
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layeredDrawableDescriptor
+     */
+    size_t len = 1;
+    std::string path = "abc";
+    uint32_t iconType = 0;
+    Napi::DataInfo foregroundInfo = { std::make_unique<uint8_t[]>(1024), 1024 };
+    Napi::DataInfo backgroundInfo = { std::make_unique<uint8_t[]>(512), 512 };
+    const std::pair<int32_t, int32_t> decoderSize = { 10, 20 };
+    auto layeredDrawableDescriptor =
+        Napi::LayeredDrawableDescriptor(len, path, iconType, foregroundInfo, backgroundInfo, decoderSize);
+    /**
+     * @tc.steps: step2. EXPECT len
+     * @tc.expected: return rightly
+     */
+    EXPECT_EQ(len, layeredDrawableDescriptor.len_);
+}
 } // namespace OHOS::Ace

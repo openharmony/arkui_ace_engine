@@ -109,6 +109,8 @@ private:
         const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
     static void UpdateCancelButtonTextLayoutProperty(
         const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
+    static std::string GetDialogAgingButtonText(bool isNext);
+    static std::string GetDialogNormalButtonText(bool isConfirm);
     static thread_local bool switchFlag_;
     static thread_local Dimension selectedTextStyleFont_;
     static thread_local Dimension normalTextStyleFont_;

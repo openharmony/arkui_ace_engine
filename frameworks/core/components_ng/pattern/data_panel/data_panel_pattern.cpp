@@ -118,7 +118,7 @@ RefPtr<FrameNode> DataPanelPattern::BuildContentModifierNode()
         tmpArry.push_back(0.0f);
     }
 
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     double max = paintProperty->GetMax().value_or(DEFAULT_MAX_VALUE);

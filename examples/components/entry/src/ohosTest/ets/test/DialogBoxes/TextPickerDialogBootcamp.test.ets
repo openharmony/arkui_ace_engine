@@ -34,30 +34,30 @@ export default function TextPickerDialogBootcampTest() {
         });
 
         await driver.delayMs(5000);
-        
-        let ListItemGroup :Component[] = await driver.findComponents(ON.type('ListItemGroup'))
-        let width:Point = await ListItemGroup[0].getBoundsCenter()
-        let width2:Point = await ListItemGroup[5].getBoundsCenter()
+
+        let ListItemGroup: Component[] = await driver.findComponents(ON.type('ListItemGroup'))
+        let width: Point = await ListItemGroup[0].getBoundsCenter()
+        let width2: Point = await ListItemGroup[5].getBoundsCenter()
         await driver.swipe(width.x, width2.y, width.x, width.y, 500)
         await driver.delayMs(2000);
 
-      let atomDisplays:Component = await driver.findComponent(ON.text('弹窗'));
+        let atomDisplays: Component = await driver.findComponent(ON.text('弹窗'));
         await atomDisplays.click();
         await driver.delayMs(3000);
         await driver.swipe(width.x, width2.y, width.x, width.y, 500)
 
 
-        let ListItemGroup1 :Component[] = await driver.findComponents(ON.type('ListItem'))
-        let width3:Point = await ListItemGroup1[0].getBoundsCenter()
-        let width4:Point = await ListItemGroup1[2].getBoundsCenter()
+        let ListItemGroup1: Component[] = await driver.findComponents(ON.type('ListItem'))
+        let width3: Point = await ListItemGroup1[0].getBoundsCenter()
+        let width4: Point = await ListItemGroup1[2].getBoundsCenter()
         await driver.swipe(width3.x, width4.y, width3.x, width3.y, 500)
         await driver.delayMs(2000);
 
-        let scrollSearch:Component = await driver.findComponent(ON.text('文本选择器弹窗/TextpickerDialog'))
+        let scrollSearch: Component = await driver.findComponent(ON.text('文本选择器弹窗/TextpickerDialog'))
         await scrollSearch.click()
         await driver.delayMs(2000);
 
-        let Buttons:Component[] = await driver.findComponents(ON.type('Button'));
+        let Buttons: Component[] = await driver.findComponents(ON.type('Button'));
         await Buttons[1].click()
         await driver.delayMs(2000);
 
@@ -251,7 +251,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'textStyle.font.weight')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -263,7 +262,6 @@ export default function TextPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -415,7 +413,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'acceptButtonStyle.style')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -424,7 +421,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'acceptButtonStyle.style')
       await radioClick({
         radioClickObj: 1,
-
       })
       done();
     })
@@ -436,7 +432,6 @@ export default function TextPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -445,7 +440,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'cancelButtonStyle.style')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -454,7 +448,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'cancelButtonStyle.style')
       await radioClick({
         radioClickObj: 1,
-
       })
       done();
     })
@@ -466,7 +459,6 @@ export default function TextPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -475,7 +467,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'acceptButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 0,
-
       })
       done();
     })
@@ -484,7 +475,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'acceptButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 1,
-
       })
       done();
     })
@@ -493,7 +483,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'acceptButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 2,
-
       })
       done();
     })
@@ -502,7 +491,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'acceptButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 3,
-
       })
       done();
     })
@@ -511,7 +499,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'acceptButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 4,
-
       })
       done();
     })
@@ -523,7 +510,6 @@ export default function TextPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -532,7 +518,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'cancelButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 0,
-
       })
       done();
     })
@@ -541,7 +526,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'cancelButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 1,
-
       })
       done();
     })
@@ -550,7 +534,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'cancelButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 2,
-
       })
       done();
     })
@@ -559,7 +542,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'cancelButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 3,
-
       })
       done();
     })
@@ -568,7 +550,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'cancelButtonStyle.fontColor')
       await buttonClick({
         buttonClickObj: 4,
-
       })
       done();
     })
@@ -580,7 +561,6 @@ export default function TextPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -721,7 +701,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'acceptButtonStyle.backgroundColor')
       await buttonClick({
         buttonClickObj: 0,
-
       })
       done();
     })
@@ -730,7 +709,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'acceptButtonStyle.backgroundColor')
       await buttonClick({
         buttonClickObj: 1,
-
       })
       done();
     })
@@ -739,7 +717,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'acceptButtonStyle.backgroundColor')
       await buttonClick({
         buttonClickObj: 2,
-
       })
       done();
     })
@@ -748,7 +725,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'acceptButtonStyle.backgroundColor')
       await buttonClick({
         buttonClickObj: 3,
-
       })
       done();
     })
@@ -757,7 +733,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'acceptButtonStyle.backgroundColor')
       await buttonClick({
         buttonClickObj: 4,
-
       })
       done();
     })
@@ -769,7 +744,6 @@ export default function TextPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -778,7 +752,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'cancelButtonStyle.backgroundColor')
       await buttonClick({
         buttonClickObj: 0,
-
       })
       done();
     })
@@ -787,7 +760,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'cancelButtonStyle.backgroundColor')
       await buttonClick({
         buttonClickObj: 1,
-
       })
       done();
     })
@@ -796,7 +768,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'cancelButtonStyle.backgroundColor')
       await buttonClick({
         buttonClickObj: 2,
-
       })
       done();
     })
@@ -805,7 +776,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'cancelButtonStyle.backgroundColor')
       await buttonClick({
         buttonClickObj: 3,
-
       })
       done();
     })
@@ -814,7 +784,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'cancelButtonStyle.backgroundColor')
       await buttonClick({
         buttonClickObj: 4,
-
       })
       done();
     })
@@ -826,7 +795,6 @@ export default function TextPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -884,7 +852,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'alignment')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -893,7 +860,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'alignment')
       await radioClick({
         radioClickObj: 1,
-
       })
       done();
     })
@@ -902,7 +868,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'alignment')
       await radioClick({
         radioClickObj: 2,
-
       })
       done();
     })
@@ -1016,7 +981,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'backgroundColor')
       await buttonClick({
         buttonClickObj: 0,
-
       })
       done();
     })
@@ -1025,7 +989,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'backgroundColor')
       await buttonClick({
         buttonClickObj: 1,
-
       })
       done();
     })
@@ -1034,7 +997,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'backgroundColor')
       await buttonClick({
         buttonClickObj: 2,
-
       })
       done();
     })
@@ -1043,7 +1005,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'backgroundColor')
       await buttonClick({
         buttonClickObj: 3,
-
       })
       done();
     })
@@ -1052,7 +1013,6 @@ export default function TextPickerDialogBootcampTest() {
       await Search('参数列表', 'backgroundColor')
       await buttonClick({
         buttonClickObj: 4,
-
       })
       done();
     })
@@ -1075,7 +1035,6 @@ export default function TextPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickObj: 'backgroundBlurStyle'
         }
-
       })
       done();
     })
@@ -1099,7 +1058,6 @@ export default function TextPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickObj: 'shadow'
         }
-
       })
       done();
     })
@@ -1112,7 +1070,6 @@ export default function TextPickerDialogBootcampTest() {
           toggleClickObj: 'shadow',
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })
@@ -1124,7 +1081,6 @@ export default function TextPickerDialogBootcampTest() {
         toggleClick: {
           toggleClickObj: 'hapticFeedback',
         }
-
       })
       done();
     })
@@ -1137,7 +1093,6 @@ export default function TextPickerDialogBootcampTest() {
           toggleClickObj: 'hapticFeedback',
           toggleClickType: ToggleClick.Close
         }
-
       })
       done();
     })

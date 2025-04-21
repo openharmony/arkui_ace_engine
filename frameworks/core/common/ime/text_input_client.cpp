@@ -93,9 +93,9 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     { KeyComb(KeyCode::KEY_DPAD_RIGHT, KEY_CTRL | KEY_SHIFT),
         [](tic* c) -> void { c->HandleSelect(CaretMoveIntent::RightWord); } },
     { KeyComb(KeyCode::KEY_DPAD_UP, KEY_CTRL | KEY_SHIFT),
-        [](tic* c) -> void { c->CursorMove(CaretMoveIntent::ParagraghBegin); } },
+        [](tic* c) -> void { c->HandleSelectExtend(CaretMoveIntent::ParagraghBegin); } },
     { KeyComb(KeyCode::KEY_DPAD_DOWN, KEY_CTRL | KEY_SHIFT),
-        [](tic* c) -> void { c->CursorMove(CaretMoveIntent::ParagraghEnd); } },
+        [](tic* c) -> void { c->HandleSelectExtend(CaretMoveIntent::ParagraghEnd); } },
     { KeyComb(KeyCode::KEY_MOVE_HOME, KEY_CTRL | KEY_SHIFT),
         [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Home); } },
     { KeyComb(KeyCode::KEY_MOVE_END, KEY_CTRL | KEY_SHIFT),
@@ -151,6 +151,7 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     // when numLock off, KEY_NUMPAD_DOT perform as KEY_FORWARD_DEL
     { KeyComb(KeyCode::KEY_NUMPAD_DOT), [](tic* c) -> void { c->HandleOnDelete(false); } },
     { KeyComb(KeyCode::KEY_NUMPAD_DOT, KEY_CTRL), [](tic* c) -> void { c->HandleOnDeleteComb(false); } },
+    { KeyComb(KeyCode::KEY_DEL, KEY_ALT), &tic::HandleOnExtendUndoAction },
 };
 
 void TextInputClient::NotifyKeyboardHeight(uint32_t height)

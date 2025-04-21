@@ -19,13 +19,21 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/render/adapter/animated_image.h"
+#include "frameworks/core/components_ng/render/adapter/pixelmap_image.h"
+#ifdef ACE_ENABLE_VK
+#include "render_service_base/include/platform/common/rs_system_properties.h"
+#include "2d_graphics/include/recording/draw_cmd_list.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -63,7 +71,7 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     dragStatus_ = MakeRefPtr<PropertyBool>(false);
     AttachProperty(dragStatus_);
     if (textStyle.has_value()) {
-        SetDefaultAnimatablePropertyValue(textStyle.value());
+        SetDefaultAnimatablePropertyValue(textStyle.value(), host);
     }
 
     textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
@@ -75,7 +83,7 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     racePercentFloat_ = MakeRefPtr<AnimatablePropertyFloat>(0.0f);
     AttachProperty(racePercentFloat_);
 
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip_ = MakeRefPtr<PropertyBool>(true);
     } else {
         clip_ = MakeRefPtr<PropertyBool>(false);
@@ -94,14 +102,17 @@ void TextContentModifier::ChangeDragStatus()
     dragStatus_->Set(!dragStatus_->Get());
 }
 
-void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& textStyle)
+void TextContentModifier::SetDefaultAnimatablePropertyValue(
+    const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode)
 {
     SetDefaultFontSize(textStyle);
     SetDefaultAdaptMinFontSize(textStyle);
     SetDefaultAdaptMaxFontSize(textStyle);
     SetDefaultFontWeight(textStyle);
     SetDefaultTextColor(textStyle);
-    SetDefaultSymbolColor(textStyle);
+    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        SetDefaultSymbolColor(textStyle);
+    }
     SetDefaultTextShadow(textStyle);
     SetDefaultTextDecoration(textStyle);
     SetDefaultBaselineOffset(textStyle);
@@ -402,7 +413,13 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
     ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f][contentRect:%s]", host->GetId(), paintOffset_.GetX(),
         paintOffset_.GetY(), contentRect.ToString().c_str());
 
-    AnimationMeasureUpdate(host);
+#ifdef ACE_ENABLE_VK
+    SetHybridRenderTypeIfNeeded(drawingContext, pManager, host);
+#endif
+    PropertyChangeFlag flag = 0;
+    if (NeedMeasureUpdate(flag)) {
+        host->MarkDirtyNode(flag);
+    }
     if (!ifPaintObscuration_) {
         auto& canvas = drawingContext.canvas;
         CHECK_NULL_VOID(contentSize_);
@@ -418,7 +435,15 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
             canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         }
         if (!marqueeSet_) {
-            DrawText(canvas, pManager);
+            auto paintOffsetY = paintOffset_.GetY();
+            auto paragraphs = pManager->GetParagraphs();
+            for (auto&& info : paragraphs) {
+                auto paragraph = info.paragraph;
+                CHECK_NULL_VOID(paragraph);
+                ChangeParagraphColor(paragraph);
+                paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
+                paintOffsetY += paragraph->GetHeight();
+            }
         } else {
             // Racing
             DrawTextRacing(drawingContext, fadeoutInfo, pManager);
@@ -429,6 +454,27 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
     }
     PaintCustomSpan(drawingContext);
 }
+
+#ifdef ACE_ENABLE_VK
+void TextContentModifier::SetHybridRenderTypeIfNeeded(DrawingContext& drawingContext,
+    const RefPtr<ParagraphManager>& pManager, RefPtr<FrameNode>& host)
+{
+    RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&drawingContext.canvas);
+    if (recordingCanvas != nullptr && recordingCanvas->GetDrawCmdList() != nullptr) {
+        if (host->IsAtomicNode()) {
+            if (Rosen::RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::HMSYMBOL)) {
+                recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::HMSYMBOL);
+            }
+        } else {
+            if (Rosen::RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::TEXTBLOB) != 0 &&
+                static_cast<uint32_t>(pManager->GetLineCount()) >=
+                Rosen::RSSystemProperties::GetHybridRenderTextBlobLenCount()) {
+                    recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::TEXT);
+            }
+        }
+    }
+}
+#endif
 
 void TextContentModifier::DrawText(RSCanvas& canvas, RefPtr<ParagraphManager> pManager)
 {
@@ -560,11 +606,11 @@ void TextContentModifier::ModifyFontWeightInTextStyle(TextStyle& textStyle)
     }
 }
 
-void TextContentModifier::ModifyTextColorInTextStyle(TextStyle& textStyle)
+void TextContentModifier::ModifyTextColorInTextStyle(Color& textColor)
 {
     if (textColor_.has_value() && animatableTextColor_) {
         lastTextColor_.SetValue(animatableTextColor_->Get().GetValue());
-        textStyle.SetTextColor(Color(animatableTextColor_->Get().GetValue()));
+        textColor = Color(animatableTextColor_->Get().GetValue());
     }
 }
 
@@ -637,13 +683,13 @@ void TextContentModifier::ModifyLineHeightInTextStyle(TextStyle& textStyle)
     }
 }
 
-void TextContentModifier::ModifyTextStyle(TextStyle& textStyle)
+void TextContentModifier::ModifyTextStyle(TextStyle& textStyle, Color& textColor)
 {
     ModifyFontSizeInTextStyle(textStyle);
     ModifyAdaptMinFontSizeInTextStyle(textStyle);
     ModifyAdaptMaxFontSizeInTextStyle(textStyle);
     ModifyFontWeightInTextStyle(textStyle);
-    ModifyTextColorInTextStyle(textStyle);
+    ModifyTextColorInTextStyle(textColor);
     ModifySymbolColorInTextStyle(textStyle);
     ModifyTextShadowsInTextStyle(textStyle);
     ModifyDecorationInTextStyle(textStyle);
@@ -705,6 +751,9 @@ void TextContentModifier::UpdateTextColorMeasureFlag(PropertyChangeFlag& flag)
 
 void TextContentModifier::UpdateSymbolColorMeasureFlag(PropertyChangeFlag& flag)
 {
+    if (!symbolColors_.has_value()) {
+        return;
+    }
     auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
@@ -770,14 +819,6 @@ void TextContentModifier::UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag)
         CheckNeedMeasure(lineHeight_.value().Value(), lastLineHeight_, lineHeightFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastLineHeight_ = lineHeightFloat_->Get();
-    }
-}
-
-void TextContentModifier::AnimationMeasureUpdate(const RefPtr<FrameNode>& host)
-{
-    PropertyChangeFlag flag = 0;
-    if (NeedMeasureUpdate(flag)) {
-        host->MarkDirtyNode(flag);
     }
 }
 

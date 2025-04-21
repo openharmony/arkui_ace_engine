@@ -47,6 +47,7 @@ constexpr uint32_t HALF = 2;
 const Dimension FOCUS_WIDTH = 2.0_vp;
 constexpr float DISABLE_ALPHA = 0.6f;
 constexpr float MAX_PERCENT = 100.0f;
+const int32_t UNOPTION_COUNT = 2;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -89,11 +90,12 @@ bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     return true;
 }
 
-void TextPickerPattern::UpdateConfirmButtonMargin(
-    const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme)
+void TextPickerPattern::UpdateButtonMargin(
+    const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmOrNextNode)
 {
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    isRtl = isConfirmOrNextNode ? isRtl : !isRtl;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
@@ -104,7 +106,6 @@ void TextPickerPattern::UpdateConfirmButtonMargin(
             margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
             margin.left = CalcLength(0.0_vp);
         }
-
     } else {
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
@@ -116,36 +117,31 @@ void TextPickerPattern::UpdateConfirmButtonMargin(
             margin.left = CalcLength(0.0_vp);
         }
     }
-    buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
+    buttonNode->GetLayoutProperty()->UpdateMargin(margin);
 }
 
-void TextPickerPattern::UpdateCancelButtonMargin(
-    const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme)
+void TextPickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext)
 {
-    MarginProperty margin;
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        margin.top = CalcLength(dialogTheme->GetDividerHeight());
-        margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-        if (isRtl) {
-            margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
-            margin.left = CalcLength(0.0_vp);
-        } else {
-            margin.right = CalcLength(0.0_vp);
-            margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
-        }
-    } else {
-        margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
-        margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
-        if (isRtl) {
-            margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
-            margin.left = CalcLength(0.0_vp);
-        } else {
-            margin.right = CalcLength(0.0_vp);
-            margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
-        }
-    }
-    buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
+    CHECK_NULL_VOID(buttonNode);
+    auto updateNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    CHECK_NULL_VOID(updateNode);
+    auto updateNodeLayout = updateNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(updateNodeLayout);
+
+    auto pipeline = updateNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    std::string lettersStr = isNext ? pickerTheme->GetNextText() : pickerTheme->GetPrevText();
+    updateNodeLayout->UpdateContent(lettersStr);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateLabel(lettersStr);
+
+    UpdateButtonMargin(buttonNode, dialogTheme, isNext);
+    updateNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void TextPickerPattern::OnLanguageConfigurationUpdate()
@@ -156,15 +152,15 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(confirmNode);
     auto confirmNodeLayout = confirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(confirmNodeLayout);
-    confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
-    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonConfirmLayoutProperty);
-    buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
     auto pipeline = confirmNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
+    confirmNodeLayout->UpdateContent(dialogTheme->GetConfirmText());
+    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonConfirmLayoutProperty);
+    buttonConfirmLayoutProperty->UpdateLabel(dialogTheme->GetConfirmText());
+    UpdateButtonMargin(buttonConfirmNode, dialogTheme, true);
     confirmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto buttonCancelNode = weakButtonCancel_.Upgrade();
@@ -173,12 +169,17 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(cancelNode);
     auto cancelNodeLayout = cancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(cancelNodeLayout);
-    cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
-    UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
+    cancelNodeLayout->UpdateContent(dialogTheme->GetCancelText());
+    UpdateButtonMargin(buttonCancelNode, dialogTheme, false);
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonCancelLayoutProperty);
-    buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    buttonCancelLayoutProperty->UpdateLabel(dialogTheme->GetCancelText());
     cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    auto buttonForwardNode = weakButtonForward_.Upgrade();
+    UpdateDialogAgingButton(buttonForwardNode, true);
+    auto buttonBackwardNode = weakButtonBackward_.Upgrade();
+    UpdateDialogAgingButton(buttonBackwardNode, false);
 }
 
 void TextPickerPattern::OnFontConfigurationUpdate()
@@ -266,7 +267,7 @@ void TextPickerPattern::InitFocusEvent()
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -443,7 +444,9 @@ void TextPickerPattern::CalcLeftTotalColumnWidth(
 
 void TextPickerPattern::ColumnPatternInitHapticController()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     if (!isHapticChanged_) {
@@ -721,7 +724,7 @@ void TextPickerPattern::FireChangeEvent(bool refresh)
             value.emplace_back(currentValue);
         }
     }
-    auto textPickerEventHub = GetEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(textPickerEventHub);
     textPickerEventHub->FireChangeEvent(value, index);
     textPickerEventHub->FireDialogChangeEvent(GetSelectedObject(true, 1));
@@ -763,7 +766,7 @@ void TextPickerPattern::FireScrollStopEvent(bool refresh)
             value.emplace_back(currentValue);
         }
     }
-    auto textPickerEventHub = GetEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(textPickerEventHub);
     textPickerEventHub->FireScrollStopEvent(value, index);
     textPickerEventHub->FireDialogScrollStopEvent(GetSelectedObject(true, 1));
@@ -802,7 +805,7 @@ void TextPickerPattern::FireEnterSelectedAreaEvent(bool refresh)
             value.emplace_back(enterValue);
         }
     }
-    auto textPickerEventHub = GetEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(textPickerEventHub);
     textPickerEventHub->FireEnterSelectedAreaEvent(value, index);
     textPickerEventHub->FireDialogEnterSelectedAreaEvent(GetSelectedObject(true, 1, true));
@@ -812,7 +815,7 @@ void TextPickerPattern::InitDisabled()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     enabled_ = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -821,11 +824,11 @@ void TextPickerPattern::InitDisabled()
     if (!enabled_) {
         opacity *= DISABLE_ALPHA;
         renderContext->UpdateOpacity(opacity);
-    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    } else if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         renderContext->UpdateOpacity(opacity);
     }
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         for (const auto& child : host->GetChildren()) {
             auto stackNode = DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(stackNode);
@@ -1160,25 +1163,10 @@ bool TextPickerPattern::OnKeyEvent(const KeyEvent& event)
         return false;
     }
 
-    if (event.code == KeyCode::KEY_SPACE || event.code == KeyCode::KEY_ENTER) {
-        if (!operationOn_ && event.code == KeyCode::KEY_ENTER) {
-            HandleDirectionKey(event.code);
-        }
-        operationOn_ = (event.code == KeyCode::KEY_SPACE) || (event.code == KeyCode::KEY_ENTER);
-        return true;
-    }
-
-    if (event.code == KeyCode::KEY_TAB) {
-        operationOn_ = false;
-        return false;
-    }
-
     if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN ||
-        event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_RIGHT) {
-        if (operationOn_) {
-            HandleDirectionKey(event.code);
-        }
-        return true;
+        event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_RIGHT ||
+        event.code == KeyCode::KEY_MOVE_HOME || event.code == KeyCode::KEY_MOVE_END) {
+        return HandleDirectionKey(event.code);
     }
     return false;
 }
@@ -1355,44 +1343,46 @@ void TextPickerPattern::CheckFocusID(int32_t childSize)
     }
 }
 
-bool TextPickerPattern::ParseDirectionKey(
-    RefPtr<TextPickerColumnPattern>& textPickerColumnPattern, KeyCode& code, int32_t childSize)
+bool TextPickerPattern::ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textPickerColumnPattern,
+    KeyCode& code, uint32_t totalOptionCount, int32_t childSize)
 {
     bool result = true;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     switch (code) {
         case KeyCode::KEY_DPAD_UP:
-            if (textPickerColumnPattern->InnerHandleScroll(0, false)) {
-                textPickerColumnPattern->HandleScrollStopEventCallback(true);
-            }
-            break;
-        case KeyCode::KEY_DPAD_DOWN:
-            if (textPickerColumnPattern->InnerHandleScroll(1, false)) {
+            if (textPickerColumnPattern->InnerHandleScroll(false, false)) {
                 textPickerColumnPattern->HandleScrollStopEventCallback(true);
             }
             break;
 
-        case KeyCode::KEY_ENTER:
-            focusKeyID_ = 0;
-            PaintFocusState();
+        case KeyCode::KEY_DPAD_DOWN:
+            if (textPickerColumnPattern->InnerHandleScroll(true, false)) {
+                textPickerColumnPattern->HandleScrollStopEventCallback(true);
+            }
+            break;
+
+        case KeyCode::KEY_MOVE_HOME:
+            textPickerColumnPattern->SetCurrentIndex(1);
+            if (textPickerColumnPattern->InnerHandleScroll(false, false)) {
+                textPickerColumnPattern->HandleScrollStopEventCallback(true);
+            }
+            break;
+
+        case KeyCode::KEY_MOVE_END:
+            textPickerColumnPattern->SetCurrentIndex(totalOptionCount - UNOPTION_COUNT);
+            if (textPickerColumnPattern->InnerHandleScroll(true, false)) {
+                textPickerColumnPattern->HandleScrollStopEventCallback(true);
+            }
             break;
 
         case KeyCode::KEY_DPAD_LEFT:
-            if (isRtl) {
-                focusKeyID_ += 1;
-            } else {
-                focusKeyID_ -= 1;
-            }
+            focusKeyID_ = isRtl ? (focusKeyID_ + 1) : (focusKeyID_ - 1);
             CheckFocusID(childSize);
             PaintFocusState();
             break;
 
         case KeyCode::KEY_DPAD_RIGHT:
-            if (isRtl) {
-                focusKeyID_ -= 1;
-            } else {
-                focusKeyID_ += 1;
-            }
+            focusKeyID_ = isRtl ? (focusKeyID_ - 1) : (focusKeyID_ + 1);
             CheckFocusID(childSize);
             PaintFocusState();
             break;
@@ -1417,7 +1407,7 @@ bool TextPickerPattern::HandleDirectionKey(KeyCode code)
     if (totalOptionCount == 0) {
         return false;
     }
-    return ParseDirectionKey(textPickerColumnPattern, code, static_cast<int32_t>(childSize));
+    return ParseDirectionKey(textPickerColumnPattern, code, totalOptionCount, static_cast<int32_t>(childSize));
 }
 
 std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::string>& values,

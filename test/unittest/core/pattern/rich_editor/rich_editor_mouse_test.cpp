@@ -223,10 +223,11 @@ HWTEST_F(RichEditorMouseTest, OnHover001, TestSize.Level1)
     auto id = host->GetId();
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
-    richEditorPattern->OnHover(true);
+    HoverInfo hoverInfo;
+    richEditorPattern->OnHover(true, hoverInfo);
     auto mouseStyleManager = pipeline->eventManager_->GetMouseStyleManager();
     EXPECT_EQ(mouseStyleManager->mouseStyleNodeId_.value(), id);
-    richEditorPattern->OnHover(false);
+    richEditorPattern->OnHover(false, hoverInfo);
     EXPECT_FALSE(mouseStyleManager->mouseStyleNodeId_.has_value());
 }
 
@@ -302,7 +303,8 @@ HWTEST_F(RichEditorMouseTest, RichEditorPatternTestInitMouseEvent001, TestSize.L
     ASSERT_NE(hoverEventActuator, nullptr);
     auto hoverInputEvents = hoverEventActuator->inputEvents_;
     for (auto input : hoverInputEvents) {
-        input->GetOnHoverEventFunc()(true);
+        CHECK_NULL_CONTINUE(input);
+        (*input)(true);
     }
 
     ASSERT_EQ(richEditorPattern->mouseEventInitialized_, true);

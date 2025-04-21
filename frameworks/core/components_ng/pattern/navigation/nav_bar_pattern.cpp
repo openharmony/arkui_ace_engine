@@ -35,7 +35,7 @@ constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
 void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
     const RefPtr<FrameNode>& barMenuNode, const RefPtr<NavBarNode>& navBarNode)
 {
-    auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
+    auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto context = PipelineContext::GetCurrentContext();
@@ -126,7 +126,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
 
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_RETURN(navigationGroupNode, nullptr);
-    auto hub = navigationGroupNode->GetEventHub<EventHub>();
+    auto hub = navigationGroupNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(hub, nullptr);
     auto isButtonEnabled = hub->IsEnabled();
 
@@ -378,7 +378,7 @@ void NavBarPattern::OnAttachToFrameNode()
 void NavBarPattern::OnCoordScrollStart()
 {
     if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
-        auto eventHub = GetEventHub<NavBarEventHub>();
+        auto eventHub = GetOrCreateEventHub<NavBarEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnCoordScrollStartAction();
         return;
@@ -395,7 +395,7 @@ void NavBarPattern::OnCoordScrollStart()
 float NavBarPattern::OnCoordScrollUpdate(float offset, float currentOffset)
 {
     if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
-        auto eventHub = GetEventHub<NavBarEventHub>();
+        auto eventHub = GetOrCreateEventHub<NavBarEventHub>();
         CHECK_NULL_RETURN(eventHub, 0.0f);
         eventHub->FireOnCoordScrollUpdateAction(currentOffset);
         return 0.0f;
@@ -414,7 +414,7 @@ void NavBarPattern::OnCoordScrollEnd()
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "OnCoordScroll end");
     if (titleMode_ != NavigationTitleMode::FREE) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "titleMode_ is not free");
-        auto eventHub = GetEventHub<NavBarEventHub>();
+        auto eventHub = GetOrCreateEventHub<NavBarEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnCoordScrollEndAction();
         return;
@@ -499,7 +499,7 @@ bool NavBarPattern::CanCoordScrollUp(float offset) const
     CHECK_NULL_RETURN(titlePattern, false);
     bool canScrollUp = false;
     if (titleMode_ != NavigationTitleMode::FREE) {
-        auto eventHub = GetEventHub<NavBarEventHub>();
+        auto eventHub = GetOrCreateEventHub<NavBarEventHub>();
         if (eventHub && eventHub->HasOnCoordScrollStartAction()) {
             canScrollUp = true;
         }

@@ -186,6 +186,9 @@ template("ace_osal_ohos_source_set") {
       "pixel_map_ohos.cpp",
       "system_bar_style_ohos.cpp",
     ]
+    if (is_ohos_standard_system) {
+      cflags = [ "-DIMAGE_COLORSPACE_FLAG" ]
+    }
     external_deps += [
       "ability_runtime:abilitykit_native",
       "ability_runtime:app_manager",

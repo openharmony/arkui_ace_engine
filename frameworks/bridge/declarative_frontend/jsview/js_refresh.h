@@ -30,6 +30,7 @@ public:
     static void OnRefreshing(const JSCallbackInfo& args);
     static void OnOffsetChange(const JSCallbackInfo& args);
     static void SetPullDownRatio(const JSCallbackInfo& info);
+    static void SetMaxPullDownDistance(const JSCallbackInfo& info);
     static void ParsFrictionData(const JsiRef<JsiValue>& value);
 
 private:

@@ -213,6 +213,10 @@ void CalendarDialogPattern::UpdateOptionsButton()
     CHECK_NULL_VOID(host);
     auto options = host->GetChildAtIndex(OPTIONS_NODE_INDEX);
     CHECK_NULL_VOID(options);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
 
     size_t buttonIndex = OPTION_CANCEL_BUTTON_INDEX;
     for (const auto& child : options->GetChildren()) {
@@ -223,9 +227,9 @@ void CalendarDialogPattern::UpdateOptionsButton()
             auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
             CHECK_NULL_VOID(buttonLayoutProperty);
             if (buttonIndex == OPTION_ACCEPT_BUTTON_INDEX) {
-                buttonLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
+                buttonLayoutProperty->UpdateLabel(dialogTheme->GetConfirmText());
             } else {
-                buttonLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+                buttonLayoutProperty->UpdateLabel(dialogTheme->GetCancelText());
             }
             button->MarkDirtyNode();
             buttonIndex++;
@@ -463,7 +467,7 @@ void CalendarDialogPattern::InitEntryChangeEvent()
 {
     auto entryNode = entryNode_.Upgrade();
     CHECK_NULL_VOID(entryNode);
-    auto eventHub = entryNode->GetEventHub<CalendarPickerEventHub>();
+    auto eventHub = entryNode->GetOrCreateEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto callback = [weak = WeakClaim(this)](const std::string& info) {
         auto pattern = weak.Upgrade();
@@ -1145,7 +1149,7 @@ void CalendarDialogPattern::FireChangeByKeyEvent(PickerDate& selectedDay)
     CHECK_NULL_VOID(swiperPattern);
     auto monthNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperPattern->GetCurrentIndex()));
     CHECK_NULL_VOID(monthNode);
-    auto eventHub = monthNode->GetEventHub<CalendarEventHub>();
+    auto eventHub = monthNode->GetOrCreateEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateSelectedChangeEvent(selectedDay.ToString(true));
 }

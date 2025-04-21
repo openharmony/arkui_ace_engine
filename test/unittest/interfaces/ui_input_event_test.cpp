@@ -313,7 +313,7 @@ HWTEST_F(UIInputEventTest, CapiInputTest002, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_PointerEvent_GetPressure(inputEvent, 0), ARKUI_PRESSURE);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetToolType(inputEvent), NodeModel::ConvertToCInputEventToolType(ARKUI_TOOLTYPE));
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), 401);
     EXPECT_EQ(OH_ArkUI_PointerEvent_GetPointerCount(inputEvent), ARKUI_POINTERCOUNTER);
 }
 
@@ -376,7 +376,7 @@ HWTEST_F(UIInputEventTest, CapiInputTest003, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_PointerEvent_GetTiltY(inputEvent, 0), ARKUI_TILTY);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetToolType(inputEvent), NodeModel::ConvertToCInputEventToolType(ARKUI_TOOLTYPE));
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), 401);
     EXPECT_TRUE(OH_ArkUI_HoverEvent_IsHovered(inputEvent));
     const auto* hoverEvent = reinterpret_cast<ArkUIHoverEvent*>(inputEvent->inputEvent);
     EXPECT_FALSE(hoverEvent->stopPropagation);
@@ -425,7 +425,7 @@ HWTEST_F(UIInputEventTest, CapiInputTest004, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetWidth(inputEvent), ARKUI_X);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetHeight(inputEvent), ARKUI_Y);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), 401);
 }
 
 /**
@@ -478,7 +478,7 @@ HWTEST_F(UIInputEventTest, CapiInputTest005, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetWidth(inputEvent), ARKUI_X);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetHeight(inputEvent), ARKUI_Y);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), 401);
     EXPECT_EQ(OH_ArkUI_PointerEvent_GetPressure(inputEvent, 0), ARKUI_PRESSURE);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetSourceType(inputEvent), ARKUI_SOURCETYPE);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetToolType(inputEvent), NodeModel::ConvertToCInputEventToolType(ARKUI_TOOLTYPE));
@@ -530,7 +530,7 @@ HWTEST_F(UIInputEventTest, CapiInputTest006, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetWidth(inputEvent), ARKUI_X);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetEventTargetHeight(inputEvent), ARKUI_Y);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), 401);
 }
 
 /**
@@ -562,7 +562,7 @@ HWTEST_F(UIInputEventTest, CapiInputTest007, TestSize.Level1)
      * @tc.expected: Return expected results.
      */
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent), ARKUI_DEVICE_ID);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), ARKUI_MODIFIERKEYSTATE);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetModifierKeyStates(inputEvent, 0), 401);
 }
 
 /**
@@ -798,6 +798,97 @@ HWTEST_F(UIInputEventTest, MouseEventGetRawDeltaY002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaY003
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaY003, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_TOUCH_EVENT_ID;
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaY004
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaY004, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = TOUCH_EVENT_ID;
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaY005
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaY005, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_MOUSE_EVENT_ID;
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaY006
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaY006, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_AXIS_EVENT_ID;
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaY007
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaY007, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_FOCUS_AXIS_EVENT_ID;
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaY008
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaY008, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_HOVER_EVENT_ID;
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaY009
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaY009, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_CLICK_EVENT_ID;
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
  * @tc.name: OH_ArkUI_MouseEvent_GetPressedButtons001
  * @tc.desc: test OH_ArkUI_MouseEvent_GetPressedButtons
  * @tc.type: FUNC
@@ -1005,6 +1096,84 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaX004, TestSize.Level1)
 {
     auto event = std::make_unique<ArkUI_UIInputEvent>();
     event->eventTypeId = AXIS_EVENT_ID;
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaX005
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaX005, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_TOUCH_EVENT_ID;
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaX006
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaX006, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = TOUCH_EVENT_ID;
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaX007
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaX007, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = AXIS_EVENT_ID;
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaX008
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaX008, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_CLICK_EVENT_ID;
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaX009
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaX009, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_HOVER_EVENT_ID;
+    auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaX0010
+ * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_MouseEvent_GetRawDeltaX0010, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_FOCUS_AXIS_EVENT_ID;
     auto result = OH_ArkUI_MouseEvent_GetRawDeltaX(event.get());
     EXPECT_EQ(result, 0.0);
 }
@@ -3233,5 +3402,570 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_PostClonedEvent001, TestSize.Le
     inputEvent->isCloned = true;
     auto res = OH_ArkUI_PointerEvent_PostClonedEvent(nodeHandle, inputEvent);
     EXPECT_EQ(res, 180004);
+}
+
+/**
+ * @tc.name: OH_ArkUI_AxisEvent_SetPropagation001
+ * @tc.desc: Test OH_ArkUI_AxisEvent_SetPropagation functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_AxisEvent_SetPropagation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.kind = TOUCH_EVENT;
+    event.touchEvent.actionTouchPoint.nodeX = ARKUI_X;
+    event.touchEvent.actionTouchPoint.nodeY = ARKUI_Y;
+    // deviceid
+    event.touchEvent.deviceId = ARKUI_DEVICE_ID;
+    // modifierkeystates
+    event.touchEvent.modifierKeyState = ARKUI_MODIFIERKEYSTATE;
+    uiInputEvent.inputEvent = &event.touchEvent;
+    uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    event.touchEvent.action = ARKUI_FINGERID;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    auto* touchEvenInput = reinterpret_cast<ArkUITouchEvent*>(inputEvent->inputEvent);
+    event.touchEvent.target.id = touchEvenInput->target.id;
+    event.touchEvent.target.type = touchEvenInput->target.type;
+    event.touchEvent.target.area = touchEvenInput->target.area;
+    event.touchEvent.target.origin = touchEvenInput->target.origin;
+    event.touchEvent.action = touchEvenInput->action;
+    event.touchEvent.changedPointerId = touchEvenInput->changedPointerId;
+    event.touchEvent.actionTouchPoint = touchEvenInput->actionTouchPoint;
+    event.touchEvent.timeStamp = touchEvenInput->timeStamp;
+    event.touchEvent.sourceType = touchEvenInput->sourceType;
+    event.touchEvent.targetDisplayId = touchEvenInput->targetDisplayId;
+    event.touchEvent.deviceId = touchEvenInput->deviceId;
+
+    ArkUI_UIInputEvent setEvent;
+    ArkUIAxisEvent cAxisEvent;
+    cAxisEvent.propagation = true;
+    setEvent.inputEvent = &cAxisEvent;
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    auto res = OH_ArkUI_AxisEvent_SetPropagation(nullptr, true);
+    EXPECT_EQ(res, 401);
+    res = OH_ArkUI_AxisEvent_SetPropagation(&setEvent, true);
+    EXPECT_EQ(res, 0);
+    cAxisEvent.propagation = false;
+    setEvent.inputEvent = &cAxisEvent;
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_AxisEvent_SetPropagation(&setEvent, false);
+    EXPECT_EQ(res, 0);
+    cAxisEvent.propagation = true;
+    setEvent.inputEvent = &cAxisEvent;
+    setEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    res = OH_ArkUI_AxisEvent_SetPropagation(&setEvent, true);
+    EXPECT_EQ(res, 401);
+    cAxisEvent.propagation = false;
+    setEvent.inputEvent = &cAxisEvent;
+    setEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    res = OH_ArkUI_AxisEvent_SetPropagation(&setEvent, false);
+    EXPECT_EQ(res, 401);
+}
+
+/**
+ * @tc.name: OH_ArkUI_HoverEvent_IsHovered001
+ * @tc.desc: Test OH_ArkUI_HoverEvent_IsHovered functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_HoverEvent_IsHovered001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.kind = TOUCH_EVENT;
+    event.touchEvent.actionTouchPoint.nodeX = ARKUI_X;
+    event.touchEvent.actionTouchPoint.nodeY = ARKUI_Y;
+    // deviceid
+    event.touchEvent.deviceId = ARKUI_DEVICE_ID;
+    // modifierkeystates
+    event.touchEvent.modifierKeyState = ARKUI_MODIFIERKEYSTATE;
+    uiInputEvent.inputEvent = &event.touchEvent;
+    uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    event.touchEvent.action = ARKUI_FINGERID;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    auto* touchEvenInput = reinterpret_cast<ArkUITouchEvent*>(inputEvent->inputEvent);
+    event.touchEvent.target.id = touchEvenInput->target.id;
+    event.touchEvent.target.type = touchEvenInput->target.type;
+    event.touchEvent.target.area = touchEvenInput->target.area;
+    event.touchEvent.target.origin = touchEvenInput->target.origin;
+    event.touchEvent.action = touchEvenInput->action;
+    event.touchEvent.changedPointerId = touchEvenInput->changedPointerId;
+    event.touchEvent.actionTouchPoint = touchEvenInput->actionTouchPoint;
+    event.touchEvent.timeStamp = touchEvenInput->timeStamp;
+    event.touchEvent.sourceType = touchEvenInput->sourceType;
+    event.touchEvent.targetDisplayId = touchEvenInput->targetDisplayId;
+    event.touchEvent.deviceId = touchEvenInput->deviceId;
+
+    ArkUI_UIInputEvent setEvent;
+    ArkUIHoverEvent hoverEvent;
+    hoverEvent.isHover = true;
+    setEvent.inputEvent = &hoverEvent;
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    auto res = OH_ArkUI_HoverEvent_IsHovered(nullptr);
+    EXPECT_EQ(res, false);
+    res = OH_ArkUI_HoverEvent_IsHovered(&setEvent);
+    EXPECT_EQ(res, false);
+    hoverEvent.isHover = false;
+    setEvent.inputEvent = &hoverEvent;
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_HoverEvent_IsHovered(&setEvent);
+    EXPECT_EQ(res, false);
+    hoverEvent.isHover = true;
+    setEvent.inputEvent = &hoverEvent;
+    setEvent.eventTypeId = C_HOVER_EVENT_ID;
+    res = OH_ArkUI_HoverEvent_IsHovered(&setEvent);
+    EXPECT_EQ(res, true);
+    hoverEvent.isHover = false;
+    setEvent.inputEvent = &hoverEvent;
+    setEvent.eventTypeId = C_HOVER_EVENT_ID;
+    res = OH_ArkUI_HoverEvent_IsHovered(&setEvent);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_UIInputEvent_GetModifierKeyStates009
+ * @tc.desc: Test OH_ArkUI_UIInputEvent_GetModifierKeyStates functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetModifierKeyStates009, TestSize.Level1)
+{
+    ArkUI_UIInputEvent setEvent;
+    ArkUITouchEvent touchEvent;
+    setEvent.inputEvent = &touchEvent;
+    setEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    uint64_t keys = C_TOUCH_EVENT_ID;
+    auto res = OH_ArkUI_UIInputEvent_GetModifierKeyStates(nullptr, &keys);
+    EXPECT_EQ(res, 401);
+    res = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&setEvent, &keys);
+    setEvent.eventTypeId = TOUCH_EVENT_ID;
+    keys = TOUCH_EVENT_ID;
+    res = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&setEvent, &keys);
+    ArkUIAxisEvent axisEvent;
+    setEvent.inputEvent = &axisEvent;
+    setEvent.eventTypeId = AXIS_EVENT_ID;
+    keys = AXIS_EVENT_ID;
+    res = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&setEvent, &keys);
+    EXPECT_EQ(res, 0);
+    ArkUIMouseEvent mouseEvent;
+    setEvent.inputEvent = &mouseEvent;
+    setEvent.eventTypeId = C_MOUSE_EVENT_ID;
+    keys = C_MOUSE_EVENT_ID;
+    res = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&setEvent, &keys);
+    EXPECT_EQ(res, 0);
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    keys = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&setEvent, &keys);
+    EXPECT_EQ(res, 0);
+    ArkUIKeyEvent keyEvent;
+    setEvent.inputEvent = &keyEvent;
+    setEvent.eventTypeId = C_KEY_EVENT_ID;
+    keys = C_KEY_EVENT_ID;
+    res = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&setEvent, &keys);
+    EXPECT_EQ(res, 0);
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    keys = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&setEvent, &keys);
+    EXPECT_EQ(res, 0);
+    ArkUIHoverEvent hoverEvent;
+    setEvent.inputEvent = &hoverEvent;
+    setEvent.eventTypeId = C_HOVER_EVENT_ID;
+    keys = C_HOVER_EVENT_ID;
+    res = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&setEvent, &keys);
+    EXPECT_EQ(res, 0);
+    ArkUIClickEvent clickEvent;
+    setEvent.inputEvent = &clickEvent;
+    setEvent.eventTypeId = C_CLICK_EVENT_ID;
+    keys = C_CLICK_EVENT_ID;
+    res = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&setEvent, &keys);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetTiltX001
+ * @tc.desc: Test OH_ArkUI_PointerEvent_GetTiltX functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetTiltX001, TestSize.Level1)
+{
+    ArkUI_UIInputEvent setEvent;
+    ArkUITouchEvent touchEvent;
+    setEvent.inputEvent = &touchEvent;
+    setEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    auto res = OH_ArkUI_PointerEvent_GetTiltX(nullptr, -1);
+    EXPECT_EQ(res, 0);
+    res = OH_ArkUI_PointerEvent_GetTiltX(&setEvent, -1);
+    setEvent.eventTypeId = TOUCH_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetTiltX(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIAxisEvent axisEvent;
+    setEvent.inputEvent = &axisEvent;
+    setEvent.eventTypeId = AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetTiltX(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIMouseEvent mouseEvent;
+    setEvent.inputEvent = &mouseEvent;
+    setEvent.eventTypeId = C_MOUSE_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetTiltX(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetTiltX(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIKeyEvent keyEvent;
+    setEvent.inputEvent = &keyEvent;
+    setEvent.eventTypeId = C_KEY_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetTiltX(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetTiltX(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIHoverEvent hoverEvent;
+    setEvent.inputEvent = &hoverEvent;
+    setEvent.eventTypeId = C_HOVER_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetTiltX(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIClickEvent clickEvent;
+    setEvent.inputEvent = &clickEvent;
+    setEvent.eventTypeId = C_CLICK_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetTiltX(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetTiltY001
+ * @tc.desc: Test OH_ArkUI_PointerEvent_GetTiltY functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetTiltY001, TestSize.Level1)
+{
+    ArkUI_UIInputEvent setEvent;
+    ArkUITouchEvent touchEvent;
+    setEvent.inputEvent = &touchEvent;
+    setEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    auto res = OH_ArkUI_PointerEvent_GetTiltY(nullptr, -1);
+    EXPECT_EQ(res, 0);
+    res = OH_ArkUI_PointerEvent_GetTiltY(&setEvent, -1);
+    setEvent.eventTypeId = TOUCH_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetTiltY(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIAxisEvent axisEvent;
+    setEvent.inputEvent = &axisEvent;
+    setEvent.eventTypeId = AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetTiltY(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIMouseEvent mouseEvent;
+    setEvent.inputEvent = &mouseEvent;
+    setEvent.eventTypeId = C_MOUSE_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetTiltY(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetTiltY(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIKeyEvent keyEvent;
+    setEvent.inputEvent = &keyEvent;
+    setEvent.eventTypeId = C_KEY_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetTiltY(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetTiltY(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIHoverEvent hoverEvent;
+    setEvent.inputEvent = &hoverEvent;
+    setEvent.eventTypeId = C_HOVER_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetTiltY(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIClickEvent clickEvent;
+    setEvent.inputEvent = &clickEvent;
+    setEvent.eventTypeId = C_CLICK_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetTiltY(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetRollAngle001
+ * @tc.desc: Test OH_ArkUI_PointerEvent_GetRollAngle functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetRollAngle001, TestSize.Level1)
+{
+    ArkUI_UIInputEvent setEvent;
+    ArkUITouchEvent touchEvent;
+    setEvent.inputEvent = &touchEvent;
+    setEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    double rollAngle = 0.0;
+    touchEvent.subKind = ON_HOVER_MOVE;
+    touchEvent.actionTouchPoint.rollAngle = 1.0;
+    auto res = OH_ArkUI_PointerEvent_GetRollAngle(nullptr, &rollAngle);
+    EXPECT_EQ(res, 401);
+    res = OH_ArkUI_PointerEvent_GetRollAngle(&setEvent, &rollAngle);
+    setEvent.eventTypeId = TOUCH_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetRollAngle(&setEvent, &rollAngle);
+    EXPECT_EQ(res, 401);
+    ArkUIAxisEvent axisEvent;
+    setEvent.inputEvent = &axisEvent;
+    setEvent.eventTypeId = AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetRollAngle(&setEvent, &rollAngle);
+    EXPECT_EQ(res, 401);
+    ArkUIMouseEvent mouseEvent;
+    setEvent.inputEvent = &mouseEvent;
+    setEvent.eventTypeId = C_MOUSE_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetRollAngle(&setEvent, &rollAngle);
+    EXPECT_EQ(res, 401);
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetRollAngle(&setEvent, &rollAngle);
+    EXPECT_EQ(res, 401);
+    ArkUIKeyEvent keyEvent;
+    setEvent.inputEvent = &keyEvent;
+    setEvent.eventTypeId = C_KEY_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetRollAngle(&setEvent, &rollAngle);
+    EXPECT_EQ(res, 401);
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetRollAngle(&setEvent, &rollAngle);
+    EXPECT_EQ(res, 401);
+    ArkUIHoverEvent hoverEvent;
+    setEvent.inputEvent = &hoverEvent;
+    setEvent.eventTypeId = C_HOVER_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetRollAngle(&setEvent, &rollAngle);
+    EXPECT_EQ(res, 0);
+    ArkUIClickEvent clickEvent;
+    setEvent.inputEvent = &clickEvent;
+    setEvent.eventTypeId = C_CLICK_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetRollAngle(&setEvent, &rollAngle);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetDisplayYByIndex008
+ * @tc.desc: Test OH_ArkUI_PointerEvent_GetDisplayYByIndex functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetDisplayYByIndex008, TestSize.Level1)
+{
+    ArkUI_UIInputEvent setEvent;
+    ArkUITouchEvent touchEvent;
+    setEvent.inputEvent = &touchEvent;
+    setEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    ArkUITouchPoint points[2]; // 2 points
+    ArkUITouchEvent* touchEventPtr = new ArkUITouchEvent();
+    touchEventPtr->touchPointes = points;
+    touchEventPtr->touchPointSize = 2;
+    setEvent.inputEvent = touchEventPtr;
+    auto res = OH_ArkUI_PointerEvent_GetDisplayYByIndex(nullptr, 0);
+    EXPECT_EQ(res, 0);
+    res = OH_ArkUI_PointerEvent_GetDisplayYByIndex(&setEvent, 0);
+    setEvent.eventTypeId = TOUCH_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayYByIndex(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIAxisEvent axisEvent;
+    setEvent.inputEvent = &axisEvent;
+    setEvent.eventTypeId = AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayYByIndex(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIMouseEvent mouseEvent;
+    setEvent.inputEvent = &mouseEvent;
+    setEvent.eventTypeId = C_MOUSE_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayYByIndex(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayYByIndex(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIKeyEvent keyEvent;
+    setEvent.inputEvent = &keyEvent;
+    setEvent.eventTypeId = C_KEY_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayYByIndex(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayYByIndex(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIHoverEvent hoverEvent;
+    setEvent.inputEvent = &hoverEvent;
+    setEvent.eventTypeId = C_HOVER_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayYByIndex(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIClickEvent clickEvent;
+    setEvent.inputEvent = &clickEvent;
+    setEvent.eventTypeId = C_CLICK_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayYByIndex(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetDisplayXByIndex008
+ * @tc.desc: Test OH_ArkUI_PointerEvent_GetDisplayXByIndex functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetDisplayXByIndex008, TestSize.Level1)
+{
+    ArkUI_UIInputEvent setEvent;
+    ArkUITouchEvent touchEvent;
+    setEvent.inputEvent = &touchEvent;
+    setEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    ArkUITouchPoint points[2]; // 2 points
+    ArkUITouchEvent* touchEventPtr = new ArkUITouchEvent();
+    touchEventPtr->touchPointes = points;
+    touchEventPtr->touchPointSize = 2;
+    setEvent.inputEvent = touchEventPtr;
+    auto res = OH_ArkUI_PointerEvent_GetDisplayXByIndex(nullptr, 0);
+    EXPECT_EQ(res, 0);
+    res = OH_ArkUI_PointerEvent_GetDisplayXByIndex(&setEvent, 0);
+    setEvent.eventTypeId = TOUCH_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayXByIndex(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIAxisEvent axisEvent;
+    setEvent.inputEvent = &axisEvent;
+    setEvent.eventTypeId = AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayXByIndex(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIMouseEvent mouseEvent;
+    setEvent.inputEvent = &mouseEvent;
+    setEvent.eventTypeId = C_MOUSE_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayXByIndex(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayXByIndex(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIKeyEvent keyEvent;
+    setEvent.inputEvent = &keyEvent;
+    setEvent.eventTypeId = C_KEY_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayXByIndex(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayXByIndex(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIHoverEvent hoverEvent;
+    setEvent.inputEvent = &hoverEvent;
+    setEvent.eventTypeId = C_HOVER_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayXByIndex(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+    ArkUIClickEvent clickEvent;
+    setEvent.inputEvent = &clickEvent;
+    setEvent.eventTypeId = C_CLICK_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayXByIndex(&setEvent, 0);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetDisplayX008
+ * @tc.desc: Test OH_ArkUI_PointerEvent_GetDisplayX functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetDisplayX008, TestSize.Level1)
+{
+    ArkUI_UIInputEvent setEvent;
+    ArkUITouchEvent touchEvent;
+    setEvent.inputEvent = &touchEvent;
+    setEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    ArkUITouchPoint points[2]; // 2 points
+    ArkUITouchEvent* touchEventPtr = new ArkUITouchEvent();
+    touchEventPtr->touchPointes = points;
+    touchEventPtr->touchPointSize = 2;
+    setEvent.inputEvent = touchEventPtr;
+    auto res = OH_ArkUI_PointerEvent_GetDisplayX(nullptr);
+    EXPECT_EQ(res, 0);
+    res = OH_ArkUI_PointerEvent_GetDisplayX(&setEvent);
+    setEvent.eventTypeId = TOUCH_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayX(&setEvent);
+    EXPECT_EQ(res, 0);
+    ArkUIAxisEvent axisEvent;
+    setEvent.inputEvent = &axisEvent;
+    setEvent.eventTypeId = AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayX(&setEvent);
+    EXPECT_EQ(res, 0);
+    ArkUIMouseEvent mouseEvent;
+    setEvent.inputEvent = &mouseEvent;
+    setEvent.eventTypeId = C_MOUSE_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayX(&setEvent);
+    EXPECT_EQ(res, 0);
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayX(&setEvent);
+    EXPECT_EQ(res, 0);
+    ArkUIKeyEvent keyEvent;
+    setEvent.inputEvent = &keyEvent;
+    setEvent.eventTypeId = C_KEY_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayX(&setEvent);
+    EXPECT_EQ(res, 0);
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayX(&setEvent);
+    EXPECT_EQ(res, 0);
+    ArkUIHoverEvent hoverEvent;
+    setEvent.inputEvent = &hoverEvent;
+    setEvent.eventTypeId = C_HOVER_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayX(&setEvent);
+    EXPECT_EQ(res, 0);
+    ArkUIClickEvent clickEvent;
+    setEvent.inputEvent = &clickEvent;
+    setEvent.eventTypeId = C_CLICK_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayX(&setEvent);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetDisplayY008
+ * @tc.desc: Test OH_ArkUI_PointerEvent_GetDisplayY functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetDisplayY008, TestSize.Level1)
+{
+    ArkUI_UIInputEvent setEvent;
+    ArkUITouchEvent touchEvent;
+    setEvent.inputEvent = &touchEvent;
+    setEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    ArkUITouchPoint points[2]; // 2 points
+    points[0].screenY = 3.0;
+    points[1].screenY = 4.0;
+    ArkUITouchEvent* touchEventPtr = new ArkUITouchEvent();
+    touchEventPtr->touchPointes = points;
+    touchEventPtr->touchPointSize = 2;
+    setEvent.inputEvent = touchEventPtr;
+    auto res = OH_ArkUI_PointerEvent_GetDisplayY(nullptr);
+    EXPECT_EQ(res, 0);
+    res = OH_ArkUI_PointerEvent_GetDisplayY(&setEvent);
+    setEvent.eventTypeId = TOUCH_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayY(&setEvent);
+    EXPECT_EQ(res, 0);
+    ArkUIAxisEvent axisEvent;
+    setEvent.inputEvent = &axisEvent;
+    setEvent.eventTypeId = AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayY(&setEvent);
+    EXPECT_EQ(res, 0);
+    ArkUIMouseEvent mouseEvent;
+    setEvent.inputEvent = &mouseEvent;
+    setEvent.eventTypeId = C_MOUSE_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayY(&setEvent);
+    EXPECT_EQ(res, 0);
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayY(&setEvent);
+    EXPECT_EQ(res, 0);
+    ArkUIKeyEvent keyEvent;
+    setEvent.inputEvent = &keyEvent;
+    setEvent.eventTypeId = C_KEY_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayY(&setEvent);
+    EXPECT_EQ(res, 0);
+    setEvent.eventTypeId = C_AXIS_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayY(&setEvent);
+    EXPECT_EQ(res, 0);
+    ArkUIHoverEvent hoverEvent;
+    setEvent.inputEvent = &hoverEvent;
+    setEvent.eventTypeId = C_HOVER_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayY(&setEvent);
+    EXPECT_EQ(res, 0);
+    ArkUIClickEvent clickEvent;
+    setEvent.inputEvent = &clickEvent;
+    setEvent.eventTypeId = C_CLICK_EVENT_ID;
+    res = OH_ArkUI_PointerEvent_GetDisplayY(&setEvent);
+    EXPECT_EQ(res, 0);
 }
 } // namespace OHOS::Ace

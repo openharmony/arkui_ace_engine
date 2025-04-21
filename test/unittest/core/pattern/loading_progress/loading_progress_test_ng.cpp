@@ -1074,7 +1074,9 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleFocusEventTest002, TestSize
     loadingProgressPattern->HandleFocusEvent();
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
-    pipeline->isFocusActive_ = true;
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     EXPECT_TRUE(loadingProgressPattern->isFocusColorSet_);
 }
 

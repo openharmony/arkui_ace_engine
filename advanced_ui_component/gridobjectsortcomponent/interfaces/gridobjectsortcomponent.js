@@ -2265,16 +2265,6 @@ export class GridObjectSortComponent extends ViewPU {
             LongPressGesture.onAction(() => {
                 this.menuSwitch = true;
             });
-            LongPressGesture.onActionEnd(() => {
-                let y95 = ({
-                    type: 'announceForAccessibility',
-                    bundleName: this.bundleName,
-                    triggerAction: 'common',
-                    textAnnouncedForAccessibility: getContext().resourceManager
-                        .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE)
-                });
-                accessibility.sendAccessibilityEvent(y95);
-            });
             LongPressGesture.pop();
             Gesture.pop();
             Column.accessibilityText(this.getStringByResourceToken(ACCESSIBILITY_RESIDENT_AREA));

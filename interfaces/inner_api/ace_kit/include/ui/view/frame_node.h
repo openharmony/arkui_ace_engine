@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_FRAME_NODE_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_FRAME_NODE_H
 
+#include <functional>
 #include <list>
 #include <optional>
 #include <string>
@@ -23,6 +24,7 @@
 #include "ui/base/ace_type.h"
 #include "ui/base/referenced.h"
 #include "ui/properties/dirty_flag.h"
+#include "ui/resource/resource_configuration.h"
 #include "ui/view/layout/layout_info.h"
 
 namespace OHOS::Ace::NG {
@@ -66,6 +68,12 @@ public:
 
     virtual void MeasureChildren() = 0;
     virtual void LayoutChildren() = 0;
+    virtual void SetOnNodeDestroyCallback(const std::function<void(RefPtr<FrameNode>)>& destroyCallback) = 0;
+    virtual void SetConfigurationUpdateCallback(
+        const std::function<void(const ConfigurationChange& configurationChange)>&& callback) = 0;
+    virtual void AddExtraCustomProperty(const std::string& key, void* extraData) = 0;
+    virtual void* GetExtraCustomProperty(const std::string& key) const = 0;
+    virtual void SetClipEdge(bool isClip) = 0;
 
     virtual RefPtr<UIContext> GetUIContext() const = 0;
 };

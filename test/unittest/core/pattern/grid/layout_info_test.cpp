@@ -896,4 +896,77 @@ HWTEST_F(GridLayoutInfoTest, CheckGridMatrix005, TestSize.Level1)
     info.endIndex_ = 4;
     EXPECT_TRUE(info.CheckGridMatrix(0));
 }
+
+/**
+ * @tc.name: GridLayoutInfo::UpdateStartIndexByStartLineTest001
+ * @tc.desc: test UpdateStartIndexByStartLine with empty GridMatrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, UpdateStartIndexByStartLineTest001, TestSize.Level1)
+{
+    // gridMatrix is empty
+    GridLayoutInfo info;
+    info.gridMatrix_ = {};
+    info.startMainLineIndex_ = 0;
+    info.startIndex_ = 0;
+
+    info.UpdateStartIndexByStartLine();
+
+    // Assert startIndex is not update
+    EXPECT_EQ(info.startIndex_, 0);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::UpdateStartIndexByStartLineTest002
+ * @tc.desc: test UpdateStartIndexByStartLine with startMainLineIndex not found
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, UpdateStartIndexByStartLineTest002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = { { 0, { { 1, 10 }, { 2, 11 } } } };
+    info.startMainLineIndex_ = 1;
+    info.startIndex_ = 0;
+
+    info.UpdateStartIndexByStartLine();
+
+    // Assert startIndex is not update
+    EXPECT_EQ(info.startIndex_, 0);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::UpdateStartIndexByStartLineTest003
+ * @tc.desc: test UpdateStartIndexByStartLine with startLine not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, UpdateStartIndexByStartLineTest003, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = { { 0, {} }, { 1, { { 1, 10 }, { 2, 11 } } } };
+    info.startMainLineIndex_ = 0;
+    info.startIndex_ = 0;
+
+    info.UpdateStartIndexByStartLine();
+
+    // Assert startIndex is not update
+    EXPECT_EQ(info.startIndex_, 0);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::UpdateStartIndexByStartLineTest004
+ * @tc.desc: test UpdateStartIndexByStartLine with startLine not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, UpdateStartIndexByStartLineTest004, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = { { 0, { { 1, 10 }, { 2, 11 } } }, { 1, { { 1, 12 }, { 2, 13 } } } };
+    info.startMainLineIndex_ = 1;
+    info.startIndex_ = 0;
+
+    info.UpdateStartIndexByStartLine();
+
+    // Assert startIndex is updated
+    EXPECT_EQ(info.startIndex_, 12);
+}
 } // namespace OHOS::Ace::NG

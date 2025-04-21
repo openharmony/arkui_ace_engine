@@ -52,6 +52,7 @@ enum class SubwindowType {
     TYPE_DIALOG,
     TYPE_SELECT_MENU,
     TYPE_SHEET,
+    TYPE_TIPS,
     SUB_WINDOW_TYPE_COUNT,
 };
 
@@ -64,6 +65,7 @@ public:
     virtual void InitContainer() = 0;
     virtual void ResizeWindow() = 0;
     virtual void ResizeWindowForMenu() = 0;
+    virtual void SetFollowParentWindowLayoutEnabled(bool enable) = 0;
     virtual NG::RectF GetRect() = 0;
     virtual void SetRect(const NG::RectF& rect) = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;

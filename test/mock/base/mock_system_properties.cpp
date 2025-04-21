@@ -20,6 +20,9 @@
 #include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
+namespace MockSystemProperties {
+bool g_isSuperFoldDisplayDevice = false;
+}
 namespace {
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
@@ -86,6 +89,7 @@ int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
+bool SystemProperties::formSkeletonBlurEnabled_ = true;
 
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
@@ -274,17 +278,22 @@ int32_t SystemProperties::GetDragDropFrameworkStatus()
 
 bool SystemProperties::GetContainerDeleteFlag()
 {
-    return false;
+    return containerDeleteFlag_;
 }
 
 bool SystemProperties::IsSuperFoldDisplayDevice()
 {
-    return false;
+    return MockSystemProperties::g_isSuperFoldDisplayDevice;
 }
 
 bool SystemProperties::IsPageTransitionFreeze()
 {
     return pageTransitionFrzEnabled_;
+}
+
+bool SystemProperties::IsFormSkeletonBlurEnabled()
+{
+    return formSkeletonBlurEnabled_;
 }
 
 } // namespace OHOS::Ace

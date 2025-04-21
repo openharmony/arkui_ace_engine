@@ -43,8 +43,9 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr XComponentType XCOMPONENT_SURFACE_TYPE_VALUE = XComponentType::SURFACE;
 ArkUI_XComponent_Params params;
-bool isCreated = false;
-bool isChanged = false;
+bool g_isCreated = false;
+bool g_isChanged = false;
+bool g_isDestroyed = false;
 const float MAX_WIDTH = 400.0f;
 const float MAX_HEIGHT = 400.0f;
 const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
@@ -59,8 +60,8 @@ public:
     static void TearDownTestSuite();
     void TearDown() override
     {
-        isCreated = false;
-        isChanged = false;
+        g_isCreated = false;
+        g_isChanged = false;
     }
 
 protected:
@@ -111,10 +112,10 @@ HWTEST_F(XComponentV2TestNg, XComponentSurfaceLifeCycleCallback001, TestSize.Lev
     ASSERT_TRUE(pattern->surfaceHolder_);
 
     OH_ArkUI_SurfaceCallback* surfaceCallback = new OH_ArkUI_SurfaceCallback();
-    surfaceCallback->OnSurfaceCreated = [](OH_ArkUI_SurfaceHolder* /* surfaceHolder */) { isCreated = true; };
-    surfaceCallback->OnSurfaceDestroyed = [](OH_ArkUI_SurfaceHolder* /* surfaceHolder */) { isCreated = false; };
+    surfaceCallback->OnSurfaceCreated = [](OH_ArkUI_SurfaceHolder* /* surfaceHolder */) { g_isCreated = true; };
+    surfaceCallback->OnSurfaceDestroyed = [](OH_ArkUI_SurfaceHolder* /* surfaceHolder */) { g_isCreated = false; };
     surfaceCallback->OnSurfaceChanged = [](OH_ArkUI_SurfaceHolder* /* surfaceHolder */, uint64_t width,
-                                            uint64_t height) { isChanged = true; };
+                                            uint64_t height) { g_isChanged = true; };
     auto code = surfaceHolder->AddSurfaceCallback(surfaceCallback);
     EXPECT_EQ(code, ERROR_CODE_NO_ERROR);
     /**
@@ -123,7 +124,7 @@ HWTEST_F(XComponentV2TestNg, XComponentSurfaceLifeCycleCallback001, TestSize.Lev
      */
     EXPECT_TRUE(pattern->autoInitialize_);
     pattern->OnAttachToMainTree();
-    EXPECT_TRUE(isCreated);
+    EXPECT_TRUE(g_isCreated);
     /**
      * @tc.steps: step4. call BeforeSyncGeometryProperties
      *            case: contentSize = 0
@@ -135,10 +136,10 @@ HWTEST_F(XComponentV2TestNg, XComponentSurfaceLifeCycleCallback001, TestSize.Lev
     frameNode->geometryNode_ = geometryNode;
     geometryNode->SetContentSize({ 0.0f, 0.0f });
     pattern->BeforeSyncGeometryProperties(config);
-    EXPECT_FALSE(isChanged);
+    EXPECT_FALSE(g_isChanged);
     config.skipMeasure = true;
     pattern->BeforeSyncGeometryProperties(config);
-    EXPECT_FALSE(isChanged);
+    EXPECT_FALSE(g_isChanged);
     /**
      * @tc.steps: step5. call BeforeSyncGeometryProperties
      * @tc.expected: OnSurfaceChanged has called
@@ -154,13 +155,13 @@ HWTEST_F(XComponentV2TestNg, XComponentSurfaceLifeCycleCallback001, TestSize.Lev
         SetBounds(0, 0, MAX_WIDTH, MAX_HEIGHT))
         .WillOnce(Return());
     pattern->BeforeSyncGeometryProperties(config);
-    EXPECT_TRUE(isChanged);
+    EXPECT_TRUE(g_isChanged);
     /**
      * @tc.steps: step6. call OnDetachFromFrameNode
      * @tc.expected: onSurfaceDestroyed has called
      */
     pattern->OnDetachFromMainTree();
-    EXPECT_FALSE(isCreated);
+    EXPECT_FALSE(g_isCreated);
     /**
      * @tc.steps: step7. call OnDetachFromFrameNode
      * @tc.expected: nativeWindow has finalize
@@ -305,5 +306,116 @@ HWTEST_F(XComponentV2TestNg, XComponentWindowTest004, TestSize.Level1)
     pattern->OnWindowShow(); // test when hasReleasedSurface_ is not satisfied
     EXPECT_FALSE(pattern->hasReleasedSurface_);
     delete surfaceHolder;
+}
+
+/**
+ * @tc.name: XComponentSurfaceLifeCycleCallbackTest002
+ * @tc.desc: Test SurfaceHolder's surface life cycle callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, XComponentSurfaceLifeCycleCallbackTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    /**
+     * @tc.steps: step2. set surface life cycle callback functions pointers as nullptr
+     * @tc.expected: surface life cycle callback add successfully
+     */
+    OH_ArkUI_SurfaceHolder surfaceHolder;
+    pattern->SetSurfaceHolder(&surfaceHolder);
+    ASSERT_TRUE(pattern->surfaceHolder_);
+
+    g_isCreated = false;
+    g_isChanged = false;
+    g_isDestroyed = false;
+
+    OH_ArkUI_SurfaceCallback surfaceCallback = {
+        .OnSurfaceCreated = nullptr,
+        .OnSurfaceChanged = nullptr,
+        .OnSurfaceDestroyed = nullptr
+    };
+    auto code = surfaceHolder.AddSurfaceCallback(&surfaceCallback);
+    EXPECT_EQ(code, ERROR_CODE_NO_ERROR);
+    /**
+     * @tc.steps: step3. change surface life cycle callback functions pointers after add the callback to SurfaceHolder
+     * @tc.expected: surface life cycle callback functions pointers are not nullptrs;
+     */
+    surfaceCallback.OnSurfaceCreated = [](OH_ArkUI_SurfaceHolder* /* surfaceHolder */) { g_isCreated = true; };
+    surfaceCallback.OnSurfaceChanged = [](OH_ArkUI_SurfaceHolder* /* surfaceHolder */, uint64_t width,
+        uint64_t height) { g_isChanged = true; };
+    surfaceCallback.OnSurfaceDestroyed = [](OH_ArkUI_SurfaceHolder* /* surfaceHolder */) { g_isDestroyed = true; };
+    ASSERT_TRUE(surfaceCallback.OnSurfaceCreated);
+    ASSERT_TRUE(surfaceCallback.OnSurfaceChanged);
+    ASSERT_TRUE(surfaceCallback.OnSurfaceDestroyed);
+    /**
+     * @tc.steps: step4. call OnAttachToMainTree after change the surface life cycle callback functions pointers
+     * @tc.expected: OnSurfaceCreated has called
+     */
+    EXPECT_TRUE(pattern->autoInitialize_);
+    pattern->OnAttachToMainTree();
+    EXPECT_TRUE(g_isCreated);
+    /**
+     * @tc.steps: step5. call BeforeSyncGeometryProperties
+     * @tc.expected: OnSurfaceChanged has called
+     */
+    DirtySwapConfig config;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    frameNode->geometryNode_ = geometryNode;
+    config.skipMeasure = false;
+    geometryNode->SetFrameSize(MAX_SIZE);
+    geometryNode->SetContentSize(MAX_SIZE);
+    pattern->BeforeSyncGeometryProperties(config);
+    EXPECT_TRUE(g_isChanged);
+    /**
+     * @tc.steps: step6. call OnDetachFromFrameNode
+     * @tc.expected: onSurfaceDestroyed has called
+     */
+    pattern->OnDetachFromMainTree();
+    EXPECT_TRUE(g_isDestroyed);
+}
+
+/**
+ * @tc.name: XComponentSurfaceHolderTest001
+ * @tc.desc: Test SurfaceHolder AddSurfaceCallback and RemoveSurfaceCallback method
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, XComponentSurfaceHolderTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare SurfaceHolder and SurfaceCallback
+     */
+    OH_ArkUI_SurfaceHolder surfaceHolder;
+    OH_ArkUI_SurfaceCallback surfaceCallback;
+    /**
+     * @tc.steps: step2. add SurfaceCallback to SurfaceHolder
+     * @tc.expected: add SurfaceCallback successfully
+     */
+    auto code = surfaceHolder.AddSurfaceCallback(&surfaceCallback);
+    EXPECT_EQ(code, ERROR_CODE_NO_ERROR);
+    /**
+     * @tc.steps: step3. add duplicated SurfaceCallback to SurfaceHolder
+     * @tc.expected: add SurfaceCallback failed
+     */
+    code = surfaceHolder.AddSurfaceCallback(&surfaceCallback);
+    EXPECT_EQ(code, ERROR_CODE_PARAM_INVALID);
+    /**
+     * @tc.steps: step4. remove SurfaceCallback from SurfaceHolder
+     * @tc.expected: remove SurfaceCallback successfully
+     */
+    code = surfaceHolder.RemoveSurfaceCallback(&surfaceCallback);
+    EXPECT_EQ(code, ERROR_CODE_NO_ERROR);
+    /**
+     * @tc.steps: step5. remove nonexistent SurfaceCallback from SurfaceHolder
+     * @tc.expected: remove SurfaceCallback failed
+     */
+    code = surfaceHolder.RemoveSurfaceCallback(&surfaceCallback);
+    EXPECT_EQ(code, ERROR_CODE_PARAM_INVALID);
 }
 } // namespace OHOS::Ace::NG

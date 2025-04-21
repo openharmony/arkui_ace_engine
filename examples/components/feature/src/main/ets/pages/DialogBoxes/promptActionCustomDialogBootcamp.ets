@@ -79,6 +79,7 @@ export struct promptActionCustomDialogBootcamp {
   @State enableShadowOptionsFill: boolean = false;
   @State shadowOptionsFill: boolean = false;
   scroller: Scroller = new Scroller();
+
   aboutToAppear(): void {
     AppStorage.setOrCreate('scroller', this.scroller)
   }
@@ -90,6 +91,9 @@ export struct promptActionCustomDialogBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        generic: () => {
+          this.Generic()
         },
         parameters: () => {
           this.Parameters()
@@ -334,7 +338,6 @@ export struct promptActionCustomDialogBootcamp {
         })
 
 
-
         RadioBlock({
           title: 'CustomDialogOptions.backgroundBlurStyle',
           isEnabled: $enableCustomDialogBackgroundBlurStyle,
@@ -437,6 +440,11 @@ export struct promptActionCustomDialogBootcamp {
     }
     .height('52%')
     .id('scroll')
+  }
+
+  @Builder
+  Generic() {
+
   }
 }
 

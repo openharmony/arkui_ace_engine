@@ -144,4 +144,38 @@ ArkUINativeModuleValue ListItemBridge::ResetOnSelect(ArkUIRuntimeCallInfo* runti
     GetArkUINodeModifiers()->getListItemModifier()->resetListItemOnSelectCallback(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ListItemBridge::SetListItemInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(1); // 1 is index of style
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    if (styleArg->IsUndefined() || styleArg->IsNull() || !styleArg->IsNumber()) {
+        GetArkUINodeModifiers()->getListItemModifier()->resetListItemStyle(nativeNode);
+    } else {
+        uint32_t style = styleArg->Uint32Value(vm);
+        if (style < static_cast<uint32_t>(V2::ListItemStyle::NONE) ||
+            style > static_cast<uint32_t>(V2::ListItemStyle::CARD)) {
+            style = static_cast<uint32_t>(V2::ListItemStyle::NONE);
+        }
+        GetArkUINodeModifiers()->getListItemModifier()->setListItemStyle(nativeNode, style);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListItemBridge::ResetListItemInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListItemModifier()->resetListItemStyle(nativeNode);
+
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

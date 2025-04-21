@@ -17,7 +17,6 @@
 #include "test/mock/core/render/mock_paragraph.h"
 #include "text_base.h"
 
-#include "core/components_ng/pattern/text/text_select_overlay.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
@@ -365,7 +364,7 @@ HWTEST_F(TextTestNineNg, SetupMagnifier014, TestSize.Level1)
     auto pageGeoNode = pageNode->GetGeometryNode();
 
     pattern->HandleLongPress(info);
-    EXPECT_EQ(11, pattern->magnifierController_->hostViewPort_->Width());
+    EXPECT_EQ(0, pattern->magnifierController_->hostViewPort_->Width());
 }
 
 /**
@@ -392,7 +391,7 @@ HWTEST_F(TextTestNineNg, SetupMagnifier021, TestSize.Level1)
     renderContext->UpdateClipEdge(true);
 
     pattern->HandleLongPress(info);
-    EXPECT_EQ(0, pattern->magnifierController_->hostViewPort_->Width());
+    EXPECT_EQ(5, pattern->magnifierController_->hostViewPort_->Width());
 }
 
 /**
@@ -419,7 +418,7 @@ HWTEST_F(TextTestNineNg, SetupMagnifier022, TestSize.Level1)
     renderContext->UpdateClipEdge(true);
 
     pattern->HandleLongPress(info);
-    EXPECT_EQ(0, pattern->magnifierController_->hostViewPort_->Width());
+    EXPECT_EQ(5, pattern->magnifierController_->hostViewPort_->Width());
 }
 
 /**

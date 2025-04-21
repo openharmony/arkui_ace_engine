@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
 
 #include <optional>
+#include "base/log/ace_trace.h"
 
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
 #include "accessibility_element_info.h"
@@ -395,7 +396,7 @@ void SideBarContainerPattern::OnModifyDone()
 
     CreateAndMountNodes();
 
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -424,6 +425,8 @@ void SideBarContainerPattern::OnModifyDone()
     if (!hasInit_) {
         hasInit_ = true;
     }
+    InitToolBarManager();
+    toolbarManager_->OnSideBarModifyDone();
 }
 
 void SideBarContainerPattern::CreateAndMountNodes()
@@ -452,6 +455,7 @@ void SideBarContainerPattern::CreateAndMountNodes()
             auto sideBarTheme = context->GetTheme<SideBarTheme>();
             CHECK_NULL_VOID(sideBarTheme);
             Color bgColor = sideBarTheme->GetSideBarBackgroundColor();
+            UpdateSideBarColorToolBarManager(bgColor);
             renderContext->UpdateBackgroundColor(bgColor);
         }
         if (SystemProperties::GetSideBarContainerBlurEnable() &&
@@ -537,7 +541,7 @@ void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>&
     auto dividerNode = FrameNode::GetOrCreateFrameNode(
         V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
 
-    auto dividerHub = dividerNode->GetEventHub<EventHub>();
+    auto dividerHub = dividerNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(dividerHub);
     auto inputHub = dividerHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -582,7 +586,7 @@ void SideBarContainerPattern::CreateAndMountControlButton(const RefPtr<NG::Frame
     auto imgNode = CreateControlImage(sideBarTheme, parentNode);
     CHECK_NULL_VOID(imgNode);
 
-    auto buttonHub = buttonNode->GetEventHub<EventHub>();
+    auto buttonHub = buttonNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(buttonHub);
     auto gestureHub = buttonHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -694,7 +698,9 @@ void SideBarContainerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     CHECK_NULL_VOID(dividerNode);
     auto dividerGestureHub = dividerNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(dividerGestureHub);
-    dividerGestureHub->AddPanEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    dividerGestureHub->AddPanEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
 }
 
 void SideBarContainerPattern::CreateAnimation()
@@ -862,7 +868,7 @@ void SideBarContainerPattern::UpdateSideBarPosition(float value)
 
 void SideBarContainerPattern::FireChangeEvent(bool isShow)
 {
-    auto sideBarContainerEventHub = GetEventHub<SideBarContainerEventHub>();
+    auto sideBarContainerEventHub = GetOrCreateEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(sideBarContainerEventHub);
 
     sideBarContainerEventHub->FireChangeEvent(isShow);
@@ -963,7 +969,43 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
+
+    UpdateSideBarStatus();
+    UpdateSideBarDividerToolBarManager(realDividerWidth_);
+
     return paddingProperty != nullptr;
+}
+
+void SideBarContainerPattern::UpdateSideBarStatus()
+{
+    auto host = GetHost();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto frameSize = geometryNode->GetFrameSize();
+    bool showSideBar = true;
+    switch (sideBarStatus_) {
+        case SideBarStatus::SHOW: {
+            showSideBar = true;
+            break;
+        }
+        case SideBarStatus::HIDDEN: {
+            showSideBar = false;
+            break;
+        }
+        case SideBarStatus::CHANGING: {
+            if (inAnimation_) {
+                showSideBar = !showSideBar_;
+            }
+            break;
+        }
+        default: {
+            showSideBar = layoutProperty->GetShowSideBar().value_or(true);
+            break;
+        }
+    }
+    UpdateSideBarToolBarManager(showSideBar, realSideBarWidth_.ConvertToPxWithSize(frameSize.Width()));
 }
 
 void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm)
@@ -1059,7 +1101,7 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
     bool isPercent = realSideBarWidth_.Unit() == DimensionUnit::PERCENT;
     auto preSidebarWidthPx = DimensionConvertToPx(preSidebarWidth_).value_or(0.0);
     auto sideBarLine = preSidebarWidthPx + (isSideBarStart ? xOffset : -xOffset);
-    auto eventHub = host->GetEventHub<SideBarContainerEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     if (sideBarLine > minSideBarWidth_ && sideBarLine < maxSideBarWidth_) {
@@ -1109,7 +1151,7 @@ void SideBarContainerPattern::FireSideBarWidthChangeEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<SideBarContainerEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1118,6 +1160,10 @@ void SideBarContainerPattern::FireSideBarWidthChangeEvent()
     Dimension usrSetUnitWidth = DimensionUnit::PERCENT == userSetDimensionUnit ?
         ConvertPxToPercent(realSideBarWidthPx) :
         Dimension(realSideBarWidth_.GetNativeValue(userSetDimensionUnit), userSetDimensionUnit);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    UpdateSideBarToolBarManager(true, usrSetUnitWidth.ConvertToPxWithSize(frameSize.Width()));
     eventHub->FireSideBarWidthChangeEvent(usrSetUnitWidth);
 }
 
@@ -1262,7 +1308,7 @@ void SideBarContainerPattern::InitLongPressEvent(const RefPtr<FrameNode>& button
         return;
     }
 
-    auto buttonHub = buttonNode->GetEventHub<EventHub>();
+    auto buttonHub = buttonNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(buttonHub);
     auto gestureHub = buttonHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -1342,7 +1388,7 @@ void SideBarContainerPattern::OnWindowSizeChanged(int32_t width, int32_t height,
     MarkNeedInitRealSideBarWidth(true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<SideBarContainerEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     FireSideBarWidthChangeEvent();
 }
@@ -1375,7 +1421,7 @@ void SideBarContainerPattern::SetAccessibilityEvent()
 void SideBarContainerPattern::InitImageErrorCallback(const RefPtr<SideBarTheme>& sideBarTheme,
     const RefPtr<FrameNode>& imgNode)
 {
-    auto eventHub = imgNode->GetEventHub<ImageEventHub>();
+    auto eventHub = imgNode->GetOrCreateEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto errorCallback = [weakPattern = WeakClaim(this), weakNode = WeakClaim(RawPtr(imgNode)),
         weakTheme = WeakClaim(RawPtr(sideBarTheme))] (const LoadImageFailEvent& info) {
@@ -1425,5 +1471,39 @@ bool SideBarContainerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     UpdateControlButtonIcon();
     imgFrameNode->MarkDirtyNode();
     return false;
+}
+
+void SideBarContainerPattern::UpdateSideBarToolBarManager(bool isShow, float width)
+{
+    InitToolBarManager();
+    auto info = toolbarManager_->GetSideBarInfo();
+    if (info.isShow == isShow && info.width == width) {
+        return;
+    }
+    info.isShow = isShow;
+    info.width = width;
+    toolbarManager_->SetHasSideBar(true);
+    toolbarManager_->SetSideBarInfo(info);
+}
+
+void SideBarContainerPattern::UpdateSideBarColorToolBarManager(const Color& backgroudColor)
+{
+    InitToolBarManager();
+    auto color = toolbarManager_->GetSideBarColor();
+    if (color == backgroudColor) {
+        return;
+    }
+    toolbarManager_->SetSideBarColor(backgroudColor);
+}
+
+void SideBarContainerPattern::UpdateSideBarDividerToolBarManager(float dividerWidth)
+{
+    InitToolBarManager();
+    auto info = toolbarManager_->GetSideBarDividerInfo();
+    if (info.width == dividerWidth) {
+        return;
+    }
+    info.width = dividerWidth;
+    toolbarManager_->SetSideBarDividerInfo(info);
 }
 } // namespace OHOS::Ace::NG

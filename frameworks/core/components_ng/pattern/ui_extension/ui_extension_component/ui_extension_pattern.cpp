@@ -27,6 +27,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/overlay/overlay_mask_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
@@ -34,6 +35,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_container_handler.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_surface_pattern.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -63,6 +65,9 @@ constexpr char ATOMIC_SERVICE_PREFIX[] = "com.atomicservice.";
 constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
 constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
     "Prohibit nesting uIExtensionExtensionComponent in securityUIAbility";
+constexpr char UEC_ERROR_NAME_PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting";
+constexpr char UEC_ERROR_MAG_PROHIBIT_NESTING_FAIL_MESSAGE[] =
+    "Prohibit nesting uiExtensionComponent";
 constexpr char PID_FLAG[] = "pidflag";
 constexpr char NO_EXTRA_UIE_DUMP[] = "-nouie";
 constexpr double SHOW_START = 0.0;
@@ -166,6 +171,7 @@ UIExtensionPattern::~UIExtensionPattern()
     }
     NotifyDestroy();
     FireModalOnDestroy();
+    OverlayMaskManager::GetInstance().OnUIExtDestroy(uiExtensionId_);
     UIExtensionIdUtility::GetInstance().RecycleExtensionId(uiExtensionId_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -416,6 +422,32 @@ void UIExtensionPattern::RemovePlaceholderNode()
     SetCurPlaceholderType(PlaceholderType::NONE);
 }
 
+bool UIExtensionPattern::CheckHostUiContentConstraint()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto containerHandler = container->GetContainerHandler();
+    CHECK_NULL_RETURN(containerHandler, true);
+    auto uIExtensionContainerHandler =
+        AceType::DynamicCast<UIExtensionContainerHandler>(containerHandler);
+    CHECK_NULL_RETURN(uIExtensionContainerHandler, true);
+    UIContentType hostUIContentType = uIExtensionContainerHandler->GetHostUIContentType();
+    static std::set<UIContentType> dcNotSupportHostUIContentType = {
+        UIContentType::ISOLATED_COMPONENT,
+        UIContentType::DYNAMIC_COMPONENT
+    };
+
+    if (dcNotSupportHostUIContentType.find(hostUIContentType) != dcNotSupportHostUIContentType.end()) {
+        UIEXT_LOGE("Not support uec in hostUIContentType: %{public}d.",
+            static_cast<int32_t>(hostUIContentType));
+        FireOnErrorCallback(ERROR_CODE_UIEXTENSION_FORBID_CASCADE,
+            UEC_ERROR_NAME_PROHIBIT_NESTING_FAIL_NAME, UEC_ERROR_MAG_PROHIBIT_NESTING_FAIL_MESSAGE);
+        return false;
+    }
+
+    return true;
+}
+
 bool UIExtensionPattern::CheckConstraint()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -427,7 +459,7 @@ bool UIExtensionPattern::CheckConstraint()
         return false;
     }
 
-    return true;
+    return CheckHostUiContentConstraint();
 }
 
 void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
@@ -478,7 +510,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     }
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    if (container->IsScenceBoardWindow() && !isModal_ && !hasMountToParent_) {
+    if (container->IsSceneBoardWindow() && !isModal_ && !hasMountToParent_) {
         needReNotifyForeground_ = true;
         UIEXT_LOGI("Should NotifyForeground after MountToParent.");
         return;
@@ -581,6 +613,7 @@ void UIExtensionPattern::InitBusinessDataHandleCallback()
     RegisterEventProxyFlagCallback();
     RegisterGetAvoidInfoCallback();
     RegisterReplyPageModeCallback();
+    OverlayMaskManager::GetInstance().RegisterOverlayHostMaskMountCallback(uiExtensionId_, GetHost());
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()
@@ -878,7 +911,7 @@ void UIExtensionPattern::RegisterPipelineEvent(
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
         const RectF& oldRect,
@@ -955,7 +988,7 @@ void UIExtensionPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -974,7 +1007,7 @@ void UIExtensionPattern::OnModifyDone()
 
 void UIExtensionPattern::InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub)
 {
-    focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
+    focusHub->SetOnFocusInternal([weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Focus Internal.");
@@ -1842,16 +1875,22 @@ void UIExtensionPattern::DumpInfo()
     // Use -nouie to choose not dump extra uie info
     if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
         UIEXT_LOGI("Not Support Dump Extra UIE Info");
-    } else {
-        if (!container->IsUIExtensionWindow()) {
-            params.push_back(PID_FLAG);
-        }
-        params.push_back(std::to_string(getpid()));
-        std::vector<std::string> dumpInfo;
-        sessionWrapper_->NotifyUieDump(params, dumpInfo);
-        for (std::string info : dumpInfo) {
-            DumpLog::GetInstance().AddDesc(std::string("UI Extension info: ").append(info));
-        }
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto dumpNodeIter = std::find(params.begin(), params.end(), std::to_string(host->GetId()));
+    if (dumpNodeIter != params.end()) {
+        params.erase(dumpNodeIter);
+    }
+    if (!container->IsUIExtensionWindow()) {
+        params.push_back(PID_FLAG);
+    }
+    params.push_back(std::to_string(getpid()));
+    std::vector<std::string> dumpInfo;
+    sessionWrapper_->NotifyUieDump(params, dumpInfo);
+    for (std::string info : dumpInfo) {
+        DumpLog::GetInstance().AddDesc(std::string("UI Extension info: ").append(info));
     }
 }
 
@@ -1878,16 +1917,22 @@ void UIExtensionPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     // Use -nouie to choose not dump extra uie info
     if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
         UIEXT_LOGI("Not Support Dump Extra UIE Info");
-    } else {
-        if (!container->IsUIExtensionWindow()) {
-            params.push_back(PID_FLAG);
-        }
-        params.push_back(std::to_string(getpid()));
-        std::vector<std::string> dumpInfo;
-        sessionWrapper_->NotifyUieDump(params, dumpInfo);
-        for (std::string info : dumpInfo) {
-            json->Put("UI Extension info: ", info.c_str());
-        }
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto dumpNodeIter = std::find(params.begin(), params.end(), std::to_string(host->GetId()));
+    if (dumpNodeIter != params.end()) {
+        params.erase(dumpNodeIter);
+    }
+    if (!container->IsUIExtensionWindow()) {
+        params.push_back(PID_FLAG);
+    }
+    params.push_back(std::to_string(getpid()));
+    std::vector<std::string> dumpInfo;
+    sessionWrapper_->NotifyUieDump(params, dumpInfo);
+    for (std::string info : dumpInfo) {
+        json->Put("UI Extension info: ", info.c_str());
     }
 }
 

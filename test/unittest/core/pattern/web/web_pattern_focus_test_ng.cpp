@@ -250,9 +250,9 @@ public:
         return false;
     }
     void OnScrollStartCallback() override {}
-    void FireOnScrollStart() override {}
-    void FireOnReachStart(const OnReachEvent& onReachStart) override {}
-    void FireOnReachEnd(const OnReachEvent& onReachEnd) override {}
+    void FireOnScrollStart(bool withPerfMonitor) override {}
+    void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override {}
+    void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override {}
 
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override {}
 
@@ -370,7 +370,8 @@ protected:
 
     void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const override {}
 
-    void OnScrollStop(const OnScrollStopEvent& onScrollStop) override {}
+    void OnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop) override
+    {}
 
 private:
     void OnScrollEndCallback() override {};
@@ -526,9 +527,8 @@ HWTEST_F(WebPatternFocusTestNg, OnAccessibilityHoverEvent, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     PointF point(20.0f, 100.0f);
-    bool web = webPattern->OnAccessibilityHoverEvent(point);
+    webPattern->OnAccessibilityHoverEvent(point, true);
     ASSERT_NE(webPattern->delegate_, nullptr);
-    ASSERT_FALSE(web);
 #endif
 }
 

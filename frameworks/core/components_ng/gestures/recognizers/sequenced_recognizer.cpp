@@ -198,8 +198,6 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
     if (point.type == TouchType::DOWN || point.type == TouchType::UP) {
         inputEventType_ = point.sourceType == SourceType::TOUCH ? InputEventType::TOUCH_SCREEN :
             InputEventType::MOUSE_BUTTON;
-        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, sequenced %{public}d type: %{public}d",
-            point.touchEventId, point.id, static_cast<int32_t>(point.type));
     }
     auto iter = recognizers_.begin();
     std::advance(iter, currentIndex_);

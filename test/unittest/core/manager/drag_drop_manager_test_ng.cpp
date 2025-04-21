@@ -1795,11 +1795,11 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest042, TestSize.Level1)
     ASSERT_NE(container, nullptr);
     auto instanceId = container->GetInstanceId();
     /**
-     * @tc.steps: step3. call ResetPreTargetFrameNode in ScenceBoardWindow.
+     * @tc.steps: step3. call ResetPreTargetFrameNode in SceneBoardWindow.
      * @tc.expected: The value of preTargetFrameNode_ is frameNode
      */
     container->isUIExtensionWindow_ = false;
-    container->isScenceBoardWindow_ = true;
+    container->isSceneBoardWindow_ = true;
     dragDropManager->ResetPreTargetFrameNode(instanceId);
     EXPECT_EQ(dragDropManager->preTargetFrameNode_, frameNode);
 
@@ -1808,7 +1808,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest042, TestSize.Level1)
      * @tc.expected: The value of preTargetFrameNode_ is frameNode
      */
     container->isUIExtensionWindow_ = true;
-    container->isScenceBoardWindow_ = false;
+    container->isSceneBoardWindow_ = false;
     dragDropManager->ResetPreTargetFrameNode(instanceId);
     EXPECT_EQ(dragDropManager->preTargetFrameNode_, frameNode);
 
@@ -1817,7 +1817,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest042, TestSize.Level1)
      * @tc.expected: The value of preTargetFrameNode_ is nullptr
      */
     container->isUIExtensionWindow_ = false;
-    container->isScenceBoardWindow_ = false;
+    container->isSceneBoardWindow_ = false;
     dragDropManager->ResetPreTargetFrameNode(instanceId);
     EXPECT_EQ(dragDropManager->preTargetFrameNode_, nullptr);
 }

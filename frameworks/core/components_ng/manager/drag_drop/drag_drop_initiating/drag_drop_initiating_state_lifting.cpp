@@ -15,6 +15,7 @@
 
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_lifting.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_machine.h"
@@ -127,26 +128,13 @@ void DragDropInitiatingStateLifting::HandleTouchEvent(const TouchEvent& touchEve
         CHECK_NULL_VOID(pipeline);
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->SetDragMoveLastPoint(point);
+        dragDropManager->UpdatePointInfoForFinger(touchEvent.id, point);
     }
 }
 
 void DragDropInitiatingStateLifting::HandlePanOnActionEnd(const GestureEvent& info)
 {
-    TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action end.");
-    DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    if (dragDropManager->IsAboutToPreview()) {
-        dragDropManager->ResetDragging();
-    }
-    dragDropManager->SetIsDragNodeNeedClean(false);
-    dragDropManager->SetIsDisableDefaultDropAnimation(true);
-    auto machine = GetStateMachine();
-    CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+    OnActionEnd(info);
 }
 
 void DragDropInitiatingStateLifting::HandleReStartDrag(const GestureEvent& info)
@@ -295,7 +283,7 @@ void DragDropInitiatingStateLifting::SetPixelMap()
     hub->SetPixelMap(gestureHub->GetPixelMap());
     // mount to rootNode
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto windowScene = manager->FindWindowScene(frameNode);
         manager->MountPixelMapToWindowScene(columnNode, windowScene);
     } else {
@@ -419,7 +407,7 @@ void DragDropInitiatingStateLifting::SetEventColumn()
     BindClickEvent(columnNode);
     columnNode->MarkModifyDone();
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto machine = GetStateMachine();
         CHECK_NULL_VOID(machine);
         auto params = machine->GetDragDropInitiatingParams();
@@ -454,12 +442,16 @@ void DragDropInitiatingStateLifting::Init(int32_t currentState)
     CHECK_NULL_VOID(machine);
     auto params = machine->GetDragDropInitiatingParams();
     auto frameNode = params.frameNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (currentState < static_cast<int32_t>(DragDropInitiatingStatus::PRESS) && !gestureHub->GetTextDraggable()) {
+        UpdateDragPreviewOptionFromModifier();
+    }
     if (!CheckDoShowPreview(frameNode)) {
         ResetNodeInMultiDrag();
         return;
     }
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
     if (gestureHub->GetTextDraggable()) {
         if (gestureHub->GetIsTextDraggable()) {
             SetTextAnimation();

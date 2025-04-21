@@ -147,7 +147,7 @@ float CounterDecorator::MeasureTextNodeHeight()
     // For efficiency: keep content same, make full use of rs cache.
     auto textContent = contentController->GetTextValue();
     auto textLength = static_cast<uint32_t>(textContent.length());
-    auto maxLength = static_cast<uint32_t>(textFieldLayoutProperty->GetMaxLength().value());
+    auto maxLength = static_cast<uint32_t>(textFieldLayoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
     UpdateCounterContentAndStyle(textLength, maxLength);
     // Both the non-backend rendering process and the backend rendering process will be called.
 	// note using this statement have any impact on the back-end rendering process.

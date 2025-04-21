@@ -72,14 +72,14 @@ public:
         isUIExtensionWindow_ = isUIExtensionWindow;
     }
 
-    bool IsScenceBoardWindow() override
+    bool IsSceneBoardWindow() override
     {
-        return isScenceBoardWindow_;
+        return isSceneBoardWindow_;
     }
 
-    void SetIsScenceBoardWindow(bool isScenceBoardWindow)
+    void SetIsSceneBoardWindow(bool isSceneBoardWindow)
     {
-        isScenceBoardWindow_ = isScenceBoardWindow;
+        isSceneBoardWindow_ = isSceneBoardWindow;
     }
 
     bool IsCrossAxisWindow()
@@ -95,6 +95,29 @@ public:
     ColorMode GetColorMode() const override
     {
         return mockColorMode_;
+    }
+
+    bool IsSubContainer() const override
+    {
+        return isSubContainer_;
+    }
+
+    bool IsFreeMultiWindow() const override
+    {
+        return isFreeMultiWindow_;
+    }
+
+    void ResetContainer()
+    {
+        CHECK_NULL_VOID(container_);
+        container_->isFormRender_ = false;
+        container_->isUIExtensionWindow_ = false;
+        container_->isSubContainer_ = false;
+        container_->isSceneBoardWindow_ = false;
+        container_->isCrossAxisWindow_ = false;
+        container_->isFreeMultiWindow_ = false;
+        container_->SetApiTargetVersion(0);
+        UpdateCurrent(0);
     }
 
     int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
@@ -128,6 +151,13 @@ public:
     MOCK_METHOD(void, DumpHeapSnapshot, (bool isPrivate), (override));
     MOCK_METHOD(void, TriggerGarbageCollection, (), (override));
     MOCK_METHOD(bool, WindowIsShow, (), (const, override));
+    MOCK_METHOD(bool, IsPcOrPadFreeMultiWindowMode, (), (const, override));
+    MOCK_METHOD(bool, IsMainWindow, (), (const, override));
+    MOCK_METHOD(bool, IsFullScreenWindow, (), (const, override));
+    MOCK_METHOD(RefPtr<PageViewportConfig>, GetCurrentViewportConfig, (), (const, override));
+    MOCK_METHOD(RefPtr<PageViewportConfig>, GetTargetViewportConfig, (Orientation orientation,
+        bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator), (override));
+    MOCK_METHOD(bool, SetSystemBarEnabled, (SystemBarType type, bool enable, bool animation), (override));
     static RefPtr<MockContainer> container_;
     static ColorMode mockColorMode_;
 
@@ -136,7 +166,9 @@ private:
     RefPtr<PipelineBase> pipelineContext_;
     bool isFormRender_ = false;
     bool isUIExtensionWindow_ = false;
-    bool isScenceBoardWindow_ = false;
+    bool isSubContainer_ = false;
+    bool isFreeMultiWindow_ = false;
+    bool isSceneBoardWindow_ = false;
     bool isCrossAxisWindow_ = false;
     RefPtr<DisplayInfo> displayInfo_ = MakeRefPtr<DisplayInfo>();
 };

@@ -25,23 +25,26 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     return CreateDialogNode(nodeId, param, customNode);
 }
 
-void SetDialogTransitionEffects(RefPtr<FrameNode> dialog,
-                                RefPtr<FrameNode> frameNode,
-                                const DialogProperties& param,
-                                RefPtr<DialogPattern> pattern)
+void SetDialogTransitionEffects(
+    const RefPtr<FrameNode>& dialog, const DialogProperties& param, RefPtr<DialogPattern> pattern)
 {
     auto dialogContext = dialog->GetRenderContext();
-    if (param.transitionEffect != nullptr) {
+    if (param.maskTransitionEffect != nullptr || param.dialogTransitionEffect != nullptr) {
+        dialogContext->UpdateBackgroundColor(Color(0x00000000));
+        if (param.dialogTransitionEffect != nullptr) {
+            auto contentNode = AceType::DynamicCast<FrameNode>(dialog->GetChildByIndex(0));
+            CHECK_NULL_VOID(contentNode);
+            contentNode->GetRenderContext()->UpdateChainedTransition(param.dialogTransitionEffect);
+        }
+        if (param.maskTransitionEffect != nullptr) {
+            auto maskNode = AceType::DynamicCast<FrameNode>(dialog->GetChildByIndex(1));
+            CHECK_NULL_VOID(maskNode);
+            maskNode->GetRenderContext()->UpdateChainedTransition(param.maskTransitionEffect);
+        }
+    } else if (param.transitionEffect != nullptr) {
         dialogContext->UpdateChainedTransition(param.transitionEffect);
     }
-    if (param.maskTransitionEffect != nullptr) {
-        dialogContext->UpdateChainedTransition(param.maskTransitionEffect);
-    }
-    if (param.dialogTransitionEffect != nullptr) {
-        frameNode->GetRenderContext()->UpdateChainedTransition(param.dialogTransitionEffect);
-    }
-    if (param.transitionEffect == nullptr &&
-        param.dialogTransitionEffect == nullptr &&
+    if (param.transitionEffect == nullptr && param.dialogTransitionEffect == nullptr &&
         param.maskTransitionEffect == nullptr) {
         // set open and close animation
         pattern->SetOpenAnimation(param.openAnimation);
@@ -81,8 +84,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     dialogLayoutProp->UpdateShowInSubWindow(param.isShowInSubWindow);
     dialogLayoutProp->UpdateDialogButtonDirection(param.buttonDirection);
     dialogLayoutProp->UpdateIsModal(param.isModal);
-    dialogLayoutProp->UpdateIsScenceBoardDialog(param.isScenceBoardDialog);
-    dialogLayoutProp->UpdateEnableHoverMode(param.enableHoverMode);
+    dialogLayoutProp->UpdateIsSceneBoardDialog(param.isSceneBoardDialog);
     if (param.width.has_value() && NonNegative(param.width.value().Value())) {
         dialogLayoutProp->UpdateWidth(param.width.value());
     } else {
@@ -90,6 +92,9 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     }
     if (param.height.has_value() && NonNegative(param.height.value().Value())) {
         dialogLayoutProp->UpdateHeight(param.height.value());
+    }
+    if (param.enableHoverMode.has_value()) {
+        dialogLayoutProp->UpdateEnableHoverMode(param.enableHoverMode.value());
     }
     if (param.hoverModeArea.has_value()) {
         dialogLayoutProp->UpdateHoverModeArea(param.hoverModeArea.value());
@@ -106,12 +111,12 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     } else {
         dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
     }
-    if (dialogLayoutProp->GetIsScenceBoardDialog().value_or(false)) {
+    if (dialogLayoutProp->GetIsSceneBoardDialog().value_or(false)) {
         dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
     }
     SetDialogAccessibilityHoverConsume(dialog);
     // set onCancel callback
-    auto hub = dialog->GetEventHub<DialogEventHub>();
+    auto hub = dialog->GetOrCreateEventHub<DialogEventHub>();
     CHECK_NULL_RETURN(hub, dialog);
     hub->SetOnCancel(param.onCancel);
     hub->SetOnSuccess(param.onSuccess);
@@ -120,8 +125,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     pattern->SetOnWillDismiss(param.onWillDismiss);
     pattern->SetOnWillDismissByNDK(param.onWillDismissCallByNDK);
 
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(customNode);
-    SetDialogTransitionEffects(dialog, frameNode, param, pattern);
+    SetDialogTransitionEffects(dialog, param, pattern);
 
     dialog->MarkModifyDone();
     return dialog;

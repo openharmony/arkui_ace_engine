@@ -36,7 +36,7 @@ public:
     PageViewportConfigOhos() = default;
     ~PageViewportConfigOhos() = default;
 
-    RefPtr<PageViewportConfig> Clone() override;
+    RefPtr<PageViewportConfig> Clone() const override;
 
     void SetPipelineContext(const WeakPtr<NG::PipelineContext>& pipeline)
     {
@@ -54,7 +54,11 @@ public:
         avoidAreas_ = info;
     }
 
-    DisplayOrientation GetOrientation() override
+    int32_t GetWidth() const override
+    {
+        return config_.Width();
+    }
+    DisplayOrientation GetOrientation() const override
     {
         return static_cast<DisplayOrientation>(config_.Orientation());
     }

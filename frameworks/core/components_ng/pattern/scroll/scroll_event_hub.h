@@ -111,10 +111,46 @@ public:
         onScrollBegin_ = std::move(event);
     }
 
+    void SetJSFrameNodeOnScrollWillScroll(ScrollEventWithReturn&& onScroll)
+    {
+        onJSFrameNodeWillScroll_ = std::move(onScroll);
+    }
+
+    void ClearJSFrameNodeOnScrollWillScroll()
+    {
+        if (onJSFrameNodeWillScroll_) {
+            onJSFrameNodeWillScroll_ = nullptr;
+        }
+    }
+
+    const ScrollEventWithReturn& GetJSFrameNodeOnScrollWillScroll()
+    {
+        return onJSFrameNodeWillScroll_;
+    }
+
+    void SetJSFrameNodeOnScrollDidScroll(ScrollEventWithState&& onScroll)
+    {
+        onJSFrameNodeDidScroll_ = std::move(onScroll);
+    }
+
+    void ClearJSFrameNodeOnScrollDidScroll()
+    {
+        if (onJSFrameNodeDidScroll_) {
+            onJSFrameNodeDidScroll_ = nullptr;
+        }
+    }
+
+    const ScrollEventWithState& GetJSFrameNodeOnScrollDidScroll()
+    {
+        return onJSFrameNodeDidScroll_;
+    }
+
 private:
     ScrollEvent onScroll_;
     ScrollEventWithReturn onWillScroll_;
     ScrollEventWithState onDidScroll_;
+    ScrollEventWithReturn onJSFrameNodeWillScroll_;
+    ScrollEventWithState onJSFrameNodeDidScroll_;
     OnScrollBeginEvent onScrollBegin_;
     ScrollEndEvent onScrollEnd_;
     ScrollEdgeEvent onScrollEdge_;

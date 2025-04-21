@@ -588,6 +588,7 @@ struct KeyEvent final : public NonPointerEvent {
     bool isPreIme = false;
     bool isRedispatch = false;
     bool numLock = false;
+    bool scrollLock = false;
     uint32_t unicode = 0;
     std::vector<uint8_t> enhanceData;
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
@@ -624,6 +625,9 @@ public:
         keyMsg_ = event.msg;
         SetPressedKeyCodes(event.pressedCodes);
         unicode_ = event.unicode;
+        numLock_ = event.numLock;
+        capsLock_ = event.enableCapsLock;
+        scrollLock_ = event.scrollLock;
     };
     ~KeyEventInfo() override = default;
 
@@ -662,6 +666,21 @@ public:
         return unicode_;
     }
 
+    bool GetNumLock() const
+    {
+        return numLock_;
+    }
+
+    bool GetCapsLock() const
+    {
+        return capsLock_;
+    }
+
+    bool GetScrollLock() const
+    {
+        return scrollLock_;
+    }
+
     void ParseKeyEvent(KeyEvent& keyEvent);
 
 private:
@@ -673,6 +692,9 @@ private:
     KeyIntention keyIntention_ = KeyIntention::INTENTION_UNKNOWN;
     std::string keyMsg_ = "";
     uint32_t unicode_ = 0;
+    bool numLock_= false;
+    bool capsLock_ = false;
+    bool scrollLock_ = false;
 };
 
 enum class BlurReason : int32_t {

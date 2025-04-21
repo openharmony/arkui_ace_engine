@@ -20,12 +20,14 @@
 #include "ui/base/geometry/calc_dimension.h"
 #include "ui/base/macros.h"
 #include "ui/properties/color.h"
+#include "ui/view/scroller.h"
 
 namespace OHOS::Ace::Kit {
 
 bool ACE_FORCE_EXPORT ParseColor(napi_env env, napi_value value, Color& info);
 bool ACE_FORCE_EXPORT ParseDimension(
     napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit, bool isSupportPercent);
+RefPtr<Scroller> ACE_FORCE_EXPORT ParseScroller(napi_env env, napi_value value);
 
 } // namespace OHOS::Ace::Kit
 

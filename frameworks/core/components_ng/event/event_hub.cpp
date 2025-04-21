@@ -45,7 +45,7 @@ void EventHub::OnDetachContext(PipelineContext *context)
         context->RemoveOnAreaChangeNode(host->GetId());
     }
 
-    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false)) {
+    if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false) || HasThrottledVisibleAreaCallback()) {
         host->SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::DETACH_FROM_MAINTREE);
         host->TriggerVisibleAreaChangeCallback(0, true);
         context->RemoveVisibleAreaChangeNode(host->GetId());
@@ -91,6 +91,22 @@ void EventHub::RemoveSupportedUIState(UIState state, bool isInner)
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
     stateStyleMgr_->RemoveSupportedUIState(state, isInner);
+}
+
+bool EventHub::GetUserSetStateStyle()
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    return stateStyleMgr_->GetUserSetStateStyle();
+}
+
+void EventHub::SetScrollingFeatureForbidden(bool isSetStateStyle)
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    stateStyleMgr_->SetScrollingFeatureForbidden(isSetStateStyle);
 }
 
 void EventHub::SetCurrentUIState(UIState state, bool flag)
@@ -412,6 +428,9 @@ void EventHub::ClearJSFrameNodeOnSizeChange()
     if (onJsFrameNodeSizeChanged_) {
         onJsFrameNodeSizeChanged_ = nullptr;
     }
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    host->ResetLastFrameNodeRect();
 }
 
 bool EventHub::HasOnSizeChanged() const
@@ -1045,6 +1064,11 @@ bool EventHub::HasVisibleAreaCallback(bool isUser)
     } else {
         return static_cast<bool>(visibleAreaInnerCallback_.callback);
     }
+}
+
+bool EventHub::HasThrottledVisibleAreaCallback() const
+{
+    return static_cast<bool>(throttledVisibleAreaCallback_.callback);
 }
 
 void EventHub::HandleOnAreaChange(const std::unique_ptr<RectF>& lastFrameRect,

@@ -100,7 +100,8 @@ protected:
     {
         return stateMachine_.Upgrade();
     }
-
+    void UpdatePointInfoForFinger(const TouchEvent& touchEvent);
+    void OnActionEnd(const GestureEvent& info);
     bool IsAllowedDrag();
     void UpdateDragPreviewOptionFromModifier();
     void ResetBorderRadiusAnimation();
@@ -116,7 +117,6 @@ protected:
     void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
     void HandleTextDragCallback();
     void HandleTextDragStart(const RefPtr<FrameNode>& frameNode, const GestureEvent& info);
-
 private:
     WeakPtr<DragDropInitiatingStateMachine> stateMachine_;
 };

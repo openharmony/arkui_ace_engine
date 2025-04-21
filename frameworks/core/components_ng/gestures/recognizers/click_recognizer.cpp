@@ -32,6 +32,7 @@ constexpr int32_t MAX_THRESHOLD_MANYTAP = 60;
 constexpr int32_t MAX_TAP_FINGERS = 10;
 constexpr double MAX_THRESHOLD = 20.0;
 constexpr int32_t DEFAULT_TAP_FINGERS = 1;
+constexpr int32_t DOUBLE_CLICK_COUNT = 2;
 constexpr int32_t DEFAULT_LONGPRESS_DURATION = 800000000;
 
 } // namespace
@@ -46,6 +47,7 @@ void ClickRecognizer::ForceCleanRecognizer()
     tapDeadlineTimer_.Cancel();
     currentTouchPointsNum_ = 0;
     responseRegionBuffer_.clear();
+    localMatrix_.clear();
     paintRect_ = RectF();
 }
 
@@ -68,7 +70,7 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
     if (!frameNode.Invalid()) {
         auto host = frameNode.Upgrade();
         CHECK_NULL_RETURN(host, false);
-        NGGestureRecognizer::Transform(localPoint, frameNode, false, isPostEventResult_, event.postEventNodeId);
+        TransformForRecognizer(localPoint, frameNode, false, isPostEventResult_, event.postEventNodeId);
         localPoint = localPoint + paintRect_.GetOffset();
         if (!host->InResponseRegionList(localPoint, responseRegionBuffer_)) {
             TAG_LOGI(AceLogTag::ACE_GESTURE,
@@ -120,7 +122,7 @@ ClickInfo ClickRecognizer::GetClickInfo()
     }
     ClickInfo info(touchPoint.id);
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+    TransformForRecognizer(localPoint, GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     info.SetTimeStamp(touchPoint.time);
@@ -177,7 +179,9 @@ void ClickRecognizer::OnAccepted()
         touchPoint = touchPoints_.begin()->second;
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
+    TransformForRecognizer(localPoint, GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     if (onClick_) {
@@ -220,16 +224,19 @@ void ClickRecognizer::OnRejected()
 
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
-        "Id:%{public}d, click %{public}d down, ETF: %{public}d, CTP: %{public}d, state: %{public}d",
-        event.touchEventId, event.id, equalsToFingers_, currentTouchPointsNum_, refereeState_);
     extraInfo_ = "ETF: " + std::to_string(equalsToFingers_) + " CFP: " + std::to_string(currentTouchPointsNum_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
 
+    if (count_ == DOUBLE_CLICK_COUNT) {
+        if (tappedCount_ == 0 || tappedCount_ == 1) {
+            TAG_LOGD(AceLogTag::ACE_GESTURE, "Click recognizer handle touch down event current Click is %{public}d",
+                tappedCount_);
+        }
+    }
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    if (pipeline && pipeline->IsFormRender()) {
+    if (pipeline && pipeline->IsFormRenderExceptDynamicComponent()) {
         touchDownTime_ = event.time;
     }
     if (IsRefereeFinished()) {
@@ -322,8 +329,6 @@ void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d up, state: %{public}d", event.touchEventId,
-        event.id, refereeState_);
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
         --currentTouchPointsNum_;
@@ -331,7 +336,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     // In a card scenario, determine the interval between finger pressing and finger lifting. Delete this section of
     // logic when the formal scenario is complete.
-    if (pipeline && pipeline->IsFormRender() && IsFormRenderClickRejected(event)) {
+    if (pipeline && pipeline->IsFormRenderExceptDynamicComponent() && IsFormRenderClickRejected(event)) {
         return;
     }
     if (IsRefereeFinished()) {
@@ -388,7 +393,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     // In form scenario, if move more than 20vp, reject click gesture.
     // Remove form scenario when formal solution is completed.
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    if (pipeline && pipeline->IsFormRender()) {
+    if (pipeline && pipeline->IsFormRenderExceptDynamicComponent()) {
         Offset offset = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
         if (offset.GetDistance() > MAX_THRESHOLD) {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "This gesture is out of offset, try to reject it");
@@ -402,7 +407,6 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d cancel", event.touchEventId, event.id);
     extraInfo_ += "receive cancel event.";
     if (IsRefereeFinished()) {
         return;
@@ -476,7 +480,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
         }
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+    TransformForRecognizer(localPoint, GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());

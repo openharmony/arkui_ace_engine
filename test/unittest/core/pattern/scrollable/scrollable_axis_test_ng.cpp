@@ -319,4 +319,52 @@ HWTEST_F(ScrollableAxisTestNg, DragEnd001, TestSize.Level1)
     EXPECT_NE(scrollable->lastMainDelta_, lastMainDelta);
     EXPECT_EQ(scrollable->lastMainDelta_, 200.0);
 }
+
+/**
+* @tc.name: NotifyFRCSceneInfo
+* @tc.desc: Test the NotifyFRCSceneInfo of DragUpdate
+* @tc.type: FUNC
+*/
+HWTEST_F(ScrollableAxisTestNg, NotifyFRCSceneInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List.
+     * @tc.expected: Create List successfully.
+     */
+    ListModelNG listModel;
+    listModel.Create();
+    listModel.SetEdgeEffect(EdgeEffect::NONE, false);
+    ViewAbstract::SetWidth(CalcLength(SCROLLABLE_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SCROLLABLE_HEIGHT));
+    ListItemModelNG itemModel;
+    itemModel.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewAbstract::SetHeight(CalcLength(450));
+    ViewStackProcessor::GetInstance()->Pop();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto listNode = AceType::DynamicCast<FrameNode>(element);
+    FlushUITasks(listNode);
+    auto scrollable = GetScrollable(listNode);
+    ASSERT_NE(scrollable, nullptr);
+    EXPECT_EQ(scrollable->lastMainDelta_, 0.0);
+    scrollable->context_ = PipelineContext::GetCurrentContext();
+    auto context = scrollable->context_.Upgrade();
+    ASSERT_NE(context, nullptr);
+
+    bool notifyFRCTrigger = false;
+    auto dragFRCSceneCallback = [&notifyFRCTrigger](double velocity, SceneStatus sceneStatus) {
+        notifyFRCTrigger = true;
+    };
+    scrollable->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
+    
+    /**
+    * @tc.steps: step2. Trigger the drag update event.
+    * @tc.expected: NotifyFRCSceneInfo call 1 time.
+    */
+    AxisDragStart(scrollable);
+    context->SetVsyncTime(1);
+    AxisDragUpdate(scrollable, -100.f);
+    ASSERT_NE(scrollable->axisAnimator_, nullptr);
+    ASSERT_NE(scrollable->axisAnimator_->axisScrollAnimator_, nullptr);
+    EXPECT_TRUE(notifyFRCTrigger);
+}
 } // namespace OHOS::Ace::NG

@@ -16,13 +16,8 @@
 #include "core/components_ng/render/adapter/animated_image.h"
 
 namespace OHOS::Ace::NG {
-#ifndef USE_ROSEN_DRAWING
-RefPtr<CanvasImage> AnimatedImage::Create(
-    const RefPtr<SkiaImageData>& data, const ResizeParam& size, const std::string& url)
-#else
 RefPtr<CanvasImage> AnimatedImage::Create(
     const RefPtr<DrawingImageData>& data, const ResizeParam& size, const std::string& url)
-#endif
 {
     return nullptr;
 }

@@ -77,7 +77,7 @@ private:
     void AddSucceedBlockRecognizer(const RefPtr<NGGestureRecognizer>& recognizer)
     {
         if (std::find(succeedBlockRecognizers_.begin(), succeedBlockRecognizers_.end(),
-            currentBatchRecognizer_) == succeedBlockRecognizers_.end()) {
+            recognizer) == succeedBlockRecognizers_.end()) {
             succeedBlockRecognizers_.push_back(recognizer);
         }
     }

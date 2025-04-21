@@ -18,6 +18,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/button/button_theme.h"
@@ -29,15 +30,15 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double DOUBLENESS = 2.0;
 constexpr Dimension OUT_RANGE_SPACE = 40.0_vp;
-constexpr Dimension MAX_WIDTH = 400.0_vp;
+constexpr Dimension MAX_WIDTH = 480.0_vp;
 constexpr Dimension MIN_BUTTON_FONT_SIZE = 9.0_vp;
-constexpr int32_t TIPS_MAX_LINE = 1;
 constexpr int32_t BUTTON_MAX_LINE = 2;
 constexpr float AGE_FONT_MAX_SIZE_SCALE = 2.0f;
 constexpr float AGE_SCALE_NUMBER = 1.0f;
@@ -123,7 +124,7 @@ void UpdateTextProperties(const RefPtr<PopupParam>& param, const RefPtr<TextLayo
 
 void SetHitTestMode(RefPtr<FrameNode>& popupNode, bool isBlockEvent)
 {
-    auto hub = popupNode->GetEventHub<BubbleEventHub>();
+    auto hub = popupNode->GetOrCreateEventHub<BubbleEventHub>();
     if (hub) {
         auto ges = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(ges);
@@ -133,6 +134,29 @@ void SetHitTestMode(RefPtr<FrameNode>& popupNode, bool isBlockEvent)
             ges->SetHitTestMode(HitTestMode::HTMDEFAULT);
         }
     }
+}
+
+int32_t GetTextLineHeight(const RefPtr<FrameNode>& textNode)
+{
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, 0);
+    auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
+    auto textLayoutWrapper = textNode->CreateLayoutWrapper();
+    CHECK_NULL_RETURN(textLayoutWrapper, 0);
+    textLayoutWrapper->Measure(layoutConstraint);
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(textLayoutWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, 0);
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(textLayoutAlgorithm, 0);
+    auto paragraph = textLayoutAlgorithm->GetSingleParagraph();
+    CHECK_NULL_RETURN(paragraph, 0);
+    auto paragHeight = paragraph->GetHeight();
+    auto paragLineCount = paragraph->GetLineCount();
+    int32_t paragLineHeight = 0;
+    if (paragLineCount > 0) {
+        paragLineHeight = static_cast<int32_t>(paragHeight / paragLineCount);
+    }
+    return paragLineHeight;
 }
 
 RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int32_t targetId,
@@ -147,7 +171,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
     auto useCustom = param->IsUseCustom();
 
     // onstateChange.
-    auto bubbleHub = popupNode->GetEventHub<BubbleEventHub>();
+    auto bubbleHub = popupNode->GetOrCreateEventHub<BubbleEventHub>();
     if (bubbleHub) {
         bubbleHub->SetOnStateChange(param->GetOnStateChange());
     }
@@ -212,10 +236,15 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
     bubblePattern->SetOutlineWidth(param->GetOutlineWidth());
     bubblePattern->SetInnerBorderLinearGradient(param->GetInnerBorderLinearGradient());
     bubblePattern->SetInnerBorderWidth(param->GetInnerBorderWidth());
+    if (param->IsTips()) {
+        bubblePattern->SetTipsTag(true);
+    }
     auto popupTheme = GetPopupTheme();
     CHECK_NULL_RETURN(popupTheme, nullptr);
     // Create child
     RefPtr<FrameNode> child;
+    int textLineHeight = 0;
+    RefPtr<TextLayoutProperty> layoutProps;
     if (primaryButton.showButton || secondaryButton.showButton) {
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -240,11 +269,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
         bubblePattern->SetMessageNode(textNode);
         auto popupTheme = GetPopupTheme();
         auto padding = param->IsTips() ? popupTheme->GetTipsPadding() : popupTheme->GetPadding();
-        auto layoutProps = textNode->GetLayoutProperty<TextLayoutProperty>();
-        if (param->IsTips()) {
-            layoutProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-            layoutProps->UpdateMaxLines(TIPS_MAX_LINE);
-        }
+        layoutProps = textNode->GetLayoutProperty<TextLayoutProperty>();
         PaddingProperty textPadding;
         textPadding.left = CalcLength(padding.Left());
         textPadding.right = CalcLength(padding.Right());
@@ -260,6 +285,9 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
         textNode->MarkModifyDone();
         if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
             textNode->MountToParent(columnNode);
+        } else if (param->IsTips()) {
+            textNode->MountToParent(columnNode);
+            textLineHeight = GetTextLineHeight(textNode);
         } else {
             auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
@@ -279,6 +307,13 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
     float popupMaxWidth = 0.0f;
     float popupMaxHeight = 0.0f;
     GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight, popupId);
+    if (param->IsTips()) {
+        layoutProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        if (textLineHeight > 0) {
+            auto maxLines = static_cast<int32_t>(std::floor(popupMaxHeight / textLineHeight)) - 1;
+            layoutProps->UpdateMaxLines(maxLines);
+        }
+    }
     if (GreatNotEqual(popupMaxWidth, 0.0f) && GreatNotEqual(popupMaxHeight, 0.0f)) {
         childLayoutProperty->UpdateCalcMaxSize(
             CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
@@ -332,7 +367,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
     auto popupNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
-    auto bubbleHub = popupNode->GetEventHub<BubbleEventHub>();
+    auto bubbleHub = popupNode->GetOrCreateEventHub<BubbleEventHub>();
     if (bubbleHub) {
         bubbleHub->SetOnStateChange(param->GetOnStateChange());
     }
@@ -630,6 +665,7 @@ void BubbleView::GetPopupMaxWidthAndHeight(
     popupMaxWidth = GetMaxWith().Value();
     if (param->IsTips()) {
         popupMaxWidth = (popupMaxWidth > MAX_WIDTH.ConvertToPx()) ? MAX_WIDTH.ConvertToPx() : popupMaxWidth;
+        popupMaxHeight = maxHeight - bottom - top;
     }
 }
 
@@ -637,7 +673,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
 {
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
     CHECK_NULL_VOID(popupNode);
-    auto bubbleHub = popupNode->GetEventHub<BubbleEventHub>();
+    auto bubbleHub = popupNode->GetOrCreateEventHub<BubbleEventHub>();
     if (bubbleHub && (!(param->GetIsPartialUpdate().has_value()))) {
         bubbleHub->SetOnStateChange(param->GetOnStateChange());
     }
@@ -1025,7 +1061,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(ButtonProperties& buttonParam, int32_
     } else {
         buttonProp->UpdatePadding(buttonPadding);
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (buttonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonProp->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         auto popupButtonType = static_cast<ButtonType>(popupTheme->GetPopupButtonType());

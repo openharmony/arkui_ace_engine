@@ -1331,7 +1331,7 @@ HWTEST_F(MenuLayout3TestNg, SelectLayoutAvoidAlgorithm002, TestSize.Level1)
     layoutAlgorithm->targetSize_ = SizeF(OFFSET_X, TARGET_SIZE_HEIGHT);
     layoutAlgorithm->SelectLayoutAvoidAlgorithm(prop, menuPattern, size, didNeedArrow, layoutWrapper);
     auto select = layoutAlgorithm->SelectLayoutAvoidAlgorithm(prop, menuPattern, size, didNeedArrow, layoutWrapper);
-    EXPECT_EQ(select.x_, ZERO);
+    EXPECT_EQ(select.x_, OFFSET_X_NEW);
 }
 
 /**
@@ -1900,5 +1900,59 @@ HWTEST_F(MenuLayout3TestNg, LayoutOtherDeviceLeftPreviewRightMenu001, TestSize.L
     layoutAlgorithm->param_.windowGlobalSizeF.height_ = FIVE;
     layoutAlgorithm->LayoutOtherDeviceLeftPreviewRightMenu(previewGeometryNode, menuGeometryNode, totalSize, TWENTY);
     EXPECT_EQ(previewGeometryNode->frame_.rect_.width_, ZERO);
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg065
+ * @tc.desc: Verify GetMenuWindowRectInfo.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg065, TestSize.Level1)
+{
+    MenuLayoutAlgorithm menuLayoutAlgorithm;
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", MenuType::MENU);
+    menuLayoutAlgorithm.canExpandCurrentWindow_ = false;
+    menuLayoutAlgorithm.isExpandDisplay_ = false;
+    menuLayoutAlgorithm.isUIExtensionSubWindow_ = true;
+    menuLayoutAlgorithm.targetOffset_ = { TARGET_OFFSET_FIRST, TARGET_OFFSET_SECOND };
+    menuLayoutAlgorithm.displayWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD_NEW, RECT_FORTH_NEW);
+    menuLayoutAlgorithm.UIExtensionHostWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD, RECT_FORTH);
+    menuLayoutAlgorithm.ModifyTargetOffset();
+    EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TEN);
+    EXPECT_EQ(menuLayoutAlgorithm.GetMenuWindowRectInfo(menuPattern).width_, TEN);
+
+    menuLayoutAlgorithm.canExpandCurrentWindow_ = true;
+    menuLayoutAlgorithm.isExpandDisplay_ = true;
+    menuLayoutAlgorithm.isTargetNodeInSubwindow_ = false;
+    menuLayoutAlgorithm.ModifyTargetOffset();
+    EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TEN);
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg065
+ * @tc.desc: Verify CheckChildConstraintCondition.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg066, TestSize.Level1)
+{
+    MenuLayoutAlgorithm menuLayoutAlgorithm;
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", MenuType::MENU);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    EXPECT_TRUE(menuLayoutAlgorithm.CheckChildConstraintCondition(menuPattern));
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    EXPECT_TRUE(menuLayoutAlgorithm.CheckChildConstraintCondition(menuPattern));
+    menuPattern->type_ = MenuType::MULTI_MENU;
+    EXPECT_FALSE(menuLayoutAlgorithm.CheckChildConstraintCondition(menuPattern));
+    menuPattern->type_ = MenuType::SUB_MENU;
+    menuPattern->parentMenuItem_ = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
+    auto menuItemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::SIDE;
+    menuPattern->parentMenuItem_->pattern_ = menuItemPattern;
+    EXPECT_TRUE(menuLayoutAlgorithm.CheckChildConstraintCondition(menuPattern));
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
+    EXPECT_FALSE(menuLayoutAlgorithm.CheckChildConstraintCondition(menuPattern));
 }
 } // namespace OHOS::Ace::NG

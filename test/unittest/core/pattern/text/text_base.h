@@ -22,7 +22,6 @@
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_paint_method.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -112,6 +111,10 @@ constexpr float TEXT_CONTENT_SIZE = 50.0f;
 constexpr float TEXT_CONTENT_OFFSET = 2.25f;
 const std::string TEXT_DEFAULT_VALUE =
     "{\"style\":\"FontStyle.Normal\",\"size\":\"16.00fp\",\"weight\":"
+    "\"FontWeight.Normal\",\"variableFontWeight\":\"0\",\"enableVariableFontWeight\":\"false\",\"family\":"
+    "\"HarmonyOS Sans\"}";
+const std::string WITH_THEME_CALL_TEXT_DEFAULT_VALUE =
+    "{\"style\":\"FontStyle.Normal\",\"size\":\"14.00px\",\"weight\":"
     "\"FontWeight.Normal\",\"variableFontWeight\":\"0\",\"enableVariableFontWeight\":\"false\",\"family\":"
     "\"HarmonyOS Sans\"}";
 const std::string TEXT_EQUALS_VALUE =

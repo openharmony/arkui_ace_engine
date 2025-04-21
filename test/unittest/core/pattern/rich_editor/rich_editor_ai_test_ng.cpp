@@ -93,7 +93,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite001, TestSize.Level1)
     richEditorController->AddTextSpan(options);
     richEditorPattern->textSelector_.Update(0, 5);
     auto mockContainer = MockContainer::Current();
-    mockContainer->SetIsScenceBoardWindow(true);
+    mockContainer->SetIsSceneBoardWindow(true);
     auto result = richEditorPattern->IsShowAIWrite();
     EXPECT_FALSE(result);
 }

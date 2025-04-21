@@ -267,7 +267,7 @@ void CalendarMonthPattern::SetVirtualNodeUserSelected(int32_t index)
         for (auto& day : obtainedMonth_.days) {
             day.focused = false;
         }
-        auto calendarEventHub = GetEventHub<CalendarEventHub>();
+        auto calendarEventHub = GetOrCreateEventHub<CalendarEventHub>();
         CHECK_NULL_VOID(calendarEventHub);
         if (selectedIndex >= 0 && selectedIndex < static_cast<int32_t>(obtainedMonth_.days.size())) {
             obtainedMonth_.days[selectedIndex].focused = true;
@@ -484,7 +484,7 @@ void CalendarMonthPattern::InitHoverEvent()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = GetEventHub<CalendarEventHub>();
+    auto eventHub = GetOrCreateEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -536,7 +536,7 @@ void CalendarMonthPattern::OnClick(Offset& localLocation, const ObtainedMonth& o
         for (auto& day : pattern->obtainedMonth_.days) {
             day.focused = false;
         }
-        auto calendarEventHub = GetEventHub<CalendarEventHub>();
+        auto calendarEventHub = GetOrCreateEventHub<CalendarEventHub>();
         CHECK_NULL_VOID(calendarEventHub);
         if (index >= 0 && index < static_cast<int32_t>(obtainedMonth.days.size())) {
             pattern->obtainedMonth_.days[index].focused = true;
@@ -1069,6 +1069,17 @@ std::string CalendarMonthPattern::GetDayStr(int32_t index)
     }
 }
 
+std::string CalendarMonthPattern::GetTodayStr()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, "");
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, "");
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_RETURN(theme, "");
+    return theme->GetCalendarTheme().today;
+}
+
 void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarDay)
 {
     auto host = GetHost();
@@ -1085,7 +1096,7 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
     std::string message;
     if (calendarDay.month.year == calendarDay_.month.year && calendarDay.month.month == calendarDay_.month.month &&
                       calendarDay.day == calendarDay_.day) {
-        message += Localization::GetInstance()->GetEntryLetters("calendar.today");
+        message += GetTodayStr();
     }
     message += std::to_string(calendarDay.month.year) + "/";
     message += std::to_string(calendarDay.month.month) + "/";

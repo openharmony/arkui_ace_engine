@@ -30,7 +30,6 @@ build_component_ng("render_ng") {
     "adapter/sk_painter.cpp",
     "adapter/skia_color_filter.cpp",
     "adapter/skia_decoration_painter.cpp",
-    "adapter/skia_image.cpp",
     "adapter/span_model_adapter.cpp",
     "adapter/svg_canvas_image.cpp",
     "adapter/txt_font_collection.cpp",
@@ -90,13 +89,12 @@ build_component_ng("render_ng") {
     sources -= [
       "adapter/sk_painter.cpp",
       "adapter/skia_decoration_painter.cpp",
-      "adapter/skia_image.cpp",
     ]
 
     rosen_sources += [
-      "adapter/rosen/drawing_decoration_painter.cpp",
-      "adapter/rosen/drawing_image.cpp",
-      "adapter/rosen/drawing_painter.cpp",
+      "adapter/drawing_decoration_painter.cpp",
+      "adapter/drawing_image.cpp",
+      "adapter/drawing_painter.cpp",
     ]
   }
 

@@ -142,7 +142,7 @@ void MenuPreviewPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -227,7 +227,7 @@ void MenuPreviewPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     CHECK_NULL_VOID(menuPattern);
     auto dragTargetNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
     CHECK_NULL_VOID(dragTargetNode);
-    auto eventHub = dragTargetNode->GetEventHub<EventHub>();
+    auto eventHub = dragTargetNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto targetGestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(targetGestureHub);
@@ -253,7 +253,9 @@ void MenuPreviewPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
     auto panEvent = MakeRefPtr<PanEvent>(std::move(actionStartTask), nullptr, std::move(actionEndTask), nullptr);
-    gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, distanceMap);
 }
 
 void MenuPreviewPattern::HandleDragEnd(float offsetX, float offsetY, float velocity)
@@ -267,6 +269,6 @@ void MenuPreviewPattern::HandleDragEnd(float offsetX, float offsetY, float veloc
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu");
-    wrapperPattern->HideMenu();
+    wrapperPattern->HideMenu(HideMenuType::PREVIEW_DRAG_END);
 }
 } // namespace OHOS::Ace::NG

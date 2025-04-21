@@ -1101,8 +1101,11 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest012, TestSize.Level1)
  */
 HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest001, TestSize.Level1)
 {
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     RadioLayoutAlgorithm radioLayoutAlgorithm;
-    radioLayoutAlgorithm.InitializeParam();
+    radioLayoutAlgorithm.InitializeParam(frameNode);
     EXPECT_EQ(radioLayoutAlgorithm.horizontalPadding_, HORIZONTAL_PADDING.ConvertToPx());
     EXPECT_EQ(radioLayoutAlgorithm.verticalPadding_, VERTICAL_PADDING.ConvertToPx());
 }

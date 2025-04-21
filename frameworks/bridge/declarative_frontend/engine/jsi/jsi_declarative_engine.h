@@ -27,7 +27,6 @@
 #include "native_engine/impl/ark/ark_native_engine.h"
 
 #include "base/memory/ace_type.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_page.h"

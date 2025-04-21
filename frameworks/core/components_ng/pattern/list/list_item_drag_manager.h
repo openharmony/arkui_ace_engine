@@ -53,7 +53,7 @@ public:
 
     void InitDragDropEvent();
     void DeInitDragDropEvent();
-    void SetDragState(ListItemDragState dragState);
+    void SetIsNeedDividerAnimation(bool isNeedDividerAnimation);
 
 private:
     void HandleOnItemLongPress(const GestureEvent& info);
@@ -71,11 +71,14 @@ private:
     void SetPosition(const OffsetF& offset);
     void ResetPrevScaleNode();
     int32_t ScaleNearItem(int32_t index, const RectF& rect, const OffsetF& delta);
+    int32_t CalcMainNearIndex(const int32_t index, const OffsetF& delta);
+    int32_t CalcCrossNearIndex(const int32_t index, const OffsetF& delta);
     int32_t GetIndex() const;
     int32_t GetLanes() const;
     bool IsInHotZone(int32_t index, const RectF& frameRect) const;
     RefPtr<FrameNode> GetListFrameNode() const;
-
+    OffsetF GetParentPaddingOffset();
+    
     OffsetF dragOffset_;
     WeakPtr<FrameNode> frameNode_;
     WeakPtr<ForEachBaseNode> forEachNode_;
@@ -88,6 +91,7 @@ private:
     int32_t lanes_ = 1;
     bool isStackFromEnd_ = false;
     bool scrolling_ = false;
+    bool isSwapAnimationStopped_ = true;
     OffsetF realOffset_;
 
     int32_t fromIndex_ = -1;

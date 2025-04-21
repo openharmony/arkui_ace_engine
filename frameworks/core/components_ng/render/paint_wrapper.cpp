@@ -40,21 +40,21 @@ void PaintWrapper::SetNodePaintMethod(const RefPtr<NodePaintMethod>& nodePaintIm
     auto contentModifier = AceType::DynamicCast<ContentModifier>(nodePaintImpl_->GetContentModifier(this));
     if (contentModifier) {
         if (extensionHandler_) {
-            contentModifier->SetExtensionHandler(AceType::RawPtr(extensionHandler_));
+            contentModifier->SetExtensionHandler(extensionHandler_);
         }
         renderContext->FlushContentModifier(contentModifier);
     }
     auto overlayModifier = AceType::DynamicCast<OverlayModifier>(nodePaintImpl_->GetOverlayModifier(this));
     if (overlayModifier) {
         if (extensionHandler_) {
-            overlayModifier->SetExtensionHandler(AceType::RawPtr(extensionHandler_));
+            overlayModifier->SetExtensionHandler(extensionHandler_);
         }
         renderContext->FlushOverlayModifier(overlayModifier);
     }
     auto foregroundModifier = AceType::DynamicCast<ForegroundModifier>(nodePaintImpl_->GetForegroundModifier(this));
     if (foregroundModifier) {
         if (extensionHandler_) {
-            foregroundModifier->SetExtensionHandler(AceType::RawPtr(extensionHandler_));
+            foregroundModifier->SetExtensionHandler(extensionHandler_);
         }
         renderContext->FlushForegroundModifier(foregroundModifier);
     }

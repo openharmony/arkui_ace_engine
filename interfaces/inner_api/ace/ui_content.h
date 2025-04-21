@@ -177,6 +177,7 @@ public:
     virtual uint32_t GetBackgroundColor() = 0;
     virtual void SetBackgroundColor(uint32_t color) = 0;
     virtual void SetUIContentType(UIContentType uIContentType) {};
+    virtual void SetHostParams(const OHOS::AAFwk::WantParams& params) {};
     virtual void SetWindowContainerColor(uint32_t activeColor, uint32_t inactiveColor) = 0;
 
     // Judge whether window need soft keyboard or not

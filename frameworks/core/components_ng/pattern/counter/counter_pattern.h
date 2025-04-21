@@ -84,7 +84,9 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        auto frameNode = GetHost();
+        CHECK_NULL_RETURN(frameNode, FocusPattern());
+        if (frameNode->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
         }
         return { FocusType::SCOPE, true, FocusStyleType::OUTER_BORDER };
@@ -115,7 +117,7 @@ public:
         auto addNode = AceType::DynamicCast<FrameNode>(
             frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId_.value())));
         if (addNode) {
-            auto eventHub = addNode->GetEventHub<ButtonEventHub>();
+            auto eventHub = addNode->GetOrCreateEventHub<ButtonEventHub>();
             if (eventHub) {
                 auto enableInc = eventHub->GetStateEffect();
                 json->Put("enableInc", enableInc ? "true" : "false");
@@ -125,7 +127,7 @@ public:
         auto subNode = AceType::DynamicCast<FrameNode>(
             frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId_.value())));
         if (subNode) {
-            auto eventHub = subNode->GetEventHub<ButtonEventHub>();
+            auto eventHub = subNode->GetOrCreateEventHub<ButtonEventHub>();
             if (eventHub) {
                 auto enableDec = eventHub->GetStateEffect();
                 json->Put("enableDec", enableDec ? "true" : "false");
@@ -141,7 +143,7 @@ private:
         auto addNode = AceType::DynamicCast<FrameNode>(
             frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId_.value())));
         if (addNode) {
-            auto eventHub = addNode->GetEventHub<ButtonEventHub>();
+            auto eventHub = addNode->GetOrCreateEventHub<ButtonEventHub>();
             if (eventHub) {
                 auto enableInc = eventHub->GetStateEffect();
                 DumpLog::GetInstance().AddDesc(std::string("enableInc: ").append(enableInc ? "true" : "false"));
@@ -151,7 +153,7 @@ private:
         auto subNode = AceType::DynamicCast<FrameNode>(
             frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId_.value())));
         if (subNode) {
-            auto eventHub = subNode->GetEventHub<ButtonEventHub>();
+            auto eventHub = subNode->GetOrCreateEventHub<ButtonEventHub>();
             if (eventHub) {
                 auto enableDec = eventHub->GetStateEffect();
                 DumpLog::GetInstance().AddDesc(std::string("enableDec: ").append(enableDec ? "true" : "false"));

@@ -36,9 +36,11 @@
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
 #include "adapter/ohos/osal/window_utils.h"
 #include "base/i18n/localization.h"
+#include "base/log/event_report.h"
 #include "base/log/jank_frame_report.h"
 #include "base/thread/background_task_executor.h"
 #include "base/thread/task_dependency_manager.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "bridge/card_frontend/card_frontend.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -64,6 +66,10 @@
 
 #include "base/ressched/ressched_report.h"
 
+#ifdef ACE_ENABLE_VK
+#include "accessibility_config.h"
+#endif
+
 namespace OHOS::Ace::Platform {
 namespace {
 constexpr uint32_t DIRECTION_KEY = 0b1000;
@@ -85,12 +91,13 @@ const char IS_FOCUS_ACTIVE_KEY[] = "persist.gesture.smart_gesture_enable";
 std::mutex g_mutexFormRenderFontFamily;
 constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
 constexpr int32_t EXTENSION_HALF_SCREEN_MODE = 2;
+constexpr size_t RESOURCE_CACHE_DEFAULT_SIZE = 5;
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
 #else
 const std::string ASSET_LIBARCH_PATH = "/lib/arm";
 #endif
-const std::string THEME_JSON = "theme_config.json";
+constexpr uint32_t OHOS_THEME_ID = 125829872;
 
 #ifndef NG_BUILD
 constexpr char ARK_ENGINE_SHARED_LIB[] = "libace_engine_ark.z.so";
@@ -184,27 +191,59 @@ const char* GetDeclarativeSharedLibrary()
     return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
 }
 
-void LoadSystemThemeFromJson(const RefPtr<AssetManager>& assetManager, const RefPtr<PipelineBase>& pipelineContext)
+void LoadSystemThemeFromJson(const RefPtr<AssetManager>& assetManager, const RefPtr<PipelineBase>& pipelineContext,
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
 {
+    CHECK_NULL_VOID(assetManager);
+    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto hapModuleInfo = context->GetHapModuleInfo();
+    CHECK_NULL_VOID(hapModuleInfo);
+    std::string themeConfigFilePath = hapModuleInfo->systemTheme;
+    if (themeConfigFilePath.empty()) {
+        LOGW("not found systemTheme in HapModuleInfo, loading default OHOS_THEME");
+        auto themeManager = pipelineContext->GetThemeManager();
+        CHECK_NULL_VOID(themeManager);
+        themeManager->SetSystemThemeId(OHOS_THEME_ID);
+        return;
+    }
+    constexpr char profilePrefix[] = "$profile:";
+    constexpr char themeConfigDefaultName[] = "theme_config";
+    constexpr char jsonSubfix[] = ".json";
+    constexpr char themePrefix[] = "$theme:";
+    if (!StringUtils::StartWith(themeConfigFilePath,
+        std::string(profilePrefix) + std::string(themeConfigDefaultName))) { // start with: "$profile:theme_config"
+        LOGW("path: %{public}s doesn't start with %{public}s%{public}s, loading default OHOS_THEME",
+            themeConfigFilePath.c_str(), profilePrefix, themeConfigDefaultName);
+        auto themeManager = pipelineContext->GetThemeManager();
+        CHECK_NULL_VOID(themeManager);
+        themeManager->SetSystemThemeId(OHOS_THEME_ID);
+        return;
+    }
+    themeConfigFilePath = themeConfigFilePath.substr(sizeof(profilePrefix) - 1) + jsonSubfix; // e.g. theme_config.json
     std::string themeJsonContent;
-    bool loadThemeJsonFlag = OHOS::Ace::Framework::GetAssetContentImpl(assetManager, THEME_JSON, themeJsonContent);
+    bool loadThemeJsonFlag =
+        OHOS::Ace::Framework::GetAssetContentImpl(assetManager, themeConfigFilePath, themeJsonContent);
     if (loadThemeJsonFlag) {
         auto themeRootJson = JsonUtil::ParseJsonString(themeJsonContent);
         if (themeRootJson) {
-            auto systemThemeId = themeRootJson->GetInt("systemTheme", -1);
-            if (systemThemeId != -1) {
+            std::string systemThemeValue = themeRootJson->GetString("systemTheme", ""); // e.g. $theme:125829872
+            if (!systemThemeValue.empty() && StringUtils::StartWith(systemThemeValue, themePrefix) &&
+                systemThemeValue.size() > sizeof(themePrefix) - 1) {
+                auto systemThemeId = StringUtils::StringToInt(systemThemeValue.substr(sizeof(themePrefix) - 1));
                 auto themeManager = pipelineContext->GetThemeManager();
-                themeManager->LoadSystemTheme(systemThemeId);
+                CHECK_NULL_VOID(themeManager);
+                themeManager->SetSystemThemeId(systemThemeId);
                 auto checkTheme = themeManager->GetSystemTheme();
-                LOGI("get systemTheme id from json success, systemTheme id = %{public}d", checkTheme);
+                LOGI("get systemThemeId from json success, systemTheme id = %{public}d", checkTheme);
             } else {
-                LOGW("get systemTheme id from json failed, not a number");
+                LOGW("get systemThemeId from json failed, not a valid id");
             }
         } else {
-            LOGW("get systemTheme id from json failed, parse theme json file failed");
+            LOGW("get systemThemeId from json failed, parse theme json file failed");
         }
     } else {
-        LOGW("get systemTheme id from json failed, %{public}s not found", THEME_JSON.c_str());
+        LOGW("get systemTheme id from json failed, %{public}s not found", themeConfigFilePath.c_str());
     }
 }
 
@@ -238,7 +277,7 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     ThemeConstants::InitDeviceType();
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     pipelineContext->SetThemeManager(themeManager);
-    LoadSystemThemeFromJson(assetManager, pipelineContext);
+    LoadSystemThemeFromJson(assetManager, pipelineContext, context);
     themeManager->SetColorScheme(colorScheme);
     themeManager->LoadCustomTheme(assetManager);
     themeManager->LoadResourceThemes();
@@ -291,6 +330,33 @@ void ParseLanguage(ConfigurationChange& configurationChange, const std::string& 
         AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
     }
 }
+
+#ifdef ACE_ENABLE_VK
+class HighContrastObserver : public AccessibilityConfig::AccessibilityConfigObserver {
+public:
+    HighContrastObserver(AceContainer* aceContainer) : aceContainer_(aceContainer) {}
+
+    void OnConfigChanged(const AccessibilityConfig::CONFIG_ID id, const AccessibilityConfig::ConfigValue& value)
+    {
+        if (first_) {
+            first_ = false;
+            return;
+        }
+        if (aceContainer_ == nullptr) {
+            return;
+        }
+        auto pipelineContext = aceContainer_->GetPipelineContext();
+        auto fontManager = pipelineContext == nullptr ? nullptr : pipelineContext->GetFontManager();
+        if (fontManager != nullptr) {
+            fontManager->UpdateHybridRenderNodes();
+        }
+    }
+
+private:
+    AceContainer* aceContainer_ = nullptr;
+    bool first_ = true;
+};
+#endif
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
@@ -311,6 +377,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_pt
     if (ability) {
         abilityInfo_ = ability->GetAbilityInfo();
     }
+#ifdef ACE_ENABLE_VK
+    SubscribeHighContrastChange();
+#endif
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type,
@@ -333,6 +402,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
+#ifdef ACE_ENABLE_VK
+    SubscribeHighContrastChange();
+#endif
 }
 
 // for DynamicComponent
@@ -356,6 +428,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
+#ifdef ACE_ENABLE_VK
+    SubscribeHighContrastChange();
+#endif
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type) : instanceId_(instanceId), type_(type)
@@ -372,6 +447,9 @@ AceContainer::~AceContainer()
 {
     std::lock_guard lock(destructMutex_);
     LOGI("Container Destroyed");
+#ifdef ACE_ENABLE_VK
+    UnsubscribeHighContrastChange();
+#endif
 }
 
 void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
@@ -468,6 +546,7 @@ void AceContainer::Destroy()
     }
     DestroyToastSubwindow(instanceId_);
     DestroySelectOverlaySubwindow(instanceId_);
+    RegisterContainerHandler(nullptr);
     resRegister_.Reset();
     assetManager_.Reset();
 }
@@ -885,7 +964,7 @@ void AceContainer::OnInactive(int32_t instanceId)
             ContainerScope scope(container->GetInstanceId());
             pipelineContext->WindowFocus(false);
             pipelineContext->ChangeDarkModeBrightness();
-            if (container->IsScenceBoardWindow()) {
+            if (container->IsSceneBoardWindow()) {
                 JankFrameReport::GetInstance().FlushRecord();
             }
         },
@@ -964,7 +1043,7 @@ void AceContainer::UnActiveWindow(int32_t instanceId)
             ContainerScope scope(container->GetInstanceId());
             pipelineContext->WindowActivate(false);
             pipelineContext->ChangeDarkModeBrightness();
-            if (container->IsScenceBoardWindow()) {
+            if (container->IsSceneBoardWindow()) {
                 JankFrameReport::GetInstance().FlushRecord();
             }
         },
@@ -1230,12 +1309,13 @@ void AceContainer::InitializeCallback()
         ACE_SCOPED_TRACE("DensityChangeCallback(%lf)", density);
         auto callback = [context, density, id]() {
             context->OnSurfaceDensityChanged(density);
-            if (context->IsDensityChanged()) {
+            if (context->IsNeedReloadDensity()) {
                 auto container = Container::GetContainer(id);
                 CHECK_NULL_VOID(container);
                 auto aceContainer = DynamicCast<AceContainer>(container);
                 CHECK_NULL_VOID(aceContainer);
                 aceContainer->NotifyDensityUpdate(density);
+                context->SetIsNeedReloadDensity(false);
             }
         };
         auto taskExecutor = context->GetTaskExecutor();
@@ -1404,6 +1484,9 @@ void AceContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiW
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
     container->SetUIWindowInner(uiWindow);
+    if (!container->IsSceneBoardWindow()) {
+        ResourceManager::GetInstance().SetResourceCacheSize(RESOURCE_CACHE_DEFAULT_SIZE);
+    }
 }
 
 sptr<OHOS::Rosen::Window> AceContainer::GetUIWindow(int32_t instanceId)
@@ -2063,7 +2146,7 @@ bool AceContainer::DumpCommon(const std::vector<std::string>& params, std::vecto
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
     if (IsUIExtensionWindow()) {
-        DumpLog::GetInstance().SetSeparator(";");
+        DumpLog::GetInstance().SetUIExtFlag(true);
     }
     auto context = runtimeContext_.lock();
     DumpLog::GetInstance().Print("bundleName:" + context->GetHapModuleInfo()->bundleName);
@@ -3040,6 +3123,14 @@ void AceContainer::UpdateConfiguration(
         ParseLanguage(configurationChange, parsedConfig.preferredLanguage);
         resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
     }
+    // The density of sub windows needs to be consistent with the main window.
+    if (instanceId_ >= MIN_SUBCONTAINER_ID) {
+        auto parentContainer = Platform::AceContainer::GetContainer(GetParentId());
+        CHECK_NULL_VOID(parentContainer);
+        auto parentPipeline = parentContainer->GetPipelineContext();
+        CHECK_NULL_VOID(parentPipeline);
+        resConfig.SetDensity(parentPipeline->GetDensity());
+    }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
     if (!abilityLevel) {
@@ -3056,7 +3147,7 @@ void AceContainer::UpdateConfiguration(
     }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     if (configurationChange.IsNeedUpdate()) {
-        OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
+        OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig);
     }
 #endif
     NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
@@ -3343,7 +3434,7 @@ void AceContainer::GetImageDataFromAshmem(
     }
 }
 
-bool AceContainer::IsScenceBoardWindow()
+bool AceContainer::IsSceneBoardWindow()
 {
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
@@ -4359,4 +4450,35 @@ bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool ani
     }
     return true;
 }
+
+#ifdef ACE_ENABLE_VK
+void AceContainer::SubscribeHighContrastChange()
+{
+    if (!Rosen::RSSystemProperties::GetHybridRenderEnabled()) {
+        return;
+    }
+    if (highContrastObserver_ != nullptr) {
+        return;
+    }
+    auto& config = AccessibilityConfig::AccessibilityConfig::GetInstance();
+    if (!config.InitializeContext()) {
+        return;
+    }
+    highContrastObserver_ = std::make_shared<HighContrastObserver>(this);
+    config.SubscribeConfigObserver(AccessibilityConfig::CONFIG_ID::CONFIG_HIGH_CONTRAST_TEXT, highContrastObserver_);
+}
+
+void AceContainer::UnsubscribeHighContrastChange()
+{
+    if (highContrastObserver_ == nullptr) {
+        return;
+    }
+    auto& config = AccessibilityConfig::AccessibilityConfig::GetInstance();
+    if (config.InitializeContext()) {
+        config.UnsubscribeConfigObserver(
+            AccessibilityConfig::CONFIG_ID::CONFIG_HIGH_CONTRAST_TEXT, highContrastObserver_);
+    }
+    highContrastObserver_ = nullptr;
+}
+#endif
 } // namespace OHOS::Ace::Platform

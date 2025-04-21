@@ -14,7 +14,7 @@
  */
 
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { Driver, ON,Component  } from '@kit.TestKit';
+import { Driver, ON, Component } from '@kit.TestKit';
 import {
   buttonClick,
   radioClick,
@@ -49,8 +49,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -58,8 +56,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -72,8 +68,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
       done();
     })
@@ -85,8 +79,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
       done();
     })
@@ -98,8 +90,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       done();
@@ -110,8 +100,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('shadow.value.color', true, '基础属性', '通用属性2')
       await buttonClick({
         buttonClickObj: 1,
-
-
       })
 
       done();
@@ -122,8 +110,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('shadow.value.color', true, '基础属性', '通用属性2')
       await buttonClick({
         buttonClickObj: 2,
-
-
       })
 
       done();
@@ -134,8 +120,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('shadow.value.color', true, '基础属性', '通用属性2')
       await buttonClick({
         buttonClickObj: 3,
-
-
       })
 
       done();
@@ -146,8 +130,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('shadow.value.color', true, '基础属性', '通用属性2')
       await buttonClick({
         buttonClickObj: 4,
-
-
       })
 
       done();
@@ -161,8 +143,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -176,8 +156,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -185,8 +163,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -199,8 +175,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -208,8 +182,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -222,8 +194,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
       done();
     })
@@ -235,8 +205,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
       done();
     })
@@ -251,8 +219,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -260,8 +226,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -277,8 +241,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -286,8 +248,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -303,8 +263,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -312,8 +270,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -330,8 +286,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -339,8 +293,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -356,7 +308,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       await sliderDrag({
@@ -364,8 +315,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -381,8 +330,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -390,8 +337,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -414,8 +359,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -431,8 +374,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       done();
@@ -443,8 +384,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('colorBlend', true, '基础属性', '通用属性2')
       await buttonClick({
         buttonClickObj: 1,
-
-
       })
 
       done();
@@ -455,7 +394,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('colorBlend', true, '基础属性', '通用属性2')
       await buttonClick({
         buttonClickObj: 2,
-
       })
 
       done();
@@ -466,8 +404,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('colorBlend', true, '基础属性', '通用属性2')
       await buttonClick({
         buttonClickObj: 3,
-
-
       })
 
       done();
@@ -478,8 +414,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('colorBlend', true, '基础属性', '通用属性2')
       await buttonClick({
         buttonClickObj: 4,
-
-
       })
 
       done();
@@ -493,8 +427,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -511,8 +443,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -520,8 +450,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -534,8 +462,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       done();
@@ -546,8 +472,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('linearGradientBlur.options.fractionStops', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 1,
-
-
       })
 
       done();
@@ -561,8 +485,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -576,8 +498,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       done();
@@ -588,8 +508,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('linearGradientBlur.options.direction', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 1,
-
-
       })
 
       done();
@@ -600,8 +518,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('linearGradientBlur.options.direction', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 2,
-
-
       })
 
       done();
@@ -612,8 +528,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('linearGradientBlur.options.direction', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 3,
-
-
       })
 
       done();
@@ -624,8 +538,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('linearGradientBlur.options.direction', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 4,
-
-
       })
 
       done();
@@ -636,8 +548,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('linearGradientBlur.options.direction', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 5,
-
-
       })
 
       done();
@@ -648,8 +558,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('linearGradientBlur.options.direction', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 6,
-
-
       })
 
       done();
@@ -660,8 +568,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('linearGradientBlur.options.direction', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 7,
-
-
       })
 
       done();
@@ -676,7 +582,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -691,7 +596,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -705,8 +609,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -721,8 +623,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       done();
@@ -733,8 +633,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 1,
-
-
       })
 
       done();
@@ -745,7 +643,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 2,
-
       })
 
       done();
@@ -756,8 +653,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 3,
-
-
       })
 
       done();
@@ -768,7 +663,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 4,
-
       })
 
       done();
@@ -779,7 +673,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 5,
-
       })
 
       done();
@@ -790,8 +683,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 6,
-
-
       })
 
       done();
@@ -802,8 +693,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 7,
-
-
       })
 
       done();
@@ -814,8 +703,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 8,
-
-
       })
 
       done();
@@ -826,8 +713,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 9,
-
-
       })
 
       done();
@@ -838,8 +723,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 10,
-
-
       })
 
       done();
@@ -850,8 +733,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 11,
-
-
       })
 
       done();
@@ -862,8 +743,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 12,
-
-
       })
 
       done();
@@ -874,8 +753,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 13,
-
-
       })
 
       done();
@@ -895,8 +772,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 15,
-
-
       })
 
       done();
@@ -907,8 +782,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 16,
-
-
       })
 
       done();
@@ -919,8 +792,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 17,
-
-
       })
 
       done();
@@ -931,8 +802,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 18,
-
-
       })
 
       done();
@@ -953,8 +822,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 20,
-
-
       })
 
       done();
@@ -965,8 +832,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 21,
-
-
       })
 
       done();
@@ -977,8 +842,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 22,
-
-
       })
 
       done();
@@ -989,8 +852,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 23,
-
-
       })
 
       done();
@@ -1001,8 +862,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 24,
-
-
       })
 
       done();
@@ -1013,8 +872,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 25,
-
-
       })
 
       done();
@@ -1025,8 +882,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 26,
-
-
       })
 
       done();
@@ -1037,8 +892,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 27,
-
-
       })
 
       done();
@@ -1049,8 +902,6 @@ export default function MenuItemGroup3() {
       await searchParentBlock('blendMode.value', true, '基础属性', '通用属性2')
       await radioClick({
         radioClickObj: 28,
-
-
       })
 
       done();
@@ -1064,8 +915,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       }, 'blendMode.value', '基础属性', '通用属性2')
       done();
 
@@ -1074,7 +923,7 @@ export default function MenuItemGroup3() {
 
     it('ArkUI_MenuItemGroup_Comp_0315', 0, async (done: Function) => {
       // 获取不到
-      await titleSearch('基础属性','blendMode.type','通用属性2')
+      await titleSearch('基础属性', 'blendMode.type', '通用属性2')
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
@@ -1086,7 +935,7 @@ export default function MenuItemGroup3() {
     })
     it('ArkUI_MenuItemGroup_Comp_0316', 0, async (done: Function) => {
       // 获取不到
-      await titleSearch('基础属性','blendMode.type','通用属性2')
+      await titleSearch('基础属性', 'blendMode.type', '通用属性2')
       await radioClick({
         radioClickObj: 1,
         toggleClick: {
@@ -1104,7 +953,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
       })
       done();
 
@@ -1117,8 +965,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
       done();
 
@@ -1132,8 +978,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -1141,8 +985,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -1156,8 +998,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -1165,8 +1005,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -1180,8 +1018,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -1189,8 +1025,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -1203,8 +1037,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -1212,8 +1044,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -1226,8 +1056,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -1235,8 +1063,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -1249,7 +1075,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       await sliderDrag({
@@ -1257,8 +1082,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -1298,8 +1121,6 @@ export default function MenuItemGroup3() {
 
       await sliderDrag({
         slideStar: Slide.start,
-
-
       })
 
       await sliderDrag({
@@ -1307,7 +1128,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
       })
 
       done();
@@ -1320,8 +1140,6 @@ export default function MenuItemGroup3() {
 
       await radioClick({
         radioClickObj: 0,
-
-
       })
 
       done();
@@ -1334,7 +1152,6 @@ export default function MenuItemGroup3() {
 
       await radioClick({
         radioClickObj: 1,
-
       })
 
       done();
@@ -1359,7 +1176,6 @@ export default function MenuItemGroup3() {
 
       await radioClick({
         radioClickObj: 3,
-
       })
 
       done();
@@ -1372,7 +1188,6 @@ export default function MenuItemGroup3() {
 
       await radioClick({
         radioClickObj: 4,
-
       })
 
       done();
@@ -1397,8 +1212,6 @@ export default function MenuItemGroup3() {
 
       await radioClick({
         radioClickObj: 6,
-
-
       })
 
       done();
@@ -1411,8 +1224,6 @@ export default function MenuItemGroup3() {
 
       await radioClick({
         radioClickObj: 7,
-
-
       })
 
       done();
@@ -1428,8 +1239,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
-
       })
 
       done();
@@ -1446,7 +1255,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
       })
 
       done();
@@ -1459,8 +1267,6 @@ export default function MenuItemGroup3() {
 
       await buttonClick({
         buttonClickObj: 1,
-
-
       })
 
       done();
@@ -1473,8 +1279,6 @@ export default function MenuItemGroup3() {
 
       await buttonClick({
         buttonClickObj: 2,
-
-
       })
 
       done();
@@ -1487,8 +1291,6 @@ export default function MenuItemGroup3() {
 
       await buttonClick({
         buttonClickObj: 3,
-
-
       })
 
       done();
@@ -1501,8 +1303,6 @@ export default function MenuItemGroup3() {
 
       await buttonClick({
         buttonClickObj: 4,
-
-
       })
 
       done();
@@ -1518,7 +1318,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
       })
 
       done();
@@ -1558,8 +1357,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
-
       })
 
       done();
@@ -1572,8 +1369,6 @@ export default function MenuItemGroup3() {
 
       await buttonClick({
         buttonClickObj: 1,
-
-
       })
 
       done();
@@ -1586,8 +1381,6 @@ export default function MenuItemGroup3() {
 
       await buttonClick({
         buttonClickObj: 2,
-
-
       })
 
       done();
@@ -1600,8 +1393,6 @@ export default function MenuItemGroup3() {
 
       await buttonClick({
         buttonClickObj: 3,
-
-
       })
 
       done();
@@ -1614,7 +1405,6 @@ export default function MenuItemGroup3() {
 
       await buttonClick({
         buttonClickObj: 4,
-
       })
 
       done();
@@ -1630,8 +1420,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
-
       })
 
       done();
@@ -1670,8 +1458,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
-
       })
 
       done();
@@ -1687,8 +1473,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
-
       })
 
       done();
@@ -1705,8 +1489,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
-
       })
 
       done()
@@ -1721,8 +1503,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
-
       })
 
       done()
@@ -1767,8 +1547,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
-
       })
 
       done()
@@ -1783,8 +1561,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
-
       })
 
       done()
@@ -1800,8 +1576,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
-
       })
 
       done()
@@ -1816,8 +1590,6 @@ export default function MenuItemGroup3() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
-
       })
 
       done()

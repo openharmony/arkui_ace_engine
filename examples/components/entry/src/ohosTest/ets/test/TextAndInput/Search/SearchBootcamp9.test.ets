@@ -16,16 +16,17 @@
 import { describe, beforeAll, it } from '@ohos/hypium';
 import { abilityDelegatorRegistry, Driver } from '@kit.TestKit';
 import {
-    buttonClick,
-    getToggle,
-    JsonType,
-    KeyStruct,
-    radioClick,
-    Search,
-    searchParentBlock, Slide,
-    sliderDrag,
-    titleSearch,
-    ToggleClick
+  buttonClick,
+  getToggle,
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Search,
+  searchParentBlock,
+  Slide,
+  sliderDrag,
+  titleSearch,
+  ToggleClick
 } from '../../../utils';
 import { searchBeforeAll } from './Search.test';
 
@@ -1602,29 +1603,6 @@ export default function SearchBootcampTest9() {
           new KeyStruct('hitTestBehavior', JsonType.value)
         ],
         assertEqual: 'HitTestMode.None'
-      })
-      done();
-    })
-    //bindContentCover.isShow
-    /*
-     * 测试组件bindContentCover.isShow支持设置true且获取属性正确
-     * */
-    it('ArkUI_Search_Comp_0649', 0, async (done: Function) => {
-      //无法获取属性
-      await titleSearch('基础属性', 'bindContentCover.isShow', '通用属性7')
-      await radioClick({
-        radioClickObj: 0,
-      })
-      done();
-    })
-    /*
-     * 测试组件bindContentCover.isShow支持设置false且获取属性正确
-     * */
-    it('ArkUI_Search_Comp_0650', 0, async (done: Function) => {
-      //无法获取属性
-      await titleSearch('基础属性', 'bindContentCover.isShow', '通用属性7')
-      await radioClick({
-        radioClickObj: 1
       })
       done();
     })

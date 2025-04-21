@@ -317,7 +317,7 @@ HWTEST_F(ScrollableEventTest, SetOnScrollStop001, TestSize.Level1)
      * @tc.steps: step3. Trigger OnScrollStop event and verify callback is called
      * @tc.expected: isScrollStopCalled should be true.
      */
-    pattern_->OnScrollStop(eventHub->GetOnScrollStop());
+    pattern_->OnScrollStop(eventHub->GetOnScrollStop(), nullptr);
     EXPECT_TRUE(isScrollStopCalled);
 }
 

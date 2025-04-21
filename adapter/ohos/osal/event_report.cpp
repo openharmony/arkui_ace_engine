@@ -142,6 +142,13 @@ constexpr char EVENT_KEY_NODE_TYPE[] = "NODE_TYPE";
 constexpr char EVENT_KEY_SUB_ERROR_TYPE[] = "SUB_ERROR_TYPE";
 constexpr char EVENT_KEY_TARGET_API_VERSION[] = "TARGET_API_VERSION";
 constexpr char EVENT_KEY_REUSED_NODE_SKIP_MEASURE[] = "REUSED_NODE_SKIP_MEASURE";
+constexpr char EVENT_KEY_PAGE_SLID_INFO[] = "PAGE_SLID_INFO";
+constexpr char EVENT_KEY_GESTURE_VELOCITY[] = "GESTURE_VELOCITY";
+constexpr char EVENT_KEY_VELOCITY_SCALE[] = "VELOCITY_SCALE";
+constexpr char EVENT_KEY_DRAG_GAIN[] = "DRAG_GAIN";
+constexpr char EVENT_KEY_MAX_FLING_VELOCITY[] = "MAX_FLING_VELOCITY";
+constexpr char EVENT_KEY_SLIP_FACTOR[] = "SLIP_FACTOR";
+constexpr char EVENT_KEY_FRICTION[] = "FRICTION";
 
 void StrTrim(std::string& str)
 {
@@ -863,5 +870,16 @@ void EventReport::ReportReusedNodeSkipMeasureApp()
     auto progressName = AceApplicationInfo::GetInstance().GetProcessName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_REUSED_NODE_SKIP_MEASURE,
         OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC, EVENT_KEY_PACKAGE_NAME, progressName);
+}
+
+void EventReport::ReportPageSlidInfo(NG::SlidInfo &slidInfo)
+{
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_PAGE_SLID_INFO,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_GESTURE_VELOCITY, slidInfo.gestureVelocity,
+        EVENT_KEY_VELOCITY_SCALE, slidInfo.velocityScale, EVENT_KEY_DRAG_GAIN,
+        slidInfo.gain, EVENT_KEY_MAX_FLING_VELOCITY, slidInfo.maxFlingVelocity,
+        EVENT_KEY_SLIP_FACTOR, slidInfo.slipFactor, EVENT_KEY_FRICTION,
+        slidInfo.friction);
 }
 } // namespace OHOS::Ace

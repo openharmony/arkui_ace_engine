@@ -143,7 +143,7 @@ public:
     {
         return false;
     }
-    
+
     virtual RefPtr<AccessibilityProperty> CreateAccessibilityProperty()
     {
         return MakeRefPtr<AccessibilityProperty>();
@@ -372,7 +372,8 @@ public:
         return host->GetInstanceId();
     }
 
-    PipelineContext* GetContext() {
+    PipelineContext* GetContext() const
+    {
         auto frameNode = GetHost();
         CHECK_NULL_RETURN(frameNode, nullptr);
         return frameNode->GetContext();
@@ -413,7 +414,15 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
-        return DynamicCast<T>(host->GetEventHub<T>());
+        return DynamicCast<T>(host->GetOrCreateEventHub<T>());
+    }
+
+    template<typename T>
+    RefPtr<T> GetOrCreateEventHub() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        return DynamicCast<T>(host->GetOrCreateEventHub<T>());
     }
 
     // Called after frameNode RebuildRenderContextTree.
@@ -586,7 +595,6 @@ public:
     virtual void OnAttachContext(PipelineContext *context) {}
     virtual void OnDetachContext(PipelineContext *context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
-
     void CheckLocalized()
     {
         auto host = GetHost();
@@ -615,11 +623,6 @@ public:
     }
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
-
-    virtual bool OnAccessibilityHoverEvent(const PointF& point)
-    {
-        return false;
-    }
 
     virtual uint32_t GetWindowPatternType() const
     {
@@ -681,12 +684,28 @@ public:
     virtual void SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids) {};
     virtual void EndTranslate() {};
     virtual void SendTranslateResult(std::string results) {};
+    virtual int32_t OnInjectionEvent(const std::string& command)
+    {
+        return RET_SUCCESS;
+    };
+
+    int32_t OnRecvCommand(const std::string& command)
+    {
+        auto json = JsonUtil::ParseJsonString(command);
+        if (!json || !json->IsValid() || !json->IsObject()) {
+            return RET_FAILED;
+        }
+        auto event = json->GetString("cmd");
+        if (event != "click") {
+            return OnInjectionEvent(command);
+        }
+        return RET_FAILED;
+    }
 
     virtual bool BorderUnoccupied() const
     {
         return false;
     }
-
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

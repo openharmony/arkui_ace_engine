@@ -24,7 +24,6 @@
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
-#include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/text/html_utils.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -800,9 +799,7 @@ void JSSpanString::Marshalling(const JSCallbackInfo& info)
         ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
         return;
     }
-    auto arg = info[0];
-
-    auto* spanString = JSRef<JSObject>::Cast(arg)->Unwrap<JSSpanString>();
+    auto* spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
     CHECK_NULL_VOID(spanString);
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
@@ -822,7 +819,7 @@ void JSSpanString::Marshalling(const JSCallbackInfo& info)
 
 void JSSpanString::MarshallingExtSpan(const JSCallbackInfo& info, std::vector<uint8_t>& buff)
 {
-    if (info.Length() != 2 || !info[1]->IsFunction()) {
+    if (info.Length() != 2 || !info[1]->IsFunction() || !info[0]->IsObject()) {
         // marshalling only support one or two params
         return;
     }

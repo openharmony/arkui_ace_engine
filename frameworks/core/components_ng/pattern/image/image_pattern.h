@@ -43,7 +43,6 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_source_info.h"
-#include "core/animation/animator.h"
 
 namespace OHOS::Ace {
 class ImageAnalyzerManager;
@@ -208,6 +207,7 @@ public:
     inline void DumpSmoothEdge(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
     inline void DumpResizable(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
     inline void DumpInterpolation(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpHdrBrightness(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
     void DumpBorderRadiusProperties(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
     inline void DumpOtherInfo();
     void DumpRenderInfo(std::unique_ptr<JsonValue>& json);

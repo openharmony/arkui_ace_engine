@@ -231,9 +231,9 @@ void DynamicComponentRendererImpl::BuildDynamicInitialConfig(
     CHECK_NULL_VOID(container);
     auto context = container->GetPipelineContext();
     CHECK_NULL_VOID(context);
-    if (container->IsScenceBoardWindow()) {
+    if (container->IsSceneBoardWindow()) {
         dynamicInitialConfig.hostWindowInfo.focusWindowId = context->GetFocusWindowId();
-        dynamicInitialConfig.hostWindowInfo.realHostWindowId = GetWindowSceneId();
+        dynamicInitialConfig.hostWindowInfo.realHostWindowId = static_cast<uint32_t>(GetWindowSceneId());
     } else {
         dynamicInitialConfig.hostWindowInfo.focusWindowId = context->GetFocusWindowId();
         dynamicInitialConfig.hostWindowInfo.realHostWindowId = context->GetRealHostWindowId();
@@ -444,6 +444,7 @@ void DynamicComponentRendererImpl::UnRegisterConfigChangedCallback()
     auto container = Platform::AceContainer::GetContainer(hostInstanceId_);
     CHECK_NULL_VOID(container);
     container->RemoveOnConfigurationChange(uiContent_->GetInstanceId());
+    container->RegisterContainerHandler(nullptr);
 }
 
 void DynamicComponentRendererImpl::AttachRenderContext()

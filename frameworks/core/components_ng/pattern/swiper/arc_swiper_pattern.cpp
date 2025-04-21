@@ -81,9 +81,7 @@ constexpr int32_t NO_ANIMAION_DEFAULT_DURATION = 400;
 constexpr int32_t VERTICAL_ANIMAION_DEFAULT_DURATION = 330;
 constexpr int32_t HORIZONTAL_ANIMAION_DEFAULT_DURATION = 750;
 #ifdef SUPPORT_DIGITAL_CROWN
-constexpr int32_t COUNT_TWO_INDEX = 2;
-constexpr const char* HAPTIC_STRENGTH4 = "watchhaptic.feedback.crown.strength4";
-constexpr const char* HAPTIC_IMPACT = "watchhaptic.feedback.crown.impact";
+constexpr const char* HAPTIC_STRENGTH3 = "watchhaptic.feedback.crown.strength3";
 #endif
 
 float GetHorizontalExitScaleValue(bool rollBack)
@@ -883,7 +881,7 @@ void ArcSwiperPattern::UsePropertyAnimation(const OffsetF& offset)
 }
 
 void ArcSwiperPattern::PlayPropertyTranslateAnimation(
-    float translate, int32_t nextIndex, float velocity, bool stopAutoPlay)
+    float translate, int32_t nextIndex, float velocity, bool stopAutoPlay, std::optional<float> pixelRoundTargetPos)
 {
     if (NearZero(translate)) {
         OnAnimationTranslateZero(nextIndex, stopAutoPlay);
@@ -1425,11 +1423,6 @@ int32_t ArcSwiperPattern::CalcTime(int32_t time)
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN
-void ArcSwiperPattern::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
-{
-    crownSensitivity_ = sensitivity;
-}
-
 void ArcSwiperPattern::InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub)
 {
     auto host = GetHost();
@@ -1586,13 +1579,7 @@ void ArcSwiperPattern::StartVibrator(bool isLeft)
     if ((isLeft && currentIndex_ == 0) || (!isLeft && currentIndex_ == TotalCount() - 1)) {
         return;
     }
-    // Perform HAPTIC_STRENGTH4 vibration when switching between each item
-    // Perform HAPTIC_IMPACT vibration when reaching the boundary
-    const char* effectId = ((currentIndex_ == 1 && isLeft) ||
-        (currentIndex_ == TotalCount() - COUNT_TWO_INDEX && (!isLeft)))
-                               ? HAPTIC_IMPACT
-                               : HAPTIC_STRENGTH4;
-    VibratorUtils::StartVibraFeedback(effectId);
+    VibratorUtils::StartVibraFeedback(HAPTIC_STRENGTH3);
 }
 
 void ArcSwiperPattern::HandleCrownActionCancel()
@@ -1606,41 +1593,6 @@ void ArcSwiperPattern::HandleCrownActionCancel()
     HandleDragEnd(0.0);
     HandleTouchUp();
     isDragging_ = false;
-}
-
-double ArcSwiperPattern::GetCrownRotatePx(const CrownEvent& event) const
-{
-    double velocity = event.degree;
-    double px = 0.0;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, 0.0);
-    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_RETURN(theme, 0.0);
-
-    if (LessOrEqualCustomPrecision(velocity, theme->GetSlowVelocityThreshold(), 0.01f)) {
-        px = theme->GetDisplayControlRatioVerySlow() * velocity;
-    } else if (LessOrEqualCustomPrecision(velocity, theme->GetMediumVelocityThreshold(), 0.01f)) {
-        px = theme->GetDisplayControlRatioSlow() * velocity;
-    } else if (LessOrEqualCustomPrecision(velocity, theme->GetFastVelocityThreshold(), 0.01f)) {
-        px = theme->GetDisplayControlRatioMedium() * velocity;
-    } else {
-        px = theme->GetDisplayControlRatioFast() * velocity;
-    }
-
-    switch (crownSensitivity_) {
-        case CrownSensitivity::LOW:
-            px *= theme->GetCrownSensitivityLow();
-            break;
-        case CrownSensitivity::MEDIUM:
-            px *= theme->GetCrownSensitivityMedium();
-            break;
-        case CrownSensitivity::HIGH:
-            px *= theme->GetCrownSensitivityHigh();
-            break;
-        default:
-            break;
-    }
-    return px;
 }
 
 void ArcSwiperPattern::UpdateCrownVelocity(double degree, double mainDelta, bool isEnd)

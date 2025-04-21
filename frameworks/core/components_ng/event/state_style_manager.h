@@ -38,6 +38,7 @@ inline constexpr UIState UI_STATE_FOCUSED = 1 << 1;
 inline constexpr UIState UI_STATE_DISABLED = 1 << 2;
 // used for radio, checkbox, switch.
 inline constexpr UIState UI_STATE_SELECTED = 1 << 3;
+inline constexpr UIState UI_STATE_UNKNOWN = 1 << 9;
 
 // StateStyleManager is mainly used to manage the setting and refresh of state styles.
 class StateStyleManager : public virtual AceType {
@@ -61,7 +62,9 @@ public:
     void AddSupportedState(UIState state)
     {
         supportedStates_ = supportedStates_ | state;
-        frontendSubscribers_ = frontendSubscribers_ | state;
+        if (frontendSubscribers_ & UI_STATE_UNKNOWN) {
+            frontendSubscribers_ = frontendSubscribers_ | state;
+        }
     }
 
     void SetSupportedStates(UIState state)
@@ -84,6 +87,17 @@ public:
             userStateStyleSubscribers_.first |= state;
             userStateStyleSubscribers_.second = callback;
         }
+    }
+
+    bool GetUserSetStateStyle()
+    {
+        bool isSetState = true;
+
+        if (innerStateStyleSubscribers_.first == UI_STATE_UNKNOWN &&
+            userStateStyleSubscribers_.first == UI_STATE_UNKNOWN && frontendSubscribers_ == UI_STATE_UNKNOWN) {
+            isSetState = false;
+        }
+        return isSetState;
     }
 
     void RemoveSupportedUIState(UIState state, bool isInner)
@@ -117,6 +131,16 @@ public:
         } else {
             currentState_ &= ~state;
         }
+    }
+
+    void SetScrollingFeatureForbidden(bool scrollingFeatureForbidden)
+    {
+        scrollingFeatureForbidden_ = scrollingFeatureForbidden;
+    }
+
+    bool GetScrollingFeatureForbidden()
+    {
+        return scrollingFeatureForbidden_;
     }
 
     void UpdateCurrentUIState(UIState state)
@@ -246,11 +270,11 @@ private:
     UIState supportedStates_ = UI_STATE_NORMAL;
     UIState currentState_ = UI_STATE_NORMAL;
     // manages inner subscription UI state and callbacks.
-    std::pair<UIState, std::function<void(uint64_t)>> innerStateStyleSubscribers_ = { UI_STATE_NORMAL, nullptr };
+    std::pair<UIState, std::function<void(uint64_t)>> innerStateStyleSubscribers_ = { UI_STATE_UNKNOWN, nullptr };
     // manages user subscription UI state and callbacks.
-    std::pair<UIState, std::function<void(uint64_t)>> userStateStyleSubscribers_ = { UI_STATE_NORMAL, nullptr };
+    std::pair<UIState, std::function<void(uint64_t)>> userStateStyleSubscribers_ = { UI_STATE_UNKNOWN, nullptr };
     // tracks frontend UI state.
-    UIState frontendSubscribers_ = UI_STATE_NORMAL;
+    UIState frontendSubscribers_ = UI_STATE_UNKNOWN;
     
     std::set<int32_t> pointerId_;
     CancelableCallback<void()> pressStyleTask_;
@@ -258,6 +282,7 @@ private:
     bool pressedPendingState_ = false;
     bool pressedCancelPendingState_ = false;
     bool hasScrollingParent_ = false;
+    bool scrollingFeatureForbidden_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(StateStyleManager);
 };

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
+
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 
@@ -99,7 +101,7 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseOpenDialogTask(int32_t cu
         if (dialogProperties.isShowInSubWindow) {
             dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
             CHECK_NULL_VOID(dialog);
-            if (dialogProperties.isModal && !dialogProperties.isScenceBoardDialog &&
+            if (dialogProperties.isModal && !dialogProperties.isSceneBoardDialog &&
                 !container->IsUIExtensionWindow()) {
                 auto mask = overlayManager->SetDialogMask(dialogProperties);
                 if (!mask) {
@@ -149,15 +151,12 @@ RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProper
     RefPtr<NG::FrameNode> dialog;
     if (dialogProperties.isShowInSubWindow) {
         dialog = SubwindowManager::GetInstance()->ShowDialogNGWithNode(dialogProperties, customNode);
-        if (dialogProperties.isModal && !dialogProperties.isScenceBoardDialog && !container->IsUIExtensionWindow()) {
+        CHECK_NULL_RETURN(dialog, nullptr);
+        if (dialogProperties.isModal && !dialogProperties.isSceneBoardDialog && !container->IsUIExtensionWindow()) {
             DialogProperties Maskarg;
             Maskarg.isMask = true;
             Maskarg.autoCancel = dialogProperties.autoCancel;
             Maskarg.maskColor = dialogProperties.maskColor;
-            Maskarg.onWillAppear = dialogProperties.onWillAppear;
-            Maskarg.onDidAppear = dialogProperties.onDidAppear;
-            Maskarg.onWillDisappear = dialogProperties.onWillDisappear;
-            Maskarg.onDidDisappear = dialogProperties.onDidDisappear;
             auto mask = overlayManager->ShowDialogWithNode(Maskarg, nullptr, false);
             CHECK_NULL_RETURN(mask, dialog);
             overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());

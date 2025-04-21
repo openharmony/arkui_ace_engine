@@ -28,10 +28,7 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
-constexpr int32_t OFFSET_1 = 1;
-constexpr int32_t OFFSET_2 = 2;
-constexpr int32_t OFFSET_3 = 3;
-constexpr int32_t OFFSET_5 = 5;
+constexpr int32_t OFFSET_OF_COLOR = 5;
 const int32_t SIZE_OF_TWO = 2;
 const std::string FORMAT_FONT = "%s|%s|%s";
 const std::string DEFAULT_STR = "-1";
@@ -1136,9 +1133,9 @@ void ParseOuterBorderColor(
     ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex)
 {
     Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(argsIndex);
-    Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + OFFSET_1);
-    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(argsIndex + OFFSET_2);
-    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + OFFSET_3);
+    Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + 1);
+    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(argsIndex + 2);
+    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + 3);
 
     std::optional<Color> leftColor;
     std::optional<Color> rightColor;
@@ -1177,7 +1174,7 @@ ArkUINativeModuleValue SelectBridge::SetMenuOutline(ArkUIRuntimeCallInfo* runtim
     std::vector<ArkUI_Float32> width;
     std::vector<uint32_t> color;
     CommonBridge::ParseOuterBorderWidth(runtimeCallInfo, vm, width);
-    ParseOuterBorderColor(runtimeCallInfo, vm, color, OFFSET_5);
+    ParseOuterBorderColor(runtimeCallInfo, vm, color, OFFSET_OF_COLOR);
     GetArkUINodeModifiers()->getSelectModifier()->setMenuOutline(
         nativeNode, width.data(), width.size(), color.data(), color.size());
     return panda::JSValueRef::Undefined(vm);

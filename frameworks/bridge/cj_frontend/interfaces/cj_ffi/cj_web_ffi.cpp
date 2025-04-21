@@ -484,6 +484,7 @@ void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(FfiWebResourceReques
         MapToCFFIArray mapToCFFIArray;
         auto wirteSuccess = WebRequestHeadersToMapToCFFIArray(request, mapToCFFIArray);
         if (!wirteSuccess) {
+            delete cjWebResourceRequest;
             return false;
         }
         cjWebResourceRequest->url = request->GetUrl().c_str();
@@ -1078,6 +1079,7 @@ void FfiWebOnErrorReceive(void (*callback)(FfiWebResourceRequest request, void* 
         MapToCFFIArray mapToCFFIArray;
         auto wirteSuccess = WebRequestHeadersToMapToCFFIArray(request, mapToCFFIArray);
         if (!wirteSuccess) {
+            delete cjWebResourceRequest;
             return;
         }
         cjWebResourceRequest->url = request->GetUrl().c_str();

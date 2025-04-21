@@ -43,13 +43,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'ss03'on
      */
     it('ArkUI_TextClock_050', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:5,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 5,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -63,19 +63,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "ss03"off
      */
     it('ArkUI_TextClock_051', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:6,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 6,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"ss03" 0'
-
       })
       done();
     })
@@ -83,13 +82,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'ss04'on
      */
     it('ArkUI_TextClock_052', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:7,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 7,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -103,19 +102,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "ss04"off
      */
     it('ArkUI_TextClock_053', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:8,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 8,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"ss04" 0'
-
       })
       done();
     })
@@ -123,13 +121,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'ss05'on
      */
     it('ArkUI_TextClock_054', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:9,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 9,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -143,19 +141,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "ss05"off
      */
     it('ArkUI_TextClock_055', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:10,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 10,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"ss05" 0'
-
       })
       done();
     })
@@ -163,13 +160,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'ss08'on
      */
     it('ArkUI_TextClock_056', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:11,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 11,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -183,19 +180,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "ss08"off
      */
     it('ArkUI_TextClock_057', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:12,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 12,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"ss08" 0'
-
       })
       done();
     })
@@ -203,13 +199,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'ss09'on
      */
     it('ArkUI_TextClock_058', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:13,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 13,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -223,19 +219,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "ss09"off
      */
     it('ArkUI_TextClock_059', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:14,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 14,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"ss09" 0'
-
       })
       done();
     })
@@ -243,13 +238,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'ss10'on
      */
     it('ArkUI_TextClock_060', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:15,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 15,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -263,19 +258,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "ss10"off
      */
     it('ArkUI_TextClock_061', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:16,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 16,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"ss10" 0'
-
       })
       done();
     })
@@ -283,13 +277,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'frac'on
      */
     it('ArkUI_TextClock_062', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:17,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 17,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -303,19 +297,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "frac"off
      */
     it('ArkUI_TextClock_063', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:18,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 18,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"frac" 0'
-
       })
       done();
     })
@@ -323,13 +316,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'sups'on
      */
     it('ArkUI_TextClock_064', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:19,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 19,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -343,16 +336,15 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "sups"off
      */
     it('ArkUI_TextClock_065', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:20,
-        id:'TextClock',
+        radioClickObj: 20,
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"sups" 0'
-
       })
       done();
     })
@@ -360,13 +352,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'subs'on
      */
     it('ArkUI_TextClock_066', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:21,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 21,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -380,19 +372,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "subs"off
      */
     it('ArkUI_TextClock_067', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:22,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 22,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"subs" 0'
-
       })
       done();
     })
@@ -400,13 +391,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'numr'on
      */
     it('ArkUI_TextClock_068', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:23,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 23,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -420,19 +411,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "numr"off
      */
     it('ArkUI_TextClock_069', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:24,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 24,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"numr" 0'
-
       })
       done();
     })
@@ -440,13 +430,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'dnom'on
      */
     it('ArkUI_TextClock_070', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:25,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 25,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -460,19 +450,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "dnom"off
      */
     it('ArkUI_TextClock_071', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:26,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 26,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"dnom" 0'
-
       })
       done();
     })
@@ -480,13 +469,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'case'on
      */
     it('ArkUI_TextClock_072', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:27,
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: 27,
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -500,19 +489,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "case"off
      */
     it('ArkUI_TextClock_073', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:'"case" off',
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: '"case" off',
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"case" 0'
-
       })
       done();
     })
@@ -520,13 +508,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'tnum'on
      */
     it('ArkUI_TextClock_074', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:'"tnum" on',
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: '"tnum" on',
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -540,19 +528,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "tnum"off
      */
     it('ArkUI_TextClock_075', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:'"tnum" off',
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: '"tnum" off',
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"tnum" 0'
-
       })
       done();
     })
@@ -560,13 +547,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'pnum'on
      */
     it('ArkUI_TextClock_076', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:'"pnum" on',
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: '"pnum" on',
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -580,19 +567,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "pnum"off
      */
     it('ArkUI_TextClock_077', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:'"pnum" off',
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: '"pnum" off',
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"pnum" 0'
-
       })
       done();
     })
@@ -600,13 +586,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'vert'on
      */
     it('ArkUI_TextClock_078', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:'"vert" on',
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: '"vert" on',
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -620,19 +606,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "vert"off
      */
     it('ArkUI_TextClock_079', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:'"vert" off',
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: '"vert" off',
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"vert" 0'
-
       })
       done();
     })
@@ -640,13 +625,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'vrt2'on
      */
     it('ArkUI_TextClock_080', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:'"vrt2" on',
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: '"vrt2" on',
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -660,19 +645,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "vrt2"off
      */
     it('ArkUI_TextClock_081', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:'"vrt2" off',
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: '"vrt2" off',
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"vrt2" 0'
-
       })
       done();
     })
@@ -680,13 +664,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'liga'on
      */
     it('ArkUI_TextClock_082', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:'"liga" on',
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: '"liga" on',
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -700,19 +684,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "liga"off
      */
     it('ArkUI_TextClock_083', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:'"liga" off',
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: '"liga" off',
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"liga" 0'
-
       })
       done();
     })
@@ -720,13 +703,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'ordn'on
      */
     it('ArkUI_TextClock_084', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:'"ordn" on',
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: '"ordn" on',
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -740,19 +723,18 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "ordn"off
      */
     it('ArkUI_TextClock_085', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:'"ordn" off',
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: '"ordn" off',
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"ordn" 0'
-
       })
       done();
     })
@@ -760,13 +742,13 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 'sinf'on
      */
     it('ArkUI_TextClock_086', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:'"sinf" on',
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: '"sinf" on',
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
@@ -780,26 +762,25 @@ export default function TextClock1() {
      * 测试组件fontFeature支持设置文字特性效果为 "sinf"off
      */
     it('ArkUI_TextClock_087', 0, async (done: Function) => {
-      await Search('参数列表','fontFeature')
+      await Search('参数列表', 'fontFeature')
       await radioClick({
-        radioClickObj:'"sinf" off',
-        toggleClick:{
-          toggleClickObj:'fontFeature'
+        radioClickObj: '"sinf" off',
+        toggleClick: {
+          toggleClickObj: 'fontFeature'
         },
-        id:'TextClock',
+        id: 'TextClock',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fontFeature', JsonType.value),
         ],
         assertEqual: '"sinf" 0'
-
       })
       done();
     })
 
     //fontFeature的相关属性测试完毕，关闭fontFeature Toggle
     it('ArkUI_TextClock_88', 0, async (done: Function) => {
-      await searchParentBlock('fontFeature',false,'参数列表')
+      await searchParentBlock('fontFeature', false, '参数列表')
       done();
     })
 
@@ -807,11 +788,11 @@ export default function TextClock1() {
      * 测试组件contentModifier支持定制TextClock内容区的方法为允许
      */
     it('ArkUI_TextClock_089', 0, async (done: Function) => {
-      await Search('参数列表','contentModifier')
+      await Search('参数列表', 'contentModifier')
       await radioClick({
-        radioClickObj:1,
-        toggleClick:{
-          toggleClickObj:'contentModifier'
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'contentModifier'
         },
       })
       done();
@@ -821,13 +802,12 @@ export default function TextClock1() {
      * 测试组件contentModifier支持定制TextClock内容区的方法禁止
      */
     it('ArkUI_TextClock_090', 0, async (done: Function) => {
-      await Search('参数列表','contentModifier')
+      await Search('参数列表', 'contentModifier')
       await radioClick({
-        radioClickObj:1,
-        toggleClick:{
-          toggleClickObj:'contentModifier'
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'contentModifier'
         }
-
       })
       done();
     })
@@ -1820,6 +1800,6 @@ export default function TextClock1() {
       done();
     })
 
-    })
+  })
 
 }

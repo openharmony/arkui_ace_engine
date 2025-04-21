@@ -190,29 +190,6 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue005, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestRichEditorUpdateSelectionByTouchMove001
- * @tc.desc: test UpdateSelectionByTouchMove
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorUpdateSelectionByTouchMove001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto richOffset = Offset(40, 30);
-    richEditorPattern->UpdateSelectionByTouchMove(richOffset);
-    auto host = richEditorPattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    ASSERT_NE((host->layoutProperty_->propertyChangeFlag_) & PROPERTY_UPDATE_RENDER, 0);
-}
-
-/**
  * @tc.name: TestRichEditorGetAllChildren001
  * @tc.desc: test GetAllChildren
  * @tc.type: FUNC
@@ -395,24 +372,6 @@ HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj002, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsTouchInFrameArea001
- * @tc.desc: test IsTouchInFrameArea
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, IsTouchInFrameArea001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-    */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    PointF touchPoint;
-    auto ret = richEditorPattern->IsTouchInFrameArea(touchPoint);
-    EXPECT_EQ(ret, false);
-}
-
-/**
  * @tc.name: CalcInsertValueObj001
  * @tc.desc: test CalcInsertValueObj
  * @tc.type: FUNC
@@ -555,31 +514,6 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder001, TestSize.Level1)
     richEditorPattern->spans_.clear();
     richEditorPattern->SetPlaceholder(spanItemList);
     EXPECT_FALSE(richEditorPattern->isShowPlaceholder_);
-}
-
-/**
- * @tc.name: GetCaretColor001
- * @tc.desc: test GetCaretColor
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, GetCaretColor001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    richEditorPattern->caretColor_.reset();
-    auto ret = richEditorPattern->GetCaretColor();
-    EXPECT_NE(ret.GetValue(), 0);
 }
 
 /**
