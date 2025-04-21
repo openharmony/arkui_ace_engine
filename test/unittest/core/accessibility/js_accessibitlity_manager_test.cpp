@@ -1615,4 +1615,27 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
     NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
 }
+
+/**
+ * @tc.name: ConvertActionTypeToBoolen004
+ * @tc.desc: Test focusing action
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    int64_t elementId = 0;
+
+    /**
+     * @tc.steps: step2. Use invalid action type and test ConvertActionTypeToBoolen
+     */
+    bool result = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_TYPE_MASK,
+        frameNode, elementId, context);
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG
