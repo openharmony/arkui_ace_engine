@@ -56,13 +56,11 @@ namespace Converter {
         if (!optTextChangeOptions.has_value()) {
             return changeValue;
         }
-        
         auto arkTextChangeOptions = optTextChangeOptions.value();
         changeValue.rangeBefore = Converter::Convert<TextRange>(arkTextChangeOptions.rangeBefore);
         changeValue.rangeAfter = Converter::Convert<TextRange>(arkTextChangeOptions.rangeAfter);
         changeValue.oldContent = Converter::Convert<std::u16string>(arkTextChangeOptions.oldContent);
         changeValue.oldPreviewText = Converter::Convert<PreviewText>(arkTextChangeOptions.oldPreviewText);
-    
         return changeValue;
     }
 } // namespace Converter
@@ -444,11 +442,17 @@ HWTEST_F(TextInputModifierTest2, setMaxLinesTestInvalidValues, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     std::string resultValue;
-    const std::string invalidValue = "INF";
+    const std::string invalidValue = "INF", zeroValue = "0";
 
     using OneTestStep = std::tuple<Ark_Number, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Ark_Number>(-1), invalidValue},
+        {Converter::ArkValue<Ark_Number>(0), zeroValue},
+        {Converter::ArkValue<Ark_Number>(-0.0), zeroValue},
+        {Converter::ArkValue<Ark_Number>(-0.00001), zeroValue},
+        {Converter::ArkValue<Ark_Number>(0.88), zeroValue},
+        {Converter::ArkValue<Ark_Number>(INT32_MIN), invalidValue},
+        {Converter::ArkValue<Ark_Number>(INT32_MIN+1), invalidValue},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setMaxLines(node_, &inputValue);
@@ -477,14 +481,14 @@ HWTEST_F(TextInputModifierTest2, OnWillChangeTest, TestSize.Level1)
         .value = u"test content", .previewText.offset = 2, .previewText.value = u"previewText",
         .oldPreviewText.offset = 1, .oldPreviewText.value = u"oldPreviewText", .oldContent = u"oldContent",
         .rangeBefore.start = 1, .rangeBefore.end = 6, .rangeAfter.start = 2, .rangeAfter.end = 5};
-    
+
     auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_EditableTextChangeValue parameter, const Callback_Boolean_Void continuation) {
         auto value = Converter::Convert<ChangeValueInfo>(parameter);
         checkEvent = CheckEvent {resourceId, value};
         CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
     };
-    
+
     auto func = Converter::ArkValue<Callback_EditableTextChangeValue_Boolean>(nullptr,
         inputCallback, expectedResourceId);
     modifier_->setOnWillChange(node_, &func);

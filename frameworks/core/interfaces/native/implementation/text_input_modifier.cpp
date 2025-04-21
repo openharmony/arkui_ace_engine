@@ -844,7 +844,7 @@ void OnWillChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCallback = [arkCallback = CallbackHelper(*value), frameNode](const ChangeValueInfo& param) -> bool {
+    auto onCallback = [arkCallback = CallbackHelper(*value)](const ChangeValueInfo& param) -> bool {
         Converter::ConvContext ctx;
         auto data = Converter::ArkValue<Ark_EditableTextChangeValue>(param, &ctx);
         auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
