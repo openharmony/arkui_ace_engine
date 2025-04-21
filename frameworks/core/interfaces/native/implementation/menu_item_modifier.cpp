@@ -160,7 +160,7 @@ void OnChangeImpl(Ark_NativePointer node,
     auto onChange = [arkCallback = CallbackHelper(*value)](const bool param) {
         arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(param));
     };
-    // MenuItemModelNG::SetOnChange(frameNode, onChange);
+    MenuItemModelNG::SetOnChange(frameNode, onChange);
 }
 void ContentFontImpl(Ark_NativePointer node,
                      const Ark_Font* value)
@@ -187,7 +187,7 @@ void ContentFontColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    // MenuItemModelNG::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
+    MenuItemModelNG::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void LabelFontImpl(Ark_NativePointer node,
                    const Ark_Font* value)
@@ -214,7 +214,7 @@ void LabelFontColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    // MenuItemModelNG::SetLabelFontColor(frameNode, Converter::OptConvert<Color>(*value));
+    MenuItemModelNG::SetLabelFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,
                                  const Callback_Boolean_Void* callback)
