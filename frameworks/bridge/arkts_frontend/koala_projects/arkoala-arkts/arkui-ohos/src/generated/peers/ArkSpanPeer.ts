@@ -156,10 +156,13 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
     fontStyleAttribute(value: FontStyle): void {
         ArkUIGeneratedNativeModule._SpanAttribute_fontStyle(this.peer.ptr, value.valueOf())
     }
-    fontWeightAttribute(value: number | FontWeight | string): void {
-        const thisSerializer : Serializer = Serializer.hold()
+    fontWeightAttribute(value: number | FontWeight | string | undefined): void {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
+        if (RuntimeType.UNDEFINED == value_type) {
+            return
+        }
+        const thisSerializer : Serializer = Serializer.hold()
         if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as number

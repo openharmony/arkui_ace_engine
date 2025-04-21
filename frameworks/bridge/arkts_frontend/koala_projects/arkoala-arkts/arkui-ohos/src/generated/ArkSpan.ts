@@ -119,9 +119,9 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements SpanAttrib
         return this
     }
     /** @memo */
-    public fontWeight(value: number | FontWeight | string): this {
+    public fontWeight(value: number | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (number | FontWeight | string)
+            const value_casted = value as (number | FontWeight | string | undefined)
             this.getPeer()?.fontWeightAttribute(value_casted)
             return this
         }
