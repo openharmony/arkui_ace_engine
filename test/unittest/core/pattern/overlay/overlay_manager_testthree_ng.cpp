@@ -175,8 +175,8 @@ HWTEST_F(OverlayManagerTestThreeNg, RemoveFrameNodeWithOrder001, TestSize.Level1
     EXPECT_NE(pipelineContext, nullptr);
     auto overlayManager = pipelineContext->overlayManager_;
     ASSERT_NE(overlayManager, nullptr);
-    overlayManager->dialogOrderMap_.emplace(3, true);
-    overlayManager->dialogOrderMap_.emplace(1, true);
+    overlayManager->nodeIdOrderMap_.emplace(3, true);
+    overlayManager->nodeIdOrderMap_.emplace(1, true);
     auto frameNode =
         FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
     ASSERT_NE(frameNode, nullptr);

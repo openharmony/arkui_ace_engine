@@ -126,6 +126,8 @@ ohos_source_set("ace_kit_mock") {
 ohos_unittest("ace_kit_test") {
   module_out_path = interface_test_output_path
 
+  defines = [ "USE_ARK_ENGINE" ]
+
   sources = [
     "$ace_root/interfaces/inner_api/ace_kit/src/agingadapation/aging_adapation_dialog_util.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/animation/animation_utils.cpp",
@@ -159,10 +161,17 @@ ohos_unittest("ace_kit_test") {
     "aging_adapation_dialog_util_test.cpp",
     "animation_kit_test.cpp",
     "box_layout_algorithm_test.cpp",
+    "color_test.cpp",
     "content_modifier_test.cpp",
+    "dimension_test.cpp",
     "frame_node_test.cpp",
+    "property_test.cpp",
+    "resource_parser_test.cpp",
     "view_stack_processor_test.cpp",
+    "view_test.cpp",
   ]
+
+  cflags = [ "-fno-access-control" ]
 
   sources += ace_kit_mock_sources
 

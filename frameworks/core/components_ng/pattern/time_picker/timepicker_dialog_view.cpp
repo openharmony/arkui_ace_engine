@@ -193,7 +193,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     buttonTitleNode->MountToParent(contentColumn);
     timePickerNode->MountToParent(contentColumn);
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (timePickerNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         bool enableHaptic = settingData.isEnableHapticFeedback;
         timePickerRowPattern->SetIsEnableHaptic(enableHaptic);
         timePickerRowPattern->ColumnPatternInitHapticController();
@@ -277,6 +277,7 @@ std::function<void()> TimePickerDialogView::CloseDialogEvent(const RefPtr<TimePi
 RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<void()>& timePickerSwitchEvent,
     const RefPtr<FrameNode>& timeNode, const std::vector<ButtonInfo>& buttonInfos)
 {
+    CHECK_NULL_RETURN(timeNode, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
@@ -290,6 +291,9 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     CHECK_NULL_RETURN(textNextPrevNode, nullptr);
     auto textNextPrevLayoutProperty = textNextPrevNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textNextPrevLayoutProperty, nullptr);
+    auto timePickerRowPattern = timeNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, nullptr);
+    timePickerRowPattern->SetNextPrevButtonNode(nextPrevButtonNode);
     textNextPrevLayoutProperty->UpdateContent(GetDialogAgingButtonText(true));
     textNextPrevLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textNextPrevLayoutProperty->UpdateFontSize(
@@ -301,13 +305,13 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     auto event = UpdateTimePickerSwitchEvent(timeNode, textNextPrevNode, dialogTheme, nextPrevButtonNode,
         timePickerSwitchEvent);
     eventNextPrevHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(event)));
-    auto buttonNextPrevEventHub = nextPrevButtonNode->GetEventHub<ButtonEventHub>();
+    auto buttonNextPrevEventHub = nextPrevButtonNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonNextPrevEventHub, nullptr);
     buttonNextPrevEventHub->SetStateEffect(true);
     auto buttonNextPrevLayoutProperty = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonNextPrevLayoutProperty->UpdateLabel(GetDialogAgingButtonText(true));
     buttonNextPrevLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (nextPrevButtonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -345,7 +349,7 @@ std::function<void(const GestureEvent&)> TimePickerDialogView::UpdateTimePickerS
         CHECK_NULL_VOID(textLayoutProperty);
         auto pickerPattern = timeNode->GetPattern<TimePickerRowPattern>();
         CHECK_NULL_VOID(pickerPattern);
-        auto timePickerEventHub = pickerPattern->GetEventHub<TimePickerEventHub>();
+        auto timePickerEventHub = pickerPattern->GetOrCreateEventHub<TimePickerEventHub>();
         CHECK_NULL_VOID(timePickerEventHub);
         auto nextPrevButtonNode = nextPrevButtonNodeWeak.Upgrade();
         CHECK_NULL_VOID(nextPrevButtonNode);
@@ -359,6 +363,7 @@ std::function<void(const GestureEvent&)> TimePickerDialogView::UpdateTimePickerS
         if (textLayoutProperty->GetContent() == UtfUtils::Str8ToStr16(GetDialogAgingButtonText(true))) {
             UpdateCancelButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
             textLayoutProperty->UpdateContent(GetDialogAgingButtonText(false));
+            pickerPattern->SetIsNext(false);
         } else {
             UpdateConfirmButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
             textLayoutProperty->UpdateContent(GetDialogAgingButtonText(true));
@@ -659,7 +664,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, pickerTheme);
     auto columnPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
     columnPattern->SetConfirmNode(buttonConfirmNode);
-    auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
+    auto buttonConfirmEventHub = buttonConfirmNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
     buttonConfirmEventHub->SetStateEffect(true);
 
@@ -681,7 +686,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
         CHECK_NULL_VOID(dateNode);
         auto pickerPattern = dateNode->GetPattern<TimePickerRowPattern>();
         CHECK_NULL_VOID(pickerPattern);
-        auto timePickerEventHub = pickerPattern->GetEventHub<TimePickerEventHub>();
+        auto timePickerEventHub = pickerPattern->GetOrCreateEventHub<TimePickerEventHub>();
         CHECK_NULL_VOID(timePickerEventHub);
         timePickerEventHub->FireDialogAcceptEvent(pickerPattern->GetSelectedObject(true));
     };
@@ -783,14 +788,14 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     CHECK_NULL_RETURN(eventCancelHub, nullptr);
     eventCancelHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
 
-    auto buttonCancelEventHub = buttonCancelNode->GetEventHub<ButtonEventHub>();
+    auto buttonCancelEventHub = buttonCancelNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonCancelEventHub, nullptr);
     buttonCancelEventHub->SetStateEffect(true);
 
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonCancelLayoutProperty->UpdateLabel(GetDialogNormalButtonText(false));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (buttonCancelNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonCancelLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -933,7 +938,7 @@ void TimePickerDialogView::SetHour24(const RefPtr<TimePickerRowPattern>& timePic
 void TimePickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogChange(std::move(onChange));
 }
@@ -942,7 +947,7 @@ void TimePickerDialogView::SetDialogEnterSelectedArea(
     const RefPtr<FrameNode>& frameNode, DialogEvent&& onEnterSelectedArea)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogEnterSelectedArea(std::move(onEnterSelectedArea));
 }
@@ -950,7 +955,7 @@ void TimePickerDialogView::SetDialogEnterSelectedArea(
 void TimePickerDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogAcceptEvent(std::move(onChange));
 }

@@ -21,6 +21,7 @@
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/base/mock_task_executor.h"
 
 using namespace testing::ext;
@@ -119,38 +120,6 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveStart002, TestSize.Level1)
     richEditorPattern->selectOverlay_->isSingleHandle_ = true;
     richEditorPattern->selectOverlay_->OnHandleMoveStart(info, true);
     EXPECT_TRUE(richEditorPattern->isCursorAlwaysDisplayed_);
-}
-
-/**
- * @tc.name: OnOverlayTouchDown001
- * @tc.desc: test OnOverlayTouchDown
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayTouchDown001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TouchEventInfo info("text");
-    richEditorPattern->selectOverlay_->OnOverlayTouchDown(info);
-    EXPECT_FALSE(richEditorPattern->isOnlyRequestFocus_);
-}
-
-/**
- * @tc.name: OnOverlayTouchDown002
- * @tc.desc: test OnOverlayTouchDown
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayTouchDown002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TouchEventInfo info("text");
-    info.SetSourceTool(SourceTool::MOUSE);
-    richEditorPattern->selectOverlay_->OnOverlayTouchDown(info);
-    EXPECT_EQ(info.GetSourceTool(), SourceTool::MOUSE);
-    EXPECT_FALSE(richEditorPattern->isOnlyRequestFocus_);
 }
 
 /**
@@ -398,5 +367,53 @@ HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectOverlayInfo, TestSize.Level1)
     ASSERT_TRUE(secondHandleInfo.has_value());
     EXPECT_FALSE(secondHandleInfo.value().isShow);
     EXPECT_FALSE(secondHandleInfo.value().isTouchable);
+}
+
+/**
+ * @tc.name: RefreshSelectOverlay001
+ * @tc.desc: test RefreshSelectOverlay and more.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, RefreshSelectOverlay001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    int32_t posx = 1;
+    int32_t posy = 3;
+    richEditorPattern->HandleSurfacePositionChanged(posx, posy);
+    EXPECT_EQ(richEditorPattern->HasFocus(), false);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    pipeline->themeManager_ = theme;
+
+    richEditorPattern->customKeyboardBuilder_ = []() {};
+    richEditorPattern->DumpInfo();
+    richEditorPattern->isTextChange_ = false;
+    EXPECT_EQ(richEditorPattern->IsShowHandle(), true);
+
+    richEditorPattern->selectOverlay_->SetUsingMouse(false);
+    richEditorPattern->UpdateSelectionInfo(posx, posy);
+    EXPECT_EQ(richEditorPattern->sourceType_, SourceType::TOUCH);
+
+    richEditorPattern->InitScrollablePattern();
+    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
+
+    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<TextOverlayModifier>();
+    richEditorPattern->InitScrollablePattern();
+    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
+
+    Offset Offset = {1, 4};
+    richEditorPattern->isTextChange_ = true;
+    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
+    EXPECT_EQ(richEditorPattern->HasFocus(), false);
+
+    richEditorPattern->isTextChange_ = false;
+    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
+    EXPECT_EQ(richEditorPattern->HasFocus(), false);
 }
 } // namespace OHOS::Ace::NG

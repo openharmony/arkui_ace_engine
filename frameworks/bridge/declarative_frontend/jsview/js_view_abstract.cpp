@@ -81,6 +81,8 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/pattern/toolbaritem/toolbaritem_model.h"
+#include "core/components_ng/pattern/toolbaritem/toolbaritem_pattern.h"
 #include "core/event/key_event.h"
 
 namespace OHOS::Ace::NG {
@@ -1607,6 +1609,28 @@ void JSViewAbstract::JsHeight(const JSCallbackInfo& info)
     JsHeight(info[0]);
 }
 
+void JSViewAbstract::JsToolbar(const JSCallbackInfo& info)
+{
+    // Check the parameters
+    if (info.Length() <= 0 || !info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> toolbarObj = JSRef<JSObject>::Cast(info[0]);
+    auto builder = toolbarObj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        return;
+    };
+    ToolBarItemModel::GetInstance()->SetIsFirstCreate(true);
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
+    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Toolbar");
+        func->Execute();
+    };
+    ViewAbstractModel::GetInstance()->SetToolbarBuilder(std::move(buildFunc));
+}
+
 bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
 {
     CalcDimension value;
@@ -2207,17 +2231,11 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsSharedTransition", jsVal, checkList)) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
-            ViewAbstractModel::GetInstance()->SetSharedTransition("", nullptr);
-        }
         return;
     }
     // id
     auto id = jsVal->ToString();
     if (id.empty()) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
-            ViewAbstractModel::GetInstance()->SetSharedTransition("", nullptr);
-        }
         return;
     }
     std::shared_ptr<SharedTransitionOption> sharedOption;
@@ -2484,28 +2502,34 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
 void JSViewAbstract::ParseBrightnessOption(const JSRef<JSObject>& jsOption, BrightnessOption& brightnessOption)
 {
     double rate = 1.0f;
-    if (jsOption->GetProperty("rate")->IsNumber()) {
-        rate = jsOption->GetProperty("rate")->ToNumber<double>();
+    auto jsRate = jsOption->GetProperty("rate");
+    if (jsRate->IsNumber()) {
+        rate = jsRate->ToNumber<double>();
     }
     double lightUpDegree = 0.0f;
-    if (jsOption->GetProperty("lightUpDegree")->IsNumber()) {
-        lightUpDegree = jsOption->GetProperty("lightUpDegree")->ToNumber<double>();
+    auto jslightUpDegree = jsOption->GetProperty("lightUpDegree");
+    if (jslightUpDegree->IsNumber()) {
+        lightUpDegree = jslightUpDegree->ToNumber<double>();
     }
     double cubicCoeff = 0.0f;
-    if (jsOption->GetProperty("cubicCoeff")->IsNumber()) {
-        cubicCoeff = jsOption->GetProperty("cubicCoeff")->ToNumber<double>();
+    auto jsCubicCoeff = jsOption->GetProperty("cubicCoeff");
+    if (jsCubicCoeff->IsNumber()) {
+        cubicCoeff = jsCubicCoeff->ToNumber<double>();
     }
     double quadCoeff = 0.0f;
-    if (jsOption->GetProperty("quadCoeff")->IsNumber()) {
-        quadCoeff = jsOption->GetProperty("quadCoeff")->ToNumber<double>();
+    auto jsQuadCoeff = jsOption->GetProperty("quadCoeff");
+    if (jsQuadCoeff->IsNumber()) {
+        quadCoeff = jsQuadCoeff->ToNumber<double>();
     }
     double saturation = 1.0f;
-    if (jsOption->GetProperty("saturation")->IsNumber()) {
-        saturation = jsOption->GetProperty("saturation")->ToNumber<double>();
+    auto jsSaturation = jsOption->GetProperty("saturation");
+    if (jsSaturation->IsNumber()) {
+        saturation = jsSaturation->ToNumber<double>();
     }
     std::vector<float> posRGB(3, 0.0);
-    if (jsOption->GetProperty("posRGB")->IsArray()) {
-        JSRef<JSArray> params = JSRef<JSArray>::Cast(jsOption->GetProperty("posRGB"));
+    auto jsPosRGB = jsOption->GetProperty("posRGB");
+    if (jsPosRGB->IsArray()) {
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(jsPosRGB);
         auto r = params->GetValueAt(0)->ToNumber<double>();
         auto g = params->GetValueAt(1)->ToNumber<double>();
         auto b = params->GetValueAt(2)->ToNumber<double>();
@@ -2514,8 +2538,9 @@ void JSViewAbstract::ParseBrightnessOption(const JSRef<JSObject>& jsOption, Brig
         posRGB[2] = b;
     }
     std::vector<float> negRGB(3, 0.0);
-    if (jsOption->GetProperty("negRGB")->IsArray()) {
-        JSRef<JSArray> params = JSRef<JSArray>::Cast(jsOption->GetProperty("negRGB"));
+    auto jsNegRGB = jsOption->GetProperty("negRGB");
+    if (jsNegRGB->IsArray()) {
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(jsNegRGB);
         auto r = params->GetValueAt(0)->ToNumber<double>();
         auto g = params->GetValueAt(1)->ToNumber<double>();
         auto b = params->GetValueAt(2)->ToNumber<double>();
@@ -2524,8 +2549,9 @@ void JSViewAbstract::ParseBrightnessOption(const JSRef<JSObject>& jsOption, Brig
         negRGB[2] = b;
     }
     double fraction = 1.0f;
-    if (jsOption->GetProperty("fraction")->IsNumber()) {
-        fraction = jsOption->GetProperty("fraction")->ToNumber<double>();
+    auto jsFraction = jsOption->GetProperty("fraction");
+    if (jsFraction->IsNumber()) {
+        fraction = jsFraction->ToNumber<double>();
         fraction = std::clamp(fraction, 0.0, 1.0);
     }
     brightnessOption = { rate, lightUpDegree, cubicCoeff, quadCoeff, saturation, posRGB, negRGB, fraction };
@@ -6895,6 +6921,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
     JSClass<JSViewAbstract>::StaticMethod("width", &JSViewAbstract::JsWidth);
     JSClass<JSViewAbstract>::StaticMethod("height", &JSViewAbstract::JsHeight);
+    JSClass<JSViewAbstract>::StaticMethod("toolbar", &JSViewAbstract::JsToolbar);
     JSClass<JSViewAbstract>::StaticMethod("responseRegion", &JSViewAbstract::JsResponseRegion);
     JSClass<JSViewAbstract>::StaticMethod("mouseResponseRegion", &JSViewAbstract::JsMouseResponseRegion);
     JSClass<JSViewAbstract>::StaticMethod("size", &JSViewAbstract::JsSize);
@@ -7090,6 +7117,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
                                           &JSViewAbstract::JsAccessibilityScrollTriggerable);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityFocusDrawLevel",
                                           &JSViewAbstract::JsAccessibilityFocusDrawLevel);
+    JSClass<JSViewAbstract>::StaticMethod("onAccessibilityActionIntercept",
+                                          &JSViewAbstract::JsOnAccessibilityActionIntercept);
 
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);
@@ -9119,6 +9148,31 @@ std::function<std::string(const std::string&)> ParseJsGetFunc(const JSCallbackIn
     };
 }
 
+std::function<std::string()> JsGetCustomMapFunc(const JSCallbackInfo& info, int32_t nodeId)
+{
+    auto* vm = info.GetVm();
+    return [vm, nodeId]() -> std::string {
+        std::string resultString = std::string();
+        CHECK_NULL_RETURN(vm, resultString);
+        panda::LocalScope scope(vm);
+        auto global = JSNApi::GetGlobalObject(vm);
+        auto getCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getCustomPropertyMapString__"));
+        if (getCustomProperty->IsUndefined() || !getCustomProperty->IsFunction(vm)) {
+            return resultString;
+        }
+        auto obj = getCustomProperty->ToObject(vm);
+        panda::Local<panda::FunctionRef> func = obj;
+        panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, nodeId) };
+        auto function = panda::CopyableGlobal(vm, func);
+        auto callValue = function->Call(vm, function.ToLocal(), params, 1);
+        if (callValue.IsNull() || callValue->IsUndefined() || !callValue->IsString(vm)) {
+            return resultString;
+        }
+        auto value = callValue->ToString(vm)->ToString(vm);
+        return value;
+    };
+}
+
 std::function<bool()> ParseJsFunc(const JSCallbackInfo& info, int32_t nodeId)
 {
     auto* vm = info.GetVm();
@@ -9170,7 +9224,8 @@ void JSViewAbstract::JsCustomProperty(const JSCallbackInfo& info)
     auto nodeId = frameNode->GetId();
     auto getFunc = ParseJsGetFunc(info, nodeId);
     auto func = ParseJsFunc(info, nodeId);
-    frameNode->SetJSCustomProperty(func, getFunc);
+    auto getMapFunc = JsGetCustomMapFunc(info, nodeId);
+    frameNode->SetJSCustomProperty(func, getFunc, std::move(getMapFunc));
 }
 
 void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)

@@ -65,7 +65,6 @@ constexpr uint32_t DEFAULT_MODAL_COLOR = 0x00000000;
 constexpr float ZOOM_DISTANCE_DEFAULT = 50.0;
 constexpr float ZOOM_DISTANCE_MOVE_PER_WHEEL = 5.0;
 constexpr int32_t FLUSH_RELOAD_TRANSITION_DURATION_MS = 400;
-constexpr int32_t ROTATION_DIVISOR = 64; // from adapter/ohos/entrance/ace_view_ohos.cpp
 
 PipelineContext::TimeProvider g_defaultTimeProvider = []() -> uint64_t {
     struct timespec ts;
@@ -1682,6 +1681,31 @@ bool PipelineContext::OnKeyEvent(const NonPointerEvent& nonPointerEvent)
     return false;
 }
 
+constexpr double ANGULAR_VELOCITY_FACTOR = 0.001f;
+constexpr float ANGULAR_VELOCITY_SLOW = 0.07f;
+constexpr float ANGULAR_VELOCITY_MEDIUM = 0.2f;
+constexpr float ANGULAR_VELOCITY_FAST = 0.54f;
+constexpr float DISPLAY_CONTROL_RATIO_VERY_SLOW = 1.19f;
+constexpr float DISPLAY_CONTROL_RATIO_SLOW = 1.87f;
+constexpr float DISPLAY_CONTROL_RATIO_MEDIUM = 1.67f;
+constexpr float DISPLAY_CONTROL_RATIO_FAST = 1.59f;
+
+double GetCrownRotateVP(const CrownEvent& event)
+{
+    double velocity = std::abs(event.angularVelocity * ANGULAR_VELOCITY_FACTOR);
+    double vp = 0.0;
+    if (LessOrEqualCustomPrecision(velocity, ANGULAR_VELOCITY_SLOW, 0.01f)) { // very slow
+        vp = (Dimension(DISPLAY_CONTROL_RATIO_VERY_SLOW, DimensionUnit::VP) * event.degree).ConvertToVp();
+    } else if (LessOrEqualCustomPrecision(velocity, ANGULAR_VELOCITY_MEDIUM, 0.01f)) { // slow
+        vp = (Dimension(DISPLAY_CONTROL_RATIO_SLOW, DimensionUnit::VP) * event.degree).ConvertToVp();
+    } else if (LessOrEqualCustomPrecision(velocity, ANGULAR_VELOCITY_FAST, 0.01f)) { // medium
+        vp = (Dimension(DISPLAY_CONTROL_RATIO_MEDIUM, DimensionUnit::VP) * event.degree).ConvertToVp();
+    } else { // fast
+        vp = (Dimension(DISPLAY_CONTROL_RATIO_FAST, DimensionUnit::VP) * event.degree).ConvertToVp();
+    }
+    return vp;
+}
+
 bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
 {
     CHECK_RUN_ON(UI);
@@ -1690,7 +1714,7 @@ bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
     } else if (nonPointerEvent.eventType == UIInputEventType::CROWN) {
         const auto& crownEvent = static_cast<const CrownEvent&>(nonPointerEvent);
         RotationEvent rotationEvent;
-        rotationEvent.value = crownEvent.degree * ROTATION_DIVISOR;
+        rotationEvent.value = GetCrownRotateVP(crownEvent);
         return OnRotationEvent(rotationEvent);
     }
     return false;

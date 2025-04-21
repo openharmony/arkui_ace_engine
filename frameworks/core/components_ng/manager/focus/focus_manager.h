@@ -29,17 +29,78 @@ namespace OHOS::Ace::NG {
 
 class PipelineContext;
 
+template<typename ContainerType, typename... Args>
+class ACE_EXPORT FocusCallbackManager : public virtual AceType {
+    DECLARE_ACE_TYPE(FocusCallbackManager, AceType);
+
+public:
+    using ValueType = std::function<void(Args...)>;
+    FocusCallbackManager() = default;
+    ~FocusCallbackManager() override = default;
+
+    void SetListener(int32_t key, const ValueType& callback)
+    {
+        callbackContainer_.insert_or_assign(key, callback);
+    }
+
+    int32_t AddListener(const ValueType& callback)
+    {
+        if (callbackContainer_.size() == static_cast<size_t>(std::numeric_limits<int32_t>::max() - 1)) {
+            return -1;
+        }
+        int32_t handler = nextKey_;
+        callbackContainer_.emplace(handler, callback);
+
+        do {
+            nextKey_ = (nextKey_ == std::numeric_limits<int32_t>::max()) ? 0 : ++nextKey_;
+        } while (callbackContainer_.count(nextKey_) != 0);
+        return handler;
+    }
+
+    void RemoveListener(int32_t key)
+    {
+        callbackContainer_.erase(key);
+    }
+
+    void ClearListener()
+    {
+        callbackContainer_.clear();
+    }
+
+    void NotifyListener(Args... args)
+    {
+        for (const auto& [id, callback] : callbackContainer_) {
+            if (callback) {
+                callback(args...);
+            }
+        }
+    }
+
+private:
+    ContainerType callbackContainer_;
+    int32_t nextKey_ { 0 };
+};
+
 using FocusViewMap = std::unordered_map<int32_t, std::pair<WeakPtr<FocusView>, std::list<WeakPtr<FocusView>>>>;
 using RequestFocusCallback = std::function<void(NG::RequestFocusResult result)>;
 using FocusHubScopeMap = std::unordered_map<std::string, std::pair<WeakPtr<FocusHub>, std::list<WeakPtr<FocusHub>>>>;
-using FocusChangeCallback = std::function<void(const WeakPtr<FocusHub>& last,
-    const RefPtr<FocusHub>& current, FocusReason focusReason)>;
+
+using FocusChangeCallback =
+    std::function<void(const WeakPtr<FocusHub>& last, const RefPtr<FocusHub>& current, FocusReason focusReason)>;
 using FocusActiveChangeCallback = std::function<void(bool isFocusActive)>;
+using IsFocusActiveUpdateEvent = std::function<void(bool isFocusActive)>;
+
+using FocusChangeCallbackManager = FocusCallbackManager<std::map<int32_t, FocusChangeCallback>, const WeakPtr<FocusHub>,
+    const RefPtr<FocusHub>, FocusReason>;
+using FocusActiveChangeCallbackManager =
+    FocusCallbackManager<std::unordered_map<int32_t, FocusActiveChangeCallback>, bool>;
+using IsFocusActiveUpdateEventManager = FocusCallbackManager<std::map<int32_t, IsFocusActiveUpdateEvent>, bool>;
 
 enum class FocusActiveReason : int32_t {
     POINTER_EVENT = 0,
-    KEYBOARD_EVENT = 1,
+    DEFAULT = 1,
     USE_API = 2,
+    KEY_TAB = 3,
 };
 
 enum class FocusViewStackState : int32_t {
@@ -53,6 +114,58 @@ enum class KeyProcessingMode : int32_t {
     ANCESTOR_EVENT = 1,
 };
 
+#define DECLARE_FOCUS_CALLBACK_MANAGER(callbackName, callbackType, managerName, managerType) \
+public:                                                                                      \
+    void Set##callbackName(int32_t key, const callbackType& callback)                        \
+    {                                                                                        \
+        if (!focusCallbacks_) {                                                              \
+            focusCallbacks_ = MakeRefPtr<FocusCallbacks>();                                  \
+        }                                                                                    \
+        focusCallbacks_->managerName##_->SetListener(key, callback);                         \
+    }                                                                                        \
+    int32_t Add##callbackName(const callbackType& callback)                                  \
+    {                                                                                        \
+        if (!focusCallbacks_) {                                                              \
+            focusCallbacks_ = MakeRefPtr<FocusCallbacks>();                                  \
+        }                                                                                    \
+        return focusCallbacks_->managerName##_->AddListener(callback);                       \
+    }                                                                                        \
+    void Remove##callbackName(int32_t key)                                                   \
+    {                                                                                        \
+        if (focusCallbacks_) {                                                               \
+            focusCallbacks_->managerName##_->RemoveListener(key);                            \
+        }                                                                                    \
+    }                                                                                        \
+    void Clear##callbackName()                                                               \
+    {                                                                                        \
+        if (focusCallbacks_) {                                                               \
+            focusCallbacks_->managerName##_->ClearListener();                                \
+        }                                                                                    \
+    }                                                                                        \
+    RefPtr<managerType> Get##callbackName##Manager()                                         \
+    {                                                                                        \
+        if (focusCallbacks_) {                                                               \
+            return focusCallbacks_->managerName##_;                                          \
+        }                                                                                    \
+        return nullptr;                                                                      \
+    }
+
+class FocusCallbacks : public virtual AceType {
+    DECLARE_ACE_TYPE(FocusCallbacks, AceType);
+
+public:
+    FocusCallbacks()
+    {
+        focusActiveChangeCallbacks_ = MakeRefPtr<FocusActiveChangeCallbackManager>();
+        focusChangeCallbacks_ = MakeRefPtr<FocusChangeCallbackManager>();
+        isFocusActiveUpdateEvents_ = MakeRefPtr<IsFocusActiveUpdateEventManager>();
+    }
+    ~FocusCallbacks() override = default;
+
+    RefPtr<FocusActiveChangeCallbackManager> focusActiveChangeCallbacks_;
+    RefPtr<FocusChangeCallbackManager> focusChangeCallbacks_;
+    RefPtr<IsFocusActiveUpdateEventManager> isFocusActiveUpdateEvents_;
+};
 class FocusManager : public virtual AceType {
     DECLARE_ACE_TYPE(FocusManager, AceType);
 
@@ -190,11 +303,7 @@ public:
             endReason_ = reason;
         }
     }
-    int32_t AddFocusListener(FocusChangeCallback&& callback);
-    void RemoveFocusListener(int32_t id);
-    int32_t AddFocusActiveChangeListener(const FocusActiveChangeCallback& callback);
-    void RemoveFocusActiveChangeListener(int32_t handler);
-    void TriggerFocusActiveChangeCallback(bool isFocusActive);
+    void TriggerAllFocusActiveChangeCallback(bool isFocusActive);
     void FocusSwitchingStart(const RefPtr<FocusHub>& focusHub, SwitchingStartReason reason);
     void FocusSwitchingEnd(SwitchingEndReason reason = SwitchingEndReason::FOCUS_GUARD_DESTROY);
     void WindowFocusMoveStart();
@@ -218,9 +327,20 @@ public:
 
     static RefPtr<FocusManager> GetFocusManager(RefPtr<FrameNode>& node);
 
+    bool SetIsFocusActive(
+        bool isFocusActive, FocusActiveReason reason = FocusActiveReason::DEFAULT, bool autoFocusInactive = true);
+    bool GetIsFocusActive() const
+    {
+        return isFocusActive_;
+    }
+    bool HandleKeyForExtendOrActivateFocus(const KeyEvent& event, const RefPtr<FocusView>& curFocusView);
+    bool ExtendOrActivateFocus(
+        const RefPtr<FocusView>& curFocusView, FocusActiveReason reason = FocusActiveReason::DEFAULT);
+
 private:
     void GetFocusViewMap(FocusViewMap& focusViewMap);
     void ReportFocusSwitching(FocusReason focusReason);
+    bool NeedChangeFocusAvtive(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive);
 
     std::list<WeakPtr<FocusView>> focusViewStack_;
     WeakPtr<FocusView> lastFocusView_;
@@ -238,9 +358,14 @@ private:
     std::optional<bool> isNeedTriggerScroll_ = false;
     FocusHubScopeMap focusHubScopeMap_;
 
-    std::map<int32_t, FocusChangeCallback> listeners_;
-    ValueListenable<bool> focusActiveChangeCallback_;
-    int32_t nextListenerHdl_ = -1;
+    DECLARE_FOCUS_CALLBACK_MANAGER(FocusActiveChangeCallback, FocusActiveChangeCallback, focusActiveChangeCallbacks,
+        FocusActiveChangeCallbackManager);
+    DECLARE_FOCUS_CALLBACK_MANAGER(
+        FocusChangeCallback, FocusChangeCallback, focusChangeCallbacks, FocusChangeCallbackManager);
+    DECLARE_FOCUS_CALLBACK_MANAGER(
+        IsFocusActiveUpdateEvent, IsFocusActiveUpdateEvent, isFocusActiveUpdateEvents, IsFocusActiveUpdateEventManager);
+    RefPtr<FocusCallbacks> focusCallbacks_;
+
     std::optional<bool> isSwitchingFocus_;
     bool isSwitchingWindow_ = false;
     RefPtr<FocusHub> switchingFocus_;
@@ -250,6 +375,8 @@ private:
     std::optional<SwitchingUpdateReason> updateReason_;
 
     bool isAutoFocusTransfer_ = true;
+    bool isFocusActive_ = false;
+    bool autoFocusInactive_ = true;
     FocusViewStackState focusViewStackState_ = FocusViewStackState::IDLE;
 
     int32_t requestFocusResult_ = ERROR_CODE_NO_ERROR;

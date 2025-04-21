@@ -400,6 +400,8 @@ public:
         PopupInfo& tipsInfo, bool showInSubWindow, const RefPtr<SpanString>& spanString);
     static void AddHoverEventForTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
         PopupInfo& tipsInfo, bool showInSubWindow);
+    static void UpdateTipsInfo(PopupInfo& tipsInfo, int32_t popupId, const RefPtr<FrameNode>& popupNode,
+        const RefPtr<PopupParam>& param, bool isAvoidKeyboard);
     static RefPtr<OverlayManager> GetCurOverlayManager(const RefPtr<UINode>& node);
     static bool GetTargetNodeIsInSubwindow(const RefPtr<UINode>& targetNode);
     static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);

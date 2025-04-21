@@ -106,6 +106,15 @@ void RecordChange(RefPtr<FrameNode> host, int32_t index, const std::string& valu
         }
     }
 }
+
+static std::string ConvertVectorToString(std::vector<std::string> vec)
+{
+    std::ostringstream oss;
+    for (size_t i = 0; i < vec.size(); ++i) {
+        oss << ((i == 0) ? "" : ",") << vec[i];
+    }
+    return oss.str();
+}
 } // namespace
 
 void SelectPattern::OnAttachToFrameNode()
@@ -123,7 +132,7 @@ void SelectPattern::OnModifyDone()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<SelectEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<SelectEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->IsEnabled()) {
         SetDisabledStyle();
@@ -180,8 +189,8 @@ void SelectPattern::SetItemSelected(int32_t index, const std::string& value)
     textProps->UpdateContent(value);
     text_->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    menuPattern->HideMenu();
-    auto hub = host->GetEventHub<SelectEventHub>();
+    menuPattern->HideMenu(HideMenuType::SELECT_SELECTED);
+    auto hub = host->GetOrCreateEventHub<SelectEventHub>();
     CHECK_NULL_VOID(hub);
 
     auto onSelect = hub->GetSelectEvent();
@@ -209,7 +218,7 @@ void SelectPattern::ShowSelectMenu()
     } else {
         offset.AddY(selectSize_.Height());
     }
-
+    ShowScrollBar();
     TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "select click to show menu.");
     overlayManager->ShowMenu(host->GetId(), offset, menuWrapper_);
 }
@@ -329,7 +338,7 @@ void SelectPattern::RegisterOnPress()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<SelectEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<SelectEventHub>();
     CHECK_NULL_VOID(eventHub);
     std::function<void(UIState)> callback = [weak = WeakClaim(this)](const UIState& state) {
         auto pattern = weak.Upgrade();
@@ -372,7 +381,7 @@ void SelectPattern::CreateSelectedCallback()
         pattern->SetSelected(index);
         pattern->UpdateText(index);
         pattern->isSelected_ = true;
-        auto hub = host->GetEventHub<SelectEventHub>();
+        auto hub = host->GetOrCreateEventHub<SelectEventHub>();
         CHECK_NULL_VOID(hub);
         // execute change event callback
         auto selectChangeEvent = hub->GetSelectChangeEvent();
@@ -397,7 +406,7 @@ void SelectPattern::CreateSelectedCallback()
         RecordChange(host, index, value);
     };
     for (auto&& option : options_) {
-        auto hub = option->GetEventHub<MenuItemEventHub>();
+        auto hub = option->GetOrCreateEventHub<MenuItemEventHub>();
         // no std::move, need to set multiple options
         hub->SetOnSelect(callback);
         option->MarkModifyDone();
@@ -422,7 +431,7 @@ void SelectPattern::InitFocusEvent()
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
 
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusStyleTask();
@@ -687,7 +696,7 @@ void SelectPattern::BuildChild()
     // get theme from SelectThemeManager
     auto* pipeline = select->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
 
     bool hasRowNode = HasRowNode();
@@ -1287,7 +1296,7 @@ void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const I
         CHECK_NULL_VOID(rowProps);
         json->PutExtAttr("space", rowProps->GetSpaceValue(Dimension()).ToString().c_str(), filter);
 
-        if (rowProps->GetFlexDirection().value() == FlexDirection::ROW) {
+        if (rowProps->GetFlexDirection().value_or(FlexDirection::ROW) == FlexDirection::ROW) {
             json->PutExtAttr("arrowPosition", "ArrowPosition.END", filter);
         } else {
             json->PutExtAttr("arrowPosition", "ArrowPosition.START", filter);
@@ -1492,6 +1501,17 @@ void SelectPattern::UpdateTargetSize()
     menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SelectPattern::ShowScrollBar()
+{
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto scroll = DynamicCast<FrameNode>(menu->GetFirstChild());
+    CHECK_NULL_VOID(scroll);
+    auto scrollPattern = scroll->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
+    scrollPattern->TriggerScrollBarDisplay();
+}
+
 void SelectPattern::SetSpace(const Dimension& value)
 {
     auto host = GetHost();
@@ -1649,7 +1669,7 @@ void SelectPattern::OnLanguageConfigurationUpdate()
             pattern->UpdateText(index);
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            auto hub = host->GetEventHub<SelectEventHub>();
+            auto hub = host->GetOrCreateEventHub<SelectEventHub>();
             CHECK_NULL_VOID(hub);
             if (index >= static_cast<int32_t>(pattern->options_.size()) || index < 0) {
                 return;
@@ -2070,5 +2090,31 @@ void SelectPattern::UpdateSelectedOptionFontFromPattern(const RefPtr<MenuItemPat
     } else if (optionFont_.FontWeight.has_value()) {
         optionPattern->SetFontWeight(optionFont_.FontWeight.value());
     }
+}
+
+void SelectPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc("Selected: " + std::to_string(selected_));
+    DumpLog::GetInstance().AddDesc("FontColor: " + fontColor_.value_or(Color()).ToString());
+    DumpLog::GetInstance().AddDesc(
+        "SelectedOptionFontSize: " + selectedFont_.FontSize.value_or(Dimension()).ToString());
+    DumpLog::GetInstance().AddDesc(
+        "SelectedOptionFontStyle: " + StringUtils::ToString(selectedFont_.FontStyle.value_or(Ace::FontStyle::NORMAL)));
+    DumpLog::GetInstance().AddDesc("SelectedOptionFontWeight: " +
+        StringUtils::FontWeightToString(selectedFont_.FontWeight.value_or(FontWeight::NORMAL)));
+    DumpLog::GetInstance().AddDesc("SelectedOptionFontFamily: " +
+        ConvertVectorToString(selectedFont_.FontFamily.value_or(std::vector<std::string>())));
+    DumpLog::GetInstance().AddDesc("SelectedOptionFontColor: " + selectedFont_.FontColor.value_or(Color()).ToString());
+    DumpLog::GetInstance().AddDesc("SelectedBgColor: " + selectedBgColor_.value_or(Color()).ToString());
+    DumpLog::GetInstance().AddDesc("OptionFontSize: " + optionFont_.FontSize.value_or(Dimension()).ToString());
+    DumpLog::GetInstance().AddDesc(
+        "OptionFontStyle: " + StringUtils::ToString(optionFont_.FontStyle.value_or(Ace::FontStyle::NORMAL)));
+    DumpLog::GetInstance().AddDesc(
+        "OptionFontWeight: " + StringUtils::FontWeightToString(optionFont_.FontWeight.value_or(FontWeight::NORMAL)));
+    DumpLog::GetInstance().AddDesc(
+        "OptionFontFamily: " + ConvertVectorToString(optionFont_.FontFamily.value_or(std::vector<std::string>())));
+    DumpLog::GetInstance().AddDesc("OptionFontColor: " + optionFont_.FontColor.value_or(Color()).ToString());
+    DumpLog::GetInstance().AddDesc("OptionBgColor: " + optionBgColor_.value_or(Color()).ToString());
+    DumpLog::GetInstance().AddDesc("ControlSize: " + ConvertControlSizeToString(controlSize_));
 }
 } // namespace OHOS::Ace::NG

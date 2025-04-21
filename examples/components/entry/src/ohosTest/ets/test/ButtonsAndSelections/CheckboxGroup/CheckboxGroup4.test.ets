@@ -14,13 +14,18 @@
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
 import { Driver, ON } from '@kit.TestKit';
-import { buttonClick,
-  JsonType, KeyStruct, radioClick,
+import {
+  buttonClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
   searchParentBlock,
-  Slide, sliderDrag,
+  Slide,
+  sliderDrag,
   titleSearch,
   Search,
-  ToggleClick } from '../../../utils';
+  ToggleClick
+} from '../../../utils';
 import { CheckboxGroupStart } from './CheckboxGroup';
 
 /*初始化与UI元素交互的驱动对象*/
@@ -781,7 +786,7 @@ export default function CheckboxGroup4() {
 
     it('ArkUI_CheckboxGroup_Comp_0315', 0, async (done: Function) => {
       // 获取不到
-      await titleSearch('基础属性','blendMode.type','通用属性2')
+      await titleSearch('基础属性', 'blendMode.type', '通用属性2')
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
@@ -793,7 +798,7 @@ export default function CheckboxGroup4() {
     })
     it('ArkUI_CheckboxGroup_Comp_0316', 0, async (done: Function) => {
       // 获取不到
-      await titleSearch('基础属性','blendMode.type','通用属性2')
+      await titleSearch('基础属性', 'blendMode.type', '通用属性2')
       await radioClick({
         radioClickObj: 1,
         toggleClick: {
@@ -1617,208 +1622,6 @@ export default function CheckboxGroup4() {
 
       done();
 
-    })
-
-    // BindPopup
-    // show.button
-    it('ArkUI_CheckboxGroup_Comp_0353', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'show.button', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done();
-
-    })
-
-    it('ArkUI_CheckboxGroup_Comp_0354', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'show.button', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done();
-
-    })
-
-    // bindPopup.arrowOffset
-    it('ArkUI_CheckboxGroup_Comp_0355', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.arrowOffset', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done();
-    })
-
-    // bindPopup.showInSubWindow
-    it('ArkUI_CheckboxGroup_Comp_0356', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.showInSubWindow', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_CheckboxGroup_Comp_0357', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.showInSubWindow', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.maskType
-    it('ArkUI_CheckboxGroup_Comp_0358', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.maskType', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.maskType
-    it('ArkUI_CheckboxGroup_Comp_0359', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.maskType', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.mask.color
-    it('ArkUI_CheckboxGroup_Comp_0360', 0, async (done: Function) => {
-
-      let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
-
-      if (!title) {
-        await Search('基础属性', 'bindPopup.maskType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.mask.color', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_CheckboxGroup_Comp_0361', 0, async (done: Function) => {
-
-      let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
-
-      if (!title) {
-        await Search('基础属性', 'bindPopup.maskType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.mask.color', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 1,
-      })
-
-      done()
-    })
-
-    it('ArkUI_CheckboxGroup_Comp_0362', 0, async (done: Function) => {
-
-      let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
-
-      if (!title) {
-        await Search('基础属性', 'bindPopup.maskType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.mask.color', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 2,
-      })
-
-      done()
     })
 
   })

@@ -118,7 +118,7 @@ void WebPattern::InitEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
@@ -227,7 +227,7 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto mouseEventCallback = eventHub->GetOnMouseEvent();
     CHECK_NULL_VOID(mouseEventCallback);
@@ -300,7 +300,7 @@ bool WebPattern::IsImageDrag()
 
 void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -348,7 +348,7 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ret);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_RETURN(eventHub, ret);
 
     KeyEventInfo info(keyEvent);
@@ -379,7 +379,7 @@ void WebPattern::WebRequestFocus()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -1394,6 +1394,12 @@ void WebPattern::RemovePreviewMenuNode()
 void WebPattern::UpdateImagePreviewParam()
 {
     // cross platform is not support now;
+}
+
+bool WebPattern::RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback)
+{
+    // cross platform is not support now;
+    return false;
 }
 
 void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)

@@ -48,7 +48,7 @@ void AddSafeIntervalBetweenToolbarItem(
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (count == ONE_TOOLBAR_ITEM && toolbarItemSize != ONE_TOOLBAR_ITEM) {
             margin.right = CalcLength(theme->GetToolbarItemMargin());
         } else if (!needMoreButton && (count == toolbarItemSize) && (toolbarItemSize != ONE_TOOLBAR_ITEM)) {
@@ -93,7 +93,7 @@ RefPtr<FrameNode> CreateToolbarItemTextNode(const std::string& text)
     CHECK_NULL_RETURN(theme, nullptr);
     textLayoutProperty->UpdateContent(text);
     textLayoutProperty->UpdateFontSize(theme->GetToolBarItemFontSize());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         textLayoutProperty->UpdateLineHeight(theme->GetToolBarItemFontSize());
     }
     textLayoutProperty->UpdateTextColor(theme->GetToolBarItemFontColor());
@@ -160,7 +160,7 @@ void RegisterToolbarHotZoneEvent(const RefPtr<FrameNode>& buttonNode, const RefP
             return;
         }
         auto barItemNode = weakNode.Upgrade();
-        auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
+        auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         auto pattern = barItemNode->GetPattern<BarItemPattern>();
         CHECK_NULL_VOID(pattern);
@@ -219,7 +219,7 @@ void UpdateToolbarItemNodeWithConfiguration(
         barItemNode->AddChild(iconNode);
     }
     if (barItem.action) {
-        auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
+        auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetItemAction(barItem.action);
         RegisterToolbarHotZoneEvent(buttonNode, barItemNode);
@@ -232,14 +232,14 @@ void UpdateToolbarItemNodeWithConfiguration(
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateOpacity(theme->GetToolbarItemDisabledAlpha());
 
-        auto itemEventHub = barItemNode->GetEventHub<BarItemEventHub>();
+        auto itemEventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
         CHECK_NULL_VOID(itemEventHub);
         itemEventHub->SetEnabled(false);
         auto itemFocusHub = barItemNode->GetFocusHub();
         CHECK_NULL_VOID(itemFocusHub);
         itemFocusHub->SetEnabled(false);
 
-        auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
+        auto buttonEventHub = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
         CHECK_NULL_VOID(buttonEventHub);
         buttonEventHub->SetEnabled(false);
         auto buttonFocusHub = buttonNode->GetFocusHub();
@@ -324,7 +324,7 @@ RefPtr<FrameNode> CreateToolbarItemInContainer(
     buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
     buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
     buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonPattern->SetBlendColor(Color::TRANSPARENT, std::nullopt);
     }
     auto toolBarItemNode = FrameNode::CreateFrameNode(
@@ -395,7 +395,7 @@ RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNo
     buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
     buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
     buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonPattern->SetBlendColor(Color::TRANSPARENT, std::nullopt);
     }
     auto toolBarItemNode = FrameNode::CreateFrameNode(
@@ -432,7 +432,7 @@ RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNo
 void BuildToolbarMoreMenuNodeAction(
     const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode, const RefPtr<FrameNode>& buttonNode)
 {
-    auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
+    auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto context = PipelineContext::GetCurrentContext();

@@ -341,14 +341,14 @@ public:
 
     void FireWillShowEvent()
     {
-        auto tabContentEventHub = GetEventHub<TabContentEventHub>();
+        auto tabContentEventHub = GetOrCreateEventHub<TabContentEventHub>();
         CHECK_NULL_VOID(tabContentEventHub);
         tabContentEventHub->FireWillShowEvent();
     }
 
     void FireWillHideEvent()
     {
-        auto tabContentEventHub = GetEventHub<TabContentEventHub>();
+        auto tabContentEventHub = GetOrCreateEventHub<TabContentEventHub>();
         CHECK_NULL_VOID(tabContentEventHub);
         tabContentEventHub->FireWillHideEvent();
     }

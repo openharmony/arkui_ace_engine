@@ -1450,7 +1450,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg028, TestSize.Level1)
     swiperLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
     indicatorPattern->GetTextContentSub(firstContent, lastContent);
     EXPECT_EQ(firstContent, "4");
-    EXPECT_EQ(lastContent, "3\\");
+    EXPECT_EQ(lastContent, "3/");
 }
 
 /**

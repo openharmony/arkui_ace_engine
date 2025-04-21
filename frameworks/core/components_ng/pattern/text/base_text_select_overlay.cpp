@@ -1376,7 +1376,7 @@ void BaseTextSelectOverlay::HandleOnSearch()
 bool BaseTextSelectOverlay::IsSupportMenuShare()
 {
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         return false;
     }
     return SystemProperties::IsSyscapExist(SYSTEM_CAPABILITY_OF_SHARE);
@@ -1385,7 +1385,15 @@ bool BaseTextSelectOverlay::IsSupportMenuShare()
 bool BaseTextSelectOverlay::IsNeedMenuShare()
 {
     auto shareContent = GetSelectedText();
-    return !std::regex_match(shareContent, std::regex("^\\s*$"));
+    auto shareWord = std::regex_replace(shareContent, std::regex("^\\s+|\\s+$"), "");
+    if (shareWord.empty()) {
+        return false;
+    }
+    auto maxShareLength = TextShareAdapter::GetMaxTextShareLength();
+    if (shareWord.size() > maxShareLength) {
+        return false;
+    }
+    return true;
 }
 
 void BaseTextSelectOverlay::HandleOnShare()

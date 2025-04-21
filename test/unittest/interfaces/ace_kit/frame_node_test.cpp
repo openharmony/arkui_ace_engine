@@ -97,10 +97,10 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest003, TestSize.Level1)
         NG::FrameNode::GetOrCreateFrameNode("TEST_ACE_NODE", 3, []() { return AceType::MakeRefPtr<NG::Pattern>(); });
     ASSERT_TRUE(aceNode);
 
-    auto popAceNode = frameNodeImpl->PopAceNode();
+    auto popAceNode = frameNodeImpl->MoveOwnershipAndGetAceNode();
     EXPECT_EQ(popAceNode->GetTag(), tag);
     EXPECT_EQ(popAceNode->GetId(), id);
-    EXPECT_FALSE(frameNodeImpl->GetAceNode());
+    EXPECT_NE(frameNodeImpl->GetAceNodePtr(), nullptr);
 }
 
 /**

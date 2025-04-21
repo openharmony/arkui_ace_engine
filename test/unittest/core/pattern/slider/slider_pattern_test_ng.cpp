@@ -271,7 +271,6 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest001, TestSize.Level1)
     sliderPattern->bubbleFlag_ = true;
     sliderPattern->isVisibleArea_ = true;
     ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
-    sliderPattern->sliderTipModifier_->getBubbleVertexFunc_();
     sliderPattern->UpdateCircleCenterOffset();
     auto contentSize = sliderPattern->GetHostContentSize();
     EXPECT_EQ(sliderPattern->GetBlockCenter().GetY(), contentSize->Height() * HALF);

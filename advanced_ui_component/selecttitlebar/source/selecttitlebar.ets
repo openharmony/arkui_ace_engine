@@ -539,9 +539,9 @@ struct ImageMenuItem {
     } else if (this.item.value === PUBLIC_MORE) {
       return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
     } else if (this.item.accessibilityText) {
-      return this.toStringFormat(this.item.accessibilityText);
+      return this.item.accessibilityText as string;
     } else if (this.item.label) {
-      return this.toStringFormat(this.item.label);
+      return this.item.label as string;
     }
     return ' ';
   }
@@ -590,7 +590,7 @@ struct ImageMenuItem {
       }
       .accessibilityText(this.getAccessibilityReadText())
       .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
-      .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
+      .accessibilityDescription(this.item?.accessibilityDescription as string)
       .width(ImageMenuItem.imageHotZoneWidth)
       .height(ImageMenuItem.imageHotZoneWidth)
       .borderRadius(ImageMenuItem.buttonBorderRadius)
@@ -688,7 +688,7 @@ struct ImageMenuItem {
       }
       .accessibilityText(this.getAccessibilityReadText())
       .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
-      .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
+      .accessibilityDescription(this.item?.accessibilityDescription as string)
       .width(ImageMenuItem.imageHotZoneWidth)
       .height(ImageMenuItem.imageHotZoneWidth)
       .borderRadius(ImageMenuItem.buttonBorderRadius)

@@ -502,7 +502,7 @@ float OH_ArkUI_PointerEvent_GetTiltY(const ArkUI_UIInputEvent* event, uint32_t p
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 18
+ * @since 17
  */
 int32_t OH_ArkUI_PointerEvent_GetRollAngle(const ArkUI_UIInputEvent* event, double* rollAngle);
 

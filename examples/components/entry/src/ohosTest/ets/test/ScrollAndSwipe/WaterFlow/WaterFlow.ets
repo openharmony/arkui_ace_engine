@@ -18,14 +18,14 @@ import { Point } from '@ohos.UiTest';
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
 
-export async function WaterFlowStart(done:Function) {
+export async function WaterFlowStart(done: Function) {
   await delegator.startAbility({
     bundleName: 'cn.ohos.components',
     abilityName: 'EntryAbility'
   });
   await driver.delayMs(5000);
 
-  let atomNavigates: Component = await driver.findComponent(ON.text('容器类'));
+  let atomNavigates: Component = await driver.findComponent(ON.text('滚动与滑动'));
   await atomNavigates.click();
   await driver.delayMs(3500);
 

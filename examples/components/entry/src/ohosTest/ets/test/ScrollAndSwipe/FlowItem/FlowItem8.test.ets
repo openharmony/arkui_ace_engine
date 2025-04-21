@@ -13,13 +13,8 @@
  * limitations under the License.
  */
 
-import { describe, beforeAll, it} from '@ohos/hypium'
-import {
-  radioClick,
-  titleSearch,
-  ToggleClick,
-  getToggle
-} from '../../../utils';
+import { describe, beforeAll, it } from '@ohos/hypium'
+import { radioClick, titleSearch, ToggleClick, getToggle } from '../../../utils';
 import { FlowItemStart } from './FlowItem';
 
 export default function FlowItem8() {

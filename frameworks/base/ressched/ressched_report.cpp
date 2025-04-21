@@ -95,7 +95,7 @@ using namespace Ressched;
 
 ResSchedReport& ResSchedReport::GetInstance()
 {
-    static ResSchedReport instance;
+    thread_local ResSchedReport instance;
     return instance;
 }
 

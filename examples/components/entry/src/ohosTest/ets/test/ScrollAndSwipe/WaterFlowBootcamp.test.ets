@@ -1,7 +1,8 @@
 import { describe, beforeAll, it } from '@ohos/hypium'
 import { abilityDelegatorRegistry, Driver, Component, ON } from '@kit.TestKit';
 import { Point } from '@ohos.UiTest';
-import { buttonClick,
+import {
+  buttonClick,
   getToggle,
   JsonType,
   KeyStruct,
@@ -31,7 +32,7 @@ export default function WaterFlowBootcampTest() {
         });
         await driver.delayMs(5000);
 
-        let atomNavigates: Component = await driver.findComponent(ON.text('容器类'));
+        let atomNavigates: Component = await driver.findComponent(ON.text('滚动与滑动'));
         await atomNavigates.click();
         await driver.delayMs(3500);
 

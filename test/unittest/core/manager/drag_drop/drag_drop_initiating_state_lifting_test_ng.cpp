@@ -120,29 +120,29 @@ const std::vector<DragDropInitiatingStateLiftingTestCase> DRAG_DROP_INITIATING_S
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::HandleReStartDrag,
         DragDropInitiatingStatus::LIFTING, true, false, SourceType::MOUSE),
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::HandleDragStart,
-        DragDropInitiatingStatus::LIFTING, false, false, SourceType::TOUCH),
+        DragDropInitiatingStatus::MOVING, false, false, SourceType::TOUCH),
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::HandleDragStart,
-        DragDropInitiatingStatus::LIFTING, true, false, SourceType::TOUCH),
+        DragDropInitiatingStatus::MOVING, true, false, SourceType::TOUCH),
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::HandleDragStart,
-        DragDropInitiatingStatus::LIFTING, false, false, SourceType::MOUSE),
+        DragDropInitiatingStatus::MOVING, false, false, SourceType::MOUSE),
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::HandleDragStart,
-        DragDropInitiatingStatus::LIFTING, true, false, SourceType::MOUSE),
+        DragDropInitiatingStatus::MOVING, true, false, SourceType::MOUSE),
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::TransMenuShow,
-        DragDropInitiatingStatus::LIFTING, false, false, SourceType::TOUCH),
+        DragDropInitiatingStatus::IDLE, false, false, SourceType::TOUCH),
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::TransMenuShow,
         DragDropInitiatingStatus::LIFTING, true, false, SourceType::TOUCH),
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::TransMenuShow,
-        DragDropInitiatingStatus::LIFTING, false, false, SourceType::MOUSE),
+        DragDropInitiatingStatus::IDLE, false, false, SourceType::MOUSE),
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::TransMenuShow,
         DragDropInitiatingStatus::LIFTING, true, false, SourceType::MOUSE),
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::TransDragWindowToFwk,
-        DragDropInitiatingStatus::LIFTING, false, false, SourceType::TOUCH),
+        DragDropInitiatingStatus::IDLE, false, false, SourceType::TOUCH),
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::TransDragWindowToFwk,
-        DragDropInitiatingStatus::LIFTING, true, false, SourceType::TOUCH),
+        DragDropInitiatingStatus::IDLE, true, false, SourceType::TOUCH),
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::TransDragWindowToFwk,
-        DragDropInitiatingStatus::LIFTING, false, false, SourceType::MOUSE),
+        DragDropInitiatingStatus::IDLE, false, false, SourceType::MOUSE),
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::TransDragWindowToFwk,
-        DragDropInitiatingStatus::LIFTING, true, false, SourceType::MOUSE),
+        DragDropInitiatingStatus::IDLE, true, false, SourceType::MOUSE),
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::HandlePanOnReject,
         DragDropInitiatingStatus::LIFTING, false, false, SourceType::TOUCH),
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::HandlePanOnReject,
@@ -151,6 +151,10 @@ const std::vector<DragDropInitiatingStateLiftingTestCase> DRAG_DROP_INITIATING_S
         DragDropInitiatingStatus::IDLE, false, false, SourceType::TOUCH),
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::HandleSequenceOnActionCancel,
         DragDropInitiatingStatus::IDLE, false, false, SourceType::MOUSE),
+    DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::HandlePullEvent,
+        DragDropInitiatingStatus::LIFTING, false, false, SourceType::TOUCH),
+    DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::HandleDragEnd,
+        DragDropInitiatingStatus::IDLE, false, false, SourceType::TOUCH),
 };
 
 const std::vector<CheckDoShowPreviewTestCase> DRAG_DROP_INITIATING_CHECK_DO_SHOW_PREVIEW_TEST_CASES = {
@@ -209,6 +213,7 @@ HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTes
         ASSERT_NE(machine, nullptr);
         machine->InitializeState();
         machine->currentState_ = static_cast<int32_t>(testCase.originStatus);
+        DragDropGlobalController::GetInstance().UpdateMenuShowingStatus(testCase.isMenuShow);
         gestureEventHub->SetIsTextDraggable(testCase.isTextDraggable);
         if (((static_cast<int32_t>(testCase.receivedInput)) & DRAG_ACTION_NONE_ARGS) != 0) {
             DragDropInitiatingStateTestNG::DoMachineAction(machine, testCase.receivedInput);

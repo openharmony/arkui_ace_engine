@@ -1579,4 +1579,112 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest041, TestSize
         static_cast<RSScalar>(gradient.GetEndOffset().GetX()), static_cast<RSScalar>(gradient.GetEndOffset().GetY()));
     EXPECT_FALSE(gradient.GetInnerRadius() <= 0.0 && beginPoint == endPoint);
 }
+
+/**
+ * @tc.name: GetSystemDirectionTest
+ * @tc.desc: Test the function 'GetSystemDirection' of the class 'CanvasPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, GetSystemDirectionTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto contentModifier = AceType::MakeRefPtr<CanvasModifier>();
+    ASSERT_TRUE(contentModifier);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_TRUE(frameNode);
+    frameNode->layoutProperty_ = AceType::MakeRefPtr<LayoutProperty>();
+    auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>(contentModifier, frameNode);
+    ASSERT_TRUE(paintMethod);
+    paintMethod->frameNode_ = std::move(frameNode);
+
+    /**
+     * @tc.steps2: layoutDirection_ default is TextDirection::AUTO.
+     * @tc.expected: return TextDirection::LTR.
+     */
+    TextDirection ret = paintMethod->GetSystemDirection();
+    EXPECT_EQ(ret, TextDirection::LTR);
+
+    /**
+     * @tc.steps3: layoutDirection_ is not TextDirection::AUTO.
+     * @tc.expected: return TextDirection::INHERIT.
+     */
+    frameNode->layoutProperty_->layoutDirection_ = TextDirection::INHERIT;
+    ret = paintMethod->GetSystemDirection();
+    EXPECT_EQ(ret, TextDirection::INHERIT);
+}
+
+/**
+ * @tc.name: GetImageDataTest
+ * @tc.desc: Test the function 'GetImageData' of the class 'CanvasPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, GetImageDataTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto contentModifier = AceType::MakeRefPtr<CanvasModifier>();
+    ASSERT_TRUE(contentModifier);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_TRUE(frameNode);
+    auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>(contentModifier, frameNode);
+    ASSERT_TRUE(paintMethod);
+    /**
+     * @tc.steps2: invoked by default.
+     * @tc.expected: DrawBitmap(renderContext, currentBitmap) return false.
+     */
+    auto imageData = paintMethod->GetImageData(10, 10, 10, 10);
+    EXPECT_FALSE(imageData);
+}
+
+/**
+* @tc.name: UpdateRecordingCanvasTest
+* @tc.desc: Test the function 'UpdateRecordingCanvas' of the class 'CanvasPaintMethod'.
+* @tc.type: FUNC
+*/
+HWTEST_F(CanvasCustomPaintMethodTestNg, UpdateRecordingCanvasTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto contentModifier = AceType::MakeRefPtr<CanvasModifier>();
+    ASSERT_TRUE(contentModifier);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_TRUE(frameNode);
+    auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>(contentModifier, frameNode);
+    ASSERT_TRUE(paintMethod);
+
+    /**
+     * @tc.steps2: invoked by default.
+     * @tc.expected: set paintMethod->needMarkDirty_ is true.
+     */
+    paintMethod->UpdateRecordingCanvas(10, 10);
+    EXPECT_TRUE(paintMethod->needMarkDirty_);
+
+    /**
+     * @tc.steps3: set apiTargetVersion is VERSION_THIRTEEN.
+     * @tc.expected: set paintMethod->needMarkDirty_ is true.
+     */
+    auto container = Container::Current();
+    ASSERT_TRUE(container);
+    auto apiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    paintMethod->UpdateRecordingCanvas(10, 10);
+    EXPECT_TRUE(paintMethod->needMarkDirty_);
+    container->SetApiTargetVersion(apiVersion);
+}
 } // namespace OHOS::Ace::NG

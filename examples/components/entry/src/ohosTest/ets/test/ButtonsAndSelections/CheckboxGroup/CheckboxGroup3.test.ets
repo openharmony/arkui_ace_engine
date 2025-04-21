@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { buttonClick,
-  JsonType, KeyStruct, radioClick,
-  Slide, sliderDrag,
+import {
+  buttonClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Slide,
+  sliderDrag,
   Search,
   ToggleClick,
-  searchParentBlock} from '../../../utils';
+  searchParentBlock
+} from '../../../utils';
 import { CheckboxGroupStart } from './CheckboxGroup';
 
 export default function CheckboxGroup3() {

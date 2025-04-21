@@ -61,6 +61,7 @@ private:
     void Distribute(float& scrollHeight, float& listHeight, float restHeight);
     void AnalysisHeightOfChild(LayoutWrapper* layoutWrapper);
     void AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& scroll);
+    void AvoidScreen(OffsetF& topLeftPoint, const RefPtr<DialogLayoutProperty>& prop, SizeF childSize);
 
     bool ComputeInnerLayoutSizeParam(LayoutConstraintF& innerLayout, const RefPtr<DialogLayoutProperty>& dialogProp);
     bool IsGetExpandDisplayValidHeight();
@@ -80,7 +81,6 @@ private:
     void ProcessMaskRect(std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog, bool isMask = false);
     void SetSubWindowHotarea(
         const RefPtr<DialogLayoutProperty>& dialogProp, SizeF childSize, SizeF selfSize, int32_t frameNodeId);
-    std::optional<DimensionRect> GetMaskRect(const RefPtr<FrameNode>& dialog);
 
     void UpdateTouchRegion();
 
@@ -94,7 +94,6 @@ private:
     void UpdateSafeArea(const RefPtr<FrameNode>& frameNode);
     void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
-    void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog);
     void AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child);
     void UpdateIsScrollHeightNegative(LayoutWrapper* layoutWrapper, float height);
     void UpdateChildMaxSizeHeight(SizeT<float>& maxSize);
@@ -105,6 +104,8 @@ private:
     bool IsEmbeddedDialog(const RefPtr<FrameNode>& frameNode);
     float GetEmbeddedDialogOffsetY(const RefPtr<FrameNode>& frameNode);
     float GetStackRootDialogOffsetY(const RefPtr<FrameNode>& frameNode);
+    void AdjustHoverModeForWaterfall(const RefPtr<FrameNode>& frameNode);
+    bool IsDefaultPosition(const RefPtr<DialogLayoutProperty>& dialogProp);
 
     RectF touchRegion_;
     OffsetF topLeftPoint_;

@@ -25,19 +25,6 @@ class ApngImageObject : public ImageObject {
 public:
     using CancelableTask = CancelableCallback<void()>;
 
-#ifndef USE_ROSEN_DRAWING
-    ApngImageObject(
-        ImageSourceInfo source,
-        const Size& imageSize,
-        int32_t frameCount,
-        const sk_sp<SkData>& data,
-        const RefPtr<PNGImageDecoder>& decoder)
-        : ImageObject(source, imageSize, frameCount), skData_(data)
-    {
-        skData_ = data;
-        apngDecoder_ = decoder;
-    }
-#else
     ApngImageObject(
         ImageSourceInfo source,
         const Size& imageSize,
@@ -49,7 +36,6 @@ public:
         drawingData_ = data;
         apngDecoder_ = decoder;
     }
-#endif
 
     void UploadToGpuForRender(
         const WeakPtr<PipelineBase>& context,
@@ -88,11 +74,7 @@ public:
     }
 
 private:
-#ifndef USE_ROSEN_DRAWING
-    sk_sp<SkData> skData_;
-#else
     std::shared_ptr<RSData> drawingData_;
-#endif
     RefPtr<APngImagePlayer> animatedPlayer_;
     RefPtr<PNGImageDecoder> apngDecoder_;
 };

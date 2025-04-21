@@ -19,6 +19,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -61,6 +62,8 @@ public:
     }
 
     void SetHotZoneRect(DimensionRect& hotZoneRegion, float iconSize, float hotZoneHeight);
+
+    virtual void OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme) {}
 
 protected:
     Alignment GetStackAlignment(const TextDirection& userDirection);
@@ -116,6 +119,8 @@ public:
     {
         return hoverIconPadding_;
     }
+
+    void OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme) override;
 
 private:
     void LoadImageSourceInfo();
@@ -213,6 +218,8 @@ public:
     {
         return hoverIconPadding_;
     }
+
+    void OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme) override;
 
 private:
     bool IsShowClean() const;

@@ -15,19 +15,13 @@
 
 #include "core/components_ng/render/adapter/animated_image.h"
 
-#ifdef USE_ROSEN_DRAWING
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #include "drawing/engine_adapter/skia_adapter/skia_image_info.h"
-#endif
 
-#ifndef USE_ROSEN_DRAWING
-#include "core/components_ng/image_provider/adapter/skia_image_data.h"
-#else
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
-#endif
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
 
 #include "core/components_ng/image_provider/image_utils.h"
-#include "core/image/sk_image_cache.h"
+#include "core/image/image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -47,23 +41,6 @@ inline void RSDataWrapperReleaseProc(const void*, void* context)
 }
 } // namespace
 
-#ifndef USE_ROSEN_DRAWING
-RefPtr<CanvasImage> AnimatedImage::Create(
-    const RefPtr<SkiaImageData>& data, const ResizeParam& size, const std::string& url)
-{
-    CHECK_NULL_RETURN(data, nullptr);
-    auto skData = data->GetSkData();
-    CHECK_NULL_RETURN(skData, nullptr);
-    auto codec = SkCodec::MakeFromData(skData);
-    CHECK_NULL_RETURN(codec, nullptr);
-    if (SystemProperties::GetImageFrameworkEnabled()) {
-        auto src = ImageSource::Create(skData->bytes(), skData->size());
-        CHECK_NULL_RETURN(src, nullptr);
-        return MakeRefPtr<AnimatedPixmap>(codec, src, size, url);
-    }
-    return MakeRefPtr<AnimatedSkImage>(std::move(codec), url);
-}
-#else
 RefPtr<CanvasImage> AnimatedImage::Create(
     const RefPtr<DrawingImageData>& data, const ResizeParam& size, const std::string& url)
 {
@@ -81,7 +58,6 @@ RefPtr<CanvasImage> AnimatedImage::Create(
     }
     return MakeRefPtr<AnimatedRSImage>(std::move(codec), url);
 }
-#endif
 
 AnimatedImage::AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string url)
     : cacheKey_(std::move(url)), duration_(GenerateDuration(codec)), iteration_(GenerateIteration(codec))
@@ -221,28 +197,16 @@ bool AnimatedImage::GetCachedFrame(uint32_t idx)
 // AnimatedSkImage implementation
 // ----------------------------------------------------------
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkImage> AnimatedSkImage::GetImage() const
-#else
 std::shared_ptr<RSImage> AnimatedRSImage::GetImage() const
-#endif
 {
     std::scoped_lock<std::mutex> lock(frameMtx_);
     return currentFrame_;
 }
 
-#ifndef USE_ROSEN_DRAWING
-void AnimatedSkImage::DecodeImpl(uint32_t idx)
-#else
 void AnimatedRSImage::DecodeImpl(uint32_t idx)
-#endif
 {
     SkImageInfo imageInfo = codec_->getInfo();
-#ifndef USE_ROSEN_DRAWING
-    SkBitmap bitmap;
-#else
     RSBitmap bitmap;
-#endif
 
     SkCodec::Options options;
     options.fFrameIndex = static_cast<int32_t>(idx);
@@ -255,20 +219,12 @@ void AnimatedRSImage::DecodeImpl(uint32_t idx)
         bitmap = requiredFrame_;
     } else {
         // create from empty layer
-#ifndef USE_ROSEN_DRAWING
-        bitmap.allocPixels(imageInfo);
-#else
         auto info = Rosen::Drawing::SkiaImageInfo::ConvertToRSImageInfo(imageInfo);
         bitmap.Build(info);
-#endif
     }
 
     // decode pixels from codec
-#ifndef USE_ROSEN_DRAWING
-    auto res = codec_->getPixels(imageInfo, bitmap.getPixels(), bitmap.rowBytes(), &options);
-#else
     auto res = codec_->getPixels(imageInfo, bitmap.GetPixels(), bitmap.GetRowBytes(), &options);
-#endif
     CHECK_NULL_VOID(res == SkCodec::kSuccess);
 
     // next frame will be drawn on top of this one
@@ -279,20 +235,12 @@ void AnimatedRSImage::DecodeImpl(uint32_t idx)
     // save current frame, notify redraw
     {
         std::scoped_lock<std::mutex> lock(frameMtx_);
-#ifndef USE_ROSEN_DRAWING
-        currentFrame_ = SkImage::MakeFromBitmap(bitmap);
-#else
         currentFrame_ = std::make_shared<RSImage>();
         currentFrame_->BuildFromBitmap(bitmap);
-#endif
     }
 }
 
-#ifndef USE_ROSEN_DRAWING
-void AnimatedSkImage::CacheFrame(const std::string& key)
-#else
 void AnimatedRSImage::CacheFrame(const std::string& key)
-#endif
 {
     auto ctx = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(ctx);
@@ -306,31 +254,16 @@ void AnimatedRSImage::CacheFrame(const std::string& key)
     cache->CacheImage(key, cacheNode);
 }
 
-#ifndef USE_ROSEN_DRAWING
-RefPtr<CanvasImage> AnimatedSkImage::GetCachedFrameImpl(const std::string& key)
-{
-    return SkiaImage::QueryFromCache(key);
-}
-#else
 RefPtr<CanvasImage> AnimatedRSImage::GetCachedFrameImpl(const std::string& key)
 {
     return DrawingImage::QueryFromCache(key);
 }
-#endif
 
-#ifndef USE_ROSEN_DRAWING
-void AnimatedSkImage::UseCachedFrame(RefPtr<CanvasImage>&& image)
-{
-    std::scoped_lock<std::mutex> lock(frameMtx_);
-    currentFrame_ = DynamicCast<SkiaImage>(image)->GetImage();
-}
-#else
 void AnimatedRSImage::UseCachedFrame(RefPtr<CanvasImage>&& image)
 {
     std::scoped_lock<std::mutex> lock(frameMtx_);
     currentFrame_ = DynamicCast<DrawingImage>(image)->GetImage();
 }
-#endif
 
 // ----------------------------------------------------------
 // AnimatedPixmap implementation

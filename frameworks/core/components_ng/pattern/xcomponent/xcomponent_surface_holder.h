@@ -54,6 +54,6 @@ struct OH_ArkUI_SurfaceHolder {
     void* userData_ = nullptr;
     OHNativeWindow* nativeWindow_ = nullptr;
     std::list<OH_ArkUI_SurfaceCallback*> surfaceCallbackList_;
-    ArkUI_NodeHandle node_;
+    ArkUI_NodeHandle node_ = nullptr;
 };
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_XCOMPONENT_XCOMPONENT_SURFACE_HOLDER_H

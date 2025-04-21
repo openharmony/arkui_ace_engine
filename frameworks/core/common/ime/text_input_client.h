@@ -178,6 +178,11 @@ public:
 
     virtual void HandleSelect(CaretMoveIntent direction) {}
 
+    virtual void HandleSelectExtend(CaretMoveIntent direction)
+    {
+        CursorMove(direction);
+    }
+
     virtual void HandleSelectFontStyle(KeyCode code) {}
 
     virtual void HandleOnSelectAll() {}
@@ -193,6 +198,8 @@ public:
     virtual void HandleOnPaste() {}
 
     virtual void HandleOnUndoAction() {}
+
+    virtual void HandleOnExtendUndoAction() {}
 
     virtual void HandleOnRedoAction() {}
 

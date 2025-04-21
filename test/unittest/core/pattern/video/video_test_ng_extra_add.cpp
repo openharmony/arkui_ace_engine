@@ -725,6 +725,13 @@ HWTEST_F(VideoTestExtraAddNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
         CalcSize(CalcLength(10, DimensionUnit::PERCENT), CalcLength(10, DimensionUnit::PERCENT));
     videoLayoutProperty->UpdateCalcLayoutProperty(constraint);
     EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+    /**
+     * @tc.steps: step2. Call function while ObjectFit is not ImageFit::COVER or imageFit == ImageFit::NONE.
+     * @tc.expected: step2. LayoutWrapper swap failed.
+     */
+    videoLayoutProperty->UpdateObjectFit(ImageFit::FILL);
+    EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
 }
 
 /**
@@ -1183,6 +1190,7 @@ HWTEST_F(VideoTestExtraAddNg, ChangePlayerStatus001, TestSize.Level1)
     PlaybackStatus status = PlaybackStatus::PREPARED;
 
     auto mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();
+    videoPattern->muted_ = true;
     EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
     videoPattern->mediaPlayer_ = mockMediaPlayer;
 
@@ -1385,6 +1393,10 @@ HWTEST_F(VideoTestExtraAddNg, SetCurrentTime001, TestSize.Level1)
     videoPattern->mediaPlayer_ = mockMediaPlayer;
 
     videoPattern->SetCurrentTime(10, OHOS::Ace::SeekMode::SEEK_PREVIOUS_SYNC);
+    EXPECT_EQ(seekPos, 0);
+
+    videoPattern->isPrepared_ = true;
+    videoPattern->SetCurrentTime(-1, OHOS::Ace::SeekMode::SEEK_PREVIOUS_SYNC);
     EXPECT_EQ(seekPos, 0);
 
     mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();

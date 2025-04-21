@@ -54,6 +54,7 @@ const int32_t HALF_NUMBER = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
 const double CURVE_MOVE_THRESHOLD = 0.5;
 constexpr char PICKER_DRAG_SCENE[] = "picker_drag_scene";
+const uint32_t NEXT_COLOUM_DIFF = 1;
 } // namespace
 
 void TextPickerColumnPattern::OnAttachToFrameNode()
@@ -65,7 +66,7 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -139,10 +140,10 @@ void TextPickerColumnPattern::OnModifyDone()
 
 void TextPickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    CHECK_NULL_VOID(host);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
-    CHECK_NULL_VOID(host);
     auto blendNode = DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_VOID(blendNode);
     auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
@@ -447,7 +448,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto columnEventHub = host->GetEventHub<EventHub>();
+    auto columnEventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(columnEventHub);
     RefPtr<TouchEventImpl> touchListener = CreateItemTouchEventListener();
     CHECK_NULL_VOID(touchListener);
@@ -459,7 +460,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
     auto midSize = childSize / 2;
     middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(midSize));
     CHECK_NULL_VOID(middleChild);
-    auto eventHub = middleChild->GetEventHub<EventHub>();
+    auto eventHub = middleChild->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ParseMouseEvent();
@@ -476,7 +477,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
         param->instance = childNode;
         param->itemIndex = i;
         param->itemTotalCounts = childSize;
-        auto eventHub = childNode->GetEventHub<EventHub>();
+        auto eventHub = childNode->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         if (i != midSize) {
             RefPtr<ClickEvent> clickListener = CreateItemClickEventListener(param);
@@ -1144,14 +1145,6 @@ void TextPickerColumnPattern::SetSelectColor(const RefPtr<TextLayoutProperty>& t
 {
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, percent);
-    if (selectedMarkPaint_ && isEqual && !isUserSetSelectColor_) {
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-        CHECK_NULL_VOID(pickerTheme);
-        updateColor = pickerTheme->GetOptionStyle(true, true).GetTextColor();
-    }
-
     textLayoutProperty->UpdateTextColor(updateColor);
 }
 
@@ -1313,7 +1306,9 @@ void TextPickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
 }
 
 RefPtr<TextPickerLayoutProperty> TextPickerColumnPattern::GetParentLayout() const
@@ -1626,11 +1621,18 @@ double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection 
     return distance;
 }
 
+bool TextPickerColumnPattern::IsDisableTextStyleAnimation() const
+{
+    RefPtr<TextPickerLayoutProperty> layout = GetParentLayout();
+    CHECK_NULL_RETURN(layout, false);
+    return layout->GetDisableTextStyleAnimation().value_or(false);
+}
+
 double TextPickerColumnPattern::GetSelectedDistance(int32_t index, int32_t nextIndex, ScrollDirection dir)
 {
     double distance = 0.0;
     double val = 0.0;
-    if (columnKind_ == TEXT && !isDisableTextStyleAnimation_) {
+    if (columnKind_ == TEXT && !IsDisableTextStyleAnimation()) {
         if (GreatOrEqual(optionProperties_[nextIndex].fontheight, optionProperties_[nextIndex].height)) {
             distance = (dir == ScrollDirection::UP) ?
                 - optionProperties_[nextIndex].height : optionProperties_[index].height;
@@ -1657,7 +1659,7 @@ double TextPickerColumnPattern::GetUpCandidateDistance(int32_t index, int32_t ne
     if (index > maxIndex || index < minIndex || nextIndex > maxIndex || nextIndex < minIndex) {
         return distance;
     }
-    if (columnKind_ == TEXT && !isDisableTextStyleAnimation_) {
+    if (columnKind_ == TEXT && !IsDisableTextStyleAnimation()) {
         if (dir == ScrollDirection::UP) {
             distance = -optionProperties_[nextIndex].height;
         } else {
@@ -1676,7 +1678,7 @@ double TextPickerColumnPattern::GetDownCandidateDistance(int32_t index, int32_t 
 {
     double distance = 0.0;
     double val = 0.0;
-    if (columnKind_ == TEXT && !isDisableTextStyleAnimation_) {
+    if (columnKind_ == TEXT && !IsDisableTextStyleAnimation()) {
         if (dir == ScrollDirection::DOWN) {
             distance = optionProperties_[index].height;
         } else {
@@ -2136,6 +2138,8 @@ void TextPickerColumnPattern::SetSelectedMarkPaint(bool paint)
 
 void TextPickerColumnPattern::UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme)
 {
+    UpdateAnimationColor(pickerTheme);
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto blendNode = DynamicCast<FrameNode>(host->GetParent());
@@ -2173,6 +2177,40 @@ void TextPickerColumnPattern::UpdateUserSetSelectColor()
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     UpdateSelectedTextColor(pickerTheme);
+}
+
+void TextPickerColumnPattern::UpdateAnimationColor(const RefPtr<PickerTheme>& pickerTheme)
+{
+    CHECK_NULL_VOID(pickerTheme);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto layoutProperty = parentNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    Color color;
+
+    if (pickerTheme->IsCircleDial() && !isUserSetSelectColor_) {
+        if (selectedMarkPaint_) {
+            color = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+        } else {
+            color = pickerTheme->GetOptionStyle(false, false).GetTextColor();
+        }
+    } else {
+        color = layoutProperty->GetSelectedColor().value_or(
+            pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    }
+
+    uint32_t middleIndex = GetShowOptionCount() / PICKER_SELECT_AVERAGE;
+    if (middleIndex - NEXT_COLOUM_DIFF >= 0 && animationProperties_.size() > middleIndex) {
+        animationProperties_[middleIndex - NEXT_COLOUM_DIFF].downColor = color;
+        animationProperties_[middleIndex + NEXT_COLOUM_DIFF].upColor = color;
+        animationProperties_[middleIndex].currentColor = color;
+    }
 }
 
 void TextPickerColumnPattern::InitTextHeightAndFontHeight(uint32_t childIndex, uint32_t midIndex,

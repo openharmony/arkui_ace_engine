@@ -24,7 +24,6 @@
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
-constexpr int32_t EMPTY_JUMP_INDEX = -2;
 
 enum class WaterFlowLayoutMode;
 
@@ -32,6 +31,8 @@ class WaterFlowLayoutInfoBase : public AceType {
     DECLARE_ACE_TYPE(WaterFlowLayoutInfoBase, AceType);
 
 public:
+    static constexpr int32_t EMPTY_JUMP_INDEX = -2;
+
     WaterFlowLayoutInfoBase() = default;
     ~WaterFlowLayoutInfoBase() override = default;
 

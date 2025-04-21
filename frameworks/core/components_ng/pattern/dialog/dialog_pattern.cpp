@@ -52,6 +52,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/overlay/overlay_mask_manager.h"
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -249,23 +250,49 @@ void DialogPattern::HandleClick(const GestureEvent& info)
         auto&& clickPosition = info.GetGlobalLocation();
         if (!contentRect.IsInRegion(
             PointF(clickPosition.GetX() - globalOffset.GetX(), clickPosition.GetY() - globalOffset.GetY()))) {
-            auto overlayManager = GetOverlayManager(nullptr);
-            CHECK_NULL_VOID(overlayManager);
-            if (this->CallDismissInNDK(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE))) {
-                return;
-            } else if (this->ShouldDismiss()) {
-                overlayManager->SetDismissDialogId(host->GetId());
-                DialogManager::GetInstance().SetDismissDialogInfo(host->GetId(), host->GetTag());
-                auto currentId = Container::CurrentId();
-                this->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE), currentId);
-                TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss, currentId: %{public}d", currentId);
+            if (dialogProperties_.isUECHostMask) {
+                NG::OverlayMaskManager::GetInstance().SendDialogMaskEventToUEA(host, UECHostMaskAction::CLICK);
                 return;
             }
-            PopDialog(-1);
-            if (overlayManager->isMaskNode(GetHost()->GetId())) {
-                overlayManager->PopModalDialog(GetHost()->GetId());
-            }
+
+            CloseDialogByEvent(DialogDismissReason::DIALOG_TOUCH_OUTSIDE);
         }
+    }
+}
+
+void DialogPattern::CloseDialogByEvent(DialogDismissReason reason)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto overlayManager = GetOverlayManager(nullptr);
+    CHECK_NULL_VOID(overlayManager);
+
+    if (CallDismissInNDK(static_cast<int32_t>(reason))) {
+        return;
+    }
+
+    if (ShouldDismiss()) {
+        overlayManager->SetDismissDialogId(host->GetId());
+        DialogManager::GetInstance().SetDismissDialogInfo(host->GetId(), host->GetTag());
+        auto currentId = Container::CurrentId();
+        CallOnWillDismiss(static_cast<int32_t>(reason), currentId);
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss, currentId: %{public}d", currentId);
+        return;
+    }
+
+    CloseDialog();
+}
+
+void DialogPattern::CloseDialog()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto overlayManager = GetOverlayManager(nullptr);
+    CHECK_NULL_VOID(overlayManager);
+
+    PopDialog(-1);
+    if (overlayManager->isMaskNode(host->GetId()) && !dialogProperties_.isUECHostMask) {
+        overlayManager->PopModalDialog(host->GetId());
     }
 }
 
@@ -280,7 +307,7 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
         return;
     }
 
-    auto hub = host->GetEventHub<DialogEventHub>();
+    auto hub = host->GetOrCreateEventHub<DialogEventHub>();
     if (buttonIdx != -1) {
         hub->FireSuccessEvent(buttonIdx);
         RecordEvent(buttonIdx);
@@ -563,8 +590,7 @@ void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
     auto needAddMaskNode = props.maskTransitionEffect != nullptr || props.dialogTransitionEffect != nullptr;
-    if ((IsUIExtensionSubWindow() && props.isModal) ||
-        (needAddMaskNode && props.isModal && !props.isShowInSubWindow)) {
+    if (needAddMaskNode && props.isModal && !props.isShowInSubWindow) {
         auto extraMaskNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
         CHECK_NULL_VOID(extraMaskNode);
@@ -1236,7 +1262,7 @@ bool DialogPattern::OnKeyEvent(const KeyEvent& event)
 
 void DialogPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-    auto onFocus = [wp = WeakClaim(this)]() {
+    auto onFocus = [wp = WeakClaim(this)](FocusReason reason) {
         auto pattern = wp.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -1291,6 +1317,9 @@ void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         json->PutExtAttr("subtitle", subtitle_.c_str(), filter);
         json->PutExtAttr("message", message_.c_str(), filter);
     }
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    json->PutExtAttr("uniRender", context->IsUniRenderEnabled() ? "true" : "false", filter);
 }
 
 void DialogPattern::OnColorConfigurationUpdate()
@@ -1302,10 +1331,37 @@ void DialogPattern::OnColorConfigurationUpdate()
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
     dialogTheme_ = dialogTheme;
+    UpdateTitleAndContentColor();
     UpdateWrapperBackgroundStyle(host, dialogTheme);
     UpdateButtonsProperty();
     OnModifyDone();
     host->MarkDirtyNode();
+}
+
+void DialogPattern::UpdateTitleAndContentColor()
+{
+    CHECK_NULL_VOID(dialogTheme_);
+    if (!dialogProperties_.title.empty() && contentNodeMap_.find(DialogContentNode::TITLE) != contentNodeMap_.end()) {
+        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::TITLE], dialogTheme_->GetTitleTextStyle());
+    }
+    if (!dialogProperties_.subtitle.empty() &&
+        contentNodeMap_.find(DialogContentNode::SUBTITLE) != contentNodeMap_.end()) {
+        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::SUBTITLE],
+            dialogProperties_.title.empty() ? dialogTheme_->GetTitleTextStyle() : dialogTheme_->GetSubTitleTextStyle());
+    }
+    if (!dialogProperties_.content.empty() &&
+        contentNodeMap_.find(DialogContentNode::MESSAGE) != contentNodeMap_.end()) {
+        UpdateDialogTextColor(contentNodeMap_[DialogContentNode::MESSAGE], dialogTheme_->GetContentTextStyle());
+    }
+}
+
+void DialogPattern::UpdateDialogTextColor(const RefPtr<FrameNode>& textNode, const TextStyle& textStyle)
+{
+    CHECK_NULL_VOID(textNode);
+    auto textProps = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
+    CHECK_NULL_VOID(textProps);
+    textProps->UpdateTextColor(textStyle.GetTextColor());
+    textNode->MarkModifyDone();
 }
 
 void DialogPattern::UpdateAlignmentAndOffset()
@@ -1688,7 +1744,7 @@ void DialogPattern::UpdateFontScale()
 void DialogPattern::SetButtonEnabled(const RefPtr<FrameNode>& buttonNode, bool enabled)
 {
     // set Enabled and Focusable
-    auto buttonButtonEvent = buttonNode->GetEventHub<ButtonEventHub>();
+    auto buttonButtonEvent = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonButtonEvent);
     buttonButtonEvent->SetEnabled(enabled);
     buttonNode->GetOrCreateFocusHub()->SetFocusable(enabled);
@@ -1758,7 +1814,7 @@ void DialogPattern::DumpBoolProperty()
     DumpLog::GetInstance().AddDesc("IsMenu: " + GetBoolStr(dialogProperties_.isMenu));
     DumpLog::GetInstance().AddDesc("IsMask: " + GetBoolStr(dialogProperties_.isMask));
     DumpLog::GetInstance().AddDesc("IsModal: " + GetBoolStr(dialogProperties_.isModal));
-    DumpLog::GetInstance().AddDesc("IsScenceBoardDialog: " + GetBoolStr(dialogProperties_.isScenceBoardDialog));
+    DumpLog::GetInstance().AddDesc("IsSceneBoardDialog: " + GetBoolStr(dialogProperties_.isSceneBoardDialog));
     DumpLog::GetInstance().AddDesc("IsSysBlurStyle: " + GetBoolStr(dialogProperties_.isSysBlurStyle));
     DumpLog::GetInstance().AddDesc("IsShowInSubWindow: " + GetBoolStr(dialogProperties_.isShowInSubWindow));
 }
@@ -1857,15 +1913,7 @@ void DialogPattern::UpdateHostWindowRect()
         return;
     }
 
-    auto needUpdate = true;
-    if (SystemProperties::IsSuperFoldDisplayDevice()) {
-        auto container = AceEngine::Get().GetContainer(currentId);
-        auto isHalfFold = container && container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD;
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(currentId);
-        needUpdate = isHalfFold && subwindow && subwindow->IsSameDisplayWithParentWindow();
-    }
-
-    if (needUpdate) {
+    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
         InitHostWindowRect();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -1944,7 +1992,7 @@ void DialogPattern::DumpBoolProperty(std::unique_ptr<JsonValue>& json)
     json->Put("IsMenu", GetBoolStr(dialogProperties_.isMenu).c_str());
     json->Put("IsMask", GetBoolStr(dialogProperties_.isMask).c_str());
     json->Put("IsModal", GetBoolStr(dialogProperties_.isModal).c_str());
-    json->Put("IsScenceBoardDialog", GetBoolStr(dialogProperties_.isScenceBoardDialog).c_str());
+    json->Put("IsSceneBoardDialog", GetBoolStr(dialogProperties_.isSceneBoardDialog).c_str());
     json->Put("IsSysBlurStyle", GetBoolStr(dialogProperties_.isSysBlurStyle).c_str());
     json->Put("IsShowInSubWindow", GetBoolStr(dialogProperties_.isShowInSubWindow).c_str());
 }
@@ -2152,8 +2200,8 @@ void DialogPattern::DumpSimplifyBoolProperty(std::unique_ptr<JsonValue>& json)
     if (dialogProperties_.isModal) {
         json->Put("IsModal", GetBoolStr(dialogProperties_.isModal).c_str());
     }
-    if (dialogProperties_.isScenceBoardDialog) {
-        json->Put("IsScenceBoardDialog", GetBoolStr(dialogProperties_.isScenceBoardDialog).c_str());
+    if (dialogProperties_.isSceneBoardDialog) {
+        json->Put("IsSceneBoardDialog", GetBoolStr(dialogProperties_.isSceneBoardDialog).c_str());
     }
     if (dialogProperties_.isSysBlurStyle) {
         json->Put("IsSysBlurStyle", GetBoolStr(dialogProperties_.isSysBlurStyle).c_str());
@@ -2213,6 +2261,7 @@ void DialogPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    MountMaskToUECHost();
     auto parentNode = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_VOID(parentNode);
     if (parentNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
@@ -2224,6 +2273,39 @@ void DialogPattern::OnAttachToMainTree()
     CHECK_NULL_VOID(navDestinationPattern);
     auto zIndex = navDestinationPattern->GetTitlebarZIndex();
     dialogRenderContext->UpdateZIndex(zIndex + 1);
+
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto containerId = pipeline->GetInstanceId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_DIALOG);
+    CHECK_NULL_VOID(subwindow);
+    subwindow->RegisterFreeMultiWindowSwitchCallback([containerId](bool enable) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_DIALOG);
+        CHECK_NULL_VOID(subwindow);
+        if (enable) {
+            subwindow->SetFollowParentWindowLayoutEnabled(false);
+            subwindow->ResizeWindow();
+        } else {
+            subwindow->SetFollowParentWindowLayoutEnabled(true);
+        }
+    });
+}
+
+void DialogPattern::MountMaskToUECHost()
+{
+    auto hasHostMask = !hostMaskInfo_.uuid.empty();
+    if (dialogProperties_.isMask || hasHostMask) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    if (isUIExtensionSubWindow_ && dialogProperties_.isModal) {
+        auto pipeline = host->GetContextRefPtr();
+        auto instanceId = pipeline ? pipeline->GetInstanceId() : -1;
+        NG::OverlayMaskManager::GetInstance().SendDialogMaskInfoToHost(host, UECHostMaskAction::MOUNT, instanceId);
+    }
 }
 
 RefPtr<OverlayManager> DialogPattern::GetOverlayManager(const RefPtr<FrameNode>& host)

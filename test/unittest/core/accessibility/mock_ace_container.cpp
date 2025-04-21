@@ -145,7 +145,7 @@ bool AceContainer::IsLauncherContainer()
 {
     return true;
 }
-bool AceContainer::IsScenceBoardWindow()
+bool AceContainer::IsSceneBoardWindow()
 {
     return false;
 }

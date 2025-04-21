@@ -20,7 +20,7 @@
 #include "base/image/pixel_map.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_object.h"
-#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#include "core/components_ng/render/adapter/drawing_image.h"
 
 namespace OHOS::Ace::NG {
 
@@ -58,6 +58,7 @@ private:
         const ImageDecoderConfig& imageDecoderConfig);
 
     static std::shared_mutex pixelMapMtx_;
+    // only support netWork image
     static std::unordered_map<std::string, WeakPtr<PixelMap>> weakPixelMapCache_;
 };
 } // namespace OHOS::Ace::NG

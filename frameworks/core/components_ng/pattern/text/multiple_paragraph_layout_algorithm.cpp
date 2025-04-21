@@ -63,6 +63,9 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     textStyle.SetTextStyleUid(frameNode->GetId() + 1);
+    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        textStyle.SetSymbolUid(frameNode->GetId() + 1);
+    }
     if (Negative(contentConstraint.maxSize.Width()) || Negative(contentConstraint.maxSize.Height())) {
         return;
     }
@@ -78,28 +81,28 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto content = textLayoutProperty->GetContent().value_or(u"");
     auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_VOID(textTheme);
-    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG,
-        frameNode->GetTag() == V2::RICH_EDITOR_ETS_TAG);
-    auto symbolType = textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM);
-    textStyle.SetSymbolType(symbolType);
-    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        // Update Symbol TextStyle
-        textStyle.SetSymbolUid(frameNode->GetId() + 1);
-        UpdateSymbolStyle(textStyle);
+    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    textStyle.SetSymbolType(textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM));
+    std::vector<std::string> fontFamilies;
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
+        !(textLayoutProperty->GetFontFamily().has_value())) {
+        fontFamilies = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
     } else {
-        auto fontManager = pipeline->GetFontManager();
-        if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
-            !(textLayoutProperty->GetFontFamily().has_value())) {
-            textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
-        } else {
-            textStyle.SetFontFamilies(
-                textLayoutProperty->GetFontFamilyValue(textTheme->GetTextStyle().GetFontFamilies()));
-        }
+#ifndef OHOS_STANDARD_SYSTEM
+        const std::vector<std::string> defaultFontFamily = {"sans-serif"};
+#else
+        const std::vector<std::string> defaultFontFamily = textTheme->GetTextStyle().GetFontFamilies();
+#endif
+        fontFamilies = textLayoutProperty->GetFontFamilyValue(defaultFontFamily);
     }
+    UpdateFontFamilyWithSymbol(textStyle, fontFamilies, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    UpdateSymbolStyle(textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    auto textColor = textLayoutProperty->GetTextColorValue(textTheme->GetTextStyle().GetTextColor());
     if (contentModifier) {
         if (textLayoutProperty->GetIsAnimationNeededValue(true)) {
-            SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle);
-            contentModifier->ModifyTextStyle(textStyle);
+            SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle, frameNode, textColor);
+            contentModifier->ModifyTextStyle(textStyle, textColor);
         }
         contentModifier->SetFontReady(false);
     }
@@ -109,30 +112,41 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     FontRegisterCallback(frameNode, textStyle);
     textStyle.SetTextDirection(GetTextDirection(content, layoutWrapper));
     textStyle.SetLocale(Localization::GetInstance()->GetFontLocale());
-    UpdateTextColorIfForeground(frameNode, textStyle);
+    UpdateTextColorIfForeground(frameNode, textStyle, textColor);
     inheritTextStyle_ = textStyle;
 }
 
-void MultipleParagraphLayoutAlgorithm::UpdateSymbolStyle(TextStyle& textStyle)
+void MultipleParagraphLayoutAlgorithm::UpdateFontFamilyWithSymbol(TextStyle& textStyle,
+    std::vector<std::string>& fontFamilies, bool isSymbol)
 {
-    textStyle.isSymbolGlyph_ = true;
-    textStyle.SetRenderStrategy(textStyle.GetRenderStrategy() < 0 ? 0 : textStyle.GetRenderStrategy());
-    textStyle.SetEffectStrategy(textStyle.GetEffectStrategy() < 0 ? 0 : textStyle.GetEffectStrategy());
+    if (!isSymbol) {
+        textStyle.SetFontFamilies(fontFamilies);
+        return;
+    }
     auto symbolType = textStyle.GetSymbolType();
-    std::vector<std::string> fontFamilies;
+    std::vector<std::string> symbolFontFamilies;
     if (symbolType == SymbolType::CUSTOM) {
-        auto symbolFontFamily = textStyle.GetFontFamilies();
-        for (auto& name : symbolFontFamily) {
+        for (auto& name : fontFamilies) {
             if (name.find(CUSTOM_SYMBOL_SUFFIX) != std::string::npos) {
-                fontFamilies.push_back(name);
+                symbolFontFamilies.push_back(name);
                 break;
             }
         }
-        textStyle.SetFontFamilies(fontFamilies);
+        textStyle.SetFontFamilies(symbolFontFamilies);
     } else {
-        fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
-        textStyle.SetFontFamilies(fontFamilies);
+        symbolFontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        textStyle.SetFontFamilies(symbolFontFamilies);
     }
+}
+
+void MultipleParagraphLayoutAlgorithm::UpdateSymbolStyle(TextStyle& textStyle, bool isSymbol)
+{
+    if (!isSymbol) {
+        return;
+    }
+    textStyle.isSymbolGlyph_ = true;
+    textStyle.SetRenderStrategy(textStyle.GetRenderStrategy() < 0 ? 0 : textStyle.GetRenderStrategy());
+    textStyle.SetEffectStrategy(textStyle.GetEffectStrategy() < 0 ? 0 : textStyle.GetEffectStrategy());
 }
 
 void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -296,16 +310,20 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
 }
 
 void MultipleParagraphLayoutAlgorithm::UpdateTextColorIfForeground(
-    const RefPtr<FrameNode>& frameNode, TextStyle& textStyle)
+    const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, const Color& textColor)
 {
     // Determines whether a foreground color is set or inherited.
     auto renderContext = frameNode->GetRenderContext();
     if (renderContext->HasForegroundColor()) {
-        if (renderContext->GetForegroundColorValue().GetValue() != textStyle.GetTextColor().GetValue()) {
+        if (renderContext->GetForegroundColorValue().GetValue() != textColor.GetValue()) {
             textStyle.SetTextColor(Color::FOREGROUND);
+        } else {
+            textStyle.SetTextColor(textColor);
         }
     } else if (renderContext->HasForegroundColorStrategy()) {
         textStyle.SetTextColor(Color::FOREGROUND);
+    } else {
+        textStyle.SetTextColor(textColor);
     }
 }
 
@@ -353,7 +371,8 @@ void MultipleParagraphLayoutAlgorithm::SetDecorationPropertyToModifier(const Ref
 }
 
 void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
-    const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle)
+    const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode,
+    const Color& textColor)
 {
     SetFontSizePropertyToModifier(layoutProperty, modifier, textStyle);
     auto fontWeight = layoutProperty->GetFontWeight();
@@ -362,17 +381,19 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLa
     } else {
         modifier->SetFontWeight(textStyle.GetFontWeight(), true);
     }
-    auto textColor = layoutProperty->GetTextColor();
-    if (textColor.has_value()) {
-        modifier->SetTextColor(textColor.value());
+    auto propTextColor = layoutProperty->GetTextColor();
+    if (propTextColor.has_value()) {
+        modifier->SetTextColor(propTextColor.value());
     } else {
-        modifier->SetTextColor(textStyle.GetTextColor(), true);
+        modifier->SetTextColor(textColor, true);
     }
-    auto symbolColors = layoutProperty->GetSymbolColorList();
-    if (symbolColors && symbolColors.has_value()) {
-        modifier->SetSymbolColor(symbolColors.value());
-    } else {
-        modifier->SetSymbolColor(textStyle.GetSymbolColorList(), true);
+    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolColors = layoutProperty->GetSymbolColorList();
+        if (symbolColors && symbolColors.has_value()) {
+            modifier->SetSymbolColor(symbolColors.value());
+        } else {
+            modifier->SetSymbolColor(textStyle.GetSymbolColorList(), true);
+        }
     }
     auto textShadow = layoutProperty->GetTextShadow();
     if (textShadow.has_value()) {

@@ -119,7 +119,7 @@ protected:
 
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     RefPtr<ParagraphManager> paragraphManager_;
-    std::optional<TextStyle> textStyle_;
+    TextStyle textStyle_;
     TextStyle inheritTextStyle_;
     float baselineOffset_ = 0.0f;
     float shadowOffset_ = 0.0f;
@@ -142,9 +142,10 @@ private:
     void UpdateSymbolSpanEffect(
         RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph, const std::list<RefPtr<SpanItem>>& spans);
     void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
-    void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle);
+    void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, const Color& textColor);
     void SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
-        const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle);
+        const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode,
+        const Color& textColor);
     void SetDecorationPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
         const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle);
     void SetFontSizePropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
@@ -157,7 +158,8 @@ private:
     bool CustomSpanMeasure(const RefPtr<CustomSpanItem>& customSpanItem, LayoutWrapper* layoutWrapper);
     bool PlaceholderSpanMeasure(const RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
         const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain);
-    void UpdateSymbolStyle(TextStyle& textStyle);
+    void UpdateFontFamilyWithSymbol(TextStyle& textStyle, std::vector<std::string>& fontFamilies, bool isSymbol);
+    void UpdateSymbolStyle(TextStyle& textStyle, bool isSymbol);
 
     ACE_DISALLOW_COPY_AND_MOVE(MultipleParagraphLayoutAlgorithm);
 };

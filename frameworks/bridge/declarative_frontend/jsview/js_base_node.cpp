@@ -53,6 +53,7 @@ constexpr int32_t INFO_LENGTH_LIMIT = 2;
 constexpr int32_t BUILD_PARAM_INDEX_TWO = 2;
 constexpr int32_t BUILD_PARAM_INDEX_THREE = 3;
 constexpr int32_t BUILD_PARAM_INDEX_FOUR = 4;
+constexpr int32_t BUILD_PARAM_INDEX_THIS_OBJ = 5;
 } // namespace
 
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
@@ -144,18 +145,21 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     ProccessNode(isSupportExportTexture, isSupportLazyBuild);
     UpdateEnd(info);
     CHECK_NULL_VOID(viewNode_);
-    JSRef<JSObject> thisObj = info.This();
-    JSWeak<JSObject> jsObject(thisObj);
-    viewNode_->RegisterUpdateJSInstanceCallback([jsObject, vm = info.GetVm()](int32_t id) {
-        JSRef<JSObject> jsThis = jsObject.Lock();
-        JSRef<JSVal> jsUpdateFunc = jsThis->GetProperty("updateInstance");
-        if (jsUpdateFunc->IsFunction()) {
-            auto jsFunc = JSRef<JSFunc>::Cast(jsUpdateFunc);
-            auto uiContext = NG::UIContextHelper::GetUIContext(vm, id);
-            auto jsVal = JSRef<JSVal>::Make(uiContext);
-            jsFunc->Call(jsThis, 1, &jsVal);
-        }
-    });
+
+    JSRef<JSObject> thisObj = info[BUILD_PARAM_INDEX_THIS_OBJ];
+    auto updateInstance = thisObj->GetProperty("updateInstance");
+    if (!updateInstance->IsFunction()) {
+        return;
+    }
+    EcmaVM* vm = info.GetVm();
+    auto updateInstanceFunc = AceType::MakeRefPtr<JsFunction>(thisObj, JSRef<JSFunc>::Cast(updateInstance));
+    CHECK_NULL_VOID(updateInstanceFunc);
+    auto updateJSInstanceCallback = [updateInstanceFunc, vm](int32_t instanceId) {
+        auto uiContext = NG::UIContextHelper::GetUIContext(vm, instanceId);
+        auto jsVal = JSRef<JSVal>::Make(uiContext);
+        updateInstanceFunc->ExecuteJS(1, &jsVal);
+    };
+    viewNode_->RegisterUpdateJSInstanceCallback(updateJSInstanceCallback);
 }
 
 void JSBaseNode::ProccessNode(bool isSupportExportTexture, bool isSupportLazyBuild)

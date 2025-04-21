@@ -17,6 +17,7 @@
 #include "interfaces/native/node/dialog_model.h"
 
 #include "base/error/error_code.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "frameworks/core/components/dialog/dialog_properties.h"
@@ -113,7 +114,7 @@ ArkUIDialogHandle CreateDialog()
         .blurStyleOption = std::nullopt,
         .effectOption = std::nullopt,
         .keyboardAvoidMode = OHOS::Ace::KeyboardAvoidMode::DEFAULT,
-        .enableHoverMode = false,
+        .enableHoverMode = std::nullopt,
         .hoverModeAreaType = OHOS::Ace::HoverModeAreaType::TOP_SCREEN,
         .focusable = true,
     });
@@ -363,7 +364,6 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.blurStyleOption = controllerHandler->blurStyleOption;
     dialogProperties.effectOption = controllerHandler->effectOption;
     dialogProperties.keyboardAvoidMode = controllerHandler->keyboardAvoidMode;
-    dialogProperties.enableHoverMode = controllerHandler->enableHoverMode;
     dialogProperties.hoverModeArea = controllerHandler->hoverModeAreaType;
     if (controllerHandler->customShadow.has_value()) {
         dialogProperties.shadow = controllerHandler->customShadow;
@@ -426,7 +426,9 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
         AnimationOption animation;
         dialogProperties.closeAnimation = animation;
     }
-
+    if (controllerHandler->enableHoverMode.has_value()) {
+        dialogProperties.enableHoverMode = controllerHandler->enableHoverMode.value();
+    }
     ParseDialogKeyboardAvoidDistance(dialogProperties, controllerHandler);
     ParseDialogBorderWidth(dialogProperties, controllerHandler);
     ParseDialogBorderColor(dialogProperties, controllerHandler);
@@ -435,31 +437,8 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     ParseDialogHeight(dialogProperties, controllerHandler);
 }
 
-PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties &dialogProps)
+void ParsePartialDialogPropertiesFromProps(const DialogProperties& dialogProps, PromptDialogAttr& dialogAttr)
 {
-    PromptDialogAttr dialogAttr = {
-        .autoCancel = dialogProps.autoCancel, .customStyle = dialogProps.customStyle,
-        .customOnWillDismiss = dialogProps.onWillDismiss, .maskColor = dialogProps.maskColor,
-        .backgroundColor = dialogProps.backgroundColor, .borderRadius = dialogProps.borderRadius,
-        .showInSubWindow = dialogProps.isShowInSubWindow, .isModal = dialogProps.isModal,
-        .enableHoverMode = dialogProps.enableHoverMode, .customBuilder = dialogProps.customBuilder,
-        .customBuilderWithId = dialogProps.customBuilderWithId, .borderWidth = dialogProps.borderWidth,
-        .borderColor = dialogProps.borderColor, .borderStyle = dialogProps.borderStyle, .shadow = dialogProps.shadow,
-        .width = dialogProps.width, .height = dialogProps.height, .maskRect = dialogProps.maskRect,
-        .transitionEffect = dialogProps.transitionEffect, .contentNode = dialogProps.contentNode,
-        .onDidAppear = dialogProps.onDidAppear, .onDidDisappear = dialogProps.onDidDisappear,
-        .onWillAppear = dialogProps.onWillAppear, .onWillDisappear = dialogProps.onWillDisappear,
-        .keyboardAvoidMode = dialogProps.keyboardAvoidMode, .dialogCallback = dialogProps.dialogCallback,
-        .keyboardAvoidDistance = dialogProps.keyboardAvoidDistance,
-        .levelOrder = dialogProps.levelOrder,
-        .dialogLevelMode = dialogProps.dialogLevelMode,
-        .dialogLevelUniqueId = dialogProps.dialogLevelUniqueId,
-        .isUserCreatedDialog = dialogProps.isUserCreatedDialog,
-        .dialogImmersiveMode = dialogProps.dialogImmersiveMode,
-        .blurStyleOption = dialogProps.blurStyleOption,
-        .effectOption = dialogProps.effectOption,
-        .customCNode = dialogProps.customCNode
-    };
 #if defined(PREVIEW)
     if (dialogAttr.showInSubWindow) {
         LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
@@ -477,6 +456,45 @@ PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties &dialogPr
             dialogAttr.backgroundBlurStyle = dialogProps.backgroundBlurStyle;
         }
     }
+}
+
+PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties& dialogProps)
+{
+    PromptDialogAttr dialogAttr = { .autoCancel = dialogProps.autoCancel,
+        .showInSubWindow = dialogProps.isShowInSubWindow,
+        .isModal = dialogProps.isModal,
+        .enableHoverMode = dialogProps.enableHoverMode,
+        .isUserCreatedDialog = dialogProps.isUserCreatedDialog,
+        .customBuilder = dialogProps.customBuilder,
+        .customBuilderWithId = dialogProps.customBuilderWithId,
+        .customOnWillDismiss = dialogProps.onWillDismiss,
+        .maskRect = dialogProps.maskRect,
+        .backgroundColor = dialogProps.backgroundColor,
+        .blurStyleOption = dialogProps.blurStyleOption,
+        .effectOption = dialogProps.effectOption,
+        .borderWidth = dialogProps.borderWidth,
+        .borderColor = dialogProps.borderColor,
+        .borderStyle = dialogProps.borderStyle,
+        .borderRadius = dialogProps.borderRadius,
+        .shadow = dialogProps.shadow,
+        .width = dialogProps.width,
+        .height = dialogProps.height,
+        .contentNode = dialogProps.contentNode,
+        .customStyle = dialogProps.customStyle,
+        .maskColor = dialogProps.maskColor,
+        .transitionEffect = dialogProps.transitionEffect,
+        .onDidAppear = dialogProps.onDidAppear,
+        .onDidDisappear = dialogProps.onDidDisappear,
+        .onWillAppear = dialogProps.onWillAppear,
+        .onWillDisappear = dialogProps.onWillDisappear,
+        .keyboardAvoidMode = dialogProps.keyboardAvoidMode,
+        .dialogCallback = dialogProps.dialogCallback,
+        .levelOrder = dialogProps.levelOrder,
+        .dialogLevelMode = dialogProps.dialogLevelMode,
+        .dialogLevelUniqueId = dialogProps.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogProps.dialogImmersiveMode,
+        .customCNode = dialogProps.customCNode };
+    ParsePartialDialogPropertiesFromProps(dialogProps, dialogAttr);
     return dialogAttr;
 }
 
@@ -999,9 +1017,7 @@ ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle controllerHandler, A
     blurStyleOption.adaptiveColor = static_cast<AdaptiveColor>((*intArray)[NUM_1]);
     blurStyleOption.policy = static_cast<BlurStyleActivePolicy>((*intArray)[NUM_2]);
     blurStyleOption.scale = scale;
-    std::vector<float> greyVec(2); // 2 number
-    greyVec[0] = (*uintArray)[NUM_0];
-    greyVec[1] = (*uintArray)[NUM_1];
+    std::vector<float> greyVec = { (*uintArray)[NUM_0], (*uintArray)[NUM_1] };
     blurStyleOption.blurOption.grayscale = greyVec;
     blurStyleOption.inactiveColor = Color((*uintArray)[NUM_2]);
     blurStyleOption.isValidColor = isValidColor;
@@ -1024,9 +1040,7 @@ ArkUI_Int32 SetBackgroundEffect(ArkUIDialogHandle controllerHandler, ArkUI_Float
     effectOption.adaptiveColor = static_cast<AdaptiveColor>((*intArray)[NUM_0]);
     effectOption.policy = static_cast<BlurStyleActivePolicy>((*intArray)[NUM_1]);
     effectOption.color = Color((*uintArray)[NUM_0]);
-    std::vector<float> greyVec(2); // 2 number
-    greyVec[0] = (*uintArray)[NUM_1];
-    greyVec[1] = (*uintArray)[NUM_2];
+    std::vector<float> greyVec = { (*uintArray)[NUM_0], (*uintArray)[NUM_1] };
     effectOption.blurOption.grayscale = greyVec;
     effectOption.inactiveColor = Color((*uintArray)[NUM_3]);
     effectOption.isValidColor = isValidColor;

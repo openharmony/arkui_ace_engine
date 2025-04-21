@@ -23,10 +23,10 @@
 #include "base/image/image_source.h"
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
-#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#include "core/components_ng/render/adapter/drawing_image.h"
 #include "core/image/image_compressor.h"
 #include "core/image/image_loader.h"
 
@@ -36,6 +36,10 @@ std::unordered_map<std::string, WeakPtr<PixelMap>> ImageDecoder::weakPixelMapCac
 
 WeakPtr<PixelMap> ImageDecoder::GetFromPixelMapCache(const ImageSourceInfo& imageSourceInfo, const SizeF& size)
 {
+    // only support network image
+    if (imageSourceInfo.GetSrcType() != SrcType::NETWORK) {
+        return nullptr;
+    }
     std::shared_lock<std::shared_mutex> lock(pixelMapMtx_);
     auto key = ImageUtils::GenerateImageKey(imageSourceInfo, size);
     // key exists -> task is running
@@ -62,6 +66,10 @@ void ImageDecoder::ClearPixelMapCache()
 void ImageDecoder::AddToPixelMapCache(
     const ImageSourceInfo& imageSourceInfo, const SizeF& size, WeakPtr<PixelMap> weakPixelMap)
 {
+    // only cache network image
+    if (imageSourceInfo.GetSrcType() != SrcType::NETWORK) {
+        return;
+    }
     std::unique_lock<std::shared_mutex> lock(pixelMapMtx_);
     auto key = ImageUtils::GenerateImageKey(imageSourceInfo, size);
     weakPixelMapCache_.emplace(key, weakPixelMap);
@@ -185,9 +193,9 @@ std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage(
     const RefPtr<ImageObject>& obj, std::shared_ptr<RSData> data, const ImageDecoderConfig& imageDecoderConfig)
 {
     CHECK_NULL_RETURN(data, nullptr);
-    auto rsSkiaData = data->GetImpl<Rosen::Drawing::SkiaData>();
-    CHECK_NULL_RETURN(rsSkiaData, nullptr);
-    auto skData = rsSkiaData->GetSkData();
+    RSDataWrapper* wrapper = new RSDataWrapper{data};
+    auto skData =
+        SkData::MakeWithProc(data->GetData(), data->GetSize(), RSDataWrapperReleaseProc, wrapper);
     auto encodedImage = std::make_shared<RSImage>();
     if (!encodedImage->MakeFromEncoded(data)) {
         return nullptr;

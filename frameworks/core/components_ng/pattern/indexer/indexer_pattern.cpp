@@ -446,7 +446,9 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(onActionStart), std::move(onActionUpdate), std::move(onActionEnd), std::move(onActionCancel));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distanceMap);
 }
 
 void IndexerPattern::OnHover(bool isHover)
@@ -541,7 +543,9 @@ void IndexerPattern::InitPopupPanEvent()
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
     auto panEvent = MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
-    gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, distanceMap);
 }
 
 void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
@@ -1015,7 +1019,7 @@ void IndexerPattern::UpdateBubbleList(std::vector<std::string>& currentListData)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
+    auto indexerEventHub = host->GetOrCreateEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     auto popListData = indexerEventHub->GetOnRequestPopupData();
     CHECK_NULL_VOID(popListData);
@@ -1391,7 +1395,7 @@ void IndexerPattern::UpdatePopupListGradientView(int32_t popupSize, int32_t maxI
     CHECK_NULL_VOID(listNode);
     if (popupSize > maxItemsSize) {
         DrawPopupListGradient(PopupListGradientStatus::BOTTOM);
-        auto listEventHub = listNode->GetEventHub<ListEventHub>();
+        auto listEventHub = listNode->GetOrCreateEventHub<ListEventHub>();
         CHECK_NULL_VOID(listEventHub);
         auto onScroll = [weak = WeakClaim(this)](Dimension offset, ScrollState state) {
             auto pattern = weak.Upgrade();
@@ -1679,7 +1683,7 @@ void IndexerPattern::OnListItemClick(int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
+    auto indexerEventHub = host->GetOrCreateEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
     ReportPoupSelectEvent();
@@ -1990,7 +1994,7 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
+    auto indexerEventHub = host->GetOrCreateEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     int32_t actualIndex = GetActualIndex(selectIndex);
     if (fromPress || lastIndexFromPress_ == fromPress || lastFireSelectIndex_ != selectIndex) {

@@ -676,14 +676,17 @@ void FreeCustomPropertyCharPtr(char* value, ArkUI_Uint32 size)
     value = nullptr;
 }
 
-void SetCustomPropertyModiferByKey(ArkUINodeHandle node, void* callback, void* getCallback)
+void SetCustomPropertyModiferByKey(ArkUINodeHandle node, void* callback, void* getCallback,
+    void* getCustomPropertyMap)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::function<bool()>* func = reinterpret_cast<std::function<bool()>*>(callback);
     std::function<std::string(const std::string&)>* getFunc =
         reinterpret_cast<std::function<std::string(const std::string&)>*>(getCallback);
-    frameNode->SetJSCustomProperty(*func, *getFunc);
+    std::function<std::string()>* getMapFunc =
+        reinterpret_cast<std::function<std::string()>*>(getCustomPropertyMap);
+    frameNode->SetJSCustomProperty(*func, *getFunc, std::move(*getMapFunc));
 }
 
 void AddCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, ArkUI_CharPtr value)

@@ -559,7 +559,7 @@ public:
 
     bool HasFocusedChild();
 
-    void SetOnFocusInternal(OnFocusFunc&& onFocusInternal)
+    void SetOnFocusInternal(std::function<void(FocusReason reason)>&& onFocusInternal)
     {
         onFocusInternal_ = std::move(onFocusInternal);
     }
@@ -604,6 +604,8 @@ public:
     /* Manipulation on node-tree is forbidden in operation. */
     bool AnyChildFocusHub(const std::function<bool(const RefPtr<FocusHub>&)>& operation, bool isReverse = false);
     bool AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation, bool isReverse = false);
+    bool AllChildFocusHubInMainTree(const std::function<void(const RefPtr<FocusHub>&)>& operation,
+        RefPtr<FocusHub>& lastFocusNode, bool isReverse = false);
 
     bool IsChild() const
     {
@@ -965,7 +967,7 @@ private:
 
     bool IsLastWeakNodeFocused() const;
 
-    OnFocusFunc onFocusInternal_;
+    std::function<void(FocusReason reason)> onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
     OnPreFocusFunc onPreFocusCallback_;

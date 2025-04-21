@@ -113,6 +113,7 @@ using RSColorSpace = Testing::TestingColorSpace;
 using RSData = Testing::TestingData;
 using RSRecordingCanvas = Testing::TestingRecordingCanvas;
 using RSDrawCmdList = Testing::TestingDrawCmdList;
+using RSHybridRenderType = Testing::TestingHybridRenderType;
 using RSFilterMode = Testing::FilterMode;
 using RSMipmapMode = Testing::MipmapMode;
 using RSRecordingPath = Testing::TestingPath;
@@ -127,12 +128,10 @@ using RSSrcRectConstraint = Testing::SrcRectConstraint;
 using RSImageBlurType = Testing::ImageBlurType;
 using RSSurface = Testing::TestingSurface;
 using RSPictureRecorder =Testing::TestingPictureRecorder;
-#ifdef USE_ROSEN_DRAWING
 using RSRecordingColorFilter = Testing::TestingColorFilter;
 using RSRecordingImageFilter = Testing::TestingImageFilter;
 using RSRecordingShaderEffect = Testing::TestingShaderEffect;
 using RSPicture = Testing::TestingPicture;
-#endif
 using RSTextRectHeightStyle = Testing::TestingTypographyProperties::TextRectHeightStyle;
 using RSTextRectWidthStyle = Testing::TestingTypographyProperties::TextRectWidthStyle;
 using RSTextRect = Testing::TestingTypographyProperties::TextRect;

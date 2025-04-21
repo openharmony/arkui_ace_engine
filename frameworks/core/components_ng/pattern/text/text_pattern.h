@@ -109,9 +109,11 @@ public:
         auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
         if (textLayoutProperty &&
             textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
-            return MakeRefPtr<TextLayoutAlgorithm>(spans_, pManager_, isSpanStringMode_, true);
+            return MakeRefPtr<TextLayoutAlgorithm>(
+                spans_, pManager_, isSpanStringMode_, textStyle_.value_or(TextStyle()), true);
         } else {
-            return MakeRefPtr<TextLayoutAlgorithm>(spans_, pManager_, isSpanStringMode_);
+            return MakeRefPtr<TextLayoutAlgorithm>(
+                spans_, pManager_, isSpanStringMode_, textStyle_.value_or(TextStyle()));
         }
     }
 
@@ -169,10 +171,10 @@ public:
 
     void DumpAdvanceInfo() override;
     void DumpInfo() override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpTextStyleInfo();
     void DumpTextStyleInfo2();
     void DumpTextStyleInfo3();
@@ -392,6 +394,7 @@ public:
     std::string GetFontInJson() const;
     std::string GetBindSelectionMenuInJson() const;
     virtual void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const {}
+    std::string GetFontSizeWithThemeInJson(const std::optional<Dimension>& value) const;
 
     const std::vector<std::u16string>& GetDragContents() const
     {
@@ -735,6 +738,10 @@ public:
     void OnTextOverflowChanged();
 
     void MarkDirtyNodeRender();
+    void ChangeHandleHeight(const GestureEvent& event, bool isFirst, bool isOverlayMode);
+    void ChangeFirstHandleHeight(const Offset& touchOffset, RectF& handleRect);
+    void ChangeSecondHandleHeight(const Offset& touchOffset, RectF& handleRect);
+    virtual void CalculateDefaultHandleHeight(float& height);
 
     uint64_t GetSystemTimestamp()
     {
@@ -743,26 +750,21 @@ public:
                 .count());
     }
 
-    void ChangeHandleHeight(const GestureEvent& event, bool isFirst, bool isOverlayMode);
-    void ChangeFirstHandleHeight(const Offset& touchOffset, RectF& handleRect);
-    void ChangeSecondHandleHeight(const Offset& touchOffset, RectF& handleRect);
-    virtual void CalculateDefaultHandleHeight(float& height);
-
     void SetEnableHapticFeedback(bool isEnabled)
     {
         isEnableHapticFeedback_ = isEnabled;
     }
 
     bool HasContent();
-    void SetupMagnifier();
 
     virtual bool IsEnabledObscured() const
     {
         return true;
     }
+    void SetupMagnifier();
+    void DoTextSelectionTouchCancel() override;
 
     virtual Color GetUrlSpanColor();
-    void DoTextSelectionTouchCancel() override;
     void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
 
     void RegisterAfterLayoutCallback(std::function<void()> callback)
@@ -830,6 +832,7 @@ protected:
     bool TryLinkJump(const RefPtr<SpanItem>& span);
     void ActTextOnClick(GestureEvent& info);
     RectF CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc);
+    virtual void AdjustAIEntityRect(RectF& aiRect) {}
     bool ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
         const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
     void SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
@@ -889,7 +892,7 @@ protected:
 
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
-    void OnTextGenstureSelectionEnd(const TouchLocationInfo& locationInfo) override;
+    void OnTextGestureSelectionEnd(const TouchLocationInfo& locationInfo) override;
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
 
     void SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode);

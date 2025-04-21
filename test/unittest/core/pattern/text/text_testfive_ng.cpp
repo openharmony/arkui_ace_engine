@@ -1684,6 +1684,25 @@ HWTEST_F(TextTestFiveNg, IsNeedMenuShare001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsNeedMenuShare002
+ * @tc.desc: test base_text_select_overlay.cpp IsNeedMenuShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, IsNeedMenuShare002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+    pattern->textForDisplay_ = TEXT_U16CONTENT;
+
+    EXPECT_EQ(textSelectOverlay->IsNeedMenuShare(), false);
+}
+
+/**
  * @tc.name: HandleOnShare001
  * @tc.desc: test base_text_select_overlay.cpp HandleOnShare function
  * @tc.type: FUNC
@@ -1785,7 +1804,7 @@ HWTEST_F(TextTestFiveNg, UpdateTextColorIfForeground001, TestSize.Level1)
     TextStyle textStyle;
 
     renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::INVERT);
-    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle);
+    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle, Color::BLACK);
     EXPECT_EQ(textStyle.GetTextColor(), Color::FOREGROUND);
 
     textStyle.SetTextColor(Color::BLACK);
@@ -2244,9 +2263,9 @@ HWTEST_F(TextTestFiveNg, UpdateTextStyle002, TestSize.Level1)
      * @tc.steps: step6. call UpdateTextStyle
      * @tc.expected: update text style when selStart and selEnd is invalid.
      */
-    EXPECT_CALL(*paragraph, AddText).Times(0);
-    EXPECT_CALL(*paragraph, PushStyle).Times(0);
-    EXPECT_CALL(*paragraph, PopStyle).Times(0);
+    EXPECT_CALL(*paragraph, AddText).Times(1);
+    EXPECT_CALL(*paragraph, PushStyle).Times(2);
+    EXPECT_CALL(*paragraph, PopStyle).Times(2);
     spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, -1, -1);
 }
 

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"

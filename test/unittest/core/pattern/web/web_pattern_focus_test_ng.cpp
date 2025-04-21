@@ -527,9 +527,8 @@ HWTEST_F(WebPatternFocusTestNg, OnAccessibilityHoverEvent, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     PointF point(20.0f, 100.0f);
-    bool web = webPattern->OnAccessibilityHoverEvent(point);
+    webPattern->OnAccessibilityHoverEvent(point, true);
     ASSERT_NE(webPattern->delegate_, nullptr);
-    ASSERT_FALSE(web);
 #endif
 }
 

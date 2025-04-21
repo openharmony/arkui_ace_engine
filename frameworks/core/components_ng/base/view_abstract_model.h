@@ -374,6 +374,9 @@ public:
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
     virtual void SetPrivacySensitive(bool flag) = 0;
 
+    // toolbar
+    virtual void SetToolbarBuilder(std::function<void()>&& buildFunc) = 0;
+    
     // background
     virtual void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) = 0;
 
@@ -427,6 +430,8 @@ public:
     virtual void SetAccessibilityNextFocusId(const std::string& nextFocusId) = 0;
     virtual void SetAccessibilityRole(const std::string& role, bool resetValue) = 0;
     virtual void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) = 0;
+    virtual void SetOnAccessibilityActionIntercept(
+        NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) = 0;
     virtual void ResetOnAccessibilityFocus() = 0;
     virtual void SetAccessibilityDefaultFocus(bool isFocus) = 0;
     virtual void SetAccessibilityUseSamePage(const std::string& pageMode) = 0;

@@ -690,23 +690,26 @@ HWTEST_F(DragAnimationHelperTestNg, CreateBadgeTextNodeTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateRelativeContainerNode01
- * @tc.desc: test CreateRelativeContainerNode func.
+ * @tc.name: ShowMenuHideAnimation001
+ * @tc.desc: Test ShowMenuHideAnimation
  * @tc.type: FUNC
  */
-HWTEST_F(DragAnimationHelperTestNg, CreateRelativeContainerNode01, TestSize.Level1)
+HWTEST_F(DragAnimationHelperTestNg, ShowMenuHideAnimation001, TestSize.Level1)
 {
-    RefPtr<MockPixelMap> mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
-    ASSERT_NE(mockPixelMap, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
-    ASSERT_TRUE(frameNode != nullptr);
-    auto imageNodeId = GetElmtId();
-    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId,
-        []() { return AceType::MakeRefPtr<Pattern>(); });
-    ASSERT_TRUE(imageNode != nullptr);
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, GetElmtId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    DragPreviewOption previewOption;
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
+    imageNode->SetDragPreviewOptions(previewOption);
     PreparedInfoForDrag data;
-
-    DragAnimationHelper::CreateRelativeContainerNode(frameNode, imageNode, data, OffsetF(0.0f, 0.0f), mockPixelMap);
-    ASSERT_TRUE(data.relativeContainerNode != nullptr);
+    DragAnimationHelper::ShowMenuHideAnimation(imageNode, data);
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
+    imageNode->SetDragPreviewOptions(previewOption);
+    auto menuNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_TAG, GetElmtId(), []() { return AceType::MakeRefPtr<MenuPattern>(0, "", MenuType::MENU); });
+    data.menuNode = menuNode;
+    DragAnimationHelper::ShowMenuHideAnimation(imageNode, data);
+    EXPECT_EQ(data.menuNode, menuNode);
 }
 } // namespace OHOS::Ace::NG

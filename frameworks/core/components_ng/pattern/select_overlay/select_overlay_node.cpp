@@ -215,7 +215,7 @@ RefPtr<FrameNode> BuildPasteButton(
     } else {
         buttonPaintProperty->UpdateFontColor(
             textStyle.GetTextColor().BlendOpacity(textOverlayTheme->GetAlphaDisabled()));
-        auto buttonEventHub = pasteButton->GetEventHub<MenuItemEventHub>();
+        auto buttonEventHub = pasteButton->GetOrCreateEventHub<MenuItemEventHub>();
         CHECK_NULL_RETURN(buttonEventHub, pasteButton);
         buttonEventHub->SetEnabled(false);
     }
@@ -324,7 +324,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
                 }
             });
     } else {
-        auto buttonEventHub = button->GetEventHub<MenuItemEventHub>();
+        auto buttonEventHub = button->GetOrCreateEventHub<MenuItemEventHub>();
         CHECK_NULL_RETURN(buttonEventHub, button);
         buttonEventHub->SetEnabled(false);
     }
@@ -869,7 +869,7 @@ void UpdatePasteOpacityFont(bool isPaste, RefPtr<FrameNode>& leftTextNode, const
     }
     auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(menuItemPattern);
-    auto eventHub = menuItemPattern->GetEventHub<MenuItemEventHub>();
+    auto eventHub = menuItemPattern->GetOrCreateEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetSelectedChangeEvent([action = param.action](bool isSelected) {
         if (isSelected) {
@@ -926,13 +926,13 @@ void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const std:
 void SetPasteMenuItemEvent(const RefPtr<FrameNode>& menuItem, const RefPtr<FrameNode>& pasteNode,
     const OptionParam& param, const RefPtr<SelectTheme>& theme)
 {
-    auto eventHub = menuItem->GetEventHub<MenuItemEventHub>();
+    auto eventHub = menuItem->GetOrCreateEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     auto focusHub = menuItem->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetEnabled(false);
-    auto pasteEventHub = pasteNode->GetEventHub<EventHub>();
+    auto pasteEventHub = pasteNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(pasteEventHub);
     pasteEventHub->SetEnabled(param.enabled);
     auto pasteFocusHub = pasteNode->GetFocusHub();
@@ -1312,14 +1312,6 @@ void SelectOverlayNode::MoreOrBackAnimation(bool isMore, bool noAnimation)
     CHECK_NULL_VOID(backButton_);
     if (isMore && !isExtensionMenu_) {
         MoreAnimation(noAnimation);
-        auto context = GetContext();
-        if (context) {
-            context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(extensionMenu_))]() {
-                auto menuNode = weakNode.Upgrade();
-                CHECK_NULL_VOID(menuNode);
-                menuNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
-            });
-        }
     } else if (!isMore && isExtensionMenu_) {
         BackAnimation(noAnimation);
     }
@@ -1385,14 +1377,25 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
     CHECK_NULL_VOID(menuPattern);
     menuPattern->SetMenuShow();
     FinishCallback callback = [selectMenuInnerProperty, extensionProperty, backButtonProperty, id = containerId,
-                                  weak = WeakClaim(this)]() {
+                                  weak = WeakClaim(this), weakExtensionMenu = WeakClaim(RawPtr(extensionMenu_))]() {
         ContainerScope scope(id);
         selectMenuInnerProperty->UpdateVisibility(VisibleType::GONE);
         extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
         auto selectOverlay = weak.Upgrade();
         CHECK_NULL_VOID(selectOverlay);
         selectOverlay->SetAnimationStatus(false);
-        selectOverlay->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        auto extensionMenu = weakExtensionMenu.Upgrade();
+        CHECK_NULL_VOID(extensionMenu);
+        auto child = extensionMenu->GetFirstChild();
+        while (child) {
+            if (child->GetTag() == V2::OPTION_ETS_TAG) {
+                auto target = AceType::DynamicCast<FrameNode>(child);
+                CHECK_NULL_VOID(target);
+                target->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+                break;
+            }
+            child = child->GetFirstChild();
+        }
     };
     AnimationOption selectOption;
     selectOption.SetDuration(ANIMATION_DURATION1);
@@ -1477,7 +1480,16 @@ void SelectOverlayNode::BackAnimation(bool noAnimation)
         CHECK_NULL_VOID(selectOverlay);
         selectOverlay->UpdateMoreOrBackSymbolOptions(true, false);
         selectOverlay->SetAnimationStatus(false);
-        selectOverlay->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        auto child = selectOverlay->GetFirstChild();
+        while (child) {
+            if (child->GetTag() == "SelectMenuButton") {
+                auto target = AceType::DynamicCast<FrameNode>(child);
+                CHECK_NULL_VOID(target);
+                target->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+                break;
+            }
+            child = child->GetFirstChild();
+        }
     };
 
     AnimationOption selectOption;
@@ -1622,7 +1634,7 @@ std::vector<OptionParam> SelectOverlayNode::GetDefaultOptionsParams(const std::s
     if (!isShowInDefaultMenu_[OPTION_INDEX_PASTE]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_PASTE_SVG) : "";
         params.emplace_back(textOverlayTheme->GetPasteLabel(), iconPath,
-            GetMenuCallbackWithContainerId(info->menuCallback.onPaste), GetSymbolFunc(OH_DEFAULT_PASTE));
+            GetMenuCallbackWithContainerId(info->menuCallback.onPaste));
     }
     if (!isShowInDefaultMenu_[OPTION_INDEX_COPY_ALL]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_SELECT_ALL_SVG) : "";
@@ -1830,6 +1842,7 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuO
         auto param = OptionParam(content, GetSystemIconPath(item.id, item.icon.value_or(" ")), callback, symbol);
         if (item.id == OH_DEFAULT_PASTE) {
             param.isPasteOption = true;
+            param.symbol = nullptr;
         }
         params.emplace_back(param);
         itemNum++;
@@ -2193,7 +2206,7 @@ void SelectOverlayNode::ShowCamera(
 bool SelectOverlayNode::IsShowOnTargetAPIVersion()
 {
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return false;
     }
     return true;
@@ -2202,7 +2215,7 @@ bool SelectOverlayNode::IsShowOnTargetAPIVersion()
 bool SelectOverlayNode::IsShowTranslateOnTargetAPIVersion()
 {
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
         return false;
     }
     return true;
@@ -2928,7 +2941,7 @@ void SelectOverlayNode::UpdateSelectMenuBg()
 
 void SelectOverlayNode::AddCustomMenuCallbacks(const std::shared_ptr<SelectOverlayInfo>& info)
 {
-    auto overlayEventHub = GetEventHub<SelectOverlayEventHub>();
+    auto overlayEventHub = GetOrCreateEventHub<SelectOverlayEventHub>();
     CHECK_NULL_VOID(overlayEventHub);
     if (info->menuCallback.onMenuShow) {
         overlayEventHub->SetMenuShowCallback(std::move(info->menuCallback.onMenuShow));
@@ -2943,7 +2956,7 @@ void SelectOverlayNode::AddCustomMenuCallbacks(const std::shared_ptr<SelectOverl
         overlayEventHub->SetMenuDisappearCallback(std::move(info->menuCallback.onDisappear));
     }
     CHECK_NULL_VOID(selectMenu_);
-    auto eventHub = selectMenu_->GetEventHub<EventHub>();
+    auto eventHub = selectMenu_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnAppear([weak = WeakClaim(this)]() {
         auto overlayNode = weak.Upgrade();
@@ -2960,7 +2973,7 @@ void SelectOverlayNode::AddCustomMenuCallbacks(const std::shared_ptr<SelectOverl
 void SelectOverlayNode::OnCustomSelectMenuAppear()
 {
     isCustomMenuAppear_ = true;
-    auto eventHub = GetEventHub<SelectOverlayEventHub>();
+    auto eventHub = GetOrCreateEventHub<SelectOverlayEventHub>();
     CHECK_NULL_VOID(eventHub);
     // fire appear event.
     eventHub->FireAppearEvent();
@@ -2979,7 +2992,7 @@ void SelectOverlayNode::OnCustomSelectMenuAppear()
 void SelectOverlayNode::FireCustomMenuChangeEvent(bool isMenuShow)
 {
     if (isCustomMenuAppear_) {
-        auto eventHub = GetEventHub<SelectOverlayEventHub>();
+        auto eventHub = GetOrCreateEventHub<SelectOverlayEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireMenuVisibilityChangeEvent(isMenuShow);
     }

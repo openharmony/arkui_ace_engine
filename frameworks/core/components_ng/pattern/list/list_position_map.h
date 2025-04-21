@@ -43,6 +43,7 @@ namespace {
 struct PositionInfo {
     float mainPos;
     float mainSize;
+    bool isGroup;
 };
 
 enum class ListPosMapUpdate {
@@ -60,7 +61,17 @@ public:
 
     void UpdatePos(int32_t index, PositionInfo posInfo)
     {
-        posMap_[index] = { posInfo.mainPos, posInfo.mainSize };
+        posMap_[index] = posInfo;
+    }
+
+    void UpdatePosRange(int32_t startIndex, int32_t endIndex, PositionInfo posInfo, float space, int32_t lanes)
+    {
+        for (int32_t i = startIndex; i < endIndex; i++) {
+            posMap_[i] = posInfo;
+            if (lanes >= 1 && (i % lanes == lanes - 1)) {
+                posInfo.mainPos = posInfo.mainPos + posInfo.mainSize + space;
+            }
+        }
     }
 
     void UpdatePosWithCheck(int32_t index, PositionInfo posInfo)
@@ -70,6 +81,7 @@ public:
             posMap_[index] = posInfo;
             return;
         }
+        iter->second.isGroup = posInfo.isGroup;
         if (LessNotEqual(iter->second.mainSize, posInfo.mainSize)) {
             iter->second.mainSize = posInfo.mainSize;
         }
@@ -316,14 +328,6 @@ public:
             curRowHeight_ = 0.0f;
         }
         totalHeight_ = totalHeight_ - space_ + footerSize_;
-    }
-
-    void PosMapUpdateAllSize()
-    {
-        float curPos = 0.0f;
-        for (int32_t index = 0; index < totalItemCount_; index++) {
-            posMap_[index] = { curPos, curRowHeight_ };
-        }
     }
 
     virtual void UpdatePosMap(LayoutWrapper* layoutWrapper, int32_t lanes, float space,

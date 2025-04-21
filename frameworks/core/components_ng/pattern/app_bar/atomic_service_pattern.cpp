@@ -189,6 +189,12 @@ void AtomicServicePattern::OnColorConfigurationUpdate()
     AppBgColorCallBack();
     ColorConfigurationCallBack();
 }
+
+void AtomicServicePattern::OnLanguageConfigurationUpdate()
+{
+    AppInfoCallBack();
+}
+
 RefPtr<CustomAppBarNode> AtomicServicePattern::GetJSAppBarContainer()
 {
     auto customAppBarNode = NG::ViewStackProcessor::GetInstance()->GetCustomAppBarNode();

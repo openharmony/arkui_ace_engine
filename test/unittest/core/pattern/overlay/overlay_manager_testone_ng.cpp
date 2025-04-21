@@ -877,7 +877,7 @@ HWTEST_F(OverlayManagerTestOneNG, MountPopup004, TestSize.Level1)
     ASSERT_NE(layoutProp, nullptr);
     auto paintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
     ASSERT_NE(paintProperty, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     overlayManager->UpdatePopupMap(targetNode->GetId(), popupInfo);
     overlayManager->MountPopup(targetNode->GetId(), popupInfo);
     EXPECT_TRUE(overlayManager->popupMap_[targetNode->GetId()].isCurrentOnShow);
@@ -888,7 +888,7 @@ HWTEST_F(OverlayManagerTestOneNG, MountPopup004, TestSize.Level1)
     popupInfo.focusable = false;
     paintProperty->UpdatePrimaryButtonShow(false);
     layoutProp->UpdateShowInSubWindow(true);
-    MockContainer::Current()->SetIsScenceBoardWindow(false);
+    MockContainer::Current()->SetIsSceneBoardWindow(false);
     overlayManager->MountPopup(targetNode->GetId(), popupInfo);
     EXPECT_TRUE(overlayManager->popupMap_[targetNode->GetId()].isCurrentOnShow);
 }
@@ -932,7 +932,7 @@ HWTEST_F(OverlayManagerTestOneNG, HidePopup001, TestSize.Level1)
     overlayManager->popupMap_.clear();
     popupInfo.markNeedUpdate = true;
     popupPattern->SetTransitionStatus(TransitionStatus::EXITING);
-    MockContainer::Current()->SetIsScenceBoardWindow(false);
+    MockContainer::Current()->SetIsSceneBoardWindow(false);
     overlayManager->HidePopup(targetNode->GetId(), popupInfo);
 
     overlayManager->popupMap_.clear();
@@ -987,7 +987,7 @@ HWTEST_F(OverlayManagerTestOneNG, HidePopup002, TestSize.Level1)
     popupInfo.target = targetNode;
     popupInfo.markNeedUpdate = true;
     popupInfo.isCurrentOnShow = true;
-    MockContainer::Current()->SetIsScenceBoardWindow(false);
+    MockContainer::Current()->SetIsSceneBoardWindow(false);
     popupPattern->SetTransitionStatus(TransitionStatus::ENTERING);
     auto paintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
     paintProperty->UpdatePrimaryButtonShow(true);
@@ -1166,7 +1166,7 @@ HWTEST_F(OverlayManagerTestOneNG, HideCustomPopups001, TestSize.Level1)
     overlayManager->UpdatePopupMap(targetNode->GetId(), popupInfo);
     paintProperty->UpdatePrimaryButtonShow(false);
     layoutProp->UpdateShowInSubWindow(false);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     overlayManager->HideCustomPopups();
     EXPECT_FALSE(overlayManager->popupMap_[targetNode->GetId()].markNeedUpdate);
 }

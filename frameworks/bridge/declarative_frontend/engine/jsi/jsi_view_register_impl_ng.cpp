@@ -389,6 +389,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSForEach::JSBind(globalObj);
     JSRepeat::JSBind(globalObj);
     JSRepeatVirtualScroll::JSBind(globalObj);
+    JSRepeatVirtualScroll2::JSBind(globalObj);
     JSIfElse::JSBind(globalObj);
     JSDivider::JSBind(globalObj);
     JSScroll::JSBind(globalObj);
@@ -472,10 +473,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSSlider::JSBind(globalObj);
     JSGridRow::JSBind(globalObj);
     JSGridCol::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSStepper::JSBind(globalObj);
     JSStepperItem::JSBind(globalObj);
-#endif
     JSBlank::JSBind(globalObj);
     JSCalendar::JSBind(globalObj);
     JSShape::JSBind(globalObj);
@@ -521,9 +520,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRenderingContextSettings::JSBind(globalObj);
     JSMatrix2d::JSBind(globalObj);
     JSSearch::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSSelect::JSBind(globalObj);
-#endif
     JSSearchController::JSBind(globalObj);
     JSTextClockController::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
@@ -534,10 +531,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSCheckbox::JSBind(globalObj);
     JSCheckboxGroup::JSBind(globalObj);
     JSRefresh::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSWaterFlow::JSBind(globalObj);
     JSWaterFlowItem::JSBind(globalObj);
-#endif
     JSCommonView::JSBind(globalObj);
     JSRecycleView::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);

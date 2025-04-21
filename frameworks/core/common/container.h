@@ -28,7 +28,6 @@
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/shared_image_manager.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
@@ -532,7 +531,7 @@ public:
         return false;
     }
 
-    virtual bool IsScenceBoardWindow()
+    virtual bool IsSceneBoardWindow()
     {
         return false;
     }
@@ -735,12 +734,12 @@ public:
         return false;
     }
 
-    void RegisterContainerHandler(const WeakPtr<ContainerHandler>& containerHandler)
+    void RegisterContainerHandler(const RefPtr<ContainerHandler>& containerHandler)
     {
         containerHandler_ = containerHandler;
     }
 
-    WeakPtr<ContainerHandler> GetContainerHandler()
+    RefPtr<ContainerHandler> GetContainerHandler()
     {
         return containerHandler_;
     }
@@ -803,7 +802,7 @@ protected:
     bool isFRSCardContainer_ = false;
     bool isDynamicRender_ = false;
     // for common handler
-    WeakPtr<ContainerHandler> containerHandler_;
+    RefPtr<ContainerHandler> containerHandler_;
     RefPtr<DisplayInfoUtils> displayManager_ = AceType::MakeRefPtr<DisplayInfoUtils>();
 
 private:

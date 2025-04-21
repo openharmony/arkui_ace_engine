@@ -391,13 +391,16 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternProcessDepth002, TestSize.Lev
 
 /**
  * @tc.name: TextPickerPatternTest001
- * @tc.desc: test OnKeyEvent
+ * @tc.desc: test OnKeyEvent when event.action is not DOWN.
  * @tc.type: FUNC
  */
 HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest001, TestSize.Level1)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
+    TextPickerModelNG::GetInstance()->SetRange(range);
+
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto focusHub = frameNode->GetEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
@@ -408,25 +411,28 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest001, TestSize.Level1)
     /**
      * @tc.cases: case1. up KeyEvent.
      */
-    KeyEvent keyEventUp(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
-    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventUp));
+    KeyEvent keyEventUp(KeyCode::KEY_DPAD_UP, KeyAction::UP);
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEventUp));
 
     /**
-     * @tc.cases: case1. down KeyEvent.
+     * @tc.cases: case2. down KeyEvent.
      */
-    KeyEvent keyEventDown(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
-    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventDown));
+    KeyEvent keyEventDown(KeyCode::KEY_DPAD_DOWN, KeyAction::UP);
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEventDown));
 }
 
 /**
  * @tc.name: TextPickerPatternTest002
- * @tc.desc: test OnKeyEvent
+ * @tc.desc: test OnKeyEvent when event.action is DOWN.
  * @tc.type: FUNC
  */
 HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest002, TestSize.Level1)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
+    TextPickerModelNG::GetInstance()->SetRange(range);
+
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto focusHub = frameNode->GetEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
@@ -441,10 +447,52 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest002, TestSize.Level1)
     EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventLeft));
 
     /**
-     * @tc.cases: case1. right KeyEvent.
+     * @tc.cases: case2. right KeyEvent.
      */
     KeyEvent keyEventRight(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
     EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventRight));
+
+    /**
+     * @tc.cases: case3. up KeyEvent.
+     */
+    KeyEvent keyEventUp(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventUp));
+ 
+     /**
+      * @tc.cases: case4. down KeyEvent.
+      */
+    KeyEvent keyEventDwn(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventDwn));
+
+     /**
+     * @tc.cases: case5. move home KeyEvent.
+     */
+    KeyEvent keyEventMoveHome(KeyCode::KEY_MOVE_HOME, KeyAction::DOWN);
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventMoveHome));
+ 
+     /**
+      * @tc.cases: case6. move end KeyEvent.
+      */
+    KeyEvent keyEventMoveEnd(KeyCode::KEY_MOVE_END, KeyAction::DOWN);
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventMoveEnd));
+
+    /**
+     * @tc.cases: case7. KEY_TAB KeyEvent.
+     */
+    KeyEvent keyEventTab(KeyCode::KEY_TAB, KeyAction::DOWN);
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEventTab));
+
+    /**
+     * @tc.cases: case8. KEY_SPACE KeyEvent.
+     */
+    KeyEvent keyEventSpace(KeyCode::KEY_SPACE, KeyAction::DOWN);
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEventSpace));
+
+    /**
+     * @tc.cases: case9. KEY_ENTER KeyEvent.
+     */
+    KeyEvent keyEventEnter(KeyCode::KEY_ENTER, KeyAction::DOWN);
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEventEnter));
 }
 
 /**
@@ -1541,7 +1589,7 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternHandleDirectionKey001, TestSi
     /**
      * @tc.cases: case. cover KeyCode == KEY_ENTER.
      */
-    EXPECT_TRUE(textPickerPattern_->HandleDirectionKey(KeyCode::KEY_ENTER));
+    EXPECT_FALSE(textPickerPattern_->HandleDirectionKey(KeyCode::KEY_ENTER));
     /**
      * @tc.cases: case. cover KeyCode == KEY_DPAD_LEFT.
      */
@@ -1779,11 +1827,11 @@ HWTEST_F(TextPickerPatternTestNg, LinearFontSize002, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateConfirmButtonMargin001
- * @tc.desc: Test TextPickerPattern UpdateConfirmButtonMargin
+ * @tc.name: UpdateButtonMargin001
+ * @tc.desc: Test TextPickerPattern UpdateButtonMargin
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerPatternTestNg, UpdateConfirmButtonMargin001, TestSize.Level1)
+HWTEST_F(TextPickerPatternTestNg, UpdateButtonMargin001, TestSize.Level1)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -1803,26 +1851,26 @@ HWTEST_F(TextPickerPatternTestNg, UpdateConfirmButtonMargin001, TestSize.Level1)
     ASSERT_NE(textPickerPattern_, nullptr);
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    textPickerPattern_->UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
+    textPickerPattern_->UpdateButtonMargin(buttonConfirmNode, dialogTheme, true);
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right, CalcLength(0.0_vp));
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
-    textPickerPattern_->UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
+    textPickerPattern_->UpdateButtonMargin(buttonConfirmNode, dialogTheme, true);
     EXPECT_EQ(layoutProperty->GetMarginProperty()->left, CalcLength(0.0_vp));
 
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    textPickerPattern_->UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
+    textPickerPattern_->UpdateButtonMargin(buttonConfirmNode, dialogTheme, true);
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right, CalcLength(0.0_vp));
 }
 
 /**
- * @tc.name: UpdateCancelButtonMargin001
- * @tc.desc: Test TextPickerPattern UpdateCancelButtonMargin
+ * @tc.name: UpdateButtonMargin002
+ * @tc.desc: Test TextPickerPattern UpdateButtonMargin
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerPatternTestNg, UpdateCancelButtonMargin001, TestSize.Level1)
+HWTEST_F(TextPickerPatternTestNg, UpdateButtonMargin002, TestSize.Level1)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -1842,17 +1890,17 @@ HWTEST_F(TextPickerPatternTestNg, UpdateCancelButtonMargin001, TestSize.Level1)
     ASSERT_NE(textPickerPattern_, nullptr);
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    textPickerPattern_->UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
+    textPickerPattern_->UpdateButtonMargin(buttonCancelNode, dialogTheme, false);
     EXPECT_EQ(layoutProperty->GetMarginProperty()->left, CalcLength(0.0_vp));
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
-    textPickerPattern_->UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
+    textPickerPattern_->UpdateButtonMargin(buttonCancelNode, dialogTheme, false);
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right, CalcLength(0.0_vp));
 
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    textPickerPattern_->UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
+    textPickerPattern_->UpdateButtonMargin(buttonCancelNode, dialogTheme, false);
     EXPECT_EQ(layoutProperty->GetMarginProperty()->left, CalcLength(0.0_vp));
 }
 
@@ -1919,25 +1967,26 @@ HWTEST_F(TextPickerPatternTestNg, ParseDirectionKey001, TestSize.Level1)
 
     auto textPickerColumnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
     ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto totalOptionCount = textPickerColumnPattern->GetOptionCount();
 
     KeyCode code = KeyCode::KEY_UNKNOWN;
 
     code = KeyCode::KEY_DPAD_UP;
-    textPickerPattern_->ParseDirectionKey(textPickerColumnPattern, code, 0);
+    textPickerPattern_->ParseDirectionKey(textPickerColumnPattern, code, totalOptionCount, 0);
     EXPECT_FALSE(textPickerColumnPattern->InnerHandleScroll(0, false));
 
     code = KeyCode::KEY_DPAD_DOWN;
-    textPickerPattern_->ParseDirectionKey(textPickerColumnPattern, code, 0);
+    textPickerPattern_->ParseDirectionKey(textPickerColumnPattern, code, totalOptionCount, 0);
     EXPECT_FALSE(textPickerColumnPattern->InnerHandleScroll(1, false));
 
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
 
     code = KeyCode::KEY_DPAD_LEFT;
-    textPickerPattern_->ParseDirectionKey(textPickerColumnPattern, code, 0);
+    textPickerPattern_->ParseDirectionKey(textPickerColumnPattern, code, totalOptionCount, 0);
     EXPECT_EQ(textPickerPattern_->focusKeyID_, -1);
 
     code = KeyCode::KEY_DPAD_RIGHT;
-    textPickerPattern_->ParseDirectionKey(textPickerColumnPattern, code, 0);
+    textPickerPattern_->ParseDirectionKey(textPickerColumnPattern, code, totalOptionCount, 0);
     EXPECT_EQ(textPickerPattern_->focusKeyID_, 0);
 }
 

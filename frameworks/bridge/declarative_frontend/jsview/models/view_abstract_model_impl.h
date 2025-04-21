@@ -37,6 +37,7 @@ public:
 
     void SetWidth(const CalcDimension& width) override;
     void SetHeight(const CalcDimension& height) override;
+    void SetToolbarBuilder(std::function<void()>&& buildFunc) override;
     void ClearWidthOrHeight(bool isWidth) override {};
     void SetMinWidth(const CalcDimension& minWidth) override;
     void SetMinHeight(const CalcDimension& minHeight) override;
@@ -346,6 +347,8 @@ public:
     void SetAccessibilityRole(const std::string& role, bool resetValue) override;
     void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;
     void ResetOnAccessibilityFocus() override;
+    void SetOnAccessibilityActionIntercept(
+        NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) override;
     void SetAccessibilityDefaultFocus(bool isFocus) override;
     void SetAccessibilityUseSamePage(const std::string& pageMode) override;
     void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;

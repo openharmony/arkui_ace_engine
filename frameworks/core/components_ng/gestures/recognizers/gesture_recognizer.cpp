@@ -124,6 +124,7 @@ void NGGestureRecognizer::HandleTouchDown(const TouchEvent& point)
 {
     deviceId_ = point.deviceId;
     deviceType_ = point.sourceType;
+    deviceTool_ = point.sourceTool;
     inputEventType_ = (deviceType_ == SourceType::MOUSE) ? InputEventType::MOUSE_BUTTON : InputEventType::TOUCH_SCREEN;
 
     auto result = AboutToAddCurrentFingers(point);
@@ -168,6 +169,7 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
         case AxisAction::BEGIN:
             deviceId_ = event.deviceId;
             deviceType_ = event.sourceType;
+            deviceTool_ = event.sourceTool;
             inputEventType_ = InputEventType::AXIS;
             HandleTouchDownEvent(event);
             break;
@@ -203,6 +205,7 @@ void NGGestureRecognizer::HandleBridgeModeEvent(const TouchEvent& point)
         case TouchType::DOWN: {
             deviceId_ = point.deviceId;
             deviceType_ = point.sourceType;
+            deviceTool_ = point.sourceTool;
             if (deviceType_ == SourceType::MOUSE) {
                 inputEventType_ = InputEventType::MOUSE_BUTTON;
             } else {
@@ -255,6 +258,7 @@ void NGGestureRecognizer::HandleBridgeModeEvent(const AxisEvent& event)
         case AxisAction::BEGIN:
             deviceId_ = event.deviceId;
             deviceType_ = event.sourceType;
+            deviceTool_ = event.sourceTool;
             inputEventType_ = InputEventType::AXIS;
             HandleTouchDownEvent(event);
             break;
@@ -297,16 +301,16 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
     referee->Adjudicate(recognizer, disposal);
 }
 
-void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime,
+std::vector<Matrix4> NGGestureRecognizer::GetTransformMatrix(const WeakPtr<FrameNode>& node, bool isRealTime,
     bool isPostEventResult, int32_t postEventNodeId)
 {
+    std::vector<Matrix4> vTrans {};
     if (node.Invalid()) {
-        return;
+        return vTrans;
     }
 
-    std::vector<Matrix4> vTrans {};
     auto host = node.Upgrade();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, vTrans);
 
     std::function<Matrix4()> getLocalMatrix;
     if (isRealTime) {
@@ -337,9 +341,43 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
         }
         host = host->GetAncestorNodeOfFrame(false);
     }
+    return vTrans;
+}
 
+void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime,
+    bool isPostEventResult, int32_t postEventNodeId)
+{
+    if (node.Invalid()) {
+        return;
+    }
+
+    auto host = node.Upgrade();
+    CHECK_NULL_VOID(host);
+
+    auto vTrans = GetTransformMatrix(node, isRealTime, isPostEventResult, postEventNodeId);
     Point temp(localPointF.GetX(), localPointF.GetY());
     for (auto iter = vTrans.rbegin(); iter != vTrans.rend(); iter++) {
+        temp = *iter * temp;
+    }
+    localPointF.SetX(temp.GetX());
+    localPointF.SetY(temp.GetY());
+}
+
+void NGGestureRecognizer::TransformForRecognizer(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime,
+    bool isPostEventResult, int32_t postEventNodeId)
+{
+    if (node.Invalid()) {
+        return;
+    }
+    auto host = node.Upgrade();
+    CHECK_NULL_VOID(host);
+
+    if (localMatrix_.empty() || isPostEventResult) {
+        NGGestureRecognizer::Transform(localPointF, node, isRealTime, isPostEventResult, postEventNodeId);
+        return;
+    }
+    Point temp(localPointF.GetX(), localPointF.GetY());
+    for (auto iter = localMatrix_.rbegin(); iter != localMatrix_.rend(); iter++) {
         temp = *iter * temp;
     }
     localPointF.SetX(temp.GetX());
@@ -495,8 +533,7 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealT
         NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_,
             isPostEventResult_, event.postEventNodeId);
     } else {
-        NGGestureRecognizer::Transform(localPoint, frameNode, false,
-            isPostEventResult_, event.postEventNodeId);
+        TransformForRecognizer(localPoint, frameNode, false, isPostEventResult_, event.postEventNodeId);
     }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);

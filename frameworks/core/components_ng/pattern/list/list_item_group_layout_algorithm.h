@@ -162,6 +162,11 @@ public:
         prevContentMainSize_ = prevContentSize;
     }
 
+    float GetListContentSize() const
+    {
+        return endPos_ - startPos_;
+    }
+
     void ModifyReferencePos(int32_t index, float pos);
 
     void SetNeedAdjustRefPos(bool needAdjust)
@@ -467,6 +472,7 @@ private:
     void UpdateCachedItemPosition(int32_t cacheCount);
     void UpdateLayoutedItemInfo();
     void ReportGetChildError(const std::string& funcName, int32_t index) const;
+    bool IsRoundingMode(LayoutWrapper* layoutWrapper);
 
     bool isCardStyle_ = false;
     int32_t headerIndex_;

@@ -35,7 +35,7 @@ constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
 ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
 
@@ -65,7 +65,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* run
 ArkUINativeModuleValue SymbolGlyphBridge::ResetFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -76,7 +76,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::ResetFontColor(ArkUIRuntimeCallInfo* r
 ArkUINativeModuleValue SymbolGlyphBridge::SetFontSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
@@ -94,7 +94,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontSize(ArkUIRuntimeCallInfo* runt
 ArkUINativeModuleValue SymbolGlyphBridge::ResetFontSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -105,7 +105,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::ResetFontSize(ArkUIRuntimeCallInfo* ru
 ArkUINativeModuleValue SymbolGlyphBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
@@ -124,7 +124,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontWeight(ArkUIRuntimeCallInfo* ru
 ArkUINativeModuleValue SymbolGlyphBridge::ResetFontWeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -135,7 +135,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::ResetFontWeight(ArkUIRuntimeCallInfo* 
 ArkUINativeModuleValue SymbolGlyphBridge::SetRenderingStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
@@ -152,7 +152,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetRenderingStrategy(ArkUIRuntimeCallI
 ArkUINativeModuleValue SymbolGlyphBridge::ResetRenderingStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -163,7 +163,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::ResetRenderingStrategy(ArkUIRuntimeCal
 ArkUINativeModuleValue SymbolGlyphBridge::SetEffectStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
@@ -180,7 +180,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetEffectStrategy(ArkUIRuntimeCallInfo
 ArkUINativeModuleValue SymbolGlyphBridge::ResetEffectStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -191,7 +191,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::ResetEffectStrategy(ArkUIRuntimeCallIn
 ArkUINativeModuleValue SymbolGlyphBridge::SetSymbolEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -211,7 +211,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetSymbolEffect(ArkUIRuntimeCallInfo* 
 ArkUINativeModuleValue SymbolGlyphBridge::ResetSymbolEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -245,7 +245,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetSymbolGlyphInitialize(ArkUIRuntimeC
 ArkUINativeModuleValue SymbolGlyphBridge::ResetSymbolGlyphInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -256,7 +256,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::ResetSymbolGlyphInitialize(ArkUIRuntim
 ArkUINativeModuleValue SymbolGlyphBridge::SetMinFontScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
@@ -272,7 +272,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetMinFontScale(ArkUIRuntimeCallInfo* 
 ArkUINativeModuleValue SymbolGlyphBridge::ResetMinFontScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -283,7 +283,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::ResetMinFontScale(ArkUIRuntimeCallInfo
 ArkUINativeModuleValue SymbolGlyphBridge::SetMaxFontScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
@@ -299,7 +299,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetMaxFontScale(ArkUIRuntimeCallInfo* 
 ArkUINativeModuleValue SymbolGlyphBridge::ResetMaxFontScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());

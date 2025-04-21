@@ -37,6 +37,7 @@ public:
     MOCK_METHOD1(OnFormLinkInfoUpdate, int32_t(const std::vector<std::string>& formLinkInfos));
     MOCK_METHOD1(OnGetRectRelativeToWindow, int32_t(AccessibilityParentRectInfo& parentRectInfo));
     MOCK_METHOD1(OnCheckManagerDelegate, int32_t(bool &checkFlag));
+    MOCK_METHOD1(OnUpdateFormDone, int32_t(const int64_t formId));
 };
 } // namespace Ace
 } // namespace OHOS

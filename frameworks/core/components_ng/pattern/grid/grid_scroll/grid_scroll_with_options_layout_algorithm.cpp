@@ -126,7 +126,7 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
     CHECK_NULL_RETURN(layoutProperty, std::make_pair(-1, 1));
     const auto& options = *layoutProperty->GetLayoutOptions();
     if (options.irregularIndexes.empty()) {
-        return std::make_pair(itemIndex % crossCount_, 1);
+        return std::make_pair(-1, 1);
     }
 
     auto firstIrregularIndex = *(options.irregularIndexes.begin());

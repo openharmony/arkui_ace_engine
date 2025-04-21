@@ -92,6 +92,16 @@ public:
         weakButtonCancel_ = buttonCancelNode;
     }
 
+    void SetNextPrevButtonNode(WeakPtr<FrameNode> nextPrevButtonNode)
+    {
+        nextPrevButtonNode_ = nextPrevButtonNode;
+    }
+
+    void SetIsNext(bool isNext)
+    {
+        isNext_ = isNext;
+    }
+
     void SetLunarSwitchTextNode(WeakPtr<FrameNode> lunarSwitchTextNode)
     {
         weakLunarSwitchText_ = lunarSwitchTextNode;
@@ -798,7 +808,7 @@ private:
     void AdjustSolarStartEndDate();
     void AdjustLunarStartEndDate();
     void UpdateButtonMargin(
-        const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmNode);
+        const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmOrNextNode);
     void UpdateButtonNode(const RefPtr<FrameNode>& buttonNode, const bool isConfirmNode);
     void ShowColumnByDatePickMode();
     void UpdateStackPropVisibility(const RefPtr<FrameNode>& stackNode,
@@ -815,6 +825,7 @@ private:
     void FlushChildNodes();
     void UpdateLunarSwitch();
     void UpdateDateOrder();
+    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext);
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
@@ -851,6 +862,8 @@ private:
     WeakPtr<FrameNode> weakButtonConfirm_;
     WeakPtr<FrameNode> weakButtonCancel_;
     WeakPtr<FrameNode> weakLunarSwitchText_;
+    WeakPtr<FrameNode> nextPrevButtonNode_;
+    bool isNext_ = true;
     PickerDate startDateSolar_ = PickerDate(1970, 1, 1); // default start date is 1970-1-1 from FA document.
     LunarDate startDateLunar_;
     PickerDate endDateSolar_ = PickerDate(2100, 12, 31); // default end date is 2100-12-31 from FA document.

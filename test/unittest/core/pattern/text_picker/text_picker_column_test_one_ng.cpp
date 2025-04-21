@@ -1775,6 +1775,8 @@ HWTEST_F(TextPickerColumnTestOneNg, SetOptionShiftDistance004, TestSize.Level1)
     ASSERT_NE(theme, nullptr);
     theme->showOptionCount_ = 7;
     columnPattern->isDisableTextStyleAnimation_ = true;
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateDisableTextStyleAnimation(true);
 
     TextPickerOptionProperty prop1;
     prop1.height = 117.0f;

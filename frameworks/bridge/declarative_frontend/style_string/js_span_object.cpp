@@ -239,8 +239,7 @@ void JSFontSpan::GetFontStyle(const JSCallbackInfo& info)
     if (!fontSpan_->GetFont().fontStyle.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)?
-        JSVal(ToJSValue(static_cast<int32_t>(fontSpan_->GetFont().fontStyle.value()))) :
+    auto ret = JSRef<JSVal>::Make(
         JSVal(ToJSValue(std::to_string(static_cast<int32_t>(fontSpan_->GetFont().fontStyle.value())))));
     info.SetReturnValue(ret);
 }
@@ -253,8 +252,7 @@ void JSFontSpan::GetFontWeight(const JSCallbackInfo& info)
     if (!fontSpan_->GetFont().fontWeight.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)?
-        JSVal(ToJSValue(static_cast<int32_t>(fontSpan_->GetFont().fontWeight.value()))) :
+    auto ret = JSRef<JSVal>::Make(
         JSVal(ToJSValue(std::to_string(static_cast<int32_t>(fontSpan_->GetFont().fontWeight.value())))));
     info.SetReturnValue(ret);
 }
@@ -705,10 +703,9 @@ ImageSpanOptions JSImageAttachment::CreateImageOptions(const JSRef<JSObject>& ob
 {
     ImageSpanOptions options;
     auto container = Container::CurrentSafely();
-    CHECK_NULL_RETURN(container, options);
-    auto context = PipelineBase::GetCurrentContextSafely();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, options);
-    bool isCard = context->IsFormRender() && !container->IsDynamicRender();
+    bool isCard = context->IsFormRender() && container && !container->IsDynamicRender();
 
     std::string imageSrc;
     std::string bundleName;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "ui/view/pattern.h"
 #include "ui/view/ui_context.h"
 
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
@@ -30,15 +31,25 @@
 namespace OHOS::Ace::Kit {
 
 FrameNodeImpl::FrameNodeImpl(const RefPtr<AceNode>& node, const RefPtr<Pattern>& pattern)
-    : nodeRef_(node), pattern_(pattern)
+    : frameNode_(AceType::RawPtr(node)), pattern_(pattern)
 {
-    frameNode_ = AceType::RawPtr(node);
+    // Need temporary save strong pointer to AceNode in the FrameNodeImpl.
+    // That guaranty that AceNode will not be destroyed since there is strong pointer to it.
+    // Need to keep this temporary strong pointer until ownership of AceNode will be moved ace_engine
+    // with ViewStackProcessor::Push() call or FrameNodeImpl::AddChild() call or other calls like this.
+    // Call FrameNodeImpl::MoveOwnershipAndGetAceNode() when you need put AceNode to ace_engine.
+    PushAceNode(node);
 }
 
-FrameNodeImpl::FrameNodeImpl(const RefPtr<AceNode>& node) : nodeRef_(node)
+FrameNodeImpl::FrameNodeImpl(const RefPtr<AceNode>& node) : frameNode_(AceType::RawPtr(node))
 {
-    frameNode_ = AceType::RawPtr(node);
+    // The same reason of this call as above
+    PushAceNode(node);
 }
+
+// This constructor should be called for AceNode that already owned by ace_engine
+// so PushAceNode() is not called here.
+FrameNodeImpl::FrameNodeImpl(AceNode* node) : frameNode_(node) {}
 
 FrameNodeImpl::~FrameNodeImpl()
 {
@@ -48,7 +59,7 @@ FrameNodeImpl::~FrameNodeImpl()
 void FrameNodeImpl::Reset()
 {
     frameNode_ = nullptr;
-    nodeRef_.Reset();
+    nodeTempRef_.Reset();
     pattern_.Reset();
 }
 
@@ -64,19 +75,30 @@ void FrameNodeImpl::InitializePatternAndContext()
 
 void FrameNodeImpl::PushAceNode(const RefPtr<AceNode>& node)
 {
-    nodeRef_ = node;
+    nodeTempRef_ = node;
 }
 
 RefPtr<AceNode> FrameNodeImpl::PopAceNode()
 {
     RefPtr<AceNode> node;
-    node.Swap(nodeRef_);
+    node.Swap(nodeTempRef_);
     return node;
+}
+
+RefPtr<AceNode> FrameNodeImpl::MoveOwnershipAndGetAceNode()
+{
+    auto aceNode = PopAceNode();
+    if (aceNode) {
+        aceNode->SetKitNode(AceType::Claim(this));
+    } else {
+        aceNode = GetAceNode();
+    }
+    return aceNode;
 }
 
 RefPtr<AceNode> FrameNodeImpl::GetAceNode() const
 {
-    return nodeRef_;
+    return AceType::Claim(frameNode_);
 }
 
 AceNode* FrameNodeImpl::GetAceNodePtr()
@@ -175,9 +197,9 @@ void FrameNodeImpl::AddChild(const RefPtr<FrameNode>& child)
     CHECK_NULL_VOID(frameNode_);
     auto childNode = AceType::DynamicCast<FrameNodeImpl>(child);
     CHECK_NULL_VOID(childNode);
-    auto* childNodePtr = childNode->GetAceNodePtr();
+    auto childNodePtr = childNode->MoveOwnershipAndGetAceNode();
     CHECK_NULL_VOID(childNodePtr);
-    frameNode_->AddChild(AceType::Claim(childNodePtr));
+    frameNode_->AddChild(childNodePtr);
 }
 
 std::list<RefPtr<FrameNode>> FrameNodeImpl::GetChildren()
@@ -191,7 +213,8 @@ std::list<RefPtr<FrameNode>> FrameNodeImpl::GetChildren()
         }
         auto kitNode = node->GetKitNode();
         if (!kitNode) {
-            kitNode = MakeRefPtr<FrameNodeImpl>(node);
+            kitNode = MakeRefPtr<FrameNodeImpl>(AceType::RawPtr(node));
+            node->SetKitNode(kitNode);
         }
         children.emplace_back(kitNode);
     }
@@ -224,4 +247,43 @@ int32_t FrameNodeImpl::GetId() const
     CHECK_NULL_RETURN(frameNode_, -1);
     return frameNode_->GetId();
 }
+
+void FrameNodeImpl::SetOnNodeDestroyCallback(const std::function<void(RefPtr<FrameNode>)>& destroyCallback)
+{
+    CHECK_NULL_VOID(frameNode_);
+    auto frameNode = frameNode_;
+    auto onDestroyCallback = [frameNode, destroyCallback](int32_t nodeId) {
+        RefPtr<FrameNode> node = frameNode->GetKitNode();
+        if (!node) {
+            node = AceType::MakeRefPtr<FrameNodeImpl>(frameNode);
+        }
+        destroyCallback(node);
+    };
+    frameNode_->SetOnNodeDestroyCallback(std::move(onDestroyCallback));
+}
+
+void FrameNodeImpl::SetConfigurationUpdateCallback(
+    const std::function<void(const ConfigurationChange& configurationChange)>&& callback)
+{
+    frameNode_->SetConfigurationModeUpdateCallback(std::move(callback));
+}
+
+void FrameNodeImpl::AddExtraCustomProperty(const std::string& key, void* extraData)
+{
+    CHECK_NULL_VOID(frameNode_);
+    frameNode_->AddExtraCustomProperty(key, extraData);
+}
+
+void* FrameNodeImpl::GetExtraCustomProperty(const std::string& key) const
+{
+    CHECK_NULL_RETURN(frameNode_, nullptr);
+    return frameNode_->GetExtraCustomProperty(key);
+}
+
+void FrameNodeImpl::SetClipEdge(bool isClip)
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetClipEdge(frameNode_, isClip);
+}
+
 } // namespace OHOS::Ace::Kit

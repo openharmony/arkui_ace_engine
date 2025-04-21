@@ -331,7 +331,8 @@ void CircleDotIndicatorModifier::PaintContent(DrawingContext& context, ContentPr
 {
     RSCanvas& canvas = context.canvas;
     auto totalCount = contentProperty.vectorBlackPointAngle.size();
-    for (size_t i = 0; i < totalCount; ++i) {
+    auto totalCountRadius = contentProperty.vectorBlackPointRadius.size();
+    for (size_t i = 0; i < totalCount && i < totalCountRadius; ++i) {
         float itemAngle = contentProperty.vectorBlackPointAngle[i];
         float itemRadius = contentProperty.vectorBlackPointRadius[i];
         PaintUnselectedIndicator(canvas, itemAngle, itemRadius, contentProperty, LinearColor(unselectedColor_->Get()));

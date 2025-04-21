@@ -25,15 +25,9 @@
 
 #include "base/image/image_source.h"
 #include "base/thread/cancelable_callback.h"
-#ifndef USE_ROSEN_DRAWING
-#include "core/components_ng/image_provider/adapter/skia_image_data.h"
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
-#include "core/components_ng/render/adapter/skia_image.h"
-#else
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
-#include "core/components_ng/render/adapter/pixelmap_image.h"
-#include "core/components_ng/render/adapter/rosen/drawing_image.h"
-#endif
+#include "core/components_ng/render/adapter/drawing_image.h"
 
 namespace OHOS::Ace {
 class Animator;
@@ -54,13 +48,8 @@ public:
         AIImageQuality imageQuality = AIImageQuality::NONE;
     };
 
-#ifndef USE_ROSEN_DRAWING
-    static RefPtr<CanvasImage> Create(
-        const RefPtr<SkiaImageData>& data, const ResizeParam& size, const std::string& url);
-#else
     static RefPtr<CanvasImage> Create(
         const RefPtr<DrawingImageData>& data, const ResizeParam& size, const std::string& url);
-#endif
     void ControlAnimation(bool play) override;
     void SetRedrawCallback(std::function<void()>&& callback) override
     {
@@ -119,17 +108,6 @@ private:
 
 // ================================================================================================
 
-#ifndef USE_ROSEN_DRAWING
-class AnimatedSkImage : public AnimatedImage, public SkiaImage {
-    DECLARE_ACE_TYPE(AnimatedSkImage, AnimatedImage, SkiaImage)
-public:
-    AnimatedSkImage(std::unique_ptr<SkCodec> codec, std::string url)
-        : AnimatedImage(codec, std::move(url)), codec_(std::move(codec))
-    {}
-    ~AnimatedSkImage() override = default;
-
-    sk_sp<SkImage> GetImage() const override;
-#else
 class AnimatedRSImage : public AnimatedImage, public DrawingImage {
     DECLARE_ACE_TYPE(AnimatedRSImage, AnimatedImage, DrawingImage)
 public:
@@ -149,7 +127,6 @@ public:
     {
         return currentFrame_ ? currentFrame_->GetHeight() : 0;
     }
-#endif
 
     RefPtr<CanvasImage> Clone() override
     {
@@ -163,19 +140,11 @@ private:
     RefPtr<CanvasImage> GetCachedFrameImpl(const std::string& key) override;
     void UseCachedFrame(RefPtr<CanvasImage>&& image) override;
 
-#ifndef USE_ROSEN_DRAWING
-    SkBitmap requiredFrame_;
-    std::unique_ptr<SkCodec> codec_;
-    sk_sp<SkImage> currentFrame_;
-
-    ACE_DISALLOW_COPY_AND_MOVE(AnimatedSkImage);
-#else
     RSBitmap requiredFrame_;
     std::unique_ptr<SkCodec> codec_;
     std::shared_ptr<RSImage> currentFrame_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AnimatedRSImage);
-#endif
 };
 
 // ================================================================================================

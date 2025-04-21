@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#include "bridge/declarative_frontend/engine/functions/js_accessibility_function.h"
+#include "bridge/declarative_frontend/jsview/js_accessibility.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "frameworks/base/log/ace_scoring_log.h"
-#include "bridge/declarative_frontend/jsview/js_accessibility.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -350,5 +350,22 @@ void JSViewAbstract::JsAccessibilityFocusDrawLevel(const JSCallbackInfo& info)
         drawLevel = arg->ToNumber<int32_t>();
     } while (false);
     ViewAbstractModel::GetInstance()->SetAccessibilityFocusDrawLevel(drawLevel);
+}
+
+void JSViewAbstract::JsOnAccessibilityActionIntercept(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->SetOnAccessibilityActionIntercept(nullptr);
+        return;
+    }
+    auto jsInterceptFunc = AceType::MakeRefPtr<JsAccessibilityActionInterceptFunction>(JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onAccessibilityActionIntercept = [execCtx = info.GetExecutionContext(), func = std::move(jsInterceptFunc),
+        node = frameNode](AccessibilityInterfaceAction action) -> AccessibilityActionInterceptResult {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, AccessibilityActionInterceptResult::ACTION_CONTINUE);
+        ACE_SCORING_EVENT("onAccessibilityActionIntercept");
+        return func->Execute(action);
+    };
+    ViewAbstractModel::GetInstance()->SetOnAccessibilityActionIntercept(std::move(onAccessibilityActionIntercept));
 }
 }

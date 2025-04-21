@@ -66,6 +66,8 @@ public:
         RefPtr<NG::RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve);
     static void PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
     static void ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
+    // need to reset the attribute of arkui node after Reverse in case of attribute inconsistent
+    static void ReverseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
     static void ExecuteWithoutAnimation(const PropertyCallback& callback);
 
     static std::shared_ptr<AnimationUtils::InteractiveAnimation> CreateInteractiveAnimation(

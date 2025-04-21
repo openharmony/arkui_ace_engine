@@ -80,7 +80,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.size',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -95,7 +94,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.size',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -113,7 +111,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.enabled',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -128,7 +125,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.enabled',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -146,7 +142,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.activated',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -161,7 +156,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.activated',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -179,7 +173,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.src',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -195,7 +188,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.src',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -211,8 +203,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.src',
           toggleClickType: ToggleClick.Open
         },
-        
-
       })
 
       done();
@@ -227,7 +217,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.src',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -243,7 +232,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.src',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -259,7 +247,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.src',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -277,7 +264,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.size.width',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       await sliderDrag({
@@ -286,7 +272,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.size.width',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -303,7 +288,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.size.height',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       await sliderDrag({
@@ -312,7 +296,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.size.height',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -330,7 +313,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.fillColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -346,7 +328,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.fillColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -362,8 +343,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.fillColor',
           toggleClickType: ToggleClick.Open
         },
-        
-
       })
 
       done();
@@ -378,7 +357,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.fillColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -394,7 +372,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.fillColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -410,7 +387,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.fillColor',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -429,7 +405,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.activatedFillColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -445,7 +420,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.activatedFillColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -461,8 +435,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.activatedFillColor',
           toggleClickType: ToggleClick.Open
         },
-        
-
       })
 
       done();
@@ -477,7 +449,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.activatedFillColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -493,7 +464,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.activatedFillColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -509,7 +479,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.prefixIcon.activatedFillColor',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -528,7 +497,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.text',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -543,7 +511,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.text',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -561,7 +528,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.fontSize',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -576,7 +542,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.fontSize',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -591,7 +556,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.fontSize',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -609,7 +573,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.fontColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -625,7 +588,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.fontColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -641,8 +603,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.fontColor',
           toggleClickType: ToggleClick.Open
         },
-        
-
       })
 
       done();
@@ -657,7 +617,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.fontColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -673,7 +632,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.fontColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -689,7 +647,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.fontColor',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -708,7 +665,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.activatedFontColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -724,7 +680,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.activatedFontColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -740,8 +695,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.activatedFontColor',
           toggleClickType: ToggleClick.Open
         },
-        
-
       })
 
       done();
@@ -756,7 +709,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.activatedFontColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -772,7 +724,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.activatedFontColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -788,7 +739,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.activatedFontColor',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -806,7 +756,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.labelMargin.left',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       await sliderDrag({
@@ -815,7 +764,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.labelMargin.left',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -832,7 +780,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.labelMargin.right',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       await sliderDrag({
@@ -841,7 +788,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.labelMargin.right',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -858,7 +804,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.localizedLabelMargin.start.value',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       await sliderDrag({
@@ -867,7 +812,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.localizedLabelMargin.start.value',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -885,7 +829,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.localizedLabelMargin.start.unit',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -900,7 +843,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.localizedLabelMargin.start.unit',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -915,7 +857,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.localizedLabelMargin.start.unit',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -930,7 +871,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.localizedLabelMargin.start.unit',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -947,7 +887,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.localizedLabelMargin.end.value',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       await sliderDrag({
@@ -956,7 +895,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.localizedLabelMargin.end.value',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -974,7 +912,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.localizedLabelMargin.end.unit',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -989,7 +926,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.localizedLabelMargin.end.unit',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1004,7 +940,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.localizedLabelMargin.end.unit',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1019,7 +954,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.label.localizedLabelMargin.end.unit',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -1037,7 +971,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.src',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1053,7 +986,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.src',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1069,8 +1001,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.src',
           toggleClickType: ToggleClick.Open
         },
-        
-
       })
 
       done();
@@ -1085,7 +1015,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.src',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1101,7 +1030,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.src',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1117,7 +1045,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.src',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -1135,7 +1062,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.size.width',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       await sliderDrag({
@@ -1144,7 +1070,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.size.width',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -1161,7 +1086,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.size.height',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       await sliderDrag({
@@ -1170,7 +1094,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.size.height',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -1188,7 +1111,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.fillColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1204,7 +1126,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.fillColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1220,8 +1141,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.fillColor',
           toggleClickType: ToggleClick.Open
         },
-        
-
       })
 
       done();
@@ -1236,7 +1155,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.fillColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1252,7 +1170,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.fillColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1268,7 +1185,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.fillColor',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -1287,7 +1203,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.activatedFillColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1303,7 +1218,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.activatedFillColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1319,8 +1233,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.activatedFillColor',
           toggleClickType: ToggleClick.Open
         },
-        
-
       })
 
       done();
@@ -1335,7 +1247,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.activatedFillColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1351,7 +1262,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.activatedFillColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1367,7 +1277,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.suffixIcon.activatedFillColor',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -1386,7 +1295,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.backgroundColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1402,7 +1310,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.backgroundColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1418,8 +1325,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.backgroundColor',
           toggleClickType: ToggleClick.Open
         },
-        
-
       })
 
       done();
@@ -1434,7 +1339,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.backgroundColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1450,7 +1354,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.backgroundColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1466,7 +1369,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.backgroundColor',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -1486,7 +1388,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.activatedBackgroundColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1502,7 +1403,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.activatedBackgroundColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1518,8 +1418,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.activatedBackgroundColor',
           toggleClickType: ToggleClick.Open
         },
-        
-
       })
 
       done();
@@ -1534,7 +1432,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.activatedBackgroundColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1550,7 +1447,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.activatedBackgroundColor',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1566,7 +1462,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.activatedBackgroundColor',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -1584,7 +1479,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.borderRadius',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       await sliderDrag({
@@ -1593,7 +1487,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.borderRadius',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -1611,7 +1504,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.allowClose',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1626,7 +1518,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.allowClose',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -1644,7 +1535,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.direction',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1659,7 +1549,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.direction',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1673,7 +1562,6 @@ export default function ChipBootcampTest() {
           toggleClickObj: 'options.direction',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();

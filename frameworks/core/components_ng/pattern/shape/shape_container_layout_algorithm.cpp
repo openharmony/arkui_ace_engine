@@ -37,8 +37,7 @@ std::optional<SizeF> ShapeContainerLayoutAlgorithm::MeasureContent(
     // When the width and height are both not specified, shape size is determined by viewport's size.
     if (contentConstraint.selfIdealSize.IsNull()) {
         if (GreatNotEqual(portWidth, 0.0) && GreatNotEqual(portHeight, 0.0)) {
-            newSize = contentConstraint.Constrain(SizeF(portWidth, portHeight));
-            return newSize;
+            return contentConstraint.Constrain(SizeF(portWidth, portHeight));
         }
     }
 
@@ -99,12 +98,8 @@ SizeF ShapeContainerLayoutAlgorithm::GetChildrenSize(LayoutWrapper* layoutWrappe
                 heightPercentReference).value_or(0.0f);
         }
 
-        if (maxWidth < childSize.Width() + offsetX) {
-            maxWidth = childSize.Width() + offsetX;
-        }
-        if (maxHeight < childSize.Height() + offsetY) {
-            maxHeight = childSize.Height() + offsetY;
-        }
+        maxWidth = std::max(maxWidth, childSize.Width() + offsetX);
+        maxHeight = std::max(maxHeight, childSize.Height() + offsetY);
     }
     childFrame.SetSizeT(SizeF { maxWidth, maxHeight });
     return childFrame;

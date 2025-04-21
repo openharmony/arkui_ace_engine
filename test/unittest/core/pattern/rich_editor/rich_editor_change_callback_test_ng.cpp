@@ -666,7 +666,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest010, TestSize.Lev
     auto& spanResult = onWillReplacedSpans[0];
     EXPECT_EQ(spanResult.spanIndex_, 0);
     EXPECT_EQ(spanResult.value_, u"hhello11");
-    EXPECT_EQ(spanResult.fontSize_, TEXT_STYLE_1.fontSize_.ConvertToPx());
+    EXPECT_EQ(spanResult.fontSize_, TEXT_STYLE_1.fontSize_.value.ConvertToPx());
     EXPECT_EQ(spanResult.offsetInSpan_, 1);
     EXPECT_EQ(spanResult.eraseLength_, 6);
 
@@ -716,7 +716,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest011, TestSize.Lev
     auto& spanResult = onWillReplacedSpans[0];
     EXPECT_EQ(spanResult.spanIndex_, 0);
     EXPECT_EQ(spanResult.value_, u"hhello1");
-    EXPECT_EQ(spanResult.fontSize_, TEXT_STYLE_1.fontSize_.ConvertToPx());
+    EXPECT_EQ(spanResult.fontSize_, TEXT_STYLE_1.fontSize_.value.ConvertToPx());
     EXPECT_EQ(spanResult.offsetInSpan_, 1);
     EXPECT_EQ(spanResult.eraseLength_, 6);
 

@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace Ace {
 #ifdef ARKUI_WEARABLE
-constexpr int32_t PROCESS_WAIT_TIME = 50;
+constexpr int32_t PROCESS_WAIT_TIME = 85;
 #else
 constexpr int32_t PROCESS_WAIT_TIME = 20;
 #endif

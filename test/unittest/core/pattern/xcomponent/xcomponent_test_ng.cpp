@@ -543,7 +543,7 @@ HWTEST_F(XComponentTestNg, XComponentKeyEventTest010, TestSize.Level1)
      * @tc.steps: step4. call focusHub's focus & blur event
      * @tc.expected: the callbacks registered in step3 are called
      */
-    focusHub->onFocusInternal_();
+    focusHub->onFocusInternal_(focusHub->focusReason_);
     EXPECT_TRUE(isFocus);
     focusHub->onBlurInternal_();
     EXPECT_FALSE(isFocus);

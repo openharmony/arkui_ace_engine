@@ -1878,6 +1878,6 @@ export default function TextTimer2() {
 
     })
 
-    })
+  })
 
 }

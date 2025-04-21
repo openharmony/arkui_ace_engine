@@ -74,6 +74,9 @@ void ListLayoutAlgorithm::ReviseSpace(const RefPtr<ListLayoutProperty>& listLayo
             spaceWidth_ = std::max(spaceWidth_, static_cast<float>(Round(dividerSpace.value())));
         }
     }
+    if (isRoundingMode_) {
+        spaceWidth_ = Round(spaceWidth_);
+    }
     spaceWidth_ += chainInterval_;
 }
 
@@ -1283,7 +1286,7 @@ void ListLayoutAlgorithm::ReMeasureListItemGroup(LayoutWrapper* layoutWrapper, b
         }
         return;
     }
-    if (isNeedCheckOffset_ && GreatNotEqual(std::abs(currentDelta_), contentMainSize_ * 2.0f)) {
+    if (LessNotEqual(itemPosition_.begin()->second.endPos, currentOffset_)) {
         for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); pos++) {
             float chainOffset = GetChainOffset(pos->first);
             if (LessOrEqual(pos->second.endPos + chainOffset, startMainPos_)) {

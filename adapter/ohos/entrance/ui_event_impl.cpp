@@ -19,9 +19,11 @@
 
 #include "core/common/container.h"
 #include "core/common/recorder/event_controller.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/inspector_tree_collector.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/base/simplified_inspector.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace {
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_RegisterUIEventObserver(
@@ -60,7 +62,6 @@ std::string GetWebLanguageByNodeId(int32_t nodeId)
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(const TreeParams& params, std::string& tree)
 {
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "GetSimplifiedInspectorTree.");
     auto containerId = Recorder::EventRecorder::Get().GetContainerId(params.inspectorType == InspectorPageType::FOCUS);
     auto container = Container::GetContainer(containerId);
     if (!container) {
@@ -83,7 +84,6 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(const TreeP
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTreeAsync(
     const TreeParams& params, OnInspectorTreeResult&& callback)
 {
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "GetSimplifiedInspectorTreeAsync.");
     auto containerId = Recorder::EventRecorder::Get().GetContainerId(params.inspectorType == InspectorPageType::FOCUS);
     auto container = Container::GetContainer(containerId);
     if (!container) {

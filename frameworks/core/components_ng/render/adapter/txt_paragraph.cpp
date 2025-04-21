@@ -107,11 +107,11 @@ void TxtParagraph::PopStyle()
 void TxtParagraph::AddText(const std::u16string& text)
 {
     ACE_TEXT_SCOPED_TRACE("TxtParagraph::AddText:%d", static_cast<uint32_t>(text.length()));
+    CHECK_NULL_VOID(!hasExternalParagraph_);
     if (!builder_) {
         CreateBuilder();
     }
     text_ += text;
-    CHECK_NULL_VOID(!hasExternalParagraph_);
     builder_->AppendText(text);
 }
 

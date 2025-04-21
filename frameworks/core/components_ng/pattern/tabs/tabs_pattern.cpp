@@ -100,7 +100,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         (*onChangeEvent_).swap(changeEvent);
     } else {
         onChangeEvent_ = std::make_shared<ChangeEventWithPreIndex>(changeEvent);
-        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+        auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->AddOnChangeEventWithPreIndex(onChangeEvent_);
     }
@@ -196,7 +196,7 @@ void TabsPattern::SetAnimationStartEvent(AnimationStartEvent&& event)
         CHECK_NULL_VOID(tabsNode);
         auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
         CHECK_NULL_VOID(swiperNode);
-        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+        auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
         animationStartEvent_ = std::make_shared<AnimationStartEvent>(std::move(event));
         eventHub->AddAnimationStartEvent(animationStartEvent_);
@@ -214,7 +214,7 @@ void TabsPattern::SetAnimationEndEvent(AnimationEndEvent&& event)
         CHECK_NULL_VOID(tabsNode);
         auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
         CHECK_NULL_VOID(swiperNode);
-        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+        auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
         animationEndEvent_ = std::make_shared<AnimationEndEvent>(std::move(event));
         eventHub->AddAnimationEndEvent(animationEndEvent_);
@@ -239,7 +239,7 @@ void TabsPattern::SetOnSelectedEvent(std::function<void(const BaseEventInfo*)>&&
         CHECK_NULL_VOID(tabsNode);
         auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
         CHECK_NULL_VOID(swiperNode);
-        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+        auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
         selectedEvent_ = std::make_shared<ChangeEvent>(std::move(selectedEvent));
         eventHub->AddOnSlectedEvent(selectedEvent_);
@@ -359,7 +359,7 @@ void TabsPattern::SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)
         (*onIndexChangeEvent_).swap(changeEvent);
     } else {
         onIndexChangeEvent_ = std::make_shared<ChangeEvent>(changeEvent);
-        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+        auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->AddOnChangeEvent(onIndexChangeEvent_);
     }
@@ -578,7 +578,6 @@ void TabsPattern::InitAccessibilityZIndex()
     CHECK_NULL_VOID(tabsLayoutProperty);
     BarPosition barPosition = tabsLayoutProperty->GetTabBarPositionValue(BarPosition::START);
     if (barPosition != barPosition_) {
-        barPosition_ = barPosition;
         auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
         CHECK_NULL_VOID(swiperNode);
         auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
@@ -594,6 +593,7 @@ void TabsPattern::InitAccessibilityZIndex()
             swiperAccessibilityProperty->SetAccessibilityZIndex(0);
             tabBarAccessibilityProperty->SetAccessibilityZIndex(1);
         }
+        barPosition_ = barPosition;
     }
 }
 
@@ -786,7 +786,7 @@ void TabsPattern::SetOnUnselectedEvent(std::function<void(const BaseEventInfo*)>
         CHECK_NULL_VOID(tabsNode);
         auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
         CHECK_NULL_VOID(swiperNode);
-        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+        auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
         unselectedEvent_ = std::make_shared<ChangeEvent>(std::move(unselectedEvent));
         eventHub->AddOnUnselectedEvent(unselectedEvent_);
@@ -795,24 +795,25 @@ void TabsPattern::SetOnUnselectedEvent(std::function<void(const BaseEventInfo*)>
 
 void TabsPattern::ReportComponentChangeEvent(int32_t currentIndex)
 {
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     if (!UiSessionManager::GetInstance()->IsHasReportObject()) {
         return;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto params = InspectorJsonUtil::CreateObject();
+    auto params = JsonUtil::Create();
     CHECK_NULL_VOID(params);
     params->Put("index", currentIndex);
-    auto json = InspectorJsonUtil::Create();
+    auto json = JsonUtil::Create();
     CHECK_NULL_VOID(json);
     json->Put("cmd", "onTabBarClick");
     json->Put("params", params);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
     auto nodeId = host->GetId();
-    TAG_LOGI(AceLogTag::ACE_TABS, "Report onTabBarClick event, the nodeId:%{public}d, details:%{public}s", nodeId,
-        json->ToString().c_str());
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", json);
-#endif
+    result->Put("nodeId", nodeId);
+    result->Put("event", json);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
 }
 
 bool TabsPattern::GetTargetIndex(const std::string& command, int32_t& targetIndex)

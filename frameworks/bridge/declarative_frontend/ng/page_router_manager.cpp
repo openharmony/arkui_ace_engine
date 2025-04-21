@@ -1556,7 +1556,7 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
         TAG_LOGE(AceLogTag::ACE_ROUTER, "Update RootComponent Failed or LoadNamedRouter Failed");
 #if !defined(PREVIEW)
         if (!target.isNamedRouterMode && target.url.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
-            ThrowError("Load Page Failed: " + target.url, ERROR_CODE_LOAD_PAGE_ERROR);
+            ThrowError("Load Page Failed: " + target.url, ERROR_CODE_INTERNAL_ERROR);
         }
 #endif
         pageRouterStack_.pop_back();

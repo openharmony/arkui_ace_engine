@@ -52,8 +52,11 @@ void ThreadCheckerTest::TearDownTestSuite()
 HWTEST_F(ThreadCheckerTest, ThreadCheckerGetThread, TestSize.Level1)
 {
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    EXPECT_FALSE(CheckThread(TaskExecutor::TaskType::PLATFORM));
     EXPECT_TRUE(CheckThread(TaskExecutor::TaskType::UI));
+    RefPtr<Container> conainer = Container::Current();
+    conainer->SetUseNewPipeline();
+    EXPECT_EQ(Container::IsCurrentUseNewPipeline(), true);
     EXPECT_TRUE(CheckThread(TaskExecutor::TaskType::JS));
-    EXPECT_FALSE(CheckThread(TaskExecutor::TaskType::UNKNOWN));
 }
 } // namespace OHOS::Ace

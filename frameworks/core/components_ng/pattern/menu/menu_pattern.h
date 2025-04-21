@@ -303,7 +303,13 @@ public:
         needHideAfterTouch_ = needHideAfterTouch;
     }
 
-    void HideMenu(bool isMenuOnTouch = false, OffsetF position = OffsetF()) const;
+    void HideMenu(const HideMenuType& reason)
+    {
+        HideMenu(false, OffsetF(), reason);
+    }
+
+    void HideMenu(bool isMenuOnTouch = false, OffsetF position = OffsetF(),
+        const HideMenuType& reason = HideMenuType::NORMAL) const;
 
     bool HideStackExpandMenu(const OffsetF& position) const;
 

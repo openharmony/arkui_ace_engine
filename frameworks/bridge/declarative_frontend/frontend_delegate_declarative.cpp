@@ -17,6 +17,7 @@
 
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "core/components/toast/toast_component.h"
@@ -27,6 +28,7 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "frameworks/core/common/ace_engine.h"
 #include "jsview/js_view_abstract.h"
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -186,9 +188,14 @@ UIContentErrorCode FrontendDelegateDeclarative::RunPage(
         CHECK_NULL_RETURN(pageRouterManager_, UIContentErrorCode::NULL_PAGE_ROUTER);
         pageRouterManager_->SetManifestParser(manifestParser_);
         taskExecutor_->PostTask(
-            [weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params, isNamedRouter]() {
+            [weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params, isNamedRouter,
+                weak = AceType::WeakClaim(this)]() {
                 auto pageRouterManager = weakPtr.Upgrade();
                 CHECK_NULL_VOID(pageRouterManager);
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    NG::AppBarView::BuildAppbar(delegate->GetPipelineContext());
+                }
                 if (isNamedRouter) {
                     pageRouterManager->RunPageByNamedRouter(url, params);
                 } else {
@@ -1797,7 +1804,11 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
         .blurStyleOption = dialogAttr.blurStyleOption,
-        .effectOption = dialogAttr.effectOption
+        .effectOption = dialogAttr.effectOption,
+        .onDidAppear = dialogAttr.onDidAppear,
+        .onDidDisappear = dialogAttr.onDidDisappear,
+        .onWillAppear = dialogAttr.onWillAppear,
+        .onWillDisappear = dialogAttr.onWillDisappear
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {

@@ -314,7 +314,7 @@ HWTEST_F(ScrollableTestNg, GetEventDumpInfo001, TestSize.Level1)
     frameNode->eventHub_ = eventHub;
     scrollablePattern->frameNode_ = frameNode;
     scrollablePattern->GetEventDumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[2], "hasOnWillScroll: false\n");
+    EXPECT_EQ(DumpLog::GetInstance().description_[4], "hasOnWillScroll: false\n");
 }
 
 /**
@@ -335,7 +335,7 @@ HWTEST_F(ScrollableTestNg, GetEventDumpInfo002, TestSize.Level1)
     frameNode->eventHub_ = eventHub;
     scrollablePattern->frameNode_ = frameNode;
     scrollablePattern->GetEventDumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[2], "hasOnWillScroll: false\n");
+    EXPECT_EQ(DumpLog::GetInstance().description_[4], "hasOnWillScroll: false\n");
 }
 
 /**

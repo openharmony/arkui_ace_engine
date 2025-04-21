@@ -36,6 +36,8 @@ public:
     void CloseDialog(RefPtr<FrameNode>& dialogNode) override;
 
     void ShowMenu(const int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode>& menu) override;
+
+    NG::SafeAreaInsets GetSafeAreaInsets(const RefPtr<FrameNode>& frameNode, bool useCurrentWindow = false) override;
 private:
     NG::OverlayManager* overlayManager_ = nullptr;
 };

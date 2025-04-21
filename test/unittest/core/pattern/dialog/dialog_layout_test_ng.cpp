@@ -420,7 +420,7 @@ HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithm002, TestSize.Level1)
      */
     dialogLayoutAlgorithm.Measure(layoutWrapper.rawPtr_);
     dialogLayoutAlgorithm.Layout(layoutWrapper.rawPtr_);
-    EXPECT_FALSE(property->GetIsScenceBoardDialog().value_or(false));
+    EXPECT_FALSE(property->GetIsSceneBoardDialog().value_or(false));
 }
 
 /**
@@ -1058,7 +1058,7 @@ HWTEST_F(DialogLayoutTestNg, DialogViewTest001, TestSize.Level1)
         .backgroundColor = Color::TRANSPARENT,
         .alignment = DialogAlignment::DEFAULT,
         .hoverModeArea = HoverModeAreaType::TOP_SCREEN,
-        .isScenceBoardDialog = true,
+        .isSceneBoardDialog = true,
         .maskTransitionEffect = maskTransitionEffect,
         .dialogTransitionEffect = dialogTransitionEffect };
     NG::BorderRadiusProperty borderRadius;
@@ -1465,7 +1465,7 @@ HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmSetSubWindowHotarea, TestSize.
     auto dialogProp = dialogWithCustom->GetLayoutProperty<DialogLayoutProperty>();
     ASSERT_NE(dialogProp, nullptr);
     dialogProp->propShowInSubWindow_ = true;
-    dialogProp->propIsScenceBoardDialog_ = true;
+    dialogProp->propIsSceneBoardDialog_ = true;
     dialogLayoutAlgorithm.isUIExtensionSubWindow_ = true;
     dialogLayoutAlgorithm.isModal_ = false;
     SizeF childSize = SizeT(10.0f, 10.0f);
@@ -1476,7 +1476,7 @@ HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmSetSubWindowHotarea, TestSize.
      */
     dialogLayoutAlgorithm.SetSubWindowHotarea(dialogProp, childSize, selfSize, 0);
     EXPECT_TRUE(dialogProp->GetShowInSubWindowValue(false));
-    EXPECT_TRUE(dialogProp->GetIsScenceBoardDialog().value_or(false));
+    EXPECT_TRUE(dialogProp->GetIsSceneBoardDialog().value_or(false));
 }
 
 /**

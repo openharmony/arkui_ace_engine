@@ -1352,4 +1352,69 @@ HWTEST_F(EventRecorderTest, InspectorTreeCollectorTest002, TestSize.Level1)
     collector.UpdateTaskNum(2);
     EXPECT_EQ(collector.taskNum_, 2);
 }
+
+/**
+ * @tc.name: AddApiTest001
+ * @tc.desc: FillExtraTextIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, AddApiTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    Recorder::EventParamsBuilder builder;
+    string value = "";
+    builder.params_->emplace(KEY_TEXT, value);
+    auto pageNode = CreatePageNode("pages/Index");
+    builder.eventType_ = Recorder::EventType::CLICK;
+    builder.SetHost(pageNode);
+
+    /**
+     * @tc.steps: step2. set different variables to meet the conditional values and test OnWebEvent.
+     */
+    EventRecorder::Get().globalSwitch_[10] = true;
+    EventRecorder::Get().eventSwitch_[10] = true;
+    builder.SetHost(pageNode);
+
+    /**
+     * @tc.steps: step2. set the different variables to test.
+     */
+    auto pageNode2 = CreatePageNode("pages/Index2");
+    pageNode->AddChild(pageNode2, 1, false);
+    builder.SetHost(pageNode);
+    EXPECT_EQ(builder.params_->empty(), false);
+}
+
+/**
+ * @tc.name: AddApiTest002
+ * @tc.desc: SetHostOnWebEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, AddApiTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    Recorder::EventParamsBuilder builder;
+    auto pageNode = CreatePageNode("pages/Index");
+    EventRecorder::Get().globalSwitch_[6] = true;
+    EventRecorder::Get().eventSwitch_[6] = true;
+
+    /**
+     * @tc.steps: step2. test SetHost.
+     */
+    builder.SetHost(pageNode);
+
+    /**
+     * @tc.steps: step3. set the variables to meet the conditional values and test OnWebEvent.
+     */
+    auto pageNode2 = CreatePageNode("pages/Index");
+    vector<std::string> params;
+    Recorder::EventRecorder::Get().OnWebEvent(pageNode2, params);
+    vector<std::string> params2 = {"df", "rfds", "fd"};
+    EventRecorder::Get().globalSwitch_[7] = true;
+    Recorder::EventRecorder::Get().OnWebEvent(pageNode2, params2);
+    EXPECT_EQ(builder.params_->empty(), false);
+}
 } // namespace OHOS::Ace

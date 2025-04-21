@@ -36,6 +36,7 @@ build_component_ng("ui_extension_pattern_ng") {
     "ui_extension_component/session_wrapper_impl.cpp",
     "ui_extension_component/ui_extension_pattern.cpp",
     "ui_extension_component/ui_extension_proxy.cpp",
+    "ui_extension_container_handler.cpp",
     "ui_extension_manager.cpp",
     "ui_extension_model_ng.cpp",
   ]

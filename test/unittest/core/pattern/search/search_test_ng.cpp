@@ -1853,7 +1853,7 @@ HWTEST_F(SearchTestNg, Pattern013, TestSize.Level1)
     /**
      * @tc.step: step2. call onFocusInternal_().
      */
-    focusHub->onFocusInternal_();
+    focusHub->onFocusInternal_(focusHub->focusReason_);
     /**
      * @tc.step: step3. call onBlurInternal_().
      * @tc.expected: selectionMode_ = SelectionMode::NONE.

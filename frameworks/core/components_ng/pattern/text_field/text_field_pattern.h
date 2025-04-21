@@ -473,7 +473,7 @@ public:
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
     void OnHandleAreaChanged() override;
-    void OnVisibleChange(bool isVisible) override;
+
     void HandleCounterBorder();
 
     int32_t GetCaretIndex() const override
@@ -919,7 +919,7 @@ public:
     std::string TextInputActionToString() const;
     std::string AutoCapTypeToString() const;
     std::string TextContentTypeToString() const;
-    std::string GetPlaceholderFont() const;
+    virtual std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
     void InitTheme();
     std::string GetTextColor() const;
@@ -1593,13 +1593,12 @@ protected:
 
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
-    void OnTextGenstureSelectionEnd(const TouchLocationInfo& locationInfo) override;
+    void OnTextGestureSelectionEnd(const TouchLocationInfo& locationInfo) override;
     void DoTextSelectionTouchCancel() override;
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
     virtual bool IsNeedProcessAutoFill();
-    void UpdatePasswordIconColor(const Color& color);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     RefPtr<ContentController> contentController_;
@@ -1677,6 +1676,7 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void StartVibratorByLongPress();
+    bool IsInResponseArea(const Offset& location);
     void HandleLongPress(GestureEvent& info);
     bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
@@ -2074,7 +2074,7 @@ private:
     bool isPasswordSymbol_ = true;
     bool isEnableHapticFeedback_ = true;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
-    RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
+    WeakPtr<AIWriteAdapter> aiWriteAdapter_;
     std::optional<Dimension> adaptFontSize_;
     uint32_t longPressFingerNum_ = 0;
     ContentScroller contentScroller_;

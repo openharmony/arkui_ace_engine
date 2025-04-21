@@ -141,7 +141,7 @@ void MenuItemModelNG::SetSelected(bool isSelected)
     auto pattern = frameNode->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(isSelected);
-    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
 }
@@ -176,7 +176,7 @@ void MenuItemModelNG::SetOnChange(std::function<void(bool)>&& onChange)
 void MenuItemModelNG::SetOnChange(FrameNode* frameNode, std::function<void(bool)>&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -260,7 +260,7 @@ void MenuItemModelNG::SetSelected(FrameNode* frameNode, bool isSelected)
     auto pattern = frameNode->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(isSelected);
-    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
 }

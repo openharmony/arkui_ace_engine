@@ -21,10 +21,12 @@
 
 #include "base/thread/task_executor.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container_scope.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Kit {
+constexpr int32_t API_VERSION_LIMIT = 1000;
 
 RefPtr<UIContext> UIContext::Current()
 {
@@ -99,4 +101,27 @@ RefPtr<OverlayManager> UIContextImpl::GetOverlayManager()
     overlayManager_ = AceType::MakeRefPtr<OverlayManagerImpl>(context_);
     return overlayManager_;
 }
+
+void UIContextImpl::AddAfterLayoutTask(Task&& task, bool isFlushInImplicitAnimationTask)
+{
+    CHECK_NULL_VOID(context_);
+    context_->AddAfterLayoutTask(std::move(task), isFlushInImplicitAnimationTask);
+}
+
+void UIContextImpl::RequestFrame()
+{
+    CHECK_NULL_VOID(context_);
+    context_->RequestFrame();
+}
+
+int32_t UIContextImpl::GetApiTargetVersion()
+{
+    return AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_VERSION_LIMIT;
+}
+
+bool UIContextImpl::GreatOrEqualTargetAPIVersion(int32_t version)
+{
+    return AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(static_cast<PlatformVersion>(version));
+}
+
 } // namespace OHOS::Ace::Kit

@@ -31,7 +31,6 @@ constexpr int32_t ERROR_CODE_INTERNAL_ERROR = 100001;    // Internal error.
 constexpr int32_t ERROR_CODE_URI_ERROR = 100002;         // Uri error.
 constexpr int32_t ERROR_CODE_PAGE_STACK_FULL = 100003;   // The pages are pushed too much.
 constexpr int32_t ERROR_CODE_NAMED_ROUTE_ERROR = 100004; // Named route error.
-constexpr int32_t ERROR_CODE_LOAD_PAGE_ERROR = 100007;   // Load page root component failed.
 constexpr int32_t ERROR_CODE_URI_ERROR_LITE = 200002;    // Uri error for lite.
 
 // push destination error code
@@ -101,6 +100,13 @@ constexpr int32_t ERROR_CODE_TOAST_NOT_FOUND = 103401;
 
 // XComponent error code
 constexpr int32_t ERROR_CODE_XCOMPONENT_STATE_INVALID = 103501;
+
+// Video error Code
+constexpr int32_t ERROR_CODE_VIDEO_CREATE_PLAYER_FAILED = 103601;
+constexpr int32_t ERROR_CODE_VIDEO_SOURCE_INVALID = 103602;
+
+// Canvas error code
+constexpr int32_t ERROR_CODE_CANVAS_PARAM_INVALID = 103701;
 
 // BindSheet error code
 constexpr int32_t ERROR_CODE_BIND_SHEET_CONTENT_ERROR = 120001;

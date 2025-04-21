@@ -168,7 +168,7 @@ void JsThirdProviderInteractionOperation::Initialize()
     CHECK_NULL_VOID(provider);
 }
 
-void JsThirdProviderInteractionOperation::SearchElementInfoByAccessibilityId(
+RetError JsThirdProviderInteractionOperation::SearchElementInfoByAccessibilityId(
     const int64_t elementId, const int32_t requestId,
     Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode)
 {
@@ -195,6 +195,7 @@ void JsThirdProviderInteractionOperation::SearchElementInfoByAccessibilityId(
 
     // 3. Return result
     SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
+    return RET_OK;
 }
 
 bool JsThirdProviderInteractionOperation::FindAccessibilityNodeInfosByIdFromProvider(

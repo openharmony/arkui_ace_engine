@@ -61,6 +61,8 @@ enum class UIContentBusinessCode : uint32_t {
     // avoid info business begin
     NOTIFY_AVOID_INFO_CHANGE = 3001,
     GET_AVOID_INFO = 3002,
+    OVERLAY_MASK_MOUNT = 4001,
+    OVERLAY_MASK_EVENT = 4002,
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UIEXTENSION_CONFIG_H

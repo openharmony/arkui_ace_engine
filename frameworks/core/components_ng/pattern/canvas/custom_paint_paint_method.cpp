@@ -32,7 +32,7 @@
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/image/image_provider.h"
-#include "core/image/sk_image_cache.h"
+#include "core/image/image_cache.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -518,10 +518,8 @@ void CustomPaintPaintMethod::DrawImageInternal(const Ace::CanvasImage& info, con
         imageBrush_.SetAlphaF(state_.globalState.GetAlpha());
     }
     if (HasShadow()) {
-        bool isSupported = (info.flag == DrawImageType::THREE_PARAMS) &&
-            (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
-        auto width = info.dx + (isSupported ? image->GetWidth() : info.dWidth);
-        auto height = info.dy + (isSupported ? image->GetHeight() : info.dHeight);
+        auto width = info.dx + (info.flag == DrawImageType::THREE_PARAMS ? image->GetWidth() : info.dWidth);
+        auto height = info.dy + (info.flag == DrawImageType::THREE_PARAMS ? image->GetHeight() : info.dHeight);
         RSRect rsRect = RSRect(info.dx, info.dy, width, height);
         RSPath path;
         path.AddRect(rsRect);
@@ -566,7 +564,7 @@ void CustomPaintPaintMethod::DrawImage(const Ace::CanvasImage& canvasImage, doub
             return;
         }
         RSBitmap bitmap;
-        RSBitmapFormat format = GetBitmapFormat();
+        RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_PREMUL };
         bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
         bitmap.SetPixels(const_cast<void*>(reinterpret_cast<const void*>(imageData.data.data())));
         image->BuildFromBitmap(bitmap);
@@ -586,7 +584,7 @@ void CustomPaintPaintMethod::PutImageData(const Ace::ImageData& imageData)
         return;
     }
     RSBitmap bitmap;
-    RSBitmapFormat format = GetBitmapFormat();
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_PREMUL };
     bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
     bitmap.SetPixels(const_cast<void*>(reinterpret_cast<const void*>(imageData.data.data())));
     RSBrush brush;
@@ -1562,11 +1560,7 @@ void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        colorMatrix_.PostConcat(colorMatrix);
-    } else {
-        colorMatrix_.PreConcat(colorMatrix);
-    }
+    colorMatrix_.PostConcat(colorMatrix);
 }
 
 // https://drafts.fxtf.org/filter-effects/#sepiaEquivalent
@@ -1592,11 +1586,7 @@ void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        colorMatrix_.PostConcat(colorMatrix);
-    } else {
-        colorMatrix_.PreConcat(colorMatrix);
-    }
+    colorMatrix_.PostConcat(colorMatrix);
 }
 
 // https://drafts.fxtf.org/filter-effects/#saturateEquivalent
@@ -1623,11 +1613,7 @@ void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        colorMatrix_.PostConcat(colorMatrix);
-    } else {
-        colorMatrix_.PreConcat(colorMatrix);
-    }
+    colorMatrix_.PostConcat(colorMatrix);
 }
 
 // https://drafts.fxtf.org/filter-effects/#huerotateEquivalent
@@ -1668,11 +1654,7 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        colorMatrix_.PostConcat(colorMatrix);
-    } else {
-        colorMatrix_.PreConcat(colorMatrix);
-    }
+    colorMatrix_.PostConcat(colorMatrix);
 }
 
 /*
@@ -1697,11 +1679,7 @@ void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        colorMatrix_.PostConcat(colorMatrix);
-    } else {
-        colorMatrix_.PreConcat(colorMatrix);
-    }
+    colorMatrix_.PostConcat(colorMatrix);
 }
 
 /*
@@ -1724,11 +1702,7 @@ void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent)
     matrix[18] = percentNum;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        colorMatrix_.PostConcat(colorMatrix);
-    } else {
-        colorMatrix_.PreConcat(colorMatrix);
-    }
+    colorMatrix_.PostConcat(colorMatrix);
 }
 
 /*
@@ -1748,11 +1722,7 @@ void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        colorMatrix_.PostConcat(colorMatrix);
-    } else {
-        colorMatrix_.PreConcat(colorMatrix);
-    }
+    colorMatrix_.PostConcat(colorMatrix);
 }
 
 /*
@@ -1773,11 +1743,7 @@ void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent)
     matrix[18] = 1;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        colorMatrix_.PostConcat(colorMatrix);
-    } else {
-        colorMatrix_.PreConcat(colorMatrix);
-    }
+    colorMatrix_.PostConcat(colorMatrix);
 }
 
 // https://drafts.fxtf.org/filter-effects/#blurEquivalent

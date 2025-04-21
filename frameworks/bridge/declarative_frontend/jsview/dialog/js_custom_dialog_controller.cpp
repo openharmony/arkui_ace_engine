@@ -76,7 +76,6 @@ void ParseCustomDialogLevelOrder(DialogProperties& properties, JSRef<JSObject> o
         return;
     }
 
-    properties.levelOrder = std::make_optional(NG::LevelOrder::ORDER_DEFAULT);
     auto levelOrderValue = obj->GetProperty("levelOrder");
     if (!levelOrderValue->IsObject()) {
         return;
@@ -381,8 +380,8 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     });
 
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow() && !dialogProperties_.windowScene.Upgrade()) {
-        dialogProperties_.isScenceBoardDialog = true;
+    if (container && container->IsSceneBoardWindow() && !dialogProperties_.windowScene.Upgrade()) {
+        dialogProperties_.isSceneBoardDialog = true;
         auto viewNode = this->ownerView_->GetViewNode();
         CHECK_NULL_VOID(viewNode);
         auto parentCustom = AceType::DynamicCast<NG::CustomNode>(viewNode);

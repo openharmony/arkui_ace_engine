@@ -105,6 +105,9 @@ void EventReport::ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, 
 void EventReport::ReportClipboardFailEvent(const std::string& errorType)
 {}
 
+void EventReport::ReportPageSlidInfo(NG::SlidInfo &slidinfo)
+{}
+
 void EventReport::SendDiffFrameRatesDuring(const std::string& scene, const FRCSceneFpsInfo& curFRCSceneFpsInfo_)
 {}
 

@@ -64,7 +64,9 @@ void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
-    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
 }
 
 void LinearSplitPattern::HandlePanStart(const GestureEvent& info)
@@ -550,7 +552,7 @@ void LinearSplitPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);

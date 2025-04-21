@@ -372,7 +372,8 @@ public:
         return host->GetInstanceId();
     }
 
-    PipelineContext* GetContext() {
+    PipelineContext* GetContext() const
+    {
         auto frameNode = GetHost();
         CHECK_NULL_RETURN(frameNode, nullptr);
         return frameNode->GetContext();
@@ -413,7 +414,15 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
-        return DynamicCast<T>(host->GetEventHub<T>());
+        return DynamicCast<T>(host->GetOrCreateEventHub<T>());
+    }
+
+    template<typename T>
+    RefPtr<T> GetOrCreateEventHub() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        return DynamicCast<T>(host->GetOrCreateEventHub<T>());
     }
 
     // Called after frameNode RebuildRenderContextTree.
@@ -615,11 +624,6 @@ public:
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
 
-    virtual bool OnAccessibilityHoverEvent(const PointF& point)
-    {
-        return false;
-    }
-
     virtual uint32_t GetWindowPatternType() const
     {
         return 0;
@@ -702,7 +706,6 @@ public:
     {
         return false;
     }
-
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

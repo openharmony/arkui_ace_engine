@@ -1181,4 +1181,65 @@ HWTEST_F(MenuPattern2TestNg, UpdateShowScale001, TestSize.Level1)
     RefPtr<MenuPattern> nullMenuPattern;
     menuPreviewPattern.UpdateShowScale(menuRenderContext, menuTheme, nullMenuPattern);
 }
+
+/**
+ * @tc.name: DuplicateMenuNode001
+ * @tc.desc: Test DuplicateMenuNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, DuplicateMenuNode001, TestSize.Level1)
+{
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    scrollNode->MountToParent(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    MenuParam menuParam;
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+
+    BorderRadiusProperty borderRadius;
+    CalcDimension radiusDim(20.0f, DimensionUnit::VP);
+    borderRadius.SetRadius(radiusDim);
+    menuLayoutProperty->UpdateBorderRadius(borderRadius);
+    auto duplicateMenuNode = menuPattern->DuplicateMenuNode(menuNode, menuParam);
+    ASSERT_NE(duplicateMenuNode, nullptr);
+    auto duplicateMenuRenderContext = duplicateMenuNode->GetRenderContext();
+    ASSERT_NE(duplicateMenuRenderContext, nullptr);
+    EXPECT_EQ(duplicateMenuRenderContext->GetBorderRadius(), borderRadius);
+}
+
+/**
+ * @tc.name: DuplicateMenuNode002
+ * @tc.desc: Test  DuplicateMenuNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, DuplicateMenuNode002, TestSize.Level1)
+{
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    scrollNode->MountToParent(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    MenuParam menuParam;
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    menuParam.backgroundColor = Color::RED;
+
+    auto duplicateMenuNode = menuPattern->DuplicateMenuNode(menuNode, menuParam);
+    auto duplicateMenuRenderContext = duplicateMenuNode->GetRenderContext();
+    ASSERT_NE(duplicateMenuRenderContext, nullptr);
+    EXPECT_EQ(duplicateMenuRenderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), Color::RED);
+}
 } // namespace OHOS::Ace::NG

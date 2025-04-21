@@ -450,6 +450,12 @@ napi_modules = [
         lib_names = [ "subheader" ]
       },
       {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/subheaderv2/interfaces:subheaderv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "subheaderv2" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/swiperefresher/interfaces:swiperefresher"
         subsystem_name = "arkui"
         part_name = "ace_engine"

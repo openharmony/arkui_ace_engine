@@ -1006,4 +1006,54 @@ HWTEST_F(MenuViewTestNg, UpdateMenuDefaultConstraintByDevice004, TestSize.Level1
         menuPattern, childConstraint, paddingWidth, layoutConstraint, idealSizeHasVal);
     EXPECT_EQ(layoutConstraint->selfIdealSize.width_, TEN);
 }
+
+/**
+ * @tc.name: SetHasCustomOutline001
+ * @tc.desc: Verify SetHasCustomOutline.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetHasCustomOutline001, TestSize.Level1)
+{
+    InitMenuWrapperNode();
+    MenuView menuView;
+    MenuParam menuParam;
+    BorderWidthProperty borderWidthPropertyOne = { 0.0_px, 0.0_px, 0.0_px, 0.0_px };
+    BorderWidthProperty borderWidthPropertyTwo = { -1.0_px, 0.0_px, 0.0_px, 0.0_px };
+    BorderWidthProperty borderWidthPropertyThree = { 0.0_px, -1.0_px, 0.0_px, 0.0_px };
+    BorderWidthProperty borderWidthPropertyFour = { 0.0_px, 0.0_px, -1.0_px, 0.0_px };
+    BorderWidthProperty borderWidthPropertyFive = { 0.0_px, 0.0_px, 0.0_px, -1.0_px };
+    menuView.SetHasCustomOutline(menuWrapperNode_, menuFrameNode_, menuParam);
+    auto menuWrapperPattern = menuWrapperNode_->GetPattern<MenuWrapperPattern>();
+    EXPECT_FALSE(menuWrapperPattern->hasCustomOutlineWidth_);
+    menuParam.outlineWidth = borderWidthPropertyOne;
+    menuView.SetHasCustomOutline(menuWrapperNode_, menuFrameNode_, menuParam);
+    EXPECT_TRUE(menuWrapperPattern->hasCustomOutlineWidth_);
+    menuParam.outlineWidth = borderWidthPropertyTwo;
+    menuView.SetHasCustomOutline(menuWrapperNode_, menuFrameNode_, menuParam);
+    EXPECT_FALSE(menuWrapperPattern->hasCustomOutlineWidth_);
+    menuParam.outlineWidth = borderWidthPropertyThree;
+    menuView.SetHasCustomOutline(menuWrapperNode_, menuFrameNode_, menuParam);
+    EXPECT_FALSE(menuWrapperPattern->hasCustomOutlineWidth_);
+    menuParam.outlineWidth = borderWidthPropertyFour;
+    menuView.SetHasCustomOutline(menuWrapperNode_, menuFrameNode_, menuParam);
+    EXPECT_FALSE(menuWrapperPattern->hasCustomOutlineWidth_);
+    menuParam.outlineWidth = borderWidthPropertyFive;
+    menuView.SetHasCustomOutline(menuWrapperNode_, menuFrameNode_, menuParam);
+    EXPECT_FALSE(menuWrapperPattern->hasCustomOutlineWidth_);
+}
+
+/**
+ * @tc.name: UpdateMenuNodeByAnimation001
+ * @tc.desc: Verify UpdateMenuNodeByAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuNodeByAnimation001, TestSize.Level1)
+{
+    InitMenuWrapperNode();
+    MenuView menuView;
+    PreparedInfoForDrag data;
+    menuView.UpdateMenuNodeByAnimation(menuFrameNode_, data);
+    EXPECT_EQ(menuFrameNode_->GetRenderContext()->GetTransformScale()->x, 0.4f);
+    EXPECT_EQ(menuFrameNode_->GetRenderContext()->GetTransformScale()->y, 0.4f);
+}
 } // namespace OHOS::Ace::NG

@@ -185,7 +185,7 @@ export default function List1() {
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
-          toggleClickObj:'divider'
+          toggleClickObj: 'divider'
         }
       })
 
@@ -201,7 +201,7 @@ export default function List1() {
         radioClickObj: 1,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-          toggleClickObj:'divider'
+          toggleClickObj: 'divider'
         }
       })
 
@@ -214,7 +214,7 @@ export default function List1() {
 
       let title = await driver.findComponent(ON.text('divider.strokeWidth'));
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'divider')
 
@@ -222,7 +222,7 @@ export default function List1() {
           radioClickObj: 0,
           toggleClick: {
             toggleClickType: ToggleClick.Close,
-            toggleClickObj:'divider'
+            toggleClickObj: 'divider'
           }
         })
 
@@ -268,7 +268,7 @@ export default function List1() {
 
       let title = await driver.findComponent(ON.text('divider.color'));
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'divider')
 
@@ -276,7 +276,7 @@ export default function List1() {
           radioClickObj: 0,
           toggleClick: {
             toggleClickType: ToggleClick.Open,
-            toggleClickObj:'divider'
+            toggleClickObj: 'divider'
           }
         })
 
@@ -306,7 +306,7 @@ export default function List1() {
 
       let title = await driver.findComponent(ON.text('divider.color'));
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'divider')
 
@@ -314,7 +314,7 @@ export default function List1() {
           radioClickObj: 0,
           toggleClick: {
             toggleClickType: ToggleClick.Open,
-            toggleClickObj:'divider'
+            toggleClickObj: 'divider'
           }
         })
 
@@ -341,7 +341,7 @@ export default function List1() {
 
       let title = await driver.findComponent(ON.text('divider.color'));
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'divider')
 
@@ -349,7 +349,7 @@ export default function List1() {
           radioClickObj: 0,
           toggleClick: {
             toggleClickType: ToggleClick.Open,
-            toggleClickObj:'divider'
+            toggleClickObj: 'divider'
           }
         })
 
@@ -376,7 +376,7 @@ export default function List1() {
 
       let title = await driver.findComponent(ON.text('divider.color'));
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'divider')
 
@@ -384,7 +384,7 @@ export default function List1() {
           radioClickObj: 0,
           toggleClick: {
             toggleClickType: ToggleClick.Open,
-            toggleClickObj:'divider'
+            toggleClickObj: 'divider'
           }
         })
 
@@ -411,7 +411,7 @@ export default function List1() {
 
       let title = await driver.findComponent(ON.text('divider.color'));
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'divider')
 
@@ -419,7 +419,7 @@ export default function List1() {
           radioClickObj: 0,
           toggleClick: {
             toggleClickType: ToggleClick.Open,
-            toggleClickObj:'divider'
+            toggleClickObj: 'divider'
           }
         })
 
@@ -446,7 +446,7 @@ export default function List1() {
 
       let title = await driver.findComponent(ON.text('divider.color'));
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'divider')
 
@@ -454,7 +454,7 @@ export default function List1() {
           radioClickObj: 0,
           toggleClick: {
             toggleClickType: ToggleClick.Open,
-            toggleClickObj:'divider'
+            toggleClickObj: 'divider'
           }
         })
 
@@ -485,7 +485,7 @@ export default function List1() {
 
       let title = await driver.findComponent(ON.text('divider.startMargin'));
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'divider')
 
@@ -493,7 +493,7 @@ export default function List1() {
           radioClickObj: 0,
           toggleClick: {
             toggleClickType: ToggleClick.Open,
-            toggleClickObj:'divider'
+            toggleClickObj: 'divider'
           }
         })
 
@@ -538,7 +538,7 @@ export default function List1() {
 
       let title = await driver.findComponent(ON.text('divider.endMargin'));
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'divider')
 
@@ -546,7 +546,7 @@ export default function List1() {
           radioClickObj: 0,
           toggleClick: {
             toggleClickType: ToggleClick.Open,
-            toggleClickObj:'divider'
+            toggleClickObj: 'divider'
           }
         })
 
@@ -631,7 +631,7 @@ export default function List1() {
 
       let title = await driver.findComponent(ON.text('fadingEdge.length'));
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'fadingEdge')
 
@@ -672,7 +672,7 @@ export default function List1() {
     it('ArkUI_List_061', 0, async (done: Function) => {
       let title = await driver.findComponent(ON.text('fadingEdge.length.unit'));
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'fadingEdge')
 
@@ -702,7 +702,7 @@ export default function List1() {
     it('ArkUI_List_062', 0, async (done: Function) => {
       let title = await driver.findComponent(ON.text('fadingEdge.length.unit'));
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'fadingEdge')
 
@@ -732,7 +732,7 @@ export default function List1() {
     it('ArkUI_List_063', 0, async (done: Function) => {
       let title = await driver.findComponent(ON.text('fadingEdge.length.unit'));
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'fadingEdge')
 
@@ -762,7 +762,7 @@ export default function List1() {
     it('ArkUI_List_064', 0, async (done: Function) => {
       let title = await driver.findComponent(ON.text('fadingEdge.length.unit'));
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'fadingEdge')
 
@@ -792,7 +792,7 @@ export default function List1() {
     it('ArkUI_List_065', 0, async (done: Function) => {
       let title = await driver.findComponent(ON.text('fadingEdge.length.unit'));
 
-      if (!title){
+      if (!title) {
 
         await Search('参数列表', 'fadingEdge')
 
@@ -806,7 +806,7 @@ export default function List1() {
 
       }
 
-      await titleSearch('参数列表','fadingEdge.length.unit')
+      await titleSearch('参数列表', 'fadingEdge.length.unit')
 
       await radioClick({
         radioClickObj: 4,
@@ -831,7 +831,7 @@ export default function List1() {
 
     it('ArkUI_List_066', 0, async (done: Function) => {
 
-      await titleSearch('参数列表','listDirection')
+      await titleSearch('参数列表', 'listDirection')
 
       await radioClick({
         radioClickObj: 1,
@@ -852,7 +852,7 @@ export default function List1() {
 
     it('ArkUI_List_067', 0, async (done: Function) => {
 
-      await titleSearch('参数列表','listDirection')
+      await titleSearch('参数列表', 'listDirection')
 
       await radioClick({
         radioClickObj: 0,

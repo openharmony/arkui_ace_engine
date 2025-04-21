@@ -822,7 +822,7 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     if (pipeline->IsFocusWindowIdSetted()) {
         windId = pipeline->GetFocusWindowId();
     }
-    if (container->IsScenceBoardWindow()) {
+    if (container->IsSceneBoardWindow()) {
         GetWindowSceneWindowId(node, windId);
     }
     buttonInfo.windowId_ = static_cast<int32_t>(windId);

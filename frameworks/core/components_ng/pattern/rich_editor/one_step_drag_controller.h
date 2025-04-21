@@ -39,6 +39,8 @@ public:
     void FillJsonValue(const std::unique_ptr<JsonValue>& jsonValue) const;
     void HandleDirtyNodes();
     inline void MarkDirtyNode(const WeakPtr<FrameNode>& dirtyFrameNode);
+    template<typename T>
+    void SetEnableEventResponse(int32_t start, int32_t end, std::list<WeakPtr<T>>& nodes);
 
     const TextSpanType spanType_;
     const std::function<bool(const std::string&)> tagFilter_;
@@ -79,12 +81,9 @@ public:
     bool SetMenuParam(TextSpanType spanType, const Builder& builder, const SelectMenuParam& menuParam);
     void EnableOneStepDrag(TextSpanType spanType, const RefPtr<FrameNode>& frameNode);
     void CopyDragCallback(TextSpanType spanType, const RefPtr<FrameNode>& frameNode);
-    void SetEnableEventResponse(bool isEnable);
     void SetEnableEventResponse(const TextSelector& selector,
         std::list<WeakPtr<ImageSpanNode>>& imageNodes,
         std::list<WeakPtr<PlaceholderSpanNode>>& builderNodes);
-    template<typename T>
-    void SetEnableEventResponse(int32_t start, int32_t end, std::list<WeakPtr<T>>& builderNodes);
     void FillJsonValue(const std::unique_ptr<JsonValue>& jsonValue);
     void MarkDirtyNode(const WeakPtr<ImageSpanNode>& dirtyFrameNode);
     void HandleDirtyNodes();
@@ -99,7 +98,6 @@ private:
     WeakPtr<RichEditorPattern> pattern_;
     std::unique_ptr<OneStepDragParam> imageDragParam_ = nullptr;
     std::unique_ptr<OneStepDragParam> placeholderDragParam_ = nullptr;
-    bool isEnableEventResponse_ = true;
 };
 
 } // namespace OHOS::Ace::NG

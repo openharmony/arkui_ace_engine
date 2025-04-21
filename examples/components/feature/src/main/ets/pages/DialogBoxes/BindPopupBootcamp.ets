@@ -123,18 +123,19 @@ export struct BindPopupBootcamp {
   @State compBindPopupTransitionRotatePerspective: number = 0;
   @State enableCompBindPopupTransitionMove: boolean = false;
   @State compBindPopupTransitionMove: TransitionEdge = TransitionEdge.START;
-
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
   scroller: Scroller = new Scroller();
+
   aboutToAppear(): void {
     AppStorage.setOrCreate('scroller', this.scroller)
   }
+
   //compEvent
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time,value)
+      new BlockTag(time, value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -154,7 +155,7 @@ export struct BindPopupBootcamp {
       }
     }, 200)
   }
-  
+
   build() {
     NavDestination() {
       Drawer({
@@ -236,7 +237,7 @@ export struct BindPopupBootcamp {
             this.compBindPopupBackgroundBlurStyle),
           transition:
           (TransitionEffect.opacity(
-            useEnabled(this.enableCompBindPopupTransitionOpacity,this.compBindPopupTransitionOpacity)
+            useEnabled(this.enableCompBindPopupTransitionOpacity, this.compBindPopupTransitionOpacity)
           )
             .combine(TransitionEffect.translate({
               x: useEnabled(
@@ -296,7 +297,7 @@ export struct BindPopupBootcamp {
           onStateChange: (e) => {
             console.info('onStateChange', JSON.stringify(e.isVisible))
             this.compEventTriggeredLog('onStateChange触发')
-            if (!e.isVisible){
+            if (!e.isVisible) {
               this.handlePopup = false
             }
 
@@ -317,10 +318,10 @@ export struct BindPopupBootcamp {
               this.compEventTriggeredLog('cancel Button click触发')
             }
           } : null,
-          onWillDismiss:(dismissPopupAction: DismissPopupAction)=>{
-              if (dismissPopupAction.reason == DismissReason.PRESS_BACK) {
-                dismissPopupAction.dismiss()
-              }
+          onWillDismiss: (dismissPopupAction: DismissPopupAction) => {
+            if (dismissPopupAction.reason == DismissReason.PRESS_BACK) {
+              dismissPopupAction.dismiss()
+            }
             this.compEventTriggeredLog('BindPopup:onWillDismiss()')
           }
         })
@@ -743,7 +744,7 @@ export struct BindPopupBootcamp {
             { label: 'END', value: TransitionEdge.END },
           ]
         })
-        
+
       }
     }
     .height('52%')

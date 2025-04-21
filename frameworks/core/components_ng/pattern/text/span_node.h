@@ -123,7 +123,12 @@ public:                                                           \
     void Reset##name()                                            \
     {                                                             \
         if (spanItem_->fontStyle) {                               \
-            return spanItem_->fontStyle->Reset##name();           \
+            spanItem_->fontStyle->Reset##name();                  \
+        }                                                         \
+        if (changeflag == ChangeFlag::RE_CREATE) {                \
+            spanItem_->MarkDirty();                               \
+        } else {                                                  \
+            spanItem_->MarkReLayoutParagraph();                   \
         }                                                         \
         spanItem_->MarkReCreateParagraph();                       \
     }                                                             \
@@ -181,7 +186,12 @@ public:                                                                         
     void Reset##name()                                                           \
     {                                                                            \
         if (spanItem_->textLineStyle) {                                          \
-            return spanItem_->textLineStyle->Reset##name();                      \
+            spanItem_->textLineStyle->Reset##name();                             \
+        }                                                                        \
+        if (changeflag == ChangeFlag::RE_CREATE) {                               \
+            spanItem_->MarkDirty();                                              \
+        } else {                                                                 \
+            spanItem_->MarkReLayoutParagraph();                                  \
         }                                                                        \
     }                                                                            \
     void Update##name##WithoutFlushDirty(const type& value)                      \
@@ -285,7 +295,7 @@ public:
     virtual bool UpdateSpanTextStyle(const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode);
     bool CheckSpanNeedReCreate(int32_t index);
     void UpdateReLayoutTextStyle(
-        TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol, bool isRichEditor);
+        TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(const std::u16string& content, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, const TextStyle& aiSpanStyle);

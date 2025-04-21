@@ -14,12 +14,17 @@
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
 import { Component, Driver, ON } from '@kit.TestKit';
-import { buttonClick,
-  JsonType, KeyStruct, radioClick,
+import {
+  buttonClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
   Search,
-  Slide, sliderDrag,
+  Slide,
+  sliderDrag,
   titleSearch,
-  ToggleClick } from '../../../utils';
+  ToggleClick
+} from '../../../utils';
 import { TextPickerStart } from './TextPicker';
 
 /*初始化与UI元素交互的驱动对象*/
@@ -33,14 +38,14 @@ export default function TimePicker1() {
     })
 
     // divider.startMargin
-    it('ArkUI_TextPicker_034', 0, async (done:Function) => {
+    it('ArkUI_TextPicker_034', 0, async (done: Function) => {
 
-      await Search('参数列表','divider.startMargin')
+      await Search('参数列表', 'divider.startMargin')
 
       await sliderDrag({
-        slideStar:Slide.start,
+        slideStar: Slide.start,
         toggleClick: {
-          toggleClickObj:'divider.startMargin',
+          toggleClickObj: 'divider.startMargin',
         },
         id: 'TextPicker',
         arr: [
@@ -52,9 +57,9 @@ export default function TimePicker1() {
       })
 
       await sliderDrag({
-        slideStar:Slide.end,
+        slideStar: Slide.end,
         toggleClick: {
-          toggleClickObj:'divider.startMargin',
+          toggleClickObj: 'divider.startMargin',
           toggleClickType: ToggleClick.Close,
         },
         id: 'TextPicker',
@@ -70,21 +75,21 @@ export default function TimePicker1() {
     })
 
     // divider.endMargin(divider.startMargin有值此属性才能获取值)
-    it('ArkUI_TextPicker_035', 0, async (done:Function) => {
+    it('ArkUI_TextPicker_035', 0, async (done: Function) => {
 
-      await Search('参数列表','divider.endMargin')
+      await Search('参数列表', 'divider.endMargin')
 
       await sliderDrag({
-        slideStar:Slide.start,
+        slideStar: Slide.start,
         toggleClick: {
-          toggleClickObj:'divider.endMargin',
+          toggleClickObj: 'divider.endMargin',
         }
       })
 
       await sliderDrag({
-        slideStar:Slide.end,
+        slideStar: Slide.end,
         toggleClick: {
-          toggleClickObj:'divider.endMargin',
+          toggleClickObj: 'divider.endMargin',
           toggleClickType: ToggleClick.Close,
         }
       })
@@ -93,85 +98,85 @@ export default function TimePicker1() {
     })
 
     // divider.color(divider.startMargin有值此属性才能获取值)
-    it('ArkUI_TextPicker_036', 0, async (done:Function) => {
+    it('ArkUI_TextPicker_036', 0, async (done: Function) => {
 
-      await Search('参数列表','divider.color')
+      await Search('参数列表', 'divider.color')
 
       await buttonClick({
-        buttonClickObj:0,
-        toggleClick:{
-          toggleClickObj:'divider.color'
+        buttonClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'divider.color'
         }
       })
 
       done();
     })
 
-    it('ArkUI_TextPicker_037', 0, async (done:Function) => {
+    it('ArkUI_TextPicker_037', 0, async (done: Function) => {
 
-      await Search('参数列表','divider.color')
+      await Search('参数列表', 'divider.color')
 
       await buttonClick({
-        buttonClickObj:1,
-        toggleClick:{
-          toggleClickObj:'divider.color'
+        buttonClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'divider.color'
         }
       })
 
       done();
     })
 
-    it('ArkUI_TextPicker_038', 0, async (done:Function) => {
+    it('ArkUI_TextPicker_038', 0, async (done: Function) => {
 
-      await Search('参数列表','divider.color')
+      await Search('参数列表', 'divider.color')
 
       await buttonClick({
-        buttonClickObj:2,
-        toggleClick:{
-          toggleClickObj:'divider.color'
+        buttonClickObj: 2,
+        toggleClick: {
+          toggleClickObj: 'divider.color'
         }
       })
 
       done();
     })
 
-    it('ArkUI_TextPicker_039', 0, async (done:Function) => {
+    it('ArkUI_TextPicker_039', 0, async (done: Function) => {
 
-      await Search('参数列表','divider.color')
+      await Search('参数列表', 'divider.color')
 
       await buttonClick({
-        buttonClickObj:3,
-        toggleClick:{
-          toggleClickObj:'divider.color'
+        buttonClickObj: 3,
+        toggleClick: {
+          toggleClickObj: 'divider.color'
         }
       })
 
       done();
     })
 
-    it('ArkUI_TextPicker_040', 0, async (done:Function) => {
+    it('ArkUI_TextPicker_040', 0, async (done: Function) => {
 
-      await Search('参数列表','divider.color')
+      await Search('参数列表', 'divider.color')
 
       await buttonClick({
-        buttonClickObj:4,
-        toggleClick:{
-          toggleClickObj:'divider.color'
+        buttonClickObj: 4,
+        toggleClick: {
+          toggleClickObj: 'divider.color'
         }
       })
 
       done();
     })
 
-    it('ArkUI_TextPicker_041', 0, async (done:Function) => {
+    it('ArkUI_TextPicker_041', 0, async (done: Function) => {
 
-      await Search('参数列表','divider.color')
+      await Search('参数列表', 'divider.color')
 
       await buttonClick({
-        buttonClickObj:5,
-        toggleClick:{
-          toggleClickObj:'divider.color',
-          toggleClickType:ToggleClick.Close
+        buttonClickObj: 5,
+        toggleClick: {
+          toggleClickObj: 'divider.color',
+          toggleClickType: ToggleClick.Close
         }
       })
 
@@ -179,14 +184,14 @@ export default function TimePicker1() {
     })
 
     // gradientHeight
-    it('ArkUI_TextPicker_042', 0, async (done:Function) => {
+    it('ArkUI_TextPicker_042', 0, async (done: Function) => {
 
-      await Search('参数列表','gradientHeight')
+      await Search('参数列表', 'gradientHeight')
 
       await sliderDrag({
-        slideStar:Slide.start,
+        slideStar: Slide.start,
         toggleClick: {
-          toggleClickObj:'gradientHeight',
+          toggleClickObj: 'gradientHeight',
         },
         id: 'TextPicker',
         arr: [
@@ -197,9 +202,9 @@ export default function TimePicker1() {
       })
 
       await sliderDrag({
-        slideStar:Slide.end,
+        slideStar: Slide.end,
         toggleClick: {
-          toggleClickObj:'gradientHeight',
+          toggleClickObj: 'gradientHeight',
           toggleClickType: ToggleClick.Close,
         },
         id: 'TextPicker',
@@ -214,14 +219,14 @@ export default function TimePicker1() {
     })
 
     // flexBasis
-    it('ArkUI_TextPicker_043', 0, async (done:Function) => {
+    it('ArkUI_TextPicker_043', 0, async (done: Function) => {
 
-      await Search('参数列表','flexBasis')
+      await Search('参数列表', 'flexBasis')
 
       await sliderDrag({
-        slideStar:Slide.start,
+        slideStar: Slide.start,
         toggleClick: {
-          toggleClickObj:'flexBasis',
+          toggleClickObj: 'flexBasis',
         },
         id: 'TextPicker',
         arr: [
@@ -232,9 +237,9 @@ export default function TimePicker1() {
       })
 
       await sliderDrag({
-        slideStar:Slide.end,
+        slideStar: Slide.end,
         toggleClick: {
-          toggleClickObj:'flexBasis',
+          toggleClickObj: 'flexBasis',
           toggleClickType: ToggleClick.Close,
         },
         id: 'TextPicker',
@@ -249,14 +254,14 @@ export default function TimePicker1() {
     })
 
     // direction
-    it('ArkUI_TextPicker_044', 0, async (done:Function) => {
+    it('ArkUI_TextPicker_044', 0, async (done: Function) => {
 
-      await Search('参数列表','direction')
+      await Search('参数列表', 'direction')
 
       await radioClick({
         radioClickObj: 1,
         toggleClick: {
-          toggleClickObj:'direction'
+          toggleClickObj: 'direction'
         },
         id: 'TextPicker',
         arr: [
@@ -269,14 +274,14 @@ export default function TimePicker1() {
       done();
     })
 
-    it('ArkUI_TextPicker_045', 0, async (done:Function) => {
+    it('ArkUI_TextPicker_045', 0, async (done: Function) => {
 
-      await Search('参数列表','direction')
+      await Search('参数列表', 'direction')
 
       await radioClick({
         radioClickObj: 2,
         toggleClick: {
-          toggleClickObj:'direction'
+          toggleClickObj: 'direction'
         },
         id: 'TextPicker',
         arr: [
@@ -289,15 +294,15 @@ export default function TimePicker1() {
       done();
     })
 
-    it('ArkUI_TextPicker_046', 0, async (done:Function) => {
+    it('ArkUI_TextPicker_046', 0, async (done: Function) => {
 
-      await Search('参数列表','direction')
+      await Search('参数列表', 'direction')
 
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
-          toggleClickObj:'direction',
-          toggleClickType:ToggleClick.Close
+          toggleClickObj: 'direction',
+          toggleClickType: ToggleClick.Close
         },
         id: 'TextPicker',
         arr: [

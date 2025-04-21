@@ -480,7 +480,7 @@
         "name": "OH_ArkUI_PointerEvent_GetTiltY"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_PointerEvent_GetRollAngle"
     },
     {
@@ -2616,6 +2616,18 @@
         "name": "OH_ArkUI_KeyEvent_Dispatch"
     },
     {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_KeyEvent_IsNumLockOn"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_KeyEvent_IsCapsLockOn"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_KeyEvent_IsScrollLockOn"
+    },
+    {
         "first_introduced": "16",
         "name": "OH_ArkUI_NodeEvent_GetTextChangeEvent"
     },
@@ -2752,11 +2764,11 @@
         "name": "OH_ArkUI_GetNodeSnapshot"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_XComponent_StartImageAnalyzer"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_XComponent_StopImageAnalyzer"
     },
     {
@@ -3208,67 +3220,67 @@
         "name": "OH_ArkUI_CustomDialog_RegisterOnDidDisappearCallback"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_SurfaceHolder_Create"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_SurfaceHolder_Dispose"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_SurfaceHolder_SetUserData"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_SurfaceHolder_GetUserData"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_SurfaceCallback_Create"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_SurfaceCallback_Dispose"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_SurfaceCallback_SetSurfaceCreatedEvent"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_SurfaceCallback_SetSurfaceChangedEvent"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_SurfaceCallback_SetSurfaceDestroyedEvent"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_SurfaceHolder_AddSurfaceCallback"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_SurfaceHolder_RemoveSurfaceCallback"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_XComponent_GetNativeWindow"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_XComponent_SetAutoInitialize"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_XComponent_Initialize"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_XComponent_Finalize"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_XComponent_IsInitialized"
     },
     {
@@ -3302,5 +3314,13 @@
     {
         "first_introduced": "18",
         "name": "OH_ArkUI_TextCascadePickerRangeContentArray_Destroy"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_PanGesture_SetDistanceMap"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_PanGesture_GetDistanceByToolType"
     }
 ]

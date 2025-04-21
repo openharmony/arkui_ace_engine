@@ -280,7 +280,7 @@ public:
 
     RefPtr<WebEventHub> GetWebEventHub()
     {
-        return GetEventHub<WebEventHub>();
+        return GetOrCreateEventHub<WebEventHub>();
     }
 
     FocusPattern GetFocusPattern() const override
@@ -494,6 +494,8 @@ public:
         const WebElementType& type, const ResponseType& responseType);
 
     bool IsPreviewMenuNotNeedShowPreview();
+
+    bool RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback);
 
     void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
         const ScriptItemsByOrder& scriptItemsByOrder);

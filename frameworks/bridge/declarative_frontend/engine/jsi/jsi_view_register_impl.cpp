@@ -154,6 +154,7 @@
 #include "bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "bridge/declarative_frontend/jsview/js_toggle.h"
+#include "bridge/declarative_frontend/jsview/js_toolbaritem.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "bridge/declarative_frontend/jsview/js_water_flow.h"
@@ -593,11 +594,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollBar", JSScrollBar::JSBind },
     { "GridRow", JSGridRow::JSBind },
     { "GridCol", JSGridCol::JSBind },
-#ifndef ARKUI_WEARABLE
     { "Stepper", JSStepper::JSBind },
     { "StepperItem", JSStepperItem::JSBind },
-#endif
     { "Toggle", JSToggle::JSBind },
+    { "ToolBarItem", JSToolBarItem::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
 #ifndef ARKUI_WEARABLE
@@ -625,10 +625,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
     { "PageTransitionEnter", JSPageTransition::JSBind },
     { "PageTransitionExit", JSPageTransition::JSBind },
-#ifndef ARKUI_WEARABLE
     { "RowSplit", JSRowSplit::JSBind },
     { "ColumnSplit", JSColumnSplit::JSBind },
-#endif
     { "AlphabetIndexer", JSIndexer::JSBind },
     { "Hyperlink", JSHyperlink::JSBind },
     { "Radio", JSRadio::JSBind },
@@ -734,9 +732,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #endif
     { "Search", JSSearch::JSBind },
-#ifndef ARKUI_WEARABLE
     { "Select", JSSelect::JSBind },
-#endif
     { "SearchController", JSSearchController::JSBind },
     { "TextClockController", JSTextClockController::JSBind },
     { "Sheet", JSSheet::JSBind },
@@ -750,10 +746,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Checkbox", JSCheckbox::JSBind },
     { "CheckboxGroup", JSCheckboxGroup::JSBind },
     { "Refresh", JSRefresh::JSBind },
-#ifndef ARKUI_WEARABLE
     { "WaterFlow", JSWaterFlow::JSBind },
     { "FlowItem", JSWaterFlowItem::JSBind },
-#endif
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "__Recycle__", JSRecycleView::JSBind },

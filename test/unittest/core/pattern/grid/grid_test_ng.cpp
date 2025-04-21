@@ -21,6 +21,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
+#include "core/components/refresh/refresh_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -45,6 +46,9 @@ void GridTestNg::SetUpTestSuite()
     auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
+    auto refreshThemeConstants = CreateThemeConstants(THEME_PATTERN_REFRESH);
+    auto refreshTheme = RefreshTheme::Builder().Build(refreshThemeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(RefreshTheme::TypeId())).WillRepeatedly(Return(refreshTheme));
     auto container = Container::GetContainer(CONTAINER_ID_DIVIDE_SIZE);
     EXPECT_CALL(*(AceType::DynamicCast<MockContainer>(container)), GetWindowId()).Times(AnyNumber());
     MockAnimationManager::Enable(true);

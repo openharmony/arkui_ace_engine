@@ -17,14 +17,14 @@ import { abilityDelegatorRegistry, Driver, Component, ON } from '@kit.TestKit';
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
 
-export async function TabContentStart(done:Function) {
+export async function TabContentStart(done: Function) {
   await delegator.startAbility({
     bundleName: 'cn.ohos.components',
     abilityName: 'EntryAbility'
   });
   await driver.delayMs(3500);
 
-  let atomNavigates: Component = await driver.findComponent(ON.text('导航类'));
+  let atomNavigates: Component = await driver.findComponent(ON.text('导航与切换'));
   await atomNavigates.click();
   await driver.delayMs(3500);
 

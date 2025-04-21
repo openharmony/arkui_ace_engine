@@ -338,7 +338,6 @@ void RosenRenderSurface::DrawBuffer(int32_t width, int32_t height)
         rosenRenderContext->SyncGeometryProperties(keyBoardAvoidRect);
         isNeedSyncGeometryProperties_ = false;
     }
-    rosenRenderContext->StartRecording();
     auto rsNode = rosenRenderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode);
     rsNode->DrawOnNode(
@@ -363,7 +362,6 @@ void RosenRenderSurface::DrawBuffer(int32_t width, int32_t height)
             recordingCanvas->DrawSurfaceBuffer(info);
 #endif
         });
-    rosenRenderContext->StopRecordingIfNeeded();
 #endif
 }
 

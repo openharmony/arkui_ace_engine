@@ -1,4 +1,4 @@
-import { describe, beforeAll, it} from '@ohos/hypium'
+import { describe, beforeAll, it } from '@ohos/hypium'
 import { abilityDelegatorRegistry, Driver, Component } from '@kit.TestKit';
 import { ON, Point } from '@ohos.UiTest';
 import {
@@ -32,7 +32,7 @@ export default function ScrollBarBootcampTest() {
         });
         await driver.delayMs(5000);
 
-        let atomNavigates: Component = await driver.findComponent(ON.text('展示类'));
+        let atomNavigates: Component = await driver.findComponent(ON.text('滚动与滑动'));
         await atomNavigates.click();
         await driver.delayMs(3500);
 

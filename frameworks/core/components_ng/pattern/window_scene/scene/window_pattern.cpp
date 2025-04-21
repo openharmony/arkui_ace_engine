@@ -205,7 +205,8 @@ void WindowPattern::OnAttachToFrameNode()
 
     CHECK_EQUAL_VOID(CheckAndAddStartingWindowAboveLocked(), true);
 
-    if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence() &&
+    if ((state == Rosen::SessionState::STATE_BACKGROUND || session_->IsAnco()) &&
+        session_->GetScenePersistence() &&
         session_->GetScenePersistence()->HasSnapshot()) {
         if (!session_->GetShowRecent()) {
             AddChild(host, appWindow_, appWindowName_, 0);
@@ -254,18 +255,19 @@ void WindowPattern::CreateAppWindow()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("CreateAppWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
-    appWindow_ = FrameNode::CreateFrameNode(
+    RefPtr<FrameNode> tempWindow = FrameNode::CreateFrameNode(
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    appWindow_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    appWindow_->SetHitTestMode(HitTestMode::HTMNONE);
+    tempWindow->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    tempWindow->SetHitTestMode(HitTestMode::HTMNONE);
     CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode) {
-        auto context = AceType::DynamicCast<NG::RosenRenderContext>(appWindow_->GetRenderContext());
+        auto context = AceType::DynamicCast<NG::RosenRenderContext>(tempWindow->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
         surfaceNode->SetVisible(true);
     }
+    (!appWindow_) ? appWindow_ = std::move(tempWindow) : (newAppWindow_ = std::move(tempWindow));
 }
 
 #ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
@@ -478,6 +480,7 @@ void WindowPattern::CreateStartingWindow()
     Rosen::SceneSessionManager::GetInstance().GetStartupPage(sessionInfo, startingWindowInfo);
     if (startingWindowInfo.configFileEnabled_) {
         CHECK_NULL_VOID(startingWindowLayoutHelper_);
+        lastParentSize_ = { 0.0f, 0.0f };
         startingWindow_ = startingWindowLayoutHelper_->CreateStartingWindowNode(
             startingWindowInfo, sessionInfo.bundleName_, sessionInfo.moduleName_);
         return;
@@ -503,6 +506,7 @@ void WindowPattern::UpdateSnapshotWindowProperty()
     CHECK_NULL_VOID(snapshotWindow_ && session_);
     auto isExitSplitOnBackground = session_->IsExitSplitOnBackground();
     if (isExitSplitOnBackground) {
+        Rosen::SceneSessionManager::GetInstance().SetDelayRemoveSnapshot(false);
         auto imagePattern = snapshotWindow_->GetPattern<ImagePattern>();
         auto renderContext = snapshotWindow_->GetRenderContext();
         auto imageRenderProperty = snapshotWindow_->GetPaintProperty<ImageRenderProperty>();
@@ -570,10 +574,14 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
         snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
     } else {
-        auto context = GetContext();
-        CHECK_NULL_VOID(context);
-        auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-        snapshotWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+        if (session_->GetSystemConfig().IsPhoneWindow() && session_->GetShowRecent()) {
+            auto context = GetContext();
+            CHECK_NULL_VOID(context);
+            auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+            auto snapshotContext = snapshotWindow_->GetRenderContext();
+            CHECK_NULL_VOID(snapshotContext);
+            snapshotContext->UpdateBackgroundColor(Color(backgroundColor));
+        }
         ImageSourceInfo sourceInfo;
         auto scenePersistence = session_->GetScenePersistence();
         CHECK_NULL_VOID(scenePersistence);
@@ -592,7 +600,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         }
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
         ClearImageCache(sourceInfo);
-        auto eventHub = snapshotWindow_->GetEventHub<ImageEventHub>();
+        auto eventHub = snapshotWindow_->GetOrCreateEventHub<ImageEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnError([weakThis = WeakClaim(this)](const LoadImageFailEvent& info) {
             auto self = weakThis.Upgrade();
@@ -609,7 +617,11 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
                 return;
             }
             auto self = weakThis.Upgrade();
-            CHECK_NULL_VOID(self && self->snapshotWindow_);
+            CHECK_NULL_VOID(self);
+            if (self->session_->IsExitSplitOnBackground()) {
+                return;
+            }
+            CHECK_NULL_VOID(self->snapshotWindow_);
             TAG_LOGD(AceLogTag::ACE_WINDOW_SCENE, "load snapshot complete id: %{public}d",
                 self->session_->GetPersistentId());
             auto context = self->snapshotWindow_->GetRenderContext();

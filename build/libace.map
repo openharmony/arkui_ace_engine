@@ -392,6 +392,7 @@
       OHOS::Ace::BorderImage::*;
       OHOS::Ace::ContainerScope::*;
       OHOS::Ace::Dimension::*;
+      OHOS::Ace::ImageSource::*;
       OHOS::Ace::ImageSourceInfo::*;
       OHOS::Ace::JsonUtil::*;
       OHOS::Ace::Recorder::*;
@@ -448,10 +449,13 @@
       OHOS::Ace::Kit::Property::*;
       OHOS::Ace::Kit::ParseColor*;
       OHOS::Ace::Kit::ParseDimension*;
+      OHOS::Ace::Kit::ParseScroller*;
       OHOS::Ace::Kit::AnimationUtils::*;
       OHOS::Ace::Kit::View::*;
       OHOS::Ace::Kit::Column::*;
+      OHOS::Ace::Kit::CustomNode::*;
       OHOS::Ace::Kit::Text::*;
+      OHOS::Ace::Kit::Tabs::*;
       OHOS::Ace::NG::NavigationStack::*;
       OHOS::Ace::NG::CustomNode::*;
       OHOS::Ace::NG::NavigationGroupNode::*;
@@ -532,6 +536,7 @@
       OHOS::Ace::NG::NGGestureRecognizer::IsInResponseLinkRecognizers*;
       OHOS::Ace::TouchEventTarget::GetAttachedNode*;
       "OHOS::Ace::CheckThread(OHOS::Ace::TaskExecutor::TaskType)";
+      OHOS::Ace::NG::PanRecognizer::GetDistance*;
     };
   local:
     *;

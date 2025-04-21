@@ -144,6 +144,7 @@ const CONTENT_FONT_WEIGHT = lazyInit<FontWeight>(() => {
   return fontWeight;
 });
 const SCROLL_BAR_OFFSET = 20;
+const SELECT_DIALOG_SCROLL_BAR_OFFSET = 4;
 
 @CustomDialog
 export struct TipsDialog {
@@ -322,11 +323,12 @@ export struct TipsDialog {
           }
         }
       }
-      .margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) })
+      .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
+      .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
     }
     .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
     .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-    .margin({ end: LengthMetrics.vp(this.marginOffset) })
+    .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) })
   }
 
   aboutToAppear() {
@@ -586,6 +588,7 @@ export struct SelectDialog {
         this.isFocus = false;
       }
     })
+    .margin({ end: LengthMetrics.vp(SELECT_DIALOG_SCROLL_BAR_OFFSET) })
   }
 
   build() {
@@ -747,11 +750,12 @@ export struct ConfirmDialog {
             })
             .width('100%')
         }
-        .margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) })
+        .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
+        .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
       }
       .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-      .margin({ end: LengthMetrics.vp(this.marginOffset) })
+      .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) })
     }
   }
 
@@ -1123,16 +1127,14 @@ struct CustomDialogContentComponent {
                   }
                 }.padding(this.getContentPadding())
               } else {
-                WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
-                  this.ButtonBuilder();
-                }
+                this.buildButton();
               }
             });
           }
         }
         .constraintSize({ maxHeight: this.contentMaxHeight })
         .backgroundBlurStyle(this.customStyle ?
-          BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true })
+        BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true })
         .borderRadius(this.customStyle ? $r('sys.float.ohos_id_corner_radius_dialog') : 0)
         .margin(this.customStyle ? {
           start: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_start')),
@@ -1141,6 +1143,7 @@ struct CustomDialogContentComponent {
         } : { left: 0, right: 0, bottom: 0 })
         .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
       }
+      .borderRadius($r('sys.float.alert_container_shape'))
       .edgeEffect(EdgeEffect.None, { alwaysEnabled: false })
       .backgroundColor(this.themeColorMode === ThemeColorMode.SYSTEM || undefined ?
       Color.Transparent : $r('sys.color.comp_background_primary'))
@@ -1407,6 +1410,33 @@ struct CustomDialogContentComponent {
     .padding(this.getOperationAreaPadding());
   }
 
+  private isSetCustomButtonTheme(): boolean {
+    // is set fadeout style: now only on TV
+    if (IS_FADEOUT_ENABLE()) {
+      // has set button background color prop
+      if (this.theme?.colors?.compBackgroundTertiary || this.theme?.colors?.backgroundEmphasize) {
+        return true;
+      }
+      // has set button font color prop
+      if (this.theme?.colors?.fontEmphasize || this.theme?.colors?.fontOnPrimary || this.theme?.colors?.warning) {
+        return true;
+      }
+      return false;
+    }
+    return true;
+  }
+
+  @Builder
+  buildButton() {
+    if (this.isSetCustomButtonTheme()) {
+      WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+        this.ButtonBuilder();
+      }
+    } else {
+      this.ButtonBuilder();
+    }
+  }
+
   /**
    * get operation area padding
    *
@@ -1579,14 +1609,21 @@ struct CustomDialogContentComponent {
       }
       let isVertical: boolean = false;
       let maxButtonTextSize = vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN() -
-        BUTTON_HORIZONTAL_SPACE() - 2 * BUTTON_HORIZONTAL_PADDING);
+      BUTTON_HORIZONTAL_SPACE() - 2 * BUTTON_HORIZONTAL_PADDING);
       this.buttons.forEach((button) => {
-        let contentSize: SizeOptions = measure.measureTextSize({
-          textContent: button.value,
-          fontSize: this.buttonMaxFontSize
-        });
-        if (Number(contentSize.width) > maxButtonTextSize) {
-          isVertical = true;
+        try {
+          let contentSize: SizeOptions = measure.measureTextSize({
+            textContent: button.value,
+            fontSize: this.buttonMaxFontSize
+          });
+          if (Number(contentSize?.width) > maxButtonTextSize) {
+            isVertical = true;
+          }
+        } catch (err) {
+          let code: number = (err as BusinessError).code;
+          let message: string = (err as BusinessError).message;
+          hilog.error(0x3900, 'Ace',
+            `Faild to dialog isVerticalAlignButton measureTextSize,cause, code: ${code}, message: ${message}`);
         }
       });
       return isVertical;

@@ -125,12 +125,18 @@ public:
 
     bool GetAnalyzerState();
 
+    void GetXmageHeight();
+
+    float CalculateRatio(SizeF layoutSize);
+
 protected:
     int32_t instanceId_;
 
     RefPtr<MediaPlayer> mediaPlayer_ = MediaPlayer::Create();
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<RenderContext> renderContextForMediaPlayer_ = RenderContext::Create();
+    RefPtr<RenderSurface> columnSurface_ = RenderSurface::Create();
+    RefPtr<RenderContext> columnRenderContext_ = RenderContext::Create();
 
 private:
     void OnModifyDone() override;
@@ -142,6 +148,7 @@ private:
     void OnWindowHide() override;
     void OnWindowShow() override;
     
+    void AddWindowStateChangedCallback();
     void RegisterVisibleAreaChange();
     void VisibleAreaCallback(bool visible);
 
@@ -157,13 +164,21 @@ private:
     void UpdateImageHdrMode(const RefPtr<FrameNode>& imageNode);
     void MovingPhotoFormatConvert(MovingPhotoFormat format);
     void DynamicRangeModeConvert(DynamicRangeMode rangeMode);
+    void SetRenderContextBounds(const SizeF& movingPhotoNodeSize, const SizeF& VideoFrameSize);
     SizeF CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize);
     SizeF CalculateFitFill(const SizeF& layoutSize);
     SizeF CalculateFitCover(const SizeF& rawSize, const SizeF& layoutSize);
     SizeF CalculateFitNone(const SizeF& rawSize);
     SizeF CalculateFitScaleDown(const SizeF& rawSize, const SizeF& layoutSize);
     SizeF CalculateFitAuto(const SizeF& rawSize, const SizeF& layoutSize);
+    SizeF CalculateModeFitContain(const SizeF& rawSize, const SizeF& layoutSize);
+    SizeF CalculateModeFitFill(const SizeF& layoutSize);
+    SizeF CalculateModeFitCover(const SizeF& rawSize, const SizeF& layoutSize);
+    SizeF CalculateModeFitNone(const SizeF& rawSize);
+    SizeF CalculateModeFitScaleDown(const SizeF& rawSize, const SizeF& layoutSize);
+    SizeF CalculateModeFitAuto(const SizeF& rawSize, const SizeF& layoutSize);
     SizeF MeasureContentLayout(const SizeF& layoutSize, const RefPtr<MovingPhotoLayoutProperty>& layoutProperty);
+    SizeF MeasureModeContentLayout(const SizeF& layoutSize, const RefPtr<MovingPhotoLayoutProperty>& layoutProperty);
     SizeF GetRawImageSize();
 
     void PrepareMediaPlayer();
@@ -240,6 +255,7 @@ private:
     int64_t autoPlayPeriodStartTime_ = -1;
     int64_t autoPlayPeriodEndTime_ = -1;
     std::string uri_ = "";
+    bool isXmageMode_ = false;
     bool startAnimationFlag_ = false;
     bool isPrepared_ = false;
     bool isMuted_ = false;

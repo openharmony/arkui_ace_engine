@@ -382,7 +382,7 @@ void PatternLockPattern::UpdateDotConnectEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<PatternLockEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<PatternLockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateDotConnectEvent(choosePoint_.back().GetCode());
 }
@@ -535,7 +535,7 @@ void PatternLockPattern::AddPointEnd()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<PatternLockEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<PatternLockEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto patternCompleteEvent = V2::PatternCompleteEvent(chooseCellVec);
@@ -563,7 +563,7 @@ void PatternLockPattern::InitFocusEvent()
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
 
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -763,7 +763,7 @@ void PatternLockPattern::InitMouseEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputEventHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputEventHub);

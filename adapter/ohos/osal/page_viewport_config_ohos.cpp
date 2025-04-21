@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 
-RefPtr<PageViewportConfig> PageViewportConfigOhos::Clone()
+RefPtr<PageViewportConfig> PageViewportConfigOhos::Clone() const
 {
     auto ret = MakeRefPtr<PageViewportConfigOhos>();
     ret->config_ = config_;

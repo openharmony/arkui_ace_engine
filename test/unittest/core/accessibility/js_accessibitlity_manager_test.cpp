@@ -19,6 +19,7 @@
 #define private public
 #define protected public
 #include "accessibility_system_ability_client.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -135,6 +136,8 @@ public:
         void(const AccessibilityEvent& accessibilityEvent,
             const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context));
     MOCK_METHOD0(GenerateAccessibilityWorkMode, AccessibilityWorkMode());
+    MOCK_METHOD1(HandleWillClickAccept, void(RefPtr<NG::FrameNode>& frameNode));
+    MOCK_METHOD1(HandleDidClickAccept, void(RefPtr<NG::FrameNode>& frameNode));
 };
 
 /**
@@ -1222,6 +1225,41 @@ HWTEST_F(JsAccessibilityManagerTest, FrameNodeAccessibilityVisible02, TestSize.L
 }
 
 /**
+ * @tc.name: FrameNodeAccessibilityVisible03
+ * @tc.desc: Test searching root element info when elementId is -1
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, FrameNodeAccessibilityVisible03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a pipeline context and set it as the current context.
+     */
+    auto context = NG::PipelineContext::GetCurrentContext();
+
+    /**
+     * @tc.steps: step2. create an instance of JsAccessibilityManager and set the pipeline context.
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    CHECK_NULL_VOID(jsAccessibilityManager);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    /**
+     * @tc.steps: step3. call the function SearchElementInfoByAccessibilityIdNG with an invalid elementId.
+     */
+    std::list<AccessibilityElementInfo> infos;
+    jsAccessibilityManager->SearchElementInfoByAccessibilityIdNG(-1, 1, infos, context, 0);
+
+    /**
+     * @tc.steps: step4. verify that the infos list contains elements with specific properties.
+     */
+    EXPECT_FALSE(infos.empty());
+    for (auto& info : infos) {
+        EXPECT_FALSE(info.GetAccessibilityVisible());
+    }
+}
+
+/**
  * @tc.name: JsAccessibilityManager024
  * @tc.desc: RegisterGetParentRectHandler
  * @tc.type: FUNC
@@ -1458,5 +1496,158 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     EXPECT_CALL(mockJsManger, GenerateAccessibilityWorkMode())
         .WillOnce(Return(accessibilityWorkMode));
     EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
+}
+
+/**
+ * @tc.name: ConvertActionTypeToBoolen001
+ * @tc.desc: UpdateAccessibilityElementInfo
+ * @tc.type: FUNC
+ */
+ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen001, TestSize.Level1)
+ {
+    /**
+    * @tc.steps: step1. construct JsAccessibilityManager
+    */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    int64_t elementId = 0;
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->GetOrCreateGestureEventHub();
+    auto gesture = eventHub->GetGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    std::string nodeName = "Click";
+    frameNode->SetNodeName(nodeName);
+    /**
+    * @tc.steps: step2. test do without any willClick or didClick, expect return nodeName Click
+    */
+    jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
+        frameNode, elementId, context);
+    EXPECT_EQ(frameNode->GetNodeName(), nodeName);
+    /**
+    * @tc.steps: step3. test do with willClick or didClick, expect return nodeName WillClick_Click_DidClick
+    */
+    NG::UIObserverHandler::WillClickHandleFunc willClickHandleFunc = [](
+        AbilityContextInfo&, const GestureEvent&, const ClickInfo&,
+        const RefPtr<FrameNode>& frameNode) -> void {
+            if (frameNode) {
+                std::string willClick = "WillClick_" + frameNode->GetNodeName();
+                frameNode->SetNodeName(willClick);
+            }
+        };
+    ASSERT_NE(willClickHandleFunc, nullptr);
+    NG::UIObserverHandler::GetInstance().SetWillClickFunc(willClickHandleFunc);
+
+    NG::UIObserverHandler::DidClickHandleFunc didClickHandleFunc = [](
+        AbilityContextInfo&, const GestureEvent&, const ClickInfo&,
+        const RefPtr<FrameNode>& frameNode) -> void {
+            if (frameNode) {
+                std::string didClick = frameNode->GetNodeName() + "_DidClick";
+                frameNode->SetNodeName(didClick);
+            }
+        };
+    ASSERT_NE(didClickHandleFunc, nullptr);
+    NG::UIObserverHandler::GetInstance().SetDidClickFunc(didClickHandleFunc);
+    jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
+        frameNode, elementId, context);
+    EXPECT_EQ(frameNode->GetNodeName(), "WillClick_Click_DidClick");
+    NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
+    NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
+}
+
+/**
+ * @tc.name: ConvertActionTypeToBoolen002
+ * @tc.desc: UpdateAccessibilityElementInfo
+ * @tc.type: FUNC
+ */
+ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen002, TestSize.Level1)
+ {
+    /**
+    * @tc.steps: step1. construct JsAccessibilityManager
+    */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    int64_t elementId = 0;
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->GetOrCreateGestureEventHub();
+    auto gesture = eventHub->GetGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    std::string nodeName = "Click";
+    frameNode->SetNodeName(nodeName);
+    /**
+    * @tc.steps: step2. test only with willClick, expect return nodeName WillClick_Click
+    */
+    NG::UIObserverHandler::WillClickHandleFunc willClickHandleFunc = [](
+        AbilityContextInfo&, const GestureEvent&, const ClickInfo&,
+        const RefPtr<FrameNode>& frameNode) -> void {
+            if (frameNode) {
+                std::string willClick = "WillClick_" + frameNode->GetNodeName();
+                frameNode->SetNodeName(willClick);
+            }
+        };
+    ASSERT_NE(willClickHandleFunc, nullptr);
+    NG::UIObserverHandler::GetInstance().SetWillClickFunc(willClickHandleFunc);
+
+    NG::UIObserverHandler::DidClickHandleFunc didClickHandleFunc = [](
+        AbilityContextInfo&, const GestureEvent&, const ClickInfo&,
+        const RefPtr<FrameNode>& frameNode) -> void {};
+    ASSERT_NE(didClickHandleFunc, nullptr);
+    NG::UIObserverHandler::GetInstance().SetDidClickFunc(didClickHandleFunc);
+    jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
+        frameNode, elementId, context);
+    EXPECT_EQ(frameNode->GetNodeName(), "WillClick_Click");
+    NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
+    NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
+}
+
+/**
+ * @tc.name: ConvertActionTypeToBoolen003
+ * @tc.desc: UpdateAccessibilityElementInfo
+ * @tc.type: FUNC
+ */
+ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen003, TestSize.Level1)
+ {
+    /**
+    * @tc.steps: step1. construct JsAccessibilityManager
+    */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    int64_t elementId = 0;
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->GetOrCreateGestureEventHub();
+    auto gesture = eventHub->GetGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    std::string nodeName = "Click";
+    frameNode->SetNodeName(nodeName);
+
+    /**
+    * @tc.steps: step3. test do with didClick, expect return nodeName Click_DidClick
+    */
+    NG::UIObserverHandler::WillClickHandleFunc willClickHandleFunc = [](
+        AbilityContextInfo&, const GestureEvent&, const ClickInfo&,
+        const RefPtr<FrameNode>& frameNode) -> void {};
+    ASSERT_NE(willClickHandleFunc, nullptr);
+    NG::UIObserverHandler::GetInstance().SetWillClickFunc(willClickHandleFunc);
+
+    NG::UIObserverHandler::DidClickHandleFunc didClickHandleFunc = [](
+        AbilityContextInfo&, const GestureEvent&, const ClickInfo&,
+        const RefPtr<FrameNode>& frameNode) -> void {
+            if (frameNode) {
+                std::string didClick = frameNode->GetNodeName() + "_DidClick";
+                frameNode->SetNodeName(didClick);
+            }
+        };
+    ASSERT_NE(didClickHandleFunc, nullptr);
+    NG::UIObserverHandler::GetInstance().SetDidClickFunc(didClickHandleFunc);
+    jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
+        frameNode, elementId, context);
+    EXPECT_EQ(frameNode->GetNodeName(), "Click_DidClick");
+    NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
+    NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
 }
 } // namespace OHOS::Ace::NG

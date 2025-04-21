@@ -162,7 +162,7 @@ void VideoModelNG::SetOnStart(VideoEventFunc&& onStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStart(std::move(onStart));
 }
@@ -171,7 +171,7 @@ void VideoModelNG::SetOnPause(VideoEventFunc&& onPause)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPause(std::move(onPause));
 }
@@ -180,7 +180,7 @@ void VideoModelNG::SetOnFinish(VideoEventFunc&& onFinish)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFinish(std::move(onFinish));
 }
@@ -189,7 +189,7 @@ void VideoModelNG::SetOnError(VideoEventFunc&& onError)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(onError));
 }
@@ -198,7 +198,7 @@ void VideoModelNG::SetOnPrepared(VideoEventFunc&& onPrepared)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPrepared(std::move(onPrepared));
 }
@@ -207,7 +207,7 @@ void VideoModelNG::SetOnSeeking(VideoEventFunc&& onSeeking)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSeeking(std::move(onSeeking));
 }
@@ -216,7 +216,7 @@ void VideoModelNG::SetOnSeeked(VideoEventFunc&& onSeeked)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSeeked(std::move(onSeeked));
 }
@@ -225,7 +225,7 @@ void VideoModelNG::SetOnUpdate(VideoEventFunc&& onUpdate)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnUpdate(std::move(onUpdate));
 }
@@ -234,7 +234,7 @@ void VideoModelNG::SetOnStop(VideoEventFunc&& onStop)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStop(std::move(onStop));
 }
@@ -243,7 +243,7 @@ void VideoModelNG::SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFullScreenChange(std::move(onFullScreenChange));
 }

@@ -19,7 +19,7 @@
 #include "base/network/download_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/image_provider/adapter/image_decoder.h"
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
 #include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_object.h"
@@ -28,7 +28,7 @@
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/image_provider/svg_image_object.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
-#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#include "core/components_ng/render/adapter/drawing_image.h"
 #include "core/image/image_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

@@ -1808,23 +1808,6 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc089, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextPatternFunc090
- * @tc.desc: test OnAreaChangedInner.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc090, TestSize.Level1)
-{
-    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
-    ASSERT_NE(keyboard, nullptr);
-    auto pattern = keyboard->GetPattern<KeyboardPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->SetKeyboardOption(false);
-    pattern->keyboardHeight_ = 5.0f;
-    pattern->OnAreaChangedInner();
-    EXPECT_EQ(pattern->keyboardHeight_, 5.0f);
-}
-
-/**
  * @tc.name: TextPatternFunc091
  * @tc.desc: test OnAreaChangedInner.
  * @tc.type: FUNC

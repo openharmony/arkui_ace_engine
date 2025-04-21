@@ -24,7 +24,7 @@
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/image/sk_image_cache.h"
+#include "core/image/image_cache.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -138,8 +138,7 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
         auto tempPixelMap = pixelMap->GetPixelMapSharedPtr();
         CHECK_NULL_VOID(tempPixelMap);
         RSRect rec;
-        if (canvasImage.flag == DrawImageType::THREE_PARAMS &&
-            apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
+        if (canvasImage.flag == DrawImageType::THREE_PARAMS) {
             rec = RSRect(canvasImage.dx, canvasImage.dy,
                 canvasImage.dx + tempPixelMap->GetWidth(), canvasImage.dy + tempPixelMap->GetHeight());
         } else {
@@ -225,7 +224,7 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
         return nullptr;
     }
 
-    RSBitmapFormat format = GetBitmapFormat();
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_PREMUL };
     RSBitmap tempCache;
     tempCache.Build(dirtyWidth, dirtyHeight, format);
     int32_t size = dirtyWidth * dirtyHeight;

@@ -109,7 +109,6 @@ const IS_SUPPORT_SUBCOMPONENT_EVENT = LengthMetrics.resource({
 const RECOVER_ITEM_SCALE = 1;
 const CLEAR_SHADOW = -1;
 const OPERATE_ITEM_RADIUS = 50;
-const OPERATE_ITEM_BACKGROUND_COLOR = '#33000000';
 const DEFUALT_RADIO_CHECKBOX_BORDER_COLOR = {
     'id': -1,
     'type': 10001,
@@ -117,7 +116,6 @@ const DEFUALT_RADIO_CHECKBOX_BORDER_COLOR = {
     'bundleName': '__harDefaultBundleName__',
     'moduleName': '__harDefaultModuleName__'
 };
-const OPERATE_ITEM_COLOR = '#99000000';
 const TEXT_SUPPORT_MARQUEE = 1;
 const IS_MARQUEE_OR_ELLIPSIS = LengthMetrics.resource({
     'id': -1,
@@ -1011,6 +1009,17 @@ class ContentItemStruct extends ViewPU {
 class CreateIconParam {
 }
 
+class OperateItemStructController {
+    constructor() {
+        this.changeRadioState = () => {
+        };
+        this.changeCheckboxState = () => {
+        };
+        this.changeSwitchState = () => {
+        };
+    }
+}
+
 class OperateItemStruct extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -1070,7 +1079,16 @@ class OperateItemStruct extends ViewPU {
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         }, this, 'iconColor');
-        this.__isChecked = new SynchedPropertySimpleTwoWayPU(params.isChecked, this, 'isChecked');
+        this.controller = new OperateItemStructController();
+        this.changeRadioState = () => {
+            this.radioState = !this.radioState;
+        };
+        this.changeCheckboxState = () => {
+            this.checkBoxState = !this.checkBoxState;
+        };
+        this.changeSwitchState = () => {
+            this.switchState = !this.switchState;
+        };
         this.setInitiallyProvidedValue(params);
         this.declareWatch('arrow', this.onPropChange);
         this.declareWatch('icon', this.onPropChange);
@@ -1084,7 +1102,6 @@ class OperateItemStruct extends ViewPU {
         this.declareWatch('text', this.onPropChange);
         this.declareWatch('secondaryTextColor', this.onFocusChange);
         this.declareWatch('isFocus', this.onFocusChange);
-        this.declareWatch('isChecked', this.onPropChange);
         this.finalizeConstruction();
     }
 
@@ -1152,6 +1169,18 @@ class OperateItemStruct extends ViewPU {
         if (params.iconColor !== undefined) {
             this.iconColor = params.iconColor;
         }
+        if (params.controller !== undefined) {
+            this.controller = params.controller;
+        }
+        if (params.changeRadioState !== undefined) {
+            this.changeRadioState = params.changeRadioState;
+        }
+        if (params.changeCheckboxState !== undefined) {
+            this.changeCheckboxState = params.changeCheckboxState;
+        }
+        if (params.changeSwitchState !== undefined) {
+            this.changeSwitchState = params.changeSwitchState;
+        }
     }
 
     updateStateVars(params) {
@@ -1198,7 +1227,6 @@ class OperateItemStruct extends ViewPU {
         this.__secondaryTextSize.purgeDependencyOnElmtId(rmElmtId);
         this.__secondaryTextColors.purgeDependencyOnElmtId(rmElmtId);
         this.__iconColor.purgeDependencyOnElmtId(rmElmtId);
-        this.__isChecked.purgeDependencyOnElmtId(rmElmtId);
     }
 
     aboutToBeDeleted() {
@@ -1231,7 +1259,6 @@ class OperateItemStruct extends ViewPU {
         this.__secondaryTextSize.aboutToBeDeleted();
         this.__secondaryTextColors.aboutToBeDeleted();
         this.__iconColor.aboutToBeDeleted();
-        this.__isChecked.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -1468,14 +1495,6 @@ class OperateItemStruct extends ViewPU {
         this.__iconColor.set(newValue);
     }
 
-    get isChecked() {
-        return this.__isChecked.get();
-    }
-
-    set isChecked(newValue) {
-        this.__isChecked.set(newValue);
-    }
-
     onWillApplyTheme(theme) {
         this.secondaryTextColor = theme.colors.fontSecondary;
         this.hoveringColor = theme.colors.interactiveHover;
@@ -1511,13 +1530,13 @@ class OperateItemStruct extends ViewPU {
 
     onPropChange() {
         if (this.switch != null) {
-            this.switchState = IS_SUPPORT_SUBCOMPONENT_EVENT ? this.switch.isCheck : this.isChecked;
+            this.switchState = this.switch.isCheck;
         }
         if (this.radio != null) {
-            this.radioState = IS_SUPPORT_SUBCOMPONENT_EVENT ? this.radio.isCheck : this.isChecked;
+            this.radioState = this.radio.isCheck;
         }
         if (this.checkBox != null) {
-            this.checkBoxState = IS_SUPPORT_SUBCOMPONENT_EVENT ? this.checkBox.isCheck : this.isChecked;
+            this.checkBoxState = this.checkBox.isCheck;
         }
         if ((this.button == null && this.image == null && this.symbolStyle == null && this.text != null) &&
             ((this.icon != null) || (this.icon == null && this.arrow != null))) {
@@ -1527,25 +1546,14 @@ class OperateItemStruct extends ViewPU {
         }
     }
 
-    getUnselectedColor() {
-        if (IS_SUPPORT_SUBCOMPONENT_EVENT) {
-            return DEFUALT_RADIO_CHECKBOX_BORDER_COLOR;
-        }
-        return this.isFocus ? OPERATE_ITEM_COLOR : DEFUALT_RADIO_CHECKBOX_BORDER_COLOR;
-    }
-
     aboutToAppear() {
-        if (this.switch !== null) {
-            this.isChecked = this.switch.isCheck;
-        }
-        if (this.radio !== null) {
-            this.isChecked = this.radio.isCheck;
-        }
-        if (this.checkBox !== null) {
-            this.isChecked = this.checkBox.isCheck;
-        }
         this.onPropChange();
         this.onFocusChange();
+        if (this.controller) {
+            this.controller.changeRadioState = this.changeRadioState;
+            this.controller.changeCheckboxState = this.changeCheckboxState;
+            this.controller.changeSwitchState = this.changeSwitchState;
+        }
     }
 
     createButton(parent = null) {
@@ -1883,15 +1891,13 @@ class OperateItemStruct extends ViewPU {
             Radio.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Radio.checked(this.radioState);
             Radio.radioStyle({
-                uncheckedBorderColor: this.getUnselectedColor()
+                uncheckedBorderColor: DEFUALT_RADIO_CHECKBOX_BORDER_COLOR
             });
-            Radio.backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
-            Color.Transparent);
+            Radio.backgroundColor(Color.Transparent);
             Radio.borderRadius(OPERATE_ITEM_RADIUS);
             Radio.onChange((isCheck) => {
                 if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.radioState = isCheck;
-                    this.isChecked = isCheck;
                 }
                 if (this.radio?.onChange) {
                     this.radio?.onChange(isCheck);
@@ -1929,15 +1935,13 @@ class OperateItemStruct extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Checkbox.create();
             Checkbox.borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS);
-            Checkbox.unselectedColor(this.getUnselectedColor());
-            Checkbox.backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
-            Color.Transparent);
+            Checkbox.unselectedColor(DEFUALT_RADIO_CHECKBOX_BORDER_COLOR);
+            Checkbox.backgroundColor(Color.Transparent);
             Checkbox.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Checkbox.select(this.checkBoxState);
             Checkbox.onChange((isCheck) => {
                 if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.checkBoxState = isCheck;
-                    this.isChecked = isCheck;
                 }
                 if (this.checkBox?.onChange) {
                     this.checkBox?.onChange(isCheck);
@@ -1999,16 +2003,9 @@ class OperateItemStruct extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Toggle.create({ type: ToggleType.Switch, isOn: this.switchState });
             Toggle.borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS);
-            Toggle.backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
-            Color.Transparent);
-            Toggle.switchPointColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus && !this.switchState ?
-                OPERATE_ITEM_COLOR :
-                UNUSUAL);
+            Toggle.backgroundColor(Color.Transparent);
             Toggle.onChange((isCheck) => {
                 this.switchState = isCheck;
-                if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-                    this.isChecked = isCheck;
-                }
                 if (this.switch?.onChange) {
                     this.switch?.onChange(isCheck);
                 }
@@ -2469,9 +2466,9 @@ export class ComposeListItem extends ViewPU {
         this.callbackId = undefined;
         this.__accessibilityTextBuilder = new ObservedPropertySimplePU('', this, 'accessibilityTextBuilder');
         this.__isFocus = new ObservedPropertySimplePU(false, this, 'isFocus');
-        this.__isChecked = new ObservedPropertySimplePU(false, this, 'isChecked');
         this.__isWrapText = new ObservedPropertySimplePU(false, this, 'isWrapText');
         this.__listScale = new ObservedPropertyObjectPU({ x: 1, y: 1 }, this, 'listScale');
+        this.operateItemStructRef = new OperateItemStructController();
         this.envCallback = {
             onConfigurationUpdated: (config) => {
                 if (config === undefined || !this.isFollowingSystemFontScale) {
@@ -2570,14 +2567,14 @@ export class ComposeListItem extends ViewPU {
         if (params.isFocus !== undefined) {
             this.isFocus = params.isFocus;
         }
-        if (params.isChecked !== undefined) {
-            this.isChecked = params.isChecked;
-        }
         if (params.isWrapText !== undefined) {
             this.isWrapText = params.isWrapText;
         }
         if (params.listScale !== undefined) {
             this.listScale = params.listScale;
+        }
+        if (params.operateItemStructRef !== undefined) {
+            this.operateItemStructRef = params.operateItemStructRef;
         }
         if (params.envCallback !== undefined) {
             this.envCallback = params.envCallback;
@@ -2611,7 +2608,6 @@ export class ComposeListItem extends ViewPU {
         this.__textArrowLeftSafeOffset.purgeDependencyOnElmtId(rmElmtId);
         this.__accessibilityTextBuilder.purgeDependencyOnElmtId(rmElmtId);
         this.__isFocus.purgeDependencyOnElmtId(rmElmtId);
-        this.__isChecked.purgeDependencyOnElmtId(rmElmtId);
         this.__isWrapText.purgeDependencyOnElmtId(rmElmtId);
         this.__listScale.purgeDependencyOnElmtId(rmElmtId);
     }
@@ -2638,7 +2634,6 @@ export class ComposeListItem extends ViewPU {
         this.__textArrowLeftSafeOffset.aboutToBeDeleted();
         this.__accessibilityTextBuilder.aboutToBeDeleted();
         this.__isFocus.aboutToBeDeleted();
-        this.__isChecked.aboutToBeDeleted();
         this.__isWrapText.aboutToBeDeleted();
         this.__listScale.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
@@ -2811,14 +2806,6 @@ export class ComposeListItem extends ViewPU {
 
     set isFocus(newValue) {
         this.__isFocus.set(newValue);
-    }
-
-    get isChecked() {
-        return this.__isChecked.get();
-    }
-
-    set isChecked(newValue) {
-        this.__isChecked.set(newValue);
     }
 
     get isWrapText() {
@@ -3143,7 +3130,6 @@ export class ComposeListItem extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             });
             Stack.onClick(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : () => {
-                this.isChecked = this.operateItem?.radio ? true : !this.isChecked;
                 if (this.operateItem?.icon && this.operateItem.icon?.action) {
                     this.operateItem.icon.action();
                 }
@@ -3152,6 +3138,15 @@ export class ComposeListItem extends ViewPU {
                 }
                 if (this.operateItem?.arrow && this.operateItem.arrow?.action) {
                     this.operateItem.arrow.action();
+                }
+                if (this.operateItem?.radio) {
+                    this.operateItemStructRef.changeRadioState();
+                }
+                if (this.operateItem?.checkbox) {
+                    this.operateItemStructRef.changeCheckboxState();
+                }
+                if (this.operateItem?.switch) {
+                    this.operateItemStructRef.changeSwitchState();
                 }
             });
             Stack.scale(ObservedObject.GetRawObject(this.listScale));
@@ -3255,7 +3250,7 @@ export class ComposeListItem extends ViewPU {
                                 }, undefined, elmtId, () => {
                                 }, {
                                     page: 'library/src/main/ets/components/composelistitem.ets',
-                                    line: 1405,
+                                    line: 1401,
                                     col: 11
                                 });
                                 ViewPU.create(componentCall);
@@ -3300,7 +3295,7 @@ export class ComposeListItem extends ViewPU {
                                 }, undefined, elmtId, () => {
                                 }, {
                                     page: 'library/src/main/ets/components/composelistitem.ets',
-                                    line: 1410,
+                                    line: 1406,
                                     col: 11
                                 });
                                 ViewPU.create(componentCall);
@@ -3383,11 +3378,11 @@ export class ComposeListItem extends ViewPU {
                                     rightWidth: this.calculatedRightWidth(),
                                     parentDirection: this.__containerDirection,
                                     isFocus: this.__isFocus,
-                                    isChecked: this.__isChecked,
+                                    controller: this.operateItemStructRef
                                 }, undefined, elmtId, () => {
                                 }, {
                                     page: 'library/src/main/ets/components/composelistitem.ets',
-                                    line: 1426,
+                                    line: 1422,
                                     col: 11
                                 });
                                 ViewPU.create(componentCall);
@@ -3412,7 +3407,7 @@ export class ComposeListItem extends ViewPU {
                                         rightWidth: this.calculatedRightWidth(),
                                         parentDirection: this.containerDirection,
                                         isFocus: this.isFocus,
-                                        isChecked: this.isChecked
+                                        controller: this.operateItemStructRef
                                     };
                                 };
                                 componentCall.paramsGenerator_ = paramsLambda;
