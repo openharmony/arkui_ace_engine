@@ -489,6 +489,7 @@ PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties& dialogPr
         .onWillDisappear = dialogProps.onWillDisappear,
         .keyboardAvoidMode = dialogProps.keyboardAvoidMode,
         .dialogCallback = dialogProps.dialogCallback,
+        .keyboardAvoidDistance = dialogProps.keyboardAvoidDistance,
         .levelOrder = dialogProps.levelOrder,
         .dialogLevelMode = dialogProps.dialogLevelMode,
         .dialogLevelUniqueId = dialogProps.dialogLevelUniqueId,
