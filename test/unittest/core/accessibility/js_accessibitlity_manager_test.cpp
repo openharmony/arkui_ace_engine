@@ -1481,25 +1481,25 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager031, TestSize.Level1)
     /**
      * @tc.steps: step2. test ConvertActionTypeToBoolen
      */
-    auto ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD,
+    bool ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD,
         frameNode, elementId, context);
-    EXPECT_EQ(ret, false);
+    EXPECT_FALSE(ret);
     
     ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD,
         frameNode, elementId, context);
-    EXPECT_EQ(ret, false);
+    EXPECT_FALSE(ret);
     
     ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_NEXT_TEXT,
         frameNode, elementId, context);
-    EXPECT_EQ(ret, false);
+        EXPECT_FALSE(ret);
     
     ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_PREVIOUS_TEXT,
         frameNode, elementId, context);
-    EXPECT_EQ(ret, false);
+    EXPECT_FALSE(ret);
     
     ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_SET_TEXT,
         frameNode, elementId, context);
-    EXPECT_EQ(ret, false);
+    EXPECT_FALSE(ret);
 }
 
 /**
