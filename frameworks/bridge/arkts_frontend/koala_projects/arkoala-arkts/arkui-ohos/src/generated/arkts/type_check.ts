@@ -5342,11 +5342,11 @@ export class TypeChecker {
     static SslError_FromOrdinal(ordinal: int32): SslError {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
-    static FileSelectorMode_ToNumeric(value: FileSelectorMode): int32 {
-        return value.valueOf()
+    static FileSelectorMode_ToOrdinal(value: FileSelectorMode): int32 {
+        return value as int32
     }
-    static FileSelectorMode_FromNumeric(ordinal: int32): FileSelectorMode {
-        return FileSelectorMode.fromValue(ordinal)
+    static FileSelectorMode_FromOrdinal(ordinal: int32): FileSelectorMode {
+        throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
     static WebLayoutMode_ToOrdinal(value: WebLayoutMode): int32 {
         return value as int32
@@ -5366,23 +5366,23 @@ export class TypeChecker {
     static ProtectedResourceType_FromOrdinal(ordinal: int32): ProtectedResourceType {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
-    static ContextMenuSourceType_ToNumeric(value: ContextMenuSourceType): int32 {
-        return value.valueOf()
+    static ContextMenuSourceType_ToOrdinal(value: ContextMenuSourceType): int32 {
+        return value as int32
     }
-    static ContextMenuSourceType_FromNumeric(ordinal: int32): ContextMenuSourceType {
-        return ContextMenuSourceType.fromValue(ordinal)
+    static ContextMenuSourceType_FromOrdinal(ordinal: int32): ContextMenuSourceType {
+        throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
-    static ContextMenuMediaType_ToNumeric(value: ContextMenuMediaType): int32 {
-        return value.valueOf()
+    static ContextMenuMediaType_ToOrdinal(value: ContextMenuMediaType): int32 {
+        return value as int32
     }
-    static ContextMenuMediaType_FromNumeric(ordinal: int32): ContextMenuMediaType {
-        return ContextMenuMediaType.fromValue(ordinal)
+    static ContextMenuMediaType_FromOrdinal(ordinal: int32): ContextMenuMediaType {
+        throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
-    static ContextMenuInputFieldType_ToNumeric(value: ContextMenuInputFieldType): int32 {
-        return value.valueOf()
+    static ContextMenuInputFieldType_ToOrdinal(value: ContextMenuInputFieldType): int32 {
+        return value as int32
     }
-    static ContextMenuInputFieldType_FromNumeric(ordinal: int32): ContextMenuInputFieldType {
-        return ContextMenuInputFieldType.fromValue(ordinal)
+    static ContextMenuInputFieldType_FromOrdinal(ordinal: int32): ContextMenuInputFieldType {
+        throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
     static NativeEmbedStatus_ToOrdinal(value: NativeEmbedStatus): int32 {
         return value as int32
