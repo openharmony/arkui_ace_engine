@@ -5504,7 +5504,7 @@ ArkUINativeModuleValue CommonBridge::ResetForegroundBrightness(ArkUIRuntimeCallI
 }
 
 void ParseDragPreViewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, Local<JSValueRef>& valueObj,
-    ArkUIDragPreViewOptions& preViewOptions, int32_t* modeIntArray)
+    ArkUIDragPreViewOptions& preViewOptions)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
@@ -5522,13 +5522,12 @@ void ParseDragPreViewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, Local<JSValu
         if (arrLength > NUM_4) {
             arrLength = NUM_4;
         }
-        modeIntArray = new int32_t[arrLength];
+        preViewOptions.modeArray = new int32_t[arrLength];
         for (int32_t i = 0; i < arrLength; i++) {
             Local<JSValueRef> objValue = modeArray->GetValueAt(vm, modeArray, i);
-            modeIntArray[i] = objValue->Int32Value(vm);
+            preViewOptions.modeArray[i] = objValue->Int32Value(vm);
         }
         preViewOptions.isModeArray = true;
-        preViewOptions.modeArray = modeIntArray;
         preViewOptions.modeArrayLength = static_cast<ArkUI_Int32>(arrLength);
     }
 
@@ -5589,13 +5588,12 @@ ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo*
     Local<JSValueRef> valueObj = runtimeCallInfo->GetCallArgRef(NUM_1);
     struct ArkUIDragPreViewOptions preViewOptions = { 1, 0, 0, 0, nullptr, false, true, false };
     struct ArkUIDragInteractionOptions interactionOptions = { false, false, true, false, false };
-    int32_t* modeIntArray = nullptr;
-    ParseDragPreViewOptions(runtimeCallInfo, valueObj, preViewOptions, modeIntArray);
+    ParseDragPreViewOptions(runtimeCallInfo, valueObj, preViewOptions);
     ParseDragInteractionOptions(runtimeCallInfo, valueObj, interactionOptions);
 
     GetArkUINodeModifiers()->getCommonModifier()->setDragPreviewOptions(
         nativeNode, preViewOptions, interactionOptions);
-    delete[] modeIntArray;
+    delete[] preViewOptions.modeArray;
     return panda::JSValueRef::Undefined(vm);
 }
 
