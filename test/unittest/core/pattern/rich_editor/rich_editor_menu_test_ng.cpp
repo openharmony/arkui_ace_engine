@@ -740,6 +740,7 @@ HWTEST_F(RichEditorMenuTestNg, HandleMenuCallbackOnSelectAll001, TestSize.Level1
     richEditorPattern->selectOverlay_->isUsingMouse_ = true;
     EXPECT_EQ(richEditorPattern->selectOverlay_->IsUsingMouse(), true);
     richEditorPattern->HandleMenuCallbackOnSelectAll();
+    ASSERT_EQ(richEditorPattern->IsUsingMouse(), false);
 }
 
 /**
