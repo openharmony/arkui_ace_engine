@@ -1649,6 +1649,370 @@ HWTEST_F(SwiperTestNg, SwipeAutoLinearIsOutOfBoundary001, TestSize.Level1)
 }
 
 /**
++ * @tc.name: BuildAxisInfo001
+ * @tc.desc: Test BuildAxisInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildAxisInfo001, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->direction_ = Axis::NONE;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildAxisInfo(json);
+    EXPECT_EQ(json->GetString("Axis"), "NONE");
+}
+
+/**
++ * @tc.name: BuildAxisInfo002
+ * @tc.desc: Test BuildAxisInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildAxisInfo002, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->direction_ = Axis::HORIZONTAL;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildAxisInfo(json);
+    EXPECT_EQ(json->GetString("Axis"), "HORIZONTAL");
+}
+
+/**
++ * @tc.name: BuildAxisInfo003
+ * @tc.desc: Test BuildAxisInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildAxisInfo003, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->direction_ = Axis::FREE;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildAxisInfo(json);
+    EXPECT_EQ(json->GetString("Axis"), "FREE");
+}
+
+/**
++ * @tc.name: BuildAxisInfo004
+ * @tc.desc: Test BuildAxisInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildAxisInfo004, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->direction_ = Axis::VERTICAL;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildAxisInfo(json);
+    EXPECT_EQ(json->GetString("Axis"), "VERTICAL");
+}
+
+/**
++ * @tc.name: BuildAxisInfo005
+ * @tc.desc: Test BuildAxisInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildAxisInfo005, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto direct = 5;
+    swiperPattern->direction_ = (Axis)direct;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildAxisInfo(json);
+    EXPECT_EQ(json->GetString("Axis"), "");
+}
+
+/**
++ * @tc.name: BuildItemPositionInfo001
+ * @tc.desc: Test BuildItemPositionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildItemPositionInfo001, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, swiperPattern);
+    SwiperItemInfo item1;
+    item1.startPos = 0;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, swiperPattern);
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPosition.insert(std::make_pair(0, item1));
+    itemPosition.insert(std::make_pair(1, item2));
+    swiperPattern->itemPosition_ = itemPosition;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildItemPositionInfo(json);
+    EXPECT_TRUE(json->GetValue("itemPosition"));
+}
+
+/**
++ * @tc.name: BuildItemPositionInfo002
+ * @tc.desc: Test BuildItemPositionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildItemPositionInfo002, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    swiperPattern->itemPosition_ = itemPosition;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildItemPositionInfo(json);
+    EXPECT_EQ(json->GetString("itemPosition"), "");
+}
+
+/**
++ * @tc.name: BuildItemPositionInfo003
+ * @tc.desc: Test BuildItemPositionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildItemPositionInfo003, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item1;
+    item1.startPos = 0;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPositionInAnimation.insert(std::make_pair(0, item1));
+    itemPositionInAnimation.insert(std::make_pair(1, item2));
+    swiperPattern->itemPositionInAnimation_ = itemPositionInAnimation;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildItemPositionInfo(json);
+    EXPECT_TRUE(json->GetValue("itemPositionInAnimation"));
+}
+
+/**
++ * @tc.name: BuildItemPositionInfo004
+ * @tc.desc: Test BuildItemPositionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildItemPositionInfo004, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation;
+    swiperPattern->itemPositionInAnimation_ = itemPositionInAnimation;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildAxisInfo(json);
+    EXPECT_EQ(json->GetString("itemPositionInAnimation"), "");
+}
+
+/**
++ * @tc.name: BuildIndicatorTypeInfo001
+ * @tc.desc: Test BuildIndicatorTypeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildIndicatorTypeInfo001, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->lastSwiperIndicatorType_ = SwiperIndicatorType::DOT;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildIndicatorTypeInfo(json);
+    EXPECT_EQ(json->GetString("SwiperIndicatorType"), "DOT");
+}
+
+/**
++ * @tc.name: BuildIndicatorTypeInfo002
+ * @tc.desc: Test BuildIndicatorTypeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildIndicatorTypeInfo002, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->lastSwiperIndicatorType_ = SwiperIndicatorType::DIGIT;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildIndicatorTypeInfo(json);
+    EXPECT_EQ(json->GetString("SwiperIndicatorType"), "DIGIT");
+}
+
+/**
++ * @tc.name: BuildIndicatorTypeInfo003
+ * @tc.desc: Test BuildIndicatorTypeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildIndicatorTypeInfo003, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto lastSwiperIndicatorType = 5;
+    swiperPattern->lastSwiperIndicatorType_ = (SwiperIndicatorType)lastSwiperIndicatorType;
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildIndicatorTypeInfo(json);
+    EXPECT_EQ(json->GetString("SwiperIndicatorType"), "");
+}
+
+/**
++ * @tc.name: BuildIndicatorTypeInfo004
+ * @tc.desc: Test BuildIndicatorTypeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildIndicatorTypeInfo004, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->BuildIndicatorTypeInfo(json);
+    EXPECT_EQ(json->GetString("lastSwiperIndicatorType"), "null");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo001
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo001, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->panDirection_.type = PanDirection::NONE;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "NONE");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo002
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo002, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->panDirection_.type = PanDirection::LEFT;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "LEFT");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo003
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo003, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->panDirection_.type = PanDirection::RIGHT;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "RIGHT");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo004
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo004, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->panDirection_.type = PanDirection::HORIZONTAL;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "HORIZONTAL");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo005
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo005, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->panDirection_.type = PanDirection::UP;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "UP");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo006
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo006, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->panDirection_.type = PanDirection::DOWN;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "DOWN");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo007
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo007, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->panDirection_.type = PanDirection::VERTICAL;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "VERTICAL");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo008
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo008, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    swiperPattern->panDirection_.type = PanDirection::ALL;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "ALL");
+}
+
+/**
+ * @tc.name: BuildPanDirectionInfo009
+ * @tc.desc: Test BuildPanDirectionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, BuildPanDirectionInfo009, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto json = JsonUtil::Create(true);
+    uint32_t type = 10;
+    swiperPattern->panDirection_.type = type;
+    swiperPattern->BuildPanDirectionInfo(json);
+    EXPECT_EQ(json->GetString("PanDirection"), "");
+}
+
+/**
  * @tc.name: CustomAnimationHandleDragEnd001
  * @tc.desc: Test SwiperPattern HandleDragEnd on custom animation
  * @tc.type: FUNC
