@@ -75,6 +75,9 @@ namespace {
     static const auto ATTRIBUTE_TEXT_DEFAULT_VALUE = "TextOverflow.Clip";
     static const auto ATTRIBUTE_MAX_LINES_NAME = "maxLines";
     static const auto ATTRIBUTE_MAX_LINES_DEFAULT_STR_VALUE = "1";
+    static const auto ATTRIBUTE_SHOW_COUNTER_NAME = "showCounter";
+    static const auto ATTRIBUTE_SHOW_COUNTER_DEFAULT_VALUE =
+        "{\"value\":false,\"options\":{\"thresholdPercentage\":-1,\"highlightBorder\":true}}";
 }
 
 class TextInputModifierTest2 : public ModifierTestBase<GENERATED_ArkUITextInputModifier,
@@ -223,7 +226,7 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOpt
 HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
 {
     static const int expectedResId = 123;
-    static const std::u16string TEST_VALUE(u"string text");
+    static const std::u16string testValue(u"string text");
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<NG::TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -235,7 +238,7 @@ HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
         ASSERT_NE(peer, nullptr);
         auto submitEventInfo = peer->GetEventInfo();
         ASSERT_NE(submitEventInfo, nullptr);
-        EXPECT_EQ(submitEventInfo->GetText(), TEST_VALUE);
+        EXPECT_EQ(submitEventInfo->GetText(), testValue);
         GeneratedModifier::GetSubmitEventAccessor()->destroyPeer(peer);
         EXPECT_EQ(resourceId, expectedResId);
         g_EventTestKey = enterKeyType;
@@ -244,7 +247,7 @@ HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
     auto func = Converter::ArkValue<OnSubmitCallback>(onSubmitFunc, expectedResId);
     modifier_->setOnSubmit(node_, &func);
     TextFieldCommonEvent event;
-    event.SetText(TEST_VALUE);
+    event.SetText(testValue);
     eventHub->FireOnSubmit(111, event);
     EXPECT_EQ(g_EventTestKey, -1);
     eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEXT, event);
@@ -482,7 +485,8 @@ HWTEST_F(TextInputModifierTest2, OnWillChangeTest, TestSize.Level1)
         CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
     };
     
-    auto func = Converter::ArkValue<Callback_EditableTextChangeValue_Boolean>(nullptr, inputCallback, expectedResourceId);
+    auto func = Converter::ArkValue<Callback_EditableTextChangeValue_Boolean>(nullptr,
+        inputCallback, expectedResourceId);
     modifier_->setOnWillChange(node_, &func);
 
     auto eventHub = frameNode->GetEventHub<NG::TextFieldEventHub>();
@@ -502,4 +506,96 @@ HWTEST_F(TextInputModifierTest2, OnWillChangeTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->info.rangeAfter.start, expectedChangeValueInfo.rangeAfter.start);
     EXPECT_EQ(checkEvent->info.rangeAfter.end, expectedChangeValueInfo.rangeAfter.end);
 }
+
+/**
+ * @tc.name: ShowCounterTestDefaultValues
+ * @tc.desc: setOnWillChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest2, ShowCounterTestDefaultValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setShowCounter, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto resultValue = GetStringAttribute(node_, ATTRIBUTE_SHOW_COUNTER_NAME);
+    EXPECT_EQ(resultValue, ATTRIBUTE_SHOW_COUNTER_DEFAULT_VALUE)
+        << "Passed value is: " << ATTRIBUTE_SHOW_COUNTER_DEFAULT_VALUE;
+}
+
+/**
+ * @tc.name: ShowCounterTestValidValues
+ * @tc.desc: setOnWillChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest2, ShowCounterTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setShowCounter, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    std::string resultValue;
+
+    using OneTestStep = std::tuple<Opt_Number, Opt_Boolean, Ark_Boolean, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkValue<Opt_Number>(25), Converter::ArkValue<Opt_Boolean>(true),
+            Converter::ArkValue<Ark_Boolean>(true),
+            "{\"value\":true,\"options\":{\"thresholdPercentage\":25,\"highlightBorder\":true}}"},
+        {Converter::ArkValue<Opt_Number>(30), Converter::ArkValue<Opt_Boolean>(false),
+            Converter::ArkValue<Ark_Boolean>(true),
+            "{\"value\":true,\"options\":{\"thresholdPercentage\":30,\"highlightBorder\":false}}"},
+        {Converter::ArkValue<Opt_Number>(35), Converter::ArkValue<Opt_Boolean>(true),
+            Converter::ArkValue<Ark_Boolean>(false),
+            "{\"value\":false,\"options\":{\"thresholdPercentage\":35,\"highlightBorder\":true}}"},
+        {Converter::ArkValue<Opt_Number>(40), Converter::ArkValue<Opt_Boolean>(false),
+            Converter::ArkValue<Ark_Boolean>(false),
+            "{\"value\":false,\"options\":{\"thresholdPercentage\":40,\"highlightBorder\":false}}"},
+        };
+    Opt_InputCounterOptions arkOptions;
+
+    for (auto [inputThresholdPercentageValue, inputHighlightBorderValue, inputIsShowCounter, expectedValue]: testPlan) {
+        arkOptions = Converter::ArkValue<Opt_InputCounterOptions>(
+            Ark_InputCounterOptions {inputThresholdPercentageValue, inputHighlightBorderValue});
+        modifier_->setShowCounter(node_, inputIsShowCounter, &arkOptions);
+        resultValue = GetStringAttribute(node_, ATTRIBUTE_SHOW_COUNTER_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/**
+ * @tc.name: ShowCounterTestInvalidValues
+ * @tc.desc: setOnWillChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest2, ShowCounterTestInvalidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setShowCounter, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    std::string resultValue;
+
+    using OneTestStep = std::tuple<Opt_Number, Opt_Boolean, Ark_Boolean, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {{.tag = Ark_Tag::INTEROP_TAG_UNDEFINED}, Converter::ArkValue<Opt_Boolean>(true),
+            Converter::ArkValue<Ark_Boolean>(true),
+            "{\"value\":true,\"options\":{\"thresholdPercentage\":-1,\"highlightBorder\":true}}"},
+        {{.tag = Ark_Tag::INTEROP_TAG_UNDEFINED}, {.tag = Ark_Tag::INTEROP_TAG_UNDEFINED},
+            Converter::ArkValue<Ark_Boolean>(false),
+            "{\"value\":false,\"options\":{\"thresholdPercentage\":-1,\"highlightBorder\":true}}"},
+        };
+    Opt_InputCounterOptions arkOptions;
+
+    for (auto [inputThresholdPercentageValue, inputHighlightBorderValue, inputIsShowCounter, expectedValue]: testPlan) {
+        arkOptions = Converter::ArkValue<Opt_InputCounterOptions>(
+            Ark_InputCounterOptions {inputThresholdPercentageValue, inputHighlightBorderValue});
+        modifier_->setShowCounter(node_, inputIsShowCounter, &arkOptions);
+        resultValue = GetStringAttribute(node_, ATTRIBUTE_SHOW_COUNTER_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+
+    auto inputIsShowCounter = Converter::ArkValue<Ark_Boolean>(true);
+    auto expectedValue = "{\"value\":true,\"options\":{\"thresholdPercentage\":-1,\"highlightBorder\":true}}";
+    modifier_->setShowCounter(node_, inputIsShowCounter, nullptr);
+    resultValue = GetStringAttribute(node_, ATTRIBUTE_SHOW_COUNTER_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+}
+
 } // namespace OHOS::Ace::NG

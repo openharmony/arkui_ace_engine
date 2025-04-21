@@ -902,7 +902,7 @@ void ShowCounterImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto counterOptions = Converter::OptConvert<InputCounterOptions>(*options);
+    auto counterOptions = options ? Converter::OptConvert<InputCounterOptions>(*options) : std::nullopt;
     auto isShowCounter = Converter::Convert<bool>(value);
     if (counterOptions && counterOptions->thresholdPercentage.has_value()) {
         int32_t thresholdValue = counterOptions->thresholdPercentage.value();
