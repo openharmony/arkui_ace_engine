@@ -61,6 +61,7 @@
 #include "core/interfaces/native/implementation/hover_event_peer.h"
 #include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/utility/peer_utils.h"
@@ -262,6 +263,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src);
     void AssignArkValue(Ark_PanelMode& dst, const PanelMode& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
+    void AssignArkValue(Ark_PixelMap& pixelMap, const RefPtr<OHOS::Ace::PixelMap>& info);
     void AssignArkValue(Ark_Position& dst, const OffsetF& src);
     void AssignArkValue(Ark_PositionWithAffinity& dst, const PositionWithAffinity& src);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx);

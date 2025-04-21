@@ -15,18 +15,28 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "layered_drawable_descriptor_peer.h"
 #include "arkoala_api_generated.h"
 
+using namespace OHOS::Ace::NG::Converter;
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LayeredDrawableDescriptorAccessor {
 void DestroyPeerImpl(Ark_LayeredDrawableDescriptor peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_LayeredDrawableDescriptor CtorImpl(const Opt_DrawableDescriptor* foreground,
                                        const Opt_DrawableDescriptor* background,
                                        const Opt_DrawableDescriptor* mask)
 {
-    return nullptr;
+    std::optional<Ark_DrawableDescriptor> foregroundDescriptor = foreground ? GetOpt(*foreground) : std::nullopt;
+    std::optional<Ark_DrawableDescriptor> backgroundDescriptor = background ? GetOpt(*background) : std::nullopt;
+    std::optional<Ark_DrawableDescriptor> maskDescriptor = mask ? GetOpt(*mask) : std::nullopt;
+    auto foregroundPixelMap = foregroundDescriptor ? foregroundDescriptor.value()->GetPixelMap() : nullptr;
+    auto backgroundPixelMap = backgroundDescriptor ? backgroundDescriptor.value()->GetPixelMap() : nullptr;
+    auto maskPixelMap = maskDescriptor ? maskDescriptor.value()->GetPixelMap() : nullptr;
+    return PeerUtils::CreatePeer<LayeredDrawableDescriptorPeer>(
+        foregroundPixelMap, backgroundPixelMap, maskPixelMap);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -34,18 +44,22 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_DrawableDescriptor GetForegroundImpl(Ark_LayeredDrawableDescriptor peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, nullptr);
+    return peer->GetForeground();
 }
 Ark_DrawableDescriptor GetBackgroundImpl(Ark_LayeredDrawableDescriptor peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, nullptr);
+    return peer->GetBackground();
 }
 Ark_DrawableDescriptor GetMaskImpl(Ark_LayeredDrawableDescriptor peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, nullptr);
+    return peer->GetMask();
 }
 Ark_String GetMaskClipPathImpl()
 {
+    LOGE("ARKOALA: Ark_LayeredDrawableDescriptor::GetMaskClipPathImpl not implemented");
     return {};
 }
 } // LayeredDrawableDescriptorAccessor
