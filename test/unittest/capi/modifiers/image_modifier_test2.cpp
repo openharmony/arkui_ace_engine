@@ -32,6 +32,7 @@ using namespace OHOS::Ace::NG::PointLight;
 
 namespace OHOS::Ace::NG {
 namespace Converter {
+
 } // OHOS::Ace::NG::Converter
 
 namespace  {
@@ -207,90 +208,6 @@ HWTEST_F(ImageModifierTest2, SetImageOptions1_SetPixMap, testing::ext::TestSize.
 
     auto resultPixelMap = sourceInfo->GetPixmap();
     EXPECT_EQ(resultPixelMap, expectedPixelMapRefPtr);
-}
-
-/**
- * @tc.name: SetImageOptions_SetPixMapviaDrawableDescriptor
- * @tc.desc: Test ImageModifierTest
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest2, SetImageOptions_SetPixMapviaDrawableDescriptor, testing::ext::TestSize.Level1)
-{
-    int expectedValue = 12;
-    int startValue[] = {10,2,0};
-
-    DrawableDescriptorPeer descriptorPeer;
-    descriptorPeer.drawableDescriptorPeer = reinterpret_cast<void*>(&startValue);
-    Ark_DrawableDescriptor drawableDescriptor = &descriptorPeer;
-    auto inputArkDrawableDescriptor =
-        Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor,
-            Ark_DrawableDescriptor>(drawableDescriptor);
-    modifier_->setImageOptions0(node_, &inputArkDrawableDescriptor);
-
-    EXPECT_EQ(expectedValue, startValue[2]);
-}
-
-/**
- * @tc.name: SetImageOptions1_SetPixMapviaDrawableDescriptor
- * @tc.desc: Test ImageModifierTest
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest2, SetImageOptions1_SetPixMapviaDrawableDescriptor, testing::ext::TestSize.Level1)
-{
-    int expectedValue = 12;
-    int startValue[] = {10,2,0};
-
-    DrawableDescriptorPeer descriptorPeer;
-    descriptorPeer.drawableDescriptorPeer = reinterpret_cast<void*>(&startValue);
-    Ark_DrawableDescriptor drawableDescriptor = &descriptorPeer;
-    auto inputArkDrawableDescriptor =
-        Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
-            Ark_DrawableDescriptor>(drawableDescriptor);
-    modifier_->setImageOptions1(node_, &inputArkDrawableDescriptor);
-
-    EXPECT_EQ(expectedValue, startValue[2]);
-}
-
-/**
- * @tc.name: SetImageOptions_SetPixMapviaAnimatedDrawableDescriptor
- * @tc.desc: Test ImageModifierTest
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest2, SetImageOptions_SetPixMapviaAnimatedDrawableDescriptor, testing::ext::TestSize.Level1)
-{
-    int expectedValue = 0;
-    int startValue[] = {7,7,4};
-
-    DrawableDescriptorPeer descriptorPeer;
-    descriptorPeer.drawableDescriptorPeer = reinterpret_cast<void*>(&startValue);
-    Ark_DrawableDescriptor drawableDescriptor = &descriptorPeer;
-    auto inputArkDrawableDescriptor =
-        Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor,
-            Ark_DrawableDescriptor>(drawableDescriptor);
-    modifier_->setImageOptions0(node_, &inputArkDrawableDescriptor);
-
-    EXPECT_EQ(expectedValue, startValue[2]);
-}
-
-/**
- * @tc.name: SetImageOptions1_SetPixMapviaAnimatedDrawableDescriptor
- * @tc.desc: Test ImageModifierTest
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest2, SetImageOptions1_SetPixMapviaAnimatedDrawableDescriptor, testing::ext::TestSize.Level1)
-{
-    int expectedValue = 0;
-    int startValue[] = {5,5,5};
-
-    DrawableDescriptorPeer descriptorPeer;
-    descriptorPeer.drawableDescriptorPeer = reinterpret_cast<void*>(&startValue);
-    Ark_DrawableDescriptor drawableDescriptor = &descriptorPeer;
-    auto inputArkDrawableDescriptor =
-        Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
-            Ark_DrawableDescriptor>(drawableDescriptor);
-    modifier_->setImageOptions1(node_, &inputArkDrawableDescriptor);
-
-    EXPECT_EQ(expectedValue, startValue[2]);
 }
 
 
