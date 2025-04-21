@@ -1639,7 +1639,7 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen004, TestSize.Leve
     frameNode->SetNodeName(nodeName);
 
     /**
-    * @tc.steps: step2. test only with willClick, expect return nodeName WillClick_Click
+    * @tc.steps: step2. test with nothing, expect return nodeName Click
     */
     NG::UIObserverHandler::WillClickHandleFunc willClickHandleFunc = [](
         AbilityContextInfo&, const GestureEvent&, const ClickInfo&,
