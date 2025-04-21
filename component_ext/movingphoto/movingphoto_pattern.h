@@ -220,6 +220,7 @@ private:
     void StopPlayback();
     void PausePlayback();
     void RefreshMovingPhoto();
+    void RefreshMovingPhotoSceneManager();
     void StopAnimation();
     void StopAnimationCallback();
     void StartAutoPlay();
