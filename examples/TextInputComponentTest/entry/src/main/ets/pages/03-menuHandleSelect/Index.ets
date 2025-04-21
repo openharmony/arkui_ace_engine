@@ -29,23 +29,18 @@ class TextList {
 
 @Entry
 @Component
-struct struct_01_style_index {
+struct struct_03_layout_index {
   scroll: Scroller = new Scroller()
   @State arr: TextList[] = [
-    new TextList(1, '01-placeholderFont', 'pages/01-style/01-placeholderFont',),
-    new TextList(2, '02-style', 'pages/01-style/02-style',),
-    new TextList(3, '03-selectedBackgroundColor', 'pages/01-style/03-selectedBackgroundColor',),
-    new TextList(4, '04-showUnit', 'pages/01-style/04-showUnit',),
-    new TextList(5, '05-showError', 'pages/01-style/05-showError',),
-    new TextList(6, '06-showUnderline', 'pages/01-style/06-showUnderline',),
-    new TextList(7, '07-underlineColor', 'pages/01-style/07-underlineColor',),
-    new TextList(8, '08-barState', 'pages/01-style/08-barState',),
-    new TextList(9, '09-maxLines', 'pages/01-style/09-maxLines',),
-    new TextList(10, '10-cancelButton', 'pages/01-style/10-cancelButton',),
-    new TextList(11, '11-showCounter', 'pages/01-style/11-showCounter',),
-    new TextList(12, '12-decoration', 'pages/01-style/12-decoration',),
-    new TextList(13, '13-placeholderColor', 'pages/01-style/13-placeholderColor',),
-    new TextList(14, '14-type', 'pages/01-style/14-type',),
+    new TextList(2, '03-menuHandleSelect', 'pages/03-menuHandleSelect/02-selectionValid',),
+    new TextList(3, '03-menuHandleSelect', 'pages/03-menuHandleSelect/03-caretColor',),
+    new TextList(4, '03-menuHandleSelect', 'pages/03-menuHandleSelect/04-caretStyle',),
+    new TextList(5, '03-menuHandleSelect', 'pages/03-menuHandleSelect/05-caretPosition',),
+    new TextList(7, '03-menuHandleSelect', 'pages/03-menuHandleSelect/07-selectAll',),
+    new TextList(8, '03-menuHandleSelect', 'pages/03-menuHandleSelect/08-selectAllAfterDraws',),
+    new TextList(9, '03-menuHandleSelect', 'pages/03-menuHandleSelect/09-swiperMoveNextHideMenu',),
+    new TextList(10, '03-menuHandleSelecte', 'pages/03-menuHandleSelect/10-moveTextToTarContentNeedHideHandle',),
+    new TextList(11, '02-style', 'pages/03-menuHandleSelect/11-changeLandscapePortraitHideMenusKeepSelection',)
   ]
   @State fontSize: Resource | undefined = undefined
 
