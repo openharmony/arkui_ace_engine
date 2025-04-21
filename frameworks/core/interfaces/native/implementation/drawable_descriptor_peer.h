@@ -28,6 +28,7 @@ using PixelMapPtr = OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>;
 
 struct DrawableDescriptorPeer : public virtual OHOS::Ace::AceType {
     DECLARE_ACE_TYPE(DrawableDescriptorPeer, OHOS::Ace::AceType);
+
 public:
     virtual PixelMapPtr GetPixelMap() const;
 

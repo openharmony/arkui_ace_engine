@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
-
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api_generated.h"
 #include "animated_drawable_descriptor_peer.h"
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MediaCachedImageModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
     RefPtr<PixelMap> pixmap = nullptr;
     auto frameNode = ImageModelNG::CreateFrameNode(id, "", pixmap, "", "", false);
@@ -29,16 +29,14 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
-} // namespace MediaCachedImageModifier
+} // MediaCachedImageModifier
 namespace MediaCachedImageInterfaceModifier {
 void SetMediaCachedImageOptionsImpl(Ark_NativePointer node,
                                     const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource* src)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
-    // Note.
-    // This function should skip InitImage invocation if info's optional is empty.
     Converter::VisitUnion(
         *src,
         [frameNode](const Ark_PixelMap& pixmap) {
