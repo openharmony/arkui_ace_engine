@@ -1096,6 +1096,17 @@ void TabBarPattern::OnModifyDone()
              (tabBarDirection == TextDirection::AUTO && tabsDirection == TextDirection::RTL);
 }
 
+void TabBarPattern::ResetOnForceMeasure(int32_t index)
+{
+    jumpIndex_ = index;
+    focusIndicator_ = index;
+    UpdateSubTabBoard(index);
+    UpdateTextColorAndFontWeight(index);
+    UpdateIndicator(index);
+    UpdatePaintIndicator(index, true);
+    HandleBottomTabBarChange(index);
+}
+
 void TabBarPattern::UpdateBackBlurStyle(const RefPtr<TabTheme>& tabTheme)
 {
     auto host = GetHost();

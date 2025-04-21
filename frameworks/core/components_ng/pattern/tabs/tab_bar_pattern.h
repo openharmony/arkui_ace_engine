@@ -560,6 +560,8 @@ public:
         focusIndicator_ = focusIndicator;
     }
 
+    void ResetOnForceMeasure(int32_t index);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
