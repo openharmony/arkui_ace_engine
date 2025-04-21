@@ -85,8 +85,8 @@ void UseMilitaryTime1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TimePickerModelNG::SetUseMilitaryTime1(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TimePickerModelNG::SetHour24(frameNode, convValue);
 }
 void Loop0Impl(Ark_NativePointer node,
                Ark_Boolean value)
@@ -100,8 +100,8 @@ void Loop1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TimePickerModelNG::SetLoop1(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TimePickerModelNG::SetWheelModeEnabled(frameNode, convValue);
 }
 void DisappearTextStyle0Impl(Ark_NativePointer node,
                              const Ark_PickerTextStyle* value)
@@ -121,8 +121,12 @@ void DisappearTextStyle1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TimePickerModelNG::SetDisappearTextStyle1(frameNode, convValue);
+    auto pickerStyle = value ? Converter::OptConvert<PickerTextStyle>(*value) : std::nullopt;
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    TimePickerModelNG::SetDisappearTextStyle(frameNode, theme, pickerStyle);
 }
 void TextStyle0Impl(Ark_NativePointer node,
                     const Ark_PickerTextStyle* value)
@@ -142,8 +146,12 @@ void TextStyle1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TimePickerModelNG::SetTextStyle1(frameNode, convValue);
+    auto pickerStyle = value ? Converter::OptConvert<PickerTextStyle>(*value) : std::nullopt;
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    TimePickerModelNG::SetNormalTextStyle(frameNode, theme, pickerStyle);
 }
 void SelectedTextStyle0Impl(Ark_NativePointer node,
                             const Ark_PickerTextStyle* value)
@@ -163,8 +171,12 @@ void SelectedTextStyle1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TimePickerModelNG::SetSelectedTextStyle1(frameNode, convValue);
+    auto pickerStyle = value ? Converter::OptConvert<PickerTextStyle>(*value) : std::nullopt;
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    TimePickerModelNG::SetSelectedTextStyle(frameNode, theme, pickerStyle);
 }
 void DateTimeOptions0Impl(Ark_NativePointer node,
                           const Ark_DateTimeOptions* value)
@@ -210,8 +222,18 @@ void OnChange1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TimePickerModelNG::SetOnChange1(frameNode, convValue);
+    std::optional<OnTimePickerChangeCallback> optCallback = value ? Converter::GetOpt(*value) : std::nullopt;
+    if (optCallback.has_value()) {
+        auto onChange = [arkCallback = CallbackHelper(*optCallback)](const BaseEventInfo* event) {
+            const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
+            auto resultStr = eventInfo->GetSelectedStr();
+            auto result = Converter::ArkValue<Ark_TimePickerResult>(resultStr);
+            arkCallback.Invoke(result);
+        };
+        TimePickerModelNG::SetOnChange(frameNode, onChange);
+    } else {
+        TimePickerModelNG::SetOnChange(frameNode, nullptr);
+    }
 }
 void OnEnterSelectedAreaImpl(Ark_NativePointer node,
                              const Callback_TimePickerResult_Void* value)
@@ -241,8 +263,8 @@ void EnableHapticFeedback1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TimePickerModelNG::SetEnableHapticFeedback1(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TimePickerModelNG::SetIsEnableHapticFeedback(frameNode, convValue);
 }
 void DigitalCrownSensitivityImpl(Ark_NativePointer node,
                                  const Opt_CrownSensitivity* value)
