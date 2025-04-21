@@ -627,7 +627,6 @@ public:
     void HandleSelectFontStyleWrapper(KeyCode code, TextStyle& spanStyle);
     void HandleOnShowMenu() override;
     int32_t HandleKbVerticalSelection(bool isUp);
-    int32_t HandleSelectParagraghPos(bool direction);
     PositionType GetPositionTypeFromLine();
     int32_t HandleSelectWrapper(CaretMoveIntent direction, int32_t fixedPos);
     void AIDeleteComb(int32_t start, int32_t end, int32_t& aiPosition, bool direction);
