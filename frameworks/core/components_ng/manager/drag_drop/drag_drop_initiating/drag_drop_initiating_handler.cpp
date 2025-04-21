@@ -183,4 +183,10 @@ bool DragDropInitiatingHandler::IsNeedGather()
     }
     return false;
 }
+
+void DragDropInitiatingHandler::NotifyPreDragStatus(const PreDragStatus preDragStatus)
+{
+    CHECK_NULL_VOID(initiatingFlow_);
+    initiatingFlow_->HandlePreDragStatus(preDragStatus);
+}
 } // namespace OHOS::Ace::NG
