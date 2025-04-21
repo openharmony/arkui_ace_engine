@@ -971,7 +971,7 @@ public:
         return false;
     }
     void OnScrollStartCallback() override {}
-    void FireOnScrollStart() override {}
+    void FireOnScrollStart(bool withPerfMonitor) override {}
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override {}
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override {}
 
