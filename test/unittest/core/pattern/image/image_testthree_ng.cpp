@@ -1935,6 +1935,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternControlAnimation0053, TestSize.Level1)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
+    frameNode->onMainTree_ = true;
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     imagePattern->status_ = AnimatorStatus::IDLE;
     imagePattern->ControlAnimation(2);
