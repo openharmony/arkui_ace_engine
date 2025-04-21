@@ -7181,6 +7181,7 @@ bool OverlayManager::ShowAIEntityMenu(const std::vector<std::pair<std::string, s
         MenuParam menuParam {};
         SubwindowManager::GetInstance()->ShowMenuNG(menuWrapperNode, menuParam, targetNode, aiRect.GetOffset());
     } else {
+        menuLayoutProperty->UpdateShowInSubWindow(false);
         ShowMenu(targetNode->GetId(), aiRect.GetOffset(), menuWrapperNode);
     }
     return true;
