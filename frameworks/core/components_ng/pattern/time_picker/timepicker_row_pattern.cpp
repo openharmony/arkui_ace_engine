@@ -1068,9 +1068,6 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
             amPmNode->MovePosition(0);
         }
         UpdateNodePositionForUg();
-        auto layoutProperty = AceType::DynamicCast<FrameNode>(amPmNode)->GetLayoutProperty<LayoutProperty>();
-        layoutProperty->UpdateAlignment(Alignment::CENTER);
-        layoutProperty->UpdateLayoutWeight(1);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
