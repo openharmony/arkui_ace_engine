@@ -193,15 +193,15 @@ HWTEST_F(WebModifierTest3, bindSelectionMenuTestValidValues, TestSize.Level1)
         .preview = std::nullopt, .menuType = Ark_MenuType::ARK_MENU_TYPE_SELECTION_MENU};
     auto options = Converter::ArkValue<Opt_SelectionMenuOptionsExt>(selectionMenuOptions);
 
-    #ifdef WEB_SUPPORTED_TEST
+    // #ifdef WEB_SUPPORTED_TEST
     int callsCount(0);
     auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
     ASSERT_NE(webPattern, nullptr);
-    #endif // WEB_SUPPORTED
+    // #endif // WEB_SUPPORTED
 
     for (auto [spanType, builder, responseType]: testPlan) {
         modifier_->setBindSelectionMenu(node_, spanType, &builder, responseType, &options);
-        #ifdef WEB_SUPPORTED_TEST
+        // #ifdef WEB_SUPPORTED_TEST
         WebElementType convType = Converter::OptConvert<WebElementType>(spanType).value();
         ResponseType convResponseType = Converter::OptConvert<ResponseType>(responseType).value();
         std::shared_ptr<WebPreviewSelectionMenuParam> reviewSelectionMenuParams =
@@ -209,7 +209,7 @@ HWTEST_F(WebModifierTest3, bindSelectionMenuTestValidValues, TestSize.Level1)
         ASSERT_NE(reviewSelectionMenuParams, nullptr);
         reviewSelectionMenuParams->menuBuilder();
         EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
-        #endif // WEB_SUPPORTED
+        // #endif // WEB_SUPPORTED
 
         fullJson = GetJsonValue(node_);
         resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BIND_SELECTION_MENU_NAME);

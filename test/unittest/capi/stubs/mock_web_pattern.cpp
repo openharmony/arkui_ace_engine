@@ -450,4 +450,17 @@ WebPattern::OnControllerAttachedCallback WebPattern::GetOnControllerAttachedCall
 {
     return onControllerAttachedCallback_;
 }
+
+std::shared_ptr<WebPreviewSelectionMenuParam> WebPattern::GetPreviewSelectionMenuParams(
+    const WebElementType& type, const ResponseType& responseType)
+{
+    auto key = std::make_pair(type, responseType);
+    auto it = previewSelectionMenuMap_.find(key);
+    if (it != previewSelectionMenuMap_.end()) {
+        return it->second;
+    }
+
+    TAG_LOGD(AceLogTag::ACE_WEB, "The key not in previewSelectionMenuMap_");
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG
