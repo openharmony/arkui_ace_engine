@@ -977,6 +977,8 @@ private:
 
     SingleHandTransform singleHandTransform_;
 
+    bool lastThemeHasSkin_ = false;
+
 #ifdef ACE_ENABLE_VK
     void SubscribeHighContrastChange();
     void UnsubscribeHighContrastChange();
