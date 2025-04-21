@@ -6229,6 +6229,7 @@ void FrameNode::AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag)
 
 void FrameNode::RegisterNodeChangeListener()
 {
+    ACE_LAYOUT_SCOPED_TRACE("RegisterNodeChangeListener:%s,%d", GetTag().c_str(), GetId());
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->AddFrameNodeChangeListener(WeakClaim(this));
@@ -6236,6 +6237,7 @@ void FrameNode::RegisterNodeChangeListener()
 
 void FrameNode::UnregisterNodeChangeListener()
 {
+    ACE_LAYOUT_SCOPED_TRACE("UnregisterNodeChangeListener:%s,%d", GetTag().c_str(), GetId());
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->RemoveFrameNodeChangeListener(GetId());
@@ -6243,6 +6245,7 @@ void FrameNode::UnregisterNodeChangeListener()
 
 void FrameNode::ProcessFrameNodeChangeFlag()
 {
+    ACE_LAYOUT_SCOPED_TRACE("ProcessFrameNodeChangeFlag:%s,%d", GetTag().c_str(), GetId());
     auto changeFlag = FRAME_NODE_CHANGE_INFO_NONE;
     auto parent = Claim(this);
     while (parent) {
@@ -6256,6 +6259,7 @@ void FrameNode::ProcessFrameNodeChangeFlag()
     }
     auto pattern = GetPattern();
     if (pattern) {
+        ACE_LAYOUT_SCOPED_TRACE("OnFrameNodeChanged:%s,%d", GetTag().c_str(), GetId());
         pattern->OnFrameNodeChanged(changeFlag);
     }
 }
