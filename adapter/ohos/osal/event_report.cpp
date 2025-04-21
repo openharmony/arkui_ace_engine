@@ -190,8 +190,8 @@ void EventReport::FrameRateDurationsStatistics(int32_t expectedRate, const std::
                 calFrameRate_ = expectedRate;
             }
             if (expectedRate != calFrameRate_) {
-                int32_t endTime = GetSysTimestamp();
-                int32_t duration = endTime - calTime_;
+                int64_t endTime = GetSysTimestamp();
+                int32_t duration = static_cast<int32_t>(endTime - calTime_);
                 calTime_ = endTime;
             AddFrameRateDuration(calFrameRate_, duration);
             }
@@ -199,8 +199,8 @@ void EventReport::FrameRateDurationsStatistics(int32_t expectedRate, const std::
             return;
         }
         case NG::SceneStatus::END: {
-            int32_t endTime = GetSysTimestamp();
-            int32_t duration = endTime - calTime_;
+            int64_t endTime = GetSysTimestamp();
+            int32_t duration = static_cast<int32_t>(endTime - calTime_);
             calTime_ = endTime;
             AddFrameRateDuration(calFrameRate_, duration);
             EventReport::SendDiffFrameRatesDuring(scene, curFRCSceneFpsInfo_);
