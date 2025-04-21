@@ -94,7 +94,7 @@ const UI_STATE_SELECTED = 1 << 3;
 
  /** @memo */
 export function applyUIAttributes<T>(modifier: AttributeModifier<T>, nativeNode: ArkCommonMethodPeer): void {
-  let status = ArkUIGeneratedNativeModule._UIStateGet(nativeNode.peer.ptr);
+   //let status = ArkUIGeneratedNativeModule._UIStateGet(nativeNode.peer.ptr);
    modifier.applyNormalAttribute(nativeNode._attributeSet! as T);
    modifier.applyPressedAttribute(nativeNode._attributeSet! as T);
    modifier.applyFocusedAttribute(nativeNode._attributeSet! as T);

@@ -3998,12 +3998,10 @@ export interface CommonShapeMethod extends CommonMethod {
 /** @memo:stable */
 export interface CommonAttribute extends CommonMethod {
     /** @memo */
-    setCommonOptions(): this
+    setCommonOptions(): this;
 }
 
 export interface AttributeModifier<T> {
-
-   
     applyNormalAttribute(instance: T) : void;
     applyPressedAttribute(instance: T) : void;
     applyFocusedAttribute(instance: T) : void;
