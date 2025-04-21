@@ -65,8 +65,8 @@ void AssignArkValue(Ark_SectionOptions& dst, const WaterFlowSections::Section& s
         auto helper = CallbackHelper(continuation);
         helper.Invoke(Converter::ArkValue<Ark_Number>(result));
     };
-
-    auto rc = CallbackKeeper::RegisterReverseCallback<::GetItemMainSizeByIndex, std::function<void(Ark_Number, Callback_Number_Void)> >(cb);
+    auto rc = CallbackKeeper::RegisterReverseCallback<::GetItemMainSizeByIndex,
+                                                   std::function<void(Ark_Number, Callback_Number_Void)>>(cb);
     dst.onGetItemMainSizeByIndex = Converter::ArkValue<Opt_GetItemMainSizeByIndex>(rc);
     dst.columnsGap = Converter::ArkValue<Opt_Length>(src.columnsGap);
     dst.rowsGap = Converter::ArkValue<Opt_Length>(src.rowsGap);
