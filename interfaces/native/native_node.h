@@ -3748,7 +3748,7 @@ typedef enum {
      * .value[1].i32: The vertical offset of the surface relative to XComponent, in pixels. \n
      * .value[2].i32: The width of the surface created by XComponent, in pixels. \n
      * .value[3].i32: The height of the surface created by XComponent, in pixels. \n
-     * @since 16
+     * @since 18
      */
     NODE_XCOMPONENT_SURFACE_RECT,
     /**
@@ -3760,7 +3760,7 @@ typedef enum {
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * value[0].i32: The parameter type is 1 or 0.
-     * @since 16
+     * @since 18
      */
     NODE_XCOMPONENT_ENABLE_ANALYZER,
 
@@ -5848,6 +5848,19 @@ typedef enum {
      *
      */
     NODE_REFRESH_PULL_TO_REFRESH = 1009004,
+    /**
+     * @brief Set the max pull down distance for Refresh.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: max pull-down distance, in vp.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: max pull-down distance, in vp.
+     *
+     * @since 20
+     */
+    NODE_REFRESH_MAX_PULL_DOWN_DISTANCE = 1009005,
 
     /**
      * @brief Defines the main axis direction of the <b><WaterFlow></b> component layout.

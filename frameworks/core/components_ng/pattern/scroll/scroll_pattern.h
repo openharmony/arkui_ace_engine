@@ -380,6 +380,8 @@ public:
 
     SizeF GetChildrenExpandedSize() override;
 
+    void TriggerScrollBarDisplay();
+
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 

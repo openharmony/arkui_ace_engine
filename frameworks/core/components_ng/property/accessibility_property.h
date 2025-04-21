@@ -68,7 +68,8 @@ using OnAccessibilityHoverConsumeCheckImpl = std::function<bool(const NG::PointF
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
 
-class ACE_FORCE_EXPORT AccessibilityProperty : public virtual AceType, public AccessibilityPropertyInnerFunction {
+class ACE_FORCE_EXPORT AccessibilityProperty : public virtual AceType,
+    public AccessibilityPropertyInnerFunction, public AccessibilityPropertyInterfaceFunction {
     DECLARE_ACE_TYPE(AccessibilityProperty, AceType);
 
 public:

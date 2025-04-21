@@ -71,15 +71,19 @@ class MyModifier implements AttributeModifier<SliderAttribute> {
   applyNormalAttribute(instance: SliderAttribute) {
     instance.backgroundColor('#0A59F7')
   }
+
   applyPressedAttribute(instance: SliderAttribute) {
     instance.backgroundColor('#ED6F21')
   }
+
   applyFocusedAttribute(instance: SliderAttribute) {
     instance.backgroundColor(Color.Gray)
   }
+
   applyDisabledAttribute(instance: SliderAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
+
   applySelectedAttribute(instance: SliderAttribute) {
     instance.backgroundColor('#ffedea21')
   }
@@ -607,7 +611,6 @@ export struct SliderBootcamp {
   @State compForegroundFilter: boolean = false
   @State enableCompCompositingFilter: boolean = false
   @State compCompositingFilter: boolean = false
-
   // Hit Test Control
   @State enableCompHitTestBehavior: boolean = false
   @State compHitTestBehavior: HitTestMode = HitTestMode.Default
@@ -633,16 +636,16 @@ export struct SliderBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
-
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
+
   aboutToAppear(): void {
     AppStorage.setOrCreate('scroller', this.scroller)
   }
+
   compMaskColorChange() {
     this.progress.updateColor(this.compMaskColor);
   }
@@ -655,7 +658,7 @@ export struct SliderBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time,value)
+      new BlockTag(time, value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -676,7 +679,6 @@ export struct SliderBootcamp {
     }, 200)
   }
 
-
   build() {
     NavDestination() {
       Drawer({
@@ -685,7 +687,7 @@ export struct SliderBootcamp {
         content: () => {
           this.Content()
         },
-        generic:()=>{
+        generic: () => {
           this.Generic()
         },
         parameters: () => {
@@ -696,11 +698,11 @@ export struct SliderBootcamp {
     .backgroundColor($r('sys.color.ohos_id_color_sub_background'))
     .hideTitleBar(true)
   }
+
   @Builder
   compBackground() {
     Text('123')
   }
-
 
   @Builder
   ListItemGroupHeaders(str: string) {
@@ -713,7 +715,7 @@ export struct SliderBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -774,8 +776,7 @@ export struct SliderBootcamp {
         .onChange((value: number, mode: SliderChangeMode) => {
           this.sliderOptionsValue = value
           console.info('value:' + value + 'mode:' + mode.toString())
-        })
-        /*通用属性和通用事件*/
+        })/*通用属性和通用事件*/
         .width(useEnabled(this.enableCompWidth, this.compWidth))
         .height(useEnabled(this.enableCompHeight, this.compHeight))
         .padding(useEnabled(this.enableCompPadding, this.compPadding))
@@ -1200,7 +1201,7 @@ export struct SliderBootcamp {
             this.compPixelStretchEffectOptionsBottom)
         })
         .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))//part2
-        .linearGradient( {
+        .linearGradient({
           angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
           direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
           colors: [
@@ -1489,7 +1490,7 @@ export struct SliderBootcamp {
           title: 'trackThickness',
           isEnabled: $enableTrackThickness,
           value: $showTrackThickness,
-          min:4,
+          min: 4,
           max: 100
         })
 
@@ -1605,6 +1606,7 @@ export struct SliderBootcamp {
     }.id('scroll')
     .height('52%')
   }
+
   @Builder
   Generic() {
     Scroll(this.scroller) {

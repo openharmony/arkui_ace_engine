@@ -1005,4 +1005,26 @@ HWTEST_F(TextFieldPatternTestNine, CalcDecoratorWidth001, TestSize.Level0)
     ret = pattern_->CalcDecoratorWidth(childrenNode);
     EXPECT_EQ(ret, 460);
 }
+
+/**
+ * @tc.name: PasteAfterStopEditing001
+ * @tc.desc: test text_field_pattern.cpp call StopEditing & OnPaste in sequence, expect paste success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, PasteAfterStopEditing001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    pattern_->selectController_->UpdateHandleIndex(0, 4);
+    pattern_->HandleOnCopy();
+    pattern_->StopEditing();
+    auto focushHub = pattern_->GetFocusHub();
+    focushHub->currentFocus_ = false;
+    pattern_->HandleBlurEvent();
+    FlushLayoutTask(frameNode_);
+    pattern_->HandleOnPaste();
+    FlushLayoutTask(frameNode_);
+    auto value = pattern_->contentController_->GetTextValue();
+    EXPECT_EQ(value, "abcdabcdefghijklmnopqrstuvwxyz");
+}
 } // namespace OHOS::Ace::NG

@@ -12,11 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define private public
 #include "scroll_test_ng.h"
-
 #include "base/memory/ace_type.h"
-#undef private
+
 namespace OHOS::Ace::NG {
 
 void ScrollBarOverlayTestNg::SetUp() {}
@@ -37,7 +35,6 @@ HWTEST_F(ScrollBarOverlayTestNg, StopAdaptAnimation001, TestSize.Level1)
     option.SetCurve(motion);
     auto adaptAnimation_ = AnimationUtils::StartAnimation(option, [&]() {});
     ASSERT_NE(adaptAnimation_, nullptr);
-    scrollBarOverlayModifier.isAdaptAnimationStop_ = true;
     scrollBarOverlayModifier.StopAdaptAnimation();
     EXPECT_EQ(scrollBarOverlayModifier.isAdaptAnimationStop_, true);
 }

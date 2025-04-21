@@ -755,6 +755,45 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex004, TestSize.L
  }
 
 /**
+ * @tc.name: DumpAdvanceInfo003
+ * @tc.desc: DumpAdvanceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, DumpAdvanceInfo003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_EQ(indicatorPattern->GetIndicatorType(), SwiperIndicatorType::ARC_DOT);
+    indicatorPattern->DumpAdvanceInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 5);
+}
+
+/**
+ * @tc.name: DumpAdvanceInfo004
+ * @tc.desc: DumpAdvanceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, DumpAdvanceInfo004, TestSize.Level1)
+{
+    SwiperIndicatorType type = (SwiperIndicatorType)4;
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    model.SetIndicatorType(type);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_EQ(indicatorPattern->GetIndicatorType(), type);
+    indicatorPattern->DumpAdvanceInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 9);
+}
+
+/**
  * @tc.name: SwiperIndicatorPatternTestNg0020
  * @tc.desc: CheckIsTouchBottom
  * @tc.type: FUNC
@@ -1132,5 +1171,634 @@ HWTEST_F(SwiperIndicatorTestNg, CheckPointLocation005, TestSize.Level1)
     indicatorPattern->direction_ = SwiperDirection::RIGHT;
     auto result = indicatorPattern->CheckPointLocation(center, point);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CalculateCycle001
+ * @tc.desc: CalculateCycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalculateCycle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CalculateCycle.
+     */
+    const PointT<float> center = PointT(float(1.0), float(0.0));
+    const PointT<float> point = PointT(float(0.0), float(1.0));
+    float angle = 90.0f;
+    float startAngle = 0.0f;
+    indicatorPattern->isUpdateCycle_ = true;
+    indicatorPattern->direction_ = SwiperDirection::LEFT;
+    indicatorPattern->CalculateCycle(angle, startAngle, center, point);
+    EXPECT_FALSE(indicatorPattern->isUpdateCycle_);
+}
+
+/**
+ * @tc.name: CalculateCycle002
+ * @tc.desc: CalculateCycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalculateCycle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CalculateCycle.
+     */
+    const PointT<float> center = PointT(float(1.0), float(0.0));
+    const PointT<float> point = PointT(float(0.0), float(1.0));
+    float angle = 0.0f;
+    float startAngle = 90.0f;
+    indicatorPattern->isUpdateCycle_ = true;
+    indicatorPattern->direction_ = SwiperDirection::LEFT;
+    indicatorPattern->CalculateCycle(angle, startAngle, center, point);
+    EXPECT_TRUE(indicatorPattern->isUpdateCycle_);
+}
+
+/**
+ * @tc.name: CalculateCycle003
+ * @tc.desc: CalculateCycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalculateCycle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CalculateCycle.
+     */
+    const PointT<float> center = PointT(float(1.0), float(0.0));
+    const PointT<float> point = PointT(float(0.0), float(1.0));
+    float angle = 0.0f;
+    float startAngle = 90.0f;
+    indicatorPattern->isUpdateCycle_ = false;
+    indicatorPattern->direction_ = SwiperDirection::LEFT;
+    indicatorPattern->CalculateCycle(angle, startAngle, center, point);
+    EXPECT_FALSE(indicatorPattern->CheckPointLocation(center, point));
+    EXPECT_FALSE(indicatorPattern->isUpdateCycle_);
+}
+
+/**
+ * @tc.name: CalculateCycle004
+ * @tc.desc: CalculateCycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalculateCycle004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CalculateCycle.
+     */
+    const PointT<float> center = PointT(float(0.0), float(1.0));
+    const PointT<float> point = PointT(float(1.0), float(0.0));
+    float angle = 0.0f;
+    float startAngle = 90.0f;
+    indicatorPattern->isUpdateCycle_ = false;
+    indicatorPattern->direction_ = SwiperDirection::LEFT;
+    indicatorPattern->CalculateCycle(angle, startAngle, center, point);
+    EXPECT_TRUE(indicatorPattern->CheckPointLocation(center, point));
+    EXPECT_TRUE(indicatorPattern->isUpdateCycle_);
+}
+
+/**
+ * @tc.name: CalculateCycle005
+ * @tc.desc: CalculateCycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalculateCycle005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CalculateCycle.
+     */
+    const PointT<float> center = PointT(float(1.0), float(0.0));
+    const PointT<float> point = PointT(float(0.0), float(1.0));
+    float angle = 0.0f;
+    float startAngle = 90.0f;
+    indicatorPattern->isUpdateCycle_ = true;
+    indicatorPattern->direction_ = SwiperDirection::RIGHT;
+    indicatorPattern->CalculateCycle(angle, startAngle, center, point);
+    EXPECT_FALSE(indicatorPattern->isUpdateCycle_);
+}
+
+/**
+ * @tc.name: CalculateCycle006
+ * @tc.desc: CalculateCycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalculateCycle006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CalculateCycle.
+     */
+    const PointT<float> center = PointT(float(1.0), float(0.0));
+    const PointT<float> point = PointT(float(0.0), float(1.0));
+    float angle = 90.0f;
+    float startAngle = 0.0f;
+    indicatorPattern->isUpdateCycle_ = true;
+    indicatorPattern->direction_ = SwiperDirection::RIGHT;
+    indicatorPattern->CalculateCycle(angle, startAngle, center, point);
+    EXPECT_TRUE(indicatorPattern->isUpdateCycle_);
+}
+
+/**
+ * @tc.name: CalculateCycle007
+ * @tc.desc: CalculateCycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalculateCycle007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CalculateCycle.
+     */
+    const PointT<float> center = PointT(float(1.0), float(0.0));
+    const PointT<float> point = PointT(float(10.0), float(1.0));
+    float angle = 90.0f;
+    float startAngle = 0.0f;
+    indicatorPattern->isUpdateCycle_ = false;
+    indicatorPattern->direction_ = SwiperDirection::RIGHT;
+    indicatorPattern->CalculateCycle(angle, startAngle, center, point);
+    EXPECT_FALSE(indicatorPattern->CheckPointLocation(center, point));
+    EXPECT_FALSE(indicatorPattern->isUpdateCycle_);
+}
+
+/**
+ * @tc.name: CalculateCycle008
+ * @tc.desc: CalculateCycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalculateCycle008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CalculateCycle.
+     */
+    const PointT<float> center = PointT(float(10.0), float(10.0));
+    const PointT<float> point = PointT(float(1.0), float(0.0));
+    float angle = 90.0f;
+    float startAngle = 0.0f;
+    indicatorPattern->isUpdateCycle_ = false;
+    indicatorPattern->direction_ = SwiperDirection::RIGHT;
+    indicatorPattern->CalculateCycle(angle, startAngle, center, point);
+    EXPECT_TRUE(indicatorPattern->CheckPointLocation(center, point));
+    EXPECT_TRUE(indicatorPattern->isUpdateCycle_);
+}
+
+/**
+ * @tc.name: GetAngleWithPoint001
+ * @tc.desc: GetAngleWithPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, GetAngleWithPoint001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::HORIZONTAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    FlushUITasks();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
+    ASSERT_NE(nodePaintMethod, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetAngleWithPoint.
+     */
+    PointF center(5.0f, 10.0f);
+    PointF point(0.0f, 10.000001f);
+    indicatorPattern->direction_ = SwiperDirection::RIGHT;
+    auto angle = indicatorPattern->GetAngleWithPoint(center, point);
+    EXPECT_EQ(angle, 90);
+}
+
+/**
+ * @tc.name: GetAngleWithPoint002
+ * @tc.desc: GetAngleWithPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, GetAngleWithPoint002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::HORIZONTAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    FlushUITasks();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
+    ASSERT_NE(nodePaintMethod, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetAngleWithPoint.
+     */
+    PointF center(0.0f, 10.0f);
+    PointF point(5.0f, 10.000001f);
+    indicatorPattern->direction_ = SwiperDirection::RIGHT;
+    auto angle = indicatorPattern->GetAngleWithPoint(center, point);
+    EXPECT_EQ(angle, -90);
+}
+
+/**
+ * @tc.name: CalculateAngleOffset001
+ * @tc.desc: CalculateAngleOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalculateAngleOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CalculateAngleOffset.
+     */
+    float centerX = 1.0f;
+    float centerY = 2.0f;
+    float radius = 1.0f;
+    double angle = -10.0f;
+    OffsetF Offset = { 0.0, 0.0 };
+    auto result = indicatorPattern->CalculateAngleOffset(centerX, centerY, radius, angle);
+    EXPECT_EQ(result, Offset);
+}
+
+/**
+ * @tc.name: CalculateAngleOffset002
+ * @tc.desc: CalculateAngleOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalculateAngleOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CalculateAngleOffset.
+     */
+    float centerX = 1.0f;
+    float centerY = 2.0f;
+    float radius = 1.0f;
+    double angle = 180.0f;
+    OffsetF Offset = { 0.0, 0.0 };
+    auto result = indicatorPattern->CalculateAngleOffset(centerX, centerY, radius, angle);
+    EXPECT_NE(result, Offset);
+}
+
+/**
+ * @tc.name: CalculateAngleOffset003
+ * @tc.desc: CalculateAngleOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalculateAngleOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CalculateAngleOffset.
+     */
+    float centerX = 1.0f;
+    float centerY = 2.0f;
+    float radius = 1.0f;
+    double angle = 45.0f;
+    OffsetF Offset = { 0.0, 0.0 };
+    auto result = indicatorPattern->CalculateAngleOffset(centerX, centerY, radius, angle);
+    EXPECT_NE(result, Offset);
+}
+
+/**
+ * @tc.name: GetInnerFocusPaintRect001
+ * @tc.desc: GetInnerFocusPaintRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, GetInnerFocusPaintRect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call GetInnerFocusPaintRect.
+     */
+    RoundRect paintRect;
+    indicatorPattern->GetInnerFocusPaintRect(paintRect);
+    auto rect = paintRect.GetRect();
+
+    EXPECT_NE(rect.GetX(), 10);
+}
+
+/**
+ * @tc.name: HandleMouseClick004
+ * @tc.desc: HandleMouseClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call HandleMouseClick.
+     */
+    indicatorPattern->isRepeatClicked_ = false;
+    GestureEvent gestureEvent;
+    gestureEvent.SetSourceDevice(SourceType::MOUSE);
+    indicatorPattern->HandleMouseClick(gestureEvent);
+    EXPECT_FALSE(indicatorPattern->isRepeatClicked_);
+}
+
+/**
+ * @tc.name: HandleMouseEvent001
+ * @tc.desc: HandleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, HandleMouseEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call HandleMouseEvent.
+     */
+    MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::MOVE);
+    mouseInfo.SetLocalLocation(Offset(200.0, 30.0));
+    mouseInfo.SetSourceDevice(SourceType::TOUCH);
+    indicatorPattern->isClicked_ = true;
+    indicatorPattern->HandleMouseEvent(mouseInfo);
+    EXPECT_TRUE(indicatorPattern->isClicked_);
+}
+
+/**
+ * @tc.name: HandleMouseEvent002
+ * @tc.desc: HandleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, HandleMouseEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call HandleMouseEvent.
+     */
+    MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::PRESS);
+    mouseInfo.SetLocalLocation(Offset(200.0, 30.0));
+    mouseInfo.SetSourceDevice(SourceType::MOUSE);
+    indicatorPattern->isClicked_ = true;
+    indicatorPattern->HandleMouseEvent(mouseInfo);
+    EXPECT_FALSE(indicatorPattern->isClicked_);
+}
+
+/**
+ * @tc.name: HandleMouseEvent003
+ * @tc.desc: HandleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, HandleMouseEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call HandleMouseEvent.
+     */
+    MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::RELEASE);
+    mouseInfo.SetLocalLocation(Offset(200.0, 30.0));
+    mouseInfo.SetSourceDevice(SourceType::MOUSE);
+    indicatorPattern->isClicked_ = true;
+    indicatorPattern->HandleMouseEvent(mouseInfo);
+    EXPECT_FALSE(indicatorPattern->isClicked_);
+}
+
+/**
+ * @tc.name: CheckDragAndUpdate001
+ * @tc.desc: CheckDragAndUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CheckDragAndUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CheckPointLocation.
+     */
+    indicatorPattern->overlongDotIndicatorModifier_ = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    indicatorPattern->overlongDotIndicatorModifier_->currentSelectedIndex_ = 10;
+    indicatorPattern->overlongDotIndicatorModifier_->currentOverlongType_ = OverlongType::NONE;
+    indicatorPattern->overlongDotIndicatorModifier_->targetSelectedIndex_ = 20;
+    indicatorPattern->overlongDotIndicatorModifier_->targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    pattern_->isTouchDownOnOverlong_ = true;
+    pattern_->isDragging_ = true;
+    pattern_->touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    int32_t animationStartIndex = 10;
+    int32_t animationEndIndex = 0;
+    indicatorPattern->CheckDragAndUpdate(pattern_, animationStartIndex, animationEndIndex);
+    EXPECT_NE(indicatorPattern->overlongDotIndicatorModifier_->currentSelectedIndex_,
+        indicatorPattern->overlongDotIndicatorModifier_->targetSelectedIndex_);
+    EXPECT_NE(indicatorPattern->overlongDotIndicatorModifier_->currentOverlongType_,
+        indicatorPattern->overlongDotIndicatorModifier_->targetOverlongType_);
+}
+
+/**
+ * @tc.name: CheckDragAndUpdate002
+ * @tc.desc: CheckDragAndUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CheckDragAndUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CheckPointLocation.
+     */
+    indicatorPattern->overlongDotIndicatorModifier_ = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    indicatorPattern->overlongDotIndicatorModifier_->currentSelectedIndex_ = 10;
+    indicatorPattern->overlongDotIndicatorModifier_->currentOverlongType_ = OverlongType::NONE;
+    indicatorPattern->overlongDotIndicatorModifier_->targetSelectedIndex_ = 20;
+    indicatorPattern->overlongDotIndicatorModifier_->targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    pattern_->isTouchDownOnOverlong_ = true;
+    pattern_->isDragging_ = true;
+    pattern_->turnPageRate_ = 0.2f;
+    int32_t animationStartIndex = 0;
+    int32_t animationEndIndex = 3;
+    indicatorPattern->CheckDragAndUpdate(pattern_, animationStartIndex, animationEndIndex);
+    EXPECT_EQ(indicatorPattern->overlongDotIndicatorModifier_->currentSelectedIndex_,
+        indicatorPattern->overlongDotIndicatorModifier_->targetSelectedIndex_);
+    EXPECT_EQ(indicatorPattern->overlongDotIndicatorModifier_->currentOverlongType_,
+        indicatorPattern->overlongDotIndicatorModifier_->targetOverlongType_);
+}
+
+/**
+ * @tc.name: CheckDragAndUpdate003
+ * @tc.desc: CheckDragAndUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CheckDragAndUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CheckPointLocation.
+     */
+    indicatorPattern->overlongDotIndicatorModifier_ = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    indicatorPattern->overlongDotIndicatorModifier_->currentSelectedIndex_ = 10;
+    indicatorPattern->overlongDotIndicatorModifier_->currentOverlongType_ = OverlongType::NONE;
+    indicatorPattern->overlongDotIndicatorModifier_->targetSelectedIndex_ = 20;
+    indicatorPattern->overlongDotIndicatorModifier_->targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    indicatorPattern->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    pattern_->isTouchDownOnOverlong_ = true;
+    pattern_->touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    pattern_->isDragging_ = true;
+    pattern_->turnPageRate_ = 2.5f;
+    int32_t animationStartIndex = 10;
+    int32_t animationEndIndex = -1;
+    indicatorPattern->CheckDragAndUpdate(pattern_, animationStartIndex, animationEndIndex);
+    EXPECT_EQ(indicatorPattern->overlongDotIndicatorModifier_->currentSelectedIndex_,
+        indicatorPattern->overlongDotIndicatorModifier_->targetSelectedIndex_);
+    EXPECT_EQ(indicatorPattern->overlongDotIndicatorModifier_->currentOverlongType_,
+        indicatorPattern->overlongDotIndicatorModifier_->targetOverlongType_);
 }
 } // namespace OHOS::Ace::NG

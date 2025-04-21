@@ -50,6 +50,7 @@ constexpr float SLIDER_MIN = .0f;
 constexpr float SLIDER_MAX = 100.0f;
 constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
 constexpr Dimension FORM_PAN_DISTANCE = 1.0_vp;
+constexpr Dimension PAN_MOVE_DISTANCE = 5.0_vp;
 constexpr double DEFAULT_SLIP_FACTOR = 50.0;
 constexpr double SLIP_FACTOR_COEFFICIENT = 1.07;
 constexpr uint64_t SCREEN_READ_SENDEVENT_TIMESTAMP = 400;
@@ -59,9 +60,8 @@ const std::string SLIDER_EFFECT_ID_NAME = "haptic.slide";
 constexpr float CROWN_SENSITIVITY_LOW = 0.5f;
 constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
 constexpr float CROWN_SENSITIVITY_HIGH = 2.0f;
-constexpr int32_t CROWN_EVENT_NUN_THRESH = 30;
+constexpr int64_t CROWN_TIME_THRESH = 30;
 constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength2";
-constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.feedback.crown.impact";
 #endif
 
 bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
@@ -145,7 +145,7 @@ void SliderPattern::OnModifyDone()
     FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -294,7 +294,7 @@ void SliderPattern::HandleEnabled()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -385,6 +385,34 @@ void SliderPattern::InitAccessibilityVirtualNodeTask()
                 CHECK_NULL_VOID(sliderPattern);
                 sliderPattern->isInitAccessibilityVirtualNode_ = sliderPattern->InitAccessibilityVirtualNode();
             });
+        auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+        CHECK_NULL_VOID(sliderPaintProperty);
+        float step = sliderPaintProperty->GetStep().value_or(1.0f);
+        float min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
+        float max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
+        float initValue = sliderPaintProperty->GetValue().value_or(min);
+
+        if (NearZero(step)) {
+            return;
+        }
+    
+        auto validSlideRange = sliderPaintProperty->GetValidSlideRange();
+        if (validSlideRange.has_value() && validSlideRange.value()->HasValidValues()) {
+            value_ =
+                std::clamp(initValue, validSlideRange.value()->GetFromValue(), validSlideRange.value()->GetToValue());
+            if (NearEqual(value_, validSlideRange.value()->GetToValue())) {
+                sliderPaintProperty->UpdateValue(value_);
+                return;
+            }
+        } else {
+            value_ = std::clamp(initValue, min, max);
+            if (NearEqual(value_, max)) {
+                sliderPaintProperty->UpdateValue(value_);
+                return;
+            }
+        }
+        value_ = std::round((value_ - min) / step) * step + min;
+        sliderPaintProperty->UpdateValue(value_);
     }
 }
 
@@ -765,6 +793,10 @@ bool SliderPattern::UpdateParameters()
                                         : theme->GetInsetHotBlockShadowWidth();
 
     auto direction = sliderLayoutProperty->GetDirectionValue(Axis::HORIZONTAL);
+    if (direction_ != direction && isAccessibilityOn_) {
+        ClearSliderVirtualNode();
+        direction_ = direction;
+    }
     auto blockLength = direction == Axis::HORIZONTAL ? blockSize_.Width() : blockSize_.Height();
 
     hotBlockShadowWidth_ = static_cast<float>(hotBlockShadowWidth.ConvertToPx());
@@ -958,10 +990,16 @@ void SliderPattern::HandleTouchDown(const Offset& location, SourceType sourceTyp
     sliderContentModifier_->SetIsPressed(true);
 }
 
+bool NeedFireClickEvent(const Offset& downLocation, const Offset& upLocation)
+{
+    auto diff = downLocation - upLocation;
+    return diff.GetDistance() < PAN_MOVE_DISTANCE.ConvertToPx();
+}
+
 void SliderPattern::HandleTouchUp(const Offset& location, SourceType sourceType)
 {
     if (sliderInteractionMode_ == SliderModelNG::SliderInteraction::SLIDE_AND_CLICK_UP &&
-        lastTouchLocation_.has_value() && lastTouchLocation_.value() == location) {
+        lastTouchLocation_.has_value() && NeedFireClickEvent(lastTouchLocation_.value(), location)) {
         allowDragEvents_ = true;
         if (!AtPanArea(location, sourceType)) {
             UpdateValueByLocalLocation(location);
@@ -1693,7 +1731,7 @@ void SliderPattern::HandleMouseEvent(const MouseInfo& info)
 void SliderPattern::FireChangeEvent(int32_t mode)
 {
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider fire change %{public}d %{public}f", mode, value_);
-    auto sliderEventHub = GetEventHub<SliderEventHub>();
+    auto sliderEventHub = GetOrCreateEventHub<SliderEventHub>();
     CHECK_NULL_VOID(sliderEventHub);
     if ((mode == SliderChangeMode::Click || mode == SliderChangeMode::Moving) &&
         NearEqual(value_, sliderEventHub->GetValue())) {
@@ -1793,13 +1831,11 @@ void SliderPattern::HandleCrownAction(double mainDelta)
 
 void SliderPattern::StartVibrateFeedback()
 {
-    crownEventNum_ = reachBoundary_ ? 0 : crownEventNum_ + 1;
-    if (valueChangeFlag_ && reachBoundary_) {
-        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s", CROWN_VIBRATOR_STRONG);
-    } else if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
+    timestampCur_ = GetCurrentTimestamp();
+    if (!reachBoundary_ && (timeStampCur_ - timestampPre_ >= CROWN_TIME_THRESH)) {
         VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s", CROWN_VIBRATOR_WEAK);
+        timeStampPre_ = timeStampCur_;
     }
 }
 #endif
@@ -2086,7 +2122,7 @@ void SliderPattern::SetSliderValue(double value, int32_t mode)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -2287,7 +2323,7 @@ RefPtr<FrameNode> SliderPattern::BuildContentModifierNode()
     auto value = sliderPaintProperty->GetValue().value_or(min);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     SliderConfiguration sliderConfiguration(value, min, max, step, enabled);

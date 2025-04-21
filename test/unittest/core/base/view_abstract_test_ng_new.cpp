@@ -14,6 +14,8 @@
  */
 
 #include "test/unittest/core/base/view_abstract_test_ng.h"
+
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/event/focus_hub.h"
 
 using namespace testing;

@@ -443,7 +443,7 @@ void XComponentPattern::RequestFocus()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<XComponentEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -563,7 +563,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         }
         if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
             OnSurfaceDestroyed();
-            auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+            auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
             CHECK_NULL_VOID(eventHub);
             {
                 ACE_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", GetId().c_str());
@@ -814,7 +814,7 @@ void XComponentPattern::XComponentSizeInit()
         xcomponentController_->SetSurfaceId(renderSurface_->GetUniqueId());
     }
 #endif
-    auto eventHub = host->GetEventHub<XComponentEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] triggers onLoad and OnSurfaceCreated callback",
         GetId().c_str());
@@ -1044,7 +1044,7 @@ void XComponentPattern::InitEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<XComponentEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (id_.has_value()) {
         eventHub->SetOnSurfaceInitEvent(CreateExternalEvent());
@@ -1736,7 +1736,7 @@ void XComponentPattern::LoadNative()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<XComponentEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireSurfaceInitEvent(id_.value_or(""), host->GetId());
     OnNativeLoad(reinterpret_cast<FrameNode*>(AceType::RawPtr(host)));
@@ -1746,7 +1746,7 @@ void XComponentPattern::OnNativeLoad(FrameNode* frameNode)
 {
     hasLoadNativeDone_ = true;
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     {
         ACE_SCOPED_TRACE("XComponent[%s] FireLoadEvent", GetId().c_str());
@@ -1758,7 +1758,7 @@ void XComponentPattern::OnNativeUnload(FrameNode* frameNode)
 {
     hasLoadNativeDone_ = false;
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     {
         ACE_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", GetId().c_str());
@@ -1786,7 +1786,7 @@ void XComponentPattern::OnSurfaceCreated()
     } else {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto eventHub = host->GetEventHub<XComponentEventHub>();
+        auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         {
             ACE_SCOPED_TRACE("XComponent[%s] FireControllerCreatedEvent", GetId().c_str());
@@ -1819,7 +1819,7 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
             callback->OnSurfaceChanged(nativeXComponent_.get(), surface);
         }
     } else {
-        auto eventHub = host->GetEventHub<XComponentEventHub>();
+        auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         {
             ACE_SCOPED_TRACE("XComponent[%s] FireControllerChangedEvent[w:%f,h:%f]", GetId().c_str(), width, height);
@@ -1849,7 +1849,7 @@ void XComponentPattern::OnSurfaceDestroyed(FrameNode* frameNode)
             CHECK_NULL_VOID(host);
             frameNode = Referenced::RawPtr(host);
         }
-        auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         {
             ACE_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", GetId().c_str());

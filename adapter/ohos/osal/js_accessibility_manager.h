@@ -361,10 +361,7 @@ public:
     void RegisterUIExtBusinessConsumeCallback();
     void RegisterGetParentRectHandler();
 
-    bool IsScreenReaderEnabled() override
-    {
-        return isScreenReaderEnabled_;
-    }
+    bool IsScreenReaderEnabled() override;
 
     void UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode) override;
     void OnAccessbibilityDetachFromMainTree(const RefPtr<NG::FrameNode>& frameNode) override;
@@ -394,7 +391,7 @@ private:
         explicit JsInteractionOperation(int32_t windowId) : windowId_(windowId) {}
         virtual ~JsInteractionOperation() = default;
         // Accessibility override.
-        void SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
+        RetError SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode) override;
         void SearchElementInfosByText(const int64_t elementId, const std::string& text, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback) override;
@@ -435,7 +432,7 @@ private:
         explicit WebInteractionOperation(int32_t windowId) : windowId_(windowId) {}
         virtual ~WebInteractionOperation() = default;
         // Accessibility override.
-        void SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
+        RetError SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode) override;
         void SearchElementInfosByText(const int64_t elementId, const std::string& text, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback) override;
@@ -707,6 +704,7 @@ private:
     float scaleY_ = 1.0f;
     int64_t currentFocusNodeId_ = -1;
     bool isScreenReaderEnabled_ = false;
+    bool isScreenReaderEnabledInitialized_ = false;
 
     int64_t lastElementId_ = -1;
     WeakPtr<NG::FrameNode> lastFrameNode_;

@@ -42,6 +42,7 @@ constexpr uint32_t CRITICAL_TIME = 50;     // ms. If show time of image is less 
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t DEFAULT_ITERATIONS = 1;
 constexpr int32_t MEMORY_LEVEL_CRITICAL_STATUS = 2;
+constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
 
 std::string GetImageInterpolation(ImageInterpolation interpolation)
 {
@@ -200,7 +201,7 @@ void ImagePattern::OnCompleteInDataReady()
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto imageEventHub = GetEventHub<ImageEventHub>();
+    auto imageEventHub = GetOrCreateEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
     CHECK_NULL_VOID(loadingCtx_);
     LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
@@ -248,7 +249,7 @@ void ImagePattern::SetOnFinishCallback(const RefPtr<CanvasImage>& image)
     image->SetOnFinishCallback([weak = WeakPtr(GetHost())] {
         auto imageNode = weak.Upgrade();
         CHECK_NULL_VOID(imageNode);
-        auto eventHub = imageNode->GetEventHub<ImageEventHub>();
+        auto eventHub = imageNode->GetOrCreateEventHub<ImageEventHub>();
         if (eventHub) {
             eventHub->FireFinishEvent();
         }
@@ -349,7 +350,7 @@ void ImagePattern::RemoveAreaChangeInner()
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<ImageEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (eventHub->HasOnAreaChanged()) {
         return;
@@ -449,7 +450,7 @@ void ImagePattern::OnImageLoadSuccess()
         EnableDrag();
     }
     ClearAltData();
-    auto eventHub = GetEventHub<ImageEventHub>();
+    auto eventHub = GetOrCreateEventHub<ImageEventHub>();
     if (eventHub) {
         eventHub->FireCompleteEvent(event);
     }
@@ -535,7 +536,7 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
-    auto imageEventHub = GetEventHub<ImageEventHub>();
+    auto imageEventHub = GetOrCreateEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
     LoadImageFailEvent event(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), errorMsg);
     imageEventHub->FireErrorEvent(event);
@@ -895,7 +896,7 @@ void ImagePattern::InitOnKeyEvent()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto focusHub = hub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -957,6 +958,9 @@ void ImagePattern::ControlAnimation(int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (!host->IsOnMainTree()) {
+        return;
+    }
     if (!animator_->HasScheduler()) {
         auto context = host->GetContextRefPtr();
         if (context) {
@@ -1440,6 +1444,9 @@ void ImagePattern::OnDetachFromMainTree()
         ResetImageAndAlt();
         isNeedReset_ = false;
     }
+    if (GetIsAnimation() && !animator_->IsStopped() && animator_->HasScheduler()) {
+        animator_->Stop();
+    }
 }
 
 void ImagePattern::EnableDrag()
@@ -1456,7 +1463,7 @@ void ImagePattern::EnableDrag()
         info.extraInfo = imagePattern->loadingCtx_->GetSourceInfo().GetSrc();
         return info;
     };
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDefaultOnDragStart(std::move(dragStart));
 }
@@ -1707,6 +1714,13 @@ void ImagePattern::DumpRenderInfo()
     DumpSmoothEdge(renderProp);
     DumpBorderRadiusProperties(renderProp);
     DumpResizable(renderProp);
+    DumpHdrBrightness(renderProp);
+}
+
+inline void ImagePattern::DumpHdrBrightness(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
+{
+    auto hdrBrightness = renderProp->GetHdrBrightness().value_or(DEFAULT_HDR_BRIGHTNESS);
+    DumpLog::GetInstance().AddDesc(std::string("hdrBrightness: ").append(std::to_string(hdrBrightness)));
 }
 
 inline void ImagePattern::DumpRenderMode(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
@@ -1996,7 +2010,7 @@ void ImagePattern::EnableAnalyzer(bool value)
     if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::IMAGE);
     }
-    RegisterVisibleAreaChange(false);
+    RegisterVisibleAreaChange(true);
 }
 
 // As an example
@@ -2118,9 +2132,6 @@ bool ImagePattern::hasSceneChanged()
     CHECK_NULL_RETURN(imageLayoutProperty, false);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
-    if (loadingCtx_ && loadingCtx_->GetSourceInfo() == src && srcRect_ == dstRect_) {
-        return false;
-    }
     return true;
 }
 
@@ -2345,7 +2356,7 @@ int32_t ImagePattern::GetNextIndex(int32_t preIndex)
 void ImagePattern::AddImageLoadSuccessEvent(const RefPtr<FrameNode>& imageFrameNode)
 {
     CHECK_NULL_VOID(imageFrameNode);
-    auto eventHub = imageFrameNode->GetEventHub<ImageEventHub>();
+    auto eventHub = imageFrameNode->GetOrCreateEventHub<ImageEventHub>();
     eventHub->SetOnComplete(
         [weakImage = WeakPtr<FrameNode>(imageFrameNode), weak = WeakClaim(this)](const LoadImageSuccessEvent& info) {
             if (info.GetLoadingStatus() != 1) {
@@ -2631,10 +2642,10 @@ void ImagePattern::TriggerVisibleAreaChangeForChild(const RefPtr<UINode>& node, 
     for (const auto& childNode : node->GetChildren()) {
         if (AceType::InstanceOf<FrameNode>(childNode)) {
             auto frame = AceType::DynamicCast<FrameNode>(childNode);
-            if (!frame || !frame->GetEventHub<EventHub>()) {
+            if (!frame || !frame->GetOrCreateEventHub<EventHub>()) {
                 continue;
             }
-            auto callback = frame->GetEventHub<EventHub>()->GetVisibleAreaCallback(true).callback;
+            auto callback = frame->GetOrCreateEventHub<EventHub>()->GetVisibleAreaCallback(true).callback;
             if (callback) {
                 callback(visible, ratio);
             }

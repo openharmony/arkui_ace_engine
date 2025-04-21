@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { buttonClick,
+import {
+  buttonClick,
   JsonType,
   KeyStruct,
   radioClick,
@@ -28,6 +29,7 @@ import { WaterFlowStart } from './WaterFlow';
 import { Driver } from '@kit.TestKit';
 
 const driver = Driver.create();
+
 export default function WaterFlow8() {
   describe('WaterFlow8', () => {
     beforeAll(async (done: Function) => {

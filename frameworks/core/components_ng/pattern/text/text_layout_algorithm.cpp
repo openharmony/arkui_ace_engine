@@ -24,6 +24,10 @@
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
+#ifdef ACE_ENABLE_VK
+#include "render_service_base/include/platform/common/rs_system_properties.h"
+#endif
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t HUNDRED = 100;
@@ -51,10 +55,12 @@ uint32_t GetAdaptedMaxLines(const TextStyle& textStyle, const LayoutConstraintF&
 }; // namespace
 
 TextLayoutAlgorithm::TextLayoutAlgorithm(
-    std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> pManager, bool isSpanStringMode, bool isMarquee)
+    std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> pManager, bool isSpanStringMode,
+    const TextStyle& textStyle, bool isMarquee)
 {
     paragraphManager_ = pManager;
     isSpanStringMode_ = isSpanStringMode;
+    textStyle_ = textStyle;
 
     if (!isSpanStringMode) {
         if (!spans.empty()) {
@@ -134,39 +140,48 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(pattern, std::nullopt);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
-    textStyle_ = pattern->GetTextStyle();
-    CHECK_NULL_RETURN(textStyle_.has_value(), std::nullopt);
-    ConstructTextStyles(contentConstraint, layoutWrapper, textStyle_.value());
-
+    ConstructTextStyles(contentConstraint, layoutWrapper, textStyle_);
     if (isSpanStringMode_ && spanStringHasMaxLines_) {
-        textStyle_->SetMaxLines(UINT32_MAX);
+        textStyle_.SetMaxLines(UINT32_MAX);
     }
     // inheritTextStyle_ is used to control spans_ in versions below VERSION_EIGHTEEN, preventing them from
     // adapting to font size automatically.
-    inheritTextStyle_ = textStyle_.value();
-    MeasureChildren(layoutWrapper, textStyle_.value());
-    CheckNeedReCreateParagraph(layoutWrapper, textStyle_.value());
+    inheritTextStyle_ = textStyle_;
+    MeasureChildren(layoutWrapper, textStyle_);
+    CheckNeedReCreateParagraph(layoutWrapper, textStyle_);
     ACE_SCOPED_TRACE(
         "TextLayoutAlgorithm::MeasureContent[id:%d][needReCreateParagraph:%d]", host->GetId(), needReCreateParagraph_);
 
-    if (textStyle_->GetTextOverflow() == TextOverflow::MARQUEE) { // create a paragraph with all text in 1 line
+    if (textStyle_.GetTextOverflow() == TextOverflow::MARQUEE) { // create a paragraph with all text in 1 line
         isMarquee_ = true;
-        auto result = BuildTextRaceParagraph(textStyle_.value(), textLayoutProperty, contentConstraint, layoutWrapper);
+        auto result = BuildTextRaceParagraph(textStyle_, textLayoutProperty, contentConstraint, layoutWrapper);
         return result;
     }
     if (isSpanStringMode_ && host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        BuildParagraph(textStyle_.value(), textLayoutProperty, contentConstraint, layoutWrapper);
+        BuildParagraph(textStyle_, textLayoutProperty, contentConstraint, layoutWrapper);
     } else {
-        if (!AddPropertiesAndAnimations(textStyle_.value(), textLayoutProperty, contentConstraint, layoutWrapper)) {
+        if (!AddPropertiesAndAnimations(textStyle_, textLayoutProperty, contentConstraint, layoutWrapper)) {
             return std::nullopt;
         }
     }
-    baselineOffset_ = textStyle_->GetBaselineOffset().ConvertToPxDistribute(
-        textStyle_->GetMinFontScale(), textStyle_->GetMaxFontScale(), textStyle_->IsAllowScale());
+    baselineOffset_ = textStyle_.GetBaselineOffset().ConvertToPxDistribute(
+        textStyle_.GetMinFontScale(), textStyle_.GetMaxFontScale(), textStyle_.IsAllowScale());
     if (NearZero(contentConstraint.maxSize.Height()) || NearZero(contentConstraint.maxSize.Width())) {
         return SizeF {};
     }
     CHECK_NULL_RETURN(paragraphManager_, std::nullopt);
+#ifdef ACE_ENABLE_VK
+    auto pipeline = host->GetContext();
+    auto fontManager = pipeline == nullptr ? nullptr : pipeline->GetFontManager();
+    if (fontManager != nullptr && Rosen::RSSystemProperties::GetHybridRenderEnabled()) {
+        if (static_cast<uint32_t>(paragraphManager_->GetLineCount()) >=
+            Rosen::RSSystemProperties::GetHybridRenderTextBlobLenCount()) {
+            fontManager->AddHybridRenderNode(host);
+        } else {
+            fontManager->RemoveHybridRenderNode(host);
+        }
+    }
+#endif
     auto height = paragraphManager_->GetHeight();
     auto maxWidth = paragraphManager_->GetMaxWidth();
     auto longestLine = paragraphManager_->GetLongestLine();
@@ -179,8 +194,8 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     if (host->GetTag() == V2::TEXT_ETS_TAG && textLayoutProperty->GetContent().value_or(u"").empty() &&
         NonPositive(longestLine)) {
         ACE_SCOPED_TRACE("TextHeightFinal [%f], TextContentWidth [%f], FontSize [%lf]", heightFinal, maxWidth,
-            textStyle_->GetFontSize().ConvertToPxDistribute(
-                textStyle_->GetMinFontScale(), textStyle_->GetMaxFontScale(), textStyle_->IsAllowScale()));
+            textStyle_.GetFontSize().ConvertToPxDistribute(
+                textStyle_.GetMinFontScale(), textStyle_.GetMaxFontScale(), textStyle_.IsAllowScale()));
         return SizeF {};
     }
     return SizeF(maxWidth, heightFinal);
@@ -860,7 +875,7 @@ void TextLayoutAlgorithm::UpdateSensitiveContent(std::u16string& content)
         }, u'-');
 }
 
-std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
+const TextStyle& TextLayoutAlgorithm::GetTextStyle() const
 {
     return textStyle_;
 }

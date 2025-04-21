@@ -176,6 +176,11 @@ public:
         isCustomPopup_ = isCustomPopup;
     }
 
+    void SetTipsTag(bool isTips)
+    {
+        isTips_ = isTips;
+    }
+
     void SetTransitionStatus(TransitionStatus transitionStatus)
     {
         transitionStatus_ = transitionStatus;
@@ -414,6 +419,7 @@ private:
     std::optional<SizeF> targetSize_;
 
     bool isCustomPopup_ = false;
+    bool isTips_ = false;
     RefPtr<FrameNode> messageNode_;
 
     std::string clipPath_;

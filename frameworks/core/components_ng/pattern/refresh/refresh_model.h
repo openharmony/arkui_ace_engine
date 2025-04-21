@@ -54,6 +54,7 @@ public:
     virtual void SetOnRefreshing(std::function<void()>&& refreshing) = 0;
     virtual void SetOnOffsetChange(std::function<void(const float)>&& dragOffset) = 0;
     virtual void ResetOnOffsetChange() = 0;
+    virtual void SetMaxPullDownDistance(const std::optional<float>& maxDistance) {}
     virtual void SetPullDownRatio(const std::optional<float>& pullDownRatio) {}
     virtual void SetChangeEvent(std::function<void(const std::string)>&& changeEvent) = 0;
     virtual void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) = 0;

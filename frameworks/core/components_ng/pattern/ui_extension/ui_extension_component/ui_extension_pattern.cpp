@@ -27,6 +27,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/overlay/overlay_mask_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
@@ -170,6 +171,7 @@ UIExtensionPattern::~UIExtensionPattern()
     }
     NotifyDestroy();
     FireModalOnDestroy();
+    OverlayMaskManager::GetInstance().OnUIExtDestroy(uiExtensionId_);
     UIExtensionIdUtility::GetInstance().RecycleExtensionId(uiExtensionId_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -611,6 +613,7 @@ void UIExtensionPattern::InitBusinessDataHandleCallback()
     RegisterEventProxyFlagCallback();
     RegisterGetAvoidInfoCallback();
     RegisterReplyPageModeCallback();
+    OverlayMaskManager::GetInstance().RegisterOverlayHostMaskMountCallback(uiExtensionId_, GetHost());
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()
@@ -908,7 +911,7 @@ void UIExtensionPattern::RegisterPipelineEvent(
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
         const RectF& oldRect,
@@ -985,7 +988,7 @@ void UIExtensionPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);

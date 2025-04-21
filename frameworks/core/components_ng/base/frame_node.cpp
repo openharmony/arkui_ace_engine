@@ -471,15 +471,7 @@ FrameNode::~FrameNode()
     if (IsOnMainTree()) {
         OnDetachFromMainTree(false, GetContextWithCheck());
     }
-    if (eventHub_) {
-        eventHub_->ClearOnAreaChangedInnerCallbacks();
-        if (eventHub_->HasVisibleAreaCallback(true) || eventHub_->HasVisibleAreaCallback(false)) {
-            SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::FRAMENODE_DESTROY);
-            TriggerVisibleAreaChangeCallback(0, true);
-            CleanVisibleAreaUserCallback();
-            CleanVisibleAreaInnerCallback();
-        }
-    }
+    HandleAreaChangeDestruct();
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
@@ -2039,7 +2031,7 @@ void FrameNode::ProcessThrottledVisibleCallback(bool forceDisappear)
     auto& visibleAreaUserCallback = eventHub_->GetThrottledVisibleAreaCallback();
     CHECK_NULL_VOID(visibleAreaUserCallback.callback);
 
-    if (forceDisappear) {
+    if (forceDisappear && !NearEqual(lastThrottledVisibleCbRatio_, VISIBLE_RATIO_MIN)) {
         auto& userRatios = eventHub_->GetThrottledVisibleAreaRatios();
         ProcessAllVisibleCallback(
             userRatios, visibleAreaUserCallback, VISIBLE_RATIO_MIN, lastThrottledVisibleCbRatio_, true);
@@ -2839,12 +2831,25 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     if (!isActive_) {
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test. Rect is %{public}s",
             GetTag().c_str(), paintRect.ToString().c_str());
+        int32_t parentId = -1;
+        auto parent = GetAncestorNodeOfFrame(true);
+        if (parent) {
+            parentId = parent->GetId();
+        }
+        AddFrameNodeSnapshot(true, parentId, std::vector<RectF>(), EventTreeType::TOUCH);
+
         return HitTestResult::OUT_OF_REGION;
     }
+
     if (eventHub_ && !eventHub_->IsEnabled()) {
+        if (hasBindTips_) {
+            TipsTouchTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, result,
+                responseLinkResult, isDispatch);
+        }
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s eventHub not enabled, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
+
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto localMat = cacheMatrixInfo.localMatrix;
     if (!touchRestrict.touchEvent.isMouseTouchTest) {
@@ -3049,6 +3054,35 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     return testResult;
 }
 
+void FrameNode::TipsTouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result,
+    ResponseLinkResult& responseLinkResult, bool isDispatch)
+{
+    auto& cacheMatrixInfo = GetOrRefreshMatrixFromCache();
+    auto paintRect = cacheMatrixInfo.paintRectWithTransform;
+    auto defaultResponseRegion = renderContext_->GetPaintRectWithoutTransform();
+    auto responseRegionList =
+        GetResponseRegionList(defaultResponseRegion, static_cast<int32_t>(touchRestrict.sourceType));
+    RefPtr<TargetComponent> targetComponent = targetComponent_.Upgrade();
+    if (!targetComponent) {
+        targetComponent = MakeRefPtr<TargetComponent>();
+        targetComponent_ = targetComponent;
+    }
+    targetComponent->SetNode(WeakClaim(this));
+    TouchTestResult newComingTargets;
+    auto tmp = parentLocalPoint - paintRect.GetOffset();
+    renderContext_->GetPointWithTransform(tmp);
+    const auto localPoint = tmp;
+    auto revertPoint = parentRevertPoint;
+    if ((GetHitTestMode() != HitTestMode::HTMNONE) &&
+        (isDispatch || (InResponseRegionList(revertPoint, responseRegionList)))) {
+        if (touchRestrict.hitTestType == SourceType::MOUSE) {
+            ProcessTipsMouseTestHit(globalPoint, localPoint, touchRestrict, newComingTargets);
+        }
+    }
+    result.splice(result.end(), std::move(newComingTargets));
+}
+
 bool FrameNode::ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
     TouchRestrict& touchRestrict, TouchTestResult& newComingTargets)
 {
@@ -3064,6 +3098,18 @@ bool FrameNode::ProcessMouseTestHit(const PointF& globalPoint, const PointF& loc
     }
 
     return mouseHub->ProcessMouseTestHit(coordinateOffset, newComingTargets);
+}
+
+bool FrameNode::ProcessTipsMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
+    TouchRestrict& touchRestrict, TouchTestResult& newComingTargets)
+{
+    CHECK_NULL_RETURN(eventHub_, false);
+    auto mouseHub = eventHub_->GetInputEventHub();
+    if (!mouseHub) {
+        return false;
+    }
+    const auto coordinateOffset = globalPoint - localPoint;
+    return mouseHub->ProcessTipsMouseTestHit(coordinateOffset, newComingTargets);
 }
 
 std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t sourceType)
@@ -4249,6 +4295,7 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
     auto frameRateManager = pipelineContext->GetFrameRateManager();
     CHECK_NULL_VOID(frameRateManager);
 
+    frameRateManager->SetDragScene(status == SceneStatus::END ? 0 : 1);
     auto expectedRate = renderContext->CalcExpectedFrameRate(scene, std::abs(speed));
     auto nodeId = GetId();
     auto iter = sceneRateMap_.find(scene);
@@ -4330,10 +4377,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     ACE_LAYOUT_TRACE_BEGIN("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
         GetAncestorNodeOfFrame(true) ? GetAncestorNodeOfFrame(true)->GetId() : 0, GetInspectorIdValue("").c_str());
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
-        ACE_MEASURE_SCOPED_TRACE(
-            "Measure[%s][self:%d][parent:%d][key:%s][frameRect:%s][parentConstraint:%s][calcConstraint:%s]",
-            GetTag().c_str(), GetId(), GetAncestorNodeOfFrame(true) ? GetAncestorNodeOfFrame(true)->GetId() : 0,
-            GetInspectorIdValue("").c_str(), GetGeometryNode()->GetFrameRect().ToString().c_str(),
+        ACE_MEASURE_SCOPED_TRACE("MeasureInfo[frameRect:%s][parentConstraint:%s][calcConstraint:%s]",
+            GetGeometryNode()->GetFrameRect().ToString().c_str(),
             parentConstraint.has_value() ? parentConstraint.value().ToString().c_str() : "NA",
             layoutProperty_->GetCalcLayoutConstraint() ? layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str()
                                                        : "NA");
@@ -4451,9 +4496,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
-        ACE_MEASURE_SCOPED_TRACE("MeasureFinish[%s][self:%d][parent:%d][key:%s][frameRect:%s][contentSize:%s]",
-            GetTag().c_str(), GetId(), GetAncestorNodeOfFrame(true) ? GetAncestorNodeOfFrame(true)->GetId() : 0,
-            GetInspectorIdValue("").c_str(), GetGeometryNode()->GetFrameRect().ToString().c_str(),
+        ACE_MEASURE_SCOPED_TRACE("MeasureFinish[frameRect:%s][contentSize:%s]",
+            GetGeometryNode()->GetFrameRect().ToString().c_str(),
             GetGeometryNode()->GetContentSize().ToString().c_str());
     }
     ACE_LAYOUT_TRACE_END()
@@ -4465,9 +4509,7 @@ void FrameNode::Layout()
     ACE_LAYOUT_TRACE_BEGIN("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
         GetAncestorNodeOfFrame(true) ? GetAncestorNodeOfFrame(true)->GetId() : 0, GetInspectorIdValue("").c_str());
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
-        ACE_MEASURE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d][key:%s][frameRect:%s]", GetTag().c_str(), GetId(),
-            GetAncestorNodeOfFrame(true) ? GetAncestorNodeOfFrame(true)->GetId() : 0, GetInspectorIdValue("").c_str(),
-            GetGeometryNode()->GetFrameRect().ToString().c_str());
+        ACE_MEASURE_SCOPED_TRACE("LayoutInfo[frameRect:%s]", GetGeometryNode()->GetFrameRect().ToString().c_str());
     }
     if (layoutProperty_->GetLayoutRect()) {
         GetGeometryNode()->SetFrameOffset(layoutProperty_->GetLayoutRect().value().GetOffset());
@@ -4520,9 +4562,8 @@ void FrameNode::Layout()
         GetLayoutAlgorithm()->SetSkipLayout();
     }
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
-        ACE_MEASURE_SCOPED_TRACE("LayoutFinish[%s][self:%d][parent:%d][key:%s][frameRect:%s]", GetTag().c_str(),
-            GetId(), GetAncestorNodeOfFrame(true) ? GetAncestorNodeOfFrame(true)->GetId() : 0,
-            GetInspectorIdValue("").c_str(), GetGeometryNode()->GetFrameRect().ToString().c_str());
+        ACE_MEASURE_SCOPED_TRACE(
+            "LayoutFinish[frameRect:%s]", GetGeometryNode()->GetFrameRect().ToString().c_str());
     }
 
     auto pipeline = GetContext();
@@ -5166,7 +5207,8 @@ void FrameNode::AddFrameNodeSnapshot(
         .monopolizeEvents = GetMonopolizeEvents(),
         .isHit = isHit,
         .hitTestMode = static_cast<int32_t>(GetHitTestMode()),
-        .responseRegionList = responseRegionList };
+        .responseRegionList = responseRegionList,
+        .active = isActive_ };
     eventMgr->GetEventTreeRecord(type).AddFrameNodeSnapshot(std::move(info));
 }
 
@@ -5644,6 +5686,11 @@ CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool l
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
     auto rectToParent = GetPaintRectWithTransform();
     auto scale = GetTransformScale();
+    if (renderContext_) {
+        auto matrix4 = renderContext_->GetTransformMatrixValue(Matrix4());
+        scale = { scale.x * static_cast<float>(matrix4.GetScaleX()),
+            scale.y * static_cast<float>(matrix4.GetScaleY()) };
+    }
 
     if (!parentUi || IsWindowBoundary()) {
         cachedVisibleRectResult_ = {timestamp,
@@ -5676,10 +5723,8 @@ CacheVisibleRectResult FrameNode::CalculateCacheVisibleRect(CacheVisibleRectResu
     auto parentRenderContext = parentUi->GetRenderContext();
     OffsetF windowOffset;
     auto offset = rectToParent.GetOffset();
-    if (parentRenderContext && parentRenderContext->GetTransformScale()) {
-        auto parentScale = parentRenderContext->GetTransformScale();
-        offset = OffsetF(offset.GetX() * parentScale.value().x, offset.GetY() * parentScale.value().y);
-    }
+    offset = OffsetF(offset.GetX() * parentCacheVisibleRect.cumulativeScale.x,
+        offset.GetY() * parentCacheVisibleRect.cumulativeScale.y);
     windowOffset = parentCacheVisibleRect.windowOffset + offset;
 
     RectF rect;
@@ -6621,5 +6666,20 @@ int32_t FrameNode::OnRecvCommand(const std::string& command)
     auto pattern = GetPattern();
     CHECK_NULL_RETURN(pattern, RET_FAILED);
     return pattern->OnRecvCommand(command);
+}
+
+void FrameNode::HandleAreaChangeDestruct()
+{
+    if (eventHub_) {
+        eventHub_->ClearOnAreaChangedInnerCallbacks();
+        if (eventHub_->HasVisibleAreaCallback(true) || eventHub_->HasVisibleAreaCallback(false) ||
+            eventHub_->HasThrottledVisibleAreaCallback()) {
+            SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::FRAMENODE_DESTROY);
+            TriggerVisibleAreaChangeCallback(0, true);
+            CleanVisibleAreaUserCallback(true);
+            CleanVisibleAreaUserCallback();
+            CleanVisibleAreaInnerCallback();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

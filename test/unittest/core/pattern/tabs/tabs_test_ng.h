@@ -85,6 +85,7 @@ public:
     void HandleHoverEvent(bool isHover);
     GestureEvent CreateDragInfo(bool moveDirection);
     void MockPaintRect(const RefPtr<FrameNode>& frameNode);
+    void MockPaintRectSmallSize(const RefPtr<FrameNode>& frameNode);
     RefPtr<TabBarModifier> OnDraw();
     AssertionResult CurrentIndex(int32_t expectIndex);
     AssertionResult VerifyBackgroundColor(int32_t itemIndex, Color expectColor);

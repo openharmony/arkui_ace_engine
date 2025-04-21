@@ -75,6 +75,7 @@ private:
     OHOS::Rosen::WindowMode initWindowMode_ = OHOS::Rosen::WindowMode::WINDOW_MODE_UNDEFINED;
     CancelableCallback<void()> deleteWindowTask_;
     CancelableCallback<void()> removeStartingWindowTask_;
+    CancelableCallback<void()> removeSnapshotWindowTask_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
 };

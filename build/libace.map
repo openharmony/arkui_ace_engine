@@ -392,6 +392,7 @@
       OHOS::Ace::BorderImage::*;
       OHOS::Ace::ContainerScope::*;
       OHOS::Ace::Dimension::*;
+      OHOS::Ace::ImageSource::*;
       OHOS::Ace::ImageSourceInfo::*;
       OHOS::Ace::JsonUtil::*;
       OHOS::Ace::Recorder::*;
@@ -535,6 +536,7 @@
       OHOS::Ace::NG::NGGestureRecognizer::IsInResponseLinkRecognizers*;
       OHOS::Ace::TouchEventTarget::GetAttachedNode*;
       "OHOS::Ace::CheckThread(OHOS::Ace::TaskExecutor::TaskType)";
+      OHOS::Ace::NG::PanRecognizer::GetDistance*;
     };
   local:
     *;

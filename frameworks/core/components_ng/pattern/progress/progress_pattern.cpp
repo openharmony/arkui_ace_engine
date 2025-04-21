@@ -309,7 +309,7 @@ void ProgressPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
 
@@ -327,7 +327,7 @@ void ProgressPattern::RemoveHoverEvent()
     if (hoverEvent_) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto eventHub = host->GetEventHub<EventHub>();
+        auto eventHub = host->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         auto inputHub = eventHub->GetOrCreateInputEventHub();
         inputHub->RemoveOnHoverEvent(hoverEvent_);
@@ -391,7 +391,7 @@ void ProgressPattern::HandleEnabled()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -503,7 +503,7 @@ void ProgressPattern::OnModifyDone()
     auto progressLayoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     if (progressLayoutProperty->GetType() == ProgressType::CAPSULE) {
-        auto hub = host->GetEventHub<EventHub>();
+        auto hub = host->GetOrCreateEventHub<EventHub>();
         HandleEnabled();
         InitTouchEvent();
         InitHoverEvent();
@@ -761,7 +761,7 @@ RefPtr<FrameNode> ProgressPattern::BuildContentModifierNode()
     auto total = renderProperty->GetMaxValue().value_or(PROGRESS_MAX_VALUE);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     return (makeFunc_.value())(ProgressConfiguration{value, total, enabled});

@@ -767,10 +767,12 @@ HWTEST_F(WebPatternPartTwoTest, ParseNWebViewDataNode001, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern, nullptr);
+    MockPipelineContext::SetUp();
     auto child = std::make_unique<JsonValue>();
     std::vector<RefPtr<PageNodeInfoWrap>> nodeInfos;
     int32_t nId = 1;
     webPattern->ParseNWebViewDataNode(std::move(child), nodeInfos, nId);
+    MockPipelineContext::TearDown();
 #endif
 }
 

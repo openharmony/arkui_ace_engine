@@ -611,6 +611,9 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         return;
     }
 
+    // set menu window touchable
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    DragDropFuncWrapper::SetMenuSubWindowTouchable((mainPipeline != pipeline));
     // set drag drop status is moving
     DragDropGlobalController::GetInstance().UpdateDragDropInitiatingStatus(frameNode, DragDropInitiatingStatus::MOVING);
 
@@ -629,7 +632,6 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
      */
     DragDropInfo dragPreviewInfo;
     auto dragDropInfo = GetDragDropInfo(info, frameNode, dragPreviewInfo, event);
-    GetUnifiedData(frameNode->GetTag(), dragDropInfo, event);
     auto continueFunc = [id = Container::CurrentId(), weak = WeakClaim(this), dragPreviewInfo, info, event,
         dragDropInfo, frameNode, pipeline]() {
         ContainerScope scope(id);
@@ -681,12 +683,12 @@ bool GestureEventHub::ParsePixelMapAsync(DragDropInfo& dragDropInfo, const DragD
                 return true;
             }
         }
-    }
-
-    if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode == nullptr && dragPreviewInfo.pixelMap == nullptr &&
-        dragPreviewInfo.customNode == nullptr && pixelMap_ != nullptr && !frameNode->GetDragPreview().onlyForLifting) {
-        dragDropInfo.pixelMap = pixelMap_;
-        return true;
+        if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode == nullptr &&
+            dragPreviewInfo.pixelMap == nullptr && dragPreviewInfo.customNode == nullptr && pixelMap_ != nullptr &&
+            !frameNode->GetDragPreview().onlyForLifting) {
+            dragDropInfo.pixelMap = pixelMap_;
+            return true;
+        }
     }
     if (dragPreviewInfo.pixelMap != nullptr) {
         ACE_SCOPED_TRACE("drag: handling with pixelmap directly");
@@ -703,6 +705,7 @@ void GestureEventHub::DoOnDragStartHandling(const GestureEvent& info, const RefP
     DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event, DragDropInfo dragPreviewInfo,
     const RefPtr<PipelineContext>& pipeline)
 {
+    GetUnifiedData(frameNode->GetTag(), dragDropInfo, event);
     // set drag pointer status
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -822,10 +825,7 @@ void GestureEventHub::PrepareDragStartInfo(
     CHECK_NULL_VOID(relativeContainerRenderContext);
     relativeContainerRenderContext->UpdateTransformTranslate({ 0, 0, 0.0f });
     CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetDragPreviewOption().sizeChangeEffect != DraggingSizeChangeEffect::DEFAULT &&
-        !data.hasTransition) {
-        GestureEventHub::UpdateMenuNode(menuWrapperNode, data, frameNode);
-    }
+    GestureEventHub::UpdateMenuNode(menuWrapperNode, data, frameNode);
 }
 
 void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context,
@@ -1621,16 +1621,19 @@ OffsetF GestureEventHub::GetDragPreviewInitPositionToScreen(
 void GestureEventHub::UpdateMenuNode(
     const RefPtr<FrameNode> menuWrapperNode, PreparedInfoForDrag& data, const RefPtr<FrameNode> frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(menuWrapperNode);
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    data.hasTransition = menuWrapperPattern->HasTransitionEffect();
-    if (data.hasTransition) {
+    if (frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT ||
+        menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->IsHide()) {
         return;
     }
     auto menuNode = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(menuNode);
-    auto menuGeometryNode = menuNode->GetGeometryNode();
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildByIndex(0));
+    CHECK_NULL_VOID(scrollNode);
+    auto menuGeometryNode = scrollNode->GetGeometryNode();
     CHECK_NULL_VOID(menuGeometryNode);
     auto menuNodeSize = menuGeometryNode->GetFrameRect();
     RefPtr<FrameNode> imageNode;
@@ -1649,7 +1652,7 @@ void GestureEventHub::UpdateMenuNode(
         data.frameNodeRect = imageNodeSize;
     }
     auto imageNodeOffset = imageNode->GetPaintRectOffset(false, true);
-    auto menuNodeOffset = menuNode->GetPaintRectOffset(false, true);
+    auto menuNodeOffset = scrollNode->GetPaintRectOffset(false, true);
     data.menuRect = menuNodeSize;
     data.menuPositionLeft = menuNodeOffset.GetX() - imageNodeOffset.GetX();
     data.menuPositionTop = menuNodeOffset.GetY() - imageNodeOffset.GetY();
@@ -1660,11 +1663,11 @@ void GestureEventHub::UpdateMenuNode(
     auto menuParam = menuWrapperPattern->GetMenuParam();
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
+    auto placement = menuPattern->GetLastPlacement().value_or(Placement::NONE);
+    data.menuPosition = placement;
     auto newMenuNode = menuPattern->DuplicateMenuNode(menuNode, menuParam);
     CHECK_NULL_VOID(newMenuNode);
     data.menuNode = newMenuNode;
-    auto placement = menuPattern->GetLastPlacement().value_or(Placement::NONE);
-    data.menuPosition = placement;
 }
 
 int32_t GestureEventHub::GetBadgeNumber(const RefPtr<UnifiedData>& unifiedData)
@@ -1735,9 +1738,9 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     DragAnimationHelper::MountPixelMap(
         subWindowOverlayManager, eventHub->GetOrCreateGestureEventHub(), data, true);
 
+    HideMenu();
     // update position
     UpdateNodePositionBeforeStartAnimation(frameNode, data);
-    HideMenu();
     pipeline->FlushSyncGeometryNodeTasks();
     overlayManager->RemovePixelMap();
     DragAnimationHelper::ShowBadgeAnimation(data.textNode);

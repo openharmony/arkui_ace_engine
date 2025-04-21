@@ -1719,16 +1719,6 @@ export struct GridObjectSortComponent {
       LongPressGesture({ repeat: true })
         .onAction(() => {
           this.menuSwitch = true;
-        })
-        .onActionEnd(() => {
-          let eventInfo: accessibility.EventInfo = ({
-            type: 'announceForAccessibility', // 表示主动播报的事件。
-            bundleName: this.bundleName, // 目标应用名；不可缺省。
-            triggerAction: 'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
-            textAnnouncedForAccessibility: getContext().resourceManager
-              .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE) // 主动播报的内容。
-          });
-          accessibility.sendAccessibilityEvent(eventInfo);
         }))
     .accessibilityText(this.getStringByResourceToken(ACCESSIBILITY_RESIDENT_AREA))
     .accessibilityDescription(this.menuSwitch ? ' ' :

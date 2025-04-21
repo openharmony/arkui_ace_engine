@@ -373,7 +373,7 @@ void TimePickerRowPattern::InitDisabled()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     enabled_ = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -571,7 +571,7 @@ void TimePickerRowPattern::SetEventCallback(EventCallback&& value)
 void TimePickerRowPattern::FireChangeEvent(bool refresh)
 {
     if (refresh) {
-        auto timePickerEventHub = GetEventHub<TimePickerEventHub>();
+        auto timePickerEventHub = GetOrCreateEventHub<TimePickerEventHub>();
         CHECK_NULL_VOID(timePickerEventHub);
         auto str = GetSelectedObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);
@@ -602,7 +602,7 @@ void TimePickerRowPattern::SetEnterSelectedAreaEventCallback(EventCallback&& val
 void TimePickerRowPattern::FireEnterSelectedAreaEvent(bool refresh)
 {
     if (refresh) {
-        auto timePickerEventHub = GetEventHub<TimePickerEventHub>();
+        auto timePickerEventHub = GetOrCreateEventHub<TimePickerEventHub>();
         CHECK_NULL_VOID(timePickerEventHub);
         auto str = GetEnterObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);
@@ -1010,31 +1010,39 @@ void TimePickerRowPattern::OnFontScaleConfigurationUpdate()
     closeDialogEvent_();
 }
 
-void TimePickerRowPattern::UpdateConfirmButtonMargin(
-    const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme)
+void TimePickerRowPattern::UpdateButtonMargin(
+    const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmOrNextNode)
 {
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    isRtl = isConfirmOrNextNode ? isRtl : !isRtl;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
     } else {
         DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, false, ModuleDialogType::TIMEPICKER_DIALOG);
     }
-    buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
+    buttonNode->GetLayoutProperty()->UpdateMargin(margin);
 }
 
-void TimePickerRowPattern::UpdateCancelButtonMargin(
-    const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme)
+void TimePickerRowPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext)
 {
-    MarginProperty margin;
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
-    } else {
-        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, false,
-            ModuleDialogType::TIMEPICKER_DIALOG);
-    }
-    buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
+    CHECK_NULL_VOID(buttonNode);
+    auto updateNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    CHECK_NULL_VOID(updateNode);
+    auto updateNodeLayout = updateNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(updateNodeLayout);
+
+    auto pipeline = updateNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    std::string lettersStr = isNext ? pickerTheme->GetNextText() : pickerTheme->GetPrevText();
+    updateNodeLayout->UpdateContent(lettersStr);
+
+    UpdateButtonMargin(buttonNode, dialogTheme, isNext);
+    updateNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void TimePickerRowPattern::OnLanguageConfigurationUpdate()
@@ -1076,7 +1084,7 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
     confirmNodeLayout->UpdateContent(dialogTheme->GetConfirmText());
-    UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
+    UpdateButtonMargin(buttonConfirmNode, dialogTheme, true);
     confirmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto buttonCancelNode = weakButtonCancel_.Upgrade();
@@ -1086,8 +1094,11 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
     auto cancelNodeLayout = cancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(cancelNodeLayout);
     cancelNodeLayout->UpdateContent(dialogTheme->GetCancelText());
-    UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
+    UpdateButtonMargin(buttonCancelNode, dialogTheme, false);
     cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    auto nextPrevButton = nextPrevButtonNode_.Upgrade();
+    UpdateDialogAgingButton(nextPrevButton, isNext_);
 }
 
 void TimePickerRowPattern::UpdateNodePositionForUg()

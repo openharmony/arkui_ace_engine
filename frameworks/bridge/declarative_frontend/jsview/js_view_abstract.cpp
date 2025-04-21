@@ -2231,17 +2231,11 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsSharedTransition", jsVal, checkList)) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
-            ViewAbstractModel::GetInstance()->SetSharedTransition("", nullptr);
-        }
         return;
     }
     // id
     auto id = jsVal->ToString();
     if (id.empty()) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
-            ViewAbstractModel::GetInstance()->SetSharedTransition("", nullptr);
-        }
         return;
     }
     std::shared_ptr<SharedTransitionOption> sharedOption;
@@ -7123,6 +7117,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
                                           &JSViewAbstract::JsAccessibilityScrollTriggerable);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityFocusDrawLevel",
                                           &JSViewAbstract::JsAccessibilityFocusDrawLevel);
+    JSClass<JSViewAbstract>::StaticMethod("onAccessibilityActionIntercept",
+                                          &JSViewAbstract::JsOnAccessibilityActionIntercept);
 
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);

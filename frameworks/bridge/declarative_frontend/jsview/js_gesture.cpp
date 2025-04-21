@@ -394,7 +394,11 @@ napi_value JSPanGesture::ParsePanDistanceMap(JSRef<JSVal> jsDistanceMap, PanDist
         NAPI_CALL(env, napi_get_value_int32(env, key, &sourceTool));
         double distance = 0.0;
         NAPI_CALL(env, napi_get_value_double(env, value, &distance));
-        distanceMap[static_cast<SourceTool>(sourceTool)] = distance;
+        SourceTool st = static_cast<SourceTool>(sourceTool);
+        if (st >= SourceTool::UNKNOWN && st <= SourceTool::JOYSTICK && GreatOrEqual(distance, 0.0)) {
+            Dimension dimension = Dimension(distance, DimensionUnit::VP);
+            distanceMap[st] = dimension.ConvertToPx();
+        }
     }
     return next;
 }
@@ -426,6 +430,7 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
     PanDirection panDirection;
     PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() } };
     if (args.Length() <= 0 || !args[0]->IsObject()) {
+        distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
         PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceMap, isLimitFingerCount);
         return;
     }
@@ -727,7 +732,7 @@ void JSPanGestureOption::GetDistance(const JSCallbackInfo& args)
         CHECK_NULL_VOID(context);
         distance_new = context->ConvertPxToVp(Dimension(distance, DimensionUnit::PX));
     }
-    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<double>(distance_new))));
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(RoundToMaxPrecision(distance_new))));
 }
 
 void JSPanGestureOption::Constructor(const JSCallbackInfo& args)

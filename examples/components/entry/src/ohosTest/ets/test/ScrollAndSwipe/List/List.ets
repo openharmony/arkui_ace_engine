@@ -23,7 +23,7 @@ const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorReg
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
 
-export async function ListStart(done:Function){
+export async function ListStart(done: Function) {
 
   console.info('beforeAll begin');
 

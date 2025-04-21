@@ -17,6 +17,7 @@
 
 #include "cj_lambda.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_transitioneffect.h"
 #include "core/components/theme/shadow_theme.h"

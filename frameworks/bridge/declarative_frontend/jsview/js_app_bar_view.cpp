@@ -67,7 +67,6 @@ void JSAppBar::OnDidBuild(const JSCallbackInfo& info)
     CHECK_NULL_VOID(container);
     auto appBar = container->GetAppBar();
     CHECK_NULL_VOID(appBar);
-    appBar->AddContentToJSContainer();
 }
 
 void JSAppBar::OnCreateServicePanel(const JSCallbackInfo& info)

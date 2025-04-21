@@ -227,12 +227,11 @@ void SliderContentModifier::AddStepPoint(float startX, float startY, float endX,
         while (GreatOrEqual(endX, startX) && GreatOrEqual(endY, startY)) {
             canvas.DrawCircle(RSPoint(endX, endY), isEnlarge_ ? stepSize * HALF * scaleValue_ : stepSize * HALF);
             stepPointVec_.emplace_back(PointF(endX, endY));
-            if (NearEqual(endX, startX) && NearEqual(endY, startY)) {
-                return;
-            }
             endX -= stepsLengthX;
             endY -= stepsLengthY;
         }
+        endX += stepsLengthX;
+        endY += stepsLengthY;
         if (!NearEqual(endX, startX) || !NearEqual(endY, startY)) {
             stepPointVec_.emplace_back(PointF(startX, startY));
         }
@@ -240,12 +239,11 @@ void SliderContentModifier::AddStepPoint(float startX, float startY, float endX,
         while (LessOrEqual(startX, endX) && LessOrEqual(startY, endY)) {
             canvas.DrawCircle(RSPoint(startX, startY), isEnlarge_ ? stepSize * HALF * scaleValue_ : stepSize * HALF);
             stepPointVec_.emplace_back(PointF(startX, startY));
-            if (NearEqual(startX, endX) && NearEqual(startY, endY)) {
-                return;
-            }
             startX += stepsLengthX;
             startY += stepsLengthY;
         }
+        startX -= stepsLengthX;
+        startY -= stepsLengthY;
         if (!NearEqual(startX, endX) || !NearEqual(startY, endY)) {
             stepPointVec_.emplace_back(PointF(endX, endY));
         }

@@ -199,6 +199,7 @@ public:
     RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
     void HideDragPreviewOverlay();
     void HideDragPreviewWindow(int32_t containerId);
+    void HideSubwindowDragNode();
     bool IsMSDPDragging() const;
     void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const OHOS::Ace::DragPointerEvent& pointerEvent);
     void UpdateNotifyDragEvent(
@@ -442,8 +443,6 @@ public:
     static OffsetF GetTouchOffsetRelativeToSubwindow(int32_t containerId, int32_t x = 0, int32_t y = 0);
     static RectF GetMenuPreviewRect();
     static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager, const GatherAnimationInfo& info);
-    static void HandleDragPreviewUpdate(const RefPtr<RenderContext>& renderContext, const DragPreviewInfo& info,
-        const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager);
     static void UpdateGatherNodePosition(const RefPtr<OverlayManager>& overlayManager,
         const RefPtr<FrameNode>& imageNode);
     static void UpdateTextNodePosition(const RefPtr<FrameNode>& textNode, const Offset& localPoint);
@@ -783,6 +782,7 @@ private:
     std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction_;
     RefPtr<GridColumnInfo> columnInfo_;
     WeakPtr<FrameNode> menuWrapperNode_;
+    WeakPtr<OverlayManager> subwindowOverlayManager_;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
     bool grayedState_ = false;
 

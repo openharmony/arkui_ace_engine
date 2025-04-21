@@ -2378,4 +2378,33 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetOrCreate001, TestSize.Level1)
     auto children = frameNode1->GetChildren();
     EXPECT_EQ(children.size(), 1);
 }
+
+/**
+ * @tc.name: FrameNodeTestNG089
+ * @tc.desc: Test DumpSimplifyCommonInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNG089, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const NG::RectF rect = { 10.0f, 20.0f, 30.0f, 40.0f };
+    frameNode->geometryNode_->frame_.rect_ = rect;
+    frameNode->renderContext_->UpdateBackgroundColor(Color::BLUE);
+    frameNode->layoutProperty_->UpdateVisibility(VisibleType::INVISIBLE);
+    frameNode->layoutProperty_->SetLayoutRect(rect);
+    frameNode->layoutProperty_->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    frameNode->layoutProperty_->padding_ = std::make_unique<PaddingProperty>();
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize.width_ = 20.0f;
+    constraint.selfIdealSize.height_ = 30.0f;
+    frameNode->layoutProperty_->contentConstraint_ = constraint;
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.percentReference.width_ = 10.0;
+    frameNode->geometryNode_->SetParentLayoutConstraint(layoutConstraint);
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    frameNode->DumpInfo(json);
+    std::string res = json->ToString();
+
+    EXPECT_EQ(res.length() < 9000, true);
+}
 } // namespace OHOS::Ace::NG

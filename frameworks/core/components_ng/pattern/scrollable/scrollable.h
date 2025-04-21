@@ -56,6 +56,15 @@ struct ScrollResult {
     bool reachEdge;
 };
 
+struct SlidInfo {
+    double gestureVelocity;
+    double velocityScale;
+    double gain;
+    double maxFlingVelocity;
+    double slipFactor;
+    double friction;
+};
+
 using ScrollEventCallback = std::function<void()>;
 using OutBoundaryCallback = std::function<bool()>;
 using ScrollOverCallback = std::function<void(double velocity)>;
@@ -722,6 +731,7 @@ private:
     bool reachBoundary_ = false;
     CancelableCallback<void()> crownTask_;
 #endif
+    SlidInfo slidInfo_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -919,7 +919,7 @@ public:
     std::string TextInputActionToString() const;
     std::string AutoCapTypeToString() const;
     std::string TextContentTypeToString() const;
-    std::string GetPlaceholderFont() const;
+    virtual std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
     void InitTheme();
     std::string GetTextColor() const;
@@ -1676,6 +1676,7 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void StartVibratorByLongPress();
+    bool IsInResponseArea(const Offset& location);
     void HandleLongPress(GestureEvent& info);
     bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);

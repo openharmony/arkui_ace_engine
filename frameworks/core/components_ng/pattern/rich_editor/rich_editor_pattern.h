@@ -524,7 +524,6 @@ public:
     void ResetBeforePaste();
     void ResetAfterPaste();
 
-    void OnVisibleChange(bool isVisible) override;
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -562,6 +561,7 @@ public:
     std::u16string DeleteForwardOperation(int32_t length);
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
+    void AdjustAIEntityRect(RectF& aiRect) override;
     WindowMode GetWindowMode();
     bool GetIsMidScene();
     void NotifyKeyboardClosedByUser() override
@@ -589,6 +589,12 @@ public:
     void UpdateShiftFlag(const KeyEvent& keyEvent)override;
     bool HandleOnEscape() override;
     void HandleOnUndoAction() override;
+
+    void HandleOnExtendUndoAction() override
+    {
+        HandleOnUndoAction();
+    }
+
     void HandleOnRedoAction() override;
     void CursorMove(CaretMoveIntent direction) override;
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle) override;
@@ -634,6 +640,12 @@ public:
     int32_t GetParagraphEndPosition(int32_t caretPosition);
     int32_t CaretPositionSelectEmoji(CaretMoveIntent direction);
     void HandleSelect(CaretMoveIntent direction) override;
+
+    void HandleSelectExtend(CaretMoveIntent direction) override
+    {
+        HandleSelect(direction);
+    }
+
     void SetCaretPositionWithAffinity(PositionWithAffinity positionWithAffinity);
     bool SetCaretPosition(int32_t pos, bool needNotifyImf = true);
     int32_t GetCaretPosition();
@@ -1275,7 +1287,7 @@ private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleBlurEvent();
-    void HandleFocusEvent();
+    void HandleFocusEvent(FocusReason focusReason = FocusReason::DEFAULT);
     void OnFocusNodeChange(FocusReason focusReason) override;
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
@@ -1341,6 +1353,7 @@ private:
     void StartFloatingCaretLand();
     void ResetTouchAndMoveCaretState(bool needAnimation = true);
     void ResetTouchSelectState();
+    void ScheduleFirstClickResetAfterWindowFocus();
     void HandleTouchUpAfterLongPress();
     void HandleTouchCancelAfterLongPress();
     void HandleTouchMove(const TouchLocationInfo& info);
@@ -1407,7 +1420,7 @@ private:
     int32_t GetParagraphLength(const std::list<RefPtr<UINode>>& spans) const;
     // REQUIRES: 0 <= start < end
     std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
-    void OnHover(bool isHover);
+    void OnHover(bool isHover, HoverInfo& hoverInfo);
     void ChangeMouseStyle(MouseFormat format, bool freeMouseHoldNode = false);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
         SourceType sourceType = SourceType::NONE);
@@ -1744,6 +1757,9 @@ private:
     LRUMap<std::uintptr_t, RefPtr<Paragraph>> paragraphCache_;
     SysScale lastSysScale_;
     std::map<int32_t, AISpan> lastAISpanMap_;
+    // Used to avoid show single handle by first click after window focus
+    bool firstClickAfterWindowFocus_ = false;
+    CancelableCallback<void()> firstClickResetTask_;
 };
 } // namespace OHOS::Ace::NG
 

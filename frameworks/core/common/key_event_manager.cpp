@@ -151,7 +151,7 @@ bool KeyEventManager::IsSameKeyboardShortcutNode(const std::string& value, uint8
         if (!frameNode) {
             continue;
         }
-        auto eventHub = frameNode->GetEventHub<EventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
         if (!eventHub) {
             continue;
         }
@@ -438,7 +438,7 @@ bool KeyEventManager::DispatchKeyboardShortcut(const KeyEvent& event)
         if (!frameNode || !(frameNode->IsActive())) {
             continue;
         }
-        auto eventHub = frameNode->GetEventHub<EventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
         if (!eventHub || !(eventHub->IsEnabled())) {
             continue;
         }

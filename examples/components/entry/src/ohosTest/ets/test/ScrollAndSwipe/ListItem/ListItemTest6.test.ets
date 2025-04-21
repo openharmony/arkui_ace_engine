@@ -30,7 +30,9 @@ import {
   getToggle
 } from '../../../utils';
 import { ListItemTest } from './ListItemTest.test'
+
 const driver = Driver.create();
+
 export default function ListItemTest6() {
   describe('ListItemTest6', () => {
     beforeAll(async (done: Function) => {

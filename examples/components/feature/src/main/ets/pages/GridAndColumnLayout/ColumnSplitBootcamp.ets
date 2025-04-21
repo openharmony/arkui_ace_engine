@@ -1386,14 +1386,10 @@ export struct ColumnSplitBootcamp {
     }.width('100%').padding({ top: 5 })
   }
 
-
-
-
   @Builder
   compBackground() {
     Text('123')
   }
-
 
   @Builder
   Parameters() {

@@ -70,7 +70,7 @@ void TextClockModelNG::SetOnDateChange(std::function<void(const std::string)>&& 
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextClockEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDateChange(std::move(onChange));
 }
@@ -127,9 +127,6 @@ void TextClockModelNG::InitFontDefault(const TextStyle& textStyle)
     }
     if (!textClockLayoutProperty->GetFontWeight().has_value()) {
         SetFontWeight(textStyle.GetFontWeight());
-    }
-    if (!textClockLayoutProperty->GetTextColor().has_value()) {
-        SetTextColor(textStyle.GetTextColor());
     }
     if (!textClockLayoutProperty->GetFontFamily().has_value()) {
         SetFontFamily(textStyle.GetFontFamilies());
@@ -295,7 +292,7 @@ RefPtr<Referenced> TextClockModelNG::GetJSTextClockController(FrameNode* frameNo
 void TextClockModelNG::SetOnDateChange(FrameNode* frameNode, std::function<void(const std::string)>&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextClockEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDateChange(std::move(onChange));
 }

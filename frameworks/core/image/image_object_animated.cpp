@@ -80,7 +80,9 @@ void AnimatedImageObject::UploadToGpuForRender(
 {
     constexpr float SizeOffset = 0.5f;
     if (!animatedPlayer_ && drawingData_) {
-        auto skData = SkData::MakeWithoutCopy(drawingData_->GetData(), drawingData_->GetSize());
+        RSDataWrapper* wrapper = new RSDataWrapper{drawingData_};
+        auto skData =
+            SkData::MakeWithProc(drawingData_->GetData(), drawingData_->GetSize(), RSDataWrapperReleaseProc, wrapper);
         auto codec = SkCodec::MakeFromData(skData);
         int32_t dstWidth = -1;
         int32_t dstHeight = -1;

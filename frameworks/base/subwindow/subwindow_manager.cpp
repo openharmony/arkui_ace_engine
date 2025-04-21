@@ -480,19 +480,19 @@ void SubwindowManager::ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const
     auto targetId = targetNode->GetId();
     auto manager = SubwindowManager::GetInstance();
     CHECK_NULL_VOID(manager);
-    auto subwindow = manager->GetSubwindowByType(containerId, SubwindowType::TYPE_POPUP);
+    auto subwindow = manager->GetSubwindowByType(containerId, SubwindowType::TYPE_TIPS);
     if (!IsSubwindowExist(subwindow)) {
         subwindow = Subwindow::CreateSubwindow(containerId);
         subwindow->InitContainer();
         CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
-        manager->AddSubwindow(containerId, SubwindowType::TYPE_POPUP, subwindow);
+        manager->AddSubwindow(containerId, SubwindowType::TYPE_TIPS, subwindow);
     }
     auto overlayManager = subwindow->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
     overlayManager->UpdateTipsEnterAndLeaveInfoBool(targetId);
     auto duration = appearingTime;
-    if (overlayManager->TipsInfoListIsEmpty()) {
+    if (overlayManager->TipsInfoListIsEmpty(targetId)) {
         overlayManager->UpdateTipsStatus(targetId, false);
         duration = appearingTime;
     } else {
@@ -521,7 +521,7 @@ void SubwindowManager::HideTipsNG(int32_t targetId, int32_t disappearingTime, in
     RefPtr<Subwindow> subwindow;
     if (instanceId != -1) {
         // get the subwindow which overlay node in, not current
-        subwindow = GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
+        subwindow = GetSubwindowByType(instanceId, SubwindowType::TYPE_TIPS);
     } else {
         subwindow = GetCurrentWindow();
     }

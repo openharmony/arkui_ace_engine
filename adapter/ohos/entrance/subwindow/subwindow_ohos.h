@@ -27,7 +27,6 @@
 #include "adapter/ohos/entrance/platform_event_callback.h"
 #include "base/resource/asset_manager.h"
 #include "base/subwindow/subwindow.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/task_executor.h"
 #include "core/common/ace_view.h"
 #include "core/common/js_message_dispatcher.h"
@@ -181,6 +180,10 @@ public:
     bool IsSameDisplayWithParentWindow(bool useInitializedId = false) override;
 
     void InitializeSafeArea();
+    void SetFollowParentWindowLayoutEnabled(bool enable) override
+    {
+        window_->SetFollowParentWindowLayoutEnabled(enable);
+    }
     bool ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode) override;
 
     void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,

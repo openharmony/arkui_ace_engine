@@ -180,6 +180,11 @@ template("ace_ohos_standard_source_set") {
     if (os_account_exists) {
       external_deps += [ "os_account:os_account_innerkits" ]
     }
+
+    if (defined(config.accessibility_support) && config.accessibility_support) {
+      external_deps += [ "accessibility:accessibilityconfig" ]
+    }
+
     deps +=
         [ "$ace_root/interfaces/inner_api/ui_service_manager:ui_service_mgr" ]
   }

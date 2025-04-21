@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "base/log/ace_checker.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -203,7 +202,7 @@ bool NavigationGroupNode::ReorderNavDestination(
         navDestinationPattern->SetIndex(static_cast<int32_t>(i));
         SetBackButtonEvent(navDestination);
         navDestination->SetIndex(i);
-        auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+        auto eventHub = navDestination->GetOrCreateEventHub<NavDestinationEventHub>();
         if (eventHub && !eventHub->GetOnStateChange()) {
             auto onStateChangeMap = pattern->GetOnStateChangeMap();
             auto iter = onStateChangeMap.find(uiNode->GetId());
@@ -252,7 +251,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
             continue;
         }
         navDestination->SetInCurrentStack(false);
-        auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+        auto eventHub = navDestination->GetOrCreateEventHub<NavDestinationEventHub>();
         if (eventHub) {
             eventHub->FireChangeEvent(false);
         }
@@ -383,14 +382,14 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
         backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
     }
     CHECK_NULL_VOID(backButtonNode);
-    auto backButtonEventHub = backButtonNode->GetEventHub<EventHub>();
+    auto backButtonEventHub = backButtonNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(backButtonEventHub);
     auto onBackButtonEvent = [navDestinationWeak = WeakPtr<NavDestinationGroupNode>(navDestination),
                                  navigationWeak = WeakClaim(this)](GestureEvent& /*info*/) -> bool {
         auto navDestination = navDestinationWeak.Upgrade();
         TAG_LOGD(AceLogTag::ACE_NAVIGATION, "click navigation back button");
         CHECK_NULL_RETURN(navDestination, false);
-        auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+        auto eventHub = navDestination->GetOrCreateEventHub<NavDestinationEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
         eventHub->SetState(NavDestinationState::ON_BACKPRESS);
         auto navdestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
@@ -745,6 +744,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto context = navigation->GetContextWithCheck();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
+            context->UpdateOcclusionCullingStatus(false, nullptr);
         };
     AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
         auto navigation = weakNavigation.Upgrade();
@@ -767,7 +767,9 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         SetNeedSetInvisible(false);
     }
     isOnAnimation_ = true;
-    UiSessionManager::GetInstance()->OnRouterChange(navigationPathInfo_, "navigationPopPage");
+    auto context = GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    context->UpdateOcclusionCullingStatus(true, preNode);
 }
 
 void NavigationGroupNode::RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
@@ -991,6 +993,9 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             navigation->CleanPushAnimations();
             auto pattern = navigation->GetPattern<NavigationPattern>();
             pattern->CheckContentNeedMeasure(navigation);
+            auto context = navigation->GetContextWithCheck();
+            CHECK_NULL_VOID(context);
+            context->UpdateOcclusionCullingStatus(false, nullptr);
         };
 
     AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
@@ -1031,11 +1036,13 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             AceScopedPerformanceCheck::RecordPerformanceCheckData(nodeMap, endTime - startTime, path);
         });
     }
-    UiSessionManager::GetInstance()->OnRouterChange(navigationPathInfo_, "navigationPushPage");
 #if !defined(ACE_UNITTEST)
     TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode,
         curNavDestination->GetNavDestinationPathInfo());
 #endif
+    auto context = GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    context->UpdateOcclusionCullingStatus(true, curNode);
 }
 
 std::shared_ptr<AnimationUtils::Animation> NavigationGroupNode::MaskAnimation(const RefPtr<FrameNode>& node,
@@ -1110,7 +1117,7 @@ void NavigationGroupNode::TransitionWithReplace(
         auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
         navigationNode->OnAccessibilityEvent(
             AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
-        preNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
+        preNode->GetOrCreateEventHub<EventHub>()->SetEnabledInternal(true);
         if (!navigationNode->CheckAnimationIdValid(preNode, preAnimationId)) {
             return;
         }
@@ -1139,7 +1146,7 @@ void NavigationGroupNode::TransitionWithReplace(
     option.SetDuration(DEFAULT_REPLACE_DURATION);
     option.SetOnFinishEvent(callback);
 
-    preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
+    preNode->GetOrCreateEventHub<EventHub>()->SetEnabledInternal(false);
     auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
     if (curNavDestination && curNavDestination->IsNeedContentTransition() && !curUseCustomTransition) {
         curNode->GetRenderContext()->UpdateOpacity(0.0f);
@@ -1180,8 +1187,8 @@ void NavigationGroupNode::OnInspectorIdUpdate(const std::string& id)
 void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBar, bool isAnimated)
 {
     CHECK_NULL_VOID(preNode);
-    if (preNode->GetEventHub<EventHub>()) {
-        preNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
+    if (preNode->GetOrCreateEventHub<EventHub>()) {
+        preNode->GetOrCreateEventHub<EventHub>()->SetEnabledInternal(true);
     }
     if (isNavBar && isAnimated) {
         SetNeedSetInvisible(true);
@@ -1261,14 +1268,14 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
     const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize, const RefPtr<UINode>& preLastStandardNode)
 {
     CHECK_NULL_RETURN(navDestination, false);
-    auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+    auto eventHub = navDestination->GetOrCreateEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     if (index == static_cast<int32_t>(destinationSize) - 1) {
         // process shallow builder
         navDestination->ProcessShallowBuilder();
         navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE, true);
         navDestination->SetJSViewActive(true);
-        navDestination->GetEventHub<EventHub>()->SetEnabledInternal(true);
+        navDestination->GetOrCreateEventHub<EventHub>()->SetEnabledInternal(true);
         // for the navDestination at the top, FireChangeEvent
         eventHub->FireChangeEvent(true);
         bool hasChanged = CheckNeedMeasure(navDestination->GetLayoutProperty()->GetPropertyChangeFlag());

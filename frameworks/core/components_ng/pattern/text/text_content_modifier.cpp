@@ -30,6 +30,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/render/adapter/animated_image.h"
 #include "frameworks/core/components_ng/render/adapter/pixelmap_image.h"
+#ifdef ACE_ENABLE_VK
+#include "render_service_base/include/platform/common/rs_system_properties.h"
+#include "2d_graphics/include/recording/draw_cmd_list.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -409,12 +413,12 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
     ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f][contentRect:%s]", host->GetId(), paintOffset_.GetX(),
         paintOffset_.GetY(), contentRect.ToString().c_str());
 
+#ifdef ACE_ENABLE_VK
+    SetHybridRenderTypeIfNeeded(drawingContext, pManager, host);
+#endif
     PropertyChangeFlag flag = 0;
     if (NeedMeasureUpdate(flag)) {
         host->MarkDirtyNode(flag);
-        auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->OnPropertyChangeMeasure();
     }
     if (!ifPaintObscuration_) {
         auto& canvas = drawingContext.canvas;
@@ -450,6 +454,27 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
     }
     PaintCustomSpan(drawingContext);
 }
+
+#ifdef ACE_ENABLE_VK
+void TextContentModifier::SetHybridRenderTypeIfNeeded(DrawingContext& drawingContext,
+    const RefPtr<ParagraphManager>& pManager, RefPtr<FrameNode>& host)
+{
+    RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&drawingContext.canvas);
+    if (recordingCanvas != nullptr && recordingCanvas->GetDrawCmdList() != nullptr) {
+        if (host->IsAtomicNode()) {
+            if (Rosen::RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::HMSYMBOL)) {
+                recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::HMSYMBOL);
+            }
+        } else {
+            if (Rosen::RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::TEXTBLOB) != 0 &&
+                static_cast<uint32_t>(pManager->GetLineCount()) >=
+                Rosen::RSSystemProperties::GetHybridRenderTextBlobLenCount()) {
+                    recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::TEXT);
+            }
+        }
+    }
+}
+#endif
 
 void TextContentModifier::DrawText(RSCanvas& canvas, RefPtr<ParagraphManager> pManager)
 {
@@ -581,11 +606,11 @@ void TextContentModifier::ModifyFontWeightInTextStyle(TextStyle& textStyle)
     }
 }
 
-void TextContentModifier::ModifyTextColorInTextStyle(TextStyle& textStyle)
+void TextContentModifier::ModifyTextColorInTextStyle(Color& textColor)
 {
     if (textColor_.has_value() && animatableTextColor_) {
         lastTextColor_.SetValue(animatableTextColor_->Get().GetValue());
-        textStyle.SetTextColor(Color(animatableTextColor_->Get().GetValue()));
+        textColor = Color(animatableTextColor_->Get().GetValue());
     }
 }
 
@@ -658,13 +683,13 @@ void TextContentModifier::ModifyLineHeightInTextStyle(TextStyle& textStyle)
     }
 }
 
-void TextContentModifier::ModifyTextStyle(TextStyle& textStyle)
+void TextContentModifier::ModifyTextStyle(TextStyle& textStyle, Color& textColor)
 {
     ModifyFontSizeInTextStyle(textStyle);
     ModifyAdaptMinFontSizeInTextStyle(textStyle);
     ModifyAdaptMaxFontSizeInTextStyle(textStyle);
     ModifyFontWeightInTextStyle(textStyle);
-    ModifyTextColorInTextStyle(textStyle);
+    ModifyTextColorInTextStyle(textColor);
     ModifySymbolColorInTextStyle(textStyle);
     ModifyTextShadowsInTextStyle(textStyle);
     ModifyDecorationInTextStyle(textStyle);
@@ -794,14 +819,6 @@ void TextContentModifier::UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag)
         CheckNeedMeasure(lineHeight_.value().Value(), lastLineHeight_, lineHeightFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastLineHeight_ = lineHeightFloat_->Get();
-    }
-}
-
-void TextContentModifier::AnimationMeasureUpdate(const RefPtr<FrameNode>& host)
-{
-    PropertyChangeFlag flag = 0;
-    if (NeedMeasureUpdate(flag)) {
-        host->MarkDirtyNode(flag);
     }
 }
 

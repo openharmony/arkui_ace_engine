@@ -146,6 +146,11 @@ public:
         checkboxFlag_ = checkboxFlag;
     }
 
+    void SetBindTips(bool hasBindTips)
+    {
+        hasBindTips_ = hasBindTips;
+    }
+
     bool GetCheckboxFlag() const
     {
         return checkboxFlag_;
@@ -364,6 +369,14 @@ public:
 
     template<typename T>
     RefPtr<T> GetEventHub()
+    {
+        CreateEventHubInner();
+        CHECK_NULL_RETURN(eventHub_, nullptr);
+        return DynamicCast<T>(eventHub_);
+    }
+
+    template<typename T>
+    RefPtr<T> GetOrCreateEventHub()
     {
         CreateEventHubInner();
         CHECK_NULL_RETURN(eventHub_, nullptr);
@@ -1358,6 +1371,13 @@ public:
 
     int32_t OnRecvCommand(const std::string& command) override;
 
+    void ResetLastFrameNodeRect()
+    {
+        if (lastFrameNodeRect_) {
+            lastFrameNodeRect_.reset();
+        }
+    }
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1498,7 +1518,14 @@ private:
     bool ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
     TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
 
+    bool ProcessTipsMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
+        TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
+
+    void TipsTouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
+        TouchRestrict& touchRestrict, TouchTestResult& result, ResponseLinkResult& responseLinkResult, bool isDispatch);
+
     void ResetPredictNodes();
+    void HandleAreaChangeDestruct();
 
     const char* GetPatternTypeName() const;
     const char* GetLayoutPropertyTypeName() const;
@@ -1606,6 +1633,7 @@ private:
     bool exposeInnerGestureFlag_ = false;
     bool isDeleteRsNode_ = false;
     bool hasPositionZ_ = false;
+    bool hasBindTips_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

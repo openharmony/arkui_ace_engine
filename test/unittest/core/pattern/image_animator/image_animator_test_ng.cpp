@@ -2385,6 +2385,9 @@ HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest007, TestSize.Level1)
     animator->AddListener(func);
     EXPECT_NE(animator->playbackListener_, nullptr);
 
+    std::vector<PictureInfo> frames { { 0.5f, 100 }, { 0.5f, 200 } };
+    animator->AddInterpolator(frames);
+
     animator->SetIteration(-1);
     animator->PostPlayTask(2, 2, 2, 3);
 

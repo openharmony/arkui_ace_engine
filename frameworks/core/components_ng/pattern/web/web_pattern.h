@@ -683,7 +683,7 @@ public:
     std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
 
     void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
-    bool OnAccessibilityHoverEvent(const PointF& point) override;
+    void OnAccessibilityHoverEvent(const PointF& point, bool isHoverEnter);
     void RegisterTextBlurCallback(TextBlurCallback&& callback);
     void UnRegisterTextBlurCallback();
     TextBlurCallback GetTextBlurCallback() const
@@ -753,12 +753,25 @@ public:
     void UpdateImageOverlayTouchInfo(int touchPointX, int touchPointY, TouchType touchType);
     void PushOverlayInfo(float x, float y, int32_t id);
     void WebOverlayRequestFocus();
-    
+
     std::string GetCurrentLanguage() override;
+    void GetTranslateTextCallback(const std::string& result);
+    void RegisterTranslateTextJavaScript();
+    void InitTranslateText();
+    void GetTranslateText(
+        std::string extraData, std::function<void(std::string)> callback, bool isContinued) override;
+    void SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids) override;
+    void SendTranslateResult(std::string results) override;
+    void EndTranslate() override;
+    void RunJsInit();
+
+    RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
     void RegisterSurfaceDensityCallback();
     void SetSurfaceDensity(double density);
 
+    void InitRotationEventCallback();
+    void UninitRotationEventCallback();
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
@@ -914,6 +927,8 @@ private:
     void InitTouchEventListener();
     void UninitTouchEventListener();
     void OnDragFileNameStart(const RefPtr<UnifiedData>& aceUnifiedData, const std::string& fileName);
+    void AdjustRotationRenderFit(WindowSizeChangeReason type);
+    void RecoverToTopLeft();
     bool needRestoreMenuForDrag_ = false;
     int32_t dropX_ = 0;
     int32_t dropY_ = 0;
@@ -1085,6 +1100,7 @@ private:
     bool isReceivedArkDrag_ = false;
     bool isW3cDragEvent_ = false;
     bool isDragStartFromWeb_ = false;
+    RefPtr<AccessibilitySessionAdapter> accessibilitySessionAdapter_;
 
     bool isNewDragStyle_ = false;
     std::map<std::pair<WebElementType, ResponseType>,
@@ -1219,7 +1235,10 @@ private:
     bool keyboardGetready_ = false;
 
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
+    bool isRegisterJsObject_ = false;
 
+    bool isRotating_ {false};
+    int32_t rotationEndCallbackId_ = 0;
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;

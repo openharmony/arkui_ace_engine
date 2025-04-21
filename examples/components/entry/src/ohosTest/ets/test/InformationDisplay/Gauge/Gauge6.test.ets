@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
-import {  Driver, ON } from '@kit.TestKit';
+import { Driver, ON } from '@kit.TestKit';
 import {
   buttonClick,
   JsonType,
@@ -25,7 +25,6 @@ import {
   ToggleClick,
   titleSearch,
 } from '../../../utils';
-
 
 import { GaugeStart } from './Gauge';
 

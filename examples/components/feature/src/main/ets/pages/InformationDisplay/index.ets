@@ -59,37 +59,37 @@ export const informationDisplayRoute: RouteGroup = {
 @Builder
 export function informationDisplayDestination(name: string, route: Route) {
   if (name === 'InformationDisplay/AlphabetIndexer') {
-    AlphabetIndexerBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/Badge'){
-    BadgeBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/Chip'){
-    ChipBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/ChipGroup'){
-    ChipGroupBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/counter'){
-    CounterBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/DataPanel'){
-    DataPanelBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/Gauge'){
-    GaugeBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/LoadingProgress'){
-    LoadingProgressBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/PatternLock'){
-    PatternLockBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/Progress'){
-    ProgressLockBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/Popup'){
-    PopupBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/QRCode'){
-    QRCodeBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/TextClock'){
-    TextClockBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/TextTimer'){
-    TextTimerBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/AdvancedCounter'){
-    AdvancedCounterBootcamp({title: route.label})
-  }else if (name === 'InformationDisplay/Toast'){
-    ToastBootcamp({title:route.label})
+    AlphabetIndexerBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/Badge') {
+    BadgeBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/Chip') {
+    ChipBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/ChipGroup') {
+    ChipGroupBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/counter') {
+    CounterBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/DataPanel') {
+    DataPanelBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/Gauge') {
+    GaugeBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/LoadingProgress') {
+    LoadingProgressBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/PatternLock') {
+    PatternLockBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/Progress') {
+    ProgressLockBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/Popup') {
+    PopupBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/QRCode') {
+    QRCodeBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/TextClock') {
+    TextClockBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/TextTimer') {
+    TextTimerBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/AdvancedCounter') {
+    AdvancedCounterBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/Toast') {
+    ToastBootcamp({ title: route.label })
   }
 
 }

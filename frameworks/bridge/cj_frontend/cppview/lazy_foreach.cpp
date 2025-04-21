@@ -44,6 +44,7 @@ std::pair<std::string, RefPtr<NG::UINode>> CJLazyForEachBuilder::OnGetChildByInd
     if (cachedIter != cachedItems.end()) {
         result.first = key;
         result.second = cachedIter->second.second;
+        cachedItems.erase(cachedIter);
         return result;
     }
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
@@ -109,6 +110,10 @@ void CJLazyForEachBuilder::RegisterDataChangeListener(const RefPtr<V2::DataChang
         return;
     }
     listenerManager = FFIData::Create<CJDataChangeListener>();
+    if (!listenerManager) {
+        LOGW("LazyForEach::RegisterDataChangeListener fail, listenerManager is null.");
+        return;
+    }
     listenerManager->AddListener(listener);
     weakListenerManager_ = listenerManager;
     cjBuilder_->RegisterListenerFunc(listenerManager);

@@ -63,15 +63,19 @@ class MyModifier implements AttributeModifier<ProgressAttribute> {
   applyNormalAttribute(instance: ProgressAttribute) {
     instance.backgroundColor('#0A59F7')
   }
+
   applyPressedAttribute(instance: ProgressAttribute) {
     instance.backgroundColor('#ED6F21')
   }
+
   applyFocusedAttribute(instance: ProgressAttribute) {
     instance.backgroundColor(Color.Gray)
   }
+
   applyDisabledAttribute(instance: ProgressAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
+
   applySelectedAttribute(instance: ProgressAttribute) {
     instance.backgroundColor('#ffedea21')
   }
@@ -628,11 +632,9 @@ export struct ProgressLockBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
-
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
 
@@ -652,7 +654,7 @@ export struct ProgressLockBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time,value)
+      new BlockTag(time, value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -673,7 +675,6 @@ export struct ProgressLockBootcamp {
     }, 200)
   }
 
-
   build() {
     NavDestination() {
       Drawer({
@@ -682,7 +683,7 @@ export struct ProgressLockBootcamp {
         content: () => {
           this.Content()
         },
-        generic:() => {
+        generic: () => {
           this.Generic()
         },
         parameters: () => {
@@ -694,18 +695,10 @@ export struct ProgressLockBootcamp {
     .hideTitleBar(true)
   }
 
-
-
-
-
-
   @Builder
   compBackground() {
     Text('123')
   }
-
-
-
 
   @Builder
   Content() {
@@ -758,8 +751,7 @@ export struct ProgressLockBootcamp {
                     this.progressStyleOptionsScaleWidth),
                   scaleCount: useEnabled(this.enableProgressStyleOptionsScaleCount, this.progressStyleOptionsScaleCount)
                 } as ProgressStyleOptions)
-        .layoutWeight(useEnabled(this.enableProgressLayoutWeight, this.progressLayoutWeight))
-          //part1
+        .layoutWeight(useEnabled(this.enableProgressLayoutWeight, this.progressLayoutWeight))//part1
         .width(useEnabled(this.enableCompWidth, this.compWidth))
         .height(useEnabled(this.enableCompHeight, this.compHeight))
         .padding(useEnabled(this.enableCompPadding, this.compPadding))
@@ -1184,7 +1176,7 @@ export struct ProgressLockBootcamp {
             this.compPixelStretchEffectOptionsBottom)
         })
         .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))//part2
-        .linearGradient( {
+        .linearGradient({
           angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
           direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
           colors: [
@@ -1389,8 +1381,6 @@ export struct ProgressLockBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
-
-        
 
 
     }.justifyContent(FlexAlign.Center)

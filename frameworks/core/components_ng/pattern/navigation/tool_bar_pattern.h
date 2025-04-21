@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
@@ -88,6 +89,7 @@ private:
     void HandleLongPressEvent(const GestureEvent& info);
     void HandleLongPressActionEnd();
     void ShowDialogWithNode(const RefPtr<BarItemNode>& barItemNode);
+    void UpdateBarItemBackgroundColor(const RefPtr<FrameNode>& toolBarItemNode, const RefPtr<ButtonTheme>& buttonTheme);
 
     void SetDefaultBackgroundColorIfNeeded(RefPtr<FrameNode>& host);
     void UpdateBackgroundStyle();

@@ -445,6 +445,7 @@ void ListItemGroupLayoutAlgorithm::ClearItemPosition()
 {
     itemPosition_.clear();
     cachedItemPosition_.clear();
+    layoutedItemInfo_.reset();
     forwardCachedIndex_ = -1;
     backwardCachedIndex_ = INT_MAX;
 }

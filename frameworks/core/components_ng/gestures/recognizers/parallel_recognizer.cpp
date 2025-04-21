@@ -93,10 +93,6 @@ void ParallelRecognizer::OnBlocked()
 
 bool ParallelRecognizer::HandleEvent(const TouchEvent& point)
 {
-    if (point.type == TouchType::DOWN || point.type == TouchType::UP) {
-        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, parallel %{public}d type: %{public}d", point.touchEventId,
-            point.id, static_cast<int32_t>(point.type));
-    }
     if (refereeState_ == RefereeState::READY) {
         refereeState_ = RefereeState::DETECTING;
     }

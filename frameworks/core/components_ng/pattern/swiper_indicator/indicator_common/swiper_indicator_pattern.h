@@ -259,6 +259,10 @@ public:
     virtual int32_t RealTotalCount() const;
     virtual int32_t GetCurrentIndex() const;
     void ResetDotModifier();
+    const RefPtr<DotIndicatorModifier>& GetDotIndicatorModifier() const
+    {
+        return dotIndicatorModifier_;
+    }
     
 private:
     void OnAttachToFrameNode() override;
@@ -423,11 +427,6 @@ protected:
     void SetTouchBottomType(TouchBottomType touchBottomType)
     {
         touchBottomType_ = touchBottomType;
-    }
-
-    const RefPtr<DotIndicatorModifier>& GetDotIndicatorModifier() const
-    {
-        return dotIndicatorModifier_;
     }
  
     void SetDotIndicatorModifier(RefPtr<DotIndicatorModifier> dotIndicatorModifier)

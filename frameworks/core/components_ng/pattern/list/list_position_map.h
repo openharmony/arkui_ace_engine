@@ -64,6 +64,16 @@ public:
         posMap_[index] = posInfo;
     }
 
+    void UpdatePosRange(int32_t startIndex, int32_t endIndex, PositionInfo posInfo, float space, int32_t lanes)
+    {
+        for (int32_t i = startIndex; i < endIndex; i++) {
+            posMap_[i] = posInfo;
+            if (lanes >= 1 && (i % lanes == lanes - 1)) {
+                posInfo.mainPos = posInfo.mainPos + posInfo.mainSize + space;
+            }
+        }
+    }
+
     void UpdatePosWithCheck(int32_t index, PositionInfo posInfo)
     {
         auto iter = posMap_.find(index);

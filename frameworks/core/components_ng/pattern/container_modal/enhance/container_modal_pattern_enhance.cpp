@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/resource/resource_manager.h"
+#include "base/subwindow/subwindow_manager.h"
 namespace OHOS::Ace::NG {
 namespace {
 

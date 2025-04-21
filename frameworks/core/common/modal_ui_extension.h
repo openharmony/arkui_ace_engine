@@ -18,7 +18,9 @@
 
 #include <cstdint>
 
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 
 namespace OHOS::AAFwk {
@@ -27,7 +29,12 @@ class Want;
 
 namespace OHOS::Ace {
 struct ModalUIExtensionCallbacks;
+using BusinessDataUECConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
 } // namespace OHOS::Ace
+
+namespace OHOS::Ace::NG {
+class UIExtensionManager;
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
 class ModalUIExtension final {
@@ -39,6 +46,20 @@ public:
 
     static void SetBindModalCallback(const RefPtr<NG::FrameNode>& uiExtNode,
         std::function<void()>&& bindModalCallback);
+
+    static UECHostMaskInfo GetUECHostMaskInfoFromWant(const AAFwk::Want& data);
+
+    static void RegisterBusinessConsumeCallbackOnUEA(const RefPtr<NG::UIExtensionManager>& uiExtMgr,
+        NG::UIContentBusinessCode code, BusinessDataUECConsumeCallback callback);
+
+    static void RegisterBusinessConsumeCallbackOnHost(const RefPtr<NG::FrameNode>& uiExtNode,
+        NG::UIContentBusinessCode code, BusinessDataUECConsumeCallback callback);
+
+    static bool SendOverlayMaskInfoToUEA(const RefPtr<NG::FrameNode>& uiExtNode, const UECHostMaskInfo& info,
+        NG::UIContentBusinessCode code, NG::BusinessDataSendType type = NG::BusinessDataSendType::ASYNC);
+
+    static bool SendOverlayMaskInfoToHost(const RefPtr<NG::UIExtensionManager>& uiExtMgr, const UECHostMaskInfo& info,
+        NG::UIContentBusinessCode code, NG::BusinessDataSendType type = NG::BusinessDataSendType::ASYNC);
 };
 
 } // namespace OHOS::Ace

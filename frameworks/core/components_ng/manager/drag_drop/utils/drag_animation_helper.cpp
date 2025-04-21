@@ -275,7 +275,7 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
 void DragAnimationHelper::ShowMenuHideAnimation(const RefPtr<FrameNode>& imageNode, const PreparedInfoForDrag& data)
 {
     CHECK_NULL_VOID(imageNode);
-    if (imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT || data.hasTransition) {
+    if (imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT) {
         return;
     }
     auto menuNode = data.menuNode;
@@ -690,7 +690,7 @@ bool DragAnimationHelper::ShowGatherNodeAnimation(const RefPtr<FrameNode>& frame
     AddDragNodeCopy(manager, frameNode, gatherNode);
     MarkDirtyNode(gatherNode);
     
-    pipeline->FlushSyncGeometryNodeTasks();
+    pipeline->FlushPipelineImmediately();
     manager->SetIsGatherWithMenu(false);
 
     //do gather animation before lifting
@@ -1212,10 +1212,6 @@ void DragAnimationHelper::UpdateStartAnimation(const RefPtr<OverlayManager>& ove
     const RefPtr<NodeAnimatablePropertyFloat>& animateProperty, Point point,
     const DragDropManager::DragPreviewInfo& info, const Offset& newOffset)
 {
-    CHECK_NULL_VOID(info.relativeContainerNode);
-    auto relativeContainerRenderContext = info.relativeContainerNode->GetRenderContext();
-    CHECK_NULL_VOID(relativeContainerRenderContext);
-    relativeContainerRenderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
     auto offset = OffsetF(point.GetX(), point.GetY());
     auto menuWrapperNode = DragAnimationHelper::GetMenuWrapperNodeFromDrag();
     auto menuPosition = overlayManager->CalculateMenuPosition(menuWrapperNode, offset);
@@ -1234,6 +1230,10 @@ void DragAnimationHelper::UpdateStartAnimation(const RefPtr<OverlayManager>& ove
     if (animateProperty) {
         animateProperty->Set(1.0f);
     }
+    CHECK_NULL_VOID(info.relativeContainerNode);
+    auto relativeContainerRenderContext = info.relativeContainerNode->GetRenderContext();
+    CHECK_NULL_VOID(relativeContainerRenderContext);
+    relativeContainerRenderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
     UpdateStartTransitionOptionAnimation(info);
 }
 

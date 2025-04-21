@@ -131,7 +131,7 @@
 
 using namespace OHOS::Ace::NG;
 
-#define MODIFIER_COUNTS 12
+#define MODIFIER_COUNTS 8
 #define BLANK_LINES 6
 
 extern "C" {
@@ -144,22 +144,14 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getCheckboxGroupModifier = NodeModifier::GetCheckboxGroupModifier,
         .getCounterModifier = NodeModifier::GetCounterModifier,
         .getRowModifier = NodeModifier::GetRowModifier,
-    #ifndef ARKUI_WEARABLE
         .getRowSplitModifier = NodeModifier::GetRowSplitModifier,
-    #else
-        .getRowSplitModifier = nullptr,
-    #endif
         .getTextModifier = NodeModifier::GetTextModifier,
         .getButtonModifier = NodeModifier::GetButtonModifier,
         .getToggleModifier = NodeModifier::GetToggleModifier,
         .getImageSpanModifier = NodeModifier::GetImageSpanModifier,
         .getBlankModifier = NodeModifier::GetBlankModifier,
         .getSearchModifier = NodeModifier::GetSearchModifier,
-    #ifndef ARKUI_WEARABLE
         .getSelectModifier = NodeModifier::GetSelectModifier,
-    #else
-        .getSelectModifier = nullptr,
-    #endif
         .getRadioModifier = NodeModifier::GetRadioModifier,
         .getCheckboxModifier = NodeModifier::GetCheckboxModifier,
         .getTimepickerModifier = NodeModifier::GetTimepickerModifier,
@@ -189,11 +181,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getNavRouterModifier = NodeModifier::GetNavRouterModifier,
         .getNodeContainerModifier = NodeModifier::GetNodeContainerModifier,
         .getPatternLockModifier = NodeModifier::GetPatternLockModifier,
-    #ifndef ARKUI_WEARABLE
         .getColumnSplitModifier = NodeModifier::GetColumnSplitModifier,
-    #else
-        .getColumnSplitModifier = nullptr,
-    #endif
         .getLineModifier = NodeModifier::GetLineModifier,
         .getPathModifier = NodeModifier::GetPathModifier,
         .getPolygonModifier = NodeModifier::GetPolygonModifier,
@@ -208,11 +196,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
     #endif
         .getTextInputModifier = NodeModifier::GetTextInputModifier,
         .getTabsModifier = NodeModifier::GetTabsModifier,
-    #ifndef ARKUI_WEARABLE
         .getStepperItemModifier = NodeModifier::GetStepperItemModifier,
-    #else
-        .getStepperItemModifier = nullptr,
-    #endif
         .getHyperlinkModifier = NodeModifier::GetHyperlinkModifier,
         .getMarqueeModifier = NodeModifier::GetMarqueeModifier,
         .getMenuItemModifier = NodeModifier::GetMenuItemModifier,
@@ -311,22 +295,14 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getCheckboxGroupModifier = NodeModifier::GetCJUICheckboxGroupModifier,
         .getCounterModifier = NodeModifier::GetCJUICounterModifier,
         .getRowModifier = NodeModifier::GetCJUIRowModifier,
-    #ifndef ARKUI_WEARABLE
         .getRowSplitModifier = NodeModifier::GetCJUIRowSplitModifier,
-    #else
-        .getRowSplitModifier = nullptr,
-    #endif
         .getTextModifier = NodeModifier::GetCJUITextModifier,
         .getButtonModifier = NodeModifier::GetCJUIButtonModifier,
         .getToggleModifier = NodeModifier::GetCJUIToggleModifier,
         .getImageSpanModifier = NodeModifier::GetCJUIImageSpanModifier,
         .getBlankModifier = NodeModifier::GetCJUIBlankModifier,
         .getSearchModifier = NodeModifier::GetCJUISearchModifier,
-    #ifndef ARKUI_WEARABLE
         .getSelectModifier = NodeModifier::GetCJUISelectModifier,
-    #else
-        .getSelectModifier = nullptr,
-    #endif
         .getRadioModifier = NodeModifier::GetCJUIRadioModifier,
         .getCheckboxModifier = NodeModifier::GetCJUICheckboxModifier,
         .getTimepickerModifier = NodeModifier::GetCJUITimepickerModifier,
@@ -356,11 +332,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getNavRouterModifier = NodeModifier::GetCJUINavRouterModifier,
         .getNodeContainerModifier = NodeModifier::GetCJUINodeContainerModifier,
         .getPatternLockModifier = NodeModifier::GetCJUIPatternLockModifier,
-    #ifndef ARKUI_WEARABLE
         .getColumnSplitModifier = NodeModifier::GetCJUIColumnSplitModifier,
-    #else
-        .getColumnSplitModifier = nullptr,
-    #endif
         .getLineModifier = NodeModifier::GetCJUILineModifier,
         .getPathModifier = NodeModifier::GetCJUIPathModifier,
         .getPolygonModifier = NodeModifier::GetCJUIPolygonModifier,
@@ -375,11 +347,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
     #endif
         .getTextInputModifier = NodeModifier::GetCJUITextInputModifier,
         .getTabsModifier = NodeModifier::GetCJUITabsModifier,
-    #ifndef ARKUI_WEARABLE
         .getStepperItemModifier = NodeModifier::GetCJUIStepperItemModifier,
-    #else
-        .getStepperItemModifier = nullptr,
-    #endif
         .getHyperlinkModifier = NodeModifier::GetCJUIHyperlinkModifier,
         .getMarqueeModifier = NodeModifier::GetCJUIMarqueeModifier,
         .getMenuItemModifier = nullptr,

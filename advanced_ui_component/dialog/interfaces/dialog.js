@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 if (!('finalizeConstruction' in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
+    });
 }
 const display = requireNapi('display');
 const hilog = requireNapi('hilog');
@@ -247,6 +248,7 @@ const CONTENT_FONT_WEIGHT = lazyInit(() => {
     return fontWeight;
 });
 const SCROLL_BAR_OFFSET = 20;
+const SELECT_DIALOG_SCROLL_BAR_OFFSET = 4;
 
 export class TipsDialog extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
@@ -728,11 +730,12 @@ export class TipsDialog extends ViewPU {
                 scrollForward: NestedScrollMode.PARALLEL,
                 scrollBackward: NestedScrollMode.PARALLEL
             });
-            Scroll.margin({ end: LengthMetrics.vp(this.marginOffset) });
+            Scroll.margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) });
         }, Scroll);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) });
+            Column.margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) });
+            Column.width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
@@ -1187,6 +1190,7 @@ export class SelectDialog extends ViewPU {
                     this.isFocus = false;
                 }
             });
+            Scroll.margin({ end: LengthMetrics.vp(SELECT_DIALOG_SCROLL_BAR_OFFSET) });
         }, Scroll);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
@@ -1853,11 +1857,12 @@ export class ConfirmDialog extends ViewPU {
                 scrollForward: NestedScrollMode.PARALLEL,
                 scrollBackward: NestedScrollMode.PARALLEL
             });
-            Scroll.margin({ end: LengthMetrics.vp(this.marginOffset) });
+            Scroll.margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) });
         }, Scroll);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) });
+            Column.margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) });
+            Column.width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.content);
@@ -3025,6 +3030,13 @@ class CustomDialogContentComponent extends ViewPU {
         }, WithTheme);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Scroll.create();
+            Scroll.borderRadius({
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.alert_container_shape'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            })
             Scroll.edgeEffect(EdgeEffect.None, { alwaysEnabled: false });
             Scroll.backgroundColor(this.themeColorMode === ThemeColorMode.SYSTEM || undefined ?
             Color.Transparent : {
@@ -3039,7 +3051,7 @@ class CustomDialogContentComponent extends ViewPU {
             Column.create();
             Column.constraintSize({ maxHeight: this.contentMaxHeight });
             Column.backgroundBlurStyle(this.customStyle ?
-                BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true });
+            BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true });
             Column.borderRadius(this.customStyle ? {
                 'id': -1,
                 'type': 10002,
@@ -4002,12 +4014,19 @@ class CustomDialogContentComponent extends ViewPU {
             let maxButtonTextSize = vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN() -
             BUTTON_HORIZONTAL_SPACE() - 2 * BUTTON_HORIZONTAL_PADDING);
             this.buttons.forEach((button) => {
-                let contentSize = measure.measureTextSize({
-                    textContent: button.value,
-                    fontSize: this.buttonMaxFontSize
-                });
-                if (Number(contentSize.width) > maxButtonTextSize) {
-                    isVertical = true;
+                try {
+                    let contentSize = measure.measureTextSize({
+                        textContent: button.value,
+                        fontSize: this.buttonMaxFontSize
+                    });
+                    if (Number(contentSize?.width) > maxButtonTextSize) {
+                        isVertical = true;
+                    }
+                } catch (err) {
+                    let code = (err).code;
+                    let message = (err).message;
+                    hilog.error(0x3900, 'Ace', `Faild to dialog isVerticalAlignButton measureTextSize,cause,
+                    code: ${code}, message: ${message}`);
                 }
             });
             return isVertical;

@@ -232,7 +232,7 @@ void UIExtensionModelNG::SetSecurityOnRemoteReady(
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<UIExtensionHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<UIExtensionHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRemoteReadyCallback(std::move(onRemoteReady));
     return;
@@ -261,7 +261,7 @@ void UIExtensionModelNG::SetOnTerminated(
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (sessionType == SessionType::SECURITY_UI_EXTENSION_ABILITY) {
-        auto eventHub = frameNode->GetEventHub<UIExtensionHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<UIExtensionHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnTerminatedCallback(std::move(onTerminated));
         return;
@@ -277,7 +277,7 @@ void UIExtensionModelNG::SetOnReceive(
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (sessionType == SessionType::SECURITY_UI_EXTENSION_ABILITY) {
-        auto eventHub = frameNode->GetEventHub<UIExtensionHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<UIExtensionHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnReceiveCallback(std::move(onReceive));
         return;

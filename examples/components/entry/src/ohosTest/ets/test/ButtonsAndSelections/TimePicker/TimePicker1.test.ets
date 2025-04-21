@@ -14,12 +14,17 @@
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
 import { Component, Driver, ON } from '@kit.TestKit';
-import { buttonClick,
-  JsonType, KeyStruct, radioClick,
+import {
+  buttonClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
   Search,
-  Slide, sliderDrag,
+  Slide,
+  sliderDrag,
   titleSearch,
-  ToggleClick } from '../../../utils';
+  ToggleClick
+} from '../../../utils';
 import { TimePickerStart } from './TimePicker';
 
 /*初始化与UI元素交互的驱动对象*/
@@ -33,29 +38,29 @@ export default function TimePicker1() {
     })
 
     // dateTimeOptions.second(未找到该属性)
-    it('ArkUI_TimePicker_038', 0, async (done:Function) => {
+    it('ArkUI_TimePicker_038', 0, async (done: Function) => {
 
-      await Search('参数列表','dateTimeOptions.second')
+      await Search('参数列表', 'dateTimeOptions.second')
 
       await radioClick({
         radioClickObj: 1,
         toggleClick: {
-          toggleClickObj:'dateTimeOptions.second',
+          toggleClickObj: 'dateTimeOptions.second',
         }
       })
 
       done();
     })
 
-    it('ArkUI_TimePicker_039', 0, async (done:Function) => {
+    it('ArkUI_TimePicker_039', 0, async (done: Function) => {
 
-      await Search('参数列表','dateTimeOptions.second')
+      await Search('参数列表', 'dateTimeOptions.second')
 
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
-          toggleClickObj:'dateTimeOptions.second',
-          toggleClickType:ToggleClick.Close
+          toggleClickObj: 'dateTimeOptions.second',
+          toggleClickType: ToggleClick.Close
         }
       })
 
@@ -63,29 +68,29 @@ export default function TimePicker1() {
     })
 
     // enableHapticFeedback(未找到该属性)
-    it('ArkUI_TimePicker_040', 0, async (done:Function) => {
+    it('ArkUI_TimePicker_040', 0, async (done: Function) => {
 
-      await Search('参数列表','enableHapticFeedback')
+      await Search('参数列表', 'enableHapticFeedback')
 
       await radioClick({
         radioClickObj: 1,
         toggleClick: {
-          toggleClickObj:'enableHapticFeedback',
+          toggleClickObj: 'enableHapticFeedback',
         }
       })
 
       done();
     })
 
-    it('ArkUI_TimePicker_041', 0, async (done:Function) => {
+    it('ArkUI_TimePicker_041', 0, async (done: Function) => {
 
-      await Search('参数列表','enableHapticFeedback')
+      await Search('参数列表', 'enableHapticFeedback')
 
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
-          toggleClickObj:'enableHapticFeedback',
-          toggleClickType:ToggleClick.Close
+          toggleClickObj: 'enableHapticFeedback',
+          toggleClickType: ToggleClick.Close
         }
       })
 
@@ -93,14 +98,14 @@ export default function TimePicker1() {
     })
 
     // flexBasis
-    it('ArkUI_TimePicker_042', 0, async (done:Function) => {
+    it('ArkUI_TimePicker_042', 0, async (done: Function) => {
 
-      await Search('参数列表','flexBasis')
+      await Search('参数列表', 'flexBasis')
 
       await sliderDrag({
-        slideStar:Slide.start,
+        slideStar: Slide.start,
         toggleClick: {
-          toggleClickObj:'flexBasis',
+          toggleClickObj: 'flexBasis',
         },
         id: 'TimePicker',
         arr: [
@@ -111,9 +116,9 @@ export default function TimePicker1() {
       })
 
       await sliderDrag({
-        slideStar:Slide.end,
+        slideStar: Slide.end,
         toggleClick: {
-          toggleClickObj:'flexBasis',
+          toggleClickObj: 'flexBasis',
           toggleClickType: ToggleClick.Close,
         },
         id: 'TimePicker',
@@ -128,14 +133,14 @@ export default function TimePicker1() {
     })
 
     // direction
-    it('ArkUI_TimePicker_043', 0, async (done:Function) => {
+    it('ArkUI_TimePicker_043', 0, async (done: Function) => {
 
-      await Search('参数列表','direction')
+      await Search('参数列表', 'direction')
 
       await radioClick({
         radioClickObj: 1,
         toggleClick: {
-          toggleClickObj:'direction'
+          toggleClickObj: 'direction'
         },
         id: 'TimePicker',
         arr: [
@@ -148,14 +153,14 @@ export default function TimePicker1() {
       done();
     })
 
-    it('ArkUI_TimePicker_044', 0, async (done:Function) => {
+    it('ArkUI_TimePicker_044', 0, async (done: Function) => {
 
-      await Search('参数列表','direction')
+      await Search('参数列表', 'direction')
 
       await radioClick({
         radioClickObj: 2,
         toggleClick: {
-          toggleClickObj:'direction'
+          toggleClickObj: 'direction'
         },
         id: 'TimePicker',
         arr: [
@@ -168,15 +173,15 @@ export default function TimePicker1() {
       done();
     })
 
-    it('ArkUI_TimePicker_045', 0, async (done:Function) => {
+    it('ArkUI_TimePicker_045', 0, async (done: Function) => {
 
-      await Search('参数列表','direction')
+      await Search('参数列表', 'direction')
 
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
-          toggleClickObj:'direction',
-          toggleClickType:ToggleClick.Close
+          toggleClickObj: 'direction',
+          toggleClickType: ToggleClick.Close
         },
         id: 'TimePicker',
         arr: [

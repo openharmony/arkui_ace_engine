@@ -234,8 +234,8 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
     int32_t end = range.second;
     UpdateHandleIndex(start, end);
     if (IsSelected()) {
-        MoveFirstHandleToContentRect(GetFirstHandleIndex());
-        MoveSecondHandleToContentRect(GetSecondHandleIndex());
+        MoveFirstHandleToContentRect(GetFirstHandleIndex(), false);
+        MoveSecondHandleToContentRect(GetSecondHandleIndex(), false);
     } else {
         MoveCaretToContentRect(GetCaretIndex());
     }
@@ -707,7 +707,7 @@ void TextSelectController::FireSelectEvent()
     CHECK_NULL_VOID(pattern);
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textField);
-    auto eventHub = textField->GetEventHub<TextFieldEventHub>();
+    auto eventHub = textField->GetOrCreateEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     if (needReport && textField->IsModifyDone() && (textField->HasFocus()

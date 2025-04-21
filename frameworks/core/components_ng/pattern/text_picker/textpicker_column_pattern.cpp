@@ -66,7 +66,7 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -448,7 +448,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto columnEventHub = host->GetEventHub<EventHub>();
+    auto columnEventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(columnEventHub);
     RefPtr<TouchEventImpl> touchListener = CreateItemTouchEventListener();
     CHECK_NULL_VOID(touchListener);
@@ -460,7 +460,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
     auto midSize = childSize / 2;
     middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(midSize));
     CHECK_NULL_VOID(middleChild);
-    auto eventHub = middleChild->GetEventHub<EventHub>();
+    auto eventHub = middleChild->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ParseMouseEvent();
@@ -477,7 +477,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
         param->instance = childNode;
         param->itemIndex = i;
         param->itemTotalCounts = childSize;
-        auto eventHub = childNode->GetEventHub<EventHub>();
+        auto eventHub = childNode->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         if (i != midSize) {
             RefPtr<ClickEvent> clickListener = CreateItemClickEventListener(param);
@@ -1621,11 +1621,18 @@ double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection 
     return distance;
 }
 
+bool TextPickerColumnPattern::IsDisableTextStyleAnimation() const
+{
+    RefPtr<TextPickerLayoutProperty> layout = GetParentLayout();
+    CHECK_NULL_RETURN(layout, false);
+    return layout->GetDisableTextStyleAnimation().value_or(false);
+}
+
 double TextPickerColumnPattern::GetSelectedDistance(int32_t index, int32_t nextIndex, ScrollDirection dir)
 {
     double distance = 0.0;
     double val = 0.0;
-    if (columnKind_ == TEXT && !isDisableTextStyleAnimation_) {
+    if (columnKind_ == TEXT && !IsDisableTextStyleAnimation()) {
         if (GreatOrEqual(optionProperties_[nextIndex].fontheight, optionProperties_[nextIndex].height)) {
             distance = (dir == ScrollDirection::UP) ?
                 - optionProperties_[nextIndex].height : optionProperties_[index].height;
@@ -1652,7 +1659,7 @@ double TextPickerColumnPattern::GetUpCandidateDistance(int32_t index, int32_t ne
     if (index > maxIndex || index < minIndex || nextIndex > maxIndex || nextIndex < minIndex) {
         return distance;
     }
-    if (columnKind_ == TEXT && !isDisableTextStyleAnimation_) {
+    if (columnKind_ == TEXT && !IsDisableTextStyleAnimation()) {
         if (dir == ScrollDirection::UP) {
             distance = -optionProperties_[nextIndex].height;
         } else {
@@ -1671,7 +1678,7 @@ double TextPickerColumnPattern::GetDownCandidateDistance(int32_t index, int32_t 
 {
     double distance = 0.0;
     double val = 0.0;
-    if (columnKind_ == TEXT && !isDisableTextStyleAnimation_) {
+    if (columnKind_ == TEXT && !IsDisableTextStyleAnimation()) {
         if (dir == ScrollDirection::DOWN) {
             distance = optionProperties_[index].height;
         } else {

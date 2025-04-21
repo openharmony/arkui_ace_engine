@@ -14,12 +14,17 @@
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
 import { Driver, ON } from '@kit.TestKit';
-import { buttonClick,
-  JsonType, KeyStruct, radioClick,
+import {
+  buttonClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
   Search,
-  Slide, sliderDrag,
+  Slide,
+  sliderDrag,
   titleSearch,
-  ToggleClick } from '../../../utils';
+  ToggleClick
+} from '../../../utils';
 import { TimePickerStart } from './TimePicker';
 
 /*初始化与UI元素交互的驱动对象*/

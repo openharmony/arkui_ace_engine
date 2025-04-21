@@ -99,4 +99,18 @@ HWTEST_F(ViewportConfigTest, ViewportConfigTest002, TestSize.Level1)
     ASSERT_EQ(
         toString, "Viewport config: size: (0, 1) orientation: 0 density: 1.000000 position: (0, 0) transformHint: 0 displayId: 0");
 }
+
+/**
+* @tc.name: ViewportConfigTest003
+* @tc.desc: Verify SetKeyFrameConfig, GetKeyFrameConfig api for ViewportConfig
+* @tc.type: FUNC
+ */
+HWTEST_F(ViewportConfigTest, ViewportConfigTest003, TestSize.Level1)
+{
+    ViewportConfig viewConfig;
+    viewConfig.SetKeyFrameConfig(true, 100, 200);
+    ASSERT_EQ(viewConfig.GetKeyFrameConfig().enableKeyFrame_, true);
+    ASSERT_EQ(viewConfig.GetKeyFrameConfig().animationDuration_, 100);
+    ASSERT_EQ(viewConfig.GetKeyFrameConfig().animationDelay_, 200);
+}
 } // namespace OHOS::Ace

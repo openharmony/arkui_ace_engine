@@ -18,6 +18,10 @@
 #include "base/utils/time_util.h"
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
 #include "core/components_ng/render/render_context.h"
+#ifdef ACE_ENABLE_HYBRID_RENDER
+#include "render_service_base/include/platform/common/rs_system_properties.h"
+#include "2d_graphics/include/recording/draw_cmd_list.h"
+#endif
 
 namespace OHOS::Ace::NG {
 constexpr size_t MAX_SIZE = 10;
@@ -35,6 +39,11 @@ void CanvasModifier::onDraw(DrawingContext& drawingContext)
     CHECK_NULL_VOID(drawCmdList);
     auto rsDrawCmdList = static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList();
     CHECK_NULL_VOID(rsDrawCmdList);
+#ifdef ACE_ENABLE_HYBRID_RENDER
+    if (OHOS::Rosen::RSSystemProperties::GetHybridRenderSwitch(OHOS::Rosen::ComponentEnableSwitch::CANVAS)) {
+        rsDrawCmdList->SetHybridRenderType(RSHybridRenderType::CANVAS);
+    }
+#endif
     ACE_SCOPED_TRACE("CanvasModifier::onDraw Op count: %zu.", drawCmdList->GetOpItemSize());
     if (SystemProperties::GetCanvasDebugMode() > 0) {
         TAG_LOGI(AceLogTag::ACE_CANVAS,

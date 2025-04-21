@@ -132,7 +132,7 @@ void SelectPattern::OnModifyDone()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<SelectEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<SelectEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->IsEnabled()) {
         SetDisabledStyle();
@@ -189,8 +189,8 @@ void SelectPattern::SetItemSelected(int32_t index, const std::string& value)
     textProps->UpdateContent(value);
     text_->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    menuPattern->HideMenu();
-    auto hub = host->GetEventHub<SelectEventHub>();
+    menuPattern->HideMenu(HideMenuType::SELECT_SELECTED);
+    auto hub = host->GetOrCreateEventHub<SelectEventHub>();
     CHECK_NULL_VOID(hub);
 
     auto onSelect = hub->GetSelectEvent();
@@ -218,7 +218,7 @@ void SelectPattern::ShowSelectMenu()
     } else {
         offset.AddY(selectSize_.Height());
     }
-
+    ShowScrollBar();
     TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "select click to show menu.");
     overlayManager->ShowMenu(host->GetId(), offset, menuWrapper_);
 }
@@ -338,7 +338,7 @@ void SelectPattern::RegisterOnPress()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<SelectEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<SelectEventHub>();
     CHECK_NULL_VOID(eventHub);
     std::function<void(UIState)> callback = [weak = WeakClaim(this)](const UIState& state) {
         auto pattern = weak.Upgrade();
@@ -381,7 +381,7 @@ void SelectPattern::CreateSelectedCallback()
         pattern->SetSelected(index);
         pattern->UpdateText(index);
         pattern->isSelected_ = true;
-        auto hub = host->GetEventHub<SelectEventHub>();
+        auto hub = host->GetOrCreateEventHub<SelectEventHub>();
         CHECK_NULL_VOID(hub);
         // execute change event callback
         auto selectChangeEvent = hub->GetSelectChangeEvent();
@@ -406,7 +406,7 @@ void SelectPattern::CreateSelectedCallback()
         RecordChange(host, index, value);
     };
     for (auto&& option : options_) {
-        auto hub = option->GetEventHub<MenuItemEventHub>();
+        auto hub = option->GetOrCreateEventHub<MenuItemEventHub>();
         // no std::move, need to set multiple options
         hub->SetOnSelect(callback);
         option->MarkModifyDone();
@@ -1296,7 +1296,7 @@ void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const I
         CHECK_NULL_VOID(rowProps);
         json->PutExtAttr("space", rowProps->GetSpaceValue(Dimension()).ToString().c_str(), filter);
 
-        if (rowProps->GetFlexDirection().value() == FlexDirection::ROW) {
+        if (rowProps->GetFlexDirection().value_or(FlexDirection::ROW) == FlexDirection::ROW) {
             json->PutExtAttr("arrowPosition", "ArrowPosition.END", filter);
         } else {
             json->PutExtAttr("arrowPosition", "ArrowPosition.START", filter);
@@ -1501,6 +1501,17 @@ void SelectPattern::UpdateTargetSize()
     menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SelectPattern::ShowScrollBar()
+{
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto scroll = DynamicCast<FrameNode>(menu->GetFirstChild());
+    CHECK_NULL_VOID(scroll);
+    auto scrollPattern = scroll->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
+    scrollPattern->TriggerScrollBarDisplay();
+}
+
 void SelectPattern::SetSpace(const Dimension& value)
 {
     auto host = GetHost();
@@ -1658,7 +1669,7 @@ void SelectPattern::OnLanguageConfigurationUpdate()
             pattern->UpdateText(index);
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            auto hub = host->GetEventHub<SelectEventHub>();
+            auto hub = host->GetOrCreateEventHub<SelectEventHub>();
             CHECK_NULL_VOID(hub);
             if (index >= static_cast<int32_t>(pattern->options_.size()) || index < 0) {
                 return;

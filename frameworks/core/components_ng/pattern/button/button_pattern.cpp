@@ -27,6 +27,8 @@ constexpr int32_t TYPE_TOUCH = 0;
 constexpr int32_t TYPE_HOVER = 1;
 constexpr int32_t TYPE_CANCEL = 2;
 constexpr float NORMAL_SCALE = 1.0f;
+constexpr float MINFONTSCALE = 0.85f;
+constexpr float MAXFONTSCALE = 3.20f;
 
 inline std::string ToString(const ButtonType& type)
 {
@@ -150,7 +152,7 @@ void ButtonPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
                                                                                                   : "FontStyle.Italic",
         filter);
     json->PutExtAttr("label", layoutProperty->GetLabelValue("").c_str(), filter);
-    auto eventHub = host->GetEventHub<ButtonEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     json->PutExtAttr("stateEffect", eventHub->GetStateEffect() ? "true" : "false", filter);
 
@@ -205,6 +207,10 @@ void ButtonPattern::ToJsonValueAttribute(std::unique_ptr<JsonValue>& json, const
         ConvertControlSizeToString(layoutProperty->GetControlSize().value_or(ControlSize::NORMAL)).c_str(), filter);
     json->PutExtAttr("role",
         ConvertButtonRoleToString(layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL)).c_str(), filter);
+    json->PutExtAttr(
+        "minFontScale", std::to_string(layoutProperty->GetMinFontScaleValue(MINFONTSCALE)).c_str(), filter);
+    json->PutExtAttr(
+        "maxFontScale", std::to_string(layoutProperty->GetMaxFontScaleValue(MAXFONTSCALE)).c_str(), filter);
 }
 
 std::string ButtonPattern::ConvertButtonRoleToString(ButtonRole buttonRole)
@@ -543,7 +549,7 @@ void ButtonPattern::InitTouchEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<ButtonEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     touchListener_ = [weak = WeakClaim(this)](const UIState& state) {
         auto buttonPattern = weak.Upgrade();
@@ -560,6 +566,8 @@ void ButtonPattern::InitTouchEvent()
         }
     };
     eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, touchListener_, true);
+    auto isSetStateStyle = eventHub->GetUserSetStateStyle();
+    eventHub->SetScrollingFeatureForbidden(isSetStateStyle);
 }
 
 void ButtonPattern::OnAfterModifyDone()
@@ -580,7 +588,7 @@ void ButtonPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<ButtonEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<ButtonEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     auto hoverEffect = inputHub->GetHoverEffect();
     inputHub->SetHoverEffect(hoverEffect == HoverEffectType::BOARD ? HoverEffectType::AUTO : hoverEffect);
@@ -608,7 +616,7 @@ void ButtonPattern::HandlePressedStyle()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto buttonEventHub = GetEventHub<ButtonEventHub>();
+    auto buttonEventHub = GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
@@ -635,7 +643,7 @@ void ButtonPattern::HandleNormalStyle()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto buttonEventHub = GetEventHub<ButtonEventHub>();
+    auto buttonEventHub = GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     auto toggleButtonPattern = host->GetPattern<ToggleButtonPattern>();
     if (toggleButtonPattern) {
@@ -662,7 +670,7 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
     isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto inputEventHub = host->GetOrCreateInputEventHub();
@@ -898,7 +906,7 @@ void ButtonPattern::DumpSubInfo(RefPtr<ButtonLayoutProperty> layoutProperty)
         DumpLog::GetInstance().AddDesc("BorderRadius: " + layoutProperty->GetBorderRadiusValue().ToString());
     }
 
-    auto eventHub = GetEventHub<ButtonEventHub>();
+    auto eventHub = GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     DumpLog::GetInstance().AddDesc("StateEffect: " + std::string(eventHub->GetStateEffect() ? "true" : "false"));
 }
@@ -946,7 +954,7 @@ void ButtonPattern::HandleEnabled()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -984,7 +992,7 @@ void ButtonPattern::SetButtonPress(double xPos, double yPos)
     CHECK_NULL_VOID(contentModifierNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -1056,7 +1064,7 @@ RefPtr<FrameNode> ButtonPattern::BuildContentModifierNode()
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto label = layoutProperty->GetLabel().value_or("");
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     ButtonConfiguration buttonConfiguration(label, isPress_, enabled);

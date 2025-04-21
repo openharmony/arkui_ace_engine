@@ -46,6 +46,7 @@ public:
     void SetMovingPhotoFormat(MovingPhotoFormat format);
     void SetDynamicRangeMode(DynamicRangeMode rangeMode);
     void SetWaterMask(bool enabled);
+    void GetXmageHeight();
 
 private:
     static std::unique_ptr<MovingPhotoModelNG> instance_;

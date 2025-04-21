@@ -1219,42 +1219,6 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg029, TestSize.Level1)
 }
 
 /**
- * @tc.name: DialogModelTestNg030
- * @tc.desc: Test DialogLayoutAlgorithm.ClipUIExtensionSubWindowContent function
- * @tc.type: FUNC
- */
-HWTEST_F(DialogModelTestNg, DialogModelTestNg030, TestSize.Level1)
-{
-    DialogProperties props;
-    auto dialog = DialogView::CreateDialogNode(props, nullptr);
-    ASSERT_NE(dialog, nullptr);
-    auto extraMaskNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
-    extraMaskNode->MountToParent(dialog);
-    auto dialogPattern = dialog->GetPattern<DialogPattern>();
-    ASSERT_NE(dialogPattern, nullptr);
-    auto dialogContext = dialog->GetRenderContext();
-    ASSERT_NE(dialogContext, nullptr);
-
-    auto dialogLayoutAlgorithm = dialogPattern->CreateLayoutAlgorithm();
-    ASSERT_NE(dialogLayoutAlgorithm, nullptr);
-    RefPtr<DialogLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    layoutAlgorithm->hostWindowRect_ = RectF(OffsetF(), SizeF(FULL_SCREEN_WIDTH / 2, FULL_SCREEN_HEIGHT / 2));
-    layoutAlgorithm->expandDisplay_ = true;
-    layoutAlgorithm->ClipUIExtensionSubWindowContent(dialog);
-    NG::BorderRadiusPropertyT<Dimension> borderRadius;
-    borderRadius.SetRadius(Dimension(16.0, OHOS::Ace::DimensionUnit::VP));
-    auto maskNode = AceType::DynamicCast<FrameNode>(dialog->GetChildAtIndex(1));
-    EXPECT_EQ(maskNode->GetRenderContext()->GetBorderRadius().value(), borderRadius);
-
-    layoutAlgorithm->expandDisplay_ = false;
-    layoutAlgorithm->ClipUIExtensionSubWindowContent(dialog);
-    auto maskNodeProp = maskNode->GetLayoutProperty();
-    EXPECT_EQ(maskNodeProp->GetCalcLayoutConstraint()->selfIdealSize.value(),
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
-}
-
-/**
  * @tc.name: DialogModelTestNg031
  * @tc.desc: Test DialogLayoutAlgorithm.AdjustChildPosition function
  * @tc.type: FUNC
@@ -1293,49 +1257,6 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg031, TestSize.Level1)
     layoutAlgorithm->AdjustChildPosition(topLeftOffset, dialogOffset, childSize, true);
     EXPECT_EQ(layoutAlgorithm->dialogChildSize_.Height(), 0.f);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
-}
-
-/**
- * @tc.name: DialogModelTestNg032
- * @tc.desc: Test DialogLayoutAlgorithm.SetSubWindowHotarea/GetMaskRect function
- * @tc.type: FUNC
- */
-HWTEST_F(DialogModelTestNg, DialogModelTestNg032, TestSize.Level1)
-{
-    auto layoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    DialogProperties props;
-    props.isShowInSubWindow = true;
-    auto dialog = DialogView::CreateDialogNode(props, nullptr);
-    ASSERT_NE(dialog, nullptr);
-    auto layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(dialog, dialog->GetGeometryNode(), dialog->GetLayoutProperty());
-    auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(dialogProp);
-
-    auto childSize = SizeF(CHILD_SIZE, CHILD_SIZE);
-    auto selfSize = SizeF(CHILD_SIZE_2, CHILD_SIZE_2);
-
-    layoutAlgorithm->SetSubWindowHotarea(dialogProp, childSize, selfSize, dialog->GetId());
-    auto maskRect = layoutAlgorithm->GetMaskRect(dialog);
-    EXPECT_FALSE(maskRect.has_value());
-
-    auto offset = DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP));
-    layoutAlgorithm->isUIExtensionSubWindow_ = true;
-    layoutAlgorithm->SetSubWindowHotarea(dialogProp, childSize, selfSize, dialog->GetId());
-    maskRect = layoutAlgorithm->GetMaskRect(dialog);
-    EXPECT_EQ(maskRect.value().GetOffset(), offset);
-    EXPECT_EQ(maskRect.value().GetWidth(), CalcDimension(1, DimensionUnit::PERCENT));
-    EXPECT_EQ(maskRect.value().GetHeight(), CalcDimension(1, DimensionUnit::PERCENT));
-
-    layoutAlgorithm->expandDisplay_ = true;
-    layoutAlgorithm->hostWindowRect_ = RectF(OffsetF(), SizeF(CHILD_SIZE, CHILD_SIZE));
-    layoutAlgorithm->SetSubWindowHotarea(dialogProp, childSize, selfSize, dialog->GetId());
-    maskRect = layoutAlgorithm->GetMaskRect(dialog);
-    offset = DimensionOffset(CalcDimension(0, DimensionUnit::PX), CalcDimension(0, DimensionUnit::PX));
-    EXPECT_EQ(maskRect.value().GetOffset(), offset);
-    EXPECT_EQ(maskRect.value().GetWidth(), Dimension(CHILD_SIZE, DimensionUnit::PX));
-    EXPECT_EQ(maskRect.value().GetHeight(), Dimension(CHILD_SIZE, DimensionUnit::PX));
 }
 
 /**
@@ -1417,6 +1338,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg034, TestSize.Level1)
  HWTEST_F(DialogModelTestNg, DialogModelTestNg035, TestSize.Level1)
  {
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    CHECK_NULL_VOID(rootNode);
     AnimationOption animationOption;
     animationOption.SetDelay(10);
 
@@ -1446,9 +1368,11 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg034, TestSize.Level1)
      */
     rootNode->GetRenderContext()->UpdateChainedTransition(dialogProps.dialogTransitionEffect);
     ASSERT_NE(rootNode, nullptr);
+    CHECK_NULL_VOID(rootNode);
 
     rootNode->GetRenderContext()->UpdateChainedTransition(dialogProps.maskTransitionEffect);
     ASSERT_NE(rootNode, nullptr);
+    CHECK_NULL_VOID(rootNode);
 }
  
  /**

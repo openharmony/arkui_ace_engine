@@ -21,7 +21,7 @@ const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorReg
 
 const driver = Driver.create();
 
-export async function DatePickerStart(done:Function){
+export async function DatePickerStart(done: Function) {
   console.info('beforeAll begin');
 
   try {
@@ -34,7 +34,7 @@ export async function DatePickerStart(done:Function){
     await driver.delayMs(8000);
     console.info(TAG + 'DatePickerBootcamp' + ' begin');
 
-    let atomDisplays:Component = await driver.findComponent(ON.text('按钮与选择'));
+    let atomDisplays: Component = await driver.findComponent(ON.text('按钮与选择'));
     await atomDisplays.click();
     await driver.delayMs(1000);
 
@@ -50,11 +50,11 @@ export async function DatePickerStart(done:Function){
     await driver.swipe(width3.x, width4.y, width3.x, width3.y, 500)
     await driver.delayMs(1000);
 
-    let scrollSearch:Component = await driver.findComponent(ON.text('日期选择器/DatePicker'))
+    let scrollSearch: Component = await driver.findComponent(ON.text('日期选择器/DatePicker'))
     await scrollSearch.click()
     await driver.delayMs(1000);
 
-    let Buttons:Component[] = await driver.findComponents(ON.type('Button'));
+    let Buttons: Component[] = await driver.findComponents(ON.type('Button'));
     await Buttons[1].doubleClick()
     await driver.delayMs(1000);
 

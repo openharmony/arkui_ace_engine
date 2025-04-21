@@ -40,7 +40,6 @@ void CheckThemeId(int32_t& themeId)
     themeId = OHOS_THEME_ID;
 }
 
-std::unordered_map<std::string, uint32_t> patternNameMap;
 const std::unordered_set<std::string> PATTERN_NOT_SYNC_LOAD_SET = { THEME_PATTERN_CHECKBOX, THEME_PATTERN_DATA_PANEL,
     THEME_PATTERN_RADIO, THEME_PATTERN_SWIPER, THEME_PATTERN_SWITCH, THEME_PATTERN_TOOLBAR, THEME_PATTERN_TOGGLE,
     THEME_PATTERN_TOAST, THEME_PATTERN_DIALOG, THEME_PATTERN_DRAG_BAR, THEME_PATTERN_CLOSE_ICON,
@@ -159,6 +158,8 @@ ResourceAdapterImplV2::ResourceAdapterImplV2(
     sysResourceManager_ = resourceManager;
     if (resConfig != nullptr) {
         sysResourceManager_->UpdateResConfig(*resConfig);
+        TAG_LOGI(AceLogTag::ACE_RESOURCE, "ResourceAdapter UpdateResConfig with colorMode %{public}s",
+            (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK ? "dark" : "light"));
     }
     resConfig_ = resConfig;
     appHasDarkRes_ = resourceInfo.GetResourceConfiguration().GetAppHasDarkRes();
@@ -174,6 +175,8 @@ void ResourceAdapterImplV2::Init(const ResourceInfo& resourceInfo)
     newResMgr->AddResource(resIndexPath.c_str());
     if (resConfig != nullptr) {
         newResMgr->UpdateResConfig(*resConfig);
+        TAG_LOGI(AceLogTag::ACE_RESOURCE, "ResourceAdapter Init with colorMode %{public}s",
+            (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK ? "dark" : "light"));
     }
     sysResourceManager_ = newResMgr;
     packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
@@ -267,13 +270,13 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
         ResType patternType = std::get<1>(themeQueueFront);     // e.g. 22
         std::string patternData = std::get<2>(themeQueueFront); // e.g. 125830098
         if (patternType == ResType::PATTERN) {
-            patternNameMap[patternTag] = std::stoi(patternData);
+            patternNameMap_[patternTag] = StringUtils::StringToInt(patternData);
         }
         if (patternType == ResType::PATTERN && PATTERN_SYNC_LOAD_SET.find(patternTag) != PATTERN_SYNC_LOAD_SET.end()) {
             // is theme pattern and sync load
             ResourceThemeStyle::RawAttrMap attrMap;
             std::map<std::string, ResData> patternOutValue;
-            resourceManager->GetPatternDataById(std::stoi(patternData), patternOutValue);
+            resourceManager->GetPatternDataById(StringUtils::StringToInt(patternData), patternOutValue);
             for (auto eachPattern : patternOutValue) {
                 auto patternKey = eachPattern.first;
                 auto patternValue = eachPattern.second.value;
@@ -287,7 +290,7 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
                    PATTERN_NOT_SYNC_LOAD_SET.find(patternTag) == PATTERN_NOT_SYNC_LOAD_SET.end()) {
             // is nested pattern
             std::map<std::string, ResData> patternOutValue;
-            resourceManager->GetPatternDataById(std::stoi(patternData), patternOutValue);
+            resourceManager->GetPatternDataById(StringUtils::StringToInt(patternData), patternOutValue);
             for (auto eachPattern : patternOutValue) {
                 auto sonPatternKey = eachPattern.first;           // e.g. advanced_pattern
                 auto sonPatternType = eachPattern.second.resType; // e.g. 22
@@ -359,11 +362,25 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& pa
     auto manager = GetResourceManager();
     if (manager) {
         ResourceThemeStyle::RawAttrMap attrMap;
-        auto id = patternNameMap[patternName];
-        auto state = manager->GetPatternById(id, attrMap);
+        uint32_t id = 0;
+        Global::Resource::RState state;
+        bool patternNameFound = true;
+        if (!patternNameMap_.count(patternName)) {
+            patternNameFound = false;
+            constexpr char flag[] = "ohos_";
+            std::string patternTag = std::string(flag) + patternName;
+            state = manager->GetPatternByName(patternTag.c_str(), attrMap);
+        } else {
+            id = patternNameMap_[patternName];
+            state = manager->GetPatternById(id, attrMap);
+        }
         if (state != Global::Resource::SUCCESS) {
             TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternName.c_str());
-            state = manager->GetPatternById(id, attrMap);
+            if (patternNameFound) {
+                state = manager->GetPatternById(id, attrMap);
+            } else {
+                state = manager->GetPatternByName(patternName.c_str(), attrMap);
+            }
             if (state != Global::Resource::SUCCESS) {
                 TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternName.c_str());
                 auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();

@@ -54,6 +54,7 @@ build_component_ng("window_scene") {
 
   standard_input_deps = [
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "imf:inputmethod_client",
     "input:libmmi-client",
   ]

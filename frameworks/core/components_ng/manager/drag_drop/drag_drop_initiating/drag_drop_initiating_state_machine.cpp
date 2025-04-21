@@ -56,114 +56,120 @@ void DragDropInitiatingStateMachine::InitializeState()
 
 void DragDropInitiatingStateMachine::HandleLongPressOnAction(const GestureEvent& info)
 {
-    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
-    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
-    dragDropInitiatingState_[currentState_]->HandleLongPressOnAction(info);
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandleLongPressOnAction(info);
+    }
 }
 
 void DragDropInitiatingStateMachine::HandleLongPressOnActionEnd(const GestureEvent& info)
 {
-    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
-    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
-    dragDropInitiatingState_[currentState_]->HandleLongPressOnActionEnd(info);
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandleLongPressOnActionEnd(info);
+    }
 }
 
 void DragDropInitiatingStateMachine::HandleLongPressOnActionCancel(const GestureEvent& info)
 {
-    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
-    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
-    dragDropInitiatingState_[currentState_]->HandleLongPressOnActionCancel(info);
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandleLongPressOnActionCancel(info);
+    }
 }
 
 void DragDropInitiatingStateMachine::HandlePreviewLongPressOnAction(const GestureEvent& info)
 {
-    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
-    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
-    dragDropInitiatingState_[currentState_]->HandlePreviewLongPressOnAction(info);
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandlePreviewLongPressOnAction(info);
+    }
 }
 
 void DragDropInitiatingStateMachine::HandlePreviewLongPressOnActionEnd(const GestureEvent& info)
 {
-    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
-    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
-    dragDropInitiatingState_[currentState_]->HandlePreviewLongPressOnActionEnd(info);
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandlePreviewLongPressOnActionEnd(info);
+    }
 }
 
 void DragDropInitiatingStateMachine::HandlePreviewLongPressOnActionCancel(const GestureEvent& info)
 {
-    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
-    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
-    dragDropInitiatingState_[currentState_]->HandlePreviewLongPressOnActionCancel(info);
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandlePreviewLongPressOnActionCancel(info);
+    }
 }
 
 void DragDropInitiatingStateMachine::HandlePanOnActionStart(const GestureEvent& info)
 {
-    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
-    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
-    dragDropInitiatingState_[currentState_]->HandlePanOnActionStart(info);
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandlePanOnActionStart(info);
+    }
 }
 
 void DragDropInitiatingStateMachine::HandlePanOnActionUpdate(const GestureEvent& info)
 {
-    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
-    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
-    dragDropInitiatingState_[currentState_]->HandlePanOnActionUpdate(info);
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandlePanOnActionUpdate(info);
+    }
 }
 
 void DragDropInitiatingStateMachine::HandlePanOnActionEnd(const GestureEvent& info)
 {
-    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
-    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
-    dragDropInitiatingState_[currentState_]->HandlePanOnActionEnd(info);
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandlePanOnActionEnd(info);
+    }
 }
 
 void DragDropInitiatingStateMachine::HandlePanOnActionCancel(const GestureEvent& info)
 {
-    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
-    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
-    dragDropInitiatingState_[currentState_]->HandlePanOnActionCancel(info);
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandlePanOnActionCancel(info);
+    }
 }
 
 void DragDropInitiatingStateMachine::HandlePanOnReject()
 {
-    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
-    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
-    dragDropInitiatingState_[currentState_]->HandlePanOnReject();
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandlePanOnReject();
+    }
 }
 
 void DragDropInitiatingStateMachine::HandleSequenceOnActionCancel(const GestureEvent& info)
 {
-    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
-    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
-    dragDropInitiatingState_[currentState_]->HandleSequenceOnActionCancel(info);
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandleSequenceOnActionCancel(info);
+    }
 }
 
 void DragDropInitiatingStateMachine::HandleHitTesting(const TouchEvent& touchEvent)
 {
-    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
-    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
-    dragDropInitiatingState_[currentState_]->HandleHitTesting(touchEvent);
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandleHitTesting(touchEvent);
+    }
 }
 
 void DragDropInitiatingStateMachine::HandleTouchEvent(const TouchEvent& touchEvent)
 {
-    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
-    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
-    dragDropInitiatingState_[currentState_]->HandleTouchEvent(touchEvent);
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandleTouchEvent(touchEvent);
+    }
 }
 
 void DragDropInitiatingStateMachine::HandlePullEvent(const DragPointerEvent& dragPointerEvent)
 {
-    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
-    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
-    dragDropInitiatingState_[currentState_]->HandlePullEvent(dragPointerEvent);
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandlePullEvent(dragPointerEvent);
+    }
 }
 
 void DragDropInitiatingStateMachine::HandleReStartDrag(const GestureEvent& info)
 {
-    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
-    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
-    dragDropInitiatingState_[currentState_]->HandleReStartDrag(info);
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandleReStartDrag(info);
+    }
+}
+
+bool DragDropInitiatingStateMachine::DragInitStateIsNotEmpty()
+{
+    return !dragDropInitiatingState_.empty() && dragDropInitiatingState_[currentState_] ?
+        true : false;
 }
 
 void DragDropInitiatingStateMachine::HandleDragStart()

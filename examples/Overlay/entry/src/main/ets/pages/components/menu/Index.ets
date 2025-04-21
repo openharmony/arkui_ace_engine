@@ -25,18 +25,32 @@ export function MenuIndexBuilder(name: string, param: Object) {
 export struct MenuIndex {
   pathStack: NavPathStack = new NavPathStack()
   paths: NavListItem[] = [
+    { name: 'MultiMenu', path: 'MultiMenu' },
+    { name: 'MultiMenuSymbol', path: 'MultiMenuSymbol' },
     { name: 'BindMenu', path: 'BindMenu' },
+    { name: 'BindMenuCustomBuilder', path: 'BindMenuCustomBuilder' },
+    { name: 'BindMenuSymbolIcon', path: 'BindMenuSymbolIcon' },
+    { name: 'BindMenuBackgroundEffect', path: 'BindMenuBackgroundEffect' },
+    { name: 'BindMenuBackgroundBlurStyle', path: 'BindMenuBackgroundBlurStyle' },
     { name: 'BindContextMenu', path: 'BindContextMenu' },
+    { name: 'BindContextMenuRightClick', path: 'BindContextMenuRightClick' },
+    { name: 'BindContextMenuPreviewMode', path: 'BindContextMenuPreviewMode' },
+    { name: 'BindContextMenuPreviewCustomBuilder', path: 'BindContextMenuPreviewCustomBuilder' },
+    { name: 'BindContextMenuIsShown', path: 'BindContextMenuIsShown' },
+    { name: 'BindContextMenuTransition', path: 'BindContextMenuTransition' },
+    { name: 'BindContextMenuHoverScale', path: 'BindContextMenuHoverScale' },
   ]
 
   build() {
     NavDestination() {
-      NavList({
-        pages: this.paths,
-        onPathChange: (item: NavListItem) => {
-          this.pathStack.pushPath( { name: item.path } )
-        }
-      })
+      Scroll() {
+        NavList({
+          pages: this.paths,
+          onPathChange: (item: NavListItem) => {
+            this.pathStack.pushPath({ name: item.path })
+          }
+        })
+      }
     }
     .title('Menu')
     .onBackPressed(() => {

@@ -58,6 +58,16 @@ public:
     RefPtr<Scrollable> scrollable_;
 };
 
+class ScrollModelNGTestNg : public TestNG {
+    void SetUp() override;
+    void TearDown() override;
+};
+
+class ScrollPatternTestNg : public TestNG {
+    void SetUp() override;
+    void TearDown() override;
+};
+
 class ScrollBarOverlayTestNg : public TestNG {
     void SetUp() override;
     void TearDown() override;

@@ -239,6 +239,10 @@ public:
     void CalculateCurrentOffset(float delta, const ListLayoutAlgorithm::PositionMap& recycledItemPosition);
     void UpdatePosMap(const ListLayoutAlgorithm::PositionMap& itemPos);
     void UpdateScrollBarOffset() override;
+    virtual bool IsNeedAddContentOffset(bool isContentLessThanSize)
+    {
+        return !IsScrollSnapAlignCenter() || childrenSize_;
+    }
     // chain animation
     void SetChainAnimation();
     void SetChainAnimationOptions(const ChainAnimationOptions& options);
@@ -471,6 +475,7 @@ protected:
     float scrollSnapVelocity_ = 0.0f;
     bool isStackFromEnd_ = true;
 private:
+    void CheckAndUpdateAnimateTo(float relativeOffset, float prevOffset);
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
@@ -498,6 +503,7 @@ private:
 
     SizeF GetContentSize() const;
     void ProcessEvent(bool indexChanged, float finalOffset, bool isJump);
+    void FireOnScrollWithVersionCheck(float finalOffset, OnScrollEvent& onScroll);
     void CheckScrollable();
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
@@ -530,6 +536,7 @@ private:
     void UpdateListDirectionInCardStyle();
     bool UpdateStartListItemIndex();
     bool UpdateEndListItemIndex();
+    bool CalculateJumpOffset();
     float UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, bool isJump);
     RefPtr<ListContentModifier> listContentModifier_;
     void CreatePositionInfo(std::unique_ptr<JsonValue>& json);

@@ -34,6 +34,7 @@ const std::map<std::string, RefPtr<Curve>> curveMap {
 const uint32_t CLEAN_WINDOW_DELAY_TIME = 1000;
 const uint32_t REMOVE_STARTING_WINDOW_TIMEOUT_MS = 5000;
 const int32_t ANIMATION_DURATION = 200;
+const uint32_t REMOVE_SNAPSHOT_WINDOW_DELAY_TIME = 100;
 } // namespace
 
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)
@@ -427,8 +428,18 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(
-        std::move(uiTask), "ArkUIWindowSceneBufferAvailableCallbackForSnapshot", TaskExecutor::TaskType::UI);
+    if (Rosen::SceneSessionManager::GetInstance().GetDelayRemoveSnapshot()) {
+        Rosen::SceneSessionManager::GetInstance().SetDelayRemoveSnapshot(false);
+        removeSnapshotWindowTask_.Cancel();
+        removeSnapshotWindowTask_.Reset(uiTask);
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostDelayedTask(removeSnapshotWindowTask_, TaskExecutor::TaskType::UI,
+            REMOVE_SNAPSHOT_WINDOW_DELAY_TIME, "ArkUIWindowSceneBufferAvailableDelayedCallback");
+    } else {
+        pipelineContext->PostAsyncEvent(
+            std::move(uiTask), "ArkUIWindowSceneBufferAvailableCallbackForSnapshot", TaskExecutor::TaskType::UI);
+    }
 }
 
 void WindowScene::OnActivation()

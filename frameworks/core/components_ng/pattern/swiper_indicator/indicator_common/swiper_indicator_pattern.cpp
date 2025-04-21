@@ -48,11 +48,7 @@ void SwiperIndicatorPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID(indicatorTheme);
-    host->GetRenderContext()->SetClipToBounds(indicatorTheme->GetClipEdge());
+    host->GetRenderContext()->SetClipToBounds(false);
 }
 
 void SwiperIndicatorPattern::OnModifyDone()
@@ -138,7 +134,7 @@ void SwiperIndicatorPattern::RegisterIndicatorChangeEvent()
     RefPtr<SwiperPattern> swiperPattern = GetSwiperPattern();
     CHECK_NULL_VOID(swiperPattern);
 
-    auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
+    auto swiperEventHub = swiperPattern->GetOrCreateEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
 
     swiperEventHub->SetIndicatorOnChange(
@@ -411,7 +407,7 @@ void SwiperIndicatorPattern::InitHoverMouseEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -775,7 +771,7 @@ void SwiperIndicatorPattern::SetIndicatorInteractive(bool isInteractive)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     if (isInteractive) {
         eventHub->SetEnabled(true);

@@ -17,12 +17,16 @@
 
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/image/image_base.h"
+#include "ui/base/ace_type.h"
 
 #include "base/utils/singleton.h"
+#include "core/common/display_info.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline/base/constants.h"
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_subwindow.h"
 #include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
@@ -30,8 +34,10 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/log/dump_log.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/dialog/dialog_properties.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
 #include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
@@ -41,6 +47,9 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -738,6 +747,12 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgOnAttachToM
     auto parentNode = AceType::DynamicCast<FrameNode>(frameNode->GetParent());
     ASSERT_NE(parentNode, nullptr);
     parentNode->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
+
+    auto containerId = Container::CurrentId();
+    auto mockSubwindow = AceType::MakeRefPtr<MockSubwindow>();
+    mockSubwindow->isRosenWindowCreate_ = true;
+    SubwindowManager::GetInstance()->AddSubwindow(containerId, SubwindowType::TYPE_DIALOG, mockSubwindow);
+
     /**
      * @tc.steps: step2. Invoke Handle functions.
      * @tc.expected: These Dump properties are matched.
@@ -890,11 +905,6 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgAddExtraMas
     props.isModal = false;
     pattern->AddExtraMaskNode(props);
     EXPECT_EQ(totalChildCount, frameNode->GetTotalChildCount());
-
-    pattern->isUIExtensionSubWindow_ = true;
-    props.isModal = true;
-    pattern->AddExtraMaskNode(props);
-    EXPECT_EQ(totalChildCount + 1, frameNode->GetTotalChildCount());
 }
 
 /**
@@ -1318,6 +1328,33 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgNeedUpdateH
 }
 
 /**
+ * @tc.name: DialogPatternAdditionalTestNgNeedUpdateHostWindowRect003
+ * @tc.desc: Test DialogPattern NeedUpdateHostWindowRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgNeedUpdateHostWindowRect003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isUIExtensionSubWindow_ = true;
+    MockSystemProperties::g_isSuperFoldDisplayDevice = false;
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    EXPECT_FALSE(pattern->NeedUpdateHostWindowRect());
+}
+
+/**
  * @tc.name: DialogPatternAdditionalTestNgGetContentRect
  * @tc.desc: Test DialogPattern GetContentRect
  * @tc.type: FUNC
@@ -1435,5 +1472,285 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgIsShowInFre
     subcontainer = AceEngine::Get().GetContainer(currentId);
     ASSERT_NE(subcontainer, nullptr);
     EXPECT_FALSE(pattern->IsShowInFreeMultiWindow());
+}
+
+/**
+ * @tc.name: DialogModelTestNgShowActionSheet001
+ * @tc.desc: Test ActionSheetModelNG's ShowActionSheet.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogModelTestNgShowActionSheet001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    bool onWillAppearFlag = false;
+    auto onWillAppearEvent = [&onWillAppearFlag]() { onWillAppearFlag = true; };
+    bool onDidAppearFlag = false;
+    auto onDidAppearEvent = [&onDidAppearFlag]() { onDidAppearFlag = true; };
+    bool onWillDisappearFlag = false;
+    auto onWillDisappearEvent = [&onWillDisappearFlag]() { onWillDisappearFlag = true; };
+    bool onDidDisappearFlag = false;
+    auto onDidDisappearEvent = [&onDidDisappearFlag]() { onDidDisappearFlag = true; };
+    ActionSheetModelNG actionSheetModelNg;
+    DialogProperties props {
+        .onWillAppear = std::move(onWillAppearEvent),
+        .onDidAppear = std::move(onDidAppearEvent),
+        .onWillDisappear = std::move(onWillDisappearEvent),
+        .onDidDisappear = std::move(onDidDisappearEvent),
+        .isShowInSubWindow = true,
+    };
+    /**
+     * @tc.steps: step2. Call ShowActionSheet.
+     * @tc.expected: Check ShowActionSheet.
+     */
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    pipeline->SetThemeManager(themeManager);
+    ASSERT_NE(pipeline->GetTheme<SelectTheme>(), nullptr);
+    theme->expandDisplay_ = true;
+    container->isSubContainer_ = false;
+    actionSheetModelNg.ShowActionSheet(props);
+    container->isSubContainer_ = true;
+    actionSheetModelNg.ShowActionSheet(props);
+    theme->expandDisplay_ = false;
+    actionSheetModelNg.ShowActionSheet(props);
+    props.isShowInSubWindow = false;
+    actionSheetModelNg.ShowActionSheet(props);
+    container->isSubContainer_ = false;
+    actionSheetModelNg.ShowActionSheet(props);
+    EXPECT_FALSE(SubwindowManager::GetInstance()->GetIsExpandDisplay());
+    container->ResetContainer();
+}
+
+/**
+ * @tc.name: DialogModelTestNgShowActionSheet002
+ * @tc.desc: Test ActionSheetModelNG's ShowActionSheet.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogModelTestNgShowActionSheet002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    bool onWillAppearFlag = false;
+    auto onWillAppearEvent = [&onWillAppearFlag]() { onWillAppearFlag = true; };
+    bool onDidAppearFlag = false;
+    auto onDidAppearEvent = [&onDidAppearFlag]() { onDidAppearFlag = true; };
+    bool onWillDisappearFlag = false;
+    auto onWillDisappearEvent = [&onWillDisappearFlag]() { onWillDisappearFlag = true; };
+    bool onDidDisappearFlag = false;
+    auto onDidDisappearEvent = [&onDidDisappearFlag]() { onDidDisappearFlag = true; };
+    ActionSheetModelNG actionSheetModelNg;
+    DialogProperties props {
+        .onWillAppear = std::move(onWillAppearEvent),
+        .onDidAppear = std::move(onDidAppearEvent),
+        .onWillDisappear = std::move(onWillDisappearEvent),
+        .onDidDisappear = std::move(onDidDisappearEvent),
+        .isShowInSubWindow = true,
+        .dialogLevelMode = LevelMode::EMBEDDED,
+        .dialogLevelUniqueId = 0,
+    };
+    /**
+     * @tc.steps: step2. Call ShowActionSheet.
+     * @tc.expected: Check ShowActionSheet.
+     */
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    pipeline->SetThemeManager(themeManager);
+    ASSERT_NE(pipeline->GetTheme<SelectTheme>(), nullptr);
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    auto containerId = Container::CurrentId();
+    auto mockSubwindow = AceType::MakeRefPtr<MockSubwindow>();
+    mockSubwindow->isRosenWindowCreate_ = true;
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    EXPECT_CALL(*mockSubwindow, ShowDialogNG(_, _)).WillRepeatedly(Return(dialog));
+    EXPECT_CALL(*mockSubwindow, GetChildContainerId()).WillRepeatedly(Return(containerId));
+    SubwindowManager::GetInstance()->AddSubwindow(containerId, SubwindowType::TYPE_DIALOG, mockSubwindow);
+    actionSheetModelNg.ShowActionSheet(props);
+    container->isUIExtensionWindow_ = true;
+    actionSheetModelNg.ShowActionSheet(props);
+    props.isModal = false;
+    actionSheetModelNg.ShowActionSheet(props);
+    EXPECT_FALSE(SubwindowManager::GetInstance()->GetIsExpandDisplay());
+    container->ResetContainer();
+    mockSubwindow = nullptr;
+    SubwindowManager::GetInstance()->subwindowMap_.clear();
+    SubwindowManager::GetInstance()->instanceSubwindowMap_.clear();
+}
+
+/**
+ * @tc.name: DialogModelTestNgShowActionSheet003
+ * @tc.desc: Test ActionSheetModelNG's ShowActionSheet.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogModelTestNgShowActionSheet003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Mock data.
+     */
+    bool onWillAppearFlag = false;
+    auto onWillAppearEvent = [&onWillAppearFlag]() { onWillAppearFlag = true; };
+    bool onDidAppearFlag = false;
+    auto onDidAppearEvent = [&onDidAppearFlag]() { onDidAppearFlag = true; };
+    bool onWillDisappearFlag = false;
+    auto onWillDisappearEvent = [&onWillDisappearFlag]() { onWillDisappearFlag = true; };
+    bool onDidDisappearFlag = false;
+    auto onDidDisappearEvent = [&onDidDisappearFlag]() { onDidDisappearFlag = true; };
+    ActionSheetModelNG actionSheetModelNg;
+    DialogProperties props {
+        .onWillAppear = std::move(onWillAppearEvent),
+        .onDidAppear = std::move(onDidAppearEvent),
+        .onWillDisappear = std::move(onWillDisappearEvent),
+        .onDidDisappear = std::move(onDidDisappearEvent),
+        .isShowInSubWindow = true,
+        .dialogLevelMode = LevelMode::EMBEDDED,
+        .dialogLevelUniqueId = 0,
+    };
+    /**
+     * @tc.steps: step2. Call ShowActionSheet.
+     * @tc.expected: Check ShowActionSheet.
+     */
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    pipeline->SetThemeManager(themeManager);
+    ASSERT_NE(pipeline->GetTheme<SelectTheme>(), nullptr);
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->onMainTree_ = true;
+    ElementRegister::GetInstance()->AddReferenced(props.dialogLevelUniqueId, contentNode);
+    auto currentNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(props.dialogLevelUniqueId);
+    ASSERT_NE(currentNode, nullptr);
+    auto getOverlayManager = DialogManager::FindPageNodeOverlay(currentNode);
+    ASSERT_NE(getOverlayManager, nullptr);
+
+    actionSheetModelNg.ShowActionSheet(props);
+    EXPECT_FALSE(SubwindowManager::GetInstance()->GetIsExpandDisplay());
+    container->ResetContainer();
+    ElementRegister::GetInstance()->Clear();
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgUpdateButtonsProperty
+ * @tc.desc: Test DialogPattern UpdateButtonsProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgUpdateButtonsProperty, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->buttonContainer_ = nullptr;
+    RefPtr<FrameNode> menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(menuNode, nullptr);
+    pattern->menuNode_ = menuNode;
+    RefPtr<FrameNode> childNodeOne =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(childNodeOne, nullptr);
+    RefPtr<FrameNode> childNodeTwo =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 4, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(childNodeTwo, nullptr);
+    RefPtr<FrameNode> childNodeThree =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 5, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(childNodeThree, nullptr);
+    childNodeOne->MountToParent(menuNode);
+    childNodeTwo->MountToParent(menuNode);
+    childNodeThree->MountToParent(menuNode);
+    RefPtr<FrameNode> childNodeFour =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 6, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(childNodeFour, nullptr);
+    childNodeFour->MountToParent(childNodeThree);
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    pattern->UpdateButtonsProperty();
+    EXPECT_EQ(pattern->buttonContainer_, nullptr);
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgIsShowInFloatingWindow
+ * @tc.desc: Test DialogPattern IsShowInFloatingWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgIsShowInFloatingWindow, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    MockContainer::container_ = nullptr;
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_EQ(container, nullptr);
+    EXPECT_FALSE(pattern->IsShowInFloatingWindow());
+
+    MockContainer::SetUp();
+    container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->isSubContainer_ = true;
+    EXPECT_TRUE(container->IsSubContainer());
+    container->UpdateCurrent(11);
+
+    auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    auto subcontainer = AceEngine::Get().GetContainer(currentId);
+    ASSERT_EQ(subcontainer, nullptr);
+    EXPECT_FALSE(pattern->IsShowInFloatingWindow());
+
+    SubwindowManager::GetInstance()->AddParentContainerId(Container::CurrentId(), Container::CurrentId());
+    currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    AceEngine::Get().AddContainer(currentId, container);
+    subcontainer = AceEngine::Get().GetContainer(currentId);
+    ASSERT_NE(subcontainer, nullptr);
+    EXPECT_FALSE(pattern->IsShowInFloatingWindow());
+
+    container->ResetContainer();
+    MockSystemProperties::g_isSuperFoldDisplayDevice = false;
 }
 } // namespace OHOS::Ace::NG

@@ -210,10 +210,12 @@ void GridScrollLayoutAlgorithm::UpdateOffsetOnHeightChangeDuringAnimation(Layout
         float totalHeight = info_.GetContentHeight(mainGap_);
         if (info_.lastMainSize_ < totalHeight) {
             info_.currentOffset_ += (mainSize - info_.lastMainSize_);
+            info_.endHeight_ -= (mainSize - info_.lastMainSize_);
             return;
         }
         if (info_.lastMainSize_ >= totalHeight && mainSize < info_.lastMainSize_ && mainSize <= totalHeight) {
             info_.currentOffset_ += mainSize - totalHeight;
+            info_.endHeight_ -= mainSize - totalHeight;
         }
     }
 }

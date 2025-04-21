@@ -3,13 +3,17 @@ import { abilityDelegatorRegistry, Component, Driver, ON } from '@kit.TestKit';
 import {
   buttonClick,
   getToggle,
-  JsonType, KeyStruct, radioClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
   Search,
   searchParentBlock,
   searchToggle,
-  Slide, sliderDrag,
+  Slide,
+  sliderDrag,
   titleSearch,
-  ToggleClick } from '../../utils';
+  ToggleClick
+} from '../../utils';
 import { Point } from '@ohos.UiTest';
 
 const TAG = 'CalendarPickerBootcamp'

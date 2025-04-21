@@ -317,7 +317,7 @@ void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
 }
 
 void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& rawInputEvent,
-    const std::shared_ptr<BaseGestureEvent>& info)
+    const std::shared_ptr<BaseGestureEvent>& info, std::array<ArkUITouchPoint, MAX_POINTS>& points)
 {
     rawInputEvent.sourceType = static_cast<ArkUI_Int32>(info->GetSourceDevice());
     rawInputEvent.timeStamp = info->GetTimeStamp().time_since_epoch().count();
@@ -326,7 +326,6 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
     rawInputEvent.actionTouchPoint.rollAngle = info->GetRollAngle().value_or(0.0f);
     rawInputEvent.actionTouchPoint.toolType = static_cast<ArkUI_Int32>(info->GetSourceTool());
     rawInputEvent.actionTouchPoint.pressure = info->GetForce();
-    std::array<ArkUITouchPoint, MAX_POINTS> points;
     auto fingerList = info->GetFingerList();
     auto fingureIterator = std::begin(fingerList);
     rawInputEvent.targetDisplayId = info->GetTargetDisplayId();
@@ -742,7 +741,8 @@ void setGestureInterrupterToNodeWithUserData(
         CHECK_NULL_RETURN(node, GestureJudgeResult::CONTINUE);
         ArkUIAPIEventGestureAsyncEvent gestureEvent;
         ArkUITouchEvent rawInputEvent;
-        GetBaseGestureEvent(&gestureEvent, rawInputEvent, info);
+        std::array<ArkUITouchPoint, MAX_POINTS> points;
+        GetBaseGestureEvent(&gestureEvent, rawInputEvent, info, points);
         auto gestureInfo = current->GetGestureInfo();
         CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
         GetUniqueGestureEvent(&gestureEvent, gestureInfo->GetRecognizerType(), info);
@@ -1037,9 +1037,13 @@ ArkUI_Int32 getTapGestureDistanceThreshold(ArkUIGestureRecognizer* recognizer, d
 
 ArkUI_Int32 setDistanceMap(ArkUIGesture* gesture, int size, int* toolTypeArray, double* distanceArray)
 {
-    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() } };
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.Value() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.Value() } };
     for (int i = 0; i < size; i++) {
-        distanceMap[static_cast<SourceTool>(toolTypeArray[i])] = distanceArray[i];
+        SourceTool st = static_cast<SourceTool>(toolTypeArray[i]);
+        if (st >= SourceTool::UNKNOWN && st <= SourceTool::JOYSTICK && GreatOrEqual(distanceArray[i], 0.0)) {
+            distanceMap[st] = distanceArray[i];
+        }
     }
     auto gestureForDistanceMap = Referenced::Claim(reinterpret_cast<PanGesture*>(gesture));
     CHECK_NULL_RETURN(gestureForDistanceMap, ERROR_CODE_PARAM_INVALID);

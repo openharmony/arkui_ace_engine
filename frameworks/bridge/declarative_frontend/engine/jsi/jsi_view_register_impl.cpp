@@ -594,10 +594,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollBar", JSScrollBar::JSBind },
     { "GridRow", JSGridRow::JSBind },
     { "GridCol", JSGridCol::JSBind },
-#ifndef ARKUI_WEARABLE
     { "Stepper", JSStepper::JSBind },
     { "StepperItem", JSStepperItem::JSBind },
-#endif
     { "Toggle", JSToggle::JSBind },
     { "ToolBarItem", JSToolBarItem::JSBind },
     { "Blank", JSBlank::JSBind },
@@ -627,10 +625,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
     { "PageTransitionEnter", JSPageTransition::JSBind },
     { "PageTransitionExit", JSPageTransition::JSBind },
-#ifndef ARKUI_WEARABLE
     { "RowSplit", JSRowSplit::JSBind },
     { "ColumnSplit", JSColumnSplit::JSBind },
-#endif
     { "AlphabetIndexer", JSIndexer::JSBind },
     { "Hyperlink", JSHyperlink::JSBind },
     { "Radio", JSRadio::JSBind },
@@ -736,9 +732,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #endif
     { "Search", JSSearch::JSBind },
-#ifndef ARKUI_WEARABLE
     { "Select", JSSelect::JSBind },
-#endif
     { "SearchController", JSSearchController::JSBind },
     { "TextClockController", JSTextClockController::JSBind },
     { "Sheet", JSSheet::JSBind },
@@ -1015,8 +1009,9 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     if (cleanUpIdleTask->IsFunction()) {
         LOGI("CleanUpIdleTask is a valid function");
         const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
-        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
-            jsFunc->Call(globalObject);
+        const auto callback = [jsFunc = globalFunc, globalObject = globalObject](int64_t maxTimeInNs) {
+            auto params = ConvertToJSValues(maxTimeInNs / 1e6);
+            jsFunc->Call(globalObject, params.size(), params.data());
         };
         ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(callback);
     }

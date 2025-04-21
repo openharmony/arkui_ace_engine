@@ -917,6 +917,6 @@ export default function QRCode1() {
       done();
 
     })
-    })
+  })
 
 }

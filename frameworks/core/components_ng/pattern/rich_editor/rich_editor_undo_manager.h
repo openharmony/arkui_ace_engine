@@ -161,7 +161,7 @@ private:
     std::deque<UndoRedoRecord> undoRecords_;
     std::deque<UndoRedoRecord> redoRecords_;
     UndoRedoRecord previewInputRecord_;
-    // used to record selection at the start of a multi-step operation
+    // used to record selection or caret position at the start of a multi-step operation
     TextRange selectionBefore_;
     size_t recordCount_ = 0;
     bool isCountingRecord_ = false;

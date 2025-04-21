@@ -1627,4 +1627,24 @@ HWTEST_F(SwiperTestNg, OnInjectionEventTest001, TestSize.Level1)
     EXPECT_EQ(currentIndex, 0);
     pattern->OnInjectionEvent(command);
 }
+
+/**
+ * @tc.name: SwipeAutoLinearIsOutOfBoundary001
+ * @tc.desc: Test SwiperPattern AutoLinearIsOutOfBoundary test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwipeAutoLinearIsOutOfBoundary001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper with SwiperDisplayMode::AUTO_LINEAR
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    model.SetLoop(false);
+    CreateItemWithSize(SWIPER_WIDTH, SWIPER_HEIGHT);
+    CreateSwiperDone();
+    EXPECT_FALSE(pattern_->itemPosition_.empty());
+    EXPECT_FALSE(pattern_->itemPosition_.size() < pattern_->TotalCount());
+    EXPECT_FALSE(pattern_->AutoLinearIsOutOfBoundary(0.f));
+}
 } // namespace OHOS::Ace::NG

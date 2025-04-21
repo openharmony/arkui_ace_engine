@@ -498,7 +498,7 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragDropLink001, TestSize.Level1)
     EXPECT_NE(mockUdmfClient, nullptr);
     std::string linkUrl = "http://example.com";
     std::string linkTitle = "Example Title";
-    EXPECT_CALL(*mockUdmfClient, GetLinkRecord(AceType::DynamicCast<UnifiedData>(aceUnifiedData), _, _))
+    EXPECT_CALL(*mockUdmfClient, GetLinkEntry(AceType::DynamicCast<UnifiedData>(aceUnifiedData), _, _))
         .WillOnce(
             testing::Invoke([&](const RefPtr<UnifiedData>& data, std::string& outLinkUrl, std::string& outLinkTitle) {
                 outLinkUrl = linkUrl;
@@ -535,7 +535,7 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragDropLink002, TestSize.Level1)
     EXPECT_NE(mockUdmfClient, nullptr);
     std::string linkUrl = "";
     std::string linkTitle = "";
-    EXPECT_CALL(*mockUdmfClient, GetLinkRecord(AceType::DynamicCast<UnifiedData>(aceUnifiedData), _, _))
+    EXPECT_CALL(*mockUdmfClient, GetLinkEntry(AceType::DynamicCast<UnifiedData>(aceUnifiedData), _, _))
         .WillOnce(
             testing::Invoke([&](const RefPtr<UnifiedData>& data, std::string& outLinkUrl, std::string& outLinkTitle) {
                 outLinkUrl = linkUrl;
@@ -634,20 +634,20 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragDrop003, TestSize.Level1)
     auto aceData = AceType::MakeRefPtr<OHOS::Ace::UnifiedDataMock>();
     gestureHub->SetData(aceData);
     webPattern->delegate_->dragData_ = std::make_shared<OHOS::NWeb::NWebDragDataMock>();
-    std::vector<std::string> plains = { "plains1", "plains2", "plains3" };
+    std::string plain = "plain";
     auto mockUdmfClient = AceType::DynamicCast<MockUdmfClient>(UdmfClient::GetInstance());
     EXPECT_NE(mockUdmfClient, nullptr);
-    EXPECT_CALL(*mockUdmfClient, GetPlainTextRecords(AceType::DynamicCast<UnifiedData>(aceData)))
-        .WillOnce(Return(plains));
-    EXPECT_CALL(*mockUdmfClient, GetHtmlRecord(AceType::DynamicCast<UnifiedData>(aceData), _, _))
+    EXPECT_CALL(*mockUdmfClient, GetPlainTextEntry(AceType::DynamicCast<UnifiedData>(aceData)))
+        .WillOnce(Return(plain));
+    EXPECT_CALL(*mockUdmfClient, GetHtmlEntry(AceType::DynamicCast<UnifiedData>(aceData), _, _))
         .WillOnce(testing::Invoke([](const RefPtr<UnifiedData>&, std::string&, std::string&) {}));
     std::vector<uint8_t> spanString;
-    EXPECT_CALL(*mockUdmfClient, GetSpanStringRecord(AceType::DynamicCast<UnifiedData>(aceData)))
+    EXPECT_CALL(*mockUdmfClient, GetSpanStringEntry(AceType::DynamicCast<UnifiedData>(aceData)))
         .WillOnce(Return(spanString));
-    EXPECT_CALL(*mockUdmfClient, GetLinkRecord(AceType::DynamicCast<UnifiedData>(aceData), _, _))
+    EXPECT_CALL(*mockUdmfClient, GetLinkEntry(AceType::DynamicCast<UnifiedData>(aceData), _, _))
         .WillOnce(testing::Invoke(
             [](const RefPtr<UnifiedData>& aceData, std::string&, std::string&) { EXPECT_NE(aceData, nullptr); }));
-    EXPECT_CALL(*mockUdmfClient, GetFileUriRecord(AceType::DynamicCast<UnifiedData>(aceData), _))
+    EXPECT_CALL(*mockUdmfClient, GetFileUriEntry(AceType::DynamicCast<UnifiedData>(aceData), _))
         .WillOnce(Return(false));
     webPattern->HandleOnDragDrop(gestureHub);
 #endif
@@ -679,20 +679,20 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragDrop004, TestSize.Level1)
     auto aceData = AceType::MakeRefPtr<OHOS::Ace::UnifiedDataMock>();
     gestureHub->SetData(aceData);
     webPattern->delegate_->dragData_ = std::make_shared<OHOS::NWeb::NWebDragDataMock>();
-    std::vector<std::string> plains = { "", "", "" };
+    std::string plain = "";
     auto mockUdmfClient = AceType::DynamicCast<MockUdmfClient>(UdmfClient::GetInstance());
     EXPECT_NE(mockUdmfClient, nullptr);
-    EXPECT_CALL(*mockUdmfClient, GetPlainTextRecords(AceType::DynamicCast<UnifiedData>(aceData)))
-        .WillOnce(Return(plains));
-    EXPECT_CALL(*mockUdmfClient, GetHtmlRecord(AceType::DynamicCast<UnifiedData>(aceData), _, _))
+    EXPECT_CALL(*mockUdmfClient, GetPlainTextEntry(AceType::DynamicCast<UnifiedData>(aceData)))
+        .WillOnce(Return(plain));
+    EXPECT_CALL(*mockUdmfClient, GetHtmlEntry(AceType::DynamicCast<UnifiedData>(aceData), _, _))
         .WillOnce(testing::Invoke([](const RefPtr<UnifiedData>&, std::string&, std::string&) {}));
     std::vector<uint8_t> spanString;
-    EXPECT_CALL(*mockUdmfClient, GetSpanStringRecord(AceType::DynamicCast<UnifiedData>(aceData)))
+    EXPECT_CALL(*mockUdmfClient, GetSpanStringEntry(AceType::DynamicCast<UnifiedData>(aceData)))
         .WillOnce(Return(spanString));
-    EXPECT_CALL(*mockUdmfClient, GetLinkRecord(AceType::DynamicCast<UnifiedData>(aceData), _, _))
+    EXPECT_CALL(*mockUdmfClient, GetLinkEntry(AceType::DynamicCast<UnifiedData>(aceData), _, _))
         .WillOnce(testing::Invoke(
             [](const RefPtr<UnifiedData>& aceData, std::string&, std::string&) { EXPECT_NE(aceData, nullptr); }));
-    EXPECT_CALL(*mockUdmfClient, GetFileUriRecord(AceType::DynamicCast<UnifiedData>(aceData), _))
+    EXPECT_CALL(*mockUdmfClient, GetFileUriEntry(AceType::DynamicCast<UnifiedData>(aceData), _))
         .WillOnce(Return(false));
     webPattern->HandleOnDragDrop(gestureHub);
 #endif
@@ -724,25 +724,25 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragDrop005, TestSize.Level1)
     auto aceData = AceType::MakeRefPtr<OHOS::Ace::UnifiedDataMock>();
     gestureHub->SetData(aceData);
     webPattern->delegate_->dragData_ = std::make_shared<OHOS::NWeb::NWebDragDataMock>();
-    std::vector<std::string> plains = { "", "plains1", "plains2" };
+    std::string plain = "";
     auto mockUdmfClient = AceType::DynamicCast<MockUdmfClient>(UdmfClient::GetInstance());
     EXPECT_NE(mockUdmfClient, nullptr);
-    EXPECT_CALL(*mockUdmfClient, GetPlainTextRecords(AceType::DynamicCast<UnifiedData>(aceData)))
-        .WillOnce(Return(plains));
+    EXPECT_CALL(*mockUdmfClient, GetPlainTextEntry(AceType::DynamicCast<UnifiedData>(aceData)))
+        .WillOnce(Return(plain));
     std::string htmlContent_ = "This is a sample HTML content.";
-    EXPECT_CALL(*mockUdmfClient, GetHtmlRecord(AceType::DynamicCast<UnifiedData>(aceData), _, _))
+    EXPECT_CALL(*mockUdmfClient, GetHtmlEntry(AceType::DynamicCast<UnifiedData>(aceData), _, _))
         .WillOnce(
             testing::Invoke([&](const RefPtr<UnifiedData>& data, std::string& htmlContent, std::string& plainContent) {
                 htmlContent = htmlContent_;
                 plainContent = "plainString";
             }));
     std::vector<uint8_t> spanString;
-    EXPECT_CALL(*mockUdmfClient, GetSpanStringRecord(AceType::DynamicCast<UnifiedData>(aceData)))
+    EXPECT_CALL(*mockUdmfClient, GetSpanStringEntry(AceType::DynamicCast<UnifiedData>(aceData)))
         .WillOnce(Return(spanString));
-    EXPECT_CALL(*mockUdmfClient, GetLinkRecord(AceType::DynamicCast<UnifiedData>(aceData), _, _))
+    EXPECT_CALL(*mockUdmfClient, GetLinkEntry(AceType::DynamicCast<UnifiedData>(aceData), _, _))
         .WillOnce(testing::Invoke(
             [](const RefPtr<UnifiedData>& aceData, std::string&, std::string&) { EXPECT_NE(aceData, nullptr); }));
-    EXPECT_CALL(*mockUdmfClient, GetFileUriRecord(AceType::DynamicCast<UnifiedData>(aceData), _))
+    EXPECT_CALL(*mockUdmfClient, GetFileUriEntry(AceType::DynamicCast<UnifiedData>(aceData), _))
         .WillOnce(Return(false));
     webPattern->HandleOnDragDrop(gestureHub);
 #endif
@@ -774,25 +774,25 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragDrop006, TestSize.Level1)
     auto aceData = AceType::MakeRefPtr<OHOS::Ace::UnifiedDataMock>();
     gestureHub->SetData(aceData);
     webPattern->delegate_->dragData_ = std::make_shared<OHOS::NWeb::NWebDragDataMock>();
-    std::vector<std::string> plains = { "", "plains1", "plains2" };
+    std::string plain = "";
     auto mockUdmfClient = AceType::DynamicCast<MockUdmfClient>(UdmfClient::GetInstance());
     EXPECT_NE(mockUdmfClient, nullptr);
-    EXPECT_CALL(*mockUdmfClient, GetPlainTextRecords(AceType::DynamicCast<UnifiedData>(aceData)))
-        .WillOnce(Return(plains));
+    EXPECT_CALL(*mockUdmfClient, GetPlainTextEntry(AceType::DynamicCast<UnifiedData>(aceData)))
+        .WillOnce(Return(plain));
     std::string htmlContent_ = "";
-    EXPECT_CALL(*mockUdmfClient, GetHtmlRecord(AceType::DynamicCast<UnifiedData>(aceData), _, _))
+    EXPECT_CALL(*mockUdmfClient, GetHtmlEntry(AceType::DynamicCast<UnifiedData>(aceData), _, _))
         .WillOnce(
             testing::Invoke([&](const RefPtr<UnifiedData>& data, std::string& htmlContent, std::string& plainContent) {
                 htmlContent = htmlContent_;
                 plainContent = "";
             }));
     std::vector<uint8_t> spanString;
-    EXPECT_CALL(*mockUdmfClient, GetSpanStringRecord(AceType::DynamicCast<UnifiedData>(aceData)))
+    EXPECT_CALL(*mockUdmfClient, GetSpanStringEntry(AceType::DynamicCast<UnifiedData>(aceData)))
         .WillOnce(Return(spanString));
-    EXPECT_CALL(*mockUdmfClient, GetLinkRecord(AceType::DynamicCast<UnifiedData>(aceData), _, _))
+    EXPECT_CALL(*mockUdmfClient, GetLinkEntry(AceType::DynamicCast<UnifiedData>(aceData), _, _))
         .WillOnce(testing::Invoke(
             [](const RefPtr<UnifiedData>& aceData, std::string&, std::string&) { EXPECT_NE(aceData, nullptr); }));
-    EXPECT_CALL(*mockUdmfClient, GetFileUriRecord(AceType::DynamicCast<UnifiedData>(aceData), _))
+    EXPECT_CALL(*mockUdmfClient, GetFileUriEntry(AceType::DynamicCast<UnifiedData>(aceData), _))
         .WillOnce(Return(false));
     webPattern->HandleOnDragDrop(gestureHub);
 #endif
@@ -824,20 +824,20 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragDrop007, TestSize.Level1)
     auto aceData = AceType::MakeRefPtr<OHOS::Ace::UnifiedDataMock>();
     gestureHub->SetData(aceData);
     webPattern->delegate_->dragData_ = std::make_shared<OHOS::NWeb::NWebDragDataMock>();
-    std::vector<std::string> plains = { "", "plains1", "plains2" };
+    std::string plain = "";
     auto mockUdmfClient = AceType::DynamicCast<MockUdmfClient>(UdmfClient::GetInstance());
     EXPECT_NE(mockUdmfClient, nullptr);
-    EXPECT_CALL(*mockUdmfClient, GetPlainTextRecords(AceType::DynamicCast<UnifiedData>(aceData)))
-        .WillOnce(Return(plains));
-    EXPECT_CALL(*mockUdmfClient, GetHtmlRecord(AceType::DynamicCast<UnifiedData>(aceData), _, _))
+    EXPECT_CALL(*mockUdmfClient, GetPlainTextEntry(AceType::DynamicCast<UnifiedData>(aceData)))
+        .WillOnce(Return(plain));
+    EXPECT_CALL(*mockUdmfClient, GetHtmlEntry(AceType::DynamicCast<UnifiedData>(aceData), _, _))
         .WillOnce(testing::Invoke([](const RefPtr<UnifiedData>&, std::string&, std::string&) {}));
     std::vector<uint8_t> spanString = { 10, 20, 30 };
-    EXPECT_CALL(*mockUdmfClient, GetSpanStringRecord(AceType::DynamicCast<UnifiedData>(aceData)))
+    EXPECT_CALL(*mockUdmfClient, GetSpanStringEntry(AceType::DynamicCast<UnifiedData>(aceData)))
         .WillOnce(Return(spanString));
-    EXPECT_CALL(*mockUdmfClient, GetLinkRecord(AceType::DynamicCast<UnifiedData>(aceData), _, _))
+    EXPECT_CALL(*mockUdmfClient, GetLinkEntry(AceType::DynamicCast<UnifiedData>(aceData), _, _))
         .WillOnce(testing::Invoke(
             [](const RefPtr<UnifiedData>& aceData, std::string&, std::string&) { EXPECT_NE(aceData, nullptr); }));
-    EXPECT_CALL(*mockUdmfClient, GetFileUriRecord(AceType::DynamicCast<UnifiedData>(aceData), _))
+    EXPECT_CALL(*mockUdmfClient, GetFileUriEntry(AceType::DynamicCast<UnifiedData>(aceData), _))
         .WillOnce(Return(false));
     webPattern->HandleOnDragDrop(gestureHub);
 #endif

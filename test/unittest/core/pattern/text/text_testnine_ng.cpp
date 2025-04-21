@@ -364,7 +364,7 @@ HWTEST_F(TextTestNineNg, SetupMagnifier014, TestSize.Level1)
     auto pageGeoNode = pageNode->GetGeometryNode();
 
     pattern->HandleLongPress(info);
-    EXPECT_EQ(11, pattern->magnifierController_->hostViewPort_->Width());
+    EXPECT_EQ(0, pattern->magnifierController_->hostViewPort_->Width());
 }
 
 /**
@@ -391,7 +391,7 @@ HWTEST_F(TextTestNineNg, SetupMagnifier021, TestSize.Level1)
     renderContext->UpdateClipEdge(true);
 
     pattern->HandleLongPress(info);
-    EXPECT_EQ(0, pattern->magnifierController_->hostViewPort_->Width());
+    EXPECT_EQ(5, pattern->magnifierController_->hostViewPort_->Width());
 }
 
 /**
@@ -418,7 +418,7 @@ HWTEST_F(TextTestNineNg, SetupMagnifier022, TestSize.Level1)
     renderContext->UpdateClipEdge(true);
 
     pattern->HandleLongPress(info);
-    EXPECT_EQ(0, pattern->magnifierController_->hostViewPort_->Width());
+    EXPECT_EQ(5, pattern->magnifierController_->hostViewPort_->Width());
 }
 
 /**

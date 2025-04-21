@@ -319,7 +319,6 @@ export default function LoadingProgress5() {
     })
 
 
-
   })
 }
 

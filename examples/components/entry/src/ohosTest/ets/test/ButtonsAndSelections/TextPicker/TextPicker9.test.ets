@@ -15,10 +15,13 @@
 import { describe, beforeAll, it } from '@ohos/hypium'
 import {
   getToggle,
-  JsonType, KeyStruct, radioClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
   searchToggle,
   titleSearch,
-  ToggleClick } from '../../../utils';
+  ToggleClick
+} from '../../../utils';
 import { TextPickerStart } from './TextPicker';
 
 export default function TimePicker9() {

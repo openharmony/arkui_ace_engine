@@ -139,6 +139,7 @@ void* createToggleNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
     auto toggleParams = static_cast<const ArkUI_Toggle_Params*>(&params);
     CHECK_NULL_RETURN(toggleParams, nullptr);
     auto frameNode = ToggleModelNG::CreateFrameNode(nodeId, toggleParams->toggleType, toggleParams->isOn);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -379,6 +380,7 @@ void* createCustomNode(ArkUI_Int32 nodeId)
 void* createNavigationNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = NavigationModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -496,6 +498,7 @@ void* createGridColNode(ArkUI_Int32 nodeId)
 void* createImageAnimatorNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ImageAnimatorModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -519,6 +522,7 @@ void* createSelectNode(ArkUI_Int32 nodeId)
 void* createTabContentNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TabContentModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -663,11 +667,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createSearchNode,
     createGridRowNode,
     createGridColNode,
-#ifndef ARKUI_WEARABLE
     createSelectNode,
-#else
-    nullptr, // createSelectNode
-#endif
     createImageAnimatorNode,
     createCircleNode,
     createTabContentNode,

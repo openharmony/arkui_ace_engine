@@ -29,6 +29,7 @@
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/system_properties.h"
 #include "core/common/form_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
 #include "core/components_ng/pattern/form/form_node.h"
@@ -142,7 +143,7 @@ void FormPattern::OnAttachToFrameNode()
     static RenderContext::ContextParam param = { RenderContext::ContextType::EXTERNAL, std::nullopt };
     externalRenderContext_->InitContext(false, param);
     InitFormManagerDelegate();
-    auto eventHub = host->GetEventHub<FormEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCache([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -1127,11 +1128,16 @@ void FormPattern::LoadFormSkeleton(bool isRefresh)
 
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext != nullptr) {
-        BlurStyleOption styleOption;
-        styleOption.blurStyle = static_cast<BlurStyle>(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
-        renderContext->UpdateBackBlurStyle(styleOption);
-        renderContext->UpdateBackgroundColor(isDarkMode ?
-            Color(CONTENT_BG_COLOR_DARK) : Color(CONTENT_BG_COLOR_LIGHT));
+        Color colorStyle = isDarkMode ? Color(CONTENT_BG_COLOR_DARK) : Color(CONTENT_BG_COLOR_LIGHT);
+        if (SystemProperties::IsFormSkeletonBlurEnabled()) {
+            BlurStyleOption styleOption;
+            styleOption.blurStyle = static_cast<BlurStyle>(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+            renderContext->UpdateBackBlurStyle(styleOption);
+        } else {
+            colorStyle = isDarkMode ?
+                Color(CONTENT_BG_COLOR_DARK_WITHOUT_BLUR) : Color(CONTENT_BG_COLOR_LIGHT_WITHOUT_BLUR);
+        }
+        renderContext->UpdateBackgroundColor(colorStyle);
         double opacity = formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
             != formChildrenNodeMap_.end() ? TRANSPARENT_VAL : CONTENT_BG_OPACITY;
         renderContext->SetOpacity(opacity);
@@ -1370,6 +1376,7 @@ void FormPattern::InitFormManagerDelegate()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(context);
+    CHECK_NULL_VOID(formManagerBridge_);
     formManagerBridge_->AddRenderDelegate();
     formManagerBridge_->RegisterRenderDelegateEvent();
     auto formUtils = FormManager::GetInstance().GetFormUtils();
@@ -1406,6 +1413,7 @@ void FormPattern::InitFormManagerDelegate()
     InitAddFormSurfaceChangeAndDetachCallback(instanceID);
     InitAddUnTrustAndSnapshotCallback(instanceID);
     InitOtherCallback(instanceID);
+    InitUpdateFormDoneCallback(instanceID);
     const std::function<void(bool isRotate, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback =
         [this](bool isRotate, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
             FormManager::GetInstance().NotifyIsSizeChangeByRotate(isRotate, rsTransaction);
@@ -1694,7 +1702,7 @@ void FormPattern::FireOnErrorEvent(const std::string& code, const std::string& m
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<FormEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
     json->Put("errcode", code.c_str());
@@ -1706,7 +1714,7 @@ void FormPattern::FireOnUninstallEvent(int64_t id) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<FormEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     int64_t uninstallFormId = id < MAX_NUMBER_OF_JS ? id : -1;
     auto json = JsonUtil::Create(true);
@@ -1720,7 +1728,7 @@ void FormPattern::FireOnAcquiredEvent(int64_t id) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<FormEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     int64_t onAcquireFormId = id < MAX_NUMBER_OF_JS ? id : -1;
     auto json = JsonUtil::Create(true);
@@ -1737,7 +1745,7 @@ void FormPattern::FireOnRouterEvent(const std::unique_ptr<JsonValue>& action)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<FormEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
     json->Put("action", action);
@@ -1748,7 +1756,7 @@ void FormPattern::FireOnLoadEvent() const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<FormEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnLoad("");
 }
@@ -1872,7 +1880,7 @@ void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
 void FormPattern::RemoveSubContainer()
 {
     auto host = GetHost();
-    auto eventHub = host->GetEventHub<FormEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
     if (eventHub) {
         eventHub->FireOnCache();
     }
@@ -1900,7 +1908,7 @@ void FormPattern::EnableDrag()
         info.extraInfo = "card drag";
         return info;
     };
-    auto eventHub = GetHost()->GetEventHub<EventHub>();
+    auto eventHub = GetHost()->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDefaultOnDragStart(std::move(dragStart));
 }
@@ -2438,6 +2446,25 @@ void FormPattern::InitOtherCallback(int32_t instanceID)
         });
 }
 
+void FormPattern::InitUpdateFormDoneCallback(int32_t instanceID)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    formManagerBridge_->AddFormUpdateDoneCallback([weak = WeakClaim(this), instanceID, pipeline](const int64_t formId) {
+        ContainerScope scope(instanceID);
+        CHECK_NULL_VOID(pipeline);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([formId, weak, instanceID] {
+            ContainerScope scope(instanceID);
+            auto formPattern = weak.Upgrade();
+            CHECK_NULL_VOID(formPattern);
+            formPattern->FireOnUpdateFormDone(formId);
+            }, "ArkUIFormFireUpdateDoneEvent");
+    });
+}
+
 void FormPattern::enhancesSubContainer(bool hasContainer)
 {
     CHECK_NULL_VOID(subContainer_);
@@ -2608,5 +2635,19 @@ void FormPattern::ReAddStaticFormSnapshotTimer()
     std::string nodeIdStr = std::to_string(host->GetId());
     executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormTakeSurfaceCapture_" + nodeIdStr);
     HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_10S, nodeIdStr);
+}
+
+void FormPattern::FireOnUpdateFormDone(int64_t id) const
+{
+    TAG_LOGD(AceLogTag::ACE_FORM, "fire form update done:%{public}" PRId64, id);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    int64_t onUpdateFormId = id < MAX_NUMBER_OF_JS ? id : -1;
+    auto json = JsonUtil::Create(true);
+    json->Put("id", std::to_string(onUpdateFormId).c_str());
+    json->Put("idString", std::to_string(id).c_str());
+    eventHub->FireOnUpdate(json->ToString());
 }
 } // namespace OHOS::Ace::NG

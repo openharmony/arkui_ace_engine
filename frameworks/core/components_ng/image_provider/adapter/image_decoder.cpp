@@ -36,6 +36,10 @@ std::unordered_map<std::string, WeakPtr<PixelMap>> ImageDecoder::weakPixelMapCac
 
 WeakPtr<PixelMap> ImageDecoder::GetFromPixelMapCache(const ImageSourceInfo& imageSourceInfo, const SizeF& size)
 {
+    // only support network image
+    if (imageSourceInfo.GetSrcType() != SrcType::NETWORK) {
+        return nullptr;
+    }
     std::shared_lock<std::shared_mutex> lock(pixelMapMtx_);
     auto key = ImageUtils::GenerateImageKey(imageSourceInfo, size);
     // key exists -> task is running
@@ -62,6 +66,10 @@ void ImageDecoder::ClearPixelMapCache()
 void ImageDecoder::AddToPixelMapCache(
     const ImageSourceInfo& imageSourceInfo, const SizeF& size, WeakPtr<PixelMap> weakPixelMap)
 {
+    // only cache network image
+    if (imageSourceInfo.GetSrcType() != SrcType::NETWORK) {
+        return;
+    }
     std::unique_lock<std::shared_mutex> lock(pixelMapMtx_);
     auto key = ImageUtils::GenerateImageKey(imageSourceInfo, size);
     weakPixelMapCache_.emplace(key, weakPixelMap);
@@ -185,9 +193,9 @@ std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage(
     const RefPtr<ImageObject>& obj, std::shared_ptr<RSData> data, const ImageDecoderConfig& imageDecoderConfig)
 {
     CHECK_NULL_RETURN(data, nullptr);
-    auto rsSkiaData = data->GetImpl<Rosen::Drawing::SkiaData>();
-    CHECK_NULL_RETURN(rsSkiaData, nullptr);
-    auto skData = rsSkiaData->GetSkData();
+    RSDataWrapper* wrapper = new RSDataWrapper{data};
+    auto skData =
+        SkData::MakeWithProc(data->GetData(), data->GetSize(), RSDataWrapperReleaseProc, wrapper);
     auto encodedImage = std::make_shared<RSImage>();
     if (!encodedImage->MakeFromEncoded(data)) {
         return nullptr;

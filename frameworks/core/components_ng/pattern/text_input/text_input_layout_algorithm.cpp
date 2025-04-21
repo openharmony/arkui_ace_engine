@@ -69,11 +69,11 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
         auto paragraphData = CreateParagraphData { disableTextAlign, fontSize };
         CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), paragraphData);
         return InlineMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper);
-    }
-    if (showPlaceHolder_) {
+    } else if (showPlaceHolder_) {
         return PlaceHolderMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
+    } else {
+        return TextInputMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
     }
-    return TextInputMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
 }
 
 bool TextInputLayoutAlgorithm::IsFontSizeNonPositive(const TextStyle& textStyle) const
@@ -97,6 +97,10 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentWidth = contentSize.Width();
         contentHeight = contentSize.Height();
     }
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
     auto defaultHeight = GetDefaultHeightByType(layoutWrapper);
 
     auto responseAreaWidth = 0.0f;

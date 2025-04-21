@@ -92,6 +92,7 @@ public:
     using FoldDisplayModeChangedCallbackMap = std::unordered_map<int32_t, std::function<void(FoldDisplayMode)>>;
     using TransformHintChangedCallbackMap = std::unordered_map<int32_t, std::function<void(uint32_t)>>;
     using PredictTask = std::function<void(int64_t, bool)>;
+    using RotationEndCallbackMap = std::unordered_map<int32_t, std::function<void()>>;
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
@@ -1035,6 +1036,16 @@ public:
         return isDensityChanged_;
     }
 
+    bool IsNeedReloadDensity() const override
+    {
+        return isNeedReloadDensity_;
+    }
+
+    void SetIsNeedReloadDensity(bool isNeedReloadDensity) override
+    {
+        isNeedReloadDensity_ = isNeedReloadDensity;
+    }
+
     void GetInspectorTree(bool onlyNeedVisible);
     void NotifyAllWebPattern(bool isRegister);
     void AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node);
@@ -1084,6 +1095,7 @@ public:
 
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
     bool CheckThreadSafe();
+    void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode);
 
     bool IsHoverModeChange() const
     {
@@ -1175,6 +1187,20 @@ public:
             aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
         }
         return aiWriteAdapter_;
+    }
+
+    int32_t RegisterRotationEndCallback(std::function<void()>&& callback)
+    {
+        if (callback) {
+            rotationEndCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnregisterRotationEndCallback(int32_t callbackId)
+    {
+        rotationEndCallbackMap_.erase(callbackId);
     }
 
 protected:
@@ -1296,6 +1322,7 @@ private:
     void DumpElement(const std::vector<std::string>& params, bool hasJson) const;
     void DumpData(const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const;
     void OnDumpInjection(const std::vector<std::string>& params) const;
+    void OnRotationAnimationEnd();
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
@@ -1411,6 +1438,7 @@ private:
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
     bool isDensityChanged_ = false;
+    bool isNeedReloadDensity_ = false;
     bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
@@ -1493,6 +1521,7 @@ private:
 
     RefPtr<Kit::UIContextImpl> uiContextImpl_;
     std::shared_ptr<UiTranslateManagerImpl> uiTranslateManager_;
+    RotationEndCallbackMap rotationEndCallbackMap_ {};
     friend class ScopedLayout;
     friend class FormGestureManager;
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = nullptr;

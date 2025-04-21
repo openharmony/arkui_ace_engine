@@ -83,7 +83,7 @@ float CalcToolbarItemWidth(const float& toolbarWidth, size_t toolbarItemNum)
 
     float totalItemsInterval = (toolbarItemNum - 1) * (toolbarItemInterval);
     float containerWidth = GetToolbarContainerMaxWidth(toolbarWidth, toolbarItemNum);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return (containerWidth - totalItemsInterval) / toolbarItemNum -
             theme->GetToolbarItemLeftOrRightPadding().ConvertToPx() * BAR_ITEM_MARGIN_NUM;
     }

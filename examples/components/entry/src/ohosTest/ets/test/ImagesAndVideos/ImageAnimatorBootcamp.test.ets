@@ -20,6 +20,7 @@ const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorReg
 
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
+
 export default function ImageAnimatorBootcampTest() {
   describe('ImageAnimatorBootcampTest', () => {
     beforeAll(async (done: Function) => {
@@ -97,7 +98,7 @@ export default function ImageAnimatorBootcampTest() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('state', JsonType.value),
         ],
-        assertEqual:'AnimationStatus.Running'
+        assertEqual: 'AnimationStatus.Running'
       })
 
       done();
@@ -116,7 +117,7 @@ export default function ImageAnimatorBootcampTest() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('state', JsonType.value),
         ],
-        assertEqual:'AnimationStatus.Paused'
+        assertEqual: 'AnimationStatus.Paused'
       })
 
       done();
@@ -135,7 +136,7 @@ export default function ImageAnimatorBootcampTest() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('state', JsonType.value),
         ],
-        assertEqual:'AnimationStatus.Stopped'
+        assertEqual: 'AnimationStatus.Stopped'
       })
 
       done();
@@ -210,7 +211,7 @@ export default function ImageAnimatorBootcampTest() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('reverse', JsonType.value),
         ],
-        assertEqual:'false'
+        assertEqual: 'false'
       })
 
       done();
@@ -250,7 +251,7 @@ export default function ImageAnimatorBootcampTest() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fixedSize', JsonType.value),
         ],
-        assertEqual:'false'
+        assertEqual: 'false'
       })
 
       done();
@@ -290,7 +291,7 @@ export default function ImageAnimatorBootcampTest() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fillMode', JsonType.value),
         ],
-        assertEqual:'FillMode.Forwards'
+        assertEqual: 'FillMode.Forwards'
       })
 
       done();
@@ -309,7 +310,7 @@ export default function ImageAnimatorBootcampTest() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fillMode', JsonType.value),
         ],
-        assertEqual:'FillMode.Backwards'
+        assertEqual: 'FillMode.Backwards'
       })
 
       done();
@@ -328,7 +329,7 @@ export default function ImageAnimatorBootcampTest() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fillMode', JsonType.value),
         ],
-        assertEqual:'FillMode.Both'
+        assertEqual: 'FillMode.Both'
       })
 
       done();

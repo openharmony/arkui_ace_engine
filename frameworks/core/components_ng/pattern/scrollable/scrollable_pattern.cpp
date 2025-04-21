@@ -263,7 +263,7 @@ RefPtr<GestureEventHub> ScrollablePattern::GetGestureHub()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(hub, nullptr);
     return hub->GetOrCreateGestureEventHub();
 }
@@ -272,7 +272,7 @@ RefPtr<InputEventHub> ScrollablePattern::GetInputHub()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(hub, nullptr);
     return hub->GetOrCreateInputEventHub();
 }
@@ -1291,6 +1291,8 @@ void ScrollablePattern::SetFriction(double friction)
             auto scrollableTheme = context->GetTheme<ScrollableTheme>();
             friction = scrollableTheme->GetFriction();
         }
+        double ret = SystemProperties::GetSrollableFriction();
+        friction = !NearZero(ret) ? ret : friction;
     }
     friction_ = friction;
     CHECK_NULL_VOID(scrollableEvent_);
@@ -1417,6 +1419,7 @@ void ScrollablePattern::AnimateTo(
         PlaySpringAnimation(position, DEFAULT_SCROLL_TO_VELOCITY, DEFAULT_SCROLL_TO_MASS, DEFAULT_SCROLL_TO_STIFFNESS,
             DEFAULT_SCROLL_TO_DAMPING, useTotalOffset);
     } else {
+        useTotalOffset_ = true;
         PlayCurveAnimation(position, duration, curve, canOverScroll);
     }
     if (!GetIsDragging()) {
@@ -1431,7 +1434,6 @@ void ScrollablePattern::AnimateTo(
 
 void ScrollablePattern::OnAnimateFinish()
 {
-    useTotalOffset_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (isAnimationStop_) {
@@ -2513,7 +2515,7 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
 void ScrollablePattern::ExecuteScrollFrameBegin(float& mainDelta, ScrollState state)
 {
     auto context = GetContext();
-    auto eventHub = GetEventHub<ScrollableEventHub>();
+    auto eventHub = GetOrCreateEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto scrollFrameBeginCallback = eventHub->GetOnScrollFrameBegin();
     auto onJSFrameNodeScrollFrameBegin = eventHub->GetJSFrameNodeOnScrollFrameBegin();
@@ -2667,7 +2669,7 @@ void ScrollablePattern::OnStatusBarClick()
         return;
     }
 
-    auto pipeline = GetContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2737,7 +2739,7 @@ void ScrollablePattern::FireOnScrollStart()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ScrollableEventHub>();
+    auto hub = host->GetOrCreateEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(hub);
     SuggestOpIncGroup(true);
     if (scrollStop_ && !GetScrollAbort()) {
@@ -3000,7 +3002,7 @@ void ScrollablePattern::RecordScrollEvent(Recorder::EventType eventType)
 
 float ScrollablePattern::FireOnWillScroll(float offset) const
 {
-    auto eventHub = GetEventHub<ScrollableEventHub>();
+    auto eventHub = GetOrCreateEventHub<ScrollableEventHub>();
     CHECK_NULL_RETURN(eventHub, offset);
     auto onScroll = eventHub->GetOnWillScroll();
     auto onJSFrameNodeScroll = eventHub->GetJSFrameNodeOnWillScroll();
@@ -3653,7 +3655,7 @@ void ScrollablePattern::GetEventDumpInfo()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ScrollableEventHub>();
+    auto hub = host->GetOrCreateEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollStart = hub->GetOnScrollStart();
     onScrollStart ? DumpLog::GetInstance().AddDesc("hasOnScrollStart: true")
@@ -3667,7 +3669,7 @@ void ScrollablePattern::GetEventDumpInfo()
     auto onJSFrameNodeScrollStop = hub->GetJSFrameNodeOnScrollStop();
     onJSFrameNodeScrollStop ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollStop: true")
                             : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollStop: false");
-    auto scrollHub = host->GetEventHub<ScrollEventHub>();
+    auto scrollHub = host->GetOrCreateEventHub<ScrollEventHub>();
     if (scrollHub) {
         auto onWillScroll = scrollHub->GetOnWillScrollEvent();
         onWillScroll ? DumpLog::GetInstance().AddDesc("hasOnWillScroll: true")
@@ -3873,7 +3875,7 @@ void ScrollablePattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ScrollableEventHub>();
+    auto hub = host->GetOrCreateEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollStart = hub->GetOnScrollStart();
     json->Put("hasOnScrollStart", onScrollStart ? "true" : "false");
@@ -3884,7 +3886,7 @@ void ScrollablePattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     auto onJSFrameNodeScrollStop = hub->GetJSFrameNodeOnScrollStop();
     json->Put("hasFrameNodeOnScrollStop", onJSFrameNodeScrollStop ? "true" : "false");
 
-    auto scrollHub = host->GetEventHub<ScrollEventHub>();
+    auto scrollHub = host->GetOrCreateEventHub<ScrollEventHub>();
     if (scrollHub) {
         auto onWillScroll = scrollHub->GetOnWillScrollEvent();
         json->Put("hasOnWillScroll", onWillScroll ? "true" : "false");
@@ -4252,7 +4254,7 @@ void ScrollablePattern::SetOnHiddenChangeForParent()
     if (parent && parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
         auto navDestinationPattern = parent->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
-        auto navDestinationEventHub = navDestinationPattern->GetEventHub<NavDestinationEventHub>();
+        auto navDestinationEventHub = navDestinationPattern->GetOrCreateEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(navDestinationEventHub);
         auto onHiddenChange = [weak = WeakClaim(this)](bool isShow) {
             auto pattern = weak.Upgrade();
