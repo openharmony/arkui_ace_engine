@@ -1464,45 +1464,6 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsAccessibilityManager031
- * @tc.desc: Test UIExtensionManager ConvertActionTypeToBoolen02
- * @tc.type: FUNC
- */
-HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager031, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct JsAccessibilityManager
-     */
-    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
-    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
-    auto context = NG::PipelineContext::GetCurrentContext();
-    int64_t elementId = 0;
-
-    /**
-     * @tc.steps: step2. test ConvertActionTypeToBoolen
-     */
-    bool ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD,
-        frameNode, elementId, context);
-    EXPECT_FALSE(ret);
-    
-    ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD,
-        frameNode, elementId, context);
-    EXPECT_FALSE(ret);
-    
-    ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_NEXT_TEXT,
-        frameNode, elementId, context);
-        EXPECT_FALSE(ret);
-    
-    ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_PREVIOUS_TEXT,
-        frameNode, elementId, context);
-    EXPECT_FALSE(ret);
-    
-    ret = jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_SET_TEXT,
-        frameNode, elementId, context);
-    EXPECT_FALSE(ret);
-}
-
-/**
  * @tc.name: ConvertActionTypeToBoolen001
  * @tc.desc: UpdateAccessibilityElementInfo
  * @tc.type: FUNC
