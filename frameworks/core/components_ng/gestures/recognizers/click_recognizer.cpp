@@ -519,6 +519,7 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
     }
     if (onAction && *onAction) {
         GestureEvent info = GetGestureEventInfo();
+        info.SetGestureTypeName(GestureTypeName::TAP_GESTURE);
         // onAction may be overwritten in its invoke so we copy it first
         auto onActionFunction = *onAction;
         onActionFunction(info);

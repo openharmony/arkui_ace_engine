@@ -6856,6 +6856,29 @@ Local<panda::ObjectRef> CommonBridge::CreateRecognizerObject(EcmaVM* vm, const R
     return recognizerObj->GetLocalHandle();
 }
 
+Local<panda::ObjectRef> CommonBridge::CreateTapGestureInfo(EcmaVM* vm, GestureEvent& info)
+{
+    if (info.GetFingerList().empty()) {
+        return panda::ObjectRef::New(vm);
+    }
+    auto fingerInfo = info.GetFingerList().back();
+    const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
+    const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
+    const OHOS::Ace::Offset& screenLocation = fingerInfo.screenLocation_;
+    double density = PipelineBase::GetCurrentDensity();
+    const char* keys[] = { "x", "y", "windowX", "windowY", "displayX", "displayY"};
+    density = density != 0 ? density : 1;
+    Local<JSValueRef> values[] = {
+        panda::NumberRef::New(vm, localLocation.GetX() / density),
+        panda::NumberRef::New(vm, localLocation.GetY() / density),
+        panda::NumberRef::New(vm, globalLocation.GetX() / density),
+        panda::NumberRef::New(vm, globalLocation.GetY() / density),
+        panda::NumberRef::New(vm, screenLocation.GetX() / density),
+        panda::NumberRef::New(vm, screenLocation.GetY() / density),
+    };
+    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+}
+
 Local<panda::ObjectRef> CommonBridge::CreateFingerInfo(EcmaVM* vm, const FingerInfo& fingerInfo)
 {
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
@@ -7238,6 +7261,11 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
         vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"), panda::NumberRef::New(vm, info.GetTargetDisplayId()));
     obj->SetNativePointerFieldCount(vm, 1);
     obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+    if (info.GetGestureTypeName() == GestureTypeName::TAP_GESTURE && !info.GetFingerList().empty()) {
+        auto tapGuestureInfo = CreateTapGestureInfo(vm, info);
+        obj->Set(
+            vm, panda::StringRef::NewFromUtf8(vm, "tapLocation"), tapGuestureInfo);
+    }
     return obj;
 }
 
@@ -8145,7 +8173,7 @@ ArkUINativeModuleValue CommonBridge::SetOnGestureJudgeBegin(ArkUIRuntimeCallInfo
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
     auto onGestureJudgeBegin = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode),
-                                   containerId](const RefPtr<GestureInfo>& gestureInfo,
+                                   containerId, obj](const RefPtr<GestureInfo>& gestureInfo,
                                    const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
@@ -8159,10 +8187,43 @@ ArkUINativeModuleValue CommonBridge::SetOnGestureJudgeBegin(ArkUIRuntimeCallInfo
         if (value->IsNumber()) {
             returnValue = static_cast<GestureJudgeResult>(value->ToNumber(vm)->Value());
         }
+        if (gestureInfo->GetType() == GestureTypeName::TAP_GESTURE) {
+            auto tapGuestureInfo = CreateTapGestureLocationInfo(vm, gestureInfo->GetType(), info);
+            obj->Set(
+                vm, panda::StringRef::NewFromUtf8(vm, "tapLocation"), tapGuestureInfo);
+            panda::Local<panda::JSValueRef> params[] = { obj };
+            func->Call(vm, func.ToLocal(), params, 1);
+        }
         return returnValue;
     };
     NG::ViewAbstract::SetOnGestureJudgeBegin(frameNode, std::move(onGestureJudgeBegin));
     return panda::JSValueRef::Undefined(vm);
+}
+
+Local<panda::ObjectRef> CommonBridge::CreateTapGestureLocationInfo(
+    EcmaVM* vm, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info)
+{
+    CHECK_NULL_RETURN(vm, panda::ObjectRef::New(vm));
+    const std::list<FingerInfo>& fingerList = info->GetFingerList();
+    if (fingerList.empty()) {
+        return panda::ObjectRef::New(vm);
+    }
+    auto fingerInfo = info->GetFingerList().back();
+    const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
+    const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
+    const OHOS::Ace::Offset& screenLocation = fingerInfo.screenLocation_;
+    double density = PipelineBase::GetCurrentDensity();
+    const char* keys[] = { "x", "y", "windowX", "windowY", "displayX", "displayY"};
+    density = density != 0 ? density : 1;
+    Local<JSValueRef> values[] = {
+        panda::NumberRef::New(vm, localLocation.GetX() / density),
+        panda::NumberRef::New(vm, localLocation.GetY() / density),
+        panda::NumberRef::New(vm, globalLocation.GetX() / density),
+        panda::NumberRef::New(vm, globalLocation.GetY() / density),
+        panda::NumberRef::New(vm, screenLocation.GetX() / density),
+        panda::NumberRef::New(vm, screenLocation.GetY() / density),
+    };
+    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
 ArkUINativeModuleValue CommonBridge::ResetOnGestureJudgeBegin(ArkUIRuntimeCallInfo* runtimeCallInfo)

@@ -93,6 +93,7 @@ public:
     JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv) override;
 
 protected:
+    JSRef<JSObject> GetTapLocation(const FingerInfo& fingerInfo);
     JSRef<JSFunc> jsFunction_;
 };
 

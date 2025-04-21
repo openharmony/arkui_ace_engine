@@ -390,6 +390,7 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
     }
     if (callback && *callback) {
         GestureEvent info;
+        info.SetGestureTypeName(GestureTypeName::SWIPE_GESTURE);
         info.SetTimeStamp(time_);
         UpdateFingerListInfo();
         info.SetFingerList(fingerList_);

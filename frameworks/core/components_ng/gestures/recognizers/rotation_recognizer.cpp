@@ -361,6 +361,7 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        info.SetGestureTypeName(GestureTypeName::ROTATION_GESTURE);
         TouchEvent touchPoint = {};
         if (!touchPoints_.empty()) {
             touchPoint = touchPoints_.begin()->second;
