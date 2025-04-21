@@ -1161,6 +1161,11 @@ void TextFieldModelNG::SetNormalMaxViewLines(FrameNode* frameNode, uint32_t valu
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, NormalMaxViewLines, normalMaxViewLines, frameNode);
 }
 
+void TextFieldModelNG::SetOverflowMode(FrameNode* frameNode, OverflowMode value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, OverflowMode, value, frameNode);
+}
+
 void TextFieldModelNG::SetType(FrameNode* frameNode, TextInputType value)
 {
     CHECK_NULL_VOID(frameNode);

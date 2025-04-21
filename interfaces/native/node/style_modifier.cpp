@@ -10926,8 +10926,13 @@ int32_t SetMaxLines(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
                 node->uiNodeHandle, item->value[0].i32);
             break;
         case ARKUI_NODE_TEXT_AREA:
-            fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMaxLines(
-                node->uiNodeHandle, item->value[0].i32);
+            if (item->size == 2) {
+                fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMaxLines(
+                    node->uiNodeHandle, item->value[0].i32, item->value[1].i32);
+            } else {
+                fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMaxLines(
+                    node->uiNodeHandle, item->value[0].i32, 0);
+            }
             break;
         default:
             break;
