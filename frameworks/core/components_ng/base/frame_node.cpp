@@ -45,6 +45,7 @@
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/pattern/corner_mark/corner_mark.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -1380,6 +1381,9 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         pattern_->OnLanguageConfigurationUpdate();
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        if (cornerMarkNode_) {
+            CornerMark::UpdateCornerMarkNodeLanguage(Claim(this));
+        }
     }
     if (configurationChange.colorModeUpdate) {
         pattern_->OnColorConfigurationUpdate();
@@ -1391,6 +1395,9 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         FireColorNDKCallback();
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        if (cornerMarkNode_) {
+            CornerMark::UpdateCornerMarkNodeColorMode(Claim(this));
+        }
     }
     if (configurationChange.directionUpdate) {
         pattern_->OnDirectionConfigurationUpdate();

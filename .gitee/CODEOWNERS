@@ -2393,6 +2393,7 @@ frameworks/core/components_ng/pattern/checkbox/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/checkboxgroup/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/common_view/ @arkuievent
 frameworks/core/components_ng/pattern/container_modal/ @arkuievent
+frameworks/core/components_ng/pattern/corner_mark/ @arkuiframework
 frameworks/core/components_ng/pattern/counter/ @arkui_image
 frameworks/core/components_ng/pattern/custom/ @arkuilayout
 frameworks/core/components_ng/pattern/custom_frame_node/ @arkuiframework
@@ -3115,6 +3116,7 @@ test/unittest/core/pattern/checkbox/ @arkuipopupwindow
 test/unittest/core/pattern/checkboxgroup/ @arkuipopupwindow
 test/unittest/core/pattern/common_view/ @arkuistatemgmt
 test/unittest/core/pattern/container_modal/ @arkuievent
+test/unittest/core/pattern/corner_mark/ @arkuiframework
 test/unittest/core/pattern/counter/ @arkui_image
 test/unittest/core/pattern/custom/ @arkuilayout
 test/unittest/core/pattern/custom_frame_node/ @arkuiframework

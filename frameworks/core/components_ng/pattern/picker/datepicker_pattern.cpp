@@ -92,12 +92,12 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(pickerTheme, false);
     auto children = host->GetChildren();
     auto height = pickerTheme->GetDividerSpacing();
-    auto buttonSpace = pickerTheme->GetSelectorItemSpace();
     auto currentFocusStackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     CHECK_NULL_RETURN(currentFocusStackChild, false);
     auto currentFocusButtonNode = DynamicCast<FrameNode>(currentFocusStackChild->GetFirstChild());
     CHECK_NULL_RETURN(currentFocusButtonNode, false);
     for (const auto& child : children) {
+        CHECK_NULL_CONTINUE(child->GetLastChild());
         auto columnNode = DynamicCast<FrameNode>(child->GetLastChild()->GetLastChild());
         CHECK_NULL_RETURN(columnNode, false);
         auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
@@ -113,7 +113,7 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         auto maxButtonHeight = static_cast<float>(datePickerColumnNode->GetGeometryNode()->GetFrameSize().Height());
         auto buttonHeight = Dimension(std::min(standardButtonHeight, maxButtonHeight), DimensionUnit::PX);
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(buttonHeight)));
+            CalcSize(CalcLength(width - pickerTheme->GetSelectorItemSpace().ConvertToPx()), CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         if (!useButtonFocusArea_) {
             buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
