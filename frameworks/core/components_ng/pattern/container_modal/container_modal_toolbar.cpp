@@ -137,6 +137,7 @@ void ContainerModalToolBar::ParsePlacementType()
     if (hasItem) {
         AddToolbarItemToContainer();
         OnToolBarLayoutChange();
+        UpdateToolbarLayoutBasedOnTargetNodes();
     }
 }
 
@@ -329,9 +330,11 @@ bool ContainerModalToolBar::AddToolbarItemToNavBarEnd(const RefPtr<FrameNode>& f
         AddNavBarRow();
     }
 
-    if (navbarRow_ && !rightNavRow_) {
-        AddLeftNavRow();
-        AddRightNavRow();
+    if (navbarRow_) {
+        if (!rightNavRow_) {
+            AddLeftNavRow();
+            AddRightNavRow();
+        }
         rightNavRow_->AddChild(frameNode);
         rightNavRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         return true;
@@ -664,33 +667,16 @@ void ContainerModalToolBar::SetcustomTitleRowBlurStyle(BlurStyle& blurStyle)
     renderContext->UpdateBackBlurStyle(styleOption);
 }
 
-void ContainerModalToolBar::HasExpandStackLayout()
+void ContainerModalToolBar::UpdateToolbarLayoutBasedOnTargetNodes()
 {
-    if (!hasNavOrSideBarNodes_) {
-        if (!hasFind_) {
-            hasFind_ = true;
-            auto pattern = pattern_.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto pipeline = pattern->GetContext();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
-                auto toolbar = weak.Upgrade();
-                CHECK_NULL_VOID(toolbar);
-                if (!(toolbar->HasNavOrSideBarNodes())) {
-                    if (toolbar->GetNavOrSideBarNodes()) {
-                        toolbar->SetHasNavOrSideBarNodes(true);
-                        toolbar->ToInitNavOrSideBarNode();
-                    } else {
-                        return;
-                    }
-                }
-                toolbar->InitToolBarManager();
-                toolbar->ExpandStackLayout();
-                toolbar->SetExpandStackLayout(true);
-                toolbar->UpdateTargetNodesBarMargin();
-            });
-        } else {
-            return;
+    if (!isSafeAreaOn_ && !isFloating_) {
+        auto pattern = pattern_.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->IsContainerModalTransparent()) {
+            ExpandStackLayout();
+            SetExpandStackLayout(true);
+            UpdateTargetNodesBarMargin();
+            isSafeAreaOn_ = true;
         }
     }
 }
