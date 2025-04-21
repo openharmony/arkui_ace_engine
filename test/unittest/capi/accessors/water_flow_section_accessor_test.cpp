@@ -129,8 +129,8 @@ HWTEST_F(WaterFlowSectionAccessorTest, ValuesTest, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSectionAccessorTest, OnGetItemMainSizeByIndexTest, TestSize.Level1)
 {
-    const auto INPUT_VALUE = 123;
-    const auto EXPECTED_VALUE = 789;
+    const auto inputValue = 123;
+    const auto expextedValue = 789;
     auto onGetItemMainSizeByIndex = [](int32_t index) -> float {
         return index == 123 ? 789 : 0;
     };
@@ -154,6 +154,6 @@ HWTEST_F(WaterFlowSectionAccessorTest, OnGetItemMainSizeByIndexTest, TestSize.Le
                 auto resultOpt = callback.InvokeWithOptConvertResult<float, Ark_Number, Callback_Number_Void>(param);
                 return resultOpt.value_or(0);
             };
-    EXPECT_EQ(modelCallback(INPUT_VALUE), EXPECTED_VALUE);
+    EXPECT_EQ(modelCallback(inputValue), expextedValue);
 }
 } // namespace OHOS::Ace::NG
