@@ -34,6 +34,13 @@ void MenuModelNG::Create()
         // default min width
         layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
     }
+    if (menuNode->GetThemeScopeId() && menuNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        auto pipeline = menuNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>(menuNode->GetThemeScopeId());
+        CHECK_NULL_VOID(theme);
+        ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, theme->GetFontColor());
+    }
 }
 
 void MenuModelNG::SetFontSize(const Dimension& fontSize)

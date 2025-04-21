@@ -82,7 +82,9 @@ void MenuItemGroupView::SetHeader(const std::string& headerStr)
     layoutProps->UpdateContent(headerStr);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                     ? pipeline->GetTheme<SelectTheme>(frameNode->GetThemeScopeId())
+                     : pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         layoutProps->UpdateFontSize(theme->GetMenuItemGroupTitleTextFontSize());
@@ -130,7 +132,9 @@ void MenuItemGroupView::SetFooter(const std::string& footerStr)
     layoutProps->UpdateContent(footerStr);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                     ? pipeline->GetTheme<SelectTheme>(frameNode->GetThemeScopeId())
+                     : pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     layoutProps->UpdateTextColor(theme->GetSecondaryFontColor());
     layoutProps->UpdateFontSize(theme->GetMenuFontSize());
