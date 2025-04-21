@@ -207,6 +207,17 @@ void DecorationSpan::SetTextDecorationTypes(const std::vector<TextDecoration>& t
     types_ = types;
 }
 
+void DecorationSpan::RemoveTextDecorationType(TextDecoration type)
+{
+    if (!V2::HasTextDecoration(types_, type)) {
+        return;
+    }
+    auto iter = std::find(types_.begin(), types_.end(), type);
+    if (iter != types_.end()) {
+        types_.erase(iter);
+    }
+}
+
 void DecorationSpan::AddTextDecorationType(TextDecoration value)
 {
     if (value == TextDecoration::NONE || V2::HasTextDecoration(types_, value)) {
@@ -309,7 +320,7 @@ std::string DecorationSpan::DecorationTypesToString() const
                 result += "OVERLINE,";
                 break;
             case TextDecoration::LINE_THROUGH:
-                result += "LINE_THROUGH";
+                result += "LINE_THROUGH,";
                 break;
             default:
                 result += "NONE,";
