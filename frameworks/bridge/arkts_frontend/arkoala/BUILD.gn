@@ -55,7 +55,7 @@ action("run_arkoala_build") {
 
   deps = [
     "${ohos_ets_api_deps}",
-    "${ohos_ets_arkts_deps}",
+    # "${ohos_ets_arkts_deps}",
   ]
 
   external_deps = ets2abc_build_deps

@@ -4,7 +4,7 @@ import("//build/ohos.gni")
 generate_static_abc("simp_counter_ets_abc") {
   base_url = "./"
   files = [ "./simpCounter.ets" ]
-
+  ui_enable = "True"
   is_boot_abc = "True"
   device_dst_file = "/system/framework/simp_counter_ets_abc.abc"
 }
