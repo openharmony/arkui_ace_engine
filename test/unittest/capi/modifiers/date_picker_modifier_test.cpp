@@ -73,6 +73,8 @@ const auto ATTRIBUTE_TEXT_COLOR_SELECTED_DEFAULT_VALUE = "#FF007DFF";
 const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE = "1"; // equal "CrownSensitivity.MEDIUM"
 const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME = "digitalCrownSensitivity";
 #endif
+const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME = "enableHapticFeedback";
+const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE = "true";
 
 // Test plans
 // size
@@ -2014,5 +2016,80 @@ HWTEST_F(DatePickerModifierTest, setOnChangeEventSelectedTest, TestSize.Level1)
         EXPECT_EQ(selectedDate->GetMonth(), testValue.second.GetMonth());
         EXPECT_EQ(selectedDate->GetDay(), testValue.second.GetDay());
     };
+}
+
+/**
+ * @tc.name: setEnableHapticFeedbackDefaultTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setEnableHapticFeedbackDefaultTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setEnableHapticFeedback, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE);
+}
+
+/**
+ * @tc.name: setEnableHapticFeedbackValidTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setEnableHapticFeedbackValidTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setEnableHapticFeedback, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    auto optFalse = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setEnableHapticFeedback(node_, &optFalse);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, EXPECTED_FALSE);
+    auto optTrue = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setEnableHapticFeedback(node_, &optTrue);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, EXPECTED_TRUE);
+}
+
+/**
+ * @tc.name: setEnableHapticFeedbackInvalidTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setEnableHapticFeedbackInvalidTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setEnableHapticFeedback, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    auto optFalse = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setEnableHapticFeedback(node_, &optFalse);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, EXPECTED_FALSE);
+    modifier_->setEnableHapticFeedback(node_, nullptr);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, EXPECTED_TRUE);
+
+    auto optTrue = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setEnableHapticFeedback(node_, &optTrue);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, EXPECTED_TRUE);
+    modifier_->setEnableHapticFeedback(node_, nullptr);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, EXPECTED_TRUE);
 }
 } // namespace OHOS::Ace::NG

@@ -42,6 +42,11 @@ void CanvasPattern::AttachRenderContext()
 
 void CanvasPattern::DetachRenderContext()
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+    }
     FireOnContext2DDetach();
 }
 

@@ -12,91 +12,161 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/mock/core/pattern/mock_canvas_pattern.h"
+
 #include "accessor_test_base.h"
 #include "gmock/gmock.h"
 
-#include "frameworks/base/utils/utils.h"
-#include "node_api.h"
-
-#include "core/interfaces/native/implementation/matrix2d_peer_impl.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.h"
 #include "core/interfaces/native/implementation/canvas_pattern_peer.h"
-
-#include "core/components_ng/pattern/canvas/canvas_paint_method.h"
-#include "core/components_ng/pattern/canvas/canvas_pattern.h"
-#include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
-#include "core/interfaces/native/implementation/canvas_gradient_peer.h"
+#include "core/interfaces/native/implementation/canvas_rendering_context2d_peer_impl.h"
 #include "core/interfaces/native/implementation/image_bitmap_peer_impl.h"
+#include "core/interfaces/native/implementation/matrix2d_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
 const double DEFAULT_DOUBLE_VALUE = 10.0;
-const double SCALE_VALUE = 3.0;
+const std::string REPEAT_STRING = "repeat";
+const double FLT_PRECISION = 0.001;
 
-class MockCanvasPattern : public CanvasPattern {
-public:
-    MockCanvasPattern() = default;
-    ~MockCanvasPattern() override = default;
+std::vector<double> numberTestPlan = {
+    100, 0, -100, 12.34, -56.73
 };
 
+class MockCanvasRenderingContext2DModel : public NG::CanvasRenderingContext2DModelNG {
+public:
+    MockCanvasRenderingContext2DModel() = default;
+    ~MockCanvasRenderingContext2DModel() override = default;
+
+    MOCK_METHOD(void, SetTransform, (std::shared_ptr<Ace::Pattern>, const TransformParam&), (override));
+};
+} // namespace
 class CanvasPatternAccessorTest : public AccessorTestBase<GENERATED_ArkUICanvasPatternAccessor,
-    &GENERATED_ArkUIAccessors::getCanvasPatternAccessor, CanvasPatternPeer> {
-public:
-    void SetUp(void) override
-    {
-        AccessorTestBase::SetUp();
-        mockPattern_ = new MockCanvasPattern();
-        mockPatternKeeper_ = AceType::Claim(mockPattern_);
-        ASSERT_NE(mockPatternKeeper_, nullptr);
-        rendererKeeper_ = Referenced::MakeRefPtr<GeneratedModifier::CanvasRendererPeerImpl>();
-        ASSERT_NE(rendererKeeper_, nullptr);
-        rendererKeeper_->SetCanvasPattern(mockPatternKeeper_);
-        auto peerImpl = reinterpret_cast<CanvasPatternPeer*>(peer_);
-        ASSERT_NE(peerImpl, nullptr);
-        peerImpl->SetCanvasRenderer(rendererKeeper_);
-        ASSERT_NE(mockPattern_, nullptr);
-    }
-
-    void TearDown() override
-    {
-        AccessorTestBaseParent::TearDown();
-        mockPatternKeeper_ = nullptr;
-        rendererKeeper_ = nullptr;
-        mockPattern_ = nullptr;
-    }
-
-    MockCanvasPattern* mockPattern_ = nullptr;
-    RefPtr<MockCanvasPattern> mockPatternKeeper_ = nullptr;
-    RefPtr<GeneratedModifier::CanvasRendererPeerImpl> rendererKeeper_ = nullptr;
-};
+    &GENERATED_ArkUIAccessors::getCanvasPatternAccessor, CanvasPatternPeer> {};
 
 /**
- * @tc.name: asetTransformTest
+ * @tc.name: setTransformScaleTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPatternAccessorTest, DISABLED_setTransformTest, TestSize.Level1)
+HWTEST_F(CanvasPatternAccessorTest, setTransformScaleTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->setTransform, nullptr);
 
+    auto renderingModel_ = AceType::MakeRefPtr<NiceMock<MockCanvasRenderingContext2DModel>>();
+    auto peerImpl = Referenced::MakeRefPtr<GeneratedModifier::CanvasRenderingContext2DPeerImpl>();
+    peerImpl->SetRenderingContext2DModel(renderingModel_);
+    auto bitmap = PeerUtils::CreatePeer<ImageBitmapPeer>();
+    auto repeat = std::make_optional(REPEAT_STRING);
+    peerImpl->CreatePattern(bitmap, peer_, repeat);
     auto peer = PeerUtils::CreatePeer<Matrix2DPeer>();
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(peer);
-    peer->SetScaleX(SCALE_VALUE);
-    peer->SetScaleY(SCALE_VALUE);
-    peer->SetRotateX(DEFAULT_DOUBLE_VALUE);
-    peer->SetRotateY(DEFAULT_DOUBLE_VALUE);
-    peer->SetTranslateX(DEFAULT_DOUBLE_VALUE);
-    peer->SetTranslateY(DEFAULT_DOUBLE_VALUE);
-    accessor_->setTransform(peer_, &optMatrix);
-    EXPECT_TRUE(holder->isCalled);
-    EXPECT_TRUE(LessOrEqualCustomPrecision(holder->scaleX, SCALE_VALUE));
-    EXPECT_TRUE(LessOrEqualCustomPrecision(holder->scaleY, SCALE_VALUE));
+    for (const auto& actualX : numberTestPlan) {
+        for (const auto& actualY : numberTestPlan) {
+            peer->SetScaleX(actualX);
+            peer->SetScaleY(actualY);
+            peer->SetRotateX(DEFAULT_DOUBLE_VALUE);
+            peer->SetRotateY(DEFAULT_DOUBLE_VALUE);
+            peer->SetTranslateX(DEFAULT_DOUBLE_VALUE);
+            peer->SetTranslateY(DEFAULT_DOUBLE_VALUE);
 
-    holder->TearDown();
+            TransformParam target;
+            EXPECT_CALL(*renderingModel_, SetTransform(Matcher<std::shared_ptr<Ace::Pattern>>(testing::_), _))
+                .WillOnce(DoAll(SaveArg<1>(&target)));
+            accessor_->setTransform(peer_, &optMatrix);
+
+            EXPECT_NEAR(target.scaleX, actualX, FLT_PRECISION);
+            EXPECT_NEAR(target.scaleY, actualY, FLT_PRECISION);
+            EXPECT_NEAR(target.skewX, DEFAULT_DOUBLE_VALUE, FLT_PRECISION);
+            EXPECT_NEAR(target.skewY, DEFAULT_DOUBLE_VALUE, FLT_PRECISION);
+            EXPECT_NEAR(target.translateX, DEFAULT_DOUBLE_VALUE, FLT_PRECISION);
+            EXPECT_NEAR(target.translateY, DEFAULT_DOUBLE_VALUE, FLT_PRECISION);
+        }
+    }
+
+    EXPECT_CALL(*renderingModel_, SetTransform(Matcher<std::shared_ptr<Ace::Pattern>>(testing::_), _)).Times(0);
+    accessor_->setTransform(peer_, nullptr);
+}
+/**
+ * @tc.name: setTransformRotateTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasPatternAccessorTest, setTransformRotateTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setTransform, nullptr);
+
+    auto renderingModel_ = AceType::MakeRefPtr<NiceMock<MockCanvasRenderingContext2DModel>>();
+    auto peerImpl = Referenced::MakeRefPtr<GeneratedModifier::CanvasRenderingContext2DPeerImpl>();
+    peerImpl->SetRenderingContext2DModel(renderingModel_);
+    auto bitmap = PeerUtils::CreatePeer<ImageBitmapPeer>();
+    auto repeat = std::make_optional(REPEAT_STRING);
+    peerImpl->CreatePattern(bitmap, peer_, repeat);
+    auto peer = PeerUtils::CreatePeer<Matrix2DPeer>();
+    auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(peer);
+    for (const auto& actualX : numberTestPlan) {
+        for (const auto& actualY : numberTestPlan) {
+            peer->SetScaleX(DEFAULT_DOUBLE_VALUE);
+            peer->SetScaleY(DEFAULT_DOUBLE_VALUE);
+            peer->SetRotateX(actualX);
+            peer->SetRotateY(actualY);
+            peer->SetTranslateX(DEFAULT_DOUBLE_VALUE);
+            peer->SetTranslateY(DEFAULT_DOUBLE_VALUE);
+
+            TransformParam target;
+            EXPECT_CALL(*renderingModel_, SetTransform(Matcher<std::shared_ptr<Ace::Pattern>>(testing::_), _))
+                .WillOnce(DoAll(SaveArg<1>(&target)));
+            accessor_->setTransform(peer_, &optMatrix);
+
+            EXPECT_NEAR(target.scaleX, DEFAULT_DOUBLE_VALUE, FLT_PRECISION);
+            EXPECT_NEAR(target.scaleY, DEFAULT_DOUBLE_VALUE, FLT_PRECISION);
+            EXPECT_NEAR(target.skewX, actualX, FLT_PRECISION);
+            EXPECT_NEAR(target.skewY, actualY, FLT_PRECISION);
+            EXPECT_NEAR(target.translateX, DEFAULT_DOUBLE_VALUE, FLT_PRECISION);
+            EXPECT_NEAR(target.translateY, DEFAULT_DOUBLE_VALUE, FLT_PRECISION);
+        }
+    }
+}
+/**
+ * @tc.name: setTransformTranslateTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasPatternAccessorTest, setTransformTranslateTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setTransform, nullptr);
+
+    auto renderingModel_ = AceType::MakeRefPtr<NiceMock<MockCanvasRenderingContext2DModel>>();
+    auto peerImpl = Referenced::MakeRefPtr<GeneratedModifier::CanvasRenderingContext2DPeerImpl>();
+    peerImpl->SetRenderingContext2DModel(renderingModel_);
+    auto bitmap = PeerUtils::CreatePeer<ImageBitmapPeer>();
+    auto repeat = std::make_optional(REPEAT_STRING);
+    peerImpl->CreatePattern(bitmap, peer_, repeat);
+    auto peer = PeerUtils::CreatePeer<Matrix2DPeer>();
+    auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(peer);
+    for (const auto& actualX : numberTestPlan) {
+        for (const auto& actualY : numberTestPlan) {
+            peer->SetScaleX(DEFAULT_DOUBLE_VALUE);
+            peer->SetScaleY(DEFAULT_DOUBLE_VALUE);
+            peer->SetRotateX(DEFAULT_DOUBLE_VALUE);
+            peer->SetRotateY(DEFAULT_DOUBLE_VALUE);
+            peer->SetTranslateX(actualX);
+            peer->SetTranslateY(actualY);
+
+            TransformParam target;
+            EXPECT_CALL(*renderingModel_, SetTransform(Matcher<std::shared_ptr<Ace::Pattern>>(testing::_), _))
+                .WillOnce(DoAll(SaveArg<1>(&target)));
+            accessor_->setTransform(peer_, &optMatrix);
+
+            EXPECT_NEAR(target.scaleX, DEFAULT_DOUBLE_VALUE, FLT_PRECISION);
+            EXPECT_NEAR(target.scaleY, DEFAULT_DOUBLE_VALUE, FLT_PRECISION);
+            EXPECT_NEAR(target.skewX, DEFAULT_DOUBLE_VALUE, FLT_PRECISION);
+            EXPECT_NEAR(target.skewY, DEFAULT_DOUBLE_VALUE, FLT_PRECISION);
+            EXPECT_NEAR(target.translateX, actualX, FLT_PRECISION);
+            EXPECT_NEAR(target.translateY, actualY, FLT_PRECISION);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

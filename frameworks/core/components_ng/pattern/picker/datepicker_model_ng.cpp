@@ -371,12 +371,12 @@ void DatePickerModelNG::SetEnableHapticFeedback(bool isEnableHapticFeedback)
     SetEnableHapticFeedback(frameNode, isEnableHapticFeedback);
 }
 
-void DatePickerModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback)
+void DatePickerModelNG::SetEnableHapticFeedback(FrameNode* frameNode, const std::optional<bool>& isEnableHapticFeedback)
 {
     CHECK_NULL_VOID(frameNode);
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_VOID(datePickerPattern);
-    datePickerPattern->SetEnableHapticFeedback(isEnableHapticFeedback);
+    datePickerPattern->SetEnableHapticFeedback(isEnableHapticFeedback.value_or(true));
 }
 
 void DatePickerModelNG::SetOnChange(DateChangeEvent&& onChange)

@@ -40,7 +40,7 @@ void SetTransformImpl(Ark_CanvasPattern peer,
                       const Opt_Matrix2D* transform)
 {
     CHECK_NULL_VOID(peer);
-    auto matrix = Converter::OptConvert<Ark_Matrix2D>(*transform);
+    auto matrix = transform ? Converter::OptConvert<Ark_Matrix2D>(*transform) : std::nullopt;
     peer->SetTransform(matrix);
 }
 
