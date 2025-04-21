@@ -86,6 +86,19 @@ void AssignArkValue(Ark_Axis& dst, const Axis& src)
     }
 }
 
+void AssignArkValue(Ark_AxisAction& dst, const AxisAction& src)
+{
+    switch (src) {
+        case AxisAction::NONE: dst = ARK_AXIS_ACTION_NONE; break;
+        case AxisAction::BEGIN: dst = ARK_AXIS_ACTION_BEGIN; break;
+        case AxisAction::UPDATE: dst = ARK_AXIS_ACTION_UPDATE; break;
+        case AxisAction::END: dst = ARK_AXIS_ACTION_END; break;
+        case AxisAction::CANCEL: dst = ARK_AXIS_ACTION_CANCEL; break;
+        default: dst = INVALID_ENUM_VAL<Ark_AxisAction>;
+            LOGE("Unexpected enum value in Axis: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_BarMode& dst, const TabBarMode& src)
 {
     switch (src) {

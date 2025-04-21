@@ -125,6 +125,7 @@ public:
     ~AxisInfo() override = default;
     void SetAction(AxisAction action);
     AxisAction GetAction() const;
+    void SetScrollStep(int32_t scrollStep);
     int32_t GetScrollStep() const;
     void SetVerticalAxis(float axis);
     float GetVerticalAxis() const;

@@ -169,6 +169,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_AnimationMode& dst, const TabAnimateMode& src);
     void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src);
     void AssignArkValue(Ark_Axis& dst, const Axis& src);
+    void AssignArkValue(Ark_AxisAction& dst, const AxisAction& src);
     void AssignArkValue(Ark_AxisModel& dst, const AxisModel& src);
     void AssignArkValue(Ark_BarMode& dst, const TabBarMode& src);
     void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src);
