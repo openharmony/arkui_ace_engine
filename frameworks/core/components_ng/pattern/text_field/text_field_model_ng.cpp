@@ -754,6 +754,11 @@ void TextFieldModelNG::SetOverflowMode(OverflowMode value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, OverflowMode, value);
 }
 
+void TextFieldModelNG::SetMinLines(uint32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MinLines, value);
+}
+
 void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 {
     Color backgroundColor = color;
@@ -1164,6 +1169,11 @@ void TextFieldModelNG::SetNormalMaxViewLines(FrameNode* frameNode, uint32_t valu
 void TextFieldModelNG::SetOverflowMode(FrameNode* frameNode, OverflowMode value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, OverflowMode, value, frameNode);
+}
+
+void TextFieldModelNG::SetMinLines(FrameNode* frameNode, uint32_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MinLines, value, frameNode);
 }
 
 void TextFieldModelNG::SetType(FrameNode* frameNode, TextInputType value)

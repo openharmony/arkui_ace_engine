@@ -35,6 +35,7 @@ constexpr int DEFAULT_LENGTH = 4;
 constexpr InputStyle DEFAULT_TEXT_AREA_STYLE = InputStyle::DEFAULT;
 constexpr bool DEFAULT_SELECTION_MENU_HIDDEN = false;
 constexpr uint32_t DEFAULT_MAX_VIEW_LINE = 3;
+constexpr uint32_t DEFAULT_MIN_LINE = 1;
 constexpr CopyOptions DEFAULT_COPY_OPTIONS_VALUE = CopyOptions::Local;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
@@ -96,6 +97,13 @@ void SetTextAreaMaxLines(ArkUINodeHandle node, ArkUI_Uint32 maxLine, ArkUI_Uint3
     TextFieldModelNG::SetOverflowMode(frameNode, static_cast<OverflowMode>(overflowMode));
 }
 
+void SetTextAreaMinLines(ArkUINodeHandle node, ArkUI_Uint32 minLine)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetMinLines(frameNode, minLine);
+}
+
 void SetTextAreaMinFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -130,6 +138,13 @@ void ResetTextAreaMaxLines(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetMaxViewLines(frameNode, DEFAULT_MAX_VIEW_LINE);
     TextFieldModelNG::SetNormalMaxViewLines(frameNode, Infinity<uint32_t>());
+}
+
+void ResetTextAreaMinLines(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetMinLines(frameNode, DEFAULT_MIN_LINE);
 }
 
 void SetTextAreaCopyOption(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -1840,6 +1855,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .resetTextAreaSelectionMenuHidden = ResetTextAreaSelectionMenuHidden,
         .setTextAreaMaxLines = SetTextAreaMaxLines,
         .resetTextAreaMaxLines = ResetTextAreaMaxLines,
+        .setTextAreaMinLines = SetTextAreaMinLines,
+        .resetTextAreaMinLines = ResetTextAreaMinLines,
         .setTextAreaCopyOption = SetTextAreaCopyOption,
         .resetTextAreaCopyOption = ResetTextAreaCopyOption,
         .setTextAreaPlaceholderColor = SetTextAreaPlaceholderColor,
