@@ -257,7 +257,7 @@ void ResetBackToTop(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ScrollableModelNG::SetBackToTop(frameNode, false);
+    ScrollableModelNG::ResetBackToTop(frameNode);
 }
 
 int32_t GetBackToTop(ArkUINodeHandle node)

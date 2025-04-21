@@ -130,7 +130,7 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
     return this.checkboxNode.getFrameNode();
   }
   onChange(callback:OnCheckboxChangeCallback):this{
-    modifierWithKey(this._modifiersWithKeys, CheckBoxOnChangeModifier.identity,CheckBoxOnChangeModifier, callback);
+    modifierWithKey(this._modifiersWithKeys, CheckBoxOnChangeModifier.identity, CheckBoxOnChangeModifier, callback);
     return this;
   }
 }

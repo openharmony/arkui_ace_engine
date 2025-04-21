@@ -151,7 +151,10 @@ void OverlayManagerTestNg::SetUpTestCase()
         } else if (type == ToastTheme::TypeId()) {
             return AceType::MakeRefPtr<ToastTheme>();
         } else if (type == SheetTheme::TypeId()) {
-            return AceType::MakeRefPtr<SheetTheme>();
+            auto  sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+            sheetTheme->closeIconButtonWidth_ = SHEET_CLOSE_ICON_WIDTH;
+            sheetTheme->centerDefaultWidth_ = SHEET_LANDSCAPE_WIDTH;
+            return sheetTheme;
         } else {
             return nullptr;
         }
@@ -1604,6 +1607,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -1987,6 +1991,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea6, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -2170,6 +2175,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea7, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -2355,6 +2361,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea8, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -2516,6 +2523,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea9, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -2678,6 +2686,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea10, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -2857,6 +2866,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea11, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -3025,6 +3035,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidaiBar, TestSize.Level1)
     ASSERT_NE(sheetPattern, nullptr);
     auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
     ASSERT_NE(scrollNode, nullptr);
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
     auto scrollLayoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
@@ -4364,6 +4375,11 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage004, TestSize.Level1)
     /**
      * @tc.steps: step1. create sheet page.
      */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->centerDefaultWidth_ = SHEET_LANDSCAPE_WIDTH;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sheetTheme));
     auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto callback = [](const std::string&) {};

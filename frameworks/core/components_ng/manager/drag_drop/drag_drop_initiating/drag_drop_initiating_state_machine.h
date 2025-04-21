@@ -24,6 +24,9 @@
 #include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t DEFAULT_DRAG_DROP_INITIATING_STATE_SIZE = 5;
+}
 class DragDropInitiatingStateBase;
 class DragDropInitiatingStateMachine : public AceType {
     DECLARE_ACE_TYPE(DragDropInitiatingStateMachine, AceType);
@@ -32,6 +35,7 @@ public:
     DragDropInitiatingStateMachine(const RefPtr<FrameNode>& frameNode);
     ~DragDropInitiatingStateMachine() = default;
 
+    void InitializeState();
     void HandleLongPressOnAction(const GestureEvent& info);
     void HandleLongPressOnActionEnd(const GestureEvent& info);
     void HandleLongPressOnActionCancel(const GestureEvent& info);
@@ -52,7 +56,7 @@ public:
     void HandleDragEnd();
     void TransDragWindowToFwk();
 
-    void RequestStatusTransition(RefPtr<DragDropInitiatingStateBase> currentState, int32_t nextStatus);
+    void RequestStatusTransition(int32_t nextStatus);
     void TransMenuShow(bool isMenuShow);
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
 
@@ -67,12 +71,10 @@ public:
     }
 
 private:
-    void InitializeState();
-
-private:
     DragDropInitiatingParams dragDropInitiatingParams_;
     int32_t currentState_ = 0;
-    std::vector<RefPtr<DragDropInitiatingStateBase>> dragDropInitiatingState_;
+    std::vector<RefPtr<DragDropInitiatingStateBase>> dragDropInitiatingState_ =
+        std::vector<RefPtr<DragDropInitiatingStateBase>>(DEFAULT_DRAG_DROP_INITIATING_STATE_SIZE);
 };
 } // namespace OHOS::Ace::NG
 

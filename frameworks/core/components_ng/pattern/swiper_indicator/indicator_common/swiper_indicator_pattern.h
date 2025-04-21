@@ -71,11 +71,14 @@ public:
             indicatorLayoutAlgorithm->SetIsHoverOrPress(isHover_ || isPressed_);
             indicatorLayoutAlgorithm->SetHoverPoint(hoverPoint_);
 
-            auto indicatorDisplayCount = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+            auto indicatorDisplayCount = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ?
                 swiperPattern->DisplayIndicatorTotalCount() : swiperPattern->TotalCount();
             auto maxDisplayCount = swiperPattern->GetMaxDisplayCount();
             maxDisplayCount > 0 ? indicatorLayoutAlgorithm->SetIndicatorDisplayCount(maxDisplayCount)
                                 : indicatorLayoutAlgorithm->SetIndicatorDisplayCount(indicatorDisplayCount);
+            indicatorLayoutAlgorithm->SetMaxDisplayCount(maxDisplayCount);
+            indicatorLayoutAlgorithm->SetIsBindIndicator(swiperPattern->IsBindIndicator());
+            indicatorLayoutAlgorithm->SetIndicatorInteractive(swiperPattern->IsIndicatorInteractive());
             return indicatorLayoutAlgorithm;
         } else if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::ARC_DOT) {
             auto indicatorLayoutAlgorithm = MakeRefPtr<CircleDotIndicatorLayoutAlgorithm>();
@@ -119,9 +122,9 @@ public:
         paintMethod->SetMouseClickIndex(mouseClickIndex_);
         paintMethod->SetIsTouchBottom(touchBottomType_);
         paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
-        auto currentTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+        auto currentTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
             swiperLayoutProperty->GetSwipeByGroup().value_or(false) ?
-            swiperPattern->CalculateGroupTurnPageRate(0.0f) : swiperPattern->CalcCurrentTurnPageRate();
+            swiperPattern->CalculateGroupTurnPageRate(0.0f) : swiperPattern->CalcCurrentTurnPageRate(true);
         paintMethod->SetTouchBottomPageRate(currentTurnPageRate);
         paintMethod->SetFirstIndex(swiperPattern->GetLoopIndex(swiperPattern->GetFirstIndexInVisibleArea()));
         mouseClickIndex_ = std::nullopt;
@@ -137,6 +140,7 @@ public:
         paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));
         paintMethod->SetNextValidIndex(swiperPattern->GetNextValidIndex());
         paintMethod->SetItemCount(swiperPattern->RealTotalCount());
+        paintMethod->SetHorizontalAndRightToLeft(swiperLayoutProperty->GetNonAutoLayoutDirection());
         paintMethod->SetGestureState(swiperPattern->GetGestureState());
         paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
         paintMethod->SetTouchBottomTypeLoop(swiperPattern->GetTouchBottomTypeLoop());
@@ -215,6 +219,11 @@ public:
         jumpIndex_ = jumpIndex;
     }
 
+    void SetIsInFast(std::optional<bool> isInFast)
+    {
+        isInFast_ = isInFast;
+    }
+
     void SetStartIndex(std::optional<int32_t> startIndex)
     {
         startIndex_ = startIndex;
@@ -268,7 +277,7 @@ private:
     void HandleTouchDown();
     void HandleTouchUp();
     void HandleDragStart(const GestureEvent& info);
-    void HandleDragEnd(double dragVelocity);
+    virtual void HandleDragEnd(double dragVelocity);
     void GetMouseClickIndex();
     void UpdateTextContent(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
         const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode);
@@ -301,6 +310,14 @@ private:
     void UpdateFocusable() const;
     void CheckDragAndUpdate(
         const RefPtr<SwiperPattern>& swiperPattern, int32_t animationStartIndex, int32_t animationEndIndex);
+    void UpdateOverlongPaintMethodWhenFast(const RefPtr<DotIndicatorPaintMethod>& paintMethodTemp,
+        int32_t& animationStartIndex, int32_t& animationEndIndex);
+    void UpdateOverlongPaintMethodWhenNormal(const RefPtr<DotIndicatorPaintMethod>& paintMethodTemp,
+        int32_t& animationStartIndex, int32_t& animationEndIndex);
+    void GetStatusForOverlongPaintMethodWhenNormal(const RefPtr<SwiperPattern>& swiperPattern,
+        const int32_t& animationStartIndex, const int32_t& animationEndIndex,
+        bool& keepStatus, bool& isSwiperTouchDown) const;
+
 
     double GetIndicatorDragAngleThreshold(bool isMaxAngle);
     RefPtr<ClickEvent> clickEvent_;
@@ -326,8 +343,10 @@ private:
     SwiperIndicatorType swiperIndicatorType_ = SwiperIndicatorType::DOT;
 
     std::optional<int32_t> jumpIndex_;
+    std::optional<bool> isInFast_;
     std::optional<int32_t> startIndex_;
     std::optional<bool> changeIndexWithAnimation_;
+    std::optional<GestureState> keepGestureState_;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
 
@@ -399,6 +418,11 @@ protected:
     const TouchBottomType& GetTouchBottomType() const
     {
         return touchBottomType_;
+    }
+
+    void SetTouchBottomType(TouchBottomType touchBottomType)
+    {
+        touchBottomType_ = touchBottomType;
     }
 
     const RefPtr<DotIndicatorModifier>& GetDotIndicatorModifier() const

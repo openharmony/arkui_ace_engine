@@ -64,8 +64,8 @@ public:
     static void InitFontDefault(FrameNode* frameNode, const TextStyle& textStyle);
     static void SetDateTimeOptions(FrameNode* frameNode, const std::optional<ZeroPrefixType>& hourType);
     static void SetJSTextClockController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
-    static void SetOnDateChange(FrameNode* frameNode, std::function<void(const std::string)>&& onChange);
     static RefPtr<Referenced> GetJSTextClockController(FrameNode* frameNode);
+    static void SetOnDateChange(FrameNode* frameNode, std::function<void(const std::string)>&& onChange);
 };
 } // namespace OHOS::Ace::NG
 

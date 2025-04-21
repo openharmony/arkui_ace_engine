@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_IMAGE_SOURCE_PREVIEW_H
-#define FOUNDATION_ACE_INTERFACE_INNERKITS_IMAGE_SOURCE_PREVIEW_H
 
-#include <memory>
-#include "js_native_api.h"
-#include "js_native_api_types.h"
+#ifndef FOUNDATION_ACE_INTERFACE_INNERAPI_IMAGE_SOURCE_PREVIEW_H
+#define FOUNDATION_ACE_INTERFACE_INNERAPI_IMAGE_SOURCE_PREVIEW_H
+
+#include "napi/native_api.h"
+#include "napi/native_common.h"
+#include "napi/native_node_api.h"
+
 namespace OHOS {
 namespace Media {
 enum class PixelFormat : int32_t {
@@ -62,6 +64,7 @@ struct InitializationOptions {
 struct SourceOptions {};
 struct DecodeOptions {
     PixelFormat desiredPixelFormat;
+    Size desiredSize;
 };
 class PixelMap;
 
@@ -148,4 +151,5 @@ public:
 };
 } // namespace Media
 } // namespace OHOS
-#endif
+
+#endif // FOUNDATION_ACE_INTERFACE_INNERAPI_IMAGE_SOURCE_PREVIEW_H

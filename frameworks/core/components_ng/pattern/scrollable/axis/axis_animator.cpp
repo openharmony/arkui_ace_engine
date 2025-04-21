@@ -17,6 +17,7 @@
 
 #include "base/utils/time_util.h"
 #include "core/common/container.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -76,6 +77,18 @@ void AxisAnimator::CreateAnimator()
             CHECK_NULL_VOID(axisScrollMotion);
             axisScrollMotion->ResetCurrentTime();
         });
+    }
+}
+
+bool AxisAnimator::IsRunning()
+{
+    return axisScrollAnimator_ && axisScrollAnimator_->IsRunning();
+}
+
+void AxisAnimator::StopAxisAnimation()
+{
+    if (IsRunning()) {
+        axisScrollAnimator_->Stop();
     }
 }
 

@@ -17,8 +17,9 @@
 
 #include <cstdint>
 
-#include "loader/image_loader.h"
 #include "render_service_base/include/pipeline/rs_recording_canvas.h"
+
+#include "loader/image_loader.h"
 #include "utils/task_pool.h"
 
 namespace OHOS {
@@ -85,6 +86,24 @@ int32_t PixelmapDrawableDescriptor::GetOriginalWidth() const
 int32_t PixelmapDrawableDescriptor::GetOriginalHeight() const
 {
     return 0;
+}
+
+std::shared_ptr<Media::PixelMap> PixelmapDrawableDescriptor::GetPixelMap()
+{
+    if (pixelMap_) {
+        return pixelMap_->GetPixelMapSharedPtr();
+    }
+    return nullptr;
+}
+
+void PixelmapDrawableDescriptor::SetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    pixelMap_ = PixelMap::Create(pixelMap);
+}
+
+DrawableType PixelmapDrawableDescriptor::GetDrawableType() const
+{
+    return DrawableType::PIXELMAP;
 }
 
 void PixelmapDrawableDescriptor::RegisterRedrawCallback(RedrawCallback&& callback)

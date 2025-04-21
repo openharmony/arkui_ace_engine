@@ -58,6 +58,29 @@ std::list<std::shared_ptr<UIObserverListener>> UIObserver::tabContentStateListen
 std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedTabContentStateListeners_;
 
+std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::abilityContextBeforePanStartListeners_;
+std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::specifiedBeforePanStartListeners_;
+std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::beforePanStartInfos_;
+std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::abilityContextBeforePanEndListeners_;
+std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::specifiedBeforePanEndListeners_;
+std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::beforePanEndInfos_;
+
+std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::abilityContextAfterPanStartListeners_;
+std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::specifiedAfterPanStartListeners_;
+std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::afterPanStartInfos_;
+std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::abilityContextAfterPanEndListeners_;
+std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::specifiedAfterPanEndListeners_;
+std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::afterPanEndInfos_;
+std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::PanGestureInfos_;
+
 // UIObserver.on(type: "navDestinationUpdate", callback)
 // register a global listener without options
 void UIObserver::RegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener)
@@ -1071,6 +1094,515 @@ void UIObserver::HandleDidClick(NG::AbilityContextInfo& info, const GestureEvent
         listener->OnDidClick(gestureEventInfo, clickInfo, frameNode);
     }
     napi_close_handle_scope(env, scope);
+}
+
+void UIObserver::RegisterBeforePanStartCallback(
+    napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    NG::AbilityContextInfo info;
+    GetAbilityInfos(env, uiAbilityContext, info);
+    for (auto listenerPair : abilityContextBeforePanStartListeners_) {
+        auto ref = listenerPair.first;
+        auto localInfo = beforePanStartInfos_[ref];
+        if (info.IsEqual(localInfo)) {
+            auto& holder = listenerPair.second;
+            if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+                napi_close_handle_scope(env, scope);
+                return;
+            }
+            holder.emplace_back(listener);
+            napi_close_handle_scope(env, scope);
+            return;
+        }
+    }
+    napi_ref newRef = nullptr;
+    napi_create_reference(env, uiAbilityContext, 1, &newRef);
+    abilityContextBeforePanStartListeners_[newRef] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
+    beforePanStartInfos_[newRef] = info;
+    napi_close_handle_scope(env, scope);
+}
+
+void UIObserver::RegisterBeforePanStartCallback(
+    int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    auto iter = specifiedBeforePanStartListeners_.find(uiContextInstanceId);
+    if (iter == specifiedBeforePanStartListeners_.end()) {
+        specifiedBeforePanStartListeners_.emplace(
+            uiContextInstanceId, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+        return;
+    }
+    auto& holder = iter->second;
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
+void UIObserver::UnRegisterBeforePanStartCallback(napi_env env, napi_value uiAbilityContext, napi_value callback)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    NG::AbilityContextInfo info;
+    GetAbilityInfos(env, uiAbilityContext, info);
+    for (auto listenerPair : abilityContextBeforePanStartListeners_) {
+        auto ref = listenerPair.first;
+        auto localInfo = beforePanStartInfos_[ref];
+        if (!info.IsEqual(localInfo)) {
+            continue;
+        }
+        auto& holder = listenerPair.second;
+        if (callback == nullptr) {
+            holder.clear();
+        } else {
+            holder.erase(
+                std::remove_if(
+                    holder.begin(),
+                    holder.end(),
+                    [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                        return registeredListener->NapiEqual(callback);
+                    }),
+                holder.end());
+        }
+        if (holder.empty()) {
+            beforePanStartInfos_.erase(ref);
+            abilityContextBeforePanStartListeners_.erase(ref);
+            napi_delete_reference(env, ref);
+        }
+    }
+    napi_close_handle_scope(env, scope);
+}
+
+void UIObserver::UnRegisterBeforePanStartCallback(int32_t uiContextInstanceId, napi_value callback)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    auto iter = specifiedBeforePanStartListeners_.find(uiContextInstanceId);
+    if (iter == specifiedBeforePanStartListeners_.end()) {
+        return;
+    }
+    auto& holder = iter->second;
+    if (callback == nullptr) {
+        holder.clear();
+        return;
+    }
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }),
+        holder.end());
+}
+
+void UIObserver::RegisterBeforePanEndCallback(
+    napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    NG::AbilityContextInfo info;
+    GetAbilityInfos(env, uiAbilityContext, info);
+    for (auto listenerPair : abilityContextBeforePanEndListeners_) {
+        auto ref = listenerPair.first;
+        auto localInfo = beforePanEndInfos_[ref];
+        if (info.IsEqual(localInfo)) {
+            auto& holder = listenerPair.second;
+            if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+                napi_close_handle_scope(env, scope);
+                return;
+            }
+            holder.emplace_back(listener);
+            napi_close_handle_scope(env, scope);
+            return;
+        }
+    }
+    napi_ref newRef = nullptr;
+    napi_create_reference(env, uiAbilityContext, 1, &newRef);
+    abilityContextBeforePanEndListeners_[newRef] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
+    beforePanEndInfos_[newRef] = info;
+    napi_close_handle_scope(env, scope);
+}
+
+void UIObserver::RegisterBeforePanEndCallback(
+    int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    auto iter = specifiedBeforePanEndListeners_.find(uiContextInstanceId);
+    if (iter == specifiedBeforePanEndListeners_.end()) {
+        specifiedBeforePanEndListeners_.emplace(
+            uiContextInstanceId, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+        return;
+    }
+    auto& holder = iter->second;
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
+void UIObserver::UnRegisterBeforePanEndCallback(napi_env env, napi_value uiAbilityContext, napi_value callback)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    NG::AbilityContextInfo info;
+    GetAbilityInfos(env, uiAbilityContext, info);
+    for (auto listenerPair : abilityContextBeforePanEndListeners_) {
+        auto ref = listenerPair.first;
+        auto localInfo = beforePanEndInfos_[ref];
+        if (!info.IsEqual(localInfo)) {
+            continue;
+        }
+        auto& holder = listenerPair.second;
+        if (callback == nullptr) {
+            holder.clear();
+        } else {
+            holder.erase(
+                std::remove_if(
+                    holder.begin(),
+                    holder.end(),
+                    [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                        return registeredListener->NapiEqual(callback);
+                    }),
+                holder.end());
+        }
+        if (holder.empty()) {
+            beforePanEndInfos_.erase(ref);
+            abilityContextBeforePanEndListeners_.erase(ref);
+            napi_delete_reference(env, ref);
+        }
+    }
+    napi_close_handle_scope(env, scope);
+}
+
+void UIObserver::UnRegisterBeforePanEndCallback(int32_t uiContextInstanceId, napi_value callback)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    auto iter = specifiedBeforePanEndListeners_.find(uiContextInstanceId);
+    if (iter == specifiedBeforePanEndListeners_.end()) {
+        return;
+    }
+    auto& holder = iter->second;
+    if (callback == nullptr) {
+        holder.clear();
+        return;
+    }
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }),
+        holder.end());
+}
+
+void UIObserver::RegisterAfterPanStartCallback(
+    napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    NG::AbilityContextInfo info;
+    GetAbilityInfos(env, uiAbilityContext, info);
+    for (auto listenerPair : abilityContextAfterPanStartListeners_) {
+        auto ref = listenerPair.first;
+        auto localInfo = afterPanStartInfos_[ref];
+        if (info.IsEqual(localInfo)) {
+            auto& holder = listenerPair.second;
+            if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+                napi_close_handle_scope(env, scope);
+                return;
+            }
+            holder.emplace_back(listener);
+            napi_close_handle_scope(env, scope);
+            return;
+        }
+    }
+    napi_ref newRef = nullptr;
+    napi_create_reference(env, uiAbilityContext, 1, &newRef);
+    abilityContextAfterPanStartListeners_[newRef] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
+    afterPanStartInfos_[newRef] = info;
+    napi_close_handle_scope(env, scope);
+}
+
+void UIObserver::RegisterAfterPanStartCallback(
+    int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    auto iter = specifiedAfterPanStartListeners_.find(uiContextInstanceId);
+    if (iter == specifiedAfterPanStartListeners_.end()) {
+        specifiedAfterPanStartListeners_.emplace(
+            uiContextInstanceId, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+        return;
+    }
+    auto& holder = iter->second;
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
+void UIObserver::UnRegisterAfterPanStartCallback(napi_env env, napi_value uiAbilityContext, napi_value callback)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    NG::AbilityContextInfo info;
+    GetAbilityInfos(env, uiAbilityContext, info);
+    for (auto listenerPair : abilityContextAfterPanStartListeners_) {
+        auto ref = listenerPair.first;
+        auto localInfo = afterPanStartInfos_[ref];
+        if (!info.IsEqual(localInfo)) {
+            continue;
+        }
+        auto& holder = listenerPair.second;
+        if (callback == nullptr) {
+            holder.clear();
+        } else {
+            holder.erase(
+                std::remove_if(
+                    holder.begin(),
+                    holder.end(),
+                    [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                        return registeredListener->NapiEqual(callback);
+                    }),
+                holder.end());
+        }
+        if (holder.empty()) {
+            afterPanStartInfos_.erase(ref);
+            abilityContextAfterPanStartListeners_.erase(ref);
+            napi_delete_reference(env, ref);
+        }
+    }
+    napi_close_handle_scope(env, scope);
+}
+
+void UIObserver::UnRegisterAfterPanStartCallback(int32_t uiContextInstanceId, napi_value callback)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    auto iter = specifiedAfterPanStartListeners_.find(uiContextInstanceId);
+    if (iter == specifiedAfterPanStartListeners_.end()) {
+        return;
+    }
+    auto& holder = iter->second;
+    if (callback == nullptr) {
+        holder.clear();
+        return;
+    }
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }),
+        holder.end());
+}
+
+void UIObserver::RegisterAfterPanEndCallback(
+    napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    NG::AbilityContextInfo info;
+    GetAbilityInfos(env, uiAbilityContext, info);
+    for (auto listenerPair : abilityContextAfterPanEndListeners_) {
+        auto ref = listenerPair.first;
+        auto localInfo = afterPanEndInfos_[ref];
+        if (info.IsEqual(localInfo)) {
+            auto& holder = listenerPair.second;
+            if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+                napi_close_handle_scope(env, scope);
+                return;
+            }
+            holder.emplace_back(listener);
+            napi_close_handle_scope(env, scope);
+            return;
+        }
+    }
+    napi_ref newRef = nullptr;
+    napi_create_reference(env, uiAbilityContext, 1, &newRef);
+    abilityContextAfterPanEndListeners_[newRef] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
+    afterPanEndInfos_[newRef] = info;
+    napi_close_handle_scope(env, scope);
+}
+
+void UIObserver::RegisterAfterPanEndCallback(
+    int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    auto iter = specifiedAfterPanEndListeners_.find(uiContextInstanceId);
+    if (iter == specifiedAfterPanEndListeners_.end()) {
+        specifiedAfterPanEndListeners_.emplace(
+            uiContextInstanceId, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+        return;
+    }
+    auto& holder = iter->second;
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
+void UIObserver::UnRegisterAfterPanEndCallback(napi_env env, napi_value uiAbilityContext, napi_value callback)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+    NG::AbilityContextInfo info;
+    GetAbilityInfos(env, uiAbilityContext, info);
+    for (auto listenerPair : abilityContextAfterPanEndListeners_) {
+        auto ref = listenerPair.first;
+        auto localInfo = afterPanEndInfos_[ref];
+        if (!info.IsEqual(localInfo)) {
+            continue;
+        }
+        auto& holder = listenerPair.second;
+        if (callback == nullptr) {
+            holder.clear();
+        } else {
+            holder.erase(
+                std::remove_if(
+                    holder.begin(),
+                    holder.end(),
+                    [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                        return registeredListener->NapiEqual(callback);
+                    }),
+                holder.end());
+        }
+        if (holder.empty()) {
+            afterPanEndInfos_.erase(ref);
+            abilityContextAfterPanEndListeners_.erase(ref);
+            napi_delete_reference(env, ref);
+        }
+    }
+    napi_close_handle_scope(env, scope);
+}
+
+void UIObserver::UnRegisterAfterPanEndCallback(int32_t uiContextInstanceId, napi_value callback)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    auto iter = specifiedAfterPanEndListeners_.find(uiContextInstanceId);
+    if (iter == specifiedAfterPanEndListeners_.end()) {
+        return;
+    }
+    auto& holder = iter->second;
+    if (callback == nullptr) {
+        holder.clear();
+        return;
+    }
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }),
+        holder.end());
+}
+
+void UIObserver::HandlePanGestureAccept(NG::AbilityContextInfo& info, const GestureEvent& gestureEventInfo,
+    const RefPtr<NG::PanRecognizer>& current, const RefPtr<NG::FrameNode>& frameNode,
+    const NG::PanGestureInfo& panGestureInfo)
+{
+    auto env = GetCurrentNapiEnv();
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+
+    auto [listeners, specifiedListeners] = GetPanGestureListeners(panGestureInfo);
+    if (listeners.empty() && specifiedListeners.empty()) {
+        napi_close_handle_scope(env, scope);
+        return;
+    }
+    for (auto& listenerPair : listeners) {
+        auto ref = listenerPair.first;
+        auto localInfo = PanGestureInfos_[ref];
+        if (info.IsEqual(localInfo)) {
+            napi_value abilityContext = nullptr;
+            napi_get_reference_value(env, ref, &abilityContext);
+
+            auto& holder = listenerPair.second;
+            for (const auto& listener : holder) {
+                listener->OnPanGestureStateChange(gestureEventInfo, current, frameNode);
+            }
+            break;
+        }
+    }
+
+    auto currentId = Container::CurrentId();
+    auto iter = specifiedListeners.find(currentId);
+    if (iter == specifiedListeners.end()) {
+        napi_close_handle_scope(env, scope);
+        return;
+    }
+    auto& holder = iter->second;
+    for (const auto& listener : holder) {
+        listener->OnPanGestureStateChange(gestureEventInfo, current, frameNode);
+    }
+    napi_close_handle_scope(env, scope);
+}
+
+UIObserver::PanGestureListenersPair UIObserver::GetPanGestureListeners(const NG::PanGestureInfo& panGestureInfo)
+{
+    static std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>> emptyListeners;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> emptySpecifiedListeners;
+    if (panGestureInfo.callbackState == NG::CurrentCallbackState::START &&
+        panGestureInfo.gestureState == NG::PanGestureState::BEFORE) {
+        return { abilityContextBeforePanStartListeners_, specifiedBeforePanStartListeners_ };
+    } else if (panGestureInfo.callbackState == NG::CurrentCallbackState::END &&
+               panGestureInfo.gestureState == NG::PanGestureState::BEFORE) {
+        return { abilityContextBeforePanEndListeners_, specifiedBeforePanEndListeners_ };
+    } else if (panGestureInfo.callbackState == NG::CurrentCallbackState::START &&
+               panGestureInfo.gestureState == NG::PanGestureState::AFTER) {
+        return { abilityContextAfterPanStartListeners_, specifiedAfterPanStartListeners_ };
+    } else if (panGestureInfo.callbackState == NG::CurrentCallbackState::END &&
+               panGestureInfo.gestureState == NG::PanGestureState::AFTER) {
+        return { abilityContextAfterPanEndListeners_, specifiedAfterPanEndListeners_ };
+    } else {
+        return { emptyListeners, emptySpecifiedListeners };
+    }
 }
 
 // UIObserver.on(type: "tabContentState", callback)

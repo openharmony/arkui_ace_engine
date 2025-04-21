@@ -17,8 +17,12 @@
 #include "base/memory/ace_type.h"
 #define private public
 #define protected public
+#include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
 #include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "frameworks/core/common/window_animation_config.h"
@@ -34,6 +38,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
     const std::string PLATFORM_PATTERN_ETS_TAG = "PlatformPattern";
+    const std::string UI_EXTENSION_COMPONENT_ETS_TAG = "UIExtensionComponent";
     const int32_t CODE = 10001;
     const std::string NAME = "Test name";
     const std::string MSG = "Test msg";
@@ -218,5 +223,534 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager003, TestSize.Level1)
     ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 0);
     ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 0);
     #endif
+}
+
+/**
+ * @tc.name: UIExtensionManager004
+ * @tc.desc: Test UIExtensionManager UIExtBusinessDataSendValid/RegisterBusinessSendToHostReply/
+ *  RegisterBusinessSendToHost/SendBusinessToHost/SendBusinessToHostSyncReply
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager004, TestSize.Level1)
+{
+    #ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct UIExtensionManager.
+     */
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+    bool called0 = false;
+    bool called1 = false;
+    OHOS::AAFwk::Want want;
+    OHOS::AAFwk::Want reply;
+    BusinessDataSendType type = BusinessDataSendType::SYNC;
+    UIContentBusinessCode code = UIContentBusinessCode::UNDEFINED;
+
+    /**
+     * @tc.steps: step2. test UIExtBusinessDataSendValid/SendBusinessToHost/SendBusinessToHostSyncReply.
+     * @tc.expected: result is false.
+     */
+    EXPECT_FALSE(uiExtensionManager->UIExtBusinessDataSendValid());
+    EXPECT_FALSE(uiExtensionManager->SendBusinessToHost(code, want, type));
+    EXPECT_FALSE(uiExtensionManager->SendBusinessToHostSyncReply(code, want, reply));
+
+    /**
+     * @tc.steps: step3. RegisterBusinessSendToHostReply/RegisterBusinessSendToHost.
+     */
+    UIExtBusinessSendToHostReplyFunc func0 = [&](uint32_t code, const AAFwk::Want& req, AAFwk::Want& reply) {
+        called0 = true;
+        return true;
+    };
+    uiExtensionManager->RegisterBusinessSendToHostReply(func0);
+    EXPECT_FALSE(uiExtensionManager->UIExtBusinessDataSendValid());
+    UIExtBusinessSendToHostFunc func1 = [&](uint32_t code, const AAFwk::Want& req, BusinessDataSendType sendType) {
+        called1 = true;
+        return true;
+    };
+    uiExtensionManager->RegisterBusinessSendToHost(func1);
+    EXPECT_TRUE(uiExtensionManager->UIExtBusinessDataSendValid());
+
+    /**
+     * @tc.steps: step4. test UIExtBusinessDataSendValid/SendBusinessToHost/SendBusinessToHostSyncReply.
+     * @tc.expected: result is true.
+     */
+    EXPECT_TRUE(uiExtensionManager->SendBusinessToHostSyncReply(code, want, reply));
+    EXPECT_TRUE(called0);
+    EXPECT_TRUE(uiExtensionManager->SendBusinessToHost(code, want, type));
+    EXPECT_TRUE(called1);
+    #endif
+}
+
+/**
+ * @tc.name: UIExtensionManager005
+ * @tc.desc: Test UIExtensionManager RegisterBusinessDataConsumeReplyCallback/DispatchBusinessDataConsumeReply/
+ *  UnRegisterBusinessDataConsumeReplyCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager005, TestSize.Level1)
+{
+    #ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct UIExtensionManager.
+     */
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+    OHOS::AAFwk::Want want;
+    std::optional<OHOS::AAFwk::Want> replyData;
+    UIContentBusinessCode code = UIContentBusinessCode::UNDEFINED;
+    bool called = false;
+
+    /**
+     * @tc.steps: step2. test RegisterBusinessDataConsumeReplyCallback.
+     * @tc.expected: size of businessDataConsumeReplyCallbacks_ is 1.
+     */
+    UIExtBusinessDataConsumeReplyCallback callback = [&](const AAFwk::Want& data, std::optional<AAFwk::Want>& reply) {
+        called = true;
+        return 20;
+    };
+    uiExtensionManager->RegisterBusinessDataConsumeReplyCallback(code, callback);
+    ASSERT_EQ(uiExtensionManager->businessDataConsumeReplyCallbacks_.size(), 1);
+    EXPECT_FALSE(called);
+
+    /**
+     * @tc.steps: step3. test DispatchBusinessDataConsumeReply.
+     * @tc.expected: result is true.
+     */
+    uiExtensionManager->DispatchBusinessDataConsumeReply(code, want, replyData);
+    ASSERT_EQ(uiExtensionManager->businessDataConsumeReplyCallbacks_.size(), 1);
+    EXPECT_TRUE(called);
+
+    /**
+     * @tc.steps: step4. test UnRegisterBusinessDataConsumeReplyCallback.
+     * @tc.expected: result is true.
+     */
+    uiExtensionManager->UnRegisterBusinessDataConsumeReplyCallback(code);
+    ASSERT_EQ(uiExtensionManager->businessDataConsumeReplyCallbacks_.size(), 0);
+
+    /**
+     * @tc.steps: step5. test DispatchBusinessDataConsumeReply.
+     * @tc.expected: size of businessDataConsumeReplyCallbacks_ is 0.
+     */
+    called = false;
+    uiExtensionManager->DispatchBusinessDataConsumeReply(code, want, replyData);
+    ASSERT_EQ(uiExtensionManager->businessDataConsumeReplyCallbacks_.size(), 0);
+    EXPECT_FALSE(called);
+
+    /**
+     * @tc.steps: step6. test UnRegisterBusinessDataConsumeReplyCallback.
+     * @tc.expected: should not crash.
+     */
+    uiExtensionManager->UnRegisterBusinessDataConsumeReplyCallback(code);
+    ASSERT_EQ(uiExtensionManager->businessDataConsumeReplyCallbacks_.size(), 0);
+    #endif
+}
+
+/**
+ * @tc.name: UIExtensionManager006
+ * @tc.desc: Test UIExtensionManager RegisterBusinessDataConsumeCallback/DispatchBusinessDataConsume/
+ *  UnRegisterBusinessDataConsumeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager006, TestSize.Level1)
+{
+    #ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct UIExtensionManager.
+     */
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+    OHOS::AAFwk::Want want;
+    UIContentBusinessCode code = UIContentBusinessCode::UNDEFINED;
+    bool called = false;
+
+    /**
+     * @tc.steps: step2. test RegisterBusinessDataConsumeCallback.
+     * @tc.expected: size of businessDataConsumeCallbacks_ is 1.
+     */
+    UIExtBusinessDataConsumeCallback callback = [&](const AAFwk::Want& want) {
+        called = true;
+        return 20;
+    };
+    uiExtensionManager->RegisterBusinessDataConsumeCallback(code, callback);
+    ASSERT_EQ(uiExtensionManager->businessDataConsumeCallbacks_.size(), 1);
+    EXPECT_FALSE(called);
+
+    /**
+     * @tc.steps: step3. test DispatchBusinessDataConsume.
+     * @tc.expected: result is true.
+     */
+    uiExtensionManager->DispatchBusinessDataConsume(code, want);
+    ASSERT_EQ(uiExtensionManager->businessDataConsumeCallbacks_.size(), 1);
+    EXPECT_TRUE(called);
+
+    /**
+     * @tc.steps: step4. test UnRegisterBusinessDataConsumeCallback.
+     * @tc.expected: result is true.
+     */
+    uiExtensionManager->UnRegisterBusinessDataConsumeCallback(code);
+    ASSERT_EQ(uiExtensionManager->businessDataConsumeCallbacks_.size(), 0);
+
+    /**
+     * @tc.steps: step5. test DispatchBusinessDataConsume.
+     * @tc.expected: size of businessDataConsumeCallbacks_ is 0.
+     */
+    called = false;
+    uiExtensionManager->DispatchBusinessDataConsume(code, want);
+    ASSERT_EQ(uiExtensionManager->businessDataConsumeCallbacks_.size(), 0);
+    EXPECT_FALSE(called);
+
+    /**
+     * @tc.steps: step6. test UnRegisterBusinessDataConsumeCallback.
+     * @tc.expected: should not crash.
+     */
+    uiExtensionManager->UnRegisterBusinessDataConsumeCallback(code);
+    ASSERT_EQ(uiExtensionManager->businessDataConsumeCallbacks_.size(), 0);
+    #endif
+}
+
+/**
+ * @tc.name: UIExtensionManager007
+ * @tc.desc: Test UIExtensionManager RegisterBusinessDataSendCallback/UnRegisterBusinessDataSendCallback/
+ *  TriggerBusinessDataSend
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager007, TestSize.Level1)
+{
+    #ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct UIExtensionManager.
+     */
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+    OHOS::AAFwk::Want want;
+    std::optional<OHOS::AAFwk::Want> replyData;
+    BusinessDataSendType type = BusinessDataSendType::SYNC;
+    UIContentBusinessCode code = UIContentBusinessCode::UNDEFINED;
+    RSSubsystemId id = RSSubsystemId::WM_UIEXT;
+    bool called = false;
+
+    /**
+     * @tc.steps: step2. test RegisterBusinessDataSendCallback.
+     * @tc.expected: size of businessDataSendCallbacks_ is 1.
+     */
+    UIExtBusinessDataSendCallback callback = [&](WeakPtr<FrameNode> node) {
+        called = true;
+        return std::optional<OHOS::AAFwk::Want>(want);
+    };
+    uiExtensionManager->RegisterBusinessDataSendCallback(code, type, callback, id);
+    ASSERT_EQ(uiExtensionManager->businessDataSendCallbacks_.size(), 1);
+    EXPECT_FALSE(called);
+
+    /**
+     * @tc.steps: step3. test TriggerBusinessDataSend.
+     * @tc.expected: result is false.
+     */
+    uiExtensionManager->TriggerBusinessDataSend(code);
+    ASSERT_EQ(uiExtensionManager->businessDataSendCallbacks_.size(), 1);
+    EXPECT_FALSE(called);
+
+    /**
+     * @tc.steps: step4. test UnRegisterBusinessDataSendCallback.
+     * @tc.expected: size of businessDataSendCallbacks_ is 0.
+     */
+    uiExtensionManager->UnRegisterBusinessDataSendCallback(code);
+    ASSERT_EQ(uiExtensionManager->businessDataSendCallbacks_.size(), 0);
+    #endif
+}
+
+/**
+ * @tc.name: UIExtensionManager008
+ * @tc.desc: Test UIExtensionManager TransferOriginAvoidArea/NotifyOccupiedAreaChangeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager008, TestSize.Level1)
+{
+    #ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct UIExtensionManager.
+     */
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+
+    /**
+     * @tc.steps: step2. call AddAliveUIExtension.
+     * @tc.expected: size of aliveUIExtensions_ is 1.
+     */
+    WeakPtr<UIExtensionPattern> platformPattern;
+    int32_t nodeId = 1;
+    uiExtensionManager->AddAliveUIExtension(nodeId, platformPattern);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 1);
+
+    /**
+     * @tc.steps: step3. call AddAliveUIExtension.
+     * @tc.expected: size of aliveSecurityUIExtensions_ is 1.
+     */
+    WeakPtr<SecurityUIExtensionPattern> securityUIExtensionPattern;
+    uiExtensionManager->AddAliveUIExtension(nodeId, securityUIExtensionPattern);
+    ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 1);
+
+    /**
+     * @tc.steps: step4. test TransferOriginAvoidArea.
+     */
+    Rosen::AvoidArea avoidArea;
+    uint32_t type = 1;
+    uiExtensionManager->TransferOriginAvoidArea(avoidArea, type);
+
+    /**
+     * @tc.steps: step5. test NotifyOccupiedAreaChangeInfo.
+     */
+    auto info = sptr<Rosen::OccupiedAreaChangeInfo>(new Rosen::OccupiedAreaChangeInfo());
+    info->rect_.height_ = 100;
+    auto sessionWrapper = WeakPtr<SessionWrapper>();
+    uiExtensionManager->sessionWrapper_ = sessionWrapper;
+    bool result = uiExtensionManager->NotifyOccupiedAreaChangeInfo(info);
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step6. call RemoveDestroyedUIExtension.
+     * @tc.expected: size of aliveUIExtensions_ is 0.
+     * @tc.expected: size of aliveSecurityUIExtensions_ is 0.
+     */
+    uiExtensionManager->RemoveDestroyedUIExtension(nodeId);
+    ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 0);
+    ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 0);
+    #endif
+}
+
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager009, TestSize.Level1)
+{
+    #ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+
+    uiExtensionManager->RecycleExtensionId(0);
+    uiExtensionManager->RecycleExtensionId(11);
+    int32_t nodeId = 1;
+    ASSERT_TRUE(uiExtensionManager->IsShowPlaceholder(nodeId));
+    WeakPtr<UIExtensionPattern> platformPattern;
+    uiExtensionManager->AddAliveUIExtension(nodeId, platformPattern);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 1);
+
+    WeakPtr<UIExtensionPattern> platformPatternTwo;
+    int32_t nodeIdTwo = 2;
+    uiExtensionManager->AddAliveUIExtension(nodeIdTwo, platformPatternTwo);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 2);
+
+    auto config = std::make_shared<ViewportConfig>(1080, 1920, 2.0f);
+    uiExtensionManager->UpdateSessionViewportConfig(*config);
+
+    auto info = sptr<Rosen::OccupiedAreaChangeInfo>(new Rosen::OccupiedAreaChangeInfo());
+    info->rect_.height_ = 0;
+    auto sessionWrapper = WeakPtr<SessionWrapper>();
+    uiExtensionManager->sessionWrapper_ = sessionWrapper;
+    bool result = uiExtensionManager->NotifyOccupiedAreaChangeInfo(info);
+    EXPECT_FALSE(result);
+
+    uiExtensionManager->RemoveDestroyedUIExtension(nodeId);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 1);
+    uiExtensionManager->RemoveDestroyedUIExtension(nodeIdTwo);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 0);
+    ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 0);
+    #endif
+}
+
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager010, TestSize.Level1)
+{
+    #ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+
+    WeakPtr<UIExtensionPattern> platformPattern;
+    int32_t nodeId = 1;
+    uiExtensionManager->NotifyUECProviderIfNeedded();
+    uiExtensionManager->AddAliveUIExtension(nodeId, platformPattern);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 1);
+    WeakPtr<UIExtensionPattern> platformPatternTwo;
+    int32_t nodeIdTwo = 2;
+    uiExtensionManager->AddAliveUIExtension(nodeIdTwo, platformPattern);
+    uiExtensionManager->NotifyUECProviderIfNeedded();
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 2);
+
+    auto mode = Rosen::WindowMode::WINDOW_MODE_UNDEFINED;
+    uiExtensionManager->NotifyWindowMode(mode);
+    std::string pageMode = "normal";
+    uiExtensionManager->SendPageModeToProvider(nodeId, pageMode);
+    int32_t nodeIdZero = 0;
+    uiExtensionManager->SendPageModeToProvider(nodeIdZero, pageMode);
+    uiExtensionManager->SendPageModeRequestToHost(MockPipelineContext::pipeline_);
+    UIContentBusinessCode code = UIContentBusinessCode::UNDEFINED;
+    AAFwk::Want data;
+    data.SetParam("requestPageMode", std::string("yes"));
+    RSSubsystemId subSystemId = RSSubsystemId::WM_UIEXT;
+    uiExtensionManager->UpdateWMSUIExtProperty(code, data, subSystemId);
+    ASSERT_EQ(uiExtensionManager->businessDataSendCallbacks_.size(), 0);
+    uiExtensionManager->TriggerBusinessDataSend(code);
+    uiExtensionManager->UnRegisterBusinessDataSendCallback(code);
+    ASSERT_EQ(uiExtensionManager->businessDataSendCallbacks_.size(), 0);
+
+    WeakPtr<SecurityUIExtensionPattern> securityUIExtensionPattern;
+    uiExtensionManager->AddAliveUIExtension(nodeId, securityUIExtensionPattern);
+    ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 1);
+    uiExtensionManager->TransferAccessibilityRectInfo();
+    #endif
+}
+
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager011, TestSize.Level1)
+{
+    #ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+
+    MockContainer::container_->SetIsUIExtensionWindow(true);
+    uiExtensionManager->RegisterListenerIfNeeded();
+    ASSERT_EQ(uiExtensionManager->hasRegisterListener_, true);
+
+    uiExtensionManager->RegisterListenerIfNeeded();
+    uiExtensionManager->UnregisterListenerIfNeeded();
+    ASSERT_EQ(uiExtensionManager->hasRegisterListener_, false);
+
+    MockContainer::container_->SetIsUIExtensionWindow(false);
+    uiExtensionManager->hasRegisterListener_ = true;
+    uiExtensionManager->UnregisterListenerIfNeeded();
+    ASSERT_EQ(uiExtensionManager->hasRegisterListener_, true);
+    #endif
+}
+
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager012, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    int32_t nodeId = 1;
+    int32_t nodeIdTwo = 2;
+    WeakPtr<UIExtensionPattern> platformPattern = pattern;
+    uiExtensionManager->NotifyUECProviderIfNeedded();
+    uiExtensionManager->AddAliveUIExtension(nodeId, platformPattern);
+    WeakPtr<UIExtensionPattern> platformPatternTwo;
+    uiExtensionManager->AddAliveUIExtension(nodeIdTwo, platformPatternTwo);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 2);
+
+    WeakPtr<SecurityUIExtensionPattern> securityUIExtensionPattern;
+    uiExtensionManager->AddAliveUIExtension(nodeId, securityUIExtensionPattern);
+    ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 1);
+
+    EXPECT_FALSE(uiExtensionManager->IsShowPlaceholder(1));
+    Rosen::AvoidArea avoidArea;
+    uint32_t type = 1;
+    uiExtensionManager->TransferOriginAvoidArea(avoidArea, type);
+    std::shared_ptr<Rosen::RSTransaction> rsTransaction;
+    uiExtensionManager->NotifySizeChangeReason(WindowSizeChangeReason::RESIZE, rsTransaction);
+    auto info = sptr<Rosen::OccupiedAreaChangeInfo>(new Rosen::OccupiedAreaChangeInfo());
+    info->rect_.height_ = 0;
+    uiExtensionManager->NotifyOccupiedAreaChangeInfo(info);
+    EXPECT_NE(pattern->sessionWrapper_, nullptr);
+    pattern->sessionWrapper_ = nullptr;
+    auto result = uiExtensionManager->NotifyOccupiedAreaChangeInfo(info);
+    EXPECT_FALSE(result);
+#endif
+}
+
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager013, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    int32_t nodeId = 1;
+    int32_t nodeIdTwo = 2;
+    WeakPtr<UIExtensionPattern> platformPattern = pattern;
+    uiExtensionManager->NotifyUECProviderIfNeedded();
+    uiExtensionManager->AddAliveUIExtension(nodeId, platformPattern);
+    WeakPtr<UIExtensionPattern> platformPatternTwo;
+    uiExtensionManager->AddAliveUIExtension(nodeIdTwo, platformPatternTwo);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 2);
+
+    auto config = std::make_shared<ViewportConfig>(1080, 1920, 2.0f);
+    uiExtensionManager->UpdateSessionViewportConfig(*config);
+    config->transform_ = 1;
+    uiExtensionManager->UpdateSessionViewportConfig(*config);
+    pattern->state_ = UIExtensionPattern::AbilityState::FOREGROUND;
+    EXPECT_TRUE(pattern->IsForeground());
+    config->orientation_ = 1;
+    uiExtensionManager->UpdateSessionViewportConfig(*config);
+
+    auto isDensityFollowHost = pattern->GetSessionViewportConfig().isDensityFollowHost_;
+    SessionViewportConfig newConfig { isDensityFollowHost, 2.0f, 1, 1, 1 };
+    pattern->SetSessionViewportConfig(newConfig);
+    EXPECT_NE(pattern->sessionWrapper_, nullptr);
+    pattern->sessionWrapper_ = nullptr;
+    uiExtensionManager->UpdateSessionViewportConfig(*config);
+    EXPECT_EQ(pattern->GetSessionViewportConfig().displayId_, 0);
+    uiExtensionManager->UpdateSessionViewportConfig(*config);
+#endif
+}
+
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager014, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    int32_t nodeId = 1;
+    int32_t nodeIdTwo = 2;
+    WeakPtr<UIExtensionPattern> platformPattern = pattern;
+    uiExtensionManager->NotifyUECProviderIfNeedded();
+    uiExtensionManager->AddAliveUIExtension(nodeId, platformPattern);
+    WeakPtr<UIExtensionPattern> platformPatternTwo;
+    uiExtensionManager->AddAliveUIExtension(nodeIdTwo, platformPatternTwo);
+    uiExtensionManager->NotifyUECProviderIfNeedded();
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 2);
+
+    WeakPtr<SecurityUIExtensionPattern> securityUIExtensionPattern;
+    uiExtensionManager->AddAliveUIExtension(nodeId, securityUIExtensionPattern);
+    ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 1);
+
+    AAFwk::Want data;
+    data.SetParam("requestPageMode", std::string("yes"));
+    UIContentBusinessCode code = UIContentBusinessCode::UNDEFINED;
+    RSSubsystemId subSystemId = RSSubsystemId::WM_UIEXT;
+    uiExtensionManager->UpdateWMSUIExtProperty(code, data, subSystemId);
+    uiExtensionManager->TransferAccessibilityRectInfo();
+    auto mode = Rosen::WindowMode::WINDOW_MODE_UNDEFINED;
+    uiExtensionManager->NotifyWindowMode(mode);
+
+    OHOS::AAFwk::Want want;
+    std::optional<OHOS::AAFwk::Want> replyData;
+    BusinessDataSendType type = BusinessDataSendType::SYNC;
+    RSSubsystemId id = RSSubsystemId::WM_UIEXT;
+    bool called = false;
+
+    UIExtBusinessDataSendCallback callback = [&](WeakPtr<FrameNode> node) {
+        called = true;
+        return std::optional<OHOS::AAFwk::Want>(want);
+    };
+    uiExtensionManager->RegisterBusinessDataSendCallback(code, type, callback, id);
+    ASSERT_EQ(uiExtensionManager->businessDataSendCallbacks_.size(), 1);
+    auto result = uiExtensionManager->TriggerBusinessDataSend(code);
+    EXPECT_FALSE(result);
+#endif
 }
 }

@@ -26,6 +26,7 @@ constexpr float HALF = 2.0f;
 constexpr float TEXT_OUT_OF_RANGE_PERCENT = 0.3f; // 30%
 constexpr float TEXT_OUT_OF_WIDTH_PERCENT = 0.1f; // 10%
 constexpr float RANGE_RATIO = 1.414f;
+constexpr float ICON_RANGE_RATIO = 0.7f;
 }
 
 namespace OHOS::Ace::NG {
@@ -765,10 +766,8 @@ bool SecurityComponentLayoutAlgorithm::GetMaxLineLimitExceededFlag(std::optional
 }
 
 bool SecurityComponentLayoutAlgorithm::GetTextLimitExceededFlag(RefPtr<SecurityComponentLayoutProperty>& property,
-    LayoutWrapper* layoutWrapper, std::optional<SizeF>& currentTextSize)
+    RefPtr<FrameNode>& frameNode, std::optional<SizeF>& currentTextSize)
 {
-    CHECK_NULL_RETURN(layoutWrapper, false);
-    auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
     CHECK_NULL_RETURN(buttonNode, false);
@@ -800,16 +799,97 @@ bool SecurityComponentLayoutAlgorithm::GetTextLimitExceededFlag(RefPtr<SecurityC
     return res;
 }
 
+bool SecurityComponentLayoutAlgorithm::IsIconOutOfRange(SizeF& iconPoint, SizeF& point, double maxDistance)
+{
+    auto iconRadius = icon_.width_ * ICON_RANGE_RATIO / HALF;
+    auto distance = sqrt(pow(iconPoint.Width() - point.Width()) + pow(iconPoint.Height() - point.Height())) +
+        iconRadius;
+    if (GreatNotEqual(distance, maxDistance + 1.0)) {
+        return true;
+    }
+    return false;
+}
+
+bool SecurityComponentLayoutAlgorithm::IsIconOutOfBackground(const NG::BorderRadiusProperty& radius)
+{
+    auto iconPoint = SizeF(left_.width_ + icon_.width_ / HALF, top_.height_ + icon_.width_ / HALF);
+    auto iconRadius = icon_.width_ * ICON_RANGE_RATIO / HALF;
+    if (GreatNotEqual(iconPoint.Width() + iconRadius, componentWidth_) ||
+        GreatNotEqual(iconPoint.Height() + iconRadius, componentHeight_)) {
+        return true;
+    }
+    if (radius.radiusTopLeft.has_value() &&
+        LessNotEqual(iconPoint.Width(), radius.radiusTopLeft.value().ConvertToPx()) &&
+        LessNotEqual(iconPoint.Height(), radius.radiusTopLeft.value().ConvertToPx())) {
+        auto topLeft = SizeF(radius.radiusTopLeft.value().ConvertToPx(), radius.radiusTopLeft.value().ConvertToPx());
+        return IsIconOutOfRange(iconPoint, topLeft, radius.radiusTopLeft.value().ConvertToPx());
+    }
+    if (radius.radiusTopRight.has_value() &&
+        GreatNotEqual(iconPoint.Width(), componentWidth_ - radius.radiusTopRight.value().ConvertToPx()) &&
+        LessNotEqual(iconPoint.Height(), radius.radiusTopRight.value().ConvertToPx())) {
+        auto topRight = SizeF(componentWidth_ - radius.radiusTopRight.value().ConvertToPx(),
+            radius.radiusTopRight.value().ConvertToPx());
+        return IsIconOutOfRange(iconPoint, topRight, radius.radiusTopRight.value().ConvertToPx());
+    }
+    if (radius.radiusBottomLeft.has_value() &&
+        LessNotEqual(iconPoint.Width(), radius.radiusBottomLeft.value().ConvertToPx()) &&
+        GreatNotEqual(iconPoint.Height(), componentHeight_ - radius.radiusBottomLeft.value().ConvertToPx())) {
+        auto bottomLeft = SizeF(radius.radiusBottomLeft.value().ConvertToPx(),
+            componentHeight_ - radius.radiusBottomLeft.value().ConvertToPx());
+        return IsIconOutOfRange(iconPoint, bottomLeft, radius.radiusBottomLeft.value().ConvertToPx());
+    }
+    if (radius.radiusBottomRight.has_value() &&
+        GreatNotEqual(iconPoint.Width(), componentWidth_ - radius.radiusBottomRight.value().ConvertToPx()) &&
+        GreatNotEqual(iconPoint.Height(), componentHeight_ - radius.radiusBottomRight.value().ConvertToPx())) {
+        auto bottomRight = SizeF(componentWidth_ - radius.radiusBottomRight.value().ConvertToPx(),
+            componentHeight_ - radius.radiusBottomRight.value().ConvertToPx());
+        return IsIconOutOfRange(iconPoint, bottomRight, radius.radiusBottomRight.value().ConvertToPx());
+    }
+
+    return false;
+}
+
+bool SecurityComponentLayoutAlgorithm::GetIconExceededFlag(RefPtr<SecurityComponentLayoutProperty>& property,
+    RefPtr<FrameNode>& frameNode)
+{
+    if (LessOrEqual(icon_.width_, 0.0)) {
+        return false;
+    }
+
+    NG::BorderRadiusProperty radius = BorderRadiusProperty(Dimension(0.0));
+    if (property->GetBackgroundType() == static_cast<int32_t>(ButtonType::CIRCLE) ||
+        property->GetBackgroundType() == static_cast<int32_t>(ButtonType::CAPSULE)) {
+        radius = BorderRadiusProperty(Dimension(std::min(componentWidth_, componentHeight_) / HALF));
+    } else if (property->GetBackgroundType() == static_cast<int32_t>(ButtonType::NORMAL) ||
+        property->GetBackgroundType() == static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE)) {
+        auto buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
+        CHECK_NULL_RETURN(buttonNode, false);
+        auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_RETURN(bgProp, false);
+        const auto& borderRadius = bgProp->GetBorderRadius();
+        if (borderRadius.has_value()) {
+            radius = borderRadius.value();
+        }
+    } else {
+        return true;
+    }
+    return IsIconOutOfBackground(radius);
+}
+
 void SecurityComponentLayoutAlgorithm::UpdateTextFlags(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
     auto securityComponentLayoutProperty =
         AceType::DynamicCast<SecurityComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(securityComponentLayoutProperty);
     std::optional<SizeF> currentTextSize;
     securityComponentLayoutProperty->UpdateIsTextLimitExceeded(GetTextLimitExceededFlag(securityComponentLayoutProperty,
-        layoutWrapper, currentTextSize));
+        frameNode, currentTextSize));
     securityComponentLayoutProperty->UpdateIsMaxLineLimitExceeded(GetMaxLineLimitExceededFlag(currentTextSize));
+    securityComponentLayoutProperty->UpdateIsIconExceeded(GetIconExceededFlag(securityComponentLayoutProperty,
+        frameNode));
 }
 
 void SecurityComponentLayoutAlgorithm::InitLayoutWrapper(LayoutWrapper* layoutWrapper,

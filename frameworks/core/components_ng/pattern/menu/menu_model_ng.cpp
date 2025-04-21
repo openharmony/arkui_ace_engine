@@ -132,12 +132,14 @@ void MenuModelNG::SetExpandingMode(FrameNode* frameNode, const std::optional<Sub
     }
 }
 
-void MenuModelNG::SetItemDivider(const V2::ItemDivider& divider)
+void MenuModelNG::SetItemDivider(const V2::ItemDivider& divider, const DividerMode& mode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDivider, divider);
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, mode);
 }
 
-void MenuModelNG::SetItemDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider)
+void MenuModelNG::SetItemDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider,
+    const std::optional<DividerMode>& mode)
 {
     CHECK_NULL_VOID(frameNode);
     if (divider.has_value()) {
@@ -145,20 +147,32 @@ void MenuModelNG::SetItemDivider(FrameNode* frameNode, const std::optional<V2::I
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDivider, frameNode);
     }
+    if (mode.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, mode.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, frameNode);
+    }
 }
 
-void MenuModelNG::SetItemGroupDivider(const V2::ItemDivider& divider)
+void MenuModelNG::SetItemGroupDivider(const V2::ItemDivider& divider, const DividerMode& mode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDivider, divider);
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDividerMode, mode);
 }
 
-void MenuModelNG::SetItemGroupDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider)
+void MenuModelNG::SetItemGroupDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider,
+    const std::optional<DividerMode>& mode)
 {
     CHECK_NULL_VOID(frameNode);
     if (divider.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDivider, divider.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDivider, frameNode);
+    }
+    if (mode.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, mode.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, frameNode);
     }
 }
 

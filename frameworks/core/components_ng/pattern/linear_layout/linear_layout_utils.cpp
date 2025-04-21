@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-
+#include "core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {
 namespace {
 float GetChildMainAxisSize(LayoutWrapper* layoutWrapper, bool isVertical)

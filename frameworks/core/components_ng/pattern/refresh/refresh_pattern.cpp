@@ -189,7 +189,9 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distanceMap);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
         gestureHub->SetIsAllowMouse(false);
     }
@@ -499,9 +501,13 @@ float RefreshPattern::CalculatePullDownRatio()
     if (!ratio_.has_value()) {
         auto context = GetContext();
         CHECK_NULL_RETURN(context, 1.0f);
-        auto scrollableTheme = context->GetTheme<ScrollableTheme>();
-        CHECK_NULL_RETURN(scrollableTheme, 1.0f);
-        ratio_ = scrollableTheme->GetRatio();
+        auto refreshTheme = context->GetTheme<RefreshTheme>();
+        CHECK_NULL_RETURN(refreshTheme, 1.0f);
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+            ratio_ = refreshTheme->GetGreatApiRatio();
+        } else {
+            ratio_ = refreshTheme->GetRatio();
+        }
     }
     auto gamma = scrollOffset_ / contentHeight;
     if (GreatOrEqual(gamma, 1.0)) {
@@ -560,10 +566,26 @@ void RefreshPattern::FireOnOffsetChange(float value)
         value = 0.0f;
     }
     if (!NearEqual(lastScrollOffset_, value)) {
+        UpdateCustomBuilderVisibility();
         auto refreshEventHub = GetEventHub<RefreshEventHub>();
         CHECK_NULL_VOID(refreshEventHub);
         refreshEventHub->FireOnOffsetChange(Dimension(value).ConvertToVp());
         lastScrollOffset_ = value;
+    }
+}
+
+void RefreshPattern::UpdateCustomBuilderVisibility()
+{
+    if (!isCustomBuilderExist_) {
+        return;
+    }
+    CHECK_NULL_VOID(customBuilder_);
+    auto customBuilderLayoutProperty = customBuilder_->GetLayoutProperty();
+    CHECK_NULL_VOID(customBuilderLayoutProperty);
+    if (LessOrEqual(scrollOffset_, 0.0f)) {
+        customBuilderLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    } else {
+        customBuilderLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     }
 }
 
@@ -606,6 +628,7 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
     }
     customBuilder_ = AceType::DynamicCast<FrameNode>(builder);
     isCustomBuilderExist_ = true;
+    UpdateCustomBuilderVisibility();
 }
 
 void RefreshPattern::SetAccessibilityAction()

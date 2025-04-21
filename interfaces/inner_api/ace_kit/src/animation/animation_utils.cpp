@@ -65,8 +65,27 @@ std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const 
     return animation;
 }
 
+void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
+    CHECK_NULL_VOID(animation);
+    OHOS::Ace::AnimationUtils::PauseAnimation(animation->animation_);
+}
+
+void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
+    CHECK_NULL_VOID(animation);
+    OHOS::Ace::AnimationUtils::ResumeAnimation(animation->animation_);
+}
+
+void AnimationUtils::ReverseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
+    CHECK_NULL_VOID(animation);
+    OHOS::Ace::AnimationUtils::ReverseAnimation(animation->animation_);
+}
+
 void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
 {
+    CHECK_NULL_VOID(animation);
     OHOS::Ace::AnimationUtils::StopAnimation(animation->animation_);
     animation->animation_.reset();
 }

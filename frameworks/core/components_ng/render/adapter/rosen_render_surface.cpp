@@ -338,7 +338,6 @@ void RosenRenderSurface::DrawBuffer(int32_t width, int32_t height)
         rosenRenderContext->SyncGeometryProperties(keyBoardAvoidRect);
         isNeedSyncGeometryProperties_ = false;
     }
-    rosenRenderContext->StartRecording();
     auto rsNode = rosenRenderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode);
     rsNode->DrawOnNode(
@@ -363,7 +362,6 @@ void RosenRenderSurface::DrawBuffer(int32_t width, int32_t height)
             recordingCanvas->DrawSurfaceBuffer(info);
 #endif
         });
-    rosenRenderContext->StopRecordingIfNeeded();
 #endif
 }
 
@@ -467,7 +465,7 @@ void RosenRenderSurface::PostRenderOnlyTaskToUI()
     if (uiTaskExecutor.IsRunOnCurrentThread()) {
         task();
     } else {
-        uiTaskExecutor.PostTask(task, "ArkUIMarkNeedRenderOnly", PriorityType::VIP);
+        uiTaskExecutor.PostTask(task, "ArkUIMarkNeedRenderOnly");
     }
 }
 
@@ -584,8 +582,7 @@ void RosenRenderSurface::DrawBufferForXComponent(
     ACE_SCOPED_TRACE("DrawXComponentBuffer[id:%u][sendTimes:%d][uid:%" PRIu64 "]", surfaceNode->bufferId_,
         surfaceNode->sendTimes_, uid);
     auto& recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
-    auto transform = (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) ||
-        surfaceNode->buffer_ == nullptr)
+    auto transform = surfaceNode->buffer_ == nullptr
         ? GraphicTransformType::GRAPHIC_ROTATE_NONE
         : surfaceNode->buffer_->GetSurfaceBufferTransform();
     Rosen::DrawingSurfaceBufferInfo info { surfaceNode->buffer_, offsetX, offsetY, static_cast<int32_t>(width),

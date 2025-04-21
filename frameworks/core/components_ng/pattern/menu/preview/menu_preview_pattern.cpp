@@ -64,30 +64,29 @@ void ShowScaleAnimation(const RefPtr<RenderContext>& context, const RefPtr<MenuT
         []() { DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED); });
     context->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
 
-    CHECK_NULL_VOID(menuPattern);
-    auto menuWrapper = menuPattern->GetMenuWrapper();
-    CHECK_NULL_VOID(menuWrapper);
-    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto callback = [menuWrapperPattern, scaleFrom = previewBeforeAnimationScale, scaleTo = previewAfterAnimationScale](
-                        float rate) {
-        CHECK_NULL_VOID(menuWrapperPattern && !menuWrapperPattern->IsHide());
-        menuWrapperPattern->SetAnimationPreviewScale(rate * (scaleTo - scaleFrom) + scaleFrom);
-    };
-    auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(-1.0, std::move(callback));
-    CHECK_NULL_VOID(animateProperty);
-    context->AttachNodeAnimatableProperty(animateProperty);
-    animateProperty->Set(0.0);
-
     AnimationUtils::Animate(
         scaleOption,
-        [context, previewAfterAnimationScale, animateProperty]() {
+        [context, previewAfterAnimationScale]() {
             CHECK_NULL_VOID(context);
             context->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
-            CHECK_NULL_VOID(animateProperty);
-            animateProperty->Set(1.0);
         },
         scaleOption.GetOnFinishEvent());
+}
+
+void UpdateWhenNonNegative(BorderRadiusPropertyT<Dimension>& result, const BorderRadiusPropertyT<Dimension>& value)
+{
+    if (value.radiusTopLeft.has_value() && value.radiusTopLeft->IsNonNegative()) {
+        result.radiusTopLeft = value.radiusTopLeft;
+    }
+    if (value.radiusTopRight.has_value() && value.radiusTopRight->IsNonNegative()) {
+        result.radiusTopRight = value.radiusTopRight;
+    }
+    if (value.radiusBottomLeft.has_value() && value.radiusBottomLeft->IsNonNegative()) {
+        result.radiusBottomLeft = value.radiusBottomLeft;
+    }
+    if (value.radiusBottomRight.has_value() && value.radiusBottomRight->IsNonNegative()) {
+        result.radiusBottomRight = value.radiusBottomRight;
+    }
 }
 
 void ShowBorderRadiusAndShadowAnimation(const RefPtr<RenderContext>& context, const RefPtr<FrameNode>& frameNode,
@@ -109,7 +108,7 @@ void ShowBorderRadiusAndShadowAnimation(const RefPtr<RenderContext>& context, co
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(previewBorderRadius));
     if (menuParam.previewBorderRadius.has_value()) {
-        borderRadius.UpdateWithCheck(menuParam.previewBorderRadius.value());
+        UpdateWhenNonNegative(borderRadius, menuParam.previewBorderRadius.value());
     }
     auto delay = isShowHoverImage ? menuTheme->GetHoverImageDelayDuration() : 0;
     AnimationOption option;
@@ -254,7 +253,9 @@ void MenuPreviewPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
     auto panEvent = MakeRefPtr<PanEvent>(std::move(actionStartTask), nullptr, std::move(actionEndTask), nullptr);
-    gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, distanceMap);
 }
 
 void MenuPreviewPattern::HandleDragEnd(float offsetX, float offsetY, float velocity)

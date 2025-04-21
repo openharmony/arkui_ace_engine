@@ -156,14 +156,14 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(confirmNode);
     auto confirmNodeLayout = confirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(confirmNodeLayout);
-    confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
-    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonConfirmLayoutProperty);
-    buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
     auto pipeline = confirmNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
+    confirmNodeLayout->UpdateContent(dialogTheme->GetConfirmText());
+    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonConfirmLayoutProperty);
+    buttonConfirmLayoutProperty->UpdateLabel(dialogTheme->GetConfirmText());
     UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
     confirmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
@@ -173,11 +173,11 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(cancelNode);
     auto cancelNodeLayout = cancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(cancelNodeLayout);
-    cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    cancelNodeLayout->UpdateContent(dialogTheme->GetCancelText());
     UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonCancelLayoutProperty);
-    buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    buttonCancelLayoutProperty->UpdateLabel(dialogTheme->GetCancelText());
     cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -266,7 +266,7 @@ void TextPickerPattern::InitFocusEvent()
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -443,7 +443,9 @@ void TextPickerPattern::CalcLeftTotalColumnWidth(
 
 void TextPickerPattern::ColumnPatternInitHapticController()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     if (!isHapticChanged_) {
@@ -817,10 +819,22 @@ void TextPickerPattern::InitDisabled()
     enabled_ = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto opacity = curOpacity_;
     if (!enabled_) {
-        renderContext->UpdateOpacity(curOpacity_ * DISABLE_ALPHA);
-    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        renderContext->UpdateOpacity(curOpacity_);
+        opacity *= DISABLE_ALPHA;
+        renderContext->UpdateOpacity(opacity);
+    } else if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        renderContext->UpdateOpacity(opacity);
+    }
+
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        for (const auto& child : host->GetChildren()) {
+            auto stackNode = DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(stackNode);
+            auto renderContext = stackNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateOpacity(opacity);
+        }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -1691,7 +1705,10 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size, RefPtr<FrameNode>&
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto version10OrLarger = context->GetMinPlatformVersion() > 9;
-    pickerContentSize.Constrain(minSize, stackLayoutConstraint->maxSize, version10OrLarger);
+    if (!(minSize.Width() == 0 && minSize.Height() == 0 &&
+        stackLayoutConstraint->maxSize.Width() == 0 && stackLayoutConstraint->maxSize.Height() == 0)) {
+            pickerContentSize.Constrain(minSize, stackLayoutConstraint->maxSize, version10OrLarger);
+    }
 
     if (isNeedAdaptForAging && GetIsShowInDialog()) {
         size.SetWidth(pickerContentSize.Width());
@@ -1798,5 +1815,49 @@ void TextPickerPattern::SetDisableTextStyleAnimation(bool isDisableTextStyleAnim
         CHECK_NULL_VOID(pickerColumnPattern);
         pickerColumnPattern->SetDisableTextStyleAnimation(isDisableTextStyleAnimation);
     }
+}
+
+void TextPickerPattern::UpdateUserSetSelectColor()
+{
+    CHECK_EQUAL_VOID(IsCircle(), false);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
+        CHECK_NULL_VOID(childNode);
+        auto pickerColumnPattern = childNode->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_VOID(pickerColumnPattern);
+        pickerColumnPattern->UpdateUserSetSelectColor();
+    }
+}
+
+std::string TextPickerPattern::GetTextPickerRange() const
+{
+    std::string result;
+    if (isSingleRange_) {
+        for (auto range : range_) {
+            result.append(range.text_ + ";");
+        }
+        if (result.length() > 0) {
+            result = result.substr(0, result.length() > 0 ? result.length() - 1 : 0);
+        }
+    } else {
+        for (auto option : cascadeOriginptions_) {
+            for (auto range : option.rangeResult) {
+                result.append(range + ",");
+            }
+            result = result.substr(0, result.length() > 0 ? result.length() - 1 : 0);
+            result.append(";");
+        }
+        if (result.length() > 0) {
+            result = result.substr(0, result.length() - 1);
+        }
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG

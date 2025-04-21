@@ -82,7 +82,7 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 void ParseTitlebarOptions(const CJNavigationTitleOptions& info, NG::NavigationTitlebarOptions& options)
 {
     options.bgOptions.color.reset();
-    options.bgOptions.blurStyle.reset();
+    options.bgOptions.blurStyleOption.reset();
     options.brOptions.barStyle.reset();
     options.brOptions.paddingStart.reset();
     options.brOptions.paddingEnd.reset();
@@ -94,7 +94,9 @@ void ParseTitlebarOptions(const CJNavigationTitleOptions& info, NG::NavigationTi
     if (info.isBackgroundBlurStyleValid) {
         if (info.backgroundBlurStyle >= static_cast<int32_t>(BlurStyle::NO_MATERIAL) &&
             info.backgroundBlurStyle <= static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)) {
-            options.bgOptions.blurStyle = static_cast<BlurStyle>(info.backgroundBlurStyle);
+            BlurStyleOption blurStyleOption;
+            blurStyleOption.blurStyle = static_cast<BlurStyle>(info.backgroundBlurStyle);
+            options.bgOptions.blurStyleOption = blurStyleOption;
         }
     }
     if (info.isBarStyleValid) {
@@ -122,12 +124,14 @@ void ParseToolbarOptions(const CJNavigationToolbarOptions& info, NG::NavigationT
         CHECK_NULL_VOID(theme);
         auto blurStyle = static_cast<BlurStyle>(theme->GetToolbarBackgroundBlurStyle());
         if (blurStyle != BlurStyle::NO_MATERIAL) {
-            options.bgOptions.blurStyle = blurStyle;
+            BlurStyleOption blurStyleOption;
+            blurStyleOption.blurStyle = blurStyle;
+            options.bgOptions.blurStyleOption = blurStyleOption;
             options.bgOptions.color = Color::TRANSPARENT;
         }
     }
     options.bgOptions.color.reset();
-    options.bgOptions.blurStyle.reset();
+    options.bgOptions.blurStyleOption.reset();
     options.brOptions.barStyle.reset();
 
     if (info.isBackgroundColorValid) {
@@ -136,7 +140,9 @@ void ParseToolbarOptions(const CJNavigationToolbarOptions& info, NG::NavigationT
     if (info.isBackgroundBlurStyleValid) {
         if (info.backgroundBlurStyle >= static_cast<int32_t>(BlurStyle::NO_MATERIAL) &&
             info.backgroundBlurStyle <= static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)) {
-            options.bgOptions.blurStyle = static_cast<BlurStyle>(info.backgroundBlurStyle);
+            BlurStyleOption blurStyleOption;
+            blurStyleOption.blurStyle = static_cast<BlurStyle>(info.backgroundBlurStyle);
+            options.bgOptions.blurStyleOption = blurStyleOption;
         }
     }
     if (info.isBarStyleValid) {

@@ -241,22 +241,6 @@ void PatternLockModelNG::SetEnableWaveEffect(FrameNode* frameNode, const std::op
     }
 }
 
-void PatternLockModelNG::SetDotConnect(FrameNode* frameNode, std::function<void(int32_t)>&& onDotConnect)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<PatternLockEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDotConnect(std::move(onDotConnect));
-}
-
-void PatternLockModelNG::SetPatternComplete(FrameNode* frameNode, NG::PatternLockCompleteEvent&& onComplete)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<PatternLockEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnComplete(std::move(onComplete));
-}
-
 void PatternLockModelNG::SetEnableForeground(FrameNode* frameNode, bool enableForeground)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, EnableForeground, enableForeground, frameNode);
@@ -267,4 +251,18 @@ void PatternLockModelNG::SetSkipUnselectedPoint(FrameNode* frameNode, bool isSki
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, SkipUnselectedPoint, isSkipUnselectedPoint, frameNode);
 }
 
+void PatternLockModelNG::SetPatternComplete(FrameNode* frameNode, NG::PatternLockCompleteEvent&& onComplete)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<PatternLockEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnComplete(std::move(onComplete));
+}
+void PatternLockModelNG::SetDotConnect(FrameNode* frameNode, std::function<void(int32_t)>&& onDotConnect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<PatternLockEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDotConnect(std::move(onDotConnect));
+}
 } // namespace OHOS::Ace::NG

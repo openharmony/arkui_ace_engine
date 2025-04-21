@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
+#include "native_type.h"
 
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -304,6 +306,68 @@ ArkUI_Int32 GetTextPickerSingleRange(ArkUINodeHandle node)
     return TextPickerModelNG::GetTextPickerRangeType(frameNode);
 }
 
+void SetTextCascadePickChildrenRangeContent(
+    std::vector<NG::TextCascadePickerOptions>& multiResult, ArkUITextCascadePickerRangeContentArray arry)
+{
+    for (int index = 0; index < arry->rangeContentArraySize; index++) {
+        NG::TextCascadePickerOptions option;
+        if (arry[index].text == nullptr) {
+            continue;
+        }
+        option.rangeResult.push_back(arry[index].text);
+
+        if (arry[index].children != nullptr) {
+            SetTextCascadePickChildrenRangeContent(option.children, arry[index].children);
+        }
+        multiResult.push_back(option);
+    }
+}
+
+void SetTextCascadePickRangeContent(
+    ArkUINodeHandle node, ArkUITextCascadePickerRangeContentArray arry, ArkUI_Int32 rangeType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<NG::TextCascadePickerOptions> multiResult;
+
+    SetTextCascadePickChildrenRangeContent(multiResult, arry);
+    TextPickerModelNG::SetHasSelectAttr(frameNode, true);
+    TextPickerModelNG::SetIsCascade(frameNode, true);
+    TextPickerModelNG::SetColumns(frameNode, multiResult);
+
+    std::vector<std::string> values;
+    for (int index = 0; index < arry->rangeContentArraySize; index++) {
+        if (arry[index].text == nullptr) {
+            continue;
+        }
+        values.emplace_back(arry[index].text);
+    }
+    TextPickerModelNG::SetValues(frameNode, values);
+    TextPickerModelNG::SetTextPickerRangeType(frameNode, rangeType);
+}
+
+void SetTextPickerIconRangeStr(
+    ArkUINodeHandle node, ArkUITextPickerRangeContentArray arry, ArkUI_Bool isSingleRange, ArkUI_Int32 rangeType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetTextPickerSingeRange(static_cast<bool>(isSingleRange));
+    std::vector<NG::RangeContent> result;
+    for (int i = 0; i < arry->rangeContentArraySize; i++) {
+        NG::RangeContent content;
+        if (arry->rangeContent[i].text != nullptr) {
+            content.text_ = arry->rangeContent[i].text;
+        }
+        if (arry->rangeContent[i].icon != nullptr) {
+            content.icon_ = arry->rangeContent[i].icon;
+        }
+        result.emplace_back(content);
+    }
+    TextPickerModelNG::SetColumnKind(frameNode, MIXTURE);
+    TextPickerModelNG::SetRange(frameNode, result);
+    TextPickerModelNG::SetTextPickerRangeType(frameNode, rangeType);
+}
+
 void SetTextPickerRangeStr(
     ArkUINodeHandle node, ArkUI_CharPtr rangeStr, ArkUI_Bool isSingleRange, ArkUI_Int32 rangeType)
 {
@@ -320,6 +384,7 @@ void SetTextPickerRangeStr(
             content.text_ = text;
             result.emplace_back(content);
         }
+        TextPickerModelNG::SetColumnKind(frameNode, TEXT);
         TextPickerModelNG::SetRange(frameNode, result);
     } else {
         std::vector<NG::TextCascadePickerOptions> multiResult;
@@ -719,6 +784,8 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         .resetTextPickerOnChange = ResetTextPickerOnChange,
         .setTextPickerOnScrollStop = SetTextPickerOnScrollStopExt,
         .resetTextPickerOnScrollStop = ResetTextPickerOnScrollStop,
+        .setTextPickerIconRangeStr = SetTextPickerIconRangeStr,
+        .setTextCascadePickRangeContent = SetTextCascadePickRangeContent,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

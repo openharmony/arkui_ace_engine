@@ -342,11 +342,11 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
             ohmUrl = jsOhmUrl->ToString(vm)->ToString(vm);
             ohmUrlValid = true;
         } else {
-            LOGE("add named router record with invalid ohmUrl!");
+            TAG_LOGD(AceLogTag::ACE_ROUTER, "add named router record with invalid ohmUrl!");
         }
     }
     if (!ohmUrlValid) {
-        LOGI("build ohmUrl for forward compatibility");
+        TAG_LOGD(AceLogTag::ACE_ROUTER, "build ohmUrl for forward compatibility");
         ohmUrl = BuildOhmUrl(bundleName, moduleName, pagePath);
     }
 
@@ -597,13 +597,13 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
 
     RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
     // preload js views
+    shared_ptr<JsValue> global = arkRuntime->GetGlobal();
     JsRegisterWorkerViews(JSNApi::GetGlobalObject(vm), runtime);
 
     // preload js enums
     PreloadJsEnums(arkRuntime);
 
     // preload requireNative
-    shared_ptr<JsValue> global = arkRuntime->GetGlobal();
     JSMock::PreloadWorkerRequireNative(arkRuntime, global);
 }
 
@@ -1358,7 +1358,7 @@ void JsiDeclarativeEngine::RegisterAssetFunc()
 {
     auto weakDelegate = WeakPtr(engineInstance_->GetDelegate());
     auto&& assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize,
-        std::vector<uint8_t>& content, std::string& ami, bool& useSecureMem, bool isRestricted) {
+        std::vector<uint8_t>& content, std::string& ami, bool& useSecureMem, void** mapper, bool isRestricted) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             return;
@@ -2402,7 +2402,7 @@ void JsiDeclarativeEngine::TimerCallback(const std::string& callbackId, const st
     if (isInterval) {
         delegate->WaitTimer(callbackId, delay, isInterval, false);
     } else {
-        JsiTimerModule::GetInstance()->RemoveCallBack(std::stoi(callbackId));
+        JsiTimerModule::GetInstance()->RemoveCallBack(StringUtils::StringToInt(callbackId));
         delegate->ClearTimer(callbackId);
     }
 }
@@ -2411,7 +2411,7 @@ void JsiDeclarativeEngine::TimerCallJs(const std::string& callbackId) const
 {
     shared_ptr<JsValue> func;
     std::vector<shared_ptr<JsValue>> params;
-    if (!JsiTimerModule::GetInstance()->GetCallBack(std::stoi(callbackId), func, params)) {
+    if (!JsiTimerModule::GetInstance()->GetCallBack(StringUtils::StringToInt(callbackId), func, params)) {
         return;
     }
     auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();

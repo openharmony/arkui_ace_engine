@@ -100,6 +100,14 @@ void TextTimerModelNG::SetOnTimer(std::function<void(int64_t, int64_t)> && onCha
     eventHub->SetOnTimer(std::move(onChange));
 }
 
+void TextTimerModelNG::SetOnTimer(FrameNode* frameNode, std::function<void(int64_t, int64_t)>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextTimerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnTimer(std::move(onChange));
+}
+
 RefPtr<FrameNode> TextTimerModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto textTimerNode =
@@ -207,14 +215,6 @@ void TextTimerModelNG::SetTextShadow(FrameNode* frameNode, const std::optional<s
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, frameNode);
     }
-}
-
-void TextTimerModelNG::SetOnTimer(FrameNode* frameNode, std::function<void(int64_t, int64_t)> && onChange)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextTimerEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnTimer(std::move(onChange));
 }
 
 void TextTimerModelNG::SetBuilderFunc(FrameNode* frameNode, TextTimerMakeCallback&& makeFunc)

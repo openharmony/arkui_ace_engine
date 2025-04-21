@@ -322,6 +322,7 @@ public:
     void RebuildAllPages();
 
 private:
+    void ParsePartialPropertiesFromAttr(DialogProperties& dialogProperties, const PromptDialogAttr& dialogAttr);
     DialogProperties ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr);
 
     PipelineContextHolder pipelineContextHolder_;

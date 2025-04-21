@@ -58,6 +58,7 @@ const Rosen::RSAnimationTimingCurve NODE_ANIMATION_TIMING_CURVE =
 constexpr uint32_t COLOR_TRANSLUCENT_WHITE = 0x66ffffff;
 constexpr uint32_t COLOR_TRANSLUCENT_BLACK = 0x66000000;
 constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
+constexpr uint32_t SNAPSHOT_LOAD_COMPLETE = 1;
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {
@@ -146,6 +147,20 @@ private:
     WeakPtr<WindowPattern> windowPattern_;
 };
 
+void WindowPattern::CheckAndMeasureStartingWindow(const SizeF& currentParentSize)
+{
+    CHECK_NULL_VOID(startingWindow_);
+    const auto& sessionInfo = session_->GetSessionInfo();
+#ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
+    CHECK_EQUAL_VOID(sessionInfo.isAtomicService_, true);
+#endif
+    bool parentSizeChanged = !NearEqual(currentParentSize.Width(), lastParentSize_.Width(), 1.0f) ||
+                             !NearEqual(currentParentSize.Height(), lastParentSize_.Height(), 1.0f);
+    lastParentSize_ = currentParentSize;
+    CHECK_EQUAL_VOID(parentSizeChanged, false);
+    startingWindowLayoutHelper_->MeasureChildNode(currentParentSize);
+}
+
 void WindowPattern::RegisterLifecycleListener()
 {
     CHECK_NULL_VOID(session_);
@@ -223,12 +238,14 @@ void WindowPattern::CreateBlankWindow(RefPtr<FrameNode>& window)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
     ACE_SCOPED_TRACE("CreateBlankWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
     window = FrameNode::CreateFrameNode(
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     auto layoutProperty = window->GetLayoutProperty<LayoutProperty>();
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+    auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     window->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
 }
 
@@ -237,18 +254,19 @@ void WindowPattern::CreateAppWindow()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("CreateAppWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
-    appWindow_ = FrameNode::CreateFrameNode(
+    RefPtr<FrameNode> tempWindow = FrameNode::CreateFrameNode(
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    appWindow_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    appWindow_->SetHitTestMode(HitTestMode::HTMNONE);
+    tempWindow->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    tempWindow->SetHitTestMode(HitTestMode::HTMNONE);
     CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode) {
-        auto context = AceType::DynamicCast<NG::RosenRenderContext>(appWindow_->GetRenderContext());
+        auto context = AceType::DynamicCast<NG::RosenRenderContext>(tempWindow->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
         surfaceNode->SetVisible(true);
     }
+    (!appWindow_) ? appWindow_ = std::move(tempWindow) : (newAppWindow_ = std::move(tempWindow));
 }
 
 #ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
@@ -362,6 +380,8 @@ void WindowPattern::CreateASStartingWindow()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
     ACE_SCOPED_TRACE("CreateASStartingWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
     
     CHECK_NULL_VOID(session_);
@@ -390,7 +410,7 @@ void WindowPattern::CreateASStartingWindow()
     asStartingLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     startingWindow_->SetHitTestMode(HitTestMode::HTMNONE);
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(
-        SystemProperties::GetColorMode() == ColorMode::DARK ? Color::BLACK : Color::WHITE);
+        context->GetColorMode() == ColorMode::DARK ? Color::BLACK : Color::WHITE);
 
     auto staticNode = BuildStaticImageNode(circleIcon);
     CHECK_NULL_VOID(staticNode);
@@ -450,23 +470,29 @@ void WindowPattern::CreateStartingWindow()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
     ACE_SCOPED_TRACE("CreateStartingWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
+    Rosen::StartingWindowInfo startingWindowInfo;
+    startingWindowInfo.backgroundColorEarlyVersion_ =
+        context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+    Rosen::SceneSessionManager::GetInstance().GetStartupPage(sessionInfo, startingWindowInfo);
+    if (startingWindowInfo.configFileEnabled_) {
+        CHECK_NULL_VOID(startingWindowLayoutHelper_);
+        startingWindow_ = startingWindowLayoutHelper_->CreateStartingWindowNode(
+            startingWindowInfo, sessionInfo.bundleName_, sessionInfo.moduleName_);
+        return;
+    }
     startingWindow_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     startingWindow_->SetHitTestMode(HitTestMode::HTMNONE);
 
-    std::string startupPagePath;
-    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-    Rosen::SceneSessionManager::GetInstance().GetStartupPage(sessionInfo, startupPagePath, backgroundColor);
-    startingWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-    imageLayoutProperty->UpdateImageSourceInfo(
-        ImageSourceInfo(startupPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_));
-    auto sourceInfo = ImageSourceInfo(startupPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_);
-    auto color = Color(backgroundColor);
+    auto sourceInfo = ImageSourceInfo(
+        startingWindowInfo.iconPathEarlyVersion_, sessionInfo.bundleName_, sessionInfo.moduleName_);
+    auto color = Color(startingWindowInfo.backgroundColorEarlyVersion_);
     UpdateStartingWindowProperty(sessionInfo, color, sourceInfo);
-
     imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(color);
     imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
@@ -478,6 +504,7 @@ void WindowPattern::UpdateSnapshotWindowProperty()
     CHECK_NULL_VOID(snapshotWindow_ && session_);
     auto isExitSplitOnBackground = session_->IsExitSplitOnBackground();
     if (isExitSplitOnBackground) {
+        Rosen::SceneSessionManager::GetInstance().SetDelayRemoveSnapshot(false);
         auto imagePattern = snapshotWindow_->GetPattern<ImagePattern>();
         auto renderContext = snapshotWindow_->GetRenderContext();
         auto imageRenderProperty = snapshotWindow_->GetPaintProperty<ImageRenderProperty>();
@@ -487,8 +514,10 @@ void WindowPattern::UpdateSnapshotWindowProperty()
         borderRadius.SetRadius(SNAPSHOT_RADIUS);
         borderRadius.multiValued = false;
         renderContext->UpdateBorderRadius(borderRadius);
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
         auto backgroundColor =
-            SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_TRANSLUCENT_BLACK : COLOR_TRANSLUCENT_WHITE;
+            context->GetColorMode() == ColorMode::DARK ? COLOR_TRANSLUCENT_BLACK : COLOR_TRANSLUCENT_WHITE;
         renderContext->UpdateBackgroundColor(Color(backgroundColor));
         imagePattern->SetNeedBorderRadius(true);
         imageRenderProperty->UpdateNeedBorderRadius(true);
@@ -535,7 +564,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto imagePaintProperty = snapshotWindow_->GetPaintProperty<ImageRenderProperty>();
-    imagePaintProperty->UpdateImageInterpolation(ImageInterpolation::MEDIUM);
+    imagePaintProperty->UpdateImageInterpolation(ImageInterpolation::LOW);
     snapshotWindow_->SetHitTestMode(HitTestMode::HTMNONE);
 
     if (snapshot) {
@@ -543,6 +572,10 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
         snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
     } else {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+        snapshotWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
         ImageSourceInfo sourceInfo;
         auto scenePersistence = session_->GetScenePersistence();
         CHECK_NULL_VOID(scenePersistence);
@@ -566,9 +599,28 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         eventHub->SetOnError([weakThis = WeakClaim(this)](const LoadImageFailEvent& info) {
             auto self = weakThis.Upgrade();
             CHECK_NULL_VOID(self && self->snapshotWindow_);
+            auto context = self->GetContext();
+            CHECK_NULL_VOID(context);
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "load snapshot failed: %{public}s", info.GetErrorMessage().c_str());
-            auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+            auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
             self->snapshotWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+            self->snapshotWindow_->MarkNeedRenderOnly();
+        });
+        eventHub->SetOnComplete([weakThis = WeakClaim(this)](const LoadImageSuccessEvent& info) {
+            if (info.GetLoadingStatus() != SNAPSHOT_LOAD_COMPLETE) {
+                return;
+            }
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self);
+            if (self->session_->IsExitSplitOnBackground()) {
+                return;
+            }
+            CHECK_NULL_VOID(self->snapshotWindow_);
+            TAG_LOGD(AceLogTag::ACE_WINDOW_SCENE, "load snapshot complete id: %{public}d",
+                self->session_->GetPersistentId());
+            auto context = self->snapshotWindow_->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            context->UpdateBackgroundColor(Color::TRANSPARENT);
             self->snapshotWindow_->MarkNeedRenderOnly();
         });
     }
@@ -632,6 +684,12 @@ void WindowPattern::DisPatchFocusActiveEvent(bool isFocusActive)
 sptr<Rosen::Session> WindowPattern::GetSession()
 {
     return session_;
+}
+
+bool WindowPattern::BorderUnoccupied() const
+{
+    CHECK_NULL_RETURN(session_, false);
+    return session_->GetBorderUnoccupied();
 }
 
 void WindowPattern::TransferFocusState(bool focusState)

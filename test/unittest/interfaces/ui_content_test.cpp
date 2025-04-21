@@ -41,25 +41,6 @@ HWTEST_F(UiContentTest, DumpTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateUIContent001
- * @tc.desc: test CreateUIContent001
- * @tc.type: FUNC
- */
-HWTEST_F(UiContentTest, CreateUIContent001, TestSize.Level1)
-{
-    OHOS::AbilityRuntime::Context* context = nullptr;
-    NativeEngine* runtime = nullptr;
-    bool isFormRender = false;
-    std::unique_ptr<UIContent> ret = UIContent::Create(context, runtime, isFormRender);
-    EXPECT_TRUE((ret.get() != nullptr));
-    std::unique_ptr<UIContent> ret2 = UIContent::Create(context, runtime);
-    EXPECT_TRUE((ret2.get() != nullptr));
-    OHOS::AppExecFwk::Ability* ability = nullptr;
-    std::unique_ptr<UIContent> ret3 = UIContent::Create(ability);
-    EXPECT_TRUE(ret3.get() != nullptr);
-}
-
-/**
  * @tc.name: GetUIContent001
  * @tc.desc: test GetCurrentUIStackInfo/GetUIContent
  * @tc.type: FUNC

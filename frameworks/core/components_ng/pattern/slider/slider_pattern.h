@@ -19,7 +19,6 @@
 #include <cstddef>
 #include <optional>
 
-#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
@@ -63,18 +62,7 @@ public:
         auto overlayGlobalOffset = CalculateGlobalSafeOffset();
         std::pair<OffsetF, float> BubbleVertex = GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_);
         SliderPaintMethod::TipParameters tipParameters { bubbleFlag_, BubbleVertex.first, overlayGlobalOffset };
-        if (!sliderTipModifier_ && bubbleFlag_) {
-            sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>([weak = WeakClaim(this)]() {
-                auto pattern = weak.Upgrade();
-                if (!pattern) {
-                    return std::pair<OffsetF, float>();
-                }
-                auto blockCenter = pattern->GetBlockCenter();
-                auto trackThickness = pattern->sliderContentModifier_->GetTrackThickness();
-                auto blockSize = pattern->sliderContentModifier_->GetBlockSize();
-                return pattern->GetBubbleVertexPosition(blockCenter, trackThickness, blockSize);
-            });
-        }
+
         auto textDirection = TextDirection::AUTO;
         auto layoutProperty = GetLayoutProperty<SliderLayoutProperty>();
         if (layoutProperty) {
@@ -172,7 +160,8 @@ public:
     }
     void PlayHapticFeedback(bool isShowSteps, float step, float oldValue);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
-    
+    void DumpInfo() override;
+
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
     {
@@ -184,6 +173,40 @@ public:
         return crownSensitivity_;
     }
 #endif
+    void SetBubbleFlag(bool flag)
+    {
+        bubbleFlag_ = flag;
+    }
+    
+    RefPtr<SliderContentModifier> GetSliderContentModifier() const
+    {
+        return sliderContentModifier_;
+    }
+
+    bool IsSliderVisible();
+    SliderContentModifier::Parameters UpdateContentParameters();
+    std::pair<OffsetF, float> GetBubbleVertexPosition(
+        const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
+    const SizeF& GetBlockSize() const
+    {
+        return blockSize_;
+    }
+
+    float GetTrackThickness() const
+    {
+        return trackThickness_;
+    }
+
+    const bool& GetBubbleFlag() const
+    {
+        return bubbleFlag_;
+    }
+    void CreateTipToMountRoot();
+    void RemoveTipFromRoot();
+    void RefreshTipNode();
+    void OnFinishEventTipSize();
+    void CalculateOffset();
+    void MountToNavigation(RefPtr<FrameNode>& tipNode);
 
 private:
     void OnAttachToFrameNode() override;
@@ -291,7 +314,6 @@ private:
     void HandleCrownAction(double mainDelta);
     void StartVibrateFeedback();
 #endif
-    bool IsSliderVisible();
     void RegisterVisibleAreaChange();
     void OnWindowHide() override;
     void OnWindowShow() override;
@@ -300,7 +322,7 @@ private:
 
     void OpenTranslateAnimation(SliderStatus status);
     void CloseTranslateAnimation();
-    SliderContentModifier::Parameters UpdateContentParameters();
+
     void GetSelectPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void GetBackgroundPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void GetCirclePosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
@@ -308,8 +330,7 @@ private:
     void LayoutImageNode();
     void UpdateImagePositionX(float centerX);
     void UpdateImagePositionY(float centerY);
-    std::pair<OffsetF, float> GetBubbleVertexPosition(
-        const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
+
     void SetAccessibilityAction();
     void UpdateTipState();
     void OnIsFocusActiveUpdate(bool isFocusActive);
@@ -324,12 +345,9 @@ private:
     void AccessibilityVirtualNodeRenderTask();
     bool CheckCreateAccessibilityVirtualNode();
     void InitAccessibilityHoverEvent();
-    void HandleAccessibilityHoverEvent(bool state, const AccessibilityHoverInfo& info);
     bool InitAccessibilityVirtualNode();
     void ModifyAccessibilityVirtualNode();
     void AddStepPointsAccessibilityVirtualNode();
-    void HandleTextOnAccessibilityFocusCallback();
-    void HandleSliderOnAccessibilityFocusCallback();
     void UpdateStepAccessibilityVirtualNode();
     void UpdateParentNodeSize();
     std::string GetPointAccessibilityTxt(uint32_t pointIndex, float stepRatio, float min, float max);
@@ -359,6 +377,7 @@ private:
     {
         return skipGestureEvents_;
     }
+    void DumpSubInfo(RefPtr<SliderPaintProperty> paintProperty);
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
@@ -430,8 +449,12 @@ private:
     uint64_t lastSendPostValueTime_ = 0;
     float accessibilityValue_ = 0.0f;
     bool isEnableHaptic_ = true;
-    std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
+    bool hapticApiEnabled = false;
     double slipfactor_ = 0;
+    RefPtr<FrameNode> sliderTipNode_ = nullptr;
+    RefPtr<UINode> navigationNode_ = nullptr;
+    double xLastSlider_ = 0.0f;
+    double yLastSlider_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -25,7 +25,6 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "core/common/ai/image_analyzer_manager.h"
-#include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/touch_event.h"
@@ -110,6 +109,11 @@ public:
         dynamicRangeMode_ = rangeMode;
     }
 
+    void SetWaterMask(bool enabled)
+    {
+        isPlayWithMask_ = enabled;
+    }
+
     int64_t GetCurrentDateModified()
     {
         return currentDateModified_;
@@ -150,6 +154,7 @@ private:
     void UpdateVideoNode();
     void UpdatePlayMode();
     void HandleImageAnalyzerMode();
+    void UpdateImageHdrMode(const RefPtr<FrameNode>& imageNode);
     void MovingPhotoFormatConvert(MovingPhotoFormat format);
     void DynamicRangeModeConvert(DynamicRangeMode rangeMode);
     SizeF CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize);
@@ -231,7 +236,7 @@ private:
     RefPtr<MovingPhotoController> controller_;
     RefPtr<PixelMap> pixelMap_;
 
-    int32_t fd_ = -1;
+    SharedFd fd_;
     int64_t autoPlayPeriodStartTime_ = -1;
     int64_t autoPlayPeriodEndTime_ = -1;
     std::string uri_ = "";
@@ -245,7 +250,10 @@ private:
     bool isSetAutoPlayPeriod_ = false;
     bool isVisible_ = false;
     bool isChangePlayMode_ = false;
+    bool isRepeatChangePlayMode_ = false;
+    bool isAutoChangePlayMode_ = false;
     bool needUpdateImageNode_ = false;
+    bool isPlayWithMask_ = false;
     PlaybackStatus currentPlayStatus_ = PlaybackStatus::NONE;
     PlaybackMode autoAndRepeatLevel_ = PlaybackMode::NONE;
     PlaybackMode historyAutoAndRepeatLevel_ = PlaybackMode::NONE;

@@ -34,6 +34,7 @@
 #include "core/interfaces/native/node/grid_row_modifier.h"
 #include "core/interfaces/native/node/hyperlink_modifier.h"
 #include "core/interfaces/native/node/image_animator_modifier.h"
+#include "core/interfaces/native/node/lazy_grid_layout_modifier.h"
 #include "core/interfaces/native/node/line_modifier.h"
 #include "core/interfaces/native/node/linear_indicator_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
@@ -130,7 +131,7 @@
 
 using namespace OHOS::Ace::NG;
 
-#define MODIFIER_COUNTS 14
+#define MODIFIER_COUNTS 11
 #define BLANK_LINES 6
 
 extern "C" {
@@ -199,16 +200,8 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getPolylineModifier = NodeModifier::GetPolylineModifier,
         .getSpanModifier = NodeModifier::GetSpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetImageAnimatorModifier,
-    #ifndef ARKUI_WEARABLE
         .getSideBarContainerModifier = NodeModifier::GetSideBarContainerModifier,
-    #else
-        .getSideBarContainerModifier = nullptr,
-    #endif
-    #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCalendarPickerModifier,
-    #else
-        .getCalendarPickerModifier = nullptr,
-    #endif
         .getTextInputModifier = NodeModifier::GetTextInputModifier,
         .getTabsModifier = NodeModifier::GetTabsModifier,
     #ifndef ARKUI_WEARABLE
@@ -221,11 +214,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getMenuItemModifier = NodeModifier::GetMenuItemModifier,
         .getMenuModifier = NodeModifier::GetMenuModifier,
         .getDatePickerModifier = NodeModifier::GetDatePickerModifier,
-    #ifndef ARKUI_WEARABLE
         .getWaterFlowModifier = NodeModifier::GetWaterFlowModifier,
-    #else
-        .getWaterFlowModifier = nullptr,
-    #endif
         .getAlphabetIndexerModifier = NodeModifier::GetAlphabetIndexerModifier,
         .getDataPanelModifier = NodeModifier::GetDataPanelModifier,
         .getGaugeModifier = NodeModifier::GetGaugeModifier,
@@ -303,6 +292,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getThemeModifier = NodeModifier::GetThemeModifier,
         .getLinearIndicatorModifier = NodeModifier::GetLinearIndicatorModifier,
         .getIndicatorComponentModifier = NodeModifier::GetIndicatorComponentModifier,
+        .getLazyGridLayoutModifier = NodeModifier::GetLazyGridLayoutModifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;
@@ -373,16 +363,8 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getPolylineModifier = NodeModifier::GetCJUIPolylineModifier,
         .getSpanModifier = NodeModifier::GetCJUISpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetCJUIImageAnimatorModifier,
-    #ifndef ARKUI_WEARABLE
         .getSideBarContainerModifier = NodeModifier::GetCJUISideBarContainerModifier,
-    #else
-        .getSideBarContainerModifier = nullptr,
-    #endif
-    #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCJUICalendarPickerModifier,
-    #else
-        .getCalendarPickerModifier = nullptr,
-    #endif
         .getTextInputModifier = NodeModifier::GetCJUITextInputModifier,
         .getTabsModifier = NodeModifier::GetCJUITabsModifier,
     #ifndef ARKUI_WEARABLE
@@ -395,11 +377,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getMenuItemModifier = nullptr,
         .getMenuModifier = NodeModifier::GetCJUIMenuModifier,
         .getDatePickerModifier = NodeModifier::GetCJUIDatePickerModifier,
-    #ifndef ARKUI_WEARABLE
         .getWaterFlowModifier = NodeModifier::GetCJUIWaterFlowModifier,
-    #else
-        .getWaterFlowModifier = nullptr,
-    #endif
         .getAlphabetIndexerModifier = NodeModifier::GetCJUIAlphabetIndexerModifier,
         .getDataPanelModifier = NodeModifier::GetCJUIDataPanelModifier,
         .getGaugeModifier = NodeModifier::GetCJUIGaugeModifier,

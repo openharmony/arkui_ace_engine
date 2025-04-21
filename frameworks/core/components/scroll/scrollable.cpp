@@ -160,8 +160,10 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     };
 
     if (Container::IsCurrentUseNewPipeline()) {
+        PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+            { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
         panRecognizerNG_ = AceType::MakeRefPtr<NG::PanRecognizer>(
-            DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
+            DEFAULT_PAN_FINGER, panDirection, distanceMap);
         panRecognizerNG_->SetIsAllowMouse(false);
         panRecognizerNG_->SetOnActionStart(actionStart);
         panRecognizerNG_->SetOnActionUpdate(actionUpdate);

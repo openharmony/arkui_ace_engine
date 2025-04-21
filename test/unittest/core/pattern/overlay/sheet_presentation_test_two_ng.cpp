@@ -2836,6 +2836,7 @@ HWTEST_F(SheetPresentationTestTwoNg, InitScrollPropsTest002, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
 
     /**
      * @tc.steps: step3. init sheetPattern value.
@@ -2899,6 +2900,7 @@ HWTEST_F(SheetPresentationTestTwoNg, InitScrollPropsTest003, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
 
     /**
      * @tc.steps: step3. init sheetPattern value.
@@ -2962,6 +2964,7 @@ HWTEST_F(SheetPresentationTestTwoNg, InitScrollPropsTest004, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
 
     /**
      * @tc.steps: step3. init sheetPattern value.

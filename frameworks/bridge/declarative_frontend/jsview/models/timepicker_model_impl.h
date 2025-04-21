@@ -43,6 +43,7 @@ public:
     void HasUserDefinedOpacity() override {};
     void SetEnableCascade(bool isEnableCascade) override;
     void SetDigitalCrownSensitivity(int32_t value) override {};
+    void UpdateUserSetSelectColor() override {};
 };
 
 class TimePickerDialogModelImpl : public TimePickerDialogModel {

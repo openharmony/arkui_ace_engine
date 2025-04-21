@@ -49,7 +49,7 @@ public:
     void PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide,
         const Dimension& indicatorDotItemSpace);
     void PaintPressIndicator(const PaintWrapper* paintWrapper);
-    void CalculateNormalMargin(
+    virtual void CalculateNormalMargin(
         const LinearVector<float>& itemHalfSizes, const SizeF& frameSize, const int32_t displayCount,
         const Dimension& indicatorDotItemSpace, bool ignoreSize);
     virtual std::pair<float, float> CalculatePointCenterX(
@@ -122,6 +122,11 @@ public:
     void SetGroupTurnPageRate(float groupTurnPageRate)
     {
         groupTurnPageRate_ = groupTurnPageRate;
+    }
+
+    GestureState GetGestureState()
+    {
+        return gestureState_;
     }
 
     void SetGestureState(GestureState gestureState)

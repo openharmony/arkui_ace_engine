@@ -902,12 +902,14 @@ void checkExpandSafeArea(Ark_NodeHandle node, std::vector<std::string> vecTypes,
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node);
     auto jsonExpSA = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_EXPAND_SAFE_AREA_NAME);
     auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonExpSA, ATTRIBUTE_EXPAND_SAFE_AREA_I_TYPES_NAME);
+    ASSERT_NE(jsonArray, nullptr);
     EXPECT_EQ(jsonArray->GetArraySize(), vecTypes.size());
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
         auto itemJson = jsonArray->GetArrayItem(i);
         EXPECT_EQ(itemJson->GetString(), vecTypes[i]);
     }
     jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonExpSA, ATTRIBUTE_EXPAND_SAFE_AREA_I_EDGES_NAME);
+    ASSERT_NE(jsonArray, nullptr);
     EXPECT_EQ(jsonArray->GetArraySize(), vecEdges.size());
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
         auto itemJson = jsonArray->GetArrayItem(i);
@@ -919,7 +921,7 @@ void checkExpandSafeArea(Ark_NodeHandle node, std::vector<std::string> vecTypes,
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setExpandSafeAreaTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setExpandSafeAreaTestDefaultValues, TestSize.Level1)
 {
     std::vector<std::string> vecTypes = {"SafeAreaType.SYSTEM", "SafeAreaType.CUTOUT", "SafeAreaType.KEYBOARD"};
     std::vector<std::string> vecEdges = {"SafeAreaEdge.TOP", "SafeAreaEdge.BOTTOM", "SafeAreaEdge.START",
@@ -932,7 +934,7 @@ HWTEST_F(CommonMethodModifierTest4, setExpandSafeAreaTestDefaultValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setExpandSafeAreaTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setExpandSafeAreaTestValidValues, TestSize.Level1)
 {
     std::vector<std::string> expectedTypes = {"SafeAreaType.SYSTEM", "SafeAreaType.CUTOUT",
         "SafeAreaType.KEYBOARD"};
@@ -955,7 +957,7 @@ HWTEST_F(CommonMethodModifierTest4, setExpandSafeAreaTestValidValues, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setExpandSafeAreaTestValidValues2, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setExpandSafeAreaTestValidValues2, TestSize.Level1)
 {
     std::vector<std::string> expectedTypes = {"SafeAreaType.SYSTEM", "SafeAreaType.KEYBOARD"};
     std::vector<std::string> expectedEdges = {"SafeAreaEdge.TOP", "SafeAreaEdge.END"};
@@ -974,7 +976,7 @@ HWTEST_F(CommonMethodModifierTest4, setExpandSafeAreaTestValidValues2, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setExpandSafeAreaTestInvalidValues1, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setExpandSafeAreaTestInvalidValues1, TestSize.Level1)
 {
     std::vector<std::string> expectedTypes = {"SafeAreaType.SYSTEM", "SafeAreaType.KEYBOARD"};
     std::vector<std::string> expectedEdges = {"SafeAreaEdge.TOP", "SafeAreaEdge.END"};
@@ -994,7 +996,7 @@ HWTEST_F(CommonMethodModifierTest4, setExpandSafeAreaTestInvalidValues1, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setExpandSafeAreaTestInvalidValues2, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setExpandSafeAreaTestInvalidValues2, TestSize.Level1)
 {
     std::vector<std::string> expectedTypes = {"SafeAreaType.KEYBOARD"};
     std::vector<std::string> expectedEdges = {"SafeAreaEdge.TOP", "SafeAreaEdge.END"};

@@ -24,6 +24,7 @@ constexpr int ARG_INDEX_1 = 1;
 constexpr int ARG_INDEX_2 = 2;
 constexpr int ARG_INDEX_3 = 3;
 constexpr int ARG_INDEX_4 = 4;
+constexpr int ARG_INDEX_5 = 5;
 
 ArkUIMenuDividerOptions BuildMenuDividerOptions(EcmaVM* vm, Local<JSValueRef> strokeWidthArg,
     Local<JSValueRef> colorArg, Local<JSValueRef> startMarginArg, Local<JSValueRef> endMarginArg)
@@ -57,7 +58,7 @@ ArkUIMenuDividerOptions BuildMenuDividerOptions(EcmaVM* vm, Local<JSValueRef> st
     }
     endMarginOption.value = endMargin.Value();
     endMarginOption.units = static_cast<int32_t>(endMargin.Unit());
-    
+
     ArkUIMenuDividerOptions dividerOptions;
     dividerOptions.strokeWidth = strokeWidthOption;
     dividerOptions.color = color.GetValue();
@@ -75,9 +76,10 @@ ArkUINativeModuleValue SetMenuDivider(ArkUIRuntimeCallInfo* runtimeCallInfo, boo
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_2);
     Local<JSValueRef> startMarginArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_3);
     Local<JSValueRef> endMarginArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_4);
+    Local<JSValueRef> modeArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_5);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (strokeWidthArg->IsUndefined() && colorArg->IsUndefined() && startMarginArg->IsUndefined()
-        && endMarginArg->IsUndefined()) {
+        && endMarginArg->IsUndefined() && modeArg->IsUndefined()) {
         if (isGroupDivider) {
             GetArkUINodeModifiers()->getMenuModifier()->resetMenuItemGroupDivider(nativeNode);
         } else {
@@ -85,8 +87,12 @@ ArkUINativeModuleValue SetMenuDivider(ArkUIRuntimeCallInfo* runtimeCallInfo, boo
         }
         return panda::JSValueRef::Undefined(vm);
     }
-    auto dividerOptions = BuildMenuDividerOptions(vm, strokeWidthArg, colorArg, startMarginArg,
-        endMarginArg);
+    auto dividerOptions = BuildMenuDividerOptions(vm, strokeWidthArg, colorArg, startMarginArg, endMarginArg);
+    int32_t mode = 0;
+    if (modeArg->IsNumber()) {
+        mode = modeArg->Int32Value(vm);
+    }
+    dividerOptions.mode = mode;
     if (isGroupDivider) {
         GetArkUINodeModifiers()->getMenuModifier()->setMenuItemGroupDivider(nativeNode, &dividerOptions);
     } else {

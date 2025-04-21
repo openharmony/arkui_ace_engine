@@ -126,9 +126,11 @@ private:
         int64_t elementId, const AccessibilityElementInfo& nodeInfo, const int32_t action);
     void GetAccessibilityEventInfoFromNativeEvent(
         const ArkUI_AccessibilityEventInfo& nativeEventInfo,
-        OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo);
+        OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo,
+        bool ignoreHostOffset);
     void GetAccessibilityEventInfoFromNativeEvent(
-        OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo);
+        OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo,
+        bool ignoreHostOffset);
     bool SendAccessibilitySyncEventToService(
         const OHOS::Accessibility::AccessibilityEventInfo& eventInfo,
         void (*callback)(int32_t errorCode));
@@ -150,6 +152,7 @@ private:
     bool HandleEventByFramework(
         const ArkUI_AccessibilityEventInfo& nativeAccessibilityEvent,
         Accessibility::AccessibilityEventInfo& accessibilityEventInfo);
+    void HandleActionWhenFindNodeFail(const int32_t action);
 
     WeakPtr<AccessibilityProvider> accessibilityProvider_;
     WeakPtr<JsAccessibilityManager> jsAccessibilityManager_;

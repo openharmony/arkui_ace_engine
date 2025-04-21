@@ -28,6 +28,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr double BUTTON_ALPHA_DISABLED = 0.4;
+constexpr double COUNTER_ALPHA = 0.9;
 } // namespace
 class CounterTheme : public virtual Theme {
     DECLARE_ACE_TYPE(CounterTheme, Theme);
@@ -57,10 +58,15 @@ public:
                 LOGW("find pattern of counter fail");
                 return;
             }
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_TEXT);
+            if (!pattern) {
+                LOGW("find pattern of text fail");
+                return;
+            }
+            theme->contentTextStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK)
+                .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, COUNTER_ALPHA)));
             theme->alphaDisabled_ = counterPattern->GetAttr<double>("button_alpha_disabled", BUTTON_ALPHA_DISABLED);
             theme->contentTextStyle_.SetFontSize(counterPattern->GetAttr<Dimension>("title_font_size", 15.0_vp));
-            theme->contentTextStyle_.SetTextColor(counterPattern->GetAttr<Color>("title_font_color",
-                Color(0xff191919)));
             theme->backgroundColor_ = counterPattern->GetAttr<Color>("title_background_color", Color::TRANSPARENT);
         }
     };

@@ -16,9 +16,11 @@
 #define GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_ACE_ENGINE_TYPES_H
 
 #include <optional>
+#include <variant>
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 

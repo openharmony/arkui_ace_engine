@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
 
-#include "base/i18n/localization.h"
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -74,6 +73,23 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
         TaskExecutor::TaskType::UI, name);
 }
 
+struct DialogStrings {
+    std::string confirm;
+    std::string cancel;
+};
+
+DialogStrings GetDialogStrings()
+{
+    DialogStrings strs = {"", ""};
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, strs);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, strs);
+
+    strs.confirm = dialogTheme->GetConfirmText();
+    strs.cancel = dialogTheme->GetCancelText();
+    return strs;
+}
 } // namespace
 
 int32_t FrontendDelegateDeclarative::GenerateNextPageId()
@@ -1851,31 +1867,9 @@ void FrontendDelegateDeclarative::RemoveCustomDialog(int32_t instanceId)
     NG::ViewAbstract::DismissDialog();
 }
 
-DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr)
+void FrontendDelegateDeclarative::ParsePartialPropertiesFromAttr(
+    DialogProperties& dialogProperties, const PromptDialogAttr& dialogAttr)
 {
-    DialogProperties dialogProperties = {
-        .autoCancel = dialogAttr.autoCancel, .customStyle = dialogAttr.customStyle,
-        .onWillDismiss = dialogAttr.customOnWillDismiss, .maskColor = dialogAttr.maskColor,
-        .backgroundColor = dialogAttr.backgroundColor, .borderRadius = dialogAttr.borderRadius,
-        .isShowInSubWindow = dialogAttr.showInSubWindow, .isModal = dialogAttr.isModal,
-        .enableHoverMode = dialogAttr.enableHoverMode, .customBuilder = dialogAttr.customBuilder,
-        .customBuilderWithId = dialogAttr.customBuilderWithId, .borderWidth = dialogAttr.borderWidth,
-        .borderColor = dialogAttr.borderColor, .borderStyle = dialogAttr.borderStyle, .shadow = dialogAttr.shadow,
-        .width = dialogAttr.width, .height = dialogAttr.height, .maskRect = dialogAttr.maskRect,
-        .transitionEffect = dialogAttr.transitionEffect, .dialogTransitionEffect = dialogAttr.dialogTransitionEffect,
-        .maskTransitionEffect = dialogAttr.maskTransitionEffect, .contentNode = dialogAttr.contentNode,
-        .onDidAppear = dialogAttr.onDidAppear, .onDidDisappear = dialogAttr.onDidDisappear,
-        .onWillAppear = dialogAttr.onWillAppear, .onWillDisappear = dialogAttr.onWillDisappear,
-        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback,
-        .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance,
-        .levelOrder = dialogAttr.levelOrder,
-        .dialogLevelMode = dialogAttr.dialogLevelMode,
-        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .isUserCreatedDialog = dialogAttr.isUserCreatedDialog,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
-        .blurStyleOption = dialogAttr.blurStyleOption,
-        .effectOption = dialogAttr.effectOption
-    };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
         LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
@@ -1899,6 +1893,37 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
             dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
         }
     }
+}
+
+DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr)
+{
+    DialogProperties dialogProperties = {
+        .autoCancel = dialogAttr.autoCancel, .customStyle = dialogAttr.customStyle,
+        .onWillDismiss = dialogAttr.customOnWillDismiss, .maskColor = dialogAttr.maskColor,
+        .backgroundColor = dialogAttr.backgroundColor, .borderRadius = dialogAttr.borderRadius,
+        .isShowInSubWindow = dialogAttr.showInSubWindow, .isModal = dialogAttr.isModal,
+        .enableHoverMode = dialogAttr.enableHoverMode, .customBuilder = dialogAttr.customBuilder,
+        .customBuilderWithId = dialogAttr.customBuilderWithId,
+        .blurStyleOption = dialogAttr.blurStyleOption,
+        .effectOption = dialogAttr.effectOption,
+        .borderWidth = dialogAttr.borderWidth,
+        .borderColor = dialogAttr.borderColor, .borderStyle = dialogAttr.borderStyle, .shadow = dialogAttr.shadow,
+        .width = dialogAttr.width, .height = dialogAttr.height,
+        .isUserCreatedDialog = dialogAttr.isUserCreatedDialog,
+        .maskRect = dialogAttr.maskRect,
+        .transitionEffect = dialogAttr.transitionEffect, .dialogTransitionEffect = dialogAttr.dialogTransitionEffect,
+        .maskTransitionEffect = dialogAttr.maskTransitionEffect, .contentNode = dialogAttr.contentNode,
+        .onDidAppear = dialogAttr.onDidAppear, .onDidDisappear = dialogAttr.onDidDisappear,
+        .onWillAppear = dialogAttr.onWillAppear, .onWillDisappear = dialogAttr.onWillDisappear,
+        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback,
+        .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance,
+        .levelOrder = dialogAttr.levelOrder,
+        .focusable = dialogAttr.focusable,
+        .dialogLevelMode = dialogAttr.dialogLevelMode,
+        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
+    };
+    ParsePartialPropertiesFromAttr(dialogProperties, dialogAttr);
     return dialogProperties;
 }
 
@@ -1941,7 +1966,7 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
         overlayManager->CloseCustomDialog(dialogId);
         SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     };
-    auto dialogNode = NG::FrameNode::GetFrameNode(V2::DIALOG_ETS_TAG, dialogId);
+    auto dialogNode = NG::FrameNode::GetFrameNodeOnly(V2::DIALOG_ETS_TAG, dialogId);
     auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogNode);
     MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog", currentOverlay);
     return;
@@ -2209,14 +2234,15 @@ void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
         return;
     }
 
+    auto strs = GetDialogStrings();
     auto& currentPage = pageRouteStack_.back();
     ClearAlertCallback(currentPage);
     currentPage.alertCallback = callback;
     currentPage.dialogProperties = {
         .content = message,
         .autoCancel = false,
-        .buttons = { { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" },
-            { .text = Localization::GetInstance()->GetEntryLetters("common.ok"), .textColor = "" } },
+        .buttons = { { .text = strs.cancel, .textColor = "" },
+            { .text = strs.confirm, .textColor = "" } },
         .callbacks = std::move(callbackMarkers),
     };
 }
@@ -2457,7 +2483,7 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate(bool isSynchronous)
         callback();
         return;
     }
-    taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate", PriorityType::VIP);
+    taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate");
 }
 
 void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& componentId)

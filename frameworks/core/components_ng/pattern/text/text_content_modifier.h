@@ -100,6 +100,7 @@ public:
     }
 
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
+    void AnimationMeasureUpdate(const RefPtr<FrameNode>& host);
 
     void SetClip(bool clip);
 
@@ -112,6 +113,10 @@ public:
     }
     void TextColorModifier(const Color& value);
     void ContentModifierDump();
+#ifdef ACE_ENABLE_VK
+    void SetHybridRenderTypeIfNeeded(DrawingContext& drawingContext, const RefPtr<ParagraphManager>& pManager,
+        RefPtr<FrameNode>& host);
+#endif
 
 protected:
     OffsetF GetPaintOffset() const
@@ -121,7 +126,7 @@ protected:
 
 private:
     double NormalizeToPx(const Dimension& dimension);
-    void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle);
+    void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode);
     void SetDefaultFontSize(const TextStyle& textStyle);
     void SetDefaultAdaptMinFontSize(const TextStyle& textStyle);
     void SetDefaultAdaptMaxFontSize(const TextStyle& textStyle);
@@ -187,6 +192,7 @@ private:
     {
         return marqueeState_ == state;
     }
+    bool IsMarqueeVisible() const;
 
     std::optional<Dimension> fontSize_;
     float lastFontSize_ = 0.0f;

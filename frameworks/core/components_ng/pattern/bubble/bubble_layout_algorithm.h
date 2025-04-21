@@ -17,9 +17,11 @@
 
 #include <optional>
 #include <string>
+#include <unordered_set>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/geometry/rect.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
@@ -35,6 +37,8 @@ enum class ArrowOfTargetOffset {
 struct BubbleDumpInfo {
     bool enableArrow = false;
     bool mask = true;
+    bool avoidKeyboard = false;
+    bool enableHoverMode = false;
     std::string targetNode;
     int32_t targetID = -1;
     OffsetF targetOffset;
@@ -251,6 +255,7 @@ private:
     std::string targetTag_;
     bool bCaretMode_ = false;
     bool useCustom_ = false;
+    bool isTips_ = false;
 
     BubbleDumpInfo dumpInfo_;
     SizeF targetSize_;

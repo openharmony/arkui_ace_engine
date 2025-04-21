@@ -420,82 +420,6 @@ HWTEST_F(WebPatternWebTest, ProcessVirtualKeyBoard, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnSelectHandleDone
- * @tc.desc: OnSelectHandleDone.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWebTest, OnSelectHandleDone, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    RectF handleRect;
-    webPattern->OnSelectHandleDone(handleRect, true);
-    webPattern->overlayCreating_ = true;
-    webPattern->imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::IMAGE);
-    webPattern->OnSelectHandleDone(handleRect, true);
-    webPattern->endSelectionHandle_ = nullptr;
-    webPattern->startSelectionHandle_ = std::make_shared<NWebTouchHandleStateUN>();
-    webPattern->OnSelectHandleDone(handleRect, true);
-    webPattern->startSelectionHandle_ = nullptr;
-    webPattern->endSelectionHandle_ = std::make_shared<NWebTouchHandleStateUN>();
-    webPattern->OnSelectHandleDone(handleRect, true);
-    webPattern->startSelectionHandle_ = std::make_shared<NWebTouchHandleStateUN>();
-    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
-    webPattern->selectOverlayProxy_->IsMenuShow();
-    auto info = webPattern->selectOverlayProxy_->GetSelectOverlayMangerInfo();
-    EXPECT_EQ(webPattern->startSelectionHandle_->GetX(), 10);
-    EXPECT_EQ(webPattern->startSelectionHandle_->GetY(), 10);
-    EXPECT_EQ(webPattern->endSelectionHandle_->GetX(), 10);
-    EXPECT_EQ(webPattern->endSelectionHandle_->GetY(), 10);
-#endif
-}
-
-/**
- * @tc.name: OnSelectHandleMove
- * @tc.desc: OnSelectHandleMove.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWebTest, OnSelectHandleMove, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    auto pipeline = MockPipelineContext::GetCurrentContext();
-    auto manager = pipeline->GetDragDropManager();
-    manager->isDragged_ = true;
-    RectF handleRect;
-    webPattern->isDragging_ = true;
-    manager->isDragged_ = true;
-    webPattern->OnSelectHandleMove(handleRect, true);
-    webPattern->isDragging_ = false;
-    manager->isDragged_ = false;
-    webPattern->OnSelectHandleMove(handleRect, true);
-    webPattern->overlayCreating_ = true;
-    webPattern->OnSelectHandleMove(handleRect, true);
-    webPattern->isDragging_ = true;
-    webPattern->OnSelectHandleMove(handleRect, true);
-    manager->isDragged_ = true;
-    webPattern->OnSelectHandleMove(handleRect, true);
-    ASSERT_EQ(webPattern->imageAnalyzerManager_, nullptr);
-#endif
-}
-
-/**
  * @tc.name: OnDetachContextAllTrue
  * @tc.desc: OnDetachContext.
  * @tc.type: FUNC
@@ -688,88 +612,6 @@ HWTEST_F(WebPatternWebTest, OnModifyDoneGetNull, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckHandles_001
- * @tc.desc: CheckHandles.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWebTest, CheckHandles_001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    SelectHandleInfo selectHandleInfo;
-    auto handle_ = std::make_shared<NWebTouchHandleStateUN>();
-    handle_->GetAlpha();
-    webPattern->CheckHandles(selectHandleInfo, handle_);
-    EXPECT_FALSE(selectHandleInfo.isShow);
-#endif
-}
-
-/**
- * @tc.name: CheckHandles_002
- * @tc.desc: CheckHandles.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWebTest, CheckHandles_002, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    SelectHandleInfo selectHandleInfo;
-    auto handle_ = std::make_shared<NWebTouchHandleStateFA>();
-    handle_->GetAlpha();
-    handle_->GetY();
-    handle_->GetEdgeHeight();
-    webPattern->CheckHandles(selectHandleInfo, handle_);
-    EXPECT_FALSE(selectHandleInfo.isShow);
-#endif
-}
-
-/**
- * @tc.name: CheckHandles_003
- * @tc.desc: CheckHandles.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWebTest, CheckHandles_003, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    SelectHandleInfo selectHandleInfo;
-    auto handle_ = std::make_shared<NWebTouchHandleStateTR>();
-    handle_->GetAlpha();
-    handle_->GetY();
-    handle_->GetEdgeHeight();
-    webPattern->CheckHandles(selectHandleInfo, handle_);
-    EXPECT_FALSE(selectHandleInfo.isShow);
-#endif
-}
-
-/**
  * @tc.name: ParseTouchInfo
  * @tc.desc: ParseTouchInfo.
  * @tc.type: FUNC
@@ -907,34 +749,6 @@ HWTEST_F(WebPatternWebTest, BeforeSyncGeometryProperties, TestSize.Level1)
     EXPECT_EQ(webPattern->drawSize_.height_, 10.0);
     EXPECT_EQ(webPattern->drawSizeCache_.width_, 10.0);
     EXPECT_EQ(webPattern->drawSizeCache_.height_, 10.0);
-#endif
-}
-
-/**
- * @tc.name: OnAreaChangedInner_001
- * @tc.desc: OnAreaChangedInner.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWebTest, OnAreaChangedInner_001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->layoutMode_ = WebLayoutMode::NONE;
-    webPattern->renderMode_ = RenderMode::ASYNC_RENDER;
-    OffsetT<float> Offset(1.0, 1.0);
-    webPattern->webOffset_ = Offset;
-    webPattern->OnAreaChangedInner();
-    EXPECT_NE(webPattern->webOffset_.GetX(), Offset.GetX());
 #endif
 }
 
@@ -1250,48 +1064,6 @@ HWTEST_F(WebPatternWebTest, HandleTouchMove, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnSelectHandleStart
- * @tc.desc: OnSelectHandleStart.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWebTest, OnSelectHandleStart, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    MockPipelineContext::SetUp();
-    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(10);
-    auto pipeline = MockPipelineContext::GetCurrentContext();
-    auto manager = pipeline->GetSelectOverlayManager();
-    ASSERT_NE(manager, nullptr);
-    SelectOverlayInfo info;
-    info.isSingleHandle = false;
-    auto infoPtr = std::make_shared<SelectOverlayInfo>(info);
-    auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
-    manager->selectOverlayItem_ = selectOverlayNode;
-    auto current = manager->selectOverlayItem_.Upgrade();
-    ASSERT_NE(current, nullptr);
-    webPattern->selectOverlayProxy_->selectOverlayId_ = current->GetId();
-    manager->selectContentManager_ = AceType::MakeRefPtr<SelectContentOverlayManager>(frameNode);
-    manager->GetSelectOverlayNode(webPattern->selectOverlayProxy_->GetSelectOverlayId());
-    GestureEvent event;
-    webPattern->OnSelectHandleStart(event, true);
-    webPattern->overlayCreating_ = true;
-    webPattern->UpdateNativeEmbedModeEnabled(true);
-    webPattern->OnSelectHandleStart(event, false);
-    MockPipelineContext::TearDown();
-    ASSERT_EQ(webPattern->imageAnalyzerManager_, nullptr);
-#endif
-}
-
-/**
  * @tc.name: HandleTouchCancel
  * @tc.desc: HandleTouchCancel.
  * @tc.type: FUNC
@@ -1322,29 +1094,6 @@ HWTEST_F(WebPatternWebTest, HandleTouchCancel, TestSize.Level1)
     TouchEventInfo info("info");
     webPattern->HandleTouchCancel(info);
     EXPECT_TRUE(webPattern->isTouchUpEvent_);
-#endif
-}
-
-/**
- * @tc.name: CloseSelectOverlay
- * @tc.desc: CloseSelectOverlay.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWebTest, CloseSelectOverlay, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
-    webPattern->CloseSelectOverlay();
-    ASSERT_EQ(webPattern->selectOverlayProxy_, nullptr);
 #endif
 }
 
@@ -1545,106 +1294,6 @@ HWTEST_F(WebPatternWebTest, ClearKeyEventByKeyCodeTest, TestSize.Level1)
     webPattern->webKeyEvent_.push_front(keyEvent);
     webPattern->ClearKeyEventByKeyCode(value);
     EXPECT_TRUE(webPattern->webKeyEvent_.empty());
-#endif
-}
-
-/**
- * @tc.name: UpdateTouchHandleForOverlay_001
- * @tc.desc: UpdateTouchHandleForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWebTest, UpdateTouchHandleForOverlay_001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    EXPECT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern->delegate_, nullptr);
-    bool ret = true;
-    int32_t someValidSelectOverlayId = 1;
-    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<OHOS::Ace::NG::SelectOverlayProxy>(someValidSelectOverlayId);
-    EXPECT_NE(webPattern->selectOverlayProxy_, nullptr);
-    auto handle_ = std::make_shared<OHOS::NWeb::MockNWebTouchHandleStateImpl>();
-    webPattern->insertHandle_ = handle_;
-    webPattern->startSelectionHandle_ = nullptr;
-    webPattern->endSelectionHandle_ = nullptr;
-    bool result = webPattern->IsTouchHandleValid(handle_);
-    webPattern->UpdateTouchHandleForOverlay(ret);
-    EXPECT_TRUE(result);
-#endif
-}
-
-/**
- * @tc.name: UpdateTouchHandleForOverlay_002
- * @tc.desc: UpdateTouchHandleForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWebTest, UpdateTouchHandleForOverlay_002, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    EXPECT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern->delegate_, nullptr);
-    bool ret = true;
-    int32_t someValidSelectOverlayId = 1;
-    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<OHOS::Ace::NG::SelectOverlayProxy>(someValidSelectOverlayId);
-    EXPECT_NE(webPattern->selectOverlayProxy_, nullptr);
-    webPattern->insertHandle_ = nullptr;
-    auto handle_ = std::make_shared<OHOS::NWeb::MockNWebTouchHandleStateImpl>();
-    webPattern->startSelectionHandle_ = handle_;
-    webPattern->endSelectionHandle_ = handle_;
-    webPattern->selectTemporarilyHidden_ = true;
-    webPattern->selectTemporarilyHiddenByScroll_ = false;
-    bool result = webPattern->IsTouchHandleValid(handle_);
-    webPattern->UpdateTouchHandleForOverlay(ret);
-    EXPECT_TRUE(result);
-#endif
-}
-
-/**
- * @tc.name: UpdateTouchHandleForOverlay_003
- * @tc.desc: UpdateTouchHandleForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWebTest, UpdateTouchHandleForOverlay_003, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    EXPECT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern->delegate_, nullptr);
-    bool ret = true;
-    int32_t someValidSelectOverlayId = 1;
-    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<OHOS::Ace::NG::SelectOverlayProxy>(someValidSelectOverlayId);
-    EXPECT_NE(webPattern->selectOverlayProxy_, nullptr);
-    webPattern->insertHandle_ = nullptr;
-    auto handle_ = std::make_shared<OHOS::NWeb::MockNWebTouchHandleStateImpl>();
-    webPattern->startSelectionHandle_ = handle_;
-    webPattern->endSelectionHandle_ = handle_;
-    webPattern->selectTemporarilyHidden_ = false;
-    webPattern->selectTemporarilyHiddenByScroll_ = true;
-    bool result = webPattern->IsTouchHandleValid(handle_);
-    webPattern->UpdateTouchHandleForOverlay(ret);
-    EXPECT_TRUE(result);
 #endif
 }
 } // namespace OHOS::Ace::NG

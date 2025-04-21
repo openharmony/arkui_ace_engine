@@ -15,27 +15,9 @@
 
 #include "core/common/stylus/stylus_detector_mgr.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/rect_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/geometry/point.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/common/stylus/stylus_detector_default.h"
-#include "core/common/stylus/stylus_detector_loader.h"
 #include "core/common/stylus/stylus_detector_callback.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
-#include "core/components_ng/pattern/search/search_text_field.h"
-#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/base/log/log_wrapper.h"
 
 namespace OHOS::Ace {
 const static std::unordered_set<std::string> TEXT_FIELD_COMPONENT_TAGS = {
@@ -228,5 +210,29 @@ bool StylusDetectorMgr::IsHitCleanNodeResponseArea(
     auto globalFrameRect = cleanNodeGeometryNode->GetFrameRect();
     globalFrameRect.SetOffset(cleanNodeFrameNode->CalculateCachedTransformRelativeOffset(nanoTimestamp));
     return globalFrameRect.IsInRegion(point);
+}
+
+bool StylusDetectorMgr::IsNeedInterceptedTouchEventForWeb(float x, float y)
+{
+    if (!IsEnable()) {
+        TAG_LOGI(AceLogTag::ACE_STYLUS, "IsNeedInterceptedTouchEventForWeb Stylus service is not enable");
+        return false;
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto bundleName = container->GetBundleName();
+    NotifyInfo info;
+    info.componentId = -1;
+    info.x = x;
+    info.y = y;
+    info.bundleName = bundleName;
+    auto stylusDetectorCallback = std::make_shared<StylusDetectorCallBack>();
+    nodeId_ = 0;
+    sInd_ = -1;
+    eInd_ = -1;
+    showMenu_ = false;
+    isRegistered_ = RegisterStylusInteractionListener(bundleName, stylusDetectorCallback);
+    return Notify(info);
 }
 } // namespace OHOS::Ace

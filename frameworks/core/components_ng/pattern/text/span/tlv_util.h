@@ -28,6 +28,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/render/paragraph.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace {
 
@@ -138,6 +139,8 @@ constexpr uint8_t TLV_SPAN_BACKGROUND_BACKGROUNDRADIUS = 0x95;
 constexpr uint8_t TLV_SPAN_BACKGROUND_GROUPID = 0x96;
 
 constexpr uint8_t TLV_CUSTOM_MARSHALL_BUFFER_START = 0x97;
+
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_PARAGRAPH_SPACING = 0x98;
 
 #define TLV_DEFINE_ENUM_TYPE(type, tag) \
 public:                                                                     \

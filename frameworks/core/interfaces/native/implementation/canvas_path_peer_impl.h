@@ -17,6 +17,7 @@
 
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 class CanvasPathPeerImpl : public OHOS::Ace::Referenced {

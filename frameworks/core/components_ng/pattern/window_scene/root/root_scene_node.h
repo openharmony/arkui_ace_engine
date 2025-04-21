@@ -18,6 +18,7 @@
 
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 class RootSceneNode : public UINode {

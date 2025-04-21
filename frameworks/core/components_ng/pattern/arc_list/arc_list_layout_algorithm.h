@@ -61,7 +61,37 @@ public:
     }
     static float GetItemSnapSize();
 
+    float GetOldHeaderSize() const
+    {
+        return oldHeaderSize_;
+    }
+    void SetOldHeaderSize(float size)
+    {
+        oldHeaderSize_ = size;
+    }
+    float GetOldFirstItemSize() const
+    {
+        return oldFirstItemSize_;
+    }
+    void SetOldFirstItemSize(float size)
+    {
+        oldFirstItemSize_ = size;
+    }
+    bool GetHeaderStayNear() const
+    {
+        return headerStayNear_;
+    }
+    void SetHeaderStayNear(bool stay)
+    {
+        headerStayNear_ = stay;
+    }
+    void SetIsInitialized(bool value)
+    {
+        isInitialized_ = value;
+    }
+
 protected:
+    void HandleJumpCenter(LayoutWrapper* layoutWrapper) override;
     int32_t LayoutALineForward(
         LayoutWrapper* layoutWrapper, int32_t& currentIndex, float startPos, float& endPos) override;
     int32_t LayoutALineBackward(
@@ -77,14 +107,16 @@ private:
     void FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty) override;
     void FixPredictSnapOffsetAlignCenter();
 
-    float CalculatePredictSnapEndPositionByIndex(uint32_t index, float prevPredictEndPos);
+    float CalculatePredictSnapEndPositionByIndex(int32_t index, float prevPredictEndPos);
 
     static float GetNearScale(float pos);
     float InitItemOffset(LayoutWrapper* layoutWrapper);
     void GenerateItemOffset(LayoutWrapper* layoutWrapper);
+    float GetHeaderAreaSize() const;
 
     void MeasureHeader(LayoutWrapper* layoutWrapper) override;
     void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize) override;
+    bool CheckNeedUpdateHeaderOffset(LayoutWrapper* layoutWrapper);
     void UpdateZIndex(const RefPtr<LayoutWrapper>& layoutWrapper);
     void CalcContentOffset(const RefPtr<ListLayoutProperty>& property) override
     {
@@ -101,6 +133,10 @@ private:
     float headerMainSize_ = 0.0f;
     float startHeaderPos_ = 0.0f;
     float headerOffset_ = -1.0f;
+    float oldHeaderSize_ = 0.0f;
+    float oldFirstItemSize_ = -1.0f;
+    bool headerStayNear_ = false;
+    bool isInitialized_ = false;
 };
 } // namespace OHOS::Ace::NG
 

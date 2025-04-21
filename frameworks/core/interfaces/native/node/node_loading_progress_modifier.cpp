@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include "base/error/error_code.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -31,6 +32,7 @@ void SetLoadingProgressColor(ArkUINodeHandle node, uint32_t colorValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    LoadingProgressModelNG::SetColorParseFailed(frameNode, false);
     LoadingProgressModelNG::SetColor(frameNode, Color(colorValue));
 }
 
@@ -43,7 +45,8 @@ void ResetLoadingProgressColor(ArkUINodeHandle node)
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(theme);
-        LoadingProgressModelNG::SetColor(frameNode, theme->GetLoadingColor());
+        LoadingProgressModelNG::SetColorParseFailed(frameNode, true);
+        LoadingProgressModelNG::SetColor(frameNode, theme->GetLoadingParseFailedColor());
     }
 }
 
@@ -72,6 +75,7 @@ void SetLoadingProgressForegroundColor(ArkUINodeHandle node, ArkUI_Uint32 colorV
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    LoadingProgressModelNG::SetForegroundColorParseFailed(frameNode, false);
     LoadingProgressModelNG::SetForegroundColor(frameNode, Color(colorValue));
 }
 
@@ -79,6 +83,8 @@ void ResetLoadingProgressForegroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    LoadingProgressModelNG::SetForegroundColorParseFailed(frameNode, true);
+    LoadingProgressModelNG::ResetForegroundColor(frameNode);
 }
 } // namespace
 

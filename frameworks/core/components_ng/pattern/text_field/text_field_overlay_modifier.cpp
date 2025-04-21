@@ -16,13 +16,9 @@
 #include "core/components_ng/pattern/text_field/text_field_overlay_modifier.h"
 
 #include "base/utils/utils.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/render/adapter/pixelmap_image.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/image_painter.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -111,6 +107,10 @@ void TextFieldOverlayModifier::SetSecondHandleOffset(const OffsetF& offset)
 
 void TextFieldOverlayModifier::onDraw(DrawingContext& context)
 {
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(host);
     auto& canvas = context.canvas;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         canvas.Save();
@@ -129,7 +129,7 @@ void TextFieldOverlayModifier::onDraw(DrawingContext& context)
     PaintEdgeEffect(frameSize_->Get(), context.canvas);
     PaintUnderline(context.canvas);
     PaintPreviewTextDecoration(context);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         RSBrush brush;
         brush.SetAntiAlias(true);
         brush.SetColor(hoverColor_->Get());

@@ -136,6 +136,7 @@ public:
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void SetEnablePreviewText(const JSCallbackInfo& info);
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
+    static void SetCapitalizationMode(const JSCallbackInfo& info);
     static void SetStopBackPress(const JSCallbackInfo& info);
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo);

@@ -48,6 +48,16 @@ public:
     virtual void ResetUnSelectedColor() {};
     virtual void ResetCheckMarkColor() {};
 
+    static inline std::string ToString(const CheckBoxStyle& style)
+    {
+        static const LinearEnumMapNode<CheckBoxStyle, std::string> table[] = {
+            { CheckBoxStyle::CIRCULAR_STYLE, "CIRCULAR" },
+            { CheckBoxStyle::SQUARE_STYLE, "SQUARE" },
+        };
+        auto iter = BinarySearchFindIndex(table, ArraySize(table), style);
+        return iter != -1 ? table[iter].value : "";
+    }
+
 private:
     static std::unique_ptr<CheckBoxModel> instance_;
     static std::mutex mutex_;

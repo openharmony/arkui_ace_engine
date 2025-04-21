@@ -48,6 +48,11 @@ public:
         SEND_TRANSLATE_RESULT_STR,
         END_WEB_TRANSLATE,
         GET_CURRENT_SHOWING_IMAGE,
+        GET_CURRENT_PAGE_NAME,
+        SENDCOMMAND_ASYNC_EVENT,
+        SENDCOMMAND_EVENT,
+        GET_VISIBLE_TREE,
+        SEND_COMMAND,
     };
 
     /**
@@ -55,7 +60,7 @@ public:
      * @return: result number
      */
     virtual int32_t GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback) = 0;
-
+    virtual int32_t GetVisibleInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback) = 0;
     /**
      * @description: define SA process and current process connect interface
      * @return: result number
@@ -92,6 +97,30 @@ public:
      */
     virtual int32_t RegisterWebUnfocusEventCallback(
         const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback) = 0;
+
+    /**
+     * @description: define register a callback on SendCommand event occur to execute interface
+     * @return: result number
+     *          0: Node execution is successful.
+     */
+    virtual int32_t SendCommand(int32_t id, const std::string& command) = 0;
+
+    /**
+     * @description: define register a callback on SendCommand Async event occur to execute interface
+     * @return: result number
+     *          0: Node execution is successful.
+     *          10: SendCommand Pipeline context is null.
+     *          11: SendCommand Task executor is null.
+     *          12: Error occurred during self handling of SendCommand.
+     *          13: Failure due to no nodes.
+     */
+    virtual int32_t SendCommandAsync(int32_t id, const std::string& command) = 0;
+
+    /**
+     * @description: define register a callback on Send keycode command occur to execute interface
+     * @return: result number
+     */
+    virtual int32_t SendCommand(const std::string command) = 0;
 
     /**
      * @description: define unregister the click event occur callback last register interface
@@ -174,6 +203,12 @@ public:
     virtual int32_t GetWebViewCurrentLanguage(const EventCallback& eventCallback) = 0;
 
     /**
+     * @description:get web component current page name
+     * @return: result number
+     */
+    virtual int32_t GetCurrentPageName(const std::function<void(std::string)>& finishCallback) = 0;
+
+    /**
      * @description:get all image with use imageComponents
      * @return: result number
      */
@@ -204,6 +239,7 @@ public:
         SEND_CURRENT_LANGUAGE,
         SEND_TEXT,
         SEND_IMAGES,
+        SEND_CURRENT_PAGE_NAME,
     };
 
     /**
@@ -255,6 +291,11 @@ public:
      * @description: define ui collect all pixelMap for sa service
      */
     virtual void SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) = 0;
+
+    /**
+     * @description: define ui send page name for sa service
+     */
+    virtual void SendCurrentPageName(const std::string& data) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

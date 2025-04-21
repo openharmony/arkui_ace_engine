@@ -540,6 +540,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
 
     auto dialog = GetHost();
     contentColumn->MountToParent(dialog);
+    AddExtraMaskNode(props);
     UpdateTextFontScale();
     if (isSuitableForElderly_ && NeedsButtonDirectionChange(props.buttons)) {
         //remove buttonContainer when Button text is too long
@@ -553,6 +554,30 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     UpdateTextFontScale();
 }
 
+void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
+{
+    auto dialog = GetHost();
+    CHECK_NULL_VOID(dialog);
+    auto pipeline = dialog->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    auto needAddMaskNode = props.maskTransitionEffect != nullptr || props.dialogTransitionEffect != nullptr;
+    if ((IsUIExtensionSubWindow() && props.isModal) ||
+        (needAddMaskNode && props.isModal && !props.isShowInSubWindow)) {
+        auto extraMaskNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        CHECK_NULL_VOID(extraMaskNode);
+        auto extraMaskNodeContext = extraMaskNode->GetRenderContext();
+        CHECK_NULL_VOID(extraMaskNodeContext);
+        auto maskLayoutProps = extraMaskNode->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_VOID(maskLayoutProps);
+        extraMaskNodeContext->UpdateBackgroundColor(props.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+        extraMaskNodeContext->UpdateZIndex(-1);
+        extraMaskNode->MountToParent(dialog);
+    }
+}
+
 void DialogPattern::BuildCustomChild(const DialogProperties& props, const RefPtr<UINode>& customNode)
 {
     auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -564,6 +589,7 @@ void DialogPattern::BuildCustomChild(const DialogProperties& props, const RefPtr
     customNode->MountToParent(contentWrapper);
     auto dialog = GetHost();
     contentWrapper->MountToParent(dialog);
+    AddExtraMaskNode(props);
 }
 
 RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogProperties)
@@ -1210,7 +1236,7 @@ bool DialogPattern::OnKeyEvent(const KeyEvent& event)
 
 void DialogPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-    auto onFocus = [wp = WeakClaim(this)]() {
+    auto onFocus = [wp = WeakClaim(this)](FocusReason reason) {
         auto pattern = wp.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -1228,11 +1254,11 @@ void DialogPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 Shadow GetDefaultShadow(ShadowStyle style)
 {
     Shadow shadow = Shadow::CreateShadow(ShadowStyle::None);
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, shadow);
     auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, shadow);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = pipeline->GetColorMode();
     shadow = shadowTheme->GetShadow(style, colorMode);
     return shadow;
 }
@@ -1265,6 +1291,9 @@ void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         json->PutExtAttr("subtitle", subtitle_.c_str(), filter);
         json->PutExtAttr("message", message_.c_str(), filter);
     }
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    json->PutExtAttr("uniRender", context->IsUniRenderEnabled() ? "true" : "false", filter);
 }
 
 void DialogPattern::OnColorConfigurationUpdate()
@@ -1732,7 +1761,7 @@ void DialogPattern::DumpBoolProperty()
     DumpLog::GetInstance().AddDesc("IsMenu: " + GetBoolStr(dialogProperties_.isMenu));
     DumpLog::GetInstance().AddDesc("IsMask: " + GetBoolStr(dialogProperties_.isMask));
     DumpLog::GetInstance().AddDesc("IsModal: " + GetBoolStr(dialogProperties_.isModal));
-    DumpLog::GetInstance().AddDesc("IsScenceBoardDialog: " + GetBoolStr(dialogProperties_.isScenceBoardDialog));
+    DumpLog::GetInstance().AddDesc("IsSceneBoardDialog: " + GetBoolStr(dialogProperties_.isSceneBoardDialog));
     DumpLog::GetInstance().AddDesc("IsSysBlurStyle: " + GetBoolStr(dialogProperties_.isSysBlurStyle));
     DumpLog::GetInstance().AddDesc("IsShowInSubWindow: " + GetBoolStr(dialogProperties_.isShowInSubWindow));
 }
@@ -1818,6 +1847,33 @@ void DialogPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
     }
 }
 
+void DialogPattern::UpdateHostWindowRect()
+{
+    CHECK_NULL_VOID(isUIExtensionSubWindow_);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto currentId = pipeline->GetInstanceId();
+    if (currentId < MIN_SUBCONTAINER_ID) {
+        return;
+    }
+
+    auto needUpdate = true;
+    if (SystemProperties::IsSuperFoldDisplayDevice()) {
+        auto container = AceEngine::Get().GetContainer(currentId);
+        auto isHalfFold = container && container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD;
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(currentId);
+        needUpdate = isHalfFold && subwindow && subwindow->IsSameDisplayWithParentWindow() && dialogProperties_.isModal;
+    }
+
+    if (needUpdate) {
+        InitHostWindowRect();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
 void DialogPattern::InitHostWindowRect()
 {
     if (!dialogProperties_.isShowInSubWindow) {
@@ -1891,7 +1947,7 @@ void DialogPattern::DumpBoolProperty(std::unique_ptr<JsonValue>& json)
     json->Put("IsMenu", GetBoolStr(dialogProperties_.isMenu).c_str());
     json->Put("IsMask", GetBoolStr(dialogProperties_.isMask).c_str());
     json->Put("IsModal", GetBoolStr(dialogProperties_.isModal).c_str());
-    json->Put("IsScenceBoardDialog", GetBoolStr(dialogProperties_.isScenceBoardDialog).c_str());
+    json->Put("IsSceneBoardDialog", GetBoolStr(dialogProperties_.isSceneBoardDialog).c_str());
     json->Put("IsSysBlurStyle", GetBoolStr(dialogProperties_.isSysBlurStyle).c_str());
     json->Put("IsShowInSubWindow", GetBoolStr(dialogProperties_.isShowInSubWindow).c_str());
 }
@@ -1952,6 +2008,37 @@ bool DialogPattern::IsShowInFreeMultiWindow()
         }
     }
     return container->IsFreeMultiWindow();
+}
+
+bool DialogPattern::IsWaterfallWindowMode()
+{
+    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
+        return false;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+
+    auto currentId = pipeline->GetInstanceId();
+    auto container = AceEngine::Get().GetContainer(currentId);
+    if (!container) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "container is null");
+        return false;
+    }
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        if (!container) {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "parent container is null");
+            return false;
+        }
+    }
+
+    auto halfFoldStatus = container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD;
+    auto isWaterfallWindow = container->IsWaterfallWindow();
+    return halfFoldStatus && isWaterfallWindow;
 }
 
 bool DialogPattern::IsShowInFloatingWindow()
@@ -2068,8 +2155,8 @@ void DialogPattern::DumpSimplifyBoolProperty(std::unique_ptr<JsonValue>& json)
     if (dialogProperties_.isModal) {
         json->Put("IsModal", GetBoolStr(dialogProperties_.isModal).c_str());
     }
-    if (dialogProperties_.isScenceBoardDialog) {
-        json->Put("IsScenceBoardDialog", GetBoolStr(dialogProperties_.isScenceBoardDialog).c_str());
+    if (dialogProperties_.isSceneBoardDialog) {
+        json->Put("IsSceneBoardDialog", GetBoolStr(dialogProperties_.isSceneBoardDialog).c_str());
     }
     if (dialogProperties_.isSysBlurStyle) {
         json->Put("IsSysBlurStyle", GetBoolStr(dialogProperties_.isSysBlurStyle).c_str());

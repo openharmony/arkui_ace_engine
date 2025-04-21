@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/pattern/image_animator/controlled_animator.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -590,11 +591,7 @@ bool ImageAnimatorPattern::IsFormRender()
 {
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
-
-    auto container = Container::Current();
-    bool isDynamicComponent = container && container->IsDynamicRender() &&
-                              container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
-    return pipeline->IsFormRender() && !isDynamicComponent;
+    return pipeline->IsFormRenderExceptDynamicComponent();
 }
 
 void ImageAnimatorPattern::UpdateFormDurationByRemainder()

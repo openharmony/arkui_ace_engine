@@ -180,6 +180,7 @@ public:
     virtual void SetDigitalCrownSensitivity(int32_t sensitivity) {}
     virtual void SetDisableTransitionAnimation(bool isDisable) {}
     virtual void SetBindIndicator(bool bind) {}
+    virtual void SetJSIndicatorController(std::function<void()> resetFunc) {}
     virtual void SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected) {}
 
 private:

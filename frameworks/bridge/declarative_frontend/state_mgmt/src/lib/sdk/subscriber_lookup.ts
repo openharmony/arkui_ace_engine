@@ -20,11 +20,15 @@
 
 class SubscriberManager {
 
-  private subscriberById_: Map<number, IPropertySubscriber>;
+  private subscriberById_: Map<number, WeakRef<IPropertySubscriber>>;
 
   private static instance_: SubscriberManager;
 
   private static nextId_: number = 0;
+
+  private static finalizationRegistry_ = new FinalizationRegistry(subscriberId => {
+    SubscriberManager.GetInstance().subscriberById_?.delete(subscriberId);
+  });
 
   /**
     * check subscriber is known
@@ -158,7 +162,7 @@ class SubscriberManager {
    * @see Has
    */
   public has(id: number): boolean {
-    return this.subscriberById_.has(id);
+    return !!this.subscriberById_.get(id)?.deref();
   }
 
   /**
@@ -166,7 +170,7 @@ class SubscriberManager {
    * @see Get
    */
   public get(id: number): IPropertySubscriber {
-    return this.subscriberById_.get(id);
+    return this.subscriberById_.get(id)?.deref();
   }
 
   /**
@@ -174,10 +178,12 @@ class SubscriberManager {
  * @see Delete
  */
   public delete(id: number): boolean {
-    if (!this.has(id)) {
+    const subscriber = this.get(id);
+    if (!subscriber) {
       stateMgmtConsole.warn(`SubscriberManager.delete unknown id ${id} `);
       return false;
     }
+    SubscriberManager.finalizationRegistry_.unregister(subscriber);
     return this.subscriberById_.delete(id);
   }
 
@@ -185,12 +191,18 @@ class SubscriberManager {
  * not a public / sdk function
  * @see Add
  */
-  public add(newSubsriber: IPropertySubscriber): boolean {
-    if (this.has(newSubsriber.id__())) {
+  public add(newSubscriber: IPropertySubscriber): boolean {
+    if (this.has(newSubscriber.id__())) {
       return false;
     }
-    this.subscriberById_.set(newSubsriber.id__(), newSubsriber);
+    this.set(newSubscriber.id__(), newSubscriber);
     return true;
+  }
+
+  private set(id: number, subscriber: IPropertySubscriber): void {
+    SubscriberManager.finalizationRegistry_.unregister(subscriber);
+    SubscriberManager.finalizationRegistry_.register(subscriber, id, subscriber);
+    this.subscriberById_.set(id, new WeakRef(subscriber));
   }
 
   public updateRecycleElmtId(oldId: number, newId: number): boolean {
@@ -198,8 +210,8 @@ class SubscriberManager {
       return false;
     }
     const subscriber = this.get(oldId);
-    this.subscriberById_.delete(oldId);
-    this.subscriberById_.set(newId, subscriber);
+    this.delete(oldId);
+    this.set(newId, subscriber);
     return true;
   }
 
@@ -220,8 +232,8 @@ class SubscriberManager {
    */
   public dumpSubscriberInfo(): void {
     stateMgmtConsole.debug('Dump of SubscriberManager +++ (sart)');
-    for (let [id, subscriber] of this.subscriberById_) {
-      stateMgmtConsole.debug(`Id: ${id} -> ${subscriber['info'] ? subscriber['info']() : 'unknown'}`);
+    for (let [id, weakRef] of this.subscriberById_) {
+      stateMgmtConsole.debug(`Id: ${id} -> ${weakRef.deref()?.['info'] ? weakRef.deref()?.['info']() : 'unknown'}`);
     }
     stateMgmtConsole.debug('Dump of SubscriberManager +++ (end)');
   }
@@ -241,7 +253,7 @@ class SubscriberManager {
    * internal method
    */
   private constructor() {
-    this.subscriberById_ = new Map<number, IPropertySubscriber>();
+    this.subscriberById_ = new Map<number, WeakRef<IPropertySubscriber>>();
     stateMgmtConsole.debug('SubscriberManager has been created.');
   }
 }

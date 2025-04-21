@@ -21,6 +21,7 @@
 #include "iservice_registry.h"
 #include "singleton.h"
 #include "system_ability_definition.h"
+#include "transaction/rs_interfaces.h"
 
 #include "base/utils/utils.h"
 
@@ -278,6 +279,7 @@ void PageUrlCheckerOhos::NotifyPageShow(const std::string& pageName)
     pageStateData.pageName = pageName;
     pageStateData.targetBundleName = targetBundleName;
     pageStateData.targetModuleName = targetModuleName;
+    OHOS::Rosen::RSInterfaces::GetInstance().NotifyPageName(targetBundleName, pageName, true);
     DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->
         NotifyPageShow(context_->GetToken(), pageStateData);
 }
@@ -294,6 +296,7 @@ void PageUrlCheckerOhos::NotifyPageHide(const std::string& pageName)
     pageStateData.pageName = pageName;
     pageStateData.targetBundleName = targetBundleName;
     pageStateData.targetModuleName = targetModuleName;
+    OHOS::Rosen::RSInterfaces::GetInstance().NotifyPageName(targetBundleName, pageName, false);
     DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->
         NotifyPageHide(context_->GetToken(), pageStateData);
 }

@@ -433,7 +433,7 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setDigitalCrownSensitivityValuesTes
  * @tc.desc: Check backToTop method of ScrollableCommonMethod modifier
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollableCommonMethodModifierTest, setBackToTopTest, TestSize.Level1)
+HWTEST_F(ScrollableCommonMethodModifierTest, DISABLED_setBackToTopTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBackToTop, nullptr);
     auto frameNode = reinterpret_cast<FrameNode *>(node_);

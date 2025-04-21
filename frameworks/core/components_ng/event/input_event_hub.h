@@ -112,6 +112,14 @@ public:
         accessibilityHoverEventActuator_->ReplaceInputEvent(std::move(onAccessibilityHoverEventFunc));
     }
 
+    bool HasAccessibilityHoverEvent()
+    {
+        if (accessibilityHoverEventActuator_) {
+            return accessibilityHoverEventActuator_->HasUserCallback();
+        }
+        return false;
+    }
+
     void SetJSFrameNodeOnHoverEvent(OnHoverFunc&& onHoverEventFunc)
     {
         if (!hoverEventActuator_) {
@@ -186,6 +194,7 @@ public:
 
     // the return value means prevents event bubbling.
     bool ProcessMouseTestHit(const OffsetF& coordinateOffset, TouchTestResult& result);
+    bool ProcessTipsMouseTestHit(const OffsetF& coordinateOffset, TouchTestResult& result);
 
     bool ProcessPenHoverTestHit(const OffsetF& coordinateOffset, TouchTestResult& result);
 

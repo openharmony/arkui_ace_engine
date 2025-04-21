@@ -47,6 +47,8 @@ public:
 
     void Init() override;
 
+    void InitArkUI_X() override;
+
     void Destroy() override;
 
     void SetRootRenderNode(const RefPtr<RenderNode>& root) override {}
@@ -107,6 +109,7 @@ public:
     float GetRefreshRate() const override;
 
     void SetKeepScreenOn(bool keepScreenOn) override;
+    void SetViewKeepScreenOn(bool keepScreenOn) override;
 
     int64_t GetVSyncPeriod() const override;
 

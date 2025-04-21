@@ -15,7 +15,9 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
 
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -27,14 +29,14 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<CheckBoxPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             host->GetGeometryNode()->ResetContent();
         } else {
             host->GetGeometryNode()->Reset();
         }
         return std::nullopt;
     }
-    InitializeParam();
+    InitializeParam(host);
     // Case 1: Width and height are set in the front end.
     if (contentConstraint.selfIdealSize.Width().has_value() && contentConstraint.selfIdealSize.Height().has_value() &&
         contentConstraint.selfIdealSize.IsNonNegative()) {
@@ -109,15 +111,16 @@ void CheckBoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 }
 
-void CheckBoxLayoutAlgorithm::InitializeParam()
+void CheckBoxLayoutAlgorithm::InitializeParam(const RefPtr<FrameNode>& host)
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto checkBoxTheme = context->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);
     defaultWidth_ = checkBoxTheme->GetDefaultWidth().ConvertToPx();
     defaultHeight_ = checkBoxTheme->GetDefaultHeight().ConvertToPx();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         horizontalPadding_ = checkBoxTheme->GetDefaultPaddingSize().ConvertToPx();
         verticalPadding_ = checkBoxTheme->GetDefaultPaddingSize().ConvertToPx();
     } else {

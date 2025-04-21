@@ -44,6 +44,8 @@ public:
     void CreateNewChildStart(const std::string& id) override;
     void CreateNewChildFinish(const std::string& id) override;
 
+    void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
+        std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop) override;
     void OnMove(std::function<void(int32_t, int32_t)>&& onMove) override;
 };
 } // namespace OHOS::Ace::NG

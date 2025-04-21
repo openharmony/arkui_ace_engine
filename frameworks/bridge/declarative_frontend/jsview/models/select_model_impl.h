@@ -58,6 +58,7 @@ public:
     void SetSpace(const Dimension& value) override;
     void SetArrowPosition(const ArrowPosition value) override;
     void SetMenuAlign(const MenuAlign& menuAlign) override;
+    void SetAvoidance(AvoidanceMode mode) override;
     void SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent) override;
     void SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent) override;
     void SetOptionWidth(const Dimension& value) override;
@@ -67,12 +68,19 @@ public:
     void SetMenuBackgroundColor(const Color& color) override;
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
     void SetDivider(const NG::SelectDivider& divider) override {}
+    void SetDividerStyle(const NG::SelectDivider& divider, const DividerMode& mode) override {};
     void SetControlSize(const std::optional<ControlSize>& controlSize) override {}
     void SetLayoutDirection(TextDirection value) override;
     ControlSize GetControlSize() override { return ControlSize{}; }
     void ResetFontColor() override {};
     void BackgroundColor(const Color& color) override {};
     void ResetBackgroundColor() override {};
+    void SetMenuOutline(const NG::MenuParam& menuParam) override;
+    void SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply) override {};
+    void SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply) override {};
+    void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply) override {};
+    void SetSelectedOptionTextModifier(
+        const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_SELECT_MODEL_IMPL_H

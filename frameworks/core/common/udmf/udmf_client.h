@@ -74,6 +74,14 @@ public:
     virtual std::vector<uint8_t> GetSpanStringRecord(const RefPtr<UnifiedData>& unifiedData) = 0;
     virtual int32_t StartAsyncDataRetrieval(napi_env env, napi_value napiValue, const std::string& key) = 0;
     virtual int32_t Cancel(const std::string& key) = 0;
+
+    virtual void SetTagProperty(const RefPtr<UnifiedData>& unifiedData, const std::string& tag) = 0;
+    virtual std::string GetPlainTextEntry(const RefPtr<UnifiedData>& unifiedData) = 0;
+    virtual void GetHtmlEntry(
+        const RefPtr<UnifiedData>& unifiedData, std::string& htmlContent, std::string& plainContent) = 0;
+    virtual void GetLinkEntry(const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description) = 0;
+    virtual bool GetFileUriEntry(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri) = 0;
+    virtual std::vector<uint8_t> GetSpanStringEntry(const RefPtr<UnifiedData>& unifiedData) = 0;
 };
 } // namespace OHOS::Ace
 #endif

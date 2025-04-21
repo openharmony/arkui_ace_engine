@@ -1083,7 +1083,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest011, TestSize.Level1)
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
     auto pipeline = PipelineContext::GetCurrentContext();
     focusHub->currentFocus_ = false;
-    pipeline->isFocusActive_ = true;
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_TAB;
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_HOME);

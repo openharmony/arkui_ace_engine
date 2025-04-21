@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/linear_indicator/linear_indicator_layout_property.h"
 
 #include "core/components_ng/pattern/linear_indicator/linear_indicator_theme.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 

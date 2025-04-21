@@ -20,6 +20,12 @@
 
 namespace OHOS::Ace {
 
+struct KeyFrameConfig {
+    bool enableKeyFrame_ = false;
+    int32_t animationDuration_ = 0;
+    int32_t animationDelay_ = 0;
+};
+
 class ViewportConfig {
 public:
     ViewportConfig() = default;
@@ -129,6 +135,18 @@ public:
         return config;
     }
 
+    void SetKeyFrameConfig(bool enableKeyFrame, int32_t animationDuration, int32_t animationDelay)
+    {
+        keyFrameConfig_.enableKeyFrame_ = enableKeyFrame;
+        keyFrameConfig_.animationDuration_ = animationDuration;
+        keyFrameConfig_.animationDelay_ = animationDelay;
+    }
+
+    KeyFrameConfig GetKeyFrameConfig() const
+    {
+        return keyFrameConfig_;
+    }
+
 private:
     int32_t width_ = 0;
     int32_t height_ = 0;
@@ -138,6 +156,7 @@ private:
     float density_ = 1.0f;
     uint32_t transform_ = 0;
     uint64_t displayId_ = 0;
+    KeyFrameConfig keyFrameConfig_;
 };
 
 } // namespace OHOS::Ace

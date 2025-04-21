@@ -153,8 +153,15 @@ void JSScrollableBase::JSClipContent(const JSCallbackInfo& info)
     NG::ScrollableModelNG::SetContentClip(NG::ContentClipMode::DEFAULT, nullptr);
 }
 
-void JSScrollableBase::JSBackToTop(bool backToTop)
+void JSScrollableBase::JSBackToTop(const JSCallbackInfo& info)
 {
-    NG::ScrollableModelNG::SetBackToTop(backToTop);
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        NG::ScrollableModelNG::SetBackToTop(info[0]->ToBoolean());
+    } else {
+        NG::ScrollableModelNG::ResetBackToTop();
+    }
 }
 } // namespace OHOS::Ace::Framework

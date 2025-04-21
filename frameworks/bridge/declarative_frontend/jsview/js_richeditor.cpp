@@ -262,8 +262,7 @@ JSRef<JSObject> JSRichEditor::CreateJsTextBackgroundStyle(const TextBackgroundSt
 {
     JSRef<JSObject> textBackgroundStyleObj = JSRef<JSObject>::New();
     textBackgroundStyleObj->SetProperty<std::string>("color", style.backgroundColor->ColorToString());
-    textBackgroundStyleObj->SetProperty<std::string>(
-        "BorderRadiusProperty", style.backgroundRadius->ToString());
+    textBackgroundStyleObj->SetProperty<std::string>("radius", style.backgroundRadius->ToString());
     return textBackgroundStyleObj;
 }
 
@@ -279,7 +278,19 @@ JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& text
         paragraphStyleObj->SetProperty<int32_t>("wordBreak", textStyleResult.wordBreak);
         paragraphStyleObj->SetProperty<int32_t>("lineBreakStrategy", textStyleResult.lineBreakStrategy);
     }
+    if (textStyleResult.paragraphSpacing.has_value()) {
+        paragraphStyleObj->SetProperty<double>("paragraphSpacing",
+            textStyleResult.paragraphSpacing.value().ConvertToFp());
+    }
     return paragraphStyleObj;
+}
+
+void JSRichEditor::SetJSUrlStyle(const std::u16string& urlAddress, JSRef<JSObject>& resultObj)
+{
+    CHECK_NULL_VOID(!urlAddress.empty());
+    JSRef<JSObject> urlStyleObj = JSRef<JSObject>::New();
+    urlStyleObj->SetProperty<std::u16string>("url", urlAddress);
+    resultObj->SetPropertyObject("urlStyle", urlStyleObj);
 }
 
 JSRef<JSObject> JSRichEditor::CreateJSSymbolSpanStyleResult(const SymbolSpanStyle& symbolSpanStyle)
@@ -300,6 +311,7 @@ JSRef<JSObject> JSRichEditor::CreateJSSymbolSpanStyleResult(const SymbolSpanStyl
 JSRef<JSObject> JSRichEditor::CreateJSValueResource(const RefPtr<ResourceObject>& valueResource)
 {
     JSRef<JSObject> valueResourceObj = JSRef<JSObject>::New();
+    CHECK_NULL_RETURN(valueResource, valueResourceObj);
     valueResourceObj->SetProperty<std::string>("bundleName", valueResource->GetBundleName());
     valueResourceObj->SetProperty<std::string>("moduleName", valueResource->GetModuleName());
     valueResourceObj->SetProperty<uint32_t>("id", valueResource->GetId());
@@ -354,6 +366,9 @@ JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& in
     }
 #endif
     obj->SetPropertyObject("leadingMargin", lmObj);
+    if (info.paragraphSpacing.has_value()) {
+        obj->SetProperty<double>("paragraphSpacing", info.paragraphSpacing.value());
+    }
     return obj;
 }
 
@@ -382,6 +397,7 @@ void JSRichEditor::SetJSSpanResultObject(JSRef<JSObject>& resultObj, const Resul
         resultObj->SetProperty<std::u16string>("previewText", resultObject.previewText);
         resultObj->SetPropertyObject("textStyle", CreateJSTextStyleResult(resultObject.textStyle));
         resultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(resultObject.textStyle));
+        SetJSUrlStyle(resultObject.urlAddress, resultObj);
     } else if (resultObject.type == SelectSpanType::TYPESYMBOLSPAN) {
         resultObj->SetProperty<std::u16string>("value", resultObject.valueString);
         resultObj->SetPropertyObject("symbolSpanStyle", CreateJSSymbolSpanStyleResult(resultObject.symbolSpanStyle));
@@ -722,6 +738,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     onIMEInputCompleteObj->SetPropertyObject("textStyle", textStyleObj);
     onIMEInputCompleteObj->SetPropertyObject("offsetInSpan", offsetInSpan);
     onIMEInputCompleteObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(textSpanResult.GetTextStyle()));
+    SetJSUrlStyle(textSpanResult.GetUrlAddress(), onIMEInputCompleteObj);
     return JSRef<JSVal>::Cast(onIMEInputCompleteObj);
 }
 
@@ -778,6 +795,7 @@ void JSRichEditor::SetJSDeleteSpan(JSRef<JSObject>& spanResultObj, const NG::Ric
             spanResultObj->SetProperty<std::u16string>("previewText", it.GetPreviewText());
             spanResultObj->SetPropertyObject("textStyle", textStyleObj);
             spanResultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(it.GetTextStyle()));
+            SetJSUrlStyle(it.GetUrlAddress(), spanResultObj);
             break;
         }
         case NG::SpanResultType::IMAGE: {
@@ -845,6 +863,7 @@ void JSRichEditor::SetTextChangeSpanResult(JSRef<JSObject>& resultObj,
     resultObj->SetProperty<std::u16string>("previewText", spanResult.GetPreviewText());
     resultObj->SetPropertyObject("textStyle", textStyleObj);
     resultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(spanResult.GetTextStyle()));
+    SetJSUrlStyle(spanResult.GetUrlAddress(), resultObj);
 }
 
 void JSRichEditor::SetSymbolChangeSpanResult(JSRef<JSObject>& resultObj,
@@ -1011,17 +1030,16 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
     }
 
     // Builder
-    if (info.Length() < 2 || !info[1]->IsObject()) {
-        return;
+    const int32_t builderParamIndex = 1;
+    CHECK_NULL_VOID(info.Length() > builderParamIndex);
+    RefPtr<JsFunction> builderFunc = nullptr;
+    if (!info[1]->IsUndefined() && info[1]->IsObject()) {
+        JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[1]);
+        auto builder = menuObj->GetProperty("builder");
+        if (builder->IsFunction()) {
+            builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        }
     }
-
-    JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[1]);
-    auto builder = menuObj->GetProperty("builder");
-    if (!builder->IsFunction()) {
-        return;
-    }
-    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-    CHECK_NULL_VOID(builderFunc);
 
     // responseType
     NG::TextResponseType responseType = NG::TextResponseType::LONG_PRESS;
@@ -1029,11 +1047,14 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
         auto response = info[2]->ToNumber<int32_t>();
         responseType = static_cast<NG::TextResponseType>(response);
     }
-    std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("BindSelectionMenu");
-        func->Execute();
-    };
+    std::function<void()> buildFunc = nullptr;
+    if (builderFunc) {
+        buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("BindSelectionMenu");
+            func->Execute();
+        };
+    }
     NG::SelectMenuParam menuParam;
     const int32_t requiredParamCount = 3;
     if (info.Length() > requiredParamCount && info[requiredParamCount]->IsObject()) {
@@ -1047,6 +1068,7 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
             return;
         }
     }
+    CHECK_NULL_VOID(buildFunc);
     RichEditorModel::GetInstance()->BindSelectionMenu(editorType, responseType, buildFunc, menuParam);
 }
 
@@ -1562,6 +1584,19 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     }
 }
 
+void JSRichEditorBaseController::ParseTextUrlStyle(const JSRef<JSObject>& jsObject,
+    std::optional<std::u16string>& urlAddressOpt)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    JSRef<JSObject> urlStyleObj = JSObjectCast(jsObject->GetProperty("urlStyle"));
+    CHECK_NULL_VOID(!urlStyleObj->IsUndefined());
+ 
+    JSRef<JSVal> urlObj = urlStyleObj->GetProperty("url");
+    std::u16string urlAddress;
+    CHECK_NULL_VOID(JSContainerBase::ParseJsString(urlObj, urlAddress));
+    urlAddressOpt = urlAddress;
+}
+
 void JSRichEditorController::ParseUserGesture(
     const JSCallbackInfo& args, UserGestureOptions& gestureOption, const std::string& spanType)
 {
@@ -1845,6 +1880,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
         if (ParseParagraphStyle(paraStyleObj, style)) {
             options.paraStyle = style;
         }
+        ParseTextUrlStyle(spanObject, options.urlAddress);
         UserGestureOptions gestureOption;
         ParseUserGesture(args, gestureOption, "TextSpan");
         options.userGestureOption = std::move(gestureOption);
@@ -2182,6 +2218,17 @@ void JSRichEditorController::ParseTextAlignParagraphStyle(const JSRef<JSObject>&
     }
 }
 
+void JSRichEditorController::ParseParagraphSpacing(const JSRef<JSObject>& styleObject,
+    struct UpdateParagraphStyle& style)
+{
+    auto paragraphSpacing = styleObject->GetProperty("paragraphSpacing");
+    CalcDimension size;
+    if (!paragraphSpacing->IsNull() && JSContainerBase::ParseJsDimensionFpNG(paragraphSpacing, size, false) &&
+        !size.IsNegative() && size.Unit() != DimensionUnit::PERCENT) {
+        style.paragraphSpacing = size;
+    }
+}
+
 bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -2193,6 +2240,7 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
         ParseLineBreakStrategyParagraphStyle(styleObject, style);
         ParseWordBreakParagraphStyle(styleObject, style);
     }
+    ParseParagraphSpacing(styleObject, style);
 
     auto lm = styleObject->GetProperty("leadingMargin");
     if (lm->IsObject()) {
@@ -2272,6 +2320,7 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
         TextStyle symbolTextStyle;
         ParseJsSymbolSpanStyle(richEditorSymbolSpanStyle, symbolTextStyle, updateSpanStyle_);
     }
+    ParseTextUrlStyle(jsObject, updateSpanStyle_.updateUrlAddress);
 
     auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
     CHECK_NULL_VOID(richEditorController);
@@ -2582,6 +2631,7 @@ void JSRichEditorBaseController::ParseTextDecoration(
     if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
         updateSpanStyle.updateTextDecorationColor = style.GetTextColor();
         style.SetTextDecorationColor(style.GetTextColor());
+        CHECK_NULL_VOID(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
         updateSpanStyle.useThemeDecorationColor = false;
     }
 }
@@ -2960,7 +3010,12 @@ JSRef<JSVal> JSRichEditorStyledStringController::CreateJsOnWillChange(const NG::
     jsSpanString->SetController(spanString);
     onWillChangeObj->SetPropertyObject("range", rangeObj);
     onWillChangeObj->SetPropertyObject("replacementString", replacementStringObj);
-    onWillChangeObj->SetPropertyObject("previewText", JSRef<JSVal>::Make(ToJSValue(changeValue.GetPreviewText())));
+    if (changeValue.GetPreviewText()) {
+        JSRef<JSObject> previewTextObj = JSClass<JSSpanString>::NewInstance();
+        auto jsPreviewTextSpanString = Referenced::Claim(previewTextObj->Unwrap<JSSpanString>());
+        jsPreviewTextSpanString->SetController(AceType::DynamicCast<SpanString>(changeValue.GetPreviewText()));
+        onWillChangeObj->SetPropertyObject("previewText", previewTextObj);
+    }
     return JSRef<JSVal>::Cast(onWillChangeObj);
 }
 

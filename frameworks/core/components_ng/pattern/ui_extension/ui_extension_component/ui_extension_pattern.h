@@ -68,6 +68,9 @@ class PointerEvent;
 
 namespace OHOS::Ace {
 class ModalUIExtensionProxy;
+class AccessibilityChildTreeCallback;
+class AccessibilitySAObserverCallback;
+struct AccessibilityParentRectInfo;
 } // namespace OHOS::Ace
 
 namespace OHOS::Rosen {
@@ -97,6 +100,7 @@ public:
         bool isAsyncModalBinding = false, SessionType sessionType = SessionType::UI_EXTENSION_ABILITY);
     ~UIExtensionPattern() override;
 
+    void Initialize();
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     FocusPattern GetFocusPattern() const override;
     RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
@@ -119,6 +123,10 @@ public:
     void RegisterWindowSceneVisibleChangeCallback(const RefPtr<Pattern>& windowScenePattern);
     void UnRegisterWindowSceneVisibleChangeCallback(int32_t nodeId);
     void OnWindowSceneVisibleChange(bool visible);
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+    void OnAttachContext(PipelineContext *context) override;
+    void OnDetachContext(PipelineContext *context) override;
 
     void OnConnect();
     void OnDisconnect(bool isAbnormal);
@@ -295,6 +303,7 @@ private:
     void OnColorConfigurationUpdate() override;
     void OnModifyDone() override;
     bool CheckConstraint();
+    bool CheckHostUiContentConstraint();
 
     void InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub);
     void InitKeyEventOnBlur(const RefPtr<FocusHub>& focusHub);
@@ -321,6 +330,17 @@ private:
     void DispatchFocusState(bool focusState);
     void DispatchDisplayArea(bool isForce = false);
     void LogoutModalUIExtension();
+    bool IsMoving();
+    void UnRegisterEvent(int32_t instanceId);
+    void UnRegisterPipelineEvent(int32_t instanceId);
+    void UnRegisterPipelineEvent(
+        const RefPtr<PipelineContext>& pipeline, FrameNode* frameNode);
+    void UnRegisterUIExtensionManagerEvent(int32_t instanceId);
+    void RegisterEvent(int32_t instanceId);
+    void RegisterPipelineEvent(int32_t instanceId);
+    void RegisterPipelineEvent(const RefPtr<PipelineContext>& pipeline);
+    void RegisterUIExtensionManagerEvent(int32_t instanceId);
+    void UpdateSessionInstanceId(int32_t instanceId);
 
     void RegisterVisibleAreaChange();
     void MountPlaceholderNode(PlaceholderType type);
@@ -362,6 +382,7 @@ private:
     bool IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag);
     bool IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag);
     AccessibilityParentRectInfo GetAccessibilityRectInfo() const;
+    void ReDispatchWantParams();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -393,6 +414,7 @@ private:
     bool isTransferringCaller_ = false;
     bool isVisible_ = true;
     bool isModal_ = false;
+    bool hasInitialize_ = false;
     bool isAsyncModalBinding_ = false;
     PlaceholderType curPlaceholderType_ = PlaceholderType::NONE;
     bool isFoldStatusChanged_ = false;
@@ -403,6 +425,7 @@ private:
     bool viewportConfigChanged_ = false;
     bool displayAreaChanged_ = false;
     bool isKeyAsync_ = false;
+    bool hasDetachContext_ = false;
     // Whether to send the focus to the UIExtension
     // No multi-threading problem due to run js thread
     bool canFocusSendToUIExtension_ = true;

@@ -55,6 +55,7 @@ enum class UIContentBusinessCode : uint32_t {
     // uiextension session business begin
     EVENT_PROXY = 1001,
     SEND_PAGE_MODE = 1002,
+    SEND_PAGE_MODE_TO_UEA = 1003,
     // accessibility business begin
     TRANSFORM_PARAM = 2001,
     // avoid info business begin

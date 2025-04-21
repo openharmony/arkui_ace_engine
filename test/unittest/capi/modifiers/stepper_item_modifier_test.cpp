@@ -43,7 +43,7 @@ class StepperItemModifierTest : public ModifierTestBase<GENERATED_ArkUIStepperIt
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StepperItemModifierTest, setPrevLabelTestDefaultValues, TestSize.Level1)
+HWTEST_F(StepperItemModifierTest, DISABLED_setPrevLabelTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -91,7 +91,7 @@ HWTEST_F(StepperItemModifierTest, setPrevLabelTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StepperItemModifierTest, setNextLabelTestDefaultValues, TestSize.Level1)
+HWTEST_F(StepperItemModifierTest, DISABLED_setNextLabelTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;

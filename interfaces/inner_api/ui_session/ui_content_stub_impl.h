@@ -38,6 +38,9 @@ public:
     int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback) override;
     int32_t RegisterWebUnfocusEventCallback(
         const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback) override;
+    int32_t SendCommand(int32_t id, const std::string& command) override;
+    int32_t SendCommandAsync(int32_t id, const std::string& command) override;
+    int32_t SendCommand(const std::string command) override;
     int32_t UnregisterClickEventCallback() override;
     int32_t UnregisterSearchEventCallback() override;
     int32_t UnregisterRouterChangeEventCallback() override;
@@ -53,10 +56,12 @@ public:
         const std::string& data, const std::function<void(int32_t, std::string)>& eventCallback) override;
     int32_t SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids) override;
     int32_t EndWebViewTranslate() override;
+    int32_t GetCurrentPageName(const std::function<void(std::string)>& finishCallback) override;
     int32_t SendTranslateResult(int32_t nodeId, std::string result) override;
     int32_t GetCurrentImagesShowing(
         const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& finishCallback)
         override;
+    int32_t GetVisibleInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback) override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_IMPL_H

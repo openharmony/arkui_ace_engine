@@ -154,7 +154,12 @@ public:
     {
         return 0;
     }
-    
+
+    bool GetIsWideColorGamut() const override
+    {
+        return false;
+    }
+
 private:
     int32_t stubWidth = 2;
     int32_t stubHeight = 2;

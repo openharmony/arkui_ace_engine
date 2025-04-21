@@ -292,13 +292,15 @@ public:
     bool OnSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
         OHOS::NWeb::SslError error, const std::vector<std::string>& certChainData) override;
 
-    void OnAccessibilityEvent(int64_t accessibilityId, int32_t eventType) override;
+    void OnAccessibilityEventV2(int64_t accessibilityId, int32_t eventType, const std::string& argument) override;
 
     bool IsCurrentFocus() override;
 
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight) override;
 
     void OnScrollStart(const float x, const float y) override;
+
+    void RestoreRenderFit() override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

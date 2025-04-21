@@ -38,6 +38,8 @@ public:
     void CreateNewChildStart(const std::string& id) override;
     void CreateNewChildFinish(const std::string& id) override;
     void OnMove(std::function<void(int32_t, int32_t)>&& onMove) override {};
+    void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
+        std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop) override {};
     void SetRemovedElmtIds(std::list<int32_t>& removedElmtId) override {};
 };
 }  // namespace OHOS::Ace::Framework

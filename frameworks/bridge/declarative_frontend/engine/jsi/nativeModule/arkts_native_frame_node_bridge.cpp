@@ -43,6 +43,7 @@ constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t INDEX_OF_INTERVAL = 4;
 constexpr int32_t INDEX_OF_OPTION_OF_VISIBLE = 3;
+constexpr int DEFAULT_EXPECTED_UPDATE_INTERVAL = 1000;
 
 ArkUI_Bool GetIsExpanded(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 index)
 {
@@ -612,6 +613,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, Gest
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value_or(0.0f))));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetRollAngle().value_or(0.0f))));
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     obj->Set(
@@ -619,6 +622,10 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, Gest
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
         panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(info.GetSourceTool()))));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), CreateEventTargetObject(vm, info));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getModifierKeyState"),
+        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState));
+    obj->SetNativePointerFieldCount(vm, 1);
+    obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
     return obj;
 }
 
@@ -658,22 +665,28 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnClick(ArkUIRuntimeCallInfo* runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
-Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo& info)
+Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfoObj(EcmaVM* vm, TouchEventInfo& info)
 {
     const char* keys[] = { "source", "timestamp", "target", "pressure", "deviceId" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
         panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
         CreateEventTargetObject(vm, info), panda::NumberRef::New(vm, info.GetForce()),
         panda::NumberRef::New(vm, info.GetDeviceId()) };
-    auto eventObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+}
+
+Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo& info)
+{
+    auto eventObj = CreateTouchEventInfoObj(vm, info);
     eventObj->SetNativePointerFieldCount(vm, 1);
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value_or(0.0f))));
+    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetRollAngle().value_or(0.0f))));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
         panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(info.GetSourceTool()))));
-
     auto touchArr = panda::ArrayRef::New(vm);
     const std::list<TouchLocationInfo>& touchList = info.GetTouches();
     uint32_t idx = 0;
@@ -681,7 +694,6 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
         panda::ArrayRef::SetValueAt(vm, touchArr, idx++, CreateTouchInfo(vm, location, info));
     }
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "touches"), touchArr);
-
     auto changeTouchArr = panda::ArrayRef::New(vm);
     idx = 0; // reset index counter
     const std::list<TouchLocationInfo>& changeTouch = info.GetChangedTouches();
@@ -814,6 +826,25 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnDisappear(ArkUIRuntimeCallInfo* run
     return panda::JSValueRef::Undefined(vm);
 }
 
+Local<panda::ObjectRef> FrameNodeBridge::CreateKeyEventInfoObj(EcmaVM* vm, KeyEventInfo& info)
+{
+    const char* keys[] = { "type", "keyCode", "keyText", "keySource", "deviceId", "metaKey", "timestamp",
+        "stopPropagation", "getModifierKeyState", "intentionCode", "isNumLockOn", "isCapsLockOn", "isScrollLockOn" };
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyType())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyCode())),
+        panda::StringRef::NewFromUtf8(vm, info.GetKeyText()),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeySource())),
+        panda::NumberRef::New(vm, info.GetDeviceId()), panda::NumberRef::New(vm, info.GetMetaKey()),
+        panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
+        panda::FunctionRef::New(vm, Framework::JsStopPropagation),
+        panda::FunctionRef::New(vm, NG::ArkTSUtils::JsGetModifierKeyState),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyIntention())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetNumLock())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetCapsLock())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetScrollLock())) };
+    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+}
+
 ArkUINativeModuleValue FrameNodeBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -842,18 +873,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runt
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        const char* keys[] = { "type", "keyCode", "keyText", "keySource", "deviceId", "metaKey", "timestamp",
-            "stopPropagation", "getModifierKeyState", "intentionCode" };
-        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyType())),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyCode())),
-            panda::StringRef::NewFromUtf8(vm, info.GetKeyText()),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeySource())),
-            panda::NumberRef::New(vm, info.GetDeviceId()), panda::NumberRef::New(vm, info.GetMetaKey()),
-            panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
-            panda::FunctionRef::New(vm, Framework::JsStopPropagation),
-            panda::FunctionRef::New(vm, NG::ArkTSUtils::JsGetModifierKeyState),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyIntention())) };
-        auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        auto obj = CreateKeyEventInfoObj(vm, info);
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
         panda::Local<panda::JSValueRef> params[] = { obj };
@@ -952,7 +972,10 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo& 
         panda::NumberRef::New(vm, density != 0 ? globalOffset.GetY() / density : 0),
         panda::NumberRef::New(vm, density != 0 ? localOffset.GetX() / density : 0),
         panda::NumberRef::New(vm, density != 0 ? localOffset.GetY() / density : 0) };
-        return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    auto eventObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetRollAngle().value_or(0.0f))));
+    return eventObj;
 }
 
 ArkUINativeModuleValue FrameNodeBridge::SetOnHover(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1031,7 +1054,8 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnHoverMove(ArkUIRuntimeCallInfo* run
     NG::ViewAbstract::SetJSFrameNodeOnHoverMove(frameNode, std::move(onHoverMove));
     return panda::JSValueRef::Undefined(vm);
 }
-Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo& info)
+
+Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfoObj(EcmaVM* vm, MouseInfo& info)
 {
     const Offset& globalOffset = info.GetGlobalLocation();
     const Offset& localOffset = info.GetLocalLocation();
@@ -1058,12 +1082,19 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo& 
         panda::NumberRef::New(vm, info.GetRawDeltaX() / density),
         panda::NumberRef::New(vm, info.GetRawDeltaY() / density),
         panda::NumberRef::New(vm, info.GetTargetDisplayId()) };
-    auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+}
+
+Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo& info)
+{
+    auto obj = CreateMouseInfoObj(vm, info);
     obj->SetNativePointerFieldCount(vm, 1);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value_or(0.0f))));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetRollAngle().value_or(0.0f))));
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     obj->Set(
@@ -1437,12 +1468,7 @@ ArkUINativeModuleValue FrameNodeBridge::IsAttached(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, false));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    bool isAttached;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        isAttached = GetArkUINodeModifiers()->getFrameNodeModifier()->isAttached(nativeNode);
-    } else {
-        isAttached = GetArkUINodeModifiers()->getFrameNodeModifier()->isVisible(nativeNode);
-    }
+    bool isAttached = GetArkUINodeModifiers()->getFrameNodeModifier()->isAttached(nativeNode);
     return panda::BooleanRef::New(vm, isAttached);
 }
 ArkUINativeModuleValue FrameNodeBridge::GetInspectorInfo(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1503,6 +1529,34 @@ std::function<std::string(const std::string&)> ParseGetFunc(ArkUIRuntimeCallInfo
             panda::StringRef::NewFromUtf8(vm, key.c_str()) };
         auto function = panda::CopyableGlobal(vm, func);
         auto callValue = function->Call(vm, function.ToLocal(), params2, 2);
+        if (callValue.IsNull() || callValue->IsUndefined() || !callValue->IsString(vm)) {
+            return resultString;
+        }
+        auto value = callValue->ToString(vm)->ToString(vm);
+        return value;
+    };
+}
+
+std::function<std::string()> JsGetCustomMapFunc(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t nodeId)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    return [vm, nodeId]() -> std::string {
+        std::string resultString = std::string();
+        CHECK_NULL_RETURN(vm, resultString);
+        panda::LocalScope scope(vm);
+        auto global = JSNApi::GetGlobalObject(vm);
+        if (global.IsNull()) {
+            return resultString;
+        }
+        auto getCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getCustomPropertyMapString__"));
+        if (getCustomProperty->IsUndefined() || !getCustomProperty->IsFunction(vm)) {
+            return resultString;
+        }
+        auto obj = getCustomProperty->ToObject(vm);
+        panda::Local<panda::FunctionRef> func = obj;
+        panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, nodeId) };
+        auto function = panda::CopyableGlobal(vm, func);
+        auto callValue = function->Call(vm, function.ToLocal(), params, 1);
         if (callValue.IsNull() || callValue->IsUndefined() || !callValue->IsString(vm)) {
             return resultString;
         }
@@ -1579,8 +1633,10 @@ ArkUINativeModuleValue FrameNodeBridge::SetCustomPropertyModiferByKey(ArkUIRunti
     std::function<bool()> funcCallback = ParseFunc(runtimeCallInfo);
     CHECK_NULL_RETURN(funcCallback, panda::BooleanRef::New(vm, false));
     std::function<std::string(const std::string&)> getFuncCallback = ParseGetFunc(runtimeCallInfo, nodeId);
+    std::function<std::string()> getCustomPropertyMapCallback = JsGetCustomMapFunc(runtimeCallInfo, nodeId);
     GetArkUINodeModifiers()->getFrameNodeModifier()->setCustomPropertyModiferByKey(
-        nativeNode, reinterpret_cast<void*>(&funcCallback), reinterpret_cast<void*>(&getFuncCallback));
+        nativeNode, reinterpret_cast<void*>(&funcCallback), reinterpret_cast<void*>(&getFuncCallback),
+            reinterpret_cast<void*>(&getCustomPropertyMapCallback));
     return defaultReturnValue;
 }
 
@@ -1764,6 +1820,9 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnVisibleAreaApproximateChange(ArkUIR
         return panda::JSValueRef::Undefined(vm);
     }
     int32_t intervalMs = static_cast<int32_t>(intervalArg->ToNumber(vm)->Value());
+    if (intervalMs < 0) {
+        intervalMs = DEFAULT_EXPECTED_UPDATE_INTERVAL;
+    }
     NG::ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(
         frameNode, std::move(onVisibleAreaApproximateChange), ratioVec, intervalMs);
     return panda::JSValueRef::Undefined(vm);
@@ -1924,6 +1983,29 @@ ArkUINativeModuleValue FrameNodeBridge::CheckIfCanCrossLanguageAttributeSetting(
     return panda::BooleanRef::New(vm, result);
 }
 
+ArkUINativeModuleValue FrameNodeBridge::GetInteractionEventBindingInfo(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(!secondArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    int eventQueryType = secondArg->ToNumber(vm)->Value();
+    auto result =
+        GetArkUINodeModifiers()->getFrameNodeModifier()->getInteractionEventBindingInfo(nativeNode, eventQueryType);
+    const char* keys[] = { "baseEventRegistered", "nodeEventRegistered", "nativeEventRegistered",
+        "builtInEventRegistered" };
+    Local<JSValueRef> values[] = { panda::BooleanRef::New(vm, result.baseEventRegistered),
+        panda::BooleanRef::New(vm, result.nodeEventRegistered),
+        panda::BooleanRef::New(vm, result.nativeEventRegistered),
+        panda::BooleanRef::New(vm, result.builtInEventRegistered) };
+    auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    return obj;
+}
+
 ArkUINativeModuleValue FrameNodeBridge::AddSupportedStates(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1935,7 +2017,8 @@ ArkUINativeModuleValue FrameNodeBridge::AddSupportedStates(ArkUIRuntimeCallInfo*
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(secondArg->IsNumber(), defaultReturnValue);
     auto state = secondArg->ToNumber(vm)->Value();
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2);
+    const int32_t thirdArgIndex = 2;
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(thirdArgIndex);
     CHECK_NULL_RETURN(thirdArg->IsFunction(vm), defaultReturnValue);
     auto obj = thirdArg->ToObject(vm);
     auto containerId = Container::CurrentIdSafely();
@@ -1970,5 +2053,566 @@ ArkUINativeModuleValue FrameNodeBridge::RemoveSupportedStates(ArkUIRuntimeCallIn
     auto state = secondArg->ToNumber(vm)->Value();
     GetArkUINodeModifiers()->getUIStateModifier()->removeSupportedUIState(nativeNode, state);
     return defaultReturnValue;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetOnReachStart(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        NG::ViewAbstract::ClearJSFrameNodeOnReachStart(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = secondeArg->ToObject(vm);
+    auto containerId = GetInstanceId(runtimeCallInfo);
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    auto flag = IsCustomFrameNode(frameNode);
+    std::function<void(void)> callback = [vm, node = AceType::WeakClaim(frameNode),
+                                             func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                                             containerId]() {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction(vm));
+        PipelineContext::SetCallBackNode(node);
+        function->Call(vm, function.ToLocal(), nullptr, 0);
+    };
+    NG::ViewAbstract::SetJSFrameNodeOnReachStart(frameNode, std::move(callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetOnReachEnd(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        NG::ViewAbstract::ClearJSFrameNodeOnReachEnd(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = secondeArg->ToObject(vm);
+    auto containerId = GetInstanceId(runtimeCallInfo);
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    auto flag = IsCustomFrameNode(frameNode);
+    std::function<void(void)> callback = [vm, node = AceType::WeakClaim(frameNode),
+                                             func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                                             containerId]() {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction(vm));
+        PipelineContext::SetCallBackNode(node);
+        function->Call(vm, function.ToLocal(), nullptr, 0);
+    };
+    NG::ViewAbstract::SetJSFrameNodeOnReachEnd(frameNode, std::move(callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetOnScrollStart(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        NG::ViewAbstract::ClearJSFrameNodeOnScrollStart(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = secondeArg->ToObject(vm);
+    auto containerId = GetInstanceId(runtimeCallInfo);
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    auto flag = IsCustomFrameNode(frameNode);
+    std::function<void()> callback = [vm, node = AceType::WeakClaim(frameNode),
+                                         func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag), containerId]() {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction(vm));
+        PipelineContext::SetCallBackNode(node);
+        function->Call(vm, function.ToLocal(), nullptr, 0);
+    };
+    NG::ViewAbstract::SetJSFrameNodeOnScrollStart(frameNode, std::move(callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetOnScrollStop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        NG::ViewAbstract::ClearJSFrameNodeOnScrollStop(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = secondeArg->ToObject(vm);
+    auto containerId = GetInstanceId(runtimeCallInfo);
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    auto flag = IsCustomFrameNode(frameNode);
+    std::function<void(void)> callback = [vm, node = AceType::WeakClaim(frameNode),
+                                             func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                                             containerId]() {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction(vm));
+        PipelineContext::SetCallBackNode(node);
+        function->Call(vm, function.ToLocal(), nullptr, 0);
+    };
+    NG::ViewAbstract::SetJSFrameNodeOnScrollStop(frameNode, std::move(callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetOnScrollFrameBegin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        NG::ViewAbstract::ClearJSFrameNodeOnScrollFrameBegin(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = secondeArg->ToObject(vm);
+    auto containerId = GetInstanceId(runtimeCallInfo);
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    auto flag = IsCustomFrameNode(frameNode);
+    std::function<ScrollFrameResult(Dimension, ScrollState)> callback =
+        [vm, node = AceType::WeakClaim(frameNode), func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+            containerId](Dimension offset, ScrollState state) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            ContainerScope scope(containerId);
+            auto function = func.Lock();
+            OHOS::Ace::ScrollFrameResult scrollRes { .offset = offset };
+            CHECK_NULL_RETURN(!function.IsEmpty(), scrollRes);
+            CHECK_NULL_RETURN(function->IsFunction(vm), scrollRes);
+            PipelineContext::SetCallBackNode(node);
+
+            panda::Local<panda::NumberRef> offsetParam =
+                panda::NumberRef::New(vm, static_cast<double>(offset.ConvertToVp()));
+            panda::Local<panda::NumberRef> stateParam = panda::NumberRef::New(vm, static_cast<double>(state));
+            // 2: Array length
+            panda::Local<panda::JSValueRef> params[2] = { offsetParam, stateParam };
+            auto value = function->Call(vm, function.ToLocal(), params, 2); // 2: Array length
+            if (value->IsObject(vm)) {
+                auto resultObj = value->ToObject(vm);
+                panda::Local<panda::JSValueRef> remain =
+                    resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "offsetRemain"));
+                if (remain->IsNumber()) {
+                    scrollRes.offset = Dimension(remain->ToNumber(vm)->Value(), DimensionUnit::VP);
+                }
+            }
+            return scrollRes;
+        };
+    NG::ViewAbstract::SetJSFrameNodeOnScrollFrameBegin(frameNode, std::move(callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetOnWillScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        NG::ViewAbstract::ClearJSFrameNodeOnWillScroll(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = secondeArg->ToObject(vm);
+    auto containerId = GetInstanceId(runtimeCallInfo);
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    auto flag = IsCustomFrameNode(frameNode);
+    std::function<ScrollFrameResult(CalcDimension, ScrollState, ScrollSource)> callback =
+        [vm, node = AceType::WeakClaim(frameNode), func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+            containerId](const CalcDimension& scrollOffset, const ScrollState& scrollState, ScrollSource scrollSource) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            ContainerScope scope(containerId);
+            auto function = func.Lock();
+            ScrollFrameResult scrollRes { .offset = scrollOffset };
+            CHECK_NULL_RETURN(!function.IsEmpty(), scrollRes);
+            CHECK_NULL_RETURN(function->IsFunction(vm), scrollRes);
+            PipelineContext::SetCallBackNode(node);
+
+            panda::Local<panda::NumberRef> offsetParam =
+                panda::NumberRef::New(vm, static_cast<double>(scrollOffset.ConvertToVp()));
+            panda::Local<panda::NumberRef> stateParam = panda::NumberRef::New(vm, static_cast<int32_t>(scrollState));
+            panda::Local<panda::NumberRef> sourceParam = panda::NumberRef::New(vm, static_cast<int32_t>(scrollSource));
+            // 3: Array length
+            panda::Local<panda::JSValueRef> params[3] = { offsetParam, stateParam, sourceParam };
+            auto result = function->Call(vm, function.ToLocal(), params, 3); // 3: Array length
+            if (result->IsObject(vm)) {
+                auto resultObj = result->ToObject(vm);
+                panda::Local<panda::JSValueRef> dxRemainValue =
+                    resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "offsetRemain"));
+                if (dxRemainValue->IsNumber()) {
+                    scrollRes.offset = Dimension(dxRemainValue->ToNumber(vm)->Value(), DimensionUnit::VP);
+                }
+            }
+            return scrollRes;
+        };
+    NG::ViewAbstract::SetJSFrameNodeOnWillScroll(frameNode, std::move(callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetOnDidScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        NG::ViewAbstract::ClearJSFrameNodeOnDidScroll(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = secondeArg->ToObject(vm);
+    auto containerId = GetInstanceId(runtimeCallInfo);
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    auto flag = IsCustomFrameNode(frameNode);
+    std::function<void(Dimension, ScrollState)> callback =
+        [vm, node = AceType::WeakClaim(frameNode), func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+            containerId](const CalcDimension& scrollOffset, const ScrollState& scrollState) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            ContainerScope scope(containerId);
+            auto function = func.Lock();
+            CHECK_NULL_VOID(!function.IsEmpty());
+            CHECK_NULL_VOID(function->IsFunction(vm));
+            PipelineContext::SetCallBackNode(node);
+
+            panda::Local<panda::NumberRef> offsetParam =
+                panda::NumberRef::New(vm, static_cast<double>(scrollOffset.ConvertToVp()));
+            panda::Local<panda::NumberRef> stateParam = panda::NumberRef::New(vm, static_cast<int32_t>(scrollState));
+            // 2: Array length
+            panda::Local<panda::JSValueRef> params[2] = { offsetParam, stateParam };
+            function->Call(vm, function.ToLocal(), params, 2); // 2: Array length
+        };
+    NG::ViewAbstract::SetJSFrameNodeOnDidScroll(frameNode, std::move(callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetOnListScrollIndex(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        NG::ViewAbstract::ClearJSFrameNodeOnListScrollIndex(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = secondeArg->ToObject(vm);
+    auto containerId = GetInstanceId(runtimeCallInfo);
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    auto flag = IsCustomFrameNode(frameNode);
+    std::function<void(int32_t, int32_t, int32_t)> callback =
+        [vm, node = AceType::WeakClaim(frameNode), func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+            containerId](const int32_t start, const int32_t end, const int32_t center) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            ContainerScope scope(containerId);
+            auto function = func.Lock();
+            CHECK_NULL_VOID(!function.IsEmpty());
+            CHECK_NULL_VOID(function->IsFunction(vm));
+            PipelineContext::SetCallBackNode(node);
+
+            panda::Local<panda::NumberRef> startParam = panda::NumberRef::New(vm, start);
+            panda::Local<panda::NumberRef> endParam = panda::NumberRef::New(vm, end);
+            panda::Local<panda::NumberRef> centerParam = panda::NumberRef::New(vm, center);
+            // 3: Array length
+            panda::Local<panda::JSValueRef> params[3] = { startParam, endParam, centerParam };
+            function->Call(vm, function.ToLocal(), params, 3); // 3: Array length
+        };
+    NG::ViewAbstract::SetJSFrameNodeOnListScrollIndex(frameNode, std::move(callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+Local<panda::ObjectRef> FrameNodeBridge::SetListItemIndex(const EcmaVM* vm, const ListItemIndex indexInfo)
+{
+    const char* keys[] = { "index", "itemIndexInGroup", "itemGroupArea" };
+    auto indexInGroup = panda::NumberRef::Undefined(vm);
+    if (indexInfo.indexInGroup != -1) {
+        indexInGroup = panda::NumberRef::New(vm, static_cast<int32_t>(indexInfo.indexInGroup));
+    }
+    auto area = panda::NumberRef::Undefined(vm);
+    if (indexInfo.area != -1) {
+        area = panda::NumberRef::New(vm, static_cast<int32_t>(indexInfo.area));
+    }
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(indexInfo.index)), indexInGroup,
+        area };
+    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetOnScrollVisibleContentChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        NG::ViewAbstract::ClearJSFrameNodeOnScrollVisibleContentChange(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = secondeArg->ToObject(vm);
+    auto containerId = GetInstanceId(runtimeCallInfo);
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    auto flag = IsCustomFrameNode(frameNode);
+    std::function<void(ListItemIndex, ListItemIndex)> callback =
+        [vm, node = AceType::WeakClaim(frameNode), func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+            containerId](const ListItemIndex start, const ListItemIndex end) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            ContainerScope scope(containerId);
+            auto function = func.Lock();
+            CHECK_NULL_VOID(!function.IsEmpty());
+            CHECK_NULL_VOID(function->IsFunction(vm));
+            PipelineContext::SetCallBackNode(node);
+
+            auto startParam = SetListItemIndex(vm, start);
+            auto endParam = SetListItemIndex(vm, end);
+            startParam->SetNativePointerFieldCount(vm, 1);
+            startParam->SetNativePointerField(vm, 0, static_cast<void*>(&startParam));
+            endParam->SetNativePointerFieldCount(vm, 1);
+            endParam->SetNativePointerField(vm, 0, static_cast<void*>(&endParam));
+            // 2: Array length
+            panda::Local<panda::JSValueRef> params[2] = { startParam, endParam };
+            function->Call(vm, function.ToLocal(), params, 2); // 2: Array length
+        };
+    NG::ViewAbstract::SetJSFrameNodeOnScrollVisibleContentChange(frameNode, std::move(callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetOnScrollWillScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        NG::ViewAbstract::ClearJSFrameNodeOnScrollWillScroll(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = secondeArg->ToObject(vm);
+    auto containerId = GetInstanceId(runtimeCallInfo);
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    auto flag = IsCustomFrameNode(frameNode);
+    std::function<TwoDimensionScrollResult(Dimension, Dimension, ScrollState, ScrollSource)> callback =
+        [vm, node = AceType::WeakClaim(frameNode), func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+            containerId](Dimension xOffset, Dimension yOffset, ScrollState state, ScrollSource scrollState) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            ContainerScope scope(containerId);
+            auto function = func.Lock();
+            NG::TwoDimensionScrollResult scrollRes { .xOffset = xOffset, .yOffset = yOffset };
+            CHECK_NULL_RETURN(!function.IsEmpty(), scrollRes);
+            CHECK_NULL_RETURN(function->IsFunction(vm), scrollRes);
+            PipelineContext::SetCallBackNode(node);
+
+            panda::Local<panda::NumberRef> xOffsetParam =
+                panda::NumberRef::New(vm, static_cast<double>(xOffset.ConvertToVp()));
+            panda::Local<panda::NumberRef> yOffsetParam =
+                panda::NumberRef::New(vm, static_cast<double>(yOffset.ConvertToVp()));
+            panda::Local<panda::NumberRef> stateParam = panda::NumberRef::New(vm, static_cast<double>(state));
+            panda::Local<panda::NumberRef> sourceParam = panda::NumberRef::New(vm, static_cast<double>(scrollState));
+            // 4: Array length
+            panda::Local<panda::JSValueRef> params[4] = { xOffsetParam, yOffsetParam, stateParam, sourceParam };
+            auto result = function->Call(vm, function.ToLocal(), params, 4); // 4: Array length
+            if (result->IsObject(vm)) {
+                auto resultObj = result->ToObject(vm);
+                panda::Local<panda::JSValueRef> x = resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "xOffset"));
+                panda::Local<panda::JSValueRef> y = resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "yOffset"));
+                scrollRes.xOffset =
+                    x->IsNumber() ? Dimension(x->ToNumber(vm)->Value(), DimensionUnit::VP) : scrollRes.xOffset;
+                scrollRes.yOffset =
+                    y->IsNumber() ? Dimension(y->ToNumber(vm)->Value(), DimensionUnit::VP) : scrollRes.yOffset;
+            }
+            return scrollRes;
+        };
+    NG::ViewAbstract::SetJSFrameNodeOnScrollWillScroll(frameNode, std::move(callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetOnScrollDidScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        NG::ViewAbstract::ClearJSFrameNodeOnScrollDidScroll(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = secondeArg->ToObject(vm);
+    auto containerId = GetInstanceId(runtimeCallInfo);
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    auto flag = IsCustomFrameNode(frameNode);
+    std::function<void(Dimension, Dimension, ScrollState)> callback =
+        [vm, node = AceType::WeakClaim(frameNode), func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+            containerId](Dimension xOffset, Dimension yOffset, ScrollState state) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            ContainerScope scope(containerId);
+            auto function = func.Lock();
+            CHECK_NULL_VOID(!function.IsEmpty());
+            CHECK_NULL_VOID(function->IsFunction(vm));
+            PipelineContext::SetCallBackNode(node);
+
+            panda::Local<panda::NumberRef> xOffsetParam =
+                panda::NumberRef::New(vm, static_cast<int32_t>(xOffset.ConvertToVp()));
+            panda::Local<panda::NumberRef> yOffsetParam =
+                panda::NumberRef::New(vm, static_cast<int32_t>(yOffset.ConvertToVp()));
+            panda::Local<panda::NumberRef> stateParam = panda::NumberRef::New(vm, static_cast<int32_t>(state));
+            // 3: Array length
+            panda::Local<panda::JSValueRef> params[3] = { xOffsetParam, yOffsetParam, stateParam };
+            function->Call(vm, function.ToLocal(), params, 3); // 3: Array length
+        };
+    NG::ViewAbstract::SetJSFrameNodeOnScrollDidScroll(frameNode, std::move(callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetOnGridScrollIndex(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        NG::ViewAbstract::ClearJSFrameNodeOnGridScrollIndex(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = secondeArg->ToObject(vm);
+    auto containerId = GetInstanceId(runtimeCallInfo);
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    auto flag = IsCustomFrameNode(frameNode);
+    std::function<void(int32_t, int32_t)> callback = [vm, node = AceType::WeakClaim(frameNode),
+                                                         func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                                                         containerId](const int32_t first, const int32_t last) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction(vm));
+        PipelineContext::SetCallBackNode(node);
+
+        panda::Local<panda::NumberRef> firstParam = panda::NumberRef::New(vm, first);
+        panda::Local<panda::NumberRef> lastParam = panda::NumberRef::New(vm, last);
+        // 2: Array length
+        panda::Local<panda::JSValueRef> params[2] = { firstParam, lastParam };
+        function->Call(vm, function.ToLocal(), params, 2); // 2: Array length
+    };
+    NG::ViewAbstract::SetJSFrameNodeOnGridScrollIndex(frameNode, std::move(callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetOnWaterFlowScrollIndex(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        NG::ViewAbstract::ClearJSFrameNodeOnWaterFlowScrollIndex(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = secondeArg->ToObject(vm);
+    auto containerId = GetInstanceId(runtimeCallInfo);
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    auto flag = IsCustomFrameNode(frameNode);
+    std::function<void(int32_t, int32_t)> callback = [vm, node = AceType::WeakClaim(frameNode),
+                                                         func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                                                         containerId](const int32_t first, const int32_t last) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction(vm));
+        PipelineContext::SetCallBackNode(node);
+
+        panda::Local<panda::NumberRef> firstParam = panda::NumberRef::New(vm, first);
+        panda::Local<panda::NumberRef> lastParam = panda::NumberRef::New(vm, last);
+        // 2: Array length
+        panda::Local<panda::JSValueRef> params[2] = { firstParam, lastParam };
+        function->Call(vm, function.ToLocal(), params, 2); // 2: Array length
+    };
+    NG::ViewAbstract::SetJSFrameNodeOnWaterFlowScrollIndex(frameNode, std::move(callback));
+    return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

@@ -38,6 +38,7 @@ public:
     LineDashParam GetLineDash() const override;
     void UpdateSize(int32_t width, int32_t height);
     void Reset();
+    TextDirection GetSystemDirection() override;
     int32_t GetWidth()
     {
         return width_;

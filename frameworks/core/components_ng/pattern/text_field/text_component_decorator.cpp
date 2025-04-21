@@ -15,10 +15,10 @@
 
 #include "core/components_ng/pattern/text_field/text_component_decorator.h"
 
-#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -147,7 +147,7 @@ float CounterDecorator::MeasureTextNodeHeight()
     // For efficiency: keep content same, make full use of rs cache.
     auto textContent = contentController->GetTextValue();
     auto textLength = static_cast<uint32_t>(textContent.length());
-    auto maxLength = static_cast<uint32_t>(textFieldLayoutProperty->GetMaxLength().value());
+    auto maxLength = static_cast<uint32_t>(textFieldLayoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
     UpdateCounterContentAndStyle(textLength, maxLength);
     // Both the non-backend rendering process and the backend rendering process will be called.
 	// note using this statement have any impact on the back-end rendering process.
@@ -257,7 +257,8 @@ void CounterDecorator::UpdateTextNodeAndMeasure(
     CHECK_NULL_VOID(textFieldLayoutProperty);
 
     auto counterType = textFieldLayoutProperty->GetSetCounterValue(DEFAULT_MODE);
-    auto limitSize = static_cast<uint32_t>(static_cast<int32_t>(maxLength) * counterType / SHOW_COUNTER_PERCENT);
+    double thresholdPercent = static_cast<double>(counterType) / static_cast<double>(SHOW_COUNTER_PERCENT);
+    auto limitSize = static_cast<uint32_t>(static_cast<double>(maxLength) * thresholdPercent);
     if (counterType == DEFAULT_MODE || (textLength >= limitSize && counterType != DEFAULT_MODE)) {
         UpdateCounterContentAndStyle(textLength, maxLength, true);
     } else {

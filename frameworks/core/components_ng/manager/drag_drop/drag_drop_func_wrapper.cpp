@@ -273,10 +273,15 @@ int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkU
     int32_t ret = InteractionInterface::GetInstance()->StartDrag(dragData.value(), callback);
     if (ret != 0) {
         manager->GetDragAction()->dragState = DragAdapterState::INIT;
+        DragNotifyMsg dragNotifyMsg;
+        dragNotifyMsg.result = DragRet::DRAG_CANCEL;
+        HandleCallback(dragAction, dragNotifyMsg, DragAdapterStatus::ENDED);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "msdp start drag failed.");
         return -1;
     }
     HandleCallback(dragAction, DragNotifyMsg {}, DragAdapterStatus::STARTED);
     pipelineContext->SetIsDragging(true);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "msdp start drag successfully.");
     NG::DragDropFuncWrapper::HandleOnDragEvent(dragAction);
     return 0;
 }
@@ -364,7 +369,7 @@ void DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     auto opacity = imageContext->GetOpacity();
-    if (opacity.has_value() && (opacity.value()) <= MAX_OPACITY && (opacity.value()) >= MIN_OPACITY) {
+    if (opacity.has_value() && (opacity.value()) <= MAX_OPACITY && (opacity.value()) > MIN_OPACITY) {
         option.options.opacity = opacity.value();
     } else {
         option.options.opacity = DEFAULT_OPACITY;
@@ -479,7 +484,7 @@ std::optional<Shadow> DragDropFuncWrapper::GetDefaultShadow()
     CHECK_NULL_RETURN(pipelineContext, std::nullopt);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, std::nullopt);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = pipelineContext->GetColorMode();
     auto shadow = shadowTheme->GetShadow(ShadowStyle::OuterFloatingSM, colorMode);
     shadow.SetIsFilled(true);
     return shadow;
@@ -510,7 +515,7 @@ std::optional<EffectOption> DragDropFuncWrapper::BlurStyleToEffection(
     CHECK_NULL_RETURN(blurStyleOp, std::nullopt);
     ThemeColorMode colorMode = blurStyleOp->colorMode;
     if (blurStyleOp->colorMode == ThemeColorMode::SYSTEM) {
-        colorMode = SystemProperties::GetColorMode() == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
+        colorMode = pipeline->GetColorMode() == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
     }
     auto blurParam = blurStyleTheme->GetBlurParameter(blurStyleOp->blurStyle, colorMode);
     CHECK_NULL_RETURN(blurParam, std::nullopt);
@@ -626,7 +631,7 @@ bool DragDropFuncWrapper::IsExpandDisplay(const RefPtr<PipelineBase>& context)
         SubwindowManager::GetInstance()->GetParentContainerId(containerId) : containerId;
     auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_RETURN(container, false);
-    return container->IsFreeMultiWindow();
+    return container->IsFreeMultiWindow() || container->IsUIExtensionWindow();
 }
 
 OffsetF DragDropFuncWrapper::GetCurrentWindowOffset(const RefPtr<PipelineBase>& context)
@@ -1234,7 +1239,7 @@ std::shared_ptr<PixelMapInfo> DragDropFuncWrapper::GetTiledPixelMapInfo(const st
         auto gestureHub = node->GetOrCreateGestureEventHub();
         gestureHub->SetDragPreviewPixelMap(pixelMap);
         CHECK_NULL_RETURN(pixelMap, nullptr);
-        auto offset = DragDropFuncWrapper::GetPaintRectCenter(node, true);
+        auto offset = node->GetPositionToWindowWithTransform();
         minX = std::min(minX, offset.GetX());
         minY = std::min(minY, offset.GetY());
         maxX = std::max(maxX, offset.GetX() + pixelMap->GetWidth());
@@ -1264,8 +1269,9 @@ void DragDropFuncWrapper::DrawTiledPixelMap(
         CHECK_NULL_VOID(gestureHub);
         auto pixelMap = gestureHub->GetDragPreviewPixelMap();
         CHECK_NULL_VOID(pixelMap);
-        auto offsetX = DragDropFuncWrapper::GetPaintRectCenter(node, true).GetX();
-        auto offsetY = DragDropFuncWrapper::GetPaintRectCenter(node, true).GetY();
+        auto offset = node->GetPositionToWindowWithTransform();
+        auto offsetX = offset.GetX();
+        auto offsetY = offset.GetY();
         auto result =
             tiledPixelMap->WritePixels({ pixelMap->GetPixels(), pixelMap->GetByteCount(), 0, pixelMap->GetRowStride(),
                 { offsetX - pixelMapRect.GetOffset().GetX(), offsetY - pixelMapRect.GetOffset().GetY(),
@@ -1448,5 +1454,32 @@ bool DragDropFuncWrapper::IsTextCategoryComponent(const std::string& frameTag)
     return frameTag == V2::TEXTAREA_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
            frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG ||
            frameTag == V2::RICH_EDITOR_ETS_TAG;
+}
+
+RefPtr<DragDropManager> DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
+    const RefPtr<PipelineBase>& context, const RefPtr<PipelineBase>& nodeContext,
+    const RefPtr<Subwindow>& subWindow, bool isExpandDisplay, int32_t instanceId)
+{
+    auto pipeline = AceType::DynamicCast<PipelineContext>(context);
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    auto nodePipeline = AceType::DynamicCast<PipelineContext>(nodeContext);
+    CHECK_NULL_RETURN(nodePipeline, dragDropManager);
+    if (nodePipeline == pipeline || isExpandDisplay) {
+        return dragDropManager;
+    }
+    auto mainContainerId = instanceId >= MIN_SUBCONTAINER_ID ?
+        SubwindowManager::GetInstance()->GetParentContainerId(instanceId) : instanceId;
+    auto container = Container::GetContainer(mainContainerId);
+    CHECK_NULL_RETURN(container, dragDropManager);
+    if (!container->IsSceneBoardWindow()) {
+        return dragDropManager;
+    }
+    CHECK_NULL_RETURN(subWindow, dragDropManager);
+    subWindow->SetWindowTouchable(false);
+    auto pixelMapOffset = dragDropManager->GetPixelMapOffset();
+    dragDropManager = nodePipeline->GetDragDropManager();
+    dragDropManager->SetPixelMapOffset(pixelMapOffset);
+    return dragDropManager;
 }
 } // namespace OHOS::Ace::NG

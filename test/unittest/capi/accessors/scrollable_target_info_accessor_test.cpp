@@ -36,7 +36,7 @@ public:
         return isBegin;
     }
 
-    bool IsAtBottom() const override
+    bool IsAtBottom(bool considerRepeat) const override
     {
         return isEnd;
     }

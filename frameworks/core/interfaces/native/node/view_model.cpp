@@ -35,6 +35,7 @@
 #endif
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
@@ -138,6 +139,7 @@ void* createToggleNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
     auto toggleParams = static_cast<const ArkUI_Toggle_Params*>(&params);
     CHECK_NULL_RETURN(toggleParams, nullptr);
     auto frameNode = ToggleModelNG::CreateFrameNode(nodeId, toggleParams->toggleType, toggleParams->isOn);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -274,7 +276,6 @@ void* createRootNode(ArkUI_Int32 nodeId)
     auto stageManager = context->GetStageManager();
     CHECK_NULL_RETURN(stageManager, nullptr);
     auto stageNode = stageManager->GetStageNode();
-    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createRootNode: stageNode %{public}p", AceType::RawPtr(stageNode));
     return AceType::RawPtr(stageNode);
 }
 
@@ -284,7 +285,6 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     frameNode->IncRefCount();
-    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createComponentRootNode: frameNode %{public}p", AceType::RawPtr(frameNode));
     return AceType::RawPtr(frameNode);
 }
 
@@ -380,6 +380,7 @@ void* createCustomNode(ArkUI_Int32 nodeId)
 void* createNavigationNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = NavigationModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -497,6 +498,7 @@ void* createGridColNode(ArkUI_Int32 nodeId)
 void* createImageAnimatorNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ImageAnimatorModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -520,6 +522,7 @@ void* createSelectNode(ArkUI_Int32 nodeId)
 void* createTabContentNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TabContentModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -648,20 +651,11 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createDatePickerNode,
     createTimePickerNode,
     createTextPickerNode,
-#ifndef ARKUI_WEARABLE
     createCalendarPickerNode,
-#else
-    nullptr,
-#endif
     createGridItemNode,
     createCustomNode,
-#ifndef ARKUI_WEARABLE
     createWaterFlowNode,
     createFlowItemNode,
-#else
-    nullptr, // createWaterFlowNode
-    nullptr, // createFlowItemNode
-#endif
     createRelativeContainerNode,
     createBlankNode,
     createDividerNode,

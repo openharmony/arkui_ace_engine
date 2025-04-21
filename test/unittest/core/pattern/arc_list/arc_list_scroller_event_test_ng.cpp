@@ -70,49 +70,49 @@ HWTEST_F(ArcListScrollerEventTestNg, Event001, TestSize.Level1)
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
     pattern_->OnScrollEndCallback(); // set scrollStop_ to true
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR_FLING);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     // SetMinPlatformVersion
@@ -121,19 +121,19 @@ HWTEST_F(ArcListScrollerEventTestNg, Event001, TestSize.Level1)
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
     pattern_->OnScrollEndCallback(); // set scrollStop_ to true
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isTrigger);
 
     // set back
@@ -254,13 +254,13 @@ HWTEST_F(ArcListScrollerEventTestNg, Event005, TestSize.Level1)
     EXPECT_TRUE(isScrollStartCalled);
 
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isScrollStopCalled);
 
     isScrollStopCalled = false;
     pattern_->OnScrollEndCallback();
     pattern_->SetScrollAbort(true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_FALSE(isScrollStopCalled);
 }
 
@@ -284,7 +284,7 @@ HWTEST_F(ArcListScrollerEventTestNg, Event006, TestSize.Level1)
     ASSERT_NE(scrollableEvent, nullptr);
     auto scrollable = scrollableEvent->GetScrollable();
     EXPECT_NE(scrollable->callback_, nullptr);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 /**
@@ -415,7 +415,7 @@ HWTEST_F(ArcListScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Lev
     didOffset.Reset();
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
     pattern_->OnScrollEndCallback(); // set scrollStop_ to true
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
     EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
@@ -427,7 +427,7 @@ HWTEST_F(ArcListScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Lev
     didOffset.Reset();
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
     EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
@@ -439,7 +439,7 @@ HWTEST_F(ArcListScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Lev
     didOffset.Reset();
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
     EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
@@ -451,7 +451,7 @@ HWTEST_F(ArcListScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Lev
     didOffset.Reset();
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
     EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
@@ -463,7 +463,7 @@ HWTEST_F(ArcListScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Lev
     didOffset.Reset();
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
     EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
@@ -475,7 +475,7 @@ HWTEST_F(ArcListScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Lev
     didOffset.Reset();
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
     EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
@@ -487,7 +487,7 @@ HWTEST_F(ArcListScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Lev
     didOffset.Reset();
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
     EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
@@ -499,7 +499,7 @@ HWTEST_F(ArcListScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Lev
     didOffset.Reset();
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR_FLING);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
     EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
@@ -511,7 +511,7 @@ HWTEST_F(ArcListScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Lev
     didOffset.Reset();
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_AXIS);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
     EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
@@ -523,7 +523,7 @@ HWTEST_F(ArcListScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Lev
     didOffset.Reset();
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
     EXPECT_EQ(willOffset.Value(), -ITEM_HEIGHT);
@@ -535,7 +535,7 @@ HWTEST_F(ArcListScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Lev
     didOffset.Reset();
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(isWillTrigger);
     EXPECT_TRUE(isDidTrigger);
     EXPECT_EQ(willOffset.Value(), ITEM_HEIGHT);
@@ -579,7 +579,7 @@ HWTEST_F(ArcListScrollerEventTestNg, Pattern005, TestSize.Level1)
      */
     ASSERT_NE(pattern_->GetScrollBar(), nullptr);
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), -MID_OFFSET);
 
     /**
@@ -587,7 +587,7 @@ HWTEST_F(ArcListScrollerEventTestNg, Pattern005, TestSize.Level1)
      * @tc.expected: CurrentOffset unchange.
      */
     pattern_->OnScrollCallback(0, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), -MID_OFFSET);
 
     /**
@@ -599,10 +599,10 @@ HWTEST_F(ArcListScrollerEventTestNg, Pattern005, TestSize.Level1)
     pattern_->OnScrollCallback(850.f, SCROLL_FROM_START);
     EXPECT_EQ(pattern_->chainAnimation_->GetControlIndex(), 0);
     pattern_->OnScrollCallback(0.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     pattern_->OnScrollCallback(-100.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 } // namespace OHOS::Ace::NG

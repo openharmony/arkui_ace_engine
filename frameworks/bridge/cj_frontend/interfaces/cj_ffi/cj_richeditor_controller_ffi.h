@@ -57,7 +57,7 @@ struct NativeRichEditorLayoutStyleResult {
 
 struct NativeRichEditorGesture {
     void (*onClick)(CJClickInfo clickInfo);
-    void (*onLongPress)(CJGestureEvent info);
+    void (*onLongPress)(CJGestureEventV2 info);
 };
 
 struct NativeRichEditorTextStyle {
@@ -236,6 +236,13 @@ struct NativeRichEditorSelection {
     int32_t selectionStart;
     int32_t selectionEnd;
     NativeRichEditorSpanResult* spans;
+    int64_t spanSize;
+};
+
+struct NativeRichEditorSelection12 {
+    int32_t selectionStart;
+    int32_t selectionEnd;
+    NativeRichEditorSpanResult12* spans;
     int64_t spanSize;
 };
 

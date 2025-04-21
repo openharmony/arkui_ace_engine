@@ -525,13 +525,13 @@ void AssignArkValue(Ark_Resource& dst, const std::variant<int32_t, std::string>&
     dst.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::FLOAT));
 }
 
-void AssignArkValue(Ark_FontInfo& dst, const FontInfo& src)
+void AssignArkValue(Ark_FontInfo& dst, const FontInfo& src, ConvContext *ctx)
 {
-    dst.path = ArkValue<Ark_String>(src.path);
-    dst.postScriptName = ArkValue<Ark_String>(src.postScriptName);
-    dst.fullName = ArkValue<Ark_String>(src.fullName);
-    dst.family = ArkValue<Ark_String>(src.family);
-    dst.subfamily = ArkValue<Ark_String>(src.subfamily);
+    dst.path = ArkValue<Ark_String>(src.path, ctx);
+    dst.postScriptName = ArkValue<Ark_String>(src.postScriptName, ctx);
+    dst.fullName = ArkValue<Ark_String>(src.fullName, ctx);
+    dst.family = ArkValue<Ark_String>(src.family, ctx);
+    dst.subfamily = ArkValue<Ark_String>(src.subfamily, ctx);
     dst.weight = ArkValue<Ark_Number>(src.weight);
     dst.width = ArkValue<Ark_Number>(src.width);
     dst.italic = ArkValue<Ark_Boolean>(src.italic);

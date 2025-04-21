@@ -36,19 +36,14 @@ std::optional<SizeF> LineLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(paintProperty, std::nullopt);
 
     auto strokewidth = static_cast<float>(paintProperty->GetStrokeWidthValue(DEFAULT_STROKE_WIDTH).ConvertToPx());
-    if (paintProperty->HasStrokeWidth()) {
-        strokewidth = paintProperty->GetStrokeWidthValue().ConvertToPx();
-    }
 
     PointF startPoint = PointF(paintProperty->GetStartPointValue({0.0_vp, 0.0_vp}).first.ConvertToPx(),
         paintProperty->GetStartPointValue({0.0_vp, 0.0_vp}).second.ConvertToPx());
     PointF endPoint = PointF(paintProperty->GetEndPointValue({0.0_vp, 0.0_vp}).first.ConvertToPx(),
         paintProperty->GetEndPointValue({0.0_vp, 0.0_vp}).second.ConvertToPx());
 
-    auto width = startPoint.GetX() > endPoint.GetX() ? startPoint.GetX()
-                                                     : endPoint.GetX();
-    auto height = startPoint.GetY() > endPoint.GetY() ? startPoint.GetY()
-                                                      : endPoint.GetY();
+    auto width = std::max(startPoint.GetX(), endPoint.GetX());
+    auto height = std::max(startPoint.GetY(), endPoint.GetY());
     if (NearZero(width)) {
         width = strokewidth;
     }

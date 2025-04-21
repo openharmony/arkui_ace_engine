@@ -1962,8 +1962,8 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg044, TestSize.Level1)
     std::vector<std::string> myFamilies = {"Smith"};
     MneuModelInstance.SetFontFamily(myFamilies);
     MneuModelInstance.SetBorderRadius(Dimension(1), Dimension(2), Dimension(3), Dimension(4));
-    MneuModelInstance.SetItemDivider(ITEM_DIVIDER);
-    MneuModelInstance.SetItemGroupDivider(ITEM_DIVIDER);
+    MneuModelInstance.SetItemDivider(ITEM_DIVIDER, DividerMode::FLOATING_ABOVE_MENU);
+    MneuModelInstance.SetItemGroupDivider(ITEM_DIVIDER, DividerMode::FLOATING_ABOVE_MENU);
     MneuModelInstance.SetExpandingMode(SubMenuExpandingMode::STACK);
 
     auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -2012,8 +2012,8 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg045, TestSize.Level1)
     std::vector<std::string> myFamilies = {"Smith"};
     MneuModelInstance.SetFontFamily(frameNode, myFamilies);
     MneuModelInstance.SetBorderRadius(frameNode, Dimension(1), Dimension(2), Dimension(3), Dimension(4));
-    MneuModelInstance.SetItemDivider(frameNode, ITEM_DIVIDER);
-    MneuModelInstance.SetItemGroupDivider(frameNode, ITEM_DIVIDER);
+    MneuModelInstance.SetItemDivider(frameNode, ITEM_DIVIDER, DividerMode::FLOATING_ABOVE_MENU);
+    MneuModelInstance.SetItemGroupDivider(frameNode, ITEM_DIVIDER, DividerMode::FLOATING_ABOVE_MENU);
     MneuModelInstance.ResetBorderRadius(frameNode);
 
     auto menuPattern = menuNode->GetPattern<MenuPattern>();

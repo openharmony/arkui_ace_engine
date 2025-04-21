@@ -63,6 +63,8 @@
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/syntax/for_each_model_ng.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
@@ -103,13 +105,27 @@ constexpr float DRAG_FIX_OFFSET_RATIO = 0.85f;
 constexpr float ARC_LIST_ITEM_SNAP_SIZE = 72.5f;
 constexpr float ARC_LIST_FRICTION = 0.8f;
 constexpr float ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO = 0.4f;
-
+constexpr float START_MAIN_POS = 200.0f;
+constexpr float PREDICT_SNAPEND_POS = 34.5f;
+constexpr int32_t DEFAULT_ITEM_COUNT = 3;
+constexpr int32_t ARC_ITEM_COUNT = 20;
+constexpr int32_t ARC_ITEM_COUNT2 = 2;
+constexpr float DEVIATION_HEIGHT = 20.f;
+constexpr float FULL_SCREEN_WIDTH = 720.0f;
+constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
+constexpr float TARGET_SIZE_WIDTH = 100.0f;
+constexpr float TARGET_SIZE_HEIGHT = 100.0f;
+constexpr float MENU_SIZE_HEIGHT = 150.0f;
+constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
+constexpr float MENU_ITEM_SIZE_HEIGHT = 50.0f;
+const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 class ArcListTestNg : public TestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
+    void FlushUITasks(const RefPtr<FrameNode>& frameNode);
     void GetList();
     ListModelNG CreateList();
     void AddHeader(ListModelNG* model);
@@ -152,7 +168,9 @@ public:
     std::vector<RefPtr<FrameNode>> GetALLItem();
     int32_t findFocusNodeIndex(RefPtr<FocusHub>& focusNode);
     void ScrollTo(float position);
-
+    void SetChildrenMainSize(
+        const RefPtr<FrameNode>& frameNode, int32_t startIndex, const std::vector<float>& newChildrenSize);
+        
     RefPtr<FrameNode> frameNode_;
     RefPtr<ArcListPattern> pattern_;
     RefPtr<ListEventHub> eventHub_;

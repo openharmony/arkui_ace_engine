@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-#include "text_base.h"
-
 #include "test/mock/core/common/mock_font_manager.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pattern/mock_nestable_scroll_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_canvas_image.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+#include "text_base.h"
 
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
-
 
 namespace OHOS::Ace::NG {
 
@@ -1891,7 +1891,7 @@ HWTEST_F(TextTestFiveNg, UpdateParagraphByCustomSpan001, TestSize.Level1)
     CustomSpanPlaceholderInfo customSpanPlaceholder;
 
     textLayoutAlgorithm->UpdateParagraphByCustomSpan(
-        customSpanItem, AceType::RawPtr(layoutWrapper), paragraph, spanTextLength, customSpanPlaceholder);
+        customSpanItem, paragraph, spanTextLength, customSpanPlaceholder);
     EXPECT_EQ(customSpanPlaceholder.onDraw, nullptr);
 
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
@@ -1906,7 +1906,7 @@ HWTEST_F(TextTestFiveNg, UpdateParagraphByCustomSpan001, TestSize.Level1)
     };
 
     textLayoutAlgorithm->UpdateParagraphByCustomSpan(
-        customSpanItem, AceType::RawPtr(layoutWrapper), paragraph, spanTextLength, customSpanPlaceholder);
+        customSpanItem, paragraph, spanTextLength, customSpanPlaceholder);
     EXPECT_NE(customSpanPlaceholder.onDraw, nullptr);
 
     pipeline->themeManager_ = oldTheme;
@@ -1977,7 +1977,7 @@ HWTEST_F(TextTestFiveNg, UpdateSymbolSpanParagraph001, TestSize.Level1)
 
     spanItem->fontStyle->UpdateFontSize(Dimension(0));
     spanItem->UpdateSymbolSpanParagraph(nullptr, TextStyle(), paragraph);
-    EXPECT_EQ(callPushStyleCount, 0);
+    EXPECT_EQ(callPushStyleCount, 1);
 
     std::unique_ptr<FontStyle> oldFontStyle = std::move(spanItem->fontStyle);
     std::unique_ptr<TextLineStyle> oldTextLineStyle = std::move(spanItem->textLineStyle);
@@ -1986,7 +1986,7 @@ HWTEST_F(TextTestFiveNg, UpdateSymbolSpanParagraph001, TestSize.Level1)
     spanItem->UpdateSymbolSpanParagraph(frameNode, TextStyle(), paragraph);
     spanItem->fontStyle = std::move(oldFontStyle);
     spanItem->UpdateSymbolSpanParagraph(frameNode, TextStyle(), paragraph);
-    EXPECT_EQ(callPushStyleCount, 1);
+    EXPECT_EQ(callPushStyleCount, 3);
 }
 
 /**
@@ -2052,7 +2052,7 @@ HWTEST_F(TextTestFiveNg, UpdateSymbolSpanColor001, TestSize.Level1)
     textLayoutProperty->UpdateTextColor(Color::BLACK);
 
     spanItem->SetIsParentText(true);
-    symbolSpanStyle.renderColors_.clear();
+    symbolSpanStyle.propRenderColors_.clear();
     spanItem->UpdateSymbolSpanColor(frameNode, symbolSpanStyle);
     EXPECT_EQ(symbolSpanStyle.GetSymbolColorList().size(), 1);
 
@@ -2244,9 +2244,9 @@ HWTEST_F(TextTestFiveNg, UpdateTextStyle002, TestSize.Level1)
      * @tc.steps: step6. call UpdateTextStyle
      * @tc.expected: update text style when selStart and selEnd is invalid.
      */
-    EXPECT_CALL(*paragraph, AddText).Times(0);
-    EXPECT_CALL(*paragraph, PushStyle).Times(0);
-    EXPECT_CALL(*paragraph, PopStyle).Times(0);
+    EXPECT_CALL(*paragraph, AddText).Times(1);
+    EXPECT_CALL(*paragraph, PushStyle).Times(2);
+    EXPECT_CALL(*paragraph, PopStyle).Times(2);
     spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, -1, -1);
 }
 
@@ -2732,7 +2732,7 @@ HWTEST_F(TextTestFiveNg, MountImageNode001, TestSize.Level1)
     pattern->MountImageNode(imageSpanItem);
 
     auto imageNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
-        imageSpanItem->imageNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        imageSpanItem->nodeId_, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     ASSERT_NE(imageNode, nullptr);
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     EXPECT_EQ(imageLayoutProperty->HasImageFit(), false);
@@ -2747,7 +2747,7 @@ HWTEST_F(TextTestFiveNg, MountImageNode001, TestSize.Level1)
     pattern->MountImageNode(imageSpanItem);
 
     imageNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
-        imageSpanItem->imageNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        imageSpanItem->nodeId_, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     ASSERT_NE(imageNode, nullptr);
     imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
@@ -3087,8 +3087,22 @@ HWTEST_F(TextTestFiveNg, UpdateAdaptMaxFontSizeMeasureFlag001, TestSize.Level1)
  */
 HWTEST_F(TextTestFiveNg, ResumeAnimation001, TestSize.Level1)
 {
+    MockPipelineContext::SetUp();
+    MockPipelineContext::GetCurrent()->onShow_ = true;
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(frameNode, nullptr);
+    frameNode->onMainTree_ = true;
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContext->SetPaintRectWithTransform(RectF(0, 0, 100, 100));
+    frameNode->renderContext_ = mockRenderContext;
+    auto mockParent = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockParentRenderContext->SetPaintRectWithTransform(RectF(0, 0, 100, 100));
+    mockParent->renderContext_ = mockParentRenderContext;
+    mockParent->isActive_ = true;
+    frameNode->isActive_ = true;
+    frameNode->parent_ = mockParent;
+    frameNode->isCalculateInnerVisibleRectClip_ = false;
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->CreateModifier();
@@ -3149,7 +3163,7 @@ HWTEST_F(TextTestFiveNg, UseSelfStyle001, TestSize.Level1)
     fontStyle->UpdateMaxFontScale(2.0);
 
     EXPECT_EQ(textStyle.GetSymbolEffectOptions().has_value(), false);
-    UseSelfStyle(fontStyle, nullptr, textStyle);
+    UseSelfStyle(fontStyle, nullptr, textStyle, true);
     EXPECT_EQ(textStyle.GetSymbolEffectOptions().has_value(), true);
 }
 
@@ -3176,34 +3190,6 @@ HWTEST_F(TextTestFiveNg, UseSelfStyle002, TestSize.Level1)
 
     UseSelfStyle(nullptr, textLineStyle, textStyle);
     EXPECT_EQ(textStyle.GetLineSpacing(), Dimension(1.0, DimensionUnit::PX));
-}
-
-/**
- * @tc.name: CreateTextStyleUsingThemeWithText001
- * @tc.desc: test text_styles.cpp CreateTextStyleUsingThemeWithText function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestFiveNg, CreateTextStyleUsingThemeWithText001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-
-    auto fontStyle = std::make_unique<FontStyle>();
-    auto textLineStyle = std::make_unique<TextLineStyle>();
-    RefPtr<TextTheme> textTheme;
-
-    auto textStyle = CreateTextStyleUsingThemeWithText(frameNode, fontStyle, textLineStyle, textTheme);
-    EXPECT_EQ(textStyle, TextStyle());
-
-    renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::INVERT);
-    textStyle = CreateTextStyleUsingThemeWithText(frameNode, fontStyle, textLineStyle, textTheme);
-    EXPECT_EQ(textStyle.GetTextColor(), Color::FOREGROUND);
-
-    renderContext->UpdateForegroundColor(Color::BLACK);
-    textStyle = CreateTextStyleUsingThemeWithText(frameNode, fontStyle, textLineStyle, textTheme);
-    EXPECT_EQ(textStyle.GetTextColor(), Color::FOREGROUND);
 }
 
 /**

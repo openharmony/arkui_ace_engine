@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/node_container/node_container_node.h"
 
+#include "core/pipeline/base/element_register.h"
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> NodeContainerNode::GetOrCreateNodeContainerNode(int32_t nodeId)
 {

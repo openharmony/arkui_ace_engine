@@ -25,13 +25,15 @@
 #include <list>
 
 #include "arkui_rect.h"
+#include "constants.h"
 #include "macros.h"
 #include "modal_ui_extension_config.h"
 #include "popup_ui_extension_config.h"
-#include "serialized_gesture.h"
 #include "serializeable_object.h"
+#include "serialized_gesture.h"
+#include "ui_content_config.h"
 #include "viewport_config.h"
-#include "constants.h"
+
 namespace OHOS {
 
 namespace AbilityRuntime {
@@ -54,6 +56,7 @@ enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
 enum class MaximizeMode : uint32_t;
 class RSNode;
+class RSCanvasNode;
 class RSSurfaceNode;
 class RSTransaction;
 class Transform;
@@ -127,8 +130,7 @@ public:
                                                 napi_value storage) = 0;
     virtual void InitializeByName(OHOS::Rosen::Window *window,
         const std::string &name, napi_value storage, uint32_t focusWindowId) {};
-    virtual void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
-        const std::string& entryPoint, const std::vector<std::string>& registerComponents) {};
+    virtual void InitializeDynamic(const DynamicInitialConfig& config) {};
 
     // UIExtensionAbility initialize for focusWindow ID
     virtual void Initialize(
@@ -175,6 +177,7 @@ public:
     virtual uint32_t GetBackgroundColor() = 0;
     virtual void SetBackgroundColor(uint32_t color) = 0;
     virtual void SetUIContentType(UIContentType uIContentType) {};
+    virtual void SetHostParams(const OHOS::AAFwk::WantParams& params) {};
     virtual void SetWindowContainerColor(uint32_t activeColor, uint32_t inactiveColor) = 0;
 
     // Judge whether window need soft keyboard or not
@@ -520,6 +523,12 @@ public:
     }
 
     virtual void EnableContainerModalCustomGesture(bool enable) {};
+
+    virtual void AddKeyFrameAnimateEndCallback(const std::function<void()> &callback) {};
+    virtual void AddKeyFrameCanvasNodeCallback(const std::function<
+        void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+            std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback) {};
+    virtual void LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>&) {};
 };
 
 } // namespace OHOS::Ace

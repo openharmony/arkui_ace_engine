@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_mouse_function.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
+#include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::Framework {
 

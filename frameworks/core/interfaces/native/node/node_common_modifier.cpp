@@ -34,11 +34,13 @@
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/grid_property.h"
 #include "core/event/axis_event.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
@@ -103,6 +105,9 @@ const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t MAX_POINTS = 10;
 constexpr int32_t MAX_HISTORY_EVENT_COUNT = 20;
 constexpr int32_t ERROR_CODE_NO_ERROR = 0;
+constexpr Dimension ARROW_ZERO_PERCENT = 0.0_pct;
+constexpr Dimension ARROW_HALF_PERCENT = 0.5_pct;
+constexpr Dimension ARROW_ONE_HUNDRED_PERCENT = 1.0_pct;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -1002,7 +1007,7 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, false);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = container->GetColorMode();
     shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
     return true;
 }
@@ -1123,8 +1128,8 @@ void ResetAlign(ArkUINodeHandle node)
     ViewAbstract::SetAlign(frameNode, Alignment::CENTER);
 }
 
-void SetBackdropBlur(
-    ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+void SetBackdropBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues,
+    ArkUI_Int32 blurValuesSize, ArkUI_Bool disableSystemAdaptation)
 {
     ArkUI_Float32 blur = 0.0f;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1135,7 +1140,9 @@ void SetBackdropBlur(
     BlurOption blurOption;
     blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
     CalcDimension dimensionRadius(blur, DimensionUnit::PX);
-    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius, blurOption);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius, blurOption, sysOptions);
 }
 
 void ResetBackdropBlur(ArkUINodeHandle node)
@@ -1313,7 +1320,8 @@ void ResetBrightness(ArkUINodeHandle node)
     ViewAbstract::SetBrightness(frameNode, value);
 }
 
-void SetBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+void SetBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize,
+    ArkUI_Bool disableSystemAdaptation)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1324,7 +1332,9 @@ void SetBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blu
         blur = value;
     }
     CalcDimension dimensionBlur(blur, DimensionUnit::PX);
-    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOption);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOption, sysOptions);
 }
 
 void ResetBlur(ArkUINodeHandle node)
@@ -1584,7 +1594,7 @@ void SetBorderImageGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* val
 }
 
 void SetForegroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
-    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize, ArkUI_Bool disableSystemAdaptation)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1615,7 +1625,9 @@ void SetForegroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], Ar
         blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
         fgBlurStyle.blurOption = blurOption;
     }
-    ViewAbstract::SetForegroundBlurStyle(frameNode, fgBlurStyle);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    ViewAbstract::SetForegroundBlurStyle(frameNode, fgBlurStyle, sysOptions);
 }
 
 void ResetForegroundBlurStyle(ArkUINodeHandle node)
@@ -1705,7 +1717,8 @@ void ResetLinearGradientBlur(ArkUINodeHandle node)
 }
 
 void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[5], ArkUI_Float32 scale,
-    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize, ArkUI_Bool isValidColor, ArkUI_Uint32 inactiveColorArg)
+    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize, ArkUI_Bool isValidColor, ArkUI_Uint32 inactiveColorArg,
+    ArkUI_Bool disableSystemAdaptation)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1741,7 +1754,9 @@ void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[5], Ar
     bgBlurStyle.isValidColor = isValidColor;
     Color inactiveColor(inactiveColorArg);
     bgBlurStyle.inactiveColor = inactiveColor;
-    ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle, sysOptions);
 }
 
 ArkUIBlurStyleOptionType GetBackgroundBlurStyle(ArkUINodeHandle node)
@@ -2330,6 +2345,70 @@ void ResetGeometryTransition(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetGeometryTransition(frameNode, "", false, true);
+}
+
+void SetBindTips(ArkUINodeHandle node, ArkUI_CharPtr message, ArkUIBindTipsOptionsTime timeOptions,
+    ArkUIBindTipsOptionsArrow arrowOptions)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto tipsParam = AceType::MakeRefPtr<PopupParam>();
+    tipsParam->SetMessage(std::string(message));
+    tipsParam->SetShowInSubWindow(true);
+    tipsParam->SetAppearingTime(timeOptions.appearingTime);
+    tipsParam->SetDisappearingTime(timeOptions.disappearingTime);
+    tipsParam->SetAppearingTimeWithContinuousOperation(timeOptions.appearingTimeWithContinuousOperation);
+    tipsParam->SetDisappearingTimeWithContinuousOperation(timeOptions.disappearingTimeWithContinuousOperation);
+    tipsParam->SetEnableArrow(arrowOptions.enableArrow);
+    tipsParam->SetKeyBoardAvoidMode(PopupKeyboardAvoidMode::DEFAULT);
+    if (arrowOptions.arrowPointPosition && arrowOptions.enableArrow) {
+        char* pEnd = nullptr;
+        std::strtod(arrowOptions.arrowPointPosition, &pEnd);
+        if (pEnd != nullptr) {
+            if (std::strcmp(pEnd, "Start") == 0) {
+                tipsParam->SetArrowOffset(ARROW_ZERO_PERCENT);
+            }
+            if (std::strcmp(pEnd, "Center") == 0) {
+                tipsParam->SetArrowOffset(ARROW_HALF_PERCENT);
+            }
+            if (std::strcmp(pEnd, "End") == 0) {
+                tipsParam->SetArrowOffset(ARROW_ONE_HUNDRED_PERCENT);
+            }
+        }
+    }
+    if (arrowOptions.enableArrow) {
+        CalcDimension arrowWidth(arrowOptions.arrowWidthValue, static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit));
+        bool setArrowWidthError = true;
+        if (arrowOptions.arrowWidthValue > 0 &&
+            static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit) != DimensionUnit::PERCENT) {
+            tipsParam->SetArrowWidth(arrowWidth);
+            setArrowWidthError = false;
+        }
+        tipsParam->SetErrorArrowWidth(setArrowWidthError);
+        CalcDimension arrowHeight(
+            arrowOptions.arrowHeightValue, static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit));
+        bool setArrowHeightError = true;
+        if (arrowOptions.arrowHeightValue > 0 &&
+            static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit) != DimensionUnit::PERCENT) {
+            tipsParam->SetArrowHeight(arrowHeight);
+            setArrowHeightError = false;
+        }
+        tipsParam->SetErrorArrowHeight(setArrowHeightError);
+    }
+    tipsParam->SetBlockEvent(false);
+    tipsParam->SetTipsFlag(true);
+    ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode), nullptr);
+}
+
+void ResetBindTips(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto tipsParam = AceType::MakeRefPtr<PopupParam>();
+    tipsParam->SetBlockEvent(false);
+    tipsParam->SetTipsFlag(true);
+    RefPtr<SpanString> styledString;
+    ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode), styledString);
 }
 
 void SetOffset(ArkUINodeHandle node, const ArkUI_Float32* number, const ArkUI_Int32* unit)
@@ -3549,12 +3628,12 @@ void ResetForegroundEffect(ArkUINodeHandle node)
 void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Float32 saturationArg,
     ArkUI_Float32 brightnessArg, ArkUI_Uint32 colorArg, ArkUI_Int32 adaptiveColorArg, const ArkUI_Float32* blurValues,
     ArkUI_Int32 blurValuesSize, ArkUI_Int32 policy, ArkUI_Int32 blurType, ArkUI_Bool isValidColor,
-    ArkUI_Uint32 inactiveColorArg)
+    ArkUI_Uint32 inactiveColorArg, ArkUI_Bool disableSystemAdaptation)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension radius;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         radius = CalcDimension(radiusArg, DimensionUnit::VP);
     } else {
         radius = CalcDimension(radiusArg, DimensionUnit::PX);
@@ -3575,7 +3654,9 @@ void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Fl
     Color inactiveColor(inactiveColorArg);
     option.inactiveColor = inactiveColor;
     option.isValidColor = isValidColor;
-    ViewAbstract::SetBackgroundEffect(frameNode, option);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    ViewAbstract::SetBackgroundEffect(frameNode, option, sysOptions);
 }
 
 void ResetBackgroundEffect(ArkUINodeHandle node)
@@ -3699,6 +3780,9 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
         case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_MULTI_TILE_EFFECT):
             previewOption.isMultiTiled = true;
             break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW):
+            previewOption.isTouchPointCalculationBasedOnFinalPreviewEnable = true;
+            break;
         default:
             break;
     }
@@ -3727,6 +3811,7 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPre
     } else {
         option.isShowBadge = dragPreviewOptions.isShowBadge;
     }
+    option.sizeChangeEffect = static_cast<NG::DraggingSizeChangeEffect>(dragPreviewOptions.sizeChangeEffect);
     option.isNumber = dragPreviewOptions.isBadgeNumber;
     option.isMultiSelectionEnabled = dragInteractionOptions.isMultiSelectionEnabled;
     option.defaultAnimationBeforeLifting = dragInteractionOptions.defaultAnimationBeforeLifting;
@@ -5875,17 +5960,6 @@ void SetSystemBarEffect(ArkUINodeHandle node, ArkUI_Bool enable)
     ViewAbstract::SetSystemBarEffect(frameNode, enable);
 }
 
-void FreezeUINodeById(ArkUI_CharPtr id, ArkUI_Bool isFreeze)
-{
-    std::string idStr(id);
-    ViewAbstract::FreezeUINodeById(idStr, isFreeze);
-}
-
-void FreezeUINodeByUniqueId(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze)
-{
-    ViewAbstract::FreezeUINodeByUniqueId(uniqueId, isFreeze);
-}
-
 ArkUI_Int32 GetAccessibilityID(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6559,6 +6633,9 @@ void DispatchKeyEvent(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent)
     keyEvent.sourceType = static_cast<SourceType>(arkUIkeyEvent->keySource);
     keyEvent.deviceId = arkUIkeyEvent->deviceId;
     keyEvent.unicode = arkUIkeyEvent->unicode;
+    keyEvent.numLock = arkUIkeyEvent->isNumLockOn;
+    keyEvent.scrollLock = arkUIkeyEvent->isScrollLockOn;
+    keyEvent.enableCapsLock = arkUIkeyEvent->isCapsLockOn;
     std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUIkeyEvent->timestamp));
     TimeStamp timeStamp(nanoseconds);
     keyEvent.timeStamp = timeStamp;
@@ -6872,6 +6949,20 @@ void SetNodeBackdropBlur(
     ViewAbstract::SetNodeBackdropBlur(frameNode, dimensionRadius, blurOption);
 }
 
+void SetPrivacySensitve(ArkUINodeHandle node, ArkUI_Int32 sensitive)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetPrivacySensitive(frameNode, static_cast<bool>(sensitive));
+}
+
+void ResetPrivacySensitve(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetPrivacySensitive(frameNode, false);
+}
+
 ArkUIBackdropBlur GetNodeBackdropBlur(ArkUINodeHandle node)
 {
     ArkUIBackdropBlur backdropBlur;
@@ -6908,6 +6999,18 @@ void SetOnVisibleAreaApproximateChange(
     };
     ViewAbstract::SetOnVisibleAreaApproximateChange(frameNode, onEvent, ratioList, interval);
 }
+
+void FreezeUINodeById(ArkUI_CharPtr id, ArkUI_Bool isFreeze)
+{
+    std::string idStr(id);
+    ViewAbstract::FreezeUINodeById(idStr, isFreeze);
+}
+
+void FreezeUINodeByUniqueId(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze)
+{
+    ViewAbstract::FreezeUINodeByUniqueId(uniqueId, isFreeze);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -7006,6 +7109,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetRotate = ResetRotate,
         .setGeometryTransition = SetGeometryTransition,
         .resetGeometryTransition = ResetGeometryTransition,
+        .setBindTips = SetBindTips,
+        .resetBindTips = ResetBindTips,
         .setPixelStretchEffect = SetPixelStretchEffect,
         .resetPixelStretchEffect = ResetPixelStretchEffect,
         .setLightUpEffect = SetLightUpEffect,
@@ -7287,8 +7392,6 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetLayoutRect = ResetLayoutRect,
         .getFocusOnTouch = GetFocusOnTouch,
         .setSystemBarEffect = SetSystemBarEffect,
-        .freezeUINodeById = FreezeUINodeById,
-        .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
         .getAccessibilityID = GetAccessibilityID,
         .setAccessibilityState = SetAccessibilityState,
         .getAccessibilityState = GetAccessibilityState,
@@ -7343,6 +7446,10 @@ const ArkUICommonModifier* GetCommonModifier()
         .getNodeBackdropBlur = GetNodeBackdropBlur,
         .setDisableDataPrefetch = SetDisableDataPrefetch,
         .setOnVisibleAreaApproximateChange = SetOnVisibleAreaApproximateChange,
+        .setPrivacySensitive = SetPrivacySensitve,
+        .resetPrivacySensitive = ResetPrivacySensitve,
+        .freezeUINodeById = FreezeUINodeById,
+        .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -7706,8 +7813,6 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .resetLayoutRect = ResetLayoutRect,
         .getFocusOnTouch = GetFocusOnTouch,
         .setSystemBarEffect = SetSystemBarEffect,
-        .freezeUINodeById = FreezeUINodeById,
-        .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
         .getAccessibilityID = GetAccessibilityID,
         .setAccessibilityState = SetAccessibilityState,
         .getAccessibilityState = GetAccessibilityState,
@@ -7732,6 +7837,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .setTransition = SetTransition,
         .setDragPreview = SetDragPreview,
         .resetDragPreview = ResetDragPreview,
+        .freezeUINodeById = FreezeUINodeById,
+        .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -7905,6 +8012,8 @@ void SetOnClickInfo(ArkUINodeEvent& event, GestureEvent& info, bool usePx)
         usePx ? info.GetTiltX().value_or(0.0f) : PipelineBase::Px2VpWithCurrentDensity(info.GetTiltX().value_or(0.0f));
     event.clickEvent.tiltY =
         usePx ? info.GetTiltY().value_or(0.0f) : PipelineBase::Px2VpWithCurrentDensity(info.GetTiltY().value_or(0.0f));
+    // rollAngle
+    event.clickEvent.rollAngle = info.GetRollAngle().value_or(0.0f);
     //pressure
     event.clickEvent.pressure = info.GetForce();
     // sourcetool
@@ -8031,6 +8140,9 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
         }
         event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
         event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
+        event.keyEvent.isNumLockOn = info.GetNumLock();
+        event.keyEvent.isCapsLockOn = info.GetCapsLock();
+        event.keyEvent.isScrollLockOn = info.GetScrollLock();
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
@@ -8067,7 +8179,10 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
         }
         event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
         event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
-
+        event.keyEvent.isNumLockOn = info.GetNumLock();
+        event.keyEvent.isCapsLockOn = info.GetCapsLock();
+        event.keyEvent.isScrollLockOn = info.GetScrollLock();
+    
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(event.keyEvent.stopPropagation);
@@ -8103,6 +8218,9 @@ void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam)
         }
         event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
         event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
+        event.keyEvent.isNumLockOn = info.GetNumLock();
+        event.keyEvent.isCapsLockOn = info.GetCapsLock();
+        event.keyEvent.isScrollLockOn = info.GetScrollLock();
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
@@ -8202,6 +8320,7 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.contactAreaHeight = locationInfo.GetSize();
     touchPoint.tiltX = locationInfo.GetTiltX().value_or(0.0f);
     touchPoint.tiltY = locationInfo.GetTiltY().value_or(0.0f);
+    touchPoint.rollAngle = locationInfo.GetRollAngle().value_or(0.0f);
     touchPoint.toolType = static_cast<int32_t>(locationInfo.GetSourceTool());
     touchPoint.pressedTime = locationInfo.GetPressedTime().time_since_epoch().count();
     touchPoint.operatingHand = locationInfo.GetOperatingHand();
@@ -8237,6 +8356,7 @@ void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
         points[i].pressure = touchPoint.force;
         points[i].tiltX = touchPoint.tiltX.value_or(0.0f);
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
+        points[i].rollAngle = touchPoint.rollAngle.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(historyLoaction.GetSourceTool());
         points[i].operatingHand = touchPoint.operatingHand;
@@ -8276,6 +8396,8 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
                                        : eventInfo.GetTarget().area.GetWidth().ConvertToVp();
         event.touchEvent.height = usePx ? eventInfo.GetTarget().area.GetHeight().ConvertToPx()
                                         : eventInfo.GetTarget().area.GetHeight().ConvertToVp();
+        // rollAngle
+        event.touchEvent.rollAngle = eventInfo.GetRollAngle().value_or(0.0f);
         // deviceid
         event.touchEvent.deviceId = eventInfo.GetDeviceId();
         //modifierkeystates
@@ -8459,6 +8581,8 @@ void TriggerOnHoverEvent(void* extraParam, int32_t nodeId, bool isHover, HoverIn
     // tiltX tiltY
     event.hoverEvent.tiltX = info.GetTiltX().value_or(0.0f);
     event.hoverEvent.tiltY = info.GetTiltX().value_or(0.0f);
+    // rollAngle
+    event.hoverEvent.rollAngle = info.GetRollAngle().value_or(0.0f);
     // stoppropagation
     event.hoverEvent.stopPropagation = false;
     SendArkUISyncEvent(&event);
@@ -8500,6 +8624,7 @@ void SetOnHoverMove(ArkUINodeHandle node, void* extraParam)
         event.touchEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY();
         event.touchEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX();
         event.touchEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY();
+        event.touchEvent.actionTouchPoint.rollAngle = info.GetRollAngle().value_or(0.0f);
         SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnHoverMove(frameNode, onEvent);

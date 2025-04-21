@@ -475,8 +475,10 @@ void TitleBarLayoutAlgorithm::MeasureMenu(LayoutWrapper* layoutWrapper, const Re
             menuOccupiedWidth_ = static_cast<float>(iconBackgroundWidth_.ConvertToPx()) * maxMenu +
                 static_cast<float>(menuCompPadding_.ConvertToPx()) * (maxMenu - 1);
         } else {
+            // the number of the padding between menuItem.
+            int32_t paddingAmount = std::max(menuItemNum - 1, 0);
             menuOccupiedWidth_ = static_cast<float>(iconBackgroundWidth_.ConvertToPx()) * menuItemNum +
-                static_cast<float>(menuCompPadding_.ConvertToPx()) * (menuItemNum - 1);
+                static_cast<float>(menuCompPadding_.ConvertToPx()) * paddingAmount;
         }
     } else {
         if (menuItemNum >= maxMenu) {

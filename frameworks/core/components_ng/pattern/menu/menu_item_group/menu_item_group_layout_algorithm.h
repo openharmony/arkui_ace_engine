@@ -39,6 +39,9 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    void MeasureChildren(LayoutWrapper* layoutWrapper, float& maxChildrenWidth, SizeF& menuItemGroupSize);
+    void MeasureHeader(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& host, float& totalHeight);
+    void MeasureMenuItems(LayoutWrapper* layoutWrapper, float maxChildrenWidth, float& totalHeight);
     bool NeedHeaderPadding(const RefPtr<FrameNode>& host);
     bool NeedFooterPadding(const RefPtr<FrameNode>& host);
 
@@ -63,6 +66,7 @@ private:
     bool needFooterPadding_ = false;
 
     float groupDividerPadding_ = 0.0f;
+    float minItemHeight_ = 0.0f;
 
     ItemPositionMap itemPosition_;
 

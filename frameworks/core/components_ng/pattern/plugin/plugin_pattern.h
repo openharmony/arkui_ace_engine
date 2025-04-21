@@ -23,10 +23,9 @@
 #include "core/components_ng/pattern/plugin/plugin_layout_property.h"
 
 namespace OHOS::Ace {
-#ifndef ARKUI_CAPI_UNITTEST
 class PluginSubContainer;
 class PluginManagerDelegate;
-#endif
+class DrawDelegate;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
@@ -50,6 +49,9 @@ public:
     {
         return MakeRefPtr<PluginEventHub>();
     }
+
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
     void ReplaceAll(std::string& str, const std::string& pattern, const std::string& newPattern);
 

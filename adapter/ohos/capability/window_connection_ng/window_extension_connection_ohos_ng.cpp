@@ -14,7 +14,6 @@
  */
 #include "window_extension_connection_ohos_ng.h"
 
-#include "element_name.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 
 #include "base/memory/ace_type.h"
@@ -25,6 +24,7 @@
 #include "core/components_ng/pattern/ability_component/ability_component_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "frameworks/base/json/json_util.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef OS_ACCOUNT_EXISTS
 #include "os_account_manager.h"

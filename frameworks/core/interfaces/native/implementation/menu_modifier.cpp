@@ -144,7 +144,7 @@ void MenuItemDividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
-    MenuModelNG::SetItemDivider(frameNode, divider);
+    MenuModelNG::SetItemDivider(frameNode, divider, std::nullopt);
 }
 void MenuItemGroupDividerImpl(Ark_NativePointer node,
                               const Opt_DividerStyleOptions* value)
@@ -153,7 +153,7 @@ void MenuItemGroupDividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
-    MenuModelNG::SetItemGroupDivider(frameNode, divider);
+    MenuModelNG::SetItemGroupDivider(frameNode, divider, std::nullopt);
 }
 void SubMenuExpandingModeImpl(Ark_NativePointer node,
                               Ark_SubMenuExpandingMode value)

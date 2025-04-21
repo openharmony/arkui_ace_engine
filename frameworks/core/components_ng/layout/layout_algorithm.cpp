@@ -18,6 +18,7 @@
 #include "ui/view/layout/layout_algorithm.h"
 
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
 

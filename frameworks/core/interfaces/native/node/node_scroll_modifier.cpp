@@ -345,10 +345,8 @@ RefPtr<ScrollControllerBase> GetController(ArkUINodeHandle node)
         return ScrollModelNG::GetOrCreateController(frameNode);
     } else if (frameNode->GetTag() == V2::LIST_ETS_TAG) {
         return ListModelNG::GetOrCreateController(frameNode);
-#ifndef ARKUI_WEARABLE
     } else if (frameNode->GetTag() == V2::WATERFLOW_ETS_TAG) {
         return WaterFlowModelNG::GetOrCreateController(frameNode);
-#endif
     } else if (frameNode->GetTag() == V2::GRID_ETS_TAG) {
         return GridModelNG::GetOrCreateController(frameNode);
     }

@@ -166,6 +166,7 @@ public:
     MOCK_METHOD(int32_t, GetWidth, (), (const override));
     MOCK_METHOD(int32_t, GetHeight, (), (const override));
     MOCK_METHOD(uint32_t, WritePixels, (const WritePixelsOptions&), (override));
+    MOCK_METHOD(bool, GetIsWideColorGamut, (), (const override));
 };
 class MockCanvasRenderingContext2DModel : public NG::CanvasRenderingContext2DModelNG {
 public:

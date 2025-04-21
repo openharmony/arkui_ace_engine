@@ -49,7 +49,6 @@ const std::set<std::string> FONT_WEIGHTS = { "normal", "bold", "lighter", "bolde
 const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
 const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
 const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
-constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
 constexpr double DEFAULT_QUALITY = 0.92;
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
@@ -168,12 +167,7 @@ JSCanvasRenderer::JSCanvasRenderer()
     SetInstanceId(Container::CurrentIdSafely());
     density_ = PipelineBase::GetCurrentDensity();
     apiVersion_ = Container::GetCurrentApiTargetVersion();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
-        // The default value of the font size in canvas is 14px.
-        paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
-    }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         isJudgeSpecialValue_ = true;
     }
     auto pipeline = PipelineBase::GetCurrentContextSafely();
@@ -625,7 +619,7 @@ void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackIn
             info.GetDoubleArg(8, image.dHeight);
             // In higher versions, sx, sy, sWidth, sHeight are parsed in VP units
             // In lower versions, sx, sy, sWidth, sHeight are parsed in PX units
-            if (isImage || Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            if (isImage || Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 image.sx *= density;
                 image.sy *= density;
                 image.sWidth *= density;
@@ -884,7 +878,10 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     CHECK_NULL_VOID(runtime);
     NativeEngine* nativeEngine = runtime->GetNativeEngine();
-    CHECK_NULL_VOID(nativeEngine);
+    if (!nativeEngine) {
+        TAG_LOGE(AceLogTag::ACE_CANVAS, "GetPixelMap engine is NULL");
+        return;
+    }
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     auto pixelmapSharedPtr = pixelmap->GetPixelMapSharedPtr();
     napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelmapSharedPtr);
@@ -1037,7 +1034,7 @@ void JSCanvasRenderer::JsSetMiterLimit(const JSCallbackInfo& info)
 {
     double limit = 0.0;
     if (info.GetDoubleArg(0, limit)) {
-        if (limit == 0 && apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+        if (NearEqual(limit, 0.0)) {
             return;
         }
         renderingContext2DModel_->SetMiterLimit(limit);
@@ -1113,12 +1110,8 @@ void JSCanvasRenderer::JsSetShadowColor(const JSCallbackInfo& info)
     if (!info.GetStringArg(0, colorStr)) {
         return;
     }
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
-        if (!ProcessColorFromString(colorStr, color)) {
-            return;
-        }
-    } else {
-        color = Color::FromString(colorStr);
+    if (!ProcessColorFromString(colorStr, color)) {
+        return;
     }
     renderingContext2DModel_->SetShadowColor(color);
 }
@@ -1539,7 +1532,7 @@ std::shared_ptr<Pattern> JSCanvasRenderer::GetPatternPtr(int32_t id)
 void JSCanvasRenderer::SetTransform(unsigned int id, const TransformParam& transform)
 {
     if (id >= 0 && id <= patternCount_) {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
             renderingContext2DModel_->SetTransform(pattern_[id], transform);
         } else {
             pattern_[id]->SetScaleX(transform.scaleX);
@@ -1578,43 +1571,40 @@ void JSCanvasRenderer::JsSetTextBaseline(const JSCallbackInfo& info)
 // measureText(text: string): TextMetrics
 void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
 {
-    std::string text;
     double density = GetDensity();
-    bool isGetStr = info.GetStringArg(0, text);
-    if (!isGetStr && apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
-        if (info[0]->IsUndefined()) {
-            text = "undefined";
-            isGetStr = true;
-        } else if (info[0]->IsNull()) {
-            text = "null";
-            isGetStr = true;
-        }
+    if (!Positive(density)) {
+        return;
     }
-    if (Positive(density) && isGetStr) {
-        TextMetrics textMetrics = renderingContext2DModel_->GetMeasureTextMetrics(paintState_, text);
-        auto vm = info.GetVm();
-        CHECK_NULL_VOID(vm);
-        static const char* keysOfMeasureText[] = { "width", "height", "actualBoundingBoxLeft", "actualBoundingBoxRight",
-            "actualBoundingBoxAscent", "actualBoundingBoxDescent", "hangingBaseline", "alphabeticBaseline",
-            "ideographicBaseline", "emHeightAscent", "emHeightDescent", "fontBoundingBoxAscent",
-            "fontBoundingBoxDescent" };
-        Local<JSValueRef> valuesOfMeasureText[] = { panda::NumberRef::New(vm, (textMetrics.width / density)),
-            panda::NumberRef::New(vm, (textMetrics.height / density)),
-            panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxLeft / density)),
-            panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxRight / density)),
-            panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxAscent / density)),
-            panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxDescent / density)),
-            panda::NumberRef::New(vm, (textMetrics.hangingBaseline / density)),
-            panda::NumberRef::New(vm, (textMetrics.alphabeticBaseline / density)),
-            panda::NumberRef::New(vm, (textMetrics.ideographicBaseline / density)),
-            panda::NumberRef::New(vm, (textMetrics.emHeightAscent / density)),
-            panda::NumberRef::New(vm, (textMetrics.emHeightDescent / density)),
-            panda::NumberRef::New(vm, (textMetrics.fontBoundingBoxAscent / density)),
-            panda::NumberRef::New(vm, (textMetrics.fontBoundingBoxDescent / density)) };
-        auto obj = panda::ObjectRef::NewWithNamedProperties(
-            vm, ArraySize(keysOfMeasureText), keysOfMeasureText, valuesOfMeasureText);
-        info.SetReturnValue(JsiRef<JsiObject>(JsiObject(obj)));
+    std::string text;
+    if (info[0]->IsUndefined()) { // text is undefined
+        text = "undefined";
+    } else if (info[0]->IsNull()) { // text is null
+        text = "null";
+    } else if (!info.GetStringArg(0, text)) { // text is not string
+        return;
     }
+    TextMetrics textMetrics = renderingContext2DModel_->GetMeasureTextMetrics(paintState_, text);
+    auto vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    static const char* keysOfMeasureText[] = { "width", "height", "actualBoundingBoxLeft", "actualBoundingBoxRight",
+        "actualBoundingBoxAscent", "actualBoundingBoxDescent", "hangingBaseline", "alphabeticBaseline",
+        "ideographicBaseline", "emHeightAscent", "emHeightDescent", "fontBoundingBoxAscent", "fontBoundingBoxDescent" };
+    Local<JSValueRef> valuesOfMeasureText[] = { panda::NumberRef::New(vm, (textMetrics.width / density)),
+        panda::NumberRef::New(vm, (textMetrics.height / density)),
+        panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxLeft / density)),
+        panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxRight / density)),
+        panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxAscent / density)),
+        panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxDescent / density)),
+        panda::NumberRef::New(vm, (textMetrics.hangingBaseline / density)),
+        panda::NumberRef::New(vm, (textMetrics.alphabeticBaseline / density)),
+        panda::NumberRef::New(vm, (textMetrics.ideographicBaseline / density)),
+        panda::NumberRef::New(vm, (textMetrics.emHeightAscent / density)),
+        panda::NumberRef::New(vm, (textMetrics.emHeightDescent / density)),
+        panda::NumberRef::New(vm, (textMetrics.fontBoundingBoxAscent / density)),
+        panda::NumberRef::New(vm, (textMetrics.fontBoundingBoxDescent / density)) };
+    auto obj = panda::ObjectRef::NewWithNamedProperties(
+        vm, ArraySize(keysOfMeasureText), keysOfMeasureText, valuesOfMeasureText);
+    info.SetReturnValue(JsiRef<JsiObject>(JsiObject(obj)));
 }
 
 // fillRect(x: number, y: number, w: number, h: number): void
@@ -1677,13 +1667,7 @@ void JSCanvasRenderer::JsReset(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::ResetPaintState()
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
-        // The default value of the font size in canvas is 14px.
-        paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
-    } else {
-        paintState_ = PaintState();
-    }
+    paintState_ = PaintState();
     std::vector<PaintState>().swap(savePaintState_);
     isInitializeShadow_ = false;
     isOffscreenInitializeShadow_ = false;
@@ -1720,25 +1704,20 @@ bool JSCanvasRenderer::IsValidLetterSpacing(const std::string& letterSpacing)
 // letterSpacing: string | LengthMetrics
 void JSCanvasRenderer::JsSetLetterSpacing(const JSCallbackInfo& info)
 {
+    CalcDimension letterSpacingCal = Dimension(0.0);
     std::string letterSpacingStr;
     if (info.GetStringArg(0, letterSpacingStr) && IsValidLetterSpacing(letterSpacingStr)) {
         if (letterSpacingStr.find("vp") != std::string::npos || letterSpacingStr.find("px") != std::string::npos) {
-            renderingContext2DModel_->SetLetterSpacing(GetDimensionValue(letterSpacingStr));
-            return;
+            letterSpacingCal = GetDimensionValue(letterSpacingStr);
+        } else {
+            letterSpacingCal = Dimension(StringToDouble(letterSpacingStr) * GetDensity());
         }
-        renderingContext2DModel_->SetLetterSpacing(Dimension(StringToDouble(letterSpacingStr) * GetDensity()));
-        return;
-    }
-    
-    CalcDimension letterSpacingCal;
-    if (info[0]->IsObject() && JSViewAbstract::ParseLengthMetricsToDimension(info[0], letterSpacingCal)) {
+    } else if (info[0]->IsObject() && JSViewAbstract::ParseLengthMetricsToDimension(info[0], letterSpacingCal)) {
         if (letterSpacingCal.Unit() != DimensionUnit::PX && letterSpacingCal.Unit() != DimensionUnit::VP) {
             letterSpacingCal.Reset();
         }
-        renderingContext2DModel_->SetLetterSpacing(letterSpacingCal);
-        return;
     }
-
-    renderingContext2DModel_->SetLetterSpacing(Dimension(0.0));
+    paintState_.SetLetterSpacing(letterSpacingCal);
+    renderingContext2DModel_->SetLetterSpacing(letterSpacingCal);
 }
 } // namespace OHOS::Ace::Framework

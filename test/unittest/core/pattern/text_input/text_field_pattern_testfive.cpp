@@ -902,7 +902,12 @@ HWTEST_F(TextFieldPatternTestFive, TextFieldControllerGetSelectionTest, TestSize
     content = u"Hello😊";
     includeStartHalf = false;
     includeEndHalf = false;
-    TextEmojiSubStringRange expected_5 = {2, 2147483647};
+    TextEmojiSubStringRange expected_5;
+    if (std::numeric_limits<long>::max() == INT32_MAX) {
+        expected_5 = {2, -2147483647};
+    } else {
+        expected_5 = {2, 2147483647};
+    }
 
     TextEmojiSubStringRange result_5 =
         TextEmojiProcessor::CalSubU16stringRange(index, length, content, includeStartHalf, includeEndHalf);
@@ -1040,5 +1045,261 @@ HWTEST_F(TextFieldPatternTestFive, TextFieldControllerGetSelectionTest, TestSize
     result = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(input);
 
     EXPECT_EQ(expected, result);
+}
+
+/**
+ * @tc.name: TextFieldControllerClearPreviewTextTest
+ * @tc.desc: test textfield controller ClearPreviewText function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldControllerClearPreviewTextTest, TestSize.Level0)
+{
+    CreateTextField("", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    PreviewTextInfo info = {
+        .text = u"abc",
+        .range = {0, 2}
+    };
+    pattern_->SetPreviewTextOperation(info);
+    EXPECT_TRUE(pattern_->GetIsPreviewText());
+    FlushLayoutTask(frameNode_);
+
+    pattern_->textFieldController_->ClearPreviewText();
+    EXPECT_FALSE(pattern_->GetIsPreviewText());
+    FlushLayoutTask(frameNode_);
+}
+
+/**
+ * @tc.name: TextFieldControllerGetTextTest
+ * @tc.desc: test textfield controller GetText function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldControllerGetTextTest, TestSize.Level0)
+{
+    CreateTextField("", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+    FlushLayoutTask(frameNode_);
+
+    pattern_->contentController_->content_ = u"123";
+    EXPECT_EQ(pattern_->textFieldController_->GetText(), u"123");
+
+    pattern_->contentController_->content_ = u"";
+    EXPECT_EQ(pattern_->textFieldController_->GetText(), u"");
+
+    pattern_->contentController_->content_ = u"😓";
+    EXPECT_EQ(pattern_->textFieldController_->GetText(), u"😓");
+
+    pattern_->contentController_->content_ = std::u16string(u"😓").substr(0, 1);
+    EXPECT_EQ(pattern_->textFieldController_->GetText(), std::u16string(u"😓").substr(0, 1));
+}
+
+/**
+ * @tc.name: TextFieldSelectControllerTest001
+ * @tc.desc: test textfield select controller function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest001, TestSize.Level0)
+{
+    CreateTextField("123", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    SelectionInfo info = pattern_->textFieldController_->GetSelection();
+    auto selectionStart = info.GetSelection().selection[0];
+    auto selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 3);
+    EXPECT_EQ(selectionEnd, 3);
+
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(2);
+    FlushLayoutTask(frameNode_);
+    info = pattern_->textFieldController_->GetSelection();
+    selectionStart = info.GetSelection().selection[0];
+    selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 2);
+    EXPECT_EQ(selectionEnd, 2);
+
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextAlign(TextAlign::END);
+    auto rect = controller->CalculateEmptyValueCaretRect();
+    EXPECT_EQ(rect.Height(), 50);
+}
+
+/**
+ * @tc.name: TextFieldSelectControllerTest002
+ * @tc.desc: test textfield select controller function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest002, TestSize.Level0)
+{
+    CreateTextField("123", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    SelectionInfo info = pattern_->textFieldController_->GetSelection();
+    auto selectionStart = info.GetSelection().selection[0];
+    auto selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 3);
+    EXPECT_EQ(selectionEnd, 3);
+
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(2);
+    FlushLayoutTask(frameNode_);
+    info = pattern_->textFieldController_->GetSelection();
+    selectionStart = info.GetSelection().selection[0];
+    selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 2);
+    EXPECT_EQ(selectionEnd, 2);
+
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    auto rect = controller->CalculateEmptyValueCaretRect();
+    EXPECT_EQ(rect.Height(), 50);
+
+    layoutProperty->UpdateTextAlign(TextAlign::JUSTIFY);
+    rect = controller->CalculateEmptyValueCaretRect();
+    EXPECT_EQ(rect.Height(), 50);
+}
+
+/**
+ * @tc.name: TextFieldSelectControllerTest003
+ * @tc.desc: test textfield select controller function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest003, TestSize.Level0)
+{
+    CreateTextField("1234567", "7654321", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    SelectionInfo info = pattern_->textFieldController_->GetSelection();
+    auto selectionStart = info.GetSelection().selection[0];
+    auto selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 7);
+    EXPECT_EQ(selectionEnd, 7);
+
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(2);
+    FlushLayoutTask(frameNode_);
+    info = pattern_->textFieldController_->GetSelection();
+    selectionStart = info.GetSelection().selection[0];
+    selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 2);
+    EXPECT_EQ(selectionEnd, 2);
+
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    auto rect = controller->CalculateEmptyValueCaretRect();
+    EXPECT_EQ(rect.Height(), 50);
+}
+
+/**
+ * @tc.name: TextFieldSelectControllerTest004
+ * @tc.desc: test textfield select controller function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest004, TestSize.Level0)
+{
+    CreateTextField("1234567", "7654321", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    SelectionInfo info = pattern_->textFieldController_->GetSelection();
+    auto selectionStart = info.GetSelection().selection[0];
+    auto selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 7);
+    EXPECT_EQ(selectionEnd, 7);
+
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(2);
+    FlushLayoutTask(frameNode_);
+    info = pattern_->textFieldController_->GetSelection();
+    selectionStart = info.GetSelection().selection[0];
+    selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 2);
+    EXPECT_EQ(selectionEnd, 2);
+
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    controller->UpdateParagraph(nullptr);
+    auto rect = controller->CalculateEmptyValueCaretRect();
+    EXPECT_EQ(rect.Height(), 50);
+}
+
+/**
+ * @tc.name: TextFieldSelectControllerTest005
+ * @tc.desc: test textfield select controller function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest005, TestSize.Level0)
+{
+    CreateTextField("1234567", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    SelectionInfo info = pattern_->textFieldController_->GetSelection();
+    auto selectionStart = info.GetSelection().selection[0];
+    auto selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 7);
+    EXPECT_EQ(selectionEnd, 7);
+
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(2);
+    FlushLayoutTask(frameNode_);
+    info = pattern_->textFieldController_->GetSelection();
+    selectionStart = info.GetSelection().selection[0];
+    selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 2);
+    EXPECT_EQ(selectionEnd, 2);
+
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    controller->UpdateParagraph(nullptr);
+    auto rect = controller->CalculateEmptyValueCaretRect();
+    EXPECT_EQ(rect.Height(), 50);
+}
+
+/**
+ * @tc.name: TextFieldSelectControllerTest006
+ * @tc.desc: test textfield select controller function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest006, TestSize.Level0)
+{
+    CreateTextField("123", "7654321", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    SelectionInfo info = pattern_->textFieldController_->GetSelection();
+    auto selectionStart = info.GetSelection().selection[0];
+    auto selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 3);
+    EXPECT_EQ(selectionEnd, 3);
+
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(2);
+    FlushLayoutTask(frameNode_);
+    info = pattern_->textFieldController_->GetSelection();
+    selectionStart = info.GetSelection().selection[0];
+    selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 2);
+    EXPECT_EQ(selectionEnd, 2);
+
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    controller->UpdateParagraph(nullptr);
+    auto rect = controller->CalculateEmptyValueCaretRect();
+    EXPECT_EQ(rect.Height(), 50);
 }
 } // namespace OHOS::Ace::NG

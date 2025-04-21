@@ -174,6 +174,11 @@ public:
     void OnAttachToMainTree() override;
     void UpdateCheckBoxStyle();
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void DumpInfo() override;
+
+    int32_t OnInjectionEvent(const std::string& command) override;
+    void ReportChangeEvent(bool selectStatus);
+    std::optional<bool> ParseSelectStatus(const std::string& command);
 
 private:
     void OnAttachToFrameNode() override;

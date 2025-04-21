@@ -42,6 +42,10 @@ if (is_arkui_x) {
   common_napi_libs += [ "arkui/drawabledescriptor" ]
 }
 
+if (!is_arkui_x) {
+  common_napi_libs += [ "arkui/container_utils" ]
+}
+
 template("ace_napi_lib") {
   forward_variables_from(invoker, "*")
 

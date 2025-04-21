@@ -144,6 +144,7 @@ public:
 
     void SetSwitchIsOn(bool value);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void DumpInfo() override;
 
 private:
     void OnAttachToFrameNode() override;

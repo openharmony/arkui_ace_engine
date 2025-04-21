@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/device_config.h"
+#include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 
 #define COLOR_MODE_LOCK(colorMode) NG::ColorModeProcessor colorModeProcessor(colorMode)
@@ -29,8 +30,9 @@ public:
     ColorModeProcessor();
     ColorModeProcessor(const ColorMode colorMode)
     {
+        CHECK_NULL_VOID(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
         if (colorMode != ColorMode::COLOR_MODE_UNDEFINED) {
-            adapter_ = ResourceManager::GetInstance().GetResourceAdapter();
+            adapter_ = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
             CHECK_NULL_VOID(adapter_);
             colorMode_ = adapter_->GetResourceColorMode();
             adapter_->UpdateColorMode(colorMode);
@@ -38,7 +40,7 @@ public:
     }
     ~ColorModeProcessor()
     {
-        CHECK_NULL_VOID(adapter_);
+        CHECK_NULL_VOID(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) && adapter_);
         if (colorMode_ != ColorMode::COLOR_MODE_UNDEFINED) {
             adapter_->UpdateColorMode(colorMode_);
         }

@@ -111,14 +111,14 @@ public:
     void UpdateTranslateInXY(const OffsetF& offset) override;
 #endif
 
-
-    void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
+    void UpdateBackBlurStyle(
+        const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions()) override
     {
         const auto& groupProperty = GetOrCreateBackground();
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
 
-    void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption)
+    void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
     {
         const auto& groupProperty = GetOrCreateBackground();
         groupProperty->propBlurRadius = radius;
@@ -127,26 +127,27 @@ public:
         backdropBlurOption = blurOption;
     }
 
-    void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption)
+    void UpdateBackgroundEffect(
+        const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions = SysOptions()) override
     {
         const auto& groupProperty = GetOrCreateBackground();
         groupProperty->propEffectOption = effectOption;
     }
 
-    void UpdateMotionBlur(const MotionBlurOption& motionBlurOption)
+    void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override
     {
         const auto& groupProperty = GetOrCreateForeground();
         groupProperty->propMotionBlur = motionBlurOption;
     }
 
-    void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption)
+    void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
     {
         const auto& groupProperty = GetOrCreateForeground();
         groupProperty->propBlurRadius = radius;
         foregroundBlurOption = blurOption;
     }
 
-    void UpdateTransition(const TransitionOptions& options)
+    void UpdateTransition(const TransitionOptions& options) override
     {
         const auto& groupPropertyA = GetOrCreateTransitionAppearing();
         if (options.Type == TransitionType::APPEARING || options.Type == TransitionType::ALL) {
@@ -182,24 +183,29 @@ public:
         }
     }
 
-    int32_t CalcExpectedFrameRate(const std::string& scene, float speed)
+    int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override
     {
         return 0;
     }
 
-    void SetOpacityMultiplier(float opacity)
+    void SetOpacityMultiplier(float opacity) override
     {
         opacityMultiplier_ = opacity;
     }
 
-    bool HasDisappearTransition() const
+    bool HasDisappearTransition() const override
     {
         return hasDisappearTransition_;
     }
 
-    void SetTransitionOutCallback(std::function<void()>&& callback)
+    void SetTransitionOutCallback(std::function<void()>&& callback) override
     {
         transitionOutCallback_ = std::move(callback);
+    }
+
+    void SetActualForegroundColor(const Color& value) override
+    {
+        actualForegroundColor_ = value;
     }
 
     bool isVisible_ = true;
@@ -210,6 +216,7 @@ public:
     RefPtr<AnimatablePropertyOffsetF> translateXY_;
     float opacityMultiplier_ = 1.0f;
     std::function<void()> transitionOutCallback_;
+    Color actualForegroundColor_;
     BlurOption backdropBlurOption;
     BlurOption foregroundBlurOption;
     RefPtr<NG::ChainedTransitionEffect> chainedTransitionEffect_ = nullptr;

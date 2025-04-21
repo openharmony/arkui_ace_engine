@@ -380,7 +380,7 @@ void AssignArkValue(Ark_RichEditorParagraphResult& dst, const ParagraphInfo& src
 }
 
 template<typename To>
-std::vector<To> ArkSelectionConvert(SelectionInfo& src, ConvContext *ctx = nullptr)
+std::vector<To> ArkSelectionConvert(SelectionInfo& src, ConvContext *ctx)
 {
     std::vector<To> values;
     for (const ResultObject& spanObject : src.GetSelection().resultObjects) {
@@ -397,22 +397,22 @@ std::vector<To> ArkSelectionConvert(SelectionInfo& src, ConvContext *ctx = nullp
     return values;
 }
 
-void AssignArkValue(Ark_DecorationStyleResult& dst, const TextStyleResult& src)
+void AssignArkValue(Ark_DecorationStyleResult& dst, const TextStyleResult& src, ConvContext *ctx)
 {
     dst.type = ArkValue<Ark_TextDecorationType>(
         static_cast<OHOS::Ace::TextDecoration>(src.decorationType));
-    dst.color = ArkUnion<Ark_ResourceColor, Ark_String>(src.decorationColor);
+    dst.color = ArkUnion<Ark_ResourceColor, Ark_String>(src.decorationColor, ctx);
     dst.style = ArkValue<Opt_TextDecorationStyle>(
         static_cast<OHOS::Ace::TextDecorationStyle>(src.decorationStyle));
 }
 
 void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const TextStyleResult& src, ConvContext *ctx)
 {
-    dst.fontColor = ArkUnion<Ark_ResourceColor, Ark_String>(src.fontColor);
+    dst.fontColor = ArkUnion<Ark_ResourceColor, Ark_String>(src.fontColor, ctx);
     dst.fontSize = ArkValue<Ark_Number>(src.fontSize);
     dst.fontStyle = ArkValue<Ark_FontStyle>(static_cast<OHOS::Ace::FontStyle>(src.fontStyle));
     dst.fontWeight = ArkValue<Ark_Number>(src.fontWeight);
-    dst.fontFamily = ArkValue<Ark_String>(src.fontFamily);
+    dst.fontFamily = ArkValue<Ark_String>(src.fontFamily, ctx);
     dst.decoration = ArkValue<Ark_DecorationStyleResult>(src);
     dst.textShadow = ArkValue<Opt_Array_ShadowOptions>(src.textShadows, ctx);
     dst.letterSpacing = ArkValue<Opt_Number>(src.letterSpacing);
@@ -432,7 +432,7 @@ void AssignArkValue(Ark_RichEditorSpanPosition& dst, const SpanPosition& src)
 void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const ResultObject& src, ConvContext *ctx)
 {
     dst.spanPosition = ArkValue<Ark_RichEditorSpanPosition>(src.spanPosition);
-    dst.value = ArkValue<Ark_String>(src.valueString);
+    dst.value = ArkValue<Ark_String>(src.valueString, ctx);
     dst.textStyle = ArkValue<Ark_RichEditorTextStyleResult>(src.textStyle, ctx);
     dst.symbolSpanStyle = ArkValue<Opt_RichEditorSymbolSpanStyle>(src.symbolSpanStyle, ctx);
     if (src.valueResource) {
@@ -440,14 +440,14 @@ void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const ResultObject& src, 
     } else {
         dst.valueResource = ArkValue<Opt_Resource>();
     }
-    dst.previewText = ArkValue<Opt_String>(src.previewText);
+    dst.previewText = ArkValue<Opt_String>(src.previewText, ctx);
 }
 
 void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const ResultObject& src, ConvContext *ctx)
 {
     dst.spanPosition = ArkValue<Ark_RichEditorSpanPosition>(src.spanPosition);
     dst.valuePixelMap = ArkValue<Opt_PixelMap>(PixelMapPeer::Create(src.valuePixelMap));
-    dst.valueResourceStr = ArkUnion<Opt_ResourceStr, Ark_String>(src.valueString);
+    dst.valueResourceStr = ArkUnion<Opt_ResourceStr, Ark_String>(src.valueString, ctx);
     dst.imageStyle = ArkValue<Ark_RichEditorImageSpanStyleResult>(src.imageStyle);
     dst.offsetInSpan.value0 = ArkValue<Ark_Number>(src.offsetInSpan[0]);
     dst.offsetInSpan.value1 = ArkValue<Ark_Number>(src.offsetInSpan[1]);

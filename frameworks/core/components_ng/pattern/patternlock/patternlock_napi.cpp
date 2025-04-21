@@ -80,9 +80,11 @@ napi_value Create(napi_env env, napi_callback_info info)
     NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
     PatternLockController* wrapper = nullptr;
     napi_unwrap(env, argv[0], (void**)&wrapper);
-    auto controller = PatternLockModel::GetInstance()->Create();
-    if (controller) {
-        wrapper->SetController(controller);
+    if (wrapper) {
+        auto controller = PatternLockModel::GetInstance()->Create();
+        if (controller) {
+            wrapper->SetController(controller);
+        }
     }
     return CommonNapiUtils::CreateNull(env);
 }

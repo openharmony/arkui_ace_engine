@@ -261,9 +261,7 @@ void CustomDialogControllerPeerImpl::SetKeyboardAvoidMode(Opt_KeyboardAvoidMode 
 void CustomDialogControllerPeerImpl::SetEnableHoverMode(Opt_Boolean enableHoverMode)
 {
     auto result = Converter::OptConvert<bool>(enableHoverMode);
-    if (result) {
-        dialogProperties_.enableHoverMode = result.value();
-    }
+    dialogProperties_.enableHoverMode = result;
 }
 
 void CustomDialogControllerPeerImpl::SetHoverModeArea(Opt_HoverModeAreaType hoverModeArea)
@@ -282,7 +280,7 @@ void CustomDialogControllerPeerImpl::OpenDialog()
     if (dialogProperties_.windowScene.Invalid()) {
         const auto windowScene = GetWindowScene();
         if (windowScene) {
-            dialogProperties_.isScenceBoardDialog = true;
+            dialogProperties_.isSceneBoardDialog = true;
             dialogProperties_.windowScene = windowScene;
         }
     }

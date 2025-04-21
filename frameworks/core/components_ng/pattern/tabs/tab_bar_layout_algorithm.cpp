@@ -491,13 +491,17 @@ void TabBarLayoutAlgorithm::MeasureFocusIndex(LayoutWrapper* layoutWrapper, Layo
     auto startPos = endMainPos_;
     auto endIndex = focusIndex_.value();
     auto endPos = 0.0f;
-    if (focusIndex_.value() < visibleItemPosition_.begin()->first) {
+
+    auto iter = visibleItemPosition_.find(focusIndex_.value());
+    if ((iter != visibleItemPosition_.end() && LessNotEqual(iter->second.startPos, 0.0f)) ||
+        focusIndex_.value() < visibleItemPosition_.begin()->first) {
         if (focusIndex_.value() == 0) {
             endPos += scrollMargin_;
         }
         startIndex = endIndex - 1;
         startPos = endPos;
-    } else if (focusIndex_.value() > visibleItemPosition_.rbegin()->first) {
+    } else if ((iter != visibleItemPosition_.end() && GreatNotEqual(iter->second.endPos, contentMainSize_)) ||
+               focusIndex_.value() > visibleItemPosition_.rbegin()->first) {
         if (focusIndex_.value() == childCount_ - 1) {
             startPos -= scrollMargin_;
         }
@@ -1053,15 +1057,17 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     auto contentSize = geometryNode->GetPaddingSize();
-    auto childOffset = OffsetF(barGridMargin_, 0.0f);
+    auto childOffset = OffsetF(0.0f, 0.0f);
     if (geometryNode->GetPadding()) {
         auto left = geometryNode->GetPadding()->left.value_or(0.0f);
         auto top = geometryNode->GetPadding()->top.value_or(0.0f);
         childOffset += OffsetF(left, top);
     }
     if (isRTL_ && axis_ == Axis::HORIZONTAL) {
-        childOffset += OffsetF(0.0f, contentSize.Width() - visibleItemPosition_.begin()->second.startPos, axis_);
+        childOffset +=
+            OffsetF(0.0f, contentSize.Width() - visibleItemPosition_.begin()->second.startPos - barGridMargin_, axis_);
     } else {
+        childOffset += OffsetF(barGridMargin_, 0.0f);
         childOffset += OffsetF(0.0f, visibleItemPosition_.begin()->second.startPos, axis_);
     }
     LayoutChildren(layoutWrapper, contentSize, childOffset);

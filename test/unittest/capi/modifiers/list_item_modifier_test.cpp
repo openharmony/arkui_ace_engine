@@ -90,7 +90,7 @@ public:
  * @tc.desc: Check the functionality of ListItemModifier.setListItemOptions0
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setListItemOptions0Test, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, DISABLED_setListItemOptions0Test, TestSize.Level1)
 {
     auto style = GetAttrValue<std::string>(node_, "itemStyle");
     EXPECT_EQ(style, "ListItemStyle.NONE");

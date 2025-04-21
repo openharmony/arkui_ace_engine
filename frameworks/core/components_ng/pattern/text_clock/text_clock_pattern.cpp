@@ -161,11 +161,13 @@ bool TextClockPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 
 void TextClockPattern::OnModifyDone()
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        Pattern::OnModifyDone();
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        Pattern::OnModifyDone();
+    }
+
     auto textNode = GetTextNode();
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -175,7 +177,7 @@ void TextClockPattern::OnModifyDone()
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto textTheme = pipeline->GetTheme<TextTheme>(host->GetThemeScopeId());
+    auto textTheme = pipeline->GetTheme<TextClockTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(textTheme);
 
     textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
@@ -261,8 +263,7 @@ void TextClockPattern::InitUpdateTimeTextCallBack()
     auto context = host->GetContext();
     if (context) {
         auto container = Container::Current();
-        bool isDynamicComponent = container && container->IsDynamicRender() &&
-                                  container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+        bool isDynamicComponent = container && container->IsDynamicRender();
         isForm_ = context->IsFormRender() && !isDynamicComponent;
     }
     RegistVisibleAreaChangeCallback();
@@ -489,7 +490,9 @@ void TextClockPattern::ParseInputFormat()
             formatElementMap_[j] = tempFormatElement;
         }
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && is12h) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && is12h) {
         is24H_ = false;
     }
 }
@@ -785,7 +788,7 @@ std::string TextClockPattern::GetFormat() const
     auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
     if (isForm_) {
         auto defaultFormFormat = FORM_FORMAT;
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && is24H_) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && is24H_) {
             defaultFormFormat = FORM_FORMAT_24H;
         }
         CHECK_NULL_RETURN(textClockLayoutProperty, defaultFormFormat);
@@ -796,7 +799,7 @@ std::string TextClockPattern::GetFormat() const
         return result;
     }
     auto defaultFormat = DEFAULT_FORMAT;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && is24H_) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && is24H_) {
         defaultFormat = DEFAULT_FORMAT_24H;
     }
     CHECK_NULL_RETURN(textClockLayoutProperty, defaultFormat);

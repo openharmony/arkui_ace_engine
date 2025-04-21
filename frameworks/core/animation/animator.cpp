@@ -17,6 +17,7 @@
 
 #include "base/log/jank_frame_report.h"
 #include "core/common/container.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -553,7 +554,7 @@ void Animator::Cancel()
         return;
     }
     if (status_ == Status::IDLE) {
-        TAG_LOGI(AceLogTag::ACE_ANIMATION, "Already in idle, do not need cancel again. id: %{public}d", controllerId_);
+        TAG_LOGD(AceLogTag::ACE_ANIMATION, "Already in idle, do not need cancel again. id: %{public}d", controllerId_);
         return;
     }
     status_ = Status::IDLE;

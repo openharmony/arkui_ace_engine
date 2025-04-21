@@ -17,6 +17,7 @@
 
 #include <regex>
 
+#include "core/common/container.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
 
@@ -62,7 +63,7 @@ IdParseResult ThemeUtils::ParseThemeIdReference(const std::string& str, const Re
     if (str.size() > THEME_ID_MIN_SIZE && std::regex_match(str, matches, THEME_ID_REGEX) &&
         matches.size() == THEME_ID_MATCH_SIZE) {
         // Platform style id is no more than 32 bit.
-        result.id = static_cast<uint32_t>(std::stoul(matches[1].str()));
+        result.id = StringUtils::StringToUint(matches[1].str());
         result.parseSuccess = true;
         result.isIdRef = true;
         return result;
@@ -77,14 +78,14 @@ IdParseResult ThemeUtils::ParseThemeIdReference(const std::string& str, const Re
     if (str.size() > OHOS_ID_MIN_SIZE && std::regex_match(str, matches, OHOS_ID_REGEX) &&
         matches.size() == THEME_ID_MATCH_SIZE) {
         // Platform style id is no more than 32 bit.
-        result.id = static_cast<uint32_t>(std::stoul(matches[1].str())) + SYSTEM_RES_ID_START;
+        result.id = StringUtils::StringToUint(matches[1].str()) + SYSTEM_RES_ID_START;
         result.parseSuccess = true;
         result.isIdRef = true;
         return result;
     }
     if (str.size() > SYS_TYPE_RES_ID_MIN_SIZE && std::regex_match(str, matches, SYS_TYPE_RES_ID_REGEX) &&
         matches.size() == TYPE_RESOURCE_MATCH_SIZE) {
-        result.id = static_cast<uint32_t>(std::stoul(matches[2].str())) + SYSTEM_RES_ID_START;
+        result.id = StringUtils::StringToUint(matches[2].str()) + SYSTEM_RES_ID_START; // 2: parameter index
         result.parseSuccess = true;
         result.isIdRef = true;
         return result;
@@ -147,7 +148,7 @@ std::string ThemeUtils::ProcessImageSource(const std::string& imageSrc, const Re
         resName = matches[1].str();
     }
     if (std::regex_match(imageSrc, matches, SYS_MEDIA_RES_ID_REGEX) && matches.size() == MEDIA_RESOURCE_MATCH_SIZE) {
-        resId = static_cast<uint32_t>(std::stoul(matches[1].str())) + SYSTEM_RES_ID_START;
+        resId = StringUtils::StringToUint(matches[1].str()) + SYSTEM_RES_ID_START;
     }
     // not a image from global global resource manager subsystem, no need process.
     if (resId == 0 && resName.empty()) {
@@ -173,7 +174,8 @@ std::string ThemeUtils::ProcessImageSource(const std::string& imageSrc, const Re
     // resource name or resource id of image in global resource manager subsystem is the same in dark or light mode.
     // image will not be reloaded if name is not changed when switching between dark and light modes.
     std::string colorMode;
-    switch (SystemProperties::GetColorMode()) {
+    ColorMode mode = Container::CurrentColorMode();
+    switch (mode) {
         case ColorMode::LIGHT:
             colorMode = "light";
             break;

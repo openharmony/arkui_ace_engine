@@ -503,11 +503,9 @@ const ComponentAsyncEventHandler TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetTextPickerOnScrollStop,
 };
 
-#ifndef ARKUI_WEARABLE
 const ComponentAsyncEventHandler CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCalendarPickerOnChange,
 };
-#endif
 
 const ComponentAsyncEventHandler CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCheckboxChange,
@@ -553,7 +551,6 @@ const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetListItemOnSelect,
 };
 
-#ifndef ARKUI_WEARABLE
 const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWillScroll,
     NodeModifier::SetOnWaterFlowReachEnd,
@@ -564,7 +561,6 @@ const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWaterFlowScrollIndex,
     NodeModifier::SetOnWaterFlowReachStart,
 };
-#endif
 
 const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
@@ -769,7 +765,6 @@ const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[
     NodeModifier::ResetListItemOnSelect,
 };
 
-#ifndef ARKUI_WEARABLE
 const ResetComponentAsyncEventHandler WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnWillScroll,
     NodeModifier::ResetOnWaterFlowReachEnd,
@@ -780,7 +775,6 @@ const ResetComponentAsyncEventHandler WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[
     NodeModifier::ResetOnWaterFlowScrollIndex,
     NodeModifier::ResetOnWaterFlowReachStart,
 };
-#endif
 
 const ResetComponentAsyncEventHandler GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
@@ -935,13 +929,11 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
         }
         case ARKUI_CALENDAR_PICKER: {
             // calendar picker event type.
-#ifndef ARKUI_WEARABLE
             if (subKind >= sizeof(CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
                 return;
             }
             eventHandle = CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
-#endif
             break;
         }
         case ARKUI_CHECKBOX: {
@@ -997,7 +989,6 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-#ifndef ARKUI_WEARABLE
         case ARKUI_WATER_FLOW: {
             // swiper event type.
             if (subKind >= sizeof(WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -1007,7 +998,6 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-#endif
         case ARKUI_GRID: {
             // grid event type.
             if (subKind >= sizeof(GRID_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -1274,7 +1264,6 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             eventHandle = LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-#ifndef ARKUI_WEARABLE
         case ARKUI_WATER_FLOW: {
             // swiper event type.
             if (subKind >=
@@ -1286,7 +1275,6 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             eventHandle = WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-#endif
         case ARKUI_GRID: {
             // grid event type.
             if (subKind >= sizeof(GRID_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
@@ -1974,6 +1962,119 @@ ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle handle, ArkUI_Float64 levelOrder)
     return CustomDialog::SetLevelOrder(handle, levelOrder);
 }
 
+ArkUI_Int32 RegisterOnWillAppear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnWillAppearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 RegisterOnDidAppear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnDidAppearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 RegisterOnWillDisappear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnWillDisappearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 RegisterOnDidDisappear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnDidDisappearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 SetDialogBorderWidth(ArkUIDialogHandle handle, ArkUI_Float32 top, ArkUI_Float32 right, ArkUI_Float32 bottom,
+    ArkUI_Float32 left, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetDialogBorderWidth(handle, top, right, bottom, left, unit);
+}
+
+ArkUI_Int32 SetDialogBorderColor(ArkUIDialogHandle handle, uint32_t top, uint32_t right, uint32_t bottom, uint32_t left)
+{
+    return CustomDialog::SetDialogBorderColor(handle, top, right, bottom, left);
+}
+
+ArkUI_Int32 SetDialogBorderStyle(ArkUIDialogHandle handle, int32_t top, int32_t right, int32_t bottom, int32_t left)
+{
+    return CustomDialog::SetDialogBorderStyle(handle, top, right, bottom, left);
+}
+
+ArkUI_Int32 SetDialogWidth(ArkUIDialogHandle handle, float width, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetWidth(handle, width, unit);
+}
+
+ArkUI_Int32 SetDialogHeight(ArkUIDialogHandle handle, float height, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetHeight(handle, height, unit);
+}
+
+ArkUI_Int32 SetDialogShadow(ArkUIDialogHandle handle, ArkUI_Int32 shadow)
+{
+    return CustomDialog::SetShadow(handle, shadow);
+}
+
+ArkUI_Int32 SetDialogCustomShadow(ArkUIDialogHandle handle, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length)
+{
+    return CustomDialog::SetDialogCustomShadow(handle, shadows, length);
+}
+
+ArkUI_Int32 SetDialogBackgroundBlurStyle(ArkUIDialogHandle handle, ArkUI_Int32 blurStyle)
+{
+    return CustomDialog::SetBackgroundBlurStyle(handle, blurStyle);
+}
+
+ArkUI_Int32 SetDialogKeyboardAvoidMode(ArkUIDialogHandle handle, ArkUI_Int32 keyboardAvoidMode)
+{
+    return CustomDialog::SetKeyboardAvoidMode(handle, keyboardAvoidMode);
+}
+
+ArkUI_Int32 EnableDialogHoverMode(ArkUIDialogHandle handle, ArkUI_Bool enableHoverMode)
+{
+    return CustomDialog::EnableHoverMode(handle, enableHoverMode);
+}
+
+ArkUI_Int32 SetDialogHoverModeArea(ArkUIDialogHandle handle, ArkUI_Int32 hoverModeAreaType)
+{
+    return CustomDialog::SetHoverModeArea(handle, hoverModeAreaType);
+}
+
+ArkUI_Int32 SetDialogFocusable(ArkUIDialogHandle handle, ArkUI_Bool focusable)
+{
+    return CustomDialog::SetFocusable(handle, focusable);
+}
+
+ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void(*callback)(ArkUI_Int32 dialogId))
+{
+    return CustomDialog::OpenCustomDialog(handle, callback);
+}
+
+ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void(*callback)(int32_t dialogId))
+{
+    return CustomDialog::UpdateCustomDialog(handle, callback);
+}
+
+ArkUI_Int32 CloseCustomDialog(ArkUI_Int32 dialogId)
+{
+    return CustomDialog::CloseCustomDialog(dialogId);
+}
+
+ArkUI_Int32 SetDialogSubwindowMode(ArkUIDialogHandle handle, ArkUI_Bool showInSubWindow)
+{
+    return CustomDialog::SetDialogSubwindowMode(handle, showInSubWindow);
+}
+
+ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle handle, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
+    ArkUI_Uint32 (*uintArray)[3], ArkUI_Bool isValidColor)
+{
+    return CustomDialog::SetBackgroundBlurStyleOptions(handle, intArray, scale, uintArray, isValidColor);
+}
+
+ArkUI_Int32 SetBackgroundEffect(ArkUIDialogHandle handle, ArkUI_Float32 (*floatArray)[3], ArkUI_Int32 (*intArray)[2],
+    ArkUI_Uint32 (*uintArray)[4], ArkUI_Bool isValidColor)
+{
+    return CustomDialog::SetBackgroundEffect(handle, floatArray, intArray, uintArray, isValidColor);
+}
+
 const ArkUIDialogAPI* GetDialogAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -2001,6 +2102,28 @@ const ArkUIDialogAPI* GetDialogAPI()
         .setLevelUniqueId = SetDialogLevelUniqueId,
         .setImmersiveMode = SetDialogImmersiveMode,
         .setLevelOrder = SetLevelOrder,
+        .registerOnWillAppear = RegisterOnWillAppear,
+        .registerOnDidAppear = RegisterOnDidAppear,
+        .registerOnWillDisappear = RegisterOnWillDisappear,
+        .registerOnDidDisappear = RegisterOnDidDisappear,
+        .setBorderWidth = SetDialogBorderWidth,
+        .setBorderColor = SetDialogBorderColor,
+        .setBorderStyle = SetDialogBorderStyle,
+        .setWidth = SetDialogWidth,
+        .setHeight = SetDialogHeight,
+        .setShadow = SetDialogShadow,
+        .setCustomShadow = SetDialogCustomShadow,
+        .setBackgroundBlurStyle = SetDialogBackgroundBlurStyle,
+        .setKeyboardAvoidMode = SetDialogKeyboardAvoidMode,
+        .enableHoverMode = EnableDialogHoverMode,
+        .setHoverModeArea = SetDialogHoverModeArea,
+        .setFocusable = SetDialogFocusable,
+        .openCustomDialog = OpenCustomDialog,
+        .updateCustomDialog = UpdateCustomDialog,
+        .closeCustomDialog = CloseCustomDialog,
+        .setSubwindowMode = SetDialogSubwindowMode,
+        .setBackgroundBlurStyleOptions = SetBackgroundBlurStyleOptions,
+        .setBackgroundEffect = SetBackgroundEffect
     };
     CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
     return &dialogImpl;

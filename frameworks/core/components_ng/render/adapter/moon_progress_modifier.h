@@ -19,6 +19,8 @@
 #include "core/components_ng/base/modifier.h"
 
 namespace OHOS::Ace::NG {
+
+class FrameNode;
 class MoonProgressModifier : public OverlayModifier {
 public:
     MoonProgressModifier(const WeakPtr<FrameNode>& maskNode);

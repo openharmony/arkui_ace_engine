@@ -769,6 +769,7 @@ public:
     void ColumnPatternStopHaptic();
 
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
+    void UpdateUserSetSelectColor();
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -799,23 +800,24 @@ private:
     void FillLunarMonthDaysOptions(const LunarDate& current, RefPtr<FrameNode>& monthDaysColumn);
     void AdjustSolarStartEndDate();
     void AdjustLunarStartEndDate();
-    void UpdateConfirmButtonMargin(
-        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
-    void UpdateCancelButtonMargin(
-        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
+    void UpdateButtonMargin(
+        const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmNode);
+    void UpdateButtonNode(const RefPtr<FrameNode>& buttonNode, const bool isConfirmNode);
     void ShowColumnByDatePickMode();
     void UpdateStackPropVisibility(const RefPtr<FrameNode>& stackNode,
         const VisibleType visibleType, const int32_t weight);
     void ClearFocus();
     void SetDefaultFocus();
     bool IsCircle();
-
+    bool CurrentIsLunar();
 #ifdef SUPPORT_DIGITAL_CROWN
     void InitOnCrownEvent(const RefPtr<FocusHub>& focusHub);
     bool OnCrownEvent(const CrownEvent& event);
 #endif
     void InitFocusKeyEvent();
     void FlushChildNodes();
+    void UpdateLunarSwitch();
+    void UpdateDateOrder();
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
@@ -904,6 +906,8 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
     std::string selectedColumnId_;
+    bool lastTimeIsLuanar_ = true;
+    bool isFirstTimeSetFocus_ = true;
 };
 } // namespace OHOS::Ace::NG
 

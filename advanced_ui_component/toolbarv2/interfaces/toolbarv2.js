@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,18 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var __decorate = (this && this.__decorate) || function (a51, b51, c51, d51) {
-  var e51 = arguments.length, f51 = e51 < 3 ? b51 : d51 === null ? d51 = Object.getOwnPropertyDescriptor(b51, c51) : d51, g51;
-  if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-    f51 = Reflect.decorate(a51, b51, c51, d51);
-  else
-    for (var h51 = a51.length - 1; h51 >= 0; h51--)
-      if (g51 = a51[h51])
-        f51 = (e51 < 3 ? g51(f51) : e51 > 3 ? g51(b51, c51, f51) : g51(b51, c51)) || f51;
-  return e51 > 3 && f51 && Object.defineProperty(b51, c51, f51), f51;
+
+let __decorate = (this && this.__decorate) || function (t1, target, key, desc) {
+  let c = arguments.length;
+  let r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc;
+  let d;
+  if (typeof Reflect === 'object' && typeof Reflect.v1 === 'function') {
+    r = Reflect.v1(t1, target, key, desc);
+  } else {
+    for (let u1 = t1.length - 1; u1 >= 0; u1--) {
+      (d = t1[u1]) && (r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r);
+    }
+  }
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-  Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
@@ -31,98 +35,132 @@ const ColorMetrics = requireNapi('arkui.node').ColorMetrics;
 const DividerModifier = requireNapi('arkui.modifier').DividerModifier;
 const hilog = requireNapi('hilog');
 const promptAction = requireNapi('promptAction');
-export var ToolBarV2ItemState;
-(function (z50) {
-  z50[z50["ENABLE"] = 1] = "ENABLE";
-  z50[z50["DISABLE"] = 2] = "DISABLE";
-  z50[z50["ACTIVATE"] = 3] = "ACTIVATE";
+
+export let ToolBarV2ItemState;
+(function (ToolBarV2ItemState) {
+  ToolBarV2ItemState[ToolBarV2ItemState.ENABLE = 1] = 'ENABLE';
+  ToolBarV2ItemState[ToolBarV2ItemState.DISABLE = 2] = 'DISABLE';
+  ToolBarV2ItemState[ToolBarV2ItemState.ACTIVATE = 3] = 'ACTIVATE';
 })(ToolBarV2ItemState || (ToolBarV2ItemState = {}));
-const PUBLIC_MORE = { "id": -1, "type": 20000, params: ['sys.media.ohos_ic_public_more'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
-const IMAGE_SIZE = '24vp';
-const DEFAULT_TOOLBAR_HEIGHT = 56;
-const TOOLBAR_MAX_LENGTH = 5;
-const MAX_FONT_SIZE = 3.2;
-const DIALOG_IMAGE_SIZE = '64vp';
-const MAX_DIALOG = '256vp';
-const MIN_DIALOG = '216vp';
-const TEXT_TOOLBAR_DIALOG = '18.3fp';
-const SCREEN_WIDTH_BREAK_POINT = 640;
-const VERTICAL_SCREEN_TEXT_MAX_LINES = 6;
-const HORIZONTAL_SCREEN_TEXT_MAX_LINES = 1;
-const FOCUS_BOX_MARGIN = -2;
-const FOCUS_BOX_BORDER_WIDTH = 2;
+const j = {
+  'id': -1, 'type': 40000,
+  params: ['sys.symbol.dot_grid_2x2'],
+  'bundleName': '__harDefaultBundleName__',
+  'moduleName': '__harDefaultModuleName__' };
+const m = '24vp';
+const o = 56;
+const t = 5;
+const u = 3.2;
+const a1 = '64vp';
+const b1 = '256vp';
+const c1 = '216vp';
+const d1 = '18.3fp';
+const e1 = 640;
+const f1 = 6;
+const g1 = 1;
+const h1 = -2;
+const i1 = 2;
+const j1 = 40000;
+class Util {
+  static b2(v1) {
+    if (!Util.c2(v1)) {
+      return false;
+    }
+    let resource = v1;
+    return resource.type === j1;
+  }
+  static c2(resource) {
+    if (!resource) {
+      return false;
+    }
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    return true;
+  }
+}
 let ToolBarV2SymbolGlyph = class ToolBarV2SymbolGlyph {
-  constructor(y50) {
-    this.normal = y50.normal;
-    this.activated = y50.activated;
+  constructor(options) {
+    this.normal = options.normal;
+    this.activated = options.activated;
   }
 };
 __decorate([
   Trace
-], ToolBarV2SymbolGlyph.prototype, "normal", void 0);
+], ToolBarV2SymbolGlyph.prototype, 'normal', void 0);
 __decorate([
   Trace
-], ToolBarV2SymbolGlyph.prototype, "activated", void 0);
+], ToolBarV2SymbolGlyph.prototype, 'activated', void 0);
 ToolBarV2SymbolGlyph = __decorate([
   ObservedV2
 ], ToolBarV2SymbolGlyph);
 export { ToolBarV2SymbolGlyph };
 class ButtonGestureModifier {
   constructor() {
-    this.gestureCallBack = undefined;
+    this.d2 = undefined;
   }
-  applyGesture(w50) {
-    this.gestureCallBack?.(w50);
+  applyGesture(event) {
+    this.d2?.(event);
   }
 }
-ButtonGestureModifier.longPressTime = 500;
+ButtonGestureModifier.e2 = 500;
 ButtonGestureModifier.minFontSize = 1.75;
 let ToolBarV2ItemText = class ToolBarV2ItemText {
-  constructor(v50) {
-    this.color = ColorMetrics.resourceColor({ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-    this.activatedColor = ColorMetrics.resourceColor({ "id": -1, "type": 10001, params: ['sys.color.font_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-    this.text = v50.text;
-    this.color = v50.color;
-    this.activatedColor = v50.activatedColor;
+  constructor(options) {
+    this.color = ColorMetrics.resourceColor({
+      'id': -1,
+      'type': 10001,
+      params: ['sys.color.font_primary'],
+      'bundleName': '__harDefaultBundleName__',
+      'moduleName': '__harDefaultModuleName__' });
+    this.activatedColor = ColorMetrics.resourceColor({
+      'id': -1,
+      'type': 10001,
+      params: ['sys.color.font_emphasize'],
+      'bundleName': '__harDefaultBundleName__',
+      'moduleName': '__harDefaultModuleName__' });
+    this.text = options.text;
+    this.color = options.color;
+    this.activatedColor = options.activatedColor;
   }
 };
 __decorate([
   Trace
-], ToolBarV2ItemText.prototype, "text", void 0);
+], ToolBarV2ItemText.prototype, 'text', void 0);
 __decorate([
   Trace
-], ToolBarV2ItemText.prototype, "color", void 0);
+], ToolBarV2ItemText.prototype, 'color', void 0);
 __decorate([
   Trace
-], ToolBarV2ItemText.prototype, "activatedColor", void 0);
+], ToolBarV2ItemText.prototype, 'activatedColor', void 0);
 ToolBarV2ItemText = __decorate([
   ObservedV2
 ], ToolBarV2ItemText);
 export { ToolBarV2ItemText };
 let ToolBarV2ItemImage = class ToolBarV2ItemImage {
-  constructor(r) {
+  constructor(options) {
     this.color = undefined;
     this.activatedColor = undefined;
-    this.src = r.src;
-    this.color = r.color;
-    this.activatedColor = r.activatedColor;
+    this.src = options.src;
+    this.color = options.color;
+    this.activatedColor = options.activatedColor;
   }
 };
 __decorate([
   Trace
-], ToolBarV2ItemImage.prototype, "src", void 0);
+], ToolBarV2ItemImage.prototype, 'src', void 0);
 __decorate([
   Trace
-], ToolBarV2ItemImage.prototype, "color", void 0);
+], ToolBarV2ItemImage.prototype, 'color', void 0);
 __decorate([
   Trace
-], ToolBarV2ItemImage.prototype, "activatedColor", void 0);
+], ToolBarV2ItemImage.prototype, 'activatedColor', void 0);
 ToolBarV2ItemImage = __decorate([
   ObservedV2
 ], ToolBarV2ItemImage);
 export { ToolBarV2ItemImage };
 let ToolBarV2Item = class ToolBarV2Item {
-  constructor(r50) {
+  constructor(options) {
     this.content = new ToolBarV2ItemText({ text: '' });
     this.action = undefined;
     this.icon = undefined;
@@ -131,13 +169,13 @@ let ToolBarV2Item = class ToolBarV2Item {
     this.accessibilityDescription = '';
     this.accessibilityLevel = 'auto';
     this.backgroundColor = Color.Transparent;
-    this.content = r50.content;
-    this.action = r50.action;
-    this.icon = r50.icon;
-    this.state = r50.state;
-    this.accessibilityText = r50.accessibilityText;
-    this.accessibilityDescription = r50.accessibilityDescription;
-    this.accessibilityLevel = r50.accessibilityLevel;
+    this.content = options.content;
+    this.action = options.action;
+    this.icon = options.icon;
+    this.state = options.state;
+    this.accessibilityText = options.accessibilityText;
+    this.accessibilityDescription = options.accessibilityDescription;
+    this.accessibilityLevel = options.accessibilityLevel;
   }
   get symbol() {
     if (this.icon instanceof ToolBarV2SymbolGlyph) {
@@ -154,115 +192,153 @@ let ToolBarV2Item = class ToolBarV2Item {
 };
 __decorate([
   Trace
-], ToolBarV2Item.prototype, "content", void 0);
+], ToolBarV2Item.prototype, 'content', void 0);
 __decorate([
   Trace
-], ToolBarV2Item.prototype, "action", void 0);
+], ToolBarV2Item.prototype, 'action', void 0);
 __decorate([
   Trace
-], ToolBarV2Item.prototype, "icon", void 0);
+], ToolBarV2Item.prototype, 'icon', void 0);
 __decorate([
   Trace
-], ToolBarV2Item.prototype, "state", void 0);
+], ToolBarV2Item.prototype, 'state', void 0);
 __decorate([
   Trace
-], ToolBarV2Item.prototype, "accessibilityText", void 0);
+], ToolBarV2Item.prototype, 'accessibilityText', void 0);
 __decorate([
   Trace
-], ToolBarV2Item.prototype, "accessibilityDescription", void 0);
+], ToolBarV2Item.prototype, 'accessibilityDescription', void 0);
 __decorate([
   Trace
-], ToolBarV2Item.prototype, "accessibilityLevel", void 0);
+], ToolBarV2Item.prototype, 'accessibilityLevel', void 0);
 __decorate([
   Trace
-], ToolBarV2Item.prototype, "backgroundColor", void 0);
+], ToolBarV2Item.prototype, 'backgroundColor', void 0);
 __decorate([
   Computed
-], ToolBarV2Item.prototype, "symbol", null);
+], ToolBarV2Item.prototype, 'symbol', null);
 __decorate([
   Computed
-], ToolBarV2Item.prototype, "image", null);
+], ToolBarV2Item.prototype, 'image', null);
 ToolBarV2Item = __decorate([
   ObservedV2
 ], ToolBarV2Item);
 export { ToolBarV2Item };
 let ToolBarV2Modifier = class ToolBarV2Modifier {
   constructor() {
-    this.backgroundColorValue = { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_toolbar_bg'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
-    this.heightValue = LengthMetrics.vp(DEFAULT_TOOLBAR_HEIGHT);
-    this.stateEffectValue = true;
-    this.paddingValue = LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+    this.f2 = {
+      'id': -1,
+      'type': 10001,
+      params: ['sys.color.ohos_id_color_toolbar_bg'],
+      'bundleName': '__harDefaultBundleName__',
+      'moduleName': '__harDefaultModuleName__' };
+    this.g2 = LengthMetrics.vp(o);
+    this.h2 = true;
+    this.paddingValue = LengthMetrics.resource({
+      'id': -1,
+      'type': 10002,
+      params: ['sys.float.padding_level12'],
+      'bundleName': '__harDefaultBundleName__',
+      'moduleName': '__harDefaultModuleName__' });
   }
-  applyNormalAttribute(q50) {
-    q50.backgroundColor(this.backgroundColorValue);
+  applyNormalAttribute(instance) {
+    instance.backgroundColor(this.f2);
   }
-  backgroundColor(p50) {
-    this.backgroundColorValue = p50.color;
+  backgroundColor(backgroundColor) {
+    this.f2 = backgroundColor.color;
     return this;
   }
-  height(o50) {
-    this.heightValue = o50;
+  height(height) {
+    this.g2 = height;
     return this;
   }
-  stateEffect(n50) {
-    this.stateEffectValue = n50;
+  stateEffect(stateEffect) {
+    this.h2 = stateEffect;
     return this;
   }
-  padding(m50) {
-    this.paddingValue = m50;
+  padding(padding) {
+    this.paddingValue = padding;
     return this;
   }
 };
 __decorate([
   Trace
-], ToolBarV2Modifier.prototype, "backgroundColorValue", void 0);
+], ToolBarV2Modifier.prototype, 'backgroundColorValue', void 0);
 __decorate([
   Trace
-], ToolBarV2Modifier.prototype, "heightValue", void 0);
+], ToolBarV2Modifier.prototype, 'heightValue', void 0);
 __decorate([
   Trace
-], ToolBarV2Modifier.prototype, "stateEffectValue", void 0);
+], ToolBarV2Modifier.prototype, 'stateEffectValue', void 0);
 __decorate([
   Trace
-], ToolBarV2Modifier.prototype, "paddingValue", void 0);
+], ToolBarV2Modifier.prototype, 'paddingValue', void 0);
 ToolBarV2Modifier = __decorate([
   ObservedV2
 ], ToolBarV2Modifier);
 export { ToolBarV2Modifier };
 let ToolBarV2Theme = class ToolBarV2Theme {
   constructor() {
-    this.iconPrimaryColor = { "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
-    this.iconActivePrimaryColor = { "id": -1, "type": 10001, params: ['sys.color.icon_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
-    this.fontPrimaryColor = { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
-    this.fontActivatedPrimaryColor = { "id": -1, "type": 10001, params: ['sys.color.font_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+    this.i2 = {
+      'id': -1,
+      'type': 10001,
+      params: ['sys.color.icon_primary'],
+      'bundleName': '__harDefaultBundleName__',
+      'moduleName': '__harDefaultModuleName__' };
+    this.j2 = {
+      'id': -1,
+      'type': 10001,
+      params: ['sys.color.icon_emphasize'],
+      'bundleName': '__harDefaultBundleName__',
+      'moduleName': '__harDefaultModuleName__' };
+    this.l2 = {
+      'id': -1,
+      'type': 10001,
+      params: ['sys.color.font_primary'],
+      'bundleName': '__harDefaultBundleName__',
+      'moduleName': '__harDefaultModuleName__' };
+    this.m2 = {
+      'id': -1,
+      'type': 10001,
+      params: ['sys.color.font_emphasize'],
+      'bundleName': '__harDefaultBundleName__',
+      'moduleName': '__harDefaultModuleName__' };
   }
 };
 __decorate([
   Trace
-], ToolBarV2Theme.prototype, "iconPrimaryColor", void 0);
+], ToolBarV2Theme.prototype, 'iconPrimaryColor', void 0);
 __decorate([
   Trace
-], ToolBarV2Theme.prototype, "iconActivePrimaryColor", void 0);
+], ToolBarV2Theme.prototype, 'iconActivePrimaryColor', void 0);
 __decorate([
   Trace
-], ToolBarV2Theme.prototype, "fontPrimaryColor", void 0);
+], ToolBarV2Theme.prototype, 'fontPrimaryColor', void 0);
 __decorate([
   Trace
-], ToolBarV2Theme.prototype, "fontActivatedPrimaryColor", void 0);
+], ToolBarV2Theme.prototype, 'fontActivatedPrimaryColor', void 0);
 ToolBarV2Theme = __decorate([
   ObservedV2
 ], ToolBarV2Theme);
 export class ToolBarV2 extends ViewV2 {
-  constructor(g50, h50, i50, j50 = -1, k50, l50) {
-    super(g50, j50, l50);
-    this.initParam("toolBarList", (h50 && "toolBarList" in h50) ? h50.toolBarList : undefined);
-    this.initParam("activatedIndex", (h50 && "activatedIndex" in h50) ? h50.activatedIndex : -1);
-    this.initParam("dividerModifier", (h50 && "dividerModifier" in h50) ? h50.dividerModifier : new DividerModifier());
-    this.initParam("toolBarModifier", (h50 && "toolBarModifier" in h50) ? h50.toolBarModifier : new ToolBarV2Modifier()
-      .padding(LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }))
-      .stateEffect(true)
-      .height(LengthMetrics.vp(DEFAULT_TOOLBAR_HEIGHT))
-      .backgroundColor(ColorMetrics.resourceColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_toolbar_bg'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })));
+  constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+    super(parent, elmtId, extraInfo);
+    this.initParam('toolBarList', (params && 'toolBarList' in params) ? params.toolBarList : undefined);
+    this.initParam('activatedIndex', (params && 'activatedIndex' in params) ? params.activatedIndex : -1);
+    this.initParam('dividerModifier',
+      (params && 'dividerModifier' in params) ? params.dividerModifier : new DividerModifier());
+    this.initParam('toolBarModifier',
+      (params && 'toolBarModifier' in params) ? params.toolBarModifier : new ToolBarV2Modifier()
+        .padding(LengthMetrics.resource({
+          'id': -1, 'type': 10002,
+          params: ['sys.float.padding_level12'],
+          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }))
+        .stateEffect(true)
+        .height(LengthMetrics.vp(o))
+        .backgroundColor(ColorMetrics.resourceColor({
+          'id': -1, 'type': 10001,
+          params: ['sys.color.ohos_id_color_toolbar_bg'],
+          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })));
     this.localActivatedIndex = -1;
     this.menuContent = [];
     this.fontSize = 1;
@@ -273,31 +349,66 @@ export class ToolBarV2 extends ViewV2 {
     this.maxFontSizeScale = 3.2;
     this.moreItem = new ToolBarV2Item({
       content: new ToolBarV2ItemText({
-        text: { "id": -1, "type": 10003, params: ['sys.string.ohos_toolbar_more'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        text: {
+          'id': -1,
+          'type': 10003,
+          params: ['sys.string.ohos_toolbar_more'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__' },
       }),
       icon: new ToolBarV2ItemImage({
-        src: PUBLIC_MORE
+        src: j
       })
     });
-    this.moreText = { "id": -1, "type": 10003, params: ['sys.string.ohos_toolbar_more'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+    this.moreText = {
+      'id': -1, 'type': 10003,
+      params: ['sys.string.ohos_toolbar_more'],
+      'bundleName': '__harDefaultBundleName__',
+      'moduleName': '__harDefaultModuleName__' };
     this.finalizeConstruction();
   }
-  onActivateIndexChange(e50) {
-    this.localActivatedIndex = e50.value('activatedIndex')?.now ?? -1;
+  n2(params) {
+    this.o2('toolBarList', (params && 'toolBarList' in params) ? params.toolBarList : undefined);
+    this.o2('activatedIndex', (params && 'activatedIndex' in params) ? params.activatedIndex : -1);
+    this.o2('dividerModifier',
+      (params && 'dividerModifier' in params) ? params.dividerModifier : new DividerModifier());
+    this.o2('toolBarModifier',
+      (params && 'toolBarModifier' in params) ? params.toolBarModifier : new ToolBarV2Modifier()
+        .padding(LengthMetrics.resource({
+          'id': -1, 'type': 10002,
+          params: ['sys.float.padding_level12'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__' }))
+        .stateEffect(true)
+        .height(LengthMetrics.vp(o))
+        .backgroundColor(ColorMetrics.resourceColor({
+          'id': -1, 'type': 10001,
+          params: ['sys.color.ohos_id_color_toolbar_bg'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__' })));
+    this.localActivatedIndex = -1;
+    this.menuContent = [];
+    this.fontSize = 1;
+    this.theme = new ToolBarV2Theme();
+    this.q2('menus');
+    this.s2();
+  }
+  onActivateIndexChange(monitor) {
+    this.localActivatedIndex = monitor.value('activatedIndex')?.now ?? -1;
   }
   get menus() {
     this.menuContent = [];
-    this.toolBarList.forEach((o, p) => {
-      if (p >= TOOLBAR_MAX_LENGTH - 1) {
+    this.toolBarList.forEach((value, index) => {
+      if (index >= t - 1) {
         this.menuContent.push({
-          value: this.toolBarList[p].content.text,
+          value: this.toolBarList[index].content.text,
           action: () => {
-            let q = this.toolBarList[p].action;
-            if (q) {
-              q(p);
+            let callback = this.toolBarList[index].action;
+            if (callback) {
+              callback(index);
             }
           },
-          enabled: this.toolBarList[p].state !== ToolBarV2ItemState.DISABLE,
+          enabled: this.toolBarList[index].state !== ToolBarV2ItemState.DISABLE,
         });
       }
     });
@@ -309,139 +420,253 @@ export class ToolBarV2 extends ViewV2 {
       this.isFollowSystem = this.getUIContext()?.isFollowingSystemFontScale();
       this.maxFontSizeScale = this.getUIContext()?.getMaxFontScale();
     }
-    catch (b50) {
-      let c50 = b50?.code;
-      let d50 = b50?.message;
-      hilog.error(0x3900, 'Ace', `Faild to toolBarV2 getMaxFontScale, code: ${c50}, message: ${d50}`);
+    catch (err) {
+      let code = err?.code;
+      let message = err?.message;
+      hilog.error(0x3900, 'Ace', `Faild to toolBarV2 getMaxFontScale, code: ${code}, message: ${message}`);
     }
   }
-  onWillApplyTheme(a50) {
-    this.theme.iconPrimaryColor = a50.colors.iconPrimary;
-    this.theme.iconActivePrimaryColor = a50.colors.iconEmphasize;
-    this.theme.fontPrimaryColor = a50.colors.fontPrimary;
-    this.theme.fontActivatedPrimaryColor = a50.colors.fontEmphasize;
+  onWillApplyTheme(theme) {
+    this.theme.i2 = theme.colors.iconPrimary;
+    this.theme.j2 = theme.colors.iconEmphasize;
+    this.theme.l2 = theme.colors.fontPrimary;
+    this.theme.m2 = theme.colors.fontEmphasize;
   }
-  MoreTabBuilder(r49, s49 = null) {
-    this.observeComponentCreation2((x49, y49) => {
+  MoreTabBuilder(index, parent = null) {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
+      Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
+      Button.accessibilityGroup(true);
+      Button.focusable(true);
+      Button.focusOnTouch(true);
+      Button.focusBox({
+        margin: LengthMetrics.vp(h1),
+        strokeWidth: LengthMetrics.vp(i1),
+        strokeColor: ColorMetrics.resourceColor({
+          'id': -1,
+          'type': 10001,
+          params: ['sys.color.ohos_id_color_focused_outline'],
+          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })
+      });
+      Button.width('100%');
+      Button.height('100%');
+      Button.bindMenu(this.menuContent, { placement: Placement.TopRight, offset: { x: -12, y: -10 } });
+      Button.borderRadius({
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.ohos_id_corner_radius_clicked'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+      Button.backgroundColor(this.toolBarList[index].backgroundColor);
+      Button.onHover((isHover) => {
+        if (isHover) {
+          this.toolBarList[index].backgroundColor = {
+            'id': -1, 'type': 10001,
+            params: ['sys.color.ohos_id_color_hover'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__' };
+        }
+        else {
+          this.toolBarList[index].backgroundColor = Color.Transparent;
+        }
+      });
+      ViewStackProcessor.visualState('pressed');
+      Button.backgroundColor((!this.toolBarModifier?.h2) ?
+      this.toolBarList[index].backgroundColor : {
+          'id': -1,
+          'type': 10001,
+          params: ['sys.color.ohos_id_color_click_effect'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__' });
+      ViewStackProcessor.visualState();
+      Button.gestureModifier(this.getItemGestureModifier(this.moreItem, index));
+    }, Button);
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create();
       Column.width('100%');
       Column.height('100%');
       Column.justifyContent(FlexAlign.Center);
       Column.padding({
-        start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-        end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+        start: LengthMetrics.resource({
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.padding_level2'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__' }),
+        end: LengthMetrics.resource({
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.padding_level2'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__' }),
       });
-      Column.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-      Column.accessibilityText(this.moreText);
-      Column.focusable(true);
-      Column.focusOnTouch(true);
-      Column.focusBox({
-        margin: LengthMetrics.vp(FOCUS_BOX_MARGIN),
-        strokeWidth: LengthMetrics.vp(FOCUS_BOX_BORDER_WIDTH),
-        strokeColor: ColorMetrics.resourceColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })
-      });
-      Column.bindMenu(this.menus, { placement: Placement.TopRight, offset: { x: -12, y: -10 } });
-      Column.backgroundColor(this.toolBarList[r49].backgroundColor);
-      Column.onHover((z49) => {
-        if (z49) {
-          this.toolBarList[r49].backgroundColor = { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
-        }
-        else {
-          this.toolBarList[r49].backgroundColor = Color.Transparent;
-        }
-      });
-      ViewStackProcessor.visualState("pressed");
-      Column.backgroundColor((!this.toolBarModifier?.stateEffectValue) ?
-      this.toolBarList[r49].backgroundColor : { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_click_effect'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-      ViewStackProcessor.visualState();
-      Column.gestureModifier(this.getItemGestureModifier(this.moreItem, r49));
+      Column.borderRadius({
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.ohos_id_corner_radius_clicked'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__' });
     }, Column);
-    this.observeComponentCreation2((v49, w49) => {
-      Image.create(PUBLIC_MORE);
-      Image.width(IMAGE_SIZE);
-      Image.height(IMAGE_SIZE);
-      Image.fillColor(this.theme.iconPrimaryColor);
-      Image.margin({ bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } });
-      Image.objectFit(ImageFit.Contain);
-      Image.draggable(false);
-    }, Image);
-    this.observeComponentCreation2((t49, u49) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
+      SymbolGlyph.create(j);
+      SymbolGlyph.fontSize(m);
+      SymbolGlyph.fontColor([this.theme.i2]);
+      SymbolGlyph.draggable(false);
+      SymbolGlyph.margin({ bottom: {
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.padding_level1'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__' } });
+    }, SymbolGlyph);
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Text.create(this.moreText);
-      Text.fontColor(this.theme.fontPrimaryColor);
-      Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_caption'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Text.fontColor(this.theme.l2);
+      Text.fontSize({
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.ohos_id_text_size_caption'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__' });
       Text.fontWeight(FontWeight.Medium);
       Text.maxLines(1);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.textAlign(TextAlign.Center);
+      Text.focusable(true);
+      Text.focusOnTouch(true);
     }, Text);
     Text.pop();
     Column.pop();
+    Button.pop();
   }
-  TabBuilder(e49, f49 = null) {
-    this.observeComponentCreation2((o49, p49) => {
+  TabBuilder(index, parent = null) {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
+      Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
+      Button.accessibilityGroup(true);
+      Button.accessibilityText(this.toolBarList[index]?.accessibilityText ??
+        this.toolBarList[index]?.content?.text);
+      Button.accessibilityDescription(this.toolBarList[index]?.accessibilityDescription ?? '');
+      Button.accessibilityLevel(this.toolBarList[index]?.accessibilityLevel ?? 'auto');
+      Button.enabled(this.toolBarList[index]?.state !== ToolBarV2ItemState.DISABLE);
+      Button.width('100%');
+      Button.height('100%');
+      Button.borderRadius({
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.ohos_id_corner_radius_clicked'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__' });
+      Button.focusable(!(this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE));
+      Button.focusOnTouch(!(this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE));
+      Button.focusBox({
+        margin: LengthMetrics.vp(h1),
+        strokeWidth: LengthMetrics.vp(i1),
+        strokeColor: ColorMetrics.resourceColor({
+          'id': -1,
+          'type': 10001,
+          params: ['sys.color.ohos_id_color_focused_outline'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__' })
+      });
+      Button.backgroundColor(this.toolBarList[index].backgroundColor);
+      Button.onHover((isHover) => {
+        if (isHover && this.toolBarList[index]?.state !== ToolBarV2ItemState.DISABLE) {
+          this.toolBarList[index].backgroundColor = {
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.ohos_id_color_hover'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__' };
+        }
+        else {
+          this.toolBarList[index].backgroundColor = Color.Transparent;
+        }
+      });
+      ViewStackProcessor.visualState('pressed');
+      Button.backgroundColor((this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE) ||
+        (!this.toolBarModifier?.h2) ?
+      this.toolBarList[index].backgroundColor : {
+          'id': -1,
+          'type': 10001,
+          params: ['sys.color.ohos_id_color_click_effect'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__' });
+      ViewStackProcessor.visualState();
+      Button.onClick(() => {
+        this.clickEventAction(index);
+      });
+      Button.gestureModifier(this.getItemGestureModifier(this.toolBarList[index], index));
+    }, Button);
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create();
       Column.justifyContent(FlexAlign.Center);
       Column.width('100%');
       Column.height('100%');
-      Column.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Column.borderRadius({
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.ohos_id_corner_radius_clicked'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__' });
       Column.padding({
-        start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-        end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+        start: LengthMetrics.resource({
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.padding_level2'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__' }),
+        end: LengthMetrics.resource({
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.padding_level2'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__' }),
       });
-      Column.opacity(this.toolBarList[e49]?.state !== ToolBarV2ItemState.DISABLE ? 1 : 0.4);
-      Column.enabled(this.toolBarList[e49]?.state !== ToolBarV2ItemState.DISABLE);
-      Column.accessibilityGroup(true);
-      Column.accessibilityText(this.toStringFormat(this.toolBarList[e49]?.accessibilityText) ??
-      this.toStringFormat(this.toolBarList[e49]?.content?.text));
-      Column.accessibilityDescription(this.toStringFormat(this.toolBarList[e49]?.accessibilityDescription) ?? '');
-      Column.accessibilityLevel(this.toStringFormat(this.toolBarList[e49]?.accessibilityLevel) ?? 'auto');
-      Column.focusable(!(this.toolBarList[e49]?.state === ToolBarV2ItemState.DISABLE));
-      Column.focusOnTouch(!(this.toolBarList[e49]?.state === ToolBarV2ItemState.DISABLE));
-      Column.focusBox({
-        margin: LengthMetrics.vp(FOCUS_BOX_MARGIN),
-        strokeWidth: LengthMetrics.vp(FOCUS_BOX_BORDER_WIDTH),
-        strokeColor: ColorMetrics.resourceColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })
-      });
-      Column.backgroundColor(this.toolBarList[e49].backgroundColor);
-      Column.onHover((q49) => {
-        if (q49 && this.toolBarList[e49]?.state !== ToolBarV2ItemState.DISABLE) {
-          this.toolBarList[e49].backgroundColor = { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
-        }
-        else {
-          this.toolBarList[e49].backgroundColor = Color.Transparent;
-        }
-      });
-      ViewStackProcessor.visualState("pressed");
-      Column.backgroundColor((this.toolBarList[e49]?.state === ToolBarV2ItemState.DISABLE) ||
-        (!this.toolBarModifier?.stateEffectValue) ?
-      this.toolBarList[e49].backgroundColor : { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_click_effect'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-      ViewStackProcessor.visualState();
-      Column.onClick(() => {
-        this.clickEventAction(e49);
-      });
-      Column.gestureModifier(this.getItemGestureModifier(this.toolBarList[e49], e49));
     }, Column);
-    this.observeComponentCreation2((i49, j49) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
-      if (this.toolBarList[e49]?.symbol) {
+      if (this.toolBarList[index]?.symbol) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((m49, n49) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create();
-            SymbolGlyph.fontSize(IMAGE_SIZE);
+            SymbolGlyph.fontSize(m);
             SymbolGlyph.symbolEffect(new SymbolEffect(), false);
-            SymbolGlyph.attributeModifier.bind(this)(this.getToolBarSymbolModifier(e49));
-            SymbolGlyph.margin({ bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } });
+            SymbolGlyph.attributeModifier.bind(this)(this.getToolBarSymbolModifier(index));
+            SymbolGlyph.margin({ bottom: {
+              'id': -1,
+              'type': 10002,
+              params: ['sys.float.padding_level1'],
+              'bundleName': '__harDefaultBundleName__',
+              'moduleName': '__harDefaultModuleName__' } });
+          }, SymbolGlyph);
+        });
+      }
+      else if (Util.b2(this.toolBarList[index]?.image?.src)) {
+        this.ifElseBranchUpdateFunction(1, () => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
+            SymbolGlyph.create(this.toolBarList[index]?.image?.src);
+            SymbolGlyph.fontSize(m);
+            SymbolGlyph.fontColor([this.getIconColor(index)]);
+            SymbolGlyph.margin({ bottom: {
+              'id': -1,
+              'type': 10002,
+              params: ['sys.float.padding_level1'],
+              'bundleName': '__harDefaultBundleName__',
+              'moduleName': '__harDefaultModuleName__' } });
           }, SymbolGlyph);
         });
       }
       else {
-        this.ifElseBranchUpdateFunction(1, () => {
-          this.observeComponentCreation2((k49, l49) => {
-            Image.create(this.toolBarList[e49]?.image?.src);
-            Image.width(IMAGE_SIZE);
-            Image.height(IMAGE_SIZE);
-            Image.fillColor(this.getIconColor(e49));
-            Image.margin({ bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } });
+        this.ifElseBranchUpdateFunction(2, () => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Image.create(this.toolBarList[index]?.image?.src);
+            Image.width(m);
+            Image.height(m);
+            Image.fillColor(this.getIconColor(index));
+            Image.margin({ bottom: {
+              'id': -1,
+              'type': 10002,
+              params: ['sys.float.padding_level1'],
+              'bundleName': '__harDefaultBundleName__',
+              'moduleName': '__harDefaultModuleName__' } });
             Image.objectFit(ImageFit.Contain);
             Image.draggable(false);
           }, Image);
@@ -449,79 +674,166 @@ export class ToolBarV2 extends ViewV2 {
       }
     }, If);
     If.pop();
-    this.observeComponentCreation2((g49, h49) => {
-      Text.create(this.toolBarList[e49]?.content.text);
-      Text.fontColor(this.getTextColor(e49));
-      Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_caption'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-      Text.maxFontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_caption'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
+      Text.create(this.toolBarList[index]?.content.text);
+      Text.fontColor(this.getTextColor(index));
+      Text.fontSize({
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.ohos_id_text_size_caption'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__' });
+      Text.maxFontSize({
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.ohos_id_text_size_caption'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__' });
       Text.minFontSize(9);
       Text.fontWeight(FontWeight.Medium);
       Text.maxLines(1);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.textAlign(TextAlign.Center);
+      Text.focusable(!(this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE));
+      Text.focusOnTouch(!(this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE));
     }, Text);
     Text.pop();
     Column.pop();
+    Button.pop();
   }
-  itemCardDialogBuilder(h, i, j = null) {
-    this.observeComponentCreation2((x, y) => {
+  itemCardDialogBuilder(item, index, parent = null) {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
-      if (h.content && h.content.text) {
+      if (item.content && item.content.text) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((r1, s1) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.constraintSize({ minHeight: this.fontSize === MAX_FONT_SIZE ? MAX_DIALOG : MIN_DIALOG });
+            Column.constraintSize({ minHeight: this.fontSize === u ? b1 : c1 });
           }, Column);
-          this.observeComponentCreation2((l1, m1) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (h.symbol) {
+            if (item.symbol) {
               this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation2((p1, q1) => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
                   SymbolGlyph.create();
-                  SymbolGlyph.attributeModifier.bind(this)(this.getToolBarSymbolModifier(i));
+                  SymbolGlyph.attributeModifier.bind(this)(this.getToolBarSymbolModifier(index));
                   SymbolGlyph.symbolEffect(new SymbolEffect(), false);
-                  SymbolGlyph.fontColor([{ "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }]);
-                  SymbolGlyph.fontSize(DIALOG_IMAGE_SIZE);
+                  SymbolGlyph.fontColor([{
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.icon_primary'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__' }]);
+                  SymbolGlyph.fontSize(a1);
                   SymbolGlyph.margin({
-                    top: { "id": -1, "type": 10002, params: ['sys.float.padding_level24'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                    bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                    top: {
+                      'id': -1,
+                      'type': 10002,
+                      params: ['sys.float.padding_level24'],
+                      'bundleName': '__harDefaultBundleName__',
+                      'moduleName': '__harDefaultModuleName__' },
+                    bottom: {
+                      'id': -1,
+                      'type': 10002,
+                      params: ['sys.float.padding_level8'],
+                      'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                  });
+                }, SymbolGlyph);
+              });
+            }
+            else if (Util.b2(item.image?.src)) {
+              this.ifElseBranchUpdateFunction(1, () => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                  SymbolGlyph.create(item.image?.src);
+                  SymbolGlyph.fontColor([{
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.icon_primary'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__' }]);
+                  SymbolGlyph.fontSize(a1);
+                  SymbolGlyph.margin({
+                    top: {
+                      'id': -1,
+                      'type': 10002,
+                      params: ['sys.float.padding_level24'],
+                      'bundleName': '__harDefaultBundleName__',
+                      'moduleName': '__harDefaultModuleName__' },
+                    bottom: {
+                      'id': -1,
+                      'type': 10002,
+                      params: ['sys.float.padding_level8'],
+                      'bundleName': '__harDefaultBundleName__',
+                      'moduleName': '__harDefaultModuleName__' },
                   });
                 }, SymbolGlyph);
               });
             }
             else {
-              this.ifElseBranchUpdateFunction(1, () => {
-                this.observeComponentCreation2((n1, o1) => {
-                  Image.create(h.image?.src);
-                  Image.width(DIALOG_IMAGE_SIZE);
-                  Image.height(DIALOG_IMAGE_SIZE);
+              this.ifElseBranchUpdateFunction(2, () => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                  Image.create(item.image?.src);
+                  Image.width(a1);
+                  Image.height(a1);
                   Image.margin({
-                    top: { "id": -1, "type": 10002, params: ['sys.float.padding_level24'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                    bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                    top: {
+                      'id': -1,
+                      'type': 10002,
+                      params: ['sys.float.padding_level24'],
+                      'bundleName': '__harDefaultBundleName__',
+                      'moduleName': '__harDefaultModuleName__' },
+                    bottom: {
+                      'id': -1,
+                      'type': 10002,
+                      params: ['sys.float.padding_level8'],
+                      'bundleName': '__harDefaultBundleName__',
+                      'moduleName': '__harDefaultModuleName__' },
                   });
-                  Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                  Image.fillColor({
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.icon_primary'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__' });
                 }, Image);
               });
             }
           }, If);
           If.pop();
-          this.observeComponentCreation2((j1, k1) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.width('100%');
             Column.padding({
-              left: { "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-              right: { "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-              bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+              left: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level4'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__' },
+              right: {
+                'id': -1, 'type': 10002,
+                params: ['sys.float.padding_level4'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__' },
+              bottom: {
+                'id': -1, 'type': 10002,
+                params: ['sys.float.padding_level12'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__' },
             });
           }, Column);
-          this.observeComponentCreation2((h1, i1) => {
-            Text.create(h.content.text);
-            Text.fontSize(TEXT_TOOLBAR_DIALOG);
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(item.content.text);
+            Text.fontSize(d1);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxLines(this.itemCardTextMaxLine);
             Text.width('100%');
             Text.textAlign(TextAlign.Center);
-            Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Text.fontColor({
+              'id': -1, 'type': 10001,
+              params: ['sys.color.font_primary'],
+              'bundleName': '__harDefaultBundleName__',
+              'moduleName': '__harDefaultModuleName__' });
           }, Text);
           Text.pop();
           Column.pop();
@@ -530,31 +842,41 @@ export class ToolBarV2 extends ViewV2 {
       }
       else {
         this.ifElseBranchUpdateFunction(1, () => {
-          this.observeComponentCreation2((f1, g1) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.constraintSize({ minHeight: this.fontSize === MAX_FONT_SIZE ? MAX_DIALOG : MIN_DIALOG });
+            Column.constraintSize({ minHeight: this.fontSize === u ? b1 : c1 });
             Column.justifyContent(FlexAlign.Center);
           }, Column);
-          this.observeComponentCreation2((z, a1) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (h.symbol) {
+            if (item.symbol) {
               this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation2((d1, e1) => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
                   SymbolGlyph.create();
-                  SymbolGlyph.attributeModifier.bind(this)(this.getToolBarSymbolModifier(i));
+                  SymbolGlyph.attributeModifier.bind(this)(this.getToolBarSymbolModifier(index));
                   SymbolGlyph.symbolEffect(new SymbolEffect(), false);
-                  SymbolGlyph.fontColor([{ "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }]);
-                  SymbolGlyph.fontSize(DIALOG_IMAGE_SIZE);
+                  SymbolGlyph.fontColor([{
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.icon_primary'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__' }]);
+                  SymbolGlyph.fontSize(a1);
                 }, SymbolGlyph);
               });
             }
             else {
               this.ifElseBranchUpdateFunction(1, () => {
-                this.observeComponentCreation2((b1, c1) => {
-                  Image.create(h.image?.src);
-                  Image.width(DIALOG_IMAGE_SIZE);
-                  Image.height(DIALOG_IMAGE_SIZE);
-                  Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                  Image.create(item.image?.src);
+                  Image.width(a1);
+                  Image.height(a1);
+                  Image.fillColor({
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.icon_primary'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__' });
                 }, Image);
               });
             }
@@ -567,122 +889,107 @@ export class ToolBarV2 extends ViewV2 {
     If.pop();
   }
   getFontSizeScale() {
-    let c49 = this.getUIContext();
-    let d49 = c49.getHostContext()?.config?.fontSizeScale ?? 1;
+    let context = this.getUIContext();
+    let u1 = context.getHostContext()?.config?.fontSizeScale ?? 1;
     if (!this.isFollowSystem) {
       return 1;
     }
     else {
-      return Math.min(d49, this.maxFontSizeScale);
+      return Math.min(u1, this.maxFontSizeScale);
     }
   }
-  isItemActivating(b49) {
-    return this.localActivatedIndex === b49 && (this.toolBarList[b49]?.state === ToolBarV2ItemState.ACTIVATE);
+  isItemActivating(index) {
+    return this.localActivatedIndex === index && (this.toolBarList[index]?.state === ToolBarV2ItemState.ACTIVATE);
   }
-  getToolBarSymbolModifier(a49) {
-    if (this.isItemActivating(a49)) {
-      return this.toolBarList[a49]?.symbol?.activated;
+  getToolBarSymbolModifier(index) {
+    if (this.isItemActivating(index)) {
+      return this.toolBarList[index]?.symbol?.activated;
     }
-    return this.toolBarList[a49]?.symbol?.normal;
+    return this.toolBarList[index]?.symbol?.normal;
   }
-  getIconColor(z48) {
-    if (this.isItemActivating(z48)) {
-      return this.toolBarList[z48]?.image?.activatedColor?.color ?? this.theme.iconActivePrimaryColor;
+  getIconColor(index) {
+    if (this.isItemActivating(index)) {
+      return this.toolBarList[index]?.image?.activatedColor?.color ?? this.theme.j2;
     }
-    return this.toolBarList[z48]?.image?.color?.color ?? this.theme.iconPrimaryColor;
+    return this.toolBarList[index]?.image?.color?.color ?? this.theme.i2;
   }
-  getTextColor(y48) {
-    if (this.isItemActivating(y48)) {
-      return this.toolBarList[y48]?.content.activatedColor?.color ?? this.theme.fontActivatedPrimaryColor;
+  getTextColor(index) {
+    if (this.isItemActivating(index)) {
+      return this.toolBarList[index]?.content.activatedColor?.color ?? this.theme.m2;
     }
-    return this.toolBarList[y48]?.content.color?.color ?? this.theme.fontPrimaryColor;
+    return this.toolBarList[index]?.content.color?.color ?? this.theme.l2;
   }
-  toStringFormat(t48) {
-    if (typeof t48 === 'string' || typeof t48 === 'undefined') {
-      return t48;
-    }
-    let d = '';
-    try {
-      d = getContext()?.resourceManager?.getStringSync(t48?.id);
-    }
-    catch (e) {
-      let f = e?.code;
-      let g = e?.message;
-      hilog.error(0x3900, 'Ace', `Faild to toolBar toStringFormat, code: ${f}, message: ${g}`);
-    }
-    return d;
-  }
-  toLengthString(q48) {
-    if (q48 === undefined) {
+  toLengthString(value) {
+    if (value === undefined) {
       return '';
     }
-    const r48 = q48.value;
-    let s48 = '';
-    switch (q48.unit) {
+    const length = value.value;
+    let t1 = '';
+    switch (value.unit) {
       case LengthUnit.PX:
-        s48 = `${r48}px`;
+        t1 = `${length}px`;
         break;
       case LengthUnit.FP:
-        s48 = `${r48}fp`;
+        t1 = `${length}fp`;
         break;
       case LengthUnit.LPX:
-        s48 = `${r48}lpx`;
+        t1 = `${length}lpx`;
         break;
       case LengthUnit.PERCENT:
-        s48 = `${r48 * 100}%`;
+        t1 = `${length * 100}%`;
         break;
       case LengthUnit.VP:
-        s48 = `${r48}vp`;
+        t1 = `${length}vp`;
         break;
       default:
-        s48 = `${r48}vp`;
+        t1 = `${length}vp`;
         break;
     }
-    return s48;
+    return t1;
   }
-  clickEventAction(o48) {
-    let p48 = this.toolBarList[o48];
-    if (p48.state === ToolBarV2ItemState.ACTIVATE) {
-      if (this.localActivatedIndex === o48) {
+  clickEventAction(index) {
+    let s1 = this.toolBarList[index];
+    if (s1.state === ToolBarV2ItemState.ACTIVATE) {
+      if (this.localActivatedIndex === index) {
         this.localActivatedIndex = -1;
       }
       else {
-        this.localActivatedIndex = o48;
+        this.localActivatedIndex = index;
       }
     }
-    if (p48.state !== ToolBarV2ItemState.DISABLE) {
-      p48.action && p48.action(o48);
+    if (s1.state !== ToolBarV2ItemState.DISABLE) {
+      s1.action && s1.action(index);
     }
   }
-  getItemGestureModifier(j48, k48) {
-    if (!j48?.icon) {
+  getItemGestureModifier(item, index) {
+    if (!item?.icon) {
       return undefined;
     }
-    let l48 = new ButtonGestureModifier();
-    l48.gestureCallBack = (b) => {
+    let p1 = new ButtonGestureModifier();
+    p1.d2 = (event) => {
       if (this.fontSize >= ButtonGestureModifier.minFontSize) {
-        b.addGesture(new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
+        event.addGesture(new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.e2 })
           .onAction(() => {
             promptAction.openCustomDialog({
               builder: () => {
-                this.itemCardDialogBuilder(j48, k48);
+                this.itemCardDialogBuilder(item, index);
               },
               onWillAppear: () => {
                 try {
-                  let u = this.getUIContext().getHostContext();
-                  let v = u.windowStage.getMainWindowSync();
-                  let w = v.getWindowProperties();
-                  if (px2vp(w.windowRect.height) > SCREEN_WIDTH_BREAK_POINT) {
-                    this.itemCardTextMaxLine = VERTICAL_SCREEN_TEXT_MAX_LINES;
+                  let context = this.getUIContext().getHostContext();
+                  let q1 = context.windowStage.getMainWindowSync();
+                  let properties = q1.getWindowProperties();
+                  if (px2vp(properties.windowRect.height) > e1) {
+                    this.itemCardTextMaxLine = f1;
                   }
                   else {
-                    this.itemCardTextMaxLine = HORIZONTAL_SCREEN_TEXT_MAX_LINES;
+                    this.itemCardTextMaxLine = g1;
                   }
                 }
-                catch (n) {
-                  let s = n?.code;
-                  let t = n?.message;
-                  hilog.error(0x3900, 'Ace', `ToolBarV2 get window height failed, code: ${s}, message: ${t}`);
+                catch (err) {
+                  let code = err?.code;
+                  let message = err?.message;
+                  hilog.error(0x3900, 'Ace', `ToolBarV2 get window height failed, code: ${code}, message: ${message}`);
                 }
               },
               maskColor: Color.Transparent,
@@ -690,74 +997,94 @@ export class ToolBarV2 extends ViewV2 {
               backgroundBlurStyle: BlurStyle.COMPONENT_ULTRA_THICK,
               backgroundColor: Color.Transparent,
               shadow: ShadowStyle.OUTER_DEFAULT_LG,
-              cornerRadius: { "id": -1, "type": 10002, params: ['sys.float.corner_radius_level10'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-              width: this.fontSize === MAX_FONT_SIZE ? MAX_DIALOG : MIN_DIALOG
-            }).then((c) => {
-              this.itemDialogId = c;
+              cornerRadius: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.corner_radius_level10'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__' },
+              width: this.fontSize === u ? b1 : c1
+            }).then((dialogId) => {
+              this.itemDialogId = dialogId;
             });
           })
           .onActionEnd(() => {
             if (this.itemDialogId) {
               promptAction.closeCustomDialog(this.itemDialogId);
             }
+          })
+          .onActionCancel(() => {
+            if (this.itemDialogId) {
+              promptAction.closeCustomDialog(this.itemDialogId);
+            }
           }));
         return;
       }
-      b.clearGestures();
+      event.clearGestures();
     };
-    return l48;
+    return p1;
   }
-  onMeasureSize(b48, c48, d48) {
+  onMeasureSize(selfLayoutInfo, children, constraint) {
     this.fontSize = this.getFontSizeScale();
-    let e48 = { height: 0, width: 0 };
-    c48.forEach((f48) => {
-      let g48 = f48.measure(d48);
-      e48.width = g48.width;
-      e48.height = g48.height;
+    let n1 = { height: 0, width: 0 };
+    children.forEach((child) => {
+      let o1 = child.measure(constraint);
+      n1.width = o1.width;
+      n1.height = o1.height;
     });
-    return e48;
+    return n1;
   }
   initialRender() {
-    this.observeComponentCreation2((z47, a48) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create();
       Column.attributeModifier.bind(this)(this.toolBarModifier);
     }, Column);
-    this.observeComponentCreation2((x47, y47) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Divider.create();
       Divider.width('100%');
       Divider.height(1);
       Divider.attributeModifier.bind(this)(this.dividerModifier);
     }, Divider);
-    this.observeComponentCreation2((v47, w47) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Row.create();
       Row.justifyContent(FlexAlign.Center);
       Row.constraintSize({
-        minHeight: this.toLengthString(this.toolBarModifier?.heightValue),
-        maxHeight: this.toLengthString(this.toolBarModifier?.heightValue),
+        minHeight: this.toLengthString(this.toolBarModifier?.g2),
+        maxHeight: this.toLengthString(this.toolBarModifier?.g2),
       });
       Row.width('100%');
-      Row.height(this.toLengthString(this.toolBarModifier?.heightValue));
+      Row.height(this.toLengthString(this.toolBarModifier?.g2));
       Row.padding({
-        start: this.toolBarList.length < TOOLBAR_MAX_LENGTH ?
-          this.toolBarModifier?.paddingValue : LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level0'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-        end: this.toolBarList.length < TOOLBAR_MAX_LENGTH ?
-          this.toolBarModifier?.paddingValue : LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level0'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+        start: this.toolBarList.length < t ?
+          this.toolBarModifier?.paddingValue : LengthMetrics.resource({
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.padding_level0'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__' }),
+        end: this.toolBarList.length < t ?
+          this.toolBarModifier?.paddingValue : LengthMetrics.resource({
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.padding_level0'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__' }),
       });
     }, Row);
-    this.observeComponentCreation2((j47, k47) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       ForEach.create();
-      const a = (o47, p47) => {
-        const q47 = o47;
-        this.observeComponentCreation2((r47, s47) => {
+      const forEachItemGenFunction = (_item, index) => {
+        const item = _item;
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
           If.create();
-          if (this.toolBarList.length <= TOOLBAR_MAX_LENGTH || p47 < TOOLBAR_MAX_LENGTH - 1) {
+          if (this.toolBarList.length <= t || index < t - 1) {
             this.ifElseBranchUpdateFunction(0, () => {
-              this.observeComponentCreation2((t47, u47) => {
+              this.observeComponentCreation2((elmtId, isInitialRender) => {
                 Row.create();
                 Row.height('100%');
                 Row.flexShrink(1);
               }, Row);
-              this.TabBuilder.bind(this)(p47);
+              this.TabBuilder.bind(this)(index);
               Row.pop();
             });
           }
@@ -768,21 +1095,21 @@ export class ToolBarV2 extends ViewV2 {
         }, If);
         If.pop();
       };
-      this.forEachUpdateFunction(j47, this.toolBarList, a, (m47, n47) => {
-        return `${this.getUniqueId}__${n47}}`;
+      this.forEachUpdateFunction(elmtId, this.toolBarList, forEachItemGenFunction, (item, index) => {
+        return `${this.getUniqueId}__${index}}`;
       }, true, true);
     }, ForEach);
     ForEach.pop();
-    this.observeComponentCreation2((f47, g47) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
-      if (this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
+      if (this.toolBarList.length > t) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((h47, i47) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.height('100%');
             Row.flexShrink(1);
           }, Row);
-          this.MoreTabBuilder.bind(this)(TOOLBAR_MAX_LENGTH - 1);
+          this.MoreTabBuilder.bind(this)(t - 1);
           Row.pop();
         });
       }
@@ -795,21 +1122,21 @@ export class ToolBarV2 extends ViewV2 {
     Row.pop();
     Column.pop();
   }
-  updateStateVars(e47) {
-    if (e47 === undefined) {
+  updateStateVars(params) {
+    if (params === undefined) {
       return;
     }
-    if ("toolBarList" in e47) {
-      this.updateParam("toolBarList", e47.toolBarList);
+    if ('toolBarList' in params) {
+      this.updateParam('toolBarList', params.toolBarList);
     }
-    if ("activatedIndex" in e47) {
-      this.updateParam("activatedIndex", e47.activatedIndex);
+    if ('activatedIndex' in params) {
+      this.updateParam('activatedIndex', params.activatedIndex);
     }
-    if ("dividerModifier" in e47) {
-      this.updateParam("dividerModifier", e47.dividerModifier);
+    if ('dividerModifier' in params) {
+      this.updateParam('dividerModifier', params.dividerModifier);
     }
-    if ("toolBarModifier" in e47) {
-      this.updateParam("toolBarModifier", e47.toolBarModifier);
+    if ('toolBarModifier' in params) {
+      this.updateParam('toolBarModifier', params.toolBarModifier);
     }
   }
   rerender() {
@@ -818,32 +1145,32 @@ export class ToolBarV2 extends ViewV2 {
 }
 __decorate([
   Param
-], ToolBarV2.prototype, "toolBarList", void 0);
+], ToolBarV2.prototype, 'toolBarList', void 0);
 __decorate([
   Param
-], ToolBarV2.prototype, "activatedIndex", void 0);
+], ToolBarV2.prototype, 'activatedIndex', void 0);
 __decorate([
   Param
-], ToolBarV2.prototype, "dividerModifier", void 0);
+], ToolBarV2.prototype, 'dividerModifier', void 0);
 __decorate([
   Param
-], ToolBarV2.prototype, "toolBarModifier", void 0);
+], ToolBarV2.prototype, 'toolBarModifier', void 0);
 __decorate([
   Local
-], ToolBarV2.prototype, "localActivatedIndex", void 0);
+], ToolBarV2.prototype, 'localActivatedIndex', void 0);
 __decorate([
   Local
-], ToolBarV2.prototype, "menuContent", void 0);
+], ToolBarV2.prototype, 'menuContent', void 0);
 __decorate([
   Local
-], ToolBarV2.prototype, "fontSize", void 0);
+], ToolBarV2.prototype, 'fontSize', void 0);
 __decorate([
   Local
-], ToolBarV2.prototype, "theme", void 0);
+], ToolBarV2.prototype, 'theme', void 0);
 __decorate([
   Monitor('activatedIndex')
-], ToolBarV2.prototype, "onActivateIndexChange", null);
+], ToolBarV2.prototype, 'onActivateIndexChange', null);
 __decorate([
   Computed
-], ToolBarV2.prototype, "menus", null);
+], ToolBarV2.prototype, 'menus', null);
 export default { ToolBarV2Item, ToolBarV2ItemImage, ToolBarV2ItemText, ToolBarV2, ToolBarV2ItemState, ToolBarV2Modifier, ToolBarV2SymbolGlyph };

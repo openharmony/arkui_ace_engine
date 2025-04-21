@@ -27,6 +27,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/common/container.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -108,6 +109,10 @@ RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
     layoutAlgorithm->SetCurOffset(curOffset_);
     layoutAlgorithm->SetHasStartDeleteArea(hasStartDeleteArea_);
     layoutAlgorithm->SetHasEndDeleteArea(hasEndDeleteArea_);
+    if (swipeActionState_ == SwipeActionState::ACTIONING && !isSpringMotionRunning_) {
+        layoutAlgorithm->SetCanUpdateCurOffset();
+        layoutAlgorithm->SetItemChildCrossSize(GetContentSize().CrossSize(axis_));
+    }
     return layoutAlgorithm;
 }
 
@@ -128,6 +133,14 @@ bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     endNodeSize_ = layoutAlgorithm->GetEndNodeSize();
     if (axis_ != GetAxis()) {
         ChangeAxis(GetAxis());
+    } else if (layoutAlgorithm->GetCurOffsetUpdated()) {
+        float newOffset = layoutAlgorithm->GetCurOffset();
+        FireSwipeActionOffsetChange(curOffset_, newOffset);
+        curOffset_ = newOffset;
+    }
+    if (pendingSwipeFunc_) {
+        pendingSwipeFunc_();
+        pendingSwipeFunc_ = nullptr;
     }
     return false;
 }
@@ -414,7 +427,9 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
         PanDirection panDirection = {
             .type = axis_ == Axis::HORIZONTAL ? PanDirection::VERTICAL : PanDirection::HORIZONTAL,
         };
-        gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+        PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+            { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+        gestureHub->AddPanEvent(panEvent_, panDirection, 1, distanceMap);
 
         startNodeSize_ = 0.0f;
         endNodeSize_ = 0.0f;
@@ -440,6 +455,7 @@ void ListItemPattern::HandleDragStart(const GestureEvent& info)
         springController_->Stop();
     }
     isDragging_ = true;
+    isSpringMotionRunning_ = false;
     SetSwiperItemForList();
 }
 
@@ -634,8 +650,8 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity, 
             listItem->springController_->Stop();
             position = end;
         }
-        if (NearEqual(position, listItem->curOffset_, 1.0) && !listItem->springMotionTraceFlag_) {
-            listItem->springMotionTraceFlag_ = true;
+        if (NearEqual(position, listItem->curOffset_, 1.0) && !listItem->isSpringMotionRunning_) {
+            listItem->isSpringMotionRunning_ = true;
             AceAsyncTraceBeginCommercial(0, TRAILING_ANIMATION);
         }
         float delta = listItem->IsRTLAndVertical() ? listItem->curOffset_ - position : position - listItem->curOffset_;
@@ -651,8 +667,8 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity, 
             listItem->ResetNodeSize();
             listItem->FireSwipeActionOffsetChange(SWIPE_SPRING_MASS, listItem->curOffset_);
         }
-        if (listItem->springMotionTraceFlag_) {
-            listItem->springMotionTraceFlag_ = false;
+        if (listItem->isSpringMotionRunning_) {
+            listItem->isSpringMotionRunning_ = false;
             AceAsyncTraceEndCommercial(0, TRAILING_ANIMATION);
         }
         listItem->MarkDirtyNode();
@@ -707,6 +723,7 @@ void ListItemPattern::FireSwipeActionStateChange(ListItemSwipeIndex newSwiperInd
     if (newSwiperIndex == swiperIndex_) {
         return;
     }
+    auto oldState = swipeActionState_;
     auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
 
@@ -727,6 +744,14 @@ void ListItemPattern::FireSwipeActionStateChange(ListItemSwipeIndex newSwiperInd
                 trigStart = false;
             }
             swipeActionState_ = SwipeActionState::COLLAPSED;
+    }
+    if (swipeActionState_ != oldState) {
+        if (swipeActionState_ == SwipeActionState::COLLAPSED) {
+            host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        }
+        if (swipeActionState_ == SwipeActionState::EXPANDED) {
+            host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        }
     }
     swiperIndex_ = newSwiperIndex;
     listItemEventHub->FireStateChangeEvent(swipeActionState_, trigStart);
@@ -903,6 +928,53 @@ void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
         "ListItemStyle.NONE" : "ListItemStyle.CARD", filter);
 }
 
+void ListItemPattern::SwipeCommon(ListItemSwipeIndex targetState)
+{
+    bool isForward = (targetState == ListItemSwipeIndex::SWIPER_END);
+    ListItemSwipeIndex checkPosition = targetState;
+    ListItemSwipeIndex oppositePosition = isForward ? ListItemSwipeIndex::SWIPER_START : ListItemSwipeIndex::SWIPER_END;
+    float collapsedOffset = isForward ? -1.0f : 1.0f;
+
+    auto itemPosition = GetSwiperIndex();
+    if (itemPosition == checkPosition) {
+        return;
+    }
+
+    if (GetSwipeActionState() == SwipeActionState::COLLAPSED) {
+        curOffset_ = collapsedOffset;
+        MarkDirtyNode();
+        pendingSwipeFunc_ = [weakPtr = WeakClaim(this), targetState]() {
+            const auto& pattern = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireSwipeActionStateChange(targetState);
+
+            float targetOffset =
+                (targetState == ListItemSwipeIndex::SWIPER_END) ? -(pattern->endNodeSize_) : pattern->startNodeSize_;
+            pattern->StartSpringMotion(pattern->curOffset_, targetOffset, 0.0f, true);
+        };
+    }
+
+    if (itemPosition == oppositePosition) {
+        FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
+        StartSpringMotion(curOffset_, 0.0f, 0.0f, true);
+    }
+}
+
+void ListItemPattern::SwipeForward()
+{
+    SwipeCommon(ListItemSwipeIndex::SWIPER_END);
+}
+
+void ListItemPattern::SwipeBackward()
+{
+    SwipeCommon(ListItemSwipeIndex::SWIPER_START);
+}
+
+SwipeActionState ListItemPattern::GetSwipeActionState()
+{
+    return swipeActionState_;
+}
+
 void ListItemPattern::SetAccessibilityAction()
 {
     auto host = GetHost();
@@ -937,6 +1009,20 @@ void ListItemPattern::SetAccessibilityAction()
         pattern->MarkIsSelected(false);
         context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     });
+    
+    listItemAccessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_EQUAL_VOID(pattern->Selectable(), false);
+        pattern->SwipeForward();
+    });
+
+    listItemAccessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_EQUAL_VOID(pattern->Selectable(), false);
+        pattern->SwipeBackward();
+    });
 }
 
 void ListItemPattern::InitListItemCardStyleForList()
@@ -946,6 +1032,17 @@ void ListItemPattern::InitListItemCardStyleForList()
         InitHoverEvent();
         InitPressEvent();
         InitDisableEvent();
+    }
+}
+
+void ListItemPattern::SetListItemStyle(V2::ListItemStyle style)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (listItemStyle_ == V2::ListItemStyle::NONE && style == V2::ListItemStyle::CARD) {
+        listItemStyle_ = style;
+        SetListItemDefaultAttributes(host);
+        InitListItemCardStyleForList();
     }
 }
 

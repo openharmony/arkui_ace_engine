@@ -798,11 +798,28 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
     manager->currentId_ = DEFAULT_INT1;
     context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_MOVE);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_MOVE);
     context_->SetIsDragging(false);
     EXPECT_FALSE(context_->IsDragging());
     context_->ResetDragging();
+
+    /**
+     * @tc.steps5: Call the function OnDragEvent with DRAG_EVENT_PULL_CANCEL.
+     * @tc.expected: The dragDropState_ is changed to DragDropMgrState::IDLE.
+     */
+    manager->dragDropState_ = DragDropMgrState::DRAGGING;
+    context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_PULL_CANCEL);
+    EXPECT_EQ(manager->dragDropState_, DragDropMgrState::IDLE);
+
+    /**
+     * @tc.steps6: Call the function OnDragEvent with DRAG_EVENT_PULL_THROW.
+     * @tc.expected: The isWindowConsumed_ is changed to false.
+     */
+    manager->isWindowConsumed_ = true;
+    MockContainer::Current()->SetIsSceneBoardWindow(false);
+    context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_PULL_THROW);
+    EXPECT_EQ(manager->isWindowConsumed_, false);
 }
 
 /**
@@ -999,7 +1016,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_TAB;
     event.pressedCodes = { KeyCode::KEY_TAB };
-    EXPECT_FALSE(context_->OnNonPointerEvent(event));
+    EXPECT_TRUE(context_->OnNonPointerEvent(event));
 
     /**
      * @tc.steps3: Call the function OnKeyEvent with isFocusActive_ = false, action = KeyAction::DOWN and
@@ -1971,7 +1988,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg094, TestSize.Level1)
     ASSERT_NE(context_, nullptr);
     context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
 
-    SystemProperties::SetColorMode(ColorMode::DARK);
+    MockContainer::SetMockColorMode(ColorMode::DARK);
     context_->SetAppBgColor(Color::BLACK);
     context_->ChangeDarkModeBrightness();
     context_->SetIsJsCard(true);
@@ -1984,7 +2001,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg094, TestSize.Level1)
     context_->ChangeDarkModeBrightness();
     context_->SetAppBgColor(Color::BLUE);
     context_->ChangeDarkModeBrightness();
-    SystemProperties::SetColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
     context_->ChangeDarkModeBrightness();
     EXPECT_NE(context_->stageManager_, nullptr);
 }
@@ -2056,6 +2073,23 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg102, TestSize.Level1)
         EXPECT_EQ(mouseEvents.size(), 0);
     }
     context_->mouseEvents_.clear();
+}
+
+/**
+ * @tc.name: PipelineContextTestNg103
+ * @tc.desc: Test the function IsFormRenderExceptDynamicComponent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg103, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    bool isFormRender = context_->IsFormRenderExceptDynamicComponent();
+    ASSERT_EQ(isFormRender, true);
 }
 
 /**

@@ -58,12 +58,21 @@ public:
     {
         debugLine_ = debugline;
     }
+    inline int32_t GetParentId()
+    {
+        return parentId_;
+    }
+    inline void SetParentId(int32_t id)
+    {
+        parentId_ = id;
+    }
 
 private:
     uint64_t selfId_ = 0;
     int32_t nodeId_ = 0;
     std::string name_;
     std::string debugLine_;
+    int32_t parentId_ = -1;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_REC_NODE_H

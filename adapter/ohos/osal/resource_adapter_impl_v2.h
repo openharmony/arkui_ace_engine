@@ -22,6 +22,7 @@
 #include "base/thread/task_executor.h"
 #include "base/image/pixel_map.h"
 #include "base/utils/device_config.h"
+#include "base/utils/string_utils.h"
 #include "core/components/theme/resource_adapter.h"
 #include "adapter/ohos/osal/resource_theme_style.h"
 
@@ -32,6 +33,7 @@ class ResourceAdapterImplV2 : public ResourceAdapter {
 public:
     ResourceAdapterImplV2() = default;
     explicit ResourceAdapterImplV2(std::shared_ptr<Global::Resource::ResourceManager> resourceManager);
+    ResourceAdapterImplV2(std::shared_ptr<Global::Resource::ResourceManager> resourceManager, int32_t instanceId);
     ResourceAdapterImplV2(
         std::shared_ptr<Global::Resource::ResourceManager> resourceManager, const ResourceInfo& resourceInfo);
     ~ResourceAdapterImplV2() override = default;

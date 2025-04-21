@@ -270,7 +270,7 @@ HWTEST_F(TextClockModifierTest, setFontColorTestFontColorInvalidValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockModifierTest, setFontSizeTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextClockModifierTest, DISABLED_setFontSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;

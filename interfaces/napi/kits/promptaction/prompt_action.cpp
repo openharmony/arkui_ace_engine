@@ -17,12 +17,12 @@
 #include "prompt_controller.h"
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "base/i18n/localization.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/toast/toast_theme.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -68,14 +68,14 @@ bool ContainerIsService()
     return containerId >= MIN_PA_SERVICE_ID || containerId < 0;
 }
 
-bool ContainerIsScenceBoard()
+bool ContainerIsSceneBoard()
 {
     auto container = Container::CurrentSafely();
     if (!container) {
         container = Container::GetActive();
     }
 
-    return container && container->IsScenceBoardWindow();
+    return container && container->IsSceneBoardWindow();
 }
 #endif
 } // namespace
@@ -242,12 +242,12 @@ void GetToastBackgroundBlurStyle(napi_env env,
 
 bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 {
-    auto colorMode = SystemProperties::GetColorMode();
     if (shadowStyle == ShadowStyle::None) {
         return true;
     }
     auto container = Container::CurrentSafelyWithCheck();
     CHECK_NULL_RETURN(container, false);
+    auto colorMode = container->GetColorMode();
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
@@ -478,7 +478,7 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
 bool ShowToast(napi_env env, NG::ToastInfo& toastInfo, std::function<void(int32_t)>& toastCallback)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
+    if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsSceneBoard() &&
         toastInfo.showMode == NG::ToastShowMode::DEFAULT) {
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (!delegate) {
@@ -579,7 +579,7 @@ void CloseToast(napi_env env, int32_t toastId, NG::ToastShowMode showMode)
         }
     };
 #ifdef OHOS_STANDARD_SYSTEM
-    if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
+    if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsSceneBoard() &&
         showMode == NG::ToastShowMode::DEFAULT) {
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (delegate) {
@@ -673,7 +673,6 @@ struct PromptAsyncContext {
     std::string messageString;
     std::vector<ButtonInfo> buttons;
     bool autoCancelBool = true;
-    bool enableHoverModeBool = false;
     bool showInSubWindowBool = false;
     bool isModalBool = true;
     std::set<std::string> callbacks;
@@ -699,6 +698,7 @@ struct PromptAsyncContext {
     napi_value dialogLevelModeApi = nullptr;
     napi_value dialogLevelUniqueId = nullptr;
     napi_value dialogImmersiveModeApi = nullptr;
+    napi_value focusableApi = nullptr;
 };
 
 void DeleteContextAndThrowError(
@@ -809,7 +809,11 @@ bool ParseButtonsPara(napi_env env, std::shared_ptr<PromptAsyncContext>& context
         return false;
     }
     if (isShowActionMenu) {
-        ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"),
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto theme = pipeline->GetTheme<ButtonTheme>();
+        CHECK_NULL_RETURN(theme, false);
+        ButtonInfo buttonInfo = { .text = theme->GetCancelText(),
             .textColor = "", .isPrimary = primaryButtonNum == 0 ? true : false};
         context->buttons.emplace_back(buttonInfo);
     }
@@ -875,7 +879,8 @@ void GetNapiDialogProps(napi_env env, const std::shared_ptr<PromptAsyncContext>&
 }
 
 void GetNapiBlurStyleAndHoverModeProps(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
-    std::optional<int32_t>& backgroundBlurStyle, std::optional<HoverModeAreaType>& hoverModeArea)
+    std::optional<int32_t>& backgroundBlurStyle, std::optional<HoverModeAreaType>& hoverModeArea,
+    std::optional<bool>& enableHoverMode)
 {
     TAG_LOGD(AceLogTag::ACE_DIALOG, "get napi dialog backgroundBlurStyle and hoverModeArea props enter");
     napi_valuetype blurStyleValueType = napi_undefined;
@@ -887,6 +892,14 @@ void GetNapiBlurStyleAndHoverModeProps(napi_env env, const std::shared_ptr<Promp
         if (num >= 0 && num < BG_BLUR_STYLE_MAX_INDEX) {
             backgroundBlurStyle = num;
         }
+    }
+
+    napi_valuetype enableHoverModeValueType = napi_undefined;
+    napi_typeof(env, asyncContext->enableHoverMode, &enableHoverModeValueType);
+    if (enableHoverModeValueType == napi_boolean) {
+        bool enableHoverModeBool = false;
+        napi_get_value_bool(env, asyncContext->enableHoverMode, &enableHoverModeBool);
+        enableHoverMode = enableHoverModeBool;
     }
 
     napi_valuetype hoverModeValueType = napi_undefined;
@@ -1338,10 +1351,6 @@ void GetNapiNamedBoolProperties(napi_env env, std::shared_ptr<PromptAsyncContext
     if (valueType == napi_boolean) {
         napi_get_value_bool(env, asyncContext->autoCancel, &asyncContext->autoCancelBool);
     }
-    napi_typeof(env, asyncContext->enableHoverMode, &valueType);
-    if (valueType == napi_boolean) {
-        napi_get_value_bool(env, asyncContext->enableHoverMode, &asyncContext->enableHoverModeBool);
-    }
     napi_typeof(env, asyncContext->showInSubWindow, &valueType);
     if (valueType == napi_boolean) {
         napi_get_value_bool(env, asyncContext->showInSubWindow, &asyncContext->showInSubWindowBool);
@@ -1399,6 +1408,7 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
     napi_get_named_property(env, argv[index], "levelMode", &asyncContext->dialogLevelModeApi);
     napi_get_named_property(env, argv[index], "levelUniqueId", &asyncContext->dialogLevelUniqueId);
     napi_get_named_property(env, argv[index], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
+    napi_get_named_property(env, argv[index], "focusable", &asyncContext->focusableApi);
 
     GetNapiNamedBoolProperties(env, asyncContext);
 }
@@ -1504,11 +1514,10 @@ std::optional<double> GetLevelOrderParam(napi_env env, const std::shared_ptr<Pro
         napi_unwrap(env, levelOrderApi, reinterpret_cast<void**>(&levelOrder));
     }
 
-    double order = NG::LevelOrder::ORDER_DEFAULT;
     if (levelOrder) {
-        order = levelOrder->GetOrder();
+        return std::make_optional(levelOrder->GetOrder());
     }
-    return std::make_optional(order);
+    return std::nullopt;
 }
 
 napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
@@ -1547,6 +1556,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     std::optional<BlurStyleOption> blurStyleOption;
     std::optional<EffectOption> effectOption;
     std::optional<HoverModeAreaType> hoverModeArea;
+    std::optional<bool> enableHoverMode;
     LevelMode dialogLevelMode = LevelMode::OVERLAY;
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
@@ -1583,15 +1593,11 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             GetNapiDialogProps(env, asyncContext, alignment, offset, maskRect);
             backgroundColor = GetColorProps(env, asyncContext->backgroundColorApi);
             shadowProps = GetShadowProps(env, asyncContext);
-            GetNapiBlurStyleAndHoverModeProps(env, asyncContext, backgroundBlurStyle, hoverModeArea);
+            GetNapiBlurStyleAndHoverModeProps(env, asyncContext, backgroundBlurStyle, hoverModeArea, enableHoverMode);
             GetBackgroundBlurStyleOption(env, asyncContext, blurStyleOption);
             GetBackgroundEffect(env, asyncContext, effectOption);
             if (!ParseButtonsPara(env, asyncContext, SHOW_DIALOG_BUTTON_NUM_MAX, false)) {
                 return nullptr;
-            }
-            napi_typeof(env, asyncContext->enableHoverMode, &valueType);
-            if (valueType == napi_boolean) {
-                napi_get_value_bool(env, asyncContext->enableHoverMode, &asyncContext->enableHoverModeBool);
             }
             napi_typeof(env, asyncContext->autoCancel, &valueType);
             if (valueType == napi_boolean) {
@@ -1730,7 +1736,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         .autoCancel = asyncContext->autoCancelBool,
         .showInSubWindow = asyncContext->showInSubWindowBool,
         .isModal = asyncContext->isModalBool,
-        .enableHoverMode = asyncContext->enableHoverModeBool,
+        .enableHoverMode = enableHoverMode,
         .alignment = alignment,
         .offset = offset,
         .maskRect = maskRect,
@@ -2219,6 +2225,19 @@ std::function<void(const int32_t& dialogId)> GetCustomBuilderWithId(
     return builder;
 }
 
+bool GetFocusableParam(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    bool focusable = true;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, asyncContext->focusableApi, &valueType);
+    if (valueType != napi_boolean) {
+        return focusable;
+    }
+
+    napi_get_value_bool(env, asyncContext->focusableApi, &focusable);
+    return focusable;
+}
+
 PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
     std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss)
 {
@@ -2229,8 +2248,9 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
     std::optional<HoverModeAreaType> hoverModeArea;
     std::optional<BlurStyleOption> blurStyleOption;
     std::optional<EffectOption> effectOption;
+    std::optional<bool> enableHoverMode;
     GetNapiDialogProps(env, asyncContext, alignment, offset, maskRect);
-    GetNapiBlurStyleAndHoverModeProps(env, asyncContext, backgroundBlurStyle, hoverModeArea);
+    GetNapiBlurStyleAndHoverModeProps(env, asyncContext, backgroundBlurStyle, hoverModeArea, enableHoverMode);
     GetBackgroundBlurStyleOption(env, asyncContext, blurStyleOption);
     GetBackgroundEffect(env, asyncContext, effectOption);
     auto borderWidthProps = GetBorderWidthProps(env, asyncContext);
@@ -2253,7 +2273,7 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
     PromptDialogAttr promptDialogAttr = { .autoCancel = asyncContext->autoCancelBool,
         .showInSubWindow = asyncContext->showInSubWindowBool,
         .isModal = asyncContext->isModalBool,
-        .enableHoverMode = asyncContext->enableHoverModeBool,
+        .enableHoverMode = enableHoverMode,
         .customBuilder = std::move(builder),
         .customOnWillDismiss = std::move(onWillDismiss),
         .alignment = alignment,
@@ -2283,9 +2303,10 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .keyboardAvoidMode = KEYBOARD_AVOID_MODE[mode],
         .keyboardAvoidDistance = GetKeyboardAvoidDistanceProps(env, asyncContext),
         .levelOrder = GetLevelOrderParam(env, asyncContext),
+        .focusable = GetFocusableParam(env, asyncContext),
         .dialogLevelMode = dialogLevelMode,
         .dialogLevelUniqueId = dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogImmersiveMode
+        .dialogImmersiveMode = dialogImmersiveMode,
     };
     return promptDialogAttr;
 }
@@ -2551,10 +2572,6 @@ void ParseBaseDialogOptions(napi_env env, napi_value arg, std::shared_ptr<Prompt
     napi_get_named_property(env, arg, "keyboardAvoidMode", &asyncContext->keyboardAvoidModeApi);
     napi_get_named_property(env, arg, "keyboardAvoidDistance", &asyncContext->keyboardAvoidDistanceApi);
     napi_get_named_property(env, arg, "enableHoverMode", &asyncContext->enableHoverMode);
-    napi_typeof(env, asyncContext->enableHoverMode, &valueType);
-    if (valueType == napi_boolean) {
-        napi_get_value_bool(env, asyncContext->enableHoverMode, &asyncContext->enableHoverModeBool);
-    }
     napi_get_named_property(env, arg, "hoverModeArea", &asyncContext->hoverModeAreaApi);
     napi_get_named_property(env, arg, "levelOrder", &asyncContext->levelOrderApi);
     napi_get_named_property(env, arg, "backgroundBlurStyleOptions", &asyncContext->blurStyleOptionApi);
@@ -2562,6 +2579,7 @@ void ParseBaseDialogOptions(napi_env env, napi_value arg, std::shared_ptr<Prompt
     napi_get_named_property(env, arg, "levelMode", &asyncContext->dialogLevelModeApi);
     napi_get_named_property(env, arg, "levelUniqueId", &asyncContext->dialogLevelUniqueId);
     napi_get_named_property(env, arg, "immersiveMode", &asyncContext->dialogImmersiveModeApi);
+    napi_get_named_property(env, arg, "focusable", &asyncContext->focusableApi);
 
     ParseBaseDialogOptionsEvent(env, arg, asyncContext);
 }

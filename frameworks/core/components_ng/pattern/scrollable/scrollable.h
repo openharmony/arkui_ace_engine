@@ -56,6 +56,15 @@ struct ScrollResult {
     bool reachEdge;
 };
 
+struct SlidInfo {
+    double gestureVelocity;
+    double velocityScale;
+    double gain;
+    double maxFlingVelocity;
+    double slipFactor;
+    double friction;
+};
+
 using ScrollEventCallback = std::function<void()>;
 using OutBoundaryCallback = std::function<bool()>;
 using ScrollOverCallback = std::function<void(double velocity)>;
@@ -187,12 +196,12 @@ public:
         springVelocityScale_ = scale;
     }
 
-    void HandleTouchDown();
+    void HandleTouchDown(bool fromcrown = false);
     void HandleTouchUp();
     void HandleTouchCancel();
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
-    void HandleDragEnd(const GestureEvent& info);
+    void HandleDragEnd(const GestureEvent& info, bool isFromPanEnd = false);
     void HandleScrollEnd(const std::optional<float>& velocity);
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
@@ -492,11 +501,7 @@ public:
         return endPos_;
     }
 
-    void SetMaxFlingVelocity(double max)
-    {
-        double density = PipelineBase::GetCurrentDensity();
-        maxFlingVelocity_ = max * density;
-    }
+    void SetMaxFlingVelocity(double max);
 
     double GetMaxFlingVelocity() const
     {
@@ -544,11 +549,6 @@ public:
     {
         isCrownEventDragging_ = draging;
     }
-
-    void SetReachBoundary(bool flag)
-    {
-        reachBoundary_ = flag;
-    }
 #endif
 
     void SetOverScrollOffsetCallback(std::function<double()> overScrollOffsetCallback)
@@ -578,6 +578,8 @@ private:
     void SetOnActionUpdate();
     void SetOnActionEnd();
     void SetOnActionCancel();
+    void SetPanEndCallback();
+    void ProcessPanActionEndEvents(const GestureEvent& info);
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
     void ProcessScrollMotion(double position, int32_t source = SCROLL_FROM_ANIMATION);
@@ -593,6 +595,7 @@ private:
         float final, float position, float signum, float friction, float threshold = DEFAULT_MULTIPLIER);
     void InitFriction(double friction);
     void CalcOverScrollVelocity();
+    double CalcNextStep(double position, double mainDelta);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void HandleCrownEvent(const CrownEvent& event, const OffsetF& center);
@@ -714,6 +717,8 @@ private:
     bool nestedScrolling_ = false;
     float axisSnapDistance_ = 0.f;
     SnapDirection snapDirection_ = SnapDirection::NONE;
+    bool isSlow_ = false;
+    std::optional<float> nextStep_;
 
     RefPtr<AxisAnimator> axisAnimator_;
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -726,6 +731,7 @@ private:
     bool reachBoundary_ = false;
     CancelableCallback<void()> crownTask_;
 #endif
+    SlidInfo slidInfo_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -15,6 +15,7 @@
 
 #include "bridge/cj_frontend/cppview/canvas_path.h"
 
+#include "core/pipeline/pipeline_base.h"
 namespace OHOS::Ace::Framework {
 
 NativeCanvasPath::NativeCanvasPath() : FFIData()
@@ -107,5 +108,11 @@ void NativeCanvasPath::Rect(double x, double y, double width, double height)
 void NativeCanvasPath::ClosePath()
 {
     path2d_->ClosePath();
+}
+
+double NativeCanvasPath::GetDensity()
+{
+    double density = PipelineBase::GetCurrentDensity();
+    return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
 }
 } // namespace OHOS::Ace::Framework

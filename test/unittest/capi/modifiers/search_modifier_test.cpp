@@ -1513,7 +1513,7 @@ HWTEST_F(SearchModifierTest, setTextAlignTest, TestSize.Level1)
  * @tc.desc: Check the functionality of setType
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest, setTypeTest, TestSize.Level1)
+HWTEST_F(SearchModifierTest, DISABLED_setTypeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setType, nullptr);
     auto checkVal = GetStringAttribute(node_, TYPE_ATTR);

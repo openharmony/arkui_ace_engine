@@ -58,15 +58,10 @@ struct MenuItemInfo {
 };
 
 struct PreviewMenuAnimationInfo {
-    float previewScale = -1.0f;
-    float menuScale = -1.0f;
     BorderRadiusProperty borderRadius = BorderRadiusProperty(Dimension(-1.0f));
 
     // for hoverScale animation
     float clipRate = -1.0f;
-
-    OffsetF previewOffset = OffsetF();
-    OffsetF menuOffset = OffsetF();
 };
 
 class MenuPattern : public Pattern, public FocusView {
@@ -317,6 +312,7 @@ public:
     void MountOption(const RefPtr<FrameNode>& option);
 
     void RemoveOption();
+    RefPtr<FrameNode> DuplicateMenuNode(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
 
     RefPtr<FrameNode> GetMenuColumn() const;
 
@@ -618,9 +614,14 @@ public:
     float GetSelectMenuWidthFromTheme() const;
 
     bool IsSelectOverlayDefaultModeRightClickMenu();
+    void UpdateMenuDividerWithMode(const RefPtr<UINode>& previousNode, const RefPtr<UINode>& currentNode,
+        const RefPtr<MenuLayoutProperty>& property, int32_t& index);
+    void RemoveLastNodeDivider(const RefPtr<UINode>& lastNode);
+    void UpdateMenuItemDivider();
+    void UpdateDividerProperty(const RefPtr<FrameNode>& dividerNode, const std::optional<V2::ItemDivider>& divider);
 
 protected:
-    void UpdateMenuItemChildren(RefPtr<UINode>& host);
+    void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
     void SetAccessibilityAction();
     void SetType(MenuType value)
@@ -648,6 +649,7 @@ private:
     // reset outer menu container and only apply theme on the inner <Menu> node.
     void ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu);
     void ResetScrollTheme(const RefPtr<FrameNode>& host);
+    void ResetThemeByInnerMenuCount();
     void CopyMenuAttr(const RefPtr<FrameNode>& menuNode) const;
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -682,6 +684,7 @@ private:
     RefPtr<UINode> GetIfElseMenuItem(const RefPtr<UINode>& parent, bool next);
     void HandleNextPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover);
     void HandlePrevPressed(const RefPtr<UINode>& parent, int32_t index, bool press);
+    void SetMenuBackGroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     void UpdateMenuBorderAndBackgroundBlur()
     {
         auto host = GetHost();

@@ -74,6 +74,7 @@ void ContainerModelTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_CONTAINER_MODAL);
@@ -130,7 +131,7 @@ void ContainerModelTestNg::CreateContainerModal()
     auto frameNode = view.Create(content);
     ViewStackProcessor::GetInstance()->Push(frameNode);
     GetInstance();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void ContainerModelTestNg::Touch(TouchLocationInfo locationInfo)
@@ -563,7 +564,7 @@ HWTEST_F(ContainerModelTestNg, AccessibilityProperty002, TestSize.Level1)
     auto frameNode = view.Create(content);
     ViewStackProcessor::GetInstance()->Push(frameNode);
     GetInstance();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     pattern_->appLabel_ = "abc";
     EXPECT_EQ(accessibilityProperty_->GetText(), "abc");
 }

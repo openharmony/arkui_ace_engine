@@ -17,6 +17,11 @@
 
 #include "gtest/gtest.h"
 #include "search_base.h"
+#include "ui/view/frame_node.h"
+
+#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -737,7 +742,7 @@ HWTEST_F(SearchTestTwoNg, Pattern025, TestSize.Level1)
     touchInfo1.SetTouchType(TouchType::UP);
     info.AddTouchLocationInfo(std::move(touchInfo1));
     ASSERT_NE(events.size(), 0);
-    SystemProperties::SetColorMode(ColorMode::DARK);
+    MockContainer::SetMockColorMode(ColorMode::DARK);
     for (auto event : events) {
         event->callback_(info);
     }
@@ -1217,6 +1222,11 @@ HWTEST_F(SearchTestTwoNg, SetProperty005, TestSize.Level1)
     searchModelInstance.SetSearchEnterKeyType(frameNode, TextInputAction::NEXT);
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     EXPECT_EQ(TextInputAction::NEXT, textFieldPattern->GetTextInputActionValue(TextInputAction::UNSPECIFIED));
+
+    //test SetSearchCapitalizationMode
+    searchModelInstance.SetSearchCapitalizationMode(AutoCapitalizationMode::SENTENCES);
+    EXPECT_EQ(AutoCapitalizationMode::SENTENCES,
+        textFieldPattern->GetAutoCapitalizationMode());
 }
 /**
  * @tc.name: SetEnterKeyType001
@@ -1233,6 +1243,22 @@ HWTEST_F(SearchTestTwoNg, SetEnterKeyType001, TestSize.Level1)
     auto textFieldChild = AceType::DynamicCast<FrameNode>(fNode->GetChildren().front());
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     EXPECT_EQ(TextInputAction::SEARCH, textFieldPattern->GetTextInputActionValue(TextInputAction::UNSPECIFIED));
+}
+
+/**
+ * @tc.name: SetCapitalizationMode001
+ * @tc.desc: test search set CapitalizationMode default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, SetCapitalizationMode001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto fNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    searchModelInstance.SetSearchCapitalizationMode(AutoCapitalizationMode::NONE);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(fNode->GetChildren().front());
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    EXPECT_EQ(AutoCapitalizationMode::NONE, textFieldPattern->GetAutoCapitalizationMode());
 }
 
 /**
@@ -1896,5 +1922,1217 @@ HWTEST_F(SearchTestTwoNg, CalcSearchWidth003, TestSize.Level1)
     SearchLayoutAlgorithm searchLayoutAlgorithm;
     auto result = searchLayoutAlgorithm.CalcSearchWidth(layoutConstraintT, Referenced::RawPtr(layoutWrapper));
     EXPECT_EQ(result, 200.0f);
+}
+
+/**
+ * @tc.name: testSearchUpdateDisableAndEnable
+ * @tc.desc: Test Search UpdateDisable and UpdateEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, testSearchUpdateDisableAndEnable, TestSize.Level1)
+{
+     /**
+      * @tc.steps: Create Search Node
+      */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+     /**
+      * @tc.expected: Test Search UpdateDisable and UpdateEnable
+      */
+    pattern->UpdateEnable(false);
+    EXPECT_EQ(pattern->isSearchButtonEnabled_, false);
+
+    pattern->UpdateDisable(u"abcd");
+    EXPECT_EQ(pattern->isSearchButtonEnabled_, false);
+
+    pattern->UpdateEnable(true);
+    EXPECT_EQ(pattern->isSearchButtonEnabled_, true);
+
+    std::u16string textValue;
+    pattern->UpdateDisable(textValue);
+    EXPECT_EQ(pattern->isSearchButtonEnabled_, true);
+}
+
+/**
+ * @tc.name: testSearchAccessibility
+ * @tc.desc: searchAccessibility PerformAction test Select ClearSelection and Copy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, testSearchAccessibility, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern, set callback function.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::None);
+    pattern->SetAccessibilityAction();
+    pattern->SetSearchFieldAccessibilityAction();
+
+    /**
+    * @tc.steps: step2. Get text accessibilityProperty to call callback function.
+    * @tc.expected: Related function is called.
+    */
+    auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(textAccessibilityProperty, nullptr);
+    auto textFieldAccessibilityProperty = textFieldFrameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(textFieldAccessibilityProperty, nullptr);
+
+    /**
+    * @tc.steps: step3. When text CopyOptions is None, call the callback function in textAccessibilityProperty.
+    * @tc.expected: Related function is called.
+    */
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, 2));
+    EXPECT_FALSE(textAccessibilityProperty->ActActionClearSelection());
+    EXPECT_FALSE(textAccessibilityProperty->ActActionCopy());
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionClick());
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetText(""));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetIndex(0));
+    EXPECT_EQ(textAccessibilityProperty->ActActionGetIndex(), 0);
+
+    /**
+    * @tc.steps: step4. When text CopyOptions is InApp, call the callback function in textAccessibilityProperty.
+    * @tc.expected: Related function is called.
+    */
+    textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::InApp);
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(-1, -1));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, 3));
+    EXPECT_FALSE(textAccessibilityProperty->ActActionClearSelection());
+    EXPECT_FALSE(textAccessibilityProperty->ActActionCopy());
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionClick());
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetText(""));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetIndex(1));
+    EXPECT_EQ(textAccessibilityProperty->ActActionGetIndex(), 0);
+
+    /**
+    * @tc.steps: step5. When text CopyOptions is Local, call the callback function in textAccessibilityProperty.
+    * @tc.expected: Related function is called.
+    */
+    textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::Local);
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(-2, -2));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(2, 3));
+    EXPECT_FALSE(textAccessibilityProperty->ActActionClearSelection());
+    EXPECT_FALSE(textAccessibilityProperty->ActActionCopy());
+    EXPECT_TRUE(textFieldAccessibilityProperty->ActActionClick());
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetText(""));
+    EXPECT_TRUE(textAccessibilityProperty->ActActionSetIndex(2));
+    EXPECT_EQ(textAccessibilityProperty->ActActionGetIndex(), 0);
+}
+
+/**
+ * @tc.name: testSearchChangeEvent
+ * @tc.desc: SearchEventHub
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, testSearchChangeEvent, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    pattern->InitTextFieldValueChangeEvent();
+
+    /**
+    * @tc.steps: step2. fire search change event.
+    * @tc.expected: Related function is called.
+    */
+    ChangeAndSubmitEvent changeEvent = [](const std::u16string str) {};
+    searchModelInstance.SetOnChangeEvent(changeEvent);
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->AttachHost(AceType::WeakClaim(frameNode));
+    eventHub->lastPreviewText_ = { 0, u"" };
+    ChangeValueInfo changeValueInfo;
+    changeValueInfo.value = u"123";
+    changeValueInfo.previewText.offset = -1;
+    changeValueInfo.previewText.value = u"456";
+    eventHub->FireOnChange(changeValueInfo);
+    EXPECT_EQ(eventHub->lastValue_, u"123");
+    EXPECT_EQ(eventHub->lastPreviewText_.value, u"456");
+}
+
+/**
+ * @tc.name: searchDropTest
+ * @tc.desc: Test search method
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SearchTestTwoNg, searchDropTest, TestSize.Level1)
+ {
+     /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    /**
+    * @tc.steps: step2. construct a allowDropSet.
+    * @tc.expected: allowDropSet is not null.
+    */
+    std::set<std::string> allowDropSet = { "" };
+
+    /**
+    * @tc.steps: step3. Set an allowDrop in the frameNode and then get an allowDrop.
+    * @tc.expected: The set allowDrop is the same as the get allowDrop.
+    */
+    frameNode->SetAllowDrop(allowDropSet);
+    std::set<std::string> allowDropGet = frameNode->GetAllowDrop();
+    EXPECT_EQ(allowDropGet, allowDropSet);
+
+    /**
+    * @tc.steps: step4. Set an isDisallowDropForcedly in the frameNode and then get an isDisallowDropForcedly.
+    * @tc.expected: The set isDisallowDropForcedly is the same as the get isDisallowDropForcedly.
+    */
+    bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
+    ASSERT_FALSE(isDisallowDropForcedly);
+
+    pattern->InitTextFieldDragEvent();
+
+    frameNode->SetDisallowDropForcedly(true);
+    pattern->InitTextFieldDragEvent();
+
+    isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
+    ASSERT_TRUE(isDisallowDropForcedly);
+
+    frameNode->UpdateInspectorId("1235646");
+    searchModelInstance.SetLineHeight(2.0_fp);
+    frameNode->MarkModifyDone();
+    pattern->OnAfterModifyDone();
+    textFieldPattern->selectController_->UpdateCaretHeight(10);
+    textFieldPattern->contentController_->SetTextValue(u"12312");
+    EXPECT_EQ(textFieldLayoutProperty->GetLineHeight(), 2.0_fp);
+    EXPECT_EQ(pattern->HandleTextContentLines(), 0);
+}
+
+/**
+ * @tc.name: searchOnKeyEvent001
+ * @tc.desc: Test search onKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchOnKeyEvent001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: pre setting
+    */
+    pattern->focusChoice_ = SearchPattern::FocusChoice::SEARCH;
+
+    /**
+    * @tc.steps: case KEY_SHIFT_LEFT + KEY_DPAD_LEFT
+    */
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    keyEvent.pressedCodes = presscodes;
+    keyEvent.pressedCodes.clear();
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_SHIFT_LEFT);
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_DPAD_LEFT);
+    keyEvent.code = KeyCode::KEY_DPAD_LEFT;
+    EXPECT_EQ(pattern->OnKeyEvent(keyEvent), true);
+
+    /**
+    * @tc.steps: case KEY_SHIFT_RIGHT + KEY_DPAD_RIGHT
+    */
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.pressedCodes.clear();
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_SHIFT_RIGHT);
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_DPAD_RIGHT);
+    keyEvent.code = KeyCode::KEY_DPAD_RIGHT;
+    EXPECT_EQ(pattern->OnKeyEvent(keyEvent), true);
+
+    /**
+    * @tc.steps: case KeyAction::UP
+    */
+    keyEvent.action = KeyAction::UP;
+    keyEvent.code = KeyCode::KEY_TAB;
+    EXPECT_EQ(pattern->OnKeyEvent(keyEvent), false);
+
+    keyEvent.action = KeyAction::UP;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    EXPECT_EQ(pattern->OnKeyEvent(keyEvent), false);
+
+    keyEvent.action = KeyAction::UP;
+    keyEvent.code = KeyCode::KEY_SHIFT_RIGHT;
+    EXPECT_EQ(pattern->OnKeyEvent(keyEvent), false);
+}
+
+/**
+ * @tc.name: searchHandleFocusChoiceTest
+ * @tc.desc: Test search onKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchHandleFocusChoiceTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto searchTextFieldPattern = AceType::DynamicCast<SearchTextFieldPattern>(textFieldPattern);
+    CHECK_NULL_VOID(searchTextFieldPattern);
+
+    /**
+    * @tc.steps: case
+    */
+    pattern->directionKeysMoveFocusOut_ = true;
+    pattern->HandleFocusChoiceSearch(textFieldPattern, false, searchTextFieldPattern);
+    EXPECT_EQ(textFieldPattern->GetTextUtf16Value().empty(), false);
+
+    pattern->directionKeysMoveFocusOut_ = false;
+    pattern->HandleFocusChoiceSearch(textFieldPattern, true, searchTextFieldPattern);
+    EXPECT_EQ(textFieldPattern->GetTextUtf16Value().empty(), false);
+}
+
+/**
+ * @tc.name: searchGetSearchFocusPaintRectTest
+ * @tc.desc: Test search onKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchGetSearchFocusPaintRectTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);;
+
+    /**
+    * @tc.steps: case
+    */
+    RoundRect focusRect;
+    pattern->GetSearchFocusPaintRect(focusRect);
+    EXPECT_EQ(focusRect.GetRect().Left(), 0.0f);
+    EXPECT_EQ(focusRect.GetRect().Top(), 0.0f);
+    EXPECT_EQ(focusRect.GetRect().Right(), 0.0f);
+    EXPECT_EQ(focusRect.GetRect().Bottom(), 0.0f);
+    EXPECT_EQ(focusRect.GetRect().Width(), 0.0f);
+    EXPECT_EQ(focusRect.GetRect().Height(), 0.0f);
+}
+
+/**
+ * @tc.name: searchTriggerButtonMouseEventTest
+ * @tc.desc: Test search onKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchTriggerButtonMouseEventTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);;
+
+    /**
+    * @tc.steps: case
+    */
+    pattern->searchButtonMouseEvent_ = nullptr;
+    pattern->InitButtonMouseEvent(pattern->searchButtonMouseEvent_, BUTTON_INDEX);
+
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto eventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    ASSERT_NE(inputHub, nullptr);
+    auto events = inputHub->hoverEventActuator_->inputEvents_;
+    for (const auto& callback : events) {
+        if (callback) {
+            (*callback)(true);
+        }
+    }
+    EXPECT_NE(events.size(), 0);
+
+    pattern->searchHoverListener_ = nullptr;
+    pattern->InitHoverEvent();
+    auto callback = pattern->searchHoverListener_->GetOnHoverEventFunc();
+    if (callback) {
+        callback(true);
+    }
+    EXPECT_NE(callback, nullptr);
+}
+
+/**
+ * @tc.name: searchAnimateTouchAndHoverTest
+ * @tc.desc: Test search onKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchAnimateTouchAndHoverTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto renderContext = buttonFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    pattern->AnimateTouchAndHover(renderContext, 0.0f, 0.05f, 250, Curves::FRICTION);
+}
+
+/**
+ * @tc.name: searchHoverEventTest
+ * @tc.desc: Test search hover event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchHoverEventTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    pattern->InitHoverEvent();
+    pattern->InitHoverEvent(); // second for testing searchHoverListener_ = true;
+
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto inputEventHub = frameNode->GetOrCreateInputEventHub();
+    ASSERT_NE(inputEventHub, nullptr);
+    inputEventHub->SetHoverEffect(HoverEffectType::NONE);
+    pattern->HandleHoverEvent(true);
+}
+
+/**
+ * @tc.name: searchTouchEventTest
+ * @tc.desc: Test search touch event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchTouchEventTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    pattern->InitTouchEvent();
+    pattern->InitTouchEvent(); // second for testing searchTouchListener_ = true;
+    pattern->OnTouchDownOrUp(true);
+    pattern->OnTouchDownOrUp(false);
+
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    auto events = gesture->touchEventActuator_->touchEvents_;
+    TouchEventInfo info("onTouch");
+    TouchLocationInfo touchInfo1(1);
+    touchInfo1.SetTouchType(TouchType::UP);
+    info.AddTouchLocationInfo(std::move(touchInfo1));
+    for (auto event : events) {
+        if (event->callback_) {
+            event->callback_(info);
+        }
+    }
+    EXPECT_NE(events.size(), 0);
+
+    TouchEventInfo info2("onTouch");
+    TouchLocationInfo touchInfo2(1);
+    touchInfo2.SetTouchType(TouchType::MOVE);
+    info2.AddTouchLocationInfo(std::move(touchInfo2));
+    for (auto event : events) {
+        if (event->callback_) {
+            event->callback_(info2);
+        }
+    }
+    EXPECT_NE(events.size(), 0);
+}
+
+/**
+ * @tc.name: searchToJsonTest
+ * @tc.desc: Test search to json
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchToJsonTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    InspectorFilter filter;
+    filter.AddFilterAttr("content");
+    auto jsonValue = JsonUtil::Create(true);
+    pattern->ToJsonValueForTextField(jsonValue, filter);
+    pattern->ToJsonValueForSearchIcon(jsonValue, filter);
+    pattern->ToJsonValueForCancelButton(jsonValue, filter);
+    pattern->ToJsonValueForCursor(jsonValue, filter);
+    pattern->ToJsonValueForSearchButtonOption(jsonValue, filter);
+    EXPECT_EQ(filter.FilterEmpty(), false);
+    EXPECT_EQ(filter.IsFastFilter(), true);
+
+    InspectorFilter filter2;
+    pattern->CreateOrUpdateSymbol(IMAGE_INDEX, false, false);
+    searchModelInstance.SetSearchIconColor(Color::BLACK);
+    pattern->ToJsonValueForSearchIcon(jsonValue, filter2);
+    searchModelInstance.ResetSearchIconColor();
+    pattern->ToJsonValueForSearchIcon(jsonValue, filter2);
+    auto searchIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
+    ASSERT_NE(searchIconFrameNode, nullptr);
+    EXPECT_EQ(searchIconFrameNode->GetTag(), V2::SYMBOL_ETS_TAG);
+
+    pattern->CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, false, false);
+    searchModelInstance.SetCancelIconColor(Color::BLACK);
+    pattern->ToJsonValueForCancelButton(jsonValue, filter2);
+    searchModelInstance.ResetCancelIconColor();
+    pattern->ToJsonValueForCancelButton(jsonValue, filter2);
+    auto cancelImageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    ASSERT_NE(cancelImageFrameNode, nullptr);
+    EXPECT_EQ(cancelImageFrameNode->GetTag(), V2::SYMBOL_ETS_TAG);
+}
+
+/**
+ * @tc.name: searchSymbolIconColorTest
+ * @tc.desc: Test search symbol icon color
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchSymbolIconColorTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    pattern->CreateOrUpdateSymbol(IMAGE_INDEX, false, false);
+    searchModelInstance.SetSearchIconColor(Color::BLACK);
+    pattern->isFocusIconColorSet_ = true;
+    pattern->UpdateSearchSymbolIconColor();
+
+    auto color = pattern->GetDefaultIconColor(IMAGE_INDEX);
+    auto searchTheme = pattern->GetTheme();
+    ASSERT_NE(searchTheme, nullptr);
+    auto normalIconColor = searchTheme->GetSymbolIconColor();
+    EXPECT_EQ(color, normalIconColor);
+}
+
+/**
+ * @tc.name: searchMinMaxFontScaleTest
+ * @tc.desc: Test search min and max font scale
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchMinMaxFontScaleTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    auto max = pattern->GetMaxFontScale();
+    EXPECT_EQ(max, 2);
+    auto min = pattern->GetMinFontScale();
+    EXPECT_EQ(max, 2);
+
+    searchModelInstance.SetMaxFontScale(1.0f);
+    max = pattern->GetMaxFontScale();
+    EXPECT_EQ(max, 1.0f);
+
+    searchModelInstance.SetMinFontScale(1.0f);
+    min = pattern->GetMinFontScale();
+    EXPECT_EQ(min, 1.0f);
+}
+
+RefPtr<LayoutWrapperNode> GetLayoutWrapper(
+    FrameNode* frameNode, RefPtr<GeometryNode> geometryNode, RefPtr<SearchLayoutAlgorithm> layoutAlgorithm)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    CHECK_NULL_RETURN(geometryNode, nullptr);
+    CHECK_NULL_RETURN(layoutAlgorithm, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(AceType::Claim(frameNode), geometryNode, frameNode->GetLayoutProperty());
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    layoutWrapper->layoutProperty_ = layoutProperty;
+
+    // textField Wrapper
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, nullptr);
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    RefPtr<GeometryNode> textFieldNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> textFieldNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        textFieldFrameNode, textFieldNodeGeometryNode, textFieldFrameNode->GetLayoutProperty());
+        CHECK_NULL_RETURN(textFieldNodeLayoutWrapper, nullptr);
+    layoutWrapper->AppendChild(textFieldNodeLayoutWrapper);
+
+    // image Wrapper
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
+    CHECK_NULL_RETURN(imageFrameNode, nullptr);
+    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    RefPtr<GeometryNode> imageNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> imageNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        imageFrameNode, imageNodeGeometryNode, imageFrameNode->GetLayoutProperty());
+        CHECK_NULL_RETURN(imageNodeLayoutWrapper, nullptr);
+    layoutWrapper->AppendChild(imageNodeLayoutWrapper);
+
+    // cancelImage Wrapper
+    auto cancelImageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    CHECK_NULL_RETURN(cancelImageFrameNode, nullptr);
+    auto cancelImageLayoutProperty = cancelImageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    RefPtr<GeometryNode> cancelImageNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> cancelImageNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        cancelImageFrameNode, cancelImageNodeGeometryNode, cancelImageFrameNode->GetLayoutProperty());
+        CHECK_NULL_RETURN(cancelImageNodeLayoutWrapper, nullptr);
+    layoutWrapper->AppendChild(cancelImageNodeLayoutWrapper);
+
+    // cancelButton Wrapper
+    auto cancelButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_BUTTON_INDEX));
+    CHECK_NULL_RETURN(cancelButtonFrameNode, nullptr);
+    auto cancelButtonLayoutProperty = cancelButtonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    RefPtr<GeometryNode> cancelButtonNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> cancelButtonNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        cancelButtonFrameNode, cancelButtonNodeGeometryNode, cancelButtonFrameNode->GetLayoutProperty());
+        CHECK_NULL_RETURN(cancelButtonNodeLayoutWrapper, nullptr);
+    layoutWrapper->AppendChild(cancelButtonNodeLayoutWrapper);
+
+    // button Wrapper
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    CHECK_NULL_RETURN(buttonFrameNode, nullptr);
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    RefPtr<GeometryNode> buttonNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> buttonNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        buttonFrameNode, buttonNodeGeometryNode, buttonFrameNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(buttonNodeLayoutWrapper, nullptr);
+    layoutWrapper->AppendChild(buttonNodeLayoutWrapper);
+
+    return layoutWrapper;
+}
+
+/**
+ * @tc.name: searchMinMaxFontScaleLayoutTest
+ * @tc.desc: Test search min and max font scale in layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchMinMaxFontScaleLayoutTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutAlgorithm =
+        AccessibilityManager::DynamicCast<SearchLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper = GetLayoutWrapper(frameNode, geometryNode, layoutAlgorithm);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    double textfieldHeight = 0;
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldNodeGeometryNode = textFieldFrameNode->GetGeometryNode();
+    ASSERT_NE(textFieldNodeGeometryNode, nullptr);
+    textFieldNodeGeometryNode->SetFrameSize(SizeF(100, textfieldHeight));
+
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+
+    searchModelInstance.SetMinFontScale(1.0f);
+    float min = pattern->GetMinFontScale();
+    EXPECT_EQ(min, 1.0f);
+    auto textFieldWrapper = layoutWrapper->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
+    ASSERT_NE(textFieldWrapper, nullptr);
+    auto textFieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(textFieldWrapper->GetLayoutProperty());
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    textFieldLayoutProperty->ResetMaxFontScale();
+
+    layoutAlgorithm->CalculateMaxFontScale(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->CalculateMinFontScale(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+
+    searchModelInstance.SetMinFontScale(3.0f);
+    min = pattern->GetMinFontScale();
+    EXPECT_EQ(min, 3.0f);
+
+    searchModelInstance.SetMaxFontScale(3.0f);
+    float max = pattern->GetMaxFontScale();
+    EXPECT_EQ(max, 2.0f);
+
+    layoutAlgorithm->CalculateMaxFontScale(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->CalculateMinFontScale(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+}
+
+/**
+ * @tc.name: searchCancelImageMeasureTest
+ * @tc.desc: Test search CancelImageMeasure function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchCancelImageMeasureTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, false, false);
+    pattern->CreateOrUpdateSymbol(IMAGE_INDEX, false, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutAlgorithm =
+        AccessibilityManager::DynamicCast<SearchLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper = GetLayoutWrapper(frameNode, geometryNode, layoutAlgorithm);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    double textfieldHeight = 0;
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldNodeGeometryNode = textFieldFrameNode->GetGeometryNode();
+    ASSERT_NE(textFieldNodeGeometryNode, nullptr);
+    textFieldNodeGeometryNode->SetFrameSize(SizeF(100, textfieldHeight));
+
+    layoutProperty->ResetCancelButtonUDSize();
+
+    layoutAlgorithm->CancelImageMeasure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+
+    searchModelInstance.SetCancelIconSize(Dimension(10));
+
+    layoutAlgorithm->CancelImageMeasure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->ImageMeasure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+}
+
+/**
+ * @tc.name: searchCalculateTextFieldWidthTest
+ * @tc.desc: Test search CalculateTextFieldWidth function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchCalculateTextFieldWidthTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutAlgorithm =
+        AccessibilityManager::DynamicCast<SearchLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper = GetLayoutWrapper(frameNode, geometryNode, layoutAlgorithm);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    double textfieldHeight = 0;
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldNodeGeometryNode = textFieldFrameNode->GetGeometryNode();
+    ASSERT_NE(textFieldNodeGeometryNode, nullptr);
+    textFieldNodeGeometryNode->SetFrameSize(SizeF(100, textfieldHeight));
+
+    searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::INVISIBLE);
+
+    auto searchButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(searchButtonFrameNode, nullptr);
+    auto buttonEventHub = searchButtonFrameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(buttonEventHub, nullptr);
+    buttonEventHub->SetEnabled(false);
+    EXPECT_EQ(buttonEventHub->IsEnabled(), false);
+
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>(frameNode->GetThemeScopeId());
+
+    layoutAlgorithm->CalculateTextFieldWidth(AccessibilityManager::RawPtr(layoutWrapper), 10, searchTheme);
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+
+    FONT_FEATURES_LIST fontFeature;
+    searchModelInstance.SetFontFeature(fontFeature);
+
+    layoutAlgorithm->UpdateFontFeature(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    textFieldLayoutProperty->ResetLineHeight();
+
+    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize.SetWidth(30);
+
+    layoutAlgorithm->SetTextFieldLayoutConstraintHeight(
+        childLayoutConstraint, 50, AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+}
+
+/**
+ * @tc.name: searchSearchButtonMeasureTest
+ * @tc.desc: Test search SearchButtonMeasure function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchSearchButtonMeasureTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    searchModelInstance.SetSearchButton("Search");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutAlgorithm =
+        AccessibilityManager::DynamicCast<SearchLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper = GetLayoutWrapper(frameNode, geometryNode, layoutAlgorithm);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    double textfieldHeight = 0;
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldNodeGeometryNode = textFieldFrameNode->GetGeometryNode();
+    ASSERT_NE(textFieldNodeGeometryNode, nullptr);
+    textFieldNodeGeometryNode->SetFrameSize(SizeF(100, textfieldHeight));
+
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->fontScale_ = 3.0f;
+    EXPECT_EQ(pipeline->GetFontScale(), 3.0f);
+
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+
+    pipeline->fontScale_ = 1.0f;
+    EXPECT_EQ(pipeline->GetFontScale(), 1.0f);
+
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+}
+
+/**
+ * @tc.name: searchCalcSearchHeightTest
+ * @tc.desc: Test search CalcSearchHeight function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchCalcSearchHeightTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutAlgorithm =
+        AccessibilityManager::DynamicCast<SearchLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper = GetLayoutWrapper(frameNode, geometryNode, layoutAlgorithm);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    double textfieldHeight = 0;
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldNodeGeometryNode = textFieldFrameNode->GetGeometryNode();
+    ASSERT_NE(textFieldNodeGeometryNode, nullptr);
+    textFieldNodeGeometryNode->SetFrameSize(SizeF(100, textfieldHeight));
+
+    std::unique_ptr<MeasureProperty> calcLayoutConstraint = std::make_unique<MeasureProperty>();
+    std::optional<CalcLength> len = CalcLength("auto");
+    calcLayoutConstraint->selfIdealSize = CalcSize(std::nullopt, len);
+    calcLayoutConstraint->minSize = CalcSize(NG::CalcLength(1.0f), NG::CalcLength(1.0f));
+    calcLayoutConstraint->maxSize = CalcSize(NG::CalcLength(3.0f), NG::CalcLength(3.0f));
+    layoutProperty->calcLayoutConstraint_ = std::move(calcLayoutConstraint);
+
+    LayoutConstraintF constraint;
+    float sizeTmp = 720.f;
+    constraint.selfIdealSize = OptionalSizeF(sizeTmp, sizeTmp);
+    constraint.maxSize = SizeF(sizeTmp, sizeTmp);
+    constraint.percentReference = SizeF(sizeTmp, sizeTmp);
+    constraint.parentIdealSize.SetSize(SizeF(sizeTmp, sizeTmp));
+
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+
+    layoutAlgorithm->CalcSearchWidth(constraint, AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->CalcSearchHeight(constraint, AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+}
+
+/**
+ * @tc.name: searchLayoutSearchIconTest
+ * @tc.desc: Test search LayoutSearchIcon function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchLayoutSearchIconTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutAlgorithm =
+        AccessibilityManager::DynamicCast<SearchLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper = GetLayoutWrapper(frameNode, geometryNode, layoutAlgorithm);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    double textfieldHeight = 0;
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldNodeGeometryNode = textFieldFrameNode->GetGeometryNode();
+    ASSERT_NE(textFieldNodeGeometryNode, nullptr);
+    textFieldNodeGeometryNode->SetFrameSize(SizeF(100, textfieldHeight));
+
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    EXPECT_EQ(layoutProperty->GetNonAutoLayoutDirection(), TextDirection::RTL);
+
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+}
+
+/**
+ * @tc.name: searchLayoutSearchButtonTest
+ * @tc.desc: Test search LayoutSearchButton function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchLayoutSearchButtonTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutAlgorithm =
+        AccessibilityManager::DynamicCast<SearchLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper = GetLayoutWrapper(frameNode, geometryNode, layoutAlgorithm);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    double textfieldHeight = 0;
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldNodeGeometryNode = textFieldFrameNode->GetGeometryNode();
+    ASSERT_NE(textFieldNodeGeometryNode, nullptr);
+    textFieldNodeGeometryNode->SetFrameSize(SizeF(100, textfieldHeight));
+
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    searchModelInstance.SetSearchButton("Search");
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    EXPECT_EQ(layoutProperty->GetNonAutoLayoutDirection(), TextDirection::RTL);
+
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+
+    layoutProperty->UpdateLayoutDirection(TextDirection::LTR);
+    EXPECT_EQ(layoutProperty->GetNonAutoLayoutDirection(), TextDirection::LTR);
+
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+}
+
+/**
+ * @tc.name: searchLayoutCancelButtonTest
+ * @tc.desc: Test search LayoutCancelButton function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, searchLayoutCancelButtonTest, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create search, get frameNode and pattern.
+    * @tc.expected: FrameNode and pattern is not null, related function is called.
+    */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutAlgorithm =
+        AccessibilityManager::DynamicCast<SearchLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper = GetLayoutWrapper(frameNode, geometryNode, layoutAlgorithm);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+    * @tc.steps: case
+    */
+    double textfieldHeight = 0;
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldNodeGeometryNode = textFieldFrameNode->GetGeometryNode();
+    ASSERT_NE(textFieldNodeGeometryNode, nullptr);
+    textFieldNodeGeometryNode->SetFrameSize(SizeF(100, textfieldHeight));
+
+    searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::CONSTANT);
+    layoutProperty->UpdateLayoutDirection(TextDirection::LTR);
+    EXPECT_EQ(layoutProperty->GetNonAutoLayoutDirection(), TextDirection::LTR);
+
+    auto searchButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(searchButtonFrameNode, nullptr);
+    auto buttonEventHub = searchButtonFrameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(buttonEventHub, nullptr);
+    buttonEventHub->SetEnabled(true);
+    EXPECT_EQ(buttonEventHub->IsEnabled(), true);
+
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+
+    buttonEventHub->SetEnabled(false);
+    EXPECT_EQ(buttonEventHub->IsEnabled(), false);
+
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
+
+    layoutProperty->ResetSearchIconUDSize();
+    layoutProperty->ResetCancelButtonUDSize();
+
+    layoutAlgorithm->UpdateClipBounds(AccessibilityManager::RawPtr(layoutWrapper), 10);
+    layoutAlgorithm->CalcSymbolIconHeight(AccessibilityManager::RawPtr(layoutWrapper), IMAGE_INDEX, 10);
+    layoutAlgorithm->CalcSymbolIconHeight(AccessibilityManager::RawPtr(layoutWrapper), CANCEL_IMAGE_INDEX, 10);
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_GE(geometryNode->GetFrameSize().Height(), textfieldHeight);
 }
 } // namespace OHOS::Ace::NG

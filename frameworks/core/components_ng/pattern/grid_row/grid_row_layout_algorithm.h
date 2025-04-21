@@ -59,12 +59,20 @@ public:
     }
 
 private:
+    bool IsRightToLeft(LayoutWrapper* layoutWrapper);
+    bool GetSizeTypeAndMaxSize(LayoutWrapper* layoutWrapper, SizeF &maxSize, V2::GridSizeType& sizeType);
+    void ParseGridRowParams(LayoutWrapper *layoutWrapper, const V2::GridSizeType &sizeType,
+        const SizeF &maxSize);
     void MeasureSelf(LayoutWrapper* layoutWrapper, float childHeight, float selfHeight);
     float MeasureChildren(LayoutWrapper* layoutWrapper, double columnUnitWidth, double childHeightLimit,
         std::pair<double, double>& gutter, V2::GridSizeType sizeType, int32_t columnNum);
     void CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper,
         std::list<std::pair<RefPtr<LayoutWrapper>, NewLineOffset>>& row, float currentRowHeight);
     void OnBreakPointChange(LayoutWrapper* layoutWrapper, const V2::GridSizeType& sizeType);
+    float CalcCrossAxisOffset(LayoutWrapper* gridRow, RefPtr<LayoutWrapper> &child,
+        FlexAlign alignSelf, float currentRowHeight);
+    FlexAlign GetChildAlignment(LayoutWrapper* gridRow, const RefPtr<LayoutProperty>& childLayoutProperty);
+    int32_t columnNum_ {V2::DEFAULT_COLUMN_NUMBER};
     std::pair<double, double> gutterInDouble_ { 0, 0 };
     double columnUnitWidth_ = 0;
     std::list<ChildrenRow> gridColChildrenRows_ {};

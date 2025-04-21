@@ -18,6 +18,7 @@
 #include <iomanip>
 #include <sstream>
 
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/recorder/event_recorder.h"
@@ -177,11 +178,7 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
 void RatingPattern::OnImageDataReady(int32_t imageFlag)
 {
     imageReadyStateCode_ |= static_cast<uint32_t>(imageFlag);
-
-    // 3 images are ready, invoke to update layout to calculate single star size.
-    if (IsRatingImageReady(imageReadyStateCode_)) {
-        MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    }
+    MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 void RatingPattern::UpdatePaintConfig()
@@ -454,7 +451,9 @@ void RatingPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             pattern->HandleDragEnd();
         },
         [weak = WeakClaim(this)]() {});
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distanceMap);
 }
 
 void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -674,7 +673,7 @@ void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
             pattern->GetInnerFocusPaintRect(paintRect);
         }
     });
-    focusHub->SetOnFocusInternal([wp = WeakClaim(this)]() {
+    focusHub->SetOnFocusInternal([wp = WeakClaim(this)](FocusReason reason) {
         auto pattern = wp.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnFocusEvent();
@@ -752,7 +751,6 @@ void RatingPattern::SetRatingScore(double ratingScore)
         return;
     }
     UpdateRatingScore(ratingScore);
-    OnModifyDone();
 }
 
 void RatingPattern::UpdateRatingScore(double ratingScore)
@@ -944,10 +942,10 @@ void RatingPattern::LoadFocusBackground(const RefPtr<RatingLayoutProperty>& layo
 void RatingPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    HandleEnabled();
+    FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_VOID(ratingTheme);
@@ -960,7 +958,7 @@ void RatingPattern::OnModifyDone()
     imageSuccessStateCode_ = 0;
     // Constrains ratingScore and starNum in case of the illegal input.
     ConstrainsRatingScore(layoutProperty);
-    FireBuilder();
+
     LoadForeground(layoutProperty, ratingTheme, iconTheme);
     LoadSecondary(layoutProperty, ratingTheme, iconTheme);
     LoadBackground(layoutProperty, ratingTheme, iconTheme);
@@ -1069,6 +1067,41 @@ void RatingPattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
         CHECK_NULL_VOID(ratingNode);
         ratingNode->MarkNeedRenderOnly();
     });
+}
+
+void RatingPattern::DumpInfo()
+{
+    auto renderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(renderProperty);
+
+    if (renderProperty->HasRatingScore()) {
+        DumpLog::GetInstance().AddDesc("RatingScore: " + std::to_string(renderProperty->GetRatingScoreValue()));
+    }
+    if (renderProperty->HasStepSize()) {
+        DumpLog::GetInstance().AddDesc("StepSize: " + std::to_string(renderProperty->GetStepSizeValue()));
+    }
+
+    auto layoutProperty = GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasIndicator()) {
+        DumpLog::GetInstance().AddDesc(
+            "Indicator: " + std::string(layoutProperty->GetIndicator().value() ? "true" : "false"));
+    }
+    if (layoutProperty->HasStars()) {
+        DumpLog::GetInstance().AddDesc("Stars: " + std::to_string(layoutProperty->GetStars().value()));
+    }
+    if (layoutProperty->HasForegroundImageSourceInfo()) {
+        DumpLog::GetInstance().AddDesc(
+            "ForegroundImageSourceInfo: " + layoutProperty->GetForegroundImageSourceInfo().value().ToString());
+    }
+    if (layoutProperty->HasSecondaryImageSourceInfo()) {
+        DumpLog::GetInstance().AddDesc(
+            "SecondaryImageSourceInfo: " + layoutProperty->GetSecondaryImageSourceInfo().value().ToString());
+    }
+    if (layoutProperty->HasBackgroundImageSourceInfo()) {
+        DumpLog::GetInstance().AddDesc(
+            "BackgroundImageSourceInfo: " + layoutProperty->GetBackgroundImageSourceInfo().value().ToString());
+    }
 }
 
 void RatingPattern::FireBuilder()

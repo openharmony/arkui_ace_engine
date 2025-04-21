@@ -382,10 +382,10 @@ HWTEST_F(WaterFlowSWTest, OverScroll001, TestSize.Level1)
     EXPECT_EQ(info_->endIndex_, 0);
 
     UpdateCurrentOffset(-35000.0f);
-    EXPECT_EQ(info_->startIndex_, 11);
+    EXPECT_EQ(info_->startIndex_, 12);
     EXPECT_EQ(info_->endIndex_, 22);
-    EXPECT_LT(info_->StartPos(), 0.0f);
-    EXPECT_GT(info_->EndPos(), 800.0f);
+    EXPECT_EQ(info_->StartPos(), 0.0f);
+    EXPECT_EQ(info_->EndPos(), 800.0f);
 }
 
 /**
@@ -425,10 +425,10 @@ HWTEST_F(WaterFlowSWTest, OverScroll002, TestSize.Level1)
     EXPECT_EQ(info_->endIndex_, 49);
 
     UpdateCurrentOffset(35000.0f);
-    EXPECT_EQ(info_->startIndex_, 28);
-    EXPECT_EQ(info_->endIndex_, 41);
-    EXPECT_LT(info_->StartPos(), 0.0f);
-    EXPECT_GT(info_->EndPos(), 800.0f);
+    EXPECT_EQ(info_->startIndex_, 32);
+    EXPECT_EQ(info_->endIndex_, 42);
+    EXPECT_EQ(info_->StartPos(), 0.0f);
+    EXPECT_EQ(info_->EndPos(), 800.0f);
 }
 
 /**
@@ -2116,19 +2116,19 @@ HWTEST_F(WaterFlowSWTest, EdgeEffect001, TestSize.Level1)
     scrollable->HandleTouchDown();
     scrollable->HandleDragStart(gesture);
     scrollable->HandleDragUpdate(gesture);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 22.279572);
     MockAnimationManager::GetInstance().SetTicks(2);
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(gesture);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 45.735794);
 
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 22.867897);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
 }
 
@@ -2156,7 +2156,7 @@ HWTEST_F(WaterFlowSWTest, UpdateAndJump001, TestSize.Level1)
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(300.0f), CalcLength(Dimension(1000.0f))));
     pattern_->ScrollToIndex(8, false, ScrollAlign::START);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_EQ(info_->startIndex_, 7);
     EXPECT_EQ(info_->endIndex_, 16);

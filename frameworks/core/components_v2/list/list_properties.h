@@ -18,12 +18,14 @@
 
 #include <string>
 
+#include "base/memory/ace_type.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/scroll/scrollable.h"
 
 namespace OHOS::Ace {
+class ItemDragInfo;
+enum class SwipeActionState : uint32_t;
 
 namespace V2 {
 

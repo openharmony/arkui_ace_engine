@@ -227,7 +227,7 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
 bool RosenMediaPlayer::RawFileWithModuleInfoPlay(const std::string& src, const std::string& bundleName,
     const std::string& moduleName)
 {
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, Container::CurrentIdSafely());
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
@@ -382,12 +382,7 @@ bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd, bool& 
         useFd = true;
     } else if (StringUtils::StartWith(filePath, "file://")) {
         filePath = FileUriHelper::GetRealPath(filePath);
-        std::FILE* fp = std::fopen(filePath.c_str(), "r");
-        if (fp != nullptr) {
-            fd = fileno(fp);
-        } else {
-            LOGE("Open file %{public}s failed", filePath.c_str());
-        }
+        fd = open(filePath.c_str(), O_RDONLY);
         useFd = true;
     } else if (StringUtils::StartWith(filePath, "resource:///")) {
         // file path: resources/base/media/xxx.xx --> resource:///xxx.xx

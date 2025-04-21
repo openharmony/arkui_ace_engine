@@ -45,10 +45,14 @@ DownloadManager* CreateDownloadManager()
 DownloadManager* DownloadManager::GetInstance()
 {
     TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER, "DownloadManager GetInstance");
-    static std::once_flag onceFlag;
-    std::call_once(onceFlag, []() {
-        instance_.reset(CreateDownloadManager());
-    });
-    return instance_.get();
+    struct DownloadManagerHolder {
+        DownloadManager* mgr_;
+        DownloadManagerHolder()
+        {
+            mgr_ = CreateDownloadManager();
+        }
+    };
+    static DownloadManagerHolder mgrHolder;
+    return mgrHolder.mgr_;
 }
 } // namespace OHOS::Ace

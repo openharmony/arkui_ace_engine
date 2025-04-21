@@ -261,97 +261,6 @@ void WebPatternPartTwoTest::SetUp() {}
 void WebPatternPartTwoTest::TearDown() {}
 
 /**
- * @tc.name: ComputeClippedSelectionBounds001
- * @tc.desc: ComputeClippedSelectionBounds.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternPartTwoTest, ComputeClippedSelectionBounds001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    auto params = std::make_shared<NWebQuickMenuParamsMockImpl>();
-    auto startHandle = std::make_shared<NWebTouchHandleStateMockImpl>();
-    auto endHandle = std::make_shared<NWebTouchHandleStateMockImpl>();
-    bool isNewAvoid = true;
-    auto ret = webPattern->ComputeClippedSelectionBounds(params, startHandle, endHandle, isNewAvoid);
-    EXPECT_TRUE(isNewAvoid);
-    EXPECT_EQ(ret, RectF());
-#endif
-}
-
-/**
- * @tc.name: QuickMenuIsNeedNewAvoid001
- * @tc.desc: QuickMenuIsNeedNewAvoid.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternPartTwoTest, QuickMenuIsNeedNewAvoid001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    SelectOverlayInfo selectInfo;
-    selectInfo.firstHandle.isShow = false;
-    selectInfo.secondHandle.isShow = false;
-    auto params = std::make_shared<NWebQuickMenuParamsDummy>();
-    auto startHandle = std::make_shared<NWebTouchHandleStateDummy>();
-    auto endHandle = std::make_shared<NWebTouchHandleStateDummy>();
-    webPattern->QuickMenuIsNeedNewAvoid(selectInfo, params, startHandle, endHandle);
-    EXPECT_EQ(webPattern->isQuickMenuMouseTrigger_, true);
-    EXPECT_TRUE(selectInfo.isNewAvoid);
-    EXPECT_TRUE(webPattern->isQuickMenuMouseTrigger_);
-    EXPECT_EQ(selectInfo.selectArea, RectF(100, 0, 150, 50));
-#endif
-}
-
-/**
- * @tc.name: QuickMenuIsNeedNewAvoid002
- * @tc.desc: QuickMenuIsNeedNewAvoid.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternPartTwoTest, QuickMenuIsNeedNewAvoid002, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    SelectOverlayInfo selectInfo;
-    selectInfo.firstHandle.isShow = false;
-    selectInfo.secondHandle.isShow = false;
-    auto params = std::make_shared<NWebQuickMenuParamsMockImpl>();
-    auto startHandle = std::make_shared<NWebTouchHandleStateEndDummy>();
-    auto endHandle = std::make_shared<NWebTouchHandleStateEndDummy>();
-    webPattern->QuickMenuIsNeedNewAvoid(selectInfo, params, startHandle, endHandle);
-    EXPECT_EQ(webPattern->isQuickMenuMouseTrigger_, false);
-    EXPECT_TRUE(selectInfo.isNewAvoid);
-    EXPECT_EQ(selectInfo.selectArea, RectF());
-#endif
-}
-
-/**
  * @tc.name: OnQuickMenuDismissed001
  * @tc.desc: OnQuickMenuDismissed.
  * @tc.type: FUNC
@@ -858,10 +767,12 @@ HWTEST_F(WebPatternPartTwoTest, ParseNWebViewDataNode001, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern, nullptr);
+    MockPipelineContext::SetUp();
     auto child = std::make_unique<JsonValue>();
     std::vector<RefPtr<PageNodeInfoWrap>> nodeInfos;
     int32_t nId = 1;
     webPattern->ParseNWebViewDataNode(std::move(child), nodeInfos, nId);
+    MockPipelineContext::TearDown();
 #endif
 }
 
@@ -1075,119 +986,6 @@ HWTEST_F(WebPatternPartTwoTest, CloseAutoFillPopup001, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     auto ret = webPattern->CloseAutoFillPopup();
     EXPECT_EQ(ret, false);
-#endif
-}
-
-/**
- * @tc.name: UpdateSelectHandleInfo001
- * @tc.desc: UpdateSelectHandleInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternPartTwoTest, UpdateSelectHandleInfo001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    EXPECT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    auto selectOverlayProxy = AceType::MakeRefPtr<SelectOverlayProxy>(1);
-    webPattern->selectOverlayProxy_ = selectOverlayProxy;
-    auto startSelectionHandle = std::make_shared<NiceMock<NWebTouchHandleStateMockImpl>>();
-    auto endSelectionHandle = std::make_shared<NiceMock<NWebTouchHandleStateMockImpl>>();
-    webPattern->startSelectionHandle_ = startSelectionHandle;
-    webPattern->endSelectionHandle_ = endSelectionHandle;
-    webPattern->UpdateSelectHandleInfo();
-#endif
-}
-
-/**
- * @tc.name: IsSelectHandleReverse001
- * @tc.desc: IsSelectHandleReverse.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternPartTwoTest, IsSelectHandleReverse001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    EXPECT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    auto startSelectionHandle = std::make_shared<NWebTouchHandleStateDummy>();
-    auto endSelectionHandle = std::make_shared<NWebTouchHandleStateDummy>();
-    webPattern->startSelectionHandle_ = startSelectionHandle;
-    webPattern->endSelectionHandle_ = endSelectionHandle;
-    webPattern->IsSelectHandleReverse();
-    EXPECT_EQ(webPattern->IsSelectHandleReverse(), true);
-#endif
-}
-
-/**
- * @tc.name: IsSelectHandleReverse002
- * @tc.desc: IsSelectHandleReverse.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternPartTwoTest, IsSelectHandleReverse002, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    EXPECT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    auto startSelectionHandle = std::make_shared<NWebTouchHandleStateEndDummy>();
-    auto endSelectionHandle = std::make_shared<NWebTouchHandleStateEndDummy>();
-    webPattern->startSelectionHandle_ = startSelectionHandle;
-    webPattern->endSelectionHandle_ = endSelectionHandle;
-    webPattern->IsSelectHandleReverse();
-    EXPECT_EQ(webPattern->IsSelectHandleReverse(), true);
-#endif
-}
-
-/**
- * @tc.name: IsSelectHandleReverse003
- * @tc.desc: IsSelectHandleReverse.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternPartTwoTest, IsSelectHandleReverse003, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    EXPECT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    auto startSelectionHandle = std::make_shared<NWebTouchHandleStateBeginDummy>();
-    auto endSelectionHandle = std::make_shared<NWebTouchHandleStateEndDummy>();
-    webPattern->startSelectionHandle_ = startSelectionHandle;
-    webPattern->endSelectionHandle_ = endSelectionHandle;
-    webPattern->IsSelectHandleReverse();
-    EXPECT_EQ(webPattern->IsSelectHandleReverse(), false);
 #endif
 }
 
@@ -2018,6 +1816,29 @@ HWTEST_F(WebPatternPartTwoTest, OnEnableFollowSystemFontWeightUpdate_002, TestSi
     webPattern->delegate_ = nullptr;
     webPattern->OnEnableFollowSystemFontWeightUpdate(true);
 
+#endif
+}
+
+/**
+ * @tc.name: RunJavascriptAsync_001
+ * @tc.desc: RunJavascriptAsync.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartTwoTest, RunJavascriptAsync_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->delegate_ = nullptr;
+    auto ret = webPattern->RunJavascriptAsync("console.log('hello')", [](const std::string&) {});
+    ASSERT_FALSE(ret);
 #endif
 }
 }

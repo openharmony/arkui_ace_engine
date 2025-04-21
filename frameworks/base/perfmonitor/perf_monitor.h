@@ -202,6 +202,7 @@ private:
     // filter common discarded frames in white list
     bool isExceptAnimator {false};
     bool IsSceneIdInSceneWhiteList(const std::string& sceneId);
+    bool IsScrollJank(const std::string& sceneId);
     void CheckTimeOutOfExceptAnimatorStatus(const std::string& sceneId);
     bool IsExclusionFrame();
     void SetVsyncLazyMode();

@@ -23,8 +23,8 @@
 namespace OHOS::Ace {
 class TaskRunners {
 public:
-    TaskRunners(std::string label, RefPtr<TaskRunnerAdapter>& platform, RefPtr<TaskRunnerAdapter>& gpu,
-        RefPtr<TaskRunnerAdapter>& ui, RefPtr<TaskRunnerAdapter>& io);
+    TaskRunners(const std::string& label, const RefPtr<TaskRunnerAdapter>& platform,
+        const RefPtr<TaskRunnerAdapter>& gpu, const RefPtr<TaskRunnerAdapter>& ui, const RefPtr<TaskRunnerAdapter>& io);
     TaskRunners(const TaskRunners& other) = default;
     ~TaskRunners() = default;
 

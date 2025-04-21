@@ -93,6 +93,22 @@ void EventHub::RemoveSupportedUIState(UIState state, bool isInner)
     stateStyleMgr_->RemoveSupportedUIState(state, isInner);
 }
 
+bool EventHub::GetUserSetStateStyle()
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    return stateStyleMgr_->GetUserSetStateStyle();
+}
+
+void EventHub::SetScrollingFeatureForbidden(bool isSetStateStyle)
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    stateStyleMgr_->SetScrollingFeatureForbidden(isSetStateStyle);
+}
+
 void EventHub::SetCurrentUIState(UIState state, bool flag)
 {
     if (!stateStyleMgr_) {
@@ -236,6 +252,7 @@ void EventHub::FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OH
         case DragFuncType::DRAG_DROP: {
             if (customerOnDrop_ != nullptr) {
                 auto customerOnDrop = customerOnDrop_;
+                ACE_SCOPED_TRACE("drag: execute user onDrop");
                 customerOnDrop(info, extraParams);
             }
             break;
@@ -411,6 +428,9 @@ void EventHub::ClearJSFrameNodeOnSizeChange()
     if (onJsFrameNodeSizeChanged_) {
         onJsFrameNodeSizeChanged_ = nullptr;
     }
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    host->ResetLastFrameNodeRect();
 }
 
 bool EventHub::HasOnSizeChanged() const
@@ -941,6 +961,7 @@ bool EventHub::HasStateStyle(UIState state) const
 void EventHub::SetKeyboardShortcut(
     const std::string& value, uint8_t keys, const std::function<void()>& onKeyboardShortcutAction)
 {
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SetKeyboardShortcut value = %{public}s, keys = %{public}d", value.c_str(), keys);
     KeyboardShortcut keyboardShortcut;
     for (auto&& ch : value) {
         keyboardShortcut.value.push_back(static_cast<char>(std::toupper(ch)));

@@ -47,11 +47,18 @@ public:
     };
 
 protected:
-    ~LifeCycleCheckable();
+    ~LifeCycleCheckable()
+    {
+        if (usingCount_) {
+            OnDetectedObjDestroyInUse();
+        }
+    }
+
+    void OnDetectedObjDestroyInUse();
 
 private:
     std::atomic_int usingCount_ = 0;
-    void* lastStack_ = 0;
+    std::atomic<void*> lastStack_ = nullptr;
 };
 } // namespace OHOS::Ace
 

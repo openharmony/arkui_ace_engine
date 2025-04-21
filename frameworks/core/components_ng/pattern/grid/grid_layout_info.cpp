@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -141,6 +141,7 @@ void GridLayoutInfo::UpdateEndIndex(float overScrollOffset, float mainSize, floa
             CHECK_NULL_VOID(endLine != gridMatrix_.end());
             CHECK_NULL_VOID(!endLine->second.empty());
             endIndex_ = endLine->second.rbegin()->second;
+            endMainLineIndex_ = i;
             break;
         }
     }
@@ -252,13 +253,14 @@ float GridLayoutInfo::GetContentHeightOfRegularGrid(float mainGap) const
     if (crossCount_ == 0 || lineHeightMap_.empty()) {
         return res;
     }
+    auto childrenCount = childrenCount_ + repeatDifference_;
     float lineHeight = GetTotalLineHeight(0.0f) / static_cast<float>(lineHeightMap_.size());
-    auto lines = (childrenCount_) / crossCount_;
+    auto lines = (childrenCount) / crossCount_;
     for (int i = 0; i < lines; ++i) {
         auto it = lineHeightMap_.find(i);
         res += (it != lineHeightMap_.end() ? it->second : lineHeight) + mainGap;
     }
-    if (childrenCount_ % crossCount_ == 0) {
+    if (childrenCount % crossCount_ == 0) {
         return res - mainGap;
     }
     auto lastLine = lineHeightMap_.find(lines);
@@ -281,10 +283,11 @@ float GridLayoutInfo::GetContentHeight(float mainGap) const
     }
     float averageHeight = heightSum / itemCount;
 
-    if (itemCount == childrenCount_) {
+    auto childrenCount = childrenCount_ + repeatDifference_;
+    if (itemCount == childrenCount) {
         return heightSum - mainGap;
     }
-    return heightSum + (childrenCount_ - itemCount) * averageHeight;
+    return heightSum + (childrenCount - itemCount) * averageHeight;
 }
 
 float GridLayoutInfo::GetContentOffset(const GridLayoutOptions& options, float mainGap) const
@@ -403,8 +406,9 @@ float GridLayoutInfo::GetIrregularHeight(float mainGap) const
     if (lineHeightMap_.empty() || childrenCount_ == 0) {
         return 0.0f;
     }
+    auto childrenCount = childrenCount_ + repeatDifference_;
     int32_t lastKnownLine = lineHeightMap_.rbegin()->first;
-    float itemRatio = static_cast<float>(FindEndIdx(lastKnownLine).itemIdx + 1) / static_cast<float>(childrenCount_);
+    float itemRatio = static_cast<float>(FindEndIdx(lastKnownLine).itemIdx + 1) / static_cast<float>(childrenCount);
     float estTotalLines = std::round(static_cast<float>(lastKnownLine + 1) / itemRatio);
 
     auto knownLineCnt = static_cast<float>(lineHeightMap_.size());
@@ -1008,7 +1012,7 @@ int32_t GridLayoutInfo::FindInMatrixByMainIndexAndCrossIndex(int32_t mainIndex, 
 
 void GridLayoutInfo::PrintMatrix()
 {
-    TAG_LOGD(ACE_GRID, "-----------start print gridMatrix------------");
+    TAG_LOGI(ACE_GRID, "-----------start print gridMatrix------------");
     std::string res = std::string("");
     for (auto item : gridMatrix_) {
         res.append(std::to_string(item.first));
@@ -1020,18 +1024,59 @@ void GridLayoutInfo::PrintMatrix()
                 .append(std::to_string(index.second))
                 .append("] ");
         }
-        TAG_LOGD(ACE_GRID, "%{public}s", res.c_str());
+        TAG_LOGI(ACE_GRID, "%{public}s", res.c_str());
         res.clear();
     }
-    TAG_LOGD(ACE_GRID, "-----------end print gridMatrix------------");
+    TAG_LOGI(ACE_GRID, "-----------end print gridMatrix------------");
 }
 
 void GridLayoutInfo::PrintLineHeight()
 {
-    TAG_LOGD(ACE_GRID, "-----------start print lineHeightMap------------");
+    TAG_LOGI(ACE_GRID, "-----------start print lineHeightMap------------");
     for (auto item : lineHeightMap_) {
-        TAG_LOGD(ACE_GRID, "%{public}d : %{public}f", item.first, item.second);
+        TAG_LOGI(ACE_GRID, "%{public}d : %{public}f", item.first, item.second);
     }
-    TAG_LOGD(ACE_GRID, "-----------end print lineHeightMap------------");
+    TAG_LOGI(ACE_GRID, "-----------end print lineHeightMap------------");
+}
+
+bool GridLayoutInfo::CheckGridMatrix(int32_t cachedCount)
+{
+    auto endRow = gridMatrix_.upper_bound(endMainLineIndex_);
+    while (endRow != gridMatrix_.end()) {
+        if (endRow->first > endMainLineIndex_ + cachedCount) {
+            break;
+        }
+        for (const auto& cell : endRow->second) {
+            if (cell.second < endIndex_) {
+                TAG_LOGW(AceLogTag::ACE_GRID,
+                    "check grid matrix failed, index %{public}d is less than endIndex %{public}d", cell.second,
+                    endIndex_);
+                PrintMatrix();
+                return false;
+            }
+        }
+        ++endRow;
+    }
+
+    auto startRow = gridMatrix_.lower_bound(startMainLineIndex_);
+    if (startRow == gridMatrix_.end()) {
+        return true;
+    }
+    while (startRow != gridMatrix_.begin()) {
+        --startRow;
+        if (startRow->first < startMainLineIndex_ - cachedCount) {
+            break;
+        }
+        for (const auto& cell : startRow->second) {
+            if (cell.second > startIndex_) {
+                TAG_LOGW(AceLogTag::ACE_GRID,
+                    "check grid matrix failed, index %{public}d is greater than startIndex %{public}d", cell.second,
+                    startIndex_);
+                PrintMatrix();
+                return false;
+            }
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

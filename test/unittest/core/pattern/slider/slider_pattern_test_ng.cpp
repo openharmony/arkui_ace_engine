@@ -23,7 +23,6 @@
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/common/mock_container.h"
 
-#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/point.h"
@@ -272,7 +271,6 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest001, TestSize.Level1)
     sliderPattern->bubbleFlag_ = true;
     sliderPattern->isVisibleArea_ = true;
     ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
-    sliderPattern->sliderTipModifier_->getBubbleVertexFunc_();
     sliderPattern->UpdateCircleCenterOffset();
     auto contentSize = sliderPattern->GetHostContentSize();
     EXPECT_EQ(sliderPattern->GetBlockCenter().GetY(), contentSize->Height() * HALF);
@@ -998,6 +996,8 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest015, TestSize.Level1)
     ASSERT_NE(sliderNode, nullptr);
     auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    sliderNode->context_ = AceType::RawPtr(context);
     sliderPaintProperty->UpdateValue(VALUE);
     sliderPaintProperty->UpdateMin(MIN);
     sliderPaintProperty->UpdateMax(MAX);
@@ -1007,10 +1007,10 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest015, TestSize.Level1)
      * @tc.steps: step2. Set parameters to pattern builderFunc
      */
     int32_t setApiVersion = 13;
-    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = context->GetApiTargetVersion();
+    context->SetApiTargetVersion(setApiVersion);
     sliderPattern->OnWindowSizeChanged(FRAME_WIDTH, FRAME_HEIGHT, WindowSizeChangeReason::ROTATION);
-    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+    context->SetApiTargetVersion(rollbackApiVersion);
     EXPECT_TRUE(sliderPattern->skipGestureEvents_);
 }
 
@@ -1509,7 +1509,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest006, TestSize.Level1
     accessibilityProperty->OnAccessibilityFocusCallback(true);
     auto sliderAccessibilityProperty = sliderNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(sliderAccessibilityProperty, nullptr);
-    EXPECT_EQ(sliderAccessibilityProperty->accessibilityLevel_, AccessibilityProperty::Level::NO_STR);
+    EXPECT_EQ(sliderAccessibilityProperty->accessibilityLevel_, std::nullopt);
 }
 
 /**
@@ -1576,11 +1576,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest008, TestSize.Level1
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     AccessibilityHoverInfo info;
     auto actuator = eventHub->accessibilityHoverEventActuator_;
-    ASSERT_NE(actuator, nullptr);
-    auto callback = actuator->userCallback_;
-    ASSERT_NE(callback, nullptr);
-    auto hoverFunc = callback->GetOnAccessibilityHoverFunc();
-    ASSERT_NE(hoverFunc, nullptr);
+    EXPECT_EQ(actuator, nullptr);
 }
 
 /**
@@ -1879,7 +1875,7 @@ HWTEST_F(SliderPatternTestNg, EnableHapticFeedbackTest001, TestSize.Level1)
 
 /**
  * @tc.name: PlayHapticFeedbackTest001
- * @tc.desc: Test PlayHapticFeedback
+ * @tc.desc: Test PlayHapticFeedback &&  InitHapticController
  * @tc.type: FUNC
  */
 HWTEST_F(SliderPatternTestNg, PlayHapticFeedbackTest001, TestSize.Level1)
@@ -1888,65 +1884,23 @@ HWTEST_F(SliderPatternTestNg, PlayHapticFeedbackTest001, TestSize.Level1)
     ASSERT_NE(sliderPattern, nullptr);
     float step = 10.0f;
     float oldvalue = 1.0f;
-    sliderPattern->PlayHapticFeedback(false, step, oldvalue);
-    sliderPattern->hapticController_ = PickerAudioHapticFactory::GetInstance("", SLIDER_EFFECT_ID_NAME);
     sliderPattern->isEnableHaptic_ = false;
     sliderPattern->PlayHapticFeedback(false, step, oldvalue);
     sliderPattern->isEnableHaptic_ = true;
+    sliderPattern->InitHapticController();
+    EXPECT_FALSE(sliderPattern->hapticApiEnabled);
+    sliderPattern->isEnableHaptic_ = true;
+    auto host = sliderPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    host->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
+    sliderPattern->InitHapticController();
+    EXPECT_TRUE(sliderPattern->hapticApiEnabled);
     sliderPattern->valueRatio_ = 0.5f;
     sliderPattern->PlayHapticFeedback(false, step, oldvalue);
     sliderPattern->valueRatio_ = 0.0f;
     sliderPattern->PlayHapticFeedback(false, step, oldvalue);
     sliderPattern->valueRatio_ = 1.0f;
     sliderPattern->PlayHapticFeedback(false, step, oldvalue);
-    sliderPattern->PlayHapticFeedback(true, step, oldvalue);
-    EXPECT_NE(sliderPattern->hapticController_, nullptr);
-}
-
-/**
- * @tc.name: InitHapticControllerTest001
- * @tc.desc: Test InitHapticController
- * @tc.type: FUNC
- */
-HWTEST_F(SliderPatternTestNg, InitHapticControllerTest001, TestSize.Level1)
-{
-    auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
-    ASSERT_NE(sliderPattern, nullptr);
-    auto sliderNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
-    sliderPattern->AttachToFrameNode(sliderNode);
-    ASSERT_NE(sliderNode, nullptr);
-    sliderPattern->InitHapticController();
-    EXPECT_EQ(sliderPattern->hapticController_, nullptr);
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
-    sliderPattern->isEnableHaptic_ = true;
-    sliderPattern->InitHapticController();
-    EXPECT_NE(sliderPattern->hapticController_, nullptr);
-    sliderPattern->InitHapticController();
-    EXPECT_NE(sliderPattern->hapticController_, nullptr);
-    sliderPattern->isEnableHaptic_ = false;
-    sliderPattern->InitHapticController();
-    EXPECT_NE(sliderPattern->hapticController_, nullptr);
-    sliderPattern->hapticController_ = nullptr;
-    sliderPattern->InitHapticController();
-    EXPECT_EQ(sliderPattern->hapticController_, nullptr);
-}
-
-/**
- * @tc.name: StopAnimationTest001
- * @tc.desc: Test StopAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SliderPatternTestNg, StopAnimationTest001, TestSize.Level1)
-{
-    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
-    ASSERT_NE(sliderPattern, nullptr);
-    SliderContentModifier::Parameters parameters;
-    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
-    ASSERT_NE(sliderPattern->sliderContentModifier_, nullptr);
-    sliderPattern->StopAnimation();
-    EXPECT_FALSE(sliderPattern->sliderContentModifier_->GetVisible());
-    sliderPattern->hapticController_ = PickerAudioHapticFactory::GetInstance("", SLIDER_EFFECT_ID_NAME);
-    sliderPattern->StopAnimation();
-    EXPECT_FALSE(sliderPattern->sliderContentModifier_->GetVisible());
+    EXPECT_TRUE(sliderPattern->isEnableHaptic_);
 }
 } // namespace OHOS::Ace::NG

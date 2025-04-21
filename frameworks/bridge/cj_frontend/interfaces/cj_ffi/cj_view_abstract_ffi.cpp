@@ -150,7 +150,7 @@ void UpdateBackgroundImagePosition(const Align& align, BackgroundImagePosition& 
     }
 }
 
-void SetPopupParams(CJBindPopupParams bindPopupParams, const RefPtr<PopupParam>& popupParam)
+void SetPopupParams(CJBindPopupParamsV2 bindPopupParams, const RefPtr<PopupParam>& popupParam)
 {
     popupParam->SetMessage(bindPopupParams.message);
     popupParam->SetPlacement(bindPopupParams.placementOnTop ? Placement::TOP : Placement::BOTTOM);
@@ -202,6 +202,49 @@ void SetPopupParams(CJBindPopupParams bindPopupParams, const RefPtr<PopupParam>&
 }
 
 void DealBindPopupParams(bool isShow, const CJBindPopupParams& bindPopupParams,
+    const std::function<void(bool)>& onStateChangeFunc, const std::function<void()>& primaryActionFunc,
+    const std::function<void()>& secondaryActionFunc)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(isShow);
+    popupParam->SetMessage(bindPopupParams.message);
+    popupParam->SetPlacement(bindPopupParams.placementOnTop ? Placement::TOP : Placement::BOTTOM);
+    auto onStateChangeCallback = [onStateChangeFunc](const std::string& param) {
+        auto paramData = JsonUtil::ParseJsonString(param);
+        onStateChangeFunc(paramData->GetBool("isVisible"));
+    };
+    popupParam->SetOnStateChange(onStateChangeCallback);
+    std::string primaryString = bindPopupParams.primaryValue;
+    if (!primaryString.empty()) {
+        ButtonProperties propertiesPrimary;
+        propertiesPrimary.value = primaryString;
+        auto touchPrimaryCallback = [primaryActionFunc](TouchEventInfo&) {
+            primaryActionFunc();
+        };
+        auto onNewClick = [primaryActionFunc](const GestureEvent& info) -> void { primaryActionFunc(); };
+        propertiesPrimary.touchFunc = touchPrimaryCallback;
+        propertiesPrimary.action = AceType::MakeRefPtr<NG::ClickEvent>(onNewClick);
+        propertiesPrimary.showButton = true;
+        popupParam->SetPrimaryButtonProperties(propertiesPrimary);
+    }
+
+    std::string secondaryString = bindPopupParams.secondaryValue;
+    if (!secondaryString.empty()) {
+        ButtonProperties propertiesSecondary;
+        propertiesSecondary.value = secondaryString;
+        auto touchSecondaryCallback = [secondaryActionFunc](TouchEventInfo&) {
+            secondaryActionFunc();
+        };
+        auto onNewClick = [secondaryActionFunc](const GestureEvent& info) -> void { secondaryActionFunc(); };
+        propertiesSecondary.touchFunc = touchSecondaryCallback;
+        propertiesSecondary.action = AceType::MakeRefPtr<NG::ClickEvent>(onNewClick);
+        propertiesSecondary.showButton = true;
+        popupParam->SetSecondaryButtonProperties(propertiesSecondary);
+    }
+    ViewAbstractModel::GetInstance()->BindPopup(popupParam, nullptr);
+}
+
+void DealBindPopupParamsV2(bool isShow, const CJBindPopupParamsV2& bindPopupParams,
     const std::function<void(bool)>& onStateChangeFunc, const std::function<void()>& primaryActionFunc,
     const std::function<void()>& secondaryActionFunc)
 {
@@ -397,7 +440,7 @@ void FfiOHOSAceFrameworkViewAbstractSetPixelRound(CJPixelRoundPolicy cjValue)
             value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START);
         }
     }
-    
+
 
     int32_t topValue = cjValue.top;
     if (Utils::CheckParamsValid(topValue, PIXEL_ROUND_CALC_POLICIES.size())) {
@@ -1682,6 +1725,21 @@ void FfiOHOSAceFrameworkViewAbstractBindPopup(bool isShow, CJBindPopupParams bin
     DealBindPopupParams(isShow, bindPopupParams, onStateChangeFunc, primaryActionFunc, secondaryActionFunc);
 }
 
+void FfiOHOSAceFrameworkViewAbstractBindPopupV2(bool isShow, CJBindPopupParamsV2 bindPopupParams)
+{
+    std::function<void(bool)> onStateChangeFunc = (reinterpret_cast<int64_t>(bindPopupParams.onStateChange) == 0)
+                                                      ? ([](bool) -> void {})
+                                                      : CJLambda::Create(bindPopupParams.onStateChange);
+    std::function<void()> primaryActionFunc = (reinterpret_cast<int64_t>(bindPopupParams.primaryAction) == 0)
+                                                  ? ([]() -> void {})
+                                                  : CJLambda::Create(bindPopupParams.primaryAction);
+    std::function<void()> secondaryActionFunc = (reinterpret_cast<int64_t>(bindPopupParams.secondaryAction) == 0)
+                                                    ? ([]() -> void {})
+                                                    : CJLambda::Create(bindPopupParams.secondaryAction);
+
+    DealBindPopupParamsV2(isShow, bindPopupParams, onStateChangeFunc, primaryActionFunc, secondaryActionFunc);
+}
+
 void FfiOHOSAceFrameworkViewAbstractKeyShortcut(
     std::string& value, int32_t* keysArray, int64_t size, void (*callback)(void))
 {
@@ -1725,7 +1783,7 @@ void FfiOHOSAceFrameworkViewAbstractKeyShortcutByChar(
     FfiOHOSAceFrameworkViewAbstractKeyShortcut(keyValue, keysArray, size, callback);
 }
 
-void SetCustomPopupParams(CJBindCustomPopup& value, const RefPtr<PopupParam>& popupParam)
+void SetCustomPopupParams(CJBindCustomPopupV2& value, const RefPtr<PopupParam>& popupParam)
 {
     popupParam->SetPlacement(static_cast<Placement>(value.placement));
     popupParam->SetMaskColor(Color(value.maskColor));
@@ -1774,7 +1832,7 @@ void SetCustomPopupParams(CJBindCustomPopup& value, const RefPtr<PopupParam>& po
     }
 }
 
-void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
+void FfiOHOSAceFrameworkViewAbstractBindCustomPopupV2(CJBindCustomPopupV2 value)
 {
     std::function<void(bool)> onStateChangeFunc = (reinterpret_cast<int64_t>(value.onStateChange) == 0)
                                                       ? ([](bool) -> void {})
@@ -1792,7 +1850,7 @@ void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
         std::function<void(const int32_t& info)> onWillDismissFunc =
             [nativeFunc = CJLambda::Create(value.onWillDismiss.value)]
             (const int32_t& info) {nativeFunc(info);};
-        
+
         popupParam->SetOnWillDismiss(onWillDismissFunc);
     }
     if (value.transition.hasValue) {
@@ -1816,6 +1874,48 @@ void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
     }
 }
 
+void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
+{
+    std::function<void(bool)> onStateChangeFunc =
+        (reinterpret_cast<int64_t>(value.onStateChange) == 0) ?
+        ([](bool) -> void {}) : CJLambda::Create(value.onStateChange);
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(value.isShow);
+    popupParam->SetUseCustomComponent(true);
+    popupParam->SetPlacement(static_cast<Placement>(value.placement));
+    popupParam->SetMaskColor(Color(value.maskColor));
+    popupParam->SetBackgroundColor(Color(value.backgroundColor));
+    popupParam->SetEnableArrow(value.enableArrow);
+    popupParam->SetHasAction(!value.autoCancel);
+    auto onStateChangeCallback = [onStateChangeFunc](const std::string& param) {
+        auto paramData = JsonUtil::ParseJsonString(param);
+        onStateChangeFunc(paramData->GetBool("isVisible"));
+    };
+    popupParam->SetOnStateChange(onStateChangeCallback);
+    if (popupParam->IsShow()) {
+        auto builderFunc = CJLambda::Create(value.builder);
+        RefPtr<AceType> customNode;
+        {
+            ViewStackModel::GetInstance()->NewScope();
+            builderFunc();
+            customNode = ViewStackModel::GetInstance()->Finish();
+        }
+        ViewAbstractModel::GetInstance()->BindPopup(popupParam, customNode);
+    } else {
+        ViewAbstractModel::GetInstance()->BindPopup(popupParam, nullptr);
+    }
+}
+
+void GetMenuShowInSubwindow(NG::MenuParam& menuParam)
+{
+    menuParam.isShowInSubWindow = false;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    menuParam.isShowInSubWindow = theme->GetExpandDisplay();
+}
+
 void FfiOHOSAceFrameworkViewAbstractBindMenu(
     VectorMenuValuePtr vectorMenuValue, void (*menuActionCallback)(const char*))
 {
@@ -1831,12 +1931,14 @@ void FfiOHOSAceFrameworkViewAbstractBindMenu(
         params[i].action = [menuActionHandle, label]() { menuActionHandle(label); };
     }
     NG::MenuParam options;
+    GetMenuShowInSubwindow(options);
     ViewAbstractModel::GetInstance()->BindMenu(std::move(params), nullptr, options);
 }
 
 void FfiOHOSAceFrameworkViewAbstractBindCustomMenu(void (*builder)())
 {
     NG::MenuParam params;
+    GetMenuShowInSubwindow(params);
     ViewAbstractModel::GetInstance()->BindMenu({}, CJLambda::Create(builder), params);
 }
 
@@ -2023,16 +2125,6 @@ void ParseContextMenuParam(CJContextMenuOptions options, NG::MenuParam& menuPara
     ParseMenuLayoutRegionMarginParam(options.layoutRegionMargin, menuParam);
     ParseContentPreviewAnimationOptionsParam(options.preview, options.previewAnimationOptions, menuParam,
         previewBuildFunc);
-}
-
-void GetMenuShowInSubwindow(NG::MenuParam& menuParam)
-{
-    menuParam.isShowInSubWindow = false;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    menuParam.isShowInSubWindow = theme->GetExpandDisplay();
 }
 
 void ParseMenuParam(CJMenuOptions options, NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc)
@@ -2375,7 +2467,28 @@ void FfiOHOSAceFrameworkViewAbstractSpringBack()
     ViewAbstractModel::GetInstance()->SheetSpringBack();
 }
 
-void ParseSheetCallback(CJSheetOptions options, std::function<void()>& onAppear, std::function<void()>& onDisappear,
+void ParseSheetCallback(CJSheetOptions options, std::function<void()>& onAppear,
+    std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
+    std::function<void()>& onWillDisappear)
+{
+    if (options.onAppear.hasValue) {
+        onAppear =  CJLambda::Create(options.onAppear.value);
+    }
+    if (options.onDisappear.hasValue) {
+        onDisappear = CJLambda::Create(options.onDisappear.value);
+    }
+    if (options.shouldDismiss.hasValue) {
+        shouldDismiss = CJLambda::Create(options.shouldDismiss.value);
+    }
+    if (options.onWillAppear.hasValue) {
+        onWillAppear = CJLambda::Create(options.onWillAppear.value);
+    }
+    if (options.onWillDisappear.hasValue) {
+        onWillDisappear =  CJLambda::Create(options.onWillDisappear.value);
+    }
+}
+
+void ParseSheetCallbackV2(CJSheetOptionsV2 options, std::function<void()>& onAppear, std::function<void()>& onDisappear,
     std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
     std::function<void(const int32_t info)>& onWillDismiss, std::function<void()>& sheetSpringBack,
     std::function<void(const float)>& onHeightDidChange, std::function<void(const float)>& onDetentsDidChange,
@@ -2456,7 +2569,7 @@ bool ParseSheetDetents(const CArrInt32 array, std::vector<NG::SheetHeight>& shee
     return true;
 }
 
-void ParseSheetBorderProps(CJSheetOptions option, NG::SheetStyle& sheetStyle)
+void ParseSheetBorderProps(CJSheetOptionsV2 option, NG::SheetStyle& sheetStyle)
 {
     if (option.borderWidth.hasValue) {
         auto nativeBorderWidth = option.borderWidth.value;
@@ -2579,6 +2692,46 @@ void ParseSheetStyle(CJSheetOptions option, NG::SheetStyle& sheetStyle)
         sheetStyle.sheetHeight.sheetMode = sheetDetent.sheetMode;
         sheetStyle.sheetHeight.height = sheetDetent.height;
     }
+}
+
+void ParseSheetStyleV2(CJSheetOptionsV2 option, NG::SheetStyle& sheetStyle)
+{
+    std::vector<NG::SheetHeight> detents;
+    if (option.detents.hasValue && ParseSheetDetents(option.detents.value, detents)) {
+        sheetStyle.detents = detents;
+    }
+    if (option.blurStyle.hasValue) {
+        ParseBlurStyle(option.blurStyle.value, sheetStyle);
+    }
+    if (option.showClose.hasValue) {
+        sheetStyle.showCloseIcon = option.showClose.value;
+    }
+    if (option.dragBarl.hasValue) {
+        sheetStyle.showDragBar = option.dragBarl.value;
+    } else {
+        sheetStyle.showDragBar = true;
+    }
+    if (option.enableOutsideInteractive.hasValue) {
+        sheetStyle.interactive = option.enableOutsideInteractive.value;
+    }
+    if (option.enableOutsideInteractive.hasValue) {
+        sheetStyle.interactive = option.enableOutsideInteractive.value;
+    }
+    if (option.preferType.hasValue) {
+        ParsePreferType(option.preferType.value, sheetStyle);
+    }
+    if (option.backgroundColor.hasValue) {
+        sheetStyle.backgroundColor = Color(ColorAlphaAdapt(option.backgroundColor.value));
+    }
+    if (option.maskColor.hasValue) {
+        sheetStyle.maskColor = Color(ColorAlphaAdapt(option.maskColor.value));
+    }
+    NG::SheetHeight sheetDetent;
+    if (option.height.hasValue) {
+        ParseSheetDetentHeight(option.height.value, sheetDetent);
+        sheetStyle.sheetHeight.sheetMode = sheetDetent.sheetMode;
+        sheetStyle.sheetHeight.height = sheetDetent.height;
+    }
     if (option.mode.hasValue) {
         auto sheetLevel = option.mode.value;
         sheetStyle.showInPage = (sheetLevel == static_cast<uint32_t>(NG::SheetLevel::EMBEDDED));
@@ -2592,10 +2745,11 @@ void ParseSheetStyle(CJSheetOptions option, NG::SheetStyle& sheetStyle)
     ParseSheetBorderProps(option, sheetStyle);
 }
 
-void ParseSheetTitle(CJSheetOptions option, NG::SheetStyle& sheetStyle, std::function<void()>& titleBuilderFunction)
+void ParseSheetTitle(
+    NativeOptionCallBack title, NG::SheetStyle& sheetStyle, std::function<void()>& titleBuilderFunction)
 {
     sheetStyle.isTitleBuilder = true;
-    titleBuilderFunction = option.title.hasValue ? CJLambda::Create(option.title.value) : ([]() -> void {});
+    titleBuilderFunction = title.hasValue ? CJLambda::Create(title.value) : ([]() -> void {});
 }
 
 void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(), CJSheetOptions option)
@@ -2618,11 +2772,44 @@ void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(
     std::function<void(const float)> onTypeDidChangeCallback;
     std::function<void()> titleBuilderFunction;
     std::function<void()> sheetSpringBackFunc;
-    ParseSheetCallback(option, onAppearCallback, onDisappearCallback, shouldDismissFunc, onWillAppearCallback,
+    ParseSheetCallback(option, onAppearCallback, onDisappearCallback, shouldDismissFunc,
+        onWillAppearCallback, onWillDisappearCallback);
+    ParseSheetStyle(option, sheetStyle);
+    ParseSheetTitle(option.title, sheetStyle, titleBuilderFunction);
+    ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc),
+        std::move(titleBuilderFunction), sheetStyle, std::move(onAppearCallback), std::move(onDisappearCallback),
+        std::move(shouldDismissFunc), std::move(onWillDismissCallback),  std::move(onWillAppearCallback),
+        std::move(onWillDisappearCallback), std::move(onHeightDidChangeCallback),
+        std::move(onDetentsDidChangeCallback), std::move(onWidthDidChangeCallback),
+        std::move(onTypeDidChangeCallback), std::move(sheetSpringBackFunc));
+    return;
+}
+
+void FfiOHOSAceFrameworkViewAbstractbindSheetParamV2(bool isShow, void (*builder)(), CJSheetOptionsV2 option)
+{
+    auto buildFunc = CJLambda::Create(builder);
+    NG::SheetStyle sheetStyle;
+    DoubleBindCallback callback = nullptr;
+    sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.showDragBar = true;
+    sheetStyle.showInPage = false;
+    std::function<void()> onAppearCallback;
+    std::function<void()> onDisappearCallback;
+    std::function<void()> onWillAppearCallback;
+    std::function<void()> onWillDisappearCallback;
+    std::function<void()> shouldDismissFunc;
+    std::function<void(const int32_t)> onWillDismissCallback;
+    std::function<void(const float)> onHeightDidChangeCallback;
+    std::function<void(const float)> onDetentsDidChangeCallback;
+    std::function<void(const float)> onWidthDidChangeCallback;
+    std::function<void(const float)> onTypeDidChangeCallback;
+    std::function<void()> titleBuilderFunction;
+    std::function<void()> sheetSpringBackFunc;
+    ParseSheetCallbackV2(option, onAppearCallback, onDisappearCallback, shouldDismissFunc, onWillAppearCallback,
         onWillDisappearCallback, onWillDismissCallback, sheetSpringBackFunc, onHeightDidChangeCallback,
         onDetentsDidChangeCallback, onWidthDidChangeCallback, onTypeDidChangeCallback);
-    ParseSheetStyle(option, sheetStyle);
-    ParseSheetTitle(option, sheetStyle, titleBuilderFunction);
+    ParseSheetStyleV2(option, sheetStyle);
+    ParseSheetTitle(option.title, sheetStyle, titleBuilderFunction);
     ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc),
         std::move(titleBuilderFunction), sheetStyle, std::move(onAppearCallback), std::move(onDisappearCallback),
         std::move(shouldDismissFunc), std::move(onWillDismissCallback), std::move(onWillAppearCallback),
@@ -2709,28 +2896,30 @@ uint32_t FFIOHOSAceFrameworkBlendColor(uint32_t color, uint32_t overlayColor)
     return Color(color).BlendColor(Color(overlayColor)).GetValue();
 }
 
-void ParseModalTransition(CJContentCoverOptions options, NG::ModalStyle& modalStyle)
+void ParseModalTransition(uint32_t transVal, NativeOptionUInt32 bgColor, NG::ModalStyle& modalStyle)
 {
     modalStyle.modalTransition = NG::ModalTransition::DEFAULT;
-    auto modalTransition = options.modalTransition;
+    auto modalTransition = transVal;
     auto transitionNumber = static_cast<int32_t>(modalTransition);
     modalStyle.modalTransition = static_cast<NG::ModalTransition>(transitionNumber);
-    if (options.backgroundColor.hasValue) {
-        auto backgroundColor = static_cast<uint32_t>(options.backgroundColor.value);
+    if (bgColor.hasValue) {
+        auto backgroundColor = static_cast<uint32_t>(bgColor.value);
         modalStyle.backgroundColor = Color(backgroundColor);
     }
 }
 
-void FFIOHOSAceFrameworkBindContentCover(bool isShow, void (*builder)(), CJContentCoverOptions options)
+void FFIOHOSAceFrameworkBindContentCoverV2(bool isShow, void (*builder)(), CJContentCoverOptionsV2 options)
 {
     // parse builder
     auto buildFunc = CJLambda::Create(builder);
 
     // parse ModalTransition
     NG::ModalStyle modalStyle;
-    ParseModalTransition(options, modalStyle);
-    std::function<void()> onWillShowCallback;
-    std::function<void()> onWillDismissCallback;
+    ParseModalTransition(options.modalTransition, options.backgroundColor, modalStyle);
+    std::function<void()> onWillShowCallback =
+        options.onWillAppear.hasValue ? CJLambda::Create(options.onWillAppear.value) : ([]() -> void {});
+    std::function<void()> onWillDismissCallback =
+        options.onWillDisappear.hasValue ? CJLambda::Create(options.onWillDisappear.value) : ([]() -> void {});
     NG::ContentCoverParam contentCoverParam;
     std::function<void(const int32_t&)> onWillDismissFunc;
     // parse callback
@@ -2762,6 +2951,31 @@ void FFIOHOSAceFrameworkBindContentCover(bool isShow, void (*builder)(), CJConte
         };
         contentCoverParam.onWillDismiss = std::move(onWillDismissFunc);
     }
+
+    ViewAbstractModel::GetInstance()->BindContentCover(isShow, nullptr, std::move(buildFunc), modalStyle,
+        std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
+        std::move(onWillDismissCallback), contentCoverParam);
+}
+
+void FFIOHOSAceFrameworkBindContentCover(bool isShow, void (*builder)(), CJContentCoverOptions options)
+{
+    // parse builder
+    auto buildFunc = CJLambda::Create(builder);
+
+    // parse ModalTransition
+    NG::ModalStyle modalStyle;
+    ParseModalTransition(options.modalTransition, options.backgroundColor, modalStyle);
+    std::function<void()> onWillShowCallback =
+        options.onWillAppear.hasValue ? CJLambda::Create(options.onWillAppear.value) : ([]() -> void {});
+    std::function<void()> onWillDismissCallback =
+        options.onWillDisappear.hasValue ? CJLambda::Create(options.onWillDisappear.value) : ([]() -> void {});
+    NG::ContentCoverParam contentCoverParam;
+    std::function<void(const int32_t&)> onWillDismissFunc;
+    // parse callback
+    std::function<void()> onShowCallback =
+        options.onAppear.hasValue ? CJLambda::Create(options.onAppear.value) : ([]() -> void {});
+    std::function<void()> onDismissCallback =
+        options.onDisappear.hasValue ? CJLambda::Create(options.onDisappear.value) : ([]() -> void {});
 
     ViewAbstractModel::GetInstance()->BindContentCover(isShow, nullptr, std::move(buildFunc), modalStyle,
         std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
@@ -2959,6 +3173,16 @@ void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithString(const char* value)
     ViewAbstractModel::GetInstance()->SetDragPreview(dragPreviewInfo);
 }
 
+void FfiOHOSAceFrameworkViewAbstractHitTestBehavior(int32_t hitTestMode)
+{
+    ViewAbstractModel::GetInstance()->SetHitTestMode(static_cast<NG::HitTestMode>(hitTestMode));
+}
+
+void FfiOHOSAceFrameworkViewAbstractHoverEffect(int32_t hoverEffectValue)
+{
+    ViewAbstractModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(hoverEffectValue));
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithString(
     const char* source, CBorderImageOption option)
 {
@@ -2982,7 +3206,7 @@ void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithLinearGradient(
     NewCjLinearGradient(source, lineGradient);
     ViewAbstractModel::GetInstance()->SetBorderImageGradient(lineGradient);
     imageBorderBitsets |= BorderImage::GRADIENT_BIT;
-    
+
     ParceBorderImageParam(borderImage, imageBorderBitsets, option);
     ViewAbstractModel::GetInstance()->SetBorderImage(borderImage, imageBorderBitsets);
 }

@@ -108,7 +108,10 @@ CanvasRendererPeerImpl::CanvasRendererPeerImpl()
     instanceId_ = Container::CurrentIdSafely();
     density_ = PipelineBase::GetCurrentDensity();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
+        paintState_ = PaintState();
+        paintState_.SetTextAlign(TextAlign::START);
+        paintState_.SetOffTextDirection(TextDirection::INHERIT);
+        paintState_.SetFontSize(DEFAULT_FONT_SIZE);
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         isJudgeSpecialValue_ = true;
@@ -967,12 +970,13 @@ void CanvasRendererPeerImpl::SetLetterSpacing(const Ace::Dimension& letterSpacin
 // inheritance
 void CanvasRendererPeerImpl::ResetPaintState()
 {
+    paintState_ = PaintState();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
         // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
         // The default value of the font size in canvas is 14px.
-        paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
-    } else {
-        paintState_ = PaintState();
+        paintState_.SetTextAlign(TextAlign::START);
+        paintState_.SetOffTextDirection(TextDirection::INHERIT);
+        paintState_.SetFontSize(DEFAULT_FONT_SIZE);
     }
     std::vector<PaintState>().swap(savePaintState_);
     isInitializeShadow_ = false;

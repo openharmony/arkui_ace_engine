@@ -213,6 +213,10 @@ void CalendarDialogPattern::UpdateOptionsButton()
     CHECK_NULL_VOID(host);
     auto options = host->GetChildAtIndex(OPTIONS_NODE_INDEX);
     CHECK_NULL_VOID(options);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
 
     size_t buttonIndex = OPTION_CANCEL_BUTTON_INDEX;
     for (const auto& child : options->GetChildren()) {
@@ -223,9 +227,9 @@ void CalendarDialogPattern::UpdateOptionsButton()
             auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
             CHECK_NULL_VOID(buttonLayoutProperty);
             if (buttonIndex == OPTION_ACCEPT_BUTTON_INDEX) {
-                buttonLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
+                buttonLayoutProperty->UpdateLabel(dialogTheme->GetConfirmText());
             } else {
-                buttonLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+                buttonLayoutProperty->UpdateLabel(dialogTheme->GetCancelText());
             }
             button->MarkDirtyNode();
             buttonIndex++;
@@ -1472,5 +1476,11 @@ void CalendarDialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
         disabledDateRangeStr.pop_back();
     }
     json->PutExtAttr("disabledDateRange", disabledDateRangeStr.c_str(), filter);
+    if (currentSettingData_.startDate.ToDays() != PickerDate().ToDays()) {
+        json->PutExtAttr("start", currentSettingData_.startDate.ToString(false).c_str(), filter);
+    }
+    if (currentSettingData_.endDate.ToDays() != PickerDate().ToDays()) {
+        json->PutExtAttr("end", currentSettingData_.endDate.ToString(false).c_str(), filter);
+    }
 }
 } // namespace OHOS::Ace::NG

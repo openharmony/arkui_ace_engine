@@ -16,6 +16,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 
 #include "core/components_ng/base/group_node.h"
+#include "core/components_ng/base/view_stack_model_ng.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/if_else_node.h"
 
@@ -24,6 +25,7 @@ namespace {
 const RefPtr<UINode> INVALID_NODE = nullptr;
 }
 thread_local std::unique_ptr<ViewStackProcessor> ViewStackProcessor::instance = nullptr;
+thread_local std::unique_ptr<ScopedViewStackProcessor> ViewStackModelNG::scopeStack_ = nullptr;
 
 ViewStackProcessor* ViewStackProcessor::GetInstance()
 {

@@ -185,7 +185,11 @@ void MenuWrapperPattern::HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItem
     CHECK_NULL_VOID(subMenuPattern);
     auto currentHoverMenuItem = subMenuPattern->GetParentMenuItem();
     CHECK_NULL_VOID(currentHoverMenuItem);
-
+    auto geometryNode = subMenuNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto offset = subMenuNode->GetPaintRectOffset(false, true);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto menuZone = RectF(offset.GetX(), offset.GetY(), frameSize.Width(), frameSize.Height());
     auto menuItemNode = menuItemPattern->GetHost();
     CHECK_NULL_VOID(menuItemNode);
     if (currentHoverMenuItem->GetId() != menuItemNode->GetId()) {
@@ -194,11 +198,19 @@ void MenuWrapperPattern::HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItem
     const auto& mousePosition = info.GetGlobalLocation();
     if (!menuItemPattern->IsInHoverRegions(mousePosition.GetX(), mousePosition.GetY()) &&
         menuItemPattern->IsSubMenuShowed()) {
-        HideSubMenu();
-        menuItemPattern->OnHover(false);
-        menuItemPattern->SetIsSubMenuShowed(false);
-        menuItemPattern->ClearHoverRegions();
-        menuItemPattern->ResetWrapperMouseEvent();
+        menuItemPattern->CheckHideSubMenu(
+            [weak = WeakClaim(this), weakSubMenu = WeakClaim(RawPtr(subMenuNode))] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto subMenu = weakSubMenu.Upgrade();
+                CHECK_NULL_VOID(subMenu);
+                if (subMenu == pattern->GetShowedSubMenu()) {
+                    pattern->HideSubMenu();
+                }
+            },
+            PointF(mousePosition.GetX(), mousePosition.GetY()), menuZone);
+    } else {
+        menuItemPattern->CancelHideSubMenuTask(PointF(mousePosition.GetX(), mousePosition.GetY()));
     }
 }
 
@@ -229,7 +241,7 @@ void MenuWrapperPattern::GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenu
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuProperty);
     expandingMode = menuProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
-    menuItemPattern->SetIsSubMenuShowed (false);
+    menuItemPattern->SetIsSubMenuShowed(false);
 }
 
 void MenuWrapperPattern::HideSubMenu()
@@ -368,6 +380,18 @@ void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
                     CHECK_NULL_VOID(subMenuNode);
                     auto menuWrapper = weak.Upgrade();
                     CHECK_NULL_VOID(menuWrapper);
+
+                    auto subMenuFrameNode = DynamicCast<FrameNode>(subMenuNode);
+                    CHECK_NULL_VOID(subMenuFrameNode);
+                    auto accessibilityProperty =
+                        subMenuFrameNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
+                    CHECK_NULL_VOID(accessibilityProperty);
+                    accessibilityProperty->SetAccessibilityIsShow(false);
+                    subMenuFrameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE,
+                        WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+                    TAG_LOGI(AceLogTag::ACE_MENU, "Send event to %{public}d",
+                        static_cast<int32_t>(AccessibilityEventType::PAGE_CLOSE));
+
                     menuWrapper->RemoveChild(subMenuNode);
                     menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
                 },
@@ -385,13 +409,6 @@ void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
     auto subMenuPattern = subMenuFrameNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(subMenuPattern);
     subMenuPattern->SetSubMenuShow(false);
-    auto accessibilityProperty = subMenuFrameNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityIsShow(false);
-    subMenuFrameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE,
-        WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-    TAG_LOGI(AceLogTag::ACE_MENU, "Send event to %{public}d",
-        static_cast<int32_t>(AccessibilityEventType::PAGE_CLOSE));
 }
 
 void MenuWrapperPattern::RegisterOnTouch()
@@ -678,6 +695,7 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
 
 void MenuWrapperPattern::StartShowAnimation()
 {
+    TAG_LOGI(AceLogTag::ACE_MENU, "start show menu animation");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
@@ -760,7 +778,7 @@ bool MenuWrapperPattern::IsSelectOverlayRightClickMenu(const RefPtr<FrameNode>& 
 
 void MenuWrapperPattern::RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
 {
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "register menu enter");
+    TAG_LOGD(AceLogTag::ACE_MENU, "register menu enter");
     CHECK_NULL_VOID(menuWrapperNode);
     auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(pattern);
@@ -773,7 +791,7 @@ void MenuWrapperPattern::RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapp
 
 void MenuWrapperPattern::SetMenuTransitionEffect(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
 {
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "set menu transition effect");
+    TAG_LOGD(AceLogTag::ACE_MENU, "set menu transition effect");
     CHECK_NULL_VOID(menuWrapperNode);
     auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(pattern);
@@ -832,90 +850,6 @@ void MenuWrapperPattern::ClearAllSubMenu()
     }
 }
 
-bool PreviewBorderRadiusHasPositive(const BorderRadiusProperty& borderRadius)
-{
-    return borderRadius.radiusTopLeft->IsValid() || borderRadius.radiusTopRight->IsValid() ||
-           borderRadius.radiusBottomLeft->IsValid() || borderRadius.radiusBottomRight->IsValid();
-}
-
-void MenuWrapperPattern::StopPreviewMenuAnimation()
-{
-    if (HasTransitionEffect() || HasPreviewTransitionEffect()) {
-        return;
-    }
-
-    auto menu = GetMenu();
-    CHECK_NULL_VOID(menu);
-    auto menuContext = menu->GetRenderContext();
-    CHECK_NULL_VOID(menuContext);
-
-    RefPtr<RenderContext> previewPositionContext;
-    RefPtr<RenderContext> previewScaleContext;
-    RefPtr<RenderContext> previewDisappearContext;
-
-    GetPreviewRenderContexts(previewPositionContext, previewScaleContext, previewDisappearContext);
-
-    AnimatePreviewMenu(previewPositionContext, previewScaleContext, menuContext, previewDisappearContext);
-}
-
-void MenuWrapperPattern::GetPreviewRenderContexts(RefPtr<RenderContext>& previewPositionContext,
-    RefPtr<RenderContext>& previewScaleContext, RefPtr<RenderContext>& previewDisappearContext)
-{
-    if (isShowHoverImage_) {
-        auto flexNode = GetHoverImageFlexNode();
-        CHECK_NULL_VOID(flexNode);
-        previewPositionContext = flexNode->GetRenderContext();
-        CHECK_NULL_VOID(previewPositionContext);
-
-        auto stackNode = GetHoverImageStackNode();
-        CHECK_NULL_VOID(stackNode);
-        previewScaleContext = stackNode->GetRenderContext();
-        CHECK_NULL_VOID(previewScaleContext);
-    } else {
-        auto preview = GetPreview();
-        CHECK_NULL_VOID(preview);
-        previewPositionContext = preview->GetRenderContext();
-        CHECK_NULL_VOID(previewPositionContext);
-        previewScaleContext = previewPositionContext;
-    }
-    auto previewNode = GetPreview();
-    CHECK_NULL_VOID(previewNode);
-    previewDisappearContext = previewNode->GetRenderContext();
-}
-
-void MenuWrapperPattern::AnimatePreviewMenu(RefPtr<RenderContext> previewPositionContext,
-    RefPtr<RenderContext> previewScaleContext, RefPtr<RenderContext> menuContext,
-    RefPtr<RenderContext> previewDisappearContext)
-{
-    auto option = AnimationOption(Curves::LINEAR, 0);
-    AnimationUtils::Animate(option, [previewPositionContext, previewScaleContext, menuContext, previewDisappearContext,
-                                        previewStopOffset = previewDisappearStartOffset_,
-                                        animationInfo = animationInfo_]() {
-        auto previewOffset = previewStopOffset.NonOffset() ? animationInfo.previewOffset : previewStopOffset;
-        if (previewPositionContext && !previewOffset.NonOffset()) {
-            previewPositionContext->UpdatePosition(
-                OffsetT<Dimension>(Dimension(previewOffset.GetX()), Dimension(previewOffset.GetY())));
-        }
-
-        auto menuOffset = animationInfo.menuOffset;
-        if (menuContext && !menuOffset.NonOffset()) {
-            menuContext->UpdatePosition(OffsetT<Dimension>(Dimension(menuOffset.GetX()), Dimension(menuOffset.GetY())));
-        }
-
-        if (menuContext && Positive(animationInfo.menuScale)) {
-            menuContext->UpdateTransformScale(VectorF(animationInfo.menuScale, animationInfo.menuScale));
-        }
-
-        if (previewScaleContext && Positive(animationInfo.previewScale)) {
-            previewScaleContext->UpdateTransformScale(VectorF(animationInfo.previewScale, animationInfo.previewScale));
-            if (PreviewBorderRadiusHasPositive(animationInfo.borderRadius)) {
-                previewScaleContext->UpdateBorderRadius(animationInfo.borderRadius);
-                CHECK_NULL_VOID(previewDisappearContext);
-                previewDisappearContext->UpdateBorderRadius(animationInfo.borderRadius);
-            }
-        }
-    });
-}
 
 void MenuWrapperPattern::RequestPathRender()
 {
@@ -976,9 +910,9 @@ void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("MenuPreviewMode", std::to_string(dumpInfo_.menuPreviewMode).c_str());
     json->Put("MenuType", std::to_string(dumpInfo_.menuType).c_str());
     json->Put("EnableArrow", std::to_string(dumpInfo_.enableArrow).c_str());
+    json->Put("Offset", dumpInfo_.offset.ToString().c_str());
     json->Put("TargetNode", dumpInfo_.targetNode.c_str());
     json->Put("TargetOffset", dumpInfo_.targetOffset.ToString().c_str());
-
     json->Put("TargetSize", dumpInfo_.targetSize.ToString().c_str());
     json->Put("MenuWindowRect", dumpInfo_.menuWindowRect.ToString().c_str());
     json->Put("WrapperRect", dumpInfo_.wrapperRect.ToString().c_str());
@@ -995,36 +929,11 @@ void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("FinalPlacement", dumpInfo_.finalPlacement.c_str());
 }
 
-void MenuWrapperPattern::SetDumpInfo(const MenuDumpInfo& dumpInfo)
-{
-    dumpInfo_.menuPreviewMode = dumpInfo.menuPreviewMode;
-    dumpInfo_.menuType = dumpInfo.menuType;
-    dumpInfo_.enableArrow = dumpInfo.enableArrow;
-    dumpInfo_.targetNode = dumpInfo.targetNode;
-    dumpInfo_.targetOffset = dumpInfo.targetOffset;
-    dumpInfo_.targetSize = dumpInfo.targetSize;
-    dumpInfo_.menuWindowRect = dumpInfo.menuWindowRect;
-    dumpInfo_.wrapperRect = dumpInfo.wrapperRect;
-    dumpInfo_.previewBeginScale = dumpInfo.previewBeginScale;
-    dumpInfo_.previewEndScale = dumpInfo.previewEndScale;
-    dumpInfo_.top = dumpInfo.top;
-    dumpInfo_.bottom = dumpInfo.bottom;
-    dumpInfo_.left = dumpInfo.left;
-    dumpInfo_.right = dumpInfo.right;
-    dumpInfo_.globalLocation = dumpInfo.globalLocation;
-    dumpInfo_.originPlacement = dumpInfo.originPlacement;
-    dumpInfo_.defaultPlacement = dumpInfo.defaultPlacement;
-    dumpInfo_.finalPosition = dumpInfo.finalPosition;
-    dumpInfo_.finalPlacement = dumpInfo.finalPlacement;
-}
-
 bool MenuWrapperPattern::CheckPointInMenuZone(const RefPtr<FrameNode>& node, const PointF& point)
 {
     CHECK_NULL_RETURN(node, false);
-    auto geometryNode = node->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
     auto childOffset = node->GetPaintRectOffset(false, true);
-    auto childSize = geometryNode->GetFrameSize();
+    auto childSize = node->GetPaintRectWithTransform();
     auto menuZone = RectF(childOffset.GetX(), childOffset.GetY(), childSize.Width(), childSize.Height());
     return menuZone.IsInRegion(point);
 }

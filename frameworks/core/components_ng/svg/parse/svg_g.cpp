@@ -41,6 +41,7 @@ RSRecordingPath SvgG::AsPath(const SvgLengthScaleRule& lengthRule)
         auto childPath = child->AsPath(lengthRule);
         path.Op(path, childPath, RSPathOp::UNION);
     }
+    ApplyTransform(path, lengthRule);
     return path;
 }
 

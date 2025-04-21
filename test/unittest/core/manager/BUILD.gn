@@ -25,6 +25,12 @@ ace_unittest("drag_animation_helper_test_ng") {
   sources = [ "drag_animation_helper_test_ng.cpp" ]
 }
 
+ace_unittest("drag_drop_controller_func_wrapper_test_ng") {
+  type = "new"
+  module_output = "manager"
+  sources = [ "drag_drop_controller_func_wrapper_test_ng.cpp" ]
+}
+
 ace_unittest("drag_drop_func_wrapper_test_ng") {
   type = "new"
   module_output = "manager"
@@ -48,6 +54,7 @@ ace_unittest("drag_drop_initiating_state_test_ng") {
   type = "new"
   module_output = "manager"
   sources = [
+    "./drag_drop/drag_drop_initiating_handler_test_ng.cpp",
     "./drag_drop/drag_drop_initiating_state_idle_test_ng.cpp",
     "./drag_drop/drag_drop_initiating_state_lifting_test_ng.cpp",
     "./drag_drop/drag_drop_initiating_state_machine_test_ng.cpp",
@@ -150,9 +157,11 @@ ace_unittest("drag_drop_behavior_reporter_test_ng") {
 group("core_manager_unittest") {
   testonly = true
   deps = [
+    ":avoid_info_manager_test_ng",
     ":display_sync_manager_test_ng",
     ":drag_animation_helper_test_ng",
     ":drag_drop_behavior_reporter_test_ng",
+    ":drag_drop_controller_func_wrapper_test_ng",
     ":drag_drop_func_wrapper_test_ng",
     ":drag_drop_initiating_state_test_ng",
     ":drag_drop_manager_test_ng",

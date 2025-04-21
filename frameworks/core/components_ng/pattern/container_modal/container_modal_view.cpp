@@ -116,7 +116,10 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleContainer(RefPtr<FrameNode>& con
     }
 
     CHECK_NULL_RETURN(customTitleBarNode, nullptr);
-    containerTitleRow->AddChild(customTitleBarNode);
+    auto customTitleBarRow = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(false));
+    customTitleBarRow->AddChild(customTitleBarNode);
+    containerTitleRow->AddChild(customTitleBarRow);
     return containerTitleRow;
 }
 

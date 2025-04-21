@@ -806,7 +806,7 @@ FontWeightInt Convert(const Ark_FontWeight& src)
     }
     return dst;
 }
-    
+
 template<>
 FontWeightInt Convert(const Ark_Number& src)
 {
@@ -1941,8 +1941,10 @@ void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src)
     if (!shadowTheme) {
         return;
     }
+    auto context = AceType::DynamicCast<PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
 
-    dst = shadowTheme->GetShadow(shadowStyle, SystemProperties::GetColorMode());
+    dst = shadowTheme->GetShadow(shadowStyle, context->GetColorMode());
 }
 
 template<>

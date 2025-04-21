@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
 
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 constexpr size_t MAX_SIZE = 10;

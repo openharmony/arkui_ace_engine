@@ -28,6 +28,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
+#include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace {
 class DebugBoundaryPainter : public virtual AceType {

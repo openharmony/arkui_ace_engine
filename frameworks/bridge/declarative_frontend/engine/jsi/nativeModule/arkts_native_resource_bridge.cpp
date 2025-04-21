@@ -90,7 +90,7 @@ ArkUINativeModuleValue ResourceBridge::Restore(ArkUIRuntimeCallInfo* runtimeCall
     CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
     pipelineContext->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
 
-    auto colorModeValue = SystemProperties::GetColorMode();
+    auto colorModeValue = pipelineContext->GetColorMode();
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     UpdateColorModeForThemeConstants(colorModeValue);
 #else

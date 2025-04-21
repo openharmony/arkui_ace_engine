@@ -15,25 +15,15 @@
 
 #include "adapter/ohos/entrance/dialog_container.h"
 
-#include <mutex>
 
-#include "adapter/ohos/entrance/ace_application_info.h"
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
+
 #include "adapter/ohos/entrance/ace_view_ohos.h"
-#include "base/log/frame_report.h"
-#include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/common/container_scope.h"
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
-#include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_manager_impl.h"
-#include "core/pipeline/pipeline_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/base/subwindow/subwindow_manager.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
 

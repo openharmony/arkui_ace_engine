@@ -25,11 +25,15 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/common/properties/text_style.h"
+#include "core/components_ng/event/click_event.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_event_handler.h"
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace {
+
+using ComposeId = std::string;
 
 struct ButtonProperties {
     bool showButton = false;
@@ -38,6 +42,16 @@ struct ButtonProperties {
     //  touchFunc used in Declarative mode.
     TouchEventFunc touchFunc;
     RefPtr<NG::ClickEvent> action; // button click action
+};
+
+struct PopupGradientColor {
+    Color gradientColor;
+    double gradientNumber;
+};
+
+struct PopupLinearGradientProperties {
+    GradientDirection popupDirection;
+    std::vector<PopupGradientColor> gradientColors;
 };
 
 enum class PopupKeyboardAvoidMode {
@@ -99,6 +113,46 @@ public:
     Placement GetPlacement() const
     {
         return placement_;
+    }
+
+    void SetAppearingTime(int32_t appearingTime)
+    {
+        appearingTime_ = appearingTime;
+    }
+
+    int32_t GetAppearingTime() const
+    {
+        return appearingTime_;
+    }
+
+    void SetDisappearingTime(int32_t disappearingTime)
+    {
+        disappearingTime_ = disappearingTime;
+    }
+
+    int32_t GetDisappearingTime() const
+    {
+        return disappearingTime_;
+    }
+
+    void SetAppearingTimeWithContinuousOperation(int32_t appearingTimeWithContinuousOperation)
+    {
+        appearingTimeWithContinuousOperation_ = appearingTimeWithContinuousOperation;
+    }
+
+    int32_t GetAppearingTimeWithContinuousOperation() const
+    {
+        return appearingTimeWithContinuousOperation_;
+    }
+
+    void SetDisappearingTimeWithContinuousOperation(int32_t disappearingTimeWithContinuousOperation)
+    {
+        disappearingTimeWithContinuousOperation_ = disappearingTimeWithContinuousOperation;
+    }
+
+    int32_t GetDisappearingTimeWithContinuousOperation() const
+    {
+        return disappearingTimeWithContinuousOperation_;
     }
 
     const Color& GetMaskColor() const
@@ -539,6 +593,55 @@ public:
         isPartialUpdate_ = isPartialUpdate;
     }
 
+    void SetTipsFlag(bool isTips)
+    {
+        isTips_ = isTips;
+    }
+
+    bool IsTips() const
+    {
+        return isTips_;
+    }
+    void SetOutlineLinearGradient(const PopupLinearGradientProperties& outlineLinearGradient)
+    {
+        outlineLinearGradient_ = outlineLinearGradient;
+    }
+
+    const PopupLinearGradientProperties& GetOutlineLinearGradient() const
+    {
+        return outlineLinearGradient_;
+    }
+
+    void SetOutlineWidth(const std::optional<Dimension>& outlineWidth)
+    {
+        outlineWidth_ = outlineWidth;
+    }
+
+    const std::optional<Dimension>& GetOutlineWidth() const
+    {
+        return outlineWidth_;
+    }
+
+    void SetInnerBorderLinearGradient(const PopupLinearGradientProperties& innerBorderLinearGradient)
+    {
+        innerBorderLinearGradient_ = innerBorderLinearGradient;
+    }
+
+    const PopupLinearGradientProperties& GetInnerBorderLinearGradient() const
+    {
+        return innerBorderLinearGradient_;
+    }
+
+    void SetInnerBorderWidth(const std::optional<Dimension>& innerBorderWidth)
+    {
+        innerBorderWidth_ = innerBorderWidth;
+    }
+
+    const std::optional<Dimension>& GetInnerBorderWidth() const
+    {
+        return innerBorderWidth_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -556,6 +659,11 @@ private:
     bool isCaretMode_ = true;
     bool enableHoverMode_ = false;
     bool followTransformOfTarget_ = false;
+    bool isTips_ = false;
+    int32_t appearingTime_ = 700;
+    int32_t disappearingTime_ = 300;
+    int32_t appearingTimeWithContinuousOperation_ = 300;
+    int32_t disappearingTimeWithContinuousOperation_ = 0;
     std::optional<bool> isPartialUpdate_;
     Color maskColor_;
     Color backgroundColor_;
@@ -591,6 +699,10 @@ private:
     RefPtr<NG::ChainedTransitionEffect> transitionEffects_ = nullptr;
     StateChangeFunc doubleBindCallback_;
     PopupKeyboardAvoidMode keyboardAvoidMode_ = PopupKeyboardAvoidMode::NONE;
+    std::optional<Dimension> outlineWidth_;
+    std::optional<Dimension> innerBorderWidth_;
+    PopupLinearGradientProperties outlineLinearGradient_;
+    PopupLinearGradientProperties innerBorderLinearGradient_;
 };
 
 } // namespace OHOS::Ace

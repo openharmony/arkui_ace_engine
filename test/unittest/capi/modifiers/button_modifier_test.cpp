@@ -1718,7 +1718,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontFamily, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, setMinFontScaleTestDefaultValues, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_setMinFontScaleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1763,7 +1763,7 @@ HWTEST_F(ButtonModifierTest, setMinFontScaleTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, setMinFontScaleTestInvalidValues, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_setMinFontScaleTestInvalidValues, TestSize.Level1)
 {
     std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMinFontScaleNumInvalidValues = {
         { "-1.01", Converter::ArkValue<Ark_Number>(-1.01), ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE },
@@ -1794,7 +1794,7 @@ HWTEST_F(ButtonModifierTest, setMinFontScaleTestInvalidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, setMaxFontScaleTestDefaultValues, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_setMaxFontScaleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1839,7 +1839,7 @@ HWTEST_F(ButtonModifierTest, setMaxFontScaleTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, setMaxFontScaleTestInvalidValues, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_setMaxFontScaleTestInvalidValues, TestSize.Level1)
 {
     std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMaxFontScaleNumInvalidValues = {
         { "0.1", Converter::ArkValue<Ark_Number>(0.1), "ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE" },

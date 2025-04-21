@@ -445,6 +445,7 @@ public:
     void InitSheetMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
+    void GetSheetTypeWithCenter(SheetType& sheetType);
 
     void SetUIFirstSwitch(bool isFirstTransition, bool isNone);
 
@@ -572,6 +573,8 @@ public:
 
     void UpdateMaskBackgroundColorRender();
 
+    void UpdateTitleTextColor();
+
     Color GetMaskBackgroundColor() const
     {
         return sheetMaskColor_;
@@ -649,11 +652,14 @@ public:
         return detentsFinalIndex_;
     }
     bool IsScrollOutOfBoundary();
-    RefPtr<FrameNode> GetScrollNode();
 
     void UpdateSheetType()
     {
-        sheetType_ = GetSheetType();
+        auto sheetType = GetSheetType();
+        if (sheetType_ != sheetType) {
+            sheetType_ = sheetType;
+            typeChanged_ = true;
+        }
     }
 
     // Used for isolation of SHEET_BOTTOMLANDSPACE after version 12, such as support for height setting callback,
@@ -719,6 +725,36 @@ public:
     void OnFontScaleConfigurationUpdate() override;
 
     void FireCommonCallback();
+
+    void SetCloseButtonNode(const WeakPtr<FrameNode>& node) {
+        closeButtonNode_ = node;
+    }
+
+    void SetScrollNode(const WeakPtr<FrameNode>& node) {
+        scrolNode_ = node;
+    }
+
+    void SetTitleBuilderNode(const WeakPtr<FrameNode>& node) {
+        titleBuilderNode_ = node;
+    }
+    
+    RefPtr<FrameNode> GetSheetCloseIcon() const
+    {
+        auto closeButtonNode = closeButtonNode_.Upgrade();
+        return closeButtonNode;
+    }
+
+    RefPtr<FrameNode> GetTitleBuilderNode() const
+    {
+        auto titleBuilderNode = titleBuilderNode_.Upgrade();
+        return titleBuilderNode;
+    }
+
+    RefPtr<FrameNode> GetSheetScrollNode() const
+    {
+        auto scrollNode = scrolNode_.Upgrade();
+        return scrollNode;
+    }
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -859,6 +895,7 @@ private:
     bool windowChanged_ = false;
     bool isDirectionUp_ = true;
     bool topSafeAreaChanged_ = false;
+    bool typeChanged_ = false;
     ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
     SheetEffectEdge sheetEffectEdge_ = SheetEffectEdge::ALL;
 
@@ -905,6 +942,9 @@ private:
     bool showArrow_ = true;
     SheetArrowPosition arrowPosition_ = SheetArrowPosition::NONE;
     SheetPopupInfo sheetPopupInfo_;
+    WeakPtr<FrameNode> closeButtonNode_;
+    WeakPtr<FrameNode> scrolNode_;
+    WeakPtr<FrameNode> titleBuilderNode_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -15,31 +15,21 @@
 
 #include "dynamic_component_renderer_impl.h"
 
-#include <iterator>
-#include <memory>
-
 #include "accessibility_element_info.h"
 
-#include "interfaces/inner_api/ace/ui_content.h"
-#include "native_engine/native_engine.h"
-
-#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
-#include "base/thread/task_executor.h"
-#include "base/utils/utils.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
-#include "core/pipeline/pipeline_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t INVALID_WINDOW_ID = -1;
 constexpr int32_t WORKER_ERROR = 10002;
+constexpr size_t WORKER_MAX_NUM = 1;
 }
 
 void ApplyAccessibilityElementInfoOffset(Accessibility::AccessibilityElementInfo& output, const OffsetF& offset)
@@ -117,6 +107,12 @@ bool DynamicComponentRendererImpl::IsRestrictedWorkerThread()
     return runtime_->IsRestrictedWorkerThread();
 }
 
+bool DynamicComponentRendererImpl::CheckWorkerMaxConstraint()
+{
+    std::lock_guard<std::mutex> lock(usingWorkerMutex_);
+    return usingWorkers_.size() < WORKER_MAX_NUM;
+}
+
 bool DynamicComponentRendererImpl::HasWorkerUsing(void *worker)
 {
     if (worker == nullptr) {
@@ -179,7 +175,7 @@ void DynamicComponentRendererImpl::CreateIsolatedContent()
     uvTaskWrapper->Call([weak = WeakClaim(this)]() {
         auto renderer = weak.Upgrade();
         CHECK_NULL_VOID(renderer);
-        renderer->InitUiContent(nullptr, nullptr);
+        renderer->InitUiContent(nullptr);
     });
 }
 
@@ -189,20 +185,63 @@ void DynamicComponentRendererImpl::CreateDynamicContent()
     auto container = Platform::AceContainer::GetContainer(hostInstanceId_);
     CHECK_NULL_VOID(container);
     auto hostAbilityContext = container->GetAbilityContext();
-    auto hostJsContext = container->GetJsContext();
+    hostJsContext_ = container->GetJsContext();
     CHECK_NULL_VOID(runtime_);
     auto napiEnv = reinterpret_cast<napi_env>(runtime_);
     CHECK_NULL_VOID(napiEnv);
     auto uvTaskWrapper = std::make_shared<UVTaskWrapperImpl>(napiEnv);
-    uvTaskWrapper->Call([weak = WeakClaim(this), hostAbilityContext, hostJsContext]() {
+    uvTaskWrapper->Call([weak = WeakClaim(this), hostAbilityContext]() {
         auto renderer = weak.Upgrade();
         CHECK_NULL_VOID(renderer);
-        renderer->InitUiContent(hostAbilityContext.get(), hostJsContext);
+        renderer->InitUiContent(hostAbilityContext.get());
     });
 }
 
+RefPtr<SystemWindowScene> DynamicComponentRendererImpl::GetWindowScene()
+{
+    RefPtr<SystemWindowScene> hostPattern = nullptr;
+    auto host = host_.Upgrade();
+    CHECK_NULL_RETURN(host, hostPattern);
+    auto hostWindowNode = WindowSceneHelper::FindWindowScene(host);
+    CHECK_NULL_RETURN(hostWindowNode, hostPattern);
+    auto hostNode = AceType::DynamicCast<FrameNode>(hostWindowNode);
+    CHECK_NULL_RETURN(hostNode, hostPattern);
+    hostPattern = hostNode->GetPattern<SystemWindowScene>();
+    return hostPattern;
+}
+
+int32_t DynamicComponentRendererImpl::GetWindowSceneId()
+{
+    auto hostPattern = GetWindowScene();
+    CHECK_NULL_RETURN(hostPattern, INVALID_WINDOW_ID);
+    auto hostSession = hostPattern->GetSession();
+    CHECK_NULL_RETURN(hostSession, INVALID_WINDOW_ID);
+    return hostSession->GetPersistentId();
+}
+
+void DynamicComponentRendererImpl::BuildDynamicInitialConfig(
+    DynamicInitialConfig& dynamicInitialConfig)
+{
+    dynamicInitialConfig.hostInstanceId = hostInstanceId_;
+    dynamicInitialConfig.abcPath = isolatedInfo_.abcPath;
+    dynamicInitialConfig.hapPath = isolatedInfo_.resourcePath;
+    dynamicInitialConfig.entryPoint = isolatedInfo_.entryPoint;
+    dynamicInitialConfig.registerComponents = isolatedInfo_.registerComponents;
+    auto container = Platform::AceContainer::GetContainer(hostInstanceId_);
+    CHECK_NULL_VOID(container);
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    if (container->IsSceneBoardWindow()) {
+        dynamicInitialConfig.hostWindowInfo.focusWindowId = context->GetFocusWindowId();
+        dynamicInitialConfig.hostWindowInfo.realHostWindowId = static_cast<uint32_t>(GetWindowSceneId());
+    } else {
+        dynamicInitialConfig.hostWindowInfo.focusWindowId = context->GetFocusWindowId();
+        dynamicInitialConfig.hostWindowInfo.realHostWindowId = context->GetRealHostWindowId();
+    }
+}
+
 void DynamicComponentRendererImpl::InitUiContent(
-    OHOS::AbilityRuntime::Context *abilityContext, const std::shared_ptr<Framework::JsValue>& jsContext)
+    OHOS::AbilityRuntime::Context *abilityContext)
 {
     rendererDumpInfo_.ReSet();
     // create UI Content
@@ -212,8 +251,9 @@ void DynamicComponentRendererImpl::InitUiContent(
     uiContent_->SetUIContentType(uIContentType_);
     rendererDumpInfo_.createUiContenTime = GetCurrentTimestamp();
 
-    uiContent_->InitializeDynamic(hostInstanceId_,
-        isolatedInfo_.reourcePath, isolatedInfo_.abcPath, isolatedInfo_.entryPoint, isolatedInfo_.registerComponents);
+    DynamicInitialConfig dynamicInitialConfig;
+    BuildDynamicInitialConfig(dynamicInitialConfig);
+    uiContent_->InitializeDynamic(dynamicInitialConfig);
 
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(hostInstanceId_);
     if (runtimeContext) {
@@ -229,7 +269,7 @@ void DynamicComponentRendererImpl::InitUiContent(
     RegisterSizeChangedCallback();
     RegisterConfigChangedCallback();
     AttachRenderContext();
-    SetUIContentJsContext(jsContext);
+    SetUIContentJsContext();
     rendererDumpInfo_.limitedWorkerInitTime = GetCurrentTimestamp();
     TAG_LOGI(aceLogTag_, "foreground dynamic UI content");
     uiContent_->Foreground();
@@ -262,9 +302,10 @@ void DynamicComponentRendererImpl::RegisterContainerHandler()
     aceContainer->RegisterContainerHandler(containerHandler);
 }
 
-void DynamicComponentRendererImpl::SetUIContentJsContext(
-    const std::shared_ptr<Framework::JsValue>& jsContext)
+void DynamicComponentRendererImpl::SetUIContentJsContext()
 {
+    auto jsContext = hostJsContext_.lock();
+    CHECK_NULL_VOID(jsContext);
     CHECK_NULL_VOID(uiContent_);
     auto container = Container::GetContainer(uiContent_->GetInstanceId());
     CHECK_NULL_VOID(container);
@@ -297,6 +338,7 @@ void DynamicComponentRendererImpl::FireOnErrorCallback(
 
 void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
 {
+    CHECK_NULL_VOID(uiContent_);
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask(
@@ -367,6 +409,7 @@ void DynamicComponentRendererImpl::HandleCardSizeChangeEvent(const SizeF& size)
 
 void DynamicComponentRendererImpl::RegisterConfigChangedCallback()
 {
+    CHECK_NULL_VOID(uiContent_);
     auto hostExecutor = GetHostTaskExecutor();
     CHECK_NULL_VOID(hostExecutor);
     hostExecutor->PostTask(
@@ -397,9 +440,11 @@ void DynamicComponentRendererImpl::RegisterConfigChangedCallback()
 
 void DynamicComponentRendererImpl::UnRegisterConfigChangedCallback()
 {
+    CHECK_NULL_VOID(uiContent_);
     auto container = Platform::AceContainer::GetContainer(hostInstanceId_);
     CHECK_NULL_VOID(container);
     container->RemoveOnConfigurationChange(uiContent_->GetInstanceId());
+    container->RegisterContainerHandler(nullptr);
 }
 
 void DynamicComponentRendererImpl::AttachRenderContext()
@@ -414,6 +459,7 @@ void DynamicComponentRendererImpl::AttachRenderContext()
 
 void DynamicComponentRendererImpl::AttachRenderContextInIsolatedComponent()
 {
+    CHECK_NULL_VOID(uiContent_);
     auto taskExecutor = GetHostTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask([weak = host_, hostInstanceId = hostInstanceId_,
@@ -459,6 +505,7 @@ void DynamicComponentRendererImpl::AttachRenderContextInIsolatedComponent()
 
 void DynamicComponentRendererImpl::AttachRenderContextInDynamicComponent()
 {
+    CHECK_NULL_VOID(uiContent_);
     auto taskExecutor = GetHostTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask([weak = host_, hostInstanceId = hostInstanceId_,
@@ -496,6 +543,7 @@ void DynamicComponentRendererImpl::AttachRenderContextInDynamicComponent()
 
 void DynamicComponentRendererImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    CHECK_NULL_VOID(uiContent_);
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
@@ -670,6 +718,13 @@ void DynamicComponentRendererImpl::UpdateParentOffsetToWindow(const OffsetF& off
 
 void DynamicComponentRendererImpl::DestroyContent()
 {
+    OnDestroyContent();
+    AfterDestroyContent();
+}
+
+void DynamicComponentRendererImpl::OnDestroyContent()
+{
+    CHECK_NULL_VOID(uiContent_);
     UnRegisterConfigChangedCallback();
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -680,6 +735,10 @@ void DynamicComponentRendererImpl::DestroyContent()
             uiContent->Destroy();
         },
         TaskExecutor::TaskType::UI, "ArkUIDynamicComponentDestroy");
+}
+
+void DynamicComponentRendererImpl::AfterDestroyContent()
+{
     if (uIContentType_ == UIContentType::DYNAMIC_COMPONENT) {
         DeleteWorkerUsing(runtime_);
         return;
@@ -805,6 +864,8 @@ void DynamicComponentRendererImpl::NotifyForeground()
     if (isForeground_) {
         return;
     }
+
+    CHECK_NULL_VOID(uiContent_);
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     isForeground_ = true;
@@ -823,6 +884,8 @@ void DynamicComponentRendererImpl::NotifyBackground()
     if (!isForeground_) {
         return;
     }
+
+    CHECK_NULL_VOID(uiContent_);
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     isForeground_ = false;

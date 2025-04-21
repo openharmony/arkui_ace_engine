@@ -306,10 +306,12 @@ void HyperlinkPattern::OnMouseEvent(MouseInfo& info)
     CHECK_NULL_VOID(frame);
     auto frameId = frame->GetId();
     TouchEvent touchEvent;
+    auto frameOffset = GetHostFrameOffset();
+    CHECK_NULL_VOID(frameOffset);
 
     if (frame->IsOutOfTouchTestRegion(
-        { static_cast<float>(info.GetLocalLocation().GetX()) + GetHostFrameOffset()->GetX(),
-            static_cast<float>(info.GetLocalLocation().GetY()) + GetHostFrameOffset()->GetY() },
+        { static_cast<float>(info.GetLocalLocation().GetX()) + frameOffset->GetX(),
+            static_cast<float>(info.GetLocalLocation().GetY()) + frameOffset->GetY() },
         touchEvent)) {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         pipeline->FreeMouseStyleHoldNode(frameId);

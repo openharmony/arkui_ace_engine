@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/form/form_model_ng.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
-#include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> FormModelNG::CreateFrameNode(int32_t nodeId)

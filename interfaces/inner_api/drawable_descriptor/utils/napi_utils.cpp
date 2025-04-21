@@ -16,6 +16,7 @@
 #include "utils/napi_utils.h"
 
 #include <mutex>
+#include <string.h>
 #include <vector>
 
 #include "base/resource.h"
@@ -117,4 +118,4 @@ napi_value NapiUtils::CreateString(napi_env env, const char* str)
 }
 } // namespace Drawable
 } // namespace Ace
-} // namespace OHOS
+} // namespace OHOS

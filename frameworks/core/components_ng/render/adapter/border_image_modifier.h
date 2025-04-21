@@ -32,16 +32,9 @@ public:
 
     void Draw(RSDrawingContext& context) const override
     {
-#ifndef USE_ROSEN_DRAWING
-        std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /*unused*/) {} };
-        RSCanvas rsCanvas(&skCanvas);
-        CHECK_NULL_VOID(paintTask_);
-        paintTask_(rsCanvas);
-#else
         CHECK_NULL_VOID(context.canvas);
         CHECK_NULL_VOID(paintTask_);
         paintTask_(*context.canvas);
-#endif
     }
 
     void SetPaintTask(std::function<void(RSCanvas&)>&& paintTask)

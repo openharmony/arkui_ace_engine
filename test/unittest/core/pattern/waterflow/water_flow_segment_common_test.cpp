@@ -946,7 +946,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, Multi001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Multi001
+ * @tc.name: Spring001
  * @tc.desc: Test spring bounce-back offset.
  * @tc.type: FUNC
  */
@@ -1248,5 +1248,62 @@ HWTEST_F(WaterFlowSegmentCommonTest, SafeAreaExpand001, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->expandHeight_, 100.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 4);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 11);
+}
+
+/**
+ * @tc.name: ResetSection001
+ * @tc.desc: update section then make sections null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, ResetSection001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(30, [](int32_t i) { return 100.0f; });
+    model.SetCachedCount(3);
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateDone();
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_12);
+    FlushUITasks();
+
+    std::vector<WaterFlowSections::Section> newSection = { WaterFlowSections::Section {
+        .itemsCount = 3, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC, .crossCount = 1, .margin = MARGIN_1 } };
+    secObj->ChangeData(0, 1, newSection);
+
+    // set this.sections null, trigger ResetSections.
+    pattern_->ResetSections();
+    EXPECT_EQ(pattern_->sections_, nullptr);
+    FlushUITasks();
+}
+
+/**
+ * @tc.name: ReachEnd001
+ * @tc.desc: Test ReachEnd when there has bottom margin in the last section.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, ReachEnd001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(30, [](int32_t i) { return 100.0f; });
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    bool reached = false;
+    model.SetOnReachEnd([&reached]() { reached = true; });
+    CreateDone();
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_12);
+    FlushUITasks();
+
+    UpdateCurrentOffset(-5000.0f);
+    EXPECT_EQ(GetChildRect(frameNode_, 29).Bottom(), 795.0f);
+    EXPECT_TRUE(reached);
+    reached = false;
+
+    UpdateCurrentOffset(2.0f);
+    EXPECT_FALSE(reached);
+
+    UpdateCurrentOffset(-2.0f);
+    EXPECT_TRUE(reached);
 }
 } // namespace OHOS::Ace::NG

@@ -39,18 +39,37 @@
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/event/focus_box.h"
+#include "core/components_ng/event/focus_event_handler.h"
 #include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/menu_property.h"
 #include "core/components_ng/property/overlay_property.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
 
+namespace OHOS::Rosen {
+class VisualEffect;
+class Filter;
+class BrightnessBlender;
+} // namespace OHOS::Rosen
+
+namespace OHOS::Ace {
+class ImageSourceInfo;
+class BasicShape;
+class SpanString;
+}
+
 namespace OHOS::Ace::NG {
+struct AttractionEffect;
+using TransitionFinishCallback = std::function<void(bool)>;
+
 struct OptionParam {
     std::string value;
     std::string icon;
@@ -156,12 +175,12 @@ public:
     static void SetBackgroundImageSyncMode(bool syncMode);
     static void SetBackgroundImageSize(const BackgroundImageSize &bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition &bgImgPosition);
-    static void SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle);
-    static void SetMotionBlur(const MotionBlurOption &motionBlurOption);
-    static void SetBackgroundEffect(const EffectOption &effectOption);
+    static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions());
+    static void SetMotionBlur(const MotionBlurOption& motionBlurOption);
+    static void SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions());
     static void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice);
     static void SetForegroundEffect(float radius);
-    static void SetForegroundBlurStyle(const BlurStyleOption &fgBlurStyle);
+    static void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions = SysOptions());
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption &option);
     static void SetLightUpEffect(double radio);
@@ -224,14 +243,16 @@ public:
     static void SetBackgroundAlign(FrameNode *frameNode, const std::optional<Alignment>& align);
 
     // decoration
-    static void SetBackdropBlur(const Dimension &radius, const BlurOption &blurOption);
+    static void SetBackdropBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions());
     static void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara);
     static void SetDynamicLightUp(float rate, float lightUpDegree);
     static void SetBgDynamicBrightness(const BrightnessOption& brightnessOption);
     static void SetFgDynamicBrightness(const BrightnessOption& brightnessOption);
     static void SetDynamicDim(float DimDegree);
-    static void SetFrontBlur(const Dimension &radius, const BlurOption &blurOption);
-    static void SetBackShadow(const Shadow &shadow);
+    static void SetFrontBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions());
+    static void SetBackShadow(const Shadow& shadow);
     static void SetBlendMode(BlendMode blendMode);
     static void SetBlendApplyType(BlendApplyType blendApplyType);
     static void SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender);
@@ -374,6 +395,14 @@ public:
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
         const RefPtr<UINode> &customNode);
+    static void BindTips(
+        const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<SpanString>& spanString);
+    static void HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
+        PopupInfo& tipsInfo, bool showInSubWindow, const RefPtr<SpanString>& spanString);
+    static void AddHoverEventForTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
+        PopupInfo& tipsInfo, bool showInSubWindow);
+    static void UpdateTipsInfo(PopupInfo& tipsInfo, int32_t popupId, const RefPtr<FrameNode>& popupNode,
+        const RefPtr<PopupParam>& param, bool isAvoidKeyboard);
     static RefPtr<OverlayManager> GetCurOverlayManager(const RefPtr<UINode>& node);
     static bool GetTargetNodeIsInSubwindow(const RefPtr<UINode>& targetNode);
     static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
@@ -562,8 +591,9 @@ public:
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
-    static void SetBackdropBlur(FrameNode* frameNode, const std::optional<Dimension>& radius, const std::optional<BlurOption> &blurOption);
-    static void SetNodeBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
+    static void SetBackdropBlur(FrameNode* frameNode, const std::optional<Dimension>& radius,
+        const std::optional<BlurOption> &blurOption, const SysOptions& sysOptions = SysOptions());
+    static void SetNodeBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption);
     static void SetInvert(FrameNode* frameNode, const std::optional<InvertVariant>& invert);
     static void SetSepia(FrameNode* frameNode, const std::optional<Dimension>& sepia);
     static void SetSaturate(FrameNode* frameNode, const std::optional<Dimension>& saturate);
@@ -571,7 +601,8 @@ public:
     static void SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale);
     static void SetContrast(FrameNode* frameNode, const std::optional<Dimension>& contrast);
     static void SetBrightness(FrameNode* frameNode, const std::optional<Dimension>& brightness);
-    static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
+    static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption,
+        const SysOptions& sysOptions = SysOptions());
     static void SetHueRotate(FrameNode* frameNode, const std::optional<float>& hueRotate);
     static void SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient);
@@ -584,11 +615,13 @@ public:
     static void SetHasBorderImageOutset(FrameNode* frameNode, bool tag);
     static void SetHasBorderImageRepeat(FrameNode* frameNode, bool tag);
     static void SetBorderImageGradient(FrameNode* frameNode, const NG::Gradient& gradient);
-    static void SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle);
+    static void SetForegroundBlurStyle(
+        FrameNode* frameNode, const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions = SysOptions());
     static void SetLinearGradientBlur(FrameNode* frameNode, const std::optional<NG::LinearGradientBlurPara>& blurPara);
     static void SetMagnifier(FrameNode* frameNode, const MagnifierParams& magnifierOffset);
     static void ReSetMagnifier(FrameNode* frameNode);
-    static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
+    static void SetBackgroundBlurStyle(
+        FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions());
     static void SetBackgroundImagePosition(FrameNode* frameNode, const BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundImageSize(FrameNode* frameNode, const std::optional<BackgroundImageSize>& bgImgSize);
     static void SetBackgroundImage(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
@@ -663,7 +696,8 @@ public:
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
     static void SetMotionBlur(FrameNode* frameNode, const std::optional<MotionBlurOption>& motionBlurOption);
     static void SetForegroundEffect(FrameNode* frameNode, const std::optional<float>& radius);
-    static void SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption);
+    static void SetBackgroundEffect(
+        FrameNode* frameNode, const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions());
     static void SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
     static void SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree);
     static void SetBgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
@@ -891,6 +925,35 @@ public:
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
     static void SetDrawModifier(FrameNode* frameNode, const RefPtr<NG::DrawModifier>& drawModifier);
     static void RegisterOEMVisualEffect(OEMVisualEffectFunc func);
+    static void SetPrivacySensitive(FrameNode* frameNode, bool flag);
+
+    static void SetJSFrameNodeOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
+    static void ClearJSFrameNodeOnReachStart(FrameNode* frameNode);
+    static void SetJSFrameNodeOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
+    static void ClearJSFrameNodeOnReachEnd(FrameNode* frameNode);
+    static void SetJSFrameNodeOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
+    static void ClearJSFrameNodeOnScrollStart(FrameNode* frameNode);
+    static void SetJSFrameNodeOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
+    static void ClearJSFrameNodeOnScrollStop(FrameNode* frameNode);
+    static void SetJSFrameNodeOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
+    static void ClearJSFrameNodeOnScrollFrameBegin(FrameNode* frameNode);
+    static void SetJSFrameNodeOnWillScroll(FrameNode* frameNode, OnWillScrollEvent&& onWillScroll);
+    static void ClearJSFrameNodeOnWillScroll(FrameNode* frameNode);
+    static void SetJSFrameNodeOnDidScroll(FrameNode* frameNode, OnScrollEvent&& onDidScroll);
+    static void ClearJSFrameNodeOnDidScroll(FrameNode* frameNode);
+    static void SetJSFrameNodeOnListScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex);
+    static void ClearJSFrameNodeOnListScrollIndex(FrameNode* frameNode);
+    static void SetJSFrameNodeOnScrollVisibleContentChange(
+        FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange);
+    static void ClearJSFrameNodeOnScrollVisibleContentChange(FrameNode* frameNode);
+    static void SetJSFrameNodeOnScrollWillScroll(FrameNode* frameNode, ScrollEventWithReturn&& onWillScroll);
+    static void ClearJSFrameNodeOnScrollWillScroll(FrameNode* frameNode);
+    static void SetJSFrameNodeOnScrollDidScroll(FrameNode* frameNode, ScrollEventWithState&& onDidScroll);
+    static void ClearJSFrameNodeOnScrollDidScroll(FrameNode* frameNode);
+    static void SetJSFrameNodeOnGridScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex);
+    static void ClearJSFrameNodeOnGridScrollIndex(FrameNode* frameNode);
+    static void SetJSFrameNodeOnWaterFlowScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex);
+    static void ClearJSFrameNodeOnWaterFlowScrollIndex(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();

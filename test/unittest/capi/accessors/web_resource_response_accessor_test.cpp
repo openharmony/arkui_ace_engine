@@ -134,7 +134,8 @@ HWTEST_F(WebResourceResponseAccessorTest, getResponseDataEx2Test, TestSize.Level
         .id = Converter::ArkValue<Ark_Number>(8)
     };
 
-    auto dataBuffer = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Buffer>("buffer");
+    auto testStr = std::string("buffer");
+    auto dataBuffer = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Buffer>(testStr);
     auto dataRes = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Resource>(resource);
 
     accessor_->setResponseData(peer_, &dataBuffer);
@@ -147,7 +148,7 @@ HWTEST_F(WebResourceResponseAccessorTest, getResponseDataEx2Test, TestSize.Level
         [](const auto& value) {},
         []() {}
     );
-    EXPECT_EQ(bufResult, "buffer");
+    EXPECT_EQ(bufResult, testStr);
 
     accessor_->setResponseData(peer_, &dataRes);
     data = accessor_->getResponseDataEx(peer_);

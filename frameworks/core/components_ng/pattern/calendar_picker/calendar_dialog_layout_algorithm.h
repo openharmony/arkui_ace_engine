@@ -33,7 +33,7 @@ private:
     float GetYearRowHeight(RefPtr<FrameNode>& columnNode);
     float GetButtonColumnHeight(RefPtr<FrameNode>& columnNode);
     float GetCalendarHeight(RefPtr<UINode>& calendarNode);
-    void FireIsFoldStatusChanged(RefPtr<FrameNode>& calendarMonthNode);
+    void FireIsFoldStatusChanged(RefPtr<UINode>& swiperNode);
     ACE_DISALLOW_COPY_AND_MOVE(CalendarDialogLayoutAlgorithm);
 };
 

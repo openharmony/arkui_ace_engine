@@ -94,7 +94,7 @@ public:
     bool HasDifferentDirectionGesture();
 
     bool OnNonPointerEvent(const NonPointerEvent& event);
-    bool DispatchTouchEvent(const TouchEvent& point, bool sendOnTouch = true);
+    ACE_NON_VIRTUAL bool DispatchTouchEvent(const TouchEvent& point, bool sendOnTouch = true);
     bool DispatchTouchEvent(const AxisEvent& event, bool sendOnTouch = true);
     void DispatchTouchCancelToRecognizer(
         TouchEventTarget* touchEventTarget, const std::vector<std::pair<int32_t, TouchTestResult::iterator>>& items);
@@ -183,6 +183,9 @@ public:
         mouseStyleManager_->VsyncMouseFormat();
     }
 
+    bool TryResampleTouchEvent(std::vector<TouchEvent>& history,
+        const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& resample);
+
     bool GetResampleTouchEvent(const std::vector<TouchEvent>& history,
         const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& newTouchEvent);
 
@@ -231,6 +234,8 @@ public:
     }
 
     void DumpEvent(NG::EventTreeType type, bool hasJson = false);
+
+    void DumpEventWithCount(const std::vector<std::string>& params, NG::EventTreeType type, bool hasJson = false);
 
     void AddGestureSnapshot(
         int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target, NG::EventTreeType type);
@@ -311,7 +316,7 @@ public:
         idToTouchPoints_ = std::move(idToTouchPoint);
     }
 
-    inline const std::unordered_map<int32_t, uint64_t>& GetLastDispatchTime() const
+    inline std::unordered_map<int32_t, uint64_t>& GetLastDispatchTime()
     {
         return lastDispatchTime_;
     }
@@ -334,6 +339,9 @@ public:
     void NotifyDragTouchEventListener(const TouchEvent& dragPointerEvent);
 
     void AddToMousePendingRecognizers(const WeakPtr<NG::NGGestureRecognizer>& recognizer);
+
+    template<typename T>
+    bool CheckDifferentTargetDisplay(const std::vector<T>& historyEvents, const std::vector<T>& events);
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,

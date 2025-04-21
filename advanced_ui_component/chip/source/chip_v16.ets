@@ -621,19 +621,22 @@ export struct ChipComponent {
     .onFocus(() => {
       if (this.isSuffixIconFocusStyleCustomized) {
         this.chipNodeInFocus = true;
-        this.chipScale = {
-          x: this.resourceToNumber(this.theme.chipNode.focusBtnScaleX, 1),
-          y: this.resourceToNumber(this.theme.chipNode.focusBtnScaleY, 1),
-        };
       }
+      this.chipZoomIn();
     })
     .onBlur(() => {
       if (this.isSuffixIconFocusStyleCustomized) {
         this.chipNodeInFocus = false;
-        this.chipScale = {
-          x: 1, y: 1
-        };
       }
+      this.chipZoomOut();
+    })
+    .hoverStyle()
+  }
+
+  @Styles
+  hoverStyle() {
+    .onHover(!this.isSuffixIconFocusStyleCustomized ? undefined : (isHover: boolean) => {
+      isHover ? this.chipZoomIn() : this.chipZoomOut();
     })
   }
 
@@ -1187,6 +1190,23 @@ export struct ChipComponent {
       return false;
     }
     return Number.parseInt(matches[1], 10) >= 0;
+  }
+
+  private chipZoomOut() {
+    if (this.isSuffixIconFocusStyleCustomized) {
+      this.chipScale = {
+        x: 1, y: 1
+      };
+    }
+  }
+
+  private chipZoomIn() {
+    if (this.isSuffixIconFocusStyleCustomized) {
+      this.chipScale = {
+        x: this.resourceToNumber(this.theme.chipNode.focusBtnScaleX, 1),
+        y: this.resourceToNumber(this.theme.chipNode.focusBtnScaleY, 1),
+      };
+    }
   }
 
   build() {

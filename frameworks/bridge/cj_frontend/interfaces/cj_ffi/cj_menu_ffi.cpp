@@ -95,7 +95,7 @@ void FfiOHOSAceFrameworkMenuSetItemDivider(DividerParams dividerParams, bool has
             divider.endMargin.Reset();
         }
     }
-    MenuModel::GetInstance()->SetItemDivider(divider);
+    MenuModel::GetInstance()->SetItemDivider(divider, DividerMode::FLOATING_ABOVE_MENU);
 }
 
 void FfiOHOSAceFrameworkMenuSetItemGroupDivider(DividerParams dividerParams, bool hasValue)
@@ -125,7 +125,7 @@ void FfiOHOSAceFrameworkMenuSetItemGroupDivider(DividerParams dividerParams, boo
             divider.endMargin.SetUnit(DimensionUnit::INVALID);
         }
     }
-    MenuModel::GetInstance()->SetItemGroupDivider(divider);
+    MenuModel::GetInstance()->SetItemGroupDivider(divider, DividerMode::FLOATING_ABOVE_MENU);
 }
 
 void FfiOHOSAceFrameworkMenuSetExpandingMode(int32_t mode)

@@ -65,6 +65,9 @@ public:
         isEntry_ = info->GetIsEntry();
     }
 
+    virtual void OpenScope() {}
+    virtual void CloseScope() {}
+
 protected:
     std::string name_;
     bool isEntry_ = false;

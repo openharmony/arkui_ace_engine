@@ -91,6 +91,8 @@ const std::shared_ptr<AAFwk::Want> SessionWrapperImpl::GetWant()
     return std::make_shared<AAFwk::Want>(want);
 }
 
+void SessionWrapperImpl::UpdateInstanceId(int32_t instanceId) {}
+
 bool SessionWrapperImpl::NotifyFocusEventSync(bool isFocus)
 {
     return true;
@@ -292,4 +294,6 @@ bool SessionWrapperImpl::SendBusinessData(
 }
 
 void SessionWrapperImpl::NotifyHostWindowMode(int32_t mode) {}
+
+void SessionWrapperImpl::ReDispatchWantParams() {}
 } // namespace OHOS::Ace::NG

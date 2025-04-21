@@ -717,12 +717,13 @@ void ScrollBarPattern::InitPanRecognizer()
     PanDirection panDirection;
     panDirection.type = axis_ == Axis::HORIZONTAL ? PanDirection::HORIZONTAL : PanDirection::VERTICAL;
     const static int32_t PLATFORM_VERSION_TEN = 10;
-    float distance = DEFAULT_PAN_DISTANCE.Value();
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.Value() } };
     auto context = GetContext();
     if (context && (context->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN)) {
-        distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
+        distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+            { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
     }
-    panRecognizer_ = MakeRefPtr<PanRecognizer>(1, panDirection, distance);
+    panRecognizer_ = MakeRefPtr<PanRecognizer>(1, panDirection, distanceMap);
     panRecognizer_->SetOnActionUpdate([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scrollBar = weakBar.Upgrade();
         if (scrollBar) {
@@ -882,14 +883,7 @@ void ScrollBarPattern::OnCollectClickTarget(const OffsetF& coordinateOffset,
         clickRecognizer_->AttachFrameNode(frameNode);
         clickRecognizer_->SetTargetComponent(targetComponent);
         clickRecognizer_->SetIsSystemGesture(true);
-        clickRecognizer_->SetRecognizerType(GestureTypeName::BOXSELECT);
-        clickRecognizer_->SetSysGestureJudge([](const RefPtr<GestureInfo>& gestureInfo,
-                                                 const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
-            auto inputEventType = gestureInfo->GetInputEventType();
-            TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "input event type:%{public}d", inputEventType);
-            return inputEventType == InputEventType::MOUSE_BUTTON ? GestureJudgeResult::CONTINUE
-                                                                  : GestureJudgeResult::REJECT;
-        });
+        clickRecognizer_->SetRecognizerType(GestureTypeName::CLICK);
         result.emplace_front(clickRecognizer_);
         responseLinkResult.emplace_back(clickRecognizer_);
     }
@@ -922,6 +916,9 @@ void ScrollBarPattern::OnCollectLongPressTarget(const OffsetF& coordinateOffset,
 void ScrollBarPattern::InitClickEvent()
 {
     clickRecognizer_ = AceType::MakeRefPtr<ClickRecognizer>();
+    std::set<SourceTool> allowedTypes = { SourceTool::MOUSE };
+    auto gestureInfo = MakeRefPtr<GestureInfo>(allowedTypes);
+    clickRecognizer_->SetGestureInfo(gestureInfo);
     clickRecognizer_->SetOnClick([weakBar = AceType::WeakClaim(this)](const ClickInfo&) {
         auto scrollBar = weakBar.Upgrade();
         if (scrollBar) {

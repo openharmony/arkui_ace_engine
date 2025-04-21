@@ -123,7 +123,7 @@ void JSIndexer::Create(const JSCallbackInfo& args, bool isArc)
         JSIndexerTheme::ApplyTheme();
         JSRef<JSVal> changeEventVal = paramObj->GetProperty("$selected");
         ParseIndexerSelectedObject(args, changeEventVal);
-    } else if (length > 0 && selectedProperty->IsObject()) {
+    } else if (!isArc && length > 0 && selectedProperty->IsObject()) {
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
         auto selectedValueProperty = selectedObj->GetProperty("value");
         if (selectedValueProperty->IsNumber()) {

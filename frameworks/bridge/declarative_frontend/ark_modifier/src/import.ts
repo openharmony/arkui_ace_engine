@@ -58,6 +58,7 @@
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/image_span.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/index-full.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/lazy_for_each.d.ts" />
+/// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/lazy_grid_layout.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/line.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/list.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/list_item.d.ts" />

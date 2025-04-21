@@ -136,6 +136,45 @@ void OH_ArkUI_KeyEvent_Dispatch(ArkUI_NodeHandle node, const ArkUI_UIInputEvent*
     auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->dispatchKeyEvent(node->uiNodeHandle, keyEvent);
 }
+
+ArkUI_ErrorCode OH_ArkUI_KeyEvent_IsNumLockOn(const ArkUI_UIInputEvent* event, bool* state)
+{
+    if (!event || !state) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
+    if (!keyEvent) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *state = keyEvent->isNumLockOn;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_KeyEvent_IsCapsLockOn(const ArkUI_UIInputEvent* event, bool* state)
+{
+    if (!event || !state) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
+    if (!keyEvent) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *state = keyEvent->isCapsLockOn;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_KeyEvent_IsScrollLockOn(const ArkUI_UIInputEvent* event, bool* state)
+{
+    if (!event || !state) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
+    if (!keyEvent) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *state = keyEvent->isScrollLockOn;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
 #ifdef __cplusplus
 };
 #endif

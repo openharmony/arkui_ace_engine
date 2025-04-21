@@ -364,6 +364,13 @@ void SelectModelNG::SetMenuAlign(const MenuAlign& menuAlign)
     pattern->SetMenuAlign(menuAlign);
 }
 
+void SelectModelNG::SetAvoidance(AvoidanceMode mode)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetAvoidance(mode);
+}
+
 void SelectModelNG::SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent)
 {
     auto hub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SelectEventHub>();
@@ -423,6 +430,15 @@ void SelectModelNG::SetDivider(const NG::SelectDivider& divider)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetDivider(divider);
+    pattern->SetDividerMode(std::nullopt);
+}
+
+void SelectModelNG::SetDividerStyle(const NG::SelectDivider& divider, const DividerMode& mode)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDivider(divider);
+    pattern->SetDividerMode(mode);
 }
 
 void SelectModelNG::SetDivider(FrameNode* frameNode, const std::optional<NG::SelectDivider>& divider)
@@ -430,6 +446,35 @@ void SelectModelNG::SetDivider(FrameNode* frameNode, const std::optional<NG::Sel
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetDivider(divider);
+    pattern->SetDividerMode(std::nullopt);
+}
+
+void SelectModelNG::SetDividerStyle(FrameNode* frameNode, const NG::SelectDivider& divider, const DividerMode& mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDivider(divider);
+    pattern->SetDividerMode(mode);
+}
+
+void SelectModelNG::ResetDividerStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto selectTheme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    NG::SelectDivider divider;
+    Dimension defaultMargin = -1.0_vp;
+    divider.strokeWidth = selectTheme->GetDefaultDividerWidth();
+    divider.color = selectTheme->GetLineColor();
+    divider.startMargin = defaultMargin;
+    divider.endMargin = defaultMargin;
+    pattern->SetDivider(divider);
+    pattern->SetDividerMode(std::nullopt);
 }
 
 void SelectModelNG::SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize)
@@ -472,7 +517,7 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
     auto select = AceType::Claim(frameNode);
     SetSelectDefaultSize(select);
     auto pattern = select->GetPattern<SelectPattern>();
-    
+
     CHECK_NULL_VOID(pattern);
     auto* pipeline = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
@@ -484,7 +529,7 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
         paddings.right = NG::CalcLength(pattern->GetSelectLeftRightMargin());
         ViewAbstract::SetPadding(frameNode, paddings);
     }
-    
+
     pattern->BuildChild();
     // create menu node
     if (!pattern->GetMenuNode()) {
@@ -549,6 +594,13 @@ void SelectModelNG::SetMenuAlign(FrameNode* frameNode, const MenuAlign& menuAlig
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetMenuAlign(menuAlign);
+}
+
+void SelectModelNG::SetAvoidance(FrameNode* frameNode, AvoidanceMode mode)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetAvoidance(mode);
 }
 
 void SelectModelNG::SetValue(FrameNode* frameNode, const std::optional<std::string>& value)
@@ -834,5 +886,49 @@ void SelectModelNG::ResetBackgroundColor()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SelectPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER);
     ACE_RESET_RENDER_CONTEXT(RenderContext, BackgroundColor);
+}
+
+void SelectModelNG::SetMenuOutline(const MenuParam& menuParam)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuOutline(menuParam);
+}
+
+void SelectModelNG::SetMenuOutline(FrameNode* frameNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuOutline(menuParam);
+}
+
+void SelectModelNG::SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTextModifierApply(textApply);
+}
+
+void SelectModelNG::SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetArrowModifierApply(arrowApply);
+}
+
+void SelectModelNG::SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionTextModifier(optionApply);
+}
+
+void SelectModelNG::SetSelectedOptionTextModifier(
+    const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedOptionTextModifier(optionSelectedApply);
 }
 } // namespace OHOS::Ace::NG

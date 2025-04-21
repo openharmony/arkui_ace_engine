@@ -92,7 +92,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern002, TestSize.Level1)
         (*callback)(info);
     }
     EXPECT_TRUE(indicatorPattern->isClicked_);
-    EXPECT_EQ(indicatorPattern->mouseClickIndex_, std::nullopt);
+    EXPECT_EQ(indicatorPattern->mouseClickIndex_, 0);
 }
 
 /**
@@ -803,7 +803,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern020, TestSize.Level1)
     ASSERT_NE(indicatorPattern, nullptr);
     ASSERT_NE(pattern_, nullptr);
 
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
 

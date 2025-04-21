@@ -417,7 +417,7 @@ class RenderNode {
   private shadowRadiusValue: number;
   private transformValue: Transform;
   private translationValue: Vector2;
-  private baseNode_: __JSBaseNode__;
+  private baseNode_: BaseNode;
   private borderStyleValue: EdgeStyles;
   private borderWidthValue: EdgeWidths;
   private borderColorValue: EdgeColors;

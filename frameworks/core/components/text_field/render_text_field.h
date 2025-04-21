@@ -172,6 +172,7 @@ public:
     void DeleteLeft();
     void DeleteRight();
     void InsertValueDone(const std::string& appendElement);
+    void SyncGeometryProperties() override;
 
     void SetInputFilter(const std::string& inputFilter)
     {
@@ -728,7 +729,7 @@ private:
 
     // distribute
     void ApplyRestoreInfo();
-    void OnTapCallback();
+    void OnTapCallback(const TouchEventInfo& info);
     virtual double GetRealTextWidth() const
     {
         return 0;

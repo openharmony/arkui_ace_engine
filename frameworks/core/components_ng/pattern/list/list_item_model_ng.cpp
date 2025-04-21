@@ -328,14 +328,6 @@ void ListItemModelNG::SetSelectChangeEvent(FrameNode* frameNode, OnSelectFunc&& 
     eventHub->SetSelectChangeEvent(std::move(changeEvent));
 }
 
-void ListItemModelNG::SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemStyle>& style)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ListItemPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetListItemStyle(style.value_or(V2::ListItemStyle::NONE));
-}
-
 void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& builderComponent, OnDeleteEvent&& onDelete,
     OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
     OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea, NG::FrameNode* node)
@@ -360,9 +352,18 @@ void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& build
         ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length);
     }
 }
+
 void ListItemModelNG::SetAutoScale(FrameNode* frameNode, bool autoScale)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ArcListItemLayoutProperty, AutoScale, autoScale, frameNode);
+}
+
+void ListItemModelNG::SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemStyle>& style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetListItemStyle(style.value_or(V2::ListItemStyle::NONE));
 }
 } // namespace OHOS::Ace::NG

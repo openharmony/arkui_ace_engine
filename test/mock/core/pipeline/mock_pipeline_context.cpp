@@ -28,6 +28,7 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
 
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
 
@@ -137,6 +138,8 @@ constexpr double DISPLAY_WIDTH = 720;
 constexpr double DISPLAY_HEIGHT = 1280;
 static std::list<PipelineContext::PredictTask> predictTasks_;
 static Rect windowRect_;
+static bool g_isDragging = false;
+static bool hasModalButtonsRect_;
 } // namespace
 
 RefPtr<MockPipelineContext> MockPipelineContext::pipeline_;
@@ -144,7 +147,7 @@ RefPtr<MockPipelineContext> MockPipelineContext::pipeline_;
 // mock_pipeline_context =======================================================
 void MockPipelineContext::SetUp()
 {
-    pipeline_ = AceType::MakeRefPtr<MockPipelineContext>();
+    pipeline_ = AceType::MakeRefPtr<::testing::NiceMock<MockPipelineContext>>();
     pipeline_->eventManager_ = AceType::MakeRefPtr<EventManager>();
     pipeline_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
@@ -153,6 +156,7 @@ void MockPipelineContext::SetUp()
     pipeline_->SetupRootElement();
     pipeline_->fontManager_ = MockFontManager::Create();
     windowRect_ = { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
+    hasModalButtonsRect_ = true;
 }
 
 void MockPipelineContext::TearDown()
@@ -188,6 +192,11 @@ void MockPipelineContext::SetDensity(double density)
 void MockPipelineContext::SetInstanceId(int32_t instanceId)
 {
     pipeline_->instanceId_ = instanceId;
+}
+
+void MockPipelineContext::SetContainerModalButtonsRect(bool hasModalButtonsRect)
+{
+    hasModalButtonsRect_ = hasModalButtonsRect;
 }
 
 void MockPipelineContext::SetCurrentWindowRect(Rect rect)
@@ -305,7 +314,7 @@ void PipelineContext::SendEventToAccessibilityWithNode(
 {}
 
 void PipelineContext::OnTouchEvent(
-    const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe, bool isEventsPassThrough)
+    const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe)
 {}
 
 void PipelineContext::ReDispatch(KeyEvent& keyEvent) {}
@@ -316,7 +325,7 @@ void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, cons
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node) {}
 
-void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe, bool isEventsPassThrough) {}
+void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 
 void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
@@ -355,9 +364,15 @@ void PipelineContext::OnHide() {}
 
 void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId) {}
 
-void PipelineContext::AddWindowStateChangedCallback(int32_t nodeId) {}
+void PipelineContext::AddWindowStateChangedCallback(int32_t nodeId)
+{
+    onWindowStateChangedCallbacks_.emplace(nodeId);
+}
 
-void PipelineContext::RemoveWindowStateChangedCallback(int32_t nodeId) {}
+void PipelineContext::RemoveWindowStateChangedCallback(int32_t nodeId)
+{
+    onWindowStateChangedCallbacks_.erase(nodeId);
+}
 
 void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
@@ -417,8 +432,6 @@ void PipelineContext::FlushBuild()
     FlushBuildFinishCallbacks();
 }
 
-void PipelineContext::FlushDirtyNodeUpdate() {}
-
 void PipelineContext::FlushBuildFinishCallbacks()
 {
     decltype(buildFinishCallbacks_) buildFinishCallbacks(std::move(buildFinishCallbacks_));
@@ -434,6 +447,8 @@ void PipelineContext::NotifyMemoryLevel(int32_t level) {}
 void PipelineContext::FlushMessages() {}
 
 void PipelineContext::FlushModifier() {}
+
+void PipelineContext::FlushDirtyNodeUpdate() {}
 
 void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
 {
@@ -822,7 +837,7 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool 
         safeAreaManager_->UpdateScbNavSafeArea(navSafeArea);
         return;
     }
-    safeAreaManager_->UpdateNavArea(navSafeArea);
+    safeAreaManager_->UpdateNavSafeArea(navSafeArea);
 }
 
 KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
@@ -834,7 +849,9 @@ void PipelineContext::SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {};
 
 bool PipelineContext::UsingCaretAvoidMode()
 {
-    return false;
+    CHECK_NULL_RETURN(safeAreaManager_, false);
+    return safeAreaManager_->GetKeyBoardAvoidMode() == KeyBoardAvoidMode::OFFSET_WITH_CARET ||
+        safeAreaManager_->GetKeyBoardAvoidMode() == KeyBoardAvoidMode::RESIZE_WITH_CARET;
 }
 
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
@@ -928,10 +945,13 @@ void PipelineContext::OpenFrontendAnimation(
 
 bool PipelineContext::IsDragging() const
 {
-    return false;
+    return g_isDragging;
 }
 
-void PipelineContext::SetIsDragging(bool isDragging) {}
+void PipelineContext::SetIsDragging(bool isDragging)
+{
+    g_isDragging = isDragging;
+}
 
 void PipelineContext::ResetDragging() {}
 
@@ -1025,7 +1045,12 @@ int32_t PipelineContext::GetContainerModalTitleHeight()
 
 bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
 {
-    return true;
+    return hasModalButtonsRect_;
+}
+
+ColorMode PipelineContext::GetColorMode() const
+{
+    return MockContainer::mockColorMode_;
 }
 
 } // namespace OHOS::Ace::NG
@@ -1155,7 +1180,8 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
     if (instanceId_ == IGNORE_POSITION_TRANSITION_SWITCH) {
         return nullptr;
     }
-    static RefPtr<AccessibilityManager> testAccessibilityManager = AceType::MakeRefPtr<MockAccessibilityManager>();
+    static RefPtr<AccessibilityManager> testAccessibilityManager =
+        AceType::MakeRefPtr<::testing::NiceMock<MockAccessibilityManager>>();
     return testAccessibilityManager;
 }
 
@@ -1329,7 +1355,7 @@ void NG::PipelineContext::SetDisplayWindowRectInfo(const Rect& displayWindowRect
 {
     auto offSetPosX_ = displayWindowRectInfo_.Left() - displayWindowRectInfo.Left();
     auto offSetPosY_ = displayWindowRectInfo_.Top() - displayWindowRectInfo.Top();
-    if (offSetPosX_ != 0.0 || offSetPosY_ != 0.0) {
+    if (!NearZero(offSetPosX_) || !NearZero(offSetPosY_)) {
         if (lastMouseEvent_) {
             lastMouseEvent_->x += offSetPosX_;
             lastMouseEvent_->y += offSetPosY_;
@@ -1343,9 +1369,9 @@ void NG::PipelineContext::SetIsTransFlag(bool result)
     isTransFlag_ = result;
 }
 
-void NG::PipelineContext::SetIsWindowSizeChangeFlag(bool result)
+void NG::PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
 {
-    isWindowSizeChangeFlag = result;
+    windowSizeChangeReason_ = reason;
 }
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

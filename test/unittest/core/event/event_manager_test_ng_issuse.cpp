@@ -839,7 +839,7 @@ HWTEST_F(EventManagerTestNg, MouseLocationTest001, TestSize.Level1)
     event.y = 200.0f;
     event.action = MouseAction::PRESS;
     eventManager->DispatchMouseEventNG(event);
-    EXPECT_EQ(mouseInfo.GetLocalLocation().GetX(), 300.0f);
+    EXPECT_EQ(mouseInfo.GetLocalLocation().GetX(), 200.0f);
     EXPECT_EQ(mouseInfo.GetLocalLocation().GetY(), 200.0f);
 }
 
@@ -871,7 +871,7 @@ HWTEST_F(EventManagerTestNg, MouseLocationTest002, TestSize.Level1)
      * @tc.expected: eventManager is not null.
      */
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
 

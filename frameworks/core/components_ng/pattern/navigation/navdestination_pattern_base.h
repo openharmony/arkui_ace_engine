@@ -48,6 +48,25 @@ public:
     }
 
     void SetToolBarStyle(const std::optional<BarStyle>& barStyle);
+    void SetMenuOptions(NavigationMenuOptions&& opt)
+    {
+        menuOptions_ = std::move(opt);
+    }
+
+    NavigationMenuOptions GetMenuOptions() const
+    {
+        return menuOptions_;
+    }
+
+    void SetToolBarMenuOptions(NavigationMenuOptions& opt)
+    {
+        menuOptions_ = opt;
+    }
+
+    NavigationMenuOptions GetToolBarMenuOptions() const
+    {
+        return menuOptions_;
+    }
 
     std::optional<BarStyle> GetToolBarStyle() const
     {
@@ -284,6 +303,7 @@ protected:
     void BarAnimationFinishCallback(bool needRunTitleBarAnimation, bool needRunToolBarAnimation, int32_t animationId);
     void UpdateLayoutPropertyBeforeAnimation(const RefPtr<NavDestinationNodeBase>& navNodeBase,
         bool needRunTitleBarAnimation, bool needRunToolBarAnimation, bool hideTitleBar, bool hideToolBar);
+    bool CustomizeExpandSafeArea() override;
 
     bool isHideToolbar_ = false;
     bool isHideTitlebar_ = false;
@@ -308,6 +328,7 @@ protected:
     int32_t nextBarAnimationId_ = 0;
     std::unordered_map<int32_t, std::shared_ptr<AnimationUtils::Animation>> barAnimations_;
     std::optional<int32_t> preWidth_;
+    NavigationMenuOptions menuOptions_;
 };
 } // namespace OHOS::Ace::NG
 

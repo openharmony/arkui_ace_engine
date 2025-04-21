@@ -51,6 +51,15 @@ constexpr double CUTOUT_TOP_END = 50.0f;
 constexpr double CUTOUT_BOTTOM_START = DISPLAY_HEIGHT - 50.0f;
 constexpr double CUTOUT_BOTTOM_END = DISPLAY_HEIGHT - 20.0f;
 
+constexpr double CUTOUT_WITH_ROOT_LEFT_START = 0.0f;
+constexpr double CUTOUT_WITH_ROOT_LEFT_END = CUTOUT_LEFT_END;
+constexpr double CUTOUT_WITH_ROOT_RIGHT_START = CUTOUT_RIGHT_START;
+constexpr double CUTOUT_WITH_ROOT_RIGHT_END = DISPLAY_WIDTH;
+constexpr double CUTOUT_WITH_ROOT_TOP_START = 0.0f;
+constexpr double CUTOUT_WITH_ROOT_TOP_END = CUTOUT_TOP_END;
+constexpr double CUTOUT_WITH_ROOT_BOTTOM_START = CUTOUT_BOTTOM_START;
+constexpr double CUTOUT_WITH_ROOT_BOTTOM_END = DISPLAY_HEIGHT;
+
 constexpr double NAV_LEFT_START = 20.0f;
 constexpr double NAV_LEFT_END = 50.0f;
 constexpr double NAV_RIGHT_START = DISPLAY_WIDTH - 50.0f;
@@ -95,6 +104,10 @@ public:
             { SYSTEM_RIGHT_END, SYSTEM_RIGHT_START }, { SYSTEM_BOTTOM_END, SYSTEM_BOTTOM_START });
     NG::SafeAreaInsets navAreaNotValid = NG::SafeAreaInsets({ NAV_LEFT_END, NAV_LEFT_START },
         { NAV_TOP_END, NAV_TOP_START }, { NAV_RIGHT_END, NAV_RIGHT_START }, { NAV_BOTTOM_END, NAV_BOTTOM_START });
+    NG::SafeAreaInsets cutoutAreaWithRoot =
+        NG::SafeAreaInsets({ CUTOUT_WITH_ROOT_LEFT_START, CUTOUT_WITH_ROOT_LEFT_END }, { CUTOUT_WITH_ROOT_TOP_START,
+            CUTOUT_WITH_ROOT_TOP_END }, { CUTOUT_WITH_ROOT_RIGHT_START, CUTOUT_WITH_ROOT_RIGHT_END },
+            { CUTOUT_WITH_ROOT_BOTTOM_START, CUTOUT_WITH_ROOT_BOTTOM_END });
 };
 
 void SafeAreaManagerTest::SetUpTestCase()
@@ -177,14 +190,14 @@ HWTEST_F(SafeAreaManagerTest, IsSafeAreaValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateCutoutTest
- * @tc.desc: Use UpdateCutoutSafeArea and test.
+ * @tc.name: CutoutSafeAreaTest
+ * @tc.desc: Use CutoutSafeArea and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, UpdateCutoutTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, CutoutSafeAreaTest, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1 call UpdateCutoutSafeArea no rootSize params
+     * @tc.steps: step1 call UpdateCutoutSafeArea without rootSize params.
      * @tc.expected: cutout regions need to adjacent to edges.
      */
     safeAreaManager_->SetIsFullScreen(true);
@@ -193,13 +206,17 @@ HWTEST_F(SafeAreaManagerTest, UpdateCutoutTest, TestSize.Level1)
     ret = safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
     EXPECT_EQ(ret, false);
 
-    auto csa = safeAreaManager_->GetCutoutSafeArea();
-    auto sa = safeAreaManager_->GetSafeArea();
-    EXPECT_EQ(csa, sa);
-    CommonExpectEQ(Rect { sa.left_.start, sa.right_.end, sa.top_.start, sa.bottom_.end },
+    auto cutoutSafeArea = safeAreaManager_->GetCutoutSafeArea();
+    EXPECT_EQ(cutoutSafeArea, cutoutAreaWithRoot);
+    auto safeArea = safeAreaManager_->GetSafeArea();
+    auto safeAreaWithoutProcess = safeAreaManager_->GetSafeAreaWithoutProcess();
+    EXPECT_EQ(safeArea, safeAreaWithoutProcess);
+    EXPECT_EQ(cutoutSafeArea, safeArea);
+
+    CommonExpectEQ(Rect { safeArea.left_.start, safeArea.right_.end, safeArea.top_.start, safeArea.bottom_.end },
         Rect { 0.0f, DISPLAY_WIDTH, 0.0f, DISPLAY_HEIGHT });
     /**
-     * @tc.steps: step2 call UpdateCutoutSafeArea has rootSize params
+     * @tc.steps: step2 call UpdateCutoutSafeArea with rootSize params.
      * @tc.expected: cutout regions need to adjacent to edges.
      */
     NG::OptionalSize<uint32_t> rootSize;
@@ -207,11 +224,11 @@ HWTEST_F(SafeAreaManagerTest, UpdateCutoutTest, TestSize.Level1)
     rootSize.SetHeight(DISPLAY_HEIGHT - 25);
     ret = safeAreaManager_->UpdateCutoutSafeArea(cutoutArea, rootSize);
     EXPECT_EQ(ret, true);
-    sa = safeAreaManager_->GetSafeArea();
-    CommonExpectEQ(Rect { sa.left_.start, sa.right_.end, sa.top_.start, sa.bottom_.end },
+    safeArea = safeAreaManager_->GetSafeArea();
+    CommonExpectEQ(Rect { safeArea.left_.start, safeArea.right_.end, safeArea.top_.start, safeArea.bottom_.end },
         Rect { 0.0f, DISPLAY_WIDTH - 20, 0.0f, DISPLAY_HEIGHT - 25 });
     /**
-     * @tc.steps: step3 call UpdateCutoutSafeArea SafeAreaInsets is not valid params
+     * @tc.steps: step3 call UpdateCutoutSafeArea SafeAreaInsets with invalid params.
      * @tc.expected: cutout regions need to adjacent to edges.
      */
     ret = safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
@@ -221,11 +238,11 @@ HWTEST_F(SafeAreaManagerTest, UpdateCutoutTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateSystemSafeAreaTest
- * @tc.desc: Use UpdateSystemSafeArea and test.
+ * @tc.name: SystemSafeAreaTest
+ * @tc.desc: Use SystemSafeArea and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, UpdateSystemSafeAreaTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, SystemSafeAreaTest, TestSize.Level1)
 {
     /**
      * @tc.steps: call UpdateSystemSafeAreaTest
@@ -236,31 +253,39 @@ HWTEST_F(SafeAreaManagerTest, UpdateSystemSafeAreaTest, TestSize.Level1)
     ret = safeAreaManager_->UpdateSystemSafeArea(systemArea);
     EXPECT_EQ(ret, false);
 
-    auto ssa = safeAreaManager_->GetSystemSafeArea();
-    EXPECT_EQ(ssa, systemArea);
+    auto systemSafeArea = safeAreaManager_->GetSystemSafeArea();
+    EXPECT_EQ(systemSafeArea, systemArea);
 
-    auto sas = safeAreaManager_->GetSafeArea();
-    CommonExpectEQ(Rect { sas.left_.start, sas.right_.end, sas.top_.start, sas.bottom_.end },
+    auto safeArea = safeAreaManager_->GetSafeArea();
+    auto safeAreaWithoutProcess = safeAreaManager_->GetSafeAreaWithoutProcess();
+    EXPECT_EQ(safeArea, safeAreaWithoutProcess);
+    EXPECT_EQ(systemSafeArea, safeArea);
+
+    CommonExpectEQ(Rect { safeArea.left_.start, safeArea.right_.end, safeArea.top_.start, safeArea.bottom_.end },
         Rect { SYSTEM_LEFT_START, SYSTEM_RIGHT_END, SYSTEM_TOP_START, SYSTEM_BOTTOM_END });
 }
 
 /**
- * @tc.name: UpdateNavAreaTest
- * @tc.desc: Use UpdateNavArea and test.
+ * @tc.name: NavSafeAreaTest
+ * @tc.desc: Use UpdateNavSafeArea and test.
  * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, UpdateNavAreaTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, NavSafeAreaTest, TestSize.Level1)
 {
     /**
-     * @tc.steps: call UpdateNavAreaTest
+     * @tc.steps: call UpdateNavSafeAreaTest
      */
     safeAreaManager_->SetIsFullScreen(true);
-    auto ret = safeAreaManager_->UpdateNavArea(navArea);
+    auto ret = safeAreaManager_->UpdateNavSafeArea(navArea);
     EXPECT_EQ(ret, true);
-    ret = safeAreaManager_->UpdateNavArea(navArea);
+    ret = safeAreaManager_->UpdateNavSafeArea(navArea);
     EXPECT_EQ(ret, false);
-    auto san = safeAreaManager_->GetSafeArea();
-    CommonExpectEQ(Rect { san.left_.start, san.right_.end, san.top_.start, san.bottom_.end },
+
+    auto safeArea = safeAreaManager_->GetSafeArea();
+    auto safeAreaWithoutProcess = safeAreaManager_->GetSafeAreaWithoutProcess();
+    EXPECT_EQ(safeArea, safeAreaWithoutProcess);
+
+    CommonExpectEQ(Rect { safeArea.left_.start, safeArea.right_.end, safeArea.top_.start, safeArea.bottom_.end },
         Rect { NAV_LEFT_START, NAV_RIGHT_END, NAV_TOP_START, NAV_BOTTOM_END });
 }
 
@@ -272,7 +297,7 @@ HWTEST_F(SafeAreaManagerTest, UpdateNavAreaTest, TestSize.Level1)
 HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaTest, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1 call UpdateKeyboardSafeAreaTest systemArea is valid
+     * @tc.steps: step1 call UpdateKeyboardSafeAreaTest with valid systemArea
      */
     safeAreaManager_->SetIsFullScreen(true);
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
@@ -280,33 +305,33 @@ HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaTest, TestSize.Level1)
     EXPECT_EQ(ret, true);
     ret = safeAreaManager_->UpdateKeyboardSafeArea(KEYBOARD_HEIGHT);
     EXPECT_EQ(ret, false);
-    auto retKbi = safeAreaManager_->GetKeyboardInset();
-    EXPECT_EQ(retKbi.start, DISPLAY_HEIGHT - KEYBOARD_HEIGHT);
-    EXPECT_EQ(retKbi.end, DISPLAY_HEIGHT);
+    auto keyboardInset = safeAreaManager_->GetKeyboardInset();
+    EXPECT_EQ(keyboardInset.start, DISPLAY_HEIGHT - KEYBOARD_HEIGHT);
+    EXPECT_EQ(keyboardInset.end, DISPLAY_HEIGHT);
     /**
-     * @tc.steps: step2 call UpdateKeyboardSafeAreaTest systemArea not valid
+     * @tc.steps: step2 call UpdateKeyboardSafeAreaTest with invalid systemArea
      */
     safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
     safeAreaManager_->UpdateKeyboardSafeArea(KEYBOARD_HEIGHT);
-    retKbi = safeAreaManager_->GetKeyboardInset();
-    auto tmpBottom = PipelineContext::GetCurrentRootHeight();
-    EXPECT_EQ(retKbi.start, tmpBottom - KEYBOARD_HEIGHT);
-    EXPECT_EQ(retKbi.end, tmpBottom);
+    keyboardInset = safeAreaManager_->GetKeyboardInset();
+    auto rootHeight = PipelineContext::GetCurrentRootHeight();
+    EXPECT_EQ(keyboardInset.start, rootHeight - KEYBOARD_HEIGHT);
+    EXPECT_EQ(keyboardInset.end, rootHeight);
     /**
-     * @tc.steps: step3 call UpdateKeyboardSafeAreaTest systemArea not valid and has rootHeight
+     * @tc.steps: step3 call UpdateKeyboardSafeAreaTest with rootHeight and invalid systemArea
      */
-    uint32_t rootHeight = SYSTEM_BOTTOM_START;
+    rootHeight = SYSTEM_BOTTOM_START;
     safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
     safeAreaManager_->UpdateKeyboardSafeArea(KEYBOARD_HEIGHT, rootHeight);
-    retKbi = safeAreaManager_->GetKeyboardInset();
-    EXPECT_EQ(retKbi.start, rootHeight - KEYBOARD_HEIGHT);
-    EXPECT_EQ(retKbi.end, rootHeight);
+    keyboardInset = safeAreaManager_->GetKeyboardInset();
+    EXPECT_EQ(keyboardInset.start, rootHeight - KEYBOARD_HEIGHT);
+    EXPECT_EQ(keyboardInset.end, rootHeight);
 }
 
 /**
- * @tc.name: CheckCutoutSafeAreaTest  
- * @tc.desc: Use CheckCutoutSafeArea and test.  
- * @tc.type: FUNC  
+ * @tc.name: CheckCutoutSafeAreaTest
+ * @tc.desc: Use CheckCutoutSafeArea and test.
+ * @tc.type: FUNC
  */
 HWTEST_F(SafeAreaManagerTest, CheckCutoutSafeAreaTest, TestSize.Level1)
 {
@@ -340,9 +365,9 @@ HWTEST_F(SafeAreaManagerTest, CheckCutoutSafeAreaTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckSystemSafeAreaTest  
- * @tc.desc: Use CheckSystemSafeArea and test.  
- * @tc.type: FUNC 
+ * @tc.name: CheckSystemSafeAreaTest
+ * @tc.desc: Use CheckSystemSafeArea and test.
+ * @tc.type: FUNC
  */
 HWTEST_F(SafeAreaManagerTest, CheckSystemSafeAreaTest, TestSize.Level1)
 {
@@ -350,27 +375,28 @@ HWTEST_F(SafeAreaManagerTest, CheckSystemSafeAreaTest, TestSize.Level1)
     auto ret = safeAreaManager_->CheckSystemSafeArea(systemArea);
     EXPECT_EQ(ret, false);
 
-    safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
+    ret = safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
+    EXPECT_EQ(ret, true);
     ret = safeAreaManager_->CheckSystemSafeArea(systemArea);
     EXPECT_EQ(ret, true);
 }
 
 /**
- * @tc.name: CheckNavAreaTest  
- * @tc.desc: Use CheckNavArea and test.  
- * @tc.type: FUNC 
+ * @tc.name: CheckNavSafeAreaTest
+ * @tc.desc: Use CheckNavSafeArea and test.
+ * @tc.type: FUNC
  */
-HWTEST_F(SafeAreaManagerTest, CheckNavAreaTest, TestSize.Level1)
+HWTEST_F(SafeAreaManagerTest, CheckNavSafeAreaTest, TestSize.Level1)
 {
-    safeAreaManager_->UpdateSystemSafeArea(navArea);
-    auto ret = safeAreaManager_->CheckSystemSafeArea(navArea);
+    safeAreaManager_->UpdateNavSafeArea(navArea);
+    auto ret = safeAreaManager_->CheckNavSafeArea(navArea);
     EXPECT_EQ(ret, false);
 
-    safeAreaManager_->UpdateSystemSafeArea(navAreaNotValid);
-    ret = safeAreaManager_->CheckSystemSafeArea(navArea);
+    ret = safeAreaManager_->UpdateNavSafeArea(navAreaNotValid);
+    EXPECT_EQ(ret, true);
+    ret = safeAreaManager_->CheckNavSafeArea(cutoutArea);
     EXPECT_EQ(ret, true);
 }
-
 
 /**
  * @tc.name: GetCombinedSafeAreaTest
@@ -379,48 +405,206 @@ HWTEST_F(SafeAreaManagerTest, CheckNavAreaTest, TestSize.Level1)
  */
 HWTEST_F(SafeAreaManagerTest, GetCombinedSafeAreaTest, TestSize.Level1)
 {
-    auto funExPect = [this](SafeAreaExpandOpts saeo, float l, float r, float t, float b) {
-        auto res = safeAreaManager_->GetCombinedSafeArea(saeo);
-        CommonExpectEQ(Rect { res.left_.start, res.right_.end, res.top_.start, res.bottom_.end }, Rect { l, r, t, b });
+    auto funExPect = [this](SafeAreaExpandOpts options, float left, float right, float top, float bottom) {
+        auto res = safeAreaManager_->GetCombinedSafeArea(options);
+        CommonExpectEQ(Rect { res.left_.start, res.right_.end, res.top_.start, res.bottom_.end },
+            Rect { left, right, top, bottom });
     };
+
     safeAreaManager_->SetIsFullScreen(true);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
-    safeAreaManager_->UpdateNavArea(navArea);
+    safeAreaManager_->UpdateNavSafeArea(navArea);
     safeAreaManager_->UpdateKeyboardSafeArea(KEYBOARD_HEIGHT);
     safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET);
     SafeAreaExpandOpts opt;
-    /*@tc.steps: step1 call GetCombinedSafeArea ignore SafeArea*/
+
+    /*@tc.steps: step1 Ignore SafeArea and call GetCombinedSafeArea*/
     safeAreaManager_->SetIgnoreSafeArea(true);
     funExPect(opt, 0.0f, 0.0f, 0.0f, 0.0f);
-    /*@tc.steps: step2 call GetCombinedSafeArea opt is null*/
+
+    /*@tc.steps: step2 Set option is null and call GetCombinedSafeArea*/
     safeAreaManager_->SetIgnoreSafeArea(false);
     funExPect(opt, 0.0f, 0.0f, 0.0f, 0.0f);
-    /*@tc.steps: step3 call GetCombinedSafeArea not ignore SafeArea and SAFE_AREA_TYPE_CUTOUT*/
+
+    /*@tc.steps: step3 Call GetCombinedSafeArea with invalid SafeArea*/
+    safeAreaManager_->SetIsNeedAvoidWindow(false);
+    safeAreaManager_->SetIsFullScreen(false);
+    funExPect(opt, 0.0f, 0.0f, 0.0f, 0.0f);
+    safeAreaManager_->SetIsFullScreen(true);
+
+    /*@tc.steps: step4 SafeArea expand type includes SAFE_AREA_TYPE_CUTOUT*/
     opt.type |= SAFE_AREA_TYPE_CUTOUT;
     funExPect(opt, 0.0f, DISPLAY_WIDTH, 0.0f, DISPLAY_HEIGHT);
-    /*@tc.steps: step4 call GetCombinedSafeArea not ignore SafeArea and SAFE_AREA_TYPE_SYSTEM*/
+
+    /*@tc.steps: step5 SafeArea expand type includes SAFE_AREA_TYPE_SYSTEM*/
     opt.type |= SAFE_AREA_TYPE_SYSTEM;
     funExPect(opt, SYSTEM_LEFT_START, SYSTEM_RIGHT_END, SYSTEM_TOP_START, SYSTEM_BOTTOM_END);
-    /**@tc.steps: step5 call GetCombinedSafeArea not ignore SafeArea and keyboardSafeAreaEnabled_
-        and SAFE_AREA_TYPE_KEYBOARD*/
+
+    /**@tc.steps: step6 SafeArea expand type includes SAFE_AREA_TYPE_KEYBOARD and Set KeyBoardAvoidMode
+        to RESIZE and NONE*/
     safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE);
+    funExPect(opt, SYSTEM_LEFT_START, SYSTEM_RIGHT_END, SYSTEM_TOP_START, SYSTEM_BOTTOM_END);
+
+    safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::NONE);
     funExPect(opt, SYSTEM_LEFT_START, SYSTEM_RIGHT_END, SYSTEM_TOP_START, SYSTEM_BOTTOM_END);
 
     safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET);
     opt.type |= SAFE_AREA_TYPE_KEYBOARD;
     funExPect(opt, SYSTEM_LEFT_START, SYSTEM_RIGHT_END, SYSTEM_TOP_START, SYSTEM_BOTTOM_END);
 
+    safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::NONE);
+    funExPect(opt, SYSTEM_LEFT_START, SYSTEM_RIGHT_END, SYSTEM_TOP_START, SYSTEM_BOTTOM_END);
+
     safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE);
     funExPect(opt, SYSTEM_LEFT_START, SYSTEM_RIGHT_END, SYSTEM_TOP_START, SYSTEM_BOTTOM_END);
-    /*@tc.steps: step6 call GetSafeAreaWithoutCutout*/
+
+    /*@tc.steps: step7 call GetSafeAreaWithoutCutout*/
     auto res = safeAreaManager_->GetSafeAreaWithoutCutout();
     CommonExpectEQ(Rect { res.left_.start, res.right_.end, res.top_.start, res.bottom_.end },
         Rect { 0.0f, DISPLAY_WIDTH, 0.0f, DISPLAY_HEIGHT });
+
     /*@tc.steps: step7 call GetSafeAreaWithoutProcess*/
     res = safeAreaManager_->GetSafeAreaWithoutProcess();
     CommonExpectEQ(Rect { res.left_.start, res.right_.end, res.top_.start, res.bottom_.end },
         Rect { 0.0f, DISPLAY_WIDTH, 0.0f, DISPLAY_HEIGHT });
+}
+
+/**
+ * @tc.name: ScbSystemSafeAreaTest
+ * @tc.desc: Use UpdateScbSystemSafeArea and test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, ScbSystemSafeAreaTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1 Call UpdateSystemSafeArea.
+     */
+    auto ret = safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
+    EXPECT_EQ(ret, true);
+    ret = safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
+    EXPECT_EQ(ret, false);
+
+    /**
+     * @tc.steps: step2 Set the window type to SCB window and call GetSystemSafeArea.
+     * @tc.expected: scbSystemSafeArea is null, GetSystemSafeArea returns systemSafeArea instead of scbSystemSafeArea.
+     */
+    safeAreaManager_->SetWindowTypeConfig(false, false, true);
+    auto scbSystemSafeArea = safeAreaManager_->GetSystemSafeArea();
+    EXPECT_EQ(scbSystemSafeArea, systemAreaNotValid);
+
+    /**
+     * @tc.steps: step3 Set the window type to app window and call UpdateScbSystemSafeArea.
+     * @tc.expected: scbSystemSafeArea has value, but GetSystemSafeArea returns systemSafeArea because of appWindow.
+     */
+    safeAreaManager_->SetWindowTypeConfig(true, false, false);
+    ret = safeAreaManager_->UpdateScbSystemSafeArea(systemArea);
+    EXPECT_EQ(ret, true);
+    ret = safeAreaManager_->UpdateScbSystemSafeArea(systemArea);
+    EXPECT_EQ(ret, false);
+    auto systemSafeArea = safeAreaManager_->GetSystemSafeArea();
+    EXPECT_EQ(systemSafeArea, systemAreaNotValid);
+
+    /**
+     * @tc.steps: step2 Set the window type to SCB window and call GetSystemSafeArea.
+     * @tc.expected: scbSystemSafeArea has value and window type is SCB, GetSystemSafeArea returns scbSystemSafeArea.
+     */
+    safeAreaManager_->SetWindowTypeConfig(false, false, true);
+    scbSystemSafeArea = safeAreaManager_->GetSystemSafeArea();
+    EXPECT_EQ(scbSystemSafeArea, systemArea);
+
+    auto safeArea = safeAreaManager_->GetSafeAreaWithoutProcess();
+    EXPECT_EQ(scbSystemSafeArea, safeArea);
+
+    CommonExpectEQ(Rect { safeArea.left_.start, safeArea.right_.end, safeArea.top_.start, safeArea.bottom_.end },
+        Rect { SYSTEM_LEFT_START, SYSTEM_RIGHT_END, SYSTEM_TOP_START, SYSTEM_BOTTOM_END });
+}
+
+/**
+ * @tc.name: ScbCutoutSafeAreaTest
+ * @tc.desc: Use ScbCutoutSafeArea and test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, ScbCutoutSafeAreaTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1 call UpdateScbCutoutSafeArea without rootSize params.
+     * @tc.expected: cutout regions need to adjacent to edges.
+     */
+    safeAreaManager_->SetIsFullScreen(true);
+    auto ret = safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
+    EXPECT_EQ(ret, true);
+    ret = safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
+    EXPECT_EQ(ret, false);
+
+    /*@tc.steps: Set the window type to SCB window and call GetCutoutSafeArea.*/
+    safeAreaManager_->SetWindowTypeConfig(false, false, true);
+    auto scbCutoutSafeArea = safeAreaManager_->GetCutoutSafeArea();
+    EXPECT_EQ(scbCutoutSafeArea, cutoutAreaNotValid);
+
+    /*@tc.steps: Set the window type to app window and call UpdateScbCutoutSafeArea.*/
+    safeAreaManager_->SetWindowTypeConfig(true, false, false);
+    ret = safeAreaManager_->UpdateScbCutoutSafeArea(cutoutArea);
+    EXPECT_EQ(ret, true);
+    ret = safeAreaManager_->UpdateScbCutoutSafeArea(cutoutArea);
+    EXPECT_EQ(ret, false);
+    auto cutoutSafeArea = safeAreaManager_->GetCutoutSafeArea();
+    EXPECT_EQ(cutoutSafeArea, cutoutAreaNotValid);
+
+    /*@tc.steps: Set the window type to SCB window and call UpdateScbCutoutSafeArea.*/
+    safeAreaManager_->SetWindowTypeConfig(false, false, true);
+    scbCutoutSafeArea = safeAreaManager_->GetCutoutSafeArea();
+    EXPECT_EQ(scbCutoutSafeArea, cutoutAreaWithRoot);
+
+    auto safeArea = safeAreaManager_->GetSafeAreaWithoutProcess();
+    EXPECT_EQ(scbCutoutSafeArea, safeArea);
+
+    CommonExpectEQ(Rect { safeArea.left_.start, safeArea.right_.end, safeArea.top_.start, safeArea.bottom_.end },
+        Rect { 0.0f, DISPLAY_WIDTH, 0.0f, DISPLAY_HEIGHT });
+
+    /**
+     * @tc.steps: step2 call UpdateScbCutoutSafeArea with rootSize params.
+     * @tc.expected: cutout regions need to adjacent to edges.
+     */
+    NG::OptionalSize<uint32_t> rootSize;
+    rootSize.SetWidth(DISPLAY_WIDTH - 20);
+    rootSize.SetHeight(DISPLAY_HEIGHT - 25);
+    ret = safeAreaManager_->UpdateScbCutoutSafeArea(cutoutArea, rootSize);
+    EXPECT_EQ(ret, true);
+    safeArea = safeAreaManager_->GetSafeAreaWithoutProcess();
+    CommonExpectEQ(Rect { safeArea.left_.start, safeArea.right_.end, safeArea.top_.start, safeArea.bottom_.end },
+        Rect { 0.0f, DISPLAY_WIDTH - 20, 0.0f, DISPLAY_HEIGHT - 25 });
+
+    /**
+     * @tc.steps: step3 call UpdateScbCutoutSafeArea SafeAreaInsets with invalid params.
+     * @tc.expected: cutout regions need to adjacent to edges.
+     */
+    ret = safeAreaManager_->UpdateScbCutoutSafeArea(cutoutAreaNotValid);
+    EXPECT_EQ(ret, true);
+    ret = safeAreaManager_->UpdateScbCutoutSafeArea(cutoutAreaNotValid);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: ScbNavSafeAreaTest
+ * @tc.desc: Use UpdateScbNavSafeArea and test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, ScbNavSafeAreaTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: call UpdateScbNavSafeAreaTest
+     */
+    safeAreaManager_->SetIsFullScreen(true);
+    auto ret = safeAreaManager_->UpdateScbNavSafeArea(navArea);
+    EXPECT_EQ(ret, true);
+    ret = safeAreaManager_->UpdateScbNavSafeArea(navArea);
+    EXPECT_EQ(ret, false);
+
+    safeAreaManager_->SetWindowTypeConfig(false, false, true);
+    auto safeArea = safeAreaManager_->GetSafeAreaWithoutProcess();
+    CommonExpectEQ(Rect { safeArea.left_.start, safeArea.right_.end, safeArea.top_.start, safeArea.bottom_.end },
+        Rect { NAV_LEFT_START, NAV_RIGHT_END, NAV_TOP_START, NAV_BOTTOM_END });
 }
 
 /**
@@ -700,12 +884,12 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest1, TestSize.Level1)
 HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest2, TestSize.Level1)
 {
     /**
-     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavArea, UpdateCutoutSafeArea with
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
      * valid safeAreaInsets before calling SafeAreaToPadding.
      * @tc.expected: SafeAreaToPadding returns empty or non-empty.
      */
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
-    safeAreaManager_->UpdateNavArea(navArea);
+    safeAreaManager_->UpdateNavSafeArea(navArea);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
 
     safeAreaManager_->SetIgnoreSafeArea(false);
@@ -761,12 +945,12 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest2, TestSize.Level1)
 HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest3, TestSize.Level1)
 {
     /**
-     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavArea, UpdateCutoutSafeArea with
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
      * not valid safeAreaInsets before calling SafeAreaToPadding.
      * @tc.expected: SafeAreaToPadding returns empty or non-empty.
      */
     safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
-    safeAreaManager_->UpdateNavArea(navAreaNotValid);
+    safeAreaManager_->UpdateNavSafeArea(navAreaNotValid);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
     PaddingPropertyF paddingProperty = safeAreaManager_->SafeAreaToPadding();
     EXPECT_EQ(paddingProperty.Empty(), true);
@@ -822,12 +1006,12 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest3, TestSize.Level1)
 HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest4, TestSize.Level1)
 {
     /**
-     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavArea, UpdateCutoutSafeArea with
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
      * valid systemArea and not valid navArea cutoutArea before calling SafeAreaToPadding.
      * @tc.expected: SafeAreaToPadding returns empty or non-empty.
      */
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
-    safeAreaManager_->UpdateNavArea(navAreaNotValid);
+    safeAreaManager_->UpdateNavSafeArea(navAreaNotValid);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
 
     safeAreaManager_->SetIgnoreSafeArea(false);
@@ -883,12 +1067,12 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest4, TestSize.Level1)
 HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest5, TestSize.Level1)
 {
     /**
-     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavArea, UpdateCutoutSafeArea with
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
      * valid systemArea and cutoutArea and not valid navArea before calling SafeAreaToPadding.
      * @tc.expected: SafeAreaToPadding returns empty or non-empty.
      */
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
-    safeAreaManager_->UpdateNavArea(navAreaNotValid);
+    safeAreaManager_->UpdateNavSafeArea(navAreaNotValid);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
 
     safeAreaManager_->SetIgnoreSafeArea(false);
@@ -944,12 +1128,12 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest5, TestSize.Level1)
 HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest6, TestSize.Level1)
 {
     /**
-     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavArea, UpdateCutoutSafeArea with
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
      *  valid safeAreaInsets before calling SafeAreaToPadding.
      * @tc.expected: SafeAreaToPadding returns non-empty.
      */
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
-    safeAreaManager_->UpdateNavArea(navArea);
+    safeAreaManager_->UpdateNavSafeArea(navArea);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
     PaddingPropertyF paddingProperty = safeAreaManager_->SafeAreaToPadding(true);
 
@@ -959,23 +1143,23 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest6, TestSize.Level1)
     EXPECT_EQ(paddingProperty.bottom, SYSTEM_BOTTOM_END - NAV_BOTTOM_START);
 
     /**
-     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavArea, UpdateCutoutSafeArea with
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
      * not valid safeAreaInsets before calling SafeAreaToPadding.
      * @tc.expected: SafeAreaToPadding returns empty.
      */
     safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
-    safeAreaManager_->UpdateNavArea(navAreaNotValid);
+    safeAreaManager_->UpdateNavSafeArea(navAreaNotValid);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
     paddingProperty = safeAreaManager_->SafeAreaToPadding(true);
     EXPECT_EQ(paddingProperty.Empty(), true);
 
     /**
-     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavArea, UpdateCutoutSafeArea with
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
      * valid systemArea and not valid navArea cutoutArea before calling SafeAreaToPadding.
      * @tc.expected: SafeAreaToPadding returns non-empty.
      */
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
-    safeAreaManager_->UpdateNavArea(navAreaNotValid);
+    safeAreaManager_->UpdateNavSafeArea(navAreaNotValid);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
     paddingProperty = safeAreaManager_->SafeAreaToPadding(true);
 
@@ -985,12 +1169,12 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest6, TestSize.Level1)
     EXPECT_EQ(paddingProperty.bottom, SYSTEM_BOTTOM_END - SYSTEM_BOTTOM_START);
 
     /**
-     * @tc.steps: step4 call UpdateSystemSafeArea, UpdateNavArea, UpdateCutoutSafeArea with
+     * @tc.steps: step4 call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
      * valid systemArea and cutoutArea and not valid navArea before calling SafeAreaToPadding.
      * @tc.expected: SafeAreaToPadding returns non-empty.
      */
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
-    safeAreaManager_->UpdateNavArea(navAreaNotValid);
+    safeAreaManager_->UpdateNavSafeArea(navAreaNotValid);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
     paddingProperty = safeAreaManager_->SafeAreaToPadding(true);
 

@@ -122,5 +122,8 @@ void PickerTheme::Builder::Parse(const RefPtr<ThemeStyle>& style, const RefPtr<P
     theme->pickerDialogMaxTwoFontScale_ = pattern->GetAttr<double>("picker_dialog_maxtwo", 2.0f);
     theme->pickerDialogMaxThirdFontScale_ = pattern->GetAttr<double>("picker_dialog_maxthird", 3.2f);
     theme->titleFontScaleLimit_ = pattern->GetAttr<double>("picker_dialog_max", 1.45f);
+    theme->lunarSwitch_ = pattern->GetAttr<std::string>("picker_dialog_lunar_switch", "");
+    theme->prevText_ = pattern->GetAttr<std::string>("picker_dialog_previous_button", "");
+    theme->nextText_ = pattern->GetAttr<std::string>("picker_dialog_next_button", "");
 }
 } // namespace OHOS::Ace

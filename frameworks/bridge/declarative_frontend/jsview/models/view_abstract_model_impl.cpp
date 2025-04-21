@@ -215,6 +215,8 @@ void ViewAbstractModelImpl::SetHeight(const CalcDimension& height)
     }
 }
 
+void ViewAbstractModelImpl::SetToolbarBuilder(std::function<void()>&& buildFunc) {}
+
 void ViewAbstractModelImpl::SetMinWidth(const CalcDimension& minWidth)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -314,7 +316,7 @@ void ViewAbstractModelImpl::SetBackgroundImagePosition(const BackgroundImagePosi
     decoration->SetImage(image);
 }
 
-void ViewAbstractModelImpl::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
+void ViewAbstractModelImpl::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions)
 {
     auto decoration = GetBackDecoration();
     decoration->SetBlurStyle(bgBlurStyle);
@@ -923,14 +925,16 @@ void ViewAbstractModelImpl::SetMask(const RefPtr<BasicShape>& shape)
     box->SetMask(maskPath);
 }
 
-void ViewAbstractModelImpl::SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption)
+void ViewAbstractModelImpl::SetBackdropBlur(
+    const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     auto decoration = GetBackDecoration();
     decoration->SetBlurRadius(ToAnimatableDimension(radius));
     decoration->SetBlurStyle(BlurStyleOption());
 }
 
-void ViewAbstractModelImpl::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption)
+void ViewAbstractModelImpl::SetFrontBlur(
+    const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     auto decoration = GetFrontDecoration();
     decoration->SetBlurRadius(ToAnimatableDimension(radius));
@@ -1439,6 +1443,23 @@ void ViewAbstractModelImpl::BindPopup(const RefPtr<PopupParam>& param, const Ref
     }
 }
 
+void ViewAbstractModelImpl::BindTips(const RefPtr<PopupParam>& param, const RefPtr<SpanString>& spanString)
+{
+    ViewStackProcessor::GetInstance()->GetCoverageComponent();
+    auto tipsComponent = ViewStackProcessor::GetInstance()->GetPopupComponent(true);
+    CHECK_NULL_VOID(tipsComponent);
+
+    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    param->SetTargetMargin(boxComponent->GetMargin());
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    CHECK_NULL_VOID(inspector);
+    param->SetTargetId(inspector->GetId());
+
+    tipsComponent->SetPopupParam(param);
+    tipsComponent->SetMessage(param->GetMessage());
+    tipsComponent->SetPlacementOnTop(param->GetPlacement() == Placement::TOP);
+}
+
 RefPtr<SelectTheme> GetSelectTheme()
 {
     auto container = Container::Current();
@@ -1660,10 +1681,10 @@ void ViewAbstractModelImpl::SetOnAccessibilityFocus(
 void ViewAbstractModelImpl::ResetOnAccessibilityFocus()
 {}
 
-void ViewAbstractModelImpl::SetAccessibilityDefaultFocus()
+void ViewAbstractModelImpl::SetAccessibilityDefaultFocus(bool isFocus)
 {}
 
-void ViewAbstractModelImpl::SetAccessibilityUseSamePage(bool isFullSilent)
+void ViewAbstractModelImpl::SetAccessibilityUseSamePage(const std::string& pageMode)
 {}
 
 void ViewAbstractModelImpl::SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue)
@@ -1672,4 +1693,7 @@ void ViewAbstractModelImpl::SetAccessibilityScrollTriggerable(bool triggerable, 
 void ViewAbstractModelImpl::SetAccessibilityFocusDrawLevel(int32_t drawLevel)
 {}
 
+void ViewAbstractModelImpl::SetOnAccessibilityActionIntercept(
+    NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept)
+{}
 } // namespace OHOS::Ace::Framework

@@ -17,7 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_CONTROLLED_ANIMATOR_H
 
 #include <chrono>
+#include <vector>
+
 #include "ui/base/ace_type.h"
+
 #include "base/thread/cancelable_callback.h"
 #include "core/animation/animation_pub.h"
 namespace OHOS::Ace {

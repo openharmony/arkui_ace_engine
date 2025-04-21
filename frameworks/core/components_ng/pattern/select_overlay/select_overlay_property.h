@@ -81,6 +81,7 @@ struct SelectHandleInfo {
     bool isPaintHandleWithPoints = false;
     bool isCircleShow = true;
     bool forceDraw = false;
+    bool isTouchable = true;
     // in Global coordinates.
     RectF paintRect;
     RectF localPaintRect;
@@ -158,7 +159,8 @@ enum class CloseReason {
     CLOSE_REASON_BACK_PRESSED,
     CLOSE_REASON_CLICK_OUTSIDE,
     CLOSE_REASON_DRAG_FLOATING,
-    CLOSE_REASON_WINDOW_SIZE_CHANGE
+    CLOSE_REASON_WINDOW_SIZE_CHANGE,
+    CLOSE_REASON_SELECT_ALL
 };
 
 struct HoldSelectionInfo {
@@ -186,8 +188,8 @@ struct SelectMenuInfo {
     bool showCopyAll = true;
     bool showCut = true;
     bool showTranslate = false;
-    bool showSearch = false;
     bool showShare = false;
+    bool showSearch = false;
     bool showCameraInput = false;
     bool showAIWrite = false;
     std::optional<OffsetF> menuOffset;

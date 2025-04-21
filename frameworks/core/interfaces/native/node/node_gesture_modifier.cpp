@@ -236,6 +236,7 @@ void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& tou
         points[i].pressure = touchPoint.force;
         points[i].tiltX = touchPoint.tiltX.value_or(0.0f);
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
+        points[i].rollAngle = touchPoint.rollAngle.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(touchPoint.sourceTool);
         points[i].operatingHand = fingureIterator == fingureEnd ? 0 : fingureIterator->operatingHand_;
@@ -255,7 +256,7 @@ void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent
     const auto& targetOrigin = info.GetTarget().origin;
     // width height x y globalx globaly
     touchEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
-    touchEvent.targetGlobalPositionY = targetLocalOffset.GetY().ConvertToPx();
+    touchEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
     touchEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
     touchEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
     touchEvent.width = info.GetTarget().area.GetWidth().ConvertToPx();
@@ -322,6 +323,7 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
     rawInputEvent.timeStamp = info->GetTimeStamp().time_since_epoch().count();
     rawInputEvent.actionTouchPoint.tiltX = info->GetTiltX().value_or(0.0f);
     rawInputEvent.actionTouchPoint.tiltY = info->GetTiltY().value_or(0.0f);
+    rawInputEvent.actionTouchPoint.rollAngle = info->GetRollAngle().value_or(0.0f);
     rawInputEvent.actionTouchPoint.toolType = static_cast<ArkUI_Int32>(info->GetSourceTool());
     rawInputEvent.actionTouchPoint.pressure = info->GetForce();
     std::array<ArkUITouchPoint, MAX_POINTS> points;
@@ -337,6 +339,7 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
         points[i].nodeY = fingureIterator->localLocation_.GetY();
         points[i].tiltX = rawInputEvent.actionTouchPoint.tiltX;
         points[i].tiltY = rawInputEvent.actionTouchPoint.tiltY;
+        points[i].rollAngle = rawInputEvent.actionTouchPoint.rollAngle;
         fingureIterator++;
     }
     rawInputEvent.touchPointes = &(points[0]);
@@ -730,10 +733,13 @@ void setGestureInterrupterToNodeWithUserData(
     ArkUINodeHandle node, void* userData, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo))
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
     auto onGestureRecognizerJudgeBegin =
-        [frameNode, userData, interrupter](const std::shared_ptr<BaseGestureEvent>& info,
+        [weak = AceType::WeakClaim(frameNode), userData, interrupter](const std::shared_ptr<BaseGestureEvent>& info,
             const RefPtr<NG::NGGestureRecognizer>& current,
             const std::list<RefPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
+        auto node = weak.Upgrade();
+        CHECK_NULL_RETURN(node, GestureJudgeResult::CONTINUE);
         ArkUIAPIEventGestureAsyncEvent gestureEvent;
         ArkUITouchEvent rawInputEvent;
         GetBaseGestureEvent(&gestureEvent, rawInputEvent, info);
@@ -744,11 +750,7 @@ void setGestureInterrupterToNodeWithUserData(
         interruptInfo.isSystemGesture = gestureInfo->IsSystemGesture();
         interruptInfo.systemRecognizerType = static_cast<ArkUI_Int32>(gestureInfo->GetType());
         interruptInfo.event = &gestureEvent;
-        if (userData) {
-            interruptInfo.userData = userData;
-        } else {
-            interruptInfo.userData = gestureInfo->GetUserData();
-        }
+        interruptInfo.userData = userData ? userData : gestureInfo->GetUserData();
         ArkUIGestureRecognizer* currentArkUIGestureRecognizer = NodeModifier::CreateGestureRecognizer(current);
         interruptInfo.userData = reinterpret_cast<void*>(currentArkUIGestureRecognizer);
         auto count = static_cast<int32_t>(others.size());
@@ -768,8 +770,7 @@ void setGestureInterrupterToNodeWithUserData(
         ArkUIGestureEvent arkUIGestureEvent { gestureEvent, nullptr };
         interruptInfo.inputEvent = &inputEvent;
         interruptInfo.gestureEvent = &arkUIGestureEvent;
-
-        auto touchRecognizers = CreateTouchRecognizers(frameNode, info, interruptInfo);
+        auto touchRecognizers = CreateTouchRecognizers(AceType::RawPtr(node), info, interruptInfo);
         auto result = interrupter(&interruptInfo);
         delete[] othersRecognizer;
         DestroyTouchRecognizers(touchRecognizers, interruptInfo);
@@ -916,14 +917,22 @@ ArkUI_Int32 getPanGestureDirectionMask(ArkUIGestureRecognizer* recognizer, ArkUI
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 getSwipeGestureDirectionMask(ArkUIGestureRecognizer* recognizer, ArkUISwipeGestureDirection* direction)
+ArkUI_Int32 getSwipeGestureDirectionMask(ArkUIGestureRecognizer* recognizer, ArkUIGestureDirection* direction)
 {
     auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
     CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(swipeRecognizer, ERROR_CODE_PARAM_INVALID);
-    *direction = static_cast<ArkUISwipeGestureDirection>(swipeRecognizer->GetDirection().type);
+    if (swipeRecognizer->GetDirection().type == SwipeDirection::HORIZONTAL) {
+        *direction = static_cast<ArkUIGestureDirection>(ArkUI_GESTURE_DIRECTION_HORIZONTAL);
+    } else if (swipeRecognizer->GetDirection().type == SwipeDirection::VERTICAL) {
+        *direction = static_cast<ArkUIGestureDirection>(ArkUI_GESTURE_DIRECTION_VERTICAL);
+    } else if (swipeRecognizer->GetDirection().type == SwipeDirection::ALL) {
+        *direction = static_cast<ArkUIGestureDirection>(ArkUI_GESTURE_DIRECTION_ALL);
+    } else {
+        *direction = static_cast<ArkUIGestureDirection>(ArkUI_GESTURE_DIRECTION_NONE);
+    }
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -967,7 +976,7 @@ ArkUI_Int32 getPanGestureDistance(ArkUIGestureRecognizer* recognizer, double* di
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto panRecognizer = AceType::DynamicCast<PanRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(panRecognizer, ERROR_CODE_PARAM_INVALID);
-    *distance = static_cast<bool>(panRecognizer->GetDistance());
+    *distance = static_cast<double>(panRecognizer->GetDistance());
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -978,7 +987,7 @@ ArkUI_Int32 getPinchGestureDistance(ArkUIGestureRecognizer* recognizer, double* 
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto pinchRecognizer = AceType::DynamicCast<PinchRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(pinchRecognizer, ERROR_CODE_PARAM_INVALID);
-    *distance = static_cast<bool>(pinchRecognizer->GetDistance());
+    *distance = RoundToMaxPrecision(static_cast<double>(pinchRecognizer->GetDistance()));
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -989,7 +998,7 @@ ArkUI_Int32 getSwipeGestureSpeed(ArkUIGestureRecognizer* recognizer, double* spe
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(swipeRecognizer, ERROR_CODE_PARAM_INVALID);
-    *speed = static_cast<bool>(swipeRecognizer->GetSpeed());
+    *speed = RoundToMaxPrecision(static_cast<double>(swipeRecognizer->GetSpeed()));
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1000,7 +1009,7 @@ ArkUI_Int32 getLongPressGestureDuration(ArkUIGestureRecognizer* recognizer, int*
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(longPressRecognizer, ERROR_CODE_PARAM_INVALID);
-    *duration = static_cast<bool>(longPressRecognizer->GetDuration());
+    *duration = static_cast<int32_t>(longPressRecognizer->GetDuration());
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1011,7 +1020,7 @@ ArkUI_Int32 getRotationGestureAngle(ArkUIGestureRecognizer* recognizer, double* 
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(rotationRecognizer, ERROR_CODE_PARAM_INVALID);
-    *angle = static_cast<bool>(rotationRecognizer->GetAngle());
+    *angle = static_cast<double>(rotationRecognizer->GetAngle());
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1022,8 +1031,40 @@ ArkUI_Int32 getTapGestureDistanceThreshold(ArkUIGestureRecognizer* recognizer, d
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto tapRecognizer = AceType::DynamicCast<ClickRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(tapRecognizer, ERROR_CODE_PARAM_INVALID);
-    *distanceThreshold = static_cast<bool>(tapRecognizer->GetDistanceThreshold());
+    *distanceThreshold = static_cast<double>(tapRecognizer->GetDistanceThreshold());
     return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 setDistanceMap(ArkUIGesture* gesture, int size, int* toolTypeArray, double* distanceArray)
+{
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    for (int i = 0; i < size; i++) {
+        SourceTool st = static_cast<SourceTool>(toolTypeArray[i]);
+        if (st >= SourceTool::UNKNOWN && st <= SourceTool::JOYSTICK && GreatOrEqual(distanceArray[i], 0.0)) {
+            distanceMap[st] = distanceArray[i];
+        }
+    }
+    auto gestureForDistanceMap = Referenced::Claim(reinterpret_cast<PanGesture*>(gesture));
+    CHECK_NULL_RETURN(gestureForDistanceMap, ERROR_CODE_PARAM_INVALID);
+    gestureForDistanceMap->SetDistanceMap(distanceMap);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 getDistanceByToolType(ArkUIGestureRecognizer* recognizer, int toolType, double* distance)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto panRecognizer = AceType::DynamicCast<PanRecognizer>(gestureRecognizer);
+    CHECK_NULL_RETURN(panRecognizer, ERROR_CODE_PARAM_INVALID);
+    PanDistanceMap distanceMap = panRecognizer->GetDistanceMap();
+    auto iter = distanceMap.find(static_cast<SourceTool>(toolType));
+    if (iter == distanceMap.end()) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    *distance = static_cast<double>(iter->second);
+    return ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_Bool isBuiltInGesture(ArkUIGestureRecognizer* recognizer)
@@ -1140,6 +1181,8 @@ const ArkUIGestureModifier* GetGestureModifier()
         .getLongPressGestureDuration = getLongPressGestureDuration,
         .getRotationGestureAngle = getRotationGestureAngle,
         .getTapGestureDistanceThreshold = getTapGestureDistanceThreshold,
+        .setDistanceMap = setDistanceMap,
+        .getDistanceByToolType = getDistanceByToolType,
         .isBuiltInGesture = isBuiltInGesture,
         .getGestureTag = getGestureTag,
         .getGestureBindNodeId = getGestureBindNodeId,

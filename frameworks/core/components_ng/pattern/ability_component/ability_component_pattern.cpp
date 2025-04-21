@@ -224,7 +224,7 @@ void AbilityComponentPattern::HandleMouseEvent(const MouseInfo& info)
 
 void AbilityComponentPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
-    focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
+    focusHub->SetOnFocusInternal([weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleFocusEvent();

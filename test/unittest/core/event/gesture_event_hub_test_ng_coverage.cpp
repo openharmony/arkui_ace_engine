@@ -511,6 +511,7 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage013, TestSize
     EXPECT_TRUE(eventHub);
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_TRUE(gestureEventHub);
+    SystemProperties::dragDropFrameworkStatus_ = 3;
 
     /**
      * @tc.steps: step2. set onDragStart for eventHub
@@ -525,7 +526,6 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage013, TestSize
         return dragDropInfo;
     };
     eventHub->SetOnDragStart(std::move(onDragStart));
-    ;
 
     /**
      * @tc.steps: step3. set dragPreview for frameNode
@@ -536,7 +536,10 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage013, TestSize
     dragPreviewDropInfo.extraInfo = "drag preview extraInfo";
     auto customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     dragPreviewDropInfo.customNode = customNode;
+    auto buildFunc = [node = customNode]() -> RefPtr<NG::UINode> { return AceType::DynamicCast<NG::UINode>(node); };
+    dragPreviewDropInfo.buildFunc = buildFunc;
     dragPreviewDropInfo.onlyForLifting = true;
+    dragPreviewDropInfo.delayCreating = false;
     frameNode->SetDragPreview(dragPreviewDropInfo);
 
     /**
@@ -555,6 +558,70 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage013, TestSize
     EXPECT_TRUE(dragDropInfo.customNode);
     EXPECT_EQ(dragDropInfo.extraInfo, "user set extraInfo");
     EXPECT_FALSE(dragPreviewInfo.customNode);
-    ASSERT_NE(dragPreviewInfo.extraInfo, "");
+    EXPECT_NE(dragPreviewInfo.customNode, buildFunc());
+}
+
+/**
+ * @tc.name: GestureEventHubTestCoverage014
+ * @tc.desc: Test GetDragDropInfo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+
+    /**
+     * @tc.steps: step2. set onDragStart for eventHub
+     */
+    auto onDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
+        DragDropInfo dragDropInfo;
+        auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+        dragEvent->SetData(unifiedData);
+        auto customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        dragDropInfo.customNode = customNode;
+        dragDropInfo.extraInfo = "user set extraInfo";
+        return dragDropInfo;
+    };
+    eventHub->SetOnDragStart(std::move(onDragStart));
+
+    /**
+     * @tc.steps: step3. set dragPreview for frameNode
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    DragDropInfo dragPreviewDropInfo;
+    dragPreviewDropInfo.extraInfo = "drag preview extraInfo";
+    auto customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragPreviewDropInfo.customNode = nullptr;
+    auto buildFunc = [node = customNode]() -> RefPtr<NG::UINode> { return AceType::DynamicCast<NG::UINode>(node); };
+    dragPreviewDropInfo.buildFunc = buildFunc;
+    dragPreviewDropInfo.onlyForLifting = false;
+    dragPreviewDropInfo.delayCreating = true;
+    frameNode->SetDragPreview(dragPreviewDropInfo);
+
+    /**
+     * @tc.steps: step4. call GetDragDropInfo function
+     *            case: textDraggable is false, and component is image
+     * @tc.expected: dragPreviewInfo.customNode is not null, extraInfo is 'drag preview extraInfo'.
+     */
+    GestureEvent info;
+    DragDropInfo dragPreviewInfo;
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    gestureEventHub->InitDragDropEvent();
+    ASSERT_NE(gestureEventHub->dragEventActuator_, nullptr);
+    gestureEventHub->SetTextDraggable(true);
+    info.SetInputEventType(InputEventType::MOUSE_BUTTON);
+    auto dragDropInfo = gestureEventHub->GetDragDropInfo(info, frameNode, dragPreviewInfo, dragEvent);
+    EXPECT_TRUE(dragDropInfo.customNode);
+    EXPECT_EQ(dragDropInfo.extraInfo, "user set extraInfo");
+    EXPECT_TRUE(dragPreviewInfo.customNode);
+    EXPECT_EQ(dragPreviewInfo.customNode, buildFunc());
 }
 } // namespace OHOS::Ace::NG

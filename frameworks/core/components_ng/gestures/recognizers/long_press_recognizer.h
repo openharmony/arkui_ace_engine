@@ -125,6 +125,8 @@ public:
 
     void PrintCurrentFingersInfo() const;
 
+    void RemoteRepeatTimer();
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -160,6 +162,7 @@ private:
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
     std::unique_ptr<GestureEventFunc> longPressRecorder_;
     bool hasRepeated_ = false;
+    int32_t longPressFingerCountForSequence_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

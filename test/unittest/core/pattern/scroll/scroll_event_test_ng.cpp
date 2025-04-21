@@ -895,6 +895,51 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap003, TestSize.Level1)
 }
 
 /**
+* @tc.name: IntervalSnap004
+* @tc.desc: Test snap set intervalSize percent
+* @tc.type: FUNC
+*/
+HWTEST_F(ScrollTestNg, IntervalSnap004, TestSize.Level1)
+{
+    /**
+    * @tc.steps: set snap intervalSize percent
+    * @tc.expected: CalcPredictSnapOffset has value
+    */
+    Dimension intervalSize = Dimension(0.1f, DimensionUnit::PERCENT);
+    std::vector<Dimension> snapPaginations = {};
+    std::pair<bool, bool> enableSnapToSide = { true, true };
+    ScrollModelNG model = CreateScroll();
+    model.SetScrollSnap(ScrollSnapAlign::CENTER, intervalSize, snapPaginations, enableSnapToSide);
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(pattern_->CalcPredictSnapOffset(10.f).has_value());
+}
+
+/**
+* @tc.name: IntervalSnap005
+* @tc.desc: Test snap set snapPaginations percent
+* @tc.type: FUNC
+*/
+HWTEST_F(ScrollTestNg, IntervalSnap005, TestSize.Level1)
+{
+    /**
+    * @tc.steps: set snap snapPaginations percent
+    * @tc.expected: CalcPredictSnapOffset has value
+    */
+    Dimension intervalSize = Dimension(0.f, DimensionUnit::PERCENT);
+    std::vector<Dimension> snapPaginations = {Dimension(0.1f, DimensionUnit::PERCENT),
+            Dimension(0.2f, DimensionUnit::PERCENT)};
+    std::pair<bool, bool> enableSnapToSide = { true, true };
+    ScrollModelNG model = CreateScroll();
+    model.SetScrollSnap(ScrollSnapAlign::CENTER, intervalSize, snapPaginations, enableSnapToSide);
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(pattern_->CalcPredictSnapOffset(10.f).has_value());
+}
+
+/**
  * @tc.name: CalcPredictNextSnapOffset001
  * @tc.desc: Test CalcPredictNextSnapOffset
  * @tc.type: FUNC
@@ -1840,5 +1885,37 @@ HWTEST_F(ScrollEventTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     theme->foregroundColor_ = Color::FromString("#FFFFFFFF");
     pattern_->OnColorConfigurationUpdate();
     EXPECT_EQ(scrollBar_->GetForegroundColor(), Color::FromString("#FFFFFFFF"));
+}
+
+/**
+ * @tc.name: SpringFinalPosition001
+ * @tc.desc: Test SpringAnimation final position
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, SpringFinalPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize variables and callback
+     * @tc.expected: Variables initialized successfully.
+     */
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step2. start spring animation.
+     * @tc.expected: final position is -1 when spring animation end.
+     */
+    Offset startOffset = Offset();
+    float dragDelta = 100.f;
+    float velocityDelta = -200;
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    DragAction(frameNode_, startOffset, dragDelta, velocityDelta);
+    EXPECT_TRUE(Position(dragDelta));
+    EXPECT_TRUE(TickPosition(dragDelta / TICK));
+    EXPECT_TRUE(TickPosition(0));
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    EXPECT_EQ(scrollable->springOffsetProperty_->Get(), -1);
 }
 } // namespace OHOS::Ace::NG

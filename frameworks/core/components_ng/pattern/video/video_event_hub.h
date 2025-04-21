@@ -39,8 +39,11 @@ public:
     {
         onStart_ = std ::move(onStart);
     }
-    void FireStartEvent(const std::string& param)
+    void FireStartEvent()
     {
+        auto json = JsonUtil::Create(true);
+        json->Put("start", "");
+        auto param = json->ToString();
         if (onStart_) {
             // onStart_ may be overwritten in its invoke so we copy it first
             auto onStart = onStart_;
@@ -53,8 +56,11 @@ public:
     {
         onPause_ = std ::move(onPause);
     }
-    void FirePauseEvent(const std::string& param)
+    void FirePauseEvent()
     {
+        auto json = JsonUtil::Create(true);
+        json->Put("pause", "");
+        auto param = json->ToString();
         if (onPause_) {
             // onPause_ may be overwritten in its invoke so we copy it first
             auto onPause = onPause_;
@@ -67,8 +73,11 @@ public:
     {
         onFinish_ = std ::move(onFinish);
     }
-    void FireFinishEvent(const std::string& param)
+    void FireFinishEvent()
     {
+        auto json = JsonUtil::Create(true);
+        json->Put("finish", "");
+        auto param = json->ToString();
         if (onFinish_) {
             // onFinish_ may be overwritten in its invoke so we copy it first
             auto onFinish = onFinish_;
@@ -81,8 +90,11 @@ public:
     {
         onError_ = std ::move(onError);
     }
-    void FireErrorEvent(const std::string& param)
+    void FireErrorEvent()
     {
+        auto json = JsonUtil::Create(true);
+        json->Put("error", "");
+        auto param = json->ToString();
         if (onError_) {
             // onError_ may be overwritten in its invoke so we copy it first
             auto onError = onError_;
@@ -95,8 +107,11 @@ public:
     {
         onPrepared_ = std ::move(onPrepared);
     }
-    void FirePreparedEvent(const std::string& param)
+    void FirePreparedEvent(const double duration)
     {
+        auto json = JsonUtil::Create(true);
+        json->Put("duration", duration);
+        auto param = json->ToString();
         if (onPrepared_) {
             // onPrepared_ may be overwritten in its invoke so we copy it first
             auto onPrepared = onPrepared_;
@@ -109,8 +124,11 @@ public:
     {
         onSeeking_ = std ::move(onSeeking);
     }
-    void FireSeekingEvent(const std::string& param)
+    void FireSeekingEvent(const double posTime)
     {
+        auto json = JsonUtil::Create(true);
+        json->Put("time", posTime);
+        auto param = json->ToString();
         if (onSeeking_) {
             // onSeeking_ may be overwritten in its invoke so we copy it first
             auto onSeeking = onSeeking_;
@@ -122,8 +140,11 @@ public:
     {
         onSeeked_ = std ::move(onSeeked);
     }
-    void FireSeekedEvent(const std::string& param)
+    void FireSeekedEvent(const double posTime)
     {
+        auto json = JsonUtil::Create(true);
+        json->Put("time", posTime);
+        auto param = json->ToString();
         if (onSeeked_) {
             // onSeeked_ may be overwritten in its invoke so we copy it first
             auto onSeeked = onSeeked_;
@@ -136,8 +157,11 @@ public:
     {
         onUpdate_ = std ::move(onUpdate);
     }
-    void FireUpdateEvent(const std::string& param)
+    void FireUpdateEvent(const double currentPos)
     {
+        auto json = JsonUtil::Create(true);
+        json->Put("time", currentPos);
+        auto param = json->ToString();
         if (onUpdate_) {
             // onUpdate_ may be overwritten in its invoke so we copy it first
             auto onUpdate = onUpdate_;
@@ -149,8 +173,11 @@ public:
     {
         onStop_ = std ::move(onStop);
     }
-    void FireStopEvent(const std::string& param)
+    void FireStopEvent()
     {
+        auto json = JsonUtil::Create(true);
+        json->Put("stop", "");
+        auto param = json->ToString();
         if (onStop_) {
             // onStop_ may be overwritten in its invoke so we copy it first
             auto onStop = onStop_;
@@ -163,8 +190,11 @@ public:
     {
         onFullScreenChange_ = std ::move(onFullScreenChange);
     }
-    void FireFullScreenChangeEvent(const std::string& param)
+    void FireFullScreenChangeEvent(const bool isFullScreen)
     {
+        auto json = JsonUtil::Create(true);
+        json->Put("fullscreen", isFullScreen);
+        auto param = json->ToString();
         if (onFullScreenChange_) {
             // onFullScreenChange_ may be overwritten in its invoke so we copy it first
             auto onFullScreenChange = onFullScreenChange_;

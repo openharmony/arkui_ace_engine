@@ -41,6 +41,7 @@ class NavigationActiveTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    RefPtr<NavDestinationGroupNode> CreateAndSetLifecycle(const std::string& name);
 };
 
 void NavigationActiveTestNg::SetUpTestSuite()
@@ -58,6 +59,18 @@ void NavigationActiveTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+}
+
+RefPtr<NavDestinationGroupNode> NavigationActiveTestNg::CreateAndSetLifecycle(const std::string& name)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG, 101,
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); }));
+    EXPECT_FALSE(navDestinationGroupNode == nullptr);
+    auto pattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    pattern->SetName(name);
+    return navDestinationGroupNode;
 }
 
 /**
@@ -97,5 +110,226 @@ HWTEST_F(NavigationActiveTestNg, NavigationActiveTest001, TestSize.Level1)
     mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>("dest2"), false);
     RunNavigationStackSync(navigationPattern);
     ASSERT_EQ(customNode->GetJsActive(), false);
+}
+
+/**
+ * @tc.name: NavigationTransitionLifecycle001
+ * @tc.desc: Branch: if (activeReason == NavigationActiveReason::TRANSITION)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationActiveTestNg, NavigationTransitionLifecycle001, TestSize.Level1)
+{
+     /**
+      * @tc.steps: step1. create navigation node and add navigation node to navigationManager
+      */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG, 2,
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    EXPECT_FALSE(navigationNode == nullptr);
+    auto elementRegister = ElementRegister::GetInstance();
+    EXPECT_FALSE(elementRegister == nullptr);
+    elementRegister->AddUINode(navigationNode);
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    pattern->SetNavigationStack(mockNavPathStack);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_FALSE(pipelineContext == nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    EXPECT_FALSE(navigationManager == nullptr);
+    auto pageNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    EXPECT_FALSE(pageNode == nullptr);
+
+    /**
+     * @tc.steps: step2. create navdestiantion and setActive callback
+     */
+    auto navDestinationNode = CreateAndSetLifecycle("pageA");
+    navigationManager->AddNavigation(pageNode->GetId(), navigationNode->GetId());
+    mockNavPathStack->Add("pageA", navDestinationNode);
+    navigationNode->MarkModifyDone();
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    EXPECT_FALSE(navigationPattern == nullptr);
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+
+    /**
+     * @tc.steps: step2. fire pageA active lifecycle
+     * @tc.expected: step2.navdestinationA state is active
+     */
+    navigationManager->FireNavigationLifecycle(pageNode, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE),
+        static_cast<int32_t>(NavDestinationActiveReason::TRANSITION));
+    auto destination = AceType::DynamicCast<NavDestinationGroupNode>(mockNavPathStack->Get());
+    EXPECT_FALSE(destination == nullptr);
+    auto eventHub = destination->GetEventHub<NavDestinationEventHub>();
+    EXPECT_FALSE(eventHub == nullptr);
+    EXPECT_TRUE(eventHub->state_ == NavDestinationState::ON_INACTIVE);
+}
+
+/**
+ * @tc.name: NavigationTransitionLifecycle002
+ * @tc.desc: Branch: push destination
+ * if (activeReason == NavigationActiveReason::TRANSITION)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationActiveTestNg, NavigationTransitionLifecycle002, TestSize.Level1)
+{
+     /**
+      * @tc.steps: step1. create navigation node and add navigation node to navigationManager
+      */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG, 2,
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    EXPECT_FALSE(navigationNode == nullptr);
+    auto elementRegister = ElementRegister::GetInstance();
+    EXPECT_FALSE(elementRegister == nullptr);
+    elementRegister->AddUINode(navigationNode);
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    pattern->SetNavigationStack(mockNavPathStack);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_FALSE(pipelineContext == nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    EXPECT_FALSE(navigationManager == nullptr);
+    auto pageNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    EXPECT_FALSE(pageNode == nullptr);
+
+    /**
+     * @tc.steps: step2. create navdestiantion and setActive callback
+     */
+    auto navDestinationNode = CreateAndSetLifecycle("pageA");
+    navigationManager->AddNavigation(pageNode->GetId(), navigationNode->GetId());
+    mockNavPathStack->Add("pageA", navDestinationNode);
+    navigationNode->MarkModifyDone();
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    EXPECT_FALSE(navigationPattern == nullptr);
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+
+    /**
+     * @tc.steps: step2. check pageA state
+     * @tc.expected: step2.navdestinationA state is active
+     */
+    auto destination = AceType::DynamicCast<NavDestinationGroupNode>(mockNavPathStack->Get());
+    EXPECT_FALSE(destination == nullptr);
+    auto eventHub = destination->GetEventHub<NavDestinationEventHub>();
+    EXPECT_FALSE(eventHub == nullptr);
+    EXPECT_TRUE(eventHub->state_ == NavDestinationState::ON_ACTIVE);
+}
+
+/**
+ * @tc.name: NavigationPageLifecycle003
+ * @tc.desc: Branch: pagePattern->pageShow
+ * if (isFromWindow == true)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationActiveTestNg, NavigationTransitionLifecycle003, TestSize.Level1)
+{
+     /**
+      * @tc.steps: step1. create navigation node and add navigation node to navigationManager
+      */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG, 2,
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    EXPECT_FALSE(navigationNode == nullptr);
+    auto elementRegister = ElementRegister::GetInstance();
+    EXPECT_FALSE(elementRegister == nullptr);
+    elementRegister->AddUINode(navigationNode);
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    pattern->SetNavigationStack(mockNavPathStack);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_FALSE(pipelineContext == nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    EXPECT_FALSE(navigationManager == nullptr);
+    auto pageNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    EXPECT_FALSE(pageNode == nullptr);
+
+    /**
+     * @tc.steps: step2. create navdestiantion and setActive callback
+     */
+    auto navDestinationNode = CreateAndSetLifecycle("pageA");
+    navigationManager->AddNavigation(pageNode->GetId(), navigationNode->GetId());
+    mockNavPathStack->Add("pageA", navDestinationNode);
+    navigationNode->MarkModifyDone();
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    EXPECT_FALSE(navigationPattern == nullptr);
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+
+    /**
+     * @tc.steps: step2. fire page show,set isFromWindow true
+     * @tc.expected: step2.navdestination active reason is app state change
+     */
+    auto destination = AceType::DynamicCast<NavDestinationGroupNode>(mockNavPathStack->Get());
+    EXPECT_FALSE(destination == nullptr);
+    auto eventHub = destination->GetEventHub<NavDestinationEventHub>();
+    EXPECT_FALSE(eventHub == nullptr);
+    eventHub->SetOnActive([](int32_t reason) {
+        int32_t targetReason = static_cast<int32_t>(NavDestinationActiveReason::APP_STATE_CHANGE);
+        EXPECT_TRUE(targetReason == reason);
+    });
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    EXPECT_FALSE(pagePattern == nullptr);
+    pagePattern->OnShow(true);
+}
+
+/**
+ * @tc.name: NavigationPageLifecycle004
+ * @tc.desc: Branch: pagePattern->pageHide
+ * if (isFromWindow == true)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationActiveTestNg, NavigationTransitionLifecycle004, TestSize.Level1)
+{
+     /**
+      * @tc.steps: step1.create navigation node and add navigation node to navigationManager
+      */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG, 2,
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    EXPECT_FALSE(navigationNode == nullptr);
+    auto elementRegister = ElementRegister::GetInstance();
+    EXPECT_FALSE(elementRegister == nullptr);
+    elementRegister->AddUINode(navigationNode);
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    pattern->SetNavigationStack(mockNavPathStack);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_FALSE(pipelineContext == nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    EXPECT_FALSE(navigationManager == nullptr);
+    auto pageNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    EXPECT_FALSE(pageNode == nullptr);
+
+    /**
+     * @tc.steps: step2. create navdestiantion and setActive callback
+     */
+    auto navDestinationNode = CreateAndSetLifecycle("pageA");
+    navigationManager->AddNavigation(pageNode->GetId(), navigationNode->GetId());
+    mockNavPathStack->Add("pageA", navDestinationNode);
+    navigationNode->MarkModifyDone();
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    EXPECT_FALSE(navigationPattern == nullptr);
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+
+    /**
+     * @tc.steps: step2. fire page show,set isFromWindow true
+     * @tc.expected: step2.navdestination active reason is app state change
+     */
+    auto destination = AceType::DynamicCast<NavDestinationGroupNode>(mockNavPathStack->Get());
+    EXPECT_FALSE(destination == nullptr);
+    auto eventHub = destination->GetEventHub<NavDestinationEventHub>();
+    EXPECT_FALSE(eventHub == nullptr);
+    eventHub->SetOnActive([](int32_t reason) {
+        int32_t targetReason = static_cast<int32_t>(NavDestinationActiveReason::APP_STATE_CHANGE);
+        EXPECT_TRUE(targetReason == reason);
+    });
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    EXPECT_FALSE(pagePattern == nullptr);
+    pagePattern->OnHide(true);
 }
 } // namespace OHOS::Ace::NG

@@ -249,7 +249,7 @@ void SearchModelNG::SetSearchButton(const std::string& text)
     } else {
         searchButtonEvent->SetEnabled(false);
         searchButtonRenderContext->UpdateOpacity(0.0);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             ACE_RESET_LAYOUT_PROPERTY(SearchLayoutProperty, SearchButton);
         }
     }
@@ -592,7 +592,7 @@ void SearchModelNG::ResetTextColor()
 void SearchModelNG::SetBackgroundColor(const Color& color)
 {
     ViewAbstract::SetBackgroundColor(color);
- 
+
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -603,7 +603,7 @@ void SearchModelNG::SetBackgroundColor(const Color& color)
 
     ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, BackgroundColor, color);
 }
- 
+
 void SearchModelNG::ResetBackgroundColor()
 {
     ACE_RESET_RENDER_CONTEXT(RenderContext, BackgroundColor);
@@ -1028,7 +1028,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     pattern->RegisterWindowSizeCallback();
     pattern->SetTextFadeoutCapacity(true);
     pattern->InitSurfacePositionChangedCallback();
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = pipeline->GetColorMode();
     pattern->SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
@@ -1189,7 +1189,7 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
     cancelButtonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateFontSize(searchTheme->GetButtonFontSize());
+    textLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
     auto cancelButtonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     cancelButtonLayoutProperty->UpdateType(ButtonType::CIRCLE);
     cancelButtonLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
@@ -1277,6 +1277,17 @@ void SearchModelNG::SetSearchEnterKeyType(TextInputAction value)
         value = TextInputAction::SEARCH;
     }
     pattern->UpdateTextInputAction(value);
+}
+
+void SearchModelNG::SetSearchCapitalizationMode(AutoCapitalizationMode value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateAutoCapitalizationMode(value);
 }
 
 void SearchModelNG::SetMaxLength(uint32_t value)
@@ -2415,9 +2426,12 @@ void SearchModelNG::SetBackBorderRadius()
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
+    CHECK_NULL_VOID(renderContext->GetBorderRadius());
 
     bool isRTL = textFieldLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    auto radius = renderContext->GetBorderRadius().value();
+    auto optRadius = renderContext->GetBorderRadius();
+    CHECK_NULL_VOID(optRadius);
+    auto radius = optRadius.value();
 
     radius.radiusTopLeft = radius.radiusTopLeft.has_value() ? radius.radiusTopLeft :
         (isRTL ? radius.radiusTopEnd : radius.radiusTopStart);
@@ -2443,6 +2457,15 @@ void SearchModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
     auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableHapticFeedback(state);
+}
+
+void SearchModelNG::SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    pattern->UpdateAutoCapitalizationMode(value);
 }
 
 void SearchModelNG::SetStopBackPress(bool isStopBackPress)

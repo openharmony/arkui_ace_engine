@@ -247,8 +247,8 @@ struct DialogProperties {
     DialogButtonDirection buttonDirection = DialogButtonDirection::AUTO;
     bool isMask = false;
     bool isModal = true;
-    bool enableHoverMode = false;
-    bool isScenceBoardDialog = false;
+    std::optional<bool> enableHoverMode;
+    bool isSceneBoardDialog = false;
     bool isSysBlurStyle = true;           // init use sysBlurStyle
     std::function<void()> customBuilder;
     std::function<void(const int32_t dialogId)> customBuilderWithId;
@@ -298,9 +298,11 @@ struct DialogProperties {
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
     std::optional<Dimension> keyboardAvoidDistance;
     std::optional<double> levelOrder;
+    bool focusable = true;
     LevelMode dialogLevelMode = LevelMode::OVERLAY;
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
+    WeakPtr<NG::UINode> customCNode;
 };
 
 struct PromptDialogAttr {
@@ -309,7 +311,7 @@ struct PromptDialogAttr {
     bool autoCancel = true;
     bool showInSubWindow = false;
     bool isModal = false;
-    bool enableHoverMode = false;
+    std::optional<bool> enableHoverMode;
     bool isUserCreatedDialog = false;
     std::function<void()> customBuilder;
     std::function<void(const int32_t dialogId)> customBuilderWithId;
@@ -346,9 +348,11 @@ struct PromptDialogAttr {
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
     std::optional<Dimension> keyboardAvoidDistance;
     std::optional<double> levelOrder;
+    bool focusable = true;
     LevelMode dialogLevelMode = LevelMode::OVERLAY;
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
+    WeakPtr<NG::UINode> customCNode;
 };
 
 } // namespace OHOS::Ace

@@ -30,6 +30,7 @@
 #include "base/utils/macros.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/resource/resource_configuration.h"
+#include "core/common/window_animation_config.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/export_texture_info/export_texture_info.h"
@@ -37,6 +38,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/event/touch_event.h"
+#include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::NG {
 class AccessibilityProperty;
@@ -57,6 +59,32 @@ enum class RootNodeType : int32_t {
     PAGE_ETS_TAG = 0,
     NAVDESTINATION_VIEW_ETS_TAG = 1,
     WINDOW_SCENE_ETS_TAG = 2
+};
+
+struct InteractionEventBindingInfo  {
+    bool baseEventRegistered = false;
+    bool nodeEventRegistered = false;
+    bool nativeEventRegistered = false;
+    bool builtInEventRegistered = false;
+
+    void SetModifierEventRegistered(bool isCNode, bool state)
+    {
+        if (isCNode) {
+            nativeEventRegistered = state;
+        } else {
+            baseEventRegistered = state;
+        }
+    }
+
+    void SetNodeEventRegistered(bool state)
+    {
+        nodeEventRegistered = state;
+    }
+
+    void SetBuiltInEventRegistered(bool state)
+    {
+        builtInEventRegistered = state;
+    }
 };
 
 class InspectorFilter;
@@ -115,6 +143,10 @@ public:
     void DetachFromMainTree(bool recursive = false);
     virtual void FireCustomDisappear();
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
+
+    // Return value: 0 indicates successful execution, non - zero indicates failed execution.
+    virtual int32_t OnRecvCommand(const std::string& command) { return 0; }
+
     virtual void OnConfigurationUpdate(const ConfigurationChange& configurationChange) {}
 
     // process offscreen process.
@@ -147,6 +179,12 @@ public:
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
     virtual const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const
+    {
+        return children_;
+    }
+
+    // Return children for get inspector tree calling, return cache children directly
+    virtual const std::list<RefPtr<UINode>>& GetChildrenForInspector() const
     {
         return children_;
     }
@@ -205,6 +243,7 @@ public:
     bool NeedRequestAutoSave();
     // DFX info.
     virtual void DumpTree(int32_t depth, bool hasJson = false);
+    void DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current);
     virtual bool IsContextTransparent();
 
@@ -265,17 +304,6 @@ public:
         hostPageId_ = id;
         for (auto& child : children_) {
             child->SetHostPageId(id);
-        }
-    }
-
-    void SetHostPageIdByParent(int32_t id)
-    {
-        if (tag_ == V2::ROOT_ETS_TAG || tag_ == V2::PAGE_ETS_TAG || tag_ == V2::STAGE_ETS_TAG) {
-            return;
-        }
-        hostPageId_ = id;
-        for (auto& child : children_) {
-            child->SetHostPageIdByParent(id);
         }
     }
 
@@ -722,6 +750,11 @@ public:
         return instanceId_;
     }
 
+    static std::set<std::string> GetLayoutTags()
+    {
+        return layoutTags_;
+    }
+
     virtual void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn)
     {
         for (const auto& child : GetChildren()) {
@@ -856,6 +889,9 @@ public:
     void setIsMoving(bool isMoving)
     {
         isMoving_ = isMoving;
+        for (auto& child : children_) {
+            child->setIsMoving(isMoving);
+        }
     }
 
     bool isCrossLanguageAttributeSetting() const
@@ -883,10 +919,22 @@ public:
         isDestroyingState_ = isDestroying;
     }
     virtual void SetDestroying(bool isDestroying = true, bool cleanStatus = true);
-    bool GreatOrEqualAPITargetVersion(PlatformVersion version) const
-    {
-        return apiVersion_ >= static_cast<int32_t>(version);
-    }
+
+    /**
+     * @description: Compare whether the target api version of the application is greater than or equal to the incoming
+     * target. It can be used in scenarios where the uiNode can be obtained.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
+    bool GreatOrEqualAPITargetVersion(PlatformVersion version) const;
+
+    /**
+     * @description: Compare whether the target api version of the application is less than the incoming
+     * target. It can be used in scenarios where the uiNode can be obtained.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
+    bool LessThanAPITargetVersion(PlatformVersion version) const;
 
     bool IsArkTsRenderNode() const
     {
@@ -899,6 +947,38 @@ public:
     }
 
     void ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child);
+    virtual bool CheckVisibleOrActive()
+    {
+        return true;
+    }
+
+    void SetModifierEventRegistrationState(bool isCNode, bool state) {
+        InteractionEventBindingInfo currentInfo = GetInteractionEventBindingInfo();
+        currentInfo.SetModifierEventRegistered(isCNode, state);
+        SetInteractionEventBindingInfo(currentInfo);
+    }
+
+    void SetNodeEventRegistrationState(bool state) {
+        InteractionEventBindingInfo currentInfo = GetInteractionEventBindingInfo();
+        currentInfo.SetNodeEventRegistered(state);
+        SetInteractionEventBindingInfo(currentInfo);
+    }
+
+    void SetBuiltInEventRegistrationState(bool state) {
+        InteractionEventBindingInfo currentInfo = GetInteractionEventBindingInfo();
+        currentInfo.SetBuiltInEventRegistered(state);
+        SetInteractionEventBindingInfo(currentInfo);
+    }
+
+    void SetInteractionEventBindingInfo(const InteractionEventBindingInfo &eventBindingInfo)
+    {
+        eventBindingInfo_ = eventBindingInfo;
+    }
+
+    const InteractionEventBindingInfo& GetInteractionEventBindingInfo() const
+    {
+        return eventBindingInfo_;
+    }
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -983,6 +1063,7 @@ protected:
      * @param id the accessibilityId of child.
      */
     int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
+    const static std::set<std::string> layoutTags_;
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
@@ -1015,6 +1096,7 @@ private:
     bool isAllowUseParentTheme_ = true;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RootNodeType rootNodeType_ = RootNodeType::PAGE_ETS_TAG;
+    InteractionEventBindingInfo eventBindingInfo_;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
     int32_t apiVersion_ = 0;

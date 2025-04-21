@@ -54,6 +54,23 @@ int32_t UIContentServiceStubImpl::RegisterWebUnfocusEventCallback(
     return NO_ERROR;
 }
 
+int32_t UIContentServiceStubImpl::SendCommand(int32_t id, const std::string& command)
+{
+    UiSessionManager::GetInstance()->NotifySendCommandPattern(id, command);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::SendCommandAsync(int32_t id, const std::string& command)
+{
+    return UiSessionManager::GetInstance()->NotifySendCommandAsyncPattern(id, command);
+}
+
+int32_t UIContentServiceStubImpl::SendCommand(const std::string command)
+{
+    UiSessionManager::GetInstance()->SendCommand(command);
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceStubImpl::UnregisterClickEventCallback()
 {
     UiSessionManager::GetInstance()->SetClickEventRegistered(false);
@@ -141,6 +158,19 @@ int32_t UIContentServiceStubImpl::GetCurrentImagesShowing(
     const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& finishCallback)
 {
     UiSessionManager::GetInstance()->GetPixelMap();
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::GetCurrentPageName(const EventCallback& eventCallback)
+{
+    UiSessionManager::GetInstance()->GetCurrentPageName();
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::GetVisibleInspectorTree(
+    const std::function<void(std::string, int32_t, bool)>& eventCallback)
+{
+    UiSessionManager::GetInstance()->GetVisibleInspectorTree();
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

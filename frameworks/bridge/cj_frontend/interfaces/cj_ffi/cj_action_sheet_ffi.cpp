@@ -319,7 +319,7 @@ void FfiOHOSAceFrameworkActionSheetShowWithShadowStyle(NativeActionSheetOptions 
     // Parse shadow
     Shadow shadow;
     auto style = static_cast<ShadowStyle>(shadowSytle);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = Container::CurrentColorMode();
     if (style != ShadowStyle::None) {
         auto container = Container::Current();
         auto pipelineContext = container->GetPipelineContext();

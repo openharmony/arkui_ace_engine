@@ -102,12 +102,12 @@ void SetDefaultTheme(const ArkUI_Uint32* colors, ArkUI_Bool isDark)
     TokenThemeStorage::GetInstance()->SetDefaultTheme(theme, colorMode);
 
     // global notify if required
-    auto sysColorMode = SystemProperties::GetColorMode();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto sysColorMode = pipelineContext->GetColorMode();
     if (sysColorMode != colorMode) {
         return;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
     auto rootNode = pipelineContext->GetRootElement();
     CHECK_NULL_VOID(rootNode);
     rootNode->UpdateThemeScopeUpdate(0); // 0 means default theme scope id

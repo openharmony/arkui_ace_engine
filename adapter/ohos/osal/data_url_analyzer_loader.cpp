@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <dlfcn.h>
 
 #include "base/log/log_wrapper.h"
 #include "core/common/ai/data_url_analyzer_loader.h"
+
 namespace OHOS::Ace {
 namespace {
 #ifdef __aarch64__

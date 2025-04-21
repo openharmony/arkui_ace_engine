@@ -52,6 +52,19 @@ RefPtr<SelectContentOverlayPattern> GetSelectHandlePattern(const WeakPtr<SelectC
     auto pattern = overlayManager->GetHandlePattern();
     return AceType::DynamicCast<SelectContentOverlayPattern>(pattern);
 }
+
+RefPtr<UINode> FindAccessibleFocusNode(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    if (node->GetTag() == V2::MENU_ITEM_ETS_TAG || node->GetTag() == "SelectMenuButton" ||
+        node->GetTag() == V2::PASTE_BUTTON_ETS_TAG || node->GetTag() == V2::OPTION_ETS_TAG ||
+        node->GetTag() == V2::BUTTON_ETS_TAG) {
+        return node;
+    }
+    auto child = node->GetFirstChild();
+    CHECK_NULL_RETURN(child, nullptr);
+    return FindAccessibleFocusNode(child);
+}
 } // namespace
 
 const RefPtr<SelectContentOverlayManager> SelectContentOverlayManager::GetOverlayManager(
@@ -111,6 +124,41 @@ bool SelectContentOverlayManager::HasHolder(int32_t id)
     return selectOverlayHolder_->GetOwnerId() == id;
 }
 
+void SelectContentOverlayManager::FocusFirstFocusableChildInMenu()
+{
+    auto menuNode = menuNode_.Upgrade();
+    CHECK_NULL_VOID(menuNode);
+    auto context = menuNode->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask([weakNode = menuNode_]() {
+        auto menuNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(menuNode);
+        auto firstChild = menuNode->GetFirstChild();
+        CHECK_NULL_VOID(firstChild);
+        auto focusableNode = FindAccessibleFocusNode(firstChild);
+        CHECK_NULL_VOID(focusableNode);
+        auto frameFocusableNode = AceType::DynamicCast<FrameNode>(focusableNode);
+        CHECK_NULL_VOID(frameFocusableNode);
+        frameFocusableNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+    });
+}
+
+void SelectContentOverlayManager::NotifyAccessibilityOwner()
+{
+    auto menuNode = menuNode_.Upgrade();
+    CHECK_NULL_VOID(menuNode);
+    auto context = menuNode->GetContext();
+    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(selectOverlayHolder_);
+    auto owner = selectOverlayHolder_->GetOwner();
+    CHECK_NULL_VOID(owner);
+    context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(owner))]() {
+        auto owner = weakNode.Upgrade();
+        CHECK_NULL_VOID(owner);
+        owner->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+    });
+}
+
 void SelectContentOverlayManager::Show(bool animation, int32_t requestCode)
 {
     CHECK_NULL_VOID(selectOverlayHolder_);
@@ -128,12 +176,14 @@ void SelectContentOverlayManager::Show(bool animation, int32_t requestCode)
             CloseInternal(selectOverlayHolder_->GetOwnerId(), false, CloseReason::CLOSE_REASON_BY_RECREATE);
             SetHolder(holder);
             CreateSelectOverlay(info, animation);
+            FocusFirstFocusableChildInMenu();
             return;
         }
         UpdateExistOverlay(info, animation, requestCode);
     } else {
         CreateSelectOverlay(info, animation);
     }
+    FocusFirstFocusableChildInMenu();
 }
 
 SelectOverlayInfo SelectContentOverlayManager::BuildSelectOverlayInfo(int32_t requestCode)
@@ -434,18 +484,18 @@ void SelectContentOverlayManager::UpdateHandleInfosWithFlag(int32_t updateFlag)
         firstHandleInfo = selectOverlayHolder_->GetFirstHandleInfo();
         if (firstHandleInfo) {
             ConvertHandleRelativeToParent(*firstHandleInfo);
+            TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update first handle info %{public}s - %{public}s",
+                firstHandleInfo->ToString().c_str(), GetOwnerDebugInfo().c_str());
         }
-        TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update first handle info %{public}s - %{public}s",
-            firstHandleInfo->ToString().c_str(), GetOwnerDebugInfo().c_str());
     }
     std::optional<SelectHandleInfo> secondHandleInfo;
     if ((static_cast<uint32_t>(updateFlag) & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
         secondHandleInfo = selectOverlayHolder_->GetSecondHandleInfo();
         if (secondHandleInfo) {
             ConvertHandleRelativeToParent(*secondHandleInfo);
+            TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update second handle info %{public}s - %{public}s",
+                secondHandleInfo->ToString().c_str(), GetOwnerDebugInfo().c_str());
         }
-        TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update second handle info %{public}s - %{public}s",
-            firstHandleInfo->ToString().c_str(), GetOwnerDebugInfo().c_str());
     }
     if (!firstHandleInfo && !secondHandleInfo) {
         return;
@@ -545,7 +595,7 @@ void SelectContentOverlayManager::MountNodeToRoot(
     std::vector<std::string> nodeTags = {
         V2::KEYBOARD_ETS_TAG, // keep handle and menu node before keyboard node
         V2::SELECT_OVERLAY_ETS_TAG, // keep handle node before menu node
-        V2::TEXTINPUT_ETS_TAG, // keep handle and menu node before magnifier
+        V2::MAGNIFIER_TAG, // keep handle and menu node before magnifier
         V2::SHEET_WRAPPER_TAG // keep handle and menu node before SheetWrapper
     };
     for (auto it = slotIt; it != children.end(); ++it) {
@@ -642,7 +692,7 @@ const RefPtr<FrameNode> SelectContentOverlayManager::GetSelectOverlayRoot()
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(shareOverlayInfo_, rootNode);
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto root = FindWindowScene(shareOverlayInfo_->callerFrameNode.Upgrade());
         rootNode = DynamicCast<FrameNode>(root);
     } else if (rootNode && selectOverlayHolder_ && selectOverlayHolder_->IsEnableContainerModal()) {
@@ -664,7 +714,7 @@ const RefPtr<FrameNode> SelectContentOverlayManager::GetSelectOverlayRoot()
 RefPtr<UINode> SelectContentOverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
 {
     auto container = Container::Current();
-    if (!container || !container->IsScenceBoardWindow()) {
+    if (!container || !container->IsSceneBoardWindow()) {
         return rootNodeWeak_.Upgrade();
     }
     CHECK_NULL_RETURN(targetNode, nullptr);
@@ -695,6 +745,14 @@ bool SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     auto selectOverlayNode = selectOverlayNode_.Upgrade();
     auto menuNode = menuNode_.Upgrade();
     auto handleNode = handleNode_.Upgrade();
+    auto owner = selectOverlayHolder_->GetOwner();
+    if (owner) {
+        auto ownerTag = owner->GetTag();
+        if (ownerTag != V2::RICH_EDITOR_ETS_TAG ||
+            (reason != CloseReason::CLOSE_REASON_SELECT_ALL && reason != CloseReason::CLOSE_REASON_BY_RECREATE)) {
+            NotifyAccessibilityOwner();
+        }
+    }
     if (animation && !shareOverlayInfo_->isUsingMouse) {
         ClearAllStatus();
         DestroySelectOverlayNodeWithAnimation(selectOverlayNode);

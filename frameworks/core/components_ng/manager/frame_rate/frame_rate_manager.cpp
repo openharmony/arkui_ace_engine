@@ -79,7 +79,7 @@ std::pair<int32_t, int32_t> FrameRateManager::GetExpectedRate()
         auto maxIter = std::max_element(
             nodeRateMap_.begin(), nodeRateMap_.end(), [](auto a, auto b) { return a.second < b.second; });
         expectedRate = maxIter->second;
-        rateType = ACE_COMPONENT_FRAME_RATE_TYPE;
+        rateType = dragScene_ == 1 ? DRAG_SCENE_FRAME_RATE_TYPE : ACE_COMPONENT_FRAME_RATE_TYPE;
     }
     if (displaySyncRate_ > expectedRate) {
         expectedRate = displaySyncRate_;
@@ -96,5 +96,10 @@ std::pair<int32_t, int32_t> FrameRateManager::GetExpectedRate()
         rateType |= ANIMATION_STATE_FIRST_FRAME;
     }
     return {expectedRate, rateType};
+}
+
+void FrameRateManager::SetDragScene(int32_t status)
+{
+    dragScene_ = status;
 }
 } // namespace OHOS::Ace::NG

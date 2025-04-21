@@ -21,14 +21,9 @@
 #include "base/image/image_source.h"
 #include "base/log/dump_log.h"
 #include "base/thread/background_task_executor.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/container.h"
 #include "core/image/image_loader.h"
-#include "core/common/storage/storage_proxy.h"
 
-#ifdef USE_ROSEN_DRAWING
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
-#endif
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
 
 namespace OHOS::Ace {
 ImageFileCache::ImageFileCache() = default;
@@ -116,7 +111,7 @@ bool ImageFileCache::WriteFile(const std::string& url, const void* const data, s
     }
     outFile.write(reinterpret_cast<const char*>(data), size);
     TAG_LOGI(
-        AceLogTag::ACE_IMAGE, "write image cache: %{private}s %{private}s", url.c_str(), writeFilePath.c_str());
+        AceLogTag::ACE_IMAGE, "WriteImage:%{private}s %{private}s", url.c_str(), writeFilePath.c_str());
 #ifndef WINDOWS_PLATFORM
     if (chmod(writeFilePath.c_str(), CHOWN_RW_UG) != 0) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "write image cache chmod failed: %{private}s %{private}s",
@@ -158,11 +153,7 @@ RefPtr<NG::ImageData> ImageFileCache::GetDataFromCacheFile(const std::string& ur
     }
     auto cacheFileLoader = AceType::MakeRefPtr<FileImageLoader>();
     auto rsData = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)));
-#ifndef USE_ROSEN_DRAWING
-    return NG::ImageData::MakeFromDataWrapper(&rsData);
-#else
     return AceType::MakeRefPtr<NG::DrawingImageData>(rsData);
-#endif
 }
 
 void ImageFileCache::SaveCacheInner(const std::string& cacheKey, const std::string& suffix, size_t cacheSize,
@@ -331,31 +322,6 @@ void ImageFileCache::ClearCacheFile(const std::vector<std::string>& removeFiles)
         }
     }
 #endif
-}
-
-void ImageFileCache::ClearAllCacheFiles()
-{
-    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        return;
-    }
-    auto clearedFlag = StorageProxy::GetInstance()->GetStorage()->GetString("image.filecache.clear");
-    if (clearedFlag == "cleared") {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "get cleared = %{public}s failed.", clearedFlag.c_str());
-        return;
-    }
-
-    std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
-    for (const auto& item : cacheFileInfo_) {
-        auto filePath = ConstructCacheFilePath(item.fileName);
-        if (remove(filePath.c_str()) != 0) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "remove file %{private}s failed.", filePath.c_str());
-            continue;
-        }
-    }
-    cacheFileInfo_.clear();
-    fileNameToFileInfoPos_.clear();
-    // Update the stored flag to indicate the cache has been cleared successfully.
-    StorageProxy::GetInstance()->GetStorage()->SetString("image.filecache.clear", "cleared");
 }
 
 std::string ImageFileCache::GetCacheFilePath(const std::string& url)

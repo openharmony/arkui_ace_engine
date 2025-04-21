@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/custom/custom_measure_layout_param.h"
 
+#include "core/components_ng/layout/layout_property.h"
 namespace OHOS::Ace::NG {
 RefPtr<LayoutWrapper> MeasureLayoutChild::GetChild() const
 {

@@ -296,6 +296,13 @@ public:
         isHostNodeEnableSubWindowMenu_ = enable;
     }
 
+    std::optional<SelectOverlayInfo> GetSelectOverlayInfos()
+    {
+        auto manager = GetManager<SelectContentOverlayManager>();
+        CHECK_NULL_RETURN(manager, std::optional<SelectOverlayInfo>());
+        return manager->GetSelectOverlayInfo();
+    }
+
 protected:
     RectF MergeSelectedBoxes(
         const std::vector<RectF>& boxes, const RectF& contentRect, const RectF& textRect, const OffsetF& paintOffset);
@@ -388,6 +395,8 @@ private:
     bool IsPointsInRegion(const std::vector<PointF>& points, const RectF& regionRect);
     bool CheckAndUpdateHostGlobalPaintRect();
     bool CheckHasTransformMatrix(const RefPtr<RenderContext>& context);
+    bool IsEnableSelectionMenu();
+    bool NeedsProcessMenuOnWinChange();
     bool isHandleDragging_ = false;
     bool isSingleHandle_ = false;
     bool isShowPaste_ = false;
@@ -412,6 +421,7 @@ private:
      * the menu window may conflict with the autofill window.
      */
     bool isHostNodeEnableSubWindowMenu_ = true;
+    bool isSuperFoldDisplayDevice_ = false;
 };
 
 } // namespace OHOS::Ace::NG

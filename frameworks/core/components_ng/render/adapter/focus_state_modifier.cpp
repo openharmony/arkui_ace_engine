@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/adapter/focus_state_modifier.h"
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 

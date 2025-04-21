@@ -647,7 +647,7 @@ HWTEST_F(VideoModifierTest, setOnStartTest, TestSize.Level1)
     modifier_->setOnStart(node_, &arkCallback);
 
     EXPECT_FALSE(checkEvent);
-    eventHub->FireStartEvent("params");
+    eventHub->FireStartEvent();
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
@@ -679,7 +679,7 @@ HWTEST_F(VideoModifierTest, setOnPauseTest, TestSize.Level1)
     modifier_->setOnPause(node_, &arkCallback);
 
     EXPECT_FALSE(checkEvent);
-    eventHub->FirePauseEvent("params");
+    eventHub->FirePauseEvent();
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
@@ -711,7 +711,7 @@ HWTEST_F(VideoModifierTest, setOnFinishTest, TestSize.Level1)
     modifier_->setOnFinish(node_, &arkCallback);
 
     EXPECT_FALSE(checkEvent);
-    eventHub->FireFinishEvent("params");
+    eventHub->FireFinishEvent();
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
@@ -745,16 +745,12 @@ HWTEST_F(VideoModifierTest, setOnFullscreenChangeTest, TestSize.Level1)
 
     EXPECT_FALSE(checkEvent);
 
-    auto json = JsonUtil::Create(true);
-    json->Put("fullscreen", true);
-    eventHub->FireFullScreenChangeEvent(json->ToString());
+    eventHub->FireFullScreenChangeEvent(true);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_EQ(checkEvent->fullscreen, true);
 
-    json = JsonUtil::Create(true);
-    json->Put("fullscreen", false);
-    eventHub->FireFullScreenChangeEvent(json->ToString());
+    eventHub->FireFullScreenChangeEvent(false);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_EQ(checkEvent->fullscreen, false);
@@ -789,16 +785,12 @@ HWTEST_F(VideoModifierTest, setOnPreparedTest, TestSize.Level1)
 
     EXPECT_FALSE(checkEvent);
 
-    auto json = JsonUtil::Create(true);
-    json->Put("duration", static_cast<double>(1.25f));
-    eventHub->FirePreparedEvent(json->ToString());
+    eventHub->FirePreparedEvent(1.25f);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->duration, 1.25f, FLT_EPSILON);
 
-    json = JsonUtil::Create(true);
-    json->Put("duration", static_cast<double>(3.75f));
-    eventHub->FirePreparedEvent(json->ToString());
+    eventHub->FirePreparedEvent(3.75f);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->duration, 3.75f, FLT_EPSILON);
@@ -833,16 +825,12 @@ HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
 
     EXPECT_FALSE(checkEvent);
 
-    auto json = JsonUtil::Create(true);
-    json->Put("time", static_cast<double>(1.25f));
-    eventHub->FireSeekingEvent(json->ToString());
+    eventHub->FireSeekingEvent(1.25f);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->time, 1.25f, FLT_EPSILON);
 
-    json = JsonUtil::Create(true);
-    json->Put("time", static_cast<double>(3.75f));
-    eventHub->FireSeekingEvent(json->ToString());
+    eventHub->FireSeekingEvent(3.75f);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->time, 3.75f, FLT_EPSILON);
@@ -877,16 +865,12 @@ HWTEST_F(VideoModifierTest, setOnSeekedTest, TestSize.Level1)
 
     EXPECT_FALSE(checkEvent);
 
-    auto json = JsonUtil::Create(true);
-    json->Put("time", static_cast<double>(1.25f));
-    eventHub->FireSeekedEvent(json->ToString());
+    eventHub->FireSeekedEvent(1.25f);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->time, 1.25f, FLT_EPSILON);
 
-    json = JsonUtil::Create(true);
-    json->Put("time", static_cast<double>(3.75f));
-    eventHub->FireSeekedEvent(json->ToString());
+    eventHub->FireSeekedEvent(3.75f);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->time, 3.75f, FLT_EPSILON);
@@ -921,16 +905,12 @@ HWTEST_F(VideoModifierTest, setOnUpdateTest, TestSize.Level1)
 
     EXPECT_FALSE(checkEvent);
 
-    auto json = JsonUtil::Create(true);
-    json->Put("time", static_cast<double>(1.25f));
-    eventHub->FireUpdateEvent(json->ToString());
+    eventHub->FireUpdateEvent(1.25f);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->time, 1.25f, FLT_EPSILON);
 
-    json = JsonUtil::Create(true);
-    json->Put("time", static_cast<double>(3.75f));
-    eventHub->FireUpdateEvent(json->ToString());
+    eventHub->FireUpdateEvent(3.75f);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_NEAR(checkEvent->time, 3.75f, FLT_EPSILON);
@@ -963,7 +943,7 @@ HWTEST_F(VideoModifierTest, setOnErrorTest, TestSize.Level1)
     modifier_->setOnError(node_, &arkCallback);
 
     EXPECT_FALSE(checkEvent);
-    eventHub->FireErrorEvent("params");
+    eventHub->FireErrorEvent();
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
@@ -995,7 +975,7 @@ HWTEST_F(VideoModifierTest, setOnStopTest, TestSize.Level1)
     modifier_->setOnStop(node_, &arkCallback);
 
     EXPECT_FALSE(checkEvent);
-    eventHub->FireStopEvent("params");
+    eventHub->FireStopEvent();
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }

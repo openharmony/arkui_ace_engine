@@ -116,8 +116,7 @@ void ShowImpl(const Ark_ActionSheetOptions* value)
     dialogProps.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
         value->backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
     dialogProps.backgroundColor = Converter::OptConvert<Color>(value->backgroundColor);
-    dialogProps.enableHoverMode =
-        Converter::OptConvert<bool>(value->enableHoverMode).value_or(dialogProps.enableHoverMode);
+    dialogProps.enableHoverMode = Converter::OptConvert<bool>(value->enableHoverMode);
     dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(value->hoverModeArea);
     dialogProps.autoCancel = Converter::OptConvert<bool>(value->autoCancel).value_or(dialogProps.autoCancel);
     dialogProps.isModal = Converter::OptConvert<bool>(value->isModal).value_or(dialogProps.isModal);

@@ -28,6 +28,7 @@ public:
 
 void ArcScrollBarTestNg::CreateArcScrollBar(DisplayMode displayMode)
 {
+    SystemProperties::SetDeviceType(DeviceType::WATCH);
     auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
     ScrollBarModelNG scrollBarModel;
     int32_t directionValue = static_cast<int>(Axis::VERTICAL);
@@ -72,7 +73,7 @@ HWTEST_F(ArcScrollBarTestNg, HandleDrag001, TestSize.Level1)
     float delta = SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(-delta);
     arcScrollBar->HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks(stackNode_);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
     EXPECT_EQ(arcScrollBar->trickStartAngle_, -30.0);
 
@@ -82,7 +83,7 @@ HWTEST_F(ArcScrollBarTestNg, HandleDrag001, TestSize.Level1)
      */
     info.SetMainDelta(delta);
     arcScrollBar->HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks(stackNode_);
     float expectOffset = 200.f;
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset);
     EXPECT_GT(arcScrollBar->trickStartAngle_, -30.0);
@@ -93,7 +94,7 @@ HWTEST_F(ArcScrollBarTestNg, HandleDrag001, TestSize.Level1)
      */
     info.SetMainDelta(-delta);
     arcScrollBar->HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks(stackNode_);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0);
     EXPECT_EQ(arcScrollBar->trickStartAngle_, -30.0);
 
@@ -101,7 +102,7 @@ HWTEST_F(ArcScrollBarTestNg, HandleDrag001, TestSize.Level1)
      * @tc.steps: step5. HandleDragEnd, drag end
      */
     arcScrollBar->HandleDragEnd(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks(stackNode_);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0);
     EXPECT_EQ(arcScrollBar->trickStartAngle_, -30.0);
 }
@@ -143,7 +144,7 @@ HWTEST_F(ArcScrollBarTestNg, HandleDrag002, TestSize.Level1)
      */
     info.SetMainDelta(1000.f);
     arcScrollBar->HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks(stackNode_);
     EXPECT_GT(arcScrollBar->trickSweepAngle_, 10.0);
 }
 

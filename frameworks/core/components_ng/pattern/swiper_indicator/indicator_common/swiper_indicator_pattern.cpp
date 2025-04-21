@@ -257,7 +257,7 @@ void SwiperIndicatorPattern::InitFocusEvent()
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -579,7 +579,7 @@ std::pair<int32_t, int32_t> SwiperIndicatorPattern::CalMouseClickIndexStartAndEn
     if (IsHorizontalAndRightToLeft()) {
         end = currentIndex >= 0 ? loopCount * itemCount - 1 : -(loopCount + 1) * itemCount - 1;
         start = currentIndex >= 0 ? (loopCount + 1) * itemCount - 1 : -loopCount * itemCount - 1;
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
             swiperPattern->IsSwipeByGroup()) {
             start += (1 - swiperPattern->GetDisplayCount());
         }
@@ -620,12 +620,12 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
 
     auto [start, end] = CalMouseClickIndexStartAndEnd(itemCount, currentIndex);
     for (int32_t i = start; (start > end ? i > end : i < end); start > end ? i -= step : i += step) {
+        if (hoverPoint.GetX() >= centerX && hoverPoint.GetX() <= centerX + itemWidth &&
+            hoverPoint.GetY() >= centerY && hoverPoint.GetY() <= centerY + itemHeight) {
+            mouseClickIndex_ = i;
+            break;
+        }
         if (i != currentIndex) {
-            if (hoverPoint.GetX() >= centerX && hoverPoint.GetX() <= centerX + itemWidth &&
-                hoverPoint.GetY() >= centerY && hoverPoint.GetY() <= centerY + itemHeight) {
-                mouseClickIndex_ = i;
-                break;
-            }
             centerX += itemWidth + space;
         } else {
             centerX += selectedItemWidth + space;
@@ -761,6 +761,9 @@ void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
     }
     if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::ARC_DOT) {
         isLongPressed_ = false;
+        if (IsHorizontalAndRightToLeft()) {
+            swiperPattern->SetTurnPageRate(-1.0f);
+        }
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -999,10 +1002,15 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     swiperPattern->SetTurnPageRate(turnPageRate);
     swiperPattern->SetGroupTurnPageRate(turnPageRate);
     if (std::abs(turnPageRate) >= 1) {
-        int32_t step = (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+        int32_t step = (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
                                 swiperPattern->IsSwipeByGroup()
                             ? swiperPattern->GetDisplayCount()
                             : 1);
+
+        if (IsHorizontalAndRightToLeft() && swiperIndicatorType_ == SwiperIndicatorType::ARC_DOT) {
+            step = -step;
+        }
+
         if (Positive(turnPageRateOffset)) {
             swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() + step);
         }
@@ -1155,8 +1163,9 @@ RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlong
 
     overlongDotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
     overlongDotIndicatorModifier_->SetLongPointHeadCurve(
-        swiperPattern->GetCurveIncludeMotion(), swiperPattern->GetMotionVelocity());
+        swiperPattern->GetIndicatorHeadCurve(), swiperPattern->GetMotionVelocity());
     overlongDotIndicatorModifier_->SetUserSetSwiperCurve(swiperPattern->GetCurve());
+    overlongDotIndicatorModifier_->SetIsBindIndicator(swiperPattern->IsBindIndicator());
 
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
@@ -1179,7 +1188,7 @@ RefPtr<DotIndicatorPaintMethod> SwiperIndicatorPattern::CreateDotIndicatorPaintM
 
     dotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
     dotIndicatorModifier_->SetLongPointHeadCurve(
-        swiperPattern->GetCurveIncludeMotion(), swiperPattern->GetMotionVelocity());
+        swiperPattern->GetIndicatorHeadCurve(), swiperPattern->GetMotionVelocity());
     dotIndicatorModifier_->SetUserSetSwiperCurve(swiperPattern->GetCurve());
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
@@ -1253,28 +1262,22 @@ void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
     auto animationEndIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex());
 
     auto paintMethodTemp = DynamicCast<DotIndicatorPaintMethod>(overlongPaintMethod);
-    if (changeIndexWithAnimation_ && !changeIndexWithAnimation_.value()) {
-        animationStartIndex = startIndex_ ? startIndex_.value() : overlongDotIndicatorModifier_->GetAnimationEndIndex();
-        paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
-    }
-
-    if (jumpIndex_) {
-        paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
-
-        if (!changeIndexWithAnimation_) {
-            overlongDotIndicatorModifier_->StopAnimation(true);
-            overlongDotIndicatorModifier_->SetCurrentOverlongType(OverlongType::NONE);
+    bool keepStatus = false;
+    bool isSwiperTouchDown = false;
+    if (isInFast_ && isInFast_.value()) {
+        UpdateOverlongPaintMethodWhenFast(paintMethodTemp, animationStartIndex, animationEndIndex);
+    } else {
+        if (keepGestureState_) {
+            paintMethodTemp->SetGestureState(keepGestureState_.value());
         }
-    }
-
-    auto isSwiperTouchDown = swiperPattern->IsTouchDownOnOverlong();
-    auto isSwiperAnimationRunning =
-        swiperPattern->IsPropertyAnimationRunning() || swiperPattern->IsTranslateAnimationRunning();
-    auto keepStatus = !isSwiperTouchDown && !isSwiperAnimationRunning && animationStartIndex != animationEndIndex &&
-                      !changeIndexWithAnimation_;
-
-    if (!changeIndexWithAnimation_ && gestureState_ == GestureState::GESTURE_STATE_NONE) {
-        keepStatus = true;
+        UpdateOverlongPaintMethodWhenNormal(paintMethodTemp, animationStartIndex, animationEndIndex);
+        GetStatusForOverlongPaintMethodWhenNormal(swiperPattern, animationStartIndex, animationEndIndex,
+            keepStatus, isSwiperTouchDown);
+        if (keepGestureState_) {
+            keepStatus = false;
+            isSwiperTouchDown = false;
+        }
+        keepGestureState_.reset();
     }
 
     CheckDragAndUpdate(swiperPattern, animationStartIndex, animationEndIndex);
@@ -1288,12 +1291,59 @@ void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
     overlongPaintMethod->SetKeepStatus(keepStatus);
     overlongPaintMethod->SetAnimationStartIndex(animationStartIndex);
     overlongPaintMethod->SetAnimationEndIndex(animationEndIndex);
+    overlongPaintMethod->SetIsBindIndicator(swiperPattern->IsBindIndicator());
     overlongDotIndicatorModifier_->SetIsSwiperTouchDown(isSwiperTouchDown);
     overlongDotIndicatorModifier_->SetBoundsRect(CalcBoundsRect());
     overlongDotIndicatorModifier_->SetIsAutoPlay(swiperPattern->IsAutoPlay());
     changeIndexWithAnimation_.reset();
     jumpIndex_.reset();
     startIndex_.reset();
+    isInFast_.reset();
+}
+
+void SwiperIndicatorPattern::UpdateOverlongPaintMethodWhenFast(
+    const RefPtr<DotIndicatorPaintMethod>& paintMethodTemp,
+    int32_t& animationStartIndex, int32_t& animationEndIndex)
+{
+    animationEndIndex = animationStartIndex;
+    animationStartIndex = startIndex_ ? startIndex_.value() : overlongDotIndicatorModifier_->GetAnimationEndIndex();
+    keepGestureState_ = paintMethodTemp->GetGestureState();
+    paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
+    overlongDotIndicatorModifier_->StopAnimation(true);
+}
+
+void SwiperIndicatorPattern::UpdateOverlongPaintMethodWhenNormal(
+    const RefPtr<DotIndicatorPaintMethod>& paintMethodTemp,
+    int32_t& animationStartIndex, int32_t& animationEndIndex)
+{
+    if (changeIndexWithAnimation_ && !changeIndexWithAnimation_.value()) {
+        animationStartIndex =
+            startIndex_ ? startIndex_.value() : overlongDotIndicatorModifier_->GetAnimationEndIndex();
+        paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
+    }
+
+    if (jumpIndex_) {
+        paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
+
+        if (!changeIndexWithAnimation_) {
+            overlongDotIndicatorModifier_->StopAnimation(true);
+            overlongDotIndicatorModifier_->SetCurrentOverlongType(OverlongType::NONE);
+        }
+    }
+}
+
+void SwiperIndicatorPattern::GetStatusForOverlongPaintMethodWhenNormal(const RefPtr<SwiperPattern>& swiperPattern,
+    const int32_t& animationStartIndex, const int32_t& animationEndIndex,
+    bool& keepStatus, bool& isSwiperTouchDown) const
+{
+    isSwiperTouchDown = swiperPattern->IsTouchDownOnOverlong();
+    auto isSwiperAnimationRunning =
+        swiperPattern->IsPropertyAnimationRunning() || swiperPattern->IsTranslateAnimationRunning();
+    keepStatus = !isSwiperTouchDown && !isSwiperAnimationRunning && animationStartIndex != animationEndIndex &&
+                 !changeIndexWithAnimation_;
+    if (!changeIndexWithAnimation_ && gestureState_ == GestureState::GESTURE_STATE_NONE) {
+        keepStatus = true;
+    }
 }
 
 void SwiperIndicatorPattern::ShowPrevious()
@@ -1331,7 +1381,7 @@ int32_t SwiperIndicatorPattern::GetCurrentIndex() const
     auto indicatorCount = swiperPattern->DisplayIndicatorTotalCount();
     auto displayCount = swiperPattern->GetDisplayCount();
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
         swiperPattern->IsSwipeByGroup() && displayCount != 0) {
         currentIndex /= displayCount;
     }
@@ -1398,7 +1448,7 @@ void SwiperIndicatorPattern::GetTextContentSub(std::string& firstContent, std::s
     auto currentIndex = GetDisplayCurrentIndex();
     bool isRtl = swiperPattern->GetNonAutoLayoutDirection() == TextDirection::RTL;
     firstContent = isRtl ? std::to_string(swiperPattern->RealTotalCount()) : std::to_string(currentIndex);
-    lastContent = isRtl ? std::to_string(currentIndex) + "\\" : "/" + std::to_string(swiperPattern->RealTotalCount());
+    lastContent = isRtl ? std::to_string(currentIndex) + "/" : "/" + std::to_string(swiperPattern->RealTotalCount());
 }
 
 void SwiperIndicatorPattern::SwipeTo(std::optional<int32_t> mouseClickIndex)
@@ -1409,13 +1459,9 @@ void SwiperIndicatorPattern::SwipeTo(std::optional<int32_t> mouseClickIndex)
     CHECK_NULL_VOID(swiperPattern);
     if (swiperPattern->IsSwipeByGroup()) {
         auto clickPageIndex = SwiperUtils::ComputePageIndex(mouseClickIndex.value(), swiperPattern->GetDisplayCount());
-        if (clickPageIndex == swiperPattern->GetCurrentIndex()) {
-            mouseClickIndex_ = std::nullopt;
-            return;
-        }
         mouseClickIndex_ = clickPageIndex;
     }
-    swiperPattern->SwipeTo(mouseClickIndex.value());
+    swiperPattern->SwipeTo(mouseClickIndex_.value());
 }
 
 std::pair<int32_t, int32_t> SwiperIndicatorPattern::CalculateStepAndItemCountDefault() const

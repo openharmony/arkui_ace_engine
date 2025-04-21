@@ -23,12 +23,15 @@
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG {
+enum class PanGestureState : int32_t;
 
-class PanRecognizer : public MultiFingersRecognizer {
+class ACE_FORCE_EXPORT PanRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(PanRecognizer, MultiFingersRecognizer);
 
 public:
     PanRecognizer(int32_t fingers, const PanDirection& direction, double distance, bool isLimitFingerCount = false);
+    PanRecognizer(int32_t fingers, const PanDirection& direction, const PanDistanceMap& distanceMap,
+        bool isLimitFingerCount = false);
 
     explicit PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption);
 
@@ -57,10 +60,7 @@ public:
         isForDrag_ = isForDrag;
     }
 
-    void SetMouseDistance(double distance)
-    {
-        mouseDistance_ = distance;
-    }
+    void SetMouseDistance(double distance);
 
     void SetIsAllowMouse(bool isAllowMouse)
     {
@@ -70,17 +70,32 @@ public:
     virtual RefPtr<GestureSnapshot> Dump() const override;
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     void ForceCleanRecognizer() override;
-    void CheckCallbackState() override;
     void DumpVelocityInfo(int32_t fingerId);
 
-    double GetDistance() const
-    {
-        return distance_;
-    }
+    double GetDistance() const;
+    float GetDistanceConfigFor(SourceTool sourceTool = SourceTool::UNKNOWN) const;
 
     PanDirection GetDirection() const
     {
         return direction_;
+    }
+
+    void SetDistanceMap(const PanDistanceMap& distanceMap)
+    {
+        distanceMap_ = distanceMap;
+    }
+
+    PanDistanceMap GetDistanceMap() const
+    {
+        return distanceMap_;
+    }
+
+    void HandlePanGestureAccept(
+        const GestureEvent& info, PanGestureState panGestureState, const std::unique_ptr<GestureEventFunc>& callback);
+    
+    void SetPanEndCallback(const GestureEventFunc& panEndCallback)
+    {
+        panEndOnDisableState_ = std::make_unique<GestureEventFunc>(panEndCallback);
     }
 
 private:
@@ -129,7 +144,7 @@ private:
     void UpdateTouchEventInfo(const TouchEvent& event);
     Offset GetRawGlobalLocation(int32_t postEventNodeId);
 
-    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type);
     GestureJudgeResult TriggerGestureJudgeCallback();
     void ChangeFingers(int32_t fingers);
     void ChangeDirection(const PanDirection& direction);
@@ -137,7 +152,9 @@ private:
     double GetMainAxisDelta();
     RefPtr<DragEventActuator> GetDragEventActuator();
     bool HandlePanAccept();
+    void GetGestureEventHalfInfo(GestureEvent* info);
     GestureEvent GetGestureEventInfo();
+    void ResetDistanceMap();
 
     void OnResetStatus() override;
     void OnSucceedCancel() override;
@@ -176,6 +193,10 @@ private:
     bool isForDrag_ = false;
     bool isAllowMouse_ = true;
     bool isStartTriggered_ = false;
+    // this callback will be triggered when pan end, but the enable state is false
+    std::unique_ptr<GestureEventFunc> panEndOnDisableState_;
+    PanDistanceMap distanceMap_;
+    PanDistanceMap newDistanceMap_;
 };
 
 } // namespace OHOS::Ace::NG

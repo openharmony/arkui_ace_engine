@@ -34,8 +34,7 @@ using StopServer = void (*)(const std::string& packageName);
 using StoreMessage = void (*)(int32_t instanceId, const std::string& message);
 using RemoveMessage = void (*)(int32_t instanceId);
 using WaitForConnection = bool (*)();
-using SetSwitchCallBack = void (*)(const std::function<void(bool)>& setStatus,
-    const std::function<void(int32_t)>& createLayoutInfo, int32_t instanceId);
+using SetSwitchCallBack = void (*)(const std::function<void(int32_t)>& createLayoutInfo, int32_t instanceId);
 using SetDebugModeCallBack = void (*)(const std::function<void()>& setDebugMode);
 
 SendMessage g_sendMessage = nullptr;
@@ -126,7 +125,9 @@ void ConnectServerManager::InitConnectServer()
 #else
     const std::string soDir = "libark_connect_inspector.z.so";
 #endif // ANDROID_PLATFORM
-    handlerConnectServerSo_ = dlopen(soDir.c_str(), RTLD_LAZY);
+    if (handlerConnectServerSo_ == nullptr) {
+        handlerConnectServerSo_ = dlopen(soDir.c_str(), RTLD_LAZY);
+    }
     if (handlerConnectServerSo_ == nullptr) {
         LOGE("Cannot find %{public}s", soDir.c_str());
         return;
@@ -147,7 +148,9 @@ void ConnectServerManager::InitConnectServer()
 
 void ConnectServerManager::StartConnectServerWithSocketPair(int32_t socketFd)
 {
-    handlerConnectServerSo_ = dlopen("libark_connect_inspector.z.so", RTLD_LAZY);
+    if (handlerConnectServerSo_ == nullptr) {
+        handlerConnectServerSo_ = dlopen("libark_connect_inspector.z.so", RTLD_LAZY);
+    }
     CHECK_NULL_VOID(handlerConnectServerSo_);
 
     auto startServerForSocketPair =
@@ -213,13 +216,11 @@ void ConnectServerManager::AddInstance(
         g_sendMessage(message); // if connected, message will be sent immediately.
     }
     CHECK_NULL_VOID(createLayoutInfo_);
-    auto setStatus = [this](bool status) {
-        setStatus_(status);
-    };
+
     auto createLayoutInfo = [this](int32_t containerId) {
         createLayoutInfo_(containerId);
     };
-    g_setSwitchCallBack(setStatus, createLayoutInfo, instanceId);
+    g_setSwitchCallBack(createLayoutInfo, instanceId);
 }
 
 void ConnectServerManager::SendInspector(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr)
@@ -272,11 +273,9 @@ std::string ConnectServerManager::GetInstanceMapMessage(
     return message->ToString();
 }
 
-void ConnectServerManager::SetLayoutInspectorCallback(
-    const std::function<void(int32_t)>& createLayoutInfo, const std::function<void(bool)>& setStatus)
+void ConnectServerManager::SetLayoutInspectorCallback(const std::function<void(int32_t)>& createLayoutInfo)
 {
     createLayoutInfo_ = createLayoutInfo;
-    setStatus_ = setStatus;
 }
 
 std::function<void(int32_t)> ConnectServerManager::GetLayoutInspectorCallback()

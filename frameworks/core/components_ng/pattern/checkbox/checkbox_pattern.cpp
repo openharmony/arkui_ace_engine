@@ -14,15 +14,112 @@
  */
 
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
-
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "base/log/dump_log.h"
+#include "core/components/checkable/checkable_theme.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 constexpr int32_t DEFAULT_CHECKBOX_ANIMATION_DURATION = 100;
 } // namespace
+
+RefPtr<NodePaintMethod> CheckBoxPattern::CreateNodePaintMethod()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+    paintProperty->SetHost(host);
+    if (!paintMethod_) {
+        paintMethod_ = MakeRefPtr<CheckBoxPaintMethod>();
+    }
+    CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+    } else {
+        checkboxStyle = CheckBoxStyle::SQUARE_STYLE;
+    }
+    if (paintProperty->HasCheckBoxSelectedStyle()) {
+        checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
+    }
+    paintMethod_->SetCheckboxStyle(checkboxStyle);
+    paintMethod_->SetUseContentModifier(UseContentModifier());
+    paintMethod_->SetHasBuilder(builder_.has_value());
+    host->SetCheckboxFlag(true);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto enabled = eventHub->IsEnabled();
+    paintMethod_->SetEnabled(enabled);
+    paintMethod_->SetTouchHoverAnimationType(touchHoverType_);
+    return paintMethod_;
+}
+
+bool CheckBoxPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty, bool /*skipMeasure*/, bool /*skipLayout*/)
+{
+    auto geometryNode = dirty->GetGeometryNode();
+    offset_ = geometryNode->GetContentOffset();
+    size_ = geometryNode->GetContentSize();
+    if (!isUserSetResponseRegion_) {
+        AddHotZoneRect();
+    }
+    return true;
+}
+
+void CheckBoxPattern::SetBuilderFunc(CheckBoxMakeCallback&& makeFunc)
+{
+    if (makeFunc == nullptr) {
+        makeFunc_ = std::nullopt;
+        OnModifyDone();
+        return;
+    }
+    makeFunc_ = std::move(makeFunc);
+}
+
+void CheckBoxPattern::SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc)
+{
+    if (toggleMakeFunc == nullptr) {
+        toggleMakeFunc_ = std::nullopt;
+        OnModifyDone();
+        return;
+    }
+    toggleMakeFunc_ = std::move(toggleMakeFunc);
+}
+
+void CheckBoxPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxEventHub>();
+    auto name = checkBoxEventHub ? checkBoxEventHub->GetName() : "";
+    auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
+    json->PutExtAttr("name", name.c_str(), filter);
+    json->PutExtAttr("group", group.c_str(), filter);
+    json->PutExtAttr("type", "ToggleType.Checkbox", filter);
+    auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+    auto select = paintProperty->GetCheckBoxSelectValue(false);
+    json->PutExtAttr("select", select ? "true" : "false", filter);
+}
+
+void CheckBoxPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
+{
+    Pattern::ToTreeJson(json, config);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto select = paintProperty->GetCheckBoxSelectValue(false);
+    json->Put(TreeKey::CHECKED, select ? "true" : "false");
+}
 
 void CheckBoxPattern::OnAttachToFrameNode()
 {
@@ -260,7 +357,7 @@ void CheckBoxPattern::InitFocusEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -341,6 +438,7 @@ void CheckBoxPattern::OnClick()
     }
     paintProperty->UpdateCheckBoxSelect(!isSelected);
     UpdateState();
+    ReportChangeEvent(!isSelected);
 }
 
 void CheckBoxPattern::OnTouchDown()
@@ -861,6 +959,7 @@ void CheckBoxPattern::SetCheckBoxSelect(bool select)
     paintProperty->UpdateCheckBoxSelect(select);
     UpdateState();
     OnModifyDone();
+    ReportChangeEvent(select);
 }
 
 void CheckBoxPattern::FireBuilder()
@@ -962,6 +1061,41 @@ bool CheckBoxPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     return result;
 }
 
+void CheckBoxPattern::DumpInfo()
+{
+    auto eventHub = GetEventHub<CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    DumpLog::GetInstance().AddDesc("Name: " + eventHub->GetName());
+    DumpLog::GetInstance().AddDesc("GroupName: " + eventHub->GetGroupName());
+
+    auto paintProperty = GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->HasCheckBoxSelectedStyle()) {
+        DumpLog::GetInstance().AddDesc(
+            "Shape: " + CheckBoxModel::ToString(paintProperty->GetCheckBoxSelectedStyleValue()));
+    }
+    if (paintProperty->HasCheckBoxSelect()) {
+        DumpLog::GetInstance().AddDesc(
+            "IsSelected: " + std::string(paintProperty->GetCheckBoxSelectValue() ? "true" : "false"));
+    }
+    if (paintProperty->HasCheckBoxSelectedColor()) {
+        DumpLog::GetInstance().AddDesc("SelectedColor: " + paintProperty->GetCheckBoxSelectedColorValue().ToString());
+    }
+    if (paintProperty->HasCheckBoxUnSelectedColor()) {
+        DumpLog::GetInstance().AddDesc(
+            "UnSelectedColor: " + paintProperty->GetCheckBoxUnSelectedColorValue().ToString());
+    }
+    if (paintProperty->HasCheckBoxCheckMarkSize()) {
+        DumpLog::GetInstance().AddDesc("MarkSize: " + paintProperty->GetCheckBoxCheckMarkSizeValue().ToString());
+    }
+    if (paintProperty->HasCheckBoxCheckMarkWidth()) {
+        DumpLog::GetInstance().AddDesc("MarkWidth: " + paintProperty->GetCheckBoxCheckMarkWidthValue().ToString());
+    }
+    if (paintProperty->HasCheckBoxCheckMarkColor()) {
+        DumpLog::GetInstance().AddDesc("MarkColor: " + paintProperty->GetCheckBoxCheckMarkColorValue().ToString());
+    }
+}
+
 void CheckBoxPattern::SetPrePageIdToLastPageId()
 {
     if (!Container::IsInSubContainer()) {
@@ -1020,5 +1154,56 @@ RefPtr<GroupManager> CheckBoxPattern::GetGroupManager()
     }
     groupManager_ = GroupManager::GetGroupManager();
     return groupManager_.Upgrade();
+}
+
+int32_t CheckBoxPattern::ParseCommand(const std::string& command, bool& selectStatus)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        return RET_FAILED;
+    }
+
+    auto cmdType = json->GetString("cmd");
+    if (cmdType != "selectCheckBox") {
+        return RET_FAILED;
+    }
+
+    selectStatus = json->GetBool("selectStatus", selectStatus);
+    return RET_SUCCESS;
+}
+
+int32_t CheckBoxPattern::OnInjectionEvent(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+    bool currentStatus = paintProperty->GetCheckBoxSelectValue(false);
+    bool selectStatus = currentStatus;
+    auto ret = ParseCommand(command, selectStatus);
+    CHECK_EQUAL_RETURN(ret, RET_FAILED, RET_FAILED);
+    CHECK_EQUAL_RETURN(currentStatus, selectStatus, RET_SUCCESS);
+    auto pattern = host->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_RETURN(pattern, RET_FAILED);
+    pattern->SetCheckBoxSelect(selectStatus);
+    return RET_SUCCESS;
+}
+
+void CheckBoxPattern::ReportChangeEvent(bool selectStatus)
+{
+    if (!UiSessionManager::GetInstance()->IsHasReportObject()) {
+        return;
+    }
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("selectStatus", selectStatus);
+    params->Put("cmd", "selectCheckBox");
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("event", params);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetId();
+    json->Put("nodeId", id);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", json->ToString().c_str());
 }
 } // namespace OHOS::Ace::NG

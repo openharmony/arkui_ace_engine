@@ -27,9 +27,10 @@
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/image/image_file_cache.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -210,20 +211,12 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
 }
 
 // NG ImageLoader entrance
-bool NetworkImageLoader::DownloadImage(
-    DownloadCallback&& downloadCallback, const std::string& src, bool sync, int32_t nodeId)
+bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync)
 {
-    // If the API version is greater or equal than 14, use the preload module to download the URL.
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        return sync ? DownloadManager::GetInstance()->DownloadSyncWithPreload(
-                          std::move(downloadCallback), src, Container::CurrentId(), nodeId)
-                    : DownloadManager::GetInstance()->DownloadAsyncWithPreload(
-                          std::move(downloadCallback), src, Container::CurrentId(), nodeId);
-    }
-    return sync ? DownloadManager::GetInstance()->DownloadSync(
-                      std::move(downloadCallback), src, Container::CurrentId(), nodeId)
-                : DownloadManager::GetInstance()->DownloadAsync(
-                      std::move(downloadCallback), src, Container::CurrentId(), nodeId);
+    return sync ? DownloadManager::GetInstance()->DownloadSyncWithPreload(
+                      std::move(downloadCallback), src, Container::CurrentId())
+                : DownloadManager::GetInstance()->DownloadAsyncWithPreload(
+                      std::move(downloadCallback), src, Container::CurrentId());
 }
 
 std::shared_ptr<RSData> FileImageLoader::LoadImageData(
@@ -326,17 +319,17 @@ std::shared_ptr<RSData> AssetImageLoader::LoadImageData(
     auto pipelineContext = context.Upgrade();
     if (!pipelineContext) {
         TAG_LOGW(
-            AceLogTag::ACE_IMAGE, "invalid pipeline context. %{public}s.", imageDfxConfig.ToStringWithoutSrc().c_str());
+            AceLogTag::ACE_IMAGE, "invalid pipeline context. %{public}s", imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     auto assetManager = pipelineContext->GetAssetManager();
     if (!assetManager) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "No asset manager! %{public}s.", imageDfxConfig.ToStringWithoutSrc().c_str());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "NoAssetManager! %{public}s", imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     auto assetData = assetManager->GetAsset(assetSrc);
     if (!assetData) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "No asset data! %{public}s.", imageDfxConfig.ToStringWithoutSrc().c_str());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "NoAssetData-%{public}s", imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     const uint8_t* data = assetData->GetData();
@@ -529,11 +522,12 @@ bool ResourceImageLoader::GetResourceName(const std::string& uri, std::string& r
 std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
+    int32_t instanceId = Container::CurrentIdSafely();
     auto uri = imageSourceInfo.GetSrc();
     auto bundleName = imageSourceInfo.GetBundleName();
     auto moudleName = imageSourceInfo.GetModuleName();
 
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moudleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moudleName, instanceId);
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
@@ -543,7 +537,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
         if (imageSourceInfo.GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
             resConfig.SetColorMode(imageSourceInfo.GetLocalColorMode());
         } else {
-            resConfig.SetColorMode(SystemProperties::GetColorMode());
+            resConfig.SetColorMode(Container::CurrentColorMode());
         }
         ConfigurationChange configChange { .colorModeUpdate = true };
         resourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
@@ -619,6 +613,7 @@ std::string DecodedDataProviderImageLoader::GetThumbnailOrientation(const ImageS
 
     // check image orientation
     auto imageSrc = ImageSource::Create(fd);
+    close(fd);
     CHECK_NULL_RETURN(imageSrc, "");
     std::string orientation = imageSrc->GetProperty("Orientation");
     return orientation;
@@ -807,6 +802,7 @@ std::string AstcImageLoader::GetThumbnailOrientation(const ImageSourceInfo& src)
     CHECK_NULL_RETURN(fd >= 0, "");
 
     auto imageSrc = ImageSource::Create(fd);
+    close(fd);
     CHECK_NULL_RETURN(imageSrc, "");
     std::string orientation = imageSrc->GetProperty("Orientation");
     return orientation;

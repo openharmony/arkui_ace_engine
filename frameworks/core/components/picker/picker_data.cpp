@@ -174,7 +174,7 @@ void PickerDate::SortAndMergeDisabledDateRange(std::vector<std::pair<PickerDate,
     std::sort(disableDateRange.begin(), disableDateRange.end(), comparePickerDateRange);
     std::vector<std::pair<PickerDate, PickerDate>> mergedRange;
     for (const auto& range : disableDateRange) {
-        if (!mergedRange.empty() && (range.first.ToDays() - 1) <= mergedRange.back().second.ToDays()) {
+        if (!mergedRange.empty() && range.first.ToDays() <= (mergedRange.back().second.ToDays() + 1)) {
             mergedRange.back().second =
                 mergedRange.back().second < range.second ? range.second : mergedRange.back().second;
         } else {

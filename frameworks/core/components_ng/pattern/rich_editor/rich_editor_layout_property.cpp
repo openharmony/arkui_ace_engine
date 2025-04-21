@@ -34,5 +34,6 @@ void RichEditorLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, con
     TextLayoutProperty::ToJsonValue(json, filter);
     auto barState = GetDisplayMode().value_or(DisplayMode::AUTO);
     json->Put("barState", DisplayModeEnumToString(barState).c_str());
+    json->PutExtAttr("fontColor", GetTextColor().value_or(Color::BLACK).ColorToString().c_str(), filter);
 };
 } // namespace OHOS::Ace::NG

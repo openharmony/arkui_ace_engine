@@ -295,6 +295,64 @@ HWTEST_F(MenuItemPatternTestOneNg, OnExpandChanged001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnExpandChanged002
+ * @tc.desc: Verify OnExpandChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, OnExpandChanged002, TestSize.Level1)
+{
+    MenuItemProperties itemOption;
+    itemOption.content = "content2";
+    MenuItemModelNG MneuItemModelInstance;
+    MneuItemModelInstance.Create(itemOption);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    auto menu = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, V2::MENU_TAG, MenuType::MENU));
+    frameNode->MountToParent(menu);
+    menuItemPattern->isExpanded_ = true;
+    menuItemPattern->OnExpandChanged(frameNode);
+
+    EXPECT_EQ(menuItemPattern->embeddedMenu_, nullptr);
+}
+
+/**
+ * @tc.name: HideEmbeddedExpandMenu001
+ * @tc.desc: Verify OnExpandChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, HideEmbeddedExpandMenu001, TestSize.Level1)
+{
+    MenuItemProperties itemOption;
+    itemOption.content = "content2";
+    MenuItemModelNG MneuItemModelInstance;
+    MneuItemModelInstance.Create(itemOption);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    auto menu = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, V2::MENU_TAG, MenuType::MENU));
+
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, V2::MENU_TAG, MenuType::SUB_MENU));
+    subMenu->MountToParent(frameNode);
+    frameNode->MountToParent(menu);
+    menu->MountToParent(wrapperNode);
+
+    menuItemPattern->HideEmbeddedExpandMenu(subMenu);
+    auto childIndex = frameNode->GetChildIndex(subMenu);
+    auto notFound = -1;
+    EXPECT_EQ(childIndex, notFound);
+}
+
+/**
  * @tc.name: RegisterOnClick001
  * @tc.desc: Verify RegisterOnClick
  * @tc.type: FUNC
@@ -1393,5 +1451,119 @@ HWTEST_F(MenuItemPatternTestOneNg, InitFocusEvent004, TestSize.Level1)
     ASSERT_NE(itemPattern->selectTheme_, nullptr);
     EXPECT_EQ(itemPattern->selectTheme_->GetoptionApplyFocusedStyle(), true);
     EXPECT_EQ(itemPattern->isFocusShadowSet_, false);
+}
+
+/**
+ * @tc.name: GetSubMenu001
+ * @tc.desc: Verify GetSubMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, GetSubMenu001, TestSize.Level1)
+{
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode, nullptr);
+    auto jsViewNode1 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode1, nullptr);
+    jsViewNode1->MountToParent(jsViewNode);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto node = AceType::DynamicCast<UINode>(jsViewNode);
+    ASSERT_EQ(menuItemPattern->GetSubMenu(node), nullptr);
+}
+
+/**
+ * @tc.name: GetSubMenu002
+ * @tc.desc: Verify GetSubMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, GetSubMenu002, TestSize.Level1)
+{
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode, nullptr);
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    outerMenuNode->MountToParent(jsViewNode);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto node = AceType::DynamicCast<UINode>(jsViewNode);
+    ASSERT_EQ(menuItemPattern->GetSubMenu(node), outerMenuNode);
+}
+
+/**
+ * @tc.name: GetSubMenu003
+ * @tc.desc: Verify GetSubMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, GetSubMenu003, TestSize.Level1)
+{
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode, nullptr);
+    auto jsViewNode1 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode1, nullptr);
+    jsViewNode1->MountToParent(jsViewNode);
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    outerMenuNode->MountToParent(jsViewNode1);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto node = AceType::DynamicCast<UINode>(jsViewNode);
+    ASSERT_EQ(menuItemPattern->GetSubMenu(node), outerMenuNode);
+}
+
+/**
+ * @tc.name: GetSubMenu004
+ * @tc.desc: Verify GetSubMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, GetSubMenu004, TestSize.Level1)
+{
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode, nullptr);
+    auto jsViewNode1 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode1, nullptr);
+    jsViewNode1->MountToParent(jsViewNode);
+    auto jsViewNode2 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode2, nullptr);
+    jsViewNode2->MountToParent(jsViewNode1);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto node = AceType::DynamicCast<UINode>(jsViewNode);
+    ASSERT_EQ(menuItemPattern->GetSubMenu(node), nullptr);
 }
 } // namespace OHOS::Ace::NG

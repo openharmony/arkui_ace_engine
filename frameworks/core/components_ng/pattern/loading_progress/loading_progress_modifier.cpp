@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_modifier.h"
 
 #include "base/geometry/arc.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_utill.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
@@ -133,7 +134,7 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
     auto ringColor = color_->Get();
     ringColor.BlendOpacity(RING_ALPHA);
     pen.SetColor(ToRSColor(ringColor));
-    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+    if (Container::CurrentColorMode() == ColorMode::DARK) {
         if (ringColor.GetValue() == DEFAULT_COLOR_DARK.GetValue()) {
             ringColor = LinearColor::WHITE;
         }
@@ -152,7 +153,7 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
 #endif
         pen.SetFilter(filter);
     }
-    if (loadingProgressOwner_ == LoadingProgressOwner::REFRESH && SystemProperties::GetColorMode() == ColorMode::DARK) {
+    if (loadingProgressOwner_ == LoadingProgressOwner::REFRESH && Container::CurrentColorMode() == ColorMode::DARK) {
         filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
             RSBlurType::NORMAL, PipelineBase::GetCurrentDensity() * REFRESH_DARK_MODE_RING_BLUR_RADIUS));
         pen.SetFilter(filter);
@@ -226,7 +227,7 @@ void LoadingProgressModifier::DrawOrbit(
     matrix.MapPoints(distPoints, points, points.size());
     auto cometColor = color_->Get();
     float colorAlpha = cometColor.GetAlpha() / FULL_OPACITY;
-    if (SystemProperties::GetColorMode() == ColorMode::DARK && cometColor.GetValue() == DEFAULT_COLOR_DARK.GetValue()) {
+    if (Container::CurrentColorMode() == ColorMode::DARK && cometColor.GetValue() == DEFAULT_COLOR_DARK.GetValue()) {
         colorAlpha = OPACITY3;
     }
     auto baseAlpha = colorAlpha * cometParam.alphaScale;

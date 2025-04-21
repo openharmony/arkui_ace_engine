@@ -36,11 +36,12 @@ class ResourceObject : public AceType {
 
 public:
     ResourceObject(int32_t id, int32_t type, const std::vector<ResourceObjectParams>& params,
-        const std::string& bundleName, const std::string& moduleName)
-        : id_(id), type_(type), params_(params), bundleName_(bundleName), moduleName_(moduleName) {};
-    ResourceObject(const std::string& bundleName, const std::string& moduleName)
-        : id_(-1), type_(-1), params_(std::vector<ResourceObjectParams>()), bundleName_(bundleName),
+        const std::string& bundleName, const std::string& moduleName, int32_t instanceId)
+        : id_(id), type_(type), instanceId_(instanceId), params_(params), bundleName_(bundleName),
           moduleName_(moduleName) {};
+    ResourceObject(const std::string& bundleName, const std::string& moduleName, int32_t instanceId)
+        : id_(-1), type_(-1), instanceId_(instanceId), params_(std::vector<ResourceObjectParams>()),
+          bundleName_(bundleName), moduleName_(moduleName) {};
     ~ResourceObject() = default;
 
     int32_t GetId() const
@@ -51,6 +52,11 @@ public:
     int32_t GetType() const
     {
         return type_;
+    }
+
+    int32_t GetInstanceId() const
+    {
+        return instanceId_;
     }
 
     std::vector<ResourceObjectParams> GetParams() const
@@ -71,6 +77,7 @@ public:
 private:
     int32_t id_;
     int32_t type_;
+    int32_t instanceId_;
     std::vector<ResourceObjectParams> params_;
     std::string bundleName_;
     std::string moduleName_;

@@ -72,10 +72,7 @@ DialogProperties BuildDialogProperties(const Ark_TimePickerDialogOptions options
         options.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
     dialogProps.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
     dialogProps.shadow = Converter::OptConvert<Shadow>(options.shadow);
-    auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
-    if (enableHoverMode) {
-        dialogProps.enableHoverMode = enableHoverMode.value();
-    }
+    dialogProps.enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
     auto hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
     if (hoverModeArea) {
         dialogProps.hoverModeArea = hoverModeArea.value();
