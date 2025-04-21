@@ -599,12 +599,16 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg011, 
     AAFwk::Want reply;
     RSSubsystemId id = RSSubsystemId::ARKUI_UIEXT;
     BusinessDataSendType type = NG::BusinessDataSendType::ASYNC;
-    sessionWrapper->SendBusinessData(code, data, type, id);
-    sessionWrapper->SendBusinessDataSyncReply(code, data, reply, id);
+    auto ret = sessionWrapper->SendBusinessData(code, data, type, id);
+    EXPECT_EQ(ret, false);
+    ret = sessionWrapper->SendBusinessDataSyncReply(code, data, reply, id);
+    EXPECT_EQ(ret, false);
 
     code = UIContentBusinessCode::EVENT_PROXY;
-    sessionWrapper->SendBusinessData(code, data, type, id);
-    sessionWrapper->SendBusinessDataSyncReply(code, data, reply, id);
+    ret = sessionWrapper->SendBusinessData(code, data, type, id);
+    EXPECT_NE(ret, false);
+    ret = sessionWrapper->SendBusinessDataSyncReply(code, data, reply, id);
+    EXPECT_NE(ret, false);
 #endif
 }
 } // namespace OHOS::Ace::NG
