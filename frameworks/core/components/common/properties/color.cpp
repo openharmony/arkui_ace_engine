@@ -515,9 +515,9 @@ bool Color::MatchColorWithRGB(const std::string& colorStr, Color& color)
     std::smatch matches;
     if (std::regex_match(colorStr, matches, COLOR_WITH_RGB)) {
         if (matches.size() == RGB_SUB_MATCH_SIZE) {
-            auto redInt = std::stoi(matches[1]);
-            auto greenInt = std::stoi(matches[2]);
-            auto blueInt = std::stoi(matches[3]);
+            auto redInt = StringUtils::StringToInt(matches[1]);
+            auto greenInt = StringUtils::StringToInt(matches[2]);
+            auto blueInt = StringUtils::StringToInt(matches[3]);
             if (!IsRGBValid(redInt) || !IsRGBValid(greenInt) || !IsRGBValid(blueInt)) {
                 return false;
             }
