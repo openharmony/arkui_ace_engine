@@ -5643,7 +5643,7 @@ ArkUINativeModuleValue CommonBridge::SetDragPreview(ArkUIRuntimeCallInfo* runtim
 #endif
             if (pixmap) {
                 auto pixelMapSharedPtr = pixmap->GetPixelMapSharedPtr();
-                dragPreview.pixelMap = &pixelMapSharedPtr;
+                dragPreview.pixelMap = static_cast<void*>(&pixelMapSharedPtr);
             }
         }
     }
