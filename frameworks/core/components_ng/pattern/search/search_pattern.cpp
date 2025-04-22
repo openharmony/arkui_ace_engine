@@ -2017,6 +2017,11 @@ void SearchPattern::OnColorConfigurationUpdate()
     auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
     UpdateCancelButtonColorMode();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) ||
+        !SystemProperties::IsNeedSymbol()) {
+        UpdateImageIconNode(IMAGE_INDEX);
+        UpdateImageIconNode(CANCEL_IMAGE_INDEX);
+    }
     auto buttonNode = buttonNode_.Upgrade();
     if (buttonNode) {
         auto buttonRenderContext = buttonNode->GetRenderContext();
