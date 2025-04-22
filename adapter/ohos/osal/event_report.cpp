@@ -242,10 +242,10 @@ void EventReport::SendDiffFrameRatesDuring(const std::string& scene, const FRCSc
     if (packageName.size() > MAX_PACKAGE_NAME_LENGTH) {
         StrTrim(packageName);
     }
-    auto frameRateDuring_60_ms = curFRCSceneFpsInfo_.duration_60 / NS_TO_MS;
-    auto frameRateDuring_72_ms = curFRCSceneFpsInfo_.duration_72 / NS_TO_MS;
-    auto frameRateDuring_90_ms = curFRCSceneFpsInfo_.duration_90 / NS_TO_MS;
-    auto frameRateDuring_120_ms = curFRCSceneFpsInfo_.duration_120 / NS_TO_MS;
+    int32_t frameRateDuring_60_ms = static_cast<int32_t>(curFRCSceneFpsInfo_.duration_60 / NS_TO_MS);
+    int32_t frameRateDuring_72_ms = static_cast<int32_t>(curFRCSceneFpsInfo_.duration_72 / NS_TO_MS);
+    int32_t frameRateDuring_90_ms = static_cast<int32_t>(curFRCSceneFpsInfo_.duration_90 / NS_TO_MS);
+    int32_t frameRateDuring_120_ms = static_cast<int32_t>(curFRCSceneFpsInfo_.duration_120 / NS_TO_MS);
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_SCENE, scene,
