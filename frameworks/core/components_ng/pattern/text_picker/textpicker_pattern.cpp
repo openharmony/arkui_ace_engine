@@ -1006,9 +1006,9 @@ double TextPickerPattern::CalculateHeight()
     CHECK_NULL_RETURN(pickerTheme, height);
     if (textPickerLayoutProperty->HasDefaultPickerItemHeight()) {
         auto defaultPickerItemHeightValue = textPickerLayoutProperty->GetDefaultPickerItemHeightValue();
-        if (context->NormalizeToPx(defaultPickerItemHeightValue) <= 0) {
+        if (LessOrEqual(context->NormalizeToPx(defaultPickerItemHeightValue), 0.0f)) {
             height = pickerTheme->GetDividerSpacing().ConvertToPx();
-            if (defaultPickerItemHeight_ != height) {
+            if (!NearEqual(defaultPickerItemHeight_, height)) {
                 defaultPickerItemHeight_ = height;
                 PaintFocusState();
                 SetButtonIdeaSize();
@@ -1023,7 +1023,7 @@ double TextPickerPattern::CalculateHeight()
     } else {
         height = pickerTheme->GetDividerSpacing().ConvertToPx();
     }
-    if (defaultPickerItemHeight_ != height) {
+    if (!NearEqual(defaultPickerItemHeight_, height)) {
         defaultPickerItemHeight_ = height;
         PaintFocusState();
         SetButtonIdeaSize();
@@ -1148,16 +1148,16 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     if (isRtl) {
         currentFocusIndex = childSize - 1 - focusKeyID_;
     }
-    auto itemHeight = (defaultPickerItemHeight_ > 0) ? defaultPickerItemHeight_ : dividerSpacing;
+    auto itemHeight = GreatNotEqual(defaultPickerItemHeight_, 0.0f) ? defaultPickerItemHeight_ : dividerSpacing;
     auto centerX = (frameSize.Width() / childSize - pickerThemeWidth) / RATE +
                    columnNode->GetGeometryNode()->GetFrameRect().Width() * currentFocusIndex +
                    PRESS_INTERVAL.ConvertToPx() * RATE;
-    auto centerY = (frameSize.Height() - itemHeight) / RATE + 
+    auto centerY = (frameSize.Height() - itemHeight) / RATE +
                    FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
     float paintRectWidth = columnWidth - FOCUS_INTERVAL.ConvertToPx() * RATE - LINE_WIDTH.ConvertToPx() * RATE;
     float paintRectHeight = itemHeight - FOCUS_INTERVAL.ConvertToPx() * RATE - LINE_WIDTH.ConvertToPx() * RATE;
-    if (paintRectHeight < 0) {
-        paintRectHeight = 0.0;
+    if (LessNotEqual(paintRectHeight, 0.0f)) {
+        paintRectHeight = 0.0f;
     }
     auto focusPaintRect = CalculatePaintRect(currentFocusIndex,
         centerX, centerY, paintRectWidth, paintRectHeight, columnWidth);
