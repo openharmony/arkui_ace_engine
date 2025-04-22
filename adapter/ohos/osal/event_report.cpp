@@ -191,7 +191,7 @@ void EventReport::FrameRateDurationsStatistics(int32_t expectedRate, const std::
             }
             if (expectedRate != calFrameRate_) {
                 int64_t endTime = GetSysTimestamp();
-                int32_t duration = static_cast<int32_t>(endTime - calTime_);
+                int64_t duration = endTime - calTime_;
                 calTime_ = endTime;
             AddFrameRateDuration(calFrameRate_, duration);
             }
@@ -200,7 +200,7 @@ void EventReport::FrameRateDurationsStatistics(int32_t expectedRate, const std::
         }
         case NG::SceneStatus::END: {
             int64_t endTime = GetSysTimestamp();
-            int32_t duration = static_cast<int32_t>(endTime - calTime_);
+            int64_t duration = endTime - calTime_;
             calTime_ = endTime;
             AddFrameRateDuration(calFrameRate_, duration);
             EventReport::SendDiffFrameRatesDuring(scene, curFRCSceneFpsInfo_);
@@ -211,7 +211,7 @@ void EventReport::FrameRateDurationsStatistics(int32_t expectedRate, const std::
     }
 }
 
-void EventReport::AddFrameRateDuration(int32_t frameRate, int32_t duration)
+void EventReport::AddFrameRateDuration(int32_t frameRate, int64_t duration)
 {
     switch (frameRate) {
         case FRAME_120: {
