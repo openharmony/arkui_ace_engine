@@ -382,11 +382,20 @@ NestedScrollMode GetNestedScrollModeValue(int32_t value)
 
 void FfiOHOSAceFrameworkNestedScroll(int32_t nestedScrollNum, int32_t scrollBackwardNum)
 {
-    NestedScrollOptions nestedOpt = {
-        .forward = GetNestedScrollModeValue(nestedScrollNum),
-        .backward = GetNestedScrollModeValue(scrollBackwardNum),
-    };
-    WebModel::GetInstance()->SetNestedScroll(nestedOpt);
+    NestedScrollOptionsExt nestedOpt = { .scrollUp = GetNestedScrollModeValue(scrollBackwardNum),
+        .scrollDown = GetNestedScrollModeValue(nestedScrollNum),
+        .scrollLeft = GetNestedScrollModeValue(scrollBackwardNum),
+        .scrollRight = GetNestedScrollModeValue(nestedScrollNum) };
+    WebModel::GetInstance()->SetNestedScrollExt(nestedOpt);
+}
+
+void FfiOHOSAceFrameworkNestedScrollExt(int32_t scrollUp, int32_t scrollDown, int32_t scrollLeft, int32_t scrollRight)
+{
+    NestedScrollOptionsExt nestedOpt = { .scrollUp = GetNestedScrollModeValue(scrollUp),
+        .scrollDown = GetNestedScrollModeValue(scrollDown),
+        .scrollLeft = GetNestedScrollModeValue(scrollLeft),
+        .scrollRight = GetNestedScrollModeValue(scrollRight) };
+    WebModel::GetInstance()->SetNestedScrollExt(nestedOpt);
 }
 
 void FfiOHOSAceFrameworkWebUserAgent(const std::string& userAgent)
@@ -472,7 +481,7 @@ void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(FfiWebResourceReques
     auto instanceId = Container::CurrentId();
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onLoadIntercept = [func = CJLambda::Create(callback), instanceId, node = frameNode](
-        const BaseEventInfo* info) -> bool  {
+                               const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, false);
@@ -1426,7 +1435,7 @@ VectorStringHandle FfiWebFileSelectorParamGetAcceptType(void* ptr)
     auto param = *reinterpret_cast<RefPtr<WebFileSelectorParam>*>(ptr);
     auto result = new std::vector<std::string>;
     auto acceptType = param->GetAcceptType();
-    for (auto& it: acceptType) {
+    for (auto& it : acceptType) {
         result->emplace_back(it);
     }
     return result;
@@ -1469,11 +1478,9 @@ void FfiOHOSAceFrameworkWebOnNativeEmbedLifecyccleChange(void (*callback)(FfiNat
         auto vecParams = new std::vector<FfiHeader>(paramTmp.size());
         CHECK_NULL_VOID(vecParams);
         size_t i = 0;
-        for (const auto& it: paramTmp) {
-            (*vecParams)[i] = FfiHeader {
-                .key = Utils::MallocCString(it.first),
-                .value = Utils::MallocCString(it.second)
-            };
+        for (const auto& it : paramTmp) {
+            (*vecParams)[i] =
+                FfiHeader { .key = Utils::MallocCString(it.first), .value = Utils::MallocCString(it.second) };
             i++;
         }
         nativeEmbedInfo.params = vecParams;
