@@ -270,7 +270,7 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
         ResType patternType = std::get<1>(themeQueueFront);     // e.g. 22
         std::string patternData = std::get<2>(themeQueueFront); // e.g. 125830098
         if (patternType == ResType::PATTERN) {
-            patternNameMap_[patternTag] = StringUtils::StringToInt(patternData);
+            patternNameMap_[patternTag] = StringUtils::StringToUintCheck(patternData);
         }
         if (patternType == ResType::PATTERN && PATTERN_SYNC_LOAD_SET.find(patternTag) != PATTERN_SYNC_LOAD_SET.end()) {
             // is theme pattern and sync load
