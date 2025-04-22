@@ -1138,7 +1138,6 @@ template("declarative_js_engine_ng") {
         "jsview/js_paste_button.cpp",
         "jsview/js_save_button.cpp",
         "jsview/js_sec_button_base.cpp",
-        "jsview/menu/js_context_menu.cpp",
         "jsview/text_menu/js_text_menu.cpp",
       ]
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
