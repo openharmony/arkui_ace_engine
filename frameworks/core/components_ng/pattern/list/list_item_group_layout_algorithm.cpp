@@ -1330,7 +1330,7 @@ void ListItemGroupLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutPropert
         if (layoutProperty->GetLaneGutter().has_value()) {
             auto laneGutter = ConvertToPx(
                 layoutProperty->GetLaneGutter().value(), layoutConstraint.scaleProperty, crossSizeOptional.value());
-            laneGutter_ = laneGutter.value();
+            laneGutter_ = laneGutter.value_or(0.0f);
         }
     }
     lanes_ = ListLanesLayoutAlgorithm::CalculateLanesParam(
