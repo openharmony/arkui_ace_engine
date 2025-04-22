@@ -92,20 +92,6 @@ std::optional<std::string> XComponentModelNG::GetLibraryName()
     return xcPattern->GetLibraryName();
 }
 
-XComponentType XComponentModelNG::GetTypeImpl(const RefPtr<FrameNode>& frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, XComponentType::UNKNOWN);
-    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, XComponentType::UNKNOWN);
-    return layoutProperty->GetXComponentTypeValue();
-}
-
-XComponentType XComponentModelNG::GetType()
-{
-    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    return GetTypeImpl(frameNode);
-}
-
 void XComponentModelNG::SetSoPath(const std::string& soPath)
 {
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -117,6 +103,19 @@ void XComponentModelNG::SetSoPath(const std::string& soPath)
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
     xcPattern->SetSoPath(soPath);
+}
+
+XComponentType XComponentModelNG::GetTypeImpl(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, XComponentType::UNKNOWN);
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, XComponentType::UNKNOWN);
+    return layoutProperty->GetXComponentTypeValue();
+}
+
+XComponentType XComponentModelNG::GetType()
+{
+    return GetTypeImpl(AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode()));
 }
 
 void XComponentModelNG::SetOnLoad(LoadEvent&& onLoad)
