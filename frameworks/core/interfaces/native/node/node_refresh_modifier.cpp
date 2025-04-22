@@ -172,6 +172,29 @@ void ResetRefreshOnOffsetChangeCallback(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     RefreshModelNG::SetOnOffsetChange(frameNode, nullptr);
 }
+
+void SetMaxPullDownDistance(ArkUINodeHandle node, ArkUI_Float32 distance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<float> distanceValue = std::max(distance, 0.0f);
+    RefreshModelNG::SetMaxPullDownDistance(frameNode, distanceValue);
+}
+
+void ResetMaxPullDownDistance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<float> distanceValue = std::nullopt;
+    RefreshModelNG::SetMaxPullDownDistance(frameNode, distanceValue);
+}
+
+ArkUI_Float32 GetMaxPullDownDistance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return RefreshModelNG::GetMaxPullDownDistance(frameNode);
+}
 } // namespace
 namespace NodeModifier {
 
@@ -197,6 +220,9 @@ const ArkUIRefreshModifier* GetRefreshModifier()
         .resetOnRefreshingCallback = ResetOnRefreshingCallback,
         .setRefreshOnOffsetChangeCallback = SetRefreshOnOffsetChangeCallback,
         .resetRefreshOnOffsetChangeCallback = ResetRefreshOnOffsetChangeCallback,
+        .setMaxPullDownDistance = SetMaxPullDownDistance,
+        .resetMaxPullDownDistance = ResetMaxPullDownDistance,
+        .getMaxPullDownDistance = GetMaxPullDownDistance,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

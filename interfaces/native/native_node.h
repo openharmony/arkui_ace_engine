@@ -5918,6 +5918,19 @@ typedef enum {
      *
      */
     NODE_REFRESH_PULL_TO_REFRESH = 1009004,
+    /**
+     * @brief Set the max pull down distance for Refresh.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: max pull-down distance, in vp.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: max pull-down distance, in vp.
+     *
+     * @since 20
+     */
+    NODE_REFRESH_MAX_PULL_DOWN_DISTANCE = 1009005,
 
     /**
      * @brief Defines the main axis direction of the <b><WaterFlow></b> component layout.

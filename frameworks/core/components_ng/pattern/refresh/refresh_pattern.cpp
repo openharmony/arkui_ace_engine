@@ -49,7 +49,7 @@ constexpr float PERCENT = 0.01f; // Percent
 constexpr float FOLLOW_TO_RECYCLE_DURATION = 600.0f;
 constexpr float CUSTOM_BUILDER_ANIMATION_DURATION = 100.0f;
 constexpr float LOADING_ANIMATION_DURATION = 350.0f;
-constexpr float MAX_OFFSET = 100000.0f;
+constexpr float MAX_OFFSET = std::numeric_limits<float>::infinity();
 constexpr float HALF = 0.5f;
 constexpr float BASE_SCALE = 0.707f; // std::sqrt(2)/2
 constexpr Dimension TRIGGER_REFRESH_WITH_TEXT_DISTANCE = 96.0_vp;
@@ -442,7 +442,7 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
             return { delta, true };
         }
         auto pullDownRatio = CalculatePullDownRatio();
-        scrollOffset_ = std::clamp(scrollOffset_ + delta * pullDownRatio, 0.0f, MAX_OFFSET);
+        scrollOffset_ = std::clamp(scrollOffset_ + delta * pullDownRatio, 0.0f, GetMaxPullDownDistance());
         UpdateFirstChildPlacement();
         FireOnOffsetChange(scrollOffset_);
         if (!isSourceFromAnimation_) {
@@ -508,6 +508,16 @@ float RefreshPattern::CalculatePullDownRatio()
         gamma = 1.0f;
     }
     return exp(-ratio_.value() * gamma);
+}
+
+float RefreshPattern::GetMaxPullDownDistance()
+{
+    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    if (layoutProperty->GetMaxPullDownDistance().has_value()) {
+        return Dimension(layoutProperty->GetMaxPullDownDistance().value(), DimensionUnit::VP).ConvertToPx();
+    }
+    return MAX_OFFSET;
 }
 
 float RefreshPattern::GetFollowRatio()
@@ -708,9 +718,10 @@ void RefreshPattern::InitOffsetProperty()
         auto propertyCallback = [weak = AceType::WeakClaim(this)](float scrollOffset) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->scrollOffset_ = scrollOffset;
+            auto scrollOffsetLimit = std::clamp(scrollOffset, 0.0f, pattern->GetMaxPullDownDistance());
+            pattern->scrollOffset_ = scrollOffsetLimit;
             pattern->UpdateFirstChildPlacement();
-            pattern->FireOnOffsetChange(scrollOffset);
+            pattern->FireOnOffsetChange(scrollOffsetLimit);
         };
         offsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
         auto host = GetHost();
