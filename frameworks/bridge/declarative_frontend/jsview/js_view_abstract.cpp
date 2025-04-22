@@ -9145,6 +9145,29 @@ std::function<std::string(const std::string&)> ParseJsGetFunc(const JSCallbackIn
     };
 }
 
+std::function<std::string()> JsGetCustomMapFunc(panda::ecmascript::EcmaVM* vm, int32_t nodeId)
+{
+    return [vm, nodeId]() -> std::string {
+        std::string resultString = std::string();
+        CHECK_NULL_RETURN(vm, resultString);
+        panda::LocalScope scope(vm);
+        auto global = JSNApi::GetGlobalObject(vm);
+        auto getCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "getCustomPropertyMapString"));
+        if (!getCustomProperty->IsFunction(vm)) {
+            return resultString;
+        }
+        auto obj = getCustomProperty->ToObject(vm);
+        panda::Local<panda::FunctionRef> func = obj;
+        panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, nodeId) };
+        auto callValue = func->Call(vm, func, params, 1);
+        if (!callValue->IsString(vm)) {
+            return resultString;
+        }
+        auto value = callValue->ToString(vm)->ToString(vm);
+        return value;
+    };
+}
+
 std::function<bool()> ParseJsFunc(const JSCallbackInfo& info, int32_t nodeId)
 {
     auto* vm = info.GetVm();
@@ -9196,7 +9219,8 @@ void JSViewAbstract::JsCustomProperty(const JSCallbackInfo& info)
     auto nodeId = frameNode->GetId();
     auto getFunc = ParseJsGetFunc(info, nodeId);
     auto func = ParseJsFunc(info, nodeId);
-    frameNode->SetJSCustomProperty(func, getFunc);
+    auto getMapFunc = JsGetCustomMapFunc(vm, nodeId);
+    frameNode->SetJSCustomProperty(func, getFunc, std::move(getMapFunc));
 }
 
 void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
