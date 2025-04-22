@@ -98,6 +98,7 @@ WebModel* WebModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 bool JSWeb::webDebuggingAccess_ = false;
+int32_t JSWeb::webDebuggingPort_ = 0;
 class JSWebDialog : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -2526,11 +2527,21 @@ void JSWeb::Create(const JSCallbackInfo& info)
             return;
         }
         bool webDebuggingAccess = JSRef<JSFunc>::Cast(getWebDebugingFunction)->Call(controller, 0, {})->ToBoolean();
-        if (webDebuggingAccess == JSWeb::webDebuggingAccess_) {
-            return;
+        int32_t webDebuggingPort = 0;
+        auto getWebDebuggingPortFunction = controller->GetProperty("getWebDebuggingPort");
+        if (getWebDebuggingPortFunction->IsFunction()) {
+            webDebuggingPort = JSRef<JSFunc>::Cast(getWebDebuggingPortFunction)
+                ->Call(controller, 0, {})
+                ->ToNumber<int32_t>();
         }
-        WebModel::GetInstance()->SetWebDebuggingAccessEnabled(webDebuggingAccess);
+        if (webDebuggingPort > 0) {
+            WebModel::GetInstance()->SetWebDebuggingAccessEnabledAndPort(
+                webDebuggingAccess, webDebuggingPort);
+        } else {
+            WebModel::GetInstance()->SetWebDebuggingAccessEnabled(webDebuggingAccess);
+        }
         JSWeb::webDebuggingAccess_ = webDebuggingAccess;
+        JSWeb::webDebuggingPort_ = webDebuggingPort;
         return;
 
     } else {

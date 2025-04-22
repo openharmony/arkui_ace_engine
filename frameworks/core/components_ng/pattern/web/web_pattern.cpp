@@ -2878,10 +2878,17 @@ void WebPattern::OnTextZoomRatioUpdate(int32_t value)
     }
 }
 
-void WebPattern::OnWebDebuggingAccessEnabledUpdate(bool value)
+void WebPattern::OnWebDebuggingAccessEnabledAndPortUpdate(
+    const WebPatternProperty::WebDebuggingConfigType& enabled_and_port)
 {
     if (delegate_) {
-        delegate_->UpdateWebDebuggingAccess(value);
+        bool enabled = std::get<0>(enabled_and_port);
+        int32_t port = std::get<1>(enabled_and_port);
+        if (port > 0) {
+            delegate_->UpdateWebDebuggingAccessAndPort(enabled, port);
+        } else {
+            delegate_->UpdateWebDebuggingAccess(enabled);
+        }
     }
 }
 
@@ -3342,7 +3349,16 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateFileFromUrlEnabled(GetFileFromUrlAccessEnabledValue(false));
         delegate_->UpdateDatabaseEnabled(GetDatabaseAccessEnabledValue(false));
         delegate_->UpdateTextZoomRatio(GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO));
-        delegate_->UpdateWebDebuggingAccess(GetWebDebuggingAccessEnabledValue(false));
+        auto webDebugingConfig = GetWebDebuggingAccessEnabledAndPort();
+        if (webDebugingConfig) {
+            bool enabled = std::get<0>(webDebugingConfig.value());
+            int32_t port = std::get<1>(webDebugingConfig.value());
+            if (port > 0) {
+                delegate_->UpdateWebDebuggingAccessAndPort(enabled, port);
+            } else {
+                delegate_->UpdateWebDebuggingAccess(enabled);
+            }
+        }
         delegate_->UpdateMediaPlayGestureAccess(GetMediaPlayGestureAccessValue(true));
         delegate_->UpdatePinchSmoothModeEnabled(GetPinchSmoothModeEnabledValue(false));
         delegate_->UpdateMultiWindowAccess(GetMultiWindowAccessEnabledValue(false));

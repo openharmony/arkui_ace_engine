@@ -613,7 +613,17 @@ void WebModelNG::SetWebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateWebDebuggingAccessEnabled(isWebDebuggingAccessEnabled);
+    webPattern->UpdateWebDebuggingAccessEnabledAndPort(
+        std::make_tuple(isWebDebuggingAccessEnabled, 0));
+}
+
+void WebModelNG::SetWebDebuggingAccessEnabledAndPort(
+    bool isWebDebuggingAccessEnabled, int32_t webDebuggingPort)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebDebuggingAccessEnabledAndPort(
+        std::make_tuple(isWebDebuggingAccessEnabled, webDebuggingPort));
 }
 
 void WebModelNG::SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallback)
