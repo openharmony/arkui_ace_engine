@@ -441,7 +441,7 @@ bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
     }
 
     if (curr->duration_ != duration_ || curr->fingers_ != fingers_ || curr->repeat_ != repeat_ ||
-        curr->priorityMask_ != priorityMask_) {
+        curr->priorityMask_ != priorityMask_ || curr->isLimitFingerCount_ != isLimitFingerCount_) {
         if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) > 0) {
             SendCallbackMsg(onActionCancel_, false, GestureCallbackType::CANCEL);
         }
