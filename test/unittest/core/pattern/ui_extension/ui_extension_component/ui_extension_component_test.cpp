@@ -1820,4 +1820,89 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTestNotifyWindowMode, T
     pattern->SetIsWindowModeFollowHost(true);
     EXPECT_TRUE(pattern->GetIsWindowModeFollowHost());
 }
+
+
+/**
+ * @tc.name: UIExtensionComponentTest014
+ * @tc.desc: Test pattern OnAttachToMainTree OnDetachFromMainTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest014, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. test OnAttachToMainTree
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAttachToMainTree();
+
+    /**
+     * @tc.steps: step2. test OnDetachFromMainTree
+     */
+    pattern->OnDetachFromMainTree();
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTest015
+ * @tc.desc: Test pattern OnAttachContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest015, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. Create UIExtensionPattern and set initial instanceId.
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    int oldInstanceId = 123;
+    pattern->instanceId_ = oldInstanceId;
+
+    /**
+     * @tc.steps: step2. Call OnAttachContext with nullptr context.
+     */
+    pattern->OnAttachContext(nullptr);
+
+    /**
+     * @tc.expected: instanceId_ remains unchanged.
+     */
+    EXPECT_EQ(pattern->instanceId_, oldInstanceId);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTest016
+ * @tc.desc: Test pattern RegisterPipelineEvent/UnRegisterPipelineEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest016, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. get UIExtensionPattern.
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAttachToMainTree();
+
+    /**
+     * @tc.steps: step2. test RegisterPipelineEvent.
+     */
+    int32_t instanceId = 1;
+    pattern->RegisterPipelineEvent(instanceId);
+
+    /**
+     * @tc.steps: step3. test UnRegisterPipelineEvent.
+     */
+    pattern->UnRegisterPipelineEvent(instanceId);
+#endif
+}
 } // namespace OHOS::Ace::NG
