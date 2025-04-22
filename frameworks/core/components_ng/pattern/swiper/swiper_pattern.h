@@ -606,6 +606,7 @@ public:
     int32_t RealTotalCount() const;
     bool IsSwipeByGroup() const;
     int32_t DisplayIndicatorTotalCount() const;
+    bool IsAutoLinear() const;
     std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
     int32_t GetDisplayCount() const;
     int32_t GetCachedCount() const;
@@ -1031,7 +1032,6 @@ private:
     void StopSpringAnimationAndFlushImmediately();
     void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
     int32_t GetLoopIndex(int32_t index, int32_t childrenSize) const;
-    bool IsAutoLinear() const;
     bool AutoLinearAnimationNeedReset(float translate) const;
     void TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex);
     /**
