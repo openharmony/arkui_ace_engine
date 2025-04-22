@@ -187,10 +187,10 @@ struct RichEditorInfo {
 };
 
 struct FRCSceneFpsInfo {
-    int32_t duration_120 = 0;
-    int32_t duration_90 = 0;
-    int32_t duration_72 = 0;
-    int32_t duration_60 = 0;
+    int64_t duration_120 = 0;
+    int64_t duration_90 = 0;
+    int64_t duration_72 = 0;
+    int64_t duration_60 = 0;
 };
 
 class ACE_FORCE_EXPORT EventReport {
@@ -254,7 +254,7 @@ public:
     static void ReportReusedNodeSkipMeasureApp();
     static void SendDiffFrameRatesDuring(const std::string& scene, const FRCSceneFpsInfo& curFRCSceneFpsInfo_);
     static void FrameRateDurationsStatistics(int32_t expectedRate, const std::string& scene, NG::SceneStatus status);
-    static void AddFrameRateDuration(int32_t frameRate, int32_t duration);
+    static void AddFrameRateDuration(int32_t frameRate, int64_t duration);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);
