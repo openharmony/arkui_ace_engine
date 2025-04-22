@@ -978,11 +978,11 @@ export class ArkCommonAttributeSet implements CommonAttribute {
        return this;
     }
      /** @memo */
-    bindMenu(isShow: boolean | CustomBuilder | Array<MenuElement>, content?: CustomBuilder | Array<MenuElement> | MenuOptions | undefined, options?: MenuOptions | undefined): this {
+    bindMenu(content: CustomBuilder | Array<MenuElement>, options?: MenuOptions | undefined): this {
        return this;
     }
      /** @memo */
-    bindContextMenu(content: boolean | CustomBuilder, responseType: CustomBuilder | ResponseType, options?: ContextMenuOptions | undefined): this {
+    bindContextMenu(content: CustomBuilder, responseType: ResponseType, options?: ContextMenuOptions | undefined): this {
        return this;
     }
      /** @memo */
