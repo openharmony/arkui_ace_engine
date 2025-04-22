@@ -1777,7 +1777,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_WebResponseType responseType,
                            const Opt_SelectionMenuOptionsExt* options)
 {
-// #ifdef WEB_SUPPORTED
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(content);
@@ -1820,7 +1820,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
             WebModelNG::SetPreviewSelectionMenu(frameNode, previewSelectionMenuParam);
         }
         }, node);
-// #endif // WEB_SUPPORTED
+#endif // WEB_SUPPORTED
 }
 } // WebAttributeModifier
 const GENERATED_ArkUIWebModifier* GetWebModifier()

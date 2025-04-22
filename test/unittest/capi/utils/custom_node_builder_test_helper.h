@@ -206,7 +206,7 @@ private:
     static std::enable_if_t<has_CreateNode<U>::value, Ark_NodeHandle> call_CreateNode(U* testClassObject,
                                                                                       Ark_NodeHandle)
     {
-        Ark_NodeHandle customNode = testClassObject->CreateNode();
+        Ark_NodeHandle customNode = testClassObject ? testClassObject->CreateNode() : nullptr;
         return customNode;
     }
 
@@ -219,7 +219,7 @@ private:
     template <class U>
     static std::enable_if_t<has_DisposeNode<U>::value, void> call_DisposeNode(U* testClassObject, Ark_NodeHandle& node)
     {
-        if (node) {
+        if (testClassObject) {
             testClassObject->DisposeNode(node);
         }
     }
