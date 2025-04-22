@@ -56,16 +56,16 @@ public:
     static void SetSelectedTime(FrameNode* frameNode, const PickerTime& value);
     static void SetHasSecond(FrameNode* frameNode, bool hasSecond);
     static void SetDisappearTextStyle(
-        FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
+        FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const std::optional<NG::PickerTextStyle>& value);
     static void SetNormalTextStyle(
-        FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
+        FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const std::optional<NG::PickerTextStyle>& value);
     static void SetSelectedTextStyle(
-        FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
+        FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const std::optional<NG::PickerTextStyle>& value);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
-    static void SetHour24(FrameNode* frameNode, bool isUseMilitaryTime);
+    static void SetHour24(FrameNode* frameNode, const std::optional<bool>& isUseMilitaryTime);
     static void SetDateTimeOptions(FrameNode* frameNode, ZeroPrefixType& hourType,
         ZeroPrefixType& minuteType, ZeroPrefixType& secondType);
-    static void SetIsEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
+    static void SetIsEnableHapticFeedback(FrameNode* frameNode, const std::optional<bool>& isEnableHapticFeedback);
     static PickerTextStyle getSelectedTextStyle(FrameNode* frameNode);
     static PickerTextStyle getNormalTextStyle(FrameNode* frameNode);
     static PickerTextStyle getDisappearTextStyle(FrameNode* frameNode);
@@ -77,7 +77,7 @@ public:
     static int32_t getTimepickerEnableCascade(FrameNode* frameNode);
     static int32_t getEnableHapticFeedback(FrameNode* frameNode);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
-    static void SetWheelModeEnabled(FrameNode* frameNode, bool wheelModeEnabled);
+    static void SetWheelModeEnabled(FrameNode* frameNode, const std::optional<bool>& wheelModeEnabled);
     static void SetEnableCascade(FrameNode* frameNode, bool isEnableCascade);
     static void SetChangeEvent(FrameNode* frameNode, TimeChangeEvent&& onChange);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
