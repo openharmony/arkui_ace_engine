@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 
 namespace OHOS::Ace::NG {
 
@@ -5631,6 +5632,11 @@ void ViewAbstract::SetDragEventStrictReportingEnabled(int32_t instanceId, bool d
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetEventStrictReportingEnabled(dragEventStrictReportingEnabled);
+}
+
+void ViewAbstract::EnableDropDisallowedBadge(bool enableDropDisallowedBadge)
+{
+    DragDropGlobalController::GetInstance().SetEnableDropDisallowedBadge(enableDropDisallowedBadge);
 }
 
 void ViewAbstract::SetDisallowDropForcedly(bool isDisallowDropForcedly)

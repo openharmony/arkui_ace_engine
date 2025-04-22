@@ -153,6 +153,18 @@ void DragDropGlobalController::SetIsOnOnDropPhase(bool isOnOnDropPhase)
     isOnOnDropPhase_ = isOnOnDropPhase;
 }
 
+void DragDropGlobalController::SetEnableDropDisallowedBadge(bool enableDropDisallowedBadge)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    enableDropDisallowedBadge_ = enableDropDisallowedBadge;
+}
+
+bool DragDropGlobalController::GetEnableDropDisallowedBadge() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return enableDropDisallowedBadge_;
+}
+
 bool DragDropGlobalController::RequestDragEndCallback(int32_t requestId,
     DragRet dragResult, std::function<void(const DragRet&)> stopDragCallback)
 {

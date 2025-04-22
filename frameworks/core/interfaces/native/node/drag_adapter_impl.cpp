@@ -143,6 +143,11 @@ void SetDragEventStrictReportingEnabledWithContext(ArkUI_Int32 instanceId, bool 
     NG::ViewAbstract::SetDragEventStrictReportingEnabled(instanceId, enabled);
 }
 
+void EnableDropDisallowedBadge(bool enabled)
+{
+    NG::ViewAbstract::EnableDropDisallowedBadge(enabled);
+}
+
 ArkUI_Int32 RequestDragEndPending()
 {
     return NG::DragDropFuncWrapper::RequestDragEndPending();
@@ -173,7 +178,8 @@ const ArkUIDragAdapterAPI* GetDragAdapterAPI()
         .setDragEventStrictReportingEnabledWithContext = SetDragEventStrictReportingEnabledWithContext,
         .requestDragEndPending = RequestDragEndPending,
         .notifyDragResult = NotifyDragResult,
-        .notifyDragEndPendingDone = NotifyDragEndPendingDone
+        .notifyDragEndPendingDone = NotifyDragEndPendingDone,
+        .enableDropDisallowedBadge = EnableDropDisallowedBadge,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;

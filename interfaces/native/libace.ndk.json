@@ -2852,6 +2852,10 @@
         "name": "OH_ArkUI_NotifyDragEndPendingDone"
     },
     {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_EnableDropDisallowedBadge"
+    },
+    {
         "first_introduced": "18",
         "name": "OH_ArkUI_UIInputEvent_GetEventTargetWidth"
     },

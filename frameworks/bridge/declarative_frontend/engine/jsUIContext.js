@@ -203,6 +203,12 @@ class DragController {
         JSViewAbstract.cancelDataLoading(key);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    enableDropDisallowedBadge(enable) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        JSViewAbstract.enableDropDisallowedBadge(enable);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class UIObserver {
