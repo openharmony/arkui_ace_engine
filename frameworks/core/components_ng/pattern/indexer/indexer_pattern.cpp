@@ -977,10 +977,9 @@ void IndexerPattern::ShowBubble()
         popupNode_->MountToParent(host);
         layoutProperty->UpdateIsPopup(true);
     }
-    std::vector<std::string> currentListData = std::vector<std::string>();
-    UpdateBubbleList(currentListData);
-    UpdateBubbleView(currentListData);
-    UpdateBubbleSize(currentListData);
+    UpdateBubbleList();
+    UpdateBubbleView();
+    UpdateBubbleSize();
     delayTask_.Cancel();
     StartBubbleAppearAnimation();
     if (!isTouch_) {
@@ -1015,7 +1014,7 @@ RefPtr<FrameNode> IndexerPattern::CreatePopupNode()
     return columnNode;
 }
 
-void IndexerPattern::UpdateBubbleList(std::vector<std::string>& currentListData)
+void IndexerPattern::UpdateBubbleList()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1024,18 +1023,18 @@ void IndexerPattern::UpdateBubbleList(std::vector<std::string>& currentListData)
     auto popListData = indexerEventHub->GetOnRequestPopupData();
     CHECK_NULL_VOID(popListData);
     auto actualIndex = GetActualIndex(selected_);
-    currentListData = popListData(actualIndex);
+    currentListData_ = popListData(actualIndex);
 }
 
-void IndexerPattern::UpdateBubbleView(std::vector<std::string>& currentListData)
+void IndexerPattern::UpdateBubbleView()
 {
     CHECK_NULL_VOID(popupNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto columnLayoutProperty = popupNode_->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(columnLayoutProperty);
-    UpdateBubbleListView(currentListData);
-    UpdateBubbleLetterView(!currentListData.empty(), currentListData);
+    UpdateBubbleListView();
+    UpdateBubbleLetterView(!currentListData_.empty());
     auto columnRenderContext = popupNode_->GetRenderContext();
     CHECK_NULL_VOID(columnRenderContext);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -1101,14 +1100,14 @@ void IndexerPattern::UpdateBubbleBackgroundView()
     }
 }
 
-void IndexerPattern::UpdateBubbleSize(std::vector<std::string>& currentListData)
+void IndexerPattern::UpdateBubbleSize()
 {
     CHECK_NULL_VOID(popupNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto columnLayoutProperty = popupNode_->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(columnLayoutProperty);
-    auto popupSize = autoCollapse_ ? currentListData.size() + 1 : currentListData.size();
+    auto popupSize = autoCollapse_ ? currentListData_.size() + 1 : currentListData_.size();
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
     auto columnCalcOffset = autoCollapse_ ? 0 : 1;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -1138,7 +1137,7 @@ void IndexerPattern::UpdateBubbleSize(std::vector<std::string>& currentListData)
     popupNode_->MarkDirtyNode();
 }
 
-void IndexerPattern::UpdateBubbleLetterView(bool showDivider, std::vector<std::string>& currentListData)
+void IndexerPattern::UpdateBubbleLetterView(bool showDivider)
 {
     CHECK_NULL_VOID(popupNode_);
     auto host = GetHost();
@@ -1157,17 +1156,17 @@ void IndexerPattern::UpdateBubbleLetterView(bool showDivider, std::vector<std::s
     auto letterLayoutProperty = letterNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(letterLayoutProperty);
     auto letterNodeRenderContext = letterNode->GetRenderContext();
+    CHECK_NULL_VOID(letterNodeRenderContext);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto bubbleSize = Dimension(BUBBLE_ITEM_SIZE, DimensionUnit::VP).ConvertToPx();
         letterLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize)));
-        auto letterContext = letterNode->GetRenderContext();
-        CHECK_NULL_VOID(letterContext);
         auto radius = paintProperty->GetPopupItemBorderRadius().has_value()
-                            ? paintProperty->GetPopupItemBorderRadiusValue()
-                            : Dimension(BUBBLE_ITEM_RADIUS, DimensionUnit::VP);
-        letterContext->UpdateBorderRadius({ radius, radius, radius, radius });
+                          ? paintProperty->GetPopupItemBorderRadiusValue()
+                          : Dimension(BUBBLE_ITEM_RADIUS, DimensionUnit::VP);
+        letterNodeRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
         letterNodeRenderContext->UpdateBackgroundColor(paintProperty->GetPopupTitleBackground().value_or(
-            currentListData.size() > 0 ? indexerTheme->GetPopupTitleBackground() : Color(POPUP_TITLE_BG_COLOR_SINGLE)));
+            currentListData_.size() > 0 ? indexerTheme->GetPopupTitleBackground()
+                                        : Color(POPUP_TITLE_BG_COLOR_SINGLE)));
     } else {
         auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
         letterLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize)));
@@ -1256,11 +1255,11 @@ RefPtr<FrameNode> IndexerPattern::GetAutoCollapseLetterNode()
     return DynamicCast<FrameNode>(popupNode_->GetLastChild()->GetFirstChild()->GetFirstChild()->GetFirstChild());
 }
 
-void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListData)
+void IndexerPattern::UpdateBubbleListView()
 {
     CHECK_NULL_VOID(popupNode_);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        CreateBubbleListView(currentListData);
+        CreateBubbleListView();
     }
     auto listNode = DynamicCast<FrameNode>(popupNode_->GetLastChild()->GetFirstChild());
     CHECK_NULL_VOID(listNode);
@@ -1272,8 +1271,8 @@ void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListD
     listPattern->SetNeedLinked(false);
     auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
-    UpdateBubbleListSize(currentListData);
-    auto popupSize = autoCollapse_ ? currentListData.size() + 1 : currentListData.size();
+    UpdateBubbleListSize();
+    auto popupSize = autoCollapse_ ? currentListData_.size() + 1 : currentListData_.size();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto maxItemsSize = autoCollapse_ ? INDEXER_BUBBLE_MAXSIZE_COLLAPSED_API_TWELVE : INDEXER_BUBBLE_MAXSIZE;
         auto listPadding = Dimension(BUBBLE_DIVIDER_SIZE, DimensionUnit::VP).ConvertToPx();
@@ -1281,8 +1280,8 @@ void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListD
             CalcLength(0), std::nullopt, std::nullopt });
         UpdatePopupListGradientView(popupSize, maxItemsSize);
     }
-    if (!currentListData.empty() || autoCollapse_) {
-        UpdateBubbleListItem(currentListData, listNode, indexerTheme);
+    if (!currentListData_.empty() || autoCollapse_) {
+        UpdateBubbleListItem(listNode, indexerTheme);
     } else {
         listNode->Clean();
     }
@@ -1305,11 +1304,11 @@ void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListD
     listNode->MarkDirtyNode();
 }
 
-void IndexerPattern::UpdateBubbleListSize(std::vector<std::string>& currentListData)
+void IndexerPattern::UpdateBubbleListSize()
 {
     CHECK_NULL_VOID(popupNode_);
     currentPopupIndex_ = childPressIndex_ >= 0 ? childPressIndex_ : selected_;
-    auto popupSize = autoCollapse_ ? currentListData.size() + 1 : currentListData.size();
+    auto popupSize = autoCollapse_ ? currentListData_.size() + 1 : currentListData_.size();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto maxItemsSize = autoCollapse_ ? INDEXER_BUBBLE_MAXSIZE_COLLAPSED_API_TWELVE : INDEXER_BUBBLE_MAXSIZE;
         auto listActualSize = popupSize < maxItemsSize ? popupSize : maxItemsSize;
@@ -1331,7 +1330,7 @@ void IndexerPattern::UpdateBubbleListSize(std::vector<std::string>& currentListD
         auto listActualSize = popupSize < maxItemsSize ? popupSize : maxItemsSize;
         if (listActualSize != lastPopupSize_ || lastPopupIndex_ != currentPopupIndex_) {
             lastPopupIndex_ = currentPopupIndex_;
-            CreateBubbleListView(currentListData);
+            CreateBubbleListView();
             lastPopupSize_ = listActualSize;
         }
         auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
@@ -1344,7 +1343,7 @@ void IndexerPattern::UpdateBubbleListSize(std::vector<std::string>& currentListD
     }
 }
 
-void IndexerPattern::CreateBubbleListView(std::vector<std::string>& currentListData)
+void IndexerPattern::CreateBubbleListView()
 {
     CHECK_NULL_VOID(popupNode_);
     auto listNode = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
@@ -1371,7 +1370,7 @@ void IndexerPattern::CreateBubbleListView(std::vector<std::string>& currentListD
         listNode->AddChild(listItemNode);
     }
 
-    for (uint32_t i = 0; i < currentListData.size(); i++) {
+    for (uint32_t i = 0; i < currentListData_.size(); i++) {
         auto listItemNode =
             FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
@@ -1499,7 +1498,7 @@ CalcSize IndexerPattern::CalcBubbleListSize(int32_t popupSize, int32_t maxItemsS
 }
 
 void IndexerPattern::UpdateBubbleListItem(
-    std::vector<std::string>& currentListData, const RefPtr<FrameNode>& listNode, RefPtr<IndexerTheme>& indexerTheme)
+    const RefPtr<FrameNode>& listNode, RefPtr<IndexerTheme>& indexerTheme)
 {
     CHECK_NULL_VOID(listNode);
     CHECK_NULL_VOID(indexerTheme);
@@ -1518,7 +1517,7 @@ void IndexerPattern::UpdateBubbleListItem(
     auto bubbleSize = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
                           ? Dimension(BUBBLE_ITEM_SIZE, DimensionUnit::VP).ConvertToPx()
                           : Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-    for (uint32_t i = 0; i < currentListData.size(); i++) {
+    for (uint32_t i = 0; i < currentListData_.size(); i++) {
         auto childIndexOffset = autoCollapse_ ? 1 : 0;
         auto listItemNode = DynamicCast<FrameNode>(listNode->GetChildAtIndex(i + childIndexOffset));
         CHECK_NULL_VOID(listItemNode);
@@ -1532,7 +1531,7 @@ void IndexerPattern::UpdateBubbleListItem(
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateContent(currentListData.at(i));
+        textLayoutProperty->UpdateContent(currentListData_.at(i));
         textLayoutProperty->UpdateFontSize(popupItemTextFontSize);
         textLayoutProperty->UpdateFontWeight(popupItemTextFontWeight);
         textLayoutProperty->UpdateMaxLines(1);
@@ -2129,6 +2128,12 @@ void IndexerPattern::UpdateChildBoundary(RefPtr<FrameNode>& frameNode)
     CHECK_NULL_VOID(pattern);
     auto isMeasureBoundary = layoutProperty->GetPropertyChangeFlag() ==  PROPERTY_UPDATE_NORMAL;
     pattern->SetIsMeasureBoundary(isMeasureBoundary);
+}
+
+void IndexerPattern::OnColorConfigurationUpdate()
+{
+    ApplyIndexChanged(true, false);
+    UpdateBubbleView();
 }
 
 void IndexerPattern::DumpInfo()

@@ -118,6 +118,7 @@ private:
     void InitArrayValue(bool& autoCollapseModeChanged, bool& itemCountChanged);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnColorConfigurationUpdate() override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
@@ -163,8 +164,7 @@ private:
     void OnPopupHover(bool isHover);
     void ResetStatus();
     void OnKeyEventDisappear();
-    void UpdateBubbleListItem(std::vector<std::string>& currentListData, const RefPtr<FrameNode>& parentNode,
-        RefPtr<IndexerTheme>& indexerTheme);
+    void UpdateBubbleListItem(const RefPtr<FrameNode>& parentNode, RefPtr<IndexerTheme>& indexerTheme);
     void AddPopupTouchListener(RefPtr<FrameNode> popupNode);
     void OnPopupTouchDown(const TouchEventInfo& info);
     void AddListItemClickListener(RefPtr<FrameNode>& listItemNode, int32_t index);
@@ -172,12 +172,12 @@ private:
     void ClearClickStatus();
     void ChangeListItemsSelectedStyle(int32_t clickIndex);
     RefPtr<FrameNode> CreatePopupNode();
-    void UpdateBubbleList(std::vector<std::string>& currentListData);
-    void UpdateBubbleView(std::vector<std::string>& currentListData);
+    void UpdateBubbleList();
+    void UpdateBubbleView();
     Shadow GetPopupShadow();
-    void UpdateBubbleSize(std::vector<std::string>& currentListData);
-    void CreateBubbleListView(std::vector<std::string>& currentListData);
-    void UpdateBubbleListView(std::vector<std::string>& currentListData);
+    void UpdateBubbleSize();
+    void CreateBubbleListView();
+    void UpdateBubbleListView();
     bool NeedShowPopupView();
     bool NeedShowBubble();
     bool IfSelectIndexValid();
@@ -194,13 +194,13 @@ private:
     void SetActionClearSelection(RefPtr<FrameNode>& textNode, RefPtr<AccessibilityProperty>& accessibilityProperty);
     CalcSize CalcBubbleListSize(int32_t popupSize, int32_t maxItemsSize);
     GradientColor CreatePercentGradientColor(float percent, Color color);
-    void UpdateBubbleLetterView(bool showDivider, std::vector<std::string>& currentListData);
+    void UpdateBubbleLetterView(bool showDivider);
     void UpdateBubbleLetterStackAndLetterTextView();
     void DrawPopupListGradient(PopupListGradientStatus gradientStatus);
     void UpdatePopupListGradientView(int32_t popupSize, int32_t maxItemsSize);
     RefPtr<FrameNode> GetLetterNode();
     RefPtr<FrameNode> GetAutoCollapseLetterNode();
-    void UpdateBubbleListSize(std::vector<std::string>& currentListData);
+    void UpdateBubbleListSize();
     void UpdateBubbleListItemContext(
         const RefPtr<FrameNode>& listNode, RefPtr<IndexerTheme>& indexerTheme, uint32_t pos);
     void UpdateBubbleListItemMarkModify(RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& listItemNode);
@@ -259,6 +259,7 @@ protected:
     CancelableCallback<void()> delayCollapseTask_;
     float actualIndexerHeight_ = 0.0f;
     float itemSizeRender_ = 0.0f;
+    std::vector<std::string> currentListData_ = std::vector<std::string>();
 };
 } // namespace OHOS::Ace::NG
 
