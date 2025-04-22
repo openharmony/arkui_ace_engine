@@ -143,7 +143,7 @@ HWTEST_F(RichEditorPatternTestSixNg, SetSelfAndChildDraggableFalse001, TestSize.
     int32_t nodeId = 2;
     RefPtr<Pattern> pattern = AceType::MakeRefPtr<Pattern>();
     RefPtr<FrameNode> customNode = AceType::MakeRefPtr<FrameNode>(V2::IMAGE_ETS_TAG, nodeId, pattern, false, false);
-    auto eventHub = customNode->GetEventHub<EventHub>();
+    auto eventHub = customNode->GetOrCreateEventHub<EventHub>();
     RefPtr<EventHub> sharedEventHub = RefPtr<EventHub>(new EventHub());
     WeakPtr<EventHub> weakEventHub(sharedEventHub);
     eventHub->gestureEventHub_ = AceType::MakeRefPtr<GestureEventHub>(weakEventHub);
@@ -515,11 +515,12 @@ HWTEST_F(RichEditorPatternTestSixNg, HandleDraggableFlag001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto eventHubRefPtr = AceType::MakeRefPtr<EventHub>();
     auto eventHubWeakPtr = AceType::WeakClaim(AceType::RawPtr(eventHubRefPtr));
-    richEditorNode_->GetEventHub<EventHub>()->gestureEventHub_ = AceType::MakeRefPtr<GestureEventHub>(eventHubWeakPtr);
+    richEditorNode_->GetOrCreateEventHub<EventHub>()->gestureEventHub_ =
+        AceType::MakeRefPtr<GestureEventHub>(eventHubWeakPtr);
     richEditorPattern->copyOption_ = CopyOptions::InApp;
-    richEditorNode_->GetEventHub<EventHub>()->gestureEventHub_->isTextDraggable_ = true;
+    richEditorNode_->GetOrCreateEventHub<EventHub>()->gestureEventHub_->isTextDraggable_ = true;
     richEditorPattern->HandleDraggableFlag(true);
-    EXPECT_FALSE(richEditorNode_->GetEventHub<EventHub>()->gestureEventHub_->isTextDraggable_);
+    EXPECT_FALSE(richEditorNode_->GetOrCreateEventHub<EventHub>()->gestureEventHub_->isTextDraggable_);
 }
 
 /**
@@ -704,7 +705,7 @@ HWTEST_F(RichEditorPatternTestSixNg, BeforeChangeText001, TestSize.Level1)
     RichEditorChangeValue changeValue;
     RichEditorPattern::OperationRecord operationRecord;
     OHOS::Ace::NG::RecordType recodrType = OHOS::Ace::NG::RecordType::DEL_BACKWARD;
-    auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
     eventHub->SetOnDidChange([](const RichEditorChangeValue& value) -> bool { return false; });
     auto ret = richEditorPattern->BeforeChangeText(changeValue, operationRecord, recodrType, 100);
     EXPECT_TRUE(ret);
@@ -725,7 +726,7 @@ HWTEST_F(RichEditorPatternTestSixNg, BeforeChangeText002, TestSize.Level1)
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
     richEditorPattern->spans_.emplace_back(spanItem);
     options.offset = -1;
-    auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
     eventHub->SetOnDidChange([](const RichEditorChangeValue& value) -> bool { return false; });
     auto ret = richEditorPattern->BeforeChangeText(changeValue, options);
     EXPECT_FALSE(richEditorPattern->spans_.empty());
@@ -769,7 +770,7 @@ HWTEST_F(RichEditorPatternTestSixNg, BeforeAddImage001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     RichEditorChangeValue changeValue;
     ImageSpanOptions options;
-    auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
     eventHub->SetOnDidChange([](const RichEditorChangeValue& value) -> bool { return false; });
     auto ret = richEditorPattern->BeforeAddImage(changeValue, options, 100);
     EXPECT_TRUE(ret);

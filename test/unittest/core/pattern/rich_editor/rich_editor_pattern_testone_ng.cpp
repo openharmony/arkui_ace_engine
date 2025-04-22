@@ -279,7 +279,7 @@ HWTEST_F(RichEditorPatternTestOneNg, InsertValueInStyledString002, TestSize.Leve
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     auto host = richEditorPattern->GetHost();
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     TextSpanOptions options2;
     options2.value = INIT_VALUE_1;

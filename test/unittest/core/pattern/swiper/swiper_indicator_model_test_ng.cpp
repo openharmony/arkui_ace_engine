@@ -69,7 +69,7 @@ void IndicatorModelTestNg::Create(const std::function<void(IndicatorModelNG)>& c
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
     EXPECT_NE(indicatorPattern_, nullptr);
-    indicatorEventHub_ = frameNode_->GetEventHub<IndicatorEventHub>();
+    indicatorEventHub_ = frameNode_->GetOrCreateEventHub<IndicatorEventHub>();
     EXPECT_NE(indicatorEventHub_, nullptr);
     indicatorLayoutProperty_ = frameNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     EXPECT_NE(indicatorLayoutProperty_, nullptr);

@@ -207,11 +207,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAddJudgeToTargetComponent02, TestSize.Level1)
     /**
      * @tc.steps: step2. call the function AddJudgeToTargetComponent.
      */
-    frameNode->GetEventHub<EventHub>()->gestureEventHub_ = nullptr;
+    frameNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_ = nullptr;
     RefPtr<TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     frameNode->AddJudgeToTargetComponent(targetComponent);
     EXPECT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetEventHub<EventHub>()->gestureEventHub_, nullptr);
+    EXPECT_EQ(frameNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_, nullptr);
 }
 
 /**
@@ -225,7 +225,7 @@ HWTEST_F(FrameNodeTestNg, TriggerShouldParallelInnerWithTest01, TestSize.Level1)
      * @tc.steps: step1. create frameNode.
      */
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
-    auto gestureHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto gestureHub = frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
     ShouldBuiltInRecognizerParallelWithFunc shouldBuiltInRecognizerParallelWithFunc =
         [](RefPtr<NGGestureRecognizer> target, std::vector<RefPtr<NGGestureRecognizer>> targets) {
             return RefPtr<NGGestureRecognizer>();
@@ -383,7 +383,7 @@ HWTEST_F(FrameNodeTestNg, TriggerOnTouchInterceptTest, TestSize.Level1)
     /**
      * @tc.steps: step2. call the function AddTouchEventAllFingersInfoTest.
      */
-    auto gestureHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto gestureHub = frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
     TouchInterceptFunc touchInterceptFunc = [](TouchEventInfo& touchEventInfo) { return HitTestMode::HTMBLOCK; };
     gestureHub->SetOnTouchIntercept(std::move(touchInterceptFunc));
     TouchEventInfo touchEventInfo("touch");

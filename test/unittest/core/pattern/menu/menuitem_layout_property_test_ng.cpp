@@ -798,7 +798,7 @@ HWTEST_F(MenuItemLayoutPropertyTestNg, SetFontSize005, TestSize.Level1)
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
 
-    auto itemProperty = itemNode->GetEventHub<NG::MenuItemEventHub>();
+    auto itemProperty = itemNode->GetOrCreateEventHub<NG::MenuItemEventHub>();
     ASSERT_NE(itemProperty, nullptr);
     EXPECT_TRUE(itemProperty->GetSelectedChangeEvent());
 }

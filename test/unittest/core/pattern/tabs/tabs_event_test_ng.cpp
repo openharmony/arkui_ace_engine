@@ -691,7 +691,7 @@ HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest002, TestSize.Level1)
      * @tc.expected: isShow = false
      */
     auto callback =
-        parentNode->GetPattern<NavDestinationPattern>()->GetEventHub<NavDestinationEventHub>()->onHiddenChange_;
+        parentNode->GetPattern<NavDestinationPattern>()->GetOrCreateEventHub<NavDestinationEventHub>()->onHiddenChange_;
     EXPECT_FALSE(callback.empty());
     for (auto& OnHiddenChangeInfo : callback) {
         if (OnHiddenChangeInfo.second) {
@@ -1368,7 +1368,7 @@ HWTEST_F(TabsEventTestNg, OnAppearAndOnDisappearTest001, TestSize.Level1)
     std::function<void()> appearEvent = [&isOnAppear]() { isOnAppear = true; };
     std::function<void()> disappearEvent = [&isOnDisappear]() { isOnDisappear = true; };
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
-    auto eventHub = tabContentFrameNode->GetEventHub<EventHub>();
+    auto eventHub = tabContentFrameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetOnAppear(std::move(appearEvent));
     eventHub->SetOnDisappear(std::move(disappearEvent));
     auto pipeline = frameNode_->GetContext();

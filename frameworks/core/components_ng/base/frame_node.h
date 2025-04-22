@@ -370,8 +370,6 @@ public:
     template<typename T>
     RefPtr<T> GetEventHub()
     {
-        CreateEventHubInner();
-        CHECK_NULL_RETURN(eventHub_, nullptr);
         return DynamicCast<T>(eventHub_);
     }
 
@@ -380,12 +378,6 @@ public:
     {
         CreateEventHubInner();
         CHECK_NULL_RETURN(eventHub_, nullptr);
-        return DynamicCast<T>(eventHub_);
-    }
-
-    template<typename T>
-    RefPtr<T> GetEventHubOnly()
-    {
         return DynamicCast<T>(eventHub_);
     }
 

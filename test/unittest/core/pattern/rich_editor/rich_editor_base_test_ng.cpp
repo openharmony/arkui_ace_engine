@@ -155,7 +155,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel003, TestSize.Level1)
     ASSERT_NE(richEditorNode, nullptr);
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->FireOnReady();
     EXPECT_EQ(testOnReadyEvent, 1);
@@ -182,7 +182,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel004, TestSize.Level1)
     ASSERT_NE(richEditorNode, nullptr);
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     RichEditorInsertValue info;
     EXPECT_TRUE(eventHub->FireAboutToIMEInput(info));
@@ -206,7 +206,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel005, TestSize.Level1)
     ASSERT_NE(richEditorNode, nullptr);
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     RichEditorAbstractSpanResult info;
     eventHub->FireOnIMEInputComplete(info);
@@ -234,7 +234,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel006, TestSize.Level1)
     ASSERT_NE(richEditorNode, nullptr);
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     RichEditorDeleteValue info;
     EXPECT_TRUE(eventHub->FireAboutToDelete(info));
@@ -258,7 +258,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel007, TestSize.Level1)
     ASSERT_NE(richEditorNode, nullptr);
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->FireOnDeleteComplete();
     EXPECT_EQ(testOnDeleteComplete, 1);

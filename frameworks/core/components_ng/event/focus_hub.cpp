@@ -738,7 +738,7 @@ bool FocusHub::IsSyncRequestFocusableNode()
 bool FocusHub::IsEnabled() const
 {
     auto frameNode = frameNode_.Upgrade();
-    auto eventHub = frameNode ? frameNode->GetEventHubOnly<EventHub>() : eventHub_.Upgrade();
+    auto eventHub = frameNode ? frameNode->GetEventHub<EventHub>() : eventHub_.Upgrade();
     return eventHub ? eventHub->IsEnabled() : true;
 }
 
@@ -1472,7 +1472,7 @@ void FocusHub::OnBlurNode()
 void FocusHub::CheckFocusStateStyle(bool onFocus)
 {
     auto frameNode = frameNode_.Upgrade();
-    auto eventHub = frameNode ? frameNode->GetEventHubOnly<EventHub>() : eventHub_.Upgrade();
+    auto eventHub = frameNode ? frameNode->GetEventHub<EventHub>() : eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     if (onFocus) {
         eventHub->UpdateCurrentUIState(UI_STATE_FOCUSED);
@@ -1484,7 +1484,7 @@ void FocusHub::CheckFocusStateStyle(bool onFocus)
 bool FocusHub::HasFocusStateStyle()
 {
     auto frameNode = frameNode_.Upgrade();
-    auto eventHub = frameNode ? frameNode->GetEventHubOnly<EventHub>() : eventHub_.Upgrade();
+    auto eventHub = frameNode ? frameNode->GetEventHub<EventHub>() : eventHub_.Upgrade();
     CHECK_NULL_RETURN(eventHub, false);
     return eventHub->HasStateStyle(UI_STATE_FOCUSED);
 }

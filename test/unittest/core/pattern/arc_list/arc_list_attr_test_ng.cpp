@@ -1424,7 +1424,7 @@ HWTEST_F(ArcListAttrTestNg, InitDisableEvent001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<ArcListItemPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
     eventHub->SetEnabled(false);
     pattern->InitDisableEvent();
 

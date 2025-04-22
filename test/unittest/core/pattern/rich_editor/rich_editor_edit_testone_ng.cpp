@@ -536,7 +536,7 @@ HWTEST_F(RichEditorEditTestOneNg, HandleOnCut004, TestSize.Level1)
     ASSERT_NE(host, nullptr);
     auto richEditorPattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isEventCalled = false;
     auto onCutWithEvent = [&isEventCalled](NG::TextCommonEvent& event) {

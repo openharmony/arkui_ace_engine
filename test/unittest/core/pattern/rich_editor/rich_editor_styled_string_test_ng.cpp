@@ -45,7 +45,7 @@ HWTEST_F(RichEditorStyledStringTestNg, RichEditorModel001, TestSize.Level1)
     ASSERT_NE(richEditorNode, nullptr);
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     /**

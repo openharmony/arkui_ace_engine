@@ -265,7 +265,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest003, TestSize.Level1)
      */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    RefPtr<MarqueeEventHub> eventHub = frameNode->GetEventHub<NG::MarqueeEventHub>();
+    RefPtr<MarqueeEventHub> eventHub = frameNode->GetOrCreateEventHub<NG::MarqueeEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     /**

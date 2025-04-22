@@ -405,7 +405,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction004, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(richEditorPattern, nullptr);
     TextCommonEvent event;
     eventHub->FireOnPaste(event);

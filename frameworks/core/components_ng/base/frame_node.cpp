@@ -869,7 +869,7 @@ void FrameNode::DumpDragInfo()
     dragPreviewStr.append(" extraInfo: ").append(dragPreviewInfo_.extraInfo.c_str());
     dragPreviewStr.append(" inspectorId: ").append(dragPreviewInfo_.inspectorId.c_str());
     DumpLog::GetInstance().AddDesc(dragPreviewStr);
-    auto eventHub = GetEventHubOnly<EventHub>();
+    auto eventHub = GetEventHub<EventHub>();
     DumpLog::GetInstance().AddDesc(std::string("Event: ")
                                        .append("OnDragStart: ")
                                        .append(eventHub && eventHub->HasOnDragStart() ? "YES" : "NO")
@@ -912,7 +912,7 @@ void FrameNode::DumpOnSizeChangeInfo()
 
 void FrameNode::DumpKeyboardShortcutInfo()
 {
-    auto eventHub = GetEventHubOnly<EventHub>();
+    auto eventHub = GetEventHub<EventHub>();
     if (!eventHub) {
         return;
     }
@@ -2160,7 +2160,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
         }
         wrapper->FlushRender();
         paintProperty->CleanDirty();
-        auto eventHub = self->GetEventHubOnly<NG::EventHub>();
+        auto eventHub = self->GetEventHub<NG::EventHub>();
         if (self->GetInspectorId() || (eventHub && eventHub->HasNDKDrawCompletedCallback())) {
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(weak);
@@ -6255,7 +6255,7 @@ void FrameNode::DumpDragInfo(std::unique_ptr<JsonValue>& json)
     dragPreview->Put("inspectorId", dragPreviewInfo_.inspectorId.c_str());
     json->Put("DragPreview", dragPreview);
 
-    auto eventHub = GetEventHubOnly<EventHub>();
+    auto eventHub = GetEventHub<EventHub>();
     std::unique_ptr<JsonValue> event = JsonUtil::Create(true);
     event->Put("OnDragStart", eventHub && eventHub->HasOnDragStart() ? "YES" : "NO");
     event->Put("OnDragEnter", eventHub && eventHub->HasOnDragEnter() ? "YES" : "NO");
