@@ -311,7 +311,7 @@ void PixelMapImage::DrawToRSCanvas(
     auto pixmap = GetPixelMap();
     auto dfxConfig = GetImageDfxConfig();
     if (!pixmap || !pixmap->GetPixelMapSharedPtr()) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE, "pixmap null, %{private}s-%{public}s", dfxConfig.imageSrc_.c_str(),
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "pixmap null, %{private}s-%{public}s", dfxConfig.GetImageSrc().c_str(),
             dfxConfig.ToStringWithoutSrc().c_str());
         return;
     }
@@ -343,9 +343,9 @@ void PixelMapImage::DrawToRSCanvas(
     rsImageInfo.rotateDegree = CalculateRotateDegree(config.orientation_);
     recordingCanvas.AttachBrush(brush);
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, %{public}s-[%{public}d * %{public}d]-[%{public}s][%{public}s]",
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, %{public}s-[%{public}d * %{public}d]-[%{public}s]",
             dfxConfig.ToStringWithSrc().c_str(), pixmap->GetWidth(), pixmap->GetHeight(),
-            dfxConfig.borderRadiusValue_.c_str(), GetDynamicModeString(config.dynamicMode).c_str());
+            GetDynamicModeString(config.dynamicMode).c_str());
         pixmap->SavePixelMapToFile(dfxConfig.ToStringWithoutSrc() + "_ToRS_");
     }
     NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap);

@@ -152,9 +152,15 @@ void SvgContext::CreateDumpInfo(SvgDumpInfo dumpInfo)
     dumpInfo_ = dumpInfo;
 }
 
-SvgDumpInfo& SvgContext::GetDumpInfo()
+void SvgContext::SetSvgDrawPathInfoDump(const std::string& pathInfo)
 {
-    return dumpInfo_;
+    dumpInfo_.SetSvgDrawPathInfoDump(std::move(pathInfo));
+    hasRecordedPath_ = true;
+}
+
+std::string SvgContext::GetDumpInfo()
+{
+    return dumpInfo_.ToString();
 }
 
 double SvgContext::NormalizeToPx(const Dimension& value)

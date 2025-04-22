@@ -113,7 +113,7 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
     auto data = imageData->GetRSData();
     CHECK_NULL_RETURN(data, nullptr);
     auto imageDfxConfig = obj->GetImageDfxConfig();
-    auto src = imageDfxConfig.imageSrc_;
+    auto src = imageDfxConfig.GetImageSrc();
     auto source = ImageSource::Create(static_cast<const uint8_t*>(data->GetData()), data->GetSize());
     if (!source) {
         TAG_LOGE(AceLogTag::ACE_IMAGE, "ImageSouce Create Fail, %{private}s-%{public}s.", src.c_str(),
@@ -127,7 +127,7 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
     // Determine whether to decode the width and height of each other based on the orientation
     SwapDecodeSize(obj, width, height);
     std::string isTrimMemRebuild = "False";
-    if (imageDfxConfig.isTrimMemRecycle_) {
+    if (imageDfxConfig.GetIsTrimMemRecycle()) {
         isTrimMemRebuild = "True";
         TAG_LOGI(AceLogTag::ACE_IMAGE, "CreateImagePixelMapRebuild, %{private}s-%{public}s.",
             src.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());

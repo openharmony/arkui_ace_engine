@@ -87,6 +87,17 @@ void SvgGraphic::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
     }
 }
 
+void SvgGraphic::DumpDrawPathInfo(const RSRecordingPath& path)
+{
+    auto svgContext = svgContext_.Upgrade();
+    if (!svgContext || svgContext->GetHasRecordedPath()) {
+        return;
+    }
+    std::string dumpInfo = "";
+    path.Dump(dumpInfo);
+    svgContext->SetSvgDrawPathInfoDump(std::move(dumpInfo));
+}
+
 PaintType SvgGraphic::GetFillType()
 {
     // fill="none" in this shape, return PaintType::None
