@@ -2663,6 +2663,9 @@ void PipelineContext::OnTouchEvent(
         formEventMgr->HandleEtsCardTouchEvent(point, etsSerializedGesture);
     }
 
+    if (point.type != TouchType::DOWN && !eventManager_->touchDelegatesMap_.empty()) {
+        eventManager_->DelegateTouchEvent(point);
+    }
     auto oriPoint = point;
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     eventManager_->CheckDownEvent(scalePoint);
@@ -2721,6 +2724,9 @@ void PipelineContext::OnTouchEvent(
             formEventMgr->HandleEtsCardTouchEvent(oriPoint, etsSerializedGesture);
         }
 
+        if (!eventManager_->touchDelegatesMap_.empty()) {
+            eventManager_->DelegateTouchEvent(point);
+        }
         if (etsSerializedGesture.data.size() != 0) {
             GestureGroup rebirth(GestureMode::Exclusive);
             rebirth.Deserialize(etsSerializedGesture.data.data());
@@ -2834,6 +2840,9 @@ void PipelineContext::OnTouchEvent(
         touchPluginPipelineContext_.clear();
         if (formEventMgr) {
             formEventMgr->RemoveEtsCardTouchEventCallback(point.id);
+        }
+        if (!eventManager_->touchDelegatesMap_.empty()) {
+            eventManager_->UnregisterTouchDelegate(point.id);
         }
         if (scalePoint.type == TouchType::CANCEL) {
             dragEvents_.clear();

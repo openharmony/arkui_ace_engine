@@ -42,6 +42,11 @@ namespace NG {
 class FrameNode;
 class SelectOverlayManager;
 class ResponseCtrl;
+class TouchDelegate : public virtual AceType {
+    DECLARE_ACE_TYPE(TouchDelegate, AceType);
+public:
+    virtual void DelegateTouchEvent(const TouchEvent& point) {};
+};
 } // namespace NG
 class RenderNode;
 class Element;
@@ -50,6 +55,8 @@ using MouseHoverTestList = std::list<WeakPtr<RenderNode>>;
 using OutOfRectGetRectCallback = std::function<void(std::vector<Rect>&)>;
 using OutOfRectTouchCallback = std::function<void(void)>;
 using OutOfRectMouseCallback = std::function<void(void)>;
+using TouchDelegates = std::vector<RefPtr<NG::TouchDelegate>>;
+using TouchDelegatesIter = TouchDelegates::const_iterator;
 
 struct RectCallback final {
     RectCallback(OutOfRectGetRectCallback rectGetCallback, OutOfRectTouchCallback touchCallback,
@@ -61,6 +68,13 @@ struct RectCallback final {
     OutOfRectGetRectCallback rectGetCallback;
     OutOfRectTouchCallback touchCallback;
     OutOfRectMouseCallback mouseCallback;
+};
+
+struct TouchDelegateHdl {
+    TouchDelegateHdl(int32_t touchId, TouchDelegatesIter iter) : touchId(touchId), iter(iter) {}
+    ~TouchDelegateHdl() = default;
+    int32_t touchId = -1;
+    TouchDelegatesIter iter;
 };
 
 struct MarkProcessedEventInfo {
@@ -342,6 +356,16 @@ public:
 
     template<typename T>
     bool CheckDifferentTargetDisplay(const std::vector<T>& historyEvents, const std::vector<T>& events);
+
+    std::unordered_map<int32_t, TouchDelegates> touchDelegatesMap_;
+
+    TouchDelegateHdl RegisterTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate> delegater);
+
+    void UnregisterTouchDelegate(TouchDelegateHdl handler);
+
+    void UnregisterTouchDelegate(int32_t touchId);
+
+    void DelegateTouchEvent(const TouchEvent& point);
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
