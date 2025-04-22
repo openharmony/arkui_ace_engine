@@ -1743,6 +1743,7 @@ private:
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;
     int32_t apiTargetVersion_ = 0;
+    bool lastUiDvsyncStatus_ = false;
 
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;

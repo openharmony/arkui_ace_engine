@@ -1091,8 +1091,9 @@ void PipelineBase::OnFormRecover(const std::string& statusData)
 
 void PipelineBase::SetUiDvsyncSwitch(bool on)
 {
-    if (window_) {
+    if (window_ && lastUiDvsyncStatus_ != on) {
         window_->SetUiDvsyncSwitch(on);
     }
+    lastUiDvsyncStatus_ = on;
 }
 } // namespace OHOS::Ace
