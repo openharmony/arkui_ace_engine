@@ -1448,6 +1448,11 @@ void* GetAttachNodePtr(ArkUINodeHandle node)
 ArkUI_Int32 MeasureLayoutAndDraw(ArkUIVMContext vmContext, ArkUINodeHandle rootPtr)
 {
     auto* root = reinterpret_cast<FrameNode*>(rootPtr);
+    auto geometryNode = root->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return 0;
+    }
     float width = root->GetGeometryNode()->GetFrameSize().Width();
     float height = root->GetGeometryNode()->GetFrameSize().Height();
     // measure
@@ -1518,6 +1523,11 @@ void SetMeasureWidth(ArkUINodeHandle node, ArkUI_Int32 value)
     if (!frameNode) {
         return;
     }
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return;
+    }
     frameNode->GetGeometryNode()->SetFrameWidth(value);
 }
 
@@ -1525,6 +1535,11 @@ ArkUI_Int32 GetMeasureWidth(ArkUINodeHandle node)
 {
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     if (!frameNode) {
+        return 0;
+    }
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
         return 0;
     }
     return frameNode->GetGeometryNode()->GetFrameSize().Width();
@@ -1537,6 +1552,11 @@ void SetMeasureHeight(ArkUINodeHandle node, ArkUI_Int32 value)
     if (!frameNode) {
         return;
     }
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return;
+    }
     frameNode->GetGeometryNode()->SetFrameHeight(value);
 }
 
@@ -1544,6 +1564,11 @@ ArkUI_Int32 GetMeasureHeight(ArkUINodeHandle node)
 {
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     if (!frameNode) {
+        return 0;
+    }
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
         return 0;
     }
     return frameNode->GetGeometryNode()->GetFrameSize().Height();
@@ -1556,6 +1581,11 @@ void SetX(ArkUINodeHandle node, ArkUI_Int32 value)
     if (!frameNode) {
         return;
     }
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return;
+    }
     frameNode->GetGeometryNode()->SetMarginFrameOffsetX(value);
 }
 
@@ -1564,6 +1594,11 @@ void SetY(ArkUINodeHandle node, ArkUI_Int32 value)
     // directly set frameNode measure postionY.
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     if (!frameNode) {
+        return;
+    }
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
         return;
     }
     frameNode->GetGeometryNode()->SetMarginFrameOffsetY(value);
@@ -1575,6 +1610,11 @@ ArkUI_Int32 GetX(ArkUINodeHandle node)
     if (!frameNode) {
         return 0;
     }
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return 0;
+    }
     return frameNode->GetGeometryNode()->GetMarginFrameOffset().GetX();
 }
 
@@ -1582,6 +1622,11 @@ ArkUI_Int32 GetY(ArkUINodeHandle node)
 {
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     if (!frameNode) {
+        return 0;
+    }
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
         return 0;
     }
     return frameNode->GetGeometryNode()->GetMarginFrameOffset().GetY();
