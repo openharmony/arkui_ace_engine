@@ -1955,10 +1955,9 @@ float ScrollablePattern::GetOutOfScrollableOffset() const
     auto offset = 0.0f;
     auto mouseMainOffset = static_cast<float>(
         axis_ == Axis::VERTICAL ? lastMouseMove_.GetLocalLocation().GetY() : lastMouseMove_.GetLocalLocation().GetX());
-    auto hostSize = GetHostFrameSize();
-    CHECK_NULL_RETURN(hostSize.has_value(), offset);
+    auto hostSize = GetViewSizeMinusPadding();
     auto mainTop = 0.0f;
-    auto mainBottom = hostSize->MainSize(axis_);
+    auto mainBottom = hostSize.MainSize(axis_);
     if (GreatOrEqual(mouseMainOffset, mainTop) && LessOrEqual(mouseMainOffset, mainBottom)) {
         return offset;
     }
@@ -4158,7 +4157,7 @@ void ScrollablePattern::OnColorConfigurationUpdate()
     scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
 }
 
-SizeF ScrollablePattern::GetViewSizeMinusPadding()
+SizeF ScrollablePattern::GetViewSizeMinusPadding() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, SizeF());

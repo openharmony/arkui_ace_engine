@@ -789,7 +789,7 @@ public:
         return SizeF();
     }
 
-    SizeF GetViewSizeMinusPadding();
+    SizeF GetViewSizeMinusPadding() const;
 
     void ScrollEndCallback(bool nestedScroll, float velocity);
 
