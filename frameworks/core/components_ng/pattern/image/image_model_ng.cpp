@@ -266,6 +266,52 @@ RefPtr<FrameNode> ImageModelNG::CreateFrameNode(int32_t nodeId, const std::strin
     return frameNode;
 }
 
+void ImageModelNG::CreateAnimation(FrameNode* frameNode,
+    const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetChildren().empty()) {
+        auto imageNode = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_VOID(imageNode);
+        auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
+        CHECK_NULL_VOID(imageLayoutProperty);
+        imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+        frameNode->AddChild(imageNode);
+    }
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->GetIsAnimation()) {
+        auto castImageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
+        CHECK_NULL_VOID(castImageLayoutProperty);
+        castImageLayoutProperty->Reset();
+        auto castImageRenderProperty = frameNode->GetPaintPropertyPtr<ImageRenderProperty>();
+        CHECK_NULL_VOID(castImageRenderProperty);
+        castImageRenderProperty->Reset();
+        pattern->ResetImageAndAlt();
+        pattern->ResetImageProperties();
+    }
+    // set draggable for framenode
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto draggable = pipeline->GetDraggable<ImageTheme>();
+    if (draggable && !frameNode->IsDraggable()) {
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->InitDragDropEvent();
+    }
+    frameNode->SetDraggable(draggable);
+    pattern->SetSrcUndefined(false);
+    pattern->StopAnimation();
+    pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
+    std::vector<ImageProperties> images = imageList;
+    pattern->SetImages(std::move(images));
+    pattern->SetDuration(duration);
+    pattern->SetIteration(iteration);
+    pattern->StartAnimation();
+}
+
 void ImageModelNG::SetAlt(const ImageSourceInfo& src)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, src);

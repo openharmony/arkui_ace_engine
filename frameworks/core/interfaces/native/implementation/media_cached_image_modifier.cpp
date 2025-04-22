@@ -17,40 +17,7 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-
-namespace OHOS::Ace::NG {
-namespace {
-struct ASTCdata {
-    std::vector<std::string> sources;
-    int32_t column;
-};
-} // namespace
-
-namespace Converter {
-template<>
-void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_ASTCResource& src)
-{
-    auto sources = OptConvert<ASTCdata>(src);
-    if (sources) {
-        dst.reset();
-    }
-}
-
-template<>
-void AssignCast(std::optional<ASTCdata>& dst, const Ark_ASTCResource& src)
-{
-    auto sources = Convert<std::vector<std::string>>(src.sources);
-    if (sources.empty()) {
-        dst.reset();
-        return;
-    }
-    dst->sources = std::move(sources);
-    dst->column = Convert<int32_t>(src.column);
-}
-} // Converter
-} // OHOS::Ace::NG
-
-
+#include "animated_drawable_descriptor_peer.h"
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MediaCachedImageModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -70,18 +37,42 @@ void SetMediaCachedImageOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
-    auto info = Converter::OptConvert<ImageSourceInfo>(*src);
-    // Note.
-    // This function should skip InitImage invocation if info's optional is empty.
-    if (info) {
-        if (info->GetPixmap()) {
-            auto pixelMap = info->GetPixmap(); // GetPixmap return const RefPtr
-            ImageModelNG::SetInitialPixelMap(frameNode, pixelMap);
-        } else {
-            ImageModelNG::SetInitialSrc(frameNode, info->GetSrc(), info->GetBundleName(),
-                info->GetModuleName(), info->GetIsUriPureNumber());
-        }
-    }
+    Converter::VisitUnion(
+        *src,
+        [frameNode](const Ark_PixelMap& pixmap) {
+            auto pixelMapPeer = pixmap;
+            ImageModelNG::SetInitialPixelMap(frameNode, pixelMapPeer->pixelMap);
+        },
+        [&frameNode](const Ark_ResourceStr& src) {
+            auto info = Converter::OptConvert<ImageSourceInfo>(src);
+            if (info) {
+                ImageModelNG::SetInitialSrc(frameNode, info->GetSrc(), info->GetBundleName(), info->GetModuleName(),
+                    info->GetIsUriPureNumber());
+            }
+        },
+        [frameNode](const Ark_DrawableDescriptor drawableDescriptor) {
+            CHECK_NULL_VOID(drawableDescriptor);
+            auto animatedDrawableDescriptor = AceType::DynamicCast<AnimatedDrawableDescriptorPeer>(drawableDescriptor);
+            if (animatedDrawableDescriptor) {
+                std::vector<ImageProperties> imageList;
+                auto pixelMaps = animatedDrawableDescriptor->GetPixelMapList();
+                for (int i = 0; i < pixelMaps.size(); i++) {
+                    ImageProperties image;
+                    image.pixelMap = pixelMaps[i];
+                    imageList.push_back(image);
+                }
+                ImageModelNG::CreateAnimation(frameNode, imageList,
+                    animatedDrawableDescriptor->GetDuration(),
+                    animatedDrawableDescriptor->GetIterations());
+            } else {
+                auto pixelMap = drawableDescriptor->GetPixelMap();
+                ImageModelNG::SetInitialPixelMap(frameNode, pixelMap);
+            }
+        },
+        [frameNode](const Ark_ASTCResource& astcResource) {
+            // no need to do anything
+        },
+        []() {});
 }
 } // MediaCachedImageInterfaceModifier
 const GENERATED_ArkUIMediaCachedImageModifier* GetMediaCachedImageModifier()

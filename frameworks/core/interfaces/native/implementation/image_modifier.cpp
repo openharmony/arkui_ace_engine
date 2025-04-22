@@ -14,6 +14,8 @@
  */
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_component.h"
+
+#include "animated_drawable_descriptor_peer.h"
 #include "core/interfaces/native/implementation/image_common_methods.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -26,6 +28,43 @@ namespace {
 // similar as in the js_image.cpp
 constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
 constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
+
+void SetImageOption(FrameNode *frameNode, const Ark_PixelMap& pixelMapPeer) {
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(pixelMapPeer);
+    ImageModelNG::SetInitialPixelMap(frameNode, pixelMapPeer->pixelMap);
+}
+void SetImageOption(FrameNode *frameNode, const Ark_ResourceStr& resource) {
+    CHECK_NULL_VOID(frameNode);
+    auto info = Converter::OptConvert<ImageSourceInfo>(resource);
+    if (info) {
+        ImageModelNG::SetInitialSrc(
+            frameNode, info->GetSrc(), info->GetBundleName(), info->GetModuleName(), info->GetIsUriPureNumber());
+    }
+}
+void SetImageOption(FrameNode* frameNode, const Ark_DrawableDescriptor& drawableDescriptorPeer)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(drawableDescriptorPeer);
+    auto animatedDrawableDescriptor = AceType::DynamicCast<AnimatedDrawableDescriptorPeer>(drawableDescriptorPeer);
+    if (animatedDrawableDescriptor) {
+        std::vector<ImageProperties> imageList;
+        auto pixelMaps = animatedDrawableDescriptor->GetPixelMapList();
+        for (int i = 0; i < pixelMaps.size(); i++) {
+            ImageProperties image;
+            image.pixelMap = pixelMaps[i];
+            imageList.push_back(image);
+        }
+        ImageModelNG::CreateAnimation(frameNode, imageList, animatedDrawableDescriptor->GetDuration(),
+            animatedDrawableDescriptor->GetIterations());
+    } else {
+        auto pixelMap = drawableDescriptorPeer->GetPixelMap();
+        ImageModelNG::SetInitialPixelMap(frameNode, pixelMap);
+    }
+}
+void SetImageOption(FrameNode* frameNode, const Ark_ImageContent& astcResource) {
+    // no need to do anything
+}
 } // namespace
 
 namespace Converter {
@@ -44,12 +83,6 @@ void AssignCast(std::optional<std::pair<CalcDimension, CalcDimension>>& dst,
     }
 }
 template<>
-void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_ImageContent& src)
-{
-    dst.reset();
-}
-
-template<>
 void AssignCast(std::optional<ImageRotateOrientation>& dst, const Ark_ImageRotateOrientation& src)
 {
     switch (src) {
@@ -60,26 +93,6 @@ void AssignCast(std::optional<ImageRotateOrientation>& dst, const Ark_ImageRotat
         case ARK_IMAGE_ROTATE_ORIENTATION_LEFT: dst = ImageRotateOrientation::LEFT; break;
         default: LOGE("Unexpected enum value in Ark_ImageRotateOrientation: %{public}d", src);
     }
-}
-template<>
-void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_Union_String_Resource_PixelMap& src)
-{
-    Converter::VisitUnion(src,
-        [&dst](const Ark_String& val) {
-            dst = Converter::OptConvert<ImageSourceInfo>(val);
-        },
-        [&dst](const Ark_Resource& val) {
-            dst = Converter::OptConvert<ImageSourceInfo>(val);
-        },
-        [&dst](const Ark_PixelMap& val) {
-            dst = std::nullopt;
-            auto pixMapRefPtr = Converter::OptConvert<RefPtr<PixelMap>>(val).value_or(nullptr);
-            if (pixMapRefPtr) {
-                dst = ImageSourceInfo(pixMapRefPtr);
-            }
-        },
-        []() {}
-    );
 }
 } // Converter
 } // OHOS::Ace::NG
@@ -100,13 +113,15 @@ namespace ImageInterfaceModifier {
 void SetImageOptions0Impl(Ark_NativePointer node,
                           const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor* src)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
-    auto info = Converter::OptConvert<ImageSourceInfo>(*src);
-    if (info) {
-        auto frameNode = reinterpret_cast<FrameNode*>(node);
-        CHECK_NULL_VOID(frameNode);
-        ImageModelNG::InitImage(frameNode, info->GetSrc());
-    }
+    Converter::VisitUnion(
+        *src,
+        [frameNode](const auto& value) {
+            SetImageOption(frameNode, value);
+        },
+        []() {});
 }
 void SetImageOptions1Impl(Ark_NativePointer node,
                           const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src)
@@ -114,14 +129,7 @@ void SetImageOptions1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
-    auto info = Converter::OptConvert<ImageSourceInfo>(*src);
-    // Note.
-    // This function should skip InitImage invocation if info's optional is empty.
-    if (info) {
-        auto frameNode = reinterpret_cast<FrameNode*>(node);
-        CHECK_NULL_VOID(frameNode);
-        ImageModelNG::InitImage(frameNode, info->GetSrc());
-    }
+    Converter::VisitUnion(*src, [frameNode](const auto& value) { SetImageOption(frameNode, value); }, []() {});
 }
 void SetImageOptions2Impl(Ark_NativePointer node,
                           const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor* src,
