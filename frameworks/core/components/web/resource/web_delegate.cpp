@@ -1164,6 +1164,65 @@ void WebDelegate::UnRegisterNativeArkJSFunction(const std::string& objName)
     }
 }
 
+class NWebJsProxyMethodImpl : public OHOS::NWeb::NWebJsProxyMethod {
+public:
+    explicit NWebJsProxyMethodImpl(int size,
+        const std::vector<std::function<void(const std::vector<std::string>&)>>& func)
+        : size_(size), funcs_(func) {}
+    ~NWebJsProxyMethodImpl() = default;
+
+    int GetSize() override
+    {
+        return size_;
+    }
+
+    void OnHandle(int number, const std::vector<std::string>& param) override
+    {
+        if (number < 0 || number >= size_) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "jsProxy callback back error number %{public}d", number);
+            return;
+        }
+        if (!funcs_[number]) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "jsProxy callback is null in number %{public}d", number);
+            return;
+        }
+        TAG_LOGD(AceLogTag::ACE_WEB, "jsProxy callback success number %{public}d", number);
+        funcs_[number](param);
+    }
+
+private:
+    int size_ = 0;
+    std::vector<std::function<void(const std::vector<std::string>&)>> funcs_;
+};
+
+void WebDelegate::RegisterNativeJavaScriptProxy(const std::string& obj, const std::vector<std::string>& method,
+    std::vector<std::function<void(const std::vector<std::string>&)>> callbackImpl,
+    bool isAync, const std::string& permission, bool isNeedRefresh)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+
+    executor->PostTask(
+        [weak = WeakClaim(this), obj, methods = method, callbacks = callbackImpl, isAync, permission, isNeedRefresh]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto nweb = delegate->GetNweb();
+            CHECK_NULL_VOID(nweb);
+
+            int len = callbacks.size();
+            TAG_LOGI(AceLogTag::ACE_WEB, "RegisterNativeJavaScriptProxy %{public}s have %{public}d callback",
+                obj.c_str(), len);
+            std::shared_ptr<NWebJsProxyMethodImpl> dataImpl = std::make_shared<NWebJsProxyMethodImpl>(len, callbacks);
+            nweb->RegisterNativeJavaScriptProxy(obj, methods, dataImpl, isAync, permission);
+            if (isNeedRefresh) {
+                nweb->Reload();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebRegisterNativeJavaScriptProxy");
+}
+    
 void WebDelegate::LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
     const std::string& encoding, const std::string& historyUrl)
 {
@@ -4772,6 +4831,11 @@ void WebDelegate::OnPageFinished(const std::string& param)
             webEventHub->FireOnPageFinishedEvent(std::make_shared<LoadWebPageFinishEvent>(param));
             webPattern->OnScrollEndRecursive(std::nullopt);
             delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_END, param);
+            auto pageUrl = delegate->GetUrl();
+            if (pageUrl != "about:blank") {
+                TAG_LOGI(AceLogTag::ACE_WEB, "RunJsInit, weburl=%{public}s", pageUrl.c_str());
+                webPattern->RunJsInit();
+            }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPageFinished");
 }
