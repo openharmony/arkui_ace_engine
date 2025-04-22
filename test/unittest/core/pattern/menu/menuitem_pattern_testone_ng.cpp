@@ -101,6 +101,7 @@ void MenuItemPatternTestOneNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MockContainer::SetUp();
 }
 
@@ -109,6 +110,17 @@ void MenuItemPatternTestOneNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t id) -> RefPtr<Theme> {
         if (type == TextTheme::TypeId()) {
             return AceType::MakeRefPtr<TextTheme>();
         } else if (type == IconTheme::TypeId()) {
@@ -1358,6 +1370,13 @@ HWTEST_F(MenuItemPatternTestOneNg, InitFocusEvent003, TestSize.Level1)
             return selectTheme;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([=](ThemeType type, int32_t id) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return textTheme;
+        } else {
+            return selectTheme;
+        }
+    });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     MenuItemModelNG MenuItemModelInstance;
     MenuItemProperties itemOption;
@@ -1409,6 +1428,13 @@ HWTEST_F(MenuItemPatternTestOneNg, InitFocusEvent004, TestSize.Level1)
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     selectTheme->optionApplyFocusedStyle_ = 1;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return textTheme;
+        } else {
+            return selectTheme;
+        }
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([=](ThemeType type, int32_t id) -> RefPtr<Theme> {
         if (type == TextTheme::TypeId()) {
             return textTheme;
         } else {
