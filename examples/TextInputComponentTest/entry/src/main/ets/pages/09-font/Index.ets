@@ -29,11 +29,19 @@ class TextList {
 
 @Entry
 @Component
-struct struct_06_password_index {
+struct struct_09_font_index {
   scroll: Scroller = new Scroller()
   @State arr: TextList[] = [
-    new TextList(1, '01-showPasswordIcon', 'pages/06-password/01-showPasswordIcon',),
-    new TextList(2, '02-selectionValid', 'pages/06-password/02-selectionValid',),
+    new TextList(1, '01-fontFeature', 'pages/09-font/01-fontFeature',),
+    new TextList(2, '02-heightAdaptivePolicy', 'pages/09-font/02-heightAdaptivePolicy',),
+    new TextList(3, '03-letterSpacing', 'pages/09-font/03-letterSpacing',),
+    new TextList(4, '04-lineBreakStrategy', 'pages/09-font/04-lineBreakStrategy',),
+    new TextList(5, '05-lineHeight', 'pages/09-font/05-lineHeight',),
+    new TextList(6, '06-maxFontSize', 'pages/09-font/06-maxFontSize',),
+    new TextList(7, '07-minFontSize', 'pages/09-font/07-minFontSize',),
+    new TextList(8, '08-textIndent', 'pages/09-font/08-textIndent',),
+    new TextList(9, '09-textOverflow', 'pages/09-font/09-textOverflow',),
+    new TextList(10, '10-workBreak', 'pages/09-font/10-workBreak',),
   ]
   @State fontSize: Resource | undefined = undefined
 

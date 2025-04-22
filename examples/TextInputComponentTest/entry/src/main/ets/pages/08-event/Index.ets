@@ -29,11 +29,22 @@ class TextList {
 
 @Entry
 @Component
-struct struct_06_password_index {
+struct struct_08_event_index {
   scroll: Scroller = new Scroller()
   @State arr: TextList[] = [
-    new TextList(1, '01-showPasswordIcon', 'pages/06-password/01-showPasswordIcon',),
-    new TextList(2, '02-selectionValid', 'pages/06-password/02-selectionValid',),
+    new TextList(1, '01-onChange', 'pages/08-event/01-onChange',),
+    new TextList(2, '02-onSubmit', 'pages/08-event/02-onSubmit',),
+    new TextList(3, '03-onEditChange', 'pages/08-event/03-onEditChange',),
+    new TextList(4, '04-onCut', 'pages/08-event/04-onCut',),
+    new TextList(5, '05-onPaste', 'pages/08-event/05-onPaste',),
+    new TextList(6, '06-onTextSelectionChange', 'pages/08-event/06-onTextSelectionChange',),
+    new TextList(7, '07-onContentScroll', 'pages/08-event/07-onContentScroll',),
+    new TextList(8, '08-onSecurityStateChange', 'pages/08-event/08-onSecurityStateChange',),
+    new TextList(11, '11-orderClick', 'pages/08-event/11-orderClick',),
+    new TextList(12, '12-orderInsert', 'pages/08-event/12-orderInsert',),
+    new TextList(13, '13-orderDelete', 'pages/08-event/13-orderDelete',),
+    new TextList(14, '14-orderBlur', 'pages/08-event/14-orderBlur',),
+    new TextList(15, '15-shortcutKey', 'pages/08-event/15-shortcutKey',),
   ]
   @State fontSize: Resource | undefined = undefined
 

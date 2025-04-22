@@ -29,18 +29,20 @@ class TextList {
 
 @Entry
 @Component
-struct struct_03_layout_index {
+struct struct_03_menuHandleSelect_index {
   scroll: Scroller = new Scroller()
   @State arr: TextList[] = [
-    new TextList(2, '03-menuHandleSelect', 'pages/03-menuHandleSelect/02-selectionValid',),
-    new TextList(3, '03-menuHandleSelect', 'pages/03-menuHandleSelect/03-caretColor',),
-    new TextList(4, '03-menuHandleSelect', 'pages/03-menuHandleSelect/04-caretStyle',),
-    new TextList(5, '03-menuHandleSelect', 'pages/03-menuHandleSelect/05-caretPosition',),
-    new TextList(7, '03-menuHandleSelect', 'pages/03-menuHandleSelect/07-selectAll',),
-    new TextList(8, '03-menuHandleSelect', 'pages/03-menuHandleSelect/08-selectAllAfterDraws',),
-    new TextList(9, '03-menuHandleSelect', 'pages/03-menuHandleSelect/09-swiperMoveNextHideMenu',),
-    new TextList(10, '03-menuHandleSelecte', 'pages/03-menuHandleSelect/10-moveTextToTarContentNeedHideHandle',),
-    new TextList(11, '02-style', 'pages/03-menuHandleSelect/11-changeLandscapePortraitHideMenusKeepSelection',)
+    new TextList(2, '02-selectionValid', 'pages/03-menuHandleSelect/02-selectionValid',),
+    new TextList(3, '03-caretColor', 'pages/03-menuHandleSelect/03-caretColor',),
+    new TextList(4, '04-caretStyle', 'pages/03-menuHandleSelect/04-caretStyle',),
+    new TextList(5, '05-caretPosition', 'pages/03-menuHandleSelect/05-caretPosition',),
+    new TextList(7, '07-selectAll', 'pages/03-menuHandleSelect/07-selectAll',),
+    new TextList(8, '08-selectAllAfterDraws', 'pages/03-menuHandleSelect/08-selectAllAfterDraws',),
+    new TextList(9, '09-swiperMoveNextHideMenu', 'pages/03-menuHandleSelect/09-swiperMoveNextHideMenu',),
+    new TextList(10, '10-moveTextToTarContentNeedHideHandle',
+      'pages/03-menuHandleSelect/10-moveTextToTarContentNeedHideHandle',),
+    new TextList(11, '11-changeLandscapePortraitHideMenusKeepSelection',
+      'pages/03-menuHandleSelect/11-changeLandscapePortraitHideMenusKeepSelection',)
   ]
   @State fontSize: Resource | undefined = undefined
 

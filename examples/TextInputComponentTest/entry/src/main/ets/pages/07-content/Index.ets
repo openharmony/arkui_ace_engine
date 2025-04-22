@@ -29,16 +29,16 @@ class TextList {
 
 @Entry
 @Component
-struct struct_03_layout_index {
+struct struct_07_content_index {
   scroll: Scroller = new Scroller()
   @State arr: TextList[] = [
-    new TextList(1, '07-content', 'pages/07-content/01-contentType',),
-    new TextList(1, '07-content', 'pages/07-content/02-maxLength',),
-    new TextList(1, '07-content', 'pages/07-content/03-copyOption',),
-    new TextList(1, '07-content', 'pages/07-content/04-inputFilter',),
-    new TextList(1, '07-content', 'pages/07-content/05-textModifyWhenIsSelected',),
-    new TextList(1, '07-content', 'pages/07-content/06-rotateScreen',),
-    new TextList(1, '07-content', 'pages/07-content/07-changeDirection',),
+    new TextList(1, '01-contentType', 'pages/07-content/01-contentType',),
+    new TextList(2, '02-maxLength', 'pages/07-content/02-maxLength',),
+    new TextList(3, '03-copyOption', 'pages/07-content/03-copyOption',),
+    new TextList(4, '04-inputFilter', 'pages/07-content/04-inputFilter',),
+    new TextList(5, '05-textModifyWhenIsSelected', 'pages/07-content/05-textModifyWhenIsSelected',),
+    new TextList(6, '06-rotateScreen', 'pages/07-content/06-rotateScreen',),
+    new TextList(7, '07-changeDirection', 'pages/07-content/07-changeDirection',),
   ]
   @State fontSize: Resource | undefined = undefined
 
