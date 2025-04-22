@@ -74,11 +74,11 @@ ArkUI_GestureRecognizer* CreateLongPressGesture(int32_t fingers, bool repeatResu
 
 ArkUI_GestureRecognizer* CreatePanGesture(int32_t fingersNum, ArkUI_GestureDirectionMask mask, double distanceNum);
 
-ArkUI_GestureRecognizer* CreatePinchGesture(int32_t fingersNum, double distanceNum);
+ArkUI_GestureRecognizer* CreatePinchGesture(int32_t fingers, double distance);
 
-ArkUI_GestureRecognizer* CreateRotationGesture(int32_t fingersNum, double angleNum);
+ArkUI_GestureRecognizer* CreateRotationGesture(int32_t fingers, double angle);
 
-ArkUI_GestureRecognizer* CreateSwipeGesture(int32_t fingersNum, ArkUI_GestureDirectionMask directions, double speedNum);
+ArkUI_GestureRecognizer* CreateSwipeGesture(int32_t fingers, ArkUI_GestureDirectionMask directions, double speed);
 
 void DisposeGesture(ArkUI_GestureRecognizer* recognizer);
 

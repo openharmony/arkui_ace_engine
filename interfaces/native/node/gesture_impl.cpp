@@ -676,8 +676,7 @@ ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers)
     return ndkGesture;
 }
 
-ArkUI_GestureRecognizer* CreateTapGestureWithDistanceThreshold(
-    int32_t count, int32_t fingers, double distanceThreshold)
+ArkUI_GestureRecognizer* CreateTapGestureWithDistanceThreshold(int32_t count, int32_t fingers, double distanceThreshold)
 {
     count = std::max(count, DEFAULT_TAP_COUNT);
     fingers = std::clamp(fingers, DEFAULT_TAP_FINGERS, MAX_TAP_FINGERS);
