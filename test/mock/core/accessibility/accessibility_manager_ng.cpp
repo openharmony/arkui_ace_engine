@@ -29,9 +29,8 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
 void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     const RefPtr<FrameNode>& root,
     const PointF& point,
-    SourceType sourceType,
-    AccessibilityHoverEventType eventType,
-    TimeStamp time)
+    HandleHoverEventInnerParam param,
+    const TouchEvent& event)
 {
     return;
 }

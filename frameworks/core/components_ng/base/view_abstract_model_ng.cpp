@@ -959,6 +959,20 @@ void ViewAbstractModelNG::SetOnAccessibilityActionIntercept(
     accessibilityProperty->SetAccessibilityActionIntercept(onActionAccessibilityActionIntercept);
 }
 
+void ViewAbstractModelNG::SetOnAccessibilityHoverTransparent(TouchEventFunc&& touchEventFunc)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityTransparentCallback(touchEventFunc);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->AddHoverTransparentCallback(AceType::Claim(frameNode));
+}
+
 void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, const std::string& description)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1133,5 +1147,18 @@ void ViewAbstractModelNG::SetOnAccessibilityActionIntercept(
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityActionIntercept(onActionAccessibilityActionIntercept);
+}
+
+void ViewAbstractModelNG::SetOnAccessibilityHoverTransparent(FrameNode* frameNode, TouchEventFunc&& touchEventFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityTransparentCallback(touchEventFunc);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->AddHoverTransparentCallback(AceType::Claim(frameNode));
 }
 } // namespace OHOS::Ace::NG

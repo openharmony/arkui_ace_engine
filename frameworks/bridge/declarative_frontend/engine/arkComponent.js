@@ -2375,6 +2375,19 @@ class AccessibilityActionInterceptCallbackModifier extends ModifierWithKey {
   }
 }
 AccessibilityActionInterceptCallbackModifier.identity = Symbol('onAccessibilityActionIntercept');
+class AccessibilityHoverTransparentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityHoverTransparent(node);
+    } else {
+      getUINativeModule().common.setAccessibilityHoverTransparent(node, this.value);
+    }
+  }
+}
+AccessibilityHoverTransparentModifier.identity = Symbol('onAccessibilityHoverTransparent');
 class AllowDropModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4714,6 +4727,11 @@ class ArkComponent {
 
   onAccessibilityActionIntercept(value) {
     modifierWithKey(this._modifiersWithKeys, AccessibilityActionInterceptCallbackModifier.identity, AccessibilityActionInterceptCallbackModifier, value);
+    return this;
+  }
+
+  onAccessibilityHoverTransparent(value) {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityHoverTransparentModifier.identity, AccessibilityHoverTransparentModifier, value);
     return this;
   }
 

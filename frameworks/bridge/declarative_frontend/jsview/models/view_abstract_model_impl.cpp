@@ -1696,4 +1696,7 @@ void ViewAbstractModelImpl::SetAccessibilityFocusDrawLevel(int32_t drawLevel)
 void ViewAbstractModelImpl::SetOnAccessibilityActionIntercept(
     NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept)
 {}
+
+void ViewAbstractModelImpl::SetOnAccessibilityHoverTransparent(TouchEventFunc&& touchEventFunc)
+{}
 } // namespace OHOS::Ace::Framework

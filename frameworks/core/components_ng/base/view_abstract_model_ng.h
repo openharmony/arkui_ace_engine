@@ -1404,6 +1404,7 @@ public:
     void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;
     void SetOnAccessibilityActionIntercept(
         NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) override;
+    void SetOnAccessibilityHoverTransparent(TouchEventFunc&& touchEventFunc) override;
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
     void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
     void ResetOnAccessibilityFocus() override;
@@ -1630,6 +1631,7 @@ public:
         FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);
     static void SetOnAccessibilityActionIntercept(
         FrameNode* frameNode, NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept);
+    static void SetOnAccessibilityHoverTransparent(FrameNode* frameNode, TouchEventFunc&& touchEventFunc);
     static void ResetOnAccessibilityFocus(FrameNode* frameNode);
     static void SetAccessibilityNextFocusId(FrameNode* frameNode, const std::string& nextFocusId);
     static void SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus);
