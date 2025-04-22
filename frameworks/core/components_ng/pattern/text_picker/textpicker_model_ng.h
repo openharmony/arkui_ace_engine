@@ -97,20 +97,20 @@ public:
     void SetEnableHapticFeedback(bool isEnableHapticFeedback) override;
     void UpdateUserSetSelectColor() override;
 
-    static void SetCanLoop(FrameNode* frameNode, const bool value);
+    static void SetCanLoop(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, std::optional<int32_t>& crownSensitivity);
-    static void SetSelected(FrameNode* frameNode, uint32_t value);
-    static void SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values);
+    static void SetSelected(FrameNode* frameNode, const std::optional<uint32_t>& value);
+    static void SetSelecteds(FrameNode* frameNode, const std::optional<std::vector<uint32_t>>& values);
     static void SetHasSelectAttr(FrameNode* frameNode, bool value);
     static void SetIsCascade(FrameNode* frameNode, bool isCascade);
     static void SetColumnKind(FrameNode* frameNode, uint32_t columnKind);
     static void SetNormalTextStyle(
-        FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
+        FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const std::optional<NG::PickerTextStyle>& value);
     static void SetSelectedTextStyle(
-        FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
+        FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const std::optional<NG::PickerTextStyle>& value);
     static void SetDisappearTextStyle(
-        FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
+        FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const std::optional<NG::PickerTextStyle>& value);
     static void SetDefaultTextStyle(
         FrameNode* frameNode, const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value);
     static void SetDefaultTextStyle(FrameNode* frameNode, const NG::PickerTextStyle& value);

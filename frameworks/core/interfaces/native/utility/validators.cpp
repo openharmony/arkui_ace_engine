@@ -88,6 +88,12 @@ void ValidateGreatOrEqual(std::optional<int32_t>& opt, const int32_t& right)
         opt.reset();
     }
 }
+void ValidateLessNotEqual(std::optional<uint32_t>& opt, const uint32_t& right)
+{
+    if (opt.has_value() && GreatOrEqual(opt.value(), right)) {
+        opt.reset();
+    }
+}
 void ValidateLessOrEqual(std::optional<float>& opt, const float& right)
 {
     if (opt.has_value() && GreatNotEqual(opt.value(), right)) {
