@@ -188,7 +188,9 @@ void RenderWeb::UpdateDelegate()
     delegate_->UpdateFileFromUrlEnabled(web_->GetFileFromUrlAccessEnabled());
     delegate_->UpdateDatabaseEnabled(web_->GetDatabaseAccessEnabled());
     delegate_->UpdateTextZoomRatio(web_->GetTextZoomRatio());
-    delegate_->UpdateWebDebuggingAccess(web_->GetWebDebuggingAccessEnabled());
+    delegate_->UpdateWebDebuggingAccessAndPort(
+        std::get<0>(web_->GetWebDebuggingAccessEnabledAndPort()),
+        std::get<1>(web_->GetWebDebuggingAccessEnabledAndPort()));
     delegate_->UpdateMediaPlayGestureAccess(web_->IsMediaPlayGestureAccess());
     delegate_->UpdatePinchSmoothModeEnabled(web_->GetPinchSmoothModeEnabled());
     delegate_->UpdateMultiWindowAccess(web_->GetMultiWindowAccessEnabled());

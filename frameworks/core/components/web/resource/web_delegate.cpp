@@ -47,6 +47,7 @@
 #include "iservice_registry.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
+#include "nweb_helper.h"
 #include "parameters.h"
 #include "screen_manager/screen_types.h"
 #include "system_ability_definition.h"
@@ -2783,7 +2784,6 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
     setting->PutEnableRawFileAccessFromFileURLs(webPattern->GetFileFromUrlAccessEnabledValue(true));
     setting->PutDatabaseAllowed(webPattern->GetDatabaseAccessEnabledValue(false));
     setting->PutZoomingForTextFactor(webPattern->GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO));
-    setting->PutWebDebuggingAccess(webPattern->GetWebDebuggingAccessEnabledValue(false));
     setting->PutMediaPlayGestureAccess(webPattern->GetMediaPlayGestureAccessValue(true));
     return;
 #else
@@ -2806,7 +2806,6 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
         setting->PutEnableRawFileAccessFromFileURLs(webPattern->GetFileFromUrlAccessEnabledValue(true));
         setting->PutDatabaseAllowed(webPattern->GetDatabaseAccessEnabledValue(false));
         setting->PutZoomingForTextFactor(webPattern->GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO));
-        setting->PutWebDebuggingAccess(webPattern->GetWebDebuggingAccessEnabledValue(false));
         setting->PutMediaPlayGestureAccess(webPattern->GetMediaPlayGestureAccessValue(true));
         return;
     }
@@ -2827,7 +2826,6 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
     setting->PutEnableRawFileAccessFromFileURLs(component->GetFileFromUrlAccessEnabled());
     setting->PutDatabaseAllowed(component->GetDatabaseAccessEnabled());
     setting->PutZoomingForTextFactor(component->GetTextZoomRatio());
-    setting->PutWebDebuggingAccess(component->GetWebDebuggingAccessEnabled());
     setting->PutMediaPlayGestureAccess(component->IsMediaPlayGestureAccess());
 #endif
 }
@@ -3798,14 +3796,26 @@ void WebDelegate::UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled)
     }
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), isWebDebuggingAccessEnabled]() {
-            auto delegate = weak.Upgrade();
-            if (delegate && delegate->nweb_) {
-                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
-                CHECK_NULL_VOID(setting);
-                setting->PutWebDebuggingAccess(isWebDebuggingAccessEnabled);
-            }
+            NWebHelper::Instance().SetWebDebuggingAccess(isWebDebuggingAccessEnabled);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateDebuggingAccess");
+}
+
+void WebDelegate::UpdateWebDebuggingAccessAndPort(bool enabled, int32_t port)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), enabled, port]() {
+            if (port > 0) {
+                NWebHelper::Instance().SetWebDebuggingAccessAndPort(enabled, port);
+            } else {
+                NWebHelper::Instance().SetWebDebuggingAccess(enabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateDebuggingAccessAndPort");
 }
 
 void WebDelegate::UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled)
