@@ -709,6 +709,7 @@ void PanRecognizer::GetGestureEventHalfInfo(GestureEvent* info)
     info->SetOffsetY((direction_.type & PanDirection::VERTICAL) == 0 ? 0.0 : averageDistance_.GetY());
     info->SetDelta(delta_);
     info->SetVelocity(panVelocity_.GetVelocity());
+    info->SetGestureTypeName(GestureTypeName::PAN_GESTURE);
     info->SetMainVelocity(panVelocity_.GetMainAxisVelocity());
 }
 

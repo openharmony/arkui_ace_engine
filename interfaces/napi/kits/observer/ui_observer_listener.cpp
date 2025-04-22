@@ -524,7 +524,6 @@ void UIObserverListener::OnWillClick(
     AddGestureEventInfoThree(objValueClickEvent, gestureEventInfo);
     AddClickEventInfoOne(objValueClickEvent, clickInfo);
     AddClickEventInfoTwo(objValueClickEvent, clickInfo);
-
     napi_value objValueFrameNode = nullptr;
     napi_create_object(env_, &objValueFrameNode);
 
@@ -534,7 +533,6 @@ void UIObserverListener::OnWillClick(
     CHECK_NULL_VOID(frontEnd);
     auto nodeId = frameNode->GetId();
     objValueFrameNode = frontEnd->GetFrameNodeValueByNodeId(nodeId);
-
     napi_value argv[] = { objValueClickEvent, objValueFrameNode };
     napi_call_function(env_, nullptr, callback, PARAM_SIZE_TWO, argv, nullptr);
     napi_close_handle_scope(env_, scope);
@@ -863,6 +861,50 @@ void UIObserverListener::AddGestureEventInfoThree(napi_value objValueEvent, cons
     napi_create_double(env_, gestureEventInfo.GetTargetDisplayId(), &napiTargetDisplayId);
     napi_set_named_property(env_, objValueEvent, "targetDisplayId", napiTargetDisplayId);
     AddFingerListInfo(objValueEvent, gestureEventInfo);
+    AddTapLocationInfo(objValueEvent, gestureEventInfo);
+    napi_close_handle_scope(env_, scope);
+}
+
+void UIObserverListener::AddTapLocationInfo(napi_value objTapGestureEventInfo, const GestureEvent& gestureEventInfo)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok || gestureEventInfo.GetFingerList().size() == 0) {
+        return;
+    }
+
+    double scale = Dimension(1.0, DimensionUnit::VP).ConvertToPx();
+    if (NearZero(scale)) {
+        scale = 1.0;
+    }
+
+    auto fingerInfo = gestureEventInfo.GetFingerList().back();
+
+    napi_value tapLocation = nullptr;
+    napi_create_object(env_, &tapLocation);
+
+    const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
+    const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
+    const OHOS::Ace::Offset& screenLocation = fingerInfo.screenLocation_;
+    napi_value napiGlobalX = nullptr;
+    napi_create_double(env_, globalLocation.GetX() / scale, &napiGlobalX);
+    napi_set_named_property(env_, tapLocation, "windowX", napiGlobalX);
+    napi_value napiGlobalY = nullptr;
+    napi_create_double(env_, globalLocation.GetY() / scale, &napiGlobalY);
+    napi_set_named_property(env_, tapLocation, "windowY", napiGlobalY);
+    napi_value napiLocalX = nullptr;
+    napi_create_double(env_, localLocation.GetX() / scale, &napiLocalX);
+    napi_set_named_property(env_, tapLocation, "x", napiLocalX);
+    napi_value napiLocalY = nullptr;
+    napi_create_double(env_, localLocation.GetY() / scale, &napiLocalY);
+    napi_set_named_property(env_, tapLocation, "y", napiLocalY);
+    napi_value napiScreenX = nullptr;
+    napi_create_double(env_, screenLocation.GetX() / scale, &napiScreenX);
+    napi_set_named_property(env_, tapLocation, "displayX", napiScreenX);
+    napi_value napiScreenY = nullptr;
+    napi_create_double(env_, screenLocation.GetY() / scale, &napiScreenY);
+    napi_set_named_property(env_, tapLocation, "displayY", napiScreenY);
+    napi_set_named_property(env_, objTapGestureEventInfo, "tapLocation", tapLocation);
     napi_close_handle_scope(env_, scope);
 }
 
