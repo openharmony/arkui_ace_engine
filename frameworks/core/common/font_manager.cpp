@@ -412,7 +412,6 @@ std::vector<std::string> FontManager::GetFontNames()
     return fontNames_;
 }
 
-#ifdef ACE_ENABLE_VK
 void FontManager::AddHybridRenderNode(const WeakPtr<NG::UINode>& node)
 {
     std::lock_guard<std::mutex> lock(hybridRenderNodesMutex_);
@@ -442,5 +441,4 @@ void FontManager::UpdateHybridRenderNodes()
         }
     }
 }
-#endif
 } // namespace OHOS::Ace

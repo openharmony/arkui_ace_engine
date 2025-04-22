@@ -60,11 +60,6 @@ class FontManager;
 }
 
 namespace OHOS::Ace::Platform {
-#ifdef ACE_ENABLE_VK
-namespace {
-class HighContrastObserver;
-}
-#endif
 
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
@@ -979,11 +974,8 @@ private:
 
     bool lastThemeHasSkin_ = false;
 
-#ifdef ACE_ENABLE_VK
     void SubscribeHighContrastChange();
     void UnsubscribeHighContrastChange();
-    std::shared_ptr<HighContrastObserver> highContrastObserver_ = nullptr;
-#endif
 };
 
 } // namespace OHOS::Ace::Platform
