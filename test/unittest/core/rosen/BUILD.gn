@@ -35,6 +35,7 @@ config("rosen_render_context_config") {
     "-fdata-sections",
     "-ffunction-sections",
     "-g",
+    "-DUNITEST_FRIEND_CLASS=",
   ]
 
   ldflags = [ "-Wl,--gc-sections,--as-needed" ]
