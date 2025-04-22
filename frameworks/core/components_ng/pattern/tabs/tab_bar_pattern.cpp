@@ -1098,13 +1098,17 @@ void TabBarPattern::OnModifyDone()
 
 void TabBarPattern::ResetOnForceMeasure(int32_t index)
 {
-    jumpIndex_ = index;
-    focusIndicator_ = index;
-    UpdateSubTabBoard(index);
-    UpdateTextColorAndFontWeight(index);
-    UpdateIndicator(index);
-    UpdatePaintIndicator(index, true);
-    HandleBottomTabBarChange(index);
+    auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetIndicatorValue(0) != index) {
+        jumpIndex_ = index;
+        focusIndicator_ = index;
+        UpdateSubTabBoard(index);
+        UpdateTextColorAndFontWeight(index);
+        UpdateIndicator(index);
+        UpdatePaintIndicator(index, true);
+        HandleBottomTabBarChange(index);
+    }
 }
 
 void TabBarPattern::UpdateBackBlurStyle(const RefPtr<TabTheme>& tabTheme)
