@@ -18,6 +18,7 @@
 #include "accessor_test_base.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "test/unittest/capi/utils/async_work_test_helper.h"
 
 #include "gmock/gmock.h"
 
@@ -42,11 +43,15 @@ public:
                 finish();
             }
         });
+        SetPreloadItemsImpl(
+            std::bind(&StubSwiperController::PreloadItems, this, std::placeholders::_1)
+        );
     }
     ~StubSwiperController() override = default;
     virtual void ShowNext() {}
     virtual void ShowPrevious() {}
     virtual void ChangeIndex(int, bool) {}
+    virtual void PreloadItems(std::set<int32_t>) {}
 };
 
 class MockSwiperController : public StubSwiperController {
@@ -56,6 +61,7 @@ public:
     MOCK_METHOD(void, ShowNext, ());
     MOCK_METHOD(void, ShowPrevious, ());
     MOCK_METHOD(void, ChangeIndex, (int, bool));
+    MOCK_METHOD(void, PreloadItems, (std::set<int32_t>));
 };
 } // namespace
 
@@ -85,6 +91,7 @@ public:
 
     MockSwiperController *mockSwiperController_ = nullptr;
     RefPtr<MockSwiperController> mockSwiperControllerKeeper_ = nullptr;
+    Ark_VMContext vmContext_ = nullptr;
 };
 
 /**
@@ -185,5 +192,56 @@ HWTEST_F(SwiperControllerAccessorTest, finishAnimationTest, TestSize.Level1)
     accessor_->finishAnimation(peer_, nullptr);
     EXPECT_EQ(mockSwiperController_->GetFinishCallback(), nullptr);
     EXPECT_FALSE(checkInvoke);
+}
+
+/**
+ * @tc.name: preloadItemsTest
+ * @tc.desc: Check the functionality of SwiperControllerAccessorTest.PreloadItemsImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerAccessorTest, preloadItemsTest, TestSize.Level1)
+{
+    std::initializer_list<int32_t> indexList{1, 20, 300};
+    std::set<int32_t> expectedIndexSet(indexList);
+    const std::string expectedErrStr{"smth went wrong"};
+    static const int32_t expectedResourceId{123};
+    static std::optional<StringArray> arrayResultStr{};
+
+    ASSERT_NE(accessor_->preloadItems, nullptr);
+
+    auto returnResFunc = [] (Ark_VMContext context, const Ark_Int32 resourceId, const Opt_Array_String error) {
+        EXPECT_EQ(resourceId, expectedResourceId);
+        Converter::AssignOptionalTo(arrayResultStr, error);
+    };
+    auto cont = Converter::ArkValue<Callback_Opt_Array_String_Void>(returnResFunc, expectedResourceId);
+
+    // check of the work created
+    Converter::ArkArrayHolder<Array_Number> arrayHolder(indexList);
+    auto validValue = arrayHolder.OptValue<Opt_Array_Number>();
+    accessor_->preloadItems(vmContext_, AsyncWorkTestHelper::GetWorkerPtr(), peer_, &validValue, &cont);
+    ASSERT_TRUE(AsyncWorkTestHelper::HasWorkCreated());
+    auto fireFinish = mockSwiperController_->GetPreloadFinishCallback();
+    ASSERT_NE(fireFinish, nullptr);
+
+    // check of the simulated start
+    EXPECT_CALL(*mockSwiperController_, PreloadItems(expectedIndexSet)).Times(1);
+    AsyncWorkTestHelper::DoExeceute();
+
+    // check of the simulated finish cases
+    fireFinish(ERROR_CODE_NO_ERROR, {}); // the good case
+    EXPECT_TRUE(AsyncWorkTestHelper::HasResolved());
+    AsyncWorkTestHelper::Reset();
+    EXPECT_FALSE(arrayResultStr.has_value());
+
+    fireFinish(ERROR_CODE_PARAM_INVALID, expectedErrStr); // the bad case
+    EXPECT_TRUE(AsyncWorkTestHelper::HasRejected());
+    AsyncWorkTestHelper::Reset();
+    ASSERT_TRUE(arrayResultStr.has_value());
+    ASSERT_EQ(arrayResultStr->size(), 2);
+    EXPECT_EQ(arrayResultStr->at(0), std::to_string(ERROR_CODE_PARAM_INVALID));
+    EXPECT_EQ(arrayResultStr->at(1), expectedErrStr);
+
+    // the mandatory complete
+    AsyncWorkTestHelper::DoComplete();
 }
 } // namespace OHOS::Ace::NG
