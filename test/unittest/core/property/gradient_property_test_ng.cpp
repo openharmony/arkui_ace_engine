@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,35 +36,35 @@ void Result(const GradientDirection x, const GradientDirection y, const Gradient
     std::string str = "";
     if (x == GradientDirection::LEFT) {
         if (y == GradientDirection::TOP) {
-            str = gradient.LinearGradientToJson()->GetString("direction");
+            str = GradientJsonUtils::LinearGradientToJson(gradient)->GetString("direction");
             EXPECT_EQ(str, "GradientDirection.LeftTop");
         } else if (y == GradientDirection::BOTTOM) {
-            str = gradient.LinearGradientToJson()->GetString("direction");
+            str = GradientJsonUtils::LinearGradientToJson(gradient)->GetString("direction");
             EXPECT_EQ(str, "GradientDirection.LeftBottom");
         } else {
-            str = gradient.LinearGradientToJson()->GetString("direction");
+            str = GradientJsonUtils::LinearGradientToJson(gradient)->GetString("direction");
             EXPECT_EQ(str, "GradientDirection.Left");
         }
     } else if (x == GradientDirection::RIGHT) {
         if (y == GradientDirection::TOP) {
-            str = gradient.LinearGradientToJson()->GetString("direction");
+            str = GradientJsonUtils::LinearGradientToJson(gradient)->GetString("direction");
             EXPECT_EQ(str, "GradientDirection.RightTop");
         } else if (y == GradientDirection::BOTTOM) {
-            str = gradient.LinearGradientToJson()->GetString("direction");
+            str = GradientJsonUtils::LinearGradientToJson(gradient)->GetString("direction");
             EXPECT_EQ(str, "GradientDirection.RightBottom");
         } else {
-            str = gradient.LinearGradientToJson()->GetString("direction");
+            str = GradientJsonUtils::LinearGradientToJson(gradient)->GetString("direction");
             EXPECT_EQ(str, "GradientDirection.Right");
         }
     } else {
         if (y == GradientDirection::TOP) {
-            str = gradient.LinearGradientToJson()->GetString("direction");
+            str = GradientJsonUtils::LinearGradientToJson(gradient)->GetString("direction");
             EXPECT_EQ(str, "GradientDirection.Top");
         } else if (y == GradientDirection::BOTTOM) {
-            str = gradient.LinearGradientToJson()->GetString("direction");
+            str = GradientJsonUtils::LinearGradientToJson(gradient)->GetString("direction");
             EXPECT_EQ(str, "GradientDirection.Bottom");
         } else {
-            str = gradient.LinearGradientToJson()->GetString("direction");
+            str = GradientJsonUtils::LinearGradientToJson(gradient)->GetString("direction");
             EXPECT_EQ(str, "GradientDirection.None");
         }
     }
@@ -86,11 +86,11 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest001, TestSize.Level1)
 {
     Gradient gradient = Gradient();
     gradient.type_ = GradientType::RADIAL;
-    auto linearJson = gradient.LinearGradientToJson();
+    auto linearJson = GradientJsonUtils::LinearGradientToJson(gradient);
     EXPECT_TRUE(linearJson);
     
     gradient.type_ = GradientType::LINEAR;
-    linearJson = gradient.LinearGradientToJson();
+    linearJson = GradientJsonUtils::LinearGradientToJson(gradient);
     auto str = linearJson->GetString("angle");
     EXPECT_EQ(str, "");
 
@@ -125,11 +125,11 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest002, TestSize.Level1)
 {
     Gradient gradient = Gradient();
     gradient.type_ = GradientType::RADIAL;
-    auto sweepJson = gradient.SweepGradientToJson();
+    auto sweepJson = GradientJsonUtils::SweepGradientToJson(gradient);
     EXPECT_TRUE(sweepJson);
     
     gradient.type_ = GradientType::SWEEP;
-    sweepJson = gradient.SweepGradientToJson();
+    sweepJson = GradientJsonUtils::SweepGradientToJson(gradient);
     auto str = sweepJson->GetString("start");
     EXPECT_EQ(str, "");
 
@@ -140,7 +140,7 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest002, TestSize.Level1)
     sweepGradient.endAngle = std::make_optional(TEST_LENGTH4);
     sweepGradient.rotation = std::make_optional(TEST_LENGTH5);
     gradient.SetSweepGradient(sweepGradient);
-    sweepJson = gradient.SweepGradientToJson();
+    sweepJson = GradientJsonUtils::SweepGradientToJson(gradient);
     str = sweepJson->GetString("start");
     EXPECT_EQ(str, TEST_LENGTH3.ToString());
     str = sweepJson->GetString("end");
@@ -151,11 +151,11 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest003, TestSize.Level1)
 {
     Gradient gradient = Gradient();
     gradient.type_ = GradientType::SWEEP;
-    auto radialJson = gradient.RadialGradientToJson();
+    auto radialJson = GradientJsonUtils::RadialGradientToJson(gradient);
     EXPECT_TRUE(radialJson);
     
     gradient.type_ = GradientType::RADIAL;
-    radialJson = gradient.RadialGradientToJson();
+    radialJson = GradientJsonUtils::RadialGradientToJson(gradient);
     auto str = radialJson->GetString("radius");
     EXPECT_EQ(str, "");
 
@@ -171,7 +171,7 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest003, TestSize.Level1)
     radialGradient.fRadialCenterX = std::make_optional(TEST_LENGTH5);
     radialGradient.fRadialCenterY = std::make_optional(TEST_LENGTH6);
     gradient.SetRadialGradient(radialGradient);
-    radialJson = gradient.RadialGradientToJson();
+    radialJson = GradientJsonUtils::RadialGradientToJson(gradient);
     str = radialJson->GetString("radius");
     EXPECT_EQ(str, TEST_LENGTH2.ToString());
     EXPECT_EQ(gradient.colors_.size(), 1);
@@ -187,17 +187,17 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest004, TestSize.Level1)
 {
     Gradient gradient = Gradient();
     gradient.type_ = GradientType::RADIAL;
-    auto linearJson = gradient.LinearGradientToJson();
+    auto linearJson = GradientJsonUtils::LinearGradientToJson(gradient);
     EXPECT_TRUE(linearJson);
 
     gradient.type_ = GradientType::LINEAR;
-    linearJson = gradient.LinearGradientToJson();
+    linearJson = GradientJsonUtils::LinearGradientToJson(gradient);
     auto str = linearJson->GetString("angle");
     EXPECT_EQ(str, "");
 
     LinearGradient linearGradient;
     gradient.SetLinearGradient(linearGradient);
-    linearJson = gradient.LinearGradientToJson();
+    linearJson = GradientJsonUtils::LinearGradientToJson(gradient);
     str = linearJson->GetString("angle");
     EXPECT_EQ(str, "");
     str = linearJson->GetString("direction");
@@ -216,14 +216,14 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest005, TestSize.Level1)
      */
     Gradient gradient = Gradient();
     gradient.type_ = GradientType::RADIAL;
-    auto sweepJson = gradient.SweepGradientToJson();
+    auto sweepJson = GradientJsonUtils::SweepGradientToJson(gradient);
     EXPECT_TRUE(sweepJson);
 
     /**
      * @tc.steps: step1. set type == SWEEP.
      */
     gradient.type_ = GradientType::SWEEP;
-    sweepJson = gradient.SweepGradientToJson();
+    sweepJson = GradientJsonUtils::SweepGradientToJson(gradient);
     auto str = sweepJson->GetString("start");
     EXPECT_EQ(str, "");
 
@@ -232,7 +232,7 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest005, TestSize.Level1)
      */
     SweepGradient sweepGradient;
     gradient.SetSweepGradient(sweepGradient);
-    sweepJson = gradient.SweepGradientToJson();
+    sweepJson = GradientJsonUtils::SweepGradientToJson(gradient);
     auto jsonTemp = sweepJson->GetValue("center");
     str = jsonTemp->GetString("0");
     EXPECT_EQ(str, "");
@@ -245,7 +245,7 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest005, TestSize.Level1)
     SweepGradient sweepGradient1;
     sweepGradient1.centerY = std::make_optional(TEST_LENGTH2);
     gradient.SetSweepGradient(sweepGradient1);
-    sweepJson = gradient.SweepGradientToJson();
+    sweepJson = GradientJsonUtils::SweepGradientToJson(gradient);
     jsonTemp = sweepJson->GetValue("center");
     str = jsonTemp->GetString("0");
     EXPECT_EQ(str, "");
@@ -258,7 +258,7 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest005, TestSize.Level1)
     SweepGradient sweepGradient2;
     sweepGradient2.centerX = std::make_optional(TEST_LENGTH1);
     gradient.SetSweepGradient(sweepGradient2);
-    sweepJson = gradient.SweepGradientToJson();
+    sweepJson = GradientJsonUtils::SweepGradientToJson(gradient);
     jsonTemp = sweepJson->GetValue("center");
     str = jsonTemp->GetString("0");
     EXPECT_EQ(str, "");
@@ -271,7 +271,7 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest005, TestSize.Level1)
     sweepGradient.centerX = std::make_optional(TEST_LENGTH1);
     sweepGradient.centerY = std::make_optional(TEST_LENGTH2);
     gradient.SetSweepGradient(sweepGradient);
-    sweepJson = gradient.SweepGradientToJson();
+    sweepJson = GradientJsonUtils::SweepGradientToJson(gradient);
     jsonTemp = sweepJson->GetValue("center");
     str = jsonTemp->GetString("0");
     EXPECT_EQ(str, TEST_LENGTH1.ToString());
@@ -295,14 +295,14 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest006, TestSize.Level1)
      */
     Gradient gradient = Gradient();
     gradient.type_ = GradientType::SWEEP;
-    auto radialJson = gradient.RadialGradientToJson();
+    auto radialJson = GradientJsonUtils::RadialGradientToJson(gradient);
     EXPECT_TRUE(radialJson);
 
     /**
      * @tc.steps: step1. Set type == RADIAL.
      */
     gradient.type_ = GradientType::RADIAL;
-    radialJson = gradient.RadialGradientToJson();
+    radialJson = GradientJsonUtils::RadialGradientToJson(gradient);
     auto str = radialJson->GetString("radius");
     EXPECT_EQ(str, "");
 
@@ -313,7 +313,7 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest006, TestSize.Level1)
     gradient.AddColor(color);
     RadialGradient radialGradient;
     gradient.SetRadialGradient(radialGradient);
-    radialJson = gradient.RadialGradientToJson();
+    radialJson = GradientJsonUtils::RadialGradientToJson(gradient);
     auto jsonTemp = radialJson->GetValue("center");
     str = jsonTemp->GetString("0");
     EXPECT_EQ(str, "");
@@ -326,7 +326,7 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest006, TestSize.Level1)
     RadialGradient radialGradient1;
     radialGradient1.radialCenterX = std::make_optional(TEST_LENGTH3);
     gradient.SetRadialGradient(radialGradient1);
-    radialJson = gradient.RadialGradientToJson();
+    radialJson = GradientJsonUtils::RadialGradientToJson(gradient);
     jsonTemp = radialJson->GetValue("center");
     str = jsonTemp->GetString("0");
     EXPECT_EQ(str, "");
@@ -339,7 +339,7 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest006, TestSize.Level1)
     RadialGradient radialGradient2;
     radialGradient2.radialCenterY = std::make_optional(TEST_LENGTH4);
     gradient.SetRadialGradient(radialGradient2);
-    radialJson = gradient.RadialGradientToJson();
+    radialJson = GradientJsonUtils::RadialGradientToJson(gradient);
     jsonTemp = radialJson->GetValue("center");
     str = jsonTemp->GetString("0");
     EXPECT_EQ(str, "");
@@ -352,7 +352,7 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest006, TestSize.Level1)
     radialGradient.radialCenterX = std::make_optional(TEST_LENGTH3);
     radialGradient.radialCenterY = std::make_optional(TEST_LENGTH4);
     gradient.SetRadialGradient(radialGradient);
-    radialJson = gradient.RadialGradientToJson();
+    radialJson = GradientJsonUtils::RadialGradientToJson(gradient);
     jsonTemp = radialJson->GetValue("center");
     str = jsonTemp->GetString("0");
     EXPECT_EQ(str, TEST_LENGTH3.ToString());

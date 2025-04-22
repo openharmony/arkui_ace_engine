@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_VIEW_COMPONENTS_TABS_TABS_CONSTANTS_H
-#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_VIEW_COMPONENTS_TABS_TABS_CONSTANTS_H
+#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_PROPERTIES_TABS_EFFECT_NODE_OPTION_H
+#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_PROPERTIES_TABS_EFFECT_NODE_OPTION_H
+
+#include "ui/base/geometry/dimension.h"
 
 namespace OHOS::Ace {
 
-enum class BarPosition {
-    START,
-    END,
-};
-
-enum class TabBarMode {
-    FIXED,
-    SCROLLABLE,
-    FIXED_START,
+struct TabsEffectNodeOption {
+    Dimension strokeWidth = 0.0_vp;
+    bool isNull = false;
+    bool operator==(const TabsEffectNodeOption& other) const
+    {
+        return (strokeWidth == other.strokeWidth) && (isNull == other.isNull);
+    }
 };
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_VIEW_COMPONENTS_TABS_TABS_CONSTANTS_H
+#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_PROPERTIES_TABS_EFFECT_NODE_OPTION_H

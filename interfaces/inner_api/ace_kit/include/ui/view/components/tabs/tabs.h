@@ -13,15 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_VIEW_COMPONENTS_TABS_H
-#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_VIEW_COMPONENTS_TABS_H
+#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_VIEW_COMPONENTS_TABS_TABS_H
+#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_VIEW_COMPONENTS_TABS_TABS_H
 
 #include <functional>
 
 #include "ui/base/macros.h"
 #include "ui/base/type_info_base.h"
+#include "ui/properties/blur_style_option.h"
 #include "ui/properties/brightness_option.h"
 #include "ui/properties/color.h"
+#include "ui/properties/tabs_effect_node_option.h"
+#include "ui/view/components/tabs/tabs_constants.h"
+#include "ui/view/components/tabs/tabs_data.h"
 #include "ui/view/view.h"
 
 namespace OHOS::Ace::Kit {
@@ -45,15 +49,26 @@ public:
     static RefPtr<Tabs> Create();
     static RefPtr<Tabs> Create(RefPtr<FrameNode>& node);
 
+    void SetTabBarWidth(const Dimension& tabBarWidth);
+    void SetTabBarHeight(const Dimension& tabBarHeight);
     void SetDivider(const TabsItemDivider& divider);
+    void SetEffectNodeOption(const TabsEffectNodeOption& option);
+    void SetTabBarMode(const TabBarMode& barMode);
+    void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option);
     void UpdateDividerOpacity(const double opacity);
 
     void UpdateTabBarBrightness(const BrightnessOption& brightnessOption);
+    void UpdateEffectNodeBrightness(const BrightnessOption& brightnessOption);
+    void SetBarBackgroundBlurStyle(const BlurStyleOption& styleOption);
+    void SetBarBackgroundColor(const Color& backgroundColor);
+    void SetBarBackgroundEffect(const EffectOption& effectOption);
     double GetTabBarTop();
     double GetTabBarBottom();
     RefPtr<FrameNode> GetTabBar();
+    RefPtr<FrameNode> GetEffectNode();
     void SetOnChange(OnChangeEvent onChangeEvent);
 };
 
 } // namespace OHOS::Ace::Kit
-#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_VIEW_COMPONENTS_TABS_H
+
+#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_VIEW_COMPONENTS_TABS_TABS_H
