@@ -329,6 +329,12 @@ RefPtr<WaterFlowPaintMethod> WaterFlowTestNg::UpdateContentModifier()
     return paintMethod;
 }
 
+void WaterFlowTestNg::ChangeRadio()
+{
+    pattern_->ratio_ = 1.848f;
+    pattern_->GetScrollableEvent()->scrollable_->ratio_ = 1.848f;
+}
+
 /**
  * @tc.name: LazyForeachLayout001
  * @tc.desc: Test LazyForeach Layout

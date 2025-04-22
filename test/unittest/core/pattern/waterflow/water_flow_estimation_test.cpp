@@ -31,6 +31,7 @@ HWTEST_F(WaterFlowTestNg, Offset001, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateWaterFlowItems(100);
     CreateDone();
+    ChangeRadio();
 
     auto info = pattern_->layoutInfo_;
     EXPECT_EQ(info->Offset(), 0.0f);
@@ -78,6 +79,7 @@ HWTEST_F(WaterFlowTestNg, Offset002, TestSize.Level1)
     model.SetFooter(GetDefaultHeaderBuilder());
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateDone();
+    ChangeRadio();
     auto info = pattern_->layoutInfo_;
     pattern_->scrollableEvent_->GetScrollable()->HandleTouchDown();
 

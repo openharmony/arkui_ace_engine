@@ -104,6 +104,10 @@ public:
         return !NearZero(scrollOffset_);
     }
 
+    void SetRatio(float ratio)
+    {
+        ratio_ =  ratio;
+    }
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);

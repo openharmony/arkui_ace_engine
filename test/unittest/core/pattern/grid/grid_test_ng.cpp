@@ -356,4 +356,10 @@ RefPtr<FrameNode> GridTestNg::GetItem(int32_t idx, bool asCache)
 {
     return AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(idx, asCache));
 }
+
+void GridTestNg::ChangeRadio()
+{
+    pattern_->ratio_ = 1.848f;
+    pattern_->GetScrollableEvent()->scrollable_->ratio_ = 1.848f;
+}
 } // namespace OHOS::Ace::NG

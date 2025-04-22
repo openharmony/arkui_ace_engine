@@ -367,6 +367,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll001, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateWaterFlowItems(50);
     CreateDone();
+    ChangeRadio();
     pattern_->SetAnimateCanOverScroll(true);
     UpdateCurrentOffset(30000.0f);
     const float startPos = info_->StartPos();
@@ -401,6 +402,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll002, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateWaterFlowItems(50);
     CreateDone();
+    ChangeRadio();
     pattern_->SetAnimateCanOverScroll(true);
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 
@@ -1807,6 +1809,7 @@ HWTEST_F(WaterFlowSWTest, Refresh002, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateWaterFlowItems(3);
     CreateDone();
+    ChangeRadio();
 
     GestureEvent info;
     info.SetMainVelocity(-1200.f);
@@ -1915,6 +1918,7 @@ HWTEST_F(WaterFlowSWTest, DataChange001, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateWaterFlowItems(2);
     CreateDone();
+    ChangeRadio();
     EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 200.0f);
     frameNode_->RemoveChildAtIndex(1);
     frameNode_->ChildrenUpdatedFrom(1);
@@ -2104,6 +2108,7 @@ HWTEST_F(WaterFlowSWTest, EdgeEffect001, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::START);
     model.SetFooter(GetDefaultHeaderBuilder());
     CreateDone();
+    ChangeRadio();
     EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 50.0f);
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
 
