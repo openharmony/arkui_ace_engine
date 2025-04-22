@@ -64,7 +64,7 @@ public:
 
     virtual int32_t ConvertLargeDelta(float delta)
     {
-        return 0;
+        return -1;
     }
 
     /**
