@@ -1456,6 +1456,8 @@ private:
     bool ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
     TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
 
+    void HandleAreaChangeDestruct();
+
     void ResetPredictNodes();
 
     bool isTrimMemRecycle_ = false;
