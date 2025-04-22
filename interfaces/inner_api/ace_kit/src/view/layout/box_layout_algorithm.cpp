@@ -69,6 +69,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(FrameNode* frameNode)
     auto* frameNodeImpl = reinterpret_cast<FrameNodeImpl*>(frameNode);
     CHECK_NULL_VOID(frameNodeImpl);
     auto* layoutWrapper = frameNodeImpl->GetLayoutWrapper();
+    CHECK_NULL_VOID(layoutWrapper);
     NG::BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
         layoutWrapper, layoutWrapper->GetAllChildrenWithBuild());
 }
