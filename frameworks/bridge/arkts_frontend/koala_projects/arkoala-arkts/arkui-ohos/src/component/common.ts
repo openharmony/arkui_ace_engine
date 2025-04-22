@@ -3962,9 +3962,9 @@ export interface CommonMethod {
     /** @memo */
     bindPopup(show: boolean, popup: PopupOptions | CustomPopupOptions): this
     /** @memo */
-    bindMenu(isShow: Array<MenuElement> | CustomBuilder | boolean, content?: MenuOptions | undefined | Array<MenuElement> | CustomBuilder, options?: MenuOptions): this
+    bindMenu(content: Array<MenuElement> | CustomBuilder, options?: MenuOptions): this
     /** @memo */
-    bindContextMenu(content: CustomBuilder | boolean, responseType: ResponseType | CustomBuilder, options?: ContextMenuOptions): this
+    bindContextMenu(content: CustomBuilder, responseType: ResponseType, options?: ContextMenuOptions): this
     /** @memo */
     bindContentCover(isShow: boolean | undefined, builder: CustomBuilder, type?: ModalTransition | undefined | ContentCoverOptions | undefined): this
     /** @memo */
