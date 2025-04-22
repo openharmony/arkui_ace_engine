@@ -37,11 +37,17 @@ int32_t GridLargeDeltaConverter::SkipLinesForward()
 {
     int32_t line = info_.startMainLineIndex_;
     float height = 0.0f;
-    while (LessNotEqual(height, -info_.currentOffset_)) {
-        AddLineHeight(height, line++, info_.startMainLineIndex_, info_.lineHeightMap_);
-    }
     GridIrregularFiller filler(&info_, wrapper_);
-    return filler.FillMatrixByLine(info_.startMainLineIndex_, line);
+    int32_t lastIdx = info_.endIndex_;
+    while (LessNotEqual(height, -info_.currentOffset_)) {
+        AddLineHeight(height, line, info_.startMainLineIndex_, info_.lineHeightMap_);
+        lastIdx = filler.FillMatrixByLine(line, line + 1);
+        if (lastIdx == info_.childrenCount_ - 1) {
+            break;
+        }
+        ++line;
+    }
+    return lastIdx;
 }
 
 int32_t GridLargeDeltaConverter::SkipLinesBackward() const

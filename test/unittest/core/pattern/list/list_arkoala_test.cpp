@@ -166,6 +166,7 @@ HWTEST_F(ListArkoalaTest, TargetAnimation001, TestSize.Level1)
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(7, 12));
     EXPECT_EQ(pattern_->GetStartIndex(), 7);
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 9));
     EXPECT_EQ(GetChildY(frameNode_, 9), 210.0f);
 }
 } // namespace OHOS::Ace::NG

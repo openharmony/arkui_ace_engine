@@ -159,9 +159,11 @@ bool ScrollWindowAdapter::UpdateSlidingOffset(float delta)
 
     if (GreatOrEqual(std::abs(delta), size_.MainSize(axis_))) {
         int32_t jumpIndex = fillAlgorithm_->ConvertLargeDelta(delta);
-        jumpIndex = std::clamp(jumpIndex, 0, totalCount_ - 1);
-        PrepareJump(jumpIndex);
-        return true;
+        if (jumpIndex >= 0) {
+            jumpIndex = std::clamp(jumpIndex, 0, totalCount_ - 1);
+            PrepareJump(jumpIndex);
+            return true;
+        }
     }
 
     fillAlgorithm_->OnSlidingOffsetUpdate(delta);
