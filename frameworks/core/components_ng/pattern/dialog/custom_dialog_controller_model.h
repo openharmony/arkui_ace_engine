@@ -40,9 +40,19 @@ public:
         RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
         std::list<DialogOperation>& dialogOperation) = 0;
 
+    virtual PromptActionCommonState GetState(std::vector<WeakPtr<AceType>>& dialogs) = 0;
+    bool GetHasBind() const
+    {
+        return hasBind_;
+    }
+    void SetHasBind(bool value)
+    {
+        hasBind_ = value;
+    }
 private:
     static std::unique_ptr<CustomDialogControllerModel> instance_;
     static std::mutex mutex_;
+    bool hasBind_ = false;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_CONTROLLER_MODEL_NG_H

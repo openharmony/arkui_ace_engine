@@ -218,6 +218,7 @@ public:
         if (onDidAppearCallback_) {
             onDidAppearCallback_();
         }
+        SetState(PromptActionCommonState::APPEARED);
     }
 
     void CallDialogDidDisappearCallback()
@@ -225,6 +226,7 @@ public:
         if (onDidDisappearCallback_) {
             onDidDisappearCallback_();
         }
+        SetState(PromptActionCommonState::DISAPPEARED);
     }
 
     void CallDialogWillAppearCallback()
@@ -232,6 +234,7 @@ public:
         if (onWillAppearCallback_) {
             onWillAppearCallback_();
         }
+        SetState(PromptActionCommonState::APPEARING);
     }
 
     void CallDialogWillDisappearCallback()
@@ -239,6 +242,7 @@ public:
         if (onWillDisappearCallback_) {
             onWillDisappearCallback_();
         }
+        SetState(PromptActionCommonState::DISAPPEARING);
     }
 
     bool IsUIExtensionSubWindow() const
@@ -309,6 +313,16 @@ public:
     bool TriggerAutoSaveWhenInvisible() override
     {
         return true;
+    }
+
+    void SetState(PromptActionCommonState value)
+    {
+        state = value;
+    }
+
+    PromptActionCommonState GetState()
+    {
+        return state;
     }
 
     bool IsShowInFreeMultiWindow();
@@ -426,6 +440,7 @@ private:
     bool isSuitOldMeasure_ = false;
     bool isScrollHeightNegative_ = false;
     float fontScaleForElderly_ = 1.0f;
+    PromptActionCommonState state = PromptActionCommonState::UNINITIALIZED;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     RefPtr<FrameNode> titleContainer_;
 

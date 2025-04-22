@@ -431,6 +431,12 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         isShown_, std::move(cancelTask), dialogComponent_, customDialog_, dialogOperation_);
 }
 
+void JSCustomDialogController::JsGetState(const JSCallbackInfo& info)
+{
+    PromptActionCommonState state = CustomDialogControllerModel::GetInstance()->GetState(dialogs_);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(state))));
+}
+
 bool JSCustomDialogController::ParseAnimation(
     const JsiExecutionContext& execContext, const JsiRef<JsiValue>& animationValue, AnimationOption& result)
 {
@@ -497,6 +503,7 @@ void JSCustomDialogController::JSBind(BindingTarget object)
     JSClass<JSCustomDialogController>::Declare("NativeCustomDialogController");
     JSClass<JSCustomDialogController>::CustomMethod("open", &JSCustomDialogController::JsOpenDialog);
     JSClass<JSCustomDialogController>::CustomMethod("close", &JSCustomDialogController::JsCloseDialog);
+    JSClass<JSCustomDialogController>::CustomMethod("getState", &JSCustomDialogController::JsGetState);
     JSClass<JSCustomDialogController>::Bind(
         object, &JSCustomDialogController::ConstructorCallback, &JSCustomDialogController::DestructorCallback);
 }

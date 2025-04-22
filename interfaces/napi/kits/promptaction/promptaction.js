@@ -18,6 +18,7 @@ const __prompt__ = requireInternal('promptAction');
 const CommonController = class CommonController {
     constructor() {};
     close() {};
+    getState() {};
 };
 
 const DialogController = class DialogController extends CommonController {
@@ -28,6 +29,10 @@ const DialogController = class DialogController extends CommonController {
 
     close() {
         __prompt__.PromptController.closeDialog(this);
+    }
+
+    getState() {
+        return __prompt__.PromptController.getState(this);
     }
 };
 

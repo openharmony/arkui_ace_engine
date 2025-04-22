@@ -68,6 +68,7 @@ struct _ArkUIDialog {
     ArkUI_Bool enableHoverMode;
     OHOS::Ace::HoverModeAreaType hoverModeAreaType;
     ArkUI_Int32 focusable;
+    ArkUI_Int32* dialogState;
 };
 
 namespace OHOS::Ace::NG::CustomDialog {
@@ -121,6 +122,7 @@ ArkUI_Int32 SetKeyboardAvoidMode(ArkUIDialogHandle controllerHandler, ArkUI_Int3
 ArkUI_Int32 EnableHoverMode(ArkUIDialogHandle controllerHandler, bool enableHoverMode);
 ArkUI_Int32 SetHoverModeArea(ArkUIDialogHandle controllerHandler, ArkUI_Int32 hoverModeAreaType);
 ArkUI_Int32 SetFocusable(ArkUIDialogHandle handle, bool focusable);
+ArkUI_Int32 GetDialogState(ArkUIDialogHandle handle, ArkUI_Int32* dialogState);
 } // namespace OHOS::Ace::NG::CustomDialog
 
 #endif

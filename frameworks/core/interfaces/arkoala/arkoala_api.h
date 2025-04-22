@@ -6251,6 +6251,7 @@ struct ArkUIDialogAPI {
     ArkUI_Int32 (*enableHoverMode)(ArkUIDialogHandle handle, ArkUI_Bool enableHoverMode);
     ArkUI_Int32 (*setHoverModeArea)(ArkUIDialogHandle handle, ArkUI_Int32 hoverModeAreaType);
     ArkUI_Int32 (*setFocusable)(ArkUIDialogHandle handle, ArkUI_Bool focusable);
+    ArkUI_Int32 (*getState)(ArkUIDialogHandle handle, ArkUI_Int32* dialogState);
     ArkUI_Int32 (*openCustomDialog)(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId));
     ArkUI_Int32 (*updateCustomDialog)(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId));
     ArkUI_Int32 (*closeCustomDialog)(ArkUI_Int32 dialogId);

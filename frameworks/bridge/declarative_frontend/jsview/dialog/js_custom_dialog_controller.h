@@ -35,6 +35,7 @@ public:
     static void DestructorCallback(JSCustomDialogController* instance);
     void JsOpenDialog(const JSCallbackInfo& info);
     void JsCloseDialog(const JSCallbackInfo& info);
+    void JsGetState(const JSCallbackInfo& info);
 
 private:
     static bool ParseAnimation(
