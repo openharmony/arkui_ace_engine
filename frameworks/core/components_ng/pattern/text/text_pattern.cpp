@@ -1702,8 +1702,9 @@ void TextPattern::RecoverCopyOption()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    copyOption_ =
-        isMarqueeRunning_ ? CopyOptions::None : textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
+    copyOption_ = textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE
+                      ? CopyOptions::None
+                      : textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
 
     const auto& children = host->GetChildren();
     if (children.empty()) {
