@@ -1481,4 +1481,12 @@ RefPtr<DragDropManager> DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
     dragDropManager->SetPixelMapOffset(pixelMapOffset);
     return dragDropManager;
 }
+
+void DragDropFuncWrapper::SetMenuSubWindowTouchable(bool touchable)
+{
+    auto containerId = Container::CurrentId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+    CHECK_NULL_VOID(subwindow);
+    subwindow->SetWindowTouchable(touchable);
+}
 } // namespace OHOS::Ace::NG
