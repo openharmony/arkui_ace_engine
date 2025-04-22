@@ -33,6 +33,9 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
+constexpr int32_t TEST_FINGERS_COUNT = 3;
+constexpr int32_t TEST_FINGERS_COUNT_DEFAULT = 1;
+
 class MockGestureRecognizer : public ClickRecognizer {
 public:
     MockGestureRecognizer() = default;
@@ -40,7 +43,16 @@ public:
     MOCK_METHOD(void, SetEnabled, (bool));
     MOCK_METHOD(bool, IsEnabled, (), (const));
     MOCK_METHOD(bool, IsInResponseLinkRecognizers, ());
-    MOCK_METHOD(RefereeState, GetGestureState, (), (const));
+
+    void SetTestFingersCount(const int32_t& count)
+    {
+        fingers_ = count;
+    }
+
+    void SetTestRefereeState(RefereeState refereeState)
+    {
+        refereeState_ = refereeState;
+    }
 };
 
 const std::vector<std::pair<GestureTypeName, Ark_GestureControl_GestureType>> getTypeTestPlan = {
@@ -118,17 +130,20 @@ HWTEST_F(GestureRecognizerAccessorTest, IsEnabledTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetEnabledTest
+ * @tc.name: GetStateTest
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(GestureRecognizerAccessorTest, GetStateTest, TestSize.Level1)
 {
-    EXPECT_CALL(*mockGestureRecognizer_, GetGestureState()).Times(3);
-    accessor_->getState(peer_);
-    accessor_->getState(peer_);
-    accessor_->isEnabled(nullptr);
-    accessor_->getState(peer_);
+    ASSERT_NE(accessor_->getState, nullptr);
+
+    auto arkState = accessor_->getState(peer_);
+    EXPECT_EQ(ARK_GESTURE_RECOGNIZER_STATE_READY, arkState);
+
+    mockGestureRecognizer_->SetTestRefereeState(NG::RefereeState::PENDING);
+    arkState = accessor_->getState(peer_);
+    EXPECT_EQ(ARK_GESTURE_RECOGNIZER_STATE_PENDING, arkState);
 }
 
 /**
@@ -230,5 +245,43 @@ HWTEST_F(GestureRecognizerAccessorTest, GetTagTest, TestSize.Level1)
     peer_->GetRecognizer()->SetGestureInfo(info);
     auto result = accessor_->getTag(peer_);
     EXPECT_EQ(Converter::Convert<std::string>(result), expectedTag);
+}
+
+/**
+ * @tc.name: GetFingerCountTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerAccessorTest, GetFingerCountTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getFingerCount, nullptr);
+
+    auto count = accessor_->getFingerCount(peer_);
+    auto defCount = Converter::Convert<int32_t>(count);
+    EXPECT_EQ(TEST_FINGERS_COUNT_DEFAULT, defCount);
+
+    mockGestureRecognizer_->SetTestFingersCount(TEST_FINGERS_COUNT);
+    auto arkTestCount = accessor_->getFingerCount(peer_);
+    auto testCount = Converter::Convert<int32_t>(arkTestCount);
+    EXPECT_EQ(TEST_FINGERS_COUNT, testCount);
+}
+
+/**
+ * @tc.name: IsFingerCountLimitImplTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerAccessorTest, IsFingerCountLimitImplTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->isFingerCountLimit, nullptr);
+
+    auto limitOn = accessor_->isFingerCountLimit(peer_);
+    auto deflimitOn = Converter::Convert<bool>(limitOn);
+    EXPECT_EQ(false, deflimitOn);
+
+    mockGestureRecognizer_->SetLimitFingerCount(true);
+    auto arkTestLimit = accessor_->isFingerCountLimit(peer_);
+    auto testLimit = Converter::Convert<bool>(arkTestLimit);
+    EXPECT_EQ(true, testLimit);
 }
 } // namespace OHOS::Ace::NG

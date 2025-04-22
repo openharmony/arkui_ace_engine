@@ -73,7 +73,7 @@ Ark_GestureRecognizerState GetStateImpl(Ark_GestureRecognizer peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetRecognizer(), {});
     auto state = peer->GetRecognizer()->GetGestureState();
-    return {};
+    return Converter::ArkValue<Ark_GestureRecognizerState>(state);
 }
 Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_GestureRecognizer peer)
 {
@@ -106,11 +106,17 @@ Ark_Boolean IsValidImpl(Ark_GestureRecognizer peer)
 }
 Ark_Number GetFingerCountImpl(Ark_GestureRecognizer peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer && peer->GetRecognizer(), {});
+    auto recognizer = AceType::DynamicCast<NG::MultiFingersRecognizer>(peer->GetRecognizer());
+    CHECK_NULL_RETURN(recognizer, {});
+    return Converter::ArkValue<Ark_Number>(recognizer->GetFingers());
 }
 Ark_Boolean IsFingerCountLimitImpl(Ark_GestureRecognizer peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer && peer->GetRecognizer(), {});
+    auto recognizer = AceType::DynamicCast<NG::MultiFingersRecognizer>(peer->GetRecognizer());
+    CHECK_NULL_RETURN(recognizer, {});
+    return Converter::ArkValue<Ark_Boolean>(recognizer->GetLimitFingerCount());
 }
 } // GestureRecognizerAccessor
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
