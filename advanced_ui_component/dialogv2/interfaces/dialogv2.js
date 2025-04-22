@@ -189,7 +189,7 @@ export class TipsDialogV2 extends ViewV2 {
             buttons: this.buttons,
             minContentHeight: this.minContentHeight,
             $minContentHeight: value => { this.minContentHeight = value; }
-          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 182, col: 5 });
+          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/dialog.ets', line: 182, col: 5 });
           ViewV2.create(componentCall);
           let paramsLambda = () => {
             return {
@@ -256,7 +256,7 @@ export class TipsDialogV2 extends ViewV2 {
               ForEach.pop();
             },
             $minContentHeight: value => { this.minContentHeight = value; }
-          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 193, col: 5 });
+          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/dialog.ets', line: 193, col: 5 });
           ViewV2.create(componentCall);
           let paramsLambda = () => {
             return {
@@ -954,7 +954,7 @@ export class SelectDialogV2 extends ViewV2 {
             contentAreaPadding: this.contentPadding,
             minContentHeight: this.minContentHeight,
             $minContentHeight: value => { this.minContentHeight = value; }
-          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 603, col: 5 });
+          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/dialog.ets', line: 603, col: 5 });
           ViewV2.create(componentCall);
           let paramsLambda = () => {
             return {
@@ -1140,8 +1140,8 @@ export class ConfirmDialogV2 extends ViewV2 {
     this.initParam('checkTips', (params && 'checkTips' in params) ? params.checkTips : '');
     this.initParam('checked', (params && 'checked' in params) ? params.checked : false);
     this.checkedInner = this.checked;
-    this.initParam('primaryButton', (params && 'primaryButton' in params) ? params.primaryButton : undefined);
-    this.initParam('secondaryButton', (params && 'secondaryButton' in params) ? params.secondaryButton : undefined);
+    this.initParam('primaryButton', (params && 'primaryButton' in params) ? params.primaryButton : new AdvancedDialogV2Button({ content: '' }));
+    this.initParam('secondaryButton', (params && 'secondaryButton' in params) ? params.secondaryButton : new AdvancedDialogV2Button({ content: '' }));
     this.fontColorWithTheme = { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
     this.initParam('onCheckedChange', (params && 'onCheckedChange' in params) ? params.onCheckedChange : undefined);
     this.contentScroller = new Scroller();
@@ -1293,7 +1293,7 @@ export class ConfirmDialogV2 extends ViewV2 {
               ForEach.pop();
             },
             $minContentHeight: value => { this.minContentHeight = value; }
-          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 801, col: 5 });
+          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/dialog.ets', line: 801, col: 5 });
           ViewV2.create(componentCall);
           let paramsLambda = () => {
             return {
@@ -1354,7 +1354,7 @@ export class ConfirmDialogV2 extends ViewV2 {
             minContentHeight: this.minContentHeight,
             buttons: this.buttons,
             $minContentHeight: value => { this.minContentHeight = value; }
-          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 813, col: 5 });
+          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/dialog.ets', line: 813, col: 5 });
           ViewV2.create(componentCall);
           let paramsLambda = () => {
             return {
@@ -1496,7 +1496,7 @@ export class AlertDialogV2 extends ViewV2 {
             buttons: this.buttons,
             minContentHeight: this.minContentHeight,
             $minContentHeight: value => { this.minContentHeight = value; }
-          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 858, col: 5 });
+          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/dialog.ets', line: 858, col: 5 });
           ViewV2.create(componentCall);
           let paramsLambda = () => {
             return {
@@ -1648,7 +1648,7 @@ export class CustomContentDialogV2 extends ViewV2 {
             buttons: this.buttons,
             minContentHeight: this.minContentHeight,
             $minContentHeight: value => { this.minContentHeight = value; }
-          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 920, col: 5 });
+          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/dialog.ets', line: 920, col: 5 });
           ViewV2.create(componentCall);
           let paramsLambda = () => {
             return {
@@ -1909,7 +1909,7 @@ class CustomDialogContentComponent extends ViewV2 {
             },
             $buttonHeight: value => { this.buttonHeight = value; },
             $titleHeight: value => { this.titleHeight = value; }
-          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1057, col: 9 });
+          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/dialog.ets', line: 1057, col: 9 });
           ViewV2.create(componentCall);
           let paramsLambda = () => {
             return {
@@ -2802,7 +2802,7 @@ export class LoadingDialogV2 extends ViewV2 {
             },
             minContentHeight: this.minContentHeight,
             $minContentHeight: value => { this.minContentHeight = value; }
-          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1703, col: 7 });
+          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/dialog.ets', line: 1707, col: 7 });
           ViewV2.create(componentCall);
           let paramsLambda = () => {
             return {
