@@ -628,6 +628,8 @@ public:
         }
     }
 
+    bool HasThrottledVisibleAreaCallback() const;
+
     void SetOnAttach(std::function<void()>&& onAttach);
     void ClearOnAttach();
     void FireOnAttach();
