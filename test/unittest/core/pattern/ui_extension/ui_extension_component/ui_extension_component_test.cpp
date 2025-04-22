@@ -48,13 +48,13 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 
-#include "mock/mock_accessibility_child_tree_callback.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
 
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/render/mock_rosen_render_context.h"
+#include "../mock/mock_accessibility_child_tree_callback.h"
 
 using namespace testing;
 using namespace testing::ext;

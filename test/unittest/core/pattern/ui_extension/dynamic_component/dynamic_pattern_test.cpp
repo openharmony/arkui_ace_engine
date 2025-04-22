@@ -65,7 +65,9 @@ RefPtr<DynamicPattern> DynamicPatternTestNg::CreateDynamicComponent()
 {
     auto dynamicNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto dynamicNode = FrameNode::GetOrCreateFrameNode(
-        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() { return AceType::MakeRefPtr<DynamicPattern>(); });
+        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() {
+            return AceType::MakeRefPtr<DynamicPattern>();
+        });
     EXPECT_NE(dynamicNode, nullptr);
     EXPECT_EQ(dynamicNode->GetTag(), V2::DYNAMIC_COMPONENT_ETS_TAG);
 
@@ -147,7 +149,9 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest003, TestSize.Level1)
      */
     auto dynamicNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto dynamicNode = FrameNode::GetOrCreateFrameNode(
-        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() { return AceType::MakeRefPtr<DynamicPattern>(); });
+        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() {
+            return AceType::MakeRefPtr<DynamicPattern>();
+        });
     ASSERT_NE(dynamicNode, nullptr);
     EXPECT_EQ(dynamicNode->GetTag(), V2::DYNAMIC_COMPONENT_ETS_TAG);
 
@@ -188,7 +192,8 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest003, TestSize.Level1)
     IsolatedInfo curDynamicInfo;
     void* runtime = nullptr;
     RefPtr<FrameNode> frameNode2 = FrameNode::CreateFrameNode(TAG, 2, pattern);
-    dynamicPattern->dynamicComponentRenderer_ = DynamicComponentRenderer::Create(frameNode2, runtime, curDynamicInfo);
+    dynamicPattern->dynamicComponentRenderer_ =
+        DynamicComponentRenderer::Create(frameNode2, runtime, curDynamicInfo);
     ASSERT_NE(dynamicPattern->dynamicComponentRenderer_, nullptr);
     dynamicPattern->OnDetachFromFrameNode(AceType::RawPtr(dynamicNode));
     EXPECT_EQ(dynamicPattern->dynamicComponentRenderer_, nullptr);
@@ -278,7 +283,8 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest006, TestSize.Level1)
     void* runtime = nullptr;
     auto pattern = AceType::MakeRefPtr<DynamicPattern>();
     RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(TAG, 2, pattern);
-    dynamicPattern->dynamicComponentRenderer_ = DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
+    dynamicPattern->dynamicComponentRenderer_ =
+        DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
     ASSERT_NE(dynamicPattern, nullptr);
 
     /**
@@ -369,7 +375,8 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest009, TestSize.Level1)
     void* runtime = nullptr;
     auto pattern = AceType::MakeRefPtr<DynamicPattern>();
     RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(TAG, 2, pattern);
-    dynamicPattern->dynamicComponentRenderer_ = DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
+    dynamicPattern->dynamicComponentRenderer_ =
+        DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
     ASSERT_NE(dynamicPattern, nullptr);
 
     /**
@@ -415,7 +422,8 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest010, TestSize.Level1)
     void* runtime = nullptr;
     auto pattern = AceType::MakeRefPtr<DynamicPattern>();
     RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(TAG, 1, pattern);
-    dynamicPattern->dynamicComponentRenderer_ = DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
+    dynamicPattern->dynamicComponentRenderer_ =
+        DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
     ASSERT_NE(dynamicPattern, nullptr);
     EXPECT_TRUE(dynamicPattern->isVisible_);
 
@@ -454,7 +462,8 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest011, TestSize.Level1)
     void* runtime = nullptr;
     auto pattern = AceType::MakeRefPtr<DynamicPattern>();
     RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(TAG, 1, pattern);
-    dynamicPattern->dynamicComponentRenderer_ = DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
+    dynamicPattern->dynamicComponentRenderer_ =
+        DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
     ASSERT_NE(dynamicPattern, nullptr);
     EXPECT_TRUE(dynamicPattern->isVisible_);
 
@@ -493,7 +502,8 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest012, TestSize.Level1)
     void* runtime = nullptr;
     auto pattern = AceType::MakeRefPtr<DynamicPattern>();
     RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(TAG, 1, pattern);
-    dynamicPattern->dynamicComponentRenderer_ = DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
+    dynamicPattern->dynamicComponentRenderer_ =
+        DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
     ASSERT_NE(dynamicPattern, nullptr);
     EXPECT_TRUE(dynamicPattern->isVisible_);
 
@@ -532,7 +542,8 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest013, TestSize.Level1)
     void* runtime = nullptr;
     auto pattern = AceType::MakeRefPtr<DynamicPattern>();
     RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(TAG, 1, pattern);
-    dynamicPattern->dynamicComponentRenderer_ = DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
+    dynamicPattern->dynamicComponentRenderer_ =
+        DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
     ASSERT_NE(dynamicPattern, nullptr);
     EXPECT_TRUE(dynamicPattern->isVisible_);
 
@@ -566,7 +577,8 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest014, TestSize.Level1)
     void* runtime = nullptr;
     auto pattern = AceType::MakeRefPtr<DynamicPattern>();
     RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(TAG, 1, pattern);
-    dynamicPattern->dynamicComponentRenderer_ = DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
+    dynamicPattern->dynamicComponentRenderer_ =
+        DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
     ASSERT_NE(dynamicPattern, nullptr);
     EXPECT_TRUE(dynamicPattern->isVisible_);
 
@@ -608,7 +620,8 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest015, TestSize.Level1)
     void* runtime = nullptr;
     auto pattern = AceType::MakeRefPtr<DynamicPattern>();
     RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(TAG, 1, pattern);
-    dynamicPattern->dynamicComponentRenderer_ = DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
+    dynamicPattern->dynamicComponentRenderer_ =
+        DynamicComponentRenderer::Create(frameNode, runtime, curDynamicInfo);
     ASSERT_NE(dynamicPattern, nullptr);
     EXPECT_TRUE(dynamicPattern->isVisible_);
 
@@ -759,7 +772,9 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest021, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     auto dynamicNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto dynamicNode = FrameNode::GetOrCreateFrameNode(
-        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() { return AceType::MakeRefPtr<DynamicPattern>(); });
+        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() {
+            return AceType::MakeRefPtr<DynamicPattern>();
+        });
     EXPECT_NE(dynamicNode, nullptr);
     EXPECT_EQ(dynamicNode->GetTag(), V2::DYNAMIC_COMPONENT_ETS_TAG);
     auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();
@@ -799,7 +814,9 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest022, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     auto dynamicNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto dynamicNode = FrameNode::GetOrCreateFrameNode(
-        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() { return AceType::MakeRefPtr<DynamicPattern>(); });
+        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() {
+            return AceType::MakeRefPtr<DynamicPattern>();
+        });
     EXPECT_NE(dynamicNode, nullptr);
     EXPECT_EQ(dynamicNode->GetTag(), V2::DYNAMIC_COMPONENT_ETS_TAG);
     auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();

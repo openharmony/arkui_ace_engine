@@ -48,7 +48,6 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 
-#include "mock/mock_accessibility_child_tree_callback.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
 
@@ -57,6 +56,7 @@
 #include "test/mock/core/render/mock_rosen_render_context.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.h"
 #include "test/unittest/core/pattern/ui_extension/mock/mock_window_scene_helper.h"
+#include "../mock/mock_accessibility_child_tree_callback.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -103,7 +103,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnAccessibilityEventTest001, TestSize.Le
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -143,7 +145,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, SetEventProxyFlagTest001, TestSize.Level
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -189,7 +193,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, HandleDragEventTest001, TestSize.Level1)
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -223,7 +229,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnMountToParentDoneTest001, TestSize.Lev
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -282,7 +290,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, RegisterVisibleAreaChangeTest001, TestSi
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -316,7 +326,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, RegisterEventProxyFlagCallbackTest001, T
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -344,7 +356,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, RegisterEventProxyFlagCallbackTest002, T
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -378,7 +392,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, RegisterReplyPageModeCallbackTest001, Te
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -406,7 +422,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, RegisterReplyPageModeCallbackTest002, Te
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -450,7 +468,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, SendBusinessDataSyncReplyTest001, TestSi
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -485,7 +505,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, SendBusinessDataTest001, TestSize.Level1
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -520,7 +542,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnUIExtBusinessReceiveReplyTest001, Test
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -559,7 +583,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnUIExtBusinessReceiveTest001, TestSize.
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -590,7 +616,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, NotifyHostWindowModeTest001, TestSize.Le
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -627,7 +655,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnFrameNodeChangedTest001, TestSize.Leve
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -681,7 +711,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnFrameNodeChangedTest002, TestSize.Leve
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -735,7 +767,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, GetAccessibilityRectInfoTest001, TestSiz
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -767,7 +801,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, TransferAccessibilityRectInfoTest001, Te
      */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -785,7 +821,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTwoTest001, TestSize
 #ifdef OHOS_STANDARD_SYSTEM
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -814,7 +852,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTwoTest002, TestSize
 #ifdef OHOS_STANDARD_SYSTEM
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
@@ -845,7 +885,9 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTwoTest003, TestSize
 #ifdef OHOS_STANDARD_SYSTEM
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
