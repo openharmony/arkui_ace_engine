@@ -3167,6 +3167,20 @@ typedef enum {
     NODE_TEXT_INPUT_KEYBOARD_APPEARANCE = 7035,
 
     /**
+     * @brief Set the line height of the input node.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: line height value. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: line height value. \n
+     *
+     * @since 20
+     */
+    NODE_TEXT_INPUT_LINE_HEIGHT = 7037,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3521,6 +3535,45 @@ typedef enum {
     * @since 15
     */
     NODE_TEXT_AREA_KEYBOARD_APPEARANCE = 8026,
+
+    /**
+     * @brief Set the max lines of the node. This attrilbute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: max lines count. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: max lines count. \n
+     *
+     * @since 20
+     */
+    NODE_TEXT_AREA_MAX_LINES = 8027,
+
+    /**
+     * @brief Set line spacing of the node. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: line spacing value. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: line spacing value. \n
+     *
+     * @since 20
+     */
+    NODE_TEXT_AREA_LINE_SPACING = 8028,
+
+    /**
+     * @brief Set the line height of the node. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: line height value. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: line height value. \n
+     *
+     * @since 20
+     */
+    NODE_TEXT_AREA_LINE_HEIGHT = 8031,
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
@@ -6987,6 +7040,20 @@ typedef enum {
      * @since 16
      */
     NODE_TEXT_INPUT_ON_CHANGE_WITH_PREVIEW_TEXT = 7013,
+
+    /**
+     * @brief Defines the event triggered before content changes.
+     *
+     * When the event callback occurs, the union type {@link ArkUI_NodeEvent} is {@link ArkUI_TextChangeEvent}. \n
+     * {@link ArkUI_TextChangeEvent} contains the following parameters: \n
+     * <b>ArkUI_TextChangeEvent.pStr</b>: content in the <b>TextInput</b> component.
+     * <b>ArkUI_TextChangeEvent.pExtendStr</b>: content of the preview text in the <b>TextInput</b> component.
+     * <b>ArkUI_TextChangeEvent.number</b>: start position of the preview text in the <b>TextInput</b> component.
+     * 
+     * @since 20
+     */
+    NODE_TEXT_INPUT_ON_WILL_CHANGE = 7014,
+
     /**
      * @brief Defines the event triggered when the input in the text box changes.
      *
@@ -7147,6 +7214,18 @@ typedef enum {
      * @since 16
      */
     NODE_TEXT_AREA_ON_CHANGE_WITH_PREVIEW_TEXT = 8012,
+    /**
+     * @brief Defines the event triggered before content changes
+     *
+     * When the event callback occurs, the union type {@link ArkUI_NodeEvent} is {@link ArkUI_TextChangeEvent}. \n
+     * {@link ArkUI_TextChangeEvent} contains the following parameters: \n
+     * <b>ArkUI_TextChangeEvent.pStr</b>: content in the <b>TextArea</b> component.
+     * <b>ArkUI_TextChangeEvent.pExtendStr</b>: content of the preview text in the <b>TextArea</b> component.
+     * <b>ArkUI_TextChangeEvent.number</b>: start position of the preview text in the <b>TextArea</b> component.
+     *
+     * @since 20
+     */
+    NODE_TEXT_AREA_ON_WILL_CHANGE = 8013,
     /**
      * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX</b> component changes.
      *

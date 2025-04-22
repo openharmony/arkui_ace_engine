@@ -672,7 +672,8 @@ void SetTextAreaLineHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int3
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetLineHeight(frameNode, CalcDimension(value, (DimensionUnit)unit));
+    TextFieldModelNG::SetLineHeight(frameNode,
+        CalcDimension(LessNotEqual(value, 0.0f) ? 0.0f : value, (DimensionUnit)unit));
 }
 
 void ResetTextAreaLineHeight(ArkUINodeHandle node)
@@ -912,6 +913,13 @@ void ResetTextAreaLineSpacing(ArkUINodeHandle node)
     value.Reset();
     bool isOnlyBetweenLines = false;
     TextFieldModelNG::SetLineSpacing(frameNode, value, isOnlyBetweenLines);
+}
+
+ArkUI_Float32 GetTextAreaLineSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetLineSpacing(frameNode);
 }
 
 ArkUI_CharPtr GetTextAreaFontFeature(ArkUINodeHandle node)
@@ -1935,6 +1943,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .resetTextAreaTextIndent = ResetTextAreaTextIndent,
         .setTextAreaLineSpacing = SetTextAreaLineSpacing,
         .resetTextAreaLineSpacing = ResetTextAreaLineSpacing,
+        .getTextAreaLineSpacing = GetTextAreaLineSpacing,
         .getTextAreaSelectionMenuHidden = GetTextAreaSelectionMenuHidden,
         .getTextAreaAdaptMinFontSize = GetTextAreaAdaptMinFontSize,
         .getTextAreaAdaptMaxFontSize = GetTextAreaAdaptMaxFontSize,
@@ -2321,6 +2330,26 @@ void SetTextAreaOnSubmit(ArkUINodeHandle node, void* extraParam)
     TextFieldModelNG::SetOnSubmit(frameNode, std::move(onEvent));
 }
 
+void SetOnTextAreaWillChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onWillChange = [node, extraParam](const ChangeValueInfo& info) -> bool {
+        ArkUINodeEvent event;
+        event.kind = TEXT_INPUT_CHANGE;
+        std::string utf8StrValue = UtfUtils::Str16DebugToStr8(info.value);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(info.previewText.value);
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textChangeEvent.subKind = ON_TEXT_AREA_WILL_CHANGE;
+        event.textChangeEvent.nativeStringPtr = const_cast<char*>(utf8StrValue.c_str());
+        event.textChangeEvent.extendStringPtr = const_cast<char*>(utf8Str.c_str());
+        event.textChangeEvent.numArgs = info.previewText.offset;
+        SendArkUISyncEvent(&event);
+        return true;
+    };
+    TextFieldModelNG::SetOnWillChangeEvent(frameNode, std::move(onWillChange));
+}
+
 void SetTextAreaOnWillInsertValue(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2441,6 +2470,10 @@ void ResetTextAreaOnTextContentScroll(ArkUINodeHandle node)
 void ResetTextAreaOnSubmit(ArkUINodeHandle node)
 {
     GetTextAreaModifier()->resetTextAreaOnSubmitWithEvent(node);
+}
+void ResetOnTextAreaWillChange(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnWillChange(node);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG
