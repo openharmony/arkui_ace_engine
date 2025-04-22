@@ -145,9 +145,10 @@ HWTEST_F(WaterFlowSectionAccessorTest, OnGetItemMainSizeByIndexTest, TestSize.Le
 
     Array_SectionOptions arkSections = accessor_->values(peer_);
 
-    EXPECT_EQ(arkSections.length, 1);
+    ASSERT_TRUE(arkSections.length == 1);
     auto onGetItemMainSizeByIndeX = Converter::OptConvert<::GetItemMainSizeByIndex>
                                         (arkSections.array[0].onGetItemMainSizeByIndex);
+    ASSERT_TRUE(onGetItemMainSizeByIndeX);
     auto modelCallback = [callback = CallbackHelper(*onGetItemMainSizeByIndeX)]
             (int32_t value) -> float {
                 Ark_Number param = Converter::ArkValue<Ark_Number>(value);
