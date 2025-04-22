@@ -16,6 +16,7 @@
     "pages/Swiper/OnContentWillScrollNestList",
     "pages/Swiper/OnContentWillScrollListNest",
     "pages/Swiper/CachedCountIsShownNormal",
+    "pages/Swiper/MultiIndicator",
     "pages/List/ListMainPage",
     "pages/List/childrenMainSize/ListItemGroupScenario",
     "pages/alphabetIndexer/AlphabetIndexerMainPage",
