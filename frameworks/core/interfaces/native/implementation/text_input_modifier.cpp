@@ -73,6 +73,24 @@ PasswordIcon Convert(const Ark_PasswordIcon& src)
         []() {});
     return result;
 }
+
+template<>
+void AssignArkValue(Ark_EditableTextChangeValue& dst, const ChangeValueInfo& src, Converter::ConvContext *ctx)
+{
+    dst.content = Converter::ArkValue<Ark_String>(src.value, ctx);
+    dst.previewText = Converter::ArkValue<Opt_PreviewText>(src.previewText, ctx);
+
+    Ark_TextChangeOptions options;
+    options.rangeBefore.start = Converter::ArkValue<Opt_Number>(src.rangeBefore.start);
+    options.rangeBefore.end = Converter::ArkValue<Opt_Number>(src.rangeBefore.end);
+    options.rangeAfter.start = Converter::ArkValue<Opt_Number>(src.rangeAfter.start);
+    options.rangeAfter.end = Converter::ArkValue<Opt_Number>(src.rangeAfter.end);
+    options.oldContent = Converter::ArkValue<Ark_String>(src.oldContent, ctx);
+    options.oldPreviewText.offset = Converter::ArkValue<Ark_Number>(src.oldPreviewText.offset);
+    options.oldPreviewText.value = Converter::ArkValue<Ark_String>(src.oldPreviewText.value, ctx);
+
+    dst.options = Converter::ArkValue<Opt_TextChangeOptions>(options, ctx);
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -826,8 +844,13 @@ void OnWillChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextInputModelNG::SetOnWillChange(frameNode, convValue);
+    auto onCallback = [arkCallback = CallbackHelper(*value)](const ChangeValueInfo& param) -> bool {
+        Converter::ConvContext ctx;
+        auto data = Converter::ArkValue<Ark_EditableTextChangeValue>(param, &ctx);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
+        return Converter::Convert<bool>(result);
+    };
+    TextFieldModelNG::SetOnWillChangeEvent(frameNode, std::move(onCallback));
 }
 void KeyboardAppearanceImpl(Ark_NativePointer node,
                             const Opt_KeyboardAppearance* value)
@@ -879,7 +902,7 @@ void ShowCounterImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto counterOptions = Converter::OptConvert<InputCounterOptions>(*options);
+    auto counterOptions = options ? Converter::OptConvert<InputCounterOptions>(*options) : std::nullopt;
     auto isShowCounter = Converter::Convert<bool>(value);
     if (counterOptions && counterOptions->thresholdPercentage.has_value()) {
         int32_t thresholdValue = counterOptions->thresholdPercentage.value();
