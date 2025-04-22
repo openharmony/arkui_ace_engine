@@ -3828,6 +3828,9 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32
 {
     auto mouseStyleManager = eventManager_->GetMouseStyleManager();
     CHECK_NULL_RETURN(mouseStyleManager, false);
+    if (!windowId) {
+        windowId = static_cast<int32_t>(GetFocusWindowId());
+    }
     mouseStyleManager->SetMouseFormat(windowId, nodeId, format, isByPass, reason);
     RequestFrame();
     return true;
