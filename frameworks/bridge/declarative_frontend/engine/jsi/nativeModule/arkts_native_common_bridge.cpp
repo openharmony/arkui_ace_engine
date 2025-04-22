@@ -1474,10 +1474,6 @@ bool ParseColorMetricsToColor(const EcmaVM *vm, const Local<JSValueRef> &jsValue
     }
     return false;
 }
-
-const std::vector<AccessibilitySamePageMode> PAGE_MODE_TYPE = { AccessibilitySamePageMode::SEMI_SILENT,
-    AccessibilitySamePageMode::FULL_SILENT };
-const std::vector<FocusDrawLevel> FOCUS_DRAW_LEVEL = { FocusDrawLevel::SELF, FocusDrawLevel::TOP };
 } // namespace
 
 ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
@@ -4174,7 +4170,7 @@ ArkUINativeModuleValue CommonBridge::SetAccessibilityRoleType(ArkUIRuntimeCallIn
     if (secondArg->IsInt()) {
         auto index = secondArg->Int32Value(vm);
         AccessibilityRoleType roleType = static_cast<AccessibilityRoleType>(index);
-        std::string role = JSAccessibilityAbstract::GetRoleByType(roleType);
+        std::string role = AccessibilityUtils::GetRoleByType(roleType);
         if (!role.empty()) {
             GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityCustomRole(nativeNode, role.c_str());
         } else {
@@ -6225,8 +6221,9 @@ ArkUINativeModuleValue CommonBridge::SetAccessibilityUseSamePage(ArkUIRuntimeCal
         return panda::JSValueRef::Undefined(vm);
     }
     int32_t intValue = secondArg->Int32Value(vm);
-    if (intValue >= 0 && intValue < static_cast<int32_t>(PAGE_MODE_TYPE.size())) {
-        bool isFullSilent = static_cast<bool>(PAGE_MODE_TYPE[intValue]);
+    std::string pageMode = AccessibilityUtils::GetPageModeType(intValue);
+    if (!pageMode.empty()) {
+        bool isFullSilent = (pageMode == "FULL_SILENT");
         GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityUseSamePage(nativeNode, isFullSilent);
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityUseSamePage(nativeNode);
@@ -6283,8 +6280,9 @@ ArkUINativeModuleValue CommonBridge::SetAccessibilityFocusDrawLevel(ArkUIRuntime
         return panda::JSValueRef::Undefined(vm);
     }
     int32_t intValue = secondArg->Int32Value(vm);
-    if (intValue >= 0 && intValue < static_cast<int32_t>(FOCUS_DRAW_LEVEL.size())) {
-        GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityFocusDrawLevel(nativeNode, intValue);
+    auto drawLevel =  AccessibilityUtils::GetFocusDrawLevel(intValue);
+    if (drawLevel != -1) {
+        GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityFocusDrawLevel(nativeNode, drawLevel);
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityFocusDrawLevel(nativeNode);
     }
