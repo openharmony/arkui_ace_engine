@@ -2915,7 +2915,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     bool consumed = false;
 
     HitTestMode onTouchInterceptresult = HitTestMode::HTMDEFAULT;
-    if (touchRestrict.inputEventType != InputEventType::MOUSE_BUTTON) {
+    if (touchRestrict.inputEventType != InputEventType::MOUSE_BUTTON &&
+            touchRestrict.touchEvent.type != TouchType::HOVER_ENTER) {
         onTouchInterceptresult = TriggerOnTouchIntercept(touchRestrict.touchEvent);
     }
     TouchResult touchRes;
