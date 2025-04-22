@@ -578,8 +578,8 @@ public:
     bool CursorMoveUp();
     bool CursorMoveDown();
     void CursorMoveToNextWord(CaretMoveIntent direction);
-    int32_t GetLeftWordIndex();
-    int32_t GetRightWordIndex();
+    int32_t GetLeftWordIndex(int32_t index);
+    int32_t GetRightWordIndex(int32_t index);
     bool CursorMoveToParagraphBegin();
     bool CursorMoveToParagraphEnd();
     bool CursorMoveHome();
