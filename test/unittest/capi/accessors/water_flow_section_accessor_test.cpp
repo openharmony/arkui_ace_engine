@@ -15,6 +15,7 @@
 
 #include "core/interfaces/native/implementation/water_flow_sections_accessor_peer_impl.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "accessor_test_base.h"
 #include "node_api.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -119,5 +120,41 @@ HWTEST_F(WaterFlowSectionAccessorTest, ValuesTest, TestSize.Level1)
               Converter::OptConvert<Dimension>(sections.array[0].rowsGap));
     EXPECT_EQ(Converter::OptConvert<MarginProperty>(section.margin),
               Converter::OptConvert<MarginProperty>(sections.array[0].margin));
+}
+
+/**
+ * @tc.name: OnGetItemMainSizeByIndexTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSectionAccessorTest, OnGetItemMainSizeByIndexTest, TestSize.Level1)
+{
+    const auto inputValue = 123;
+    const auto expextedValue = 789;
+    auto onGetItemMainSizeByIndex = [](int32_t index) -> float {
+        return index == 123 ? 789 : 0;
+    };
+
+    std::vector<WaterFlowSections::Section> waterFlowSections;
+    WaterFlowSections::Section waterFlowsection;
+
+    waterFlowsection.onGetItemMainSizeByIndex = onGetItemMainSizeByIndex;
+    waterFlowSections.push_back(waterFlowsection);
+    auto start = peer_->GetController()->GetSectionInfo().size();
+    peer_->GetController()->ChangeData(start, 0, waterFlowSections);
+
+    Array_SectionOptions arkSections = accessor_->values(peer_);
+
+    ASSERT_TRUE(arkSections.length == 1);
+    auto onGetItemMainSizeByIndeX = Converter::OptConvert<::GetItemMainSizeByIndex>
+                                        (arkSections.array[0].onGetItemMainSizeByIndex);
+    ASSERT_TRUE(onGetItemMainSizeByIndeX);
+    auto modelCallback = [callback = CallbackHelper(*onGetItemMainSizeByIndeX)]
+            (int32_t value) -> float {
+                Ark_Number param = Converter::ArkValue<Ark_Number>(value);
+                auto resultOpt = callback.InvokeWithOptConvertResult<float, Ark_Number, Callback_Number_Void>(param);
+                return resultOpt.value_or(0);
+            };
+    EXPECT_EQ(modelCallback(inputValue), expextedValue);
 }
 } // namespace OHOS::Ace::NG

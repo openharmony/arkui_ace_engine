@@ -42,7 +42,8 @@ using ReverseResultHandler = std::variant<
     std::function<void(const void *)>,
     std::function<void(Ark_Boolean)>,
     std::function<void(Ark_Number)>,
-    std::function<void(Ark_Number, Ark_Number)>
+    std::function<void(Ark_Number, Ark_Number)>,
+    std::function<void(Ark_Number, Callback_Number_Void)>
 >;
 }
 
