@@ -131,6 +131,7 @@ template("ace_core_source_set") {
       "common/agingadapation/aging_adapation_dialog_util.cpp",
       "common/anr_thread.cpp",
       "common/asset_manager_impl.cpp",
+      "common/async_build_manager.cpp",
       "common/card_scope.cpp",
       "common/clipboard/clipboard_proxy.cpp",
       "common/container.cpp",
@@ -676,6 +677,11 @@ template("ace_core_source_set") {
       sources += [ "common/font/font_platform_proxy.cpp" ]
     }
 
+    if (defined(ffrt_support) && ffrt_support) {
+      defines += [ "FFRT_SUPPORT" ]
+      external_deps += [ "ffrt:libffrt" ]
+    }
+
     # arkoala C interface
     deps += [ "$ace_root/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
     deps += [ "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform" ]
@@ -745,6 +751,7 @@ template("ace_core_ng_source_set") {
       "common/agingadapation/aging_adapation_dialog_util.cpp",
       "common/anr_thread.cpp",
       "common/asset_manager_impl.cpp",
+      "common/async_build_manager.cpp",
       "common/card_scope.cpp",
       "common/clipboard/clipboard_proxy.cpp",
       "common/container.cpp",
@@ -962,6 +969,10 @@ template("ace_core_ng_source_set") {
     }
 
     external_deps = []
+    if (defined(ffrt_support) && ffrt_support) {
+      defines += [ "FFRT_SUPPORT" ]
+      external_deps += [ "ffrt:libffrt" ]
+    }
     if (ace_engine_feature_enable_event_extra_handling &&
         defined(
             vendor_configs.ace_engine_advanced_enable_event_extra_handling)) {

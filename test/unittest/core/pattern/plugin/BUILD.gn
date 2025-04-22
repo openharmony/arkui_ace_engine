@@ -26,6 +26,7 @@ ohos_unittest("plugin_pattern_test_ng") {
     "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/base/utils/time_util.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
+    "$ace_root/frameworks/core/common/async_build_manager.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/event_dump.cpp",
@@ -153,6 +154,10 @@ ohos_unittest("plugin_pattern_test_ng") {
     "window_manager:screen_session_manager_client",
     "zlib:shared_libz",
   ]
+  
+  if (is_ohos_standard_system) {
+    external_deps += [ "ffrt:libffrt" ]
+  }
 
   if (ace_use_rosen_drawing) {
     external_deps += [ "graphic_2d:2d_graphics" ]

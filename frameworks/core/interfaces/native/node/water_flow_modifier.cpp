@@ -31,7 +31,7 @@ constexpr Dimension DEFAULT_FADING_EDGE_LENGTH = Dimension(32.0f, DimensionUnit:
 constexpr int32_t INDEX_0 = 0;
 constexpr int32_t INDEX_1 = 1;
 constexpr int32_t INDEX_2 = 2;
-std::string g_strValue;
+thread_local std::string g_strValue;
 
 void ResetColumnsTemplate(ArkUINodeHandle node)
 {

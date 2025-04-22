@@ -208,6 +208,7 @@ ohos_source_set("ace_components_base") {
   part_name = ace_engine_part
   sources = [
     "$ace_root/frameworks/core/common/resource/resource_manager.cpp",
+    "$ace_root/frameworks/core/common/async_build_manager.cpp",
     "$ace_root/frameworks/core/components/theme/shadow_theme.cpp",
     "$ace_root/frameworks/core/components_ng/base/distributed_ui.cpp",
     "$ace_root/frameworks/core/components_ng/base/extension_handler.cpp",
@@ -238,6 +239,9 @@ ohos_source_set("ace_components_base") {
   }
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   configs = [ ":ace_unittest_config" ]
+  if (is_ohos_standard_system) {
+    external_deps = [ "ffrt:libffrt" ]
+  }
 }
 
 # ace components event

@@ -124,6 +124,18 @@ inline bool UsePXUnit(ArkUI_NodeHandle nodePtr)
 
 bool InitialFullImpl();
 ArkUIFullNodeAPI* GetFullImpl();
+class MultiThreadBuildScope {
+public:
+    explicit MultiThreadBuildScope()
+    {
+        GetFullImpl()->getMultiThreadManagerAPI()->setBuildingMultiThreadNode(true);
+    }
+
+    ~MultiThreadBuildScope()
+    {
+        GetFullImpl()->getMultiThreadManagerAPI()->setBuildingMultiThreadNode(false);
+    }
+};
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type);
 void DisposeNode(ArkUI_NodeHandle nativePtr);
 bool IsValidArkUINode(ArkUI_NodeHandle nodePtr);
@@ -166,6 +178,28 @@ void* GetUserData(ArkUI_NodeHandle node);
 int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit);
 int32_t AddNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
+
+ArkUI_NodeHandle CreateNodeSafely(ArkUI_NodeType type);
+void DisposeNodeSafely(ArkUI_NodeHandle nativePtr);
+int32_t AddChildSafely(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode);
+int32_t RemoveChildSafely(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode);
+int32_t InsertChildAfterSafely(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode);
+int32_t InsertChildBeforeSafely(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode);
+int32_t InsertChildAtSafely(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, int32_t position);
+int32_t SetAttributeSafely(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* value);
+const ArkUI_AttributeItem* GetAttributeSafely(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
+int32_t ResetAttributeSafely(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
+int32_t RegisterNodeEventSafely(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType,
+    int32_t targetId, void* userData);
+void UnregisterNodeEventSafely(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType);
+void RegisterOnEventSafely(void (*eventReceiver)(ArkUI_NodeEvent* event));
+void UnregisterOnEventSafely();
+void MarkDirtySafely(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag);
+int32_t AddNodeEventReceiverSafely(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
+int32_t RemoveNodeEventReceiverSafely(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
+int32_t SetUserDataSafely(ArkUI_NodeHandle node, void* userData);
+void* GetUserDataSafely(ArkUI_NodeHandle node);
+int32_t SetLengthMetricUnitSafely(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit);
 void* GetParseJsMedia();
 bool CheckIsCNode(ArkUI_NodeHandle node);
 bool CheckIsCNodeOrCrossLanguage(ArkUI_NodeHandle node);

@@ -27,6 +27,7 @@
 #include "base/log/event_report.h"
 #include "base/memory/type_info_base.h"
 #include "base/utils/utf_helper.h"
+#include "core/common/async_build_manager.h"
 #include "core/common/ime/constant.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
@@ -8276,6 +8277,12 @@ void TextFieldPattern::OnAttachToFrameNode()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
+    if (AsyncBuildManager::GetInstance().TryPostUnSafeTask(frameNode, [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        pattern->OnAttachToFrameNode();
+    })) {
+        return;
+    }
     StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode, WeakClaim(this));
 
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();

@@ -22,6 +22,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
+#include "core/common/async_build_manager.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -556,7 +557,12 @@ void ScrollablePattern::AddScrollEvent()
     });
     gestureHub->AddScrollableEvent(scrollableEvent_);
     InitTouchEvent(gestureHub);
-    RegisterWindowStateChangedCallback();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        pattern->RegisterWindowStateChangedCallback();
+    });
     if (!clickRecognizer_) {
         InitScrollBarClickEvent();
     }
@@ -1391,6 +1397,15 @@ void ScrollablePattern::GetParentModalSheet()
 
 void ScrollablePattern::StopAnimate()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (AsyncBuildManager::GetInstance().TryPostUnSafeTask(host, [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->StopAnimate();
+    })) {
+        return;
+    }
     if (!IsScrollableStopped()) {
         StopScrollable();
     }
@@ -2709,6 +2724,15 @@ void ScrollablePattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 
 void ScrollablePattern::Fling(double flingVelocity)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (AsyncBuildManager::GetInstance().TryPostUnSafeTask(host, [weak = WeakClaim(this), flingVelocity]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->Fling(flingVelocity);
+    })) {
+        return;
+    }
     StopScrollableAndAnimate();
     CHECK_NULL_VOID(scrollableEvent_);
     auto scrollable = scrollableEvent_->GetScrollable();
@@ -3347,6 +3371,16 @@ void ScrollablePattern::HandleClickEvent()
 
 void ScrollablePattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (AsyncBuildManager::GetInstance().TryPostUnSafeTask(host,
+        [weak = WeakClaim(this), reverse, smooth, scrollType]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ScrollPage(reverse, smooth, scrollType);
+    })) {
+        return;
+    }
     float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;

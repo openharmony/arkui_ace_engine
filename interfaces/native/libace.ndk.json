@@ -3294,5 +3294,13 @@
     {
         "first_introduced": "18",
         "name": "OH_ArkUI_TextCascadePickerRangeContentArray_Destroy"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_PostAsyncUITask"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_PostUITask"
     }
 ]

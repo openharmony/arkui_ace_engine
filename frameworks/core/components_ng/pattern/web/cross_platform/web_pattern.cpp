@@ -22,6 +22,7 @@
 #include "base/utils/date_util.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
+#include "core/common/async_build_manager.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -83,9 +84,13 @@ void WebPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
+    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(host, [weak = WeakPtr(host)]() {
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
+    });
     auto OnAreaChangedCallBack = [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);

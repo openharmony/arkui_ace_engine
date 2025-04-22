@@ -21,6 +21,7 @@
 #include "base/i18n/localization.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
+#include "core/common/async_build_manager.h"
 #include "core/common/container.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/slider/slider_theme.h"
@@ -1926,7 +1927,13 @@ void SliderPattern::UpdateValue(float value)
 
 void SliderPattern::OnAttachToFrameNode()
 {
-    RegisterVisibleAreaChange();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->RegisterVisibleAreaChange();
+    });
     InitHapticController();
 }
 

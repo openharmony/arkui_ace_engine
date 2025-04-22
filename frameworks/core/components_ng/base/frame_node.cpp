@@ -42,6 +42,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/async_build_manager.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
@@ -1337,6 +1338,7 @@ void FrameNode::OnAttachToMainTree(bool recursive)
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
     }
     UINode::OnAttachToMainTree(recursive);
+    AsyncBuildManager::GetInstance().ExecuteAfterAttachMainTreeTasks(GetId());
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto predictLayoutNode = std::move(predictLayoutNode_);
@@ -2413,7 +2415,7 @@ void FrameNode::RebuildRenderContextTree()
     needSyncRenderTree_ = false;
 }
 
-void FrameNode::MarkModifyDone()
+void FrameNode::MarkModifyDoneInner()
 {
     pattern_->OnModifyDone();
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -2458,6 +2460,15 @@ void FrameNode::MarkModifyDone()
 #endif
 }
 
+void FrameNode::MarkModifyDone()
+{
+    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(Claim(this), [weak = WeakClaim(this)]() {
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
+        host->MarkModifyDoneInner();
+    });
+}
+
 [[deprecated("using AfterMountToParent")]] void FrameNode::OnMountToParentDone()
 {
     pattern_->OnMountToParentDone();
@@ -2475,7 +2486,7 @@ void FrameNode::FlushUpdateAndMarkDirty()
     MarkDirtyNode();
 }
 
-void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
+void FrameNode::MarkDirtyNodeInner(PropertyChangeFlag extraFlag)
 {
     if (IsFreeze()) {
         // store the flag.
@@ -2494,6 +2505,15 @@ void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
         return;
     }
     MarkDirtyNode(IsMeasureBoundary(), IsRenderBoundary(), extraFlag);
+}
+
+void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
+{
+    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(Claim(this), [weak = WeakClaim(this), extraFlag]() {
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNodeInner(extraFlag);
+    });
 }
 
 void FrameNode::ProcessFreezeNode()

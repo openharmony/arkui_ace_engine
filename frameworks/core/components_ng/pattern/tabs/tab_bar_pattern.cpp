@@ -25,6 +25,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
+#include "core/common/async_build_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components/tab_bar/tab_theme.h"
@@ -372,7 +373,11 @@ void TabBarPattern::OnAttachToFrameNode()
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(
             SafeAreaExpandOpts { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
     }
-    InitSurfaceChangedCallback();
+    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitSurfaceChangedCallback();
+    });
 }
 
 void TabBarPattern::SetTabBarFinishCallback()

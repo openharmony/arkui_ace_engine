@@ -138,29 +138,42 @@ public:
 
     void AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node);
 
-    void RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId);
+    void RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId, bool isMultiThreadNode = false);
 
 private:
     // private constructor
     ElementRegister() = default;
-
+    static ElementRegister* GetGlobalInstance();
     bool AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced);
+    bool AddReferencedSafely(ElementIdType elmtId, const WeakPtr<AceType>& referenced);
+    bool ExistsUnSafely(ElementIdType elementId);
+    bool ExistsSafely(ElementIdType elementId);
 
     //  Singleton instance
     static thread_local ElementRegister* instance_;
-    static std::mutex mutex_;
+    static ElementRegister* globalInstance_;
+    static std::recursive_mutex mutex_;
 
     // ElementID assigned during initial render
     // first to Component, then synced to Element
-    ElementIdType nextUniqueElementId_ = 0;
+    std::atomic<ElementIdType> nextUniqueElementId_ = 0;
 
     ElementIdType lastestElementId_ = 0;
 
     // Map for created elements
     std::unordered_map<ElementIdType, WeakPtr<AceType>> itemMap_;
+ 
+    // Map for created elements async
+    std::mutex itemSafeMapMutex_;
+    std::unordered_map<ElementIdType, WeakPtr<AceType>> itemSafeMap_;
+    RemovedElementsType removedSafelyItems_;
 
     // Map for inspectorId
     std::unordered_map<std::string, std::list<WeakPtr<NG::FrameNode>>> inspectorIdMap_;
+ 
+    // Map for inspectorId of async node
+    std::mutex inspectorIdSafeMapMutex_;
+    std::unordered_map<std::string, std::list<WeakPtr<NG::FrameNode>>> inspectorIdSafeMap_;
 
     RemovedElementsType removedItems_;
 

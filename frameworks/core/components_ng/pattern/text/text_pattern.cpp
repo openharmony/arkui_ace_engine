@@ -33,6 +33,7 @@
 #include "base/window/drag_window.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/data_detector_mgr.h"
+#include "core/common/async_build_manager.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
@@ -99,10 +100,11 @@ void TextPattern::OnWindowShow()
     ResumeSymbolAnimation();
 }
 
-void TextPattern::OnAttachToFrameNode()
+void TextPattern::OnAttachToFrameNodeInner()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("OnAttachToFrameNodeInner %d", host->GetId());
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline_ = pipeline;
@@ -129,6 +131,17 @@ void TextPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(theme);
     textLayoutProperty->UpdateTextAlign(theme->GetTextStyle().GetTextAlign());
     textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+}
+
+void TextPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnAttachToFrameNodeInner();
+    });
 }
 
 void TextPattern::OnDetachFromFrameNode(FrameNode* node)

@@ -922,6 +922,16 @@ public:
         return true;
     }
 
+    bool IsMultiThreadNode() const
+    {
+        return isMultiThreadNode_;
+    }
+
+    void SetIsMultiThreadNode(bool isMultiThreadNode)
+    {
+        isMultiThreadNode_ = isMultiThreadNode;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -1010,6 +1020,7 @@ private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
     bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
+    virtual bool MaybeRelease() override;
 
     std::list<RefPtr<UINode>> children_;
     // disappearingChild、index、branchId
@@ -1026,7 +1037,8 @@ private:
     int32_t rootNodeId_ = 0; // host is Page or NavDestination
     int32_t themeScopeId_ = 0;
     bool isRoot_ = false;
-    bool onMainTree_ = false;
+    std::atomic<bool> onMainTree_ = false;
+    std::atomic<bool> isMultiThreadNode_ = false;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;
     bool isDisappearing_ = false;

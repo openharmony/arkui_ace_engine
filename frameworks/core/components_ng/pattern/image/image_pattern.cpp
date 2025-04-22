@@ -21,6 +21,7 @@
 #include "base/network/download_manager.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
+#include "core/common/async_build_manager.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
@@ -1399,8 +1400,14 @@ void ImagePattern::OnAttachToFrameNode()
 
         // register image frame node to pipeline context to receive memory level notification and window state change
         // notification
-        pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
-        pipeline->AddWindowStateChangedCallback(host->GetId());
+        AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(host, [weak = WeakPtr(host)]() {
+            auto host = weak.Upgrade();
+            CHECK_NULL_VOID(host);
+            auto pipeline = host->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
+            pipeline->AddWindowStateChangedCallback(host->GetId());
+        });
     }
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
