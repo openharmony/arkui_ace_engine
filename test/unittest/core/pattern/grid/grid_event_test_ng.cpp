@@ -576,4 +576,48 @@ HWTEST_F(GridEventTestNg, OnItemDragWithAnimation004, TestSize.Level1)
     EXPECT_EQ(rect7.x_, itemWidth * 2);
     EXPECT_EQ(rect7.y_, ITEM_MAIN_SIZE);
 }
+
+/**
+ * @tc.name: GetOutOfScrollableOffset001
+ * @tc.desc: Test GetOutOfScrollableOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEventTestNg, GetOutOfScrollableOffset001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetMultiSelectable(true);
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(20);
+    CreateDone();
+
+    Offset offset = Offset(ITEM_MAIN_SIZE, HEIGHT + 10);
+    pattern_->lastMouseMove_.SetLocalLocation(offset);
+    float outOffset = pattern_->GetOutOfScrollableOffset();
+
+    EXPECT_FLOAT_EQ(outOffset, -10.f);
+}
+
+/**
+ * @tc.name: GetOutOfScrollableOffset002
+ * @tc.desc: Test GetOutOfScrollableOffset with margin
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEventTestNg, GetOutOfScrollableOffset002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetMultiSelectable(true);
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(20);
+    CreateDone();
+
+    MarginProperty margin = { CalcLength(1), CalcLength(3), CalcLength(5), CalcLength(7) };
+    layoutProperty_->UpdateMargin(margin);
+    FlushUITasks();
+
+    Offset offset = Offset(ITEM_MAIN_SIZE, HEIGHT + 10);
+    pattern_->lastMouseMove_.SetLocalLocation(offset);
+    float outOffset = pattern_->GetOutOfScrollableOffset();
+
+    EXPECT_FLOAT_EQ(outOffset, -10.f);
+}
 } // namespace OHOS::Ace::NG
