@@ -396,6 +396,9 @@ void EventHub::ClearJSFrameNodeOnSizeChange()
     if (onJsFrameNodeSizeChanged_) {
         onJsFrameNodeSizeChanged_ = nullptr;
     }
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    host->ResetLastFrameNodeRect();
 }
 
 bool EventHub::HasOnSizeChanged() const
