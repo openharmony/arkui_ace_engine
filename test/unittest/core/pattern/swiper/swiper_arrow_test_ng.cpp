@@ -14,6 +14,7 @@
  */
 
 #include "swiper_test_ng.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components/swiper/swiper_indicator_theme.h"
@@ -1369,5 +1370,85 @@ HWTEST_F(SwiperArrowTestNg, InitAccessibilityText002, TestSize.Level1)
     buttonAccessibilityProperty->SetAccessibilityText("right");
     auto text = buttonAccessibilityProperty->GetAccessibilityText();
     EXPECT_EQ(text, "right");
+}
+
+/**
+ * @tc.name: InitOnKeyEvent002
+ * @tc.desc: Test InitOnKeyEvent method and callback is called.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, InitOnKeyEvent002, TestSize.Level1)
+{
+    auto arrowNode = FrameNode::GetOrCreateFrameNode(
+        V2::SWIPER_LEFT_ARROW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    auto pattern = arrowNode->GetPattern<SwiperArrowPattern>();
+    arrowNode->GetOrCreateFocusHub();
+    pattern->InitOnKeyEvent();
+    auto focusHub = arrowNode->GetFocusHub();
+    auto events = focusHub->onKeyEventsInternal_;
+    auto it = events.find(OnKeyEventType::DEFAULT);
+    ASSERT_NE(it, events.end());
+    /**
+     * @tc.steps: step1. Test key event with KeyCode::KEY_LEFT_KNOB and KeyAction::DOWN.
+     */
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_LEFT_KNOB;
+    keyEvent.action = KeyAction::DOWN;
+    EXPECT_FALSE(it->second(keyEvent));
+    /**
+     * @tc.steps: step2. Test key event with KeyCode::KEY_ENTER and KeyAction::DOWN.
+     */
+    keyEvent.code = KeyCode::KEY_ENTER;
+    keyEvent.action = KeyAction::DOWN;
+    EXPECT_TRUE(it->second(keyEvent));
+    /**
+     * @tc.steps: step3. Test key event with KeyCode::KEY_ENTER and KeyAction::UP.
+     */
+    keyEvent.code = KeyCode::KEY_SPACE;
+    keyEvent.action = KeyAction::UP;
+    EXPECT_FALSE(it->second(keyEvent));
+}
+
+/**
+ * @tc.name: UpdateArrowContent003
+ * @tc.desc: Test UpdateArrowContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, UpdateArrowContent003, TestSize.Level1)
+{
+    g_isNeedSymbol = false;
+    /**
+     * @tc.steps: step1. Set arrow
+     * @tc.expected: Vertify symbol type/color
+     */
+    CreateWithArrow();
+    auto leftButtonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
+    EXPECT_EQ(leftButtonNode->GetTag(), V2::BUTTON_ETS_TAG);
+    g_isNeedSymbol = true;
+}
+
+/**
+ * @tc.name: UpdateArrowContent004
+ * @tc.desc: Test UpdateArrowContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, UpdateArrowContent004, TestSize.Level1)
+{
+    g_isNeedSymbol = false;
+    /**
+     * @tc.steps: step1. Set VERTICAL and enabled:false
+     * @tc.expected: Vertify symbol type/color
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(false);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    model.SetEnabled(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto leftButtonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
+    EXPECT_EQ(leftButtonNode->GetTag(), V2::BUTTON_ETS_TAG);
+    g_isNeedSymbol = true;
 }
 } // namespace OHOS::Ace::NG

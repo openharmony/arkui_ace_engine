@@ -799,4 +799,280 @@ HWTEST_F(SwiperIndicatorModifierMoreTestNg, GetTailCurve003, TestSize.Level1)
     EXPECT_EQ(result->stiffness_, 148);
     EXPECT_EQ(result->damping_, 28);
 }
+
+/**
+ * @tc.name: CalcAndAdjustIndicatorPaintRect001
+ * @tc.desc: Test DotIndicatorModifier CalcAndAdjustIndicatorPaintRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierMoreTestNg, CalcAndAdjustIndicatorPaintRect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and ContentProperty attributes
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    contentProperty.vectorBlackPointCenterX = { 10.0f };
+    contentProperty.longPointLeftCenterX = 10.0f;
+    contentProperty.longPointRightCenterX = 20.0f;
+    LinearVector<float> itemHalfSizes = { 20.f, 30.f, 40.f, 50.f };
+    contentProperty.itemHalfSizes = itemHalfSizes;
+    DotIndicatorModifier dotIndicatorModifier;
+    contentProperty.backgroundColor.colorValue_.value = 0xff000000;
+    dotIndicatorModifier.backgroundWidthDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10.0f);
+    dotIndicatorModifier.backgroundHeightDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(20.0f);
+    /**
+     * @tc.steps: step2.Call CalcAndAdjustIndicatorPaintRect
+     * @tc.expected: The CalcAndAdjustIndicatorPaintRect executed successfully
+     */
+    dotIndicatorModifier.axis_ = Axis::HORIZONTAL;
+    dotIndicatorModifier.touchBottomType_ = TouchBottomType::START;
+    dotIndicatorModifier.currentIndex_ = 0;
+    dotIndicatorModifier.isTouchBottomLoop_ = true;
+    float rectWidth = 10.0f;
+    float rectHeight = 0.0f;
+    dotIndicatorModifier.CalcAndAdjustIndicatorPaintRect(contentProperty, rectWidth, rectHeight);
+    EXPECT_EQ(rectWidth, 10);
+    EXPECT_EQ(rectHeight, 0);
+}
+
+/**
+ * @tc.name: CalcAndAdjustIndicatorPaintRect002
+ * @tc.desc: Test DotIndicatorModifier CalcAndAdjustIndicatorPaintRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierMoreTestNg, CalcAndAdjustIndicatorPaintRect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and ContentProperty attributes
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    contentProperty.vectorBlackPointCenterX = { 10.0f };
+    contentProperty.longPointLeftCenterX = 10.0f;
+    contentProperty.longPointRightCenterX = 20.0f;
+    LinearVector<float> itemHalfSizes = { 20.f, 30.f, 40.f, 50.f };
+    contentProperty.itemHalfSizes = itemHalfSizes;
+    DotIndicatorModifier dotIndicatorModifier;
+    contentProperty.backgroundColor.colorValue_.value = 0xff000000;
+    dotIndicatorModifier.backgroundWidthDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10.0f);
+    dotIndicatorModifier.backgroundHeightDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(20.0f);
+    /**
+     * @tc.steps: step2.Call CalcAndAdjustIndicatorPaintRect
+     * @tc.expected: The CalcAndAdjustIndicatorPaintRect executed successfully
+     */
+    dotIndicatorModifier.axis_ = Axis::HORIZONTAL;
+    dotIndicatorModifier.touchBottomType_ = TouchBottomType::END;
+    dotIndicatorModifier.currentIndex_ = 0;
+    dotIndicatorModifier.isTouchBottomLoop_ = true;
+    float rectWidth = 10.0f;
+    float rectHeight = 0.0f;
+    dotIndicatorModifier.CalcAndAdjustIndicatorPaintRect(contentProperty, rectWidth, rectHeight);
+    EXPECT_EQ(rectWidth, 10);
+    EXPECT_EQ(rectHeight, 0);
+}
+
+/**
+ * @tc.name: CalcAndAdjustIndicatorPaintRect003
+ * @tc.desc: Test DotIndicatorModifier CalcAndAdjustIndicatorPaintRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierMoreTestNg, CalcAndAdjustIndicatorPaintRect003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and ContentProperty attributes
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    contentProperty.vectorBlackPointCenterX = { 10.0f };
+    contentProperty.longPointLeftCenterX = 10.0f;
+    contentProperty.longPointRightCenterX = 20.0f;
+    LinearVector<float> itemHalfSizes = { 20.f, 30.f, 40.f, 50.f };
+    contentProperty.itemHalfSizes = itemHalfSizes;
+    DotIndicatorModifier dotIndicatorModifier;
+    contentProperty.backgroundColor.colorValue_.value = 0xff000000;
+    dotIndicatorModifier.backgroundWidthDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10.0f);
+    dotIndicatorModifier.backgroundHeightDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(20.0f);
+    /**
+     * @tc.steps: step2.Call CalcAndAdjustIndicatorPaintRect
+     * @tc.expected: The CalcAndAdjustIndicatorPaintRect executed successfully
+     */
+    dotIndicatorModifier.axis_ = Axis::HORIZONTAL;
+    dotIndicatorModifier.touchBottomType_ = TouchBottomType::NONE;
+    dotIndicatorModifier.currentIndex_ = 0;
+    dotIndicatorModifier.isTouchBottomLoop_ = true;
+    float rectWidth = 10.0f;
+    float rectHeight = 0.0f;
+    dotIndicatorModifier.CalcAndAdjustIndicatorPaintRect(contentProperty, rectWidth, rectHeight);
+    EXPECT_EQ(rectWidth, 10);
+    EXPECT_EQ(rectHeight, 0);
+}
+
+/**
+ * @tc.name: CalcAndAdjustIndicatorPaintRect004
+ * @tc.desc: Test DotIndicatorModifier CalcAndAdjustIndicatorPaintRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierMoreTestNg, CalcAndAdjustIndicatorPaintRect004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and ContentProperty attributes
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    contentProperty.vectorBlackPointCenterX = { 10.0f };
+    contentProperty.longPointLeftCenterX = 10.0f;
+    contentProperty.longPointRightCenterX = 20.0f;
+    LinearVector<float> itemHalfSizes = { 20.f, 30.f, 40.f, 50.f };
+    contentProperty.itemHalfSizes = itemHalfSizes;
+    DotIndicatorModifier dotIndicatorModifier;
+    contentProperty.backgroundColor.colorValue_.value = 0xff000000;
+    dotIndicatorModifier.backgroundWidthDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10.0f);
+    dotIndicatorModifier.backgroundHeightDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(20.0f);
+    /**
+     * @tc.steps: step2.Call CalcAndAdjustIndicatorPaintRect
+     * @tc.expected: The CalcAndAdjustIndicatorPaintRect executed successfully
+     */
+    dotIndicatorModifier.axis_ = Axis::VERTICAL;
+    dotIndicatorModifier.touchBottomType_ = TouchBottomType::START;
+    dotIndicatorModifier.currentIndex_ = 0;
+    dotIndicatorModifier.isTouchBottomLoop_ = true;
+    float rectWidth = 10.0f;
+    float rectHeight = 0.0f;
+    dotIndicatorModifier.CalcAndAdjustIndicatorPaintRect(contentProperty, rectWidth, rectHeight);
+    EXPECT_EQ(rectWidth, 10);
+    EXPECT_EQ(rectHeight, 0);
+}
+
+/**
+ * @tc.name: CalcAndAdjustIndicatorPaintRect005
+ * @tc.desc: Test DotIndicatorModifier CalcAndAdjustIndicatorPaintRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierMoreTestNg, CalcAndAdjustIndicatorPaintRect005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and ContentProperty attributes
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    contentProperty.vectorBlackPointCenterX = { 10.0f };
+    contentProperty.longPointLeftCenterX = 10.0f;
+    contentProperty.longPointRightCenterX = 20.0f;
+    LinearVector<float> itemHalfSizes = { 20.f, 30.f, 40.f, 50.f };
+    contentProperty.itemHalfSizes = itemHalfSizes;
+    DotIndicatorModifier dotIndicatorModifier;
+    contentProperty.backgroundColor.colorValue_.value = 0xff000000;
+    dotIndicatorModifier.backgroundWidthDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10.0f);
+    dotIndicatorModifier.backgroundHeightDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(20.0f);
+    /**
+     * @tc.steps: step2.Call CalcAndAdjustIndicatorPaintRect
+     * @tc.expected: The CalcAndAdjustIndicatorPaintRect executed successfully
+     */
+    dotIndicatorModifier.axis_ = Axis::VERTICAL;
+    dotIndicatorModifier.touchBottomType_ = TouchBottomType::END;
+    dotIndicatorModifier.currentIndex_ = 0;
+    dotIndicatorModifier.isTouchBottomLoop_ = true;
+    float rectWidth = 10.0f;
+    float rectHeight = 0.0f;
+    dotIndicatorModifier.CalcAndAdjustIndicatorPaintRect(contentProperty, rectWidth, rectHeight);
+    EXPECT_EQ(rectWidth, 10);
+    EXPECT_EQ(rectHeight, 0);
+}
+
+/**
+ * @tc.name: CalcAndAdjustIndicatorPaintRect006
+ * @tc.desc: Test DotIndicatorModifier CalcAndAdjustIndicatorPaintRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierMoreTestNg, CalcAndAdjustIndicatorPaintRect006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and ContentProperty attributes
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    contentProperty.vectorBlackPointCenterX = { 10.0f };
+    contentProperty.longPointLeftCenterX = 10.0f;
+    contentProperty.longPointRightCenterX = 20.0f;
+    LinearVector<float> itemHalfSizes = { 20.f, 30.f, 40.f, 50.f };
+    contentProperty.itemHalfSizes = itemHalfSizes;
+    DotIndicatorModifier dotIndicatorModifier;
+    contentProperty.backgroundColor.colorValue_.value = 0xff000000;
+    dotIndicatorModifier.backgroundWidthDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10.0f);
+    dotIndicatorModifier.backgroundHeightDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(20.0f);
+    /**
+     * @tc.steps: step2.Call CalcAndAdjustIndicatorPaintRect
+     * @tc.expected: The CalcAndAdjustIndicatorPaintRect executed successfully
+     */
+    dotIndicatorModifier.axis_ = Axis::VERTICAL;
+    dotIndicatorModifier.touchBottomType_ = TouchBottomType::NONE;
+    dotIndicatorModifier.currentIndex_ = 0;
+    dotIndicatorModifier.isTouchBottomLoop_ = true;
+    float rectWidth = 10.0f;
+    float rectHeight = 0.0f;
+    dotIndicatorModifier.CalcAndAdjustIndicatorPaintRect(contentProperty, rectWidth, rectHeight);
+    EXPECT_EQ(rectWidth, 10);
+    EXPECT_EQ(rectHeight, 0);
+}
+
+/**
+ * @tc.name: GetTouchBottomCenterX001
+ * @tc.desc: Test DotIndicatorModifier GetTouchBottomCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierMoreTestNg, GetTouchBottomCenterX001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and ContentProperty attributes
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    contentProperty.vectorBlackPointCenterX = { 10.0f, 20.0f };
+    contentProperty.longPointLeftCenterX = 10.0f;
+    contentProperty.longPointRightCenterX = 20.0f;
+    LinearVector<float> itemHalfSizes = { 20.f, 30.f, 40.f, 50.f };
+    contentProperty.itemHalfSizes = itemHalfSizes;
+    DotIndicatorModifier dotIndicatorModifier;
+    contentProperty.backgroundColor.colorValue_.value = 0xff000000;
+    dotIndicatorModifier.backgroundWidthDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10.0f);
+    dotIndicatorModifier.backgroundHeightDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(20.0f);
+    /**
+     * @tc.steps: step2.Call GetTouchBottomCenterX
+     * @tc.expected: The GetTouchBottomCenterX executed successfully
+     */
+    dotIndicatorModifier.axis_ = Axis::VERTICAL;
+    dotIndicatorModifier.touchBottomType_ = TouchBottomType::NONE;
+    dotIndicatorModifier.currentIndex_ = 0;
+    dotIndicatorModifier.animationState_ = TouchBottomAnimationStage::STAGE_EXPAND_TO_LONG_POINT;
+    auto result = dotIndicatorModifier.GetTouchBottomCenterX(contentProperty);
+    EXPECT_EQ(result.first, 5);
+    EXPECT_EQ(result.second, 15);
+}
+
+/**
+ * @tc.name: GetTouchBottomCenterX002
+ * @tc.desc: Test DotIndicatorModifier GetTouchBottomCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierMoreTestNg, GetTouchBottomCenterX002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and ContentProperty attributes
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    contentProperty.vectorBlackPointCenterX = { 10.0f, 20.0f };
+    contentProperty.longPointLeftCenterX = 10.0f;
+    contentProperty.longPointRightCenterX = 20.0f;
+    LinearVector<float> itemHalfSizes = { 20.f, 30.f, 40.f, 50.f };
+    contentProperty.itemHalfSizes = itemHalfSizes;
+    DotIndicatorModifier dotIndicatorModifier;
+    contentProperty.backgroundColor.colorValue_.value = 0xff000000;
+    dotIndicatorModifier.backgroundWidthDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10.0f);
+    dotIndicatorModifier.backgroundHeightDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(20.0f);
+    /**
+     * @tc.steps: step2.Call GetTouchBottomCenterX
+     * @tc.expected: The GetTouchBottomCenterX executed successfully
+     */
+    dotIndicatorModifier.axis_ = Axis::VERTICAL;
+    dotIndicatorModifier.touchBottomType_ = TouchBottomType::NONE;
+    dotIndicatorModifier.currentIndex_ = 0;
+    dotIndicatorModifier.animationState_ = TouchBottomAnimationStage::STAGE_NONE;
+    auto result = dotIndicatorModifier.GetTouchBottomCenterX(contentProperty);
+    EXPECT_EQ(result.first, 10);
+    EXPECT_EQ(result.second, 20);
+}
 } // namespace OHOS::Ace::NG

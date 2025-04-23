@@ -25,6 +25,8 @@ namespace {
 Offset FIRST_POINT = Offset(16.f, 16.f);
 Offset SECOND_POINT = Offset(40.f, 16.f);
 Offset FOURTH_POINT = Offset(72.f, 16.f);
+constexpr double FULL_CIRCLE_ANGLE = 360.0;
+constexpr double HALF_CIRCLE_ANGLE = 180.0;
 } // namespace
 
 class SwiperIndicatorTestNg : public SwiperTestNg {
@@ -1037,6 +1039,269 @@ HWTEST_F(SwiperIndicatorTestNg, DynamicChangeIndicatorType001, TestSize.Level1)
     EXPECT_EQ(pattern_->lastSwiperIndicatorType_, SwiperIndicatorType::DOT);
     auto lastIndicatorId = pattern_->GetIndicatorId();
     EXPECT_NE(lastIndicatorId, newIndicatorId);
+}
+
+/**
+ * @tc.name: CalculateAngleOffset004
+ * @tc.desc: CalculateAngleOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalculateAngleOffset004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CalculateAngleOffset.
+     */
+    float centerX = 1.0f;
+    float centerY = 2.0f;
+    float radius = 45.0f;
+    double angle = 300.0f;
+    auto radians = std::abs(FULL_CIRCLE_ANGLE - angle) * M_PI / HALF_CIRCLE_ANGLE;
+    float resultX = centerX + cos(radians) * radius;
+    float resultY = centerY - sin(radians) * radius;
+    OffsetF Offset = { resultX, resultY };
+    auto result = indicatorPattern->CalculateAngleOffset(centerX, centerY, radius, angle);
+    EXPECT_EQ(result, Offset);
+}
+
+/**
+ * @tc.name: CalculateRectLayout001
+ * @tc.desc: CalculateRectLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalculateRectLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CalculateRectLayout.
+     */
+    double angle = 90.0f;
+    float radius = 1.0f;
+    OffsetF angleOffset = { 0.0, 0.0 };
+    Dimension width = Dimension(10.0);
+    Dimension height = Dimension(5.0);
+    OffsetF resultOffset = { 0.0, 0.0 };
+    indicatorPattern->isClicked_ = true;
+    resultOffset = indicatorPattern->CalculateRectLayout(angle, radius, angleOffset, width, height);
+    EXPECT_EQ(resultOffset.GetX(), 0.0f);
+    EXPECT_NE(resultOffset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: CalculateRectLayout002
+ * @tc.desc: CalculateRectLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalculateRectLayout002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CalculateRectLayout.
+     */
+    double angle = 30.0f;
+    float radius = 1.0f;
+    OffsetF angleOffset = { 0.0, 0.0 };
+    Dimension width = Dimension(10.0);
+    Dimension height = Dimension(5.0);
+    OffsetF resultOffset = { 0.0, 0.0 };
+    indicatorPattern->isClicked_ = true;
+    resultOffset = indicatorPattern->CalculateRectLayout(angle, radius, angleOffset, width, height);
+    EXPECT_NE(resultOffset.GetX(), 0.0f);
+    EXPECT_EQ(resultOffset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: HandleDragEnd001
+ * @tc.desc: HandleDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, HandleDragEnd001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+
+    SwiperModelNG swiperModel;
+    auto swiperNode = indicatorPattern->GetSwiperNode();
+    EXPECT_NE(swiperNode, nullptr);
+    FrameNode* frameNode = AceType::RawPtr(swiperNode);
+    swiperModel.SetBindIndicator(frameNode, true);
+    swiperModel.SetIndicatorType(frameNode, SwiperIndicatorType::ARC_DOT);
+    swiperModel.SetSwipeByGroup(frameNode, false);
+    swiperModel.SetDisplayMode(frameNode, SwiperDisplayMode::AUTO_LINEAR);
+    swiperModel.SetMinSize(frameNode, Dimension { 10.f });
+    swiperModel.SetHoverShow(frameNode, true);
+    swiperModel.SetNextMargin(frameNode, Dimension { 10.f }, true);
+    swiperModel.SetPreviousMargin(frameNode, Dimension { 10.f }, true);
+    swiperModel.SetEnabled(frameNode, false);
+    SwiperDigitalParameters swiperDigitalParameters;
+    swiperModel.SetDigitIndicatorStyle(frameNode, swiperDigitalParameters);
+    FlushUITasks(swiperNode);
+
+    /**
+     * @tc.steps: step2. call HandleMouseEvent.
+     */
+    indicatorPattern->isLongPressed_ = true;
+    indicatorPattern->HandleDragEnd(20.0f);
+    EXPECT_FALSE(indicatorPattern->isLongPressed_);
+}
+
+/**
+ * @tc.name: HandleDragEnd002
+ * @tc.desc: HandleDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, HandleDragEnd002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    RefPtr<SwiperIndicatorPattern> indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+
+    SwiperModelNG swiperModel;
+    auto swiperNode = indicatorPattern->GetSwiperNode();
+    EXPECT_NE(swiperNode, nullptr);
+    FrameNode* frameNode = AceType::RawPtr(swiperNode);
+    swiperModel.SetBindIndicator(frameNode, true);
+    swiperModel.SetIndicatorType(frameNode, SwiperIndicatorType::ARC_DOT);
+    swiperModel.SetSwipeByGroup(frameNode, false);
+    swiperModel.SetDisplayMode(frameNode, SwiperDisplayMode::AUTO_LINEAR);
+    swiperModel.SetMinSize(frameNode, Dimension { 10.f });
+    swiperModel.SetHoverShow(frameNode, true);
+    swiperModel.SetNextMargin(frameNode, Dimension { 10.f }, true);
+    swiperModel.SetPreviousMargin(frameNode, Dimension { 10.f }, true);
+    swiperModel.SetEnabled(frameNode, false);
+    SwiperDigitalParameters swiperDigitalParameters;
+    swiperModel.SetDigitIndicatorStyle(frameNode, swiperDigitalParameters);
+    FlushUITasks(swiperNode);
+
+    /**
+     * @tc.steps: step2. call HandleDragEnd.
+     */
+    indicatorPattern->isLongPressed_ = true;
+    indicatorPattern->HandleDragEnd(20.0f);
+    EXPECT_FALSE(indicatorPattern->isLongPressed_);
+}
+
+/**
+ * @tc.name: HandleDragEnd003
+ * @tc.desc: HandleDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, HandleDragEnd003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    RefPtr<SwiperIndicatorPattern> indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+
+    SwiperModelNG swiperModel;
+    auto swiperNode = indicatorPattern->GetSwiperNode();
+    EXPECT_NE(swiperNode, nullptr);
+    FrameNode* frameNode = AceType::RawPtr(swiperNode);
+    swiperModel.SetBindIndicator(frameNode, true);
+    swiperModel.SetIndicatorType(frameNode, SwiperIndicatorType::ARC_DOT);
+    swiperModel.SetSwipeByGroup(frameNode, false);
+    swiperModel.SetDisplayMode(frameNode, SwiperDisplayMode::AUTO_LINEAR);
+    swiperModel.SetMinSize(frameNode, Dimension { 10.f });
+    swiperModel.SetHoverShow(frameNode, true);
+    swiperModel.SetNextMargin(frameNode, Dimension { 10.f }, true);
+    swiperModel.SetPreviousMargin(frameNode, Dimension { 10.f }, true);
+    swiperModel.SetEnabled(frameNode, false);
+    SwiperDigitalParameters swiperDigitalParameters;
+    swiperModel.SetDigitIndicatorStyle(frameNode, swiperDigitalParameters);
+    FlushUITasks(swiperNode);
+
+    /**
+     * @tc.steps: step2. call HandleDragEnd.
+     */
+    indicatorPattern->isLongPressed_ = true;
+    indicatorPattern->HandleDragEnd(20.0f);
+    EXPECT_FALSE(indicatorPattern->isLongPressed_);
+}
+
+/**
+ * @tc.name: HandleLongPress002
+ * @tc.desc: HandleLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, HandleLongPress002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+
+    SwiperModelNG swiperModel;
+    auto swiperNode = indicatorPattern->GetSwiperNode();
+    EXPECT_NE(swiperNode, nullptr);
+    FrameNode* frameNode = AceType::RawPtr(swiperNode);
+    swiperModel.SetBindIndicator(frameNode, true);
+    swiperModel.SetIndicatorType(frameNode, SwiperIndicatorType::ARC_DOT);
+    swiperModel.SetSwipeByGroup(frameNode, false);
+    swiperModel.SetDisplayMode(frameNode, SwiperDisplayMode::AUTO_LINEAR);
+    swiperModel.SetMinSize(frameNode, Dimension { 10.f });
+    swiperModel.SetHoverShow(frameNode, true);
+    swiperModel.SetNextMargin(frameNode, Dimension { 10.f }, true);
+    swiperModel.SetPreviousMargin(frameNode, Dimension { 10.f }, true);
+    swiperModel.SetEnabled(frameNode, false);
+    SwiperDigitalParameters swiperDigitalParameters;
+    swiperModel.SetDigitIndicatorStyle(frameNode, swiperDigitalParameters);
+    FlushUITasks(swiperNode);
+
+    /**
+     * @tc.steps: step2. call HandleLongPress.
+     */
+    GestureEvent info;
+    indicatorPattern->isLongPressed_ = false;
+    indicatorPattern->HandleLongPress(info);
+    EXPECT_TRUE(indicatorPattern->isLongPressed_);
 }
 
 /**
