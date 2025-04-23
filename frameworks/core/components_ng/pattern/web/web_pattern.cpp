@@ -517,12 +517,7 @@ WebPattern::~WebPattern()
     }
     if (isActive_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern isActive_ start OnInActive");
-        if (delegate_ && delegate_->IsActivePolicyDisable()) {
-            // if active policy disable, must force it Inactive, otherwise OnInActive will inactive it.
-            delegate_->OnInactive();
-        } else {
-            OnInActive();
-        }
+        SetActiveStatusInner(false, true);
     }
     if (imageAnalyzerManager_) {
         imageAnalyzerManager_->ReleaseImageAnalyzer();
@@ -688,6 +683,28 @@ RefPtr<FrameNode> WebPattern::CreatePreviewImageFrameNode(bool isImage)
     needUpdateImagePreviewParam_ = true;
     curContextMenuResult_ = true;
     return previewNode;
+}
+
+void WebPattern::SetActiveStatusInner(bool isActive, bool isForce)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebPattern::SetActiveStatusInner webId:%{public}d, isActive_:%{public}d, isActive:%{public}d, "
+        "isForce:%{public}d",
+        GetWebId(), isActive_, isActive, isForce);
+    if (!isForce) {
+        if (isActive == isActive_) {
+            return;
+        }
+
+        if (delegate_ && delegate_->IsActivePolicyDisable()) {
+            TAG_LOGW(AceLogTag::ACE_WEB, "ArkWeb is IsActivePolicyDisable");
+            return;
+        }
+    }
+    isActive_ = isActive;
+    if (delegate_) {
+        isActive ? delegate_->OnActive() : delegate_->OnInactive();
+    }
 }
 
 void WebPattern::UpdateImagePreviewParam()
@@ -2366,7 +2383,7 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
     CloseContextSelectionMenu();
     if (!isVisible_ && isActive_ && IsDialogNested()) {
         TAG_LOGI(AceLogTag::ACE_WEB, "HandleBlurEvent, dialog nested blur but invisible while active, set inactive.");
-        OnInActive();
+        SetActiveStatusInner(false);
     }
     HideMagnifier();
 }
@@ -2573,7 +2590,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
         TAG_LOGI(AceLogTag::ACE_WEB,
             "OnDirtyLayoutWrapperSwap; WebPattern is Offline Mode, WebId:%{public}d", GetWebId());
         offlineWebRendered_ = true;
-        delegate_->ShowWebView();
+        SetActiveStatusInner(true);
     }
 
     // first update size to load url.
@@ -3576,10 +3593,7 @@ void WebPattern::InitInOfflineMode()
     delegate_->SetBoundsOrResize(drawSize, offset);
 
     LoadUrlInOfflineMode();
-    if (delegate_->IsActivePolicyDisable()) {
-        // if active policy disable, must force it Inactive, otherwise HideWebView will inactive it.
-        delegate_->OnInactive();
-    }
+    SetActiveStatusInner(false, true);
     delegate_->HideWebView();
     CloseContextSelectionMenu();
 }
@@ -5278,6 +5292,7 @@ void WebPattern::OnWindowShow()
         return;
     }
     delegate_->ShowWebView();
+    SetActiveStatusInner(true);
     isWindowShow_ = true;
 }
 
@@ -5287,11 +5302,12 @@ void WebPattern::OnWindowHide()
     CHECK_NULL_VOID(delegate_);
     delegate_->OnRenderToBackground();
 
-    if (!isWindowShow_ || !isActive_) {
+    if (!isWindowShow_) {
         return;
     }
 
     CHECK_NULL_VOID(delegate_);
+    SetActiveStatusInner(false);
     delegate_->HideWebView();
     CloseContextSelectionMenu();
     needOnFocus_ = false;
@@ -5454,36 +5470,18 @@ void WebPattern::SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterE
 
 void WebPattern::OnInActive()
 {
-    CHECK_NULL_VOID(delegate_);
-    bool policyDisable = delegate_->IsActivePolicyDisable();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "WebPattern::OnInActive webId:%{public}d, isActive:%{public}d policyDisable %{public}d",
-        GetWebId(), isActive_, policyDisable);
-    if (!isActive_) {
-        return;
-    }
-
-    if (!policyDisable) {
-        delegate_->OnInactive();
-    }
-    isActive_ = false;
+        "WebPattern::OnInActive webId:%{public}d, isActive:%{public}d",
+        GetWebId(), isActive_);
+    SetActiveStatusInner(false);
 }
 
 void WebPattern::OnActive()
 {
-    CHECK_NULL_VOID(delegate_);
-    bool policyDisable = delegate_->IsActivePolicyDisable();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "WebPattern::OnActive webId:%{public}d, isActive:%{public}d, policyDisable %{public}d",
-        GetWebId(), isActive_, policyDisable);
-    if (isActive_) {
-        return;
-    }
-
-    if (!policyDisable) {
-        delegate_->OnActive();
-    }
-    isActive_ = true;
+        "WebPattern::OnActive webId:%{public}d, isActive:%{public}d",
+        GetWebId(), isActive_);
+    SetActiveStatusInner(true);
 }
 
 void WebPattern::OnVisibleAreaChange(bool isVisible)
@@ -5506,11 +5504,11 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
         DestroyAnalyzerOverlay();
         isDragEndMenuShow_ = false;
         if (isVisibleActiveEnable_ && (!isDialogNested || !isFocus_)) {
-            OnInActive();
+            SetActiveStatusInner(false);
         }
     } else {
         if (isVisibleActiveEnable_) {
-            OnActive();
+            SetActiveStatusInner(true);
         }
     }
 }

@@ -1046,6 +1046,7 @@ private:
     void HideMagnifier();
     void OnMagnifierHandleMove(const RectF& handleRect, bool isFirst);
     int32_t GetBufferSizeByDeviceType();
+    void SetActiveStatusInner(bool isActive, bool isForce = false);
     void UpdateTouchpadSlidingStatus(const GestureEvent& event);
     CursorStyleInfo GetAndUpdateCursorStyleInfo(
         const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
