@@ -5265,7 +5265,8 @@ void WebDelegate::OnAccessibilityEvent(
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     AccessibilityEvent event;
-    if (eventType == AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY) {
+    if (eventType == AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY ||
+        eventType == AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY_NOT_INTERRUPT) {
         event.textAnnouncedForAccessibility = argument;
     }
     auto webPattern = webPattern_.Upgrade();
