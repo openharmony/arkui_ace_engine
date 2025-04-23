@@ -43,27 +43,6 @@ class IIgnoreViewSafeAreaListener;
 
 namespace OHOS::Ace::Platform {
 
-struct ConfigChanges {
-    bool watchLocale = false;
-    bool watchLayout = false;
-    bool watchFontSize = false;
-    bool watchOrientation = false;
-    bool watchDensity = false;
-};
-
-struct SystemParams {
-    int32_t deviceWidth { 0 };
-    int32_t deviceHeight { 0 };
-    bool isRound = false;
-    double density { 1.0 };
-    std::string language = "zh";
-    std::string region = "CN";
-    std::string script = "";
-    OHOS::Ace::DeviceType deviceType { DeviceType::PHONE };
-    OHOS::Ace::ColorMode colorMode { ColorMode::LIGHT };
-    OHOS::Ace::DeviceOrientation orientation { DeviceOrientation::PORTRAIT };
-};
-
 class ACE_FORCE_EXPORT AceAbility {
 public:
     explicit AceAbility(const AceRunArgs& runArgs);
