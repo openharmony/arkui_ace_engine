@@ -120,8 +120,6 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(eventHub, false);
     PrintOffsetLog(AceLogTag::ACE_SCROLL, host->GetId(), prevOffset_ - currentOffset_);
     FireOnDidScroll(prevOffset_ - currentOffset_);
-    ACE_SCOPED_TRACE("processed offset:%f, id:%d, tag:%s", prevOffset_ - currentOffset_,
-        static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     auto onReachStart = eventHub->GetOnReachStart();
     auto onJSFrameNodeReachStart = eventHub->GetJSFrameNodeOnReachStart();
     FireOnReachStart(onReachStart, onJSFrameNodeReachStart);
