@@ -559,17 +559,17 @@ void ContainerModalToolBar::AdjustNavbarRowWidth()
     titleNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
     if (navbarInfo.isShow && navbarRow_) {
-        float navbarRowAvailableWidth = sideBarInfo.isShow
-                                            ? (navbarInfo.width + sideBarDividerInfo.width + navbarDividerInfo.width)
-                                            : (navbarInfo.width + navbarDividerInfo.width);
         auto navbarRowProperty = navbarRow_->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(navbarRowProperty);
-        navbarRowProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(navbarRowAvailableWidth), std::nullopt));
-        PaddingProperty padding;
-        padding.left = sideBarInfo.isShow ? CalcLength(sideBarDividerInfo.width) : CalcLength(0);
-        padding.right = CalcLength(navbarDividerInfo.width);
-        navbarRowProperty->UpdatePadding(padding);
+        navbarRowProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(navbarInfo.width), std::nullopt));
+        MarginProperty navbarRowMargin;
+        navbarRowMargin.left = sideBarInfo.isShow ? CalcLength(sideBarDividerInfo.width) : CalcLength(0);
+        navbarRowMargin.right = CalcLength(navbarDividerInfo.width);
+        navbarRowProperty->UpdateMargin(navbarRowMargin);
         navbarRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        if (navbarInfo.width == 0) {
+            navbarRowProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        }
     }
 }
 
@@ -585,19 +585,6 @@ void ContainerModalToolBar::AdjustNavDestRowWidth()
     auto navDestInfo = toolbarManager_->GetNavDestInfo();
     auto controlButtonsWidth = pattern->GetControlButtonRowWidth();
 
-    if (navDestInfo.isShow && navDestbarRow_) {
-        float navDestbarRowAvailableWidth = navDestInfo.width - controlButtonsWidth.GetDimension().ConvertToPx();
-        auto navDestbarRowProperty = navDestbarRow_->GetLayoutProperty<LinearLayoutProperty>();
-        CHECK_NULL_VOID(navDestbarRowProperty);
-        navDestbarRowProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(navDestbarRowAvailableWidth), std::nullopt));
-        float navDestbarRowLeftMargin = sideBarDividerInfo.width + navbarInfo.width + navbarDividerInfo.width;
-        MarginProperty navDestbarRowMargin;
-        navDestbarRowMargin.left = navbarRow_ ? CalcLength(0) : CalcLength(navDestbarRowLeftMargin);
-        navDestbarRowMargin.right = CalcLength(controlButtonsWidth.GetDimension().ConvertToPx());
-        navDestbarRowProperty->UpdateMargin(navDestbarRowMargin);
-        navDestbarRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    }
     if (navDestInfo.isShow && navDestbarRow_) {
         float navDestbarRowAvailableWidth = navDestInfo.width - controlButtonsWidth.GetDimension().ConvertToPx();
         auto navDestbarRowProperty = navDestbarRow_->GetLayoutProperty<LinearLayoutProperty>();
@@ -621,6 +608,9 @@ void ContainerModalToolBar::AdjustNavDestRowWidth()
         navDestbarRowMargin.right = CalcLength(controlButtonsWidth.GetDimension().ConvertToPx());
         navDestbarRowProperty->UpdateMargin(navDestbarRowMargin);
         navDestbarRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        if (navDestInfo.width == 0) {
+            navDestbarRowProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        }
     }
 }
 
@@ -630,28 +620,21 @@ void ContainerModalToolBar::AdjustContainerModalTitleHeight()
     CHECK_NULL_VOID(pattern);
 
     if (itemsOnTree_.empty()) {
+        pattern->titleHeight_ = CONTAINER_TITLE_HEIGHT;
         pattern->SetContainerModalTitleHeight(CONTAINER_TITLE_HEIGHT.ConvertToPx());
-        if (isFloating_) {
-            auto floatingTitleRow = pattern->GetFloatingTitleRow();
-            pattern->UpdateRowHeight(floatingTitleRow, CONTAINER_TITLE_HEIGHT);
-        }
         return;
     }
 
     if (toolbarItemMaxHeight_ == 0) {
-        titleHeight_ = CONTAINER_TITLE_HEIGHT;
+        pattern->titleHeight_ = CONTAINER_TITLE_HEIGHT;
     } else if (toolbarItemMaxHeight_ <= TITLE_ITEM_HEIGT_S) {
-        titleHeight_ = Dimension(TITLE_ITEM_HEIGT_S, DimensionUnit::VP);
+        pattern->titleHeight_ = Dimension(TITLE_ITEM_HEIGT_S, DimensionUnit::VP);
     } else if (toolbarItemMaxHeight_ > TITLE_ITEM_HEIGT_S && toolbarItemMaxHeight_ <= TITLE_ITEM_HEIGT_M) {
-        titleHeight_ = Dimension(TITLE_ITEM_HEIGT_M, DimensionUnit::VP);
+        pattern->titleHeight_ = Dimension(TITLE_ITEM_HEIGT_M, DimensionUnit::VP);
     } else if (toolbarItemMaxHeight_ > TITLE_ITEM_HEIGT_M) {
-        titleHeight_ = Dimension(TITLE_ITEM_HEIGT_L, DimensionUnit::VP);
+        pattern->titleHeight_ = Dimension(TITLE_ITEM_HEIGT_L, DimensionUnit::VP);
     }
-    pattern->SetContainerModalTitleHeight(titleHeight_.ConvertToPx());
-    if (isFloating_) {
-        auto floatingTitleRow = pattern->GetFloatingTitleRow();
-        pattern->UpdateRowHeight(floatingTitleRow, titleHeight_);
-    }
+    pattern->SetContainerModalTitleHeight(pattern->titleHeight_.ConvertToPx());
 }
 
 void ContainerModalToolBar::SetcustomTitleRowBlurStyle(BlurStyle& blurStyle)
@@ -697,6 +680,8 @@ void ContainerModalToolBar::ExpandStackLayout()
 void ContainerModalToolBar::UpdateSidebarMargin()
 {
     CHECK_NULL_VOID(toolbarManager_);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
     if (toolbarManager_->GetIsMoveUp()) {
         auto sideBarNode = toolbarManager_->GetSiderBar().Upgrade();
         CHECK_NULL_VOID(sideBarNode);
@@ -705,7 +690,7 @@ void ContainerModalToolBar::UpdateSidebarMargin()
         PaddingProperty paddingProperty;
         paddingProperty.left = CalcLength(0.0_vp);
         paddingProperty.right = CalcLength(0.0_vp);
-        paddingProperty.top = CalcLength(titleHeight_);
+        paddingProperty.top = CalcLength(pattern->titleHeight_);
         paddingProperty.bottom = CalcLength(0.0_vp);
         sideBarProperty->UpdatePadding(paddingProperty);
     
@@ -723,6 +708,8 @@ void ContainerModalToolBar::UpdateSidebarMargin()
 void ContainerModalToolBar::UpdateNavbarTitlebarMargin()
 {
     CHECK_NULL_VOID(toolbarManager_);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
     if (toolbarManager_->GetIsMoveUp()) {
         auto navBar = toolbarManager_->GetNavBar().Upgrade();
         CHECK_NULL_VOID(navBar);
@@ -731,7 +718,7 @@ void ContainerModalToolBar::UpdateNavbarTitlebarMargin()
         PaddingProperty paddingProperty;
         paddingProperty.left = CalcLength(0.0_vp);
         paddingProperty.right = CalcLength(0.0_vp);
-        paddingProperty.top = CalcLength(titleHeight_);
+        paddingProperty.top = CalcLength(pattern->titleHeight_);
         paddingProperty.bottom = CalcLength(0.0_vp);
         navBarTitlebarLayoutProperty->UpdateMargin(paddingProperty);
         navBar->MarkDirtyNode(NG::PROPERTY_UPDATE_LAYOUT);
@@ -766,7 +753,9 @@ void ContainerModalToolBar::UpdateNavDestinationTitlebarMargin()
 void ContainerModalToolBar::UpdateTargetNodesBarMargin()
 {
     CHECK_NULL_VOID(toolbarManager_);
-    toolbarManager_->SetTitleHeight(titleHeight_);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    toolbarManager_->SetTitleHeight(pattern->titleHeight_);
     if (toolbarManager_->HasSideBar()) {
         BlurStyle blurStyle = BlurStyle::THIN;
         SetcustomTitleRowBlurStyle(blurStyle);

@@ -1068,11 +1068,9 @@ WeakPtr<FocusHub> PagePattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     CHECK_NULL_RETURN(toolBarRowFocusHub, nullptr);
 
     if (step == FocusStep::UP || step == FocusStep::TAB) {
-        toolBarRowFocusHub->FocusToHeadOrTailChild(true);
-        return GetCurrentFocusView()->GetFocusHub();
+        return toolBarRowFocusHub->GetHeadOrTailChild(true);
     } else if (step == FocusStep::SHIFT_TAB) {
-        toolBarRowFocusHub->FocusToHeadOrTailChild(false);
-        return GetCurrentFocusView()->GetFocusHub();
+        return toolBarRowFocusHub->GetHeadOrTailChild(false);
     }
     return nullptr;
 }

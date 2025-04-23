@@ -51,50 +51,52 @@ WeakPtr<FocusHub> ToolBarRowPattern::GetNextFocusNode(FocusStep step, const Weak
     CHECK_NULL_RETURN(page, nullptr);
     auto pageFocusHub = page->GetFocusHub();
     CHECK_NULL_RETURN(pageFocusHub, nullptr);
+
     auto toolBarRow = pattern->GetCustomTitleRow();
     CHECK_NULL_RETURN(toolBarRow, nullptr);
+    auto toolBarRowFocusHub = toolBarRow->GetFocusHub();
+    CHECK_NULL_RETURN(toolBarRowFocusHub, nullptr);
 
     auto leftRow = AceType::DynamicCast<FrameNode>(toolBarRow->GetChildAtIndex(1));
     auto rightRow = AceType::DynamicCast<FrameNode>(toolBarRow->GetChildAtIndex(2));
+
     RefPtr<FocusHub> nextFocusNode = nullptr;
+    bool isHead = true;
+
     if (step == FocusStep::DOWN) {
         GetCurrentFocusView()->FocusViewClose();
-        pageFocusHub->FocusToHeadOrTailChild(true);
-        auto currentFocusView = GetCurrentFocusView();
-        return currentFocusView->GetFocusHub();
-    } else if (step == FocusStep::UP) {
-        curFocus->FocusToHeadOrTailChild(true);
-        auto currentFocusView = GetCurrentFocusView();
-        return currentFocusView->GetFocusHub();
+        return pageFocusHub->GetHeadOrTailChild(true);
     }
 
-    bool isHead = false;
     if ((step == FocusStep::TAB || step == FocusStep::RIGHT) && rightRow) {
         isHead = true;
-        nextFocusNode = rightRow->GetOrCreateFocusHub();
+        nextFocusNode = rightRow->GetFocusHub();
     } else if ((step == FocusStep::SHIFT_TAB || step == FocusStep::LEFT) && leftRow) {
         isHead = false;
-        nextFocusNode = leftRow->GetOrCreateFocusHub();
+        nextFocusNode = leftRow->GetFocusHub();
     }
 
     if (!leftRow || !rightRow) {
         GetCurrentFocusView()->FocusViewClose();
-        pageFocusHub->FocusToHeadOrTailChild(isHead);
-        auto currentFocusView = GetCurrentFocusView();
-        return currentFocusView->GetFocusHub();
+        return pageFocusHub->GetHeadOrTailChild(isHead);
     }
 
-    if (nextFocusNode) {
+    if (nextFocusNode && (step == FocusStep::TAB || step == FocusStep::SHIFT_TAB)) {
         if (!nextFocusNode->IsCurrentFocus()) {
             return nextFocusNode;
         } else {
             GetCurrentFocusView()->FocusViewClose();
-            pageFocusHub->FocusToHeadOrTailChild(isHead);
-            auto currentFocusView = GetCurrentFocusView();
-            return currentFocusView->GetFocusHub();
+            return pageFocusHub->GetHeadOrTailChild(isHead);
         }
     }
+    if (nextFocusNode && (step == FocusStep::LEFT || step == FocusStep::RIGHT)) {
+        if (!nextFocusNode->IsCurrentFocus()) {
+            return nextFocusNode;
+        } else {
+            return nullptr;
+        }
+    }
+
     return nullptr;
 }
-
 } // namespace OHOS::Ace::NG

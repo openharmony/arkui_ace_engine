@@ -2923,4 +2923,36 @@ bool FocusHub::IsLastWeakNodeFocused() const
     CHECK_NULL_RETURN(lastFocusNode, false);
     return lastFocusNode->IsCurrentFocus();
 }
+
+RefPtr<FocusHub> FocusHub::GetHeadOrTailChild(bool isHead)
+{
+    auto curFrameNode = GetFrameNode();
+    auto curFocusHub = curFrameNode->GetFocusHub();
+    if (!IsFocusableWholePath()) {
+        return nullptr;
+    }
+    if (focusType_ != FocusType::SCOPE || (focusType_ == FocusType::SCOPE && focusDepend_ == FocusDependence::SELF)) {
+        return curFocusHub;
+    }
+
+    bool canChildBeFocused = false;
+    RefPtr<FocusHub> foundNode = nullptr;
+    canChildBeFocused = AnyChildFocusHub(
+        [isHead, &foundNode](const RefPtr<FocusHub>& node) {
+            foundNode = node->GetHeadOrTailChild(isHead);
+            return foundNode != nullptr;
+        },
+        !isHead);
+
+    if (focusDepend_ == FocusDependence::CHILD) {
+        return foundNode;
+    }
+    if (focusDepend_ == FocusDependence::AUTO) {
+        if (!canChildBeFocused) {
+            return curFocusHub;
+        }
+        return foundNode;
+    }
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

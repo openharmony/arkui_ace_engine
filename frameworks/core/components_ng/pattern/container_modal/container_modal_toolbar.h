@@ -105,8 +105,6 @@ private:
         hasNavOrSideBarNodes_ = hasNavOrSideBarNodes;
     }
 
-    Dimension titleHeight_ = CONTAINER_TITLE_HEIGHT;
-
     std::string GetTagFromNode(RefPtr<UINode> node);
     bool IsTragetNavigationNodeParse(const RefPtr<FrameNode>& childFrameNode, float pageWidth, float sideBarHeight,
         bool isNavigationFound, bool isSideBarFound);
