@@ -1653,14 +1653,11 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
 
 /**
  * @tc.name: ConvertActionTypeToBoolen004
- * @tc.desc: Test focusing action
+ * @tc.desc: Test clear currentFocusNodeId when elementId equals to currentFocusNodeId
  * @tc.type: FUNC
  */
 HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen004, TestSize.Level1)
 {
-    /**
-    * @tc.steps: step1. construct JsAccessibilityManager
-    */
     auto context = NG::PipelineContext::GetCurrentContext();
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(frameNode, nullptr);
@@ -1671,12 +1668,32 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen004, TestSize.Leve
     jsAccessibilityManager->currentFocusNodeId_ = 2;
     jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 3;
 
-    /**
-    * @tc.steps: step2. test clear currentFocusNodeId when elementId equals to currentFocusNodeId
-    */
     jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS,
         frameNode, 2, context);
     EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, -1);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 3);
+}
+
+/**
+ * @tc.name: ConvertActionTypeToBoolen005
+ * @tc.desc: Test clear currentFocusNodeId when elementId not equals to currentFocusNodeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen005, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode->GetRenderContext(), nullptr);
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->currentFocusNodeId_ = 2;
+    jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 3;
+
+    jsAccessibilityManager->ConvertActionTypeToBoolen(
+        ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, frameNode, 4, context);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, 2);
     EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 3);
 }
 
