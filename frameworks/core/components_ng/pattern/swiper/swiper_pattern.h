@@ -668,12 +668,8 @@ public:
     }
     void UpdateNodeRate();
 #ifdef SUPPORT_DIGITAL_CROWN
-    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
-    {
-        crownSensitivity_ = sensitivity;
-    }
-    virtual void InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub);
-    double GetCrownRotatePx(const CrownEvent& event);
+    virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
+    virtual void InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub) {}
     virtual bool IsCrownSpring() const { return false; }
     virtual void SetIsCrownSpring(bool isCrownSpring) {}
 #endif
@@ -1253,14 +1249,6 @@ private:
     void UpdateBottomTypeOnMultiple(int32_t currentFirstIndex);
     void UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex);
     void CheckTargetPositon(float& correctOffset);
-#ifdef SUPPORT_DIGITAL_CROWN
-    void HandleCrownEvent(const CrownEvent& event, const OffsetF& center, const OffsetF& offset);
-    void HandleCrownActionBegin(GestureEvent& info);
-    void HandleCrownActionUpdate(double degree, double mainDelta, GestureEvent& info);
-    void HandleCrownActionEnd(GestureEvent& info);
-    void UpdateCrownVelocity(double mainDelta);
-    void StartVibraFeedback();
-#endif
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1448,12 +1436,6 @@ private:
 
     std::list<int32_t> itemsLatestSwitched_;
     std::set<int32_t> itemsNeedClean_;
-#ifdef SUPPORT_DIGITAL_CROWN
-    CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
-    double crownAdjustedVelocity_ = 0.f;
-    double crownRealVelocity_ = 0.f;
-    bool isCrownActionStarted_ = false;
-#endif
 };
 } // namespace OHOS::Ace::NG
 

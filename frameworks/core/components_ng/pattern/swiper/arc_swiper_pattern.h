@@ -40,6 +40,7 @@ public:
     void SetDisableTransitionAnimation(bool isDisable) override;
 
 #ifdef SUPPORT_DIGITAL_CROWN
+    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) override;
     void InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub) override;
     bool IsCrownSpring() const override;
     void SetIsCrownSpring(bool isCrownSpring) override;
@@ -171,11 +172,13 @@ private:
     void HandleCrownActionUpdate(double degree, double mainDelta, GestureEvent& info, const OffsetF& offset);
     void HandleCrownActionEnd(double degree, double mainDelta, GestureEvent& info, const OffsetF& offset);
     void HandleCrownActionCancel();
+    double GetCrownRotatePx(const CrownEvent& event) const;
     void UpdateCrownVelocity(double degree, double mainDelta, bool isEnd = false);
     void StartVibrator(bool isLeft);
 #endif
 
 #ifdef SUPPORT_DIGITAL_CROWN
+    CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
     Offset accumulativeCrownPx_;
     bool isCrownSpring_ = false;
     double crownVelocity_ = 0.0;
