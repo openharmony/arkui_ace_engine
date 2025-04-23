@@ -1790,7 +1790,7 @@ void PipelineContext::MaximizeInImplictAnimation(int32_t width, int32_t height, 
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-        "Maximize window into immersive animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
+        "Maximize window in implict animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
         width, height);
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
