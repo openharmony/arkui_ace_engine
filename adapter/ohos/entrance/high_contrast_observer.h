@@ -22,17 +22,14 @@
 
 namespace OHOS::Ace::Platform {
 class HighContrastObserver : public AccessibilityConfig::AccessibilityConfigObserver {
-    public:
-        HighContrastObserver(RefPtr<AceContainer> aceContainer) : aceContainer_(aceContainer) {}
-    
-        void OnConfigChanged(const AccessibilityConfig::CONFIG_ID id, const AccessibilityConfig::ConfigValue& value);
-    
-    private:
-        RefPtr<AceContainer> aceContainer_ = nullptr;
-        bool first_ = true;
-    };
+public:
+    HighContrastObserver(RefPtr<AceContainer> aceContainer) : aceContainer_(aceContainer) {}
 
+    void OnConfigChanged(const AccessibilityConfig::CONFIG_ID id, const AccessibilityConfig::ConfigValue& value);
 
+private:
+    RefPtr<AceContainer> aceContainer_ = nullptr;
+    bool first_ = true;
+};
 } // namespace OHOS::Ace::Platform
-
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_CPP_HIGH_CONTRAST_OBSERVER_H

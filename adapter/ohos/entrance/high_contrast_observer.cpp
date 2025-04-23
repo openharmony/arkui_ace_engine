@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_CPP_HIGH_CONTRAST_OBSERVER_CPP
 
 #include "adapter/ohos/entrance/high_contrast_observer.h"
- 
+
 namespace OHOS::Ace::Platform {
 void HighContrastObserver::OnConfigChanged(const AccessibilityConfig::CONFIG_ID id, const AccessibilityConfig::ConfigValue& value)
 {
@@ -35,5 +35,4 @@ void HighContrastObserver::OnConfigChanged(const AccessibilityConfig::CONFIG_ID 
     }
 }
 } // namespace OHOS::Ace::Platform
-
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_CPP_HIGH_CONTRAST_OBSERVER_CPP
