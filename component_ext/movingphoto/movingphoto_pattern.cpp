@@ -1170,7 +1170,13 @@ void MovingPhotoPattern::RefreshMovingPhoto()
         return;
     }
     std::string imageSrc = dataProvider->GetMovingPhotoImageUri(uri_);
-    imageSrc += "?date_modified" + std::to_string(GetMicroTickCount());
+    auto imageCache = pipeline->GetImageCache();
+    if (imageCache) {
+        ImageSourceInfo srcKey;
+        srcKey.SetSrc(imageSrc);
+        imageCache->ClearCacheImgObj(srcKey.GetKey());
+    }
+    imageSrc += "?date_modified = " + std::to_string(GetMicroTickCount());
     ImageSourceInfo src;
     src.SetSrc(imageSrc);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSourceInfo, src, host);
@@ -1179,6 +1185,17 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_.GetValue(), host);
     isRefreshMovingPhoto_ = true;
     isSetAutoPlayPeriod_ = false;
+    RefreshMovingPhotoSceneManager();
+    ResetMediaPlayer();
+    if (IsSupportImageAnalyzer() && isEnableAnalyzer_ && imageAnalyzerManager_) {
+        UpdateAnalyzerOverlay();
+    }
+}
+
+void MovingPhotoPattern::RefreshMovingPhotoSceneManager()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         autoAndRepeatLevel_ = PlaybackMode::NONE;
         historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
@@ -1187,10 +1204,6 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     } else if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
         autoAndRepeatLevel_ = PlaybackMode::AUTO;
         isAutoChangePlayMode_ = true;
-    }
-    ResetMediaPlayer();
-    if (IsSupportImageAnalyzer() && isEnableAnalyzer_ && imageAnalyzerManager_) {
-        UpdateAnalyzerOverlay();
     }
 }
 
@@ -1242,7 +1255,11 @@ void MovingPhotoPattern::StopAnimation()
 
 void MovingPhotoPattern::StopAnimationCallback()
 {
-    Seek(0);
+    if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO && autoPlayPeriodStartTime_ >= 0) {
+        Seek(static_cast<int32_t>(autoPlayPeriodStartTime_));
+    } else {
+        Seek(0);
+    }
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "StopAnimation OnFinishEvent:%{public}d.", autoAndRepeatLevel_);
     if (needUpdateImageNode_) {
         UpdateImageNode();
@@ -1332,8 +1349,9 @@ void MovingPhotoPattern::RepeatPlay(bool isRepeatPlay)
 
 void MovingPhotoPattern::AutoPlayPeriod(int64_t startTime, int64_t endTime)
 {
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto AutoPlayPeriod: [%{public}lld, %{public}lld].",
+        static_cast<long long>(startTime), static_cast<long long>(endTime));
     if (startTime >= VIDEO_PLAYTIME_START_POSITION && startTime < endTime) {
-        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer set Period.");
         autoPlayPeriodStartTime_ = startTime;
         autoPlayPeriodEndTime_ = endTime;
     }
@@ -1341,6 +1359,8 @@ void MovingPhotoPattern::AutoPlayPeriod(int64_t startTime, int64_t endTime)
 
 void MovingPhotoPattern::SetAutoPlayPeriod(int64_t startTime, int64_t endTime)
 {
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto SetAutoPlayPeriod: [%{public}lld, %{public}lld].",
+        static_cast<long long>(startTime), static_cast<long long>(endTime));
     if (startTime < VIDEO_PLAYTIME_START_POSITION || startTime >= endTime) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer SetAutoPlayPeriod error.");
         return;
@@ -1349,12 +1369,7 @@ void MovingPhotoPattern::SetAutoPlayPeriod(int64_t startTime, int64_t endTime)
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
         return;
     }
-
-    ContainerScope scope(instanceId_);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-
-    mediaPlayer_->SetPlayRange(startTime, endTime);
+    mediaPlayer_->SetPlayRangeWithMode(startTime, endTime, SeekMode::SEEK_CLOSEST);
 }
 
 void MovingPhotoPattern::HandleImageAnalyzerPlayCallBack()
