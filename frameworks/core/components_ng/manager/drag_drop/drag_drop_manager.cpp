@@ -388,7 +388,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
     CHECK_NULL_RETURN(parentFrameNode, nullptr);
     for (auto iter : hitFrameNodes) {
         if (parentFrameNode == iter) {
-            auto eventHub = parentFrameNode->GetEventHub<EventHub>();
+            auto eventHub = parentFrameNode->GetOrCreateEventHub<EventHub>();
             if (!eventHub) {
                 continue;
             }
@@ -408,7 +408,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
 bool DragDropManager::CheckFrameNodeCanDrop(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
-    auto eventHub = node->GetEventHub<EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     if ((eventHub->HasOnDrop()) || (eventHub->HasOnItemDrop()) || (eventHub->HasCustomerOnDrop())) {
         return true;
@@ -523,7 +523,7 @@ void DragDropManager::UpdateDragAllowDrop(
         case DragBehavior::UNKNOWN: {
             // the application does not config the drag behavior, use move when moving within
             // draggedFrameNode or frameNode is disabled, otherwise use copy
-            auto eventHub = dragFrameNode->GetEventHub<EventHub>();
+            auto eventHub = dragFrameNode->GetOrCreateEventHub<EventHub>();
             if (draggedFrameNode_ == dragFrameNode || !(eventHub && eventHub->IsEnabled()) ||
                 CheckExtraSituation(dragFrameNode)) {
                 UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
@@ -654,7 +654,7 @@ void DragDropManager::NotifyDragRegisterFrameNode(std::unordered_map<int32_t, We
         if (!frameNode) {
             continue;
         }
-        auto eventHub = frameNode->GetEventHub<EventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
         if (!CheckParentVisible(frameNode) || (eventHub && !eventHub->IsEnabled())) {
             continue;
         }
@@ -840,6 +840,7 @@ void DragDropManager::OnDragThrow(const DragPointerEvent& pointerEvent)
     ClearSummary();
     ClearExtraInfo();
     SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
+    isPullThrow_ = true;
 }
 
 void DragDropManager::OnDragPullCancel(const DragPointerEvent& pointerEvent)
@@ -1077,6 +1078,7 @@ void DragDropManager::DoDragReset()
     dampingOverflowCount_ = 0;
     isDragNodeNeedClean_ = false;
     isAnyDraggableHit_ = false;
+    isPullThrow_ = false;
     fingerPointInfo_.clear();
     DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
 }
@@ -1086,7 +1088,7 @@ void DragDropManager::ResetDraggingStatus(const TouchEvent& touchPoint)
     if (IsDraggingPressed(touchPoint.id)) {
         SetDraggingPressedState(false);
     }
-    if (!IsItemDragging() && IsDragging() && IsSameDraggingPointer(touchPoint.id)) {
+    if (!IsItemDragging() && IsDragging() && IsSameDraggingPointer(touchPoint.id) && !isPullThrow_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Reset dragging status, stop drag. pointerId: %{public}d", touchPoint.id);
         DragPointerEvent dragPointerEvent;
         DragDropFuncWrapper::ConvertPointerEvent(touchPoint, dragPointerEvent);
@@ -1125,7 +1127,7 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
     RequestDragSummaryInfoAndPrivilege();
     std::string udKey;
     InteractionInterface::GetInstance()->GetUdKey(udKey);
-    auto eventHub = dragFrameNode->GetEventHub<EventHub>();
+    auto eventHub = dragFrameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->GetDisableDataPrefetch()) {
         if (!CheckRemoteData(dragFrameNode, pointerEvent, udKey)) {
@@ -1349,7 +1351,7 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
 {
     auto point = pointerEvent.GetPoint();
     CHECK_NULL_VOID(dragFrameNode);
-    auto eventHub = dragFrameNode->GetEventHub<EventHub>();
+    auto eventHub = dragFrameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     UpdateDragEvent(event, pointerEvent);
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
@@ -1369,7 +1371,7 @@ void DragDropManager::HandleStopDrag(const RefPtr<FrameNode>& dragFrameNode, con
 {
     auto point = pointerEvent.GetPoint();
     CHECK_NULL_VOID(dragFrameNode);
-    auto eventHub = dragFrameNode->GetEventHub<EventHub>();
+    auto eventHub = dragFrameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->HandleInternalOnDrop(event, extraParams);
     ClearVelocityInfo();
@@ -1607,7 +1609,7 @@ void DragDropManager::FireOnDragEvent(
         HandleUIExtensionDragEvent(frameNode, pointerEvent, type);
         return;
     }
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->HasOnDrop() && !eventHub->HasOnItemDrop() && !eventHub->HasCustomerOnDrop()) {
         return;
@@ -1724,11 +1726,11 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
         // drag on one grid and drop on other area
         if (draggedGridFrameNode_) {
             if (dragType == DragType::GRID) {
-                auto eventHub = draggedGridFrameNode_->GetEventHub<GridEventHub>();
+                auto eventHub = draggedGridFrameNode_->GetOrCreateEventHub<GridEventHub>();
                 CHECK_NULL_VOID(eventHub);
                 eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, -1, false);
             } else {
-                auto eventHub = draggedGridFrameNode_->GetEventHub<ListEventHub>();
+                auto eventHub = draggedGridFrameNode_->GetOrCreateEventHub<ListEventHub>();
                 CHECK_NULL_VOID(eventHub);
                 eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, -1, false);
             }
@@ -1763,7 +1765,7 @@ void DragDropManager::FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, Dr
 {
     CHECK_NULL_VOID(frameNode);
     if (dragType == DragType::GRID) {
-        auto eventHub = frameNode->GetEventHub<GridEventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
         CHECK_NULL_VOID(eventHub);
         switch (type) {
             case DragEventType::ENTER:
@@ -1779,7 +1781,7 @@ void DragDropManager::FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, Dr
                 break;
         }
     } else if (dragType == DragType::LIST) {
-        auto eventHub = frameNode->GetEventHub<ListEventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
         CHECK_NULL_VOID(eventHub);
         switch (type) {
             case DragEventType::ENTER:
@@ -1802,11 +1804,11 @@ bool DragDropManager::FireOnItemDropEvent(const RefPtr<FrameNode>& frameNode, Dr
 {
     CHECK_NULL_RETURN(frameNode, false);
     if (dragType == DragType::GRID) {
-        auto eventHub = frameNode->GetEventHub<GridEventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
         return eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, isSuccess);
     } else if (dragType == DragType::LIST) {
-        auto eventHub = frameNode->GetEventHub<ListEventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
         return eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, isSuccess);
     }
@@ -1818,7 +1820,7 @@ int32_t DragDropManager::GetItemIndex(
 {
     CHECK_NULL_RETURN(frameNode, -1);
     if (dragType == DragType::GRID) {
-        auto eventHub = frameNode->GetEventHub<GridEventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
         CHECK_NULL_RETURN(eventHub, -1);
         if (frameNode != draggedGridFrameNode_) {
             return eventHub->GetInsertPosition(globalX, globalY);
@@ -1832,7 +1834,7 @@ int32_t DragDropManager::GetItemIndex(
             return eventHub->GetGridItemIndex(itemFrameNode);
         }
     } else if (dragType == DragType::LIST) {
-        auto eventHub = frameNode->GetEventHub<ListEventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
         CHECK_NULL_RETURN(eventHub, -1);
         return eventHub->GetListItemIndexByPosition(globalX, globalY);
     }
@@ -1942,12 +1944,12 @@ void DragDropManager::DestroyDragWindow()
 void DragDropManager::CancelItemDrag()
 {
     if (draggedGridFrameNode_) {
-        auto listEventHub = draggedGridFrameNode_->GetEventHub<ListEventHub>();
+        auto listEventHub = draggedGridFrameNode_->GetOrCreateEventHub<ListEventHub>();
         if (listEventHub) {
             listEventHub->HandleOnItemDragCancel();
             return;
         }
-        auto gridEventHub = draggedGridFrameNode_->GetEventHub<GridEventHub>();
+        auto gridEventHub = draggedGridFrameNode_->GetOrCreateEventHub<GridEventHub>();
         if (gridEventHub) {
             gridEventHub->HandleOnItemDragCancel();
             return;
@@ -2534,7 +2536,7 @@ void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frame
 {
     CHECK_NULL_VOID(frameNode);
     auto frameTag = frameNode->GetTag();
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     if (!IsEditableTextComponent(frameTag) || !(eventHub && eventHub->IsEnabled()) || !isDragFwkShow_) {
         return;
     }

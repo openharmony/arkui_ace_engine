@@ -24,6 +24,8 @@
 #include "ui/base/ace_type.h"
 #include "ui/base/referenced.h"
 #include "ui/properties/dirty_flag.h"
+#include "ui/properties/gradient_property.h"
+#include "ui/properties/ng/calc_length.h"
 #include "ui/resource/resource_configuration.h"
 #include "ui/view/layout/layout_info.h"
 
@@ -31,6 +33,9 @@ namespace OHOS::Ace::NG {
 class LayoutProperty;
 template<class T>
 struct LayoutConstraintT;
+
+template<class T>
+struct PaddingPropertyT;
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::Kit {
@@ -74,6 +79,11 @@ public:
     virtual void AddExtraCustomProperty(const std::string& key, void* extraData) = 0;
     virtual void* GetExtraCustomProperty(const std::string& key) const = 0;
     virtual void SetClipEdge(bool isClip) = 0;
+    virtual void SetPadding(const NG::PaddingPropertyT<NG::CalcLength>& value) = 0;
+    virtual void SetSafeAreaPadding(const NG::CalcLength& value) = 0;
+    virtual void ResetSafeAreaPadding() = 0;
+    virtual void SetLinearGradient(const NG::Gradient& gradient) = 0;
+    virtual void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara) = 0;
 
     virtual RefPtr<UIContext> GetUIContext() const = 0;
 };

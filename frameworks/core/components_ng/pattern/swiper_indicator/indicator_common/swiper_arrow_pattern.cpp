@@ -32,7 +32,7 @@ void SwiperArrowPattern::OnModifyDone()
         InitNavigationArrow();
         auto swiperNode = GetSwiperNode();
         CHECK_NULL_VOID(swiperNode);
-        auto swiperEventHub = swiperNode->GetEventHub<SwiperEventHub>();
+        auto swiperEventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(swiperEventHub);
         auto layoutProperty = GetSwiperArrowLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
@@ -373,7 +373,7 @@ std::tuple<bool, bool, bool> SwiperArrowPattern::CheckHoverStatus()
     auto displayCount = swiperPattern->GetDisplayCount();
     bool leftArrowIsHidden = (index_ == 0);
     bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displayCount);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && swiperPattern->IsSwipeByGroup()) {
+    if (!swiperPattern->IsAutoLinear() && swiperPattern->IsSwipeByGroup()) {
         leftArrowIsHidden = (index_ < displayCount);
         rightArrowIsHidden = (index_ >= swiperPattern->TotalCount() - displayCount);
     }

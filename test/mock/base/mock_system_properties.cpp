@@ -93,6 +93,7 @@ bool SystemProperties::formSkeletonBlurEnabled_ = true;
 
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
+bool g_isNeedSymbol = true;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -263,7 +264,7 @@ bool SystemProperties::IsNeedResampleTouchPoints()
 
 bool SystemProperties::IsNeedSymbol()
 {
-    return true;
+    return g_isNeedSymbol;
 }
 
 bool SystemProperties::GetResourceDecoupling()

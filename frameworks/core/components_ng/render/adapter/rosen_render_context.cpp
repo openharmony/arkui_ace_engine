@@ -347,8 +347,8 @@ void RosenRenderContext::OnNodeDisappear(bool recursive)
     }
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
-    if (!recursive && host && host->GetEventHub<EventHub>()) {
-        host->GetEventHub<EventHub>()->SetEnabledInternal(false);
+    if (!recursive && host && host->GetOrCreateEventHub<EventHub>()) {
+        host->GetOrCreateEventHub<EventHub>()->SetEnabledInternal(false);
     }
     auto rect = GetPaintRectWithoutTransform();
     // only start default transition on the break point of render node tree.
@@ -3499,7 +3499,7 @@ void RosenRenderContext::OnePixelRounding(uint16_t flag)
         nodeWidthI -= 1.0f;
         roundToPixelErrorX -= 1.0f;
     }
-    if (roundToPixelErrorX < -0.5f) {
+    if (roundToPixelErrorX < -0.5f && !floorLeft && !floorRight) {
         nodeWidthI += 1.0f;
         roundToPixelErrorX += 1.0f;
     }
@@ -3515,7 +3515,7 @@ void RosenRenderContext::OnePixelRounding(uint16_t flag)
         nodeHeightI -= 1.0f;
         roundToPixelErrorY -= 1.0f;
     }
-    if (roundToPixelErrorY < -0.5f) {
+    if (roundToPixelErrorY < -0.5f && !floorTop && !floorBottom) {
         nodeHeightI += 1.0f;
         roundToPixelErrorY += 1.0f;
     }

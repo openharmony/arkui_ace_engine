@@ -18,29 +18,29 @@ import { ON, Point } from '@ohos.UiTest';
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
 
-export async function StepperStart(done:Function) {
-    await delegator.startAbility({
-      bundleName: 'cn.ohos.components',
-      abilityName: 'EntryAbility'
-    });
-    await driver.delayMs(4500);
+export async function StepperStart(done: Function) {
+  await delegator.startAbility({
+    bundleName: 'cn.ohos.components',
+    abilityName: 'EntryAbility'
+  });
+  await driver.delayMs(4500);
 
-    let atomNavigates: Component = await driver.findComponent(ON.text('导航与切换'));
-    await atomNavigates.click();
-    await driver.delayMs(3500);
+  let atomNavigates: Component = await driver.findComponent(ON.text('导航与切换'));
+  await atomNavigates.click();
+  await driver.delayMs(3500);
 
-    let ListItems: Array<Component> = await driver.findComponents(ON.type('ListItem'))
-    let width: Point = await ListItems[0].getBoundsCenter()
-    let width2: Point = await ListItems[2].getBoundsCenter()
-    await driver.swipe(width.x, width2.y, width.x, width.y)
-    await driver.delayMs(5000);
+  let ListItems: Array<Component> = await driver.findComponents(ON.type('ListItem'))
+  let width: Point = await ListItems[0].getBoundsCenter()
+  let width2: Point = await ListItems[2].getBoundsCenter()
+  await driver.swipe(width.x, width2.y, width.x, width.y)
+  await driver.delayMs(5000);
 
-    let scrollSearch: Component = await driver.findComponent(ON.text('步骤导航/Stepper'))
-    await scrollSearch.click()
-    await driver.delayMs(3500);
+  let scrollSearch: Component = await driver.findComponent(ON.text('步骤导航/Stepper'))
+  await scrollSearch.click()
+  await driver.delayMs(3500);
 
-    let Buttons: Array<Component> = await driver.findComponents(ON.type('Button'));
-    await Buttons[1].click()
-    await driver.delayMs(3500);
-    done();
-  }
+  let Buttons: Array<Component> = await driver.findComponents(ON.type('Button'));
+  await Buttons[1].click()
+  await driver.delayMs(3500);
+  done();
+}

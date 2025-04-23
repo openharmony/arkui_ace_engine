@@ -182,7 +182,7 @@ RefPtr<NodeContainerEventHub> NodeContainerPattern::GetNodeContainerEventHub()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (frameNode) {
-        return frameNode->GetEventHub<NodeContainerEventHub>();
+        return frameNode->GetOrCreateEventHub<NodeContainerEventHub>();
     }
     return nullptr;
 }

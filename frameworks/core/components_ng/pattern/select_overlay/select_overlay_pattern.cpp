@@ -118,7 +118,7 @@ void SelectOverlayPattern::InitMouseEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);

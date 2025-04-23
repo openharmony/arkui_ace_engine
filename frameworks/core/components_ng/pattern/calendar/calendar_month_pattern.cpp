@@ -133,7 +133,11 @@ Dimension CalendarMonthPattern::GetDaySize(const RefPtr<CalendarTheme>& theme)
     auto pipeline = GetHost()->GetContext();
     CHECK_NULL_RETURN(pipeline, theme->GetCalendarPickerDayWidthOrHeight());
     auto fontSizeScale = pipeline->GetFontScale();
+#ifndef ARKUI_WEARABLE
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange()) {
+#else
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale()) {
+#endif
         return theme->GetCalendarPickerDayWidthOrHeight();
     } else {
         return theme->GetCalendarPickerDayLargeWidthOrHeight();
@@ -145,8 +149,13 @@ bool CalendarMonthPattern::IsLargeSize(const RefPtr<CalendarTheme>& theme)
     auto pipeline = GetHost()->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto fontSizeScale = pipeline->GetFontScale();
+#ifndef ARKUI_WEARABLE
     if ((fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange())
         && theme->GetCalendarPickerDayLargeWidthOrHeight() > theme->GetCalendarPickerDayWidthOrHeight()) {
+#else
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale()
+        && theme->GetCalendarPickerDayLargeWidthOrHeight() > theme->GetCalendarPickerDayWidthOrHeight()) {
+#endif
         return false;
     } else {
         return true;
@@ -258,7 +267,7 @@ void CalendarMonthPattern::SetVirtualNodeUserSelected(int32_t index)
         for (auto& day : obtainedMonth_.days) {
             day.focused = false;
         }
-        auto calendarEventHub = GetEventHub<CalendarEventHub>();
+        auto calendarEventHub = GetOrCreateEventHub<CalendarEventHub>();
         CHECK_NULL_VOID(calendarEventHub);
         if (selectedIndex >= 0 && selectedIndex < static_cast<int32_t>(obtainedMonth_.days.size())) {
             obtainedMonth_.days[selectedIndex].focused = true;
@@ -475,7 +484,7 @@ void CalendarMonthPattern::InitHoverEvent()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = GetEventHub<CalendarEventHub>();
+    auto eventHub = GetOrCreateEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -527,7 +536,7 @@ void CalendarMonthPattern::OnClick(Offset& localLocation, const ObtainedMonth& o
         for (auto& day : pattern->obtainedMonth_.days) {
             day.focused = false;
         }
-        auto calendarEventHub = GetEventHub<CalendarEventHub>();
+        auto calendarEventHub = GetOrCreateEventHub<CalendarEventHub>();
         CHECK_NULL_VOID(calendarEventHub);
         if (index >= 0 && index < static_cast<int32_t>(obtainedMonth.days.size())) {
             pattern->obtainedMonth_.days[index].focused = true;

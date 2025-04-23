@@ -90,7 +90,12 @@ HWTEST_F(TextTestThreeNg, TextModelGetFontInJson001, TestSize.Level1)
      * @tc.steps: step2. not set and Gets the relevant properties of the Font
      * @tc.expected: step2. Check the font value
      */
-    EXPECT_EQ(pattern->GetFontInJson(), TEXT_DEFAULT_VALUE);
+    auto context = frameNode->GetContextRefPtr();
+    ASSERT_NE(context, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    context->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    EXPECT_EQ(pattern->GetFontInJson(), WITH_THEME_CALL_TEXT_DEFAULT_VALUE);
 
     /**
      * @tc.steps: step2. call SetFont and Gets the relevant properties of the Font

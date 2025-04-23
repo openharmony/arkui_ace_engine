@@ -21,7 +21,8 @@ import { Point } from '@ohos.UiTest';
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
-export async function RadioTest (done: Function){
+
+export async function RadioTest(done: Function) {
 
 
   console.info('beforeAll begin');
@@ -34,21 +35,21 @@ export async function RadioTest (done: Function){
     });
 
     await driver.delayMs(8000);
-    let atomDisplays:Component = await driver.findComponent(ON.text('按钮与选择'));
+    let atomDisplays: Component = await driver.findComponent(ON.text('按钮与选择'));
     await atomDisplays.click();
     await driver.delayMs(2000);
 
-    let ListItems:Component[] = await driver.findComponents(ON.type('ListItem'))
-    let width:Point = await ListItems[0].getBoundsCenter()
-    let width2:Point = await ListItems[5].getBoundsCenter()
+    let ListItems: Component[] = await driver.findComponents(ON.type('ListItem'))
+    let width: Point = await ListItems[0].getBoundsCenter()
+    let width2: Point = await ListItems[5].getBoundsCenter()
     await driver.swipe(width.x, width2.y, width.x, width.y, 500)
     await driver.delayMs(2000);
 
-    let scrollSearch:Component = await driver.findComponent(ON.text('单选框/Radio'))
+    let scrollSearch: Component = await driver.findComponent(ON.text('单选框/Radio'))
     await scrollSearch.click()
     await driver.delayMs(2000);
 
-    let Buttons:Component[] = await driver.findComponents(ON.type('Button'));
+    let Buttons: Component[] = await driver.findComponents(ON.type('Button'));
     await Buttons[1].click()
     await driver.delayMs(2000);
 

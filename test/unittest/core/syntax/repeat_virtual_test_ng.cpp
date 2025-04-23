@@ -1562,32 +1562,6 @@ HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest048, TestSize.Level1)
 }
 
 /**
- * @tc.name: RepeatNodeCacheTest049
- * @tc.desc: Test RecycleItemsByIndex function
- * @tc.type: FUNC
- */
-HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest049, TestSize.Level1)
-{
-    RepeatVirtualScrollCaches caches(
-        cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
-
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    CacheItem cacheItem;
-    auto node = AceType::MakeRefPtr<FrameNode>("node", nodeId, AceType::MakeRefPtr<Pattern>());
-    cacheItem.item = node;
-    std::unordered_map<std::string, RefPtr<UINode>> nodeKey = { { "Key049", node } };
-    caches.key4index_ = { { nodeId, "Key049" } };
-    caches.node4key_ = { { "Key049", cacheItem } };
-    caches.reusedNodeIds_.clear();
-    caches.AddKeyToL1("Key049", true);
-    EXPECT_EQ(caches.reusedNodeIds_.size(), 1);
-    auto id = caches.reusedNodeIds_.begin();
-    EXPECT_EQ(*id, node->GetId());
-    caches.RecycleItemsByIndex(nodeId);
-    EXPECT_EQ(caches.reusedNodeIds_.size(), 1);
-}
-
-/**
  * @tc.name: RepeatNodeCacheTest050
  * @tc.desc: Test RebuildL1 function
  * @tc.type: FUNC

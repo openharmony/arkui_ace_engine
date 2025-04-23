@@ -165,7 +165,7 @@ void ClickRecognizer::OnAccepted()
     firstInputTime_.reset();
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
         node ? node->GetTag().c_str() : "null");
     auto lastRefereeState = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
@@ -607,7 +607,7 @@ bool ClickRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
     }
 
     if (curr->count_ != count_ || curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_ ||
-        curr->distanceThreshold_ != distanceThreshold_) {
+        curr->distanceThreshold_ != distanceThreshold_ || curr->isLimitFingerCount_ != isLimitFingerCount_) {
         ResetStatus();
         return false;
     }

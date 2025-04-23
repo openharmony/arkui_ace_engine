@@ -650,7 +650,8 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(
     TAG_LOGI(aceLogTag_, "[%{public}d] adaptive size: %{public}s -> [%{public}d x %{public}d]",
         uiContent_->GetInstanceId(), size.ToString().c_str(), vpConfig.Width(), vpConfig.Height());
 
-    auto task = [weak = WeakClaim(this), vpConfig, animationOpt, aceLogTag = aceLogTag_, offset]() {
+    auto option = CopyAnimationOption(animationOpt);
+    auto task = [weak = WeakClaim(this), vpConfig, option, aceLogTag = aceLogTag_, offset]() {
         auto renderer = weak.Upgrade();
         CHECK_NULL_VOID(renderer);
         auto uiContent = std::static_pointer_cast<UIContentImpl>(renderer->uiContent_);
@@ -673,7 +674,7 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(
         renderer->density_ = config.Density();
         TAG_LOGI(aceLogTag, "update card viewport: [%{public}d x %{public}d]",
             config.Width(), config.Height());
-        uiContent->UpdateViewportConfigWithAnimation(config, Rosen::WindowSizeChangeReason::UNDEFINED, animationOpt);
+        uiContent->UpdateViewportConfigWithAnimation(config, Rosen::WindowSizeChangeReason::UNDEFINED, *option);
     };
     bool contentReady = false;
     {

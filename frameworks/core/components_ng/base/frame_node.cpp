@@ -1197,6 +1197,11 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
         GeometryNodeToJsonValue(json, filter);
     }
     json->PutFixedAttr("id", propInspectorId_.value_or("").c_str(), filter, FIXED_ATTR_ID);
+    json->Put("isLayoutDirtyMarked", isLayoutDirtyMarked_);
+    json->Put("isRenderDirtyMarked", isRenderDirtyMarked_);
+    json->Put("isMeasureBoundary", isMeasureBoundary_);
+    json->Put("hasPendingRequest", hasPendingRequest_);
+    json->Put("isFirstBuilding", isFirstBuilding_);
     ExtraCustomPropertyToJsonValue(json, filter);
     if (IsCNode() || !IsJsCustomPropertyUpdated()) {
         auto jsonNode = JsonUtil::Create(true);
@@ -2099,6 +2104,10 @@ void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
 {
+    if (node == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_DEFAULT_DOMAIN, "SetGeometryNode failed: tag:%{public}s, id:%{public}d] ",
+            GetTag().c_str(), GetId());
+    }
     geometryNode_ = node;
 }
 
@@ -2151,7 +2160,8 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     CHECK_NULL_RETURN(wrapper, std::nullopt);
     auto task = [weak = WeakClaim(this), wrapper, paintProperty = paintProperty_]() {
         auto self = weak.Upgrade();
-        ACE_SCOPED_TRACE("FrameNode[%s][id:%d]::RenderTask", self->GetTag().c_str(), self->GetId());
+        ACE_SCOPED_TRACE("FrameNode[%s][id:%d][parentId:%d]::RenderTask", self->GetTag().c_str(),
+            self->GetId(), self->GetParent()? self->GetParent()->GetId() : -1);
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline) {
             auto id = pipeline->GetInstanceId();
@@ -2914,7 +2924,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     bool consumed = false;
 
     HitTestMode onTouchInterceptresult = HitTestMode::HTMDEFAULT;
-    if (touchRestrict.inputEventType != InputEventType::MOUSE_BUTTON) {
+    if (touchRestrict.inputEventType != InputEventType::MOUSE_BUTTON &&
+            touchRestrict.touchEvent.type != TouchType::HOVER_ENTER) {
         onTouchInterceptresult = TriggerOnTouchIntercept(touchRestrict.touchEvent);
     }
     TouchResult touchRes;

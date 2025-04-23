@@ -800,7 +800,7 @@ void PipelineContext::InspectDrew()
             if (node->GetInspectorId().has_value()) {
                 OnDrawCompleted(node->GetInspectorId()->c_str());
             }
-            auto eventHub = node->GetEventHub<NG::EventHub>();
+            auto eventHub = node->GetOrCreateEventHub<NG::EventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->FireDrawCompletedNDKCallback(this);
         }
@@ -1656,9 +1656,8 @@ void PipelineContext::PostKeyboardAvoidTask()
             TaskExecutor::TaskType::UI, "ArkUICustomKeyboardAvoid");
         return;
     }
-    CHECK_NULL_VOID(textFieldManager->GetLaterAvoid());
     auto container = Container::Current();
-    if (container) {
+    if (container && textFieldManager->GetLaterAvoid()) {
         auto displayInfo = container->GetDisplayInfo();
         if (displayInfo && textFieldManager->GetLaterOrientation() != (int32_t)displayInfo->GetRotation()) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "orientation not match, clear laterAvoid");
@@ -1666,13 +1665,14 @@ void PipelineContext::PostKeyboardAvoidTask()
             return;
         }
     }
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "after rotation set root, trigger avoid now");
     taskExecutor_->PostTask(
         [weakContext = WeakClaim(this), weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
             auto manager = weakManager.Upgrade();
             CHECK_NULL_VOID(manager);
+            CHECK_NULL_VOID(manager->GetLaterAvoid());
             auto context = weakContext.Upgrade();
             CHECK_NULL_VOID(context);
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "after rotation set root, trigger avoid now");
             auto keyboardRect = manager->GetLaterAvoidKeyboardRect();
             auto positionY = manager->GetLaterAvoidPositionY();
             auto height = manager->GetLaterAvoidHeight();
@@ -3465,6 +3465,7 @@ void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const R
     // use mouse to collect accessibility hover target
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
+    touchRestrict.touchEvent.type = TouchType::HOVER_ENTER;
     eventManager_->AccessibilityHoverTest(scaleEvent, targerNode, touchRestrict);
     eventManager_->DispatchAccessibilityHoverEventNG(scaleEvent);
     RequestFrame();
@@ -3548,6 +3549,7 @@ void PipelineContext::UpdateLastMoveEvent(const MouseEvent& event)
     lastMouseEvent_->mockFlushEvent = event.mockFlushEvent;
     lastMouseEvent_->pointerEvent = event.pointerEvent;
     lastMouseEvent_->deviceId = event.deviceId;
+    lastMouseEvent_->sourceTool = event.sourceTool;
     lastSourceType_ = event.sourceType;
 }
 
@@ -3827,6 +3829,9 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32
 {
     auto mouseStyleManager = eventManager_->GetMouseStyleManager();
     CHECK_NULL_RETURN(mouseStyleManager, false);
+    if (!windowId) {
+        windowId = static_cast<int32_t>(GetFocusWindowId());
+    }
     mouseStyleManager->SetMouseFormat(windowId, nodeId, format, isByPass, reason);
     RequestFrame();
     return true;
@@ -5964,8 +5969,8 @@ void PipelineContext::FlushMouseEventInVsync()
     }
     if (lastMouseEvent_ && isTransFlag_ && (mouseEventSize == 0 || lastMouseEvent_->mockFlushEvent)) {
         FlushMouseEventForHover();
-        isTransFlag_ = false;
     }
+    isTransFlag_ = false;
     windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
 }
 

@@ -534,7 +534,7 @@ void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
     // set closeButton enable or disable
     auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsRow, CLOSE_BUTTON_INDEX));
     CHECK_NULL_VOID(closeButton);
-    auto buttonEvent = closeButton->GetEventHub<ButtonEventHub>();
+    auto buttonEvent = closeButton->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEvent);
     buttonEvent->SetEnabled(isEnabled);
     TAG_LOGI(AceLogTag::ACE_APPBAR, "Set close button status %{public}s", isEnabled ? "enable" : "disable");

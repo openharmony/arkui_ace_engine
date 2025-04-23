@@ -14,13 +14,19 @@
  */
 
 import { describe, beforeAll, beforeEach, afterEach, afterAll, it, expect } from '@ohos/hypium'
-import { abilityDelegatorRegistry, Driver, ON ,Component} from '@kit.TestKit';
+import { abilityDelegatorRegistry, Driver, ON, Component } from '@kit.TestKit';
 import { Point } from '@ohos.UiTest';
-import { buttonClick,
+import {
+  buttonClick,
   getToggle,
-  radioClick, Search, searchParentBlock,
+  radioClick,
+  Search,
+  searchParentBlock,
   Slide,
-  sliderDrag, titleSearch, ToggleClick } from '../utils';
+  sliderDrag,
+  titleSearch,
+  ToggleClick
+} from '../utils';
 
 
 const TAG = 'MenuItemGroupBootcamp001'
@@ -90,11 +96,11 @@ export default function MenuItemGroupBootcampTest() {
      */
     it('ArkUI_MenuItemGroup_001', 0, async (done: Function) => {
       // 无法取到属性值进行断言
-     await Search('参数列表','secondaryMenu')
+      await Search('参数列表', 'secondaryMenu')
       await radioClick({
         radioClickObj: 0,
-        toggleClick:{
-          toggleClickObj:'secondaryMenu'
+        toggleClick: {
+          toggleClickObj: 'secondaryMenu'
         }
       })
       done();
@@ -109,7 +115,7 @@ export default function MenuItemGroupBootcampTest() {
       await radioClick({
         radioClickObj: 1,
         toggleClick: {
-          toggleClickObj:'secondaryMenu',
+          toggleClickObj: 'secondaryMenu',
           toggleClickType: ToggleClick.Close
         }
       })
@@ -119,13 +125,13 @@ export default function MenuItemGroupBootcampTest() {
     /**
      * 测试组件是否显示前缀图标支持设置显示图标为1号
      */
-    it('ArkUI_MenuItemGroup_003', 0, async (done: Function)=> {
+    it('ArkUI_MenuItemGroup_003', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await Search('参数列表', 'startIcon')
       await buttonClick({
         buttonClickObj: 0,
-        toggleClick:{
-          toggleClickObj:'startIcon'
+        toggleClick: {
+          toggleClickObj: 'startIcon'
         }
       })
       done();
@@ -134,13 +140,13 @@ export default function MenuItemGroupBootcampTest() {
     /**
      *测试组件是否显示前缀图标支持设置显示图标为2号
      */
-    it('ArkUI_MenuItemGroup_004', 0, async (done: Function)=> {
+    it('ArkUI_MenuItemGroup_004', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await Search('参数列表', 'startIcon')
       await buttonClick({
         buttonClickObj: 1,
-        toggleClick:{
-          toggleClickObj:'startIcon'
+        toggleClick: {
+          toggleClickObj: 'startIcon'
         }
       })
       done();
@@ -149,13 +155,13 @@ export default function MenuItemGroupBootcampTest() {
     /**
      * 测试组件是否显示前缀图标支持设置显示图标为3号
      */
-    it('ArkUI_MenuItemGroup_005', 0, async (done: Function)=> {
+    it('ArkUI_MenuItemGroup_005', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await Search('参数列表', 'startIcon')
       await buttonClick({
         buttonClickObj: 2,
-        toggleClick:{
-          toggleClickObj:'startIcon'
+        toggleClick: {
+          toggleClickObj: 'startIcon'
         }
       })
       done();
@@ -164,13 +170,13 @@ export default function MenuItemGroupBootcampTest() {
     /**
      * 测试组件是否显示前缀图标支持设置显示图标为4号
      */
-    it('ArkUI_MenuItemGroup_006', 0, async (done: Function)=> {
+    it('ArkUI_MenuItemGroup_006', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await Search('参数列表', 'startIcon')
       await buttonClick({
         buttonClickObj: 3,
-        toggleClick:{
-          toggleClickObj:'startIcon'
+        toggleClick: {
+          toggleClickObj: 'startIcon'
         }
       })
       done();
@@ -179,13 +185,13 @@ export default function MenuItemGroupBootcampTest() {
     /**
      * 测试组件是否显示前缀图标支持设置显示图标为5号
      */
-    it('ArkUI_MenuItemGroup_007', 0, async (done: Function)=> {
+    it('ArkUI_MenuItemGroup_007', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await Search('参数列表', 'startIcon')
       await buttonClick({
         buttonClickObj: 4,
-        toggleClick:{
-          toggleClickObj:'startIcon'
+        toggleClick: {
+          toggleClickObj: 'startIcon'
         }
       })
       done();
@@ -194,13 +200,13 @@ export default function MenuItemGroupBootcampTest() {
     /**
      * 测试组件是否显示前缀图标支持设置显示图标为6号
      */
-    it('ArkUI_MenuItemGroup_008', 0, async (done: Function)=> {
+    it('ArkUI_MenuItemGroup_008', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await Search('参数列表', 'startIcon')
       await buttonClick({
         buttonClickObj: 5,
         toggleClick: {
-          toggleClickObj:'startIcon',
+          toggleClickObj: 'startIcon',
           toggleClickType: ToggleClick.Close
         }
       })
@@ -210,13 +216,13 @@ export default function MenuItemGroupBootcampTest() {
     /**
      * 测试组件是否显示后缀图标支持设置显示图标为1号
      */
-    it('ArkUI_MenuItemGroup_009', 0, async (done: Function)=> {
+    it('ArkUI_MenuItemGroup_009', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await Search('参数列表', 'endIcon')
       await buttonClick({
         buttonClickObj: 0,
-        toggleClick:{
-          toggleClickObj:'endIcon'
+        toggleClick: {
+          toggleClickObj: 'endIcon'
         }
       })
       done();
@@ -225,13 +231,13 @@ export default function MenuItemGroupBootcampTest() {
     /**
      *测试组件是否显示后缀图标支持设置显示图标为2号
      */
-    it('ArkUI_MenuItemGroup_010', 0, async (done: Function)=> {
+    it('ArkUI_MenuItemGroup_010', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await Search('参数列表', 'endIcon')
       await buttonClick({
         buttonClickObj: 1,
-        toggleClick:{
-          toggleClickObj:'endIcon'
+        toggleClick: {
+          toggleClickObj: 'endIcon'
         }
       })
       done();
@@ -240,13 +246,13 @@ export default function MenuItemGroupBootcampTest() {
     /**
      * 测试组件是否显示后缀图标支持设置显示图标为3号
      */
-    it('ArkUI_MenuItemGroup_011', 0, async (done: Function)=> {
+    it('ArkUI_MenuItemGroup_011', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await Search('参数列表', 'endIcon')
       await buttonClick({
         buttonClickObj: 2,
-        toggleClick:{
-          toggleClickObj:'endIcon'
+        toggleClick: {
+          toggleClickObj: 'endIcon'
         }
       })
       done();
@@ -255,13 +261,13 @@ export default function MenuItemGroupBootcampTest() {
     /**
      * 测试组件是否显示后缀图标支持设置显示图标为4号
      */
-    it('ArkUI_MenuItemGroup_012', 0, async (done: Function)=> {
+    it('ArkUI_MenuItemGroup_012', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await Search('参数列表', 'endIcon')
       await buttonClick({
         buttonClickObj: 3,
-        toggleClick:{
-          toggleClickObj:'endIcon'
+        toggleClick: {
+          toggleClickObj: 'endIcon'
         }
       })
       done();
@@ -270,13 +276,13 @@ export default function MenuItemGroupBootcampTest() {
     /**
      * 测试组件是否显示后缀图标支持设置显示图标为5号
      */
-    it('ArkUI_MenuItemGroup_013', 0, async (done: Function)=> {
+    it('ArkUI_MenuItemGroup_013', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await Search('参数列表', 'endIcon')
       await buttonClick({
         buttonClickObj: 4,
-        toggleClick:{
-          toggleClickObj:'endIcon'
+        toggleClick: {
+          toggleClickObj: 'endIcon'
         }
       })
       done();
@@ -285,13 +291,13 @@ export default function MenuItemGroupBootcampTest() {
     /**
      * 测试组件是否显示后缀图标支持设置显示图标为6号
      */
-    it('ArkUI_MenuItemGroup_014', 0, async (done: Function)=> {
+    it('ArkUI_MenuItemGroup_014', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await Search('参数列表', 'endIcon')
       await buttonClick({
         buttonClickObj: 5,
         toggleClick: {
-          toggleClickObj:'endIcon',
+          toggleClickObj: 'endIcon',
           toggleClickType: ToggleClick.Close
         }
       })
@@ -302,7 +308,7 @@ export default function MenuItemGroupBootcampTest() {
      * 测试组件width且获取属性正确
      */
     it('ArkUI_MenuItemGroup_Comp_0001', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'width');
       await sliderDrag({
         slideStar: Slide.start,
@@ -324,15 +330,13 @@ export default function MenuItemGroupBootcampTest() {
      * 测试组件height且获取属性正确
      */
     it('ArkUI_MenuItemGroup_Comp_0002', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'height');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
-
       })
 
       await sliderDrag({
@@ -348,7 +352,7 @@ export default function MenuItemGroupBootcampTest() {
      * 测试组件padding且获取属性正确
      */
     it('ArkUI_MenuItemGroup_Comp_0003', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'padding');
       await sliderDrag({
         slideStar: Slide.start,
@@ -370,14 +374,13 @@ export default function MenuItemGroupBootcampTest() {
      * 测试组件margin且获取属性正确
      */
     it('ArkUI_MenuItemGroup_Comp_0004', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'margin');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
       })
 
       await sliderDrag({
@@ -385,7 +388,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
       })
 
       done();
@@ -406,7 +408,7 @@ export default function MenuItemGroupBootcampTest() {
      * 测试组件constraintSize.minWidth且获取属性正确
      */
     it('ArkUI_MenuItemGroup_Comp_0006', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'constraintSize');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('constraintSize')))
@@ -419,7 +421,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
       })
 
       await sliderDrag({
@@ -435,7 +436,7 @@ export default function MenuItemGroupBootcampTest() {
      * 测试组件constraintSize.minHeight且获取属性正确
      */
     it('ArkUI_MenuItemGroup_Comp_0007', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'constraintSize');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('constraintSize')))
@@ -448,7 +449,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
       })
 
       await sliderDrag({
@@ -456,7 +456,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -465,7 +464,7 @@ export default function MenuItemGroupBootcampTest() {
      * 测试组件constraintSize.maxWidth且获取属性正确
      */
     it('ArkUI_MenuItemGroup_Comp_0008', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'constraintSize');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('constraintSize')))
@@ -478,7 +477,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       await sliderDrag({
@@ -486,8 +484,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -496,7 +492,7 @@ export default function MenuItemGroupBootcampTest() {
      * 测试组件constraintSize.maxHeight且获取属性正确
      */
     it('ArkUI_MenuItemGroup_Comp_0009', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'constraintSize');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('constraintSize')))
@@ -509,7 +505,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       await sliderDrag({
@@ -517,7 +512,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -609,7 +603,7 @@ export default function MenuItemGroupBootcampTest() {
      * 测试组件position.left且获取属性正确
      */
     it('ArkUI_MenuItemGroup_Comp_0014', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'position');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('position')))
@@ -693,7 +687,7 @@ export default function MenuItemGroupBootcampTest() {
      * 测试组件markAnchor.x且获取属性正确
      */
     it('ArkUI_MenuItemGroup_Comp_0018', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'position');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('markAnchor')))
@@ -706,7 +700,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       await sliderDrag({
@@ -714,8 +707,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -724,7 +715,7 @@ export default function MenuItemGroupBootcampTest() {
      * 测试组件markAnchor.y且获取属性正确
      */
     it('ArkUI_MenuItemGroup_Comp_0019', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'position');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('markAnchor')))
@@ -737,8 +728,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -746,7 +735,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -782,7 +770,7 @@ export default function MenuItemGroupBootcampTest() {
      * 测试组件offset.x且获取属性正确
      */
     it('ArkUI_MenuItemGroup_Comp_0022', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'offset');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('offset')))
@@ -795,8 +783,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -804,8 +790,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -814,7 +798,7 @@ export default function MenuItemGroupBootcampTest() {
      * 测试组件offset.y且获取属性正确
      */
     it('ArkUI_MenuItemGroup_Comp_0023', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'offset');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('offset')))
@@ -827,8 +811,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -836,8 +818,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -861,20 +841,18 @@ export default function MenuItemGroupBootcampTest() {
      * 测试组件borderStyle
      */
     it('ArkUI_MenuItemGroup_Comp_0025', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'borderStyle');
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
       done();
     })
     it('ArkUI_MenuItemGroup_Comp_0026', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'borderStyle');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderStyle')))
@@ -883,12 +861,11 @@ export default function MenuItemGroupBootcampTest() {
       }
       await radioClick({
         radioClickObj: 1,
-
       })
       done();
     })
     it('ArkUI_MenuItemGroup_Comp_0027', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'borderStyle');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderStyle')))
@@ -900,8 +877,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
       done();
     })
@@ -909,15 +884,13 @@ export default function MenuItemGroupBootcampTest() {
      * 测试组件borderWidth
      */
     it('ArkUI_MenuItemGroup_Comp_0028', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'borderWidth');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -925,8 +898,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -936,21 +907,20 @@ export default function MenuItemGroupBootcampTest() {
      * 测试组件borderColor
      */
     it('ArkUI_MenuItemGroup_Comp_0029', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'borderColor');
       await buttonClick({
         buttonClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
 
     })
     it('ArkUI_MenuItemGroup_Comp_0030', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'borderColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderColor')))
@@ -959,14 +929,13 @@ export default function MenuItemGroupBootcampTest() {
       }
       await buttonClick({
         buttonClickObj: 1,
-
       })
 
       done();
 
     })
     it('ArkUI_MenuItemGroup_Comp_0031', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'borderColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderColor')))
@@ -975,14 +944,12 @@ export default function MenuItemGroupBootcampTest() {
       }
       await buttonClick({
         buttonClickObj: 2,
-
-
       })
 
       done();
     })
     it('ArkUI_MenuItemGroup_Comp_0032', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'borderColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderColor')))
@@ -991,15 +958,13 @@ export default function MenuItemGroupBootcampTest() {
       }
       await buttonClick({
         buttonClickObj: 3,
-
-
       })
 
       done();
 
     })
     it('ArkUI_MenuItemGroup_Comp_0033', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'borderColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderColor')))
@@ -1008,15 +973,13 @@ export default function MenuItemGroupBootcampTest() {
       }
       await buttonClick({
         buttonClickObj: 4,
-
-
       })
 
       done();
 
     })
     it('ArkUI_MenuItemGroup_Comp_0034', 0, async (done: Function) => {
- // 无法取到属性值进行断言
+      // 无法取到属性值进行断言
       await titleSearch('基础属性', 'borderColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderColor')))
@@ -1028,8 +991,6 @@ export default function MenuItemGroupBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();

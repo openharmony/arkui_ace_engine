@@ -407,7 +407,7 @@ void MovingPhotoPattern::RegisterImageEvent()
     CHECK_NULL_VOID(movingPhoto);
     auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
     CHECK_NULL_VOID(image);
-    auto imageHub = image->GetEventHub<ImageEventHub>();
+    auto imageHub = image->GetOrCreateEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageHub);
     auto imageCompleteEventCallback = [weak = WeakClaim(this)](const LoadImageSuccessEvent& info) {
         auto pattern = weak.Upgrade();
@@ -646,14 +646,14 @@ void MovingPhotoPattern::MediaResetToPlay()
 
 void MovingPhotoPattern::FireMediaPlayerImageComplete()
 {
-    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireCompleteEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerStart()
 {
-    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireStartEvent();
     if (isFastKeyUp_) {
@@ -664,28 +664,28 @@ void MovingPhotoPattern::FireMediaPlayerStart()
 
 void MovingPhotoPattern::FireMediaPlayerStop()
 {
-    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireStopEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerPause()
 {
-    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FirePauseEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerFinish()
 {
-    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireFinishEvent();
 }
 
 void MovingPhotoPattern::FireMediaPlayerError()
 {
-    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireErrorEvent();
 }
@@ -1382,6 +1382,12 @@ void MovingPhotoPattern::RefreshMovingPhoto()
         return;
     }
     std::string imageSrc = dataProvider->GetMovingPhotoImageUri(uri_);
+    auto imageCache = pipeline->GetImageCache();
+    if (imageCache) {
+        ImageSourceInfo srcKey;
+        srcKey.SetSrc(imageSrc);
+        imageCache->ClearCacheImgObj(srcKey.GetKey());
+    }
     imageSrc += "?date_modified = " + std::to_string(GetMicroTickCount());
     ImageSourceInfo src;
     src.SetSrc(imageSrc);
@@ -1391,6 +1397,17 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_.GetValue(), host);
     isRefreshMovingPhoto_ = true;
     isSetAutoPlayPeriod_ = false;
+    RefreshMovingPhotoSceneManager();
+    ResetMediaPlayer();
+    if (IsSupportImageAnalyzer() && isEnableAnalyzer_ && imageAnalyzerManager_) {
+        UpdateAnalyzerOverlay();
+    }
+}
+
+void MovingPhotoPattern::RefreshMovingPhotoSceneManager()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         autoAndRepeatLevel_ = PlaybackMode::NONE;
         historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
@@ -1405,10 +1422,6 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     } else if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
         autoAndRepeatLevel_ = PlaybackMode::AUTO;
         isAutoChangePlayMode_ = true;
-    }
-    ResetMediaPlayer();
-    if (IsSupportImageAnalyzer() && isEnableAnalyzer_ && imageAnalyzerManager_) {
-        UpdateAnalyzerOverlay();
     }
 }
 

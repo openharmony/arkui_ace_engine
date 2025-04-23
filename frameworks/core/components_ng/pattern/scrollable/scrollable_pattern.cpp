@@ -80,8 +80,6 @@ ScrollablePattern::~ScrollablePattern()
         if (scrollable) {
             auto nodeId = scrollable->GetNodeId();
             auto nodeTag = scrollable->GetNodeTag();
-            AceAsyncTraceEnd(nodeId,
-                (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(nodeId) + std::string(" ") + nodeTag).c_str());
             AceAsyncTraceEndCommercial(
                 nodeId, (TRAILING_ANIMATION + std::to_string(nodeId) + std::string(" ") + nodeTag).c_str());
         }
@@ -263,7 +261,7 @@ RefPtr<GestureEventHub> ScrollablePattern::GetGestureHub()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(hub, nullptr);
     return hub->GetOrCreateGestureEventHub();
 }
@@ -272,7 +270,7 @@ RefPtr<InputEventHub> ScrollablePattern::GetInputHub()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(hub, nullptr);
     return hub->GetOrCreateInputEventHub();
 }
@@ -1140,7 +1138,8 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
 {
     // inner scrollbar, viewOffset is padding offset
     if (scrollBar_) {
-        bool scrollable = IsScrollable();
+        auto mainSize = axis_ == Axis::VERTICAL ? viewPort.Height() : viewPort.Width();
+        bool scrollable = GreatNotEqual(estimatedHeight, mainSize) && IsScrollable();
         if (scrollBar_->IsScrollable() != scrollable) {
             scrollBar_->SetScrollable(scrollable);
             if (scrollBarOverlayModifier_) {
@@ -1423,7 +1422,7 @@ void ScrollablePattern::AnimateTo(
         PlayCurveAnimation(position, duration, curve, canOverScroll);
     }
     if (!GetIsDragging()) {
-        FireOnScrollStart();
+        FireOnScrollStart(false);
     }
     PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::SCROLLER_ANIMATION, PerfActionType::FIRST_MOVE, "");
@@ -1956,10 +1955,9 @@ float ScrollablePattern::GetOutOfScrollableOffset() const
     auto offset = 0.0f;
     auto mouseMainOffset = static_cast<float>(
         axis_ == Axis::VERTICAL ? lastMouseMove_.GetLocalLocation().GetY() : lastMouseMove_.GetLocalLocation().GetX());
-    auto hostSize = GetHostFrameSize();
-    CHECK_NULL_RETURN(hostSize.has_value(), offset);
+    auto hostSize = GetViewSizeMinusPadding();
     auto mainTop = 0.0f;
-    auto mainBottom = hostSize->MainSize(axis_);
+    auto mainBottom = hostSize.MainSize(axis_);
     if (GreatOrEqual(mouseMainOffset, mainTop) && LessOrEqual(mouseMainOffset, mainBottom)) {
         return offset;
     }
@@ -2515,7 +2513,7 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
 void ScrollablePattern::ExecuteScrollFrameBegin(float& mainDelta, ScrollState state)
 {
     auto context = GetContext();
-    auto eventHub = GetEventHub<ScrollableEventHub>();
+    auto eventHub = GetOrCreateEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto scrollFrameBeginCallback = eventHub->GetOnScrollFrameBegin();
     auto onJSFrameNodeScrollFrameBegin = eventHub->GetJSFrameNodeOnScrollFrameBegin();
@@ -2735,11 +2733,11 @@ void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velo
     host->AddFRCSceneInfo(scene, velocity, sceneStatus);
 }
 
-void ScrollablePattern::FireOnScrollStart()
+void ScrollablePattern::FireOnScrollStart(bool withPerfMonitor)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ScrollableEventHub>();
+    auto hub = host->GetOrCreateEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(hub);
     SuggestOpIncGroup(true);
     if (scrollStop_ && !GetScrollAbort()) {
@@ -2748,7 +2746,9 @@ void ScrollablePattern::FireOnScrollStart()
     RecordScrollEvent(Recorder::EventType::SCROLL_START);
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
-    PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+    if (withPerfMonitor) {
+        PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+    }
     if (GetScrollAbort()) {
         ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStart, id:%d, tag:%s",
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
@@ -3002,7 +3002,7 @@ void ScrollablePattern::RecordScrollEvent(Recorder::EventType eventType)
 
 float ScrollablePattern::FireOnWillScroll(float offset) const
 {
-    auto eventHub = GetEventHub<ScrollableEventHub>();
+    auto eventHub = GetOrCreateEventHub<ScrollableEventHub>();
     CHECK_NULL_RETURN(eventHub, offset);
     auto onScroll = eventHub->GetOnWillScroll();
     auto onJSFrameNodeScroll = eventHub->GetJSFrameNodeOnWillScroll();
@@ -3439,9 +3439,7 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (AnimateRunning()) {
-        StopAnimate();
-    }
+    StopScrollableAndAnimate();
 
     if (!animator_) {
         auto context = host->GetContextRefPtr();
@@ -3451,11 +3449,7 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnAnimateStop();
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
-            AceAsyncTraceEnd(host->GetAccessibilityId(),
-                (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") +
-                    host->GetTag()).c_str());
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::SCROLLER_ANIMATION, false);
         });
     }
 
@@ -3484,11 +3478,9 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
         fixedVelocityMotion_->Init();
         fixedVelocityMotion_->SetVelocity(velocity);
     }
-    AceAsyncTraceBegin(
-        host->GetAccessibilityId(), (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(host->GetAccessibilityId()) +
-                                        std::string(" ") + host->GetTag()).c_str());
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::SCROLLER_ANIMATION, PerfActionType::FIRST_MOVE, "");
     animator_->PlayMotion(fixedVelocityMotion_);
-    FireOnScrollStart();
+    FireOnScrollStart(false);
 }
 
 void ScrollablePattern::CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling)
@@ -3655,7 +3647,7 @@ void ScrollablePattern::GetEventDumpInfo()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ScrollableEventHub>();
+    auto hub = host->GetOrCreateEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollStart = hub->GetOnScrollStart();
     onScrollStart ? DumpLog::GetInstance().AddDesc("hasOnScrollStart: true")
@@ -3669,7 +3661,7 @@ void ScrollablePattern::GetEventDumpInfo()
     auto onJSFrameNodeScrollStop = hub->GetJSFrameNodeOnScrollStop();
     onJSFrameNodeScrollStop ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollStop: true")
                             : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollStop: false");
-    auto scrollHub = host->GetEventHub<ScrollEventHub>();
+    auto scrollHub = host->GetOrCreateEventHub<ScrollEventHub>();
     if (scrollHub) {
         auto onWillScroll = scrollHub->GetOnWillScrollEvent();
         onWillScroll ? DumpLog::GetInstance().AddDesc("hasOnWillScroll: true")
@@ -3875,7 +3867,7 @@ void ScrollablePattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ScrollableEventHub>();
+    auto hub = host->GetOrCreateEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollStart = hub->GetOnScrollStart();
     json->Put("hasOnScrollStart", onScrollStart ? "true" : "false");
@@ -3886,7 +3878,7 @@ void ScrollablePattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     auto onJSFrameNodeScrollStop = hub->GetJSFrameNodeOnScrollStop();
     json->Put("hasFrameNodeOnScrollStop", onJSFrameNodeScrollStop ? "true" : "false");
 
-    auto scrollHub = host->GetEventHub<ScrollEventHub>();
+    auto scrollHub = host->GetOrCreateEventHub<ScrollEventHub>();
     if (scrollHub) {
         auto onWillScroll = scrollHub->GetOnWillScrollEvent();
         json->Put("hasOnWillScroll", onWillScroll ? "true" : "false");
@@ -4165,7 +4157,7 @@ void ScrollablePattern::OnColorConfigurationUpdate()
     scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
 }
 
-SizeF ScrollablePattern::GetViewSizeMinusPadding()
+SizeF ScrollablePattern::GetViewSizeMinusPadding() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, SizeF());
@@ -4254,7 +4246,7 @@ void ScrollablePattern::SetOnHiddenChangeForParent()
     if (parent && parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
         auto navDestinationPattern = parent->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
-        auto navDestinationEventHub = navDestinationPattern->GetEventHub<NavDestinationEventHub>();
+        auto navDestinationEventHub = navDestinationPattern->GetOrCreateEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(navDestinationEventHub);
         auto onHiddenChange = [weak = WeakClaim(this)](bool isShow) {
             auto pattern = weak.Upgrade();

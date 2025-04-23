@@ -107,7 +107,7 @@ void RefreshPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -223,7 +223,7 @@ void RefreshPattern::InitProgressNode()
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
     CHECK_NULL_VOID(progressChild_);
     host->AddChild(progressChild_, 0);
-    auto gestureHub = progressChild_->GetEventHub<EventHub>();
+    auto gestureHub = progressChild_->GetOrCreateEventHub<EventHub>();
     if (gestureHub) {
         gestureHub->SetEnabled(false);
     }
@@ -535,7 +535,7 @@ float RefreshPattern::GetFollowRatio()
 
 void RefreshPattern::FireStateChange(int32_t value)
 {
-    auto refreshEventHub = GetEventHub<RefreshEventHub>();
+    auto refreshEventHub = GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(refreshEventHub);
     refreshEventHub->FireOnStateChange(value);
     if (refreshStatus_ == RefreshStatus::REFRESH && Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
@@ -554,14 +554,14 @@ void RefreshPattern::FireStateChange(int32_t value)
 
 void RefreshPattern::FireRefreshing()
 {
-    auto refreshEventHub = GetEventHub<RefreshEventHub>();
+    auto refreshEventHub = GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(refreshEventHub);
     refreshEventHub->FireOnRefreshing();
 }
 
 void RefreshPattern::FireChangeEvent(const std::string& value)
 {
-    auto refreshEventHub = GetEventHub<RefreshEventHub>();
+    auto refreshEventHub = GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(refreshEventHub);
     refreshEventHub->FireChangeEvent(value);
 }
@@ -573,7 +573,7 @@ void RefreshPattern::FireOnOffsetChange(float value)
     }
     if (!NearEqual(lastScrollOffset_, value)) {
         UpdateCustomBuilderVisibility();
-        auto refreshEventHub = GetEventHub<RefreshEventHub>();
+        auto refreshEventHub = GetOrCreateEventHub<RefreshEventHub>();
         CHECK_NULL_VOID(refreshEventHub);
         refreshEventHub->FireOnOffsetChange(Dimension(value).ConvertToVp());
         lastScrollOffset_ = value;

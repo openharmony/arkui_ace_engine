@@ -35,7 +35,7 @@ void NavDestinationEventHub::FireOnDisappear()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddAfterLayoutTask([destination = navDestination]() {
-        auto eventHub = destination->GetEventHub<NavDestinationEventHub>();
+        auto eventHub = destination->GetOrCreateEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
         auto pattern = destination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(pattern);
@@ -99,7 +99,7 @@ void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name)
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
     CHECK_NULL_VOID(navDestination);
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-        "%{public}s lifecycle chang to onHidden state. navdestinationId:%{public}d, navigationId:%{public}d",
+        "%{public}s lifecycle change to onHidden state. navdestinationId:%{public}d, navigationId:%{public}d",
         name_.c_str(), navDestination->GetId(), navDestination->GetNavigationNodeId());
     state_ = NavDestinationState::ON_HIDDEN;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),

@@ -32,7 +32,7 @@ export struct BindContextMenuBootcamp {
   @State enableCompHapticFeedbackMode: boolean = false;
   @State compHapticFeedbackMode: HapticFeedbackMode = HapticFeedbackMode.DISABLED;
 
-  build(){
+  build() {
     NavDestination() {
       Drawer({
         title: this.title,
@@ -105,7 +105,7 @@ export struct BindContextMenuBootcamp {
           hapticFeedbackMode: useEnabled(this.enableCompHapticFeedbackMode, this.compHapticFeedbackMode)
         })
     }
-    .onDragStart(()=>{
+    .onDragStart(() => {
       ContextMenu.close()
     })
   }
@@ -166,7 +166,7 @@ export struct BindContextMenuBootcamp {
 @Preview
 @Component
 struct BindContextMenuBootcampPreviewer {
-  build(){
+  build() {
     BindContextMenuBootcamp({
       title: '上下文菜单/BindContextMenu'
     })

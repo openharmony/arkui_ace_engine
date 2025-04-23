@@ -12,15 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { describe, beforeAll, it} from '@ohos/hypium'
-import {
-  JsonType,
-  KeyStruct,
-  radioClick,
-  ToggleClick,
-  titleSearch,
-  getToggle,
-} from '../../../utils';
+import { describe, beforeAll, it } from '@ohos/hypium'
+import { JsonType, KeyStruct, radioClick, ToggleClick, titleSearch, getToggle, } from '../../../utils';
 import { StepperStart } from './Stepper';
 
 export default function Stepper8() {

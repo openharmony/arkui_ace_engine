@@ -1049,7 +1049,6 @@ export default function PatternLock7() {
     })
 
 
-    
   })
 }
 

@@ -174,7 +174,7 @@ public:
 
     virtual bool OnScrollCallback(float offset, int32_t source);
     virtual void OnScrollStartCallback();
-    virtual void FireOnScrollStart();
+    virtual void FireOnScrollStart(bool withPerfMonitor = true);
     virtual void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) {}
     virtual void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) {}
     bool ScrollableIdle()
@@ -789,7 +789,7 @@ public:
         return SizeF();
     }
 
-    SizeF GetViewSizeMinusPadding();
+    SizeF GetViewSizeMinusPadding() const;
 
     void ScrollEndCallback(bool nestedScroll, float velocity);
 

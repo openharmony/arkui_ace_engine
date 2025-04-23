@@ -96,6 +96,9 @@ std::shared_ptr<ArkUIPerfMonitor> PipelineBase::GetPerfMonitor()
 
 PipelineBase::~PipelineBase()
 {
+    if (eventManager_) {
+        eventManager_->FlushCursorStyleRequests();
+    }
     std::lock_guard lock(destructMutex_);
     LOGI("PipelineBase destroyed");
 }
@@ -1091,8 +1094,9 @@ void PipelineBase::OnFormRecover(const std::string& statusData)
 
 void PipelineBase::SetUiDvsyncSwitch(bool on)
 {
-    if (window_) {
+    if (window_ && lastUiDvsyncStatus_ != on) {
         window_->SetUiDvsyncSwitch(on);
     }
+    lastUiDvsyncStatus_ = on;
 }
 } // namespace OHOS::Ace

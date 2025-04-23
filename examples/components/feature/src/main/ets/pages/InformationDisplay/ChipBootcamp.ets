@@ -16,6 +16,7 @@
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { ColorBlock, IconBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
 import { Chip, ChipSize, curves, LengthUnit } from '@kit.ArkUI';
+
 @Component
 export struct ChipBootcamp {
   @Require @Prop title: ResourceStr;
@@ -100,7 +101,7 @@ export struct ChipBootcamp {
   }
 
   aboutToAppear(): void {
-    AppStorage.setOrCreate('scroller',this.scroller)
+    AppStorage.setOrCreate('scroller', this.scroller)
   }
 
   @Builder
@@ -114,10 +115,11 @@ export struct ChipBootcamp {
           src: useEnabled(this.enableChipOptionPrefixIconSrc, this.chipOptionPrefixIconSrc) as ResourceStr,
           size: {
             width: useEnabled(this.enableChipOptionPrefixIconSizeWidth, this.chipOptionPrefixIconSizeWidth),
-            height: useEnabled(this.enableChipOptionPrefixIconSizeHeight, this.chipOptionPrefixIconSizeHeight) },
-            fillColor: useEnabled(this.enableChipOptionPrefixIconFillColor, this.chipOptionPrefixIconFillColor),
-            activatedFillColor: useEnabled(this.enableChipOptionPrefixIconActivatedFillColor,
-              this.chipOptionPrefixIconActivatedFillColor)
+            height: useEnabled(this.enableChipOptionPrefixIconSizeHeight, this.chipOptionPrefixIconSizeHeight)
+          },
+          fillColor: useEnabled(this.enableChipOptionPrefixIconFillColor, this.chipOptionPrefixIconFillColor),
+          activatedFillColor: useEnabled(this.enableChipOptionPrefixIconActivatedFillColor,
+            this.chipOptionPrefixIconActivatedFillColor)
         },
         label: {
           text: this.chipOptionLabelText,
@@ -127,7 +129,8 @@ export struct ChipBootcamp {
             this.chipOptionLabelActivatedFontColor),
           labelMargin: {
             left: useEnabled(this.enableChipOptionLabelLabelMarginLeft, this.chipOptionLabelLabelMarginLeft),
-            right: useEnabled(this.enableChipOptionLabelLabelMarginRight, this.chipOptionLabelLabelMarginRight)},
+            right: useEnabled(this.enableChipOptionLabelLabelMarginRight, this.chipOptionLabelLabelMarginRight)
+          },
           localizedLabelMargin: {
             start: {
               value: useEnabled(this.enableChipOptionLabelLocalizedLabelMarginStartValue,
@@ -149,7 +152,8 @@ export struct ChipBootcamp {
             width: useEnabled(this.enableChipOptionSuffixIconSizeWidth,
               this.chipOptionSuffixIconSizeWidth),
             height: useEnabled(this.enableChipOptionSuffixIconSizeHeight,
-              this.chipOptionSuffixIconSizeHeight) },
+              this.chipOptionSuffixIconSizeHeight)
+          },
           fillColor: useEnabled(this.enableChipOptionSuffixIconFillColor,
             this.chipOptionSuffixIconFillColor),
           activatedFillColor: useEnabled(this.enableChipOptionSuffixIconActivatedFillColor,
@@ -160,10 +164,10 @@ export struct ChipBootcamp {
           this.chipOptionActivatedBackgroundColor),
         borderRadius: useEnabled(this.enableChipOptionBorderRadius, this.chipOptionBorderRadius),
         allowClose: useEnabled(this.enableChipOptionAllowClose, this.chipOptionAllowClose),
-        onClose: ()=>{
+        onClose: () => {
 
         },
-        onClicked: ()=>{
+        onClicked: () => {
 
         },
         direction: useEnabled(this.enableChipOptionDirection, this.chipOptionDirection)
@@ -246,9 +250,9 @@ export struct ChipBootcamp {
           isEnabled: $enableChipOptionLabelFontSize,
           value: $chipOptionLabelFontSize,
           dataSource: [
-            { label: 'text_size_button1', value: $r('sys.float.ohos_id_text_size_button1')},
-            { label: 'text_size_button2', value: $r('sys.float.ohos_id_text_size_button2')},
-            { label: 'text_size_button3', value: $r('sys.float.ohos_id_text_size_button3')}
+            { label: 'text_size_button1', value: $r('sys.float.ohos_id_text_size_button1') },
+            { label: 'text_size_button2', value: $r('sys.float.ohos_id_text_size_button2') },
+            { label: 'text_size_button3', value: $r('sys.float.ohos_id_text_size_button3') }
           ]
         })
         ColorBlock({
@@ -287,11 +291,11 @@ export struct ChipBootcamp {
           isEnabled: $enableChipOptionLabelLocalizedLabelMarginStartUnit,
           value: $chipOptionLabelLocalizedLabelMarginStartUnit,
           dataSource: [
-            { label: 'PX', value: LengthUnit.PX},
-            { label: 'VP', value: LengthUnit.VP},
-            { label: 'FP', value: LengthUnit.FP},
-            { label: 'PERCENT', value: LengthUnit.PERCENT},
-            { label: 'LPX', value: LengthUnit.LPX},
+            { label: 'PX', value: LengthUnit.PX },
+            { label: 'VP', value: LengthUnit.VP },
+            { label: 'FP', value: LengthUnit.FP },
+            { label: 'PERCENT', value: LengthUnit.PERCENT },
+            { label: 'LPX', value: LengthUnit.LPX },
           ]
         })
         SliderBlock({
@@ -306,11 +310,11 @@ export struct ChipBootcamp {
           isEnabled: $enableChipOptionLabelLocalizedLabelMarginEndUnit,
           value: $chipOptionLabelLocalizedLabelMarginEndUnit,
           dataSource: [
-            { label: 'PX', value: LengthUnit.PX},
-            { label: 'VP', value: LengthUnit.VP},
-            { label: 'FP', value: LengthUnit.FP},
-            { label: 'PERCENT', value: LengthUnit.PERCENT},
-            { label: 'LPX', value: LengthUnit.LPX},
+            { label: 'PX', value: LengthUnit.PX },
+            { label: 'VP', value: LengthUnit.VP },
+            { label: 'FP', value: LengthUnit.FP },
+            { label: 'PERCENT', value: LengthUnit.PERCENT },
+            { label: 'LPX', value: LengthUnit.LPX },
           ]
         })
         IconBlock({
@@ -362,7 +366,7 @@ export struct ChipBootcamp {
         RadioBlock({
           title: 'options.allowClose',
           isEnabled: $enableChipOptionAllowClose,
-          value: $chipOptionAllowClose  ,
+          value: $chipOptionAllowClose,
           dataSource: [
             { label: 'true', value: true },
             { label: 'false', value: false }
@@ -373,9 +377,9 @@ export struct ChipBootcamp {
           isEnabled: $enableChipOptionDirection,
           value: $chipOptionDirection,
           dataSource: [
-            { label: 'Ltr', value: Direction.Ltr},
-            { label: 'Rtl', value: Direction.Rtl},
-            { label: 'Auto', value: Direction.Auto}
+            { label: 'Ltr', value: Direction.Ltr },
+            { label: 'Rtl', value: Direction.Rtl },
+            { label: 'Auto', value: Direction.Auto }
           ]
         })
       }
@@ -383,6 +387,7 @@ export struct ChipBootcamp {
     .height('52%')
     .id('scroll')
   }
+
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -394,7 +399,7 @@ export struct ChipBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)

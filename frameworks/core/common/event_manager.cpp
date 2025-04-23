@@ -170,7 +170,7 @@ void EventManager::LogTouchTestResultInfo(const TouchEvent& touchPoint, const Re
 #endif
         resultInfo.append(", depth: ").append(std::to_string(item.second.depth)).append(" };");
     }
-    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "InputTracking id:%{public}d, touch test hitted node info: %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "InputTracking id:%{public}d, touch test hitted node info: %{public}s",
         touchPoint.touchEventId, resultInfo.c_str());
     if (touchTestResultInfo.empty()) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "Touch test result is empty.");
@@ -312,14 +312,12 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, 
         }
     }
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "%{public}s", hittedRecognizerTypeInfo.c_str());
-    if (hittedRecognizerInfo.empty()) {
+    if (hittedRecognizerInfo.empty() && !SystemProperties::GetAceCommercialLogEnabled()) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Hitted recognizer info is empty.");
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
         for (auto& item : dumpList) {
-            if (!SystemProperties::GetAceCommercialLogEnabled()) {
-                TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
-            }
+            TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
         }
     }
 }
@@ -858,7 +856,7 @@ void EventManager::LogTouchTestRecognizerStates(int32_t touchEventId)
         gestureLog += "}";
         log += gestureLog;
     }
-    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "id: %{public}d, log: %{public}s", touchEventId, log.c_str());
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "id: %{public}d, log: %{public}s", touchEventId, log.c_str());
 }
 
 void EventManager::DispatchTouchEventAndCheck(const TouchEvent& event, bool sendOnTouch)

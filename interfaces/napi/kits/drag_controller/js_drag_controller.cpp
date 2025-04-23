@@ -1968,6 +1968,12 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
     napi_create_object(env, &result);
     DragAction* dragAction = new DragAction(dragAsyncContext);
     dragAction->NapiSerializer(env, result);
+    if (!result) {
+        dragAction->DeleteRef();
+        delete dragAction;
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     dragAsyncContext->dragAction = dragAction;
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
@@ -1980,6 +1986,10 @@ static napi_value JSGetDragPreview(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     napi_create_object(env, &result);
     dragPreview->NapiSerializer(env, result);
+    if (!result) {
+        delete dragPreview;
+        return nullptr;
+    }
     return result;
 }
 #else

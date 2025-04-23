@@ -18,7 +18,15 @@ import { Component, Driver, ON } from '@kit.TestKit';
 import { GridStart } from './Grid';
 import {
   buttonClick,
-  JsonType, KeyStruct, radioClick, Search, Slide, sliderDrag, titleSearch, ToggleClick } from '../../../utils';
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Search,
+  Slide,
+  sliderDrag,
+  titleSearch,
+  ToggleClick
+} from '../../../utils';
 
 const driver = Driver.create();
 
@@ -342,7 +350,6 @@ export default function Grid1Test() {
           new KeyStruct('edgeEffectOptions', JsonType.obj),
         ],
         assertEqual: '{"alwaysEnabled":false}'
-
       })
 
       done();
@@ -365,7 +372,6 @@ export default function Grid1Test() {
           new KeyStruct('nestedScroll', JsonType.value),
         ],
         assertEqual: '{"scrollForward":"NestedScrollMode.SELF_ONLY","scrollBackward":"NestedScrollMode.SELF_ONLY"}'
-
       })
 
       done();

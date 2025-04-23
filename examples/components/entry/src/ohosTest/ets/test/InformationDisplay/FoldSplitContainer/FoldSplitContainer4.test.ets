@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { describe, beforeAll, it} from '@ohos/hypium'
+import { describe, beforeAll, it } from '@ohos/hypium'
 import {
   JsonType,
   KeyStruct,
@@ -1810,5 +1810,5 @@ export default function FoldSplitContainer4() {
       done();
 
     })
-    })
+  })
 }

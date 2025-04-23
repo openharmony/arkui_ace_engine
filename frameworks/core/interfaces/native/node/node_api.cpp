@@ -118,7 +118,7 @@ ArkUI_Int64 GetUIState(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, 0);
     return eventHub->GetCurrentUIState();
 }
@@ -127,7 +127,7 @@ void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->AddSupportedState(static_cast<uint64_t>(state));
 }
@@ -136,7 +136,7 @@ void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     std::function<void(uint64_t)>* func = reinterpret_cast<std::function<void(uint64_t)>*>(callback);
     eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false);
@@ -147,7 +147,7 @@ void RemoveSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->RemoveSupportedUIState(static_cast<uint64_t>(state), false);
 }
@@ -503,9 +503,11 @@ const ComponentAsyncEventHandler TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetTextPickerOnScrollStop,
 };
 
+#ifndef ARKUI_WEARABLE
 const ComponentAsyncEventHandler CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCalendarPickerOnChange,
 };
+#endif
 
 const ComponentAsyncEventHandler CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCheckboxChange,
@@ -589,11 +591,9 @@ const ComponentAsyncEventHandler RADIO_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnRadioChange,
 };
 
-#ifndef ARKUI_WEARABLE
 const ComponentAsyncEventHandler SELECT_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnSelectSelect,
 };
-#endif
 
 const ComponentAsyncEventHandler IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetImageAnimatorOnStart,
@@ -929,11 +929,13 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
         }
         case ARKUI_CALENDAR_PICKER: {
             // calendar picker event type.
+#ifndef ARKUI_WEARABLE
             if (subKind >= sizeof(CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
                 return;
             }
             eventHandle = CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+#endif
             break;
         }
         case ARKUI_CHECKBOX: {
@@ -1034,7 +1036,6 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = RADIO_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-#ifndef ARKUI_WEARABLE
         case ARKUI_SELECT: {
             // select event type.
             if (subKind >= sizeof(SELECT_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -1044,7 +1045,6 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = SELECT_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-#endif
         case ARKUI_IMAGE_ANIMATOR: {
             // imageAnimator event type.
             if (subKind >= sizeof(IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -1448,6 +1448,11 @@ void* GetAttachNodePtr(ArkUINodeHandle node)
 ArkUI_Int32 MeasureLayoutAndDraw(ArkUIVMContext vmContext, ArkUINodeHandle rootPtr)
 {
     auto* root = reinterpret_cast<FrameNode*>(rootPtr);
+    auto geometryNode = root->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return 0;
+    }
     float width = root->GetGeometryNode()->GetFrameSize().Width();
     float height = root->GetGeometryNode()->GetFrameSize().Height();
     // measure
@@ -1518,6 +1523,11 @@ void SetMeasureWidth(ArkUINodeHandle node, ArkUI_Int32 value)
     if (!frameNode) {
         return;
     }
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return;
+    }
     frameNode->GetGeometryNode()->SetFrameWidth(value);
 }
 
@@ -1525,6 +1535,11 @@ ArkUI_Int32 GetMeasureWidth(ArkUINodeHandle node)
 {
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     if (!frameNode) {
+        return 0;
+    }
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
         return 0;
     }
     return frameNode->GetGeometryNode()->GetFrameSize().Width();
@@ -1537,6 +1552,11 @@ void SetMeasureHeight(ArkUINodeHandle node, ArkUI_Int32 value)
     if (!frameNode) {
         return;
     }
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return;
+    }
     frameNode->GetGeometryNode()->SetFrameHeight(value);
 }
 
@@ -1544,6 +1564,11 @@ ArkUI_Int32 GetMeasureHeight(ArkUINodeHandle node)
 {
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     if (!frameNode) {
+        return 0;
+    }
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
         return 0;
     }
     return frameNode->GetGeometryNode()->GetFrameSize().Height();
@@ -1556,6 +1581,11 @@ void SetX(ArkUINodeHandle node, ArkUI_Int32 value)
     if (!frameNode) {
         return;
     }
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return;
+    }
     frameNode->GetGeometryNode()->SetMarginFrameOffsetX(value);
 }
 
@@ -1564,6 +1594,11 @@ void SetY(ArkUINodeHandle node, ArkUI_Int32 value)
     // directly set frameNode measure postionY.
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     if (!frameNode) {
+        return;
+    }
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
         return;
     }
     frameNode->GetGeometryNode()->SetMarginFrameOffsetY(value);
@@ -1575,6 +1610,11 @@ ArkUI_Int32 GetX(ArkUINodeHandle node)
     if (!frameNode) {
         return 0;
     }
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return 0;
+    }
     return frameNode->GetGeometryNode()->GetMarginFrameOffset().GetX();
 }
 
@@ -1582,6 +1622,11 @@ ArkUI_Int32 GetY(ArkUINodeHandle node)
 {
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     if (!frameNode) {
+        return 0;
+    }
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
         return 0;
     }
     return frameNode->GetGeometryNode()->GetMarginFrameOffset().GetY();

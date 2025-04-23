@@ -77,7 +77,6 @@ protected:
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static void GetAutoPlayOptionsInfo(const JSRef<JSObject>& obj, SwiperAutoPlayOptions& swiperAutoPlayOptions);
     static void SetIndicatorController(const JSCallbackInfo& info);
-    static void SetDigitalCrownSensitivity(const JSCallbackInfo& info);
 
     private:
         static bool ParseSpace(const JSRef<JSVal>& jsValue, CalcDimension& result);

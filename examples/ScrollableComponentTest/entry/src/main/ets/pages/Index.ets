@@ -39,6 +39,7 @@ struct IndexPage {
     new TextList(5, 'ListMainPage', 'pages/List/ListMainPage'),
     new TextList(6, 'AlphabetIndexer', 'pages/alphabetIndexer/AlphabetIndexerMainPage'),
     new TextList(7, 'Refresh', 'pages/refresh/RefreshMainPage'),
+    new TextList(8, 'GridMainPage', 'pages/grid/GridMainPage'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

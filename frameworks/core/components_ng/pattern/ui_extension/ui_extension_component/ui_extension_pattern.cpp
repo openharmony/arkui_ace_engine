@@ -27,12 +27,14 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/overlay/overlay_mask_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_container_handler.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
@@ -82,76 +84,6 @@ bool StartWith(const std::string &source, const std::string &prefix)
 
     return source.find(prefix) == 0;
 }
-
-class UIExtensionAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
-public:
-    UIExtensionAccessibilityChildTreeCallback(const WeakPtr<UIExtensionPattern>& weakPattern, int64_t accessibilityId)
-        : AccessibilityChildTreeCallback(accessibilityId), weakPattern_(weakPattern)
-    {}
-
-    ~UIExtensionAccessibilityChildTreeCallback() override = default;
-
-    bool OnRegister(uint32_t windowId, int32_t treeId) override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return false;
-        }
-        if (isReg_) {
-            return true;
-        }
-        pattern->OnAccessibilityChildTreeRegister(windowId, treeId, GetAccessibilityId());
-        isReg_ = true;
-        return true;
-    }
-
-    bool OnDeregister() override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return false;
-        }
-        if (!isReg_) {
-            return true;
-        }
-        pattern->OnAccessibilityChildTreeDeregister();
-        isReg_ = false;
-        return true;
-    }
-
-    bool OnSetChildTree(int32_t childWindowId, int32_t childTreeId) override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return false;
-        }
-        pattern->OnSetAccessibilityChildTree(childWindowId, childTreeId);
-        return true;
-    }
-
-    bool OnDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return false;
-        }
-        pattern->OnAccessibilityDumpChildInfo(params, info);
-        return true;
-    }
-
-    void OnClearRegisterFlag() override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return;
-        }
-        isReg_ = false;
-    }
-
-private:
-    bool isReg_ = false;
-    WeakPtr<UIExtensionPattern> weakPattern_;
-};
 }
 UIExtensionPattern::UIExtensionPattern(
     bool isTransferringCaller, bool isModal, bool isAsyncModalBinding, SessionType sessionType)
@@ -170,6 +102,7 @@ UIExtensionPattern::~UIExtensionPattern()
     }
     NotifyDestroy();
     FireModalOnDestroy();
+    OverlayMaskManager::GetInstance().OnUIExtDestroy(uiExtensionId_);
     UIExtensionIdUtility::GetInstance().RecycleExtensionId(uiExtensionId_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -611,6 +544,7 @@ void UIExtensionPattern::InitBusinessDataHandleCallback()
     RegisterEventProxyFlagCallback();
     RegisterGetAvoidInfoCallback();
     RegisterReplyPageModeCallback();
+    OverlayMaskManager::GetInstance().RegisterOverlayHostMaskMountCallback(uiExtensionId_, GetHost());
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()
@@ -908,7 +842,7 @@ void UIExtensionPattern::RegisterPipelineEvent(
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
         const RectF& oldRect,
@@ -985,7 +919,7 @@ void UIExtensionPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);

@@ -2090,7 +2090,6 @@ export struct ColumnBootcamp {
   compBackground() {
     Text('123')
   }
-
 }
 
 @Preview

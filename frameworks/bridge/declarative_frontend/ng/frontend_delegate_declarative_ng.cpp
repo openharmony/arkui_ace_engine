@@ -727,6 +727,10 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .onDidAppear = dialogAttr.onDidAppear,
+        .onDidDisappear = dialogAttr.onDidDisappear,
+        .onWillAppear = dialogAttr.onWillAppear,
+        .onWillDisappear = dialogAttr.onWillDisappear,
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();

@@ -394,6 +394,7 @@ public:
     std::string GetFontInJson() const;
     std::string GetBindSelectionMenuInJson() const;
     virtual void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const {}
+    std::string GetFontSizeWithThemeInJson(const std::optional<Dimension>& value) const;
 
     const std::vector<std::u16string>& GetDragContents() const
     {
@@ -957,6 +958,7 @@ protected:
     bool ShowShadow(const PointF& textOffset, const Color& color);
     virtual PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect);
     bool hasUrlSpan_ = false;
+    WeakPtr<PipelineContext> pipeline_;
 
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -1081,7 +1083,6 @@ private:
     std::optional<void*> externalParagraph_;
     std::optional<ParagraphStyle> externalParagraphStyle_;
     bool isUserSetResponseRegion_ = false;
-    WeakPtr<PipelineContext> pipeline_;
     WeakPtr<ScrollablePattern> scrollableParent_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
     std::optional<std::function<void()>> afterLayoutCallback_;

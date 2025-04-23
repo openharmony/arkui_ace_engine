@@ -16,9 +16,12 @@
 #include "mock_navigation_stack.h"
 
 #include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_container.h"
@@ -33,6 +36,9 @@ namespace {
 constexpr double HALF = 0.5;
 constexpr float FRAME_WIDTH = 300.0f;
 constexpr float FRAME_HEIGHT = 400.0f;
+constexpr float DEFAULT_HEIGHT = 0.f;
+constexpr float DEFAULT_ROOT_WIDTH = 480.f;
+constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
 constexpr float REMOVE_CLIP_SIZE = 100000.0f;
 
 RefPtr<NavDestinationNodeBase> CreateNavDestinationNodeBase()
@@ -767,5 +773,675 @@ HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushStartTest004, T
     auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
     auto offset = node->CalcTranslateForTransitionPushStart(frameSize, true);
     EXPECT_EQ(offset, OffsetF(FRAME_HEIGHT * HALF * isRTL, 0.0f));
+}
+
+/**
+ * @tc.name: CustomizeExpandSafeArea001
+ * @tc.desc: test CustomizeExpandSafeArea function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CustomizeExpandSafeArea001, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->isCustomExpandRunning_ = true;
+    auto ret = node->CustomizeExpandSafeArea();
+    EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: CustomizeExpandSafeArea002
+ * @tc.desc: test CustomizeExpandSafeArea function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CustomizeExpandSafeArea002, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->isCustomExpandRunning_ = false;
+    /**
+     * @tc.steps:step2. set rotateAngle_.has_value() == false and viewportConfig_ is nullptr.
+     */
+    node->viewportConfig_ = nullptr;
+    auto ret = node->CustomizeExpandSafeArea();
+    EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: CustomizeExpandSafeArea003
+ * @tc.desc: test CustomizeExpandSafeArea function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CustomizeExpandSafeArea003, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->isCustomExpandRunning_ = false;
+    /**
+     * @tc.steps:step2. set rotateAngle_.has_value() == true and viewportConfig_ is not nullptr.
+     * * @tc.expected: step2. angle == ROTATION_270.
+     */
+    node->SetPageRotateAngle(ROTATION_270);
+    node->viewportConfig_ = AceType::MakeRefPtr<PageViewportConfig>();
+    auto ret = node->CustomizeExpandSafeArea();
+    EXPECT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: CustomizeExpandSafeArea004
+ * @tc.desc: test CustomizeExpandSafeArea function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CustomizeExpandSafeArea004, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->isCustomExpandRunning_ = false;
+    /**
+     * @tc.steps:step2. set rotateAngle_.has_value() == true and viewportConfig_ is not nullptr.
+     * @tc.expected: step2. angle == ROTATION_90.
+     */
+    node->SetPageRotateAngle(ROTATION_90);
+    node->viewportConfig_ = AceType::MakeRefPtr<PageViewportConfig>();
+    auto ret = node->CustomizeExpandSafeArea();
+    EXPECT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: CustomizeExpandSafeArea005
+ * @tc.desc: test CustomizeExpandSafeArea function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CustomizeExpandSafeArea005, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->isCustomExpandRunning_ = false;
+    /**
+     * @tc.steps:step2. set rotateAngle_.has_value() == true and viewportConfig_ is not nullptr.
+     * @tc.expected: step2. angle == ROTATION_180.
+     */
+    node->SetPageRotateAngle(ROTATION_180);
+    node->viewportConfig_ = AceType::MakeRefPtr<PageViewportConfig>();
+    auto ret = node->CustomizeExpandSafeArea();
+    EXPECT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: MeasureTest001
+ * @tc.desc: test Measure function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, MeasureTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps:step2. rotateAngle_.has_value() == false and viewportConfig_ is nullptr.
+     */
+    node->viewportConfig_ = nullptr;
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.percentReference = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.selfIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.maxSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    EXPECT_EQ(false, node->isRotated_);
+    node->SetIsRotated(true);
+    node->Measure(LayoutConstraint);
+    EXPECT_EQ(true, node->isRotated_);
+}
+
+/**
+ * @tc.name: MeasureTest002
+ * @tc.desc: test Measure function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, MeasureTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps:step2. rotateAngle_.has_value() == true and viewportConfig_ is nullptr.
+     * @tc.expected: step2. angle == ROTATION_0.
+     */
+    node->SetPageRotateAngle(ROTATION_0);
+    node->viewportConfig_ = nullptr;
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.percentReference = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.selfIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.maxSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    EXPECT_EQ(false, node->isRotated_);
+    node->SetIsRotated(true);
+    node->Measure(LayoutConstraint);
+    EXPECT_EQ(ROTATION_0, node->rotateAngle_.value());
+    EXPECT_EQ(true, node->isRotated_);
+}
+
+/**
+ * @tc.name: MeasureTest003
+ * @tc.desc: test Measure function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, MeasureTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps:step2. rotateAngle_.has_value() == true and viewportConfig_ is not nullptr.
+     * @tc.expected: step2. angle != ROTATION_0.
+     */
+    node->SetPageRotateAngle(ROTATION_180);
+    node->viewportConfig_ = AceType::MakeRefPtr<PageViewportConfig>();
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.percentReference = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.selfIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.maxSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    EXPECT_EQ(false, node->isRotated_);
+    node->SetIsRotated(true);
+    node->Measure(LayoutConstraint);
+    EXPECT_EQ(ROTATION_180, node->rotateAngle_.value());
+    EXPECT_EQ(true, node->isRotated_);
+}
+
+/**
+ * @tc.name: LayoutTest001
+ * @tc.desc: test Layout function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, LayoutTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps:step2. rotateAngle_.has_value() == false and viewportConfig_ is nullptr.
+     */
+    node->viewportConfig_ = nullptr;
+    EXPECT_EQ(true, node->isSizeMatchNavigation_);
+    node->SetIsSizeMatchNavigation(false);
+    node->Layout();
+    EXPECT_EQ(false, node->isSizeMatchNavigation_);
+}
+
+/**
+ * @tc.name: LayoutTest002
+ * @tc.desc: test Layout function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, LayoutTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps:step2. rotateAngle_.has_value() == true and viewportConfig_ is not nullptr.
+     * @tc.expected: step2. angle != ROTATION_0.
+     */
+    node->SetPageRotateAngle(ROTATION_180);
+    node->viewportConfig_ = AceType::MakeRefPtr<PageViewportConfig>();
+    EXPECT_EQ(true, node->isSizeMatchNavigation_);
+    node->Layout();
+    EXPECT_EQ(ROTATION_180, node->rotateAngle_.value());
+}
+
+/**
+ * @tc.name: LayoutTest003
+ * @tc.desc: test Layout function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, LayoutTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps:step2. rotateAngle_.has_value() == true and viewportConfig_ is not nullptr.
+     * @tc.expected: step2. angle == ROTATION_0
+     */
+    node->SetPageRotateAngle(ROTATION_0);
+    node->viewportConfig_ = AceType::MakeRefPtr<PageViewportConfig>();
+    EXPECT_EQ(true, node->isSizeMatchNavigation_);
+    node->SetIsSizeMatchNavigation(false);
+    node->Layout();
+    EXPECT_EQ(ROTATION_0, node->rotateAngle_.value());
+    EXPECT_EQ(false, node->isSizeMatchNavigation_);
+}
+
+/**
+ * @tc.name: AdjustLayoutConstarintIfNeededTest001
+ * @tc.desc: test AdjustLayoutConstarintIfNeeded function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, AdjustLayoutConstarintIfNeededTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps:step2. rotateAngle_.has_value() == false and viewportConfig_ is nullptr.
+     */
+    node->SetPageRotateAngle(ROTATION_0);
+    node->viewportConfig_ = nullptr;
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.percentReference = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.selfIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.maxSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    auto ret = node->AdjustLayoutConstarintIfNeeded(LayoutConstraint);
+    EXPECT_EQ(ret.maxSize.height_, DEFAULT_ROOT_HEIGHT);
+}
+
+/**
+ * @tc.name: AdjustLayoutConstarintIfNeededTest002
+ * @tc.desc: test AdjustLayoutConstarintIfNeeded function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, AdjustLayoutConstarintIfNeededTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps:step2. rotateAngle_.has_value() == true and viewportConfig_ is not nullptr.
+     */
+    node->SetPageRotateAngle(ROTATION_0);
+    node->viewportConfig_ = AceType::MakeRefPtr<PageViewportConfig>();
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.percentReference = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.selfIdealSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.maxSize = { DEFAULT_ROOT_WIDTH, DEFAULT_ROOT_HEIGHT };
+    auto ret = node->AdjustLayoutConstarintIfNeeded(LayoutConstraint);
+    EXPECT_EQ(ret.minSize.height_, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: GetParentGlobalOffsetWithSafeAreaTest001
+ * @tc.desc: test GetParentGlobalOffsetWithSafeArea function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, GetParentGlobalOffsetWithSafeAreaTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps:step2. rotateAngle_.has_value() == true.
+     */
+    node->SetPageRotateAngle(ROTATION_0);
+    bool checkBoundary = true;
+    bool checkPosition = false;
+    auto testF = node->GetParentGlobalOffsetWithSafeArea(checkBoundary, checkPosition);
+    EXPECT_EQ(testF, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: GetParentGlobalOffsetWithSafeAreaTest002
+ * @tc.desc: test GetParentGlobalOffsetWithSafeArea function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, GetParentGlobalOffsetWithSafeAreaTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps:step2. rotateAngle_.has_value() == false.
+     */
+    bool checkBoundary = true;
+    bool checkPosition = false;
+    auto testF = node->GetParentGlobalOffsetWithSafeArea(checkBoundary, checkPosition);
+    EXPECT_EQ(testF, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: CalcContentTranslateForDialogTest001
+ * @tc.desc: test CalcContentTranslateForDialog function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcContentTranslateForDialogTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps:step2. rotateAngle_.has_value() == true and angle is ROTATION_0.
+     */
+    auto options = TranslateOptions(0.0f, 400.0f, 0.0f);
+    node->SetPageRotateAngle(ROTATION_0);
+    SizeF size(400.0f, 400.0f);
+    auto testF = node->CalcContentTranslateForDialog(size);
+    EXPECT_EQ(testF, options);
+}
+
+/**
+ * @tc.name: CalcContentTranslateForDialogTest002
+ * @tc.desc: test CalcContentTranslateForDialog function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcContentTranslateForDialogTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps:step2. rotateAngle_.has_value() == true and angle is ROTATION_90.
+     */
+    auto options = TranslateOptions(300.0f, 0.0f, 0.0f);
+    node->SetPageRotateAngle(ROTATION_90);
+    SizeF size(300.0f, 400.0f);
+    auto testF = node->CalcContentTranslateForDialog(size);
+    EXPECT_EQ(testF, options);
+}
+
+/**
+ * @tc.name: CalcContentTranslateForDialogTest003
+ * @tc.desc: test CalcContentTranslateForDialog function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcContentTranslateForDialogTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps:step2. rotateAngle_.has_value() == true and angle is ROTATION_180.
+     */
+    auto options = TranslateOptions(0.0f, -400.0f, 0.0f);
+    node->SetPageRotateAngle(ROTATION_180);
+    SizeF size(400.0, 400.0);
+    auto testF = node->CalcContentTranslateForDialog(size);
+    EXPECT_EQ(testF, options);
+}
+
+/**
+ * @tc.name: CalcContentTranslateForDialogTest004
+ * @tc.desc: test CalcContentTranslateForDialog function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcContentTranslateForDialogTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavDestinationNodeBase node.
+     */
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps:step2. rotateAngle_.has_value() == true and angle is ROTATION_270.
+     */
+    auto options = TranslateOptions(-400.0f, 0.0f, 0.0f);
+    node->SetPageRotateAngle(ROTATION_270);
+    SizeF size(400.0, 400.0);
+    auto testF = node->CalcContentTranslateForDialog(size);
+    EXPECT_EQ(testF, options);
+}
+
+/**
+ * @tc.name: NavigationStack001
+ * @tc.desc: Test GetNavDesNameByIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, NavigationStack001, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavigationStack node.
+     */
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    int32_t index = 0;
+    auto ret = navigationStack->GetNavDesNameByIndex(index);
+    EXPECT_EQ("", ret);
+}
+
+/**
+ * @tc.name: NavigationStack002
+ * @tc.desc: Test GetNavDesNameByIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, NavigationStack002, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavigationStack node.
+     */
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    /**
+     * @tc.steps:step2. index > Size().
+     */
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    navigationStack->navPathList_.emplace_back(std::make_pair("pageOne", frameNode));
+    EXPECT_NE(frameNode, nullptr);
+    int32_t index = 20;
+    auto ret = navigationStack->GetNavDesNameByIndex(index);
+    EXPECT_EQ("", ret);
+}
+
+/**
+ * @tc.name: NavigationStack003
+ * @tc.desc: Test GetNavDesNameByIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, NavigationStack003, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create NavigationStack node.
+     */
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    /**
+     * @tc.steps:step2. index < Size().
+     */
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    navigationStack->navPathList_.emplace_back(std::make_pair("pageOne", frameNode));
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+    navigationStack->navPathList_.emplace_back(std::make_pair("pageTwo", tempNode));
+    int32_t index = 1;
+    auto ret = navigationStack->GetNavDesNameByIndex(index);
+    EXPECT_EQ("pageTwo", ret);
+}
+
+/**
+ * @tc.name: RemoveAnimationTest001
+ * @tc.desc: Test RemoveAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, RemoveAnimationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation with barStyle and check by function.
+     */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationTitlebarOptions options;
+    options.brOptions.barStyle = BarStyle::SAFE_AREA_PADDING;
+    NavigationTitleMode currentMode = NavigationTitleMode::MINI;
+    auto navigationNode = CreateNavigationWithTitle(mockNavPathStack, options, currentMode, "navigation", "subtitle");
+    ASSERT_NE(navigationNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavDestinationNodeBase>(navigationNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navDestinationPatternBase = navBarNode->GetPattern<NavDestinationPatternBase>();
+    ASSERT_NE(navDestinationPatternBase, nullptr);
+    /**
+     * @tc.steps:step2. add Animation to barAnimations_ and remove animaton.
+     */
+    AnimationOption option;
+    auto propertyCallback = []() {};
+    auto finishCallback = []() {};
+    auto animation = AnimationUtils::StartAnimation(option, propertyCallback, finishCallback);
+    EXPECT_EQ(0, navDestinationPatternBase->barAnimations_.size());
+    navDestinationPatternBase->barAnimations_.emplace(101, animation);
+    int32_t id = 101;
+    EXPECT_EQ(1, navDestinationPatternBase->barAnimations_.size());
+    navDestinationPatternBase->RemoveAnimation(id);
+    EXPECT_EQ(0, navDestinationPatternBase->barAnimations_.size());
+}
+
+/**
+ * @tc.name: RemoveAnimationTest002
+ * @tc.desc: Test RemoveAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, RemoveAnimationTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation with barStyle and check by function.
+     */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationTitlebarOptions options;
+    options.brOptions.barStyle = BarStyle::SAFE_AREA_PADDING;
+    NavigationTitleMode currentMode = NavigationTitleMode::MINI;
+    auto navigationNode = CreateNavigationWithTitle(mockNavPathStack, options, currentMode, "navigation", "subtitle");
+    ASSERT_NE(navigationNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavDestinationNodeBase>(navigationNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navDestinationPatternBase = navBarNode->GetPattern<NavDestinationPatternBase>();
+    ASSERT_NE(navDestinationPatternBase, nullptr);
+    /**
+     * @tc.steps:step2. add Animation to barAnimations_ and don't remove animaton.
+     */
+    AnimationOption option;
+    auto propertyCallback = []() {};
+    auto finishCallback = []() {};
+    auto animation = AnimationUtils::StartAnimation(option, propertyCallback, finishCallback);
+    EXPECT_EQ(0, navDestinationPatternBase->barAnimations_.size());
+    navDestinationPatternBase->barAnimations_.emplace(101, animation);
+    int32_t id = 300;
+    EXPECT_EQ(1, navDestinationPatternBase->barAnimations_.size());
+    navDestinationPatternBase->RemoveAnimation(id);
+    EXPECT_EQ(1, navDestinationPatternBase->barAnimations_.size());
+}
+
+/**
+ * @tc.name: UpdateBarItemNodeWithItemTest001
+ * @tc.desc: Test UpdateBarItemNodeWithItem function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, UpdateBarItemNodeWithItemTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. obtain barItem nodes.
+     * @tc.expected: barItem node is not nullptr.
+     */
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, 1, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
+    ASSERT_NE(barItemNode, nullptr);
+    /**
+     * @tc.steps: step2. barItem.text.has_value() == false.
+     */
+    BarItem barItem;
+    barItem.action = []() {};
+    barItem.icon = "page";
+    bool isButtonEnabled = true;
+    RefPtr<NavigationBarTheme> theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    NavigationTitleUtil::UpdateBarItemNodeWithItem(barItemNode, barItem, isButtonEnabled, theme);
+    int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    EXPECT_EQ(NavigationTitleUtil::GetSubtitleString(titleBarNode), "");
+}
+
+/**
+ * @tc.name: UpdateBarItemNodeWithItemTest002
+ * @tc.desc: Test UpdateBarItemNodeWithItem function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, UpdateBarItemNodeWithItemTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. obtain barItem nodes.
+     * @tc.expected: barItem node is not nullptr.
+     */
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, 1, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
+    ASSERT_NE(barItemNode, nullptr);
+    /**
+     * @tc.steps: step2. barItem.text.has_value() == true and barItem.icon.has_value() == false.
+     * @tc.expected: barItem.iconSymbol.has_value() == false.
+     */
+    BarItem barItem;
+    barItem.action = []() {};
+    barItem.text = "aaaaa";
+    bool isButtonEnabled = true;
+    RefPtr<NavigationBarTheme> theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    NavigationTitleUtil::UpdateBarItemNodeWithItem(barItemNode, barItem, isButtonEnabled, theme);
+    int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    EXPECT_EQ(NavigationTitleUtil::GetSubtitleString(titleBarNode), "");
+}
+
+/**
+ * @tc.name: UpdateBarItemNodeWithItemTest003
+ * @tc.desc: Test UpdateBarItemNodeWithItem function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, UpdateBarItemNodeWithItemTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. obtain barItem nodes.
+     * @tc.expected: barItem node is not nullptr.
+     */
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, 1, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
+    ASSERT_NE(barItemNode, nullptr);
+    /**
+     * @tc.steps: step2. barItem.text.value() is empty and barItem.icon.has_value() == false.
+     * @tc.expected: barItem.iconSymbol.value() is nullptr.
+     */
+    BarItem barItem;
+    barItem.text = "";
+    barItem.iconSymbol = nullptr;
+    bool isButtonEnabled = true;
+    RefPtr<NavigationBarTheme> theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    NavigationTitleUtil::UpdateBarItemNodeWithItem(barItemNode, barItem, isButtonEnabled, theme);
+    int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    EXPECT_EQ(NavigationTitleUtil::GetSubtitleString(titleBarNode), "");
 }
 } // namespace OHOS::Ace::NG

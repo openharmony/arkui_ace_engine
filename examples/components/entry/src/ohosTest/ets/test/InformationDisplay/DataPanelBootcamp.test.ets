@@ -34,7 +34,7 @@ export default function DataPanelBootcampTest() {
       // Presets an action, which is performed only once before all test cases of the test suite start.
       // This API supports only one parameter: preset action function.
       console.info('beforeAll begin');
-      
+
       await delegator.startAbility({
         bundleName: 'cn.ohos.components',
         abilityName: 'EntryAbility'

@@ -3230,7 +3230,9 @@ void WebDelegate::InitWebViewWithSurface()
             auto upgradeContext = context.Upgrade();
             CHECK_NULL_VOID(upgradeContext);
             auto window_id = upgradeContext->GetWindowId();
+            auto foucus_window_id = upgradeContext->GetFocusWindowId();
             delegate->nweb_->SetWindowId(window_id);
+            delegate->nweb_->SetFocusWindowId(foucus_window_id);
             delegate->SetToken();
             delegate->RegisterSurfaceOcclusionChangeFun();
             delegate->nweb_->SetDrawMode(renderMode);
@@ -5263,7 +5265,8 @@ void WebDelegate::OnAccessibilityEvent(
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     AccessibilityEvent event;
-    if (eventType == AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY) {
+    if (eventType == AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY ||
+        eventType == AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY_NOT_INTERRUPT) {
         event.textAnnouncedForAccessibility = argument;
     }
     auto webPattern = webPattern_.Upgrade();

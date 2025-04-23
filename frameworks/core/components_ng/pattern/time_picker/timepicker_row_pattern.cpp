@@ -373,7 +373,7 @@ void TimePickerRowPattern::InitDisabled()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     enabled_ = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -571,7 +571,7 @@ void TimePickerRowPattern::SetEventCallback(EventCallback&& value)
 void TimePickerRowPattern::FireChangeEvent(bool refresh)
 {
     if (refresh) {
-        auto timePickerEventHub = GetEventHub<TimePickerEventHub>();
+        auto timePickerEventHub = GetOrCreateEventHub<TimePickerEventHub>();
         CHECK_NULL_VOID(timePickerEventHub);
         auto str = GetSelectedObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);
@@ -602,7 +602,7 @@ void TimePickerRowPattern::SetEnterSelectedAreaEventCallback(EventCallback&& val
 void TimePickerRowPattern::FireEnterSelectedAreaEvent(bool refresh)
 {
     if (refresh) {
-        auto timePickerEventHub = GetEventHub<TimePickerEventHub>();
+        auto timePickerEventHub = GetOrCreateEventHub<TimePickerEventHub>();
         CHECK_NULL_VOID(timePickerEventHub);
         auto str = GetEnterObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);
@@ -1068,9 +1068,6 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
             amPmNode->MovePosition(0);
         }
         UpdateNodePositionForUg();
-        auto layoutProperty = AceType::DynamicCast<FrameNode>(amPmNode)->GetLayoutProperty<LayoutProperty>();
-        layoutProperty->UpdateAlignment(Alignment::CENTER);
-        layoutProperty->UpdateLayoutWeight(1);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     auto buttonConfirmNode = weakButtonConfirm_.Upgrade();

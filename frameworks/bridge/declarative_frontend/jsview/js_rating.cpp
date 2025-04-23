@@ -184,7 +184,7 @@ void JSRating::SetOnChange(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Rating.onChange");
         PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(stod(value)));
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(StringToDouble(value)));
         func->ExecuteJS(1, &newJSVal);
     };
 

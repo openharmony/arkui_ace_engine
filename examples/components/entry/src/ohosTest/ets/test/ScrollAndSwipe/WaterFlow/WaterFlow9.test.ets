@@ -13,13 +13,9 @@
  * limitations under the License.
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
-import {
-  radioClick,
-  ToggleClick,
-  titleSearch,
-  getToggle
-} from '../../../utils'
+import { radioClick, ToggleClick, titleSearch, getToggle } from '../../../utils'
 import { WaterFlowStart } from './WaterFlow';
+
 export default function WaterFlow9() {
   describe('WaterFlow9', () => {
     beforeAll(async (done: Function) => {

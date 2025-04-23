@@ -360,6 +360,14 @@ uint32_t ThemeConstants::GetSymbolByName(const char* name) const
     return resAdapter_->GetSymbolByName(name);
 }
 
+uint32_t ThemeConstants::GetSymbolById(uint32_t resId) const
+{
+    if (!resAdapter_) {
+        return ERROR_VALUE_UINT;
+    }
+    return resAdapter_->GetSymbolById(resId);
+}
+
 std::vector<uint32_t> ThemeConstants::GetIntArray(uint32_t key) const
 {
     if (IsGlobalResource(key)) {

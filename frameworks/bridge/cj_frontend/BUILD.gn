@@ -170,6 +170,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_scrollable_ffi.cpp",
       "interfaces/cj_ffi/cj_scrollbar_ffi.cpp",
       "interfaces/cj_ffi/cj_search_ffi.cpp",
+      "interfaces/cj_ffi/cj_select_ffi.cpp",
       "interfaces/cj_ffi/cj_shape_ffi.cpp",
       "interfaces/cj_ffi/cj_side_bar_container_ffi.cpp",
       "interfaces/cj_ffi/cj_slider_ffi.cpp",
@@ -217,10 +218,6 @@ template("cj_frontend") {
       "interfaces/cj_ffi/utils.cpp",
       "runtime/cj_runtime_delegate.cpp",
     ]
-
-    if (!ace_engine_feature_wearable) {
-      sources += [ "interfaces/cj_ffi/cj_select_ffi.cpp" ]
-    }
 
     deps += [ "$ace_root/build:libace_compatible" ]
 

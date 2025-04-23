@@ -20,47 +20,6 @@
 #include "core/gestures/gesture_event.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct ArkUI_GestureRecognizer {
-    int32_t type = -1;
-    ArkUIGesture* gesture = nullptr;
-    void* extraData = nullptr;
-    void* attachNode = nullptr;
-    bool capi = true;
-    void* recognizer = nullptr;
-    ArkUIGestureEventTargetInfo targetInfo = {};
-};
-
-struct ArkUI_GestureEventTargetInfo {
-    void* uiNode = nullptr;
-};
-
-#ifdef __cplusplus
-};
-
-// the ArkUI_GestureEvent struct actually same as ArkUIAPIEventGestureAsyncEvent;
-struct ArkUI_GestureEvent {
-    ArkUIAPIEventGestureAsyncEvent eventData;
-    void* attachNode;
-};
-
-struct ArkUI_GestureInterruptInfo {
-    ArkUIGestureInterruptInfo interruptData;
-};
-
-struct ArkUI_ParallelInnerGestureEvent {
-    ArkUIGestureRecognizer* current = nullptr;
-    ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;
-    void* userData = nullptr;
-    int32_t count;
-};
-
-#endif
-
-
 ArkUI_GestureEventActionType OH_ArkUI_GestureEvent_GetActionType(const ArkUI_GestureEvent* event)
 {
     ArkUI_GestureEventActionType ret;
@@ -717,8 +676,7 @@ ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers)
     return ndkGesture;
 }
 
-ArkUI_GestureRecognizer* CreateTapGestureWithDistanceThreshold(
-    int32_t count, int32_t fingers, double distanceThreshold)
+ArkUI_GestureRecognizer* CreateTapGestureWithDistanceThreshold(int32_t count, int32_t fingers, double distanceThreshold)
 {
     count = std::max(count, DEFAULT_TAP_COUNT);
     fingers = std::clamp(fingers, DEFAULT_TAP_FINGERS, MAX_TAP_FINGERS);

@@ -4,10 +4,17 @@ import { ON } from '@ohos.UiTest';
 import {
   buttonClick,
   getToggle,
-  JsonType, KeyStruct, radioClick, Search,
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Search,
   searchParentBlock,
   searchToggle,
-  Slide, sliderDrag, titleSearch, ToggleClick } from '../../utils';
+  Slide,
+  sliderDrag,
+  titleSearch,
+  ToggleClick
+} from '../../utils';
 
 const TAG = 'ButtonBootcamp'
 
@@ -16,6 +23,7 @@ const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorReg
 
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
+
 export default function ButtonBootcampTest() {
   describe('ButtonBootcampTest', () => {
     // Defines a test suite. Two parameters are supported: test suite name and test suite function.

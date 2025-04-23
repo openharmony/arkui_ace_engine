@@ -151,11 +151,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getImageSpanModifier = NodeModifier::GetImageSpanModifier,
         .getBlankModifier = NodeModifier::GetBlankModifier,
         .getSearchModifier = NodeModifier::GetSearchModifier,
-    #ifndef ARKUI_WEARABLE
         .getSelectModifier = NodeModifier::GetSelectModifier,
-    #else
-        .getSelectModifier = nullptr,
-    #endif
         .getRadioModifier = NodeModifier::GetRadioModifier,
         .getCheckboxModifier = NodeModifier::GetCheckboxModifier,
         .getTimepickerModifier = NodeModifier::GetTimepickerModifier,
@@ -193,7 +189,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getSpanModifier = NodeModifier::GetSpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetImageAnimatorModifier,
         .getSideBarContainerModifier = NodeModifier::GetSideBarContainerModifier,
+    #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCalendarPickerModifier,
+    #else
+        .getCalendarPickerModifier = nullptr,
+    #endif
         .getTextInputModifier = NodeModifier::GetTextInputModifier,
         .getTabsModifier = NodeModifier::GetTabsModifier,
         .getStepperItemModifier = NodeModifier::GetStepperItemModifier,
@@ -302,11 +302,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getImageSpanModifier = NodeModifier::GetCJUIImageSpanModifier,
         .getBlankModifier = NodeModifier::GetCJUIBlankModifier,
         .getSearchModifier = NodeModifier::GetCJUISearchModifier,
-    #ifndef ARKUI_WEARABLE
         .getSelectModifier = NodeModifier::GetCJUISelectModifier,
-    #else
-        .getSelectModifier = nullptr,
-    #endif
         .getRadioModifier = NodeModifier::GetCJUIRadioModifier,
         .getCheckboxModifier = NodeModifier::GetCJUICheckboxModifier,
         .getTimepickerModifier = NodeModifier::GetCJUITimepickerModifier,
@@ -344,7 +340,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getSpanModifier = NodeModifier::GetCJUISpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetCJUIImageAnimatorModifier,
         .getSideBarContainerModifier = NodeModifier::GetCJUISideBarContainerModifier,
+    #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCJUICalendarPickerModifier,
+    #else
+        .getCalendarPickerModifier = nullptr,
+    #endif
         .getTextInputModifier = NodeModifier::GetCJUITextInputModifier,
         .getTabsModifier = NodeModifier::GetCJUITabsModifier,
         .getStepperItemModifier = NodeModifier::GetCJUIStepperItemModifier,

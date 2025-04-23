@@ -438,7 +438,8 @@ bool RotationRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recogn
         return false;
     }
 
-    if (curr->fingers_ != fingers_ || !NearEqual(curr->angle_, angle_) || curr->priorityMask_ != priorityMask_) {
+    if (curr->fingers_ != fingers_ || !NearEqual(curr->angle_, angle_) || curr->priorityMask_ != priorityMask_ ||
+        curr->isLimitFingerCount_ != isLimitFingerCount_) {
         if (refereeState_ == RefereeState::SUCCEED &&
             static_cast<int32_t>(activeFingers_.size()) == DEFAULT_ROTATION_FINGERS) {
             SendCallbackMsg(onActionCancel_);

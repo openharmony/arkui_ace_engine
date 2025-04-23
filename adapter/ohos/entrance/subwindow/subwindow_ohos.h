@@ -180,6 +180,10 @@ public:
     bool IsSameDisplayWithParentWindow(bool useInitializedId = false) override;
 
     void InitializeSafeArea();
+    void SetFollowParentWindowLayoutEnabled(bool enable) override
+    {
+        window_->SetFollowParentWindowLayoutEnabled(enable);
+    }
     bool ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode) override;
 
     void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,

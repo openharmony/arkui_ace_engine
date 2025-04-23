@@ -382,8 +382,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
+#ifndef ARKUI_WEARABLE
     JSCalendarPicker::JSBind(globalObj);
     JSCalendarPickerDialog::JSBind(globalObj);
+#endif
     JSForEach::JSBind(globalObj);
     JSRepeat::JSBind(globalObj);
     JSRepeatVirtualScroll::JSBind(globalObj);
@@ -486,10 +488,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSTimePicker::JSBind(globalObj);
     JSDatePicker::JSBind(globalObj);
     JSPageTransition::JSBind(globalObj);
+#ifndef ARKUI_WEARABLE
     JSTextPickerDialog::JSBind(globalObj);
     JSTimePickerDialog::JSBind(globalObj);
     JSDatePickerDialog::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSRowSplit::JSBind(globalObj);
     JSColumnSplit::JSBind(globalObj);
 #endif
@@ -518,9 +520,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRenderingContextSettings::JSBind(globalObj);
     JSMatrix2d::JSBind(globalObj);
     JSSearch::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSSelect::JSBind(globalObj);
-#endif
     JSSearchController::JSBind(globalObj);
     JSTextClockController::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
@@ -571,9 +571,9 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSPatternLockController::JSBind(globalObj);
 #endif
     // add missing binds to ng build
+    JSContextMenu::JSBind(globalObj);
 #ifndef CROSS_PLATFORM
     JSCalendarPicker::JSBind(globalObj);
-    JSContextMenu::JSBind(globalObj);
     JSTextMenu::JSBind(globalObj);
 #ifdef EFFECT_COMPONENT_SUPPORTED
     JSEffectComponent::JSBind(globalObj);

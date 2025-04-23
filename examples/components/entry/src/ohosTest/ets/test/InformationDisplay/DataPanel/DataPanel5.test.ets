@@ -495,8 +495,6 @@ export default function DataPanel5() {
     })
 
 
-
-
   })
 }
 

@@ -17,9 +17,16 @@ import { describe, beforeAll, it } from '@ohos/hypium'
 import { Component, Driver, ON } from '@kit.TestKit';
 import {
   buttonClick,
-  JsonType, KeyStruct, radioClick, Search,
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Search,
   searchParentBlock,
-  Slide, sliderDrag, titleSearch, ToggleClick } from '../../../utils';
+  Slide,
+  sliderDrag,
+  titleSearch,
+  ToggleClick
+} from '../../../utils';
 import { AlphabetIndexerStart } from './AlphabetIndexer';
 
 const driver = Driver.create();
@@ -310,7 +317,6 @@ export default function AlphabetIndexer7Test() {
 
       done()
     })
-
 
 
   })

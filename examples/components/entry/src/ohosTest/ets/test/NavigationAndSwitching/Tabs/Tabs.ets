@@ -18,7 +18,7 @@ import { ON } from '@ohos.UiTest';
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
 
-export async function TabsStart(done:Function) {
+export async function TabsStart(done: Function) {
   await delegator.startAbility({
     bundleName: 'cn.ohos.components',
     abilityName: 'EntryAbility'

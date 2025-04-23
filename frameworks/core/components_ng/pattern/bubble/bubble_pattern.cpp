@@ -113,7 +113,7 @@ void BubblePattern::OnAttachToFrameNode()
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     hasOnAreaChange_ = pipelineContext->HasOnAreaChangeNode(targetNode->GetId());
-    auto eventHub = targetNode->GetEventHub<EventHub>();
+    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host), weak = WeakClaim(this)](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
@@ -164,7 +164,7 @@ void BubblePattern::InitTouchEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);

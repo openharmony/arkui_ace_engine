@@ -18,6 +18,7 @@
 #include "ui/base/ace_type.h"
 #include "ui/base/referenced.h"
 #include "ui/base/utils/utils.h"
+#include "ui/properties/ng/measure_property.h"
 #include "ui/view/frame_node.h"
 #include "ui/view/pattern.h"
 #include "ui/view/ui_context.h"
@@ -284,6 +285,36 @@ void FrameNodeImpl::SetClipEdge(bool isClip)
 {
     CHECK_NULL_VOID(frameNode_);
     NG::ViewAbstract::SetClipEdge(frameNode_, isClip);
+}
+
+void FrameNodeImpl::SetPadding(const NG::PaddingPropertyT<NG::CalcLength>& value)
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetPadding(frameNode_, value);
+}
+
+void FrameNodeImpl::SetSafeAreaPadding(const NG::CalcLength& value)
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetSafeAreaPadding(frameNode_, value);
+}
+
+void FrameNodeImpl::ResetSafeAreaPadding()
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::ResetSafeAreaPadding();
+}
+
+void FrameNodeImpl::SetLinearGradient(const NG::Gradient& gradient)
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetLinearGradient(frameNode_, gradient);
+}
+
+void FrameNodeImpl::SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara)
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetLinearGradientBlur(frameNode_, blurPara);
 }
 
 } // namespace OHOS::Ace::Kit

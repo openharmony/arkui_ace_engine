@@ -1706,7 +1706,7 @@ export default function DataPanel2() {
       done();
 
     })
-    
+
 
   })
 }

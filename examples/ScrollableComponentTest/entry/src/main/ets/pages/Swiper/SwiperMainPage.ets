@@ -37,6 +37,7 @@ struct TabsMainPage {
     new TextList(3, 'OnContentWillScrollNestList', 'pages/Swiper/OnContentWillScrollNestList'),
     new TextList(4, 'OnContentWillScrollListNest', 'pages/Swiper/OnContentWillScrollListNest'),
     new TextList(5, 'CachedCountIsShownNormal', 'pages/Swiper/CachedCountIsShownNormal'),
+    new TextList(6, 'MultiIndicator', 'pages/Swiper/MultiIndicator'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
@@ -59,4 +60,4 @@ struct TabsMainPage {
       .scrollBar(BarState.Off)
     }
   }
-}
+}

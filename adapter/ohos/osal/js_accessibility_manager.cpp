@@ -249,6 +249,8 @@ Accessibility::EventType ConvertAceEventType(AccessibilityEventType type)
             Accessibility::EventType::TYPE_VIEW_ANNOUNCE_FOR_ACCESSIBILITY },
         { AccessibilityEventType::PAGE_OPEN, Accessibility::EventType::TYPE_PAGE_OPEN },
         { AccessibilityEventType::ELEMENT_INFO_CHANGE, Accessibility::EventType::TYPE_ELEMENT_INFO_CHANGE },
+        { AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY_NOT_INTERRUPT,
+            Accessibility::EventType::TYPE_VIEW_ANNOUNCE_FOR_ACCESSIBILITY_NOT_INTERRUPT },
         { AccessibilityEventType::SCROLLING_EVENT, Accessibility::EventType::TYPE_VIEW_SCROLLING_EVENT },
     };
     Accessibility::EventType eventType = Accessibility::EventType::TYPE_VIEW_INVALID;
@@ -1394,7 +1396,7 @@ void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElement
         }
     }
 
-    auto eventHub = node->GetEventHub<NG::EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureEventHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -1555,7 +1557,7 @@ int32_t GetLastPageId(const RefPtr<NG::PipelineContext>& ngPipeline)
 void AddHasRegisteredHover(const RefPtr<NG::FrameNode>& node, ExtraElementInfo& extraElementInfo)
 {
     CHECK_NULL_VOID(node);
-    auto eventHub = node->GetEventHub<NG::EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputEventHub = eventHub->GetInputEventHub();
     CHECK_NULL_VOID(inputEventHub);
@@ -1618,7 +1620,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
             nodeInfo.SetBlur(context->GetForeground()->propBlurRadius.value_or(Dimension(0)).ToString());
         }
     }
-    auto eventHub = node->GetEventHub<NG::EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<NG::EventHub>();
     if (eventHub != nullptr) {
         nodeInfo.SetHitTestBehavior(NG::GestureEventHub::GetHitTestModeStr(eventHub->GetGestureEventHub()));
     }
@@ -2173,17 +2175,18 @@ void JsAccessibilityManager::UpdateVirtualNodeInfo(std::list<AccessibilityElemen
     AccessibilityElementInfo& nodeInfo, const RefPtr<NG::UINode>& uiVirtualNode, const CommonProperty& commonProperty,
     const RefPtr<NG::PipelineContext>& ngPipeline)
 {
-    for (const auto& item : uiVirtualNode->GetChildren(true)) {
+    auto frameParentNode = AceType::DynamicCast<NG::FrameNode>(uiVirtualNode);
+    CHECK_NULL_VOID(frameParentNode);
+    std::list<RefPtr<NG::FrameNode>> children;
+
+    GetChildrenFromFrameNode(frameParentNode, children, commonProperty);
+    for (const auto& frameNodeChild : children) {
         AccessibilityElementInfo virtualInfo;
-        auto frameNodeChild = AceType::DynamicCast<NG::FrameNode>(item);
-        if (frameNodeChild == nullptr) {
-            continue;
-        }
         UpdateVirtualNodeChildAccessibilityElementInfo(frameNodeChild, commonProperty,
             nodeInfo, virtualInfo, ngPipeline);
         virtualInfo.SetParent(uiVirtualNode->GetAccessibilityId());
         nodeInfo.AddChild(frameNodeChild->GetAccessibilityId());
-        UpdateVirtualNodeInfo(infos, virtualInfo, item, commonProperty, ngPipeline);
+        UpdateVirtualNodeInfo(infos, virtualInfo, frameNodeChild, commonProperty, ngPipeline);
         infos.push_back(virtualInfo);
     }
 }
@@ -2341,7 +2344,7 @@ bool LostFocus(const RefPtr<NG::FrameNode>& frameNode)
 void HandleWillClickAccept(RefPtr<NG::FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureEventHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -2353,7 +2356,7 @@ void HandleWillClickAccept(RefPtr<NG::FrameNode>& frameNode)
 void HandleDidClickAccept(RefPtr<NG::FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureEventHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -2364,7 +2367,7 @@ void HandleDidClickAccept(RefPtr<NG::FrameNode>& frameNode)
 
 bool ActClick(RefPtr<NG::FrameNode>& frameNode)
 {
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     auto gesture = eventHub->GetGestureEventHub();
     CHECK_NULL_RETURN(gesture, false);
@@ -2393,7 +2396,7 @@ bool ActClick(RefPtr<NG::FrameNode>& frameNode)
 
 bool ActLongClick(RefPtr<NG::FrameNode>& frameNode)
 {
-    auto gesture = frameNode->GetEventHub<NG::EventHub>()->GetGestureEventHub();
+    auto gesture = frameNode->GetOrCreateEventHub<NG::EventHub>()->GetGestureEventHub();
     CHECK_NULL_RETURN(gesture, false);
     return gesture->ActLongClick();
 }
@@ -3399,19 +3402,66 @@ void JsAccessibilityManager::SendCacheAccessibilityEventForHost(const int32_t pa
     }
 }
 
-void JsAccessibilityManager::ReleaseCacheAccessibilityEvent(const int32_t pageId)
+bool JsAccessibilityManager::CheckPageEventValidInCache()
 {
-    if (pageIdEventMap_.count(pageId) && pageIdEventMap_[pageId].has_value()) {
-        auto event = pageIdEventMap_[pageId].value();
-        SendAccessibilityAsyncEventInner(event);
-        pageIdEventMap_.erase(pageId);
+    for (auto it = pageIdEventMap_.begin(); it !=  pageIdEventMap_.end();) {
+        if (it->second.has_value()) {
+            return true;
+        } else {
+            ++it;
+        }
+    }
+    return false;
+}
+
+bool JsAccessibilityManager::CheckPageEventByPageInCache(int32_t pageId)
+{
+    for (auto it = pageIdEventMap_.begin(); it !=  pageIdEventMap_.end();++it) {
+        if (it->second.has_value()) {
+            if (it->first == pageId) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void JsAccessibilityManager::ReleaseAllCacheAccessibilityEvent()
+{
+    for (auto it = pageIdEventMap_.begin(); it !=  pageIdEventMap_.end();) {
+        if (it->second.has_value()) {
+            auto event = it->second.value();
+            SendAccessibilityAsyncEventInner(event);
+            it = pageIdEventMap_.erase(it);
+        } else {
+            ++it;
+        }
     }
 }
 
-void JsAccessibilityManager::ReleasePageEvent(const RefPtr<NG::FrameNode>& node, bool deleteController)
+void JsAccessibilityManager::ReleaseCacheAccessibilityEvent(const int32_t pageId)
+{
+    auto it = pageIdEventMap_.find(pageId);
+    if (it != pageIdEventMap_.end() && it->second.has_value()) {
+        auto event = it->second.value();
+        SendAccessibilityAsyncEventInner(event);
+        pageIdEventMap_.erase(it);
+    }
+
+    if ((pageId == 0) || (pageId == -1)) {
+        ReleaseAllCacheAccessibilityEvent();
+    }
+}
+
+void JsAccessibilityManager::ReleasePageEvent(const RefPtr<NG::FrameNode>& node, bool deleteController, bool releaseAll)
 {
     if (pageController_.CheckNode(node, deleteController)) {
         ReleaseCacheAccessibilityEvent(node->GetPageId());
+    }
+
+    if (releaseAll) {
+        pageController_.DeleteInstanceNodeAll(node);
+        ReleaseAllCacheAccessibilityEvent();
     }
 }
 
@@ -3419,6 +3469,21 @@ void JsAccessibilityManager::AddToPageEventController(const RefPtr<NG::FrameNode
 {
     pageController_.Add(node);
 }
+
+bool JsAccessibilityManager::CheckPageEventCached(const RefPtr<NG::FrameNode>& node, bool onlyCurrentPage)
+{
+    if (onlyCurrentPage == false) {
+        return CheckPageEventValidInCache();
+    }
+    CHECK_NULL_RETURN(node, false);
+
+    auto pageId = node->GetPageId();
+    if ((pageId == 0) || (pageId == -1)) {
+        return CheckPageEventValidInCache();
+    }
+    return CheckPageEventByPageInCache(pageId);
+}
+
 
 void JsAccessibilityManager::AddFrameNodeToUecStatusVec(const RefPtr<NG::FrameNode>& node)
 {
@@ -4572,7 +4637,7 @@ static void DumpTreeNodeInfoNG(
     DumpLog::GetInstance().AddDesc("width: " + std::to_string(rect.Width()));
     DumpLog::GetInstance().AddDesc("height: " + std::to_string(rect.Height()));
     DumpLog::GetInstance().AddDesc("visible: " + std::to_string(node->IsVisible()));
-    auto eventHub = node->GetEventHub<NG::EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<NG::EventHub>();
     if (eventHub) {
         auto gestureEventHub = eventHub->GetGestureEventHub();
         DumpLog::GetInstance().AddDesc(
@@ -6106,15 +6171,16 @@ void JsAccessibilityManager::JsInteractionOperation::ClearFocus()
 void JsAccessibilityManager::JsInteractionOperation::OutsideTouch() {}
 #ifdef WEB_SUPPORTED
 
-void GetChildrenFromWebNode(
+std::shared_ptr<NG::TransitionalNodeInfo> GetChildrenFromWebNode(
     int64_t nodeId, std::list<int64_t>& children,
     const RefPtr<NG::PipelineContext>& ngPipeline, const RefPtr<NG::WebPattern>& webPattern)
 {
+    std::shared_ptr<NG::TransitionalNodeInfo> node = nullptr;
     std::list<int64_t> webNodeChildren;
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        auto node = webPattern->GetTransitionalNodeById(nodeId);
-        CHECK_NULL_VOID(node);
-    for (auto& childId : node->GetChildIds()) {
+        node = webPattern->GetTransitionalNodeById(nodeId);
+        CHECK_NULL_RETURN(node, nullptr);
+        for (auto& childId : node->GetChildIds()) {
             webNodeChildren.emplace_back(childId);
         }
     }
@@ -6122,6 +6188,7 @@ void GetChildrenFromWebNode(
         children.emplace_back(webNodeChildren.front());
         webNodeChildren.pop_front();
     }
+    return node;
 }
 
 void JsAccessibilityManager::SearchWebElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
@@ -6354,8 +6421,7 @@ void JsAccessibilityManager::UpdateWebCacheInfo(std::list<AccessibilityElementIn
         children.pop_front();
         AccessibilityElementInfo nodeInfo;
 
-        GetChildrenFromWebNode(parent, children, ngPipeline, webPattern);
-        auto node = webPattern->GetTransitionalNodeById(parent);
+        auto node = GetChildrenFromWebNode(parent, children, ngPipeline, webPattern);
         if (node) {
             UpdateWebAccessibilityElementInfo(node, commonProperty, nodeInfo, webPattern);
             infos.push_back(nodeInfo);
@@ -7708,7 +7774,7 @@ void JsAccessibilityManager::CreateNodeInfoJson(const RefPtr<NG::FrameNode>& nod
     child->Put("width", rect.Width());
     child->Put("height", rect.Height());
     child->Put("visible", node->IsVisible());
-    auto eventHub = node->GetEventHub<NG::EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<NG::EventHub>();
     if (eventHub) {
         auto gestureEventHub = eventHub->GetGestureEventHub();
         child->Put("clickable", gestureEventHub ? gestureEventHub->IsAccessibilityClickable() : false);

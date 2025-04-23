@@ -58,7 +58,7 @@ void ListItemDragManager::InitDragDropEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -108,7 +108,7 @@ void ListItemDragManager::DeInitDragDropEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -120,7 +120,8 @@ void ListItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
     if (dragState_ == ListItemDragState::IDLE) {
         HandleOnItemLongPress(info);
     }
-    SetDragState(ListItemDragState::DRAGGING);
+    dragState_ = ListItemDragState::DRAGGING;
+    SetIsNeedDividerAnimation(false);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometry = host->GetGeometryNode();
@@ -145,7 +146,8 @@ void ListItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
 
 void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
 {
-    SetDragState(ListItemDragState::LONG_PRESS);
+    dragState_ = ListItemDragState::LONG_PRESS;
+    SetIsNeedDividerAnimation(false);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -477,9 +479,18 @@ void ListItemDragManager::HandleSwapAnimation(int32_t from, int32_t to)
             pipeline->FlushUITasks();
         }
     }
+    isSwapAnimationStopped_ = false;
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 400, 38); /* 400:stiffness, 38:damping */
     option.SetCurve(curve);
+    option.SetOnFinishEvent([weak = WeakClaim(this)]() {
+        auto manager = weak.Upgrade();
+        CHECK_NULL_VOID(manager);
+        manager->isSwapAnimationStopped_ = true;
+        if (manager->dragState_ == ListItemDragState::IDLE) {
+            manager->SetIsNeedDividerAnimation(true);
+        }
+    });
     option.SetDuration(30); /* 30:duration */
     AnimationUtils::Animate(option, [weak = forEachNode_, from, to]() {
             auto forEach = weak.Upgrade();
@@ -563,13 +574,19 @@ void ListItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
     CHECK_NULL_VOID(forEach);
     forEach->FireOnMove(fromIndex_, to);
     forEach->FireOnDrop(to);
-    SetDragState(dragState_ = ListItemDragState::IDLE);
+    dragState_ = ListItemDragState::IDLE;
+    if (isSwapAnimationStopped_) {
+        SetIsNeedDividerAnimation(true);
+    }
 }
 
 void ListItemDragManager::HandleOnItemDragCancel()
 {
     HandleDragEndAnimation();
-    SetDragState(dragState_ = ListItemDragState::IDLE);
+    dragState_ = ListItemDragState::IDLE;
+    if (isSwapAnimationStopped_) {
+        SetIsNeedDividerAnimation(true);
+    }
     auto parent = listNode_.Upgrade();
     CHECK_NULL_VOID(parent);
     auto pattern = parent->GetPattern<ListPattern>();
@@ -594,14 +611,12 @@ int32_t ListItemDragManager::GetLanes() const
     return pattern->GetLanes();
 }
 
-void ListItemDragManager::SetDragState(ListItemDragState dragState)
+void ListItemDragManager::SetIsNeedDividerAnimation(bool isNeedDividerAnimation)
 {
-    dragState_ = dragState;
     auto parent = listNode_.Upgrade();
     CHECK_NULL_VOID(parent);
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    bool isNeedDividerAnimation = dragState_ == ListItemDragState::IDLE;
     pattern->SetIsNeedDividerAnimation(isNeedDividerAnimation);
 }
 } // namespace OHOS::Ace::NG

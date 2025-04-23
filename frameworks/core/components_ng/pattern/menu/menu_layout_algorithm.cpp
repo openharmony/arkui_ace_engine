@@ -1116,9 +1116,8 @@ void MenuLayoutAlgorithm::LayoutNormalTopPreviewBottomMenuLessThan(
     targetCenterOffset_ = center;
     auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
     OffsetF offset(center.GetX() - previewSize.Width() / HALF,
-        std::min<float>(center.GetY() - previewSize.Height() / HALF, param_.windowGlobalSizeF.Height() -
-                                                                         param_.bottomSecurity - param_.bottom -
-                                                                         totalSize.Height() - param_.previewMenuGap));
+        std::min<float>(center.GetY() - previewSize.Height() / HALF,
+            wrapperRect_.Bottom() - param_.bottomSecurity - totalSize.Height() - param_.previewMenuGap));
     auto x = std::clamp(offset.GetX(), static_cast<float>(wrapperRect_.Left()) + paddingStart_,
         static_cast<float>(wrapperRect_.Right()) - paddingEnd_ - previewSize.Width());
     auto y = std::clamp(offset.GetY(), static_cast<float>(wrapperRect_.Top()) + param_.topSecurity,
@@ -1205,18 +1204,20 @@ void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenuLessThan(
     CHECK_NULL_VOID(previewGeometryNode);
     CHECK_NULL_VOID(menuGeometryNode);
 
-    OffsetF center(targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
+    OffsetF center(
+        targetOffset_.GetX() + targetSize_.Width() / HALF, targetOffset_.GetY() + targetSize_.Height() / HALF);
     targetCenterOffset_ = center;
     auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
-    OffsetF offset(center.GetX() - previewSize.Width() / 2,
-        std::max<float>(center.GetY() - previewSize.Height() / 2,
-            param_.top + param_.topSecurity + totalSize.Height() - previewSize.Height() + param_.previewMenuGap));
+    OffsetF offset(center.GetX() - previewSize.Width() / HALF,
+        std::max<float>(center.GetY() - previewSize.Height() / HALF, wrapperRect_.Top() + param_.topSecurity +
+                                                                      totalSize.Height() - previewSize.Height() +
+                                                                      param_.previewMenuGap));
     auto x = std::clamp(offset.GetX(), static_cast<float>(wrapperRect_.Left()) + paddingStart_,
         static_cast<float>(wrapperRect_.Right()) - previewSize.Width() - paddingEnd_);
     auto y = std::clamp(offset.GetY(), static_cast<float>(wrapperRect_.Top()) + param_.topSecurity,
         static_cast<float>(wrapperRect_.Bottom()) - param_.bottomSecurity - previewSize.Height());
-    x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / 2;
-    y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / 2;
+    x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / HALF;
+    y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / HALF;
     previewGeometryNode->SetMarginFrameOffset(OffsetF(x, y));
 }
 
@@ -2754,36 +2755,37 @@ OffsetF MenuLayoutAlgorithm::AdjustPosition(const OffsetF& position, float width
 {
     float xMax = 0.0f;
     float yMax = 0.0f;
-    float xMin = paddingStart_;
+    float xMin = wrapperRect_.Left() + paddingStart_;
     float yMin = std::max(1.0f, static_cast<float>(wrapperRect_.Top()) + paddingTop_);
+    float wrapperRight = wrapperRect_.Right();
     float wrapperBottom = wrapperRect_.Bottom();
     switch (placement_) {
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
         case Placement::LEFT: {
-            xMax = std::min(targetOffset_.GetX() - width - space, wrapperSize_.Width() - paddingEnd_ - width);
+            xMax = std::min(targetOffset_.GetX() - width - space, wrapperRight - paddingEnd_ - width);
             yMax = wrapperBottom - height - paddingBottom_;
             break;
         }
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
         case Placement::RIGHT: {
-            xMin = std::max(targetOffset_.GetX() + targetSize_.Width() + space, paddingStart_);
-            xMax = wrapperSize_.Width() - width - paddingEnd_;
+            xMin = std::max(targetOffset_.GetX() + targetSize_.Width() + space, xMin);
+            xMax = wrapperRight - width - paddingEnd_;
             yMax = wrapperBottom - height - paddingBottom_;
             break;
         }
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
         case Placement::TOP: {
-            xMax = wrapperSize_.Width() - width - paddingEnd_;
+            xMax = wrapperRight - width - paddingEnd_;
             yMax = std::min(targetOffset_.GetY() - height - space, wrapperBottom - paddingBottom_ - height);
             break;
         }
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
         case Placement::BOTTOM: {
-            xMax = wrapperRect_.Right() - width - paddingEnd_;
+            xMax = wrapperRight - width - paddingEnd_;
             yMin = std::max(targetOffset_.GetY() + targetSize_.Height() + space, yMin);
             yMax = wrapperBottom - height - paddingBottom_;
             break;

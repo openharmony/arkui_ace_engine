@@ -1288,6 +1288,7 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
             "ArkUISetNativeEngineLoop");
     };
     nativeEngine_->SetPostTask(postTask);
+    nativeEngine_->SetInstanceId(instanceId_);
 }
 
 void JsiDeclarativeEngine::RegisterInitWorkerFunc()
@@ -2242,6 +2243,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         CHECK_NULL_VOID(nativeXComponentImpl);
 
         nativeXComponentImpl->SetXComponentId(componentId);
+
 #ifdef XCOMPONENT_SUPPORTED
         xcPattern->SetExpectedRateRangeInit();
         xcPattern->OnFrameEventInit();
@@ -2257,7 +2259,6 @@ void JsiDeclarativeEngine::FireExternalEvent(
         if (status != napi_ok) {
             return;
         }
-
         std::string arguments;
         auto soPath = xcPattern->GetSoPath().value_or("");
         auto runtime = engineInstance_->GetJsRuntime();
@@ -2269,6 +2270,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
             napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
             return;
         }
+
         auto objContext = JsiObject(objXComp);
         JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
         OHOS::Ace::Framework::XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);

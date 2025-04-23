@@ -256,11 +256,16 @@ void GetCustomNodeInfo(const RefPtr<NG::UINode> &customNode, std::unique_ptr<OHO
     jsonNode->Put(INSPECTOR_COMPONENT_TYPE, "custom");
     auto node = AceType::DynamicCast<CustomNode>(customNode);
     CHECK_NULL_VOID(node);
+    auto nodeExtraInfo = node->GetExtraInfo();
+    std::stringstream ss;
+    ss << nodeExtraInfo.page << "(" << nodeExtraInfo.line << ":" << nodeExtraInfo.col << ")";
+    auto jsonJumpLine = JsonUtil::Create(true);
+    jsonJumpLine->Put("$line", ss.str().c_str());
     auto parentNode = AceType::DynamicCast<FrameNode>(hostNode);
     jsonNode->Put(INSPECTOR_STATE_VAR, node->GetStateInspectorInfo());
     RectF rect = parentNode->GetTransformRectRelativeToWindow();
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
-    jsonNode->Put(INSPECTOR_DEBUGLINE, customNode->GetDebugLine().c_str());
+    jsonNode->Put(INSPECTOR_DEBUGLINE, jsonJumpLine->ToString().c_str());
     jsonNode->Put(INSPECTOR_CUSTOM_VIEW_TAG, node->GetCustomTag().c_str());
 }
 

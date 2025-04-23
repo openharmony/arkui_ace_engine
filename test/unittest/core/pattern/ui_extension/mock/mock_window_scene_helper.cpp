@@ -18,9 +18,6 @@
 namespace OHOS::Ace::NG {
 RefPtr<UINode> WindowSceneHelper::FindWindowScene(const RefPtr<FrameNode>& targetNode)
 {
-    if (targetNode) {
-        return targetNode;
-    }
-    return nullptr;
+    return targetNode;
 }
 } // namespace OHOS::Ace::NG

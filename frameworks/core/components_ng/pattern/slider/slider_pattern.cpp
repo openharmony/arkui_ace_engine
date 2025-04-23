@@ -145,7 +145,7 @@ void SliderPattern::OnModifyDone()
     FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -294,7 +294,7 @@ void SliderPattern::HandleEnabled()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -793,10 +793,6 @@ bool SliderPattern::UpdateParameters()
                                         : theme->GetInsetHotBlockShadowWidth();
 
     auto direction = sliderLayoutProperty->GetDirectionValue(Axis::HORIZONTAL);
-    if (direction_ != direction && isAccessibilityOn_) {
-        ClearSliderVirtualNode();
-        direction_ = direction;
-    }
     auto blockLength = direction == Axis::HORIZONTAL ? blockSize_.Width() : blockSize_.Height();
 
     hotBlockShadowWidth_ = static_cast<float>(hotBlockShadowWidth.ConvertToPx());
@@ -1332,7 +1328,13 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         return;
     }
     if (direction_ == GetDirection() && panEvent_) return;
-    direction_ = GetDirection();
+    auto direction = GetDirection();
+    if (direction_ != direction && isAccessibilityOn_) {
+        ClearSliderVirtualNode();
+        InitAccessibilityVirtualNodeTask();
+        InitAccessibilityHoverEvent();
+    }
+    direction_ = direction;
 
     if (panEvent_) {
         gestureHub->RemovePanEvent(panEvent_);
@@ -1731,7 +1733,7 @@ void SliderPattern::HandleMouseEvent(const MouseInfo& info)
 void SliderPattern::FireChangeEvent(int32_t mode)
 {
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider fire change %{public}d %{public}f", mode, value_);
-    auto sliderEventHub = GetEventHub<SliderEventHub>();
+    auto sliderEventHub = GetOrCreateEventHub<SliderEventHub>();
     CHECK_NULL_VOID(sliderEventHub);
     if ((mode == SliderChangeMode::Click || mode == SliderChangeMode::Moving) &&
         NearEqual(value_, sliderEventHub->GetValue())) {
@@ -2122,7 +2124,7 @@ void SliderPattern::SetSliderValue(double value, int32_t mode)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -2323,7 +2325,7 @@ RefPtr<FrameNode> SliderPattern::BuildContentModifierNode()
     auto value = sliderPaintProperty->GetValue().value_or(min);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     SliderConfiguration sliderConfiguration(value, min, max, step, enabled);

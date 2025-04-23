@@ -228,6 +228,9 @@ public:
     {
         return currHideToolBar_;
     }
+
+    void OnColorConfigurationUpdate() override;
+
     void HideOrShowToolBarImmediately(const RefPtr<NavDestinationNodeBase>& hostNode, bool hide);
     void OnToolBarAnimationFinish();
     void OnTitleBarAnimationFinish();

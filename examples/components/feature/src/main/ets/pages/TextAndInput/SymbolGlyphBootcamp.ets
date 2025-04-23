@@ -672,7 +672,6 @@ export struct SymbolGlyphBootcamp {
     Text('123')
   }
 
-
   @Builder
   Content() {
     Row({ space: 10 }) {

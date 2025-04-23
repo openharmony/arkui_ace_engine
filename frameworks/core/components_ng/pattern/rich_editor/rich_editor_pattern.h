@@ -115,7 +115,7 @@ enum class SelectorAdjustPolicy { INCLUDE = 0, EXCLUDE };
 enum class HandleType { FIRST = 0, SECOND };
 enum class SelectType { SELECT_FORWARD = 0, SELECT_BACKWARD, SELECT_NOTHING };
 enum class CaretAffinityPolicy { DEFAULT = 0, UPSTREAM_FIRST, DOWNSTREAM_FIRST };
-enum class OperationType { DEFAULT = 0, DRAG, IME };
+enum class OperationType { DEFAULT = 0, DRAG, IME, FINISH_PREVIEW };
 const std::map<std::pair<HandleType, SelectorAdjustPolicy>, MoveDirection> SELECTOR_ADJUST_DIR_MAP = {
     {{ HandleType::FIRST, SelectorAdjustPolicy::INCLUDE }, MoveDirection::BACKWARD },
     {{ HandleType::FIRST, SelectorAdjustPolicy::EXCLUDE }, MoveDirection::FORWARD },
@@ -627,7 +627,6 @@ public:
     void HandleSelectFontStyleWrapper(KeyCode code, TextStyle& spanStyle);
     void HandleOnShowMenu() override;
     int32_t HandleKbVerticalSelection(bool isUp);
-    int32_t HandleSelectParagraghPos(bool direction);
     PositionType GetPositionTypeFromLine();
     int32_t HandleSelectWrapper(CaretMoveIntent direction, int32_t fixedPos);
     void AIDeleteComb(int32_t start, int32_t end, int32_t& aiPosition, bool direction);

@@ -241,7 +241,7 @@ void GridRowLayoutAlgorithm::OnBreakPointChange(LayoutWrapper* layoutWrapper, co
         auto sizeTypeString = GridRowLayoutAlgorithm::ConvertSizeTypeToString(sizeType);
         auto hostLayoutProperty = host->GetLayoutProperty<GridRowLayoutProperty>();
         CHECK_NULL_VOID(hostLayoutProperty);
-        auto hostEventHub = host->GetEventHub<GridRowEventHub>();
+        auto hostEventHub = host->GetOrCreateEventHub<GridRowEventHub>();
         CHECK_NULL_VOID(hostEventHub);
         hostLayoutProperty->UpdateSizeType(sizeType);
         TAG_LOGD(AceLogTag::ACE_GRIDROW,

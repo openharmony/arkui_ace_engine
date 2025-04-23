@@ -73,7 +73,7 @@ void UIExtensionManagerNg::TearDown()
  */
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager001, TestSize.Level1)
 {
-    #ifdef OHOS_STANDARD_SYSTEM
+#ifdef OHOS_STANDARD_SYSTEM
     /**
      * @tc.steps: step1. construct UIExtensionManager
      */
@@ -116,7 +116,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager001, TestSize.Level1)
     ASSERT_EQ(uiExtensionManager->uiExtensionFocused_.Upgrade(), nullptr);
     ASSERT_EQ(uiExtensionManager->securityUiExtensionFocused_.Upgrade(), nullptr);
     ASSERT_EQ(uiExtensionManager->sessionWrapper_.Upgrade(), nullptr);
-    #endif
+#endif
 }
 
 /**
@@ -127,7 +127,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager001, TestSize.Level1)
  */
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager002, TestSize.Level1)
 {
-    #ifdef OHOS_STANDARD_SYSTEM
+#ifdef OHOS_STANDARD_SYSTEM
     /**
      * @tc.steps: step1. construct UIExtensionManager
      */
@@ -167,7 +167,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager002, TestSize.Level1)
      * @tc.steps: step5. call RecycleExtensionId.
      */
     uiExtensionManager->RecycleExtensionId(1);
-    #endif
+#endif
 }
 
 /**
@@ -178,7 +178,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager002, TestSize.Level1)
  */
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager003, TestSize.Level1)
 {
-    #ifdef OHOS_STANDARD_SYSTEM
+#ifdef OHOS_STANDARD_SYSTEM
     /**
      * @tc.steps: step1. construct UIExtensionManager
      */
@@ -222,7 +222,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager003, TestSize.Level1)
     uiExtensionManager->RemoveDestroyedUIExtension(nodeId);
     ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 0);
     ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 0);
-    #endif
+#endif
 }
 
 /**
@@ -233,7 +233,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager003, TestSize.Level1)
  */
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager004, TestSize.Level1)
 {
-    #ifdef OHOS_STANDARD_SYSTEM
+#ifdef OHOS_STANDARD_SYSTEM
     /**
      * @tc.steps: step1. construct UIExtensionManager.
      */
@@ -278,7 +278,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager004, TestSize.Level1)
     EXPECT_TRUE(called0);
     EXPECT_TRUE(uiExtensionManager->SendBusinessToHost(code, want, type));
     EXPECT_TRUE(called1);
-    #endif
+#endif
 }
 
 /**
@@ -289,7 +289,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager004, TestSize.Level1)
  */
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager005, TestSize.Level1)
 {
-    #ifdef OHOS_STANDARD_SYSTEM
+#ifdef OHOS_STANDARD_SYSTEM
     /**
      * @tc.steps: step1. construct UIExtensionManager.
      */
@@ -342,7 +342,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager005, TestSize.Level1)
      */
     uiExtensionManager->UnRegisterBusinessDataConsumeReplyCallback(code);
     ASSERT_EQ(uiExtensionManager->businessDataConsumeReplyCallbacks_.size(), 0);
-    #endif
+#endif
 }
 
 /**
@@ -353,7 +353,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager005, TestSize.Level1)
  */
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager006, TestSize.Level1)
 {
-    #ifdef OHOS_STANDARD_SYSTEM
+#ifdef OHOS_STANDARD_SYSTEM
     /**
      * @tc.steps: step1. construct UIExtensionManager.
      */
@@ -405,7 +405,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager006, TestSize.Level1)
      */
     uiExtensionManager->UnRegisterBusinessDataConsumeCallback(code);
     ASSERT_EQ(uiExtensionManager->businessDataConsumeCallbacks_.size(), 0);
-    #endif
+#endif
 }
 
 /**
@@ -416,7 +416,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager006, TestSize.Level1)
  */
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager007, TestSize.Level1)
 {
-    #ifdef OHOS_STANDARD_SYSTEM
+#ifdef OHOS_STANDARD_SYSTEM
     /**
      * @tc.steps: step1. construct UIExtensionManager.
      */
@@ -455,7 +455,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager007, TestSize.Level1)
      */
     uiExtensionManager->UnRegisterBusinessDataSendCallback(code);
     ASSERT_EQ(uiExtensionManager->businessDataSendCallbacks_.size(), 0);
-    #endif
+#endif
 }
 
 /**
@@ -465,7 +465,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager007, TestSize.Level1)
  */
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager008, TestSize.Level1)
 {
-    #ifdef OHOS_STANDARD_SYSTEM
+#ifdef OHOS_STANDARD_SYSTEM
     /**
      * @tc.steps: step1. construct UIExtensionManager.
      */
@@ -514,12 +514,12 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager008, TestSize.Level1)
     uiExtensionManager->RemoveDestroyedUIExtension(nodeId);
     ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 0);
     ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 0);
-    #endif
+#endif
 }
 
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager009, TestSize.Level1)
 {
-    #ifdef OHOS_STANDARD_SYSTEM
+#ifdef OHOS_STANDARD_SYSTEM
     auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
     ASSERT_NE(uiExtensionManager, nullptr);
 
@@ -551,12 +551,12 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager009, TestSize.Level1)
     uiExtensionManager->RemoveDestroyedUIExtension(nodeIdTwo);
     ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 0);
     ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 0);
-    #endif
+#endif
 }
 
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager010, TestSize.Level1)
 {
-    #ifdef OHOS_STANDARD_SYSTEM
+#ifdef OHOS_STANDARD_SYSTEM
     auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
     ASSERT_NE(uiExtensionManager, nullptr);
 
@@ -592,12 +592,12 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager010, TestSize.Level1)
     uiExtensionManager->AddAliveUIExtension(nodeId, securityUIExtensionPattern);
     ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 1);
     uiExtensionManager->TransferAccessibilityRectInfo();
-    #endif
+#endif
 }
 
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager011, TestSize.Level1)
 {
-    #ifdef OHOS_STANDARD_SYSTEM
+#ifdef OHOS_STANDARD_SYSTEM
     auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
     ASSERT_NE(uiExtensionManager, nullptr);
 
@@ -613,7 +613,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager011, TestSize.Level1)
     uiExtensionManager->hasRegisterListener_ = true;
     uiExtensionManager->UnregisterListenerIfNeeded();
     ASSERT_EQ(uiExtensionManager->hasRegisterListener_, true);
-    #endif
+#endif
 }
 
 HWTEST_F(UIExtensionManagerNg, UIExtensionManager012, TestSize.Level1)

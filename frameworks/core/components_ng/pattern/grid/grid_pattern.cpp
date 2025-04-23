@@ -182,7 +182,7 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
     std::list<RefPtr<FrameNode>> children;
     host->GenerateOneDepthVisibleFrame(children);
     for (const auto& itemFrameNode : children) {
-        auto itemEvent = itemFrameNode->GetEventHub<EventHub>();
+        auto itemEvent = itemFrameNode->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(itemEvent);
         if (!itemEvent->IsEnabled()) {
             continue;
@@ -203,8 +203,9 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
         if (iter == itemToBeSelected_.end()) {
             auto result = itemToBeSelected_.emplace(itemFrameNode->GetId(), ItemSelectedStatus());
             iter = result.first;
-            iter->second.onSelected = itemPattern->GetEventHub<GridItemEventHub>()->GetOnSelect();
-            iter->second.selectChangeEvent = itemPattern->GetEventHub<GridItemEventHub>()->GetSelectChangeEvent();
+            iter->second.onSelected = itemPattern->GetOrCreateEventHub<GridItemEventHub>()->GetOnSelect();
+            iter->second.selectChangeEvent =
+                itemPattern->GetOrCreateEventHub<GridItemEventHub>()->GetSelectChangeEvent();
         }
         auto startMainOffset = mouseStartOffset_.GetMainOffset(info_.axis_);
         if (info_.axis_ == Axis::VERTICAL) {
@@ -265,13 +266,15 @@ bool GridPattern::IsItemSelected(float offsetX, float offsetY)
     return itemPattern->IsSelected();
 }
 
-void GridPattern::FireOnScrollStart()
+void GridPattern::FireOnScrollStart(bool withPerfMonitor)
 {
     ScrollablePattern::RecordScrollEvent(Recorder::EventType::SCROLL_START);
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
     SuggestOpIncGroup(true);
-    PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+    if (withPerfMonitor) {
+        PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+    }
     if (GetScrollAbort()) {
         return;
     }
@@ -295,7 +298,7 @@ void GridPattern::FireOnScrollStart()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<GridEventHub>();
+    auto hub = host->GetOrCreateEventHub<GridEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollStart = hub->GetOnScrollStart();
     if (onScrollStart) {
@@ -501,7 +504,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto gridLayoutAlgorithm = DynamicCast<GridLayoutBaseAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(gridLayoutAlgorithm, false);
     const auto& gridLayoutInfo = gridLayoutAlgorithm->GetGridLayoutInfo();
-    auto eventhub = GetEventHub<GridEventHub>();
+    auto eventhub = GetOrCreateEventHub<GridEventHub>();
     CHECK_NULL_RETURN(eventhub, false);
     Dimension offset(0, DimensionUnit::VP);
     Dimension offsetPx(gridLayoutInfo.currentOffset_, DimensionUnit::PX);
@@ -578,10 +581,8 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto gridEventHub = host->GetEventHub<GridEventHub>();
+    auto gridEventHub = host->GetOrCreateEventHub<GridEventHub>();
     CHECK_NULL_VOID(gridEventHub);
-    ACE_SCOPED_TRACE("processed offset:%f, id:%d, tag:%s", finalOffset,
-        static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     auto onScroll = gridEventHub->GetOnScroll();
     PrintOffsetLog(AceLogTag::ACE_GRID, host->GetId(), finalOffset);
     if (onScroll) {
@@ -1303,7 +1304,7 @@ void GridPattern::GetEventDumpInfo()
     ScrollablePattern::GetEventDumpInfo();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<GridEventHub>();
+    auto hub = host->GetOrCreateEventHub<GridEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollIndex = hub->GetOnScrollIndex();
     onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
@@ -1318,7 +1319,7 @@ void GridPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     ScrollablePattern::GetEventDumpInfo(json);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<GridEventHub>();
+    auto hub = host->GetOrCreateEventHub<GridEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollIndex = hub->GetOnScrollIndex();
     json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");

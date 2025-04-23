@@ -2119,8 +2119,6 @@ export struct RelativeContainerBootcamp {
     .height('100%')
   }
 
-
-
   @Builder
   popupBuilder() {
     Row() {
@@ -2132,7 +2130,6 @@ export struct RelativeContainerBootcamp {
   compBackground() {
     Text('123')
   }
-
 
   @Builder
   Parameters() {

@@ -21,7 +21,7 @@ const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorReg
 
 const driver = Driver.create();
 
-export async function TextPickerStart(done:Function){
+export async function TextPickerStart(done: Function) {
 
   console.info('beforeAll begin');
 
@@ -35,27 +35,27 @@ export async function TextPickerStart(done:Function){
     await driver.delayMs(8000);
     console.info(TAG + 'TextPickerBootcamp' + ' begin');
 
-    let atomDisplays:Component = await driver.findComponent(ON.text('按钮与选择'));
+    let atomDisplays: Component = await driver.findComponent(ON.text('按钮与选择'));
     await atomDisplays.click();
     await driver.delayMs(1000);
 
-    let ListItems:Component[] = await driver.findComponents(ON.type('ListItem'))
-    let width:Point = await ListItems[0].getBoundsCenter()
-    let width2:Point = await ListItems[1].getBoundsCenter()
+    let ListItems: Component[] = await driver.findComponents(ON.type('ListItem'))
+    let width: Point = await ListItems[0].getBoundsCenter()
+    let width2: Point = await ListItems[1].getBoundsCenter()
     await driver.swipe(width.x, width2.y, width.x, width.y, 500)
     await driver.delayMs(1000);
 
-    let ListItems1:Component[] = await driver.findComponents(ON.type('ListItem'))
-    let width3:Point = await ListItems1[0].getBoundsCenter()
-    let width4:Point = await ListItems1[3].getBoundsCenter()
+    let ListItems1: Component[] = await driver.findComponents(ON.type('ListItem'))
+    let width3: Point = await ListItems1[0].getBoundsCenter()
+    let width4: Point = await ListItems1[3].getBoundsCenter()
     await driver.swipe(width3.x, width4.y, width3.x, width3.y, 500)
     await driver.delayMs(1000);
 
-    let scrollSearch:Component = await driver.findComponent(ON.text('文本选择器/TextPicker'))
+    let scrollSearch: Component = await driver.findComponent(ON.text('文本选择器/TextPicker'))
     await scrollSearch.click()
     await driver.delayMs(1000);
 
-    let Buttons:Component[] = await driver.findComponents(ON.type('Button'));
+    let Buttons: Component[] = await driver.findComponents(ON.type('Button'));
     await Buttons[1].click()
     await driver.delayMs(1000);
 
