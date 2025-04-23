@@ -1575,6 +1575,11 @@ public:
         ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
     }
 
+    void EnableDropDisallowedBadge(bool enableDisallowStatusShowing) override
+    {
+        ViewAbstract::EnableDropDisallowedBadge(enableDisallowStatusShowing);
+    }
+
     int32_t CancelDataLoading(const std::string& key) override
     {
         return ViewAbstract::CancelDataLoading(key);

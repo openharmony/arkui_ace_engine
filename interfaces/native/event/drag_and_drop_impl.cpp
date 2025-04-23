@@ -793,6 +793,17 @@ int32_t OH_ArkUI_NotifyDragEndPendingDone(int32_t requestIdentify)
     }
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
+
+int32_t OH_ArkUI_EnableDropDisallowedBadge(ArkUI_ContextHandle uiContext, bool enabled)
+{
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!fullImpl || !uiContext) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getDragAdapterAPI()->enableDropDisallowedBadge(enabled);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 #ifdef __cplusplus
 };
 #endif

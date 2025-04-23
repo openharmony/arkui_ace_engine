@@ -2236,4 +2236,22 @@ HWTEST_F(DragDropManagerTestNg, HandleOnDragEnd001, TestSize.Level1)
     dragDropManager->HandleOnDragEnd(pointerEvent, extraInfo, dragFrameNode);
     EXPECT_FALSE(dragDropManager->IsDragging());
 }
+
+/**
+ * @tc.name: SetEnableDisallowStatusShowing
+ * @tc.desc: Test SetEnableDisallowStatusShowing
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, SetEnableDisallowStatusShowing, TestSize.Level1)
+{
+    bool enableDropDisallowedBadgeDefalut = DragDropGlobalController::GetInstance().GetEnableDropDisallowedBadge();
+    EXPECT_FALSE(enableDropDisallowedBadgeDefalut);
+    DragDropGlobalController::GetInstance().SetEnableDropDisallowedBadge(true);
+    bool enableDropDisallowedBadgeTrue = DragDropGlobalController::GetInstance().GetEnableDropDisallowedBadge();
+    EXPECT_TRUE(enableDropDisallowedBadgeTrue);
+    DragDropGlobalController::GetInstance().SetEnableDropDisallowedBadge(false);
+    bool enableDropDisallowedBadgeFalse = DragDropGlobalController::GetInstance().GetEnableDropDisallowedBadge();
+    EXPECT_FALSE(enableDropDisallowedBadgeFalse);
+}
 } // namespace OHOS::Ace::NG

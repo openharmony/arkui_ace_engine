@@ -918,6 +918,32 @@ int32_t OH_ArkUI_NotifyDragResult(int32_t requestIdentify, ArkUI_DragResult resu
  * @since 18
  */
 int32_t OH_ArkUI_NotifyDragEndPendingDone(int32_t requestIdentify);
+
+/**
+ * @brief Sets whether to enable the display of a disallow status icon.
+ *
+ * Typically, when a component can receive or process data dragged by the user, or when it declares to the
+ * system that data should be processed in COPY way by setting ARKUI_DROP_OPERATION_COPY through
+ * {@link OH_ArkUI_DragEvent_SetSuggestedDropOperation}, the system will display
+ * a plus sign together with the data number on the upper-left corner of the dragged object; if setting
+ * ARKUI_DROP_OPERATION_MOVE to the system to declare that data should be processed in CUT way, the system will only
+ * display the data number on the upper-left corner of the dragged object.
+ *
+ * In some cases, when the system determines or the component explicitly declares that it cannot handle the
+ * data that the user is dragging, the system displays a badge icon in the same way as it does for DragBehavior.MOVE.
+ * So if you want to show the more clearly status, you can call this method on the UI instance in advance to force
+ * the system to display a clear prohibition icon on the upper left corner in such cases, and the user can clearly
+ * know that data cannot be dropped here.
+ *
+ * @param uiContext Pointer to a UI instance.
+ * @param enabled Whether to enable the display of the disallow badge icon.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+int32_t OH_ArkUI_EnableDropDisallowedBadge(ArkUI_ContextHandle uiContext, bool enabled);
+
 #ifdef __cplusplus
 };
 #endif

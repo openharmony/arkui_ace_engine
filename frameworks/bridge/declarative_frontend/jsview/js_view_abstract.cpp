@@ -6891,6 +6891,13 @@ void JSViewAbstract::JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& 
     }
 }
 
+void JSViewAbstract::JsEnableDropDisallowedBadge(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->EnableDropDisallowedBadge(info[0]->ToBoolean());
+    }
+}
+
 void JSViewAbstract::JsNotifyDragStartRequest(const JSCallbackInfo& info)
 {
     if (info[0]->IsNumber()) {
@@ -7146,6 +7153,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("notifyDragStartRequest", &JSViewAbstract::JsNotifyDragStartRequest);
     JSClass<JSViewAbstract>::StaticMethod(
         "setDragEventStrictReportingEnabled", &JSViewAbstract::JsSetDragEventStrictReportingEnabled);
+    JSClass<JSViewAbstract>::StaticMethod(
+        "enableDropDisallowedBadge", &JSViewAbstract::JsEnableDropDisallowedBadge);
     JSClass<JSViewAbstract>::StaticMethod("cancelDataLoading", &JSViewAbstract::JsCancelDataLoading);
 
     JSClass<JSViewAbstract>::StaticMethod("focusScopeId", &JSViewAbstract::JsFocusScopeId);

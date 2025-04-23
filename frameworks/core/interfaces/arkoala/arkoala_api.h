@@ -6397,6 +6397,7 @@ typedef struct {
     ArkUI_Int32 (*requestDragEndPending)();
     ArkUI_Int32 (*notifyDragResult)(ArkUI_Int32 requestId, ArkUI_Int32 result);
     ArkUI_Int32 (*notifyDragEndPendingDone)(ArkUI_Int32 requestId);
+    void (*enableDropDisallowedBadge)(bool enabled);
 } ArkUIDragAdapterAPI;
 
 struct ArkUISnapshotOptions {

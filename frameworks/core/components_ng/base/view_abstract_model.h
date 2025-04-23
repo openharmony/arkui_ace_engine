@@ -367,6 +367,7 @@ public:
     virtual void SetMonopolizeEvents(bool monopolizeEvents) = 0;
     virtual void NotifyDragStartRequest(DragStartRequestStatus dragStatus) {}
     virtual void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) = 0;
+    virtual void EnableDropDisallowedBadge(bool enableDropDisallowedBadge) = 0;
     virtual int32_t CancelDataLoading(const std::string& key) = 0;
     virtual void SetDisableDataPrefetch(bool disableDataPrefetch);
     virtual void SetDisallowDropForcedly(bool isDisallowDropForcedly) {}

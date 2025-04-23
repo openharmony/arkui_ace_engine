@@ -47,6 +47,8 @@ public:
     const WeakPtr<FrameNode> GetPrepareDragFrameNode() const;
     void SetPreDragStatus(PreDragStatus preDragStatus);
     PreDragStatus GetPreDragStatus() const;
+    void SetEnableDropDisallowedBadge(bool enableDisallowStatusShowing);
+    bool GetEnableDropDisallowedBadge() const;
     void UpdateDragFilterShowingStatus(bool isShowing);
     bool IsDragFilterShowing() const;
     bool IsOnOnDropPhase();
@@ -95,6 +97,7 @@ private:
     // app global drag
     bool isAppGlobalDragEnabled_ = false;
     bool isAlreadyGetAppGlobalDrag_ = false;
+    bool enableDropDisallowedBadge_ = false;
 };
 
 } // namespace OHOS::Ace::NG

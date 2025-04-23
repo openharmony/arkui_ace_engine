@@ -491,7 +491,9 @@ void DragDropManager::UpdateDragAllowDrop(
 {
     if (!IsDropAllowed(dragFrameNode)) {
         // simplified specifications for drag cursor style, no longer showing forbidden drag cursor
-        UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
+        DragDropGlobalController::GetInstance().GetEnableDropDisallowedBadge()
+            ? UpdateDragStyle(DragCursorStyleCore::FORBIDDEN, eventId)
+            : UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
         return;
     }
 
@@ -1532,7 +1534,9 @@ void DragDropManager::UpdateDragCursorStyle(const RefPtr<FrameNode>& frameNode,
         }
     } else if (event->GetResult() == DragRet::DISABLE_DROP) {
         // simplified specifications for drag cursor style, no longer showing forbidden drag cursor
-        UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
+        DragDropGlobalController::GetInstance().GetEnableDropDisallowedBadge()
+            ? UpdateDragStyle(DragCursorStyleCore::FORBIDDEN, eventId)
+            : UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
     } else {
         UpdateDragAllowDrop(frameNode, event->GetDragBehavior(), eventId, event->IsCapi());
     }
