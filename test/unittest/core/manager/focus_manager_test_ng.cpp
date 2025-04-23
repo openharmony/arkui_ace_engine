@@ -55,6 +55,26 @@ void FocusManagerTestNg::TearDownTestCase()
     MockContainer::TearDown();
 }
 
+struct HandleFocusCanBeActiveTestCase {
+    bool initialActive = false;
+    bool focusCanBeActive = false;
+    bool setActiveByUser = false;
+    bool parameterSwitch = false;
+    bool exceptResult = false;
+};
+
+const std::vector<HandleFocusCanBeActiveTestCase> FOCUS_ACTIVE_SUPPORT_HIERARCHY_PARAMETER_TEST_CASE = {
+    { false, false, true, false, false },
+    { false, false, true, true, false },
+    { false, true, true, false, true },
+    { false, true, true, true, false },
+    { true, false, false, false, false },
+    { true, false, true, false, true },
+    { true, true, false, false, false },
+    { true, true, true, false, true },
+    { true, true, true, true, false },
+};
+
 /**
  * @tc.name: FocusManagerTest001
  * @tc.desc: Create FocusManager
@@ -796,5 +816,27 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest020, TestSize.Level1)
     appTheme->focusActiveByTab_ = true;
     focusManager->SetIsFocusActive(true, FocusActiveReason::KEY_TAB);
     EXPECT_TRUE(focusManager->isFocusActive_);
+}
+
+/**
+ * @tc.name: FocusManagerTest021
+ * @tc.desc: test focusActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest021, TestSize.Level1)
+{
+    for (const auto& testCase : FOCUS_ACTIVE_SUPPORT_HIERARCHY_PARAMETER_TEST_CASE) {
+        auto context = PipelineContext::GetCurrentContext();
+        ASSERT_NE(context, nullptr);
+        auto focusManager = context->GetOrCreateFocusManager();
+        ASSERT_NE(focusManager, nullptr);
+        focusManager->isFocusActive_ = testCase.initialActive;
+        SystemProperties::focusCanBeActive_.store(testCase.focusCanBeActive);
+        focusManager->SetIsFocusActive(testCase.setActiveByUser, FocusActiveReason::USE_API);
+        if (testCase.parameterSwitch && testCase.focusCanBeActive) {
+            focusManager->SetIsFocusActive(false, FocusActiveReason::USE_API);
+        }
+        EXPECT_EQ(focusManager->isFocusActive_, testCase.exceptResult);
+    }
 }
 } // namespace OHOS::Ace::NG
