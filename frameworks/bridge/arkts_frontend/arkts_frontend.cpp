@@ -190,7 +190,7 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     std::string moduleName = Container::Current()->GetModuleName();
     ani_string module;
     env_->String_NewUTF8(moduleName.c_str(), moduleName.size(), &module);
-    if (env_->Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, false, module,
+    if (env_->Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, false,
             legacyEntryPointObj ? legacyEntryPointObj : optionalEntry,
             entryPointObj ? entryPointObj : optionalEntry) != ANI_OK) {
         LOGE("createApplication returned null");
