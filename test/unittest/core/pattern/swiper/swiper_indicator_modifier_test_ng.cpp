@@ -1094,9 +1094,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex001, TestSize.Level1)
     CreateSwiperItems(6);
     CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+
     auto displayIndicatorCount = pattern_->DisplayIndicatorTotalCount();
     EXPECT_EQ(displayIndicatorCount, 3);
 
@@ -1114,7 +1112,6 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex001, TestSize.Level1)
     int32_t indicatorIndex = displayIndicatorCount - 1;
     auto expectVal = std::pair<int32_t, int32_t>(indicatorIndex, indicatorIndex);
     EXPECT_EQ(paintMethod->GetIndex(indicatorIndex), expectVal);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1132,9 +1129,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex002, TestSize.Level1)
     CreateSwiperItems(6);
     CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+
     auto displayIndicatorCount = pattern_->DisplayIndicatorTotalCount();
     EXPECT_EQ(displayIndicatorCount, 3);
 
@@ -1152,7 +1147,6 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex002, TestSize.Level1)
     int32_t indicatorIndex = displayIndicatorCount - 1;
     auto expectVal = std::pair<int32_t, int32_t>(indicatorIndex, 0);
     EXPECT_EQ(paintMethod->GetIndex(indicatorIndex), expectVal);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
