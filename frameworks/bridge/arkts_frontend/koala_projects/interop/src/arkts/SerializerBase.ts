@@ -216,8 +216,8 @@ export class SerializerBase {
     }
     holdAndWriteCallbackForPromiseVoid(hold: pointer = 0, release: pointer = 0, call: pointer = 0): [Promise<void>, ResourceId] {
         let resourceId: ResourceId
-        const promise = new Promise<void>((resolve: (value: PromiseLike<void>) => void, reject: (err: Object|null|undefined) => void) => {
-            const callback = (err: string[]|undefined) => {
+        const promise = new Promise<void>((resolve: (value: PromiseLike<void>) => void, reject: (err: Error) => void) => {
+            const callback = (err: Error|undefined) => {
                 if (err !== undefined)
                     reject(err!)
                 else
@@ -229,8 +229,8 @@ export class SerializerBase {
     }
     holdAndWriteCallbackForPromise<T>(hold: pointer = 0, release: pointer = 0, call: pointer = 0): [Promise<T>, ResourceId] {
         let resourceId: ResourceId
-        const promise = new Promise<T>((resolve: (value: T|PromiseLike<T>) => void, reject: (err: Object|null|undefined) => void) => {
-            const callback = (value?: T|undefined, err?: string[]|undefined) => {
+        const promise = new Promise<T>((resolve: (value: T|PromiseLike<T>) => void, reject: (err: Error) => void) => {
+            const callback = (value?: T|undefined, err?: Error|undefined) => {
                 if (err !== undefined)
                     reject(err!)
                 else
