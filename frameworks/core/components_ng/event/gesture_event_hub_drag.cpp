@@ -918,6 +918,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     dragDropManager->ResetContextMenuDragPosition();
     RefPtr<Subwindow> subWindow = nullptr;
     data.dragPreviewRect = RectF(0, 0, pixelMap->GetWidth(), pixelMap->GetHeight());
+    data.deviceType = info.GetSourceDevice();
     if (!needChangeFwkForLeaveWindow && IsNeedSwitchToSubWindow(data)) {
         GestureEventHub::PrepareDragStartInfo(pipeline, data, frameNode);
         auto imageNode = overlayManager->GetPixelMapContentNode();
