@@ -78,6 +78,7 @@ constexpr Dimension MIN_DIAMETER = 1.5_vp;
 constexpr Dimension MIN_ARROWHEAD_DIAMETER = 2.0_vp;
 constexpr Dimension ANIMATION_TEXT_OFFSET = 12.0_vp;
 constexpr Dimension OVERLAY_MAX_WIDTH = 280.0_vp;
+constexpr Dimension MIN_HOTSPOT_WIDTH = 40.0_vp;
 constexpr float AGING_MIN_SCALE = 1.75f;
 
 const std::string OH_DEFAULT_CUT = "OH_DEFAULT_CUT";
@@ -574,6 +575,22 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
 
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     button->MarkModifyDone();
+    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        return button;
+    }
+    auto gestureHub = button->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, button);
+    std::vector<DimensionRect> vector;
+    auto menuPadding = textOverlayTheme->GetMenuPadding();
+    auto buttonWidth = textOverlayTheme->GetMenuButtonWidth();
+    auto top = menuPadding.Top();
+    auto responseHeight = top.Value() + menuPadding.Bottom().Value() + textOverlayTheme->GetMenuButtonHeight().Value();
+    auto responseWidth = std::max(menuPadding.Left() + menuPadding.Right() + buttonWidth, MIN_HOTSPOT_WIDTH);
+    constexpr int32_t centerDivider = 2;
+    vector.emplace_back(DimensionRect(responseWidth, Dimension(responseHeight, DimensionUnit::VP),
+        DimensionOffset(
+            Dimension(-(responseWidth - buttonWidth) / centerDivider), Dimension(-top.Value(), top.Unit()))));
+    gestureHub->SetResponseRegion(vector);
     return button;
 }
 
