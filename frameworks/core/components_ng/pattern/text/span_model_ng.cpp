@@ -67,6 +67,13 @@ RefPtr<SpanNode> SpanModelNG::CreateSpanNode(int32_t nodeId, const std::u16strin
     return spanNode;
 }
 
+RefPtr<ContainerSpanNode> SpanModelNG::CreateContainerSpanNode(int32_t nodeId)
+{
+    auto spanNode = ContainerSpanNode::GetOrCreateSpanNode(nodeId);
+    CHECK_NULL_RETURN(spanNode, nullptr);
+    return spanNode;
+}
+
 void SpanModelNG::SetFont(const Font& value)
 {
     if (value.fontSize.has_value()) {
