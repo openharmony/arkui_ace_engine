@@ -45,6 +45,11 @@ namespace OHOS::Ace::NG::Converter {
         std::optional<NestedScrollMode> backward;
     };
 
+    struct EdgeEffectOptions {
+        std::optional<bool> alwaysEnabled;
+        std::optional<EffectEdge> effectEdge;
+    };
+
     template<>
     inline NestedScrollModeOptions Convert(const Ark_NestedScrollOptions& src)
     {
@@ -72,6 +77,15 @@ namespace OHOS::Ace::NG::Converter {
             dst.endMargin = endMarginOpt.value();
         }
         return dst;
+    }
+
+    template<>
+    inline EdgeEffectOptions Convert(const Ark_EdgeEffectOptions& src)
+    {
+        EdgeEffectOptions options;
+        options.alwaysEnabled = Converter::OptConvert<bool>(src.alwaysEnabled);
+        options.effectEdge = Converter::OptConvert<EffectEdge>(src.effectEdge);
+        return options;
     }
 
     template<>
@@ -224,8 +238,7 @@ void DividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
-    // need check
-    // ListModelNG::SetDivider(frameNode, divider);
+    ListModelNG::SetDivider(frameNode, divider);
 }
 void EditModeImpl(Ark_NativePointer node,
                   Ark_Boolean value)
@@ -281,8 +294,7 @@ void StickyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<V2::StickyStyle> style = Converter::OptConvert<V2::StickyStyle>(value);
-    // need check
-    // ListModelNG::SetSticky(frameNode, EnumToInt(style));
+    ListModelNG::SetSticky(frameNode, EnumToInt(style));
 }
 void ScrollSnapAlignImpl(Ark_NativePointer node,
                          Ark_ScrollSnapAlign value)
@@ -298,8 +310,7 @@ void NestedScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto options = Converter::Convert<Converter::NestedScrollModeOptions>(*value);
-    // need check
-    // ListModelNG::SetListNestedScroll(frameNode, options.forward, options.backward);
+    ListModelNG::SetListNestedScroll(frameNode, options.forward, options.backward);
 }
 void EnableScrollInteractionImpl(Ark_NativePointer node,
                                  Ark_Boolean value)
@@ -314,8 +325,7 @@ void FrictionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    // need check
-    // ListModelNG::SetListFriction(frameNode, Converter::OptConvert<float>(*value));
+    ListModelNG::SetListFriction(frameNode, Converter::OptConvert<float>(*value));
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
                           Ark_ChildrenMainSize value)
@@ -477,8 +487,7 @@ void OnItemDeleteImpl(Ark_NativePointer node,
         auto arkResult = callback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(arkIndex);
         return Converter::Convert<bool>(arkResult);
     };
-    // need check
-    // ListModelNG::SetOnItemDelete(frameNode, std::move(onItemDelete));
+    ListModelNG::SetOnItemDelete(frameNode, std::move(onItemDelete));
 }
 void OnItemMoveImpl(Ark_NativePointer node,
                     const Callback_Number_Number_Boolean* value)
@@ -612,24 +621,21 @@ void LanesImpl(Ark_NativePointer node,
         std::optional<Dimension> gutterOpt;
         Converter::AssignOptionalTo(gutterOpt, *gutter);
         if (gutterOpt.has_value()) {
-            // need check
-            // ListModelNG::SetLaneGutter(frameNode, gutterOpt);
+            ListModelNG::SetLaneGutter(frameNode, gutterOpt);
         }
     }
 }
-void EdgeEffectImpl(Ark_NativePointer node,
-                    Ark_EdgeEffect value,
-                    const Opt_EdgeEffectOptions* options)
+void EdgeEffectImpl(Ark_NativePointer node, Ark_EdgeEffect value, const Opt_EdgeEffectOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<bool> alwaysEnabled;
+    std::optional<Converter::EdgeEffectOptions> edgeEffectOptions;
     if (options != nullptr) {
-        alwaysEnabled = Converter::OptConvert<bool>(*options);
+        edgeEffectOptions = Converter::OptConvert<Converter::EdgeEffectOptions>(*options);
     }
     std::optional<EdgeEffect> effect = Converter::OptConvert<EdgeEffect>(value);
-    // need check
-    // ListModelNG::SetEdgeEffect(frameNode, EnumToInt(effect), alwaysEnabled);
+    ListModelNG::SetEdgeEffect(
+        frameNode, EnumToInt(effect), edgeEffectOptions->alwaysEnabled, edgeEffectOptions->effectEdge);
 }
 } // ListAttributeModifier
 const GENERATED_ArkUIListModifier* GetListModifier()
