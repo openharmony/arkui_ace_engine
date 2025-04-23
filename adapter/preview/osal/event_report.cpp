@@ -119,6 +119,6 @@ void EventReport::SendDiffFrameRatesDuring(const std::string& scene, const FRCSc
 void EventReport::FrameRateDurationsStatistics(int32_t expectedRate, const std::string& scene, NG::SceneStatus status)
 {}
  
-void EventReport::AddFrameRateDuration(int32_t frameRate, int32_t duration)
+void EventReport::AddFrameRateDuration(int32_t frameRate, int64_t duration)
 {}
 } // namespace OHOS::Ace
