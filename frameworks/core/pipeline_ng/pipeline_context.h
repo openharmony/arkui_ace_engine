@@ -1212,7 +1212,7 @@ protected:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     void StartSplitWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
-    void MaximizeToImmersiveAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
+    void MaximizeInImplictAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
