@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "layered_drawable_descriptor_peer.h"
 #include "arkoala_api_generated.h"
 
@@ -59,8 +60,7 @@ Ark_DrawableDescriptor GetMaskImpl(Ark_LayeredDrawableDescriptor peer)
 }
 Ark_String GetMaskClipPathImpl()
 {
-    LOGE("ARKOALA: Ark_LayeredDrawableDescriptor::GetMaskClipPathImpl not implemented");
-    return {};
+    return ArkValue<Ark_String>(LayeredDrawableDescriptorPeer::GetStaticMaskClipPath(), Converter::FC);
 }
 } // LayeredDrawableDescriptorAccessor
 const GENERATED_ArkUILayeredDrawableDescriptorAccessor* GetLayeredDrawableDescriptorAccessor()

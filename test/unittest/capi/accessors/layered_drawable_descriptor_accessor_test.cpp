@@ -18,6 +18,7 @@
 #include "accessor_test_base.h"
 #include "accessor_test_fixtures.h"
 
+#include "core/common/resource/resource_manager.h"
 #include "core/interfaces/native/implementation/animated_drawable_descriptor_peer.h"
 #include "core/interfaces/native/implementation/drawable_descriptor_peer.h"
 #include "core/interfaces/native/implementation/layered_drawable_descriptor_peer.h"
@@ -30,6 +31,45 @@ using namespace testing;
 using namespace testing::ext;
 using namespace AccessorTestFixtures;
 using namespace Converter;
+
+namespace {
+    constexpr auto TEST_CLIP_PATH = "/some_clip_path/file.svg";
+
+    class MockResourceAdapter : public ResourceAdapter {
+    DECLARE_ACE_TYPE(MockResourceAdapter, ResourceAdapter);
+
+public:
+    MockResourceAdapter() = default;
+    ~MockResourceAdapter() override = default;
+    MOCK_METHOD0(Create, RefPtr<ResourceAdapter>());
+    MOCK_METHOD1(Init, void(const ResourceInfo& resourceInfo));
+    MOCK_METHOD2(UpdateConfig, void(const ResourceConfiguration& config, bool themeFlag));
+    MOCK_METHOD1(GetTheme, RefPtr<ThemeStyle>(int32_t themeId));
+    MOCK_METHOD1(GetColor, Color(uint32_t resId));
+    MOCK_METHOD1(GetDimension, Dimension(uint32_t resId));
+    MOCK_METHOD1(GetString, std::string(uint32_t resId));
+    MOCK_METHOD1(GetDouble, double(uint32_t resId));
+    MOCK_METHOD1(GetInt, int32_t(uint32_t resId));
+    MOCK_METHOD2(GetPluralString, std::string(uint32_t resId, int quantity));
+    MOCK_METHOD1(GetMediaPath, std::string(uint32_t resId));
+    MOCK_METHOD1(GetRawfile, std::string(const std::string& fileName));
+    MOCK_METHOD3(GetRawFileData, bool(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest));
+    MOCK_METHOD3(GetMediaData, bool(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]>& dest));
+    MOCK_METHOD3(GetMediaData, bool(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]>& dest));
+    MOCK_METHOD2(UpdateResourceManager, void(const std::string& bundleName, const std::string& moduleName));
+    MOCK_CONST_METHOD1(GetBoolean, bool(uint32_t resId));
+    MOCK_CONST_METHOD1(GetIntArray, std::vector<uint32_t>(uint32_t resId));
+    MOCK_CONST_METHOD2(GetResource, bool(uint32_t resId, std::ostream& dest));
+    MOCK_CONST_METHOD2(GetResource, bool(const std::string& resId, std::ostream& dest));
+    MOCK_CONST_METHOD3(GetIdByName, bool(const std::string& resName, const std::string& resType, uint32_t& resId));
+    MOCK_CONST_METHOD1(GetStringArray, std::vector<std::string>(uint32_t resId));
+
+    std::string GetStringByName(const std::string& resName) override
+    {
+        return TEST_CLIP_PATH;
+    }
+};
+}
 
 class LayeredDrawableDescriptorAccessorTest
     : public AccessorTestCtorBase<GENERATED_ArkUILayeredDrawableDescriptorAccessor,
@@ -173,8 +213,13 @@ HWTEST_F(LayeredDrawableDescriptorAccessorTest, getMaskTest, TestSize.Level1)
  * @tc.desc: Check the functionality of getMaskClipPath
  * @tc.type: FUNC
  */
-HWTEST_F(LayeredDrawableDescriptorAccessorTest, DISABLED_getMaskClipPathTest, TestSize.Level1)
+HWTEST_F(LayeredDrawableDescriptorAccessorTest, getMaskClipPathTest, TestSize.Level1)
 {
-    // not implemented yet
+    auto adapter = AceType::MakeRefPtr<MockResourceAdapter>();
+    ASSERT_TRUE(adapter);
+    OHOS::Ace::ResourceManager::GetInstance()
+        .RegisterMainResourceAdapter("", "", OHOS::Ace::Container::CurrentIdSafely(), adapter);
+    auto path = Convert<std::string>(accessor_->getMaskClipPath());
+    EXPECT_EQ(path, TEST_CLIP_PATH);
 }
 } // namespace OHOS::Ace::NG

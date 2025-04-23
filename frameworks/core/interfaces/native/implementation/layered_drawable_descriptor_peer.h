@@ -29,6 +29,8 @@ public:
     DrawableDescriptorPeer* GetBackground() const;
     DrawableDescriptorPeer* GetMask() const;
 
+    static std::string GetStaticMaskClipPath();
+
 protected:
     LayeredDrawableDescriptorPeer(PixelMapPtr foregroundValue, PixelMapPtr backgroundValue, PixelMapPtr maskValue)
         : foreground(foregroundValue), background(backgroundValue), mask(maskValue)
