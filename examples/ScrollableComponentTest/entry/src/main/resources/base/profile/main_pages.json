@@ -23,6 +23,8 @@
     "pages/alphabetIndexer/AutoCollapse",
     "pages/alphabetIndexer/PopupPosition",
     "pages/refresh/RefreshMainPage",
-    "pages/refresh/RefreshingContent"
+    "pages/refresh/RefreshingContent",
+    "pages/grid/GridMainPage",
+    "pages/grid/GridObjectSort"
   ]
 }
