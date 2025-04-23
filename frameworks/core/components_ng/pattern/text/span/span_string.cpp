@@ -1014,6 +1014,11 @@ bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
     TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_CONTENT);
     TLVUtil::WriteString(buff, UtfUtils::Str16DebugToStr8(text_));
     TLVUtil::WriteUint8(buff, TLV_END);
+    std::vector<uint8_t> otherInfo;
+    TLVUtil::WriteInt32(otherInfo, isFromStyledStringMode? 1 : 0);
+    TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_MODE_FLAG);
+    TLVUtil::WriteInt32(buff, static_cast<int32_t>(otherInfo.size()));
+    buff.insert(buff.end(), otherInfo.begin(), otherInfo.end());
     return true;
 }
 
@@ -1043,9 +1048,7 @@ void SpanString::DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString
     CHECK_NULL_VOID(spanString);
     int32_t cursor = 0;
     DecodeTlvOldExt(buff, spanString, cursor);
-    if (!unmarshallCallback) {
-        return;
-    }
+    
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor); tag != TLV_END; tag = TLVUtil::ReadUint8(buff, cursor)) {
         auto buffLength = TLVUtil::ReadInt32(buff, cursor);
         if (buffLength == 0) {
@@ -1054,6 +1057,9 @@ void SpanString::DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString
         auto lastCursor = cursor;
         switch (tag) {
             case TLV_CUSTOM_MARSHALL_BUFFER_START: {
+                if (!unmarshallCallback) {
+                    break;
+                }
                 auto start = TLVUtil::ReadInt32(buff, cursor);
                 auto length = TLVUtil::ReadInt32(buff, cursor);
                 auto endOfUserDataArrBuff = buffLength + cursor + cursor - lastCursor;
@@ -1069,6 +1075,10 @@ void SpanString::DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString
                     }, TaskExecutor::TaskType::UI, "SpanstringDecodeTlvExt", PriorityType::IMMEDIATE);
                 cursor = lastCursor + buffLength;
                 break;
+            }
+            case TLV_SPAN_STRING_MODE_FLAG: {
+                auto isFromStyledStringMode = TLVUtil::ReadInt32(buff, cursor);
+                spanString->isFromStyledStringMode = isFromStyledStringMode == 1;
             }
             default:
                 break;

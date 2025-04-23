@@ -686,13 +686,14 @@ void TextPattern::AsyncHandleOnCopySpanStringHtml(RefPtr<SpanString>& subSpanStr
 {
     auto taskExecutor = GetTaskExecutorItem();
     CHECK_NULL_VOID(taskExecutor);
+    std::list<RefPtr<SpanItem>> spans = GetSpanSelectedContent();
     taskExecutor->PostTask(
-        [subSpanString, weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
+        [spans, subSpanString, weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
             std::vector<uint8_t> tlvData;
             subSpanString->EncodeTlv(tlvData);
             auto multiTypeRecordImpl = AceType::MakeRefPtr<MultiTypeRecordImpl>();
             multiTypeRecordImpl->SetPlainText(subSpanString->GetString());
-            std::string htmlText = HtmlUtils::ToHtml(Referenced::RawPtr(subSpanString));
+            std::string htmlText = HtmlUtils::ToHtml(spans);
             multiTypeRecordImpl->SetHtmlText(htmlText);
 
             auto uiTaskExecutor = task.Upgrade();
@@ -713,6 +714,7 @@ void TextPattern::HandleOnCopySpanString()
 {
     auto subSpanString = styledString_->GetSubSpanString(textSelector_.GetTextStart(),
         textSelector_.GetTextEnd() - textSelector_.GetTextStart());
+    subSpanString->isFromStyledStringMode = true;
 #if defined(PREVIEW)
     clipboard_->SetData(subSpanString->GetString(), copyOption_);
     return;
