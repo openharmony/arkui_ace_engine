@@ -6869,4 +6869,235 @@ HWTEST_F(NativeNodeTest, NativeNodeTest133, TestSize.Level1)
     EXPECT_TRUE(indicator);
     OH_ArkUI_SwiperDigitIndicator_Destroy(indicator);
 }
+
+/**
+ * @tc.name: NativeNodeTest134
+ * @tc.desc: Test NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest134, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    auto option = OH_ArkUI_VisibleAreaEventOptions_Create();
+    float* ratiosArray = new float[2];
+    ratiosArray[0] = -0.2f;
+    ratiosArray[1] = 1.0f;
+    OH_ArkUI_VisibleAreaEventOptions_SetRatios(option, ratiosArray, 2);
+    OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(option, 1000);
+    ArkUI_AttributeItem attributeItem = { .object = option };
+    nodeAPI->setAttribute(rootNode, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO, &attributeItem);
+
+    float* getRatiosArray = new float[4];
+    int size = 4;
+    OH_ArkUI_VisibleAreaEventOptions_GetRatios(option, getRatiosArray, &size);
+
+    EXPECT_EQ(getRatiosArray[0], 0.0f);
+    EXPECT_EQ(getRatiosArray[1], 1.0f);
+
+    EXPECT_EQ(OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(option), 1000);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest135
+ * @tc.desc: Test NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest135, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    auto option = OH_ArkUI_VisibleAreaEventOptions_Create();
+    float* ratiosArray = new float[2];
+    ratiosArray[0] = -0.2f;
+    ratiosArray[1] = 3.0f;
+    OH_ArkUI_VisibleAreaEventOptions_SetRatios(option, ratiosArray, 2);
+    OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(option, 1000);
+    ArkUI_AttributeItem attributeItem = { .object = option };
+    nodeAPI->setAttribute(rootNode, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO, &attributeItem);
+
+    float* getRatiosArray = new float[2];
+    int size = 2;
+    OH_ArkUI_VisibleAreaEventOptions_GetRatios(option, getRatiosArray, &size);
+
+    EXPECT_EQ(getRatiosArray[0], 0.0f);
+    EXPECT_EQ(getRatiosArray[1], 1.0f);
+
+    EXPECT_EQ(OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(option), 1000);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest136
+ * @tc.desc: Test NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest136, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    auto option = OH_ArkUI_VisibleAreaEventOptions_Create();
+    float* ratiosArray = new float[2];
+    ratiosArray[0] = 0.2f;
+    ratiosArray[1] = 1.2f;
+    OH_ArkUI_VisibleAreaEventOptions_SetRatios(option, ratiosArray, 2);
+    OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(option, 1000);
+    ArkUI_AttributeItem attributeItem = { .object = option };
+    nodeAPI->setAttribute(rootNode, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO, &attributeItem);
+
+    float* getRatiosArray = new float[2];
+    int size = 2;
+    OH_ArkUI_VisibleAreaEventOptions_GetRatios(option, getRatiosArray, &size);
+
+    EXPECT_EQ(getRatiosArray[0], 0.2f);
+    EXPECT_EQ(getRatiosArray[1], 1.0f);
+
+    EXPECT_EQ(OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(option), 1000);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest137
+ * @tc.desc: Test NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest137, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    auto option = OH_ArkUI_VisibleAreaEventOptions_Create();
+    float* ratiosArray = new float[2];
+    ratiosArray[0] = 1.2f;
+    ratiosArray[1] = 1.2f;
+    OH_ArkUI_VisibleAreaEventOptions_SetRatios(option, ratiosArray, 2);
+    OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(option, 1000);
+    ArkUI_AttributeItem attributeItem = { .object = option };
+    nodeAPI->setAttribute(rootNode, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO, &attributeItem);
+
+    float* getRatiosArray = new float[2];
+    int size = 2;
+    OH_ArkUI_VisibleAreaEventOptions_GetRatios(option, getRatiosArray, &size);
+
+    EXPECT_EQ(getRatiosArray[0], 1.0f);
+    EXPECT_EQ(getRatiosArray[1], 1.0f);
+
+    EXPECT_EQ(OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(option), 1000);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest138
+ * @tc.desc: Test NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest138, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    auto option = OH_ArkUI_VisibleAreaEventOptions_Create();
+    float* ratiosArray = new float[2];
+    ratiosArray[0] = 0.2f;
+    ratiosArray[1] = 1.0f;
+    OH_ArkUI_VisibleAreaEventOptions_SetRatios(option, ratiosArray, 2);
+    OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(option, -100);
+    ArkUI_AttributeItem attributeItem = { .object = option };
+    nodeAPI->setAttribute(rootNode, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO, &attributeItem);
+
+    float* getRatiosArray = new float[2];
+    int size = 2;
+    OH_ArkUI_VisibleAreaEventOptions_GetRatios(option, getRatiosArray, &size);
+
+    EXPECT_EQ(getRatiosArray[0], 0.2f);
+    EXPECT_EQ(getRatiosArray[1], 1.0f);
+
+    EXPECT_EQ(OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(option), 1000);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest139
+ * @tc.desc: Test NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest139, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    auto option = OH_ArkUI_VisibleAreaEventOptions_Create();
+    float* ratiosArray = new float[2];
+    ratiosArray[0] = 0.2f;
+    ratiosArray[1] = 1.0f;
+    OH_ArkUI_VisibleAreaEventOptions_SetRatios(option, ratiosArray, 2);
+    OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(option, 1200);
+    ArkUI_AttributeItem attributeItem = { .object = option };
+    nodeAPI->setAttribute(rootNode, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO, &attributeItem);
+
+    float* getRatiosArray = new float[2];
+    int size = 2;
+    OH_ArkUI_VisibleAreaEventOptions_GetRatios(option, getRatiosArray, &size);
+
+    EXPECT_EQ(getRatiosArray[0], 0.2f);
+    EXPECT_EQ(getRatiosArray[1], 1.0f);
+
+    EXPECT_EQ(OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(option), 1200);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest140
+ * @tc.desc: Test NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest140, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    auto option = OH_ArkUI_VisibleAreaEventOptions_Create();
+    float* ratiosArray = new float[2];
+    ratiosArray[0] = 0.2f;
+    ratiosArray[1] = 1.0f;
+    OH_ArkUI_VisibleAreaEventOptions_SetRatios(option, ratiosArray, 2);
+    OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(option, 200);
+    ArkUI_AttributeItem attributeItem = { .object = option };
+    nodeAPI->setAttribute(rootNode, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO, &attributeItem);
+
+    float* getRatiosArray = new float[2];
+    int size = 2;
+    OH_ArkUI_VisibleAreaEventOptions_GetRatios(option, getRatiosArray, &size);
+
+    EXPECT_EQ(getRatiosArray[0], 0.2f);
+    EXPECT_EQ(getRatiosArray[1], 1.0f);
+
+    EXPECT_EQ(OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(option), 200);
+    nodeAPI->disposeNode(rootNode);
+}
 } // namespace OHOS::Ace
