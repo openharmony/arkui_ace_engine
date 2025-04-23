@@ -180,4 +180,324 @@ HWTEST_F(FocusRequestTestNG, FocusRequestTest001, TestSize.Level1)
     EXPECT_TRUE(initResult);
     InitFocusRequest();
 }
+
+/**
+ * @tc.name: TriggerFocusMoveWithTabIndex001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusRequestTestNG, TriggerFocusMoveWithTabIndex001, TestSize.Level1)
+{
+    bool initResult = InitFocusTestBaseNG();
+    EXPECT_TRUE(initResult);
+    /**
+    * @tc.steps: step1. Create rootNode and focusHub.
+    * @tc.expected: rootNode and focusHub not null.
+    */
+    auto rootNode = CreateRootNode();
+    EXPECT_NE(rootNode, nullptr);
+    auto rootNodeFocusHub = rootNode->GetOrCreateFocusHub();
+    EXPECT_NE(rootNodeFocusHub, nullptr);
+    rootNode->onMainTree_ = true;
+
+    /**
+    * @tc.steps: step2. Create scope testFocusView and focusHub.
+    * @tc.expected: testFocusView and focusHub not null.
+    */
+    std::list<int32_t> emptyList;
+    auto testFocusView = CreateFocusViewWithFocusPattern("nodeA", emptyList, FocusType::SCOPE, true);
+    EXPECT_NE(testFocusView, nullptr);
+    testFocusView->UpdateInspectorId("testFocusView");
+    auto testFocusViewHub = testFocusView->GetOrCreateFocusHub();
+    EXPECT_NE(testFocusViewHub, nullptr);
+    auto testFocusViewPattern = testFocusView->GetPattern<FocusView>();
+    EXPECT_NE(testFocusViewPattern, nullptr);
+    testFocusViewPattern->SetIsViewRootScopeFocused(true);
+
+    /**
+    * @tc.steps: step3. Create nodeA and focusHub.
+    * @tc.expected: nodeA and focusHub not null.
+    */
+    auto nodeA = CreateNodeWithFocusPattern("nodeA", FocusType::NODE, true);
+    EXPECT_NE(nodeA, nullptr);
+    nodeA->UpdateInspectorId("NODEA");
+    auto focusHubA = nodeA->GetOrCreateFocusHub();
+    EXPECT_NE(focusHubA, nullptr);
+    focusHubA->SetTabIndex(-1);
+
+    /**
+    * @tc.steps: step4. Create nodeB and focusHub.
+    * @tc.expected: nodeB and focusHub not null.
+    */
+    auto nodeB = CreateNodeWithFocusPattern("nodeB", FocusType::NODE, true);
+    EXPECT_NE(nodeB, nullptr);
+    nodeB->UpdateInspectorId("NODEB");
+    auto focusHubB = nodeB->GetOrCreateFocusHub();
+    EXPECT_NE(focusHubB, nullptr);
+
+    /**
+    * @tc.steps: step5. Create tree.
+    */
+    rootNode->AddChild(testFocusView);
+    testFocusView->AddChild(nodeA);
+    testFocusView->AddChild(nodeB);
+    testFocusView->onMainTree_ = true;
+    nodeA->onMainTree_ = true;
+    nodeB->onMainTree_ = true;
+
+    /**
+    * @tc.steps: step6. testFocusViewHub request focus.
+    * @tc.expected: testFocusViewHub focus. focusHubA not focus. focusHubB not focus. 
+    */
+    testFocusViewHub->RequestFocusImmediatelyInner();
+    EXPECT_EQ(testFocusViewHub->IsCurrentFocus(), true);
+    EXPECT_EQ(focusHubA->IsCurrentFocus(), false);
+    EXPECT_EQ(focusHubB->IsCurrentFocus(), false);
+
+    /**
+    * @tc.steps: step7. ExtendOrActivateFocus.
+    * @tc.expected: focusHubA not focus. focusHubB focus.
+    */
+    EXPECT_NE(focusManager_, nullptr);
+    focusManager_->ExtendOrActivateFocus(testFocusViewPattern);
+    EXPECT_EQ(focusHubA->IsCurrentFocus(), true);
+    EXPECT_EQ(focusHubB->IsCurrentFocus(), false);
+}
+
+/**
+ * @tc.name: TriggerFocusMoveWithTabIndex002
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusRequestTestNG, TriggerFocusMoveWithTabIndex002, TestSize.Level1)
+{
+    bool initResult = InitFocusTestBaseNG();
+    EXPECT_TRUE(initResult);
+    /**
+    * @tc.steps: step1. Create rootNode and focusHub.
+    * @tc.expected: rootNode and focusHub not null.
+    */
+    auto rootNode = CreateRootNode();
+    EXPECT_NE(rootNode, nullptr);
+    auto rootNodeFocusHub = rootNode->GetOrCreateFocusHub();
+    EXPECT_NE(rootNodeFocusHub, nullptr);
+    rootNode->onMainTree_ = true;
+
+    /**
+    * @tc.steps: step2. Create scope testFocusView and focusHub.
+    * @tc.expected: testFocusView and focusHub not null.
+    */
+    std::list<int32_t> emptyList;
+    auto testFocusView = CreateFocusViewWithFocusPattern("nodeA", emptyList, FocusType::SCOPE, true);
+    EXPECT_NE(testFocusView, nullptr);
+    testFocusView->UpdateInspectorId("testFocusView");
+    auto testFocusViewHub = testFocusView->GetOrCreateFocusHub();
+    EXPECT_NE(testFocusViewHub, nullptr);
+    auto testFocusViewPattern = testFocusView->GetPattern<FocusView>();
+    EXPECT_NE(testFocusViewPattern, nullptr);
+    testFocusViewPattern->SetIsViewRootScopeFocused(true);
+
+    /**
+    * @tc.steps: step3. Create nodeA and focusHub.
+    * @tc.expected: nodeA and focusHub not null.
+    */
+    auto nodeA = CreateNodeWithFocusPattern("nodeA", FocusType::NODE, true);
+    EXPECT_NE(nodeA, nullptr);
+    nodeA->UpdateInspectorId("NODEA");
+    auto focusHubA = nodeA->GetOrCreateFocusHub();
+    EXPECT_NE(focusHubA, nullptr);
+    focusHubA->SetTabIndex(1);
+
+    /**
+    * @tc.steps: step4. Create nodeB and focusHub.
+    * @tc.expected: nodeB and focusHub not null.
+    */
+    auto nodeB = CreateNodeWithFocusPattern("nodeB", FocusType::NODE, true);
+    EXPECT_NE(nodeB, nullptr);
+    nodeB->UpdateInspectorId("NODEB");
+    auto focusHubB = nodeB->GetOrCreateFocusHub();
+    EXPECT_NE(focusHubB, nullptr);
+
+    /**
+    * @tc.steps: step5. Create tree.
+    */
+    rootNode->AddChild(testFocusView);
+    testFocusView->AddChild(nodeA);
+    testFocusView->AddChild(nodeB);
+    testFocusView->onMainTree_ = true;
+    nodeA->onMainTree_ = true;
+    nodeB->onMainTree_ = true;
+
+    /**
+    * @tc.steps: step6. testFocusViewHub request focus.
+    * @tc.expected: testFocusViewHub focus. focusHubA not focus. focusHubB not focus.
+    */
+    testFocusViewHub->RequestFocusImmediatelyInner();
+    EXPECT_EQ(testFocusViewHub->IsCurrentFocus(), true);
+    EXPECT_EQ(focusHubA->IsCurrentFocus(), false);
+    EXPECT_EQ(focusHubB->IsCurrentFocus(), false);
+
+    /**
+    * @tc.steps: step7. ExtendOrActivateFocus.
+    * @tc.expected: focusHubA focus. focusHubB not focus. 
+    */
+    EXPECT_NE(focusManager_, nullptr);
+    focusManager_->ExtendOrActivateFocus(testFocusViewPattern);
+    EXPECT_EQ(focusHubA->IsCurrentFocus(), true);
+    EXPECT_EQ(focusHubB->IsCurrentFocus(), false);
+}
+
+/**
+ * @tc.name: TriggerFocusMoveWithTabIndex003
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusRequestTestNG, TriggerFocusMoveWithTabIndex003, TestSize.Level1)
+{
+    bool initResult = InitFocusTestBaseNG();
+    EXPECT_TRUE(initResult);
+    /**
+    * @tc.steps: step1. Create rootNode and focusHub.
+    * @tc.expected: rootNode and focusHub not null.
+    */
+    auto rootNode = CreateRootNode();
+    EXPECT_NE(rootNode, nullptr);
+    auto rootNodeFocusHub = rootNode->GetOrCreateFocusHub();
+    EXPECT_NE(rootNodeFocusHub, nullptr);
+    rootNode->onMainTree_ = true;
+
+    /**
+    * @tc.steps: step2. Create scope testFocusView and focusHub.
+    * @tc.expected: testFocusView and focusHub not null.
+    */
+    std::list<int32_t> emptyList;
+    auto testFocusView = CreateFocusViewWithFocusPattern("nodeA", emptyList, FocusType::SCOPE, true);
+    EXPECT_NE(testFocusView, nullptr);
+    testFocusView->UpdateInspectorId("testFocusView");
+    auto testFocusViewHub = testFocusView->GetOrCreateFocusHub();
+    EXPECT_NE(testFocusViewHub, nullptr);
+    auto testFocusViewPattern = testFocusView->GetPattern<FocusView>();
+    EXPECT_NE(testFocusViewPattern, nullptr);
+    testFocusViewPattern->SetIsViewRootScopeFocused(false);
+
+    /**
+    * @tc.steps: step3. Create nodeA and focusHub.
+    * @tc.expected: nodeA and focusHub not null.
+    */
+    auto nodeA = CreateNodeWithFocusPattern("nodeA", FocusType::NODE, true);
+    EXPECT_NE(nodeA, nullptr);
+    nodeA->UpdateInspectorId("NODEA");
+    auto focusHubA = nodeA->GetOrCreateFocusHub();
+    EXPECT_NE(focusHubA, nullptr);
+    focusHubA->SetTabIndex(-1);
+
+    /**
+    * @tc.steps: step4. Create nodeB and focusHub.
+    * @tc.expected: nodeB and focusHub not null.
+    */
+    auto nodeB = CreateNodeWithFocusPattern("nodeB", FocusType::NODE, true);
+    EXPECT_NE(nodeB, nullptr);
+    nodeB->UpdateInspectorId("NODEB");
+    auto focusHubB = nodeB->GetOrCreateFocusHub();
+    EXPECT_NE(focusHubB, nullptr);
+
+    /**
+    * @tc.steps: step5. Create tree.
+    */
+    rootNode->AddChild(testFocusView);
+    testFocusView->AddChild(nodeA);
+    testFocusView->AddChild(nodeB);
+    testFocusView->onMainTree_ = true;
+    nodeA->onMainTree_ = true;
+    nodeB->onMainTree_ = true;
+
+    /**
+    * @tc.steps: step6. testFocusViewHub request focus.
+    * @tc.expected: testFocusViewHub focus. focusHubA not focus. focusHubB not focus. 
+    */
+    testFocusViewHub->RequestFocusImmediatelyInner();
+    EXPECT_EQ(testFocusViewHub->IsCurrentFocus(), true);
+    EXPECT_EQ(focusHubA->IsCurrentFocus(), true);
+    EXPECT_EQ(focusHubB->IsCurrentFocus(), false);
+
+    /**
+    * @tc.steps: step7. ExtendOrActivateFocus.
+    * @tc.expected: focusHubA focus. focusHubB not focus.
+    */
+    EXPECT_NE(focusManager_, nullptr);
+    focusManager_->ExtendOrActivateFocus(testFocusViewPattern);
+    EXPECT_EQ(focusHubA->IsCurrentFocus(), true);
+    EXPECT_EQ(focusHubB->IsCurrentFocus(), false);
+}
+
+/**
+ * @tc.name: TriggerFocusMoveWithTabIndex004
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusRequestTestNG, TriggerFocusMoveWithTabIndex004, TestSize.Level1)
+{
+    bool initResult = InitFocusTestBaseNG();
+    EXPECT_TRUE(initResult);
+    /**
+    * @tc.steps: step1. Create rootNode and focusHub.
+    * @tc.expected: rootNode and focusHub not null.
+    */
+    auto rootNode = CreateRootNode();
+    EXPECT_NE(rootNode, nullptr);
+    auto rootNodeFocusHub = rootNode->GetOrCreateFocusHub();
+    EXPECT_NE(rootNodeFocusHub, nullptr);
+    rootNode->onMainTree_ = true;
+
+    /**
+    * @tc.steps: step2. Create scope testFocusView and focusHub.
+    * @tc.expected: testFocusView and focusHub not null.
+    */
+    std::list<int32_t> emptyList;
+    auto testFocusView = CreateFocusViewWithFocusPattern("nodeA", emptyList, FocusType::SCOPE, true);
+    EXPECT_NE(testFocusView, nullptr);
+    testFocusView->UpdateInspectorId("testFocusView");
+    auto testFocusViewHub = testFocusView->GetOrCreateFocusHub();
+    EXPECT_NE(testFocusViewHub, nullptr);
+    auto testFocusViewPattern = testFocusView->GetPattern<FocusView>();
+    EXPECT_NE(testFocusViewPattern, nullptr);
+    testFocusViewPattern->SetIsViewRootScopeFocused(false);
+
+    /**
+    * @tc.steps: step3. Create nodeA and focusHub.
+    * @tc.expected: nodeA and focusHub not null.
+    */
+    auto nodeA = CreateNodeWithFocusPattern("nodeA", FocusType::NODE, true);
+    EXPECT_NE(nodeA, nullptr);
+    nodeA->UpdateInspectorId("NODEA");
+    auto focusHubA = nodeA->GetOrCreateFocusHub();
+    EXPECT_NE(focusHubA, nullptr);
+    focusHubA->SetTabIndex(-1);
+
+    /**
+    * @tc.steps: step4. Create nodeB and focusHub.
+    * @tc.expected: nodeB and focusHub not null.
+    */
+    auto nodeB = CreateNodeWithFocusPattern("nodeB", FocusType::NODE, true);
+    EXPECT_NE(nodeB, nullptr);
+    nodeB->UpdateInspectorId("NODEB");
+    auto focusHubB = nodeB->GetOrCreateFocusHub();
+    EXPECT_NE(focusHubB, nullptr);
+
+    /**
+    * @tc.steps: step5. Create tree.
+    */
+    rootNode->AddChild(testFocusView);
+    testFocusView->AddChild(nodeA);
+    testFocusView->AddChild(nodeB);
+
+    /**
+    * @tc.steps: step6. ExtendOrActivateFocus.
+    * @tc.expected: focusHubA focus. focusHubB not focus. 
+    */
+    EXPECT_NE(focusManager_, nullptr);
+    focusManager_->ExtendOrActivateFocus(testFocusViewPattern);
+    EXPECT_EQ(focusHubA->IsCurrentFocus(), false);
+    EXPECT_EQ(focusHubB->IsCurrentFocus(), false);
+}
 } // namespace OHOS::Ace::NG
