@@ -324,6 +324,7 @@ export class ArkCommonAttributeSet implements CommonAttribute {
     mouseResponseRegion(value: Rectangle | Array<Rectangle>): this {
        return this;
     }
+    /** @memo */
     size(value: SizeOptions): this {
       if (value) {
          modifierWithKey(this._modifiersWithKeys, SizeModifier.identity, SizeModifier.factory, value);
@@ -461,6 +462,7 @@ export class ArkCommonAttributeSet implements CommonAttribute {
     foregroundColor(value:  ResourceColor | ColoringStrategy): this {
        return this;
     }
+    /** @memo */
     onClick(event: (event: ClickEvent) => void, distanceThreshold?: number | undefined): this {
       if (event!=undefined) {
          modifierWithKey(this._modifiersWithKeys, OnClickModifier.identity, OnClickModifier.factory, event);
@@ -657,6 +659,7 @@ export class ArkCommonAttributeSet implements CommonAttribute {
     displayPriority(value: number): this {
        return this;
     }
+    /** @memo */
     zIndex(value: number): this {
       if (value) {
          modifierWithKey(this._modifiersWithKeys, ZIndexModifier.identity, ZIndexModifier.factory, value);
@@ -1001,6 +1004,7 @@ export class ArkCommonAttributeSet implements CommonAttribute {
     keyboardShortcut(value: string | FunctionKey, keys: Array<ModifierKey>, action?: (() => void) | undefined): this {
        return this;
     }
+   /** @memo */
    width(value: Length | undefined): this {
       if (value) {
          modifierWithKey(this._modifiersWithKeys, WidthModifier.identity, WidthModifier.factory, value as Length);
@@ -1009,6 +1013,7 @@ export class ArkCommonAttributeSet implements CommonAttribute {
       }
       return this;
    }
+   /** @memo */
    height(value: Length | undefined): this {
       if (value != null) {
          modifierWithKey(this._modifiersWithKeys, HeightModifier.identity, HeightModifier.factory, value as Length);
@@ -1017,6 +1022,7 @@ export class ArkCommonAttributeSet implements CommonAttribute {
       }
       return this;
    }
+   /** @memo */
     backgroundColor(value: ResourceColor | undefined): this {
       if (value != null) {
          modifierWithKey(this._modifiersWithKeys, HeightModifier.identity, BackgroundColorModifier.factory, value as ResourceColor);

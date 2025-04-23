@@ -70,6 +70,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
     }
+    /** @memo */
     public width(value: Length): this {
         if (this.checkPriority("width")) {
             const value_casted = value as (Length)
@@ -78,6 +79,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    /** @memo */
     public height(value: Length): this {
         if (this.checkPriority("height")) {
             const value_casted = value as (Length)
@@ -113,6 +115,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    /** @memo */
     public size(value: SizeOptions): this {
         if (this.checkPriority("size")) {
             const value_casted = value as (SizeOptions)
@@ -202,7 +205,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-
+    /** @memo */
     public backgroundColor(value: ResourceColor): this {
         if (this.checkPriority("backgroundColor")) {
             const value_casted = value as (ResourceColor)
@@ -418,6 +421,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    /** @memo */
     public onClick(event: ((event: ClickEvent) => void), distanceThreshold?: number): this {
         if (this.checkPriority("onClick")) {
             const event_type = runtimeType(event)
@@ -882,6 +886,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    /** @memo */
     public zIndex(value: number): this {
         if (this.checkPriority("zIndex")) {
             const value_casted = value as (number)
