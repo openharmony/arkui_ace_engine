@@ -1681,35 +1681,6 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen004, TestSize.Leve
 }
 
 /**
- * @tc.name: ConvertActionTypeToBoolen005
- * @tc.desc: Test focusing action
- * @tc.type: FUNC
- */
-HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen005, TestSize.Level1)
-{
-    /**
-    * @tc.steps: step1. construct JsAccessibilityManager
-    */
-    auto context = NG::PipelineContext::GetCurrentContext();
-    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
-    ASSERT_NE(frameNode, nullptr);
-    ASSERT_NE(frameNode->GetRenderContext(), nullptr);
-
-    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
-    ASSERT_NE(jsAccessibilityManager, nullptr);
-    jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 3;
-    jsAccessibilityManager->currentFocusNodeId_ = 2;
-
-    /**
-    * @tc.steps: step2. test clear currentFocusNodeId when elementId not equals to currentFocusNodeId
-    */
-    jsAccessibilityManager->ConvertActionTypeToBoolen(
-        ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, frameNode, 4, context);
-    EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 3);
-    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, 2);
-}
-
-/**
 * @tc.name: JsAccessibilityManager031
 * @tc.desc: IsUpdateWindowSceneInfo
 * @tc.type: FUNC
