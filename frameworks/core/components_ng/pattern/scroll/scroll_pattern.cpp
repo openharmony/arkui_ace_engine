@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
 #include "base/log/dump_log.h"
-#include "core/common/async_build_manager.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -655,7 +655,7 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
         return;
     }
     float position = currentOffset_ + distance;
-    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(GetHost(),
+    MultiThreadBuildManager::TryExecuteUnSafeTask(GetHost(),
         [position, distance, smooth, weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         if (smooth) {

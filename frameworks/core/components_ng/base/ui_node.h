@@ -932,6 +932,22 @@ public:
         isMultiThreadNode_ = isMultiThreadNode;
     }
 
+    void PostAfterAttachMainTreeTask(const std::function<void()>& task)
+    {
+        if (IsOnMainTree()) {
+            return;
+        }
+        afterAttachMainTreeTasks_.emplace_back(std::move(task));
+    }
+
+    void ExecuteAfterAttachMainTreeTasks()
+    {
+        for (auto& task : afterAttachMainTreeTasks_) {
+            task();
+        }
+        afterAttachMainTreeTasks_.clear();
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -1038,7 +1054,8 @@ private:
     int32_t themeScopeId_ = 0;
     bool isRoot_ = false;
     std::atomic<bool> onMainTree_ = false;
-    std::atomic<bool> isMultiThreadNode_ = false;
+    bool isMultiThreadNode_ = false;
+    std::vector<std::function<void()>> afterAttachMainTreeTasks_;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;
     bool isDisappearing_ = false;

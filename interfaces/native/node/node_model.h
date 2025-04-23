@@ -124,16 +124,16 @@ inline bool UsePXUnit(ArkUI_NodeHandle nodePtr)
 
 bool InitialFullImpl();
 ArkUIFullNodeAPI* GetFullImpl();
-class MultiThreadBuildScope {
+class ThreadSafeScope {
 public:
-    explicit MultiThreadBuildScope()
+    explicit ThreadSafeScope()
     {
-        GetFullImpl()->getMultiThreadManagerAPI()->setBuildingMultiThreadNode(true);
+        GetFullImpl()->getMultiThreadManagerAPI()->setIsThreadSafeScope(true);
     }
 
-    ~MultiThreadBuildScope()
+    ~ThreadSafeScope()
     {
-        GetFullImpl()->getMultiThreadManagerAPI()->setBuildingMultiThreadNode(false);
+        GetFullImpl()->getMultiThreadManagerAPI()->setIsThreadSafeScope(false);
     }
 };
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type);

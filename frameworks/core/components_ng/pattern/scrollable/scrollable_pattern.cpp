@@ -22,8 +22,8 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
-#include "core/common/async_build_manager.h"
 #include "core/common/container.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/observer_handler.h"
@@ -559,7 +559,7 @@ void ScrollablePattern::AddScrollEvent()
     InitTouchEvent(gestureHub);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
+    MultiThreadBuildManager::TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         pattern->RegisterWindowStateChangedCallback();
     });
@@ -1399,7 +1399,7 @@ void ScrollablePattern::StopAnimate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (AsyncBuildManager::GetInstance().TryPostUnSafeTask(host, [weak = WeakClaim(this)]() {
+    if (MultiThreadBuildManager::TryPostUnSafeTask(host, [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->StopAnimate();
@@ -2726,7 +2726,7 @@ void ScrollablePattern::Fling(double flingVelocity)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (AsyncBuildManager::GetInstance().TryPostUnSafeTask(host, [weak = WeakClaim(this), flingVelocity]() {
+    if (MultiThreadBuildManager::TryPostUnSafeTask(host, [weak = WeakClaim(this), flingVelocity]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->Fling(flingVelocity);
@@ -3373,7 +3373,7 @@ void ScrollablePattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrol
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (AsyncBuildManager::GetInstance().TryPostUnSafeTask(host,
+    if (MultiThreadBuildManager::TryPostUnSafeTask(host,
         [weak = WeakClaim(this), reverse, smooth, scrollType]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);

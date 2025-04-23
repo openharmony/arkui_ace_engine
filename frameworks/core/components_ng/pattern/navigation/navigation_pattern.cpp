@@ -20,8 +20,8 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
-#include "core/common/async_build_manager.h"
 #include "core/common/ime/input_method_manager.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -203,7 +203,7 @@ void NavigationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (AsyncBuildManager::GetInstance().TryPostUnSafeTask(host, [weak = WeakClaim(this)]() {
+    if (MultiThreadBuildManager::TryPostUnSafeTask(host, [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         pattern->OnAttachToFrameNode();
     })) {

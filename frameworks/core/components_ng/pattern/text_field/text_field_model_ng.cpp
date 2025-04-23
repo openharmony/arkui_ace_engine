@@ -21,9 +21,9 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/common/async_build_manager.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -142,7 +142,7 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
         }
         ProcessDefaultStyleAndBehaviors(frameNode);
     };
-    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(frameNode, buildTask);
+    MultiThreadBuildManager::TryExecuteUnSafeTask(frameNode, buildTask);
     return frameNode;
 }
 

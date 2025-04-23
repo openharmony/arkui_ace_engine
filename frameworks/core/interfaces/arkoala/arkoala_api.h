@@ -6173,9 +6173,9 @@ struct ArkUIBasicAPI {
 };
 
 struct ArkUIMultiThreadManagerAPI {
-    void (*setBuildingMultiThreadNode)(ArkUI_Bool isBuildAsync);
-    ArkUI_Bool (*checkOperateValid)(ArkUINodeHandle node);
-    ArkUI_Bool (*checkOnMainThread)();
+    void (*setIsThreadSafeScope)(ArkUI_Bool isThreadSafeScope);
+    ArkUI_Bool (*checkNodeOnValidThread)(ArkUINodeHandle node);
+    ArkUI_Bool (*checkOnUIThread)();
     ArkUI_Bool (*isMultiThreadNode)(ArkUINodeHandle node);
     ArkUI_Int32 (*postAsyncUITask)(ArkUI_Int32 contextId,
         void* asyncUITaskData, void (*asyncUITask)(void* asyncUITaskData), void(*onFinish)(void* asyncUITaskData));

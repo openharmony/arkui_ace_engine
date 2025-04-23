@@ -42,8 +42,8 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
-#include "core/common/async_build_manager.h"
 #include "core/common/container.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -1338,7 +1338,6 @@ void FrameNode::OnAttachToMainTree(bool recursive)
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
     }
     UINode::OnAttachToMainTree(recursive);
-    AsyncBuildManager::GetInstance().ExecuteAfterAttachMainTreeTasks(GetId());
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto predictLayoutNode = std::move(predictLayoutNode_);
@@ -2462,7 +2461,7 @@ void FrameNode::MarkModifyDoneInner()
 
 void FrameNode::MarkModifyDone()
 {
-    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(Claim(this), [weak = WeakClaim(this)]() {
+    MultiThreadBuildManager::TryExecuteUnSafeTask(Claim(this), [weak = WeakClaim(this)]() {
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
         host->MarkModifyDoneInner();
@@ -2509,7 +2508,7 @@ void FrameNode::MarkDirtyNodeInner(PropertyChangeFlag extraFlag)
 
 void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
 {
-    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(Claim(this), [weak = WeakClaim(this), extraFlag]() {
+    MultiThreadBuildManager::TryExecuteUnSafeTask(Claim(this), [weak = WeakClaim(this), extraFlag]() {
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNodeInner(extraFlag);

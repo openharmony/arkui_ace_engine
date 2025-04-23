@@ -17,7 +17,7 @@
 #include "base/log/ace_checker.h"
 #include "base/log/dump_log.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "core/common/async_build_manager.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 
@@ -30,7 +30,7 @@ const std::set<std::string> UINode::layoutTags_ = { "Flex", "Stack", "Row", "Col
 UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
 {
-    if (AsyncBuildManager::IsBuildingMultiThreadNode()) {
+    if (MultiThreadBuildManager::IsThreadSafeScope()) {
         SetIsMultiThreadNode(true);
     }
     if (AceChecker::IsPerformanceCheckEnabled()) {
@@ -42,7 +42,7 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     apiVersion_ = Container::GetCurrentApiTargetVersion();
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
-        AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(Claim(this), [nodeId = nodeId_]() {
+        MultiThreadBuildManager::TryExecuteUnSafeTask(Claim(this), [nodeId = nodeId_]() {
             auto container = Container::Current();
             CHECK_NULL_BREAK(container);
             auto distributedUI = container->GetDistributedUI();
@@ -79,9 +79,6 @@ UINode::~UINode()
         ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
             propInspectorId_.value_or(""), nodeId_, isMultiThreadNode_);
     }
-    if (isMultiThreadNode_) {
-        AsyncBuildManager::GetInstance().RemoveAfterAttachMainTreeTasks(nodeId_);
-    }
     if (!onMainTree_) {
         return;
     }
@@ -96,7 +93,7 @@ UINode::~UINode()
 
 bool UINode::MaybeRelease()
 {
-    if (!isMultiThreadNode_ || AsyncBuildManager::IsOnMainThread()) {
+    if (!isMultiThreadNode_ || MultiThreadBuildManager::IsOnUIThread()) {
         return true;
     }
     auto pipeline = GetContext();
@@ -980,6 +977,7 @@ void UINode::OnDetachFromMainTree(bool, PipelineContext*) {}
 void UINode::OnAttachToMainTree(bool)
 {
     useOffscreenProcess_ = false;
+    ExecuteAfterAttachMainTreeTasks();
 }
 
 void UINode::UpdateGeometryTransition()

@@ -18,7 +18,7 @@
 #include <algorithm>
 
 #include "base/i18n/localization.h"
-#include "core/common/async_build_manager.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
@@ -360,7 +360,7 @@ void NavBarPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (AsyncBuildManager::GetInstance().TryPostUnSafeTask(host, [weak = WeakClaim(this)]() {
+    if (MultiThreadBuildManager::TryPostUnSafeTask(host, [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         pattern->OnAttachToFrameNode();
     })) {

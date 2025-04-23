@@ -33,10 +33,10 @@
 #include "base/window/drag_window.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/data_detector_mgr.h"
-#include "core/common/async_build_manager.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/vibrator/vibrator_utils.h"
@@ -137,7 +137,7 @@ void TextPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
+    MultiThreadBuildManager::TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnAttachToFrameNodeInner();

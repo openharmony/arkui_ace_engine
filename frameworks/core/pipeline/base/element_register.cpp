@@ -15,8 +15,8 @@
 
 #include "frameworks/core/pipeline/base/element_register.h"
 
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_v2/common/element_proxy.h"
-#include "core/common/async_build_manager.h"
 
 namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
@@ -36,14 +36,14 @@ ElementRegister* ElementRegister::GetGlobalInstance()
 
 ElementRegister* ElementRegister::GetInstance()
 {
-    if (AsyncBuildManager::IsBuildingMultiThreadNode()) {
+    if (MultiThreadBuildManager::IsThreadSafeScope()) {
         return GetGlobalInstance();
     }
     if (ElementRegister::instance_ == nullptr) {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         if (!ElementRegister::instance_) {
             ElementRegister::instance_ =
-                AsyncBuildManager::IsOnMainThread() ? GetGlobalInstance() : new ElementRegister();
+                MultiThreadBuildManager::IsOnUIThread() ? GetGlobalInstance() : new ElementRegister();
         }
     }
     return (ElementRegister::instance_);
@@ -63,7 +63,7 @@ RefPtr<AceType> ElementRegister::GetNodeById(ElementIdType elementId)
     if (elementId == ElementRegister::UndefinedElementId) {
         return nullptr;
     }
-    if (!AsyncBuildManager::IsMultiThreadAPIOnSubThread()) {
+    if (!MultiThreadBuildManager::IsThreadSafeScopeOnSubThread()) {
         auto position = itemMap_.find(elementId);
         if (position != itemMap_.end()) {
             return position->second.Upgrade();
@@ -162,7 +162,7 @@ RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
     if (elementId == ElementRegister::UndefinedElementId) {
         return nullptr;
     }
-    if (!AsyncBuildManager::IsMultiThreadAPIOnSubThread()) {
+    if (!MultiThreadBuildManager::IsThreadSafeScopeOnSubThread()) {
         auto iter = itemMap_.find(elementId);
         if (iter != itemMap_.end()) {
             return AceType::DynamicCast<NG::UINode>(iter->second).Upgrade();
@@ -178,7 +178,7 @@ NG::FrameNode* ElementRegister::GetFrameNodePtrById(ElementIdType elementId)
     if (elementId == ElementRegister::UndefinedElementId) {
         return nullptr;
     }
-    if (!AsyncBuildManager::IsMultiThreadAPIOnSubThread()) {
+    if (!MultiThreadBuildManager::IsThreadSafeScopeOnSubThread()) {
         auto iter = itemMap_.find(elementId);
         if (iter != itemMap_.end()) {
             auto node = AceType::DynamicCast<NG::FrameNode>(iter->second.Upgrade());
@@ -210,7 +210,7 @@ bool ElementRegister::RemoveItem(ElementIdType elementId)
         return false;
     }
     bool removed = false;
-    if (!AsyncBuildManager::IsMultiThreadAPIOnSubThread()) {
+    if (!MultiThreadBuildManager::IsThreadSafeScopeOnSubThread()) {
         removed = itemMap_.erase(elementId);
         if (removed) {
             removedItems_.insert(elementId);
@@ -231,7 +231,7 @@ bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
         return false;
     }
     bool removed = false;
-    if (!AsyncBuildManager::IsMultiThreadAPIOnSubThread()) {
+    if (!MultiThreadBuildManager::IsThreadSafeScopeOnSubThread()) {
         removed = itemMap_.erase(elementId);
     }
     if (!removed) {
@@ -243,7 +243,7 @@ bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
 
 void ElementRegister::MoveRemovedItems(RemovedElementsType& removedItems)
 {
-    if (!AsyncBuildManager::IsMultiThreadAPIOnSubThread()) {
+    if (!MultiThreadBuildManager::IsThreadSafeScopeOnSubThread()) {
         removedItems = removedItems_;
         removedItems_.clear();
     }
