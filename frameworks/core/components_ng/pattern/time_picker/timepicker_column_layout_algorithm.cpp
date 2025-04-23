@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.h"
 
 #include "base/utils/utils.h"
-#include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -85,11 +84,7 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     frameSize.SetWidth(pickerWidth);
     frameSize.SetHeight(std::min(height, pickerMaxHeight));
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
-    auto layoutChildConstraint = blendNode->GetLayoutProperty()->CreateChildConstraint();
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(layoutChildConstraint);
-    }
-    MeasureText(layoutWrapper, frameSize);
+    MeasureText(layoutWrapper, pickerTheme, frameSize);
     auto gradientPercent = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() *
         gradientFontScale_) / frameSize.Height();
     InitGradient(gradientPercent, blendNode, columnNode);
@@ -269,6 +264,34 @@ float TimePickerColumnLayoutAlgorithm::ReCalcItemHeightScale(const Dimension& us
 
     fontScale = std::max(static_cast<float>(userSetHeightValue / themeHeight.ConvertToPx()), fontScale);
     return fontScale;
+}
+
+void TimePickerColumnLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const RefPtr<PickerTheme>& pickerTheme,
+    const SizeF& size)
+{
+    auto totalChild = layoutWrapper->GetTotalChildCount();
+    CHECK_EQUAL_VOID(totalChild, 0);
+    auto selectedIndex = totalChild / 2;
+    auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+
+    const float dividerHeight = static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx() * \
+        dividerSpacingFontScale_);
+    const float gradientHeight = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * \
+        gradientFontScale_);
+    const float parentWidth = size.Width();
+
+    for (auto index = 0; index < totalChild; index++) {
+        auto child = layoutWrapper->GetOrCreateChildByIndex(index);
+        SizeF frameSize = { -1.0f, -1.0f };
+        frameSize.SetWidth(parentWidth);
+        if (index == selectedIndex) {
+            frameSize.SetHeight(dividerHeight);
+        } else {
+            frameSize.SetHeight(gradientHeight);
+        }
+        layoutChildConstraint.selfIdealSize = { frameSize.Width(), frameSize.Height() };
+        child->Measure(layoutChildConstraint);
+    }
 }
 
 } // namespace OHOS::Ace::NG

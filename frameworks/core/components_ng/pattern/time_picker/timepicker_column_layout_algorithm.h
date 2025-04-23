@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_COLUMN_LAYOUT_ALGORITHM_H
 
 #include "base/i18n/localization.h"
+#include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
@@ -58,10 +59,6 @@ public:
     }
 
 private:
-    float pickerItemHeight_ = 0.0f;
-    std::vector<int32_t> currentOffset_;
-    float dividerSpacingFontScale_ = 1.0f;
-    float gradientFontScale_ = 1.0f;
     const Dimension AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale);
     bool NeedAdaptForAging();
     float ReCalcItemHeightScale(const Dimension& userSetHeight, bool isDividerSpacing = true);
@@ -70,6 +67,13 @@ private:
         const RefPtr<FrameNode> columnNode);
     float GetPickerMaxHeight(
         const std::optional<LayoutConstraintF>& layoutConstraint, const RefPtr<FrameNode>& pickerNode);
+    void MeasureText(LayoutWrapper* layoutWrapper, const RefPtr<PickerTheme>& pickerTheme, const SizeF& size);
+
+    float pickerItemHeight_ = 0.0f;
+    std::vector<int32_t> currentOffset_;
+    float dividerSpacingFontScale_ = 1.0f;
+    float gradientFontScale_ = 1.0f;
+
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

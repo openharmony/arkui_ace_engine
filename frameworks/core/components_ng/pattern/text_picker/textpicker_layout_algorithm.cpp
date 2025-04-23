@@ -64,11 +64,7 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     textPickerPattern->CheckAndUpdateColumnSize(frameSize, columnNode, NeedAdaptForAging());
     pickerItemHeight_ = frameSize.Height();
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
-    auto layoutChildConstraint = blendNode->GetLayoutProperty()->CreateChildConstraint();
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(layoutChildConstraint);
-    }
-    MeasureText(layoutWrapper, frameSize);
+    MeasureText(layoutWrapper, pickerTheme, frameSize);
     float gradientPercent = GetGradientPercent(layoutProperty, textPickerPattern, frameSize, pickerTheme);
     InitGradient(gradientPercent, blendNode, columnNode);
 }
@@ -228,34 +224,6 @@ void TextPickerLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t showOpt
     }
     layoutChildConstraint.selfIdealSize = { frameSize.Width(), frameSize.Height() };
     childLayoutWrapper->Measure(layoutChildConstraint);
-    UpdateContentSize(frameSize, childLayoutWrapper);
-}
-
-void TextPickerLayoutAlgorithm::UpdateContentSize(const SizeF& size, const RefPtr<LayoutWrapper> layoutWrapper)
-{
-    SizeF frameSize = size;
-    CHECK_NULL_VOID(layoutWrapper->GetLayoutProperty());
-    auto contentWrapper = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    auto children = layoutWrapper->GetAllChildrenWithBuild();
-    CHECK_NULL_VOID(!children.empty());
-    for (const auto& child : children) {
-        if (child == children.back()) {
-            auto frameNode  = child->GetHostNode();
-            CHECK_NULL_VOID(frameNode);
-            auto overlayNode = frameNode ->GetOverlayNode();
-            CHECK_NULL_VOID(overlayNode);
-            auto geometryNode = frameNode->GetGeometryNode();
-            CHECK_NULL_VOID(geometryNode);
-            auto overlayGeometryNode = overlayNode->GetGeometryNode();
-            CHECK_NULL_VOID(overlayGeometryNode);
-            auto textRect = geometryNode->GetFrameRect();
-            contentWrapper.selfIdealSize = { frameSize.Width() - textRect.Left(), textRect.Height() };
-            child->Measure(contentWrapper);
-            auto textFrameSize_ = geometryNode->GetMarginFrameSize();
-            overlayGeometryNode->SetFrameSize(textFrameSize_);
-            overlayNode->Layout();
-        }
-    }
 }
 
 void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -369,6 +337,39 @@ float TextPickerLayoutAlgorithm::ReCalcItemHeightScale(const Dimension& userSetH
 
     fontScale = std::max(static_cast<float>(userSetHeightValue / themeHeight.ConvertToPx()), fontScale);
     return fontScale;
+}
+
+void TextPickerLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const RefPtr<PickerTheme>& pickerTheme,
+    const SizeF& size)
+{
+    auto totalChild = layoutWrapper->GetTotalChildCount();
+    CHECK_EQUAL_VOID(totalChild, 0);
+    auto selectedIndex = totalChild / 2;
+    auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+
+    const float dividerHeight = static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx() * \
+        dividerSpacingFontScale_);
+    const float gradientHeight = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * \
+        gradientFontScale_);
+    const float defaultHeight = static_cast<float>(defaultPickerItemHeight_);
+    const float parentWidth = size.Width();
+
+    for (auto index = 0; index < totalChild; index++) {
+        auto child = layoutWrapper->GetOrCreateChildByIndex(index);
+        SizeF frameSize = { -1.0f, -1.0f };
+        frameSize.SetWidth(parentWidth);
+        if (isDefaultPickerItemHeight_) {
+            frameSize.SetHeight(defaultHeight);
+        } else {
+            if (index == selectedIndex) {
+                frameSize.SetHeight(dividerHeight);
+            } else {
+                frameSize.SetHeight(gradientHeight);
+            }
+        }
+        layoutChildConstraint.selfIdealSize = { frameSize.Width(), frameSize.Height() };
+        child->Measure(layoutChildConstraint);
+    }
 }
 
 } // namespace OHOS::Ace::NG

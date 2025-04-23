@@ -103,6 +103,7 @@ bool PickerHapticController::IsThreadNone()
 
 void PickerHapticController::InitPlayThread()
 {
+#ifndef SUPPORT_DIGITAL_CROWN
     ThreadRelease();
     playThreadStatus_ = ThreadStatus::START;
     playThread_ = std::make_unique<std::thread>(&PickerHapticController::ThreadLoop, this);
@@ -112,6 +113,7 @@ void PickerHapticController::InitPlayThread()
     } else {
         playThreadStatus_ = ThreadStatus::NONE;
     }
+#endif
 }
 
 void PickerHapticController::ThreadLoop()
@@ -176,6 +178,7 @@ void PickerHapticController::Play(size_t speed)
 
 void PickerHapticController::PlayOnce()
 {
+#ifndef SUPPORT_DIGITAL_CROWN
     if (IsThreadPlaying()) {
         return;
     }
@@ -186,6 +189,7 @@ void PickerHapticController::PlayOnce()
         absSpeedInMm_ = SPEED_PLAY_ONCE_5_MM_PER_SEC;
     }
     threadCv_.notify_one();
+#endif
 }
 
 void PickerHapticController::Stop()
@@ -200,6 +204,7 @@ void PickerHapticController::Stop()
 
 void PickerHapticController::HandleDelta(double dy)
 {
+#ifndef SUPPORT_DIGITAL_CROWN
     auto startTime = std::chrono::high_resolution_clock::now();
     scrollValue_ += dy;
     velocityTracker_.UpdateTrackerPoint(0, scrollValue_, startTime);
@@ -209,6 +214,7 @@ void PickerHapticController::HandleDelta(double dy)
     } else {
         Stop();
     }
+#endif
 }
 
 double PickerHapticController::ConvertPxToMillimeters(double px) const
