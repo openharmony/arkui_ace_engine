@@ -209,6 +209,38 @@ HWTEST_F(CommonMethodModifierTest4, setColorBlendTestValidValues, TestSize.Level
 }
 
 /*
+ * @tc.name: setColorBlend1TestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setColorBlend1TestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setColorBlend1, nullptr);
+    using OneTestStep = std::tuple<Opt_Union_Color_String_Resource, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_WHITE), "#FFFFFFFF"},
+        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_BLACK), "#FF000000"},
+        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_BLUE), "#FF0000FF"},
+        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_BROWN), "#FFA52A2A"},
+        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_GRAY), "#FF808080"},
+        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_GREEN), "#FF008000"},
+        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_GREY), "#FF808080"},
+        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_ORANGE), "#FFFFA500"},
+        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_PINK), "#FFFFC0CB"},
+        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_RED), "#FFFF0000"},
+        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_YELLOW), "#FFFFFF00"},
+        {Converter::ArkUnion<Opt_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_TRANSPARENT),
+            "#00000000"},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setColorBlend1(node_, &inputValue);
+        auto fullJson = GetJsonValue(node_);
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_COLOR_BLEND_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/*
  * @tc.name: setColorBlendTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -270,6 +302,36 @@ HWTEST_F(CommonMethodModifierTest4, setInvertTestValidValues, TestSize.Level1)
 }
 
 /*
+ * @tc.name: setInvert1TestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setInvert1TestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setInvert1, nullptr);
+    using OneTestStep = std::tuple<Ark_Union_Number_InvertOptions, std::string>;
+    InvertOption val1 = {1.0f, 2.0f, 3.0f, 4.0f};
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkUnion<Ark_Union_Number_InvertOptions, Ark_Number>(0.0f), "0"},
+        {Converter::ArkUnion<Ark_Union_Number_InvertOptions, Ark_InvertOptions>(0.0f),
+            "{\"low\":0,\"high\":0,\"threshold\":0,\"thresholdRange\":0}"},
+        {Converter::ArkUnion<Ark_Union_Number_InvertOptions, Ark_Number>(1.0f), "1"},
+        {Converter::ArkUnion<Ark_Union_Number_InvertOptions, Ark_InvertOptions>(1.0f),
+            "{\"low\":1,\"high\":1,\"threshold\":1,\"thresholdRange\":1}"},
+        {Converter::ArkUnion<Ark_Union_Number_InvertOptions, Ark_InvertOptions>(
+            Converter::ArkValue<Ark_InvertOptions>(val1)),
+            "{\"low\":1,\"high\":2,\"threshold\":3,\"thresholdRange\":4}"},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        Opt_Union_Number_InvertOptions optValue = { .value = inputValue };
+        modifier_->setInvert1(node_, &optValue);
+        auto fullJson = GetJsonValue(node_);
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_INVERT_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/*
  * @tc.name: setInvertTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -323,6 +385,31 @@ HWTEST_F(CommonMethodModifierTest4, setHueRotateValidValues, TestSize.Level1)
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setHueRotate0(node_, &inputValue);
+        auto fullJson = GetJsonValue(node_);
+        auto resultValue = fullJson->GetInt(ATTRIBUTE_HUE_ROTATE_NAME, ATTRIBUTE_HUE_ROTATE_DEFAULT_VALUE);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/*
+ * @tc.name: setHueRotate1ValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest4, setHueRotate1ValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setHueRotate1, nullptr);
+    using OneTestStep = std::tuple<Ark_Union_Number_String, float>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0)), 0.0},
+        {Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(1.0)), 1.0},
+        {Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("4.0")), 4.0},
+        {Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("5.0")), 5.0},
+        {Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-90.0")), -90.0},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        Opt_Union_Number_String optValue = { .value = inputValue};
+        modifier_->setHueRotate1(node_, &optValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetInt(ATTRIBUTE_HUE_ROTATE_NAME, ATTRIBUTE_HUE_ROTATE_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;

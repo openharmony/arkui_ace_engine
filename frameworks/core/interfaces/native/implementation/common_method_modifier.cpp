@@ -1871,6 +1871,25 @@ constexpr int32_t CASE_1 = 1;
 constexpr int32_t CASE_2 = 2;
 
 namespace CommonMethodModifier {
+void BackgroundColor1Impl(Ark_NativePointer node, const Opt_ResourceColor* value);
+void BackgroundEffect1Impl(Ark_NativePointer node, const Opt_BackgroundEffectOptions* value);
+void Opacity1Impl(Ark_NativePointer node, const Opt_Union_Number_Resource* value);
+void Outline1Impl(Ark_NativePointer node, const Opt_OutlineOptions* value);
+void OutlineWidth1Impl(Ark_NativePointer node, const Opt_Union_Dimension_EdgeOutlineWidths* value);
+void OutlineColor1Impl(Ark_NativePointer node, const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value);
+void OutlineRadius1Impl(Ark_NativePointer node, const Opt_Union_Dimension_OutlineRadiuses* value);
+void Brightness1Impl(Ark_NativePointer node, const Opt_Number* value);
+void Contrast1Impl(Ark_NativePointer node, const Opt_Number* value);
+void Grayscale1Impl(Ark_NativePointer node, const Opt_Number* value);
+void ColorBlend1Impl(Ark_NativePointer node, const Opt_Union_Color_String_Resource* value);
+void Saturate1Impl(Ark_NativePointer node, const Opt_Number* value);
+void Sepia1Impl(Ark_NativePointer node, const Opt_Number* value);
+void Invert1Impl(Ark_NativePointer node, const Opt_Union_Number_InvertOptions* value);
+void HueRotate1Impl(Ark_NativePointer node, const Opt_Union_Number_String* value);
+void UseShadowBatching1Impl(Ark_NativePointer node, const Opt_Boolean* value);
+void RenderGroup1Impl(Ark_NativePointer node, const Opt_Boolean* value);
+void OutlineStyle1Impl(Ark_NativePointer node, const Opt_Union_OutlineStyle_EdgeOutlineStyles* value);
+
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
@@ -2135,19 +2154,20 @@ void BackgroundColor0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
-        CounterModelNG::SetBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
-    } else {
-        ViewAbstract::SetBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
-    }
+    auto optValue = Converter::ArkValue<Opt_ResourceColor>(*value);
+    BackgroundColor1Impl(node, &optValue);
 }
 void BackgroundColor1Impl(Ark_NativePointer node,
                           const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetBackgroundColor1(frameNode, convValue);
+    auto param = value ? Converter::OptConvert<Color>(*value) : std::nullopt;
+    if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
+        CounterModelNG::SetBackgroundColor(frameNode, param);
+    } else {
+        ViewAbstract::SetBackgroundColor(frameNode, param);
+    }
 }
 void PixelRoundImpl(Ark_NativePointer node,
                     const Ark_PixelRoundPolicy* value)
@@ -2222,16 +2242,16 @@ void BackgroundEffect0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<EffectOption>(*value);
-    ViewAbstract::SetBackgroundEffect(frameNode, convValue);
+    auto optValue = Converter::ArkValue<Opt_BackgroundEffectOptions>(*value);
+    BackgroundEffect1Impl(node, &optValue);
 }
 void BackgroundEffect1Impl(Ark_NativePointer node,
                            const Opt_BackgroundEffectOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetBackgroundEffect1(frameNode, convValue);
+    auto param = value ? Converter::OptConvert<EffectOption>(*value).value_or(EffectOption()) : EffectOption();
+    ViewAbstract::SetBackgroundEffect(frameNode, param);
 }
 void BackgroundImageResizableImpl(Ark_NativePointer node,
                                   const Ark_ResizableOptions* value)
@@ -2296,18 +2316,16 @@ void Opacity0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto result = Converter::OptConvert<float>(*value);
-    if (result) {
-        ViewAbstract::SetOpacity(frameNode, result.value());
-    }
+    auto optValue = Converter::ArkValue<Opt_Union_Number_Resource>(*value);
+    Opacity1Impl(node, &optValue);
 }
 void Opacity1Impl(Ark_NativePointer node,
                   const Opt_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetOpacity1(frameNode, convValue);
+    auto result =  value ? Converter::OptConvert<float>(*value) : std::nullopt;
+    ViewAbstract::SetOpacity(frameNode, result.value_or(0));
 }
 void BorderImpl(Ark_NativePointer node,
                 const Ark_BorderOptions* value)
@@ -2539,25 +2557,27 @@ void Outline0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto borderWidthOpt = Converter::OptConvert<BorderWidthProperty>(value->width);
-    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidthOpt.value_or(BorderWidthProperty()));
-
-    auto borderRadiusOpt = Converter::OptConvert<BorderRadiusProperty>(value->radius);
-    ViewAbstract::SetOuterBorderRadius(frameNode, borderRadiusOpt.value_or(BorderRadiusProperty()));
-
-    auto borderColorsOpt = Converter::OptConvert<BorderColorProperty>(value->color);
-    ViewAbstract::SetOuterBorderColor(frameNode, borderColorsOpt.value_or(BorderColorProperty()));
-
-    auto borderStylesOpt = Converter::OptConvert<BorderStyleProperty>(value->style);
-    ViewAbstract::SetOuterBorderStyle(frameNode, borderStylesOpt.value_or(BorderStyleProperty()));
+    auto optValue = Converter::ArkValue<Opt_OutlineOptions>(*value);
+    Outline1Impl(node, &optValue);
 }
 void Outline1Impl(Ark_NativePointer node,
                   const Opt_OutlineOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetOutline1(frameNode, convValue);
+
+    auto optValue = value ? Converter::GetOpt(*value) : std::nullopt;
+    auto borderWidthOpt = optValue ? Converter::OptConvert<BorderWidthProperty>(optValue->width) : std::nullopt;
+    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidthOpt.value_or(BorderWidthProperty()));
+
+    auto borderRadiusOpt = optValue ? Converter::OptConvert<BorderRadiusProperty>(optValue->radius) : std::nullopt;
+    ViewAbstract::SetOuterBorderRadius(frameNode, borderRadiusOpt.value_or(BorderRadiusProperty()));
+
+    auto borderColorsOpt = optValue ? Converter::OptConvert<BorderColorProperty>(optValue->color) : std::nullopt;
+    ViewAbstract::SetOuterBorderColor(frameNode, borderColorsOpt.value_or(BorderColorProperty()));
+
+    auto borderStylesOpt = optValue ? Converter::OptConvert<BorderStyleProperty>(optValue->style) : std::nullopt;
+    ViewAbstract::SetOuterBorderStyle(frameNode, borderStylesOpt.value_or(BorderStyleProperty()));
 }
 void OutlineStyle0Impl(Ark_NativePointer node,
                        const Ark_Union_OutlineStyle_EdgeOutlineStyles* value)
@@ -2565,16 +2585,16 @@ void OutlineStyle0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto borderStylesOpt = Converter::OptConvert<BorderStyleProperty>(*value);
-    ViewAbstract::SetOuterBorderStyle(frameNode, borderStylesOpt.value_or(BorderStyleProperty()));
+    auto optValue = Converter::ArkValue<Opt_Union_OutlineStyle_EdgeOutlineStyles>(*value);
+    OutlineStyle1Impl(node, &optValue);
 }
 void OutlineStyle1Impl(Ark_NativePointer node,
                        const Opt_Union_OutlineStyle_EdgeOutlineStyles* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetOutlineStyle1(frameNode, convValue);
+    auto borderStylesOpt = value ? Converter::OptConvert<BorderStyleProperty>(*value) : std::nullopt;
+    ViewAbstract::SetOuterBorderStyle(frameNode, borderStylesOpt.value_or(BorderStyleProperty()));
 }
 void OutlineWidth0Impl(Ark_NativePointer node,
                        const Ark_Union_Dimension_EdgeOutlineWidths* value)
@@ -2582,16 +2602,16 @@ void OutlineWidth0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto borderWidthOpt = Converter::OptConvert<BorderWidthProperty>(*value);
-    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidthOpt.value_or(BorderWidthProperty()));
+    auto optValue = Converter::ArkValue<Opt_Union_Dimension_EdgeOutlineWidths>(*value);
+    OutlineWidth1Impl(frameNode, &optValue);
 }
 void OutlineWidth1Impl(Ark_NativePointer node,
                        const Opt_Union_Dimension_EdgeOutlineWidths* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetOutlineWidth1(frameNode, convValue);
+    auto opt = value ? Converter::OptConvert<BorderWidthProperty>(*value) : std::nullopt;
+    ViewAbstract::SetOuterBorderWidth(frameNode, opt.value_or(BorderWidthProperty()));
 }
 void OutlineColor0Impl(Ark_NativePointer node,
                        const Ark_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
@@ -2599,16 +2619,16 @@ void OutlineColor0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto borderColorsOpt = Converter::OptConvert<BorderColorProperty>(*value);
-    ViewAbstract::SetOuterBorderColor(frameNode, borderColorsOpt.value_or(BorderColorProperty()));
+    auto optValue = Converter::ArkValue<Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors>(*value);
+    OutlineColor1Impl(node, &optValue);
 }
 void OutlineColor1Impl(Ark_NativePointer node,
                        const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetOutlineColor1(frameNode, convValue);
+    auto opt = value ? Converter::OptConvert<BorderColorProperty>(*value) : std::nullopt;
+    ViewAbstract::SetOuterBorderColor(frameNode, opt.value_or(BorderColorProperty()));
 }
 void OutlineRadius0Impl(Ark_NativePointer node,
                         const Ark_Union_Dimension_OutlineRadiuses* value)
@@ -2616,16 +2636,16 @@ void OutlineRadius0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto borderRadiusOpt = Converter::OptConvert<BorderRadiusProperty>(*value);
-    ViewAbstract::SetOuterBorderRadius(frameNode, borderRadiusOpt.value_or(BorderRadiusProperty()));
+    auto optValue = Converter::ArkValue<Opt_Union_Dimension_OutlineRadiuses>(*value);
+    OutlineRadius1Impl(node, &optValue);
 }
 void OutlineRadius1Impl(Ark_NativePointer node,
                         const Opt_Union_Dimension_OutlineRadiuses* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetOutlineRadius1(frameNode, convValue);
+    auto opt = value ? Converter::OptConvert<BorderRadiusProperty>(*value) : std::nullopt;
+    ViewAbstract::SetOuterBorderRadius(frameNode, opt.value_or(BorderRadiusProperty()));
 }
 void ForegroundColor0Impl(Ark_NativePointer node,
                           const Ark_Union_ResourceColor_ColoringStrategy* value)
@@ -3102,18 +3122,18 @@ void Brightness0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = value
-        ? std::optional(Dimension(Converter::Convert<float>(*value))) : std::nullopt;
-    Validator::ValidateNonNegative(convValue);
-    ViewAbstract::SetBrightness(frameNode, convValue);
+    auto optValue = Converter::ArkValue<Opt_Number>(*value);
+    Brightness1Impl(node, &optValue);
 }
 void Brightness1Impl(Ark_NativePointer node,
                      const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetBrightness1(frameNode, convValue);
+    auto optValue = value ? Converter::GetOpt(*value) : std::nullopt;
+    auto convValue = optValue ? std::optional(Dimension(Converter::Convert<float>(*optValue))) : std::nullopt;
+    Validator::ValidateNonNegative(convValue);
+    ViewAbstract::SetBrightness(frameNode, convValue);
 }
 void Contrast0Impl(Ark_NativePointer node,
                    const Ark_Number* value)
@@ -3121,18 +3141,18 @@ void Contrast0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = value
-        ? std::optional(Dimension(Converter::Convert<float>(*value))) : std::nullopt;
-    Validator::ValidateNonNegative(convValue);
-    ViewAbstract::SetContrast(frameNode, convValue);
+    auto optValue = Converter::ArkValue<Opt_Number>(*value);
+    Contrast1Impl(node, &optValue);
 }
 void Contrast1Impl(Ark_NativePointer node,
                    const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetContrast1(frameNode, convValue);
+    auto optValue = value ? Converter::GetOpt(*value) : std::nullopt;
+    auto convValue = optValue ? std::optional(Dimension(Converter::Convert<float>(*optValue))) : std::nullopt;
+    Validator::ValidateNonNegative(convValue);
+    ViewAbstract::SetContrast(frameNode, convValue);
 }
 void Grayscale0Impl(Ark_NativePointer node,
                     const Ark_Number* value)
@@ -3140,18 +3160,18 @@ void Grayscale0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = value
-        ? std::optional(Dimension(Converter::Convert<float>(*value))) : std::nullopt;
-    Validator::ValidateNonNegative(convValue);
-    ViewAbstract::SetGrayScale(frameNode, convValue);
+    auto optValue = Converter::ArkValue<Opt_Number>(*value);
+    Grayscale1Impl(node, &optValue);
 }
 void Grayscale1Impl(Ark_NativePointer node,
                     const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetGrayscale1(frameNode, convValue);
+    auto optValue = value ? Converter::GetOpt(*value) : std::nullopt;
+    auto convValue = optValue ? std::optional(Dimension(Converter::Convert<float>(*optValue))) : std::nullopt;
+    Validator::ValidateNonNegative(convValue);
+    ViewAbstract::SetGrayScale(frameNode, convValue);
 }
 void ColorBlend0Impl(Ark_NativePointer node,
                      const Ark_Union_Color_String_Resource* value)
@@ -3159,16 +3179,16 @@ void ColorBlend0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = value ? Converter::OptConvert<Color>(*value) : std::nullopt;
-    ViewAbstract::SetColorBlend(frameNode, convValue);
+    auto optValue = Converter::ArkValue<Opt_Union_Color_String_Resource>(*value);
+    ColorBlend1Impl(node, &optValue);
 }
 void ColorBlend1Impl(Ark_NativePointer node,
                      const Opt_Union_Color_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetColorBlend1(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<Color>(*value) : std::nullopt;
+    ViewAbstract::SetColorBlend(frameNode, convValue);
 }
 void Saturate0Impl(Ark_NativePointer node,
                    const Ark_Number* value)
@@ -3176,18 +3196,19 @@ void Saturate0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = value
-        ? std::optional(Dimension(Converter::Convert<float>(*value))) : std::nullopt;
-    Validator::ValidateNonNegative(convValue);
-    ViewAbstract::SetSaturate(frameNode, convValue);
+    auto optValue = Converter::ArkValue<Opt_Number>(*value);
+    Saturate1Impl(node, &optValue);
 }
 void Saturate1Impl(Ark_NativePointer node,
                    const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetSaturate1(frameNode, convValue);
+    auto optValue = value ? Converter::GetOpt(*value) : std::nullopt;
+    auto convValue = optValue
+        ? std::optional(Dimension(Converter::Convert<float>(*optValue))) : std::nullopt;
+    Validator::ValidateNonNegative(convValue);
+    ViewAbstract::SetSaturate(frameNode, convValue);
 }
 void Sepia0Impl(Ark_NativePointer node,
                 const Ark_Number* value)
@@ -3195,18 +3216,19 @@ void Sepia0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = value
-        ? std::optional(Dimension(Converter::Convert<float>(*value))) : std::nullopt;
-    Validator::ValidateNonNegative(convValue);
-    ViewAbstract::SetSepia(frameNode, convValue);
+    auto optValue = Converter::ArkValue<Opt_Number>(*value);
+    Sepia1Impl(node, &optValue);
 }
 void Sepia1Impl(Ark_NativePointer node,
                 const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetSepia1(frameNode, convValue);
+    auto optValue = value ? Converter::GetOpt(*value) : std::nullopt;
+    auto convValue = optValue
+        ? std::optional(Dimension(Converter::Convert<float>(*optValue))) : std::nullopt;
+    Validator::ValidateNonNegative(convValue);
+    ViewAbstract::SetSepia(frameNode, convValue);
 }
 void Invert0Impl(Ark_NativePointer node,
                  const Ark_Union_Number_InvertOptions* value)
@@ -3214,19 +3236,20 @@ void Invert0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    const float minValue = 0.0;
-    const float maxValue = 100.0;
-    auto convValue = value ? Converter::OptConvert<InvertVariant>(*value) : std::nullopt;
-    Validator::ValidateByRange(convValue, minValue, maxValue);
-    ViewAbstract::SetInvert(frameNode, convValue);
+    auto optValue = Converter::ArkValue<Opt_Union_Number_InvertOptions>(*value);
+    Invert1Impl(node, &optValue);
 }
 void Invert1Impl(Ark_NativePointer node,
                  const Opt_Union_Number_InvertOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetInvert1(frameNode, convValue);
+    auto optValue = value ? Converter::GetOpt(*value) : std::nullopt;
+    const float minValue = 0.0;
+    const float maxValue = 100.0;
+    auto convValue = optValue ? Converter::OptConvert<InvertVariant>(*optValue) : std::nullopt;
+    Validator::ValidateByRange(convValue, minValue, maxValue);
+    ViewAbstract::SetInvert(frameNode, convValue);
 }
 void HueRotate0Impl(Ark_NativePointer node,
                     const Ark_Union_Number_String* value)
@@ -3234,32 +3257,32 @@ void HueRotate0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
-    ViewAbstract::SetHueRotate(frameNode, convValue);
+    auto optValue = Converter::ArkValue<Opt_Union_Number_String>(*value);
+    HueRotate1Impl(node, &optValue);
 }
 void HueRotate1Impl(Ark_NativePointer node,
                     const Opt_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetHueRotate1(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
+    ViewAbstract::SetHueRotate(frameNode, convValue);
 }
 void UseShadowBatching0Impl(Ark_NativePointer node,
                             Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    ViewAbstract::SetUseShadowBatching(frameNode, convValue);
+    auto optValue = Converter::ArkValue<Opt_Boolean>(value);
+    UseShadowBatching1Impl(node, &optValue);
 }
 void UseShadowBatching1Impl(Ark_NativePointer node,
                             const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetUseShadowBatching1(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    ViewAbstract::SetUseShadowBatching(frameNode, convValue);
 }
 void UseEffect0Impl(Ark_NativePointer node,
                     Ark_Boolean value)
@@ -3294,16 +3317,16 @@ void RenderGroup0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    ViewAbstract::SetRenderGroup(frameNode, convValue);
+    auto optValue = Converter::ArkValue<Opt_Boolean>(value);
+    RenderGroup1Impl(node, &optValue);
 }
 void RenderGroup1Impl(Ark_NativePointer node,
                       const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetRenderGroup1(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    ViewAbstract::SetRenderGroup(frameNode, convValue.value_or(false));
 }
 void Freeze0Impl(Ark_NativePointer node,
                  Ark_Boolean value)

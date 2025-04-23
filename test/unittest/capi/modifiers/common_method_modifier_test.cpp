@@ -708,6 +708,42 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundColorTest, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: setBackgroundColor1Test
+ * @tc.desc: Check the functionality of CommonMethodModifierTest.setBackgroundColor1
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setBackgroundColor1Test, TestSize.Level1)
+{
+    using OneTestStep = std::pair<Ark_ResourceColor, std::string>;
+    static const std::string PROP_NAME("backgroundColor");
+    const auto RES_NAME = NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR};
+    const auto RES_ID = IntResourceId{11111, Converter::ResourceType::COLOR};
+    static const std::string EXPECTED_RESOURCE_COLOR =
+        Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
+    static const std::vector<OneTestStep> testPlan = {
+        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+        { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
+        { ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), "#00000000" },
+        { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
+        { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
+        { CreateResourceUnion<Ark_ResourceColor>(RES_NAME), EXPECTED_RESOURCE_COLOR },
+        { CreateResourceUnion<Ark_ResourceColor>(RES_ID), EXPECTED_RESOURCE_COLOR },
+    };
+
+    ASSERT_NE(modifier_->setBackgroundColor1, nullptr);
+
+    auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
+    EXPECT_EQ(checkInitial, Color::TRANSPARENT.ToString());
+
+    for (const auto &[arkResColor, expected]: testPlan) {
+        Opt_ResourceColor param = { .value = arkResColor };
+        modifier_->setBackgroundColor1(node_, &param);
+        auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
+        EXPECT_EQ(checkColor, expected);
+    }
+}
+
 /*
  * @tc.name: setMarginTestDefaultValues
  * @tc.desc:

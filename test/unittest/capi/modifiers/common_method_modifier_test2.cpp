@@ -554,6 +554,47 @@ HWTEST_F(CommonMethodModifierTest2, setBackgroundEffectTestValidValues, TestSize
 }
 
 /*
+ * @tc.name: setBackgroundEffect1TestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setBackgroundEffect1TestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundEffect1, nullptr);
+
+    EffectOption expectedBgEffect {
+        .radius = 123.45_vp,
+        .saturation = 0.123f,
+        .brightness = 100,
+        .color = Color(0xFF123123),
+        .adaptiveColor = AdaptiveColor::AVERAGE,
+        .blurOption = {.grayscale = {20, 30}},
+        .policy = BlurStyleActivePolicy::ALWAYS_ACTIVE,
+        .inactiveColor = Color(0xFF00FFFF),
+        .blurType = BlurType::WITHIN_WINDOW
+    };
+
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+
+    Ark_BackgroundEffectOptions inputValValid = {
+        .radius = ArkValue<Ark_Number>(123.45f),
+        .saturation = ArkValue<Opt_Number>(0.123f),
+        .brightness = ArkValue<Opt_Number>(100),
+        .color = ArkUnion<Opt_ResourceColor, Ark_Number>(0x123123),
+        .adaptiveColor = ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
+        .blurOptions = ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
+            .grayscale = {ArkValue<Ark_Number>(20), ArkValue<Ark_Number>(30)}
+        }),
+        .policy = ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
+        .inactiveColor = ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
+    };
+    Opt_BackgroundEffectOptions param { .value = inputValValid };
+    modifier_->setBackgroundEffect1(node_, &param);
+    EXPECT_EQ(renderMock->GetOrCreateBackground()->propEffectOption, expectedBgEffect);
+}
+
+/*
  * @tc.name: DISABLED_setBackgroundEffectTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -898,6 +939,22 @@ HWTEST_F(CommonMethodModifierTest2, setOpacity, TestSize.Level1)
     inputValue.selector = 0;
     inputValue.value0 = Converter::ArkValue<Ark_Number>(0.7001);
     modifier_->setOpacity0(node_, &inputValue);
+    auto strResult = GetStringAttribute(node_, ATTRIBUTE_OPACITY_NAME);
+    EXPECT_EQ(strResult.substr(0, 3), "0.7");
+}
+
+/*
+ * @tc.name: setOpacity1
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setOpacity1, TestSize.Level1)
+{
+    Ark_Union_Number_Resource inputValue;
+    inputValue.selector = 0;
+    inputValue.value0 = Converter::ArkValue<Ark_Number>(0.7001);
+    Opt_Union_Number_Resource param { .value = inputValue };
+    modifier_->setOpacity1(node_, &param);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_OPACITY_NAME);
     EXPECT_EQ(strResult.substr(0, 3), "0.7");
 }
