@@ -10533,6 +10533,7 @@ void impl_GaugeAttribute_description(Ark_NativePointer thisPtr, KSerializerBuffe
         Opt_CustomNodeBuilder value_value = value_value_buf;;
         GetNodeModifiers()->getGaugeModifier()->setDescription(self, (const Opt_CustomNodeBuilder*)&value_value);
 }
+KOALA_INTEROP_DIRECT_V3(GaugeAttribute_description, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NodeContainerInterface_setAboutToDisappear(
     Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength)
 {
@@ -10646,7 +10647,21 @@ void impl_NodeContainerInterface_setOnWillUnBind(Ark_NativePointer thisPtr, KSer
         GetNodeModifiers()->getNodeContainerModifier()->setOnWillUnBind(self, (const Callback_Number_Void*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(NodeContainerInterface_setOnWillUnBind, Ark_NativePointer, KSerializerBuffer, Ark_Int32)
-KOALA_INTEROP_DIRECT_V3(GaugeAttribute_description, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_NodeContainerInterface_setOnTouchEvent(
+    Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength)
+{
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Callback_TouchEvent_Void value_value = { thisDeserializer.readCallbackResource(),
+            reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_TouchEvent event)>(
+                thisDeserializer.readPointerOrDefault(
+                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_TouchEvent_Void)))),
+            reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event)>(
+                thisDeserializer.readPointerOrDefault(
+                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_TouchEvent_Void)))) };
+        GetNodeModifiers()->getCommonMethodModifier()->setOnTouch(self, (const Callback_TouchEvent_Void*)&value_value);
+}
+KOALA_INTEROP_DIRECT_V3(NodeContainerInterface_setOnTouchEvent, Ark_NativePointer, KSerializerBuffer, Ark_Int32)
 void impl_GaugeAttribute_trackShadow(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);

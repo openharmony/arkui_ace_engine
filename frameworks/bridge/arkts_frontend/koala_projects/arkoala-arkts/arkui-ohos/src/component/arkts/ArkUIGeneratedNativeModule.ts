@@ -1722,6 +1722,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NodeContainerInterface_setOnWillUnBind(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _NodeContainerInterface_setOnTouchEvent(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _Panel_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _PanelInterface_setPanelOptions(ptr: KPointer, show: KInt): void

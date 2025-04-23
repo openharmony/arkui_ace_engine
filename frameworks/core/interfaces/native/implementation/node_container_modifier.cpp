@@ -193,6 +193,11 @@ void SetOnWillUnBindImpl(Ark_NativePointer self, const Callback_Number_Void* val
     };
     eventHub->SetControllerOnWillUnbind(std::move(onWillUnBindFunc));
 }
+
+void SetOnTouchEventImpl(Ark_NativePointer self, const Callback_TouchEvent_Void* value)
+{
+
+}
 } // namespace NodeContainerInterfaceModifier
 const GENERATED_ArkUINodeContainerModifier* GetNodeContainerModifier()
 {
@@ -209,6 +214,7 @@ const GENERATED_ArkUINodeContainerModifier* GetNodeContainerModifier()
         NodeContainerInterfaceModifier::SetOnUnBindImpl,
         NodeContainerInterfaceModifier::SetOnWillBindImpl,
         NodeContainerInterfaceModifier::SetOnWillUnBindImpl,
+        NodeContainerInterfaceModifier::SetOnTouchEventImpl,
     };
     return &ArkUINodeContainerModifierImpl;
 }

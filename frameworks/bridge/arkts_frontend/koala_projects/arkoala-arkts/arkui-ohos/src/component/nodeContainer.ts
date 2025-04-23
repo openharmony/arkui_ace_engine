@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, pointer } from "@koalaui/interop"
 import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -104,6 +104,12 @@ export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NodeContainerInterface_setOnWillUnBind(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    onTouchEventAttribute(value: ((event: TouchEvent) => void)) {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(value)
+        ArkUIGeneratedNativeModule._NodeContainerInterface_setOnTouchEvent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export type NodeContainerInterface = (controller: NodeController) => NodeContainerAttribute;
 export interface NodeContainerAttribute extends CommonMethod {
@@ -114,6 +120,7 @@ export class ArkNodeContainerStyle extends ArkCommonMethodStyle implements NodeC
 }
 /** @memo:stable */
 export class ArkNodeContainerComponent extends ArkCommonMethodComponent implements UINodeContainerAttribute {
+    controller: NodeController | null = null
     getPeer(): ArkNodeContainerPeer {
         return (this.peer as ArkNodeContainerPeer)
     }

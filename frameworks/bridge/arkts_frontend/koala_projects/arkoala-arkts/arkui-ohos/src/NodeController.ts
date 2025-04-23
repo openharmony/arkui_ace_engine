@@ -16,6 +16,7 @@
 import { FrameNode } from "./FrameNode";
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Size } from "./Graphics";
+import { TouchEvent } from "./component/common";
 
 class __InternalField__ {
     _value: number;
@@ -45,7 +46,7 @@ export abstract class NodeController {
     aboutToResize(size: Size) { }
     aboutToAppear() { }
     aboutToDisappear() { }
-    // onTouchEvent(event: TouchEvent) {}
+    onTouchEvent(event: TouchEvent) {}
     onAttach() { }
     onDetach() { }
     onBind() { }
