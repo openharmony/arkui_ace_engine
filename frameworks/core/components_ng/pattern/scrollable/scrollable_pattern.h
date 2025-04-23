@@ -634,6 +634,11 @@ public:
         return false;
     }
 
+    virtual bool IsEnablePagingValid()
+    {
+        return false;
+    }
+
     void SetNeedLinked(bool needLinked)
     {
         needLinked_ = needLinked;

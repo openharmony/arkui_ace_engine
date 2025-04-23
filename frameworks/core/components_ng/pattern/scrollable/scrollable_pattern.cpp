@@ -2254,7 +2254,7 @@ ScrollResult ScrollablePattern::HandleScrollSelfOnly(float& offset, int32_t sour
     remainOffset += overOffset;
     if (NearZero(remainOffset)) {
         SetCanOverScroll(false);
-        return { 0, false };
+        return { 0, IsEnablePagingValid() };
     }
     bool canOverScroll = false;
     if (state == NestedState::CHILD_SCROLL) {

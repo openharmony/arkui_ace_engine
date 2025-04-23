@@ -1497,6 +1497,7 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
     if (!moved_) {
         ResetContinueDragCount();
         StopFrictionAnimation();
+        StopSnapAnimation();
     }
     currentPos_ = position;
 #ifdef SUPPORT_DIGITAL_CROWN
