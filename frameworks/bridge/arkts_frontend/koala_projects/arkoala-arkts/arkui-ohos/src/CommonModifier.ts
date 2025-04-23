@@ -1,24 +1,32 @@
-import { CommonAttribute } from "./component/common";
-import { AttributeModifier } from "./component/common"; 
+import { CommonAttribute, AttributeModifier } from "./component/common";
+import { ArkCommonAttributeSet } from "./handwritten/modifiers/ArkCommonModifier";
+import {  ClickEvent, Length, ResourceColor, SizeOptions} from "./";
 
-export class CommonModifier  implements AttributeModifier<CommonAttribute> {
-     /** @memo */
+export class CommonModifier implements AttributeModifier<CommonAttribute> {
+
+    private attributeSet: ArkCommonAttributeSet = new ArkCommonAttributeSet();
+
+    get attribute(): ArkCommonAttributeSet {
+        return this.attributeSet;
+    }
+
     applyNormalAttribute(instance: CommonAttribute): void {
     }
-     /** @memo */
+
     applyPressedAttribute(instance: CommonAttribute): void {
-       
+
     }
-     /** @memo */
+
     applyFocusedAttribute(instance: CommonAttribute): void {
-        
+
     }
-     /** @memo */
+
     applyDisabledAttribute(instance: CommonAttribute): void {
-      
+
     }
-     /** @memo */
+
     applySelectedAttribute(instance: CommonAttribute): void {
-        
+
     }
+
 }

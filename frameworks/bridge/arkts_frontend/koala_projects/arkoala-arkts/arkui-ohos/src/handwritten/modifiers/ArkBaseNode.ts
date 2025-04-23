@@ -23,6 +23,10 @@ import { LengthMetrics } from "../../Graphics"
 /** @memo:stable */
 export class ArkBaseNode extends ComponentBase implements CommonAttribute {
    
+    constructParam(...param: Object[]): this {
+        return this;
+    }
+   
     getPeer(): ArkCommonMethodPeer {
         return this.peer as ArkCommonMethodPeer;
     }

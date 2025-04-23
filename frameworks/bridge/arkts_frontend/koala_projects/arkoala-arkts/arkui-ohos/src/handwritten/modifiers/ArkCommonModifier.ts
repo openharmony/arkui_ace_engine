@@ -18,6 +18,8 @@ import { ArkCommonMethodPeer } from "../../generated/peers/ArkCommonPeer";
 import { InteropNativeModule } from "@koalaui/interop"
 import { Resource } from "global/resource";
 import { LengthMetrics } from "../../Graphics"
+import { ArkUIGeneratedNativeModule } from "#components"
+import { int64 } from "@koalaui/common";
 enum ModifierType {
     ORIGIN = 0,
     STATE = 1,
@@ -92,6 +94,7 @@ const UI_STATE_SELECTED = 1 << 3;
 
  /** @memo */
 export function applyUIAttributes<T>(modifier: AttributeModifier<T>, nativeNode: ArkCommonMethodPeer): void {
+   //let status = ArkUIGeneratedNativeModule._UIStateGet(nativeNode.peer.ptr);
    modifier.applyNormalAttribute(nativeNode._attributeSet! as T);
    modifier.applyPressedAttribute(nativeNode._attributeSet! as T);
    modifier.applyFocusedAttribute(nativeNode._attributeSet! as T);
@@ -244,7 +247,7 @@ class SizeModifier extends ModifierWithKey<SizeOptions> {
    constructor(value: SizeOptions) {
        super(value);
    }
-   static identity: string = 'height';
+   static identity: string = 'size';
    applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
        if (reset) {
            // commomPeerNode.resetWidthAttribute();
@@ -280,6 +283,7 @@ export function modifierNullWithKey(modifiers: ObservedMap, identity: string) {
 
 /** @memo:stable */
 export class ArkCommonAttributeSet implements CommonAttribute {
+
    /** @memo */ 
    setCommonOptions(): this {
       return this;
@@ -655,7 +659,7 @@ export class ArkCommonAttributeSet implements CommonAttribute {
     displayPriority(value: number): this {
        return this;
     }
-     /** @memo */
+    /** @memo */
     zIndex(value: number): this {
       if (value) {
          modifierWithKey(this._modifiersWithKeys, ZIndexModifier.identity, ZIndexModifier.factory, value);
@@ -1000,7 +1004,6 @@ export class ArkCommonAttributeSet implements CommonAttribute {
     keyboardShortcut(value: string | FunctionKey, keys: Array<ModifierKey>, action?: (() => void) | undefined): this {
        return this;
     }
-
    /** @memo */
    width(value: Length | undefined): this {
       if (value) {
@@ -1019,7 +1022,7 @@ export class ArkCommonAttributeSet implements CommonAttribute {
       }
       return this;
    }
-     /** @memo */
+   /** @memo */
     backgroundColor(value: ResourceColor | undefined): this {
       if (value != null) {
          modifierWithKey(this._modifiersWithKeys, HeightModifier.identity, BackgroundColorModifier.factory, value as ResourceColor);

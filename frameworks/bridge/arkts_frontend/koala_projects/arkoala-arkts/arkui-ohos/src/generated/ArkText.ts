@@ -44,11 +44,13 @@ import { Callback_String_Void } from "./../component/gridRow"
 import { TextDataDetectorConfig, EditMenuOptions, FontSettingOptions } from "./../component/textCommon"
 import { Callback_Number_Number_Void } from "./../component/grid"
 import { SelectionMenuOptions } from "./../component/richEditor"
+import { InteropNativeModule } from "@koalaui/interop"
 /** @memo:stable */
 export class ArkTextComponent extends ArkCommonMethodComponent implements TextAttribute {
     getPeer(): ArkTextPeer {
         return (this.peer as ArkTextPeer)
     }
+    
     /** @memo */
     public setTextOptions(content?: string | Resource, value?: TextOptions): this {
         if (this.checkPriority("setTextOptions")) {
@@ -454,6 +456,7 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         }
         return this
     }
+ 
     public applyAttributesFinish(): void {
         // we calls this function outside of class, so need to make it public
         super.applyAttributesFinish()

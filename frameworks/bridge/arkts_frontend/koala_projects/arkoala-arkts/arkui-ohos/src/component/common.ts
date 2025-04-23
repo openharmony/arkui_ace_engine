@@ -3403,7 +3403,7 @@ export interface Literal_Alignment_align {
 export type CustomBuilder = 
 /** @memo */
 () => void;
-export type CommonInteface = ()=>CommonAttribute
+export type CommonInteface = (...pamra:Object[])=>CommonAttribute
 export interface OverlayOptions {
     align?: Alignment;
     offset?: OverlayOffset;
@@ -3629,6 +3629,7 @@ export namespace focusControl {
 
 /** @memo:stable */
 export interface CommonMethod {
+
     /** @memo */
     width(value: Length): this
     /** @memo */
@@ -3639,7 +3640,7 @@ export interface CommonMethod {
     responseRegion(value: Array<Rectangle> | Rectangle): this
     /** @memo */
     mouseResponseRegion(value: Array<Rectangle> | Rectangle): this
-    /** @memo */
+     /** @memo */
     size(value: SizeOptions): this
     /** @memo */
     constraintSize(value: ConstraintSizeOptions): this
@@ -4004,20 +4005,14 @@ export interface CommonShapeMethod extends CommonMethod {
 /** @memo:stable */
 export interface CommonAttribute extends CommonMethod {
     /** @memo */
-    setCommonOptions(): this
+    setCommonOptions(): this;
 }
 
 export interface AttributeModifier<T> {
-
-    /** @memo */
     applyNormalAttribute(instance: T) : void;
-    /** @memo */
     applyPressedAttribute(instance: T) : void;
-   /** @memo */
     applyFocusedAttribute(instance: T) : void;
-    /** @memo */
     applyDisabledAttribute(instance: T) : void;
-   /** @memo */
     applySelectedAttribute(instance: T) : void;
 }
 /** @memo:stable */

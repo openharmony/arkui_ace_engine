@@ -35,20 +35,25 @@ import { CircleShape } from "./ArkCircleShapeMaterialized"
 import { EllipseShape } from "./ArkEllipseShapeMaterialized"
 import { PathShape } from "./ArkPathShapeMaterialized"
 import { RectShape } from "./ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
+import { AttributeModifier } from "./../component/common"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./../component/gesture"
 import { PixelMap } from "./ArkPixelMapMaterialized"
 import { Callback_Number_Number_Void } from "./../component/grid"
 import { ScrollOnWillScrollCallback, ScrollOnScrollCallback } from "./../component/scroll"
 import { ArkCommonAttributeSet, applyUIAttributes } from "../handwritten/modifiers/ArkCommonModifier"
-import { CommonModifier } from "./../component/common" 
-import { AttributeUpdater } from "../ohos.arkui.modifier" 
+import { CommonModifier } from "../CommonModifier"
+import { AttributeUpdater } from "../ohos.arkui.modifier"
 import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 /** @memo:stable */
 export class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
- 
-   
+
+    constructParam(...param: Object[]): this {
+        return this;
+    }
+    constructFunction: ((...param: object[]) => void) | undefined
+
     protected _modifierHost: ArkBaseNode | undefined
+    protected _attributeModifier: AttributeModifier<CommonAttribute> | undefined
 
     setModifierHost(value: ArkBaseNode): void {
         this._modifierHost = value
@@ -66,7 +71,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         return (this.peer as ArkCommonMethodPeer)
     }
     /** @memo */
-    public width(value: Length): this {    
+    public width(value: Length): this {
         if (this.checkPriority("width")) {
             const value_casted = value as (Length)
             this.getPeer()?.widthAttribute(value_casted)
@@ -437,9 +442,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         return this
     }
     /** @memo */
-    public onHover(value: ((isHover: boolean,event: HoverEvent) => void)): this {
+    public onHover(value: ((isHover: boolean, event: HoverEvent) => void)): this {
         if (this.checkPriority("onHover")) {
-            const value_casted = value as (((isHover: boolean,event: HoverEvent) => void))
+            const value_casted = value as (((isHover: boolean, event: HoverEvent) => void))
             this.getPeer()?.onHoverAttribute(value_casted)
             return this
         }
@@ -819,9 +824,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         return this
     }
     /** @memo */
-    public onAreaChange(value: ((oldValue: Area,newValue: Area) => void)): this {
+    public onAreaChange(value: ((oldValue: Area, newValue: Area) => void)): this {
         if (this.checkPriority("onAreaChange")) {
-            const value_casted = value as (((oldValue: Area,newValue: Area) => void))
+            const value_casted = value as (((oldValue: Area, newValue: Area) => void))
             this.getPeer()?.onAreaChangeAttribute(value_casted)
             return this
         }
@@ -990,54 +995,54 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         return this
     }
     /** @memo */
-    public onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo)): this {
+    public onDragStart(value: ((event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo)): this {
         if (this.checkPriority("onDragStart")) {
-            const value_casted = value as (((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo))
+            const value_casted = value as (((event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo))
             this.getPeer()?.onDragStartAttribute(value_casted)
             return this
         }
         return this
     }
     /** @memo */
-    public onDragEnter(value: ((event: DragEvent,extraParams?: string) => void)): this {
+    public onDragEnter(value: ((event: DragEvent, extraParams?: string) => void)): this {
         if (this.checkPriority("onDragEnter")) {
-            const value_casted = value as (((event: DragEvent,extraParams?: string) => void))
+            const value_casted = value as (((event: DragEvent, extraParams?: string) => void))
             this.getPeer()?.onDragEnterAttribute(value_casted)
             return this
         }
         return this
     }
     /** @memo */
-    public onDragMove(value: ((event: DragEvent,extraParams?: string) => void)): this {
+    public onDragMove(value: ((event: DragEvent, extraParams?: string) => void)): this {
         if (this.checkPriority("onDragMove")) {
-            const value_casted = value as (((event: DragEvent,extraParams?: string) => void))
+            const value_casted = value as (((event: DragEvent, extraParams?: string) => void))
             this.getPeer()?.onDragMoveAttribute(value_casted)
             return this
         }
         return this
     }
     /** @memo */
-    public onDragLeave(value: ((event: DragEvent,extraParams?: string) => void)): this {
+    public onDragLeave(value: ((event: DragEvent, extraParams?: string) => void)): this {
         if (this.checkPriority("onDragLeave")) {
-            const value_casted = value as (((event: DragEvent,extraParams?: string) => void))
+            const value_casted = value as (((event: DragEvent, extraParams?: string) => void))
             this.getPeer()?.onDragLeaveAttribute(value_casted)
             return this
         }
         return this
     }
     /** @memo */
-    public onDrop(value: ((event: DragEvent,extraParams?: string) => void)): this {
+    public onDrop(value: ((event: DragEvent, extraParams?: string) => void)): this {
         if (this.checkPriority("onDrop")) {
-            const value_casted = value as (((event: DragEvent,extraParams?: string) => void))
+            const value_casted = value as (((event: DragEvent, extraParams?: string) => void))
             this.getPeer()?.onDropAttribute(value_casted)
             return this
         }
         return this
     }
     /** @memo */
-    public onDragEnd(value: ((event: DragEvent,extraParams?: string) => void)): this {
+    public onDragEnd(value: ((event: DragEvent, extraParams?: string) => void)): this {
         if (this.checkPriority("onDragEnd")) {
-            const value_casted = value as (((event: DragEvent,extraParams?: string) => void))
+            const value_casted = value as (((event: DragEvent, extraParams?: string) => void))
             this.getPeer()?.onDragEndAttribute(value_casted)
             return this
         }
@@ -1408,9 +1413,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         return this
     }
     /** @memo */
-    public onGestureJudgeBegin(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult)): this {
+    public onGestureJudgeBegin(value: ((gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult)): this {
         if (this.checkPriority("onGestureJudgeBegin")) {
-            const value_casted = value as (((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult))
+            const value_casted = value as (((gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult))
             this.getPeer()?.onGestureJudgeBeginAttribute(value_casted)
             return this
         }
@@ -1790,19 +1795,30 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-     /** @memo */
+    /** @memo */
     attributeModifier<T>(modifier: AttributeModifier<T>): this {
         let peerNode = this.getPeer()
         if (!peerNode._attributeSet) {
-            peerNode._attributeSet = new ArkCommonAttributeSet()
+            let isCommonModifier: boolean = (modifier instanceof CommonModifier);
+            if (isCommonModifier) {
+                let commonModifier = modifier as object as CommonModifier;
+                peerNode._attributeSet = commonModifier.attribute;
+            } else {
+                peerNode._attributeSet = new ArkCommonAttributeSet()
+            }
         }
         applyUIAttributes(modifier, peerNode);
         let isAttributeUpdater: boolean = (modifier instanceof AttributeUpdater);
         if (isAttributeUpdater) {
             let attributeUpdater = modifier as object as AttributeUpdater<CommonAttribute, CommonInteface>
             attributeUpdater.initializeModifier(peerNode._attributeSet as CommonAttribute);
+            attributeUpdater.onComponentChanged(peerNode._attributeSet as CommonAttribute);
             attributeUpdater.attribute = this.getModifierHost() as CommonAttribute
-            attributeUpdater.updateConstructorParams = () => { return this.getModifierHost()! as CommonAttribute };
+            attributeUpdater.updateConstructorParams = (...params: Object[]) => {
+                let attribute = this.getModifierHost()! as CommonAttribute;
+                //  this.getModifierHost()!.constructParam(params);
+                return attribute;
+            };
         }
         peerNode._attributeSet!.applyModifierPatch(peerNode);
         return this
@@ -1999,9 +2015,9 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         return this
     }
     /** @memo */
-    public onScroll(value: ((first: number,last: number) => void)): this {
+    public onScroll(value: ((first: number, last: number) => void)): this {
         if (this.checkPriority("onScroll")) {
-            const value_casted = value as (((first: number,last: number) => void))
+            const value_casted = value as (((first: number, last: number) => void))
             this.getPeer()?.onScrollAttribute(value_casted)
             return this
         }
