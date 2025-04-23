@@ -39,12 +39,12 @@ namespace {
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
 constexpr uint32_t RATE = 2;
-const Dimension OFFSET = 3.5_vp;
-const Dimension OFFSET_LENGTH = 5.5_vp;
 const Dimension DIALOG_OFFSET = 1.0_vp;
 const Dimension DIALOG_OFFSET_LENGTH = 1.0_vp;
 constexpr uint32_t HALF = 2;
 const Dimension FOCUS_WIDTH = 2.0_vp;
+const Dimension FOCUS_INTERVAL = 2.0_vp;
+const Dimension LINE_WIDTH = 1.5_vp;
 constexpr float DISABLE_ALPHA = 0.6f;
 constexpr float MAX_PERCENT = 100.0f;
 const int32_t UNOPTION_COUNT = 2;
@@ -1006,8 +1006,13 @@ double TextPickerPattern::CalculateHeight()
     CHECK_NULL_RETURN(pickerTheme, height);
     if (textPickerLayoutProperty->HasDefaultPickerItemHeight()) {
         auto defaultPickerItemHeightValue = textPickerLayoutProperty->GetDefaultPickerItemHeightValue();
-        if (context->NormalizeToPx(defaultPickerItemHeightValue) <= 0) {
+        if (LessOrEqual(context->NormalizeToPx(defaultPickerItemHeightValue), 0.0f)) {
             height = pickerTheme->GetDividerSpacing().ConvertToPx();
+            if (!NearEqual(defaultPickerItemHeight_, height)) {
+                defaultPickerItemHeight_ = height;
+                PaintFocusState();
+                SetButtonIdeaSize();
+            }
             return height;
         }
         if (defaultPickerItemHeightValue.Unit() == DimensionUnit::PERCENT) {
@@ -1018,7 +1023,7 @@ double TextPickerPattern::CalculateHeight()
     } else {
         height = pickerTheme->GetDividerSpacing().ConvertToPx();
     }
-    if (defaultPickerItemHeight_ != height) {
+    if (!NearEqual(defaultPickerItemHeight_, height)) {
         defaultPickerItemHeight_ = height;
         PaintFocusState();
         SetButtonIdeaSize();
@@ -1083,8 +1088,6 @@ RectF TextPickerPattern::CalculatePaintRect(int32_t currentFocusIndex,
     float centerX, float centerY, float paintRectWidth, float paintRectHeight, float columnWidth)
 {
     if (!GetIsShowInDialog()) {
-        paintRectHeight = paintRectHeight - OFFSET_LENGTH.ConvertToPx();
-        centerY = centerY + OFFSET.ConvertToPx();
         paintRectWidth = columnWidth - FOCUS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
         centerX = currentFocusIndex * columnWidth + (columnWidth - paintRectWidth) / HALF;
         AdjustFocusBoxOffset(centerX, centerY);
@@ -1145,12 +1148,17 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     if (isRtl) {
         currentFocusIndex = childSize - 1 - focusKeyID_;
     }
+    auto itemHeight = GreatNotEqual(defaultPickerItemHeight_, 0.0f) ? defaultPickerItemHeight_ : dividerSpacing;
     auto centerX = (frameSize.Width() / childSize - pickerThemeWidth) / RATE +
                    columnNode->GetGeometryNode()->GetFrameRect().Width() * currentFocusIndex +
                    PRESS_INTERVAL.ConvertToPx() * RATE;
-    auto centerY = (frameSize.Height() - dividerSpacing) / RATE + PRESS_INTERVAL.ConvertToPx();
-    float paintRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * RATE;
-    float paintRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * RATE;
+    auto centerY = (frameSize.Height() - itemHeight) / RATE +
+                   FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
+    float paintRectWidth = columnWidth - FOCUS_INTERVAL.ConvertToPx() * RATE - LINE_WIDTH.ConvertToPx() * RATE;
+    float paintRectHeight = itemHeight - FOCUS_INTERVAL.ConvertToPx() * RATE - LINE_WIDTH.ConvertToPx() * RATE;
+    if (LessNotEqual(paintRectHeight, 0.0f)) {
+        paintRectHeight = 0.0f;
+    }
     auto focusPaintRect = CalculatePaintRect(currentFocusIndex,
         centerX, centerY, paintRectWidth, paintRectHeight, columnWidth);
     paintRect.SetRect(focusPaintRect);
