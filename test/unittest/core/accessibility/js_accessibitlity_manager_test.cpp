@@ -1626,36 +1626,51 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen004, TestSize.Leve
     /**
     * @tc.steps: step1. construct JsAccessibilityManager
     */
-    int64_t elementId = 0;
-    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
-    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto context = NG::PipelineContext::GetCurrentContext();
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    eventHub->GetOrCreateGestureEventHub();
-    auto gesture = eventHub->GetGestureEventHub();
-    ASSERT_NE(gesture, nullptr);
-    std::string nodeName = "Click";
-    frameNode->SetNodeName(nodeName);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode->GetRenderContext(), nullptr);
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->currentFocusNodeId_ = 2;
+    jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 3;
 
     /**
-    * @tc.steps: step2. test with nothing, expect return nodeName Click
+    * @tc.steps: step2. test clear currentFocusNodeId when elementId equals to currentFocusNodeId
     */
-    NG::UIObserverHandler::WillClickHandleFunc willClickHandleFunc = [](
-        AbilityContextInfo&, const GestureEvent&, const ClickInfo&,
-        const RefPtr<FrameNode>& frameNode) -> void {};
-    ASSERT_NE(willClickHandleFunc, nullptr);
-    NG::UIObserverHandler::GetInstance().SetWillClickFunc(willClickHandleFunc);
+    jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS,
+        frameNode, 2, context);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, -1);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 3);
+}
 
-    NG::UIObserverHandler::DidClickHandleFunc didClickHandleFunc = [](
-        AbilityContextInfo&, const GestureEvent&, const ClickInfo&,
-        const RefPtr<FrameNode>& frameNode) -> void {};
-    ASSERT_NE(didClickHandleFunc, nullptr);
-    NG::UIObserverHandler::GetInstance().SetDidClickFunc(didClickHandleFunc);
-    jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
-        frameNode, elementId, context);
-    EXPECT_EQ(frameNode->GetNodeName(), "Click");
-    NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
-    NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
+/**
+ * @tc.name: ConvertActionTypeToBoolen005
+ * @tc.desc: Test focusing action
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen005, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct JsAccessibilityManager
+    */
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode->GetRenderContext(), nullptr);
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->currentFocusNodeId_ = 2;
+    jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 3;
+
+    /**
+    * @tc.steps: step2. test clear currentFocusNodeId when elementId not equals to currentFocusNodeId
+    */
+    jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS,
+        frameNode, 4, context);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, 2);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 3);
 }
 } // namespace OHOS::Ace::NG
