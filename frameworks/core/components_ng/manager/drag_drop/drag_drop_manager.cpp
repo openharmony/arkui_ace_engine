@@ -840,6 +840,7 @@ void DragDropManager::OnDragThrow(const DragPointerEvent& pointerEvent)
     ClearSummary();
     ClearExtraInfo();
     SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
+    isPullThrow_ = true;
 }
 
 void DragDropManager::OnDragPullCancel(const DragPointerEvent& pointerEvent)
@@ -1077,6 +1078,7 @@ void DragDropManager::DoDragReset()
     dampingOverflowCount_ = 0;
     isDragNodeNeedClean_ = false;
     isAnyDraggableHit_ = false;
+    isPullThrow_ = false;
     fingerPointInfo_.clear();
     DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
 }
@@ -1086,7 +1088,7 @@ void DragDropManager::ResetDraggingStatus(const TouchEvent& touchPoint)
     if (IsDraggingPressed(touchPoint.id)) {
         SetDraggingPressedState(false);
     }
-    if (!IsItemDragging() && IsDragging() && IsSameDraggingPointer(touchPoint.id)) {
+    if (!IsItemDragging() && IsDragging() && IsSameDraggingPointer(touchPoint.id) && !isPullThrow_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Reset dragging status, stop drag. pointerId: %{public}d", touchPoint.id);
         DragPointerEvent dragPointerEvent;
         DragDropFuncWrapper::ConvertPointerEvent(touchPoint, dragPointerEvent);
