@@ -1613,7 +1613,7 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             break;
         }
         case WindowSizeChangeReason::MAXIMIZE_IN_IMPLICT: {
-            MaximizeToImmersiveAnimation(width, height, type, rsTransaction);
+            MaximizeInImplictAnimation(width, height, type, rsTransaction);
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
@@ -1786,7 +1786,7 @@ void PipelineContext::StartSplitWindowAnimation(int32_t width, int32_t height, W
 #endif
 }
 
-void PipelineContext::MaximizeToImmersiveAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
+void PipelineContext::MaximizeInImplictAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
