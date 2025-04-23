@@ -4904,7 +4904,19 @@ void UIContentImpl::SetForceSplitEnable(bool isForceSplit, const std::string& ho
     CHECK_NULL_VOID(container);
     auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(context);
-    context->SetForceSplitEnable(isForceSplit, homePage);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, homePage]() {
+        auto context = weakContext.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->SetForceSplitEnable(isForceSplit, homePage);
+    };
+    if(taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        forceSplitTask();
+        return;
+    }
+    taskExecutor->PostTask(std::move(forceSplitTask),TaskExecutor::TaskType::UI,
+        "ArkUISetForceSplitEnable", PriorityType::VIP);
 }
 
 void UIContentImpl::ProcessDestructCallbacks()

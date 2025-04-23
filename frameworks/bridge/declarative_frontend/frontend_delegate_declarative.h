@@ -389,6 +389,8 @@ public:
 
     std::string GetPagePathByUrl(const std::string& url) const;
 
+    void OnForceSplitChange();
+
 protected:
     bool isCardDelegate_ = false;
 

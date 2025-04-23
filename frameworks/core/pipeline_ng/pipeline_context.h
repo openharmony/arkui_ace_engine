@@ -1052,12 +1052,7 @@ public:
     void RemoveFrameNodeChangeListener(int32_t nodeId);
     bool AddChangedFrameNode(const WeakPtr<FrameNode>& node);
     void RemoveChangedFrameNode(int32_t nodeId);
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
-    {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "set force split %{public}s", isForceSplit ? "enable" : "disable");
-        isForceSplit_ = isForceSplit;
-        homePageConfig_ = homePage;
-    }
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage);
 
     bool GetForceSplitEnable() const
     {
@@ -1067,6 +1062,11 @@ public:
     std::string GetHomePageConfig() const
     {
         return homePageConfig_;
+    }
+
+    bool GetSupportSplitModeEnable() const
+    {
+        return isSupportSplitMode_;
     }
 
     bool CatchInteractiveAnimations(const std::function<void()>& animationCallback) override;
@@ -1201,6 +1201,16 @@ public:
     void UnregisterRotationEndCallback(int32_t callbackId)
     {
         rotationEndCallbackMap_.erase(callbackId);
+    }
+
+    void SetForceSplitChangeCallBack(const std::function<void()>& callback)
+    {
+        forceSplitChangeCallback_ = callback;
+    }
+
+    const std::function<void()>& GetForceSplitChangeCallBack() const
+    {
+        return forceSplitChangeCallback_;
     }
 
 protected:
@@ -1503,6 +1513,7 @@ private:
     bool isDoKeyboardAvoidAnimate_ = true;
     bool isForceSplit_ = false;
     std::string homePageConfig_;
+    bool isSupportSplitMode_ = false;
 
     std::list<FrameCallbackFuncFromCAPI> frameCallbackFuncsFromCAPI_;
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
@@ -1525,6 +1536,8 @@ private:
     friend class ScopedLayout;
     friend class FormGestureManager;
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = nullptr;
+
+    std::function<void()> forceSplitChangeCallback_ = nullptr;
 };
 
 /**
