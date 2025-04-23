@@ -4911,11 +4911,11 @@ void UIContentImpl::SetForceSplitEnable(bool isForceSplit, const std::string& ho
         CHECK_NULL_VOID(context);
         context->SetForceSplitEnable(isForceSplit, homePage);
     };
-    if(taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+    if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         forceSplitTask();
         return;
     }
-    taskExecutor->PostTask(std::move(forceSplitTask),TaskExecutor::TaskType::UI,
+    taskExecutor->PostTask(std::move(forceSplitTask), TaskExecutor::TaskType::UI,
         "ArkUISetForceSplitEnable", PriorityType::VIP);
 }
 
