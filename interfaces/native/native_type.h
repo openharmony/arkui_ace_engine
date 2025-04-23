@@ -2377,6 +2377,28 @@ typedef enum {
 } ArkUI_ExpandMode;
 
 /**
+ * @brief Defines the navigation point indicator style of the <b><Swiper></b> component.
+ * @brief Enumerates the UI states of a component, used for handling state-specific styles.
+ *
+ * @since 20
+ */
+typedef enum {
+    /** Normal state. */
+    UI_STATE_NORMAL = 0,
+    /** Pressed state. */
+    UI_STATE_PRESSED = 1 << 0,
+    /** Focused state. */
+    UI_STATE_FOCUSED = 1 << 1,
+    /** Disabled state. */
+    UI_STATE_DISABLED = 1 << 2,
+    /**
+     * Selected state. This state is supported only by specific component types:
+     * <b>Checkbox</b>, <b>Radio</b>, <b>Toggle</b>, <b>List</b>, <b>Grid</b>, and <b>MenuItem</b>.
+     */
+    UI_STATE_SELECTED = 1 << 3,
+} ArkUI_UIState;
+
+/**
  * @brief Define an enum for the focus movement directions.
  *
  * @since 18

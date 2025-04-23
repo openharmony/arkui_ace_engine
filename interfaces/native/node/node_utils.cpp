@@ -515,6 +515,28 @@ int32_t OH_ArkUI_NodeUtils_GetPositionToParent(ArkUI_NodeHandle node, ArkUI_IntO
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_ErrorCode OH_ArkUI_AddSupportedUIStates(ArkUI_NodeHandle node, int32_t uiStates,
+    void (statesChangeHandler)(int32_t currentStates, void* userData), bool excludeInner, void* userData)
+{
+    if (node == nullptr) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->addSupportedUIStates(node->uiNodeHandle, uiStates,
+        reinterpret_cast<void*>(statesChangeHandler), excludeInner, userData);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_RemoveSupportedUIStates(ArkUI_NodeHandle node, int32_t uiStates)
+{
+    if (node == nullptr) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->removeSupportedUIStates(node->uiNodeHandle, uiStates);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 #ifdef __cplusplus
 };
 #endif

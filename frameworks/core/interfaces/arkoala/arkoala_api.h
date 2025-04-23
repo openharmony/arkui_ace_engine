@@ -5717,7 +5717,7 @@ struct ArkUIXComponentModifier {
 struct ArkUIStateModifier {
     ArkUI_Int64 (*getUIState)(ArkUINodeHandle node);
     void (*setSupportedUIState)(ArkUINodeHandle node, ArkUI_Int64 state);
-    void (*addSupportedUIState)(ArkUINodeHandle node, ArkUI_Int64 state, void* callback);
+    void (*addSupportedUIState)(ArkUINodeHandle node, ArkUI_Int64 state, void* callback, ArkUI_Bool isExcludeInner);
     void (*removeSupportedUIState)(ArkUINodeHandle node, ArkUI_Int64 state);
 };
 
@@ -5853,6 +5853,9 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Bool (*getCrossLanguageOptions)(ArkUINodeHandle node);
     ArkUI_Bool (*checkIfCanCrossLanguageAttributeSetting)(ArkUINodeHandle node);
     void (*setKeyProcessingMode)(ArkUI_Int32 instanceId, ArkUI_Int32 mode);
+    void (*addSupportedUIStates)(
+        ArkUINodeHandle node, int32_t state, void* statesChangeHandler, bool isExcludeInner, void* userData);
+    void (*removeSupportedUIStates)(ArkUINodeHandle node, int32_t state);
 };
 
 struct ArkUINodeContentEvent {

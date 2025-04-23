@@ -6664,4 +6664,20 @@ HWTEST_F(NativeNodeTest, NativeNodeTest126, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetArrowSize(arrowStyle), 25.0f);
     OH_ArkUI_SwiperArrowStyle_Destroy(arrowStyle);
 }
+
+/**
+ * @tc.name: NativeNodeTest127
+ * @tc.desc: Test ArkUI_SupportedUIStates.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest127, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle styleButton = nodeAPI->createNode(ARKUI_NODE_BUTTON);
+    int32_t settingUIStatus = 1;
+    EXPECT_EQ(OH_ArkUI_AddSupportedUIStates(
+        styleButton, settingUIStatus, nullptr, false, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RemoveSupportedUIStates(styleButton, settingUIStatus), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
 } // namespace OHOS::Ace

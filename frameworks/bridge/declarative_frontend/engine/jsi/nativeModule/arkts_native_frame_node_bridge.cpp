@@ -60,6 +60,13 @@ ArkUI_Int32 GetExpandMode(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 ind
     CHECK_NULL_RETURN(!expandModeArg.IsNull(), 1);
     return expandModeArg->IsNumber() || expandModeArg->IsBoolean() ? expandModeArg->ToNumber(vm)->Value() : 1;
 }
+ArkUI_Bool GetIsExcludeInner(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 index)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> isExcludeInnerArg = runtimeCallInfo->GetCallArgRef(index);
+    CHECK_NULL_RETURN(!isExcludeInnerArg.IsNull(), false);
+    return isExcludeInnerArg->IsBoolean() ? isExcludeInnerArg->ToBoolean(vm)->Value() : false;
+}
 } // namespace
 ArkUI_Bool FrameNodeBridge::IsCustomFrameNode(FrameNode* node)
 {
@@ -1982,8 +1989,9 @@ ArkUINativeModuleValue FrameNodeBridge::AddSupportedStates(ArkUIRuntimeCallInfo*
         panda::Local<panda::JSValueRef> params[1] = { stateValues };
         func->Call(vm, func.ToLocal(), params, 1);
     };
+    int isExcludeInner = GetIsExcludeInner(runtimeCallInfo, 3);
     GetArkUINodeModifiers()->getUIStateModifier()->addSupportedUIState(
-        nativeNode, state, reinterpret_cast<void*>(&callback));
+        nativeNode, state, reinterpret_cast<void*>(&callback), isExcludeInner);
     return defaultReturnValue;
 }
 

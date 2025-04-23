@@ -910,6 +910,30 @@ void SetKeyProcessingMode(ArkUI_Int32 instanceId, ArkUI_Int32 mode)
     delegate->SetKeyProcessingMode(mode);
 }
 
+void AddSupportedUIStates(
+    ArkUINodeHandle node, int32_t state, void* statesChangeHandler, bool isExcludeInner, void* userData)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    std::function<void(uint64_t)> onStatesChange = [userData, statesChangeHandler](uint64_t currentState) {
+        using FuncType = float (*)(int32_t, void*);
+        FuncType func = reinterpret_cast<FuncType>(statesChangeHandler);
+        func(static_cast<int32_t >(currentState), userData);
+    };
+    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), onStatesChange, isExcludeInner);
+}
+
+void RemoveSupportedUIStates(ArkUINodeHandle node, int32_t state)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->RemoveSupportedUIState(static_cast<uint64_t>(state), false);
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -986,6 +1010,8 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .getCrossLanguageOptions = GetCrossLanguageOptions,
         .checkIfCanCrossLanguageAttributeSetting = CheckIfCanCrossLanguageAttributeSetting,
         .setKeyProcessingMode = SetKeyProcessingMode,
+        .addSupportedUIStates = AddSupportedUIStates,
+        .removeSupportedUIStates = RemoveSupportedUIStates,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

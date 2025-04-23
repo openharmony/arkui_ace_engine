@@ -9257,6 +9257,53 @@ int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t
  */
 int32_t OH_ArkUI_NodeUtils_GetPositionToParent(ArkUI_NodeHandle node, ArkUI_IntOffset* globalOffset);
 
+/**
+ * @brief Adds the polymorphic style states supported by the component. To handle states efficiently, specify the
+ * states of interest and the corresponding handler. When a state of interest occurs, the handler will be executed.
+ *  - You can adjust the UI style based on the current state within the callback. If this API is called multiple
+ * times on the same node, the last set of states and handler will take precedence.
+ *  - Some component types have default system handling for certain states. For example, the <b>Button</b>
+ * component has a default style effect for the PRESSED state. When custom state handling is implemented on such
+ * components, the default style effect will be applied first, followed by the custom style changes, resulting in
+ * a combined effect. To disable the default style effects, set <b>excludeInner</b> to <b>true</b>, if this is allowed
+ * by the system implementation.
+ *  - And when this API is called, the provided handler function will be executed immediately.
+ *  - There is no need to explicitly register a listener for the NORMAL state. Once a non-NORMAL state is registered,
+ * the system will automatically notify your application when the state changes back to NORMAL.
+ *
+ * @param node Target node.
+ * @param uiStates Target UI states to be handled on the node.
+ *        The combined result of all target UI states can be calculated using the <b>|</b> operator.
+ *        Example: <b>targetUIStates = ArkUI_UIState::PRESSED | ArkUI_UIState::FOCUSED</b>.
+ * @param statesChangeHandler Handler for UI state changes.
+ *        It returns the current UI status. The value is the result of combining all current state enum values using the
+ *        <b>|</b> operator. You can determine the state using the <b>&</b> operator.
+ *        Example: <b>if (currentStates & ArkUI_UIState::PRESSED == ArkUI_UIState::PRESSED)</b>
+ *        However, for checking the normal state, use the equality operator directly.
+ *        Example: <b>if (currentStates == ArkUI_UIState::NORMAL)</b>.
+ * @param excludeInner Whether to disable the default state styles.
+ * @param userData Custom data used in the <b>onDrawCompleted</b> callback.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+ArkUI_ErrorCode OH_ArkUI_AddSupportedUIStates(ArkUI_NodeHandle node, int32_t uiStates,
+    void (statesChangeHandler)(int32_t currentStates, void* userData), bool excludeInner, void* userData);
+
+/**
+ * @brief Removes registered UI states. When all states registered using <b>OH_ArkUI_AddSupportedUIStates</b>
+ * are removed, the registered <b>stateChangeHandler</b> will no longer be executed.
+ * 
+ * @param node Target node.
+ * @param uiStates Target UI states to be removed.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+ArkUI_ErrorCode OH_ArkUI_RemoveSupportedUIStates(ArkUI_NodeHandle node, int32_t uiStates);
+
 #ifdef __cplusplus
 };
 #endif
