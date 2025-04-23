@@ -241,5 +241,28 @@ ArkUI_NodeHandle GetPreviousSibling(ArkUI_NodeHandle node);
 ArkUI_NodeHandle GetNextSibling(ArkUI_NodeHandle node);
 ArkUI_NodeHandle GetParent(ArkUI_NodeHandle node);
 int32_t RemoveAllChildren(ArkUI_NodeHandle parentNode);
+
+uint32_t GetTotalChildCountSafely(ArkUI_NodeHandle node);
+ArkUI_NodeHandle GetChildAtSafely(ArkUI_NodeHandle node, int32_t position);
+ArkUI_NodeHandle GetFirstChildSafely(ArkUI_NodeHandle node);
+ArkUI_NodeHandle GetLastChildSafely(ArkUI_NodeHandle node);
+ArkUI_NodeHandle GetPreviousSiblingSafely(ArkUI_NodeHandle node);
+ArkUI_NodeHandle GetNextSiblingSafely(ArkUI_NodeHandle node);
+int32_t RegisterNodeCustomEventSafely(
+    ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType, int32_t targetId, void* userData);
+void UnregisterNodeCustomEventSafely(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType);
+void RegisterNodeCustomReceiverSafely(void (*eventReceiver)(ArkUI_NodeCustomEvent* event));
+void UnregisterNodeCustomEventReceiverSafely();
+int32_t SetMeasuredSizeSafely(ArkUI_NodeHandle node, int32_t width, int32_t height);
+int32_t SetLayoutPositionSafely(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY);
+ArkUI_IntSize GetMeasuredSizeSafely(ArkUI_NodeHandle node);
+ArkUI_IntOffset GetLayoutPositionSafely(ArkUI_NodeHandle node);
+int32_t MeasureNodeSafely(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* constraint);
+int32_t LayoutNodeSafely(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY);
+int32_t AddNodeCustomEventReceiverSafely(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(ArkUI_NodeCustomEvent* event));
+int32_t RemoveNodeCustomEventReceiverSafely(ArkUI_NodeHandle nodePtr,
+    void (*eventReceiver)(ArkUI_NodeCustomEvent* event));
+ArkUI_NodeHandle GetParentSafely(ArkUI_NodeHandle node);
+int32_t RemoveAllChildrenSafely(ArkUI_NodeHandle parentNode);
 } // namespace OHOS::Ace::NodeModel
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_EXTENED_H

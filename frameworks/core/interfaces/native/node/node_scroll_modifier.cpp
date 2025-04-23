@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 
 #include "interfaces/native/node/node_model.h"
+#include "core/common/async_build_manager.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
@@ -511,9 +512,16 @@ void SetScrollFling(ArkUINodeHandle node, ArkUI_Float64 value)
     if (NearZero(value)) {
         return;
     }
-    RefPtr<ScrollControllerBase> scrollControllerBase = GetController(node);
-    CHECK_NULL_VOID(scrollControllerBase);
-    scrollControllerBase->Fling(value);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(AceType::Claim(frameNode),
+        [weak = AceType::WeakClaim(frameNode), value]() {
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
+        RefPtr<ScrollControllerBase> scrollControllerBase =
+            GetController(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(host)));
+        CHECK_NULL_VOID(scrollControllerBase);
+        scrollControllerBase->Fling(value);
+    });
 }
 
 ArkUINodeHandle GetScroll(ArkUINodeHandle node)

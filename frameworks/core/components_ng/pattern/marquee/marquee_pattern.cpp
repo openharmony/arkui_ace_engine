@@ -16,6 +16,7 @@
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 
+#include "core/common/async_build_manager.h"
 #include "core/components/marquee/marquee_theme.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -33,6 +34,12 @@ void MarqueePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (AsyncBuildManager::GetInstance().GetInstance().TryPostUnSafeTask(host, [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        pattern->OnAttachToFrameNode();
+    })) {
+        return;
+    }
     host->GetRenderContext()->SetUsingContentRectForRenderFrame(true);
     host->GetRenderContext()->SetClipToFrame(true);
     auto pipeline = PipelineContext::GetCurrentContext();

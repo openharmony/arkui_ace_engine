@@ -1000,6 +1000,7 @@ private:
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
     ImageSourceInfo CreateImageSourceInfo(const ImageSpanOptions& options);
     void ProcessSpanString();
+    void OnAttachToFrameNodeInner();
     // to check if drag is in progress
     void SetCurrentDragTool(SourceTool tool)
     {

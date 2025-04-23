@@ -221,18 +221,24 @@ ThemeManagerImpl::ThemeManagerImpl(RefPtr<ResourceAdapter>& resourceAdapter)
 
 void ThemeManagerImpl::RegisterThemeKit(ThemeType type, Ace::Kit::BuildFunc func)
 {
-    auto findIter = themes_.find(type);
-    if (findIter != themes_.end()) {
-        return;
+    {
+        std::shared_lock<std::shared_mutex> lock(themeMutex_);
+        auto findIter = themes_.find(type);
+        if (findIter != themes_.end()) {
+            return;
+        }
     }
     THEME_BUILDERS_KIT.insert({ type, func });
 }
 
 RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type)
 {
-    auto findIter = themes_.find(type);
-    if (findIter != themes_.end()) {
-        return findIter->second;
+    {
+        std::shared_lock<std::shared_mutex> lock(themeMutex_);
+        auto findIter = themes_.find(type);
+        if (findIter != themes_.end()) {
+            return findIter->second;
+        }
     }
 
     auto theme = GetThemeKit(type);
@@ -262,11 +268,13 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeOrigin(ThemeType type)
             pipelineContext->SetLocalColorMode(localMode);
             ResourceManager::GetInstance().UpdateColorMode(localMode);
         }
+        std::unique_lock<std::shared_mutex> lock(themeMutex_);
         themes_.emplace(type, theme);
         return theme;
     }
     
     auto theme = builderIter->second(themeConstants_);
+    std::unique_lock<std::shared_mutex> lock(themeMutex_);
     themes_.emplace(type, theme);
     return theme;
 }
@@ -293,11 +301,13 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type)
             pipelineContext->SetLocalColorMode(localMode);
             ResourceManager::GetInstance().UpdateColorMode(localMode);
         }
+        std::unique_lock<std::shared_mutex> lock(themeMutex_);
         themes_.emplace(type, theme);
         return theme;
     }
     
     auto theme = builderIterKit->second();
+    std::unique_lock<std::shared_mutex> lock(themeMutex_);
     themes_.emplace(type, theme);
     return theme;
 }
@@ -347,11 +357,14 @@ RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type, NG::TokenThemeScopeId t
 
 Color ThemeManagerImpl::GetBackgroundColor() const
 {
-    auto findIter = themes_.find(AppTheme::TypeId());
-    if (findIter != themes_.end()) {
-        auto appTheme = AceType::DynamicCast<AppTheme>(findIter->second);
-        if (appTheme) {
-            return appTheme->GetBackgroundColor();
+    {
+        std::shared_lock<std::shared_mutex> lock(themeMutex_);
+        auto findIter = themes_.find(AppTheme::TypeId());
+        if (findIter != themes_.end()) {
+            auto appTheme = AceType::DynamicCast<AppTheme>(findIter->second);
+            if (appTheme) {
+                return appTheme->GetBackgroundColor();
+            }
         }
     }
     // Parse attr from system theme style.
@@ -371,7 +384,10 @@ Color ThemeManagerImpl::GetBackgroundColor() const
 
 void ThemeManagerImpl::LoadResourceThemes()
 {
-    themes_.clear();
+    {
+        std::unique_lock<std::shared_mutex> lock(themeMutex_);
+        themes_.clear();
+    }
     themeWrappersLight_.clear();
     themeWrappersDark_.clear();
     themeConstants_->LoadTheme(currentThemeId_);

@@ -2891,7 +2891,7 @@ void ViewAbstract::SetInspectorId(const std::string& inspectorId)
     if (uiNode) {
         if (uiNode->GetInspectorId().has_value() && uiNode->GetInspectorIdValue() != inspectorId) {
             ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
-                uiNode->GetInspectorIdValue(), uiNode->GetId());
+                uiNode->GetInspectorIdValue(), uiNode->GetId(), uiNode->IsMultiThreadNode());
         }
         uiNode->UpdateInspectorId(inspectorId);
     }
@@ -4368,7 +4368,7 @@ void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::string& inspe
     if (frameNode) {
         if (frameNode->GetInspectorId().has_value() && frameNode->GetInspectorIdValue() != inspectorId) {
             ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
-                frameNode->GetInspectorIdValue(), frameNode->GetId());
+                frameNode->GetInspectorIdValue(), frameNode->GetId(), frameNode->IsMultiThreadNode());
         }
         frameNode->UpdateInspectorId(inspectorId);
     }

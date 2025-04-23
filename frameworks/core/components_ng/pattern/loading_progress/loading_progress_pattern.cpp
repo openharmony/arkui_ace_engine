@@ -14,6 +14,7 @@
  */
 
 #include "base/log/dump_log.h"
+#include "core/common/async_build_manager.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 
@@ -40,7 +41,11 @@ void LoadingProgressPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->SetClipToBounds(true);
-    RegisterVisibleAreaChange();
+    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->RegisterVisibleAreaChange();
+    });
 }
 
 void LoadingProgressPattern::OnDetachFromFrameNode(FrameNode* frameNode)

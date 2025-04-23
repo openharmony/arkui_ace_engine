@@ -24,6 +24,7 @@
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "core/common/async_build_manager.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
 #include "core/components/picker/picker_theme.h"
@@ -77,7 +78,11 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
     InitPanEvent(gestureHub);
     host->GetRenderContext()->SetClipToFrame(true);
     InitHapticController(host);
-    RegisterWindowStateChangedCallback();
+    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->RegisterWindowStateChangedCallback();
+    });
 }
 
 void TextPickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)

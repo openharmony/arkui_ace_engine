@@ -28,6 +28,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
+#include "core/common/async_build_manager.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/common/layout/constants.h"
@@ -90,13 +91,17 @@ void SideBarContainerPattern::OnAttachToFrameNode()
     auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     userSetSidebarWidth_ = layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
-    auto sideBarTheme = pipelineContext->GetTheme<SideBarTheme>();
-    if (sideBarTheme && sideBarTheme->GetSideBarUnfocusEffectEnable()) {
-        pipelineContext->AddWindowFocusChangedCallback(host->GetId());
-    }
+    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(host, [weak = WeakPtr(host)]() {
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto pipelineContext = host->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->AddWindowSizeChangeCallback(host->GetId());
+        auto sideBarTheme = pipelineContext->GetTheme<SideBarTheme>();
+        if (sideBarTheme && sideBarTheme->GetSideBarUnfocusEffectEnable()) {
+            pipelineContext->AddWindowFocusChangedCallback(host->GetId());
+        }
+    });
 }
 
 void SideBarContainerPattern::OnDetachFromFrameNode(FrameNode* frameNode)

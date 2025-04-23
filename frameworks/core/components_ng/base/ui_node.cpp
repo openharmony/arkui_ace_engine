@@ -17,6 +17,7 @@
 #include "base/log/ace_checker.h"
 #include "base/log/dump_log.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "core/common/async_build_manager.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 
@@ -29,6 +30,9 @@ const std::set<std::string> UINode::layoutTags_ = { "Flex", "Stack", "Row", "Col
 UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
 {
+    if (AsyncBuildManager::IsBuildingMultiThreadNode()) {
+        SetIsMultiThreadNode(true);
+    }
     if (AceChecker::IsPerformanceCheckEnabled()) {
         auto pos = EngineHelper::GetPositionOnJsCode();
         nodeInfo_ = std::make_unique<PerformanceCheckNode>();
@@ -38,11 +42,13 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     apiVersion_ = Container::GetCurrentApiTargetVersion();
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
-        auto container = Container::Current();
-        CHECK_NULL_BREAK(container);
-        auto distributedUI = container->GetDistributedUI();
-        CHECK_NULL_BREAK(distributedUI);
-        distributedUI->AddNewNode(nodeId_);
+        AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(Claim(this), [nodeId = nodeId_]() {
+            auto container = Container::Current();
+            CHECK_NULL_BREAK(container);
+            auto distributedUI = container->GetDistributedUI();
+            CHECK_NULL_BREAK(distributedUI);
+            distributedUI->AddNewNode(nodeId);
+        });
     } while (false);
 #endif
     instanceId_ = Container::CurrentId();
@@ -70,7 +76,11 @@ UINode::~UINode()
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
     }
     if (propInspectorId_.has_value()) {
-        ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(propInspectorId_.value_or(""), nodeId_);
+        ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
+            propInspectorId_.value_or(""), nodeId_, isMultiThreadNode_);
+    }
+    if (isMultiThreadNode_) {
+        AsyncBuildManager::GetInstance().RemoveAfterAttachMainTreeTasks(nodeId_);
     }
     if (!onMainTree_) {
         return;
@@ -82,6 +92,18 @@ UINode::~UINode()
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_ON_MAINTREE) {
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
     }
+}
+
+bool UINode::MaybeRelease()
+{
+    if (!isMultiThreadNode_ || AsyncBuildManager::IsOnMainThread()) {
+        return true;
+    }
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, true);
+    auto executor = pipeline->GetTaskExecutor();
+    CHECK_NULL_RETURN(executor, true);
+    return !executor->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI, "ArkUIDestroyUINode");
 }
 
 void UINode::AttachContext(PipelineContext* context, bool recursive)

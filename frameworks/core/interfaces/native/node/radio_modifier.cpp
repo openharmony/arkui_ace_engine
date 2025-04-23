@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr bool DEFAULT_CHECKED = false;
 const int32_t ERROR_INT_CODE = -1;
-std::string g_radioStrValue;
+thread_local std::string g_radioStrValue;
 
 void SetRadioChecked(ArkUINodeHandle node, ArkUI_Bool isCheck)
 {

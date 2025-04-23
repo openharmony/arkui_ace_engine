@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/async_build_manager.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
@@ -127,16 +128,21 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
-    pattern->InitSurfaceChangedCallback();
-    pattern->InitSurfacePositionChangedCallback();
-    pattern->RegisterWindowSizeCallback();
-    pattern->InitTheme();
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    if (pipeline->GetHasPreviewTextOption()) {
-        pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
-    }
-    ProcessDefaultStyleAndBehaviors(frameNode);
+    std::function<void ()> buildTask = [weakPattern = WeakPtr(pattern), weakFrameNode = WeakPtr(frameNode)]() {
+        auto frameNode = weakFrameNode.Upgrade();
+        auto pattern = weakPattern.Upgrade();
+        pattern->InitSurfaceChangedCallback();
+        pattern->InitSurfacePositionChangedCallback();
+        pattern->RegisterWindowSizeCallback();
+        pattern->InitTheme();
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        if (pipeline->GetHasPreviewTextOption()) {
+            pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
+        }
+        ProcessDefaultStyleAndBehaviors(frameNode);
+    };
+    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(frameNode, buildTask);
     return frameNode;
 }
 

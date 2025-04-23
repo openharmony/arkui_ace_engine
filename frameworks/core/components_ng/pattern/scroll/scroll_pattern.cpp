@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "core/common/async_build_manager.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -654,11 +655,16 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
         return;
     }
     float position = currentOffset_ + distance;
-    if (smooth) {
-        AnimateTo(-position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, true, false, false);
-        return;
-    }
-    JumpToPosition(position);
+    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(GetHost(),
+        [position, distance, smooth, weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (smooth) {
+            pattern->AnimateTo(-position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED,
+                Curves::EASE_OUT, true, false, false);
+            return;
+        }
+        pattern->JumpToPosition(position);
+    });
 }
 
 void ScrollPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)

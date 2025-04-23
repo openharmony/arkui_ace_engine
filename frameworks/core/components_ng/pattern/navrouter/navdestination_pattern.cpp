@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
+#include "core/common/async_build_manager.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
@@ -361,13 +362,16 @@ void NavDestinationPattern::OnAttachToFrameNode()
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
     isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto id = host->GetId();
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-
-    pipeline->AddWindowStateChangedCallback(id);
-    pipeline->AddWindowSizeChangeCallback(id);
-    pipeline->GetMemoryManager()->AddRecyclePageNode(host);
+    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(host, [weak = WeakPtr(host)]() {
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto id = host->GetId();
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddWindowStateChangedCallback(id);
+        pipeline->AddWindowSizeChangeCallback(id);
+        pipeline->GetMemoryManager()->AddRecyclePageNode(host);
+    });
 }
 
 void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)

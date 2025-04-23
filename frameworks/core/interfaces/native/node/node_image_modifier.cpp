@@ -56,7 +56,7 @@ constexpr uint32_t ERROR_UINT_CODE = -1;
 constexpr int32_t DEFAULT_FALSE = 0;
 const std::vector<ResizableOption> directions = { ResizableOption::TOP, ResizableOption::RIGHT,
     ResizableOption::BOTTOM, ResizableOption::LEFT };
-std::string g_strValue;
+thread_local std::string g_strValue;
 
 enum class ResourceType : uint32_t {
     COLOR = 10001,
