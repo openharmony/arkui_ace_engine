@@ -918,7 +918,7 @@ public:
     std::string TextInputActionToString() const;
     std::string AutoCapTypeToString() const;
     std::string TextContentTypeToString() const;
-    std::string GetPlaceholderFont() const;
+    virtual std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
     void InitTheme();
     std::string GetTextColor() const;
