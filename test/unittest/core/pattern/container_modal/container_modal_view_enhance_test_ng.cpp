@@ -769,4 +769,43 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest031
     auto gestureRow = viewEnhance_->BuildGestureRow(containerModalNode);
     EXPECT_NE(gestureRow, nullptr);
 }
+
+/**
+ * @tc.name: ContainerModalViewEnhanceTestNgTest032
+ * @tc.desc: Test OnContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest032, TestSize.Level1)
+{
+    CreateContainerModal();
+    auto containerModalNode = FrameNode::CreateFrameNode("ContainerModal",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    bool isExecute = false;
+    auto windowModeCallback = [isExecute](
+        const std::string& name, const std::string& value) mutable { isExecute = true; };
+    auto windowManager = pipeline->GetWindowManager();
+    windowManager->SetWindowCallNativeCallback(std::move(windowModeCallback));
+    windowManager->FireWindowCallNativeCallback("name", "value");
+    EXPECT_EQ(isExecute, true);
+}
+
+/**
+ * @tc.name: ContainerModalViewEnhanceTestNgTest033
+ * @tc.desc: Test OnContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest033, TestSize.Level1)
+{
+    CreateContainerModal();
+    auto containerModalNode = FrameNode::CreateFrameNode("ContainerModal",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    pipline->SetupRootElement();
+    ContainerModalViewEnhance::OnContainerModalEvent(pipline, "name", "value");
+    EXPECT_NE(pipline, nullptr);
+}
 } // namespace OHOS::Ace::NG
