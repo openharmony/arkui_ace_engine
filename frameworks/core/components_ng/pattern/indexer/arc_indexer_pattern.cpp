@@ -648,6 +648,7 @@ void ArcIndexerPattern::MoveIndexByOffset(const Offset& offset)
             auto arraySize = (fullCount_ > ARC_INDEXER_ITEM_MAX_COUNT) ? ARC_INDEXER_ITEM_MAX_COUNT : fullCount_;
             ArcExpandedAnimation(arraySize - 1);
             auto host = GetHost();
+            CHECK_NULL_VOID(host);
             host->MarkModifyDone();
             host->MarkDirtyNode();
         }
@@ -694,7 +695,9 @@ void ArcIndexerPattern::IndexNodeCollapsedAnimation()
         [id = Container::CurrentId(), weak = AceType::WeakClaim(this)]() {
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
             auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
             host->MarkModifyDone();
             host->MarkDirtyNode();
             pattern->atomicAnimateOp_ = true;
@@ -732,6 +735,7 @@ void ArcIndexerPattern::IndexNodeExpandedAnimation()
         },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
             pattern->atomicAnimateOp_ = true;
             auto collapsedNode = pattern->collapsedNode_.Upgrade();
             CHECK_NULL_VOID(collapsedNode);
@@ -743,6 +747,7 @@ void ArcIndexerPattern::IndexNodeExpandedAnimation()
 void ArcIndexerPattern::StartIndexerNodeDisappearAnimation(int32_t nodeIndex)
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto total = fullArrayValue_.size();
     if (nodeIndex > static_cast<int32_t>(total)) {
         return;
