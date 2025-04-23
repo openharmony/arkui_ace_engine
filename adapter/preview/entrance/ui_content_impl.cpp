@@ -628,4 +628,126 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
     CHECK_NULL_VOID(appBar);
     appBar->SetStatusBarItemColor(IsDarkColor(color));
 }
+
+void UIContentImpl::OnConfigurationChanged(const DeviceConfig& newConfig)
+{
+    if (newConfig.colorMode == runArgs_.deviceConfig.colorMode) {
+        return;
+    }
+    int32_t width = runArgs_.deviceWidth;
+    int32_t height = runArgs_.deviceHeight;
+    SurfaceChanged(runArgs_.deviceConfig.orientation, runArgs_.deviceConfig.density, width, height);
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGW("container is null, change configuration failed.");
+        return;
+    }
+    container->UpdateDeviceConfig(newConfig);
+    runArgs_.deviceConfig.colorMode = newConfig.colorMode;
+    if (container->GetType() == FrontendType::DECLARATIVE_JS) {
+        container->NativeOnConfigurationUpdated(ACE_INSTANCE_ID);
+    }
+}
+
+void UIContentImpl::SurfaceChanged(
+    const DeviceOrientation& orientation, const double& resolution, int32_t& width, int32_t& height,
+    WindowSizeChangeReason type)
+{
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    CHECK_NULL_VOID(container);
+    auto viewPtr = AceType::DynamicCast<AceViewPreview>(container->GetAceView());
+    CHECK_NULL_VOID(viewPtr);
+    // Need to change the window resolution and then change the rendering resolution. Otherwise, the image may not adapt
+    // to the new window after the window is modified.
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    context->SetDisplayWindowRectInfo(Rect(Offset(0, 0), Size(width, height)));
+    SystemProperties::InitDeviceInfo(
+        width, height, orientation == DeviceOrientation::PORTRAIT ? 0 : 1, resolution, runArgs_.isRound);
+    DeviceConfig deviceConfig = runArgs_.deviceConfig;
+    deviceConfig.orientation = orientation;
+    deviceConfig.density = resolution;
+    container->UpdateDeviceConfig(deviceConfig);
+    viewPtr->NotifyDensityChanged(resolution);
+    viewPtr->NotifySurfaceChanged(width, height, type);
+    if ((orientation != runArgs_.deviceConfig.orientation && configChanges_.watchOrientation) ||
+        (resolution != runArgs_.deviceConfig.density && configChanges_.watchDensity) ||
+        ((width != runArgs_.deviceWidth || height != runArgs_.deviceHeight) && configChanges_.watchLayout)) {
+        container->NativeOnConfigurationUpdated(ACE_INSTANCE_ID);
+    }
+    if (orientation != runArgs_.deviceConfig.orientation || resolution != runArgs_.deviceConfig.density) {
+        container->NotifyConfigurationChange(false, ConfigurationChange({ false, false, true }));
+    }
+    runArgs_.deviceConfig.orientation = orientation;
+    runArgs_.deviceConfig.density = resolution;
+    runArgs_.deviceWidth = width;
+    runArgs_.deviceHeight = height;
+}
+
+void UIContentImpl::LoadDocument(const std::string& url, const std::string& componentName,
+    Platform::SystemParams& systemParams)
+{
+    LOGI("Component Preview start:%{public}s, ", componentName.c_str());
+    AceApplicationInfo::GetInstance().ChangeLocale(systemParams.language, systemParams.region);
+    runArgs_.isRound = systemParams.isRound;
+    SurfaceChanged(systemParams.orientation, systemParams.density, systemParams.deviceWidth, systemParams.deviceHeight);
+    DeviceConfig deviceConfig = {
+        .orientation = systemParams.orientation,
+        .density = systemParams.density,
+        .deviceType = systemParams.deviceType,
+        .colorMode = systemParams.colorMode,
+    };
+    OnConfigurationChanged(deviceConfig);
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    CHECK_NULL_VOID(container);
+    container->LoadDocument(url, componentName);
+    LOGI("Component Preview end");
+}
+
+std::string UIContentImpl::GetJSONTree()
+{
+    LOGI("Inspector start");
+    std::string jsonTreeStr;
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    CHECK_NULL_RETURN(container, "");
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, "");
+    taskExecutor->PostSyncTask(
+        [&jsonTreeStr] { OHOS::Ace::Framework::InspectorClient::GetInstance().AssembleJSONTreeStr(jsonTreeStr); },
+        TaskExecutor::TaskType::UI, "ArkUIGetJsonTreeStr");
+    LOGI("Inspector end");
+    return jsonTreeStr;
+}
+
+bool UIContentImpl::OperateComponent(const std::string& attrsJson)
+{
+    LOGI("Fast Preview start");
+    auto root = JsonUtil::ParseJsonString(attrsJson);
+    if (!root || !root->IsValid()) {
+        LOGE("Fast Preview failed: the attrsJson is illegal json format");
+        return false;
+    }
+
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGE("Fast Preview failed: container is null");
+        return false;
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("Fast Preview failed: taskExecutor is null");
+        return false;
+    }
+    taskExecutor->PostTask(
+        [attrsJson, instanceId = ACE_INSTANCE_ID] {
+            ContainerScope scope(instanceId);
+            bool result = OHOS::Ace::Framework::InspectorClient::GetInstance().OperateComponent(attrsJson);
+            if (!result) {
+                OHOS::Ace::Framework::InspectorClient::GetInstance().CallFastPreviewErrorCallback(attrsJson);
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUIOperateComponent");
+    LOGI("Fast Preview end");
+    return true;
+}
 } // namespace OHOS::Ace

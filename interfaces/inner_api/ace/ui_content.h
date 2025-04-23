@@ -99,6 +99,10 @@ namespace OHOS::Ace {
 struct AccessibilityParentRectInfo;
 } // namespace OHOS::Ace
 
+namespace OHOS::Ace::Platform {
+struct SystemParams;
+} //namespace OHOS::Ace::Platform
+
 class NativeEngine;
 typedef struct napi_value__* napi_value;
 
@@ -147,6 +151,18 @@ public:
         ContentInfoType type = ContentInfoType::CONTINUATION) = 0;
     virtual std::string GetContentInfo(ContentInfoType type = ContentInfoType::CONTINUATION) const = 0;
     virtual void DestroyUIDirector() = 0;
+
+    //for previewer
+    virtual void LoadDocument(const std::string& url, const std::string& componentName,
+        Platform::SystemParams& systemParams) {};
+    virtual std::string GetJSONTree()
+    {
+        return "";
+    }
+    virtual bool OperateComponent(const std::string& attrsJson)
+    {
+        return false;
+    }
 
     // UI content event process
     virtual bool ProcessBackPressed() = 0;
