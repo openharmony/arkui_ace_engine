@@ -404,9 +404,12 @@ std::pair<int32_t, std::string> UdmfClientImpl::GetErrorInfo(int32_t errorCode)
 {
     switch (errorCode) {
         case UDMF::E_NOT_FOUND:
-            return { ERROR_CODE_DRAG_DATA_NOT_FOUND, "GetData failed, data not found." };
+            return { ERROR_CODE_DRAG_DATA_NOT_FOUND,
+                "GetData failed, data not found. Possible causes: 1.The data is too large and has not been "
+                "synchronized yet; 2.No permission to access data." };
         default:
-            return { ERROR_CODE_DRAG_DATA_ERROR, "GetData failed, data error." };
+            return { ERROR_CODE_DRAG_DATA_ERROR,
+                "GetData failed, data error. Possible cause: Data synchronization failed." };
     }
 }
 
