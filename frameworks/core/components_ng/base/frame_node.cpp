@@ -1197,6 +1197,11 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
         GeometryNodeToJsonValue(json, filter);
     }
     json->PutFixedAttr("id", propInspectorId_.value_or("").c_str(), filter, FIXED_ATTR_ID);
+    json->Put("isLayoutDirtyMarked", isLayoutDirtyMarked_);
+    json->Put("isRenderDirtyMarked", isRenderDirtyMarked_);
+    json->Put("isMeasureBoundary", isMeasureBoundary_);
+    json->Put("hasPendingRequest", hasPendingRequest_);
+    json->Put("isFirstBuilding", isFirstBuilding_);
     ExtraCustomPropertyToJsonValue(json, filter);
     if (IsCNode() || !IsJsCustomPropertyUpdated()) {
         auto jsonNode = JsonUtil::Create(true);
