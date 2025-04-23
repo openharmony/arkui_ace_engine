@@ -122,22 +122,22 @@ struct InteropTypeConverter<KVMObjectHandle> {
 
 template<>
 struct InteropTypeConverter<KInteropBuffer> {
-    using InteropType = ani_array_byte;
+    using InteropType = ani_fixedarray_byte;
     static inline KInteropBuffer convertFrom(ani_env* env, InteropType value) {
       if (value == nullptr) return KInteropBuffer();
       ani_size length = 0;
-      env->Array_GetLength(value, &length);
+      env->FixedArray_GetLength(value, &length);
       KByte* data = new KByte[length];
-      env->Array_GetRegion_Byte(value, 0, length, (ani_byte*)data);
+      env->FixedArray_GetRegion_Byte(value, 0, length, (ani_byte*)data);
       KInteropBuffer result = { 0 };
       result.data = data;
       result.length = length;
       return result;
     }
     static inline InteropType convertTo(ani_env* env, KInteropBuffer value) {
-      ani_array_byte result;
-      env->Array_New_Byte(value.length, &result);
-      env->Array_SetRegion_Byte(result, 0, value.length, reinterpret_cast<const ani_byte*>(value.data));
+      ani_fixedarray_byte result;
+      env->FixedArray_New_Byte(value.length, &result);
+      env->FixedArray_SetRegion_Byte(result, 0, value.length, reinterpret_cast<const ani_byte*>(value.data));
       value.dispose(value.resourceId);
       return result;
     }
@@ -158,12 +158,12 @@ struct InteropTypeConverter<KSerializerBuffer> {
 
 template<>
 struct InteropTypeConverter<KInteropReturnBuffer> {
-    using InteropType = ani_array_byte;
+    using InteropType = ani_fixedarray_byte;
     static inline KInteropReturnBuffer convertFrom(ani_env* env, InteropType value) = delete;
     static inline InteropType convertTo(ani_env* env, KInteropReturnBuffer value) {
-      ani_array_byte result;
-      env->Array_New_Byte(value.length, &result);
-      env->Array_SetRegion_Byte(result, 0, value.length, reinterpret_cast<const ani_byte*>(value.data));
+      ani_fixedarray_byte result;
+      env->FixedArray_New_Byte(value.length, &result);
+      env->FixedArray_SetRegion_Byte(result, 0, value.length, reinterpret_cast<const ani_byte*>(value.data));
       value.dispose(value.data, value.length);
       return result;
     };
@@ -209,23 +209,23 @@ struct InteropTypeConverter<KNativePointer> {
 
 template<>
 struct InteropTypeConverter<KInt*> {
-    using InteropType = ani_array_int;
+    using InteropType = ani_fixedarray_int;
     static KInt* convertFrom(ani_env* env, InteropType value) {
       if (!value) return nullptr;
       KInt* result = nullptr;
       //env->Array_Pin(value, (void**)&result);
       ani_size length = 0;
-      env->Array_GetLength(value, &length);
+      env->FixedArray_GetLength(value, &length);
       KInt* data = new KInt[length];
-      env->Array_GetRegion_Int(value, 0, length, (ani_int*)data);
+      env->FixedArray_GetRegion_Int(value, 0, length, (ani_int*)data);
       return data;
     }
     static InteropType convertTo(ani_env* env, KInt* value) = delete;
     static void release(ani_env* env, InteropType value, KInt* converted) {
       if (converted) {
         ani_size length = 0;
-        env->Array_GetLength(value, &length);
-        env->Array_SetRegion_Int(value, 0, length, (ani_int*)converted);
+        env->FixedArray_GetLength(value, &length);
+        env->FixedArray_SetRegion_Int(value, 0, length, (ani_int*)converted);
       }
       //if (converted) env->Array_Unpin(value, converted);
       delete [] converted;
@@ -234,23 +234,23 @@ struct InteropTypeConverter<KInt*> {
 
 template<>
 struct InteropTypeConverter<KFloat*> {
-    using InteropType = ani_array_float;
+    using InteropType = ani_fixedarray_float;
     static KFloat* convertFrom(ani_env* env, InteropType value) {
       if (!value) return nullptr;
       //KFloat* result = nullptr;
       //env->Array_Pin(value, (void**)&result);
       ani_size length = 0;
-      env->Array_GetLength(value, &length);
+      env->FixedArray_GetLength(value, &length);
       KFloat* data = new KFloat[length];
-      env->Array_GetRegion_Float(value, 0, length, (ani_float*)data);
+      env->FixedArray_GetRegion_Float(value, 0, length, (ani_float*)data);
       return data;
     }
     static InteropType convertTo(ani_env* env, KFloat* value) = delete;
     static void release(ani_env* env, InteropType value, KFloat* converted) {
       if (converted) {
         ani_size length = 0;
-        env->Array_GetLength(value, &length);
-        env->Array_SetRegion_Float(value, 0, length, (ani_float*)converted);
+        env->FixedArray_GetLength(value, &length);
+        env->FixedArray_SetRegion_Float(value, 0, length, (ani_float*)converted);
       }
       //if (converted) env->Array_Unpin(value, converted);
       delete [] converted;
@@ -259,23 +259,23 @@ struct InteropTypeConverter<KFloat*> {
 
 template<>
 struct InteropTypeConverter<KByte*> {
-    using InteropType = ani_array_byte;
+    using InteropType = ani_fixedarray_byte;
     static KByte* convertFrom(ani_env* env, InteropType value) {
       if (!value) return nullptr;
       //KByte* result = nullptr;
       //env->Array_Pin(value, (void**)&result);
       ani_size length = 0;
-      env->Array_GetLength(value, &length);
+      env->FixedArray_GetLength(value, &length);
       KByte* data = new KByte[length];
-      env->Array_GetRegion_Byte(value, 0, length, (ani_byte*)data);
+      env->FixedArray_GetRegion_Byte(value, 0, length, (ani_byte*)data);
       return data;
     }
     static InteropType convertTo(ani_env* env, KByte* value) = delete;
     static void release(ani_env* env, InteropType value, KByte* converted) {
       if (converted) {
         ani_size length = 0;
-        env->Array_GetLength(value, &length);
-        env->Array_SetRegion_Byte(value, 0, length, (ani_byte*)converted);
+        env->FixedArray_GetLength(value, &length);
+        env->FixedArray_SetRegion_Byte(value, 0, length, (ani_byte*)converted);
       }
       // if (converted) env->Array_Unpin(value, converted);
       delete[] converted;

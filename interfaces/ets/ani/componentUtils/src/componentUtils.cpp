@@ -235,16 +235,22 @@ static ani_object getRotateResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::
     return obj;
 }
 
-static ani_object getRransform([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
+static ani_object getTransform([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
     const int32_t size = 16;
-    ani_array_double array = nullptr;
-    env->Array_New_Double(size, &array);
-    ani_double matrix4[size] = { 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
+    ani_array array = nullptr;
+    env->Array_New(size, nullptr, &array);
+
+    ani_class doubleClass = nullptr;
+    env->FindClass("Lstd/core/Double;", &doubleClass);
+    ani_method doubleCtor = nullptr;
+    env->Class_FindMethod(doubleClass, "<ctor>", "D:V", &doubleCtor);
+
     for (int32_t i = 0; i < size; i++) {
-        matrix4[i] = ani_double(rectangle.matrix4[i]);
+        ani_object boxedDouble {};
+        env->Object_New(doubleClass, doubleCtor, &boxedDouble, ani_double(rectangle.matrix4[i]));
+        env->Array_Set(array, i, boxedDouble);
     }
-    env->Array_SetRegion_Double(array, 0, size, matrix4);
     return array;
 }
 
@@ -315,7 +321,7 @@ static ani_object getRectangleById([[maybe_unused]] ani_env* env, ani_string id)
     if (ANI_OK != env->Object_SetPropertyByName_Ref(rectangleObj, "rotate", rotate_obj)) {
         return nullptr;
     }
-    ani_object transform_obj = getRransform(env, rectangle);
+    ani_object transform_obj = getTransform(env, rectangle);
     if (transform_obj == nullptr) {
         return nullptr;
     }

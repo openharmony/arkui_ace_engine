@@ -101,15 +101,15 @@ EntryLoader::EntryLoader(ani_env* env, const std::string& abcModulePath): env_(e
     ani_type stringCls;
     ANI_CALL(env, Object_GetType(abcModulePathStr, &stringCls), return);
 
-    ani_array_ref refArray;
-    ANI_CALL(env, Array_New_Ref(stringCls, 1, abcModulePathStr, &refArray), return);
+    ani_array refArray;
+    ANI_CALL(env, Array_New(1, abcModulePathStr, &refArray), return);
 
     ani_class cls;
     ANI_CALL(env, FindClass("Lstd/core/AbcRuntimeLinker;", &cls), return);
 
     ani_method ctor;
     ANI_CALL(env, Class_FindMethod(
-        cls, "<ctor>", "Lstd/core/RuntimeLinker;[Lstd/core/String;:V", &ctor), return);
+        cls, "<ctor>", "Lstd/core/RuntimeLinker;Lescompat/Array;:V", &ctor), return);
 
     ANI_CALL(env, Object_New(cls, ctor, &runtimeLinkerObj_, undefined, refArray), return);
 
@@ -122,23 +122,29 @@ EntryLoader::EntryLoader(ani_env* env, const std::vector<uint8_t>& abcContent): 
     ani_ref undefined;
     ANI_CALL(env, GetUndefined(&undefined), return);
 
-    ani_array_byte byteArray;
-    ANI_CALL(env, Array_New_Byte(abcContent.size(), &byteArray), return);
-    ANI_CALL(env, Array_SetRegion_Byte(
-        byteArray, 0, abcContent.size(), reinterpret_cast<const ani_byte*>(abcContent.data())), return);
+    ani_array byteArray;
+    ANI_CALL(env, Array_New(abcContent.size(), undefined, &byteArray), return);
 
-    ani_type byteArrayCls;
-    ANI_CALL(env, Object_GetType(byteArray, &byteArrayCls), return);
+    ani_class byteClass = nullptr;
+    ANI_CALL(env, FindClass("Lstd/core/Byte;", &byteClass), return);
+    ani_method byteCtor = nullptr;
+    ANI_CALL(env, Class_FindMethod(byteClass, "<ctor>", "B:V", &byteCtor), return);
 
-    ani_array_ref refArray;
-    ANI_CALL(env, Array_New_Ref(byteArrayCls, 1, byteArray, &refArray), return);
+    for (ani_size i = 0; i < abcContent.size(); i++) {
+        ani_object boxedByte {};
+        ANI_CALL(env, Object_New(byteClass, byteCtor, &boxedByte, abcContent[i]), return);
+        ANI_CALL(env, Array_Set(byteArray, i, boxedByte), return);
+    }
+
+    ani_array refArray;
+    ANI_CALL(env, Array_New(1, byteArray, &refArray), return);
 
     ani_class cls;
     ANI_CALL(env, FindClass("Lstd/core/MemoryRuntimeLinker;", &cls), return);
 
     ani_method ctor;
     ANI_CALL(env, Class_FindMethod(
-        cls, "<ctor>", "Lstd/core/RuntimeLinker;[[B:V", &ctor), return);
+        cls, "<ctor>", "Lstd/core/RuntimeLinker;Lescompat/Array;:V", &ctor), return);
 
     ANI_CALL(env, Object_New(cls, ctor, &runtimeLinkerObj_, undefined, refArray), return);
 
