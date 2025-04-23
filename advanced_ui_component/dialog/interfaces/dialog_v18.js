@@ -223,6 +223,8 @@ const CONTENT_FONT_WEIGHT = lazyInit(() => {
     return fontWeight;
 });
 const SCROLL_BAR_OFFSET = 20;
+const SELECT_DIALOG_SCROLL_BAR_OFFSET = 4;
+
 export class TipsDialog extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -416,7 +418,7 @@ export class TipsDialog extends ViewPU {
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/MainPage.ets', line: 174, col: 5 });
+                    }, { page: 'library/src/main/ets/components/dialog.ets', line: 174, col: 5 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -496,7 +498,7 @@ export class TipsDialog extends ViewPU {
                             ForEach.pop();
                         }
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/MainPage.ets', line: 189, col: 5 });
+                    }, { page: 'library/src/main/ets/components/dialog.ets', line: 189, col: 5 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -670,11 +672,12 @@ export class TipsDialog extends ViewPU {
                 scrollForward: NestedScrollMode.PARALLEL,
                 scrollBackward: NestedScrollMode.PARALLEL
             });
-            Scroll.margin({ end: LengthMetrics.vp(this.marginOffset) });
+            Scroll.margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) });
         }, Scroll);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) });
+            Column.margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) });
+            Column.width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
@@ -1086,6 +1089,7 @@ export class SelectDialog extends ViewPU {
                     this.isFocus = false;
                 }
             });
+            Scroll.margin({ end: LengthMetrics.vp(SELECT_DIALOG_SCROLL_BAR_OFFSET) });
         }, Scroll);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
@@ -1354,7 +1358,7 @@ export class SelectDialog extends ViewPU {
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/MainPage.ets', line: 589, col: 5 });
+                    }, { page: 'library/src/main/ets/components/dialog.ets', line: 589, col: 5 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -1706,11 +1710,12 @@ export class ConfirmDialog extends ViewPU {
                 scrollForward: NestedScrollMode.PARALLEL,
                 scrollBackward: NestedScrollMode.PARALLEL
             });
-            Scroll.margin({ end: LengthMetrics.vp(this.marginOffset) });
+            Scroll.margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) });
         }, Scroll);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) });
+            Column.margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) });
+            Column.width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.content);
@@ -1849,7 +1854,7 @@ export class ConfirmDialog extends ViewPU {
                             ForEach.pop();
                         }
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/MainPage.ets', line: 807, col: 5 });
+                    }, { page: 'library/src/main/ets/components/dialog.ets', line: 807, col: 5 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -1924,7 +1929,7 @@ export class ConfirmDialog extends ViewPU {
                         themeColorMode: this.themeColorMode,
                         fontSizeScale: this.__fontSizeScale,
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/MainPage.ets', line: 823, col: 5 });
+                    }, { page: 'library/src/main/ets/components/dialog.ets', line: 823, col: 5 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -2116,7 +2121,7 @@ export class AlertDialog extends ViewPU {
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/MainPage.ets', line: 881, col: 5 });
+                    }, { page: 'library/src/main/ets/components/dialog.ets', line: 881, col: 5 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -2317,7 +2322,7 @@ export class CustomContentDialog extends ViewPU {
                         minContentHeight: this.__minContentHeight,
                         customStyle: false
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/MainPage.ets', line: 967, col: 5 });
+                    }, { page: 'library/src/main/ets/components/dialog.ets', line: 967, col: 5 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -2885,7 +2890,7 @@ class CustomDialogContentComponent extends ViewPU {
                             ForEach.pop();
                         }
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1107, col: 11 });
+                    }, { page: 'library/src/main/ets/components/dialog.ets', line: 1107, col: 11 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -3959,7 +3964,7 @@ export class LoadingDialog extends ViewPU {
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1831, col: 7 });
+                    }, { page: 'library/src/main/ets/components/dialog.ets', line: 1831, col: 7 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
