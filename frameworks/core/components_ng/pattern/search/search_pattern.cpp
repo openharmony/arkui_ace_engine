@@ -1625,14 +1625,16 @@ void SearchPattern::HandleBlurEvent()
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    if (isFocusTextColorSet_) {
+    auto textFieldPaintProperty = textFieldFrameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    if (isFocusTextColorSet_ && !textFieldPaintProperty->HasTextColorFlagByUser()) {
         textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
-        isFocusTextColorSet_ = false;
     }
-    if (isFocusPlaceholderColorSet_) {
+    if (isFocusPlaceholderColorSet_ && !textFieldPaintProperty->GetPlaceholderColorFlagByUserValue(false)) {
         textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
-        isFocusPlaceholderColorSet_ = false;
     }
+    isFocusTextColorSet_ = false;
+    isFocusPlaceholderColorSet_ = false;
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->HandleBlurEvent();
