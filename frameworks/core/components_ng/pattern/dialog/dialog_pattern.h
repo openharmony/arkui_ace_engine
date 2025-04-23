@@ -219,6 +219,7 @@ public:
             onDidAppearCallback_();
         }
         SetState(PromptActionCommonState::APPEARED);
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is APPEARED.");
     }
 
     void CallDialogDidDisappearCallback()
@@ -227,6 +228,7 @@ public:
             onDidDisappearCallback_();
         }
         SetState(PromptActionCommonState::DISAPPEARED);
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is DISAPPEARED.");
     }
 
     void CallDialogWillAppearCallback()
@@ -235,6 +237,7 @@ public:
             onWillAppearCallback_();
         }
         SetState(PromptActionCommonState::APPEARING);
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is APPEARING.");
     }
 
     void CallDialogWillDisappearCallback()
@@ -243,6 +246,7 @@ public:
             onWillDisappearCallback_();
         }
         SetState(PromptActionCommonState::DISAPPEARING);
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is DISAPPEARING.");
     }
 
     bool IsUIExtensionSubWindow() const

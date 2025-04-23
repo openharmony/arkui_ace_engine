@@ -114,6 +114,7 @@ ArkUIDialogHandle CreateDialog()
         .enableHoverMode = false,
         .hoverModeAreaType = OHOS::Ace::HoverModeAreaType::TOP_SCREEN,
         .focusable = true,
+        .dialogState = nullptr,
     });
 }
 
@@ -694,6 +695,15 @@ ArkUI_Int32 RegisterOnWillDialogDismissWithUserData(
     return ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 GetDialogState(ArkUIDialogHandle controllerHandler, ArkUI_Int32* dialogState)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    auto* dialogNode = reinterpret_cast<FrameNode*>(controllerHandler->dialogHandle);
+    CHECK_NULL_RETURN(dialogNode, ERROR_CODE_PARAM_INVALID);
+    *dialogState = static_cast<int32_t>(CustomDialogControllerModelNG::GetStateWithNode(dialogNode));
+    return ERROR_CODE_NO_ERROR;
+}
+
 ArkUI_Int32 SetKeyboardAvoidDistance(
     ArkUIDialogHandle controllerHandler, float distance, ArkUI_Int32 unit)
 {
@@ -983,15 +993,6 @@ ArkUI_Int32 SetFocusable(ArkUIDialogHandle controllerHandler, bool focusable)
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->focusable = focusable;
-    return ERROR_CODE_NO_ERROR;
-}
-
-ArkUI_Int32 GetDialogState(ArkUIDialogHandle controllerHandler, ArkUI_Int32* dialogState)
-{
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    auto* dialogNode = reinterpret_cast<FrameNode*>(controllerHandler->dialogHandle);
-    CHECK_NULL_RETURN(dialogNode, ERROR_CODE_PARAM_INVALID);
-    *dialogState = static_cast<int32_t>(CustomDialogControllerModelNG::GetStateWithNode(dialogNode));
     return ERROR_CODE_NO_ERROR;
 }
 
