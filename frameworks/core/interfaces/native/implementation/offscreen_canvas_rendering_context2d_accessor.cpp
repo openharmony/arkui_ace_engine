@@ -42,7 +42,7 @@ Ark_OffscreenCanvasRenderingContext2D CtorImpl(const Ark_Number* width,
     peerImpl->IncRefCount();
     auto fWidth = static_cast<double>(Converter::Convert<float>(*width));
     auto fHeight = static_cast<double>(Converter::Convert<float>(*height));
-    auto optSettings = Converter::OptConvert<Ark_RenderingContextSettings>(*settings);
+    auto optSettings = settings ? Converter::OptConvert<Ark_RenderingContextSettings>(*settings) : std::nullopt;
     peerImpl->SetOptions(fWidth, fHeight, optSettings);
     return reinterpret_cast<OffscreenCanvasRenderingContext2DPeer*>(Referenced::RawPtr(peerImpl));
 }
@@ -57,10 +57,8 @@ Ark_String ToDataURLImpl(Ark_OffscreenCanvasRenderingContext2D peer,
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<OffscreenCanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, {});
-    CHECK_NULL_RETURN(type, {});
-    CHECK_NULL_RETURN(quality, {});
-    auto optType = Converter::OptConvert<std::string>(*type);
-    auto optQuality = Converter::OptConvert<float>(*quality);
+    auto optType = type ? Converter::OptConvert<std::string>(*type) : std::nullopt;
+    auto optQuality = quality ? Converter::OptConvert<float>(*quality) : std::nullopt;
     auto result = peerImpl->ToDataURL(optType, optQuality);
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }

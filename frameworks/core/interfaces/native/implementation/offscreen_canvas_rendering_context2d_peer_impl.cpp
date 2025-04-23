@@ -20,6 +20,7 @@
 
 using namespace OHOS::Ace;
 namespace OHOS::Ace::NG::GeneratedModifier {
+const auto DEFAULT_ANTIALIAS = false;
 std::mutex OffscreenCanvasRenderingContext2DPeerImpl::mutex_;
 std::unordered_map<uint32_t, RefPtr<AceType>> OffscreenCanvasRenderingContext2DPeerImpl::offscreenPatternMap_;
 uint32_t OffscreenCanvasRenderingContext2DPeerImpl::offscreenPatternCount_ = 0;
@@ -55,11 +56,12 @@ void OffscreenCanvasRenderingContext2DPeerImpl::SetOptions(
         std::lock_guard<std::mutex> lock(mutex_);
         offscreenPatternMap_[offscreenPatternCount_++] = offscreenPattern;
     }
+    bool anti = DEFAULT_ANTIALIAS;
     if (optSettings && optSettings.value() && optSettings.value()->antialias) {
-        bool anti = optSettings.value()->antialias.value();
-        SetAnti(anti);
-        SetAntiAlias();
+        anti = optSettings.value()->antialias.value();
     }
+    SetAnti(anti);
+    SetAntiAlias();
     SetDensity();
 }
 void OffscreenCanvasRenderingContext2DPeerImpl::RemoveOptions()
