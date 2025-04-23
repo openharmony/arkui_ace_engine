@@ -73,7 +73,7 @@ public:
     void DumpVelocityInfo(int32_t fingerId);
 
     double GetDistance() const;
-    float GetDistanceConfigFor(SourceTool sourceTool = SourceTool::UNKNOWN) const;
+    double GetDistanceConfigFor(SourceTool sourceTool = SourceTool::UNKNOWN) const;
 
     PanDirection GetDirection() const
     {
