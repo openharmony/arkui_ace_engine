@@ -824,8 +824,8 @@ void RichEditorPattern::UpdateSelectionAndHandleVisibility()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (isMouseOrTouchPad(sourceTool_) && releaseInDrop_) {
-        start = lastCaretPosition_;
-        end = insertValueLength_ + lastCaretPosition_;
+        start = caretPosition_ - insertValueLength_;
+        end = caretPosition_;
     }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateSelectionAndHandleVisibility range=[%{public}d--%{public}d]", start, end);
     textSelector_.Update(start, end);
