@@ -47,8 +47,7 @@ struct AppInfo {
 const AppInfo KOALA_APP_INFO = {
     "Larkui/ArkUIEntry/Application;",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;ZLstd/core/String;Larkui/UserView/UserView;Larkui/UserView/EntryPoint;"
-    ":Larkui/ArkUIEntry/Application;",
+    "Lstd/core/String;Lstd/core/String;ZLarkui/UserView/UserView;Larkui/UserView/EntryPoint;:Larkui/ArkUIEntry/Application;",
     "start",
     ":J",
     "enter",

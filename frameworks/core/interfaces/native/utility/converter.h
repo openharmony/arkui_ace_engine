@@ -603,7 +603,6 @@ namespace Converter {
     template<> void AssignCast(std::optional<ButtonType>& dst, const Ark_ButtonType& src);
     template<> void AssignCast(std::optional<CancelButtonStyle>& dst, const Ark_CancelButtonStyle& src);
     template<> void AssignCast(std::optional<ChainEdgeEffect>& dst, const Ark_ChainEdgeEffect& src);
-    template<> void AssignCast(std::optional<EffectEdge>& dst, const Ark_EffectEdge& src);
     template<> void AssignCast(std::optional<ChainStyle>& dst, const Ark_ChainStyle& src);
     template<> void AssignCast(std::optional<CleanNodeStyle>& dst, const Ark_CancelButtonStyle& src);
     template<> void AssignCast(std::optional<Color>& dst, const enum Ark_Color& src);
