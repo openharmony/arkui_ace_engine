@@ -1668,16 +1668,16 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen004, TestSize.Leve
 
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
-    jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 3;
     jsAccessibilityManager->currentFocusNodeId_ = 2;
+    jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 3;
 
     /**
-    * @tc.steps: step2. test clear currentFocusNodeId when elementId not equals to currentFocusNodeId
+    * @tc.steps: step2. test clear currentFocusNodeId when elementId equals to currentFocusNodeId
     */
-    jsAccessibilityManager->ConvertActionTypeToBoolen(
-        ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, frameNode, 4, context);
+    jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS,
+        frameNode, 2, context);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, -1);
     EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 3);
-    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, 2);
 }
 
 /**
@@ -1697,16 +1697,16 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen005, TestSize.Leve
 
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
-    jsAccessibilityManager->currentFocusNodeId_ = 2;
     jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 3;
+    jsAccessibilityManager->currentFocusNodeId_ = 2;
 
     /**
     * @tc.steps: step2. test clear currentFocusNodeId when elementId not equals to currentFocusNodeId
     */
-    jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS,
-        frameNode, 4, context);
-    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, 2);
+    jsAccessibilityManager->ConvertActionTypeToBoolen(
+        ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, frameNode, 4, context);
     EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 3);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, 2);
 }
 
 /**
