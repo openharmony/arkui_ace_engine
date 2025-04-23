@@ -400,6 +400,16 @@ public:
     static void SetAdsBlockedEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void NotifyPopupWindowResultStatic(int32_t webId, bool result);
+    static void SetBlurOnKeyboardHideMode(FrameNode* frameNode, const std::optional<BlurOnKeyboardHideMode>& mode);
+    static void SetEnableFollowSystemFontWeight(FrameNode* frameNode, bool enableFollowSystemFontWeight);
+    static void SetWebMediaAVSessionEnabled(FrameNode* frameNode, bool isEnabled);
+    static void SetOptimizeParserBudgetEnabled(FrameNode* frameNode, bool enable);
+    static void JavaScriptOnDocumentStartByOrder(
+        FrameNode* frameNode, const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder);
+    static void JavaScriptOnDocumentEndByOrder(
+        FrameNode* frameNode, const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder);
+    static void JavaScriptOnHeadReadyByOrder(
+        FrameNode* frameNode, const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

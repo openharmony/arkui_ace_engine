@@ -35,6 +35,7 @@ common_sources = [
   "implementation/scroller_peer_impl.cpp",
   "implementation/video_controller_peer_impl.cpp",
   "implementation/web_modifier_callbacks.cpp",
+  "implementation/web_modifier_extension.cpp",
   "implementation/x_component_controller_peer_impl.cpp",
   "utility/accessor_utils.cpp",
   "utility/converter_enums.cpp",

@@ -1228,4 +1228,68 @@ void WebModelNG::NotifyPopupWindowResultStatic(int32_t webId, bool result)
     }
 #endif
 }
+
+void WebModelNG::SetBlurOnKeyboardHideMode(FrameNode* frameNode, const std::optional<BlurOnKeyboardHideMode>& mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+    if (mode) {
+        webPattern->UpdateBlurOnKeyboardHideMode(mode.value());
+    } else {
+        webPattern->ResetBlurOnKeyboardHideMode();
+    }
+}
+
+void WebModelNG::SetEnableFollowSystemFontWeight(FrameNode* frameNode, bool enableFollowSystemFontWeight)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
+}
+
+void WebModelNG::SetWebMediaAVSessionEnabled(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebMediaAVSessionEnabled(isEnabled);
+}
+
+void WebModelNG::SetOptimizeParserBudgetEnabled(FrameNode* frameNode, bool enable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateOptimizeParserBudgetEnabled(enable);
+}
+
+void WebModelNG::JavaScriptOnDocumentStartByOrder(FrameNode* frameNode, const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+    webPattern->JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
+}
+
+void WebModelNG::JavaScriptOnDocumentEndByOrder(
+    FrameNode* frameNode, const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+    webPattern->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
+}
+
+void WebModelNG::JavaScriptOnHeadReadyByOrder(
+    FrameNode* frameNode, const ScriptItems& scriptItems, const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+    webPattern->JavaScriptOnHeadReadyByOrder(scriptItems, scriptItemsByOrder);
+}
+
 } // namespace OHOS::Ace::NG

@@ -996,4 +996,45 @@ void AssignArkValue(Ark_SelectStatus& dst, const int32_t& src)
         default: dst = static_cast<Ark_SelectStatus>(-1);
     }
 }
+
+void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src)
+{
+    switch (src) {
+        case NavigationType::NAVIGATION_TYPE_UNKNOWN: dst =
+            Ark_WebNavigationType::ARK_WEB_NAVIGATION_TYPE_UNKNOWN; break;
+        case NavigationType::NAVIGATION_TYPE_MAIN_FRAME_NEW_ENTRY: dst =
+            Ark_WebNavigationType::ARK_WEB_NAVIGATION_TYPE_MAIN_FRAME_NEW_ENTRY; break;
+        case NavigationType::NAVIGATION_TYPE_MAIN_FRAME_EXISTING_ENTRY: dst =
+            Ark_WebNavigationType::ARK_WEB_NAVIGATION_TYPE_MAIN_FRAME_EXISTING_ENTRY; break;
+        case NavigationType::NAVIGATION_TYPE_NEW_SUBFRAME: dst =
+            Ark_WebNavigationType::ARK_WEB_NAVIGATION_TYPE_NAVIGATION_TYPE_NEW_SUBFRAME; break;
+        case NavigationType::NAVIGATION_TYPE_AUTO_SUBFRAME: dst =
+            Ark_WebNavigationType::ARK_WEB_NAVIGATION_TYPE_NAVIGATION_TYPE_AUTO_SUBFRAME; break;
+        default: dst = static_cast<Ark_WebNavigationType>(-1);
+            LOGE("Unexpected enum value in NavigationType: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_ViewportFit& dst, const ViewportFit& src)
+{
+    switch (src) {
+        case ViewportFit::AUTO: dst = ARK_VIEWPORT_FIT_AUTO; break;
+        case ViewportFit::CONTAINS: dst = ARK_VIEWPORT_FIT_CONTAINS; break;
+        case ViewportFit::COVER: dst = ARK_VIEWPORT_FIT_COVER; break;
+        default: dst = static_cast<Ark_ViewportFit>(-1);
+            LOGE("Unexpected enum value in ViewportFit: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_ThreatType& dst, const ThreatType& src)
+{
+    switch (src) {
+        case ThreatType::ILLEGAL: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_ILLEGAL; break;
+        case ThreatType::FRAUD: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_FRAUD; break;
+        case ThreatType::RISK: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_RISK; break;
+        case ThreatType::WARNING: dst = Ark_ThreatType::ARK_THREAT_TYPE_THREAT_WARNING; break;
+        default: dst = static_cast<Ark_ThreatType>(-1);
+            LOGE("Unexpected enum value in ThreatType: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
