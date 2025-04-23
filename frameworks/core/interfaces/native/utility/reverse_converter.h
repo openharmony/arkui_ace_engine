@@ -346,6 +346,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TouchType& dst, const TouchType& src);
     void AssignArkValue(Ark_TransitionEdge& dst, const TransitionEdge& src);
     void AssignArkValue(Ark_TransitionEffect& dst, const RefPtr<NG::ChainedTransitionEffect>& src);
+    void AssignArkValue(Ark_TransitionHierarchyStrategy& dst, const TransitionHierarchyStrategy& src);
     void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src);
     void AssignArkValue(Ark_Tuple_Number_Number& dst, const Point& src);
     void AssignArkValue(Ark_UnifiedData& arkData, const RefPtr<UnifiedData>& data);

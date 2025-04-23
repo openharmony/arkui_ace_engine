@@ -116,24 +116,6 @@ namespace {
     static std::optional<CheckNestedEvent> checkNestedEvent = std::nullopt;
     static std::optional<RefPtr<UINode>> uiNode = nullptr;
 }
-namespace Converter {
-    void AssignArkValue(Opt_TransitionHierarchyStrategy& dst, const TransitionHierarchyStrategy& src)
-    {
-        switch (src) {
-            case TransitionHierarchyStrategy::NONE:
-                dst = Converter::ArkValue<Opt_TransitionHierarchyStrategy>(
-                    Ark_TransitionHierarchyStrategy::ARK_TRANSITION_HIERARCHY_STRATEGY_NONE);
-                break;
-            case TransitionHierarchyStrategy::ADAPTIVE:
-                dst = Converter::ArkValue<Opt_TransitionHierarchyStrategy>(
-                    Ark_TransitionHierarchyStrategy::ARK_TRANSITION_HIERARCHY_STRATEGY_ADAPTIVE);
-                break;
-            default:
-                dst = {.tag = Ark_Tag::ARK_TAG_UNDEFINED};
-                break;
-        }
-    }
-} // namespace Converter
 
 class CommonMethodModifierTest8 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
     &GENERATED_ArkUINodeModifiers::getCommonMethodModifier,
