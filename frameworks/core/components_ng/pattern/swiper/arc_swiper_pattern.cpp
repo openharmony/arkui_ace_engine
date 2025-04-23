@@ -1423,6 +1423,11 @@ int32_t ArcSwiperPattern::CalcTime(int32_t time)
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN
+void ArcSwiperPattern::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
+{
+    crownSensitivity_ = sensitivity;
+}
+
 void ArcSwiperPattern::InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub)
 {
     auto host = GetHost();
@@ -1593,6 +1598,41 @@ void ArcSwiperPattern::HandleCrownActionCancel()
     HandleDragEnd(0.0);
     HandleTouchUp();
     isDragging_ = false;
+}
+
+double ArcSwiperPattern::GetCrownRotatePx(const CrownEvent& event) const
+{
+    double velocity = event.degree;
+    double px = 0.0;
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, 0.0);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_RETURN(theme, 0.0);
+
+    if (LessOrEqualCustomPrecision(velocity, theme->GetSlowVelocityThreshold(), 0.01f)) {
+        px = theme->GetDisplayControlRatioVerySlow() * velocity;
+    } else if (LessOrEqualCustomPrecision(velocity, theme->GetMediumVelocityThreshold(), 0.01f)) {
+        px = theme->GetDisplayControlRatioSlow() * velocity;
+    } else if (LessOrEqualCustomPrecision(velocity, theme->GetFastVelocityThreshold(), 0.01f)) {
+        px = theme->GetDisplayControlRatioMedium() * velocity;
+    } else {
+        px = theme->GetDisplayControlRatioFast() * velocity;
+    }
+
+    switch (crownSensitivity_) {
+        case CrownSensitivity::LOW:
+            px *= theme->GetCrownSensitivityLow();
+            break;
+        case CrownSensitivity::MEDIUM:
+            px *= theme->GetCrownSensitivityMedium();
+            break;
+        case CrownSensitivity::HIGH:
+            px *= theme->GetCrownSensitivityHigh();
+            break;
+        default:
+            break;
+    }
+    return px;
 }
 
 void ArcSwiperPattern::UpdateCrownVelocity(double degree, double mainDelta, bool isEnd)
