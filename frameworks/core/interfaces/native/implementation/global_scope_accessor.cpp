@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -98,12 +100,28 @@ Ark_Object GetInspectorNodeByIdImpl(const Ark_Number* id)
 }
 void SetAppBgColorImpl(const Ark_String* value)
 {
+    CHECK_NULL_VOID(value);
+    auto backgroundColorStr = Converter::Convert<std::string>(*value);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetAppBgColor(Color::ColorFromString(backgroundColorStr));
 }
 void Profiler_registerVsyncCallbackImpl(const Profiler_Callback_String_Void* callback_)
 {
+    CHECK_NULL_VOID(callback_);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto onVsyncFunc = [arkCallback = CallbackHelper(*callback_)](const std::string& value) {
+        auto arkStringValue = Converter::ArkValue<Ark_String>(value);
+        arkCallback.Invoke(arkStringValue);
+    };
+    pipelineContext->SetOnVsyncProfiler(onVsyncFunc);
 }
 void Profiler_unregisterVsyncCallbackImpl()
 {
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->ResetOnVsyncProfiler();
 }
 void CursorControl_setCursorImpl(Ark_PointerStyle value)
 {
