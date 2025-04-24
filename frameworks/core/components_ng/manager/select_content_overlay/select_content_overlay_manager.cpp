@@ -130,9 +130,14 @@ void SelectContentOverlayManager::FocusFirstFocusableChildInMenu()
     CHECK_NULL_VOID(menuNode);
     auto context = menuNode->GetContext();
     CHECK_NULL_VOID(context);
-    context->AddAfterLayoutTask([weakNode = menuNode_]() {
+    context->AddAfterLayoutTask([weakNode = menuNode_, weakManager = WeakClaim(this)]() {
         auto menuNode = weakNode.Upgrade();
         CHECK_NULL_VOID(menuNode);
+        auto manager = weakManager.Upgrade();
+        CHECK_NULL_VOID(manager);
+        if (!manager->IsMenuShow()) {
+            return;
+        }
         auto firstChild = menuNode->GetFirstChild();
         CHECK_NULL_VOID(firstChild);
         auto focusableNode = FindAccessibleFocusNode(firstChild);
@@ -152,9 +157,14 @@ void SelectContentOverlayManager::NotifyAccessibilityOwner()
     CHECK_NULL_VOID(selectOverlayHolder_);
     auto owner = selectOverlayHolder_->GetOwner();
     CHECK_NULL_VOID(owner);
-    context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(owner))]() {
+    context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(owner)), weakManager = WeakClaim(this)]() {
         auto owner = weakNode.Upgrade();
         CHECK_NULL_VOID(owner);
+        auto manager = weakManager.Upgrade();
+        CHECK_NULL_VOID(manager);
+        if (!manager->IsMenuShow()) {
+            return;
+        }
         owner->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
     });
 }

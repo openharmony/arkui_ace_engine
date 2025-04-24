@@ -158,6 +158,8 @@ static const std::unordered_set<std::string> stringAttrs = {
     "common_cancel_text",
     "common_ok_text",
     "textoverlay_paste",
+    "text_overlay_menu_more_accessibility_text",
+    "text_overlay_menu_back_accessibility_text",
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)
