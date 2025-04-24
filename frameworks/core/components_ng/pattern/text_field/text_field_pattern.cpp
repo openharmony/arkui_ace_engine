@@ -2671,8 +2671,9 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     CHECK_NULL_VOID(selectOverlay_);
-    CHECK_NULL_VOID(multipleClickRecognizer_);
-    if ((selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer_->IsValidClick(info)) ||
+    auto multipleClickRecognizer = GetOrCreateMultipleClickRecognizer();
+    CHECK_NULL_VOID(multipleClickRecognizer);
+    if ((selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer->IsValidClick(info)) ||
         !focusHub->IsFocusable()) {
         return;
     }
@@ -2697,11 +2698,11 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
     selectOverlay_->SetUsingMouse(info.GetSourceDevice() == SourceType::MOUSE);
     lastClickTimeStamp_ = info.GetTimeStamp();
-    multipleClickRecognizer_->StartCounting(info);
+    multipleClickRecognizer->StartCounting(info);
     // register click event
-    if (multipleClickRecognizer_->IsTripleClick()) {
+    if (multipleClickRecognizer->IsTripleClick()) {
         HandleTripleClickEvent(info);
-    } else if (multipleClickRecognizer_->IsDoubleClick()) {
+    } else if (multipleClickRecognizer->IsDoubleClick()) {
         HandleDoubleClickEvent(info);
     } else {
         HandleSingleClickEvent(info, firstGetFocus);
@@ -6834,15 +6835,6 @@ RefPtr<TextFieldTheme> TextFieldPattern::GetTheme() const
     return theme;
 }
 
-void TextFieldPattern::InitTheme()
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto context = tmpHost->GetContext();
-    CHECK_NULL_VOID(context);
-    textFieldTheme_ = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
-}
-
 std::string TextFieldPattern::GetTextColor() const
 {
     auto theme = GetTheme();
@@ -8831,19 +8823,6 @@ void TextFieldPattern::CleanNodeResponseKeyEvent()
     if (cleanNodeStyle == CleanNodeStyle::INPUT) {
         focusIndex_ = FocuseIndex::TEXT;
     }
-}
-
-void TextFieldPattern::RegisterWindowSizeCallback()
-{
-    if (isOritationListenerRegisted_) {
-        return;
-    }
-    isOritationListenerRegisted_ = true;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddWindowSizeChangeCallback(host->GetId());
 }
 
 void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)

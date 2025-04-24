@@ -2027,6 +2027,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextFieldSelectOverlay001, TestSize.Level1)
     pattern->selectOverlay_->OnOverlayClick(event, true);
     pattern->selectOverlay_->isSingleHandle_ = true;
     pattern->selectOverlay_->OnOverlayClick(event, true);
+    pattern->multipleClickRecognizer_ = pattern->GetOrCreateMultipleClickRecognizer();
     pattern->multipleClickRecognizer_->clickCountTask_.Reset([] {});
     pattern->selectOverlay_->OnOverlayClick(event, true);
     pattern->multipleClickRecognizer_->lastClickPosition_ = Offset(0.0f, 0.0f);
