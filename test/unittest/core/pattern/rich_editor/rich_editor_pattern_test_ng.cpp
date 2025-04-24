@@ -298,6 +298,9 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorToJsonValue001, TestSize.Level1)
     filter.filterFixed = 0;
     filter.filterExt.clear();
     EXPECT_FALSE(filter.IsFastFilter());
+    richEditorPattern->SetRequestKeyboardOnFocus(true);
+    richEditorPattern->ToJsonValue(jsonObject, filter);
+    EXPECT_EQ(jsonObject->GetString("enableKeyboardOnFocus"), "true");
 
     filter.filterFixed = 10;
     EXPECT_TRUE(filter.IsFastFilter());
