@@ -502,6 +502,21 @@ void CanvasPath2D::Rect(double x, double y, double width, double height)
     caches_.emplace_back(PathCmd::RECT, args);
 }
 
+void CanvasPath2D::RoundRect(const class Rect& rect, const std::vector<double>& radii)
+{
+    Offset offsetXY = rect.GetOffset();
+    PathArgs args;
+    args.para1 = offsetXY.GetX();
+    args.para2 = offsetXY.GetY();
+    args.para3 = rect.Width();
+    args.para4 = rect.Height();
+    args.para5 = radii[0]; // 0: top-left
+    args.para6 = radii[1]; // 1: top-right
+    args.para7 = radii[2]; // 2: bottom-right
+    args.para8 = radii[3]; // 3: bottom-left
+    caches_.emplace_back(PathCmd::ROUND_RECT, args);
+}
+
 void CanvasPath2D::ClosePath()
 {
     PathArgs args;

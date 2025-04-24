@@ -1110,6 +1110,7 @@ enum class PathCmd {
     BEZIER_CURVE_TO,
     ELLIPSE,
     RECT,
+    ROUND_RECT,
     CLOSE_PATH,
 };
 
@@ -1143,6 +1144,7 @@ public:
     void Ellipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle,
         double endAngle, double ccw);
     void Rect(double x, double y, double width, double height);
+    void RoundRect(const class Rect& rect, const std::vector<double>& radii);
     void ClosePath();
     const std::vector<std::pair<PathCmd, PathArgs>>& GetCaches() const;
     std::string ToString() const;

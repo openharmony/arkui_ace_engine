@@ -85,6 +85,7 @@ public:
     void Arc(const ArcParam& param);
     void ArcTo(const ArcToParam& param);
     void AddRect(const Rect& rect);
+    void AddRoundRect(const Rect& rect, const std::vector<double>& radii);
     void Ellipse(const EllipseParam& param);
     void BezierCurveTo(const BezierCurveParam& param);
     void QuadraticCurveTo(const QuadraticCurveParam& param);
@@ -358,6 +359,7 @@ protected:
     void Path2DArc(const PathArgs& args);
     void Path2DArcTo(const PathArgs& args);
     void Path2DRect(const PathArgs& args);
+    void Path2DRoundRect(const PathArgs& args);
     void Path2DEllipse(const PathArgs& args);
     void Path2DBezierCurveTo(const PathArgs& args);
     void Path2DQuadraticCurveTo(const PathArgs& args);
