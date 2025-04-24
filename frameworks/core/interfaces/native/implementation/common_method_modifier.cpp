@@ -4232,8 +4232,8 @@ void GeometryTransition1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_EQUAL_VOID(id && options, false);
-    auto idValue = id ? Converter::Convert<std::string>(*id) : "";
+    CHECK_NULL_VOID(id);
+    auto idValue = Converter::Convert<std::string>(*id);
     auto optOptions = options ? Converter::OptConvert<GeometryTransitionOptions>(*options) : std::nullopt;
     auto followWithoutTransition {false};
     auto hierarchyStrategy = TransitionHierarchyStrategy::NONE;
@@ -4241,7 +4241,7 @@ void GeometryTransition1Impl(Ark_NativePointer node,
     if (optOptions.has_value()) {
         followWithoutTransition = optOptions.value().follow.value_or(false);
         hierarchyStrategy = optOptions.value().hierarchyStrategy.value_or(TransitionHierarchyStrategy::NONE);
-        doRegisterSharedTransition = hierarchyStrategy == TransitionHierarchyStrategy::ADAPTIVE;
+        doRegisterSharedTransition = (hierarchyStrategy == TransitionHierarchyStrategy::ADAPTIVE);
     }
     ViewAbstract::SetGeometryTransition(frameNode, idValue, followWithoutTransition, doRegisterSharedTransition);
 }

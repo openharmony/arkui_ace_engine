@@ -116,9 +116,6 @@ namespace {
     static std::optional<CheckNestedEvent> checkNestedEvent = std::nullopt;
     static std::optional<RefPtr<UINode>> uiNode = nullptr;
 }
-namespace Converter {
-
-} // namespace Converter
 
 class CommonMethodModifierTest8 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
     &GENERATED_ArkUINodeModifiers::getCommonMethodModifier,
@@ -198,11 +195,11 @@ HWTEST_F(CommonMethodModifierTest8, setGeometryTransitionTestDefaultValues, Test
 }
 
 /*
- * @tc.name: setGeometryTransitionTestValidValues
+ * @tc.name: setGeometryTransition0TestValidValues
  * @tc.desc:
- * @tc.type: FUNC /data/home/mlobakh/BZ_OHOS/OHOS/interface/sdk-js/api/@internal/component/ets/common.d.ts
+ * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, DISABLED_setGeometryTransitionTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setGeometryTransition0TestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setGeometryTransition0, nullptr);
     using OneTestStep = std::tuple<Ark_String, std::string>;
@@ -214,6 +211,113 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setGeometryTransitionTestValidValue
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_GEOMETRY_TRANSITION_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/*
+ * @tc.name: setGeometryTransition0TestValidValues2
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest8, setGeometryTransition0TestValidValues2, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setGeometryTransition0, nullptr);
+    using OneTestStep = std::tuple<Ark_String, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkValue<Ark_String>("id11"), "id11"},
+        {Converter::ArkValue<Ark_String>("id21"), "id21"},
+    };
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    std::string resultValue = "";
+    RefPtr<NG::GeometryTransition> geometryTransition;
+
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setGeometryTransition0(node_, &inputValue);
+        geometryTransition = layoutProperty->GetGeometryTransition();
+        ASSERT_NE(geometryTransition, nullptr);
+        resultValue = geometryTransition->GetId();
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/*
+ * @tc.name: setGeometryTransition1TestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setGeometryTransition1TestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setGeometryTransition1, nullptr);
+    Ark_String inputId;
+    Opt_GeometryTransitionOptions inputOptions;
+
+    using OneTestStep = std::tuple<Ark_TransitionHierarchyStrategy, bool, std::string, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Ark_TransitionHierarchyStrategy::ARK_TRANSITION_HIERARCHY_STRATEGY_NONE, false, "id31", ""},
+        {Ark_TransitionHierarchyStrategy::ARK_TRANSITION_HIERARCHY_STRATEGY_ADAPTIVE, false, "id32", ""},
+        {Ark_TransitionHierarchyStrategy::ARK_TRANSITION_HIERARCHY_STRATEGY_NONE, true, "id33", ""},
+        {Ark_TransitionHierarchyStrategy::ARK_TRANSITION_HIERARCHY_STRATEGY_ADAPTIVE, true, "id34", ""},
+    };
+
+    for (auto [inputStrategy, expectedFollow, expectedId, expectedValue]: testPlan) {
+        inputId = Converter::ArkValue<Ark_String>(expectedId);
+        inputOptions = Converter::ArkValue<Opt_GeometryTransitionOptions>(Ark_GeometryTransitionOptions{
+            .follow = Converter::ArkValue<Opt_Boolean>(expectedFollow),
+            .hierarchyStrategy = Converter::ArkValue<Opt_TransitionHierarchyStrategy>(inputStrategy)});
+        modifier_->setGeometryTransition1(node_, &inputId, &inputOptions);
+        auto fullJson = GetJsonValue(node_);
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_GEOMETRY_TRANSITION_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/*
+ * @tc.name: setGeometryTransition1TestValidValues2
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest8, setGeometryTransition1TestValidValues2, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setGeometryTransition1, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<NG::GeometryTransition> geometryTransition;
+    Opt_GeometryTransitionOptions inputOptions;
+    Ark_String inputId;
+    bool expectedDoRegisterSharedTransition;
+
+    using OneTestStep = std::tuple<Ark_TransitionHierarchyStrategy, bool, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Ark_TransitionHierarchyStrategy::ARK_TRANSITION_HIERARCHY_STRATEGY_NONE, false, "id1"},
+        {Ark_TransitionHierarchyStrategy::ARK_TRANSITION_HIERARCHY_STRATEGY_ADAPTIVE, false, "id2"},
+        {Ark_TransitionHierarchyStrategy::ARK_TRANSITION_HIERARCHY_STRATEGY_NONE, true, "id3"},
+        {Ark_TransitionHierarchyStrategy::ARK_TRANSITION_HIERARCHY_STRATEGY_ADAPTIVE, true, "id4"},
+    };
+
+    for (auto [inputStrategy, expectedFollow, expectedId]: testPlan) {
+        inputId = Converter::ArkValue<Ark_String>(expectedId);
+        inputOptions = Converter::ArkValue<Opt_GeometryTransitionOptions>(Ark_GeometryTransitionOptions{
+            .follow = Converter::ArkValue<Opt_Boolean>(expectedFollow),
+            .hierarchyStrategy = Converter::ArkValue<Opt_TransitionHierarchyStrategy>(inputStrategy)});
+        expectedDoRegisterSharedTransition =
+            (inputStrategy == Ark_TransitionHierarchyStrategy::ARK_TRANSITION_HIERARCHY_STRATEGY_ADAPTIVE);
+        modifier_->setGeometryTransition1(node_, &inputId, &inputOptions);
+        geometryTransition = layoutProperty->GetGeometryTransition();
+        ASSERT_NE(geometryTransition, nullptr);
+        auto resultId = geometryTransition->GetId();
+        auto resultFollowWithoutTransition =  geometryTransition->GetFollowWithoutTransition();
+        auto resultDoRegisterSharedTransition = geometryTransition->GetDoRegisterSharedTransition();
+        EXPECT_EQ(resultId, expectedId) << "Passed ID value is: " << expectedId;
+        EXPECT_EQ(resultFollowWithoutTransition, expectedFollow)
+            << "Passed Follow value is: " << expectedFollow;
+        EXPECT_EQ(resultDoRegisterSharedTransition, expectedDoRegisterSharedTransition)
+            << "Passed DoRegisterSharedTransition value is: " << expectedDoRegisterSharedTransition;
     }
 }
 
@@ -232,7 +336,7 @@ HWTEST_F(CommonMethodModifierTest8, setRestoreIdTestDefaultValues, TestSize.Leve
 /*
  * @tc.name: setRestoreIdTestValidValues
  * @tc.desc:
- * @tc.type: FUNC /data/home/mlobakh/BZ_OHOS/OHOS/interface/sdk-js/api/@internal/component/ets/common.d.ts
+ * @tc.type: FUNC
  */
 HWTEST_F(CommonMethodModifierTest8, DISABLED_setRestoreIdTestValidValues, TestSize.Level1)
 {

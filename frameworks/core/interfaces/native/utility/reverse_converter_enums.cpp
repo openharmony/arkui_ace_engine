@@ -875,6 +875,18 @@ void AssignArkValue(Ark_TransitionEdge& dst, const TransitionEdge& src)
     }
 }
 
+void AssignArkValue(Ark_TransitionHierarchyStrategy& dst, const TransitionHierarchyStrategy& src)
+{
+    switch (src) {
+        case TransitionHierarchyStrategy::NONE:
+            dst = Ark_TransitionHierarchyStrategy::ARK_TRANSITION_HIERARCHY_STRATEGY_NONE; break;
+        case TransitionHierarchyStrategy::ADAPTIVE:
+            dst = Ark_TransitionHierarchyStrategy::ARK_TRANSITION_HIERARCHY_STRATEGY_ADAPTIVE; break;
+        default: dst = INVALID_ENUM_VAL<Ark_TransitionHierarchyStrategy>;
+            LOGE("Unexpected enum value in TransitionHierarchyStrategy: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_RenderProcessNotRespondingReason& dst, const RenderProcessNotRespondingReason& src)
 {
     switch (src) {
