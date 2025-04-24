@@ -2139,8 +2139,13 @@ OffsetF MenuLayoutAlgorithm::SelectLayoutAvoidAlgorithm(const RefPtr<MenuLayoutP
     CHECK_NULL_RETURN(menuProp, OffsetF(0, 0));
     CHECK_NULL_RETURN(menuPattern, OffsetF(0, 0));
     CHECK_NULL_RETURN(layoutWrapper, OffsetF(0, 0));
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, OffsetF(0, 0));
     float x = 0.0f;
     float y = 0.0f;
+    float selectMenuHeight = geometryNode->GetFrameSize().Height();
+    Rect targetRect = Rect(targetOffset_.GetX(), targetOffset_.GetY(), targetSize_.Width(), targetSize_.Height());
+    auto bottomSpace = wrapperRect_.Bottom() - targetRect.Bottom() - targetSecurity_ - paddingBottom_;
     if (GreatNotEqual(targetSize_.Width(), 0.0) || GreatNotEqual(targetSize_.Height(), 0.0)) {
         placement_ = Placement::BOTTOM_LEFT;
         ComputePlacementByAlignType(menuProp);
@@ -2148,6 +2153,9 @@ OffsetF MenuLayoutAlgorithm::SelectLayoutAvoidAlgorithm(const RefPtr<MenuLayoutP
             PlacementRTL(layoutWrapper, placement_);
         }
         auto selectChildOffset = GetSelectChildPosition(size, didNeedArrow, layoutWrapper);
+        if (selectMenuHeight < bottomSpace) {
+            selectChildOffset += ComputeMenuPositionByOffset(menuProp, geometryNode);
+        }
         x = selectChildOffset.GetX();
         y = selectChildOffset.GetY();
     }
