@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,6 +68,30 @@ void InheritGridContainerSize(V2::GridContainerSize& gridContainerSize,
     gridContainerSize.xxl = containerSizeArray[XXL].value();
 }
 
+void InheritGridSpans(
+    V2::GridContainerSize& gridContainerSize, std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT])
+{
+    for (size_t i = 0; i < MAX_NUMBER_BREAKPOINT; ++i) {
+        if (containerSizeArray[i].has_value()) {
+            containerSizeArray[0] = containerSizeArray[i].value();
+            break;
+        }
+    }
+    CHECK_NULL_VOID(containerSizeArray[0].has_value());
+    for (size_t i = 1; i < MAX_NUMBER_BREAKPOINT; ++i) {
+        if (!containerSizeArray[i].has_value()) {
+            containerSizeArray[i] = containerSizeArray[i - 1].value();
+        }
+    }
+
+    gridContainerSize.xs = containerSizeArray[XS].value();
+    gridContainerSize.sm = containerSizeArray[SM].value();
+    gridContainerSize.md = containerSizeArray[MD].value();
+    gridContainerSize.lg = containerSizeArray[LG].value();
+    gridContainerSize.xl = containerSizeArray[XL].value();
+    gridContainerSize.xxl = containerSizeArray[XXL].value();
+}
+
 V2::GridContainerSize ParserGridContainerSize(const JSRef<JSVal>& jsValue, int32_t defaultVal)
 {
     if (jsValue->IsNumber()) {
@@ -111,6 +135,48 @@ V2::GridContainerSize ParserGridContainerSize(const JSRef<JSVal>& jsValue, int32
     }
 }
 
+V2::GridContainerSize ParserSpansNG(const JSRef<JSVal>& jsValue)
+{
+    if (jsValue->IsNumber()) {
+        int32_t spanNumber = NG::DEFAULT_SPAN_NUMBER;
+        JSViewAbstract::ParseJsInt32(jsValue, spanNumber);
+        auto gridContainerSize =
+            spanNumber >= 0 ? V2::GridContainerSize(spanNumber) : V2::GridContainerSize(NG::DEFAULT_SPAN_NUMBER);
+        return gridContainerSize;
+    }
+    if (jsValue->IsObject()) {
+        auto gridContainerSize = V2::GridContainerSize(NG::DEFAULT_SPAN_NUMBER);
+        auto gridParam = JSRef<JSObject>::Cast(jsValue);
+        std::optional<int32_t> containerSizeArray[MAX_NUMBER_BREAKPOINT];
+        auto xs = gridParam->GetProperty("xs");
+        if (xs->IsNumber() && xs->ToNumber<int32_t>() >= 0) {
+            containerSizeArray[XS] = xs->ToNumber<int32_t>();
+        }
+        auto sm = gridParam->GetProperty("sm");
+        if (sm->IsNumber() && sm->ToNumber<int32_t>() >= 0) {
+            containerSizeArray[SM] = sm->ToNumber<int32_t>();
+        }
+        auto md = gridParam->GetProperty("md");
+        if (md->IsNumber() && md->ToNumber<int32_t>() >= 0) {
+            containerSizeArray[MD] = md->ToNumber<int32_t>();
+        }
+        auto lg = gridParam->GetProperty("lg");
+        if (lg->IsNumber() && lg->ToNumber<int32_t>() >= 0) {
+            containerSizeArray[LG] = lg->ToNumber<int32_t>();
+        }
+        auto xl = gridParam->GetProperty("xl");
+        if (xl->IsNumber() && xl->ToNumber<int32_t>() >= 0) {
+            containerSizeArray[XL] = xl->ToNumber<int32_t>();
+        }
+        auto xxl = gridParam->GetProperty("xxl");
+        if (xxl->IsNumber() && xxl->ToNumber<int32_t>() >= 0) {
+            containerSizeArray[XXL] = xxl->ToNumber<int32_t>();
+        }
+        InheritGridSpans(gridContainerSize, containerSizeArray);
+        return gridContainerSize;
+    }
+    return V2::GridContainerSize(NG::DEFAULT_SPAN_NUMBER);
+}
 } // namespace
 
 void JSGridCol::Create(const JSCallbackInfo& info)
@@ -120,7 +186,12 @@ void JSGridCol::Create(const JSCallbackInfo& info)
         auto spanParam = gridParam->GetProperty("span");
         auto offsetParam = gridParam->GetProperty("offset");
         auto orderParam = gridParam->GetProperty("order");
-        auto span = ParserGridContainerSize(spanParam, 1);
+        V2::GridContainerSize span;
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+            span = ParserGridContainerSize(spanParam, 1);
+        } else {
+            span = ParserSpansNG(spanParam);
+        }
         auto offset = ParserGridContainerSize(offsetParam, 0);
         auto order = ParserGridContainerSize(orderParam, 0);
 
@@ -135,7 +206,12 @@ void JSGridCol::Span(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto span = ParserGridContainerSize(info[0], 1);
+    V2::GridContainerSize span;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        span = ParserGridContainerSize(info[0], 1);
+    } else {
+        span = ParserSpansNG(info[0]);
+    }
     GridColModel::GetInstance()->SetSpan(span);
 }
 
