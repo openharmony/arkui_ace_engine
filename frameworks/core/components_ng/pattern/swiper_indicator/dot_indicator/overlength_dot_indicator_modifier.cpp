@@ -256,6 +256,14 @@ bool OverlengthDotIndicatorModifier::NeedUpdateWhenAnimationFinish() const
         return false;
     }
 
+    if (std::abs(forceStopPageRate_) < HALF_FLOAT && animationStartIndex_ < animationEndIndex_) {
+        return false;
+    }
+
+    if (std::abs(forceStopPageRate_) >= HALF_FLOAT && animationStartIndex_ > animationEndIndex_) {
+        return false;
+    }
+
     return true;
 }
 
