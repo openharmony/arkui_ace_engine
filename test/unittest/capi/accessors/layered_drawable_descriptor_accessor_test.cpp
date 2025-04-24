@@ -33,9 +33,9 @@ using namespace AccessorTestFixtures;
 using namespace Converter;
 
 namespace {
-    constexpr auto TEST_CLIP_PATH = "/some_clip_path/file.svg";
+constexpr auto TEST_CLIP_PATH = "/some_clip_path/file.svg";
 
-    class MockResourceAdapter : public ResourceAdapter {
+class MockResourceAdapter : public ResourceAdapter {
     DECLARE_ACE_TYPE(MockResourceAdapter, ResourceAdapter);
 
 public:
@@ -69,7 +69,7 @@ public:
         return TEST_CLIP_PATH;
     }
 };
-}
+} // namespace
 
 class LayeredDrawableDescriptorAccessorTest
     : public AccessorTestCtorBase<GENERATED_ArkUILayeredDrawableDescriptorAccessor,
