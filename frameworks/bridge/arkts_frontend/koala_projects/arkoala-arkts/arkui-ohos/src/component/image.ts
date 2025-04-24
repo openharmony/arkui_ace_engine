@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, AttributeModifier } from "./common"
 import { Resource } from "global/resource"
 import { PixelMap } from "./arkui-pixelmap"
 import { ResourceColor, ColorFilter, ResourceStr, EdgeWidths } from "./units"
@@ -36,6 +36,11 @@ import { DrawableDescriptor } from "./arkui-drawabledescriptor"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
+import { ArkImageNode } from "../handwritten/modifiers/ArkImageNode"
+import { ImageModifier } from "../handwritten/modifiers/ArkImageModifier"
+import { ArkCommonAttributeSet, applyUIAttributes } from "../handwritten/modifiers/ArkCommonModifier"
+import { AttributeUpdater } from "../AttributeUpdater"
 
 export class ArkImagePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -830,6 +835,15 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
     getPeer(): ArkImagePeer {
         return (this.peer as ArkImagePeer)
     }
+
+    getModifierHost(): ArkBaseNode {
+        if (this._modifierHost == undefined || this._modifierHost == null) {
+            this._modifierHost = new ArkImageNode()
+            this._modifierHost!.setPeer(this.getPeer())
+        }
+        return this._modifierHost!
+    }
+
     /** @memo */
     public setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
         if (this.checkPriority("setImageOptions")) {
@@ -1107,12 +1121,40 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements UIIma
         }
         return this
     }
-    
+    /** @memo */
+    public attributeModifier<T>(value: AttributeModifier<T>): this {
+        let peerNode = this.getPeer()
+        if (!peerNode._attributeSet) {
+            let isImageModifier: boolean = (value instanceof ImageModifier)
+            if (isImageModifier) {
+                let imageModifier = value as object as ImageModifier
+                peerNode._attributeSet = imageModifier.attribute
+            } else {
+                peerNode._attributeSet = new ArkCommonAttributeSet()
+            }
+        }
+        applyUIAttributes(value, peerNode)
+        let isAttributeUpdater: boolean = (value instanceof AttributeUpdater)
+        if (isAttributeUpdater) {
+            let attributeUpdater = value as object as AttributeUpdater<ImageAttribute, ImageInterface>
+            attributeUpdater.updateConstructorParams = (...params: Object[]) => {
+                const node = this.getModifierHost()! as ArkImageNode
+                this.getModifierHost()!.constructParam(params)
+                return node
+            }
+        }
+        peerNode._attributeSet!.applyModifierPatch(peerNode)
+        return this
+    }
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
 }
+
+export type ImageInterface = (...param: Object[]) => ArkImageNode
+
 /** @memo */
 export function Image(
     /** @memo */
