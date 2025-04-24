@@ -32,7 +32,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkSliderPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -597,7 +597,6 @@ export interface SliderAttribute extends CommonMethod {
     enableHapticFeedback(value: boolean | undefined): this
     showTips(value: boolean | undefined, content?: ResourceStr): this
     _onChangeEvent_value(callback: ((index: number) => void)): void
-    attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UISliderAttribute extends UICommonMethod {
     /** @memo */
@@ -649,7 +648,6 @@ export interface UISliderAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_value(callback: ((index: number) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttribute {
     blockColor_value?: ResourceColor | undefined
@@ -745,10 +743,7 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     }
     public _onChangeEvent_value(callback: ((index: number) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkSliderComponent extends ArkCommonMethodComponent implements UISliderAttribute {
@@ -990,11 +985,7 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

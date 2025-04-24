@@ -14,7 +14,6 @@
 //  */
 
 // import { int32 } from "@koalaui/common"
-// import { AttributeModifier, ColumnAttribute, HorizontalAlign } from "../..";
 // import { ArkColumnPeer } from "../../component/peers/ArkColumnPeer";
 // import { ArkCommonMethodPeer } from "../../component/peers/ArkCommonPeer";
 // import { ArkCommonAttributeSet, modifierNullWithKey, modifierWithKey, ModifierWithKey } from "./ArkCommonModifier";
@@ -55,7 +54,6 @@
 //     }
 // }
 
-// export class ColumnModifier extends ArkColumnAttributeSet implements AttributeModifier<ColumnAttribute> {
    
 //     applyNormalAttribute(instance: ColumnAttribute) { this.alignItems(HorizontalAlign.End); }
     

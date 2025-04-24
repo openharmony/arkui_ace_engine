@@ -31,7 +31,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkGaugePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -278,7 +278,6 @@ export interface GaugeAttribute extends CommonMethod {
     indicator(value: GaugeIndicatorOptions | undefined): this
     privacySensitive(value: boolean | undefined): this
     contentModifier(value: ContentModifier | undefined): this
-    attributeModifier(value: AttributeModifier<GaugeAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIGaugeAttribute extends UICommonMethod {
     /** @memo */
@@ -302,7 +301,6 @@ export interface UIGaugeAttribute extends UICommonMethod {
     /** @memo */
     contentModifier(value: ContentModifier | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<GaugeAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkGaugeStyle extends ArkCommonMethodStyle implements GaugeAttribute {
     value_value?: number | undefined
@@ -344,10 +342,7 @@ export class ArkGaugeStyle extends ArkCommonMethodStyle implements GaugeAttribut
     }
     public contentModifier(value: ContentModifier | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<GaugeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkGaugeComponent extends ArkCommonMethodComponent implements UIGaugeAttribute {
@@ -453,11 +448,7 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements UIGau
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<GaugeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

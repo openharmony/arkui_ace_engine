@@ -30,7 +30,7 @@ import { Callback_Void } from "./abilityComponent"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkMarqueePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -223,7 +223,6 @@ export interface MarqueeAttribute extends CommonMethod {
     onStart(value: (() => void) | undefined): this
     onBounce(value: (() => void) | undefined): this
     onFinish(value: (() => void) | undefined): this
-    attributeModifier(value: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIMarqueeAttribute extends UICommonMethod {
     /** @memo */
@@ -245,7 +244,6 @@ export interface UIMarqueeAttribute extends UICommonMethod {
     /** @memo */
     onFinish(value: (() => void) | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttribute {
     fontColor_value?: ResourceColor | undefined
@@ -283,10 +281,7 @@ export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttr
     }
     public onFinish(value: (() => void) | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkMarqueeComponent extends ArkCommonMethodComponent implements UIMarqueeAttribute {
@@ -383,11 +378,7 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements UIM
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

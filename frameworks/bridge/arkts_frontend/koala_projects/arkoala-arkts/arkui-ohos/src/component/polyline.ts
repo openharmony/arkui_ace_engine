@@ -27,7 +27,7 @@ import { Point } from "./point"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkPolylinePeer extends ArkCommonShapeMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -75,22 +75,17 @@ export interface PolylineOptions {
 export type PolylineInterface = (options?: PolylineOptions) => PolylineAttribute;
 export interface PolylineAttribute extends CommonShapeMethod {
     points(value: Array<Point> | undefined): this
-    attributeModifier(value: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIPolylineAttribute extends UICommonShapeMethod {
     /** @memo */
     points(value: Array<Point> | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkPolylineStyle extends ArkCommonShapeMethodStyle implements PolylineAttribute {
     points_value?: Array<Point> | undefined
     public points(value: Array<Point> | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implements UIPolylineAttribute {
@@ -115,11 +110,7 @@ export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implemen
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

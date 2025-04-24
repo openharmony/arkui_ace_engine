@@ -29,7 +29,7 @@ import { Color } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkQRCodePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -139,7 +139,6 @@ export interface QRCodeAttribute extends CommonMethod {
     color(value: ResourceColor | undefined): this
     backgroundColor(value: ResourceColor | undefined): this
     contentOpacity(value: number | Resource | undefined): this
-    attributeModifier(value: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIQRCodeAttribute extends UICommonMethod {
     /** @memo */
@@ -149,7 +148,6 @@ export interface UIQRCodeAttribute extends UICommonMethod {
     /** @memo */
     contentOpacity(value: number | Resource | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkQRCodeStyle extends ArkCommonMethodStyle implements QRCodeAttribute {
     color_value?: ResourceColor | undefined
@@ -163,10 +161,7 @@ export class ArkQRCodeStyle extends ArkCommonMethodStyle implements QRCodeAttrib
     }
     public contentOpacity(value: number | Resource | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkQRCodeComponent extends ArkCommonMethodComponent implements UIQRCodeAttribute {
@@ -209,11 +204,7 @@ export class ArkQRCodeComponent extends ArkCommonMethodComponent implements UIQR
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

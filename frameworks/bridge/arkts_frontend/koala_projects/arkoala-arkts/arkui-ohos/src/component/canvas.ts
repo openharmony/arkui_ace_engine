@@ -35,7 +35,7 @@ import { VoidCallback } from "./units"
 import { ImageAIOptions, ImageAnalyzerConfig } from "./imageCommon"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { FrameNode, FrameNodeInternal } from "./arkui-framenode"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 import { Callback_Void } from "./abilityComponent"
 export class CanvasGradientInternal {
     public static fromPtr(ptr: KPointer): CanvasGradient {
@@ -692,15 +692,12 @@ export interface TextMetrics {
 export interface CanvasAttribute extends CommonMethod {
     onReady(value: VoidCallback | undefined): this
     enableAnalyzer(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UICanvasAttribute extends UICommonMethod {
     /** @memo */
     onReady(value: VoidCallback | undefined): this
     /** @memo */
     enableAnalyzer(value: boolean | undefined): this
-    /** @memo */
-    attributeModifier(value: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkCanvasStyle extends ArkCommonMethodStyle implements CanvasAttribute {
     onReady_value?: VoidCallback | undefined
@@ -710,9 +707,6 @@ export class ArkCanvasStyle extends ArkCommonMethodStyle implements CanvasAttrib
     }
     public enableAnalyzer(value: boolean | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 /** @memo:stable */
@@ -756,11 +750,6 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements UICa
             this.getPeer()?.enableAnalyzerAttribute(value_casted)
             return this
         }
-        return this
-    }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
         return this
     }
     public applyAttributesFinish(): void {

@@ -29,7 +29,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ButtonType } from "./button"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkSaveButtonPeer extends ArkSecurityComponentMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -95,22 +95,17 @@ export enum SaveButtonOnClickResult {
 export type SaveButtonCallback = (event: ClickEvent, result: SaveButtonOnClickResult, error?: BusinessError<void>) => void;
 export interface SaveButtonAttribute extends SecurityComponentMethod {
     onClick(value: SaveButtonCallback | undefined): this
-    attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this
 }
 export interface UISaveButtonAttribute extends UISecurityComponentMethod {
     /** @memo */
     onClick(value: SaveButtonCallback | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this
 }
 export class ArkSaveButtonStyle extends ArkSecurityComponentMethodStyle implements SaveButtonAttribute {
     onClick_value?: SaveButtonCallback | undefined
     public onClick(value: SaveButtonCallback | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent implements UISaveButtonAttribute {
@@ -135,11 +130,7 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

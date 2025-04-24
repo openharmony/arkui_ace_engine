@@ -32,7 +32,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { PixelMap } from "./arkui-pixelmap"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -270,7 +270,6 @@ export interface SideBarContainerAttribute extends CommonMethod {
     divider(value: DividerStyle | undefined): this
     minContentWidth(value: Dimension | undefined): this
     _onChangeEvent_showSideBar(callback: ((select: boolean | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UISideBarContainerAttribute extends UICommonMethod {
     /** @memo */
@@ -298,7 +297,6 @@ export interface UISideBarContainerAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_showSideBar(callback: ((select: boolean | undefined) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements SideBarContainerAttribute {
     showSideBar_value?: boolean | undefined
@@ -347,10 +345,7 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
     }
     public _onChangeEvent_showSideBar(callback: ((select: boolean | undefined) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkSideBarContainerComponent extends ArkCommonMethodComponent implements UISideBarContainerAttribute {
@@ -501,11 +496,7 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

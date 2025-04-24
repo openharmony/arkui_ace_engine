@@ -26,7 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -44,16 +44,10 @@ export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
 }
 export type EffectComponentInterface = () => EffectComponentAttribute;
 export interface EffectComponentAttribute extends CommonMethod {
-    attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIEffectComponentAttribute extends UICommonMethod {
-    /** @memo */
-    attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkEffectComponentStyle extends ArkCommonMethodStyle implements EffectComponentAttribute {
-    public attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
 }
 /** @memo:stable */
 export class ArkEffectComponentComponent extends ArkCommonMethodComponent implements UIEffectComponentAttribute {
@@ -68,11 +62,7 @@ export class ArkEffectComponentComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

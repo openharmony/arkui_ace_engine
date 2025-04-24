@@ -31,7 +31,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Callback_Boolean_Void } from "./navigation"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkCheckboxPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -336,7 +336,6 @@ export interface CheckboxAttribute extends CommonMethod {
     onChange(value: OnCheckboxChangeCallback | undefined): this
     contentModifier(value: ContentModifier | undefined): this
     _onChangeEvent_select(callback: ((select: boolean | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<CheckboxAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UICheckboxAttribute extends UICommonMethod {
     /** @memo */
@@ -355,8 +354,6 @@ export interface UICheckboxAttribute extends UICommonMethod {
     contentModifier(value: ContentModifier | undefined): this
     /** @memo */
     _onChangeEvent_select(callback: ((select: boolean | undefined) => void)): void
-    /** @memo */
-    attributeModifier(value: AttributeModifier<CheckboxAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkCheckboxStyle extends ArkCommonMethodStyle implements CheckboxAttribute {
     select_value?: boolean | undefined
@@ -389,9 +386,6 @@ export class ArkCheckboxStyle extends ArkCommonMethodStyle implements CheckboxAt
     }
     public _onChangeEvent_select(callback: ((select: boolean | undefined) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<CheckboxAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 /** @memo:stable */
@@ -542,11 +536,6 @@ export class ArkCheckboxComponent extends ArkCommonMethodComponent implements UI
             return
         }
         return
-    }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<CheckboxAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public

@@ -22908,6 +22908,10 @@ typedef struct GENERATED_ArkUIUIExtensionComponentModifier {
                            const Opt_Callback_Void* value);
 } GENERATED_ArkUIUIExtensionComponentModifier;
 
+typedef struct GENERATED_ArkUIStateModifier {
+    int64_t (*getUIState)(Ark_NativePointer node);
+} GENERATED_ArkUIStateModifier;
+
 typedef struct GENERATED_ArkUILinearIndicatorModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
@@ -26402,6 +26406,8 @@ typedef struct GENERATED_ArkUINodeModifiers {
     const GENERATED_ArkUIWaterFlowModifier* (*getWaterFlowModifier)();
     const GENERATED_ArkUIUIExtensionComponentModifier* (*getUIExtensionComponentModifier)();
     const GENERATED_ArkUILinearIndicatorModifier* (*getLinearIndicatorModifier)();
+    const GENERATED_ArkUIStateModifier* (*getUIStateModifier)();
+
 } GENERATED_ArkUINodeModifiers;
 
 typedef struct GENERATED_ArkUIAccessors {

@@ -28,7 +28,6 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ResourceColor, Length, Position } from "./units"
 import { FontWeight } from "./enums"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
 export class ArkBadgePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -82,16 +81,10 @@ export interface BadgeParamWithString extends BadgeParam {
     value: string;
 }
 export interface BadgeAttribute extends CommonMethod {
-    attributeModifier(value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIBadgeAttribute extends UICommonMethod {
-    /** @memo */
-    attributeModifier(value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkBadgeStyle extends ArkCommonMethodStyle implements BadgeAttribute {
-    public attributeModifier(value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
 }
 /** @memo:stable */
 export class ArkBadgeComponent extends ArkCommonMethodComponent implements UIBadgeAttribute {
@@ -114,11 +107,6 @@ export class ArkBadgeComponent extends ArkCommonMethodComponent implements UIBad
             }
             throw new Error("Can not select appropriate overload")
         }
-        return this
-    }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
         return this
     }
     public applyAttributesFinish(): void {

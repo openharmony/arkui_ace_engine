@@ -27,7 +27,7 @@ import { VoidCallback } from "./units"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkCounterPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -97,7 +97,6 @@ export interface CounterAttribute extends CommonMethod {
     onDec(value: VoidCallback | undefined): this
     enableDec(value: boolean | undefined): this
     enableInc(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UICounterAttribute extends UICommonMethod {
     /** @memo */
@@ -109,7 +108,6 @@ export interface UICounterAttribute extends UICommonMethod {
     /** @memo */
     enableInc(value: boolean | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkCounterStyle extends ArkCommonMethodStyle implements CounterAttribute {
     onInc_value?: VoidCallback | undefined
@@ -127,10 +125,7 @@ export class ArkCounterStyle extends ArkCommonMethodStyle implements CounterAttr
     }
     public enableInc(value: boolean | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkCounterComponent extends ArkCommonMethodComponent implements UICounterAttribute {
@@ -181,11 +176,7 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements UIC
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

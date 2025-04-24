@@ -25,7 +25,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkRootPeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -51,39 +51,24 @@ export class ArkComponentRootPeer extends PeerNode {
     }
 }
 export interface Root {
-    attributeModifier(value: AttributeModifier<Root> | undefined): this
 }
 export interface UIRoot {
-    /** @memo */
-    attributeModifier(value: AttributeModifier<Root> | undefined): this
 }
 export class ArkRootStyle implements Root {
-    public attributeModifier(value: AttributeModifier<Root> | undefined): this {
-        throw new Error("Not implemented")
-    }
+    
 }
 export interface ComponentRoot {
-    attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this
 }
 export interface UIComponentRoot {
-    /** @memo */
-    attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this
 }
 export class ArkComponentRootStyle implements ComponentRoot {
-    public attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
-        throw new Error("Not implemented")
-    }
 }
 /** @memo:stable */
 export class ArkRootComponent extends ComponentBase implements UIRoot {
     getPeer(): ArkRootPeer {
         return (this.peer as ArkRootPeer)
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<Root> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
@@ -94,11 +79,7 @@ export class ArkComponentRootComponent extends ComponentBase implements UICompon
     getPeer(): ArkComponentRootPeer {
         return (this.peer as ArkComponentRootPeer)
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

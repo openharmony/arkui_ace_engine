@@ -30,7 +30,7 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource } from "global/resource"
 import { PixelMap } from "./arkui-pixelmap"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkImageAnimatorPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -242,7 +242,6 @@ export interface ImageAnimatorAttribute extends CommonMethod {
     onRepeat(value: (() => void) | undefined): this
     onCancel(value: (() => void) | undefined): this
     onFinish(value: (() => void) | undefined): this
-    attributeModifier(value: AttributeModifier<ImageAnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIImageAnimatorAttribute extends UICommonMethod {
     /** @memo */
@@ -274,7 +273,6 @@ export interface UIImageAnimatorAttribute extends UICommonMethod {
     /** @memo */
     onFinish(value: (() => void) | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<ImageAnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkImageAnimatorStyle extends ArkCommonMethodStyle implements ImageAnimatorAttribute {
     images_value?: Array<ImageFrameInfo> | undefined
@@ -332,10 +330,7 @@ export class ArkImageAnimatorStyle extends ArkCommonMethodStyle implements Image
     }
     public onFinish(value: (() => void) | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<ImageAnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implements UIImageAnimatorAttribute {
@@ -476,11 +471,7 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ImageAnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

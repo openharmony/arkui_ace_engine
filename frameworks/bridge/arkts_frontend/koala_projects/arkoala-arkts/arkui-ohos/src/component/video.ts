@@ -34,7 +34,7 @@ import { ColorMetrics } from "./arkui-external"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource } from "global/resource"
 import { PixelMap } from "./arkui-pixelmap"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class VideoControllerInternal {
     public static fromPtr(ptr: KPointer): VideoController {
         const obj : VideoController = new VideoController()
@@ -436,7 +436,6 @@ export interface VideoAttribute extends CommonMethod {
     analyzerConfig(value: ImageAnalyzerConfig | undefined): this
     surfaceBackgroundColor(value: ColorMetrics | undefined): this
     enableShortcutKey(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIVideoAttribute extends UICommonMethod {
     /** @memo */
@@ -478,7 +477,6 @@ export interface UIVideoAttribute extends UICommonMethod {
     /** @memo */
     enableShortcutKey(value: boolean | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribute {
     muted_value?: boolean | undefined
@@ -556,10 +554,7 @@ export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribut
     }
     public enableShortcutKey(value: boolean | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVideoAttribute {
@@ -746,11 +741,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

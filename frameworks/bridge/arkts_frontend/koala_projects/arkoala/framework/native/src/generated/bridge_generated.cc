@@ -43548,3 +43548,7 @@ Ark_Boolean impl_GlobalScope_focusControl_requestFocus(const KStringPtr& value) 
         return GetAccessors()->getGlobalScopeAccessor()->focusControl_requestFocus((const Ark_String*) (&value));
 }
 KOALA_INTEROP_1(GlobalScope_focusControl_requestFocus, Ark_Boolean, KStringPtr)
+Ark_Int64 impl_UIStateGet(Ark_NativePointer thisPtr) {
+        return GetNodeModifiers()->getUIStateModifier()->getUIState(thisPtr);
+}
+KOALA_INTEROP_1(UIStateGet, Ark_Int64, Ark_NativePointer)

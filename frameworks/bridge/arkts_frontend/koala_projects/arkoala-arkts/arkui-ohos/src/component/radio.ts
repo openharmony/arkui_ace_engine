@@ -30,7 +30,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ResourceColor } from "./units"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkRadioPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -163,7 +163,6 @@ export interface RadioAttribute extends CommonMethod {
     radioStyle(value: RadioStyle | undefined): this
     contentModifier(value: ContentModifier | undefined): this
     _onChangeEvent_checked(callback: ((select: boolean | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIRadioAttribute extends UICommonMethod {
     /** @memo */
@@ -177,7 +176,6 @@ export interface UIRadioAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_checked(callback: ((select: boolean | undefined) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkRadioStyle extends ArkCommonMethodStyle implements RadioAttribute {
     checked_value?: boolean | undefined
@@ -198,10 +196,7 @@ export class ArkRadioStyle extends ArkCommonMethodStyle implements RadioAttribut
     }
     public _onChangeEvent_checked(callback: ((select: boolean | undefined) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export interface RadioConfiguration extends CommonConfiguration {
     value: string;
@@ -294,11 +289,7 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements UIRad
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

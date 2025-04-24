@@ -35,7 +35,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 import { Deserializer } from "./peers/Deserializer"
 export class ArkSearchPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -939,7 +939,6 @@ export interface SearchAttribute extends CommonMethod {
     inputFilter(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): this
     customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
     _onChangeEvent_value(callback: ((breakpoints: string) => void)): void
-    attributeModifier(value: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UISearchAttribute extends UICommonMethod {
     /** @memo */
@@ -1039,7 +1038,6 @@ export interface UISearchAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_value(callback: ((breakpoints: string) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttribute {
     fontColor_value?: ResourceColor | undefined
@@ -1229,10 +1227,7 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     }
     public _onChangeEvent_value(callback: ((breakpoints: string) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkSearchComponent extends ArkCommonMethodComponent implements UISearchAttribute {
@@ -1692,11 +1687,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements UISe
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

@@ -31,7 +31,7 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ResourceStr } from "./units"
 import { ComponentContent } from "./arkui-custom"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkRefreshPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -158,7 +158,6 @@ export interface RefreshAttribute extends CommonMethod {
     onOffsetChange(value: ((index: number) => void) | undefined): this
     pullDownRatio(value: number | undefined): this
     _onChangeEvent_refreshing(callback: ((isVisible: boolean) => void)): void
-    attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIRefreshAttribute extends UICommonMethod {
     /** @memo */
@@ -176,7 +175,6 @@ export interface UIRefreshAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_refreshing(callback: ((isVisible: boolean) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttribute {
     onStateChange_value?: ((state: RefreshStatus) => void) | undefined
@@ -205,10 +203,7 @@ export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttr
     }
     public _onChangeEvent_refreshing(callback: ((isVisible: boolean) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkRefreshComponent extends ArkCommonMethodComponent implements UIRefreshAttribute {
@@ -287,11 +282,7 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements UIR
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

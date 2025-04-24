@@ -29,7 +29,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ButtonType } from "./button"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkPasteButtonPeer extends ArkSecurityComponentMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -81,22 +81,17 @@ export enum PasteButtonOnClickResult {
 export type PasteButtonCallback = (event: ClickEvent, result: PasteButtonOnClickResult, error?: BusinessError<void>) => void;
 export interface PasteButtonAttribute extends SecurityComponentMethod {
     onClick(value: PasteButtonCallback | undefined): this
-    attributeModifier(value: AttributeModifier<PasteButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this
 }
 export interface UIPasteButtonAttribute extends UISecurityComponentMethod {
     /** @memo */
     onClick(value: PasteButtonCallback | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<PasteButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this
 }
 export class ArkPasteButtonStyle extends ArkSecurityComponentMethodStyle implements PasteButtonAttribute {
     onClick_value?: PasteButtonCallback | undefined
     public onClick(value: PasteButtonCallback | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<PasteButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent implements UIPasteButtonAttribute {
@@ -121,11 +116,7 @@ export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<PasteButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

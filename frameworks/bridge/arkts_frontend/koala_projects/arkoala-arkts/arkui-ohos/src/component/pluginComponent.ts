@@ -27,7 +27,7 @@ import { VoidCallback } from "./units"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkPluginComponentPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -87,7 +87,6 @@ export type PluginComponentInterface = (options: PluginComponentOptions) => Plug
 export interface PluginComponentAttribute extends CommonMethod {
     onComplete(value: VoidCallback | undefined): this
     onError(value: PluginErrorCallback | undefined): this
-    attributeModifier(value: AttributeModifier<PluginComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIPluginComponentAttribute extends UICommonMethod {
     /** @memo */
@@ -95,7 +94,6 @@ export interface UIPluginComponentAttribute extends UICommonMethod {
     /** @memo */
     onError(value: PluginErrorCallback | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<PluginComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkPluginComponentStyle extends ArkCommonMethodStyle implements PluginComponentAttribute {
     onComplete_value?: VoidCallback | undefined
@@ -105,10 +103,7 @@ export class ArkPluginComponentStyle extends ArkCommonMethodStyle implements Plu
     }
     public onError(value: PluginErrorCallback | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<PluginComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkPluginComponentComponent extends ArkCommonMethodComponent implements UIPluginComponentAttribute {
@@ -142,11 +137,7 @@ export class ArkPluginComponentComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<PluginComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

@@ -27,7 +27,7 @@ import { Alignment } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkStackPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -83,7 +83,6 @@ export type StackInterface = (options?: StackOptions) => StackAttribute;
 export interface StackAttribute extends CommonMethod {
     alignContent(value: Alignment | undefined): this
     pointLight(value: PointLightStyle | undefined): this
-    attributeModifier(value: AttributeModifier<StackAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIStackAttribute extends UICommonMethod {
     /** @memo */
@@ -91,7 +90,6 @@ export interface UIStackAttribute extends UICommonMethod {
     /** @memo */
     pointLight(value: PointLightStyle | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<StackAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkStackStyle extends ArkCommonMethodStyle implements StackAttribute {
     alignContent_value?: Alignment | undefined
@@ -101,10 +99,7 @@ export class ArkStackStyle extends ArkCommonMethodStyle implements StackAttribut
     }
     public pointLight(value: PointLightStyle | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<StackAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkStackComponent extends ArkCommonMethodComponent implements UIStackAttribute {
@@ -138,11 +133,7 @@ export class ArkStackComponent extends ArkCommonMethodComponent implements UISta
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<StackAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

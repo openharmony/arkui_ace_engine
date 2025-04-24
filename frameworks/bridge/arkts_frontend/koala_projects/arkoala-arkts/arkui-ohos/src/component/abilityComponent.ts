@@ -27,7 +27,6 @@ import { Want } from "./ohos.app.ability"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
 export class ArkAbilityComponentPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -79,15 +78,12 @@ export type Callback_Void = () => void;
 export interface AbilityComponentAttribute extends CommonMethod {
     onConnect(value: (() => void) | undefined): this
     onDisconnect(value: (() => void) | undefined): this
-    attributeModifier(value: AttributeModifier<AbilityComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIAbilityComponentAttribute extends UICommonMethod {
     /** @memo */
     onConnect(value: (() => void) | undefined): this
     /** @memo */
     onDisconnect(value: (() => void) | undefined): this
-    /** @memo */
-    attributeModifier(value: AttributeModifier<AbilityComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkAbilityComponentStyle extends ArkCommonMethodStyle implements AbilityComponentAttribute {
     onConnect_value?: (() => void) | undefined
@@ -97,9 +93,6 @@ export class ArkAbilityComponentStyle extends ArkCommonMethodStyle implements Ab
     }
     public onDisconnect(value: (() => void) | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<AbilityComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 /** @memo:stable */
@@ -132,11 +125,6 @@ export class ArkAbilityComponentComponent extends ArkCommonMethodComponent imple
             this.getPeer()?.onDisconnectAttribute(value_casted)
             return this
         }
-        return this
-    }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<AbilityComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
         return this
     }
     public applyAttributesFinish(): void {

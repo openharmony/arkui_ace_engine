@@ -30,7 +30,7 @@ import { SymbolEffect, SymbolEffectInternal, EffectScope, EffectDirection } from
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 import { Deserializer } from "./peers/Deserializer"
 export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -281,7 +281,6 @@ export interface SymbolGlyphAttribute extends CommonMethod {
     minFontScale(value: number | Resource | undefined): this
     maxFontScale(value: number | Resource | undefined): this
     symbolEffect(symbolEffect: SymbolEffect | undefined, isActive?: boolean | number): this
-    attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UISymbolGlyphAttribute extends UICommonMethod {
     /** @memo */
@@ -301,7 +300,6 @@ export interface UISymbolGlyphAttribute extends UICommonMethod {
     /** @memo */
     symbolEffect(symbolEffect: SymbolEffect | undefined, isActive?: boolean | number): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkSymbolGlyphStyle extends ArkCommonMethodStyle implements SymbolGlyphAttribute {
     fontSize_value?: number | string | Resource | undefined
@@ -334,10 +332,7 @@ export class ArkSymbolGlyphStyle extends ArkCommonMethodStyle implements SymbolG
     }
     public symbolEffect(symbolEffect: SymbolEffect | undefined, isActive?: boolean | number): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements UISymbolGlyphAttribute {
@@ -437,11 +432,7 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

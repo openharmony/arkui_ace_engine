@@ -29,7 +29,6 @@ import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, DateRange, BlurStyl
 import { Offset, VoidCallback, ResourceColor } from "./units"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource } from "global/resource"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
 export class CalendarPickerDialog {
     public static show(options?: CalendarDialogOptions): void {
         const options_casted = options as (CalendarDialogOptions | undefined)
@@ -190,7 +189,6 @@ export interface CalendarPickerAttribute extends CommonMethod {
     onChange(value: ((parameter: Date) => void) | undefined): this
     markToday(value: boolean | undefined): this
     edgeAlign(alignType: CalendarAlign | undefined, offset?: Offset): this
-    attributeModifier(value: AttributeModifier<CalendarPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UICalendarPickerAttribute extends UICommonMethod {
     /** @memo */
@@ -201,8 +199,6 @@ export interface UICalendarPickerAttribute extends UICommonMethod {
     markToday(value: boolean | undefined): this
     /** @memo */
     edgeAlign(alignType: CalendarAlign | undefined, offset?: Offset): this
-    /** @memo */
-    attributeModifier(value: AttributeModifier<CalendarPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkCalendarPickerStyle extends ArkCommonMethodStyle implements CalendarPickerAttribute {
     textStyle_value?: PickerTextStyle | undefined
@@ -219,9 +215,6 @@ export class ArkCalendarPickerStyle extends ArkCommonMethodStyle implements Cale
     }
     public edgeAlign(alignType: CalendarAlign | undefined, offset?: Offset): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<CalendarPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 export interface CalendarDialogOptions extends CalendarOptions {
@@ -321,11 +314,6 @@ export class ArkCalendarPickerComponent extends ArkCommonMethodComponent impleme
             }
             throw new Error("Can not select appropriate overload")
         }
-        return this
-    }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<CalendarPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
         return this
     }
     public applyAttributesFinish(): void {

@@ -30,7 +30,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Want } from "./ohos.app.ability"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkFormComponentPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -229,7 +229,6 @@ export interface FormComponentAttribute extends CommonMethod {
     onRouter(value: ((info: object) => void) | undefined): this
     onUninstall(value: ((parameter: FormCallbackInfo) => void) | undefined): this
     onLoad(value: (() => void) | undefined): this
-    attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIFormComponentAttribute extends UICommonMethod {
     /** @memo */
@@ -253,7 +252,6 @@ export interface UIFormComponentAttribute extends UICommonMethod {
     /** @memo */
     onLoad(value: (() => void) | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkFormComponentStyle extends ArkCommonMethodStyle implements FormComponentAttribute {
     size_value?: SizeOptions | undefined
@@ -295,10 +293,7 @@ export class ArkFormComponentStyle extends ArkCommonMethodStyle implements FormC
     }
     public onLoad(value: (() => void) | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkFormComponentComponent extends ArkCommonMethodComponent implements UIFormComponentAttribute {
@@ -404,11 +399,7 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

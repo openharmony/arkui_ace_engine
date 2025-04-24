@@ -26,7 +26,7 @@ import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodCompon
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkCirclePeer extends ArkCommonShapeMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -57,16 +57,10 @@ export interface CircleOptions {
 }
 export type CircleInterface = (value?: CircleOptions) => CircleAttribute;
 export interface CircleAttribute extends CommonShapeMethod {
-    attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UICircleAttribute extends UICommonShapeMethod {
-    /** @memo */
-    attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkCircleStyle extends ArkCommonShapeMethodStyle implements CircleAttribute {
-    public attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
 }
 /** @memo:stable */
 export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements UICircleAttribute {
@@ -80,11 +74,6 @@ export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements
             this.getPeer()?.setCircleOptionsAttribute(value_casted)
             return this
         }
-        return this
-    }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
         return this
     }
     public applyAttributesFinish(): void {

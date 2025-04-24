@@ -30,7 +30,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -314,7 +314,6 @@ export interface CheckboxGroupAttribute extends CommonMethod {
     onChange(value: OnCheckboxGroupChangeCallback | undefined): this
     checkboxShape(value: CheckBoxShape | undefined): this
     _onChangeEvent_selectAll(callback: ((select: boolean | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UICheckboxGroupAttribute extends UICommonMethod {
     /** @memo */
@@ -331,8 +330,6 @@ export interface UICheckboxGroupAttribute extends UICommonMethod {
     checkboxShape(value: CheckBoxShape | undefined): this
     /** @memo */
     _onChangeEvent_selectAll(callback: ((select: boolean | undefined) => void)): void
-    /** @memo */
-    attributeModifier(value: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkCheckboxGroupStyle extends ArkCommonMethodStyle implements CheckboxGroupAttribute {
     selectAll_value?: boolean | undefined
@@ -361,9 +358,6 @@ export class ArkCheckboxGroupStyle extends ArkCommonMethodStyle implements Check
     }
     public _onChangeEvent_selectAll(callback: ((select: boolean | undefined) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 /** @memo:stable */
@@ -496,11 +490,6 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
             return
         }
         return
-    }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public

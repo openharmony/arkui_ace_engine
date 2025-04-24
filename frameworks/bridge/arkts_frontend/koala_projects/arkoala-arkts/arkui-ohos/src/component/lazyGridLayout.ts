@@ -27,7 +27,7 @@ import { LengthMetrics } from "../Graphics"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkLazyGridLayoutPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -95,7 +95,6 @@ export type LazyVGridLayoutInterface = () => LazyVGridLayoutAttribute;
 export interface LazyGridLayoutAttribute extends CommonMethod {
     rowsGap(value: LengthMetrics | undefined): this
     columnsGap(value: LengthMetrics | undefined): this
-    attributeModifier(value: AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UILazyGridLayoutAttribute extends UICommonMethod {
     /** @memo */
@@ -103,7 +102,6 @@ export interface UILazyGridLayoutAttribute extends UICommonMethod {
     /** @memo */
     columnsGap(value: LengthMetrics | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkLazyGridLayoutStyle extends ArkCommonMethodStyle implements LazyGridLayoutAttribute {
     rowsGap_value?: LengthMetrics | undefined
@@ -113,29 +111,21 @@ export class ArkLazyGridLayoutStyle extends ArkCommonMethodStyle implements Lazy
     }
     public columnsGap(value: LengthMetrics | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export interface LazyVGridLayoutAttribute extends LazyGridLayoutAttribute {
     columnsTemplate(value: string | undefined): this
-    attributeModifier(value: AttributeModifier<LazyVGridLayoutAttribute> | AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UILazyVGridLayoutAttribute extends UILazyGridLayoutAttribute {
     /** @memo */
     columnsTemplate(value: string | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<LazyVGridLayoutAttribute> | AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkLazyVGridLayoutStyle extends ArkLazyGridLayoutStyle implements LazyVGridLayoutAttribute {
     columnsTemplate_value?: string | undefined
     public columnsTemplate(value: string | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<LazyVGridLayoutAttribute> | AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkLazyGridLayoutComponent extends ArkCommonMethodComponent implements UILazyGridLayoutAttribute {
@@ -160,11 +150,7 @@ export class ArkLazyGridLayoutComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
@@ -192,11 +178,7 @@ export class ArkLazyVGridLayoutComponent extends ArkLazyGridLayoutComponent impl
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<LazyVGridLayoutAttribute> | AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

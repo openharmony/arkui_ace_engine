@@ -30,7 +30,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { SymbolGlyphModifier, IndicatorStyle, LabelStyle } from "./arkui-external"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 import { VerticalAlign } from "./enums"
 export class ArkTabContentPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -204,7 +204,6 @@ export interface TabContentAttribute extends CommonMethod {
     tabBar(value: string | Resource | CustomBuilder | TabBarOptions | undefined | SubTabBarStyle | BottomTabBarStyle | undefined | ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this
     onWillShow(value: VoidCallback | undefined): this
     onWillHide(value: VoidCallback | undefined): this
-    attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UITabContentAttribute extends UICommonMethod {
     /** @memo */
@@ -214,7 +213,6 @@ export interface UITabContentAttribute extends UICommonMethod {
     /** @memo */
     onWillHide(value: VoidCallback | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkTabContentStyle extends ArkCommonMethodStyle implements TabContentAttribute {
     tabBar_value?: string | Resource | CustomBuilder | TabBarOptions | undefined
@@ -228,10 +226,7 @@ export class ArkTabContentStyle extends ArkCommonMethodStyle implements TabConte
     }
     public onWillHide(value: VoidCallback | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkTabContentComponent extends ArkCommonMethodComponent implements UITabContentAttribute {
@@ -287,11 +282,7 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

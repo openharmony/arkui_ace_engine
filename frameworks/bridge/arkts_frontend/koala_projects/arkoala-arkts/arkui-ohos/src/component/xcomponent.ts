@@ -30,7 +30,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { VoidCallback } from "./units"
 import { XComponentType } from "./enums"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class XComponentControllerInternal {
     public static fromPtr(ptr: KPointer): XComponentController {
         const obj : XComponentController = new XComponentController()
@@ -359,7 +359,6 @@ export interface XComponentAttribute extends CommonMethod {
     enableSecure(value: boolean | undefined): this
     hdrBrightness(value: number | undefined): this
     enableTransparentLayer(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIXComponentAttribute extends UICommonMethod {
     /** @memo */
@@ -375,7 +374,6 @@ export interface UIXComponentAttribute extends UICommonMethod {
     /** @memo */
     enableTransparentLayer(value: boolean | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkXComponentStyle extends ArkCommonMethodStyle implements XComponentAttribute {
     onLoad_value?: OnNativeLoadCallback | undefined
@@ -401,10 +399,7 @@ export class ArkXComponentStyle extends ArkCommonMethodStyle implements XCompone
     }
     public enableTransparentLayer(value: boolean | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkXComponentComponent extends ArkCommonMethodComponent implements UIXComponentAttribute {
@@ -493,11 +488,7 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

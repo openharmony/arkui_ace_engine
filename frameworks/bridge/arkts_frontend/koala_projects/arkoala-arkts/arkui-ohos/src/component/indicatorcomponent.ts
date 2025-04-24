@@ -29,7 +29,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { DotIndicator, DigitIndicator } from "./swiper"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class IndicatorComponentControllerInternal {
     public static fromPtr(ptr: KPointer): IndicatorComponentController {
         const obj : IndicatorComponentController = new IndicatorComponentController()
@@ -201,7 +201,6 @@ export interface IndicatorComponentAttribute extends CommonMethod {
     loop(value: boolean | undefined): this
     vertical(value: boolean | undefined): this
     onChange(value: ((index: number) => void) | undefined): this
-    attributeModifier(value: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIIndicatorComponentAttribute extends UICommonMethod {
     /** @memo */
@@ -217,7 +216,6 @@ export interface UIIndicatorComponentAttribute extends UICommonMethod {
     /** @memo */
     onChange(value: ((index: number) => void) | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkIndicatorComponentStyle extends ArkCommonMethodStyle implements IndicatorComponentAttribute {
     initialIndex_value?: number | undefined
@@ -243,10 +241,7 @@ export class ArkIndicatorComponentStyle extends ArkCommonMethodStyle implements 
     }
     public onChange(value: ((index: number) => void) | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent implements UIIndicatorComponentAttribute {
@@ -316,11 +311,7 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

@@ -33,7 +33,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Scroller, ScrollerInternal, ScrollAlign } from "./scroll"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 import { Deserializer } from "./peers/Deserializer"
 export class ArkListPeer extends ArkScrollableCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -656,7 +656,6 @@ export interface ListAttribute extends ScrollableCommonMethod {
     onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
     lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this
     edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this
-    attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIListAttribute extends UIScrollableCommonMethod {
     /** @memo */
@@ -732,7 +731,6 @@ export interface UIListAttribute extends UIScrollableCommonMethod {
     /** @memo */
     edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkListStyle extends ArkScrollableCommonMethodStyle implements ListAttribute {
     alignListItem_value?: ListItemAlign | undefined
@@ -876,10 +874,7 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     }
     public edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkListComponent extends ArkScrollableCommonMethodComponent implements UIListAttribute {
@@ -1232,11 +1227,7 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

@@ -26,7 +26,7 @@ import { ArkColumnPeer, ColumnAttribute, ArkColumnComponent, ArkColumnStyle, UIC
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
 export class ArkGridContainerPeer extends ArkColumnPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -68,16 +68,11 @@ export interface GridContainerOptions {
 }
 export type GridContainerInterface = (value?: GridContainerOptions) => GridContainerAttribute;
 export interface GridContainerAttribute extends ColumnAttribute {
-    attributeModifier(value: AttributeModifier<GridContainerAttribute> | AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIGridContainerAttribute extends UIColumnAttribute {
     /** @memo */
-    attributeModifier(value: AttributeModifier<GridContainerAttribute> | AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkGridContainerStyle extends ArkColumnStyle implements GridContainerAttribute {
-    public attributeModifier(value: AttributeModifier<GridContainerAttribute> | AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
 }
 /** @memo:stable */
 export class ArkGridContainerComponent extends ArkColumnComponent implements UIGridContainerAttribute {
@@ -93,11 +88,7 @@ export class ArkGridContainerComponent extends ArkColumnComponent implements UIG
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<GridContainerAttribute> | AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

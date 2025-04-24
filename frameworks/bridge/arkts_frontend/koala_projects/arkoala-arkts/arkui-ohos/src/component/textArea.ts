@@ -37,7 +37,7 @@ import { Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_Delet
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 import { Deserializer } from "./peers/Deserializer"
 export class ArkTextAreaPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -1110,7 +1110,6 @@ export interface TextAreaAttribute extends CommonMethod {
     showCounter(value: boolean | undefined, options?: InputCounterOptions): this
     customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
     _onChangeEvent_text(callback: ((text: ResourceStr) => void)): void
-    attributeModifier(value: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UITextAreaAttribute extends UICommonMethod {
     /** @memo */
@@ -1236,7 +1235,6 @@ export interface UITextAreaAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_text(callback: ((text: ResourceStr) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAttribute {
     placeholderColor_value?: ResourceColor | undefined
@@ -1478,10 +1476,7 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     }
     public _onChangeEvent_text(callback: ((text: ResourceStr) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UITextAreaAttribute {
@@ -2058,11 +2053,7 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements UI
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

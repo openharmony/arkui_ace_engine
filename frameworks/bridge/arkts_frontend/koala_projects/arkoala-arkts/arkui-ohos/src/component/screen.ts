@@ -26,7 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkScreenPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -44,16 +44,10 @@ export class ArkScreenPeer extends ArkCommonMethodPeer {
 }
 export type ScreenInterface = (screenId: number) => ScreenAttribute;
 export interface ScreenAttribute extends CommonMethod {
-    attributeModifier(value: AttributeModifier<ScreenAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIScreenAttribute extends UICommonMethod {
-    /** @memo */
-    attributeModifier(value: AttributeModifier<ScreenAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkScreenStyle extends ArkCommonMethodStyle implements ScreenAttribute {
-    public attributeModifier(value: AttributeModifier<ScreenAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
 }
 /** @memo:stable */
 export class ArkScreenComponent extends ArkCommonMethodComponent implements UIScreenAttribute {
@@ -69,11 +63,7 @@ export class ArkScreenComponent extends ArkCommonMethodComponent implements UISc
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ScreenAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

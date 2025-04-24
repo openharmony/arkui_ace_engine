@@ -30,7 +30,6 @@ import { AnimationStatus, Curve, FillMode, PlayMode } from "./enums"
 import { Callback_Void } from "./abilityComponent"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
 export class SpringPropInternal {
     public static fromPtr(ptr: KPointer): SpringProp {
         const obj : SpringProp = new SpringProp(undefined, undefined, undefined)
@@ -338,7 +337,6 @@ export interface AnimatorAttribute extends CommonMethod {
     onCancel(value: (() => void) | undefined): this
     onFinish(value: (() => void) | undefined): this
     onFrame(value: ((index: number) => void) | undefined): this
-    attributeModifier(value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIAnimatorAttribute extends UICommonMethod {
     /** @memo */
@@ -369,8 +367,6 @@ export interface UIAnimatorAttribute extends UICommonMethod {
     onFinish(value: (() => void) | undefined): this
     /** @memo */
     onFrame(value: ((index: number) => void) | undefined): this
-    /** @memo */
-    attributeModifier(value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkAnimatorStyle extends ArkCommonMethodStyle implements AnimatorAttribute {
     state_value?: AnimationStatus | undefined
@@ -428,9 +424,6 @@ export class ArkAnimatorStyle extends ArkCommonMethodStyle implements AnimatorAt
     }
     public onFrame(value: ((index: number) => void) | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 /** @memo:stable */
@@ -571,11 +564,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UI
             this.getPeer()?.onFrameAttribute(value_casted)
             return this
         }
-        return this
-    }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
         return this
     }
     public applyAttributesFinish(): void {

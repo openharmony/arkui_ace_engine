@@ -29,7 +29,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics } from "../Graphics"
 import { ColorMetrics } from "./arkui-external"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class LinearIndicatorControllerInternal {
     public static fromPtr(ptr: KPointer): LinearIndicatorController {
         const obj : LinearIndicatorController = new LinearIndicatorController()
@@ -177,7 +177,6 @@ export interface LinearIndicatorAttribute extends CommonMethod {
     indicatorStyle(value: LinearIndicatorStyle | undefined): this
     indicatorLoop(value: boolean | undefined): this
     onChange(value: OnLinearIndicatorChangeCallback | undefined): this
-    attributeModifier(value: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UILinearIndicatorAttribute extends UICommonMethod {
     /** @memo */
@@ -187,7 +186,6 @@ export interface UILinearIndicatorAttribute extends UICommonMethod {
     /** @memo */
     onChange(value: OnLinearIndicatorChangeCallback | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkLinearIndicatorStyle extends ArkCommonMethodStyle implements LinearIndicatorAttribute {
     indicatorStyle_value?: LinearIndicatorStyle | undefined
@@ -201,10 +199,7 @@ export class ArkLinearIndicatorStyle extends ArkCommonMethodStyle implements Lin
     }
     public onChange(value: OnLinearIndicatorChangeCallback | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export type OnLinearIndicatorChangeCallback = (index: number, progress: number) => void;
 /** @memo:stable */
@@ -249,11 +244,7 @@ export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

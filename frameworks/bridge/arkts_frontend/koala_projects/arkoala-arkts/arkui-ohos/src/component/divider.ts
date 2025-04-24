@@ -29,7 +29,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkDividerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -131,7 +131,6 @@ export interface DividerAttribute extends CommonMethod {
     color(value: ResourceColor | undefined): this
     strokeWidth(value: number | string | undefined): this
     lineCap(value: LineCapStyle | undefined): this
-    attributeModifier(value: AttributeModifier<DividerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIDividerAttribute extends UICommonMethod {
     /** @memo */
@@ -143,7 +142,6 @@ export interface UIDividerAttribute extends UICommonMethod {
     /** @memo */
     lineCap(value: LineCapStyle | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<DividerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkDividerStyle extends ArkCommonMethodStyle implements DividerAttribute {
     vertical_value?: boolean | undefined
@@ -161,10 +159,7 @@ export class ArkDividerStyle extends ArkCommonMethodStyle implements DividerAttr
     }
     public lineCap(value: LineCapStyle | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<DividerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkDividerComponent extends ArkCommonMethodComponent implements UIDividerAttribute {
@@ -215,11 +210,7 @@ export class ArkDividerComponent extends ArkCommonMethodComponent implements UID
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<DividerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

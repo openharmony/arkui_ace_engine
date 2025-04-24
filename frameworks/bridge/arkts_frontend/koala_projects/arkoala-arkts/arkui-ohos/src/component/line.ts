@@ -28,7 +28,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkLinePeer extends ArkCommonShapeMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -93,7 +93,6 @@ export type LineInterface = (options?: LineOptions) => LineAttribute;
 export interface LineAttribute extends CommonShapeMethod {
     startPoint(value: Array<Length> | undefined): this
     endPoint(value: Array<Length> | undefined): this
-    attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UILineAttribute extends UICommonShapeMethod {
     /** @memo */
@@ -101,7 +100,6 @@ export interface UILineAttribute extends UICommonShapeMethod {
     /** @memo */
     endPoint(value: Array<Length> | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkLineStyle extends ArkCommonShapeMethodStyle implements LineAttribute {
     startPoint_value?: Array<Length> | undefined
@@ -111,10 +109,7 @@ export class ArkLineStyle extends ArkCommonShapeMethodStyle implements LineAttri
     }
     public endPoint(value: Array<Length> | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkLineComponent extends ArkCommonShapeMethodComponent implements UILineAttribute {
@@ -148,11 +143,7 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements U
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

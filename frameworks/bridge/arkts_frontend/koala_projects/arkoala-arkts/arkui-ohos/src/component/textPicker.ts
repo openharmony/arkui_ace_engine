@@ -33,7 +33,7 @@ import { Resource } from "global/resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics } from "../Graphics"
 import { DialogAlignment } from "./alertDialog"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class TextPickerDialog {
     public static show(options?: TextPickerDialogOptions): undefined {
         const options_casted = options as (TextPickerDialogOptions | undefined)
@@ -518,7 +518,6 @@ export interface TextPickerAttribute extends CommonMethod {
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     _onChangeEvent_selected(callback: ((selected: number | Array<number>) => void)): void
     _onChangeEvent_value(callback: ((value: string | Array<string>) => void)): void
-    attributeModifier(value: AttributeModifier<TextPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UITextPickerAttribute extends UICommonMethod {
     /** @memo */
@@ -560,7 +559,6 @@ export interface UITextPickerAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_value(callback: ((value: string | Array<string>) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<TextPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkTextPickerStyle extends ArkCommonMethodStyle implements TextPickerAttribute {
     defaultPickerItemHeight_value?: number | string | undefined
@@ -636,10 +634,7 @@ export class ArkTextPickerStyle extends ArkCommonMethodStyle implements TextPick
     }
     public _onChangeEvent_value(callback: ((value: string | Array<string>) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<TextPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export interface TextPickerResult {
     value: string | Array<string>;
@@ -952,11 +947,7 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<TextPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

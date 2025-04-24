@@ -28,7 +28,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent } from "./arkui-custom"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -93,7 +93,6 @@ export type ListItemGroupInterface = (options?: ListItemGroupOptions) => ListIte
 export interface ListItemGroupAttribute extends CommonMethod {
     divider(value: ListDividerOptions | undefined): this
     childrenMainSize(value: ChildrenMainSize | undefined): this
-    attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIListItemGroupAttribute extends UICommonMethod {
     /** @memo */
@@ -101,7 +100,6 @@ export interface UIListItemGroupAttribute extends UICommonMethod {
     /** @memo */
     childrenMainSize(value: ChildrenMainSize | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkListItemGroupStyle extends ArkCommonMethodStyle implements ListItemGroupAttribute {
     divider_value?: ListDividerOptions | undefined
@@ -111,10 +109,7 @@ export class ArkListItemGroupStyle extends ArkCommonMethodStyle implements ListI
     }
     public childrenMainSize(value: ChildrenMainSize | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkListItemGroupComponent extends ArkCommonMethodComponent implements UIListItemGroupAttribute {
@@ -148,11 +143,7 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

@@ -29,7 +29,6 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
 export class ArkBlankPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -101,21 +100,15 @@ export class ArkBlankPeer extends ArkCommonMethodPeer {
 export type BlankInterface = (min?: number | string) => BlankAttribute;
 export interface BlankAttribute extends CommonMethod {
     color(value: ResourceColor | undefined): this
-    attributeModifier(value: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIBlankAttribute extends UICommonMethod {
     /** @memo */
     color(value: ResourceColor | undefined): this
-    /** @memo */
-    attributeModifier(value: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkBlankStyle extends ArkCommonMethodStyle implements BlankAttribute {
     color_value?: ResourceColor | undefined
     public color(value: ResourceColor | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 /** @memo:stable */
@@ -139,11 +132,6 @@ export class ArkBlankComponent extends ArkCommonMethodComponent implements UIBla
             this.getPeer()?.colorAttribute(value_casted)
             return this
         }
-        return this
-    }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
         return this
     }
     public applyAttributesFinish(): void {

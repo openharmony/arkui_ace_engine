@@ -36,7 +36,7 @@ import { TitleHeight } from "./enums"
 import { Callback_Void } from "./abilityComponent"
 import { NavDestinationContext, NavDestinationMode } from "./navDestination"
 import { LengthMetrics } from "../Graphics"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class NavPathInfoInternal {
     public static fromPtr(ptr: KPointer): NavPathInfo {
         const obj : NavPathInfo = new NavPathInfo(undefined, undefined, undefined, undefined)
@@ -1692,7 +1692,6 @@ export interface NavigationAttribute extends CommonMethod {
     title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined, options?: NavigationTitleOptions): this
     toolbarConfiguration(value: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this
     ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this
-    attributeModifier(value: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UINavigationAttribute extends UICommonMethod {
     /** @memo */
@@ -1750,7 +1749,6 @@ export interface UINavigationAttribute extends UICommonMethod {
     /** @memo */
     ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkNavigationStyle extends ArkCommonMethodStyle implements NavigationAttribute {
     navBarWidth_value?: Length | undefined
@@ -1857,10 +1855,7 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     }
     public ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export type Callback_NavigationTransitionProxy_Void = (transitionProxy: NavigationTransitionProxy) => void;
 export interface NavigationAnimatedTransition {
@@ -2181,11 +2176,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

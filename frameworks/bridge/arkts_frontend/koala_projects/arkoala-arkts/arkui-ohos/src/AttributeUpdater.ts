@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { AttributeModifier } from "./";
-
+import { AttributeModifier } from "./component/common";
+import {  InteropNativeModule } from "@koalaui/interop";
 export type Initializer<T> = (...params:Object[]) => T;
 
 export class AttributeUpdater<T, C = Initializer<T>> implements AttributeModifier<T> {
@@ -30,6 +30,8 @@ export class AttributeUpdater<T, C = Initializer<T>> implements AttributeModifie
     applySelectedAttribute(instance: T): void {  
     }
     initializeModifier(instance: T): void {
+    }
+    onComponentChanged(component: T): void {
     }
     private value: T | undefined = undefined;
     private constructorParams: C | undefined = undefined;

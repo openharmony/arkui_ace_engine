@@ -36,7 +36,8 @@ import { Callback_String_Void } from "./gridRow"
 import { Callback_Number_Number_Void } from "./grid"
 import { SelectionMenuOptions } from "./richEditor"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+import { ArkTextNode } from "../handwritten/modifiers/ArkTextNode"
+import { ArkTextAttributeSet } from "../handwritten/modifiers/ArkTextModifier"
 export class TextControllerInternal {
     public static fromPtr(ptr: KPointer): TextController {
         const obj : TextController = new TextController()
@@ -986,7 +987,6 @@ export interface TextAttribute extends CommonMethod {
     enableHapticFeedback(value: boolean | undefined): this
     selection(selectionStart: number | undefined, selectionEnd: number | undefined): this
     bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this
-    attributeModifier(value: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UITextAttribute extends UICommonMethod {
     /** @memo */
@@ -1076,7 +1076,6 @@ export interface UITextAttribute extends UICommonMethod {
     /** @memo */
     bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute {
     font_value?: Font | undefined
@@ -1248,10 +1247,7 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     }
     public bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export enum TextSpanType {
     TEXT = 0,
@@ -1288,9 +1284,33 @@ export interface TextMarqueeOptions {
 }
 /** @memo:stable */
 export class ArkTextComponent extends ArkCommonMethodComponent implements UITextAttribute {
+  
+    protected _modifierHost: ArkTextNode | undefined
+    setModifierHost(value: ArkTextNode): void {
+        this._modifierHost = value
+    }
+    getModifierHost(): ArkTextNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkTextNode()
+            this._modifierHost!.setPeer(this.getPeer())
+        }
+        return this._modifierHost!
+    }
+    getAttributeSet(): ArkTextAttributeSet | undefined {
+        if (this.getPeer()._attributeSet == null) {
+            return undefined;
+        }
+        return this.getPeer()._attributeSet as ArkTextAttributeSet;
+    }
+    initAttributeSet():void {
+        this.getPeer()._attributeSet = new ArkTextAttributeSet();
+    }
+
     getPeer(): ArkTextPeer {
         return (this.peer as ArkTextPeer)
     }
+   
+
     /** @memo */
     public setTextOptions(content?: string | Resource, value?: TextOptions): this {
         if (this.checkPriority("setTextOptions")) {
@@ -1714,11 +1734,7 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

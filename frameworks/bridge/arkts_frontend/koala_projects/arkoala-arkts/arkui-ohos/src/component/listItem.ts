@@ -32,7 +32,7 @@ import { ComponentContent } from "./arkui-custom"
 import { Length } from "./units"
 import { Callback_Void } from "./abilityComponent"
 import { Callback_Number_Void } from "./alphabetIndexer"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkListItemPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -216,7 +216,6 @@ export interface ListItemAttribute extends CommonMethod {
     swipeAction(value: SwipeActionOptions | undefined): this
     onSelect(value: ((isVisible: boolean) => void) | undefined): this
     _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIListItemAttribute extends UICommonMethod {
     /** @memo */
@@ -234,7 +233,6 @@ export interface UIListItemAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAttribute {
     sticky_value?: Sticky | undefined
@@ -263,10 +261,7 @@ export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAt
     }
     public _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkListItemComponent extends ArkCommonMethodComponent implements UIListItemAttribute {
@@ -354,11 +349,7 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements UI
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
