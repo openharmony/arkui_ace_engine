@@ -49,7 +49,6 @@ constexpr float SLIDER_MIN = .0f;
 constexpr float SLIDER_MAX = 100.0f;
 constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
 constexpr Dimension FORM_PAN_DISTANCE = 1.0_vp;
-constexpr Dimension PAN_MOVE_DISTANCE = 5.0_vp;
 constexpr double DEFAULT_SLIP_FACTOR = 50.0;
 constexpr double SLIP_FACTOR_COEFFICIENT = 1.07;
 constexpr uint64_t SCREEN_READ_SENDEVENT_TIMESTAMP = 400;
@@ -819,7 +818,7 @@ void SliderPattern::HandleTouchDown(const Offset& location, SourceType sourceTyp
 bool NeedFireClickEvent(const Offset& downLocation, const Offset& upLocation)
 {
     auto diff = downLocation - upLocation;
-    return diff.GetDistance() < PAN_MOVE_DISTANCE.ConvertToPx();
+    return diff.GetDistance() < DEFAULT_PAN_DISTANCE.ConvertToPx();
 }
 
 void SliderPattern::HandleTouchUp(const Offset& location, SourceType sourceType)
