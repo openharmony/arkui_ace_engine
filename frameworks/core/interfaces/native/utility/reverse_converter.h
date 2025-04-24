@@ -327,6 +327,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src);
     void AssignArkValue(Ark_SwipeActionState& dst, const SwipeActionState& src);
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
+    void AssignArkValue(Ark_SwiperContentWillScrollResult &dst, const SwiperContentWillScrollResult& src);
     void AssignArkValue(Ark_TextAlign& dst, const TextAlign& src);
     void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx);
     void AssignArkValue(Ark_TextBox& dst, const ParagraphManager::TextBox& src);

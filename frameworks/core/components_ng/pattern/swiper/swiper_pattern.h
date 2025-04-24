@@ -70,6 +70,7 @@ constexpr float SWIPER_CURVE_DAMPING = 34.0f;
 
 class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
+    UNITEST_FRIEND_CLASS;
 
 public:
     using CustomContentTransitionPtr = std::shared_ptr<std::function<TabContentAnimatedTransition(int32_t, int32_t)>>;
