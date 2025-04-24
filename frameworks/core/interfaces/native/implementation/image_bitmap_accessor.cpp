@@ -15,16 +15,29 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/image_bitmap_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageBitmapAccessor {
+const auto ARK_ERROR_VALUE = Converter::ArkValue<Ark_Number>(0);
 void DestroyPeerImpl(Ark_ImageBitmap peer)
 {
+    if (peer) {
+        peer->DecRefCount();
+    }
 }
 Ark_ImageBitmap CtorImpl(const Ark_String* src)
 {
-    return nullptr;
+    auto peer = Referenced::MakeRefPtr<ImageBitmapPeer>();
+    peer->IncRefCount();
+    std::string stringSrc;
+    if (src) {
+        stringSrc = Converter::Convert<std::string>(*src);
+    }
+    peer->SetOptions(stringSrc);
+    return reinterpret_cast<ImageBitmapPeer*>(Referenced::RawPtr(peer));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,14 +45,20 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void CloseImpl(Ark_ImageBitmap peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->OnClose();
 }
 Ark_Number GetHeightImpl(Ark_ImageBitmap peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
+    auto height = peer->OnGetHeight();
+    return NG::Converter::ArkValue<Ark_Number>(static_cast<int32_t>(height));
 }
 Ark_Number GetWidthImpl(Ark_ImageBitmap peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
+    double width = peer->OnGetWidth();
+    return NG::Converter::ArkValue<Ark_Number>(static_cast<int32_t>(width));
 }
 } // ImageBitmapAccessor
 const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()
@@ -54,8 +73,4 @@ const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()
     };
     return &ImageBitmapAccessorImpl;
 }
-
-struct ImageBitmapPeer {
-    virtual ~ImageBitmapPeer() = default;
-};
 }
