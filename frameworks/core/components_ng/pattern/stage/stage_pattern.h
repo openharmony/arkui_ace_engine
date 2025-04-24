@@ -61,6 +61,8 @@ public:
         currentPageIndex_ = index;
     }
 
+    virtual void OnForceSplitConfigUpdated () {};
+    
 protected:
     std::function<void()> onRebuildFrameCallback_;
     int32_t currentPageIndex_ = 0;

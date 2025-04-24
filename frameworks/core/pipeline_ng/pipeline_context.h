@@ -1203,16 +1203,6 @@ public:
         rotationEndCallbackMap_.erase(callbackId);
     }
 
-    void SetForceSplitChangeCallBack(const std::function<void()>& callback)
-    {
-        forceSplitChangeCallback_ = callback;
-    }
-
-    const std::function<void()>& GetForceSplitChangeCallBack() const
-    {
-        return forceSplitChangeCallback_;
-    }
-
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1536,8 +1526,6 @@ private:
     friend class ScopedLayout;
     friend class FormGestureManager;
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = nullptr;
-
-    std::function<void()> forceSplitChangeCallback_ = nullptr;
 };
 
 /**

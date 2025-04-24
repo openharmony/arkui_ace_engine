@@ -1191,14 +1191,6 @@ std::string DeclarativeFrontend::GetPagePathByUrl(const std::string& url) const
     return delegate_->GetPagePathByUrl(url);
 }
 
-void DeclarativeFrontend::OnForceSplitChange()
-{
-    if (!delegate_) {
-        return;
-    }
-    delegate_->OnForceSplitChange();
-}
-
 void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)
 {
     LOGI("HandleAsyncEvent pageId: %{private}d, eventId: %{private}s, eventType: %{private}s",

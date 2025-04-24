@@ -75,6 +75,11 @@ public:
         stageInTrasition_ = stageInTrasition;
     }
 
+    void OnForceSplitConfigUpdated ()
+    {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "OnForceSplitConfigUpdated")
+    }
+
 #if defined(ENABLE_SPLIT_MODE)
     bool IsNewPageReplacing() const
     {

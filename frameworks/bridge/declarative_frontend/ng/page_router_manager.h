@@ -205,8 +205,6 @@ public:
     // begin from 1
     bool IsUnrestoreByIndex(int32_t index);
 
-    virtual void HandleForceSplitChange() {};
-
 protected:
     class RouterOptScope {
     public:

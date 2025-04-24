@@ -895,7 +895,6 @@ private:
         return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN;
     }
     bool SetSystemBarEnabled(SystemBarType type, bool enable, bool animation) override;
-    void RegisterForceSplitChangeCallBack();
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;

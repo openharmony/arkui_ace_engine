@@ -2451,7 +2451,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         LOGE("pipeline invalid,only new ArkUI pipeline support UIsession");
     }
 #endif
-    RegisterForceSplitChangeCallBack();
     RegisterOrientationUpdateListener();
     RegisterOrientationChangeListener();
     InitSystemBarConfig();
@@ -4487,17 +4486,4 @@ void AceContainer::UnsubscribeHighContrastChange()
     highContrastObserver_ = nullptr;
 }
 #endif
-
-void AceContainer::RegisterForceSplitChangeCallBack()
-{
-    LOGI("AceContainer RegisterForceSplitChangeCallBack begin");
-    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    CHECK_NULL_VOID(pipeline);
-
-    auto callback = [frontend = frontend_]() {
-        auto lock = frontend->GetLock();
-        frontend->OnForceSplitChange();
-    };
-    pipeline->SetForceSplitChangeCallBack(std::move(callback));
-}
 } // namespace OHOS::Ace::Platform

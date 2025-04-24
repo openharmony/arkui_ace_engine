@@ -337,8 +337,6 @@ public:
         return "";
     }
 
-    virtual void OnForceSplitChange() {}
-
 protected:
     virtual bool MaybeRelease() override;
     FrontendType type_ = FrontendType::JS;

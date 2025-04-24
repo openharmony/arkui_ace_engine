@@ -6001,21 +6001,14 @@ void PipelineContext::OnRotationAnimationEnd()
 
 void PipelineContext::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
 {
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "set force split %{public}s", isForceSplit ? "enable" : "disable");
     isDetectPrimaryPage_ = true;
-    if (isForceSplit_ != isForceSplit || homePageConfig_ != homePage) {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "set force split %{public}s", isForceSplit ? "enable" : "disable");
-        isForceSplit_ = isForceSplit;
-        homePageConfig_ = homePage;
-
-        auto callback = GetForceSplitChangeCallBack();
-        if (callback) {
-            TAG_LOGI(AceLogTag::ACE_ROUTER, "Trigger Force Split Change Callback");
-            callback();
-        } else {
-            TAG_LOGI(AceLogTag::ACE_ROUTER, "No Force Split Change Callback");
-        }
-    } else {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "set force split failed");
+    if (isForceSplit_ == isForceSplit && homePageConfig_ == homePage) {
+        return;
     }
+    isForceSplit_ = isForceSplit;
+    homePageConfig_ = homePage;
+    CHECK_NULL_VOID(stageManager_);
+    stageManager_->OnForceSplitConfigUpdated();
 }
 } // namespace OHOS::Ace::NG

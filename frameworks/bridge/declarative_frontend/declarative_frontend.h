@@ -250,8 +250,6 @@ public:
 
     std::string GetPagePathByUrl(const std::string& url) const override;
 
-    void OnForceSplitChange() override;
-
 protected:
     bool isFormRender_ = false;
     RefPtr<Framework::FrontendDelegateDeclarative> delegate_;

@@ -3734,11 +3734,4 @@ std::string FrontendDelegateDeclarative::GetPagePathByUrl(const std::string& url
     pageRouterManager_->GetPageNameAndPath(url, name, path);
     return path + name;
 }
-
-void FrontendDelegateDeclarative::OnForceSplitChange()
-{
-    TAG_LOGI(AceLogTag::ACE_ROUTER, "OnForceSplitChange");
-    CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->HandleForceSplitChange();
-}
 } // namespace OHOS::Ace::Framework
