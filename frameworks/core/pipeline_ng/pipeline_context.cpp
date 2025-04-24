@@ -6001,11 +6001,11 @@ void PipelineContext::OnRotationAnimationEnd()
 
 void PipelineContext::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
 {
+    isDetectPrimaryPage_ = true;
     if (isForceSplit_ != isForceSplit || homePageConfig_ != homePage) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "set force split %{public}s", isForceSplit ? "enable" : "disable");
         isForceSplit_ = isForceSplit;
         homePageConfig_ = homePage;
-        isSupportSplitMode_ = true;
 
         auto callback = GetForceSplitChangeCallBack();
         if (callback) {

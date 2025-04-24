@@ -1064,9 +1064,9 @@ public:
         return homePageConfig_;
     }
 
-    bool GetSupportSplitModeEnable() const
+    bool GetDetectPrimaryPageEnable() const
     {
-        return isSupportSplitMode_;
+        return isDetectPrimaryPage_;
     }
 
     bool CatchInteractiveAnimations(const std::function<void()>& animationCallback) override;
@@ -1513,7 +1513,7 @@ private:
     bool isDoKeyboardAvoidAnimate_ = true;
     bool isForceSplit_ = false;
     std::string homePageConfig_;
-    bool isSupportSplitMode_ = false;
+    bool isDetectPrimaryPage_ = false;
 
     std::list<FrameCallbackFuncFromCAPI> frameCallbackFuncsFromCAPI_;
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
