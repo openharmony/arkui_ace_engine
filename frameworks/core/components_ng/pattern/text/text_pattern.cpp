@@ -1595,6 +1595,148 @@ void TextPattern::OnHover(bool isHover)
     }
 }
 
+void TextPattern::InitSpanMouseEvent()
+{
+    CHECK_NULL_VOID(!spanMouseEventInitialized_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+
+    auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleSpanMouseEvent(info);
+    };
+    auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnMouseEvent(mouseEvent);
+
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover, HoverInfo& info) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "on hover event isHover=%{public}d", isHover);
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            if (!isHover) {
+                pattern->ExitSpansForOnHoverEvent(info);
+            }
+        }
+    };
+    auto hoverEvent = MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(hoverEvent);
+    spanMouseEventInitialized_ = true;
+}
+
+HoverInfo TextPattern::ConvertHoverInfoFromMouseInfo(const MouseInfo& info) const
+{
+    HoverInfo result;
+    result.SetGlobalLocation(info.GetGlobalLocation());
+    result.SetScreenLocation(info.GetScreenLocation());
+    result.SetLocalLocation(info.GetLocalLocation());
+    result.SetTimeStamp(info.GetTimeStamp());
+    result.SetTarget(info.GetTarget());
+    result.SetDeviceId(info.GetDeviceId());
+    result.SetTargetDisplayId(info.GetTargetDisplayId());
+    result.SetSourceDevice(info.GetSourceDevice());
+    if (info.GetTiltX().has_value()) {
+        result.SetTiltX(info.GetTiltX().value());
+    }
+    if (info.GetTiltY().has_value()) {
+        result.SetTiltY(info.GetTiltY().value());
+    }
+    if (info.GetRollAngle().has_value()) {
+        result.SetRollAngle(info.GetRollAngle().value());
+    }
+    result.SetStopPropagation(info.IsStopPropagation());
+    result.SetPreventDefault(info.IsPreventDefault());
+    return result;
+}
+
+void TextPattern::HandleSpanMouseEvent(const MouseInfo& info)
+{
+    RectF textContentRect = contentRect_;
+    textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
+    auto localLocation = info.GetLocalLocation();
+    if (selectOverlay_->HasRenderTransform()) {
+        localLocation = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
+    }
+    PointF textOffset = { static_cast<float>(localLocation.GetX()) - textContentRect.GetX(),
+        static_cast<float>(localLocation.GetY()) - textContentRect.GetY() };
+    TriggerSpansOnHover(ConvertHoverInfoFromMouseInfo(info), textOffset);
+}
+
+void TextPattern::TriggerSpanOnHoverEvent(const HoverInfo& info, const RefPtr<SpanItem>& item, bool isOnHover)
+{
+    TAG_LOGI(AceLogTag::ACE_TEXT, "on span hover event isHover=%{public}d", isOnHover);
+    item->isOnHover = isOnHover;
+    if (item->onHover) {
+        item->onHover(isOnHover, const_cast<HoverInfo&>(info));
+    }
+}
+
+void TextPattern::TriggerSpansOnHover(const HoverInfo& info, const PointF& textOffset)
+{
+    CHECK_NULL_VOID(!spans_.empty());
+    RefPtr<SpanItem> exitItem;
+    RefPtr<SpanItem> enterItem;
+    for (const auto& item : spans_) {
+        if (!item || !item->onHover) {
+            continue;
+        }
+        int32_t end = isSpanStringMode_ && item->position == -1 ? item->interval.second : item->position;
+        int32_t start = end - item->content.length();
+        auto selectedRects = GetSelectedRects(start, end);
+        for (auto&& rect : selectedRects) {
+            bool isOnHover = rect.IsInRegion(textOffset);
+            if (!isOnHover && item->isOnHover != isOnHover) {
+                exitItem = item;
+                break;
+            } else if (isOnHover && item->isOnHover != isOnHover) {
+                enterItem = item;
+                break;
+            }
+        }
+        if (exitItem && enterItem) {
+            break;
+        }
+    }
+    if (exitItem) {
+        TriggerSpanOnHoverEvent(info, exitItem, false);
+    }
+    if (enterItem) {
+        TriggerSpanOnHoverEvent(info, enterItem, true);
+    }
+}
+
+void TextPattern::ExitSpansForOnHoverEvent(const HoverInfo& info)
+{
+    CHECK_NULL_VOID(!spans_.empty());
+    for (const auto& item : spans_) {
+        if (!item || !item->onHover) {
+            continue;
+        }
+        bool isOnHover = false;
+        if (item->isOnHover == isOnHover) {
+            continue;
+        }
+        TriggerSpanOnHoverEvent(info, item, isOnHover);
+        return;
+    }
+}
+
+bool TextPattern::HasSpanOnHoverEvent() const
+{
+    CHECK_NULL_RETURN(!spanMouseEventInitialized_, false);
+    CHECK_NULL_RETURN(!spans_.empty(), false);
+    for (const auto& item : spans_) {
+        if (item && item->onHover) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void TextPattern::InitMouseEvent()
 {
     CHECK_NULL_VOID(!mouseEventInitialized_);
@@ -3582,6 +3724,9 @@ void TextPattern::BeforeCreateLayoutWrapper()
         PreCreateLayoutWrapper();
     }
     selectOverlay_->MarkOverlayDirty();
+    if (HasSpanOnHoverEvent()) {
+        InitSpanMouseEvent();
+    }
 }
 
 void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanHasClick)

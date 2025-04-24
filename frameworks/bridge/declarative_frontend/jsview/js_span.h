@@ -44,6 +44,7 @@ public:
     static void SetAccessibilityText(const JSCallbackInfo& info);
     static void SetAccessibilityDescription(const JSCallbackInfo& info);
     static void SetAccessibilityLevel(const JSCallbackInfo& info);
+    static void SetOnHover(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

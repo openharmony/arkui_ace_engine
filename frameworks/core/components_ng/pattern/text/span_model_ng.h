@@ -52,6 +52,8 @@ public:
     void SetAccessibilityText(const std::string& text) override;
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
+    void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
+    void ResetOnHover() override;
 
     static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId, const std::u16string& content);
     static void InitSpan(UINode* uiNode, const std::u16string& content);
@@ -107,6 +109,8 @@ public:
     static void SetAccessibilityDescription(UINode* uiNode, const std::string& description);
     static void SetAccessibilityImportance(UINode* uiNode, const std::string& importance);
     static std::vector<std::string> GetSpanFontFamily(UINode* uiNode);
+    static void SetOnHover(UINode* uiNode, OnHoverFunc&& onHoverEventFunc);
+    static void ResetOnHover(UINode* uiNode);
     // impl in render/adapter/span_model_adapter.cpp
     static RefPtr<SpanItem> CreateSpanItem(ArkUI_SpanItem* item);
     static ParagraphStyle CreateParagraphStyle(ArkUI_StyledString* styledString);

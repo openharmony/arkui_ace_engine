@@ -615,4 +615,40 @@ std::vector<std::string> SpanModelNG::GetSpanFontFamily(UINode* uiNode)
     CHECK_NULL_RETURN(spanNode, value);
     return spanNode->GetFontFamily().value_or(value);
 }
+
+void SpanModelNG::SetOnHover(OnHoverFunc&& onHoverEventFunc)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    spanItem->SetHoverEvent(std::move(onHoverEventFunc));
+}
+
+void SpanModelNG::SetOnHover(UINode* uiNode, OnHoverFunc&& onHoverEventFunc)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    spanItem->SetHoverEvent(std::move(onHoverEventFunc));
+}
+
+void SpanModelNG::ResetOnHover()
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    spanItem->ResetHoverEvent();
+}
+
+void SpanModelNG::ResetOnHover(UINode* uiNode)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    spanItem->ResetHoverEvent();
+}
 } // namespace OHOS::Ace::NG
