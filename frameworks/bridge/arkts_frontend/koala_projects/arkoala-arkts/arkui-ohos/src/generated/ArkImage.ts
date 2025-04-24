@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { KStringPtr, KBoolean, RuntimeType, runtimeType } from "@koalaui/interop"
+import { KStringPtr, KBoolean, RuntimeType, runtimeType, InteropNativeModule } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentBase } from "../ComponentBase"
 import { TypeChecker } from "#components"
@@ -27,7 +27,7 @@ import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_Tou
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, ColorFilter } from "./../component/units"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, ImageFit, CopyOptions } from "./../component/enums"
 import { LengthMetrics } from "../Graphics"
-import { ResizableOptions, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, DrawingColorFilter, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, ImageErrorCallback, ResolutionQuality, DrawableDescriptor, ImageAttribute, ImageContent } from "./../component/image"
+import { ResizableOptions, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, DrawingColorFilter, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, ImageErrorCallback, ResolutionQuality, DrawableDescriptor, ImageAttribute, ImageContent, ImageInterface } from "./../component/image"
 import { Resource } from "global/resource";
 import { Callback_Void } from "./../component/abilityComponent"
 import { FocusBoxStyle, FocusPriority } from "./../component/focus"
@@ -35,12 +35,26 @@ import { CircleShape } from "./ArkCircleShapeMaterialized"
 import { EllipseShape } from "./ArkEllipseShapeMaterialized"
 import { PathShape } from "./ArkPathShapeMaterialized"
 import { RectShape } from "./ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
+import { AttributeModifier } from "./../component/common"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./../component/gesture"
 import { PixelMap } from "./ArkPixelMapMaterialized"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./../component/imageCommon"
+import { ArkImageAttributeSet, ImageModifier } from "../handwritten/modifiers/ArkImageModifier"
+import { applyUIAttributes, ArkCommonAttributeSet } from "../handwritten/modifiers/ArkCommonModifier"
+import { AttributeUpdater } from "../AttributeUpdater"
+import { ArkImageNode } from "../handwritten/modifiers/ArkImageNode"
+import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 /** @memo:stable */
 export class ArkImageComponent extends ArkCommonMethodComponent implements ImageAttribute {
+
+    getModifierHost(): ArkBaseNode {
+        if (this._modifierHost == undefined || this._modifierHost == null) {
+            this._modifierHost = new ArkImageNode()
+            this._modifierHost!.setPeer(this.getPeer())
+        }
+        return this._modifierHost!
+    }
+
     getPeer(): ArkImagePeer {
         return (this.peer as ArkImagePeer)
     }
@@ -292,6 +306,32 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
             this.getPeer()?.enhancedImageQualityAttribute(value_casted)
             return this
         }
+        return this
+    }
+    /** @memo */
+    public attributeModifier<T>(value: AttributeModifier<T>): this {
+        let peerNode = this.getPeer()
+        if (!peerNode._attributeSet) {
+            let isImageModifier: boolean = (value instanceof ImageModifier)
+            if (isImageModifier) {
+                let imageModifier = value as object as ImageModifier
+                peerNode._attributeSet = imageModifier.attribute
+            } else {
+                peerNode._attributeSet = new ArkCommonAttributeSet()
+            }
+        }
+        applyUIAttributes(value, peerNode)
+        let isAttributeUpdater: boolean = (value instanceof AttributeUpdater)
+        if (isAttributeUpdater) {
+            let attributeUpdater = value as object as AttributeUpdater<ImageAttribute, ImageInterface>
+            attributeUpdater.updateConstructorParams = (...params: Object[]) => {
+                InteropNativeModule._NativeLog(`image update constructor params`)
+                const node = this.getModifierHost()! as ArkImageNode
+                this.getModifierHost()!.constructParam(params)
+                return node
+            }
+        }
+        peerNode._attributeSet!.applyModifierPatch(peerNode)
         return this
     }
     public applyAttributesFinish(): void {
