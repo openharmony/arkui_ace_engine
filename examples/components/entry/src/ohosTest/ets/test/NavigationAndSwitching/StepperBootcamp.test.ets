@@ -14,7 +14,7 @@ import {
   Search,
   getToggle,
   searchToggle
-} from '../utils';
+} from '../../utils';
 
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();

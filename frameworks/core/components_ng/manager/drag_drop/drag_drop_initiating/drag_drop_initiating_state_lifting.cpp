@@ -362,27 +362,6 @@ void DragDropInitiatingStateLifting::SetGatherAnimation(const RefPtr<PipelineBas
     DragAnimationHelper::ShowPreviewBadgeAnimation(gestureHub, manager);
 }
 
-void DragDropInitiatingStateLifting::ResetNodeInMultiDrag()
-{
-    auto machine = GetStateMachine();
-    CHECK_NULL_VOID(machine);
-    auto params = machine->GetDragDropInitiatingParams();
-    if (!params.isNeedGather) {
-        return;
-    }
-    auto mainPipeline = PipelineContext::GetMainPipelineContext();
-    CHECK_NULL_VOID(mainPipeline);
-    auto frameNode = params.frameNode.Upgrade();
-    CHECK_NULL_VOID(frameNode);
-    mainPipeline->AddAfterRenderTask([mainPipeline, weak = WeakClaim(RawPtr(frameNode))]() {
-        CHECK_NULL_VOID(mainPipeline);
-        auto manager = mainPipeline->GetOverlayManager();
-        auto frameNode = weak.Upgrade();
-        DragAnimationHelper::HideDragNodeCopy(manager);
-        DragDropFuncWrapper::ResetNode(frameNode);
-    });
-}
-
 void DragDropInitiatingStateLifting::SetEventColumn()
 {
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -449,7 +428,6 @@ void DragDropInitiatingStateLifting::Init(int32_t currentState)
         UpdateDragPreviewOptionFromModifier();
     }
     if (!CheckDoShowPreview(frameNode)) {
-        ResetNodeInMultiDrag();
         return;
     }
     if (gestureHub->GetTextDraggable()) {
@@ -525,5 +503,20 @@ void OHOS::Ace::NG::DragDropInitiatingStateLifting::SetTextAnimation()
     pattern->OnDragNodeFloating();
     pattern->CloseHandleAndSelect();
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set text animation success.");
+}
+
+void DragDropInitiatingStateLifting::HandlePreDragStatus(const PreDragStatus preDragStatus)
+{
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    if (!params.isNeedGather) {
+        return;
+    }
+    auto frameNode = params.frameNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    if (preDragStatus == PreDragStatus::PREVIEW_LIFT_FINISHED) {
+        DragDropFuncWrapper::ResetNode(frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -285,4 +285,11 @@ void DragDropEventActuator::NotifyDragEnd()
         dragDropInitiatingHandler_->NotifyDragEnd();
     }
 }
+
+void DragDropEventActuator::NotifyPreDragStatus(const PreDragStatus preDragStatus)
+{
+    if (dragDropInitiatingHandler_) {
+        dragDropInitiatingHandler_->NotifyPreDragStatus(preDragStatus);
+    }
+}
 } // namespace OHOS::Ace::NG

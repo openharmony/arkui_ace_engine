@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,9 @@
 #include "core/components_ng/render/adapter/render_surface_impl.h"
 
 #include "core/common/container.h"
+#ifdef RENDER_EXTRACT_SUPPORTED
+#include "cross_platform/surface_utils.h"
+#endif
 namespace OHOS::Ace::NG {
 
 RenderSurfaceImpl::~RenderSurfaceImpl()
@@ -22,6 +25,9 @@ RenderSurfaceImpl::~RenderSurfaceImpl()
     if (extSurface_) {
         extSurface_->Release();
     }
+#ifdef RENDER_EXTRACT_SUPPORTED
+    SurfaceUtils::GetInstance().RemoveNativeWindow(surfaceId_);
+#endif
 }
 
 void RenderSurfaceImpl::InitSurface()
@@ -102,6 +108,9 @@ void RenderSurfaceImpl::CreateNativeWindow()
     if (extSurface_) {
         LOGI("RenderSurfaceImpl::CreateNativeWindow called");
         nativeWindow_ = extSurface_->AttachNativeWindow();
+#ifdef RENDER_EXTRACT_SUPPORTED
+        SurfaceUtils::GetInstance().AddNativeWindow(surfaceId_, nativeWindow_);
+#endif
     }
 }
 
@@ -169,5 +178,21 @@ void RenderSurfaceImpl::SetIsFullScreen(bool isFullScreen)
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUISetIsFullScreen");
 }
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+void RenderSurfaceImpl::SetSurfaceRotation(bool isLock)
+{
+    if (extSurface_) {
+        extSurface_->SetSurfaceRotation(isLock);
+    }
+}
+
+void RenderSurfaceImpl::SetSurfaceRect(float positionX, float positionY, float width, float height)
+{
+    if (extSurface_) {
+        extSurface_->SetSurfaceRect(positionX, positionY, width, height);
+    }
+}
+#endif
 
 } // namespace OHOS::Ace::NG

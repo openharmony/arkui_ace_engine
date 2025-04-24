@@ -133,8 +133,6 @@ export struct DatePickerBootcamp {
   @State compFlexBasis: number | string = 'auto';
   @State enableCompDirection: boolean = false;
   @State compDirection: Direction = Direction.Auto;
-  @State enableHapticFeedback: boolean = false;
-  @State hapticFeedback: boolean = true;
   //part1
   // size
   @State enableCompWidth: boolean = false;
@@ -609,8 +607,6 @@ export struct DatePickerBootcamp {
   // Set DatePickerMode
   @State datePickerMode: DatePickerMode = DatePickerMode.DATE;
   @State enableMode: boolean = false;
-  @State enableFlag: boolean = false;
-  @State enableValue: boolean = true;
   private selectedDate: Date = new Date();
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
@@ -1484,26 +1480,6 @@ export struct DatePickerBootcamp {
             { label: 'Auto', value: Direction.Auto },
             { label: 'Ltr', value: Direction.Ltr },
             { label: 'Rtl', value: Direction.Rtl }
-          ]
-        })
-
-        RadioBlock({
-          title: 'disabled',
-          isEnabled: $enableFlag,
-          value: $enableValue,
-          dataSource: [
-            { label: 'enabled', value: true },
-            { label: 'disabled', value: false }
-          ]
-        })
-
-        RadioBlock({
-          title: 'hapticFeedback',
-          isEnabled: this.enableHapticFeedback,
-          value: this.hapticFeedback,
-          dataSource: [
-            { label: 'true', value: true },
-            { label: 'false', value: false }
           ]
         })
 

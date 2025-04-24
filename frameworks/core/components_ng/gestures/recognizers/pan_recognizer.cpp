@@ -967,7 +967,7 @@ double PanRecognizer::GetDistance() const
     return GetDistanceConfigFor(deviceTool_);
 }
 
-float PanRecognizer::GetDistanceConfigFor(SourceTool sourceTool) const
+double PanRecognizer::GetDistanceConfigFor(SourceTool sourceTool) const
 {
     if (distanceMap_.find(sourceTool) != distanceMap_.end()) {
         return distanceMap_.at(sourceTool);

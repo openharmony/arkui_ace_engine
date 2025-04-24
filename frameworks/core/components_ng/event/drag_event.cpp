@@ -1391,6 +1391,10 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
     if (!gestureHub->IsAllowedDrag(eventHub) || gestureHub->GetTextDraggable()) {
         return;
     }
+    auto actuator = gestureHub->GetDragEventActuator();
+    if (actuator) {
+        actuator->NotifyPreDragStatus(preDragStatus);
+    }
     if (preDragStatus == PreDragStatus::PREVIEW_LANDING_STARTED) {
         dragDropManager->SetIsDragNodeNeedClean(true);
     }
@@ -1405,10 +1409,22 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
             onPreDragStatus = preDragStatus;
         }
     }
+
+    ExecutePreDragFunc(preDragFrameNode, preDragStatus, onPreDragStatus);
+}
+
+void DragEventActuator::ExecutePreDragFunc(const RefPtr<FrameNode>& node,
+    const PreDragStatus preDragStatus, const PreDragStatus onPreDragStatus)
+{
+    CHECK_NULL_VOID(node);
+    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
     auto onPreDragFunc = eventHub->GetOnPreDrag();
     CHECK_NULL_VOID(onPreDragFunc);
     if (preDragStatus == PreDragStatus::PREVIEW_LIFT_FINISHED ||
         preDragStatus == PreDragStatus::PREVIEW_LANDING_FINISHED) {
+        auto mainPipeline = PipelineContext::GetMainPipelineContext();
+        CHECK_NULL_VOID(mainPipeline);
         auto taskScheduler = mainPipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask(

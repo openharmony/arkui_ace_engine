@@ -203,6 +203,7 @@ HWTEST_F(TextFieldPatternTestTwo, HandleClickEvent001, TestSize.Level0)
     layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
 
     pattern->obscureTickCountDown_ = 1;
+    pattern->multipleClickRecognizer_ = pattern->GetOrCreateMultipleClickRecognizer();
     pattern->multipleClickRecognizer_->clickCountTask_.Reset([] {});
     pattern->HandleClickEvent(info);
     pattern->multipleClickRecognizer_->clickCountTask_.Reset([] {});
@@ -275,7 +276,7 @@ HWTEST_F(TextFieldPatternTestTwo, HandleClickEvent002, TestSize.Level0)
     ASSERT_NE(selectOverlayNode, nullptr);
     auto geometryNode = selectOverlayNode->GetGeometryNode();
     geometryNode->frame_.rect_.SetRect(100, 100, 200, 200);
-
+    pattern->multipleClickRecognizer_ = pattern->GetOrCreateMultipleClickRecognizer();
     pattern->multipleClickRecognizer_->clickCountTask_.impl_ = nullptr;
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();

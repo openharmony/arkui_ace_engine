@@ -1961,6 +1961,12 @@ HWTEST_F(OverlayTestNg, ShowAIEntityMenu, TestSize.Level1)
     menuOptions.push_back(std::make_pair(MENU_CONTENT, []() {}));
     RectF handleRect(3.0, 3.0, 100.0f, 75.0f);
     EXPECT_TRUE(overlayManager->ShowAIEntityMenu(menuOptions, handleRect, targetNode));
+    auto rootChildren = rootNode->GetChildren();
+    auto iter = std::find_if(rootChildren.begin(), rootChildren.end(), [](const RefPtr<UINode>& uiNode) {
+        CHECK_NULL_RETURN(uiNode, false);
+        return uiNode->GetTag() == V2::MENU_WRAPPER_ETS_TAG;
+    });
+    EXPECT_TRUE(iter != rootChildren.end());
 }
 
 /**

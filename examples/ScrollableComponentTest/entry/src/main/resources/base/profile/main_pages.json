@@ -9,6 +9,7 @@
     "pages/Tabs/TabContentObserver",
     "pages/Tabs/TabsHeightAdaptive",
     "pages/Tabs/TabsSubTabBarStyle",
+    "pages/Tabs/TabsOnAnimationStart",
     "pages/Tabs/TabsBarOverLap_safeAreaPadding",
     "pages/Tabs/TabsBarOverLap_ContentEndOffset",
     "pages/Tabs/TabsedgeEffect_pan",

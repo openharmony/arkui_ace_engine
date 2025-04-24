@@ -20,6 +20,7 @@
 #include <iomanip>
 #include <optional>
 #include <sstream>
+#include <string>
 
 #include "event_handler.h"
 
@@ -32,6 +33,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
+#include "base/web/webview/interfaces/native/arkweb_net_error_list.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
@@ -102,6 +104,7 @@ constexpr uint32_t DRAG_DELAY_MILLISECONDS = 300;
 constexpr uint32_t ACCESSIBILITY_DELAY_MILLISECONDS = 100;
 constexpr uint32_t DELAY_MILLISECONDS_1000 = 1000;
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
+constexpr uint32_t ACCESSIBILITY_PAGE_CHANGE_DELAY_MILLISECONDS = 100;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
 
 const std::vector<std::string> CANONICALENCODINGNAMES = {
@@ -4042,7 +4045,7 @@ void WebDelegate::OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& 
                 setting->PutForceDarkModeEnabled(false);
             }
             if (delegate->enableFollowSystemFontWeight_) {
-                setting->SetFontWeightScale(stof(weightScale));
+                setting->SetFontWeightScale(std::stof(weightScale));
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebConfigurationUpdated");
@@ -4840,6 +4843,8 @@ void WebDelegate::OnPageFinished(const std::string& param)
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPageFinished");
+    
+    AccessibilitySendPageChange();
 }
 
 void WebDelegate::OnProgressChanged(int param)
@@ -5379,6 +5384,92 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
                     AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode())));
         },
         TaskExecutor::TaskType::JS, "ArkUIWebErrorReceive");
+    
+    if (error->ErrorCode() == ArkWeb_NetError::ARKWEB_ERR_INTERNET_DISCONNECTED) {
+        AccessibilityReleasePageEvent();
+    }
+}
+
+void WebDelegate::AccessibilitySendPageChange()
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostDelayedTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto context = AceType::DynamicCast<NG::PipelineContext>(delegate->context_.Upgrade());
+            CHECK_NULL_VOID(context);
+            auto webNode = webPattern->GetHost();
+            CHECK_NULL_VOID(webNode);
+            auto accessibilityManager = context->GetAccessibilityManager();
+            CHECK_NULL_VOID(accessibilityManager);
+            if (!accessibilityManager->IsScreenReaderEnabled()) {
+                return;
+            }
+            if (webNode->IsOnMainTree()) {
+                if (!accessibilityManager->CheckAccessibilityVisible(webNode)) {
+                    return;
+                }
+                if (accessibilityManager->CheckPageEventCached(webNode, false)) {
+                    TAG_LOGI(AceLogTag::ACE_WEB,
+                        "WebDelegate::AccessibilitySendPageChange CheckPageEventCached accessibilityId = "
+                        "%{public}" PRId64,
+                        webNode->GetAccessibilityId());
+                    accessibilityManager->ReleasePageEvent(webNode, true, true);
+                    return;
+                }
+                auto navigationMgr = context->GetNavigationManager();
+                if (navigationMgr && navigationMgr->IsNavigationInAnimation()) {
+                    TAG_LOGI(AceLogTag::ACE_WEB,
+                        "WebDelegate::AccessibilitySendPageChange IsNavigationInAnimation accessibilityId = "
+                        "%{public}" PRId64,
+                        webNode->GetAccessibilityId());
+                    accessibilityManager->ReleasePageEvent(webNode, true, true);
+                    return;
+                }
+                TAG_LOGI(AceLogTag::ACE_WEB,
+                    "WebDelegate::AccessibilitySendPageChange accessibilityId = %{public}" PRId64,
+                    webNode->GetAccessibilityId());
+                accessibilityManager->ReleasePageEvent(webNode, true, true);
+                AccessibilityEvent event;
+                event.nodeId = webNode->GetAccessibilityId();
+                event.type = AccessibilityEventType::PAGE_CHANGE;
+                accessibilityManager->SendAccessibilityAsyncEvent(event);
+            }
+        },
+        TaskExecutor::TaskType::UI, ACCESSIBILITY_PAGE_CHANGE_DELAY_MILLISECONDS,
+        "ArkUIWebAccessibilitySendPageChange");
+}
+
+void WebDelegate::AccessibilityReleasePageEvent()
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostDelayedTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto context = AceType::DynamicCast<NG::PipelineContext>(delegate->context_.Upgrade());
+            CHECK_NULL_VOID(context);
+            auto webNode = webPattern->GetHost();
+            CHECK_NULL_VOID(webNode);
+            auto accessibilityManager = context->GetAccessibilityManager();
+            CHECK_NULL_VOID(accessibilityManager);
+            if (!accessibilityManager->IsScreenReaderEnabled()) {
+                return;
+            }
+            if (webNode->IsOnMainTree()) {
+                TAG_LOGI(AceLogTag::ACE_WEB,
+                    "WebDelegate::AccessibilityReleasePageEvent accessibilityId = %{public}" PRId64,
+                    webNode->GetAccessibilityId());
+                accessibilityManager->ReleasePageEvent(webNode, true, true);
+            }
+        },
+        TaskExecutor::TaskType::UI, ACCESSIBILITY_PAGE_CHANGE_DELAY_MILLISECONDS,
+        "ArkUIWebAccessibilityReleasePageEvent");
 }
 
 void WebDelegate::ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart)
