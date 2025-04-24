@@ -340,6 +340,20 @@ class SpanAccessibilityLevelModifier extends ModifierWithKey<string> {
   }
 }
 
+class SpanOnHoverModifier extends ModifierWithKey<(isHover?: boolean, event?: HoverEvent) => void> {
+  constructor(value) {
+    super(value);
+  }
+  static identity = Symbol('spanOnHover');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().span.resetOnHover(node);
+    } else {
+      getUINativeModule().span.setOnHover(node, this.value);
+    }
+  }
+}
+
 class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   _changed: boolean;
@@ -524,7 +538,8 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   }
 
   onHover(event: (isHover?: boolean, event?: HoverEvent) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SpanOnHoverModifier.identity, SpanOnHoverModifier, event);
+    return this;
   }
 
   hoverEffect(value: HoverEffect): this {

@@ -28,6 +28,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -360,6 +361,27 @@ void JSSpan::SetAccessibilityLevel(const JSCallbackInfo& info)
     SpanModel::GetInstance()->SetAccessibilityImportance(level);
 }
 
+void JSSpan::SetOnHover(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        SpanModel::GetInstance()->ResetOnHover();
+        return;
+    }
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onHover = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc), node = frameNode](
+        bool isHover, HoverInfo& hoverInfo) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onHover");
+        PipelineContext::SetCallBackNode(node);
+        func->HoverExecute(isHover, hoverInfo);
+    };
+    SpanModel::GetInstance()->SetOnHover(std::move(onHover));
+}
+
 void JSSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSpan>::Declare("Span");
@@ -377,7 +399,7 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::StaticMethod("textShadow", &JSSpan::SetTextShadow, opt);
     JSClass<JSSpan>::StaticMethod("decoration", &JSSpan::SetDecoration);
     JSClass<JSSpan>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSSpan>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSSpan>::StaticMethod("onHover", &JSSpan::SetOnHover);
     JSClass<JSSpan>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSpan>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSpan>::StaticMethod("remoteMessage", &JSSpan::JsRemoteMessage);

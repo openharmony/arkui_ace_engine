@@ -733,6 +733,13 @@ protected:
     virtual void InitAISpanHoverEvent();
     virtual void HandleAISpanHoverEvent(const MouseInfo& info);
     void OnHover(bool isHover);
+    void InitSpanMouseEvent();
+    HoverInfo ConvertHoverInfoFromMouseInfo(const MouseInfo& info) const;
+    void HandleSpanMouseEvent(const MouseInfo& info);
+    void TriggerSpanOnHoverEvent(const HoverInfo& info, const RefPtr<SpanItem>& item, bool isOnHover);
+    void TriggerSpansOnHover(const HoverInfo& info, const PointF& textOffset);
+    void ExitSpansForOnHoverEvent(const HoverInfo& info);
+    bool HasSpanOnHoverEvent();
     void InitMouseEvent();
     void InitFocusEvent();
     void InitHoverEvent();
@@ -827,6 +834,7 @@ protected:
     int32_t recoverEnd_ = 0;
     bool aiSpanHoverEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
+    bool spanMouseEventInitialized_ = false;
     bool isHover_ = false;
     bool panEventInitialized_ = false;
     bool clickEventInitialized_ = false;
