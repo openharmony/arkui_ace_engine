@@ -1926,6 +1926,25 @@ HWTEST_F(LongPressRecognizerTestNg, StartRepeatTimerTest001, TestSize.Level1)
     longPressRecognizer->StartRepeatTimer();
     EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 0);
 }
+/**
+ * @tc.name: GetOnAccessibilityEventFunc001
+ * @tc.desc: Test LongPressRecognizer function: GetOnAccessibilityEventFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, GetOnAccessibilityEventFunc001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+
+    /**
+     * @tc.steps: step2. check callback function.
+     * @tc.expected: callback function is not null.
+     */
+    ASSERT_NE(longPressRecognizer->onAccessibilityEventFunc_, nullptr);
+}
 
 /**
  * @tc.name: LongPressRecognizerBasicInfoTest001

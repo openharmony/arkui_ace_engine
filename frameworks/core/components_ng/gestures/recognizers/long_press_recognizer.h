@@ -146,6 +146,7 @@ private:
     double ConvertPxToVp(double offset) const;
     void ThumbnailTimer(int32_t time);
     RefPtr<DragEventActuator> GetDragEventActuator();
+    OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
 
     TouchEvent lastTouchEvent_;
     WeakPtr<GestureEventHub> gestureHub_;
