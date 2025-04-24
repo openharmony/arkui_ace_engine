@@ -349,6 +349,21 @@ void OnHoverMoveImpl(Ark_NativePointer node,
 void OnAccessibilityHoverImpl(Ark_NativePointer node,
                               const Opt_AccessibilityCallback* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!value) {
+        ViewAbstract::DisableOnAccessibilityHover(frameNode);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onAccessibilityHover = [arkCallback = CallbackHelper(value->value), node = weakNode](
+        bool isHover, AccessibilityHoverInfo& hoverInfo) {
+        PipelineContext::SetCallBackNode(node);
+        Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
+        auto event = Converter::ArkAccessibilityHoverEventSync(hoverInfo);
+        arkCallback.InvokeSync(arkIsHover, event.ArkValue());
+    };
+    ViewAbstract::SetOnAccessibilityHover(frameNode, std::move(onAccessibilityHover));
 }
 void HoverEffectImpl(Ark_NativePointer node,
                      const Opt_HoverEffect* value)
@@ -1260,6 +1275,13 @@ void AccessibilityLevelImpl(Ark_NativePointer node,
 void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
                                   const Opt_CustomNodeBuilder* value)
 {
+    CHECK_NULL_VOID(value);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto builder = [callback = CallbackHelper(value->value), node]() -> RefPtr<UINode> {
+        return callback.BuildSync(node);
+    };
+    ViewAbstractModelNG::SetAccessibilityVirtualNode(frameNode, std::move(builder));
 }
 void AccessibilityCheckedImpl(Ark_NativePointer node,
                               const Opt_Boolean* value)
