@@ -50,7 +50,7 @@ enum class WindowSizeChangeReason : uint32_t {
     SPLIT_DRAG,
     SPLIT_DRAG_END,
     RESIZE_BY_LIMIT,
-    MAXIMIZE_IN_IMPLICT,
+    MAXIMIZE_IN_IMPLICT = 32,
     END,
 };
 } // namespace OHOS::Ace
