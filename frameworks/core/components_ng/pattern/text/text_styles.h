@@ -251,6 +251,7 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HalfLeading, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AllowScale, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ParagraphSpacing, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(OptimizeTrailingSpace, bool);
 };
 
 struct HandleInfoNG {

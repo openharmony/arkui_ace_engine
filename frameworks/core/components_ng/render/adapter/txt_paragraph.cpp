@@ -22,6 +22,7 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/base/log/log_wrapper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -84,6 +85,7 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
                 ? static_cast<OHOS::Rosen::TextHeightBehavior>(TextHeightBehavior::DISABLE_ALL)
                 : static_cast<OHOS::Rosen::TextHeightBehavior>(TextHeightBehavior::DISABLE_LAST_ASCENT);
     }
+    style.isTrailingSpaceOptimized = paraStyle.optimizeTrailingSpace;
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);

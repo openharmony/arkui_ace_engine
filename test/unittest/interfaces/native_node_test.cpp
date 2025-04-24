@@ -6698,4 +6698,35 @@ HWTEST_F(NativeNodeTest, NativeNodeTest141, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_EMBEDDED_COMPONENT_OPTION, &item0);
     nodeAPI->disposeNode(rootNode);
 }
+
+/**
+ * @tc.name: NativeNodeTest128
+ * @tc.desc: Test optimizeTrailingSpace function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest128, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_TEXT, nullptr, true});
+    ArkUI_NumberValue value[] = {{.i32 = true}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    value[0].i32 = false;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE, &item), ARKUI_ERROR_CODE_NO_ERROR);
+
+    item.size = -1;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE, &item),
+    ARKUI_ERROR_CODE_PARAM_INVALID);
+    item.size = 1;
+    value[0].i32 = 2;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE, &item),
+    ARKUI_ERROR_CODE_PARAM_INVALID);
+    value[0].i32 = true;
+
+    nodeAPI->resetAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_OPTIMIZE_TRAILING_SPACE), nullptr);
+    nodeAPI->disposeNode(rootNode);
+}
 } // namespace OHOS::Ace

@@ -424,6 +424,23 @@ class TextLineSpacingModifier extends ModifierWithKey<ArkLineSpacing> {
   }
 }
 
+class TextOptimizeTrailingSpaceModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textOptimizeTrailingSpace');
+  applyPeer(node: KNode, reset: boolean): void {
+    if(reset) {
+      getUINativeModule().text.resetOptimizeTrailingSpace(node);
+    } else {
+      getUINativeModule().text.setOptimizeTrailingSpace(node, this.value!)
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextTextOverflowModifier extends ModifierWithKey<{ overflow: TextOverflow }> {
   constructor(value: { overflow: TextOverflow }) {
     super(value);
@@ -961,6 +978,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     arkLineSpacing.value = value;
     arkLineSpacing.onlyBetweenLines = options.onlyBetweenLines;
     modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, arkLineSpacing);
+    return this;
+  }
+  optimizeTrailingSpace(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextOptimizeTrailingSpaceModifier.identity, TextOptimizeTrailingSpaceModifier, value);
     return this;
   }
   textCase(value: TextCase): TextAttribute {

@@ -1282,4 +1282,22 @@ size_t TextModelNG::GetLineCount(FrameNode* frameNode)
     CHECK_NULL_RETURN(textPattern, 0);
     return textPattern->GetLineCount();
 }
+
+void TextModelNG::SetOptimizeTrailingSpace(bool trim)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, OptimizeTrailingSpace, trim);
+}
+
+void TextModelNG::SetOptimizeTrailingSpace(FrameNode* frameNode, bool trim)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, OptimizeTrailingSpace, trim, frameNode);
+}
+
+bool TextModelNG::GetOptimizeTrailingSpace(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, OptimizeTrailingSpace, value, frameNode, value);
+    return value;
+}
 } // namespace OHOS::Ace::NG
