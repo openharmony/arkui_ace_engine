@@ -29,6 +29,7 @@ public:
     bool WillRunOnCurrentThread() override;
     void Call(const TaskExecutor::Task& task) override;
     void Call(const TaskExecutor::Task& task, uint32_t delayTime) override;
+    static void CallInWorker(const TaskExecutor::Task& task, uint32_t delayTime, napi_env env);
 
 private:
     pthread_t threadId_ = 0;
