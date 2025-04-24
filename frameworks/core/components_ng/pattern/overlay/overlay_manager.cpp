@@ -3662,6 +3662,11 @@ void OverlayManager::RemoveDialogFromMap(const RefPtr<FrameNode>& node)
     dialogMap_.erase(node->GetId());
 }
 
+void OverlayManager::RemoveDialogFromMapForcefully(const RefPtr<FrameNode>& node)
+{
+    dialogMap_.erase(node->GetId());
+}
+
 void OverlayManager::RemoveMaskFromMap(const RefPtr<FrameNode>& dialogNode)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove mask from map enter");

@@ -2296,6 +2296,17 @@ void DialogPattern::OnAttachToMainTree()
     });
 }
 
+void DialogPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->RemoveDialogFromMapForcefully(host);
+}
+
 void DialogPattern::MountMaskToUECHost()
 {
     auto hasHostMask = !hostMaskInfo_.uuid.empty();
