@@ -20,6 +20,7 @@
 #include <iomanip>
 #include <optional>
 #include <sstream>
+#include <string>
 
 #include "event_handler.h"
 
