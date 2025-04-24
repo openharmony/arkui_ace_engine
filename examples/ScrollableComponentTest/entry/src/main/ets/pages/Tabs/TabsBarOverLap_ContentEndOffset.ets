@@ -33,7 +33,7 @@ struct barBackgroundColorTest {
             ForEach(this.arr, (item:number)=> {
               ListItem() {
                 Row() {
-                  Image($r('app.media.app_icon')).size({width:64, height:64})
+                  Image($r('app.media.startIcon')).size({width:64, height:64})
                   Text("item" + item.toString())
                   Blank()
                   Button("下载")
