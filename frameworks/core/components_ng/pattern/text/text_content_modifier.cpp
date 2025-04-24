@@ -470,7 +470,7 @@ void TextContentModifier::SetHybridRenderTypeIfNeeded(DrawingContext& drawingCon
                 static_cast<uint32_t>(pManager->GetLineCount()) >=
                 Rosen::RSSystemProperties::GetHybridRenderTextBlobLenCount()) {
                     auto textWidth = pManager->GetMaxWidth();
-                    auto textHeight = pManager->GetMaxHeight();
+                    auto textHeight = pManager->GetHeight();
                     recordingCanvas->ResetSize(textWidth, textHeight);
                     recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::TEXT);
             }
