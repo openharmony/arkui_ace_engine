@@ -61,6 +61,8 @@ public:
     virtual void SetAccessibilityText(const std::string& text) = 0;
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
+    virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
+    virtual void ResetOnHover() = 0;
 
     virtual void CreateContainSpan() {};
     virtual void SetTextBackgroundStyle(const TextBackgroundStyle& style) {};

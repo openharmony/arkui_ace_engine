@@ -52,6 +52,8 @@ public:
     void SetAccessibilityText(const std::string& text) override {};
     void SetAccessibilityDescription(const std::string& description) override {};
     void SetAccessibilityImportance(const std::string& importance) override {};
+    void SetOnHover(OnHoverFunc&& onHoverEventFunc) override {};
+    void ResetOnHover() override {};
 
 private:
     void Create(const std::string& content);

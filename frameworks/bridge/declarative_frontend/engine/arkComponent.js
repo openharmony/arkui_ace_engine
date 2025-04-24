@@ -11451,6 +11451,19 @@ class SpanAccessibilityLevelModifier extends ModifierWithKey {
   }
 }
 SpanAccessibilityLevelModifier.identity = Symbol('spanAccessibilityLevel');
+class SpanOnHoverModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().span.resetOnHover(node);
+    } else {
+      getUINativeModule().span.setOnHover(node, this.value);
+    }
+  }
+}
+SpanOnHoverModifier.identity = Symbol('spanOnHover');
 class ArkSpanComponent {
   constructor(nativePtr, classType) {
     this._modifiersWithKeys = new Map();
@@ -11598,7 +11611,8 @@ class ArkSpanComponent {
     return this;
   }
   onHover(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SpanOnHoverModifier.identity, SpanOnHoverModifier, event);
+    return this;
   }
   hoverEffect(value) {
     throw new Error('Method not implemented.');
