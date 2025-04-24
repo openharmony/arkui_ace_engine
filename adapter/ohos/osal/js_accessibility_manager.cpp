@@ -2478,6 +2478,18 @@ void ClearAccessibilityFocus(const RefPtr<NG::FrameNode>& root, int64_t focusNod
     }
 }
 
+NG::RectT<int32_t> GetFrameNodeRectInt(const RefPtr<NG::FrameNode>& frameNode)
+{
+    auto rect = frameNode->GetTransformRectRelativeToWindow();
+    NG::RectT<int32_t> rectInt {
+        static_cast<int32_t>(std::floor(rect.Left())),
+        static_cast<int32_t>(std::floor(rect.Top())),
+        static_cast<int32_t>(std::floor(rect.Width())),
+        static_cast<int32_t>(std::floor(rect.Height()))
+    };
+    return rectInt;
+}
+
 void UpdateAccessibilityFocusRect(const RefPtr<NG::FrameNode>& frameNode,
     RefPtr<NG::RenderContext>& renderContext,
     bool isAccessibilityVirtualNode)
@@ -2496,10 +2508,7 @@ void UpdateAccessibilityFocusRect(const RefPtr<NG::FrameNode>& frameNode,
         }
     } else {
         if (isAccessibilityVirtualNode) {
-            auto rect = frameNode->GetTransformRectRelativeToWindow();
-            NG::RectT<int32_t> rectInt { static_cast<int32_t>(rect.Left()), static_cast<int32_t>(rect.Top()),
-                static_cast<int32_t>(rect.Width()), static_cast<int32_t>(rect.Height()) };
-            renderContext->UpdateAccessibilityFocusRect(rectInt);
+            renderContext->UpdateAccessibilityFocusRect(GetFrameNodeRectInt(frameNode));
             renderContext->UpdateAccessibilityFocus(true, frameNode->GetAccessibilityId());
         } else {
             renderContext->ResetAccessibilityFocusRect();
@@ -2508,8 +2517,27 @@ void UpdateAccessibilityFocusRect(const RefPtr<NG::FrameNode>& frameNode,
     }
 }
 
+void ClearVirtualNodeAccessibilityFocus(const RefPtr<NG::FrameNode>& root, int64_t currentFocusVirtualNodeParentId)
+{
+    CHECK_EQUAL_VOID(currentFocusVirtualNodeParentId, -1);
+    auto currentFocusVirtualNodeParentNode = GetFramenodeByAccessibilityId(root, currentFocusVirtualNodeParentId);
+    CHECK_NULL_VOID(currentFocusVirtualNodeParentNode);
+    auto renderContext = currentFocusVirtualNodeParentNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateAccessibilityFocus(false);
+}
+
+void SetParentAccessibilityId(const RefPtr<NG::FrameNode>& frameNode, AccessibilityFocusInfo& focusInfo)
+{
+    auto parentUinode = frameNode->GetVirtualNodeParent().Upgrade();
+    CHECK_NULL_VOID(parentUinode);
+    auto parentFrame = AceType::DynamicCast<NG::FrameNode>(parentUinode);
+    CHECK_NULL_VOID(parentFrame);
+    focusInfo.currentFocusVirtualNodeParentId = parentFrame->GetAccessibilityId();
+}
+
 bool ActAccessibilityFocus(int64_t elementId, const RefPtr<NG::FrameNode>& frameNode,
-    RefPtr<NG::PipelineContext>& context, int64_t& currentFocusNodeId, bool isNeedClear)
+    RefPtr<NG::PipelineContext>& context, AccessibilityFocusInfo& focusInfo, bool isNeedClear)
 {
     CHECK_NULL_RETURN(frameNode, false);
     bool isAccessibilityVirtualNode = frameNode->IsAccessibilityVirtualNode();
@@ -2525,27 +2553,32 @@ bool ActAccessibilityFocus(int64_t elementId, const RefPtr<NG::FrameNode>& frame
     }
     CHECK_NULL_RETURN(renderContext, false);
     if (isNeedClear) {
-        if (elementId != currentFocusNodeId) {
+        if (elementId != focusInfo.currentFocusNodeId) {
             return false;
         }
         if (isAccessibilityVirtualNode) {
             renderContext->UpdateAccessibilityFocus(false);
+            focusInfo.currentFocusVirtualNodeParentId = -1;
         } else {
             PaintAccessibilityFocusNode(frameNode, false);
         }
-        currentFocusNodeId = -1;
+        focusInfo.currentFocusNodeId = -1;
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_RETURN(accessibilityProperty, true);
         accessibilityProperty->OnAccessibilityFocusCallback(false);
         accessibilityProperty->SetAccessibilityFocusState(false);
         return true;
     }
-    if (elementId == currentFocusNodeId) {
-        return false;
+    CHECK_EQUAL_RETURN(elementId, focusInfo.currentFocusNodeId, false);
+    ClearAccessibilityFocus(context->GetRootElement(), focusInfo.currentFocusNodeId);
+    if (focusInfo.currentFocusNodeId != focusInfo.currentFocusVirtualNodeParentId) {
+        ClearVirtualNodeAccessibilityFocus(context->GetRootElement(), focusInfo.currentFocusVirtualNodeParentId);
     }
-    Framework::ClearAccessibilityFocus(context->GetRootElement(), currentFocusNodeId);
     UpdateAccessibilityFocusRect(frameNode, renderContext, isAccessibilityVirtualNode);
-    currentFocusNodeId = frameNode->GetAccessibilityId();
+    focusInfo.currentFocusNodeId = frameNode->GetAccessibilityId();
+    if (isAccessibilityVirtualNode) {
+        SetParentAccessibilityId(frameNode, focusInfo);
+    }
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, false);
     accessibilityProperty->OnAccessibilityFocusCallback(true);
@@ -2895,10 +2928,7 @@ void JsAccessibilityManager::UpdateVirtualNodeFocus()
             auto rectInt = accessibilityProperty->GetAccessibilityResponseRegionRect(true);
             renderContext->UpdateAccessibilityFocusRect(rectInt);
         } else {
-            auto rect = frameNode->GetTransformRectRelativeToWindow();
-            NG::RectT<int32_t> rectInt { static_cast<int32_t>(rect.Left()), static_cast<int32_t>(rect.Top()),
-                static_cast<int32_t>(rect.Width()), static_cast<int32_t>(rect.Height()) };
-            renderContext->UpdateAccessibilityFocusRect(rectInt);
+            renderContext->UpdateAccessibilityFocusRect(GetFrameNodeRectInt(frameNode));
         }
         renderContext->UpdateAccessibilityFocus(true, frameNode->GetAccessibilityId());
         accessibilityProperty->SetAccessibilityFocusState(true);
@@ -6032,12 +6062,18 @@ bool JsAccessibilityManager::ConvertActionTypeToBoolen(ActionType action, RefPtr
         case ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS: {
             SaveLast(elementId, frameNode);
             SaveCurrentFocusNodeSize(frameNode);
-            result = ActAccessibilityFocus(elementId, frameNode, context, currentFocusNodeId_, false);
+            AccessibilityFocusInfo focusInfo{ currentFocusNodeId_, currentFocusVirtualNodeParentId_ };
+            result = ActAccessibilityFocus(elementId, frameNode, context, focusInfo, false);
+            currentFocusNodeId_ = focusInfo.currentFocusNodeId;
+            currentFocusVirtualNodeParentId_ = focusInfo.currentFocusVirtualNodeParentId;
             break;
         }
         case ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
             SaveLast(elementId, frameNode);
-            result = ActAccessibilityFocus(elementId, frameNode, context, currentFocusNodeId_, true);
+            AccessibilityFocusInfo focusInfo{ currentFocusNodeId_, currentFocusVirtualNodeParentId_ };
+            result = ActAccessibilityFocus(elementId, frameNode, context, focusInfo, true);
+            currentFocusNodeId_ = focusInfo.currentFocusNodeId;
+            currentFocusVirtualNodeParentId_ = focusInfo.currentFocusVirtualNodeParentId;
             break;
         }
         default:
@@ -6524,6 +6560,15 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
         instance->DeregisterElementOperator(context->GetWindowId());
     }
     NotifyChildTreeOnDeregister();
+
+    CHECK_EQUAL_VOID(currentFocusVirtualNodeParentId_, -1);
+    auto pipelineContext = GetPipelineContext().Upgrade();
+    CHECK_NULL_VOID(pipelineContext);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(ngPipeline);
+    auto rootNode = ngPipeline->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    ClearVirtualNodeAccessibilityFocus(rootNode, currentFocusVirtualNodeParentId_);
 }
 
 void JsAccessibilityManager::RegisterAccessibilityChildTreeCallback(
