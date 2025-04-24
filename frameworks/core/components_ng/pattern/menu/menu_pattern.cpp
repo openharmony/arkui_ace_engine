@@ -315,6 +315,36 @@ void MenuPattern::OnModifyDone()
     }
 }
 
+void MenuPattern::UpdateMenuBorderAndBackgroundBlur()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!renderContext->HasBorderColor()) {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(theme->GetMenuNormalBorderColor());
+        renderContext->UpdateBorderColor(borderColor);
+    }
+    if (!renderContext->HasBorderWidth()) {
+        auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
+        auto menuBorderWidth = theme->GetMenuNormalBorderWidth();
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(menuBorderWidth);
+        menuLayoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
+        auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
+        CHECK_NULL_VOID(scroll);
+        auto scrollRenderContext = scroll->GetRenderContext();
+        CHECK_NULL_VOID(scrollRenderContext);
+        scrollRenderContext->UpdateOffset(OffsetT<Dimension>(menuBorderWidth, menuBorderWidth));
+    }
+}
+
 void MenuPattern::ResetThemeByInnerMenuCount()
 {
     auto host = GetHost();
@@ -483,6 +513,31 @@ void InnerMenuPattern::OnModifyDone()
     CHECK_NULL_VOID(selecTheme);
     if (selecTheme->GetMenuNeedFocus()) {
         InitDefaultBorder(host);
+    }
+}
+
+void InnerMenuPattern::InitDefaultBorder(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto menuTheme = context->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    if (!renderContext->HasBorderColor()) {
+        BorderColorProperty borderColorProperty;
+        borderColorProperty.SetColor(menuTheme->GetBorderColor());
+        renderContext->UpdateBorderColor(borderColorProperty);
+    }
+
+    if (!renderContext->HasBorderWidth()) {
+        auto layoutProperty = host->GetLayoutProperty<MenuLayoutProperty>();
+        BorderWidthProperty widthProp;
+        widthProp.SetBorderWidth(menuTheme->GetBorderWidth());
+        layoutProperty->UpdateBorderWidth(widthProp);
+        renderContext->UpdateBorderWidth(widthProp);
     }
 }
 
