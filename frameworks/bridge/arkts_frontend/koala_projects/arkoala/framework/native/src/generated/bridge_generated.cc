@@ -10591,62 +10591,6 @@ void impl_NodeContainerInterface_setOnDetach(Ark_NativePointer thisPtr, KSeriali
         GetNodeModifiers()->getNodeContainerModifier()->setOnDetach(self, (const Callback_Void*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(NodeContainerInterface_setOnDetach, Ark_NativePointer, KSerializerBuffer, Ark_Int32)
-void impl_NodeContainerInterface_setOnBind(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength)
-{
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        Deserializer thisDeserializer(thisArray, thisLength);
-        Callback_Number_Void value_value = { thisDeserializer.readCallbackResource(),
-            reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_Number containerId)>(
-                thisDeserializer.readPointerOrDefault(
-                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Void)))),
-            reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number containerId)>(
-                thisDeserializer.readPointerOrDefault(
-                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_Void)))) };
-        GetNodeModifiers()->getNodeContainerModifier()->setOnBind(self, (const Callback_Number_Void*)&value_value);
-}
-KOALA_INTEROP_DIRECT_V3(NodeContainerInterface_setOnBind, Ark_NativePointer, KSerializerBuffer, Ark_Int32)
-void impl_NodeContainerInterface_setOnUnBind(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength)
-{
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        Deserializer thisDeserializer(thisArray, thisLength);
-        Callback_Number_Void value_value = { thisDeserializer.readCallbackResource(),
-            reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_Number containerId)>(
-                thisDeserializer.readPointerOrDefault(
-                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Void)))),
-            reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number containerId)>(
-                thisDeserializer.readPointerOrDefault(
-                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_Void)))) };
-        GetNodeModifiers()->getNodeContainerModifier()->setOnUnBind(self, (const Callback_Number_Void*)&value_value);
-}
-KOALA_INTEROP_DIRECT_V3(NodeContainerInterface_setOnUnBind, Ark_NativePointer, KSerializerBuffer, Ark_Int32)
-void impl_NodeContainerInterface_setOnWillBind(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength)
-{
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        Deserializer thisDeserializer(thisArray, thisLength);
-        Callback_Number_Void value_value = { thisDeserializer.readCallbackResource(),
-            reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_Number containerId)>(
-                thisDeserializer.readPointerOrDefault(
-                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Void)))),
-            reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number containerId)>(
-                thisDeserializer.readPointerOrDefault(
-                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_Void)))) };
-        GetNodeModifiers()->getNodeContainerModifier()->setOnWillBind(self, (const Callback_Number_Void*)&value_value);
-}
-KOALA_INTEROP_DIRECT_V3(NodeContainerInterface_setOnWillBind, Ark_NativePointer, KSerializerBuffer, Ark_Int32)
-void impl_NodeContainerInterface_setOnWillUnBind(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength)
-{
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        Deserializer thisDeserializer(thisArray, thisLength);
-        Callback_Number_Void value_value = { thisDeserializer.readCallbackResource(),
-            reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_Number containerId)>(
-                thisDeserializer.readPointerOrDefault(
-                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Void)))),
-            reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number containerId)>(
-                thisDeserializer.readPointerOrDefault(
-                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_Void)))) };
-        GetNodeModifiers()->getNodeContainerModifier()->setOnWillUnBind(self, (const Callback_Number_Void*)&value_value);
-}
-KOALA_INTEROP_DIRECT_V3(NodeContainerInterface_setOnWillUnBind, Ark_NativePointer, KSerializerBuffer, Ark_Int32)
 void impl_NodeContainerInterface_setOnTouchEvent(
     Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength)
 {

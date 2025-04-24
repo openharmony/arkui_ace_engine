@@ -80,30 +80,6 @@ export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NodeContainerInterface_setOnDetach(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onBindAttribute(value: (() => void)) {
-        const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NodeContainerInterface_setOnBind(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    onUnBindAttribute(value: (() => void)) {
-        const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NodeContainerInterface_setOnUnBind(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    onWillBindAttribute(value: (() => void)) {
-        const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NodeContainerInterface_setOnWillBind(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    onWillUnBindAttribute(value: (() => void)) {
-        const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NodeContainerInterface_setOnWillUnBind(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     onTouchEventAttribute(value: ((event: TouchEvent) => void)) {
         const thisSerializer: Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
@@ -120,54 +96,46 @@ export class ArkNodeContainerStyle extends ArkCommonMethodStyle implements NodeC
 }
 /** @memo:stable */
 export class ArkNodeContainerComponent extends ArkCommonMethodComponent implements UINodeContainerAttribute {
-    controller: NodeController | null = null
+    private controller: NodeController | null = null;
     getPeer(): ArkNodeContainerPeer {
         return (this.peer as ArkNodeContainerPeer)
     }
     /** @memo */
     public setNodeContainerOptions(controller: NodeController): this {
         if (this.checkPriority("setNodeContainerOptions")) {
+            if (this.controller) {
+                this.controller!.onWillUnBind(this.getPeer().getId())
+                this.controller!.resetNodeContainer()
+                this.controller!.onUnBind(this.getPeer().getId())
+                this.controller = null
+            }
+            controller.onWillBind(this.getPeer().getId())
             this.controller = controller
+            this.controller!.setNodeContainer(this)
             // makeNode
             const makeNodeFunc = controller.__makeNode__
             const child = makeNodeFunc(new UIContext(100000))
             this.getPeer().addNodeContainerRootNode(child!)
-
             // aboutToAppear
             const aboutToAppearFunc = controller.aboutToAppear
             this.getPeer().aboutToAppearAttribute(aboutToAppearFunc)
-
             // aboutToDisappear
             const aboutToDisappearFunc = controller.aboutToDisappear
             this.getPeer().aboutToDisappearAttribute(aboutToDisappearFunc)
-
             // aboutToResize
             const aboutToResizeFunc = controller.aboutToResize
             this.getPeer().aboutToResizeAttribute(aboutToResizeFunc)
-
+            // onTouchEvent
+            const onTouchEventFunc = controller.onTouchEvent
+            this.getPeer().onTouchEventAttribute(onTouchEventFunc)
             // onAttach
             const onAttach = controller.onAttach
             this.getPeer().onAttachAttribute(onAttach)
-
             // onDetach
             const onDetach = controller.onDetach
             this.getPeer().onDetachAttribute(onDetach)
 
-            // onBind
-            const onBind = controller.onBind
-            this.getPeer().onBindAttribute(onBind)
-
-            // onUnBind
-            const onUnBind = controller.onUnBind
-            this.getPeer().onUnBindAttribute(onUnBind)
-
-            // onWillBind
-            const onWillBind = controller.onWillBind
-            this.getPeer().onWillBindAttribute(onWillBind)
-
-            // onWillUnBind
-            const onWillUnBind = controller.onWillUnBind
-            this.getPeer().onWillUnBindAttribute(onWillUnBind)
+            controller.onBind(this.getPeer().getId())
         }
         return this
     }

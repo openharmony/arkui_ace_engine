@@ -20744,10 +20744,6 @@ typedef struct GENERATED_ArkUINodeContainerModifier {
     void (*setAboutToResize)(Ark_NativePointer self, const Callback_Number_Number_Void* value);
     void (*setOnAttach)(Ark_NativePointer self, const Callback_Void* value);
     void (*setOnDetach)(Ark_NativePointer self, const Callback_Void* value);
-    void (*setOnBind)(Ark_NativePointer self, const Callback_Number_Void* value);
-    void (*setOnUnBind)(Ark_NativePointer self, const Callback_Number_Void* value);
-    void (*setOnWillBind)(Ark_NativePointer self, const Callback_Number_Void* value);
-    void (*setOnWillUnBind)(Ark_NativePointer self, const Callback_Number_Void* value);
     void (*setOnTouchEvent)(Ark_NativePointer self, const Callback_TouchEvent_Void* value);
 } GENERATED_ArkUINodeContainerModifier;
 

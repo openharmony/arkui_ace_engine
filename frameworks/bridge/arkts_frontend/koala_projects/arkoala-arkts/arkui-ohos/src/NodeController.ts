@@ -17,6 +17,7 @@ import { FrameNode } from "./FrameNode";
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Size } from "./Graphics";
 import { TouchEvent } from "./component/common";
+import { ArkNodeContainerComponent } from "./generated/ArkNodeContainer";
 
 class __InternalField__ {
     _value: number;
@@ -28,10 +29,16 @@ class __InternalField__ {
 
 export abstract class NodeController {
     _nodeContainerId: __InternalField__;
+    _nodeContainer: ArkNodeContainerComponent | null = null
     constructor() {
         this._nodeContainerId = new __InternalField__();
     }
-
+    setNodeContainer(nodeContainer: ArkNodeContainerComponent) {
+        this._nodeContainer = nodeContainer;
+    }
+    resetNodeContainer() {
+        this._nodeContainer = null;
+    }
     abstract makeNode(UIContext: UIContext): FrameNode | null;
     __makeNode__(UIContext: UIContext): FrameNode | null {
         this._nodeContainerId.__rootNodeOfNodeController__ = this.makeNode(UIContext);
@@ -49,8 +56,8 @@ export abstract class NodeController {
     onTouchEvent(event: TouchEvent) {}
     onAttach() { }
     onDetach() { }
-    onBind() { }
-    onUnBind() { }
-    onWillBind() { }
-    onWillUnBind() { }
+    onBind(containerId: number) { }
+    onUnBind(containerId: number) { }
+    onWillBind(containerId: number) { }
+    onWillUnBind(containerId: number) { }
 }

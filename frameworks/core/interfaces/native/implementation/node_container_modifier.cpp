@@ -130,70 +130,6 @@ void SetOnDetachImpl(Ark_NativePointer self, const Callback_Void* value)
     eventHub->SetControllerOnDetach(std::move(onDetachFunc));
 }
 
-void SetOnBindImpl(Ark_NativePointer self, const Callback_Number_Void* value)
-{
-    auto nodeContainer = reinterpret_cast<FrameNode*>(self);
-    CHECK_NULL_VOID(nodeContainer);
-    auto eventHub = nodeContainer->GetEventHub<NodeContainerEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto* context = nodeContainer->GetContext();
-    auto onBindFunc = [callback = CallbackHelper(*value), instanceId = context->GetInstanceId()](
-                          int32_t containerId) -> void {
-        ContainerScope scope(instanceId);
-        auto arkValue = Converter::ArkValue<Ark_Number>(containerId);
-        callback.InvokeSync(arkValue);
-    };
-    eventHub->SetControllerOnBind(std::move(onBindFunc));
-}
-
-void SetOnUnBindImpl(Ark_NativePointer self, const Callback_Number_Void* value)
-{
-    auto nodeContainer = reinterpret_cast<FrameNode*>(self);
-    CHECK_NULL_VOID(nodeContainer);
-    auto eventHub = nodeContainer->GetEventHub<NodeContainerEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto* context = nodeContainer->GetContext();
-    auto onUnBindFunc = [callback = CallbackHelper(*value), instanceId = context->GetInstanceId()](
-                            int32_t containerId) -> void {
-        ContainerScope scope(instanceId);
-        auto arkValue = Converter::ArkValue<Ark_Number>(containerId);
-        callback.InvokeSync(arkValue);
-    };
-    eventHub->SetControllerOnUnbind(std::move(onUnBindFunc));
-}
-
-void SetOnWillBindImpl(Ark_NativePointer self, const Callback_Number_Void* value)
-{
-    auto nodeContainer = reinterpret_cast<FrameNode*>(self);
-    CHECK_NULL_VOID(nodeContainer);
-    auto eventHub = nodeContainer->GetEventHub<NodeContainerEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto* context = nodeContainer->GetContext();
-    auto onWillBindFunc = [callback = CallbackHelper(*value), instanceId = context->GetInstanceId()](
-                          int32_t containerId) -> void {
-        ContainerScope scope(instanceId);
-        auto arkValue = Converter::ArkValue<Ark_Number>(containerId);
-        callback.InvokeSync(arkValue);
-    };
-    eventHub->SetControllerOnWillBind(std::move(onWillBindFunc));
-}
-
-void SetOnWillUnBindImpl(Ark_NativePointer self, const Callback_Number_Void* value)
-{
-    auto nodeContainer = reinterpret_cast<FrameNode*>(self);
-    CHECK_NULL_VOID(nodeContainer);
-    auto eventHub = nodeContainer->GetEventHub<NodeContainerEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto* context = nodeContainer->GetContext();
-    auto onWillUnBindFunc = [callback = CallbackHelper(*value), instanceId = context->GetInstanceId()](
-                            int32_t containerId) -> void {
-        ContainerScope scope(instanceId);
-        auto arkValue = Converter::ArkValue<Ark_Number>(containerId);
-        callback.InvokeSync(arkValue);
-    };
-    eventHub->SetControllerOnWillUnbind(std::move(onWillUnBindFunc));
-}
-
 void SetOnTouchEventImpl(Ark_NativePointer self, const Callback_TouchEvent_Void* value)
 {
 
@@ -210,10 +146,6 @@ const GENERATED_ArkUINodeContainerModifier* GetNodeContainerModifier()
         NodeContainerInterfaceModifier::SetAboutToResizeImpl,
         NodeContainerInterfaceModifier::SetOnAttachImpl,
         NodeContainerInterfaceModifier::SetOnDetachImpl,
-        NodeContainerInterfaceModifier::SetOnBindImpl,
-        NodeContainerInterfaceModifier::SetOnUnBindImpl,
-        NodeContainerInterfaceModifier::SetOnWillBindImpl,
-        NodeContainerInterfaceModifier::SetOnWillUnBindImpl,
         NodeContainerInterfaceModifier::SetOnTouchEventImpl,
     };
     return &ArkUINodeContainerModifierImpl;

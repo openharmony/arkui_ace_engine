@@ -1714,14 +1714,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NodeContainerInterface_setOnDetach(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _NodeContainerInterface_setOnBind(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _NodeContainerInterface_setOnUnBind(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _NodeContainerInterface_setOnWillBind(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _NodeContainerInterface_setOnWillUnBind(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _NodeContainerInterface_setOnTouchEvent(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _Panel_construct(id: KInt, flags: KInt): KPointer
