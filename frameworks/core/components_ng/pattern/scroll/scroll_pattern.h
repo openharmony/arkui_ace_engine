@@ -382,6 +382,11 @@ public:
 
     void TriggerScrollBarDisplay();
 
+    bool IsEnablePagingValid() override
+    {
+        return enablePagingStatus_ == ScrollPagingStatus::VALID && GetScrollSnapAlign() == ScrollSnapAlign::NONE;
+    }
+
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 
@@ -396,10 +401,6 @@ private:
     bool IsScrollOutOnEdge(float delta) const;
     void HandleCrashTop();
     void HandleCrashBottom();
-    bool IsEnablePagingValid() const
-    {
-        return enablePagingStatus_ == ScrollPagingStatus::VALID && GetScrollSnapAlign() == ScrollSnapAlign::NONE;
-    }
 
     void RegisterScrollBarEventTask();
     void HandleScrollEffect();
