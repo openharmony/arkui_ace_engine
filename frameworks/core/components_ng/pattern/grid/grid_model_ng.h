@@ -83,6 +83,8 @@ public:
     static void SetRowsTemplate(FrameNode* frameNode, const std::string& rowsTemplate);
     static void SetColumnsGap(FrameNode* frameNode, const Dimension& columnsGap);
     static void SetRowsGap(FrameNode* frameNode, const Dimension& rowsGap);
+    static void SetColumnsGap(FrameNode* frameNode, const std::optional<Dimension>& columnsGap);
+    static void SetRowsGap(FrameNode* frameNode, const std::optional<Dimension>& rowsGap);
     static void SetScrollBarMode(FrameNode* frameNode, const std::optional<DisplayMode>& scrollBarMode);
     static void SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& scrollBarWidth);
     static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor);

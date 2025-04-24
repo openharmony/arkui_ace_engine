@@ -506,7 +506,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_onScrollFrameBegin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    edgeEffectAttribute(value: EdgeEffect | undefined, options?: EdgeEffectOptions): void {
+    edgeEffectAttribute(value: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -602,7 +602,7 @@ export interface GridAttribute extends ScrollableCommonMethod {
     onScrollStart(value: (() => void) | undefined): this
     onScrollStop(value: (() => void) | undefined): this
     onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
-    edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this
+    edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this
 }
 export interface UIGridAttribute extends UIScrollableCommonMethod {
     /** @memo */
@@ -670,7 +670,7 @@ export interface UIGridAttribute extends UIScrollableCommonMethod {
     /** @memo */
     onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
     /** @memo */
-    edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this
+    edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this
     /** @memo */
 }
 export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements GridAttribute {
@@ -802,7 +802,7 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     public onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this {
         return this
     }
-    public edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+    public edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this {
         return this
         }
 }
@@ -1121,10 +1121,10 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         return this
     }
     /** @memo */
-    public edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+    public edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this {
         if (this.checkPriority("edgeEffect")) {
             const value_casted = value as (EdgeEffect | undefined)
-            const options_casted = options as (EdgeEffectOptions)
+            const options_casted = options as (EdgeEffectOptions | undefined)
             this.getPeer()?.edgeEffectAttribute(value_casted, options_casted)
             return this
         }

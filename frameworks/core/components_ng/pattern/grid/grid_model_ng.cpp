@@ -413,10 +413,28 @@ void GridModelNG::SetColumnsGap(FrameNode* frameNode, const Dimension& columnsGa
     }
 }
 
+void GridModelNG::SetColumnsGap(FrameNode* frameNode, const std::optional<Dimension>& columnsGap)
+{
+    if (columnsGap && GreatOrEqual(columnsGap.value().Value(), 0.0f)) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, columnsGap.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, frameNode);
+    }
+}
+
 void GridModelNG::SetRowsGap(FrameNode* frameNode, const Dimension& rowsGap)
 {
     if (rowsGap.IsNonNegative()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, rowsGap, frameNode);
+    }
+}
+
+void GridModelNG::SetRowsGap(FrameNode* frameNode, const std::optional<Dimension>& rowsGap)
+{
+    if (rowsGap && GreatOrEqual(rowsGap.value().Value(), 0.0f)) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, rowsGap.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, frameNode);
     }
 }
 
