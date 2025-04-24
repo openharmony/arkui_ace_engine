@@ -14,9 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -24,55 +22,30 @@ namespace CounterModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = CounterModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    return {};
 }
 } // CounterModifier
 namespace CounterInterfaceModifier {
 void SetCounterOptionsImpl(Ark_NativePointer node)
 {
-    // keep it empty because Counter don`t have any options
 }
 } // CounterInterfaceModifier
 namespace CounterAttributeModifier {
 void OnIncImpl(Ark_NativePointer node,
-               const VoidCallback* value)
+               const Opt_VoidCallback* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onEvent = [arkCallback = CallbackHelper(*value)]() {
-        arkCallback.Invoke();
-    };
-    CounterModelNG::SetOnInc(frameNode, onEvent);
 }
 void OnDecImpl(Ark_NativePointer node,
-               const VoidCallback* value)
+               const Opt_VoidCallback* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onEvent = [arkCallback = CallbackHelper(*value)]() {
-        arkCallback.Invoke();
-    };
-    CounterModelNG::SetOnDec(frameNode, onEvent);
 }
 void EnableDecImpl(Ark_NativePointer node,
-                   Ark_Boolean value)
+                   const Opt_Boolean* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CounterModelNG::SetEnableDec(frameNode, Converter::Convert<bool>(value));
 }
 void EnableIncImpl(Ark_NativePointer node,
-                   Ark_Boolean value)
+                   const Opt_Boolean* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CounterModelNG::SetEnableInc(frameNode, Converter::Convert<bool>(value));
 }
 } // CounterAttributeModifier
 const GENERATED_ArkUICounterModifier* GetCounterModifier()

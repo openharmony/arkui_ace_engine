@@ -68,7 +68,7 @@ public:
     static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamily);
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& textColor);
     static void SetType(FrameNode* frameNode, const std::optional<int> value);
-    static void SetStateEffect(FrameNode* frameNode, const bool stateEffect);
+    static void SetStateEffect(FrameNode* frameNode, const std::optional<bool> stateEffect);
     static void SetLabelStyle(FrameNode* frameNode, const std::optional<ButtonParameters>& buttonParameters);
     static void BackgroundColor(FrameNode* frameNode, const Color& color, const bool& colorFlag);
     static void SetBorderRadius(FrameNode* frameNode, const Dimension& radius);

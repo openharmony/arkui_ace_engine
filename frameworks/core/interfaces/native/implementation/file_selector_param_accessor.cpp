@@ -14,23 +14,17 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/file_selector_param_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FileSelectorParamAccessor {
 void DestroyPeerImpl(Ark_FileSelectorParam peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
-    delete peer;
 }
 Ark_FileSelectorParam CtorImpl()
 {
-    return new FileSelectorParamPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -38,32 +32,23 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String GetTitleImpl(Ark_FileSelectorParam peer)
 {
-    std::string result = "";
-    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
-    result = peer->handler->GetTitle();
-    return Converter::ArkValue<Ark_String>(result, Converter::FC);
+    return {};
 }
 Ark_FileSelectorMode GetModeImpl(Ark_FileSelectorParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    return static_cast<Ark_FileSelectorMode>(peer->handler->GetMode());
+    return {};
 }
 Array_String GetAcceptTypeImpl(Ark_FileSelectorParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    auto acceptType = peer->handler->GetAcceptType();
-    return Converter::ArkValue<Array_String>(acceptType, Converter::FC);
+    return {};
 }
 Ark_Boolean IsCaptureImpl(Ark_FileSelectorParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, false);
-    return Converter::ArkValue<Ark_Boolean>(peer->handler->IsCapture());
+    return {};
 }
 Array_String GetMimeTypesImpl(Ark_FileSelectorParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    auto mimeTypes = peer->handler->GetMimeType();
-    return Converter::ArkValue<Array_String>(mimeTypes, Converter::FC);
+    return {};
 }
 } // FileSelectorParamAccessor
 const GENERATED_ArkUIFileSelectorParamAccessor* GetFileSelectorParamAccessor()

@@ -15,31 +15,16 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
-#include "frameworks/base/geometry/shape.h"
-#include "frameworks/core/interfaces/native/implementation/circle_shape_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CircleShapeAccessor {
 void DestroyPeerImpl(Ark_CircleShape peer)
 {
-    CHECK_NULL_VOID(peer);
-    delete peer;
 }
 Ark_CircleShape CtorImpl(const Opt_ShapeSize* options)
 {
-    auto peer = new CircleShapePeer();
-    peer->shape = Referenced::MakeRefPtr<OHOS::Ace::Circle>();
-    CHECK_NULL_RETURN(options, peer);
-
-    auto dimension = Converter::OptConvert<Dimension>(options->value.width);
-    peer->shape->SetWidth(dimension.value_or(Dimension()));
-
-    dimension = Converter::OptConvert<Dimension>(options->value.height);
-    peer->shape->SetHeight(dimension.value_or(Dimension()));
-
-    return peer;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -48,52 +33,32 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_CircleShape OffsetImpl(Ark_CircleShape peer,
                            const Ark_Position* offset)
 {
-    CHECK_NULL_RETURN(peer && offset && peer->shape, peer);
-    auto dimensionOffset = Converter::Convert<DimensionOffset>(*offset);
-    peer->shape->SetOffset(dimensionOffset);
-    return peer;
+    return {};
 }
 Ark_CircleShape FillImpl(Ark_CircleShape peer,
                          const Ark_ResourceColor* color)
 {
-    CHECK_NULL_RETURN(peer && color && peer->shape, peer);
-    auto aceColor = Converter::OptConvert<Color>(*color);
-    peer->shape->SetColor(aceColor.value_or(Color::TRANSPARENT));
-    return peer;
+    return {};
 }
 Ark_CircleShape PositionImpl(Ark_CircleShape peer,
                              const Ark_Position* position)
 {
-    CHECK_NULL_RETURN(peer && position && peer->shape, peer);
-    auto acePosition = Converter::OptConvert<DimensionOffset>(*position);
-    peer->shape->SetPosition(acePosition.value_or(DimensionOffset()));
-    return peer;
+    return {};
 }
 Ark_CircleShape WidthImpl(Ark_CircleShape peer,
                           const Ark_Length* width)
 {
-    CHECK_NULL_RETURN(peer && width && peer->shape, peer);
-    auto aceDimension = Converter::OptConvert<Dimension>(*width);
-    Validator::ValidateNonNegative(aceDimension);
-    peer->shape->SetWidth(aceDimension.value_or(Dimension()));
-    return peer;
+    return {};
 }
 Ark_CircleShape HeightImpl(Ark_CircleShape peer,
                            const Ark_Length* height)
 {
-    CHECK_NULL_RETURN(peer && height && peer->shape, peer);
-    auto aceDimension = Converter::OptConvert<Dimension>(*height);
-    Validator::ValidateNonNegative(aceDimension);
-    peer->shape->SetHeight(aceDimension.value_or(Dimension()));
-    return peer;
+    return {};
 }
 Ark_CircleShape SizeImpl(Ark_CircleShape peer,
                          const Ark_SizeOptions* size)
 {
-    CHECK_NULL_RETURN(peer && size, peer);
-    WidthImpl(peer, &size->width.value);
-    HeightImpl(peer, &size->height.value);
-    return peer;
+    return {};
 }
 } // CircleShapeAccessor
 const GENERATED_ArkUICircleShapeAccessor* GetCircleShapeAccessor()
@@ -112,4 +77,7 @@ const GENERATED_ArkUICircleShapeAccessor* GetCircleShapeAccessor()
     return &CircleShapeAccessorImpl;
 }
 
+struct CircleShapePeer {
+    virtual ~CircleShapePeer() = default;
+};
 }

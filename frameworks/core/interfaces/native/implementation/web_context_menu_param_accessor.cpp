@@ -14,22 +14,17 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/web_context_menu_param_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebContextMenuParamAccessor {
 void DestroyPeerImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
-    delete peer;
 }
 Ark_WebContextMenuParam CtorImpl()
 {
-    return new WebContextMenuParamPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -37,98 +32,59 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number XImpl(Ark_WebContextMenuParam peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer && peer->handler, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->handler->GetXCoord());
+    return {};
 }
 Ark_Number YImpl(Ark_WebContextMenuParam peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer && peer->handler, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->handler->GetYCoord());
+    return {};
 }
 Ark_String GetLinkUrlImpl(Ark_WebContextMenuParam peer)
 {
-    std::string result = "";
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    result = peer->handler->GetLinkUrl();
-    if (result.empty()) {
-        return {};
-    }
-    return Converter::ArkValue<Ark_String>(result, Converter::FC);
+    return {};
 }
 Ark_String GetUnfilteredLinkUrlImpl(Ark_WebContextMenuParam peer)
 {
-    std::string result = "";
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    result = peer->handler->GetUnfilteredLinkUrl();
-    if (result.empty()) {
-        return {};
-    }
-    return Converter::ArkValue<Ark_String>(result, Converter::FC);
+    return {};
 }
 Ark_String GetSourceUrlImpl(Ark_WebContextMenuParam peer)
 {
-    std::string result = "";
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    result = peer->handler->GetSourceUrl();
-    if (result.empty()) {
-        return {};
-    }
-    return Converter::ArkValue<Ark_String>(result, Converter::FC);
+    return {};
 }
 Ark_Boolean ExistsImageContentsImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, false);
-    return Converter::ArkValue<Ark_Boolean>(peer->handler->HasImageContents());
+    return {};
 }
 Ark_ContextMenuMediaType GetMediaTypeImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    return static_cast<Ark_ContextMenuMediaType>(peer->handler->GetMediaType());
+    return {};
 }
 Ark_String GetSelectionTextImpl(Ark_WebContextMenuParam peer)
 {
-    std::string result = "";
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    result = peer->handler->GetSelectionText();
-    if (result.empty()) {
-        return {};
-    }
-    return Converter::ArkValue<Ark_String>(result, Converter::FC);
+    return {};
 }
 Ark_ContextMenuSourceType GetSourceTypeImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    return static_cast<Ark_ContextMenuSourceType>(peer->handler->GetSourceType());
+    return {};
 }
 Ark_ContextMenuInputFieldType GetInputFieldTypeImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    return static_cast<Ark_ContextMenuInputFieldType>(peer->handler->GetInputFieldType());
+    return {};
 }
 Ark_Boolean IsEditableImpl(Ark_WebContextMenuParam peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, false);
-    return Converter::ArkValue<Ark_Boolean>(peer->handler->IsEditable());
+    return {};
 }
 Ark_Number GetEditStateFlagsImpl(Ark_WebContextMenuParam peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer && peer->handler, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->handler->GetEditStateFlags());
+    return {};
 }
 Ark_Number GetPreviewWidthImpl(Ark_WebContextMenuParam peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer && peer->handler, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->GetPreviewWidth());
+    return {};
 }
 Ark_Number GetPreviewHeightImpl(Ark_WebContextMenuParam peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer && peer->handler, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->GetPreviewHeight());
+    return {};
 }
 } // WebContextMenuParamAccessor
 const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor()

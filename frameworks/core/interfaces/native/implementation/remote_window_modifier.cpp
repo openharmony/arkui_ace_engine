@@ -29,11 +29,6 @@ namespace RemoteWindowInterfaceModifier {
 void SetRemoteWindowOptionsImpl(Ark_NativePointer node,
                                 const Ark_WindowAnimationTarget* target)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(target);
-    //auto convValue = Converter::OptConvert<type_name>(*target);
-    //RemoteWindowModelNG::SetSetRemoteWindowOptions(frameNode, convValue);
 }
 } // RemoteWindowInterfaceModifier
 const GENERATED_ArkUIRemoteWindowModifier* GetRemoteWindowModifier()

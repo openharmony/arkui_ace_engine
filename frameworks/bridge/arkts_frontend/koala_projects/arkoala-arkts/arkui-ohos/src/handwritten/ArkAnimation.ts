@@ -14,7 +14,7 @@
  */
 
 import {addPartialUpdate} from '../ArkUIEntry'
-import {AnimationExtender, AnimateParam} from '../generated'
+import {AnimationExtender, AnimateParam} from '../component'
 
 export function _animateTo(param: AnimateParam, event: (() => void)): void {
     if (!event) {

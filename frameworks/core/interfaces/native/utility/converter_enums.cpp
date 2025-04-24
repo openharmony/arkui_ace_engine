@@ -251,17 +251,6 @@ void AssignCast(std::optional<GestureMask>& dst, const Ark_GestureMask& src)
 }
 
 template<>
-void AssignCast(std::optional<GestureMode>& dst, const Ark_GestureMode& src)
-{
-    switch (src) {
-        case ARK_GESTURE_MODE_SEQUENCE: dst = GestureMode::Sequence; break;
-        case ARK_GESTURE_MODE_PARALLEL: dst = GestureMode::Parallel; break;
-        case ARK_GESTURE_MODE_EXCLUSIVE: dst = GestureMode::Exclusive; break;
-        default: LOGE("Unexpected enum value in Ark_GestureMode: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<ImageAnalyzerType>& dst, const Ark_ImageAnalyzerType& src)
 {
     switch (src) {
@@ -608,17 +597,6 @@ void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src)
         case ARK_EDGE_EFFECT_FADE: dst = EdgeEffect::FADE; break;
         case ARK_EDGE_EFFECT_NONE: dst = EdgeEffect::NONE; break;
         default: LOGE("Unexpected enum value in Ark_EdgeEffect: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<EffectEdge>& dst, const Ark_EffectEdge& src)
-{
-    switch (src) {
-        case ARK_EFFECT_EDGE_START: dst = EffectEdge::START; break;
-        case ARK_EFFECT_EDGE_END: dst = EffectEdge::END; break;
-        case ARK_EFFECT_EDGE_ALL: dst = EffectEdge::ALL; break;
-        default: LOGE("Unexpected enum value in Ark_EffectEdge: %{public}d", src);
     }
 }
 
@@ -1652,8 +1630,8 @@ template<>
 void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src)
 {
     switch (src) {
-        case ARK_BLEND_MODE_NONE: dst = BlendMode::NONE; break;
-        case ARK_BLEND_MODE_CLEAR: dst = BlendMode::CLEAR; break;
+        // case ARK_BLEND_MODE_NONE: dst = BlendMode::NONE; break;
+        // case ARK_BLEND_MODE_CLEAR: dst = BlendMode::CLEAR; break;
         case ARK_BLEND_MODE_SRC: dst = BlendMode::SRC; break;
         case ARK_BLEND_MODE_DST: dst = BlendMode::DST; break;
         case ARK_BLEND_MODE_SRC_OVER: dst = BlendMode::SRC_OVER; break;

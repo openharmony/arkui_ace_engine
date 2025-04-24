@@ -14,71 +14,30 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG {
-namespace {
-struct DividerOptions {
-    std::optional<Dimension> startMargin;
-    std::optional<Dimension> endMargin;
-};
-}
-}
-namespace OHOS::Ace::NG::Converter {
-template<>
-ItemDivider Convert(const Ark_ColumnSplitDividerStyle& src)
-{
-    ItemDivider divider;
-    auto margin = OptConvert<Dimension>(src.startMargin);
-    if (margin.has_value()) {
-        divider.startMargin = margin.value();
-    }
-    margin = OptConvert<Dimension>(src.endMargin);
-    if (margin.has_value()) {
-        divider.endMargin = margin.value();
-    }
-    return divider;
-}
-}
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColumnSplitModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // need check
-    // auto frameNode = LinearSplitModelNG::CreateFrameNode(id, NG::SplitType::COLUMN_SPLIT);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    return {};
 }
 } // ColumnSplitModifier
 namespace ColumnSplitInterfaceModifier {
 void SetColumnSplitOptionsImpl(Ark_NativePointer node)
 {
-    // keep it empty because ColumnSplit doesn`t have any options
 }
 } // ColumnSplitInterfaceModifier
 namespace ColumnSplitAttributeModifier {
 void ResizeableImpl(Ark_NativePointer node,
-                    Ark_Boolean value)
+                    const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::COLUMN_SPLIT, Converter::Convert<bool>(value));
 }
 void DividerImpl(Ark_NativePointer node,
                  const Opt_ColumnSplitDividerStyle* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<ItemDivider>(*value);
-    // need check
-    // LinearSplitModelNG::SetDivider(frameNode, NG::SplitType::COLUMN_SPLIT, divider);
 }
 } // ColumnSplitAttributeModifier
 const GENERATED_ArkUIColumnSplitModifier* GetColumnSplitModifier()

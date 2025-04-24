@@ -79,6 +79,9 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     auto frameNode = NG::UIExtensionAdapter::CreateFrameNode(id);
+    if (!frameNode) {
+        return {};
+    }
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 #else
@@ -118,14 +121,14 @@ void SetUIExtensionComponentOptionsImpl(
 } // UIExtensionComponentInterfaceModifier
 namespace UIExtensionComponentAttributeModifier {
 void OnRemoteReadyImpl(
-    Ark_NativePointer node, const Callback_UIExtensionProxy_Void* value)
+    Ark_NativePointer node, const Opt_Callback_UIExtensionProxy_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 #ifdef WINDOW_SCENE_SUPPORTED
     auto onRemoteReady =
-        [arkCallback = CallbackHelper(*value)](const RefPtr<UIExtensionProxy>& proxy) {
+        [arkCallback = CallbackHelper(value->value)](const RefPtr<UIExtensionProxy>& proxy) {
             auto accessor = GetUIExtensionProxyAccessor();
             CHECK_NULL_VOID(accessor);
             auto peer = accessor->ctor();
@@ -138,7 +141,7 @@ void OnRemoteReadyImpl(
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnReceiveImpl(
-    Ark_NativePointer node, const Ark_ReceiveCallback* value)
+    Ark_NativePointer node, const Opt_Callback_Map_String_Object_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -146,14 +149,14 @@ void OnReceiveImpl(
     LOGE("UIExtensionComponentInterfaceModifier::OnReceiveImpl - is not supported");
 }
 void OnResultImpl(
-    Ark_NativePointer node, const Callback_Literal_Number_code_Want_want_Void* value)
+    Ark_NativePointer node, const Opt_Callback_Literal_Number_code__want_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 #ifdef WINDOW_SCENE_SUPPORTED
     auto onResult =
-        [arkCallback = CallbackHelper(*value)](int32_t code, const AAFwk::Want& want) {
+        [arkCallback = CallbackHelper(value->value)](int32_t code, const AAFwk::Want& want) {
             Ark_Want arkWant;
             auto bundleName = want.GetBundle();
             arkWant.bundleName = Converter::ArkValue<Opt_String>(bundleName);
@@ -178,7 +181,7 @@ void OnResultImpl(
             auto moduleName = want.GetModuleName();
             arkWant.moduleName = Converter::ArkValue<Opt_String>(moduleName);
 
-            Ark_Literal_Number_code_Want_want parameter;
+            Ark_Literal_Number_code__want parameter;
             parameter.code = Converter::ArkValue<Ark_Number>(code);
             parameter.want = Converter::ArkValue<Opt_Want>(arkWant);
             arkCallback.Invoke(parameter);
@@ -187,14 +190,14 @@ void OnResultImpl(
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnReleaseImpl(
-    Ark_NativePointer node, const Callback_Number_Void* value)
+    Ark_NativePointer node, const Opt_Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 #ifdef WINDOW_SCENE_SUPPORTED
     auto onRelease =
-        [arkCallback = CallbackHelper(*value)](int32_t index) {
+        [arkCallback = CallbackHelper(value->value)](int32_t index) {
             Ark_Number arkIndex = Converter::ArkValue<Ark_Number>(index);
             arkCallback.Invoke(arkIndex);
         };
@@ -202,7 +205,7 @@ void OnReleaseImpl(
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnErrorImpl(
-    Ark_NativePointer node, const ErrorCallback* value)
+    Ark_NativePointer node, const Opt_ErrorCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -210,7 +213,7 @@ void OnErrorImpl(
 #ifdef WINDOW_SCENE_SUPPORTED
     auto instanceId = ContainerScope::CurrentId();
     auto weakNode = AceType::WeakClaim<NG::FrameNode>(frameNode);
-    auto onError = [arkCallback = CallbackHelper(*value), instanceId, weakNode](
+    auto onError = [arkCallback = CallbackHelper(value->value), instanceId, weakNode](
         int32_t code, const std::string& name, const std::string& message) {
         ContainerScope scope(instanceId);
         auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -225,14 +228,14 @@ void OnErrorImpl(
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnTerminatedImpl(
-    Ark_NativePointer node, const Callback_TerminationInfo_Void* value)
+    Ark_NativePointer node, const Opt_Callback_TerminationInfo_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 #ifdef WINDOW_SCENE_SUPPORTED
     auto onTerminated =
-        [arkCallback = CallbackHelper(*value)](int32_t code, const RefPtr<WantWrap>& wantWrape) {
+        [arkCallback = CallbackHelper(value->value)](int32_t code, const RefPtr<WantWrap>& wantWrape) {
             auto want = wantWrape->GetWant();
             Ark_Want arkWant;
             auto bundleName = want.GetBundle();

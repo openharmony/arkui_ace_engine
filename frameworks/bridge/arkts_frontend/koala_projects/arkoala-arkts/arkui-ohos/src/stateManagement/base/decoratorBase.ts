@@ -137,23 +137,23 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase<T
 
     /* compiler BUG: change to protcted */
     public registerWatchForObservedObjectChanges(value: T): void {
-        if (value && typeof value === 'object'
-            && TypeChecker.isIWatchTrigger(value)) {
-            this._watchFuncs.forEach((watchFunc) => {
-                watchFunc.registerMeTo(value as Object as IWatchTrigger);
-            });
-        }
+        // if (value && typeof value === 'object'
+        //     && TypeChecker.isIWatchTrigger(value)) {
+        //     this._watchFuncs.forEach((watchFunc) => {
+        //         watchFunc.registerMeTo(value as Object as IWatchTrigger);
+        //     });
+        // }
     }
 
 
     /* compiler BUG: change to protcted */
     public unregisterWatchFromObservedObjectChanges(value: T): void {
-        if (value && typeof value === 'object'
-            && TypeChecker.isIWatchTrigger(value)) {
-            this._watchFuncs.forEach((watchFunc) => {
-                watchFunc.unregisterMeFrom(value as Object as IWatchTrigger);
-            });
-        }
+        // if (value && typeof value === 'object'
+        //     && TypeChecker.isIWatchTrigger(value)) {
+        //     this._watchFuncs.forEach((watchFunc) => {
+        //         watchFunc.unregisterMeFrom(value as Object as IWatchTrigger);
+        //     });
+        // }
     }
 
     /* compiler BUG: change to protcted */

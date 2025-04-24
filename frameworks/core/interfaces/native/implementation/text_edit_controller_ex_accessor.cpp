@@ -13,20 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/implementation/text_edit_controller_ex_peer.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextEditControllerExAccessor {
 void DestroyPeerImpl(Ark_TextEditControllerEx peer)
 {
-    delete peer;
 }
 Ark_TextEditControllerEx CtorImpl()
 {
-    LOGE("TextEditControllerExPeer is an abstract class.");
     return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -35,31 +32,23 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Boolean IsEditingImpl(Ark_TextEditControllerEx peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Boolean>(false));
-    return Converter::ArkValue<Ark_Boolean>(peer->IsEditing());
+    return {};
 }
 void StopEditingImpl(Ark_TextEditControllerEx peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->StopEditing();
 }
 Ark_Boolean SetCaretOffsetImpl(Ark_TextEditControllerEx peer,
                                const Ark_Number* offset)
 {
-    CHECK_NULL_RETURN(peer && offset, Converter::ArkValue<Ark_Boolean>(false));
-    auto offsetConv = Converter::Convert<int32_t>(*offset);
-    return Converter::ArkValue<Ark_Boolean>(peer->SetCaretOffset(offsetConv));
+    return {};
 }
 Ark_Number GetCaretOffsetImpl(Ark_TextEditControllerEx peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
-    return Converter::ArkValue<Ark_Number>(peer->GetCaretOffset());
+    return {};
 }
 Ark_PreviewText GetPreviewTextImpl(Ark_TextEditControllerEx peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    auto result = peer->GetPreviewText();
-    return Converter::ArkValue<Ark_PreviewText>(result, Converter::FC);
+    return {};
 }
 } // TextEditControllerExAccessor
 const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccessor()

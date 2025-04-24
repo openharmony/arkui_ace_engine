@@ -15,24 +15,16 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-#include "url_style_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UrlStyleAccessor {
 void DestroyPeerImpl(Ark_UrlStyle peer)
 {
-    delete peer;
 }
 Ark_UrlStyle CtorImpl(const Ark_String* url)
 {
-    std::string urlAddress;
-    if (url) {
-        urlAddress = Converter::Convert<std::string>(*url);
-    }
-    auto span = AceType::MakeRefPtr<OHOS::Ace::UrlSpan>(urlAddress);
-    return new UrlStylePeer{ .span = span };
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -40,8 +32,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String GetUrlImpl(Ark_UrlStyle peer)
 {
-    CHECK_NULL_RETURN(peer && peer->span, {});
-    return Converter::ArkValue<Ark_String>(peer->span->GetUrlSpanAddress(), Converter::FC);
+    return {};
 }
 } // UrlStyleAccessor
 const GENERATED_ArkUIUrlStyleAccessor* GetUrlStyleAccessor()
@@ -54,4 +45,8 @@ const GENERATED_ArkUIUrlStyleAccessor* GetUrlStyleAccessor()
     };
     return &UrlStyleAccessorImpl;
 }
+
+struct UrlStylePeer {
+    virtual ~UrlStylePeer() = default;
+};
 }

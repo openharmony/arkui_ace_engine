@@ -31,8 +31,6 @@ export class AttributeUpdater<T, C = Initializer<T>> implements AttributeModifie
     }
     initializeModifier(instance: T): void {
     }
-    onComponentChanged(component: T): void {
-    }
     private value: T | undefined = undefined;
     private constructorParams: C | undefined = undefined;
     

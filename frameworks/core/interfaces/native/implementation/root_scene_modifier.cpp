@@ -29,7 +29,6 @@ namespace RootSceneInterfaceModifier {
 void SetRootSceneOptionsImpl(Ark_NativePointer node,
                              const Ark_RootSceneSession* session)
 {
-    // Nothing to do on the ArkUI side. RootSceneSession is empty interface in "root_scene.d.ts"
 }
 } // RootSceneInterfaceModifier
 const GENERATED_ArkUIRootSceneModifier* GetRootSceneModifier()

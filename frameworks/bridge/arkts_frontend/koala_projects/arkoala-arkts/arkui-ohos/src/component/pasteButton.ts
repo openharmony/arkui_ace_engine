@@ -17,16 +17,52 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkSecurityComponentMethodPeer, SecurityComponentMethod, ArkSecurityComponentMethodComponent, ArkSecurityComponentMethodStyle, UISecurityComponentMethod } from "./securityComponent"
+import { ClickEvent } from "./common"
+import { BusinessError } from "./base"
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ButtonType } from "./button"
-import { ClickEvent } from "./common"
-import { SecurityComponentMethod, SecurityComponentLayoutDirection } from "./securityComponent"
-import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, Padding, Length, SizeOptions, ConstraintSizeOptions } from "./units"
-import { FontStyle, FontWeight, BorderStyle } from "./enums"
-import { Resource } from "global/resource";
-import { ArkPasteButtonComponent } from "./../generated/ArkPasteButton"
-import { ArkPasteButtonPeer } from "./../generated/peers/ArkPasteButtonPeer"
+import { AttributeModifier, UICommonBase } from "./../handwritten"
+export class ArkPasteButtonPeer extends ArkSecurityComponentMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkPasteButtonPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._PasteButton_construct(peerId, flags)
+        const _peer  = new ArkPasteButtonPeer(_peerPtr, peerId, "PasteButton", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setPasteButtonOptions0Attribute(): void {
+        ArkUIGeneratedNativeModule._PasteButtonInterface_setPasteButtonOptions0(this.peer.ptr)
+    }
+    setPasteButtonOptions1Attribute(options: PasteButtonOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writePasteButtonOptions(options)
+        ArkUIGeneratedNativeModule._PasteButtonInterface_setPasteButtonOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onClickAttribute(value: PasteButtonCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._PasteButtonAttribute_onClick(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export enum PasteIconStyle {
     LINES = 0
 }
@@ -42,22 +78,67 @@ export enum PasteButtonOnClickResult {
     SUCCESS = 0,
     TEMPORARY_AUTHORIZATION_FAILED = 1
 }
-export type Callback_ClickEvent_PasteButtonOnClickResult_Void = (event: ClickEvent, result: PasteButtonOnClickResult) => void;
-/** @memo:stable */
+export type PasteButtonCallback = (event: ClickEvent, result: PasteButtonOnClickResult, error?: BusinessError<void>) => void;
 export interface PasteButtonAttribute extends SecurityComponentMethod {
+    onClick(value: PasteButtonCallback | undefined): this
+    attributeModifier(value: AttributeModifier<PasteButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this
+}
+export interface UIPasteButtonAttribute extends UISecurityComponentMethod {
     /** @memo */
-    setPasteButtonOptions(options?: PasteButtonOptions): this
+    onClick(value: PasteButtonCallback | undefined): this
     /** @memo */
-    onClick(value: ((event: ClickEvent,result: PasteButtonOnClickResult) => void)): this
+    attributeModifier(value: AttributeModifier<PasteButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this
+}
+export class ArkPasteButtonStyle extends ArkSecurityComponentMethodStyle implements PasteButtonAttribute {
+    onClick_value?: PasteButtonCallback | undefined
+    public onClick(value: PasteButtonCallback | undefined): this {
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<PasteButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
+        throw new Error("Not implemented")
+    }
+}
+/** @memo:stable */
+export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent implements UIPasteButtonAttribute {
+    getPeer(): ArkPasteButtonPeer {
+        return (this.peer as ArkPasteButtonPeer)
+    }
+    /** @memo */
+    public setPasteButtonOptions(options?: PasteButtonOptions): this {
+        if (this.checkPriority("setPasteButtonOptions")) {
+            const options_type = runtimeType(options)
+            this.getPeer()?.setPasteButtonOptions0Attribute()
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onClick(value: PasteButtonCallback | undefined): this {
+        if (this.checkPriority("onClick")) {
+            const value_casted = value as (PasteButtonCallback | undefined)
+            this.getPeer()?.onClickAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public attributeModifier(value: AttributeModifier<PasteButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
+        console.log("attributeModifier() not implemented")
+        return this
+    }
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function PasteButton(
-  /** @memo */
-  style: ((attributes: PasteButtonAttribute) => void) | undefined,
-  options?: PasteButtonOptions | undefined, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: UIPasteButtonAttribute) => void) | undefined,
+    options?: PasteButtonOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkPasteButtonComponent()
     })

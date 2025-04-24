@@ -17,45 +17,141 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { Want } from "./ohos.app.ability"
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Want } from "./../generated/ArkArkuiExternalInterfaces"
-import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { Resource } from "global/resource";
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
-import { ArkAbilityComponentComponent } from "./../generated/ArkAbilityComponent"
-import { ArkAbilityComponentPeer } from "./../generated/peers/ArkAbilityComponentPeer"
-export interface Literal_Want_want {
+import { AttributeModifier, UICommonBase } from "./../handwritten"
+export class ArkAbilityComponentPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkAbilityComponentPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._AbilityComponent_construct(peerId, flags)
+        const _peer  = new ArkAbilityComponentPeer(_peerPtr, peerId, "AbilityComponent", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setAbilityComponentOptionsAttribute(value: Literal__want): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        const value_want  = value.want
+        thisSerializer.writeWant(value_want)
+        ArkUIGeneratedNativeModule._AbilityComponentInterface_setAbilityComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onConnectAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._AbilityComponentAttribute_onConnect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDisconnectAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._AbilityComponentAttribute_onDisconnect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+export interface Literal__want {
     want: Want;
 }
+export type AbilityComponentInterface = (value: Literal__want) => AbilityComponentAttribute;
 export type Callback_Void = () => void;
-/** @memo:stable */
 export interface AbilityComponentAttribute extends CommonMethod {
+    onConnect(value: (() => void) | undefined): this
+    onDisconnect(value: (() => void) | undefined): this
+    attributeModifier(value: AttributeModifier<AbilityComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
+}
+export interface UIAbilityComponentAttribute extends UICommonMethod {
     /** @memo */
-    setAbilityComponentOptions(value: Literal_Want_want): this
+    onConnect(value: (() => void) | undefined): this
     /** @memo */
-    onConnect(value: (() => void)): this
+    onDisconnect(value: (() => void) | undefined): this
     /** @memo */
-    onDisconnect(value: (() => void)): this
+    attributeModifier(value: AttributeModifier<AbilityComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
+}
+export class ArkAbilityComponentStyle extends ArkCommonMethodStyle implements AbilityComponentAttribute {
+    onConnect_value?: (() => void) | undefined
+    onDisconnect_value?: (() => void) | undefined
+    public onConnect(value: (() => void) | undefined): this {
+        return this
+    }
+    public onDisconnect(value: (() => void) | undefined): this {
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<AbilityComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Not implemented")
+    }
+}
+/** @memo:stable */
+export class ArkAbilityComponentComponent extends ArkCommonMethodComponent implements UIAbilityComponentAttribute {
+    getPeer(): ArkAbilityComponentPeer {
+        return (this.peer as ArkAbilityComponentPeer)
+    }
+    /** @memo */
+    public setAbilityComponentOptions(value: Literal__want): this {
+        if (this.checkPriority("setAbilityComponentOptions")) {
+            const value_casted = value as (Literal__want)
+            this.getPeer()?.setAbilityComponentOptionsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onConnect(value: (() => void) | undefined): this {
+        if (this.checkPriority("onConnect")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onConnectAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onDisconnect(value: (() => void) | undefined): this {
+        if (this.checkPriority("onDisconnect")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onDisconnectAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public attributeModifier(value: AttributeModifier<AbilityComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        console.log("attributeModifier() not implemented")
+        return this
+    }
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function AbilityComponent(
-  /** @memo */
-  style: ((attributes: AbilityComponentAttribute) => void) | undefined,
-  value: Literal_Want_want, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: UIAbilityComponentAttribute) => void) | undefined,
+    value: Literal__want,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkAbilityComponentComponent()
     })

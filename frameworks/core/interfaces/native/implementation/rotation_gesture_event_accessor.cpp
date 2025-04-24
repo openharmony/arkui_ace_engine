@@ -15,18 +15,16 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/implementation/rotation_gesture_event_peer.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RotationGestureEventAccessor {
 void DestroyPeerImpl(Ark_RotationGestureEvent peer)
 {
-    delete peer;
 }
 Ark_RotationGestureEvent CtorImpl()
 {
-    return new RotationGestureEventPeer;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -34,21 +32,11 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetAngleImpl(Ark_RotationGestureEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer, errValue);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, errValue);
-    const auto& angle = info->GetAngle();
-    return Converter::ArkValue<Ark_Number>(static_cast<float>(angle));
+    return {};
 }
 void SetAngleImpl(Ark_RotationGestureEvent peer,
                   const Ark_Number* angle)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(angle);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    info->SetAngle(Converter::Convert<float>(*angle));
 }
 } // RotationGestureEventAccessor
 const GENERATED_ArkUIRotationGestureEventAccessor* GetRotationGestureEventAccessor()
@@ -62,4 +50,8 @@ const GENERATED_ArkUIRotationGestureEventAccessor* GetRotationGestureEventAccess
     };
     return &RotationGestureEventAccessorImpl;
 }
+
+struct RotationGestureEventPeer {
+    virtual ~RotationGestureEventPeer() = default;
+};
 }

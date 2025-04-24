@@ -17,42 +17,31 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ComponentContent, CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { ErrorCallback } from "./../generated/ArkArkuiExternalInterfaces"
-import { AbilityWant, BusinessError } from "#external"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { Resource } from "global/resource";
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { Want } from "./ohos.app.ability"
 import { Callback_Number_Void } from "./alphabetIndexer"
+import { ErrorCallback } from "./ohos.base"
+import { BusinessError } from "./base"
 import { Callback_TerminationInfo_Void, TerminationInfo } from "./embeddedComponent"
-import { ArkUIExtensionComponentComponent } from "./../generated/ArkUiExtensionComponent"
-import { ArkUIExtensionComponentPeer } from "./../generated/peers/ArkUiExtensionComponentPeer"
-import { ArkUIAniUiextensionProxyModal } from "arkui.ani"
+import { Callback_Void } from "./abilityComponent"
+import { NodeAttach, remember } from "@koalaui/runtime"
+import { ComponentContent } from "./arkui-custom"
+import { AttributeModifier, UICommonBase } from "./../handwritten"
 export interface UIExtensionProxy {
-    send(data: Record<string, Object>): void
-    sendSync(data: Record<string, Object>): Record<string, Object>
+    send(data: Map<string, Object>): void
+    sendSync(data: Map<string, Object>): Map<string, Object>
     onAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
     onSyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
-    offAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
-    offSyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
+    offAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void) | undefined): void
+    offSyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void) | undefined): void
 }
 export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionProxy {
     peer?: Finalizable | undefined = undefined
@@ -70,14 +59,14 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._UIExtensionProxy_getFinalizer()
     }
-    public send(data: Record<string, Object>): void {
-        const data_casted = data as (Record<string, Object>)
-        ArkUIAniUiextensionProxyModal._Send_Data(this.peer!.ptr, data);
+    public send(data: Map<string, Object>): void {
+        const data_casted = data as (Map<string, Object>)
+        this.send_serialize(data_casted)
         return
     }
-    public sendSync(data: Record<string, Object>): Record<string, Object> {
-        const data_casted = data as (Record<string, Object>)
-        return ArkUIAniUiextensionProxyModal._Send_Data_Sync(this.peer!.ptr, data)
+    public sendSync(data: Map<string, Object>): Map<string, Object> {
+        const data_casted = data as (Map<string, Object>)
+        return this.sendSync_serialize(data_casted)
     }
     public onAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((parameter: UIExtensionProxy) => void))
@@ -112,7 +101,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
             const data_key = pair[0]
             const data_value = pair[1]
             thisSerializer.writeString(data_key)
-            thisSerializer.writeCustomObject("Object", data_value)
+            thisSerializer.holdAndWriteObject(data_value)
         }
         ArkUIGeneratedNativeModule._UIExtensionProxy_send(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -124,7 +113,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
             const data_key = pair[0]
             const data_value = pair[1]
             thisSerializer.writeString(data_key)
-            thisSerializer.writeCustomObject("Object", data_value)
+            thisSerializer.holdAndWriteObject(data_value)
         }
         const retval  = ArkUIGeneratedNativeModule._UIExtensionProxy_sendSync(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -134,7 +123,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         // TODO: TS map resize
         for (let buffer_i = 0; buffer_i < buffer_size; buffer_i++) {
             const buffer_key : string = (retvalDeserializer.readString() as string)
-            const buffer_value : Object = (retvalDeserializer.readCustomObject("Object") as Object)
+            const buffer_value : Object = (retvalDeserializer.readObject() as Object)
             buffer.set(buffer_key, buffer_value)
         }
         const returnResult : Map<string, Object> = buffer
@@ -182,50 +171,295 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         return obj
     }
 }
+export class ArkUIExtensionComponentPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkUIExtensionComponentPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._UIExtensionComponent_construct(peerId, flags)
+        const _peer  = new ArkUIExtensionComponentPeer(_peerPtr, peerId, "UIExtensionComponent", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setUIExtensionComponentOptionsAttribute(want: Want, options?: UIExtensionOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeWant(want)
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeUIExtensionOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._UIExtensionComponentInterface_setUIExtensionComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onRemoteReadyAttribute(value: ((parameter: UIExtensionProxy) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_onRemoteReady(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onReceiveAttribute(value: ((parameter: Map<string, Object>) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_onReceive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onResultAttribute(value: ((parameter: Literal_Number_code__want) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_onResult(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onReleaseAttribute(value: ((index: number) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_onRelease(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onErrorAttribute(value: ErrorCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_onError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onTerminatedAttribute(value: ((parameter: TerminationInfo) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_onTerminated(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDrawReadyAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_onDrawReady(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export enum DpiFollowStrategy {
     FOLLOW_HOST_DPI = 0,
     FOLLOW_UI_EXTENSION_ABILITY_DPI = 1
+}
+export enum WindowModeFollowStrategy {
+    FOLLOW_HOST_WINDOW_MODE = 0,
+    FOLLOW_UI_EXTENSION_ABILITY_WINDOW_MODE = 1
 }
 export interface UIExtensionOptions {
     isTransferringCaller?: boolean;
     placeholder?: ComponentContent;
     areaChangePlaceholder?: Map<string, ComponentContent>;
     dpiFollowStrategy?: DpiFollowStrategy;
-}
-export interface ReceiveCallback {
-    _ReceiveCallbackStub: string;
+    windowModeFollowStrategy?: WindowModeFollowStrategy;
 }
 export type Callback_UIExtensionProxy_Void = (parameter: UIExtensionProxy) => void;
-export interface Literal_Number_code_Want_want {
-    code: number;
-    want?: AbilityWant;
-}
-export type Callback_Literal_Number_code_Want_want_Void = (parameter: Literal_Number_code_Want_want) => void;
-/** @memo:stable */
+export type UIExtensionComponentInterface = (want: Want, options?: UIExtensionOptions) => UIExtensionComponentAttribute;
 export interface UIExtensionComponentAttribute extends CommonMethod {
+    onRemoteReady(value: ((parameter: UIExtensionProxy) => void) | undefined): this
+    onReceive(value: ((parameter: Map<string, Object>) => void) | undefined): this
+    onResult(value: ((parameter: Literal_Number_code__want) => void) | undefined): this
+    onRelease(value: ((index: number) => void) | undefined): this
+    onError(value: ErrorCallback | undefined): this
+    onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this
+    onDrawReady(value: (() => void) | undefined): this
+    attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
+}
+export interface UIUIExtensionComponentAttribute extends UICommonMethod {
     /** @memo */
-    setUIExtensionComponentOptions(want: AbilityWant, options?: UIExtensionOptions): this
+    onRemoteReady(value: ((parameter: UIExtensionProxy) => void) | undefined): this
     /** @memo */
-    onRemoteReady(value: ((parameter: UIExtensionProxy) => void)): this
+    onReceive(value: ((parameter: Map<string, Object>) => void) | undefined): this
     /** @memo */
-    onReceive(value: (param: Record<string, Object>) => void): this
+    onResult(value: ((parameter: Literal_Number_code__want) => void) | undefined): this
     /** @memo */
-    onResult(value: ((parameter: Literal_Number_code_Want_want) => void)): this
+    onRelease(value: ((index: number) => void) | undefined): this
     /** @memo */
-    onRelease(value: ((index: number) => void)): this
+    onError(value: ErrorCallback | undefined): this
     /** @memo */
-    onError(value: (e: BusinessError) => void): this
+    onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this
     /** @memo */
-    onTerminated(value: ((parameter: TerminationInfo) => void)): this
+    onDrawReady(value: (() => void) | undefined): this
+    /** @memo */
+    attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
+}
+export class ArkUIExtensionComponentStyle extends ArkCommonMethodStyle implements UIExtensionComponentAttribute {
+    onRemoteReady_value?: ((parameter: UIExtensionProxy) => void) | undefined
+    onReceive_value?: ((parameter: Map<string, Object>) => void) | undefined
+    onResult_value?: ((parameter: Literal_Number_code__want) => void) | undefined
+    onRelease_value?: ((index: number) => void) | undefined
+    onError_value?: ErrorCallback | undefined
+    onTerminated_value?: ((parameter: TerminationInfo) => void) | undefined
+    onDrawReady_value?: (() => void) | undefined
+    public onRemoteReady(value: ((parameter: UIExtensionProxy) => void) | undefined): this {
+        return this
+    }
+    public onReceive(value: ((parameter: Map<string, Object>) => void) | undefined): this {
+        return this
+    }
+    public onResult(value: ((parameter: Literal_Number_code__want) => void) | undefined): this {
+        return this
+    }
+    public onRelease(value: ((index: number) => void) | undefined): this {
+        return this
+    }
+    public onError(value: ErrorCallback | undefined): this {
+        return this
+    }
+    public onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this {
+        return this
+    }
+    public onDrawReady(value: (() => void) | undefined): this {
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Not implemented")
+    }
+}
+export type Callback_Map_String_Object_Void = (parameter: Map<string, Object>) => void;
+export interface Literal_Number_code__want {
+    code: number;
+    want?: Want;
+}
+export type Callback_Literal_Number_code__want_Void = (parameter: Literal_Number_code__want) => void;
+/** @memo:stable */
+export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent implements UIUIExtensionComponentAttribute {
+    getPeer(): ArkUIExtensionComponentPeer {
+        return (this.peer as ArkUIExtensionComponentPeer)
+    }
+    /** @memo */
+    public setUIExtensionComponentOptions(want: Want, options?: UIExtensionOptions): this {
+        if (this.checkPriority("setUIExtensionComponentOptions")) {
+            const want_casted = want as (Want)
+            const options_casted = options as (UIExtensionOptions | undefined)
+            this.getPeer()?.setUIExtensionComponentOptionsAttribute(want_casted, options_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onRemoteReady(value: ((parameter: UIExtensionProxy) => void) | undefined): this {
+        if (this.checkPriority("onRemoteReady")) {
+            const value_casted = value as (((parameter: UIExtensionProxy) => void) | undefined)
+            this.getPeer()?.onRemoteReadyAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onReceive(value: ((parameter: Map<string, Object>) => void) | undefined): this {
+        if (this.checkPriority("onReceive")) {
+            const value_casted = value as (((parameter: Map<string, Object>) => void) | undefined)
+            this.getPeer()?.onReceiveAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onResult(value: ((parameter: Literal_Number_code__want) => void) | undefined): this {
+        if (this.checkPriority("onResult")) {
+            const value_casted = value as (((parameter: Literal_Number_code__want) => void) | undefined)
+            this.getPeer()?.onResultAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onRelease(value: ((index: number) => void) | undefined): this {
+        if (this.checkPriority("onRelease")) {
+            const value_casted = value as (((index: number) => void) | undefined)
+            this.getPeer()?.onReleaseAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onError(value: ErrorCallback | undefined): this {
+        if (this.checkPriority("onError")) {
+            const value_casted = value as (ErrorCallback | undefined)
+            this.getPeer()?.onErrorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this {
+        if (this.checkPriority("onTerminated")) {
+            const value_casted = value as (((parameter: TerminationInfo) => void) | undefined)
+            this.getPeer()?.onTerminatedAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onDrawReady(value: (() => void) | undefined): this {
+        if (this.checkPriority("onDrawReady")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onDrawReadyAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        console.log("attributeModifier() not implemented")
+        return this
+    }
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function UIExtensionComponent(
-  /** @memo */
-  style: ((attributes: UIExtensionComponentAttribute) => void) | undefined,
-  want: AbilityWant, options?: UIExtensionOptions | undefined,
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: UIUIExtensionComponentAttribute) => void) | undefined,
+    want: Want, options?: UIExtensionOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkUIExtensionComponentComponent()
     })

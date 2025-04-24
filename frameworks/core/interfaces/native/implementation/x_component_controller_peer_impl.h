@@ -19,32 +19,18 @@
 #ifdef XCOMPONENT_SUPPORTED
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #endif // XCOMPONENT_SUPPORTED
 
-namespace OHOS::Ace::NG::GeneratedModifier {
-
-struct XComponentControllerPeerImpl : public OHOS::Ace::Referenced {
+struct XComponentControllerPeer : public OHOS::Ace::Referenced {
 #ifdef XCOMPONENT_SUPPORTED
     void TriggerStartImageAnalyzer(const Ark_ImageAnalyzerConfig* config,
         const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
-    std::shared_ptr<XComponentControllerNG> controller;
-    void SetOnSurfaceCreatedEvent(const Callback_String_Void& callback);
-    void SetOnSurfaceChangedEvent(const Callback_String_SurfaceRect_Void& callback);
-    void SetOnSurfaceDestroyedEvent(const Callback_String_Void& callback);
-    SurfaceCreatedEvent GetOnSurfaceCreatedEvent();
-    SurfaceChangedEvent GetOnSurfaceChangedEvent();
-    SurfaceDestroyedEvent GetOnSurfaceDestroyedEvent();
+    std::shared_ptr<OHOS::Ace::NG::XComponentControllerNG> controller;
 
 private:
-    SurfaceCreatedEvent onSurfaceCreatedEvent_ = nullptr;
-    SurfaceChangedEvent onSurfaceChangedEvent_ = nullptr;
-    SurfaceDestroyedEvent onSurfaceDestroyedEvent_ = nullptr;
     bool isImageAnalyzing_ = false;
-    ImageAnalyzerConfig config_;
+    OHOS::Ace::ImageAnalyzerConfig config_;
 #endif // XCOMPONENT_SUPPORTED
 };
-
-} // namespace OHOS::Ace::NG::GeneratedModifier
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_X_COMPONENT_CONTROLLER_PEER_IMPL_H

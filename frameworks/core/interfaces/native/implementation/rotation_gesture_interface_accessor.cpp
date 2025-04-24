@@ -15,25 +15,16 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "rotation_gesture_interface_peer.h"
 #include "arkoala_api_generated.h"
-#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RotationGestureInterfaceAccessor {
 void DestroyPeerImpl(Ark_RotationGestureInterface peer)
 {
-    delete peer;
 }
-Ark_RotationGestureInterface CtorImpl()
+Ark_RotationGestureInterface CtorImpl(const Opt_Literal_Number_angle_fingers* value)
 {
-    int32_t fingersNum = DEFAULT_SLIDE_FINGER;
-    double angleNum = 0;
-    auto peer = new RotationGestureInterfacePeer();
-    peer->gesture = AceType::MakeRefPtr<RotationGesture>(fingersNum, angleNum);
-    return peer;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -42,45 +33,27 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_RotationGestureInterface OnActionStartImpl(Ark_RotationGestureInterface peer,
                                                const Callback_GestureEvent_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto onActionStart = [arkCallback = CallbackHelper(*event)](GestureEvent& aceEvent) {
-        auto arkEvent = Converter::ArkGestureEventSync(aceEvent);
-        arkCallback.InvokeSync(arkEvent.ArkValue());
-    };
-    peer->gesture->SetOnActionStartId(onActionStart);
-    return peer;
+    return {};
 }
 Ark_RotationGestureInterface OnActionUpdateImpl(Ark_RotationGestureInterface peer,
                                                 const Callback_GestureEvent_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto onActionUpdate = [arkCallback = CallbackHelper(*event)](GestureEvent& aceEvent) {
-        const auto arkEvent = Converter::ArkGestureEventSync(aceEvent);
-        arkCallback.InvokeSync(arkEvent.ArkValue());
-    };
-    peer->gesture->SetOnActionUpdateId(onActionUpdate);
-    return peer;
+    return {};
 }
 Ark_RotationGestureInterface OnActionEndImpl(Ark_RotationGestureInterface peer,
                                              const Callback_GestureEvent_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto onActionEnd = [arkCallback = CallbackHelper(*event)](GestureEvent& aceEvent) {
-        const auto arkEvent = Converter::ArkGestureEventSync(aceEvent);
-        arkCallback.InvokeSync(arkEvent.ArkValue());
-    };
-    peer->gesture->SetOnActionEndId(onActionEnd);
-    return peer;
+    return {};
 }
-Ark_RotationGestureInterface OnActionCancelImpl(Ark_RotationGestureInterface peer,
-                                                const Callback_Void* event)
+Ark_RotationGestureInterface OnActionCancel0Impl(Ark_RotationGestureInterface peer,
+                                                 const Callback_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto onActionCancel = [arkCallback = CallbackHelper(*event)]() {
-        arkCallback.Invoke();
-    };
-    // peer->gesture->SetOnActionCancelId(onActionCancel);
-    return peer;
+    return {};
+}
+Ark_RotationGestureInterface OnActionCancel1Impl(Ark_RotationGestureInterface peer,
+                                                 const Callback_GestureEvent_Void* event)
+{
+    return {};
 }
 } // RotationGestureInterfaceAccessor
 const GENERATED_ArkUIRotationGestureInterfaceAccessor* GetRotationGestureInterfaceAccessor()
@@ -92,7 +65,8 @@ const GENERATED_ArkUIRotationGestureInterfaceAccessor* GetRotationGestureInterfa
         RotationGestureInterfaceAccessor::OnActionStartImpl,
         RotationGestureInterfaceAccessor::OnActionUpdateImpl,
         RotationGestureInterfaceAccessor::OnActionEndImpl,
-        RotationGestureInterfaceAccessor::OnActionCancelImpl,
+        RotationGestureInterfaceAccessor::OnActionCancel0Impl,
+        RotationGestureInterfaceAccessor::OnActionCancel1Impl,
     };
     return &RotationGestureInterfaceAccessorImpl;
 }

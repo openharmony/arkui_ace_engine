@@ -14,7 +14,7 @@
  */
 
 import { ArkStructBase } from "../ArkStructBase"
-import { ArkCommonMethodComponent } from "../generated/ArkCommon"
+import { ArkCommonMethodComponent } from "./common"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { ProvideDecoratedVariable, ConsumeDecoratedVariable, WatchFuncType } from "../stateManagement";
 

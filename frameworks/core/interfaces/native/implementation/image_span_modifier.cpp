@@ -13,93 +13,48 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/image/image_source_info.h"
-#include "core/components_ng/pattern/text/image_span_view.h"
-#include "core/interfaces/native/implementation/image_common_methods.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "pixel_map_peer.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto imageSpanNode = ImageSpanView::CreateFrameNode(id);
-    CHECK_NULL_RETURN(imageSpanNode, nullptr);
-    imageSpanNode->IncRefCount();
-    return AceType::RawPtr(imageSpanNode);
+    return {};
 }
 } // ImageSpanModifier
 namespace ImageSpanInterfaceModifier {
 void SetImageSpanOptionsImpl(Ark_NativePointer node,
                              const Ark_Union_ResourceStr_PixelMap* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto imageSource = Converter::OptConvert<ImageSourceInfo>(*value);
-    if (imageSource) {
-        ImageSpanView::SetImageSpanSrc(frameNode, *imageSource);
-    }
 }
 } // ImageSpanInterfaceModifier
 namespace ImageSpanAttributeModifier {
 void VerticalAlignImpl(Ark_NativePointer node,
-                       Ark_ImageSpanAlignment value)
+                       const Opt_ImageSpanAlignment* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<VerticalAlign>(value);
-    ImageSpanView::SetVerticalAlign(frameNode, convValue);
 }
 void ColorFilterImpl(Ark_NativePointer node,
-                     const Ark_Union_ColorFilter_DrawingColorFilter* value)
+                     const Opt_Union_ColorFilter_DrawingColorFilter* value)
 {
-    ImageCommonMethods::ApplyColorFilterValues(node, value);
 }
 void ObjectFitImpl(Ark_NativePointer node,
-                   Ark_ImageFit value)
+                   const Opt_ImageFit* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<ImageFit>(value);
-    ImageSpanView::SetObjectFit(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node,
-                    const ImageCompleteCallback* value)
+                    const Opt_ImageCompleteCallback* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onComplete = [arkCallback = CallbackHelper(*value)](const LoadImageSuccessEvent& info) {
-        Ark_ImageLoadResult result = Converter::ArkValue<Ark_ImageLoadResult>(info);
-        arkCallback.Invoke(result);
-    };
-    ImageSpanView::SetOnComplete(frameNode, std::move(onComplete));
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const ImageErrorCallback* value)
+                 const Opt_ImageErrorCallback* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onError = [arkCallback = CallbackHelper(*value)](const LoadImageFailEvent& info) {
-        Ark_ImageError result = Converter::ArkValue<Ark_ImageError>(info);
-        arkCallback.Invoke(result);
-    };
-    ImageSpanView::SetOnError(frameNode, std::move(onError));
 }
 void AltImpl(Ark_NativePointer node,
-             Ark_PixelMap value)
+             const Opt_PixelMap* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto pixelMapPeer = value;
-    if (pixelMapPeer) {
-        ImageModelNG::SetAlt(frameNode, ImageSourceInfo(pixelMapPeer->pixelMap));
-    }
 }
 } // ImageSpanAttributeModifier
 const GENERATED_ArkUIImageSpanModifier* GetImageSpanModifier()

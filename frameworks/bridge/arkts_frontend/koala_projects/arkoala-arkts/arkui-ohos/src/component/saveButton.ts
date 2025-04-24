@@ -17,16 +17,52 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkSecurityComponentMethodPeer, SecurityComponentMethod, ArkSecurityComponentMethodComponent, ArkSecurityComponentMethodStyle, UISecurityComponentMethod } from "./securityComponent"
+import { ClickEvent } from "./common"
+import { BusinessError } from "./base"
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ButtonType } from "./button"
-import { ClickEvent } from "./common"
-import { SecurityComponentMethod, SecurityComponentLayoutDirection } from "./securityComponent"
-import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, Padding, Length, SizeOptions, ConstraintSizeOptions } from "./units"
-import { FontStyle, FontWeight, BorderStyle } from "./enums"
-import { Resource } from "global/resource";
-import { ArkSaveButtonComponent } from "./../generated/ArkSaveButton"
-import { ArkSaveButtonPeer } from "./../generated/peers/ArkSaveButtonPeer"
+import { AttributeModifier, UICommonBase } from "./../handwritten"
+export class ArkSaveButtonPeer extends ArkSecurityComponentMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkSaveButtonPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._SaveButton_construct(peerId, flags)
+        const _peer  = new ArkSaveButtonPeer(_peerPtr, peerId, "SaveButton", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setSaveButtonOptions0Attribute(): void {
+        ArkUIGeneratedNativeModule._SaveButtonInterface_setSaveButtonOptions0(this.peer.ptr)
+    }
+    setSaveButtonOptions1Attribute(options: SaveButtonOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeSaveButtonOptions(options)
+        ArkUIGeneratedNativeModule._SaveButtonInterface_setSaveButtonOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onClickAttribute(value: SaveButtonCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._SaveButtonAttribute_onClick(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export enum SaveIconStyle {
     FULL_FILLED = 0,
     LINES = 1,
@@ -44,7 +80,8 @@ export enum SaveDescription {
     SAVE_TO_GALLERY = 8,
     EXPORT_TO_GALLERY = 9,
     QUICK_SAVE_TO_GALLERY = 10,
-    RESAVE_TO_GALLERY = 11
+    RESAVE_TO_GALLERY = 11,
+    SAVE_ALL = 12
 }
 export interface SaveButtonOptions {
     icon?: SaveIconStyle;
@@ -55,22 +92,67 @@ export enum SaveButtonOnClickResult {
     SUCCESS = 0,
     TEMPORARY_AUTHORIZATION_FAILED = 1
 }
-export type Callback_ClickEvent_SaveButtonOnClickResult_Void = (event: ClickEvent, result: SaveButtonOnClickResult) => void;
-/** @memo:stable */
+export type SaveButtonCallback = (event: ClickEvent, result: SaveButtonOnClickResult, error?: BusinessError<void>) => void;
 export interface SaveButtonAttribute extends SecurityComponentMethod {
+    onClick(value: SaveButtonCallback | undefined): this
+    attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this
+}
+export interface UISaveButtonAttribute extends UISecurityComponentMethod {
     /** @memo */
-    setSaveButtonOptions(options?: SaveButtonOptions): this
+    onClick(value: SaveButtonCallback | undefined): this
     /** @memo */
-    onClick(value: ((event: ClickEvent,result: SaveButtonOnClickResult) => void)): this
+    attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this
+}
+export class ArkSaveButtonStyle extends ArkSecurityComponentMethodStyle implements SaveButtonAttribute {
+    onClick_value?: SaveButtonCallback | undefined
+    public onClick(value: SaveButtonCallback | undefined): this {
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
+        throw new Error("Not implemented")
+    }
+}
+/** @memo:stable */
+export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent implements UISaveButtonAttribute {
+    getPeer(): ArkSaveButtonPeer {
+        return (this.peer as ArkSaveButtonPeer)
+    }
+    /** @memo */
+    public setSaveButtonOptions(options?: SaveButtonOptions): this {
+        if (this.checkPriority("setSaveButtonOptions")) {
+            const options_type = runtimeType(options)
+            this.getPeer()?.setSaveButtonOptions0Attribute()
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onClick(value: SaveButtonCallback | undefined): this {
+        if (this.checkPriority("onClick")) {
+            const value_casted = value as (SaveButtonCallback | undefined)
+            this.getPeer()?.onClickAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
+        console.log("attributeModifier() not implemented")
+        return this
+    }
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function SaveButton(
-  /** @memo */
-  style: ((attributes: SaveButtonAttribute) => void) | undefined,
-  options?: SaveButtonOptions | undefined, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: UISaveButtonAttribute) => void) | undefined,
+    options?: SaveButtonOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkSaveButtonComponent()
     })

@@ -15,30 +15,16 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-
-#include "length_metrics_peer.h"
-
-namespace OHOS::Ace::NG {
-namespace {
-inline Ark_LengthMetrics CreatePeer(const Ark_Number* value, DimensionUnit unit)
-{
-    double convValue = value ? Converter::Convert<float>(*value) : 0.;
-    return LengthMetricsPeer::Create(Dimension(convValue, unit));
-}
-} // namespace
-} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LengthMetricsAccessor {
 void DestroyPeerImpl(Ark_LengthMetrics peer)
 {
-    LengthMetricsPeer::Destroy(peer);
 }
 Ark_LengthMetrics CtorImpl()
 {
-    return LengthMetricsPeer::Create({});
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -46,55 +32,43 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_LengthMetrics PxImpl(const Ark_Number* value)
 {
-    return CreatePeer(value, DimensionUnit::PX);
+    return {};
 }
 Ark_LengthMetrics VpImpl(const Ark_Number* value)
 {
-    return CreatePeer(value, DimensionUnit::VP);
+    return {};
 }
 Ark_LengthMetrics FpImpl(const Ark_Number* value)
 {
-    return CreatePeer(value, DimensionUnit::FP);
+    return {};
 }
 Ark_LengthMetrics PercentImpl(const Ark_Number* value)
 {
-    return CreatePeer(value, DimensionUnit::PERCENT);
+    return {};
 }
 Ark_LengthMetrics LpxImpl(const Ark_Number* value)
 {
-    return CreatePeer(value, DimensionUnit::LPX);
+    return {};
 }
 Ark_LengthMetrics ResourceImpl(const Ark_Resource* value)
 {
-    std::optional<Dimension> convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
-    return LengthMetricsPeer::Create(convValue.value_or(Dimension()));
+    return {};
 }
 Ark_LengthUnit GetUnitImpl(Ark_LengthMetrics peer)
 {
-    CHECK_NULL_RETURN(peer, static_cast<Ark_LengthUnit>(-1));
-    DimensionUnit unit = peer->value.Unit();
-    return Converter::ArkValue<Ark_LengthUnit>(unit);
+    return {};
 }
 void SetUnitImpl(Ark_LengthMetrics peer,
                  Ark_LengthUnit unit)
 {
-    CHECK_NULL_VOID(peer);
-    auto convValue = Converter::OptConvert<DimensionUnit>(unit);
-    peer->value.SetUnit(convValue.value_or(DimensionUnit::VP));
 }
 Ark_Number GetValueImpl(Ark_LengthMetrics peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
-    auto value = peer->value.Value();
-    return Converter::ArkValue<Ark_Number>(value);
+    return {};
 }
 void SetValueImpl(Ark_LengthMetrics peer,
                   const Ark_Number* value)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<float>(*value);
-    peer->value.SetValue(convValue);
 }
 } // LengthMetricsAccessor
 const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor()
@@ -116,4 +90,8 @@ const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor()
     };
     return &LengthMetricsAccessorImpl;
 }
+
+struct LengthMetricsPeer {
+    virtual ~LengthMetricsPeer() = default;
+};
 }

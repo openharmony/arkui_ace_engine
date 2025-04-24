@@ -15,25 +15,16 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-#include "background_color_style_peer.h"
 
-namespace OHOS::Ace::NG {
-namespace GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BackgroundColorStyleAccessor {
 void DestroyPeerImpl(Ark_BackgroundColorStyle peer)
 {
-    delete peer;
 }
 Ark_BackgroundColorStyle CtorImpl(const Ark_TextBackgroundStyle* textBackgroundStyle)
 {
-    TextBackgroundStyle style;
-    if (textBackgroundStyle) {
-        style = Converter::Convert<TextBackgroundStyle>(*textBackgroundStyle);
-    }
-    auto span = AceType::MakeRefPtr<OHOS::Ace::BackgroundColorSpan>(style);
-    return new BackgroundColorStylePeer{ .span = span };
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -41,12 +32,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_TextBackgroundStyle GetTextBackgroundStyleImpl(Ark_BackgroundColorStyle peer)
 {
-    auto textBgStyleInvalid = TextBackgroundStyle();
-    Ark_TextBackgroundStyle invalidValue =
-        Converter::ArkValue<Ark_TextBackgroundStyle>(textBgStyleInvalid, Converter::FC);
-    CHECK_NULL_RETURN(peer && peer->span, invalidValue);
-    auto textBgStyle = peer->span->GetBackgroundColor();
-    return Converter::ArkValue<Ark_TextBackgroundStyle>(textBgStyle, Converter::FC);
+    return {};
 }
 } // BackgroundColorStyleAccessor
 const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccessor()
@@ -59,5 +45,8 @@ const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccess
     };
     return &BackgroundColorStyleAccessorImpl;
 }
-}
+
+struct BackgroundColorStylePeer {
+    virtual ~BackgroundColorStylePeer() = default;
+};
 }

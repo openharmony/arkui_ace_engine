@@ -14,24 +14,18 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/gesture_group_interface_peer.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureGroupInterfaceAccessor {
 void DestroyPeerImpl(Ark_GestureGroupInterface peer)
 {
-    delete peer;
 }
-Ark_GestureGroupInterface CtorImpl()
+Ark_GestureGroupInterface CtorImpl(Ark_GestureMode mode,
+                                   const Array_GestureType* gesture)
 {
-    auto gestureMode = GestureMode::Sequence;
-    auto peer = new GestureGroupInterfacePeer();
-    peer->gesture = AceType::MakeRefPtr<GestureGroup>(gestureMode);
-    return peer;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -40,12 +34,7 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_GestureGroupInterface OnCancelImpl(Ark_GestureGroupInterface peer,
                                        const Callback_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto callback = [arkCallback = CallbackHelper(*event)]() {
-        arkCallback.Invoke();
-    };
-    // peer->gesture->SetOnActionCancelId(std::move(callback));
-    return peer;
+    return {};
 }
 } // GestureGroupInterfaceAccessor
 const GENERATED_ArkUIGestureGroupInterfaceAccessor* GetGestureGroupInterfaceAccessor()
@@ -58,4 +47,8 @@ const GENERATED_ArkUIGestureGroupInterfaceAccessor* GetGestureGroupInterfaceAcce
     };
     return &GestureGroupInterfaceAccessorImpl;
 }
+
+struct GestureGroupInterfacePeer {
+    virtual ~GestureGroupInterfacePeer() = default;
+};
 }

@@ -14,25 +14,17 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
-#include "core/interfaces/native/implementation/key_event_peer.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace {
-const auto DefaultValueInt32 = Converter::ArkValue<Ark_Number>(0);
-} // namespace
-
 namespace KeyEventAccessor {
 void DestroyPeerImpl(Ark_KeyEvent peer)
 {
-    delete peer;
 }
 Ark_KeyEvent CtorImpl()
 {
-    return new KeyEventPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -42,132 +34,87 @@ Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
                                     Ark_KeyEvent peer,
                                     const Array_String* keys)
 {
-    return GetFullAPI()->getAccessors()->getBaseEventAccessor()->getModifierKeyState(vmContext, peer, keys);
+    return {};
 }
 Ark_KeyType GetTypeImpl(Ark_KeyEvent peer)
 {
-    const auto errValue = static_cast<Ark_KeyType>(-1);
-    CHECK_NULL_RETURN(peer, errValue);
-    const auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, errValue);
-    return Converter::ArkValue<Ark_KeyType>(info->GetKeyType());
+    return {};
 }
 void SetTypeImpl(Ark_KeyEvent peer,
                  Ark_KeyType type)
 {
-    LOGW("ARKOALA KeyEventAccessor::SetTypeImpl doesn't have sense.");
 }
 Ark_Number GetKeyCodeImpl(Ark_KeyEvent peer)
 {
-    CHECK_NULL_RETURN(peer, DefaultValueInt32);
-    const auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, DefaultValueInt32);
-    const auto keyCode = info->GetKeyCode();
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(keyCode));
+    return {};
 }
 void SetKeyCodeImpl(Ark_KeyEvent peer,
                     const Ark_Number* keyCode)
 {
-    LOGW("ARKOALA KeyEventAccessor::SetKeyCodeImpl doesn't have sense.");
 }
 Ark_String GetKeyTextImpl(Ark_KeyEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    const auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, {});
-    const auto keyText = info->GetKeyText();
-    return Converter::ArkValue<Ark_String>(keyText, Converter::FC);
+    return {};
 }
 void SetKeyTextImpl(Ark_KeyEvent peer,
                     const Ark_String* keyText)
 {
-    LOGW("ARKOALA KeyEventAccessor::SetKeyTextImpl doesn't have sense.");
 }
 Ark_KeySource GetKeySourceImpl(Ark_KeyEvent peer)
 {
-    const auto errValue = static_cast<Ark_KeySource>(-1);
-    CHECK_NULL_RETURN(peer, errValue);
-    const auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, errValue);
-    return Converter::ArkValue<Ark_KeySource>(info->GetKeySource());
+    return {};
 }
 void SetKeySourceImpl(Ark_KeyEvent peer,
                       Ark_KeySource keySource)
 {
-    LOGW("ARKOALA KeyEventAccessor::SetKeySourceImpl doesn't have sense.");
 }
 Ark_Number GetDeviceIdImpl(Ark_KeyEvent peer)
 {
-    return GetFullAPI()->getAccessors()->getBaseEventAccessor()->getDeviceId(peer);
+    return {};
 }
 void SetDeviceIdImpl(Ark_KeyEvent peer,
                      const Ark_Number* deviceId)
 {
-    GetFullAPI()->getAccessors()->getBaseEventAccessor()->setDeviceId(peer, deviceId);
 }
 Ark_Number GetMetaKeyImpl(Ark_KeyEvent peer)
 {
-    CHECK_NULL_RETURN(peer, DefaultValueInt32);
-    const auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, DefaultValueInt32);
-    const auto metaKey = info->GetMetaKey();
-    return Converter::ArkValue<Ark_Number>(metaKey);
+    return {};
 }
 void SetMetaKeyImpl(Ark_KeyEvent peer,
                     const Ark_Number* metaKey)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(metaKey);
-    const auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    const auto convMetaKey = Converter::Convert<int32_t>(*metaKey);
-    info->SetMetaKey(convMetaKey);
 }
-Ark_Number GetTimestampImpl(Ark_KeyEvent peer)
+Ark_Int64 GetTimestampImpl(Ark_KeyEvent peer)
 {
-    return GetFullAPI()->getAccessors()->getBaseEventAccessor()->getTimestamp(peer);
+    return {};
 }
 void SetTimestampImpl(Ark_KeyEvent peer,
-                      const Ark_Number* timestamp)
+                      Ark_Int64 timestamp)
 {
-    GetFullAPI()->getAccessors()->getBaseEventAccessor()->setTimestamp(peer, timestamp);
 }
 Callback_Void GetStopPropagationImpl(Ark_KeyEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
-        KeyEventInfo* info = peer->GetEventInfo();
-        CHECK_NULL_VOID(info);
-        info->SetStopPropagation(true);
-    });
-    return callback;
+    return {};
 }
 void SetStopPropagationImpl(Ark_KeyEvent peer,
                             const Callback_Void* stopPropagation)
 {
-    LOGW("ARKOALA KeyEventAccessor::SetStopPropagation doesn't have sense.");
 }
 Ark_IntentionCode GetIntentionCodeImpl(Ark_KeyEvent peer)
 {
     return {};
 }
 void SetIntentionCodeImpl(Ark_KeyEvent peer,
-                          const Ark_IntentionCode* intentionCode)
+                          Ark_IntentionCode intentionCode)
 {
-    LOGW("ARKOALA KeyEventAccessor::SetIntentionCodeImpl doesn't have sense.");
 }
-Ark_Number GetUnicodeImpl(Ark_KeyEvent peer)
+Opt_Number GetUnicodeImpl(Ark_KeyEvent peer)
 {
-    CHECK_NULL_RETURN(peer, DefaultValueInt32);
-    const auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, DefaultValueInt32);
-    const auto unicode = info->GetUnicode();
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(unicode));
+    return {};
 }
 void SetUnicodeImpl(Ark_KeyEvent peer,
                     const Ark_Number* unicode)
 {
-    LOGW("ARKOALA KeyEventAccessor::SetUnicodeImpl doesn't have sense.");
 }
 } // KeyEventAccessor
 const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
@@ -200,4 +147,8 @@ const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
     };
     return &KeyEventAccessorImpl;
 }
+
+struct KeyEventPeer {
+    virtual ~KeyEventPeer() = default;
+};
 }

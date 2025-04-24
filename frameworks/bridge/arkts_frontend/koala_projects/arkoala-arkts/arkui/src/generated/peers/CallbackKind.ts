@@ -240,6 +240,5 @@ export enum CallbackKind {
     Kind_VisibleAreaChangeCallback = 541663396,
     Kind_VoidCallback = -2038961969,
     Kind_WebKeyboardCallback = -1829763354,
-    Kind_WithThemeInterface = 219587748,
-    Kind_Callback_String_SurfaceRect_Void = -1736208400,
+    Kind_WithThemeInterface = 219587748
 }

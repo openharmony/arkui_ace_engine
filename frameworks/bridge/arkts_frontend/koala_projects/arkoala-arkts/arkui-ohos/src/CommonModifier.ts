@@ -1,53 +1,23 @@
-import { CommonAttribute, AttributeModifier } from "./component/common";
-import { ArkCommonAttributeSet } from "./handwritten/modifiers/ArkCommonModifier";
-import {  ClickEvent, Length, ResourceColor, SizeOptions} from "./";
+// import { CommonAttribute } from "./component/common";
+// import { AttributeModifier } from "./component/common"; 
+// export class CommonModifier   implements AttributeModifier<CommonAttribute> {
 
-export class CommonModifier implements AttributeModifier<CommonAttribute> {
+//     applyNormalAttribute(instance: CommonAttribute): void {
+//     }
+ 
+//     applyPressedAttribute(instance: CommonAttribute): void {
+       
+//     }
 
-    private attributeSet: ArkCommonAttributeSet = new ArkCommonAttributeSet();
+//     applyFocusedAttribute(instance: CommonAttribute): void {
+        
+//     }
 
-    get attribute(): ArkCommonAttributeSet {
-        return this.attributeSet;
-    }
+//     applyDisabledAttribute(instance: CommonAttribute): void {
+      
+//     }
 
-    applyNormalAttribute(instance: CommonAttribute): void {
-    }
-
-    applyPressedAttribute(instance: CommonAttribute): void {
-
-    }
-
-    applyFocusedAttribute(instance: CommonAttribute): void {
-
-    }
-
-    applyDisabledAttribute(instance: CommonAttribute): void {
-
-    }
-
-    applySelectedAttribute(instance: CommonAttribute): void {
-
-    }
-
-    size(value: SizeOptions): this {
-        this.attributeSet.size(value);
-        return this;
-    }
-    onClick(event: (event: ClickEvent) => void, distanceThreshold?: number | undefined): this {
-        this.attributeSet.onClick(event);
-        return this;
-    }
-    width(value: Length | undefined): this {
-        this.attributeSet.width(value);
-        return this;
-    }
-    height(value: Length | undefined): this {
-        this.attributeSet.height(value);
-        return this;
-    }
-    backgroundColor(value: ResourceColor | undefined): this {
-        this.attributeSet.backgroundColor(value);
-        return this;
-    }
-
-}
+//     applySelectedAttribute(instance: CommonAttribute): void {
+        
+//     }
+// }

@@ -15,9 +15,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/components_ng/pattern/text/span_model_ng.h"
-#include "core/components_ng/pattern/text/image_span_view.h"
-#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -25,38 +22,15 @@ namespace BaseSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = SpanModelNG::CreateSpanNode(id, "");
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    return {};
 }
 void TextBackgroundStyleImpl(Ark_NativePointer node,
-                             const Ark_TextBackgroundStyle* value)
+                             const Opt_TextBackgroundStyle* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<TextBackgroundStyle>(*value);
-    if (AceType::TypeId(frameNode) == SpanNode::TypeId()) {
-        SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, convValue);
-    } else {
-        ImageSpanView::SetPlaceHolderStyle(frameNode, convValue);
-    }
 }
 void BaselineOffsetImpl(Ark_NativePointer node,
-                        Ark_LengthMetrics value)
+                        const Opt_LengthMetrics* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<Dimension>(value);
-    Validator::ValidateNonPercent(convValue);
-    if (AceType::TypeId(frameNode) == SpanNode::TypeId()) {
-        // SpanModelNG::SetBaselineOffset(frameNode, convValue);
-    } else {
-        // ImageSpanView::SetBaselineOffset(frameNode, convValue);
-    }
 }
 } // BaseSpanModifier
 const GENERATED_ArkUIBaseSpanModifier* GetBaseSpanModifier()

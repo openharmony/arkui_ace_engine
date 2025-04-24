@@ -558,7 +558,7 @@ void EmitOnClick(Ark_NativePointer node, Ark_ClickEvent event) {}
 } // namespace OHOS::Ace::NG
 
 extern "C" {
-IDLIZE_API_EXPORT const GENERATED_ArkUIAnyAPI* GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind kind, int version);
+IDLIZE_API_EXPORT const OH_AnyAPI* GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind kind, int version);
 
 __attribute__((constructor)) static void ProvideEntryPoint(void)
 {

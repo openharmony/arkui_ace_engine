@@ -16,21 +16,15 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "canvas_pattern_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasPatternAccessor {
 void DestroyPeerImpl(Ark_CanvasPattern peer)
 {
-    if (peer) {
-        peer->DecRefCount();
-    }
 }
 Ark_CanvasPattern CtorImpl()
 {
-    auto peer = Referenced::MakeRefPtr<CanvasPatternPeer>();
-    peer->IncRefCount();
-    return reinterpret_cast<CanvasPatternPeer*>(Referenced::RawPtr(peer));
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -39,11 +33,7 @@ Ark_NativePointer GetFinalizerImpl()
 void SetTransformImpl(Ark_CanvasPattern peer,
                       const Opt_Matrix2D* transform)
 {
-    CHECK_NULL_VOID(peer);
-    auto matrix = Converter::OptConvert<Ark_Matrix2D>(*transform);
-    peer->SetTransform(matrix);
 }
-
 } // CanvasPatternAccessor
 const GENERATED_ArkUICanvasPatternAccessor* GetCanvasPatternAccessor()
 {

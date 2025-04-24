@@ -679,6 +679,23 @@ void TextModelNG::SetFont(FrameNode* frameNode, const Font& value)
     SetEnableVariableFontWeight(frameNode, value.enableVariableFontWeight.value_or(false));
 }
 
+void TextModelNG::SetFont(FrameNode* frameNode, const std::optional<Font>& value)
+{
+    if (!value.has_value()) {
+        SetFontSize(frameNode, std::nullopt);
+        SetFontWeight(frameNode, std::nullopt);
+        SetFontFamily(frameNode, std::nullopt);
+        SetItalicFontStyle(frameNode, std::nullopt);
+        SetEnableVariableFontWeight(frameNode, std::nullopt);
+        return;
+    }
+    SetFontSize(frameNode, value.value().fontSize);
+    SetFontWeight(frameNode, value.value().fontWeight);
+    SetFontFamily(frameNode, value.value().fontFamilies);
+    SetItalicFontStyle(frameNode, value.value().fontStyle);
+    SetEnableVariableFontWeight(frameNode, value.value().enableVariableFontWeight);
+}
+
 void TextModelNG::SetLetterSpacing(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     if (value) {

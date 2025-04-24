@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/custom_dialog_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -22,47 +21,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CustomDialogControllerAccessor {
 void DestroyPeerImpl(Ark_CustomDialogController peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->DecRefCount();
 }
 Ark_CustomDialogController CtorImpl(const Ark_CustomDialogControllerOptions* value)
 {
-    auto peer = AceType::MakeRefPtr<CustomDialogControllerPeer>();
-    peer->IncRefCount();
-    CHECK_NULL_RETURN(value, AceType::RawPtr(peer));
-
-    LOGE("CustomDialogControllerAccessor::CtorImpl. There is no a frame node for SetOwnerView.");
-    peer->SetOwnerView(nullptr);
-    LOGE("CustomDialogControllerAccessor::CtorImpl. There is no a frame node for SetBuilder.");
-    // Call peer->SetBuilder with value->builder and frameNode if it possible.
-    LOGE("CustomDialogControllerAccessor::CtorImpl. There is no a frame node for SetOnCancel.");
-    peer->SetOnCancel(value->cancel, nullptr);
-    peer->SetAutoCancel(value->autoCancel);
-    peer->SetDialogAlignment(value->alignment);
-    peer->SetOffset(value->offset);
-    peer->SetCustomStyle(value->customStyle);
-    peer->SetGridCount(value->gridCount);
-    peer->SetMaskColor(value->maskColor);
-    peer->SetMaskRect(value->maskRect);
-    peer->SetOpenAnimation(value->openAnimation);
-    peer->SetCloseAnimation(value->closeAnimation);
-    peer->SetShowInSubWindow(value->showInSubWindow);
-    peer->SetBackgroundColor(value->backgroundColor);
-    peer->SetCornerRadius(value->cornerRadius);
-    peer->SetIsModal(value->isModal);
-    peer->SetDismiss(value->onWillDismiss);
-    peer->SetWidth(value->width);
-    peer->SetHeight(value->height);
-    peer->SetBorderWidth(value->borderWidth);
-    peer->SetBorderColor(value->borderColor);
-    peer->SetBorderStyle(value->borderStyle);
-    peer->SetShadow(value->shadow);
-    peer->SetBlurStyle(value->backgroundBlurStyle);
-    peer->SetKeyboardAvoidMode(value->keyboardAvoidMode);
-    peer->SetEnableHoverMode(value->enableHoverMode);
-    peer->SetHoverModeArea(value->hoverModeArea);
-
-    return AceType::RawPtr(peer);
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -70,13 +32,9 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void OpenImpl(Ark_CustomDialogController peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->OpenDialog();
 }
 void CloseImpl(Ark_CustomDialogController peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->CloseDialog();
 }
 } // CustomDialogControllerAccessor
 const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor()
@@ -90,4 +48,8 @@ const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAc
     };
     return &CustomDialogControllerAccessorImpl;
 }
+
+struct CustomDialogControllerPeer {
+    virtual ~CustomDialogControllerPeer() = default;
+};
 }

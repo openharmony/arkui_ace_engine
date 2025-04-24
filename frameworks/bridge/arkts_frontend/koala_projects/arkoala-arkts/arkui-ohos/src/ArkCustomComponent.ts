@@ -24,7 +24,7 @@ import {
     NavigationInfo,
     NavDestinationInfo,
     RouterPageInfo
-} from "./generated"
+} from "./component"
 import { UIContext } from "@ohos/arkui/UIContext"
 
 /**
