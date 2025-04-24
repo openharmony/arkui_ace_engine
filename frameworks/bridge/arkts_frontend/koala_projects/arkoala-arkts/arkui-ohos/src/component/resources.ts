@@ -5,6 +5,20 @@ import { Serializer } from "./peers/Serializer";
 import { asArray } from "@koalaui/common";
 import { RuntimeType, runtimeType } from "@koalaui/interop";
 
+enum ResourceType {
+    COLOR = 10001,
+    FLOAT,
+    STRING,
+    PLURAL,
+    BOOLEAN,
+    INTARRAY,
+    INTEGER,
+    PATTERN,
+    STRARRAY,
+    MEDIA = 20000,
+    RAWFILE = 30000
+}
+
 class ArkResource implements Resource {
     bundleName: string = "";
     moduleName: string = "";
@@ -21,22 +35,7 @@ class ArkResource implements Resource {
         }
         this.params = param1;
         this._id = -1;
-        const param: string = resourceName.split(".")[1];
-        this.type = 20000;
-        switch (param) {
-            case 'media':
-                this.type = 20000;
-                break;
-            case 'color':
-                this.type = 10001;
-                break;
-            case 'string':
-                this.type = 10003;
-                break;
-            case 'float':
-                this.type = 10002;
-                break;
-        }
+        this.type = this.parseResourceType(resourceName);
     }
     set id(value: number) {
         this._id = value;
@@ -75,6 +74,34 @@ class ArkResource implements Resource {
             }
         }
         return this._id;
+    }
+    parseResourceType(resourceName: string): ResourceType {
+        const typeName: string = resourceName.split(".")[1];
+        switch (typeName) {
+            case 'color':
+                return ResourceType.COLOR;
+            case 'float':
+                return ResourceType.FLOAT;
+            case 'string':
+                return ResourceType.STRING;
+            case 'plural':
+                return ResourceType.PLURAL;
+            case 'boolean':
+                return ResourceType.BOOLEAN;
+            case 'intarray':
+                return ResourceType.INTARRAY
+            case 'integer':
+                return ResourceType.INTEGER;
+            case 'pattern':
+                return ResourceType.PATTERN;
+            case 'strarray':
+                return ResourceType.STRARRAY
+            case 'media':
+                return ResourceType.MEDIA;
+            case 'RAWFILE':
+                return ResourceType.RAWFILE;
+        }
+        return ResourceType.STRING;
     }
 }
 export function _r(bundleName: string, moduleName: string, name: string, ...params: Object[]): Resource {
