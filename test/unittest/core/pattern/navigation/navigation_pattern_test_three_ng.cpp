@@ -1997,7 +1997,7 @@ HWTEST_F(NavigationPatternTestThreeNg, UpdateNavPathList004, TestSize.Level1)
     EXPECT_EQ(navPathList[1].first, PAGE02);
     EXPECT_EQ(navPathList[1].second, nullptr);
     EXPECT_TRUE(navigationStack->GetIsForceSet(1));
-    EXPECT_EQ(navPathList[3].first, "");
+    EXPECT_EQ(navPathList[2].first, PAGE03);
     EXPECT_NE(AceType::DynamicCast<NavDestinationGroupNode>(navPathList[2].second), nullptr);
     EXPECT_FALSE(navigationStack->GetIsForceSet(2));
     NavigationPatternTestThreeNg::TearDownTestSuite();
