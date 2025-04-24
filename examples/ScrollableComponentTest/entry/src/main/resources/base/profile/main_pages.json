@@ -9,6 +9,7 @@
     "pages/Tabs/TabContentObserver",
     "pages/Tabs/TabsHeightAdaptive",
     "pages/Tabs/TabsSubTabBarStyle",
+    "pages/Tabs/TabsOnAnimationStart",
     "pages/waterflow/WaterFlowMainPage",
     "pages/waterflow/demo01/WaterFlowDemo",
     "pages/Swiper/SwiperMainPage",

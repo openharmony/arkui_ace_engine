@@ -36,8 +36,9 @@ struct TabsMainPage {
     new TextList(2, 'BarBackgroundBlurStyle', 'pages/Tabs/BarBackgroundBlurStyle'),
     new TextList(3, 'OnContentWillChange', 'pages/Tabs/OnContentWillChange'),
     new TextList(4, 'TabContentObserver', 'pages/Tabs/TabContentObserver'),
-    new TextList(5, 'TabsSubTabBarStyle', 'pages/Tabs/TabsHeightAdaptive'),
+    new TextList(5, 'TabsHeightAdaptive', 'pages/Tabs/TabsHeightAdaptive'),
     new TextList(6, 'TabsSubTabBarStyle', 'pages/Tabs/TabsSubTabBarStyle'),
+    new TextList(7, 'TabsOnAnimationStart', 'pages/Tabs/TabsOnAnimationStart'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
