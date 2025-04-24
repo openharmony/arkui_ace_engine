@@ -169,6 +169,8 @@ public:
     virtual void SetAspectRatio(float ratio) = 0;
     virtual void ResetAspectRatio() = 0;
     virtual void SetAlign(const Alignment& alignment) = 0;
+    virtual void SetAlign(const std::string& localizedAlignment) = 0;
+    virtual void SetIsMirrorable(const bool& isMirrorable) = 0;
     virtual void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) = 0;
     virtual void SetChainStyle(const ChainInfo& chainInfo) = 0;
     virtual void SetBias(const BiasPair& biasPair) = 0;

@@ -1121,6 +1121,15 @@ void SetAlign(ArkUINodeHandle node, ArkUI_Int32 align)
     ViewAbstract::SetAlign(frameNode, alignment);
 }
 
+void SetLocalizedAlign(ArkUINodeHandle node, ArkUI_CharPtr align)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string localizedAlignment(align);
+    ViewAbstract::SetAlign(localizedAlignment);
+    ViewAbstract::SetIsMirrorable(true);
+}
+
 void ResetAlign(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -7070,6 +7079,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .setOpacity = SetOpacity,
         .resetOpacity = ResetOpacity,
         .setAlign = SetAlign,
+        .setLocalizedAlign = SetLocalizedAlign,
         .resetAlign = ResetAlign,
         .setBackdropBlur = SetBackdropBlur,
         .resetBackdropBlur = ResetBackdropBlur,
@@ -7857,8 +7867,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .getExpandSafeArea = GetExpandSafeArea,
         .setTransition = SetTransition,
         .setDragPreview = SetDragPreview,
-        .resetDragPreview = ResetDragPreview,
         .freezeUINodeById = FreezeUINodeById,
+        .resetDragPreview = ResetDragPreview,
         .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line

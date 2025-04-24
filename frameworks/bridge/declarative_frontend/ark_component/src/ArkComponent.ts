@@ -707,8 +707,8 @@ class OpacityModifier extends ModifierWithKey<number | Resource> {
   }
 }
 
-class AlignModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class AlignModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
     super(value);
   }
   static identity: Symbol = Symbol('align');
@@ -4556,11 +4556,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  align(value: Alignment): this {
-    if (isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, value);
-    } else {
+  align(value: Alignment | LocalizedAlignment): this {
+    if (!isNumber(value) && !isString(value)) {
       modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, value);
     }
     return this;
   }

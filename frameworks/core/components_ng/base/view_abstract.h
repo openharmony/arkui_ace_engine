@@ -272,6 +272,8 @@ public:
 
     // layout
     static void SetAlign(Alignment alignment);
+    static void SetAlign(std::string localizedAlignment);
+    static void SetIsMirrorable(bool isMirrorable);
     static void SetAlignRules(const std::map<AlignDirection, AlignRule> &alignRules);
     static void SetChainStyle(const ChainInfo& chainInfo);
     static void SetBias(const BiasPair& biasPair);

@@ -1877,16 +1877,23 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
 {
-    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::STRING };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsAlign", jsVal, checkList) &&
         Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         ViewAbstractModel::GetInstance()->SetAlign(Alignment::CENTER);
         return;
     }
-    auto value = jsVal->ToNumber<int32_t>();
-    Alignment alignment = ParseAlignment(value);
-    ViewAbstractModel::GetInstance()->SetAlign(alignment);
+    if (jsVal->IsNumber()) {
+        auto value = jsVal->ToNumber<int32_t>();
+        Alignment alignment = ParseAlignment(value);
+        ViewAbstractModel::GetInstance()->SetAlign(alignment);
+        ViewAbstractModel::GetInstance()->SetIsMirrorable(false);
+    } else {
+        std::string localizedAlignment = jsVal->ToString();
+        ViewAbstractModel::GetInstance()->SetAlign(localizedAlignment);
+        ViewAbstractModel::GetInstance()->SetIsMirrorable(true);
+    }
 }
 
 void JSViewAbstract::JsPosition(const JSCallbackInfo& info)

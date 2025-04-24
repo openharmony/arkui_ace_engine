@@ -353,6 +353,19 @@ let Alignment;
   Alignment[Alignment.BottomEnd = 8] = 'BottomEnd';
 })(Alignment || (Alignment = {}));
 
+let LocalizedAlignment;
+(function (LocalizedAlignment) {
+  LocalizedAlignment.TOP_START = 'top_start';
+  LocalizedAlignment.TOP = 'top';
+  LocalizedAlignment.TOP_END = 'top_end';
+  LocalizedAlignment.START = 'start';
+  LocalizedAlignment.CENTER = 'center';
+  LocalizedAlignment.END = 'end';
+  LocalizedAlignment.BOTTOM_START = 'bottom_start';
+  LocalizedAlignment.BOTTOM = 'bottom';
+  LocalizedAlignment.BOTTOM_END = 'bottom_end';
+})(LocalizedAlignment || (LocalizedAlignment = {}));
+
 let ChainStyle;
 (function (ChainStyle) {
   ChainStyle[ChainStyle.SPREAD = 0] = 'SPREAD';
