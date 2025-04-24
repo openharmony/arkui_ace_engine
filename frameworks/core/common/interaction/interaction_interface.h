@@ -19,6 +19,10 @@
 #include "base/memory/ace_type.h"
 #include "core/common/interaction/interaction_data.h"
 
+namespace OHOS::Rosen {
+    class RSTransaction;
+}
+
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT InteractionInterface : public AceType {
     DECLARE_ACE_TYPE(InteractionInterface, AceType);
@@ -28,7 +32,8 @@ public:
 
     virtual int32_t UpdateShadowPic(const ShadowInfoCore& shadowInfo) = 0;
 
-    virtual int32_t SetDragWindowVisible(bool visible) = 0;
+    virtual int32_t SetDragWindowVisible(bool visible,
+        const std::shared_ptr<Rosen::RSTransaction>& rSTransaction = nullptr) = 0;
 
     virtual int32_t SetMouseDragMonitorState(bool state) = 0;
 
