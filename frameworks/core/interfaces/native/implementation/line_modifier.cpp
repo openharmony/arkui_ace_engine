@@ -13,32 +13,80 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/shape/line_model_ng.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
+#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/converter.h"
+
+namespace OHOS::Ace::NG {
+struct LineOptions {
+    std::optional<Dimension> width;
+    std::optional<Dimension> height;
+};
+}
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+LineOptions Convert(const Ark_LineOptions& src)
+{
+    LineOptions options;
+    options.width = Converter::OptConvert<Dimension>(src.width);
+    options.height = Converter::OptConvert<Dimension>(src.height);
+    return options;
+}
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LineModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return {};
+    // auto frameNode = LineModelNG::CreateFrameNode(id);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 } // LineModifier
 namespace LineInterfaceModifier {
+
 void SetLineOptionsImpl(Ark_NativePointer node,
                         const Opt_LineOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    auto opt = Converter::OptConvert<LineOptions>(*options);
+    CHECK_NULL_VOID(opt);
+    if (opt->width) {
+        ShapeAbstractModelNG::SetWidth(frameNode, opt->width.value());
+    }
+
+    if (opt->height) {
+        ShapeAbstractModelNG::SetHeight(frameNode, opt->height.value());
+    }
 }
 } // LineInterfaceModifier
 namespace LineAttributeModifier {
 void StartPointImpl(Ark_NativePointer node,
                     const Opt_Array_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //LineModelNG::SetStartPoint(frameNode, convValue);
 }
 void EndPointImpl(Ark_NativePointer node,
                   const Opt_Array_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //LineModelNG::SetEndPoint(frameNode, convValue);
 }
 } // LineAttributeModifier
 const GENERATED_ArkUILineModifier* GetLineModifier()

@@ -7124,6 +7124,28 @@ void callManagedWithThemeInterfaceSync(Ark_VMContext vmContext, Ark_Int32 resour
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
+void callManagedCallback_String_SurfaceRect_Void(Ark_Int32 resourceId, Ark_String surfaceId, Ark_SurfaceRect rect)
+{
+    CallbackBuffer _buffer = {{}, {}};
+    const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_String_SurfaceRect_Void);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeString(surfaceId);
+    argsSerializer.writeSurfaceRect(rect);
+    enqueueCallback(&_buffer);
+}
+void callManagedCallback_String_SurfaceRect_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_String surfaceId, Ark_SurfaceRect rect)
+{
+    uint8_t _buffer[4096];
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
+    argsSerializer.writeInt32(Kind_Callback_String_SurfaceRect_Void);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeString(surfaceId);
+    argsSerializer.writeSurfaceRect(rect);
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
+}
 Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
 {
     switch (kind) {
@@ -7407,6 +7429,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_VoidCallback: return reinterpret_cast<Ark_NativePointer>(callManagedVoidCallback);
         case Kind_WebKeyboardCallback: return reinterpret_cast<Ark_NativePointer>(callManagedWebKeyboardCallback);
         case Kind_WithThemeInterface: return reinterpret_cast<Ark_NativePointer>(callManagedWithThemeInterface);
+        case Kind_Callback_String_SurfaceRect_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_String_SurfaceRect_Void);
     }
     return nullptr;
 }
@@ -7693,6 +7716,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_VoidCallback: return reinterpret_cast<Ark_NativePointer>(callManagedVoidCallbackSync);
         case Kind_WebKeyboardCallback: return reinterpret_cast<Ark_NativePointer>(callManagedWebKeyboardCallbackSync);
         case Kind_WithThemeInterface: return reinterpret_cast<Ark_NativePointer>(callManagedWithThemeInterfaceSync);
+        case Kind_Callback_String_SurfaceRect_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_String_SurfaceRect_VoidSync);
     }
     return nullptr;
 }
