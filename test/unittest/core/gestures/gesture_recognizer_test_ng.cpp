@@ -612,4 +612,32 @@ HWTEST_F(GestureRecognizerTestNg, HandlePanGestureAccept_002, TestSize.Level1)
     panRecognizerPtr->HandlePanGestureAccept(info, PanGestureState::AFTER, panRecognizerPtr->onActionEnd_);
     EXPECT_EQ(panRecognizerPtr->currentCallbackState_, CurrentCallbackState::END);
 }
+
+/**
+ * @tc.name: TagGestureJudgeCallbackTest001
+ * @tc.desc: Test function: CreateTapGestureLocationEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, TagGestureJudgeCallbackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Recognizer、TargetComponent.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        gestureInfo->SetType(GestureTypeName::TAP_GESTURE);
+        return GestureJudgeResult::REJECT;};
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    /**
+     * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
+     * @tc.expected: step2. result equals CONTINUE.
+     */
+    clickRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    clickRecognizerPtr->gestureInfo_->type_ = GestureTypeName::TAP_GESTURE;
+    auto result = clickRecognizerPtr->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
 } // namespace OHOS::Ace::NG
