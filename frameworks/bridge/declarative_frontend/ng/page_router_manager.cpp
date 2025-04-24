@@ -286,7 +286,7 @@ void PageRouterManager::PushNamedRouteInner(const RouterPageInfo& target)
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "PushNamedRoute exceeds maxStackSize.");
         if (target.errorCallback != nullptr) {
-            target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
+            target.errorCallback("Page stack error. Too many pages are pushed.", ERROR_CODE_PAGE_STACK_FULL);
         }
         return;
     }
@@ -1147,7 +1147,7 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "PushOhmUrl exceeds maxStackSize.");
         if (target.errorCallback != nullptr) {
-            target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
+            target.errorCallback("Page stack error. Too many pages are pushed.", ERROR_CODE_PAGE_STACK_FULL);
         }
         return;
     }
@@ -1214,7 +1214,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !context->GetForceSplitEnable()) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "StartPush exceeds maxStackSize.");
         if (target.errorCallback != nullptr) {
-            target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
+            target.errorCallback("Page stack error. Too many pages are pushed.", ERROR_CODE_PAGE_STACK_FULL);
         }
         return;
     }
@@ -1223,7 +1223,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     if (info.path.empty()) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "empty path found in StartPush with url: %{public}s", info.url.c_str());
         if (info.errorCallback != nullptr) {
-            info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR);
+            info.errorCallback("The URI of the page to redirect is incorrect or does not exist.", ERROR_CODE_URI_ERROR);
         }
         return;
     }
@@ -1321,7 +1321,9 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
     if (info.path.empty()) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "empty path found in StartReplace with url: %{public}s", info.url.c_str());
         if (info.errorCallback != nullptr) {
-            info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR_LITE);
+            info.errorCallback(
+                "Uri error. The URI of the page to be used for replacement is incorrect or does not exist.",
+                ERROR_CODE_URI_ERROR_LITE);
         }
         return;
     }
@@ -1548,7 +1550,7 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
         if (!target.isNamedRouterMode) {
             result = updateRootComponent_();
         } else if (target.errorCallback) {
-            target.errorCallback("The named route is not exist.", ERROR_CODE_NAMED_ROUTE_ERROR);
+            target.errorCallback("Named route error. The named route does not exist.", ERROR_CODE_NAMED_ROUTE_ERROR);
         }
     }
 
@@ -1854,7 +1856,8 @@ void PageRouterManager::StartRestorePageWithTarget(const RouterPageInfo& target,
             TAG_LOGW(AceLogTag::ACE_ROUTER,
                 "empty path found in StartRestorePageWithTarget with url: %{public}s", info.url.c_str());
             if (info.errorCallback != nullptr) {
-                info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR);
+                info.errorCallback("The URI of the page to redirect is incorrect or does not exist.",
+                    ERROR_CODE_URI_ERROR);
             }
             return;
         }
