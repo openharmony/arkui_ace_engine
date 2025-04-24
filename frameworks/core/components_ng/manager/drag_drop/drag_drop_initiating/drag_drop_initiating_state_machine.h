@@ -54,6 +54,7 @@ public:
     void HandleReStartDrag(const GestureEvent& info);
     void HandleDragStart();
     void HandleDragEnd();
+    void HandlePreDragStatus(const PreDragStatus preDragStatus);
     void TransDragWindowToFwk();
 
     void RequestStatusTransition(int32_t nextStatus);
