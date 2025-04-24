@@ -258,7 +258,6 @@ public:
     {
         return isPrepared_;
     }
-
     static void RegisterMediaPlayerEvent(const WeakPtr<VideoPattern>& weak, const RefPtr<MediaPlayer>& mediaPlayer,
         const std::string& videoSrc, int32_t instanceId);
 
