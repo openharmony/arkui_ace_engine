@@ -1658,6 +1658,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
  */
 HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen004, TestSize.Level1)
 {
+    int64_t elementId = 2LL;
     auto context = NG::PipelineContext::GetCurrentContext();
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(frameNode, nullptr);
@@ -1665,13 +1666,14 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen004, TestSize.Leve
 
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
-    jsAccessibilityManager->currentFocusNodeId_ = 2;
-    jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 3;
+    jsAccessibilityManager->currentFocusNodeId_ = 2LL;
+    jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 3LL;
 
-    jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS,
-        frameNode, 2, context);
-    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, -1);
-    EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 3);
+    bool ret = jsAccessibilityManager->ConvertActionTypeToBoolen(
+        ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, frameNode, elementId, context);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, -1LL);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 3LL);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -1681,6 +1683,7 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen004, TestSize.Leve
  */
 HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen005, TestSize.Level1)
 {
+    int64_t elementId = 6LL;
     auto context = NG::PipelineContext::GetCurrentContext();
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     ASSERT_NE(frameNode, nullptr);
@@ -1688,13 +1691,14 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen005, TestSize.Leve
 
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
-    jsAccessibilityManager->currentFocusNodeId_ = 2;
-    jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 3;
+    jsAccessibilityManager->currentFocusNodeId_ = 4LL;
+    jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 5LL;
 
-    jsAccessibilityManager->ConvertActionTypeToBoolen(
-        ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, frameNode, 4, context);
-    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, 2);
-    EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 3);
+    bool ret = jsAccessibilityManager->ConvertActionTypeToBoolen(
+        ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, frameNode, elementId, context);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, 4LL);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 5LL);
+    EXPECT_FALSE(ret);
 }
 
 /**
