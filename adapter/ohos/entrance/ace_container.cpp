@@ -67,7 +67,9 @@
 
 #include "base/ressched/ressched_report.h"
 
+#ifdef ACE_ENABLE_VK
 #include "accessibility_config.h"
+#endif
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -350,7 +352,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_pt
     if (ability) {
         abilityInfo_ = ability->GetAbilityInfo();
     }
+#ifdef ACE_ENABLE_VK
     SubscribeHighContrastChange();
+#endif
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type,
@@ -373,7 +377,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
+#ifdef ACE_ENABLE_VK
     SubscribeHighContrastChange();
+#endif
 }
 
 // for DynamicComponent
@@ -397,7 +403,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
+#ifdef ACE_ENABLE_VK
     SubscribeHighContrastChange();
+#endif
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type) : instanceId_(instanceId), type_(type)
@@ -414,7 +422,9 @@ AceContainer::~AceContainer()
 {
     std::lock_guard lock(destructMutex_);
     LOGI("Container Destroyed");
+#ifdef ACE_ENABLE_VK
     UnsubscribeHighContrastChange();
+#endif
 }
 
 void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
@@ -4421,8 +4431,8 @@ bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool ani
     return true;
 }
 
+#ifdef ACE_ENABLE_VK
 std::shared_ptr<HighContrastObserver> highContrastObserver_ = nullptr;
-
 void AceContainer::SubscribeHighContrastChange()
 {
     if (!Rosen::RSSystemProperties::GetHybridRenderEnabled()) {
@@ -4453,4 +4463,5 @@ void AceContainer::UnsubscribeHighContrastChange()
     }
     highContrastObserver_ = nullptr;
 }
+#endif
 } // namespace OHOS::Ace::Platform

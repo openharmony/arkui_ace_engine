@@ -974,8 +974,10 @@ private:
 
     bool lastThemeHasSkin_ = false;
 
+#ifdef ACE_ENABLE_VK
     void SubscribeHighContrastChange();
     void UnsubscribeHighContrastChange();
+#endif
 };
 
 } // namespace OHOS::Ace::Platform

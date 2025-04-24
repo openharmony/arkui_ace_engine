@@ -24,7 +24,9 @@
 #include "core/common/font_change_observer.h"
 #include "core/common/font_loader.h"
 #include "core/pipeline/pipeline_base.h"
+#ifdef ACE_ENABLE_VK
 #include "core/components_ng/base/frame_node.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -146,8 +148,10 @@ private:
     std::set<WeakPtr<NG::UINode>> variationNodesNG_;
     std::set<WeakPtr<FontChangeObserver>> observers_;
 
+#ifdef ACE_ENABLE_VK
     std::mutex hybridRenderNodesMutex_;
     std::set<WeakPtr<NG::UINode>> hybridRenderNodes_;
+#endif
 };
 
 } // namespace OHOS::Ace
