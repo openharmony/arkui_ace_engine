@@ -5601,8 +5601,8 @@ void OverlayManager::OpenBindSheetByUIContext(
         std::move(onTypeDidChange), std::move(sheetSpringBack), targetNode, true);
 }
 
-void OverlayManager::UpdateBindSheetByUIContext(
-    const RefPtr<NG::FrameNode>& sheetContentNode, NG::SheetStyle& sheetStyle, int32_t targetId, bool isPartialUpdate)
+void OverlayManager::UpdateBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode,
+    const NG::SheetStyle& sheetStyle, int32_t targetId, bool isPartialUpdate)
 {
     SheetKey sheetKey;
     if (!CreateSheetKey(sheetContentNode, targetId, sheetKey)) {
@@ -5621,7 +5621,7 @@ void OverlayManager::UpdateBindSheetByUIContext(
 }
 
 void OverlayManager::UpdateSheetRender(
-    const RefPtr<FrameNode>& sheetPageNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate)
+    const RefPtr<FrameNode>& sheetPageNode, const NG::SheetStyle& sheetStyle, bool isPartialUpdate)
 {
     CHECK_NULL_VOID(sheetPageNode);
     auto sheetRenderContext = sheetPageNode->GetRenderContext();
@@ -5656,7 +5656,7 @@ void OverlayManager::UpdateSheetRender(
     sheetNodePattern->UpdateMaskBackgroundColor();
 }
 void OverlayManager::UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode,
-    NG::SheetStyle& currentStyle, bool isPartialUpdate)
+    const NG::SheetStyle& currentStyle, bool isPartialUpdate)
 {
     UpdateSheetRender(sheetNode, currentStyle, isPartialUpdate);
     auto maskNode = GetSheetMask(sheetNode);
@@ -5665,7 +5665,7 @@ void OverlayManager::UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode,
     }
 }
 
-void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle,
+void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle,
     int32_t targetId, bool isStartByUIContext, bool isPartialUpdate,
     std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
     std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
@@ -5681,9 +5681,11 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
     }
     auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetNodePattern);
+
     sheetNodePattern->IsNeedPlayTransition(sheetStyle);
+    auto currentStyle = sheetStyle;
     if (isStartByUIContext) {
-        auto currentStyle = UpdateSheetStyle(sheetNode, sheetStyle, isPartialUpdate);
+        currentStyle = UpdateSheetStyle(sheetNode, sheetStyle, isPartialUpdate);
         UpdateSheetProperty(sheetNode, currentStyle, isPartialUpdate);
     } else {
         sheetNodePattern->UpdateOnAppear(std::move(onAppear));
@@ -5710,7 +5712,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
     CHECK_NULL_VOID(sheetWrapper);
     sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     pipeline->FlushUITasks();
-    ComputeSheetOffset(sheetStyle, sheetNode);
+    ComputeSheetOffset(currentStyle, sheetNode);
 
     auto sheetType = sheetNodePattern->GetSheetType();
     if (sheetType != SheetType::SHEET_POPUP && !sheetNodePattern->GetDismissProcess() &&
@@ -6101,7 +6103,7 @@ bool OverlayManager::CheckTopModalNode(const RefPtr<FrameNode>& topModalNode, in
     return true;
 }
 
-void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode)
+void OverlayManager::ComputeSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode)
 {
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
@@ -6158,7 +6160,7 @@ void OverlayManager::CheckDeviceInLandscape(
     }
 }
 
-void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode)
+void OverlayManager::ComputeSingleGearSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode)
 {
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
@@ -6202,7 +6204,7 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
     }
 }
 
-void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode)
+void OverlayManager::ComputeDetentsSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode)
 {
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
