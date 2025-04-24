@@ -1464,17 +1464,17 @@ HWTEST_F(FormTestNg, GetTimeLimitFontSize, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTimeLimitResource
- * @tc.desc: Test function GetTimeLimitResource in FormPattern.
+ * @tc.name: GetResourceContent
+ * @tc.desc: Test function GetResourceContent in FormPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(FormTestNg, GetTimeLimitResource, TestSize.Level1)
+HWTEST_F(FormTestNg, GetResourceContent, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     ASSERT_NE(pattern, nullptr);
     std::string tmpStr = "action";
-    pattern->GetTimeLimitResource(tmpStr);
+    pattern->GetResourceContent(FormChildNodeType::TIME_LIMIT_TEXT_NODE, tmpStr);
     EXPECT_EQ(tmpStr.empty(), false);
 }
 
