@@ -111,11 +111,13 @@ RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src)
 
 void UpdateBarItemNodeWithItem(const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem)
 {
-    if (barItem.text.has_value() && !barItem.text.value().empty() && !barItemNode->IsHideText()) {
+    if (barItem.text.has_value() && !barItem.text.value().empty()) {
         auto textNode = CreateBarItemTextNode(barItem.text.value());
         CHECK_NULL_VOID(textNode);
         barItemNode->SetTextNode(textNode);
-        barItemNode->AddChild(textNode);
+        if (!barItemNode->IsHideText()) {
+            barItemNode->AddChild(textNode);
+        }
     }
     if (barItem.icon.has_value() && !barItem.icon.value().empty()) {
         auto iconNode = CreateBarItemIconNode(barItem.icon.value());

@@ -599,6 +599,23 @@ HWTEST_F(ToolBarTestNg, IsHideTextTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsHideTextTest002
+ * @tc.desc: Test the IsHideText function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, IsHideTextTest002, TestSize.Level1)
+{
+    bool hideText = true;
+    bool showText = false;
+    toolBarNode_->SetIsHideItemText(showText);
+    bool result = toolBarNode_->IsHideItemText();
+    EXPECT_EQ(result, showText);
+    toolBarNode_->SetIsHideItemText(hideText);
+    result = toolBarNode_->IsHideItemText();
+    EXPECT_EQ(result, hideText);
+}
+
+/**
  * @tc.name: HideOrShowTitleBarImmediately001
  * @tc.desc: Test HideOrShowTitleBarImmediately function.
  * @tc.type: FUNC
