@@ -3582,6 +3582,7 @@ void PipelineContext::UpdateLastMoveEvent(const MouseEvent& event)
     lastMouseEvent_->mockFlushEvent = event.mockFlushEvent;
     lastMouseEvent_->pointerEvent = event.pointerEvent;
     lastMouseEvent_->deviceId = event.deviceId;
+    lastMouseEvent_->sourceTool = event.sourceTool;
     lastSourceType_ = event.sourceType;
 }
 
@@ -5963,10 +5964,6 @@ void PipelineContext::FlushMouseEventForHover()
     touchRestrict.sourceType = event.sourceType;
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
-    // The purpose of setting the action here as WINDOW_ENTER is to force the hover node to recalculate.
-    if (windowSizeChangeReason_ == WindowSizeChangeReason::MAXIMIZE) {
-        event.action = MouseAction::WINDOW_ENTER;
-    }
     if (container->IsScenceBoardWindow()) {
         eventManager_->MouseTest(event, lastMouseEvent_->node.Upgrade(), touchRestrict);
     } else {
@@ -6003,8 +6000,8 @@ void PipelineContext::FlushMouseEventInVsync()
     }
     if (isTransFlag_ && (mouseEventSize == 0 || lastMouseEvent_->mockFlushEvent)) {
         FlushMouseEventForHover();
-        isTransFlag_ = false;
     }
+    isTransFlag_ = false;
 }
 
 void PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
