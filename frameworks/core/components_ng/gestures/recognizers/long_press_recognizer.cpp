@@ -63,6 +63,12 @@ void LongPressRecognizer::OnAccepted()
         time_ = TimeStamp(nanoseconds);
     }
 
+    TouchEvent touchPoint = {};
+    if (!touchPoints_.empty()) {
+        touchPoint = touchPoints_.begin()->second;
+    }
+    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
     UpdateFingerListInfo();
     SendCallbackMsg(onAction_, false, GestureCallbackType::START);
     if (isLimitFingerCount_ && hasRepeated_) {
@@ -420,6 +426,7 @@ void LongPressRecognizer::OnResetStatus()
     MultiFingersRecognizer::OnResetStatus();
     timer_.Cancel();
     deadlineTimer_.Cancel();
+    localMatrix_.clear();
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
