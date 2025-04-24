@@ -666,6 +666,9 @@ void FormPattern::OnModifyDone()
     layoutProperty->UpdateRequestFormInfo(info);
     UpdateBackgroundColorWhenUnTrustForm();
     auto wantWrap = info.wantWrap;
+    info.obscuredMode = isFormObscured_;
+    info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) ||
+        IsFormBundleProtected(info.bundleName, info.id));
     if (wantWrap) {
         bool isEnable = wantWrap->GetWant().GetBoolParam(OHOS::AppExecFwk::Constants::FORM_ENABLE_SKELETON_KEY, false);
         TAG_LOGD(AceLogTag::ACE_FORM, "FORM_ENABLE_SKELETON_KEY %{public}d", isEnable);
@@ -704,7 +707,9 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     info.borderWidth = borderWidth;
     layoutProperty->UpdateRequestFormInfo(info);
-
+    info.obscuredMode = isFormObscured_;
+    info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) ||
+        IsFormBundleProtected(info.bundleName, info.id));
     UpdateBackgroundColorWhenUnTrustForm();
     HandleFormComponent(info);
     return true;
@@ -716,9 +721,6 @@ void FormPattern::HandleFormComponent(RequestFormInfo& info)
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode) {
-        info.obscuredMode = isFormObscured_;
-        info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) ||
-            IsFormBundleProtected(info.bundleName, info.id));
         AddFormComponent(info);
     } else {
         UpdateFormComponent(info);
