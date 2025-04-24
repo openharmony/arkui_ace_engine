@@ -1213,6 +1213,10 @@ void WebDelegate::RegisterNativeArkJSFunction(const std::string& objName,
     const std::vector<std::pair<std::string, NativeMethodCallback>>& methodList, bool isNeedRefresh)
 {}
 void WebDelegate::UnRegisterNativeArkJSFunction(const std::string& objName) {}
+void WebDelegate::RegisterNativeJavaScriptProxy(const std::string& obj, const std::vector<std::string>& method,
+    std::vector<std::function<void(const std::vector<std::string>&)>> callbackImpl,
+    bool isAync, const std::string& permission, bool isNeedRefresh)
+{}
 void WebDelegate::UpdateEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) {}
 bool WebDelegate::IsActivePolicyDisable()
 {
