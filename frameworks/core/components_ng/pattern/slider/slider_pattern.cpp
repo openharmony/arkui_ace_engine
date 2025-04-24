@@ -21,8 +21,8 @@
 #include "base/i18n/localization.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
-#include "core/common/async_build_manager.h"
 #include "core/common/container.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components/theme/app_theme.h"
@@ -1929,7 +1929,7 @@ void SliderPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    AsyncBuildManager::GetInstance().TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
+    MultiThreadBuildManager::TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->RegisterVisibleAreaChange();

@@ -41,11 +41,11 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "core/common/ace_engine.h"
-#include "core/common/async_build_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/font_change_observer.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/layout_inspector.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
@@ -4076,7 +4076,7 @@ void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp)
     }
     auto nodes = FrameNode::GetNodesById(onVisibleAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
-        if (!AsyncBuildManager::AllowNotifyToNode(frameNode)) {
+        if (!MultiThreadBuildManager::AllowNotifyToNode(frameNode)) {
             continue;
         }
         frameNode->TriggerVisibleAreaChangeCallback(nanoTimestamp);
@@ -4108,7 +4108,7 @@ void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)
     }
     auto nodes = FrameNode::GetNodesById(onAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
-        if (!AsyncBuildManager::AllowNotifyToNode(frameNode)) {
+        if (!MultiThreadBuildManager::AllowNotifyToNode(frameNode)) {
             continue;
         }
         frameNode->TriggerOnAreaChangeCallback(nanoTimestamp);
@@ -4433,7 +4433,7 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
         auto node = ElementRegister::GetInstance()->GetUINodeById(*iter);
         if (!node) {
             iter = onWindowStateChangedCallbacks.erase(iter);
-        } else if (AsyncBuildManager::AllowNotifyToNode(node)) {
+        } else if (MultiThreadBuildManager::AllowNotifyToNode(node)) {
             if (isShow) {
                 node->OnWindowShow();
             } else {
@@ -4466,7 +4466,7 @@ void PipelineContext::FlushWindowFocusChangedCallback(bool isFocus)
         auto node = ElementRegister::GetInstance()->GetUINodeById(*iter);
         if (!node) {
             iter = onWindowFocusChangedCallbacks_.erase(iter);
-        } else if (AsyncBuildManager::AllowNotifyToNode(node)) {
+        } else if (MultiThreadBuildManager::AllowNotifyToNode(node)) {
             if (isFocus) {
                 node->OnWindowFocused();
             } else {
@@ -4496,7 +4496,7 @@ void PipelineContext::FlushWindowActivateChangedCallback(bool isActivate)
         auto node = ElementRegister::GetInstance()->GetUINodeById(*iter);
         if (!node) {
             iter = onWindowActivateChangedCallbacks_.erase(iter);
-        } else if (AsyncBuildManager::AllowNotifyToNode(node)) {
+        } else if (MultiThreadBuildManager::AllowNotifyToNode(node)) {
             if (isActivate) {
                 node->OnWindowActivated();
             } else {
@@ -4578,7 +4578,7 @@ void PipelineContext::FlushWindowSizeChangeCallback(int32_t width, int32_t heigh
         auto node = ElementRegister::GetInstance()->GetUINodeById(*iter);
         if (!node) {
             iter = onWindowSizeChangeCallbacks_.erase(iter);
-        } else if (AsyncBuildManager::AllowNotifyToNode(node)) {
+        } else if (MultiThreadBuildManager::AllowNotifyToNode(node)) {
             node->OnWindowSizeChanged(width, height, type);
             ++iter;
         } else {
@@ -4737,7 +4737,7 @@ void PipelineContext::NotifyMemoryLevel(int32_t level)
         auto node = ElementRegister::GetInstance()->GetUINodeById(*iter);
         if (!node) {
             iter = nodesToNotifyMemoryLevel_.erase(iter);
-        } else if (AsyncBuildManager::AllowNotifyToNode(node)) {
+        } else if (MultiThreadBuildManager::AllowNotifyToNode(node)) {
             node->OnNotifyMemoryLevel(level);
             ++iter;
         } else {
@@ -5640,7 +5640,7 @@ void PipelineContext::FlushNodeChangeFlag()
     if (!changeInfoListeners_.empty()) {
         for (const auto& it : changeInfoListeners_) {
             auto listener = it.Upgrade();
-            if (listener && AsyncBuildManager::AllowNotifyToNode(listener)) {
+            if (listener && MultiThreadBuildManager::AllowNotifyToNode(listener)) {
                 listener->ProcessFrameNodeChangeFlag();
             }
         }

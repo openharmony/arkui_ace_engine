@@ -18,7 +18,7 @@
 #include <securec.h>
 #include <vector>
 
-#include "core/common/async_build_manager.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
@@ -1790,20 +1790,20 @@ ArkUI_Int32 PostFrameCallback(ArkUI_Int32 instanceId, void* userData,
     return ERROR_CODE_NO_ERROR;
 }
 
-void SetBuildingMultiThreadNode(ArkUI_Bool isBuildAsync)
+void SetIsThreadSafeScope(ArkUI_Bool isThreadSafeScope)
 {
-    AsyncBuildManager::SetBuildingMultiThreadNode(isBuildAsync);
+    MultiThreadBuildManager::SetIsThreadSafeScope(isThreadSafeScope);
 }
 
-int32_t CheckOperateValid(ArkUINodeHandle node)
+int32_t CheckNodeOnValidThread(ArkUINodeHandle node)
 {
     UINode* currentNode = reinterpret_cast<UINode*>(node);
-    return static_cast<int32_t>(AsyncBuildManager::CheckOperateValid(currentNode));
+    return static_cast<int32_t>(MultiThreadBuildManager::CheckNodeOnValidThread(currentNode));
 }
 
-int32_t CheckOnMainThread()
+int32_t CheckOnUIThread()
 {
-    return AsyncBuildManager::CheckOnMainThread();
+    return MultiThreadBuildManager::CheckOnUIThread();
 }
 
 int32_t IsMultiThreadNode(ArkUINodeHandle node)
@@ -1830,7 +1830,7 @@ int32_t PostAsyncUITask(ArkUI_Int32 contextId,
         }
         onFinish(asyncUITaskData);
     };
-    if (!AsyncBuildManager::GetInstance().PostAsyncUITask(contextId, asyncUITaskFunc, onFinishFunc)) {
+    if (!MultiThreadBuildManager::GetInstance().PostAsyncUITask(contextId, asyncUITaskFunc, onFinishFunc)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     return ERROR_CODE_NO_ERROR;
@@ -1844,7 +1844,7 @@ int32_t PostUITask(ArkUI_Int32 contextId, void* taskData, void(*task)(void* task
         }
         task(taskData);
     };
-    if (!AsyncBuildManager::GetInstance().PostUITask(contextId, taskFunc)) {
+    if (!MultiThreadBuildManager::GetInstance().PostUITask(contextId, taskFunc)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     return ERROR_CODE_NO_ERROR;
@@ -1887,9 +1887,9 @@ const ArkUIBasicAPI* GetBasicAPI()
 const ArkUIMultiThreadManagerAPI* GetMultiThreadManagerAPI()
 {
     static const ArkUIMultiThreadManagerAPI multiThreadImpl = {
-        .setBuildingMultiThreadNode = SetBuildingMultiThreadNode,
-        .checkOperateValid = CheckOperateValid,
-        .checkOnMainThread = CheckOnMainThread,
+        .setIsThreadSafeScope = SetIsThreadSafeScope,
+        .checkNodeOnValidThread = CheckNodeOnValidThread,
+        .checkOnUIThread = CheckOnUIThread,
         .isMultiThreadNode = IsMultiThreadNode,
         .postAsyncUITask = PostAsyncUITask,
         .postUITask = PostUITask,
