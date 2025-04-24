@@ -4042,7 +4042,7 @@ void WebDelegate::OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& 
                 setting->PutForceDarkModeEnabled(false);
             }
             if (delegate->enableFollowSystemFontWeight_) {
-                setting->SetFontWeightScale(stof(weightScale));
+                setting->SetFontWeightScale(std::tof(weightScale));
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebConfigurationUpdated");
