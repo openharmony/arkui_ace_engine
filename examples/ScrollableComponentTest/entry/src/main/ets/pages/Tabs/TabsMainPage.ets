@@ -39,6 +39,9 @@ struct TabsMainPage {
     new TextList(5, 'TabsHeightAdaptive', 'pages/Tabs/TabsHeightAdaptive'),
     new TextList(6, 'TabsSubTabBarStyle', 'pages/Tabs/TabsSubTabBarStyle'),
     new TextList(7, 'TabsOnAnimationStart', 'pages/Tabs/TabsOnAnimationStart'),
+    new TextList(8, 'TabsBarOverLap', 'pages/Tabs/TabsBarOverLap_safeAreaPadding'),
+    new TextList(9, 'TabsBarOverLap', 'pages/Tabs/TabsBarOverLap_ContentEndOffset'),
+    new TextList(10, 'TabsedgeEffect', 'pages/Tabs/TabsedgeEffect_pan'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
