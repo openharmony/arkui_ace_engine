@@ -108,8 +108,8 @@ public:
     static RefPtr<RichEditorBaseControllerBase> GetRichEditorController(FrameNode* frameNode);
     static RefPtr<RichEditorBaseControllerBase> GetRichEditorStyledStringController(FrameNode* frameNode);
     static void SetStyledStringMode(FrameNode* frameNode, bool isStyledStringMode);
-    static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
-    static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
+    static void SetStopBackPress(FrameNode* frameNode, const std::optional<bool>& isStopBackPress);
+    static void SetKeyboardAppearance(FrameNode* frameNode, const std::optional<KeyboardAppearance>& value);
 
 private:
     void SetDraggable(bool draggable);

@@ -728,4 +728,56 @@ HWTEST_F(RichEditorModifierTest, setMaxLinesTestInvalidValues, TestSize.Level1)
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
 }
+
+/**
+ * @tc.name: setStopBackPressTest
+ * @tc.desc: Check the functionality of setStopBackPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setStopBackPressTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setStopBackPress, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_TRUE(pattern->IsStopBackPress());
+
+    modifier_->setStopBackPress(node_, nullptr);
+    EXPECT_TRUE(pattern->IsStopBackPress());
+
+    Opt_Boolean testTrue = Converter::ArkValue<Opt_Boolean>(true);
+    Opt_Boolean testFalse = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setStopBackPress(node_, &testTrue);
+    EXPECT_TRUE(pattern->IsStopBackPress());
+    modifier_->setStopBackPress(node_, &testFalse);
+    EXPECT_FALSE(pattern->IsStopBackPress());
+}
+
+/**
+ * @tc.name: setKeyboardAppearanceTest
+ * @tc.desc: Check the functionality of setKeyboardAppearance
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setKeyboardAppearanceTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setKeyboardAppearance, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto testNone = Converter::ArkValue<Opt_KeyboardAppearance>(
+        Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_NONE_IMMERSIVE);
+    auto testLight = Converter::ArkValue<Opt_KeyboardAppearance>(
+        Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE);
+    auto testImmersive = Converter::ArkValue<Opt_KeyboardAppearance>(
+        Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_DARK_IMMERSIVE);
+    modifier_->setKeyboardAppearance(node_, &testNone);
+    EXPECT_EQ(pattern->GetKeyboardAppearance(), KeyboardAppearance::NONE_IMMERSIVE);
+    modifier_->setKeyboardAppearance(node_, &testLight);
+    EXPECT_EQ(pattern->GetKeyboardAppearance(), KeyboardAppearance::LIGHT_IMMERSIVE);
+    modifier_->setKeyboardAppearance(node_, &testImmersive);
+    EXPECT_EQ(pattern->GetKeyboardAppearance(), KeyboardAppearance::DARK_IMMERSIVE);
+}
 } // namespace OHOS::Ace::NG

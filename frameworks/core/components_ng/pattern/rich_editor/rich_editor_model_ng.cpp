@@ -691,12 +691,12 @@ void RichEditorModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value, frameNode);
 }
 
-void RichEditorModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)
+void RichEditorModelNG::SetStopBackPress(FrameNode* frameNode, const std::optional<bool>& isStopBackPress)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetStopBackPress(isStopBackPress);
+    pattern->SetStopBackPress(isStopBackPress.value_or(true));
 }
 
 void RichEditorModelNG::SetKeyboardAppearance(KeyboardAppearance value)
@@ -706,11 +706,11 @@ void RichEditorModelNG::SetKeyboardAppearance(KeyboardAppearance value)
     richEditorPattern->SetKeyboardAppearance(value);
 }
 
-void RichEditorModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value)
+void RichEditorModelNG::SetKeyboardAppearance(FrameNode* frameNode, const std::optional<KeyboardAppearance>& value)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetKeyboardAppearance(value);
+    pattern->SetKeyboardAppearance(value.value_or(KeyboardAppearance::NONE_IMMERSIVE));
 }
 } // namespace OHOS::Ace::NG
