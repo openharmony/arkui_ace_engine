@@ -76,6 +76,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/view_data_common.h"
 #include "core/components_ng/pattern/web/transitional_node_info.h"
@@ -387,84 +388,6 @@ const std::string FAKE_LINK_VAL = "https://xxx.xxx.xxx";
 #define DECIMAL_POINTS 2
 
 using Recorder::EventRecorder;
-
-class WebAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
-public:
-    WebAccessibilityChildTreeCallback(const WeakPtr<WebPattern> &weakPattern, int64_t accessibilityId)
-        : AccessibilityChildTreeCallback(accessibilityId), weakPattern_(weakPattern)
-    {}
-
-    ~WebAccessibilityChildTreeCallback() override = default;
-
-    bool OnRegister(uint32_t windowId, int32_t treeId) override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return false;
-        }
-        if (isReg_) {
-            return true;
-        }
-        if (!pattern->OnAccessibilityChildTreeRegister()) {
-            return false;
-        }
-        pattern->SetAccessibilityState(true, isDelayed_);
-        isDelayed_ = false;
-        isReg_ = true;
-        return true;
-    }
-
-    bool OnDeregister() override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return false;
-        }
-        if (!isReg_) {
-            return true;
-        }
-        if (!pattern->OnAccessibilityChildTreeDeregister()) {
-            return false;
-        }
-        pattern->SetAccessibilityState(false);
-        isReg_ = false;
-        return true;
-    }
-
-    bool OnSetChildTree(int32_t childWindowId, int32_t childTreeId) override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return false;
-        }
-        pattern->OnSetAccessibilityChildTree(childWindowId, childTreeId);
-        return true;
-    }
-
-    bool OnDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override
-    {
-        return false;
-    }
-
-    void OnClearRegisterFlag() override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return;
-        }
-        isReg_ = false;
-    }
-
-    void SetIsDelayed(bool isDelayed)
-    {
-        isDelayed_ = isDelayed;
-    }
-
-private:
-    bool isReg_ = false;
-    bool isDelayed_ = false;
-    WeakPtr<WebPattern> weakPattern_;
-};
 
 WebPattern::WebPattern()
 {

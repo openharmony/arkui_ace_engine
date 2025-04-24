@@ -31,6 +31,7 @@ build_component_ng("web_pattern_ng") {
       "richtext_model_ng.cpp",
       "touch_event_listener.cpp",
       "transitional_node_info.cpp",
+      "web_accessibility_child_tree_callback.cpp",
       "web_accessibility_property.cpp",
       "web_accessibility_session_adapter.cpp",
       "web_content_modifier.cpp",
