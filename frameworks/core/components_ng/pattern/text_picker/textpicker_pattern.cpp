@@ -392,8 +392,7 @@ void TextPickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect, float
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto context = host->GetContext();
@@ -416,13 +415,10 @@ void TextPickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect, float
         OffsetF(focusSpace - leftPadding, focusSpace - stackRenderContext->GetPaintRectWithoutTransform().GetY());
     focusButtonRect += SizeF(focusSpace + focusSpace, focusSpace + focusSpace);
     focusButtonRect += OffsetF(focusButtonXOffset, 0);
+
     paintRect.SetRect(focusButtonRect);
     BorderRadiusProperty borderRadius;
-    if (layoutProperty->HasSelectedBorderRadius()) {
-        borderRadius = layoutProperty->GetSelectedBorderRadiusValue();
-    } else {
-        borderRadius.SetRadius(selectorItemRadius_);
-    }
+    borderRadius.SetRadius(selectorItemRadius_);
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto radius = renderContext->GetBorderRadius().value_or(borderRadius);
@@ -1086,16 +1082,16 @@ void TextPickerPattern::PaintFocusState()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void TextPickerPattern::SetFocusCornerRadius(RoundRect& paintRect)
+void TextPickerPattern::SetFocusCornerRadius(RoundRect& paintRect, const BorderRadiusProperty& radius)
 {
-    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
-        static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
-    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
-        static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
-    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
-        static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
-    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
-        static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(
+        radius.radiusTopLeft->ConvertToPx()), static_cast<RSScalar>(radius.radiusTopLeft->ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(
+        radius.radiusTopRight->ConvertToPx()), static_cast<RSScalar>(radius.radiusTopRight->ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, static_cast<RSScalar>(
+        radius.radiusBottomLeft->ConvertToPx()), static_cast<RSScalar>(radius.radiusBottomLeft->ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, static_cast<RSScalar>(
+        radius.radiusBottomRight->ConvertToPx()), static_cast<RSScalar>(radius.radiusBottomRight->ConvertToPx()));
 }
 
 RectF TextPickerPattern::CalculatePaintRect(int32_t currentFocusIndex,
@@ -1140,7 +1136,7 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     if (childSize == 0) {
         return;
     }
-    if (useButtonFocusArea_ || layoutProperty->HasSelectedBorderRadius()) {
+    if (useButtonFocusArea_) {
         auto leftTotalColumnWidth = 0.0f;
         CalcLeftTotalColumnWidth(host, leftTotalColumnWidth, childSize);
         return GetInnerFocusButtonPaintRect(paintRect, leftTotalColumnWidth);
@@ -1177,7 +1173,11 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto focusPaintRect = CalculatePaintRect(currentFocusIndex,
         centerX, centerY, paintRectWidth, paintRectHeight, columnWidth);
     paintRect.SetRect(focusPaintRect);
-    SetFocusCornerRadius(paintRect);
+    if(layoutProperty->HasSelectedBorderRadius()) {
+        SetFocusCornerRadius(paintRect, layoutProperty->GetSelectedBorderRadiusValue());
+    } else {
+        SetFocusCornerRadius(paintRect, NG::BorderRadiusProperty(PRESS_RADIUS));
+    }
 }
 
 bool TextPickerPattern::OnKeyEvent(const KeyEvent& event)
