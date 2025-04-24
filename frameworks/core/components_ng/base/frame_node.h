@@ -1244,6 +1244,8 @@ public:
     void AddCustomProperty(const std::string& key, const std::string& value) override;
     void RemoveCustomProperty(const std::string& key) override;
 
+    void SetCustomPropertyMapFlagByKey(const std::string& key);
+
     void AddExtraCustomProperty(const std::string& key, void* extraData);
     void* GetExtraCustomProperty(const std::string& key) const;
     void RemoveExtraCustomProperty(const std::string& key);
@@ -1645,7 +1647,7 @@ private:
 
     DragPreviewOption previewOption_;
 
-    std::unordered_map<std::string, std::string> customPropertyMap_;
+    std::unordered_map<std::string, std::vector<std::string>> customPropertyMap_;
 
     std::unordered_map<std::string, void*> extraCustomPropertyMap_;
 

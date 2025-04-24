@@ -659,7 +659,7 @@ ArkUI_Uint32 GetCustomPropertyCapiByKey(ArkUINodeHandle node, ArkUI_CharPtr key,
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0);
     std::string capiCustomProperty;
-    if (!frameNode->GetCapiCustomProperty(key, capiCustomProperty)) {
+    if (!frameNode->IsCNode() || !frameNode->GetCapiCustomProperty(key, capiCustomProperty)) {
         return 0;
     }
     *size = capiCustomProperty.size();
