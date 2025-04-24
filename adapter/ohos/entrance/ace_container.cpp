@@ -4445,9 +4445,7 @@ void AceContainer::SubscribeHighContrastChange()
     if (!config.InitializeContext()) {
         return;
     }
-    auto weak = WeakClaim(this);
-    auto container = weak.Upgrade();
-    highContrastObserver_ = std::make_shared<HighContrastObserver>(container);
+    highContrastObserver_ = std::make_shared<HighContrastObserver>(WeakClaim(this));
     config.SubscribeConfigObserver(AccessibilityConfig::CONFIG_ID::CONFIG_HIGH_CONTRAST_TEXT, highContrastObserver_);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ADAPTER_OHOS_CPP_HIGH_CONTRAST_OBSERVER_CPP
-#define FOUNDATION_ACE_ADAPTER_OHOS_CPP_HIGH_CONTRAST_OBSERVER_CPP
-
 #include "adapter/ohos/entrance/high_contrast_observer.h"
 
 namespace OHOS::Ace::Platform {
@@ -26,14 +23,14 @@ void HighContrastObserver::OnConfigChanged(const AccessibilityConfig::CONFIG_ID 
         first_ = false;
         return;
     }
-    if (aceContainer_ == nullptr) {
+    auto container = aceContainer_.Upgrade();
+    if (container == nullptr) {
         return;
     }
-    auto pipelineContext = aceContainer_->GetPipelineContext();
+    auto pipelineContext = container->GetPipelineContext();
     auto fontManager = pipelineContext == nullptr ? nullptr : pipelineContext->GetFontManager();
     if (fontManager != nullptr) {
         fontManager->UpdateHybridRenderNodes();
     }
 }
 } // namespace OHOS::Ace::Platform
-#endif // FOUNDATION_ACE_ADAPTER_OHOS_CPP_HIGH_CONTRAST_OBSERVER_CPP

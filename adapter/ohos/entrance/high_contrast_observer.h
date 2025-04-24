@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,12 +23,12 @@
 namespace OHOS::Ace::Platform {
 class HighContrastObserver : public AccessibilityConfig::AccessibilityConfigObserver {
 public:
-    HighContrastObserver(RefPtr<AceContainer> aceContainer) : aceContainer_(aceContainer) {}
+    HighContrastObserver(WeakPtr<AceContainer> aceContainer) : aceContainer_(aceContainer) {}
 
     void OnConfigChanged(const AccessibilityConfig::CONFIG_ID id, const AccessibilityConfig::ConfigValue& value);
 
 private:
-    RefPtr<AceContainer> aceContainer_ = nullptr;
+    WeakPtr<AceContainer> aceContainer_;
     bool first_ = true;
 };
 } // namespace OHOS::Ace::Platform
