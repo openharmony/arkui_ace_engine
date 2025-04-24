@@ -256,6 +256,26 @@ public:
         return isShowHoverImagePreviewStartDrag_;
     }
 
+    void SetOnMenuDisappear(bool isDisappear)
+    {
+        onMenuDisappear_ = isDisappear;
+    }
+
+    bool GetOnMenuDisappear() const
+    {
+        return onMenuDisappear_;
+    }
+
+    void SetOnPreviewDisappear(bool isDisappear)
+    {
+        onPreviewDisappear_ = isDisappear;
+    }
+
+    bool GetOnPreviewDisappear() const
+    {
+        return onPreviewDisappear_;
+    }
+
     void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
 
     void RegisterMenuAppearCallback(const std::function<void()>& onAppear)
@@ -615,6 +635,8 @@ private:
     bool isShowHoverImage_ = false;
     bool isStopHoverImageAnimation_ = false;
     bool isShowHoverImagePreviewStartDrag_ = false;
+    bool onMenuDisappear_ = false;
+    bool onPreviewDisappear_ = false;
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;

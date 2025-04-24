@@ -271,6 +271,7 @@ public:
     bool IsProhibitedRemoveByNavigation(const RefPtr<FrameNode>& topModalNode);
     bool RemoveOverlayInSubwindow();
     bool RemoveNonKeyboardOverlay(const RefPtr<FrameNode>& overlay);
+    bool RemoveMenuInSubWindow(const RefPtr<FrameNode>& menuWrapper);
 
     void RegisterOnHideDialog(std::function<void()> callback)
     {
