@@ -605,7 +605,6 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     CHECK_NULL_VOID(buttonsRow);
     buttonsRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
     UpdateGestureRowVisible();
-    TrimFloatingWindowLayout();
 }
 
 bool ContainerModalPattern::GetContainerModalTitleVisible(bool isImmersive)
@@ -957,27 +956,6 @@ bool ContainerModalPattern::CanShowCustomTitle()
     CHECK_NULL_RETURN(buttonsRow, false);
     auto visibility = buttonsRow->GetLayoutProperty()->GetVisibilityValue(VisibleType::GONE);
     return visibility == VisibleType::VISIBLE;
-}
-
-void ContainerModalPattern::TrimFloatingWindowLayout()
-{
-    if (windowMode_ != WindowMode::WINDOW_MODE_FLOATING) {
-        return;
-    }
-    auto stack = GetStackNode();
-    CHECK_NULL_VOID(stack);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hostProp = host->GetLayoutProperty();
-    PaddingProperty padding;
-    auto customtitleRow = GetCustomTitleRow();
-    CHECK_NULL_VOID(customtitleRow);
-    auto customTitleRowProp = customtitleRow->GetLayoutProperty();
-    if (customTitleRowProp->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE) {
-        padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
-            CalcLength(CONTENT_PADDING), std::nullopt, std::nullopt };
-    }
-    hostProp->UpdatePadding(padding);
 }
 
 bool ContainerModalPattern::OnDirtyLayoutWrapperSwap(
