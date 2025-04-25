@@ -39,6 +39,8 @@ namespace OHOS::Ace::NG {
 class InspectorFilter;
 namespace {
 const Dimension FOCUS_PAINT_WIDTH = 2.0_vp;
+constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
+constexpr Dimension PICKER_MARGIN_FROM_TITLE_AND_BUTTON = 8.0_vp;
 }
 
 class DatePickerPattern : public LinearLayoutPattern {
@@ -105,6 +107,11 @@ public:
     void SetLunarSwitchTextNode(WeakPtr<FrameNode> lunarSwitchTextNode)
     {
         weakLunarSwitchText_ = lunarSwitchTextNode;
+    }
+
+    void SetLunarSwitchCheckbox(WeakPtr<FrameNode> lunarSwitchCheckbox)
+    {
+        weakLunarSwitchCheckbox_ = lunarSwitchCheckbox;
     }
 
     void OnFontConfigurationUpdate() override;
@@ -862,6 +869,7 @@ private:
     WeakPtr<FrameNode> weakButtonConfirm_;
     WeakPtr<FrameNode> weakButtonCancel_;
     WeakPtr<FrameNode> weakLunarSwitchText_;
+    WeakPtr<FrameNode> weakLunarSwitchCheckbox_;
     WeakPtr<FrameNode> nextPrevButtonNode_;
     bool isNext_ = true;
     PickerDate startDateSolar_ = PickerDate(1970, 1, 1); // default start date is 1970-1-1 from FA document.
