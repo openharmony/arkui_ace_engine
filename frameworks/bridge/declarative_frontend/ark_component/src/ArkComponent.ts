@@ -2009,6 +2009,23 @@ class OnKeyPreImeModifier extends ModifierWithKey<Callback<KeyEvent, boolean>> {
   }
 }
 
+class OnKeyEventDispatchModifier extends ModifierWithKey<Callback<KeyEvent, boolean>> {
+  private _onKeyEventDispatch: Callback<KeyEvent, boolean> = null;
+  constructor(value: Callback<KeyEvent, boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onKeyEventDispatch');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      this._onKeyEventDispatch = null;
+      getUINativeModule().common.resetOnKeyEventDispatch(node);
+    } else {
+      this._onKeyEventDispatch = this.value;
+      getUINativeModule().common.setOnKeyEventDispatch(node, this.value);
+    }
+  }
+}
+
 class OnFocusModifier extends ModifierWithKey<VoidCallback> {
   constructor(value: VoidCallback) {
     super(value);
@@ -4229,6 +4246,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   onKeyPreIme(event: Callback<KeyEvent, boolean>): this {
     modifierWithKey(this._modifiersWithKeys, OnKeyPreImeModifier.identity, OnKeyPreImeModifier, event);
+    return this;
+  }
+
+  onKeyEventDispatch(event: Callback<KeyEvent, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, OnKeyEventDispatchModifier.identity, OnKeyEventDispatchModifier, event);
     return this;
   }
 
