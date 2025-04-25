@@ -4432,7 +4432,6 @@ bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool ani
 }
 
 #ifdef ACE_ENABLE_VK
-std::shared_ptr<HighContrastObserver> highContrastObserver_ = nullptr;
 void AceContainer::SubscribeHighContrastChange()
 {
     if (!Rosen::RSSystemProperties::GetHybridRenderEnabled()) {
