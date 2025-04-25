@@ -623,6 +623,14 @@ void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
     auto gestureRow = GetGestureRow();
     UpdateRowHeight(gestureRow, titleHeight_);
     CallButtonsRectChange();
+    if (floatTitleMgr_ != nullptr) {
+        auto floatingTitleRow = GetFloatingTitleRow();
+        CHECK_NULL_VOID(floatingTitleRow);
+        UpdateRowHeight(floatingTitleRow, titleHeight_);
+        auto buttonsRowProperty = controlButtonsRow->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_VOID(buttonsRowProperty);
+        buttonsRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    }
     if (titleMgr_ != nullptr) {
         titleMgr_->UpdateTargetNodesBarMargin();
     }

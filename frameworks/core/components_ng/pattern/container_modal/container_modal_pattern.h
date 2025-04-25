@@ -239,6 +239,8 @@ public:
 
     bool IsContainerModalTransparent();
 
+    Dimension titleHeight_ = CONTAINER_TITLE_HEIGHT;
+
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
     {
@@ -274,7 +276,6 @@ protected:
     std::function<void(RectF&, RectF&)> controlButtonsRectChangeCallback_;
     RectF buttonsRect_;
     bool isInitButtonsRect_ = false;
-    Dimension titleHeight_ = CONTAINER_TITLE_HEIGHT;
     Color activeColor_;
     Color inactiveColor_;
     void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow, bool isFloating);

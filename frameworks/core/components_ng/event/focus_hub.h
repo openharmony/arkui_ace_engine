@@ -881,6 +881,8 @@ public:
     {
         FocusState::SetNextFocus(static_cast<int32_t>(key), nextFocus);
     }
+
+    RefPtr<FocusHub> GetHeadOrTailChild(bool isHead);
 protected:
     bool RequestNextFocusOfKeyTab(const FocusEvent& event);
     bool RequestNextFocusOfKeyEnter();
