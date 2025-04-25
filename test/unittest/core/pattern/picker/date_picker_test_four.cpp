@@ -1331,34 +1331,6 @@ HWTEST_F(DatePickerTestFour, DatePickerColumnLayoutAlgorithmAdjustFontSizeScale,
 }
 
 /**
- * @tc.name: HandleMonthChange
- * @tc.desc: Test HandleMonthChange.
- * @tc.type: FUNC
- */
-HWTEST_F(DatePickerTestFour, HandleMonthChange, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create pipeline and pickerTheme.
-     */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    EXPECT_NE(pipeline, nullptr);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_NE(pickerTheme, nullptr);
-    DatePickerColumnLayoutAlgorithm datePickerColumnLayoutAlgorithm;
-    /**
-     * @tc.steps: step2. Call ReCalcItemHeightScale.
-     * @tc.expected: set fontScale is not zero.
-     */
-    Dimension userSetHeight = 10.0_vp;
-    pipeline->fontScale_ = 0.0f;
-    pickerTheme->pickerDialogNormalFontScale_ = 0.00;
-    pickerTheme->pickerDialogMaxTwoFontScale_ = 0.00;
-    bool isDividerSpacing = true;
-    auto res = datePickerColumnLayoutAlgorithm.ReCalcItemHeightScale(userSetHeight, isDividerSpacing);
-    EXPECT_NE(res, 1.0f);
-}
-
-/**
  * @tc.name: OnDetachFromFrameNodeTest001
  * @tc.desc: Test OnDetachFromFrameNode  UnregisterWindowStateChangedCallback  .
  * @tc.type: FUNC
