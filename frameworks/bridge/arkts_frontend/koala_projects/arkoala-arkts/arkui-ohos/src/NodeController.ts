@@ -19,35 +19,25 @@ import { Size } from "./Graphics";
 import { TouchEvent } from "./component/common";
 import { ArkNodeContainerComponent } from "./generated/ArkNodeContainer";
 
-class __InternalField__ {
-    _value: number;
-    __rootNodeOfNodeController__: FrameNode | null = null;
-    constructor() {
-        this._value = -1;
-    }
-}
-
 export abstract class NodeController {
-    _nodeContainerId: __InternalField__;
     _nodeContainer: ArkNodeContainerComponent | null = null
-    constructor() {
-        this._nodeContainerId = new __InternalField__();
-    }
+    _rootNodeOfNodeController: FrameNode | null = null
     setNodeContainer(nodeContainer: ArkNodeContainerComponent) {
         this._nodeContainer = nodeContainer;
     }
-    resetNodeContainer() {
+    resetInternalField() {
         this._nodeContainer = null;
+        this._rootNodeOfNodeController = null;
     }
     abstract makeNode(UIContext: UIContext): FrameNode | null;
-    __makeNode__(UIContext: UIContext): FrameNode | null {
-        this._nodeContainerId.__rootNodeOfNodeController__ = this.makeNode(UIContext);
-        return this._nodeContainerId.__rootNodeOfNodeController__;
+    __makeNode__(uiContext: UIContext): FrameNode | null {
+        this._rootNodeOfNodeController = this.makeNode(uiContext);
+        return this._rootNodeOfNodeController;
 
     }
     rebuild() {
-        if (this._nodeContainerId !== undefined && this._nodeContainerId !== null && this._nodeContainerId._value >= 0) {
-            // getUINativeModule().nodeContainer.rebuild(this._nodeContainerId._value);
+        if (this._nodeContainer) {
+            this._nodeContainer!.rebuild();
         }
     }
     aboutToResize(size: Size) { }

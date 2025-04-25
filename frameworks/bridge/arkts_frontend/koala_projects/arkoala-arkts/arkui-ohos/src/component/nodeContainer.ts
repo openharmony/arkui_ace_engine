@@ -105,7 +105,7 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
         if (this.checkPriority("setNodeContainerOptions")) {
             if (this.controller) {
                 this.controller!.onWillUnBind(this.getPeer().getId())
-                this.controller!.resetNodeContainer()
+                this.controller!.resetInternalField()
                 this.controller!.onUnBind(this.getPeer().getId())
                 this.controller = null
             }
@@ -143,6 +143,13 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public rebuild(): void {
+        if (this.controller) {
+            const makeNodeFunc = this.controller!.__makeNode__
+            const child = makeNodeFunc(new UIContext(100000))
+            this.getPeer().addNodeContainerRootNode(child!)
+        }
     }
 }
 /** @memo */
