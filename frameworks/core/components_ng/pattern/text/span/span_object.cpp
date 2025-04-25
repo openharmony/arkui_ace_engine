@@ -483,22 +483,16 @@ void GestureSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOper
 
 void GestureSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
-    if (gestureInfo_.onClick.has_value()) {
-        spanItem->onClick = gestureInfo_.onClick.value();
-    } else {
-        spanItem->onClick = nullptr;
-    }
-
-    if (gestureInfo_.onLongPress.has_value()) {
-        spanItem->onLongPress = gestureInfo_.onLongPress.value();
-    } else {
-        spanItem->onLongPress = nullptr;
-    }
+    spanItem->onClick = gestureInfo_.onClick.value_or(nullptr);
+    spanItem->onLongPress = gestureInfo_.onLongPress.value_or(nullptr);
+    spanItem->onTouch = gestureInfo_.onTouch.value_or(nullptr);
 }
+
 void GestureSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
 {
     spanItem->onClick = nullptr;
     spanItem->onLongPress = nullptr;
+    spanItem->onTouch = nullptr;
 }
 
 // TextShadowSpan
