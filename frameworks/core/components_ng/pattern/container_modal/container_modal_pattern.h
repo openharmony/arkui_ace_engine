@@ -279,7 +279,6 @@ protected:
 
     bool CanShowFloatingTitle();
     bool CanShowCustomTitle();
-    void TrimFloatingWindowLayout();
     Color GetContainerColor(bool isFocus);
 
     WindowMode windowMode_;
