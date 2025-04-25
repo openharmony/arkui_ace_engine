@@ -348,6 +348,10 @@ public:
     {
         filterColumnNodeWeak_ = columnNode;
     }
+    RefPtr<FrameNode> GetFilterColumnNode() const
+    {
+        return filterColumnNodeWeak_.Upgrade();
+    }
     void MountFilterToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
     void MountPixelMapToWindowScene(
         const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene, bool isDragPixelMap = false);
@@ -660,6 +664,15 @@ public:
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
     bool isCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal);
 
+    int32_t GetMarkRemoveFilterId()
+    {
+        return markRemoveFilterId_;
+    }
+
+    void SetMarkRemoveFilterId(int32_t filterId)
+    {
+        markRemoveFilterId_ = filterId;
+    }
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
         const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
@@ -892,6 +905,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 
     bool hasFilterActived {false};
+    int32_t markRemoveFilterId_ = 0;
 
     int32_t dismissPopupId_ = 0;
 
