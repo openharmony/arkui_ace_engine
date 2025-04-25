@@ -5316,6 +5316,10 @@ bool RichEditorPattern::InitPreviewText(const std::u16string& previewTextValue, 
     record.endOffset = record.startOffset + length;
     auto spanCountBefore = spans_.size();
     ProcessInsertValue(previewTextValue, OperationType::IME, false);
+    if (!previewTextRecord_.previewTextHasStarted) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewText ends abnormally");
+        return false;
+    }
     record.isSpanSplit = spans_.size() - spanCountBefore > 1;
     record.previewContent = record.newPreviewContent;
     record.newPreviewContent.clear();

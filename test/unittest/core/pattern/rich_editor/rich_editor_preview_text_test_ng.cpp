@@ -221,6 +221,12 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText004, TestSize.Level1)
     richEditorPattern->SetPreviewText(previewTextValue, range);
 
     ASSERT_EQ(richEditorPattern->InitPreviewText(previewTextValue, range), false);
+
+    range.start = -1;
+    range.end = -1;
+    richEditorPattern->previewTextRecord_.previewContent = u"";
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = false;
+    ASSERT_EQ(richEditorPattern->InitPreviewText(previewTextValue, range), true);
 }
 
 /**
