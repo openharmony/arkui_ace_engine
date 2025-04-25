@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
-#include "core/interfaces/native/implementation/drawable_descriptor_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
@@ -1435,12 +1434,6 @@ template<>
 RefPtr<PixelMap> Convert(const Ark_PixelMap& src)
 {
     return src ? src->pixelMap : nullptr;
-}
-
-template<>
-void* Convert(const Ark_DrawableDescriptor& src)
-{
-    return src ? src->drawableDescriptorPeer : nullptr;
 }
 
 template<>
