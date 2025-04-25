@@ -18,6 +18,7 @@ interface ClickEvent {}
 interface GestureStyleArg {
     onClick?: (event: ClickEvent) => void; // arg MUST contain a onclick function
     onLongPress?: (event: ClickEvent) => void; // arg MAY contain a longpress function
+    onTouch? : (event: ClickEvent) => void; // arg MAY contain a touch function
 }
   
 /**

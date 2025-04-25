@@ -1887,6 +1887,16 @@ void RichEditorPattern::CopyGestureOption(const RefPtr<SpanNode>& source, RefPtr
         auto tmpHoverFunc = sourceItem->onHover;
         targetItem->SetHoverEvent(std::move(tmpHoverFunc));
     }
+    if (sourceItem->onTouch) {
+        auto tmpTouchFunc = sourceItem->onTouch;
+        targetItem->SetTouchEvent(std::move(tmpTouchFunc));
+    }
+}
+
+void RichEditorPattern::HandleUserTouchEvent(TouchEventInfo& info)
+{
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleUserTouchEvent");
+    TextPattern::HandleSpanStringTouchEvent(info);
 }
 
 int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargin)
@@ -7241,7 +7251,7 @@ void RichEditorPattern::InitTouchEvent()
     CHECK_NULL_VOID(!touchListener_);
     auto gesture = GetGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+    auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->sourceType_ = info.GetSourceDevice();
@@ -7285,10 +7295,11 @@ void RichEditorPattern::InitPanEvent()
     });
 }
 
-void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
+void RichEditorPattern::HandleTouchEvent(TouchEventInfo& info)
 {
     CHECK_NULL_VOID(!selectOverlay_->IsTouchAtHandle(info));
     CHECK_NULL_VOID(!info.GetTouches().empty());
+    HandleUserTouchEvent(info);
     auto acceptedTouchInfo = GetAcceptedTouchLocationInfo(info);
     CHECK_NULL_VOID(acceptedTouchInfo.has_value());
     auto touchInfo = acceptedTouchInfo.value();
