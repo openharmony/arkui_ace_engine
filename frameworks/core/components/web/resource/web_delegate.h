@@ -295,6 +295,9 @@ public:
     void Paste() const override;
     void Cut() const override;
     void SelectAll() const override;
+    void Undo() const override;
+    void Redo() const override;
+    void PasteAndMatchStyle() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback_;
