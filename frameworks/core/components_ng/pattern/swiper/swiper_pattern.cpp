@@ -1382,6 +1382,13 @@ void SwiperPattern::HandleTabsAncestor()
 
 void SwiperPattern::UpdateLayoutProperties(const RefPtr<SwiperLayoutAlgorithm>& algo)
 {
+    for (const auto& item : itemPosition_) {
+        if (algo->GetItemPosition().find(item.first) == algo->GetItemPosition().end() &&
+            algo->GetItemPosition().find(GetLoopIndex(item.first)) == algo->GetItemPosition().end() &&
+            item.second.node) {
+            item.second.node->SetActive(false);
+        }
+    }
     autoLinearReachBoundary_ = false;
     startMainPos_ = algo->GetStartPosition();
     endMainPos_ = algo->GetEndPosition();
