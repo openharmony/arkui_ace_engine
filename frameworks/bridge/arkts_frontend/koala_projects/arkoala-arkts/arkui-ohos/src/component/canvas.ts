@@ -26,7 +26,8 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { Matrix2D, Matrix2DInternal } from "./matrix2d"
 import { Size } from "./arkui-graphics"
 import { LengthMetricsUnit, LengthMetrics} from "../Graphics"
-import { PixelMap, PixelMapInternal } from "./arkui-pixelmap"
+import { PixelMap } from "#external"
+import { ArkUIAniModule } from "arkui.ani"
 import { DrawingCanvas, DrawingCanvasInternal } from "./arkui-drawing"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -1455,8 +1456,10 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         }
         else if (TypeChecker.isPixelMap(image, false, false)) {
             thisSerializer.writeInt8(1 as int32)
-            const image_1  = image as PixelMap
-            thisSerializer.writePixelMap(image_1)
+            const pixelMap = image as PixelMap
+            let ptr = ArkUIAniModule._ConvertUtils_ConvertFromPixelMapAni(pixelMap)
+            const ptr_value: KPointer  = ptr as KPointer
+            thisSerializer.writePointer(ptr_value)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_drawImage0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), dx, dy)
         thisSerializer.release()
@@ -1472,8 +1475,10 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         }
         else if (TypeChecker.isPixelMap(image, false, false)) {
             thisSerializer.writeInt8(1 as int32)
-            const image_1  = image as PixelMap
-            thisSerializer.writePixelMap(image_1)
+            const pixelMap = image as PixelMap
+            let ptr = ArkUIAniModule._ConvertUtils_ConvertFromPixelMapAni(pixelMap)
+            const ptr_value: KPointer  = ptr as KPointer
+            thisSerializer.writePointer(ptr_value)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_drawImage1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), dx, dy, dw, dh)
         thisSerializer.release()
@@ -1489,8 +1494,10 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         }
         else if (TypeChecker.isPixelMap(image, false, false)) {
             thisSerializer.writeInt8(1 as int32)
-            const image_1  = image as PixelMap
-            thisSerializer.writePixelMap(image_1)
+            const pixelMap = image as PixelMap
+            let ptr = ArkUIAniModule._ConvertUtils_ConvertFromPixelMapAni(pixelMap)
+            const ptr_value: KPointer  = ptr as KPointer
+            thisSerializer.writePointer(ptr_value)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_drawImage2(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), sx, sy, sw, sh, dx, dy, dw, dh)
         thisSerializer.release()
@@ -1597,7 +1604,8 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private getPixelMap_serialize(sx: number, sy: number, sw: number, sh: number): PixelMap {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getPixelMap(this.peer!.ptr, sx, sy, sw, sh)
-        const obj : PixelMap = PixelMapInternal.fromPtr(retval)
+        const ptr : KPointer = retval as KPointer
+        const obj : PixelMap = ArkUIAniModule._ConvertUtils_ConvertToPixelMapAni(ptr)
         return obj
     }
     private putImageData0_serialize(imagedata: ImageData, dx: number | string, dy: number | string): void {
@@ -1813,8 +1821,10 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writePixelMap(value_value)
+            const pixelMap = value as PixelMap
+            let ptr = ArkUIAniModule._ConvertUtils_ConvertFromPixelMapAni(pixelMap)
+            const ptr_value: KPointer  = ptr as KPointer
+            thisSerializer.writePointer(ptr_value)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_setPixelMap(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()

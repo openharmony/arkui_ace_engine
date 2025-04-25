@@ -31,6 +31,7 @@ ohos_shared_library("arkoala_native_ani") {
     "load.cpp",
     "module.cpp",
     "web/web_module_methods.cpp",
+    "utils/convert_utils.cpp",
   ]
 
   external_deps = [

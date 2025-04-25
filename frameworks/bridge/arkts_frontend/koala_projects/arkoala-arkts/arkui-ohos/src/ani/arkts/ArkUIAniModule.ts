@@ -25,4 +25,8 @@ export class ArkUIAniModule {
     native static _Image_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
 
     native static _Web_SetWebOptions(ptr: KPointer, webviewController: webview.WebviewController): void
+
+    native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
+
+    native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap
 }

@@ -19,6 +19,11 @@
 #include "canvas_pattern_peer.h"
 #include "image_bitmap_peer_impl.h"
 #include "pixel_map_peer.h"
+#if defined(PIXEL_MAP_SUPPORTED)
+#include "pixel_map_ani.h"
+#include "pixel_map.h"
+#include "base/image/pixel_map.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -171,17 +176,21 @@ void CanvasRendererPeerImpl::DrawSvgImage(ImageBitmapPeer* bitmap, const DrawIma
     imageInfo.imageFit = bitmap->GetImageFit();
     renderingContext2DModel_->DrawSvgImage(imageInfo);
 }
-void CanvasRendererPeerImpl::DrawPixelMap(PixelMapPeer* pixelMap, const DrawImageParam& params)
+void CanvasRendererPeerImpl::DrawPixelMap(void* nativePixelMap, const DrawImageParam& params)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
-    CHECK_NULL_VOID(pixelMap);
+    CHECK_NULL_VOID(nativePixelMap);
 #if !defined(PREVIEW)
+    Media::PixelMapAni* pixelMapAni = reinterpret_cast<Media::PixelMapAni*>(nativePixelMap);
+    CHECK_NULL_VOID(pixelMapAni);
+    auto pixelMap = UnwrapNativePixelMap(pixelMapAni);
+    CHECK_NULL_VOID(pixelMap);
+
     Ace::CanvasImage image;
     ExtractInfoToImage(image, params, false);
-
     Ace::ImageInfo imageInfo;
     imageInfo.image = image;
-    imageInfo.pixelMap = pixelMap->pixelMap;
+    imageInfo.pixelMap = pixelMap;
     CHECK_NULL_VOID(imageInfo.pixelMap);
     renderingContext2DModel_->DrawPixelMap(imageInfo);
 #endif
@@ -398,7 +407,7 @@ void CanvasRendererPeerImpl::GetImageData(
     width = finalWidth;
     height = finalHeight;
 }
-RefPtr<Ace::PixelMap> CanvasRendererPeerImpl::GetPixelMap(
+Media::PixelMapAni* CanvasRendererPeerImpl::GetPixelMap(
     const double x, const double y, const double width, const double height)
 {
 #ifdef PIXEL_MAP_SUPPORTED
@@ -414,7 +423,13 @@ RefPtr<Ace::PixelMap> CanvasRendererPeerImpl::GetPixelMap(
     if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
         return nullptr;
     }
-    return renderingContext2DModel_->GetPixelMap(imageSize);
+    auto pixelMap = renderingContext2DModel_->GetPixelMap(imageSize);
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+    auto pixelMapSharedPtr = pixelMap->GetPixelMapSharedPtr();
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+    Media::PixelMapAni* pixelMapAni = new Media::PixelMapAni();
+    pixelMapAni->nativePixelMap_ = pixelMapSharedPtr;
+    return pixelMapAni;
 #else
     LOGE("ARKOALA CanvasRendererPeerImpl::GetPixelMap PixelMap is not supported on current platform.");
     return nullptr;
@@ -654,12 +669,27 @@ void CanvasRendererPeerImpl::Translate(double x, double y)
         renderingContext2DModel_->Translate(x * density, y * density);
     }
 }
-void CanvasRendererPeerImpl::SetPixelMap(const RefPtr<Ace::PixelMap>& pixelMap)
+OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> CanvasRendererPeerImpl::UnwrapNativePixelMap(Media::PixelMapAni* pixelMapAni)
 {
+#if defined(PIXEL_MAP_SUPPORTED)
+    auto pixelMap = pixelMapAni->nativePixelMap_;
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+    return PixelMap::CreatePixelMap(&pixelMap);
+#endif
+    return nullptr;
+}
+void CanvasRendererPeerImpl::SetPixelMap(void* nativePixelMap)
+{
+#if defined(PIXEL_MAP_SUPPORTED)
     CHECK_NULL_VOID(renderingContext2DModel_);
+    CHECK_NULL_VOID(nativePixelMap);
+    Media::PixelMapAni* pixelMapAni = reinterpret_cast<Media::PixelMapAni*>(nativePixelMap);
+    CHECK_NULL_VOID(pixelMapAni);
+    auto pixelMap = UnwrapNativePixelMap(pixelMapAni);
     CHECK_NULL_VOID(pixelMap);
     ImageInfo imageInfo = { .pixelMap = pixelMap };
     renderingContext2DModel_->DrawPixelMap(imageInfo);
+#endif
 }
 void CanvasRendererPeerImpl::TransferFromImageBitmap(ImageBitmapPeer* bitmap)
 {

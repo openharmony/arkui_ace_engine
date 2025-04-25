@@ -14783,7 +14783,7 @@ typedef struct Ark_Union_ImageBitmap_PixelMap {
     Ark_Int32 selector;
     union {
         Ark_ImageBitmap value0;
-        Ark_PixelMap value1;
+        Ark_NativePointer value1;
     };
 } Ark_Union_ImageBitmap_PixelMap;
 typedef struct Opt_Union_ImageBitmap_PixelMap {
@@ -24626,7 +24626,7 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
                                   const Ark_Number* sy,
                                   const Ark_Number* sw,
                                   const Ark_Number* sh);
-    Ark_PixelMap (*getPixelMap)(Ark_CanvasRenderer peer,
+    Ark_NativePointer (*getPixelMap)(Ark_CanvasRenderer peer,
                                 const Ark_Number* sx,
                                 const Ark_Number* sy,
                                 const Ark_Number* sw,
@@ -24702,7 +24702,7 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
                       const Ark_Number* x,
                       const Ark_Number* y);
     void (*setPixelMap)(Ark_CanvasRenderer peer,
-                        const Opt_PixelMap* value);
+                        const Opt_NativePointer* value);
     void (*transferFromImageBitmap)(Ark_CanvasRenderer peer,
                                     Ark_ImageBitmap bitmap);
     void (*saveLayer)(Ark_CanvasRenderer peer);
