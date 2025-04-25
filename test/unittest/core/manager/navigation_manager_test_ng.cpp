@@ -369,8 +369,8 @@ HWTEST_F(NavigationManagerTestNg, NavigationManagerTest007, TestSize.Level1)
     navigationManager->hasCacheNavigationNodeEnable_ = true;
     navigationNode->ResetTransitionAnimationNodeState(preNode, curNode);
 
-    auto managerCurNode = navigationManager->curNavNode_;
-    auto managerPreNode = navigationManager->preNavNode_;
+    auto managerCurNode = navigationManager->curNavNode_.Upgrade();
+    auto managerPreNode = navigationManager->preNavNode_.Upgrade();
     bool isInAnimation = navigationManager->IsNavigationInAnimation();
     ASSERT_EQ(managerCurNode, nullptr);
     ASSERT_EQ(managerPreNode, nullptr);

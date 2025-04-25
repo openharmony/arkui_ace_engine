@@ -229,8 +229,8 @@ private:
     std::vector<std::function<void()>> updateCallbacks_;
     bool isInteractive_ = false;
 
-    RefPtr<FrameNode> curNavNode_;
-    RefPtr<FrameNode> preNavNode_;
+    WeakPtr<FrameNode> curNavNode_;
+    WeakPtr<FrameNode> preNavNode_;
     bool currentNodeNeverSet_ = true;
     bool curNodeAnimationCached_ = false;
     bool preNodeNeverSet_ = true;
