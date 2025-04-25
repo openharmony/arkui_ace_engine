@@ -561,6 +561,7 @@ public:
     HintToTypeWrap GetHintTypeAndMetadata(const std::string& attribute, RefPtr<PageNodeInfoWrap> node);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool RequestAutoFill(AceAutoFillType autoFillType);
+    bool RequestAutoFill(AceAutoFillType autoFillType, const std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos);
     bool RequestAutoSave();
     bool UpdateAutoFillPopup();
     bool CloseAutoFillPopup();
