@@ -48,7 +48,10 @@ GridSizeType GridContainerUtils::ProcessGridSizeType(const V2::BreakPoints& brea
     auto threshold = ParseBreakpoints(breakpoints);
     double windowWidth = 0.0;
     if (breakpoints.reference == BreakPointsReference::WindowSize) {
-        CHECK_NULL_RETURN(pipeline, GridSizeType::UNDEFINED);
+        if (!pipeline) {
+            TAG_LOGI(AceLogTag::ACE_GRIDROW, "pipeline is null");
+            return GridSizeType::UNDEFINED;
+        }
         windowWidth = pipeline->GetDisplayWindowRectInfo().GetSize().Width();
         if (mode == WindowMode::WINDOW_MODE_FLOATING
             && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
