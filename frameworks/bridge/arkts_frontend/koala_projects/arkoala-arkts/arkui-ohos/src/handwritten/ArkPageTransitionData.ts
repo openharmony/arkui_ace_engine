@@ -51,6 +51,14 @@ export class ArkPageTransitionData {
         this._opacity = value
         return this
     }
+
+    toString(): string {
+        return `[params=${optionsToString(this.params)}, slide=${this._slide}, translate=${this._translate}, scale=${this._scale}, opacity=${this._opacity}, onEnter=${this._onEnter}, onExit=${this._onExit}]`
+    }
+}
+
+function optionsToString(options:PageTransitionOptions): string {
+    return `[type=${options.type}, curve = ${options.curve}, duration=${options.duration}, delay=${options.delay}]`
 }
 
 export class ArkPageTransitionEnterComponent extends ArkPageTransitionData /* implements PageTransitionEnterInterface */ {

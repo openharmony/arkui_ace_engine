@@ -57,6 +57,9 @@
             ],
             "global/resource": [
                 "../global/resource/resource.ts"
+            ],
+            "@ohos/router": [
+                "../ohos.router.ts"
             ]
         }
     },
@@ -67,7 +70,8 @@
         "build/unmemoized/ohos.measure.ts",
         "build/unmemoized/ohos.font.ts",
         "build/unmemoized/ohos.animator.ts",
-        "src/ani/**/*.ts"
+        "src/ani/**/*.ts",
+        "build/unmemoized/ohos.router.ts"
     ],
     "exclude": [
         "**/index.ts",
