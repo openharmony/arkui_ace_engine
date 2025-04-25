@@ -939,6 +939,9 @@ void ImagePattern::ControlAnimation(int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (!host->IsOnMainTree()) {
+        return;
+    }
     if (!animator_->HasScheduler()) {
         auto context = host->GetContextRefPtr();
         if (context) {
@@ -1419,6 +1422,9 @@ void ImagePattern::OnDetachFromMainTree()
     if (isNeedReset_) {
         ResetImageAndAlt();
         isNeedReset_ = false;
+    }
+    if (GetIsAnimation() && !animator_->IsStopped() && animator_->HasScheduler()) {
+        animator_->Stop();
     }
 }
 
