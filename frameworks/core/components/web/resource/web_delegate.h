@@ -828,6 +828,7 @@ public:
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
     void UpdateTextZoomRatio(const int32_t& textZoomRatioNum);
     void UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled);
+    void UpdateWebDebuggingAccessAndPort(bool enabled, int32_t port);
     void UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     void UpdateMediaPlayGestureAccess(bool isNeedGestureAccess);
     void UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled);

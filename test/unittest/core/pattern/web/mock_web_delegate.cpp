@@ -644,6 +644,7 @@ void WebDelegate::UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnable
 void WebDelegate::UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled) {}
 void WebDelegate::UpdateTextZoomRatio(const int32_t& textZoomRatioNum) {}
 void WebDelegate::UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled) {}
+void WebDelegate::UpdateWebDebuggingAccessAndPort(bool enabled, int32_t port) {}
 void WebDelegate::UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled) {}
 void WebDelegate::UpdateMediaPlayGestureAccess(bool isNeedGestureAccess) {}
 void WebDelegate::UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled) {}

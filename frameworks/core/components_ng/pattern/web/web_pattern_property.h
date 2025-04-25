@@ -45,7 +45,9 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FileFromUrlAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DatabaseAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextZoomRatio, int32_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(WebDebuggingAccessEnabled, bool);
+    using WebDebuggingConfigType = std::tuple<bool, int32_t>;
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(WebDebuggingAccessEnabledAndPort,
+        WebDebuggingConfigType);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundColor, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(InitialScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(PinchSmoothModeEnabled, bool);

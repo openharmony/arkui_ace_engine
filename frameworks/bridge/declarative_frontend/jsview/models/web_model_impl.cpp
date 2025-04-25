@@ -415,6 +415,16 @@ void WebModelImpl::SetWebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled
     webComponent->SetWebDebuggingAccessEnabled(isWebDebuggingAccessEnabled);
 }
 
+void WebModelImpl::SetWebDebuggingAccessEnabledAndPort(
+    bool isWebDebuggingAccessEnabled, int32_t webDebuggingPort)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(
+        ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetWebDebuggingAccessEnabledAndPort(
+        isWebDebuggingAccessEnabled, webDebuggingPort);
+}
+
 void WebModelImpl::SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallback)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

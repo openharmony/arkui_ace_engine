@@ -124,6 +124,8 @@ public:
     void InitialScale(float scale) override;
     void SetSearchResultReceiveEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetWebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled) override;
+    void SetWebDebuggingAccessEnabledAndPort(
+        bool isWebDebuggingAccessEnabled, int32_t webDebuggingPort) override;
 
     void SetOnDragStart(
         std::function<NG::DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)>&&
