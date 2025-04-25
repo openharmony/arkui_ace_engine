@@ -1594,11 +1594,11 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
     auto navigationPattern = GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
     CHECK_NULL_VOID(preNode);
-    std::vector<WeakPtr<FrameNode>> preNavList;
-    InitPopPreList(preNode, preNavList);
     std::vector<WeakPtr<FrameNode>> curNavList;
     bool isNavbarNeedAnimation = lastStandardIndex_ == -1 || isNavBar;
     InitPopCurList(curNode, curNavList, isNavbarNeedAnimation);
+    std::vector<WeakPtr<FrameNode>> preNavList;
+    InitPopPreList(preNode, preNavList, curNavList);
 
     /* create animation finish callback */
     CleanPopAnimations();
@@ -1733,10 +1733,11 @@ void NavigationGroupNode::TransitionWithDialogPush(const RefPtr<FrameNode>& preN
 
     // initialization
     bool isNavbarNeedAnimation = preLastStandardIndex_ == -1 || isNavBar;
-    std::vector<WeakPtr<FrameNode>> prevNavList;
-    InitPushPreList(preNode, prevNavList, isNavbarNeedAnimation);
     std::vector<WeakPtr<FrameNode>> curNavList;
     InitPushCurList(curNode, curNavList);
+    std::vector<WeakPtr<FrameNode>> prevNavList;
+    InitPushPreList(preNode, prevNavList, curNavList, isNavbarNeedAnimation);
+
     std::function<void()> onFinish =
         [weakNavigation = WeakClaim(this), prevNavList, curNavList, weakCurNode = WeakPtr(curNode)] {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
@@ -1987,7 +1988,8 @@ void NavigationGroupNode::DialogTransitionPopAnimation(const RefPtr<FrameNode>& 
     ConfigureNavigationWithAnimation(preNode, curNode);
 }
 
-void NavigationGroupNode::InitPopPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& preNavList)
+void NavigationGroupNode::InitPopPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& preNavList,
+    const std::vector<WeakPtr<FrameNode>>& curNavList)
 {
     // find all the nodes need to do EXIT_POP
     int32_t preStartIndex = preLastStandardIndex_;
@@ -2007,6 +2009,14 @@ void NavigationGroupNode::InitPopPreList(const RefPtr<FrameNode>& preNode, std::
         CHECK_NULL_VOID(node);
         auto preNode = AceType::DynamicCast<FrameNode>(node);
         CHECK_NULL_VOID(preNode);
+        // Animation nodes should not be in both the prelist and the curlist, priority of the curlist is higher.
+        auto targetNode = std::find_if(curNavList.begin(), curNavList.end(), [=](WeakPtr<FrameNode> frameNode) {
+            auto curListNode = frameNode.Upgrade();
+            return curListNode == preNode;
+        });
+        if (targetNode != curNavList.end()) {
+            continue;
+        }
         auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
         if (preNavDestination && TriggerNavDestinationTransition(
             preNavDestination, NavigationOperation::POP, false) == INVALID_ANIMATION_ID) {
@@ -2060,7 +2070,8 @@ void NavigationGroupNode::InitPopCurList(const RefPtr<FrameNode>& curNode, std::
 }
 
 void NavigationGroupNode::InitPushPreList(const RefPtr<FrameNode>& preNode,
-    std::vector<WeakPtr<FrameNode>>& prevNavList, bool isNavbarNeedAnimation)
+    std::vector<WeakPtr<FrameNode>>& prevNavList, const std::vector<WeakPtr<FrameNode>>& curNavList,
+    bool isNavbarNeedAnimation)
 {
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(navigationPattern);
@@ -2093,6 +2104,14 @@ void NavigationGroupNode::InitPushPreList(const RefPtr<FrameNode>& preNode,
         CHECK_NULL_VOID(node);
         auto preNode = AceType::DynamicCast<FrameNode>(node);
         CHECK_NULL_VOID(preNode);
+        // Animation nodes should not be in both the prelist and the curlist, priority of the curlist is higher.
+        auto targetNode = std::find_if(curNavList.begin(), curNavList.end(), [=](WeakPtr<FrameNode> frameNode) {
+            auto curListNode = frameNode.Upgrade();
+            return curListNode == preNode;
+        });
+        if (targetNode != curNavList.end()) {
+            continue;
+        }
         auto preNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
         if (preNavdestination && TriggerNavDestinationTransition(
             preNavdestination, NavigationOperation::PUSH, false) == INVALID_ANIMATION_ID) {
