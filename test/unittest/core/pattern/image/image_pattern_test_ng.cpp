@@ -490,10 +490,11 @@ HWTEST_F(ImagePatternTestNg, TriggerFirstVisibleAreaChange001, TestSize.Level1)
 {
     auto frameNode = CreatePixelMapAnimator();
     EXPECT_NE(frameNode, nullptr);
+    frameNode->onMainTree_ = true;
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     imagePattern->isComponentSnapshotNode_ = true;
     imagePattern->TriggerFirstVisibleAreaChange();
-    EXPECT_FALSE(imagePattern->isFormAnimationStart_);
+    EXPECT_TRUE(imagePattern->isFormAnimationStart_);
 }
 
 /**
@@ -630,12 +631,14 @@ HWTEST_F(ImagePatternTestNg, UpdateFormDurationByRemainder001, TestSize.Level1)
 {
     auto frameNode = CreatePixelMapAnimator();
     ASSERT_NE(frameNode, nullptr);
+    frameNode->onMainTree_ = true;
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
     auto pipeline = MockPipelineContext::GetCurrentContext();
     pipeline->SetIsFormRender(true);
     EXPECT_EQ(imagePattern->IsFormRender(), true);
     imagePattern->animator_->duration_ = 2000;
+    imagePattern->ResetFormAnimationStartTime();
     imagePattern->UpdateFormDurationByRemainder();
     ASSERT_NE(imagePattern->animator_->duration_, 2000);
 }
