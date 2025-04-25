@@ -145,4 +145,43 @@ void ShapeAbstractModelNG::ResetHeight(FrameNode* frameNode)
 {
     ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
+
+void ShapeAbstractModelNG::SetStrokeDashOffset(FrameNode* frameNode, const Ace::Dimension& dashOffset)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, dashOffset, frameNode);
+}
+
+void ShapeAbstractModelNG::SetStrokeLineCap(FrameNode* frameNode, int lineCapStyle)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeLineCap, lineCapStyle, frameNode);
+}
+void ShapeAbstractModelNG::SetStrokeLineJoin(FrameNode* frameNode, int lineJoinStyle)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeLineJoin, lineJoinStyle, frameNode);
+}
+
+void ShapeAbstractModelNG::SetStrokeMiterLimit(FrameNode* frameNode, double miterLimit)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeMiterLimit, miterLimit, frameNode);
+}
+
+void ShapeAbstractModelNG::SetStrokeOpacity(FrameNode* frameNode, double opacity)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeOpacity, opacity, frameNode);
+}
+
+void ShapeAbstractModelNG::SetFillOpacity(FrameNode* frameNode, double opacity)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, FillOpacity, opacity, frameNode);
+}
+
+void ShapeAbstractModelNG::SetAntiAlias(FrameNode* frameNode, bool antiAlias)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, AntiAlias, antiAlias, frameNode);
+}
+
+void ShapeAbstractModelNG::SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ace::Dimension>& segments)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashArray, segments, frameNode);
+}
 } // namespace OHOS::Ace::NG

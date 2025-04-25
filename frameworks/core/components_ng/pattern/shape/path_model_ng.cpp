@@ -45,5 +45,10 @@ void PathModelNG::SetCommands(FrameNode* frameNode, const std::string& pathCmd)
     ACE_UPDATE_NODE_PAINT_PROPERTY(PathPaintProperty, Commands, pathCmd, frameNode);
 }
 
+RefPtr<FrameNode> PathModelNG::CreateFrameNode(int32_t nodeId)
+{
+    return FrameNode::CreateFrameNode(V2::PATH_ETS_TAG, nodeId, AceType::MakeRefPtr<PathPattern>());
+}
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_MODEL_NG_CPP

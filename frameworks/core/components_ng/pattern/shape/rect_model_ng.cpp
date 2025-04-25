@@ -147,6 +147,11 @@ void RectModelNG::SetRadiusValue(
     }
 }
 
+RefPtr<FrameNode> RectModelNG::CreateFrameNode(int32_t nodeId)
+{
+    return FrameNode::CreateFrameNode(V2::RECT_ETS_TAG, nodeId, AceType::MakeRefPtr<RectPattern>());
+}
+
 void RectModelNG::SetTopLeftRadius(FrameNode* frameNode, const Radius& topLeftRadius)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(RectPaintProperty, TopLeftRadius, topLeftRadius, frameNode);
