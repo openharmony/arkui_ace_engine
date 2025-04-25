@@ -1766,6 +1766,9 @@ public:
         JSClass<JSContextMenuResult>::CustomMethod("paste", &JSContextMenuResult::Paste);
         JSClass<JSContextMenuResult>::CustomMethod("cut", &JSContextMenuResult::Cut);
         JSClass<JSContextMenuResult>::CustomMethod("selectAll", &JSContextMenuResult::SelectAll);
+        JSClass<JSContextMenuResult>::CustomMethod("undo", &JSContextMenuResult::Undo);
+        JSClass<JSContextMenuResult>::CustomMethod("redo", &JSContextMenuResult::Redo);
+        JSClass<JSContextMenuResult>::CustomMethod("pasteAndMatchStyle", &JSContextMenuResult::PasteAndMatchStyle);
         JSClass<JSContextMenuResult>::Bind(
             globalObj, &JSContextMenuResult::Constructor, &JSContextMenuResult::Destructor);
     }
@@ -1814,6 +1817,27 @@ public:
     {
         if (result_) {
             result_->SelectAll();
+        }
+    }
+
+    void Undo(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Undo();
+        }
+    }
+
+    void Redo(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Redo();
+        }
+    }
+
+    void PasteAndMatchStyle(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->PasteAndMatchStyle();
         }
     }
 
