@@ -5328,7 +5328,7 @@ void JsAccessibilityManager::SearchDefaultFocusByWindowIdNG(const int32_t pageId
 
     for (const auto& defaultFocusNode : defaultFocusList_) {
         auto node = defaultFocusNode.Upgrade();
-        if (node && (node->GetPageId() == pageId || pageId == -1 || node->GetPageId() == 0)) {
+        if (node && (node->GetPageId() == pageId || pageId == -1)) {
             AccessibilityElementInfo nodeInfo;
 
             CommonProperty commonProperty;

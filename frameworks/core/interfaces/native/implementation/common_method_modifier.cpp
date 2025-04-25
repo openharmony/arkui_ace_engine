@@ -1162,11 +1162,15 @@ void AccessibilityDefaultFocusImpl(Ark_NativePointer node,
 void AccessibilityUseSamePageImpl(Ark_NativePointer node,
                                   const Opt_AccessibilitySamePageMode* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto pageMode = AccessibilityUtils::GetPageModeType(static_cast<int32_t>(value->value));
-    // ViewAbstractModelNG::SetAccessibilityUseSamePage(pageMode);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvert<Ark_AccessibilitySamePageMode>(*value);
+    if (!convValue.has_value()) {
+        return;
+    }
+    auto pageMode = AccessibilityUtils::GetPageModeType(convValue.value());
+    ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, pageMode);
 }
 void AccessibilityScrollTriggerableImpl(Ark_NativePointer node,
                                         const Opt_Boolean* value)
@@ -1186,16 +1190,22 @@ void AccessibilityScrollTriggerableImpl(Ark_NativePointer node,
 void AccessibilityRoleImpl(Ark_NativePointer node,
                            const Opt_AccessibilityRoleType* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // bool resetValue = false;
-    // auto roleType = static_cast<AccessibilityRoleType>(value->value);
-    // auto role = AccessibilityUtils::GetRoleType(roleType);
-    // if (role.empty()) {
-    //     resetValue = true;
-    // }
-    // ViewAbstractModelNG::SetAccessibilityRole(role, resetValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    bool resetValue = false;
+    std::string role;
+    auto convValue = Converter::OptConvert<Ark_AccessibilityRoleType>(*value);
+    if (!convValue.has_value()) {
+        ViewAbstractModelNG::SetAccessibilityRole(frameNode, role, true);
+        return;
+    }
+    auto roleType = static_cast<AccessibilityRoleType>(convValue.value());
+    role = AccessibilityUtils::GetRoleByType(roleType);
+    if (role.empty()) {
+        resetValue = true;
+    }
+    ViewAbstractModelNG::SetAccessibilityRole(frameNode, role, resetValue);
 }
 void OnAccessibilityFocusImpl(Ark_NativePointer node,
                               const Opt_AccessibilityFocusCallback* value)
@@ -1395,14 +1405,18 @@ void OnSizeChangeImpl(Ark_NativePointer node,
 void AccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
                                      const Opt_FocusDrawLevel* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto drawLevel = AccessibilityUtils::GetFocusDrawLevel(static_cast<int32_t>(value->value));
-    // if (drawLevel == -1) {
-    //     drawLevel = 0;
-    // }
-    // ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, drawLevel);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    int32_t drawLevel = 0;
+    auto convValue = Converter::OptConvert<Ark_FocusDrawLevel>(*value);
+    if (convValue.has_value()) {
+        drawLevel = AccessibilityUtils::GetFocusDrawLevel(static_cast<int32_t>(convValue.value()));
+        if (drawLevel == -1) {
+            drawLevel = 0;
+        }
+    }
+    ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, drawLevel);
 }
 void CustomPropertyImpl(Ark_NativePointer node,
                         const Opt_String* name,
