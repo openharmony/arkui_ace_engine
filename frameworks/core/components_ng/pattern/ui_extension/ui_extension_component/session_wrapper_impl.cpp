@@ -991,6 +991,9 @@ void SessionWrapperImpl::NotifyForeground()
     }
     auto wantPtr = session_->EditSessionInfo().want;
     UpdateWantPtr(wantPtr);
+    if (foregroundCallback_ == nullptr) {
+        InitForegroundCallback();
+    }
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
         session_, hostWindowId, std::move(foregroundCallback_));
 }
