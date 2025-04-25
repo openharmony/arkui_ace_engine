@@ -28,7 +28,6 @@ namespace OHOS::Ace::NG {
 
 void SetCanvasBeginPath(ArkUINodeHandle node)
 {
-    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasBeginPath:node:%{public}p", node);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
@@ -39,7 +38,6 @@ void SetCanvasBeginPath(ArkUINodeHandle node)
 
 void SetCanvasClosePath(ArkUINodeHandle node)
 {
-    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasClosePath:node:%{public}p", node);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
@@ -50,7 +48,7 @@ void SetCanvasClosePath(ArkUINodeHandle node)
 
 void SetCanvasFill(ArkUINodeHandle node, const char *value)
 {
-    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasFill:node:%{public}p, value: %{public}s", node, value);
+    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasFill: value: %{public}s", value);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
@@ -69,8 +67,7 @@ void SetCanvasFill(ArkUINodeHandle node, const char *value)
 
 void SetCanvasMoveTo(ArkUINodeHandle node, float x, float y)
 {
-    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasMoveTo:node:%{public}p, x: %{public}f, y: %{public}f",
-        node, x, y);
+    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasMoveTo: x: %{public}f, y: %{public}f", x, y);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
@@ -82,9 +79,9 @@ void SetCanvasMoveTo(ArkUINodeHandle node, float x, float y)
 void SetCanvasArc(ArkUINodeHandle node, ArkUICanvasArcOptions *options)
 {
     CHECK_NULL_VOID(options);
-    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasArc:node:%{public}p, x: %{public}f, y: %{public}f, \
-        radius: %{public}f, startAngle: %{public}f, endAngle: %{public}f", node, options->x, options->y,
-        options->radius, options->startAngle, options->endAngle);
+    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasArc: x: %{public}f, y: %{public}f, \
+        radius: %{public}f, startAngle: %{public}f, endAngle: %{public}f",
+        options->x, options->y, options->radius, options->startAngle, options->endAngle);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
@@ -102,8 +99,7 @@ void SetCanvasArc(ArkUINodeHandle node, ArkUICanvasArcOptions *options)
 
 void SetCanvasLineTo(ArkUINodeHandle node, float x, float y)
 {
-    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasLineTo:node:%{public}p, x: %{public}f, y: %{public}f",
-        node, x, y);
+    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasLineTo: x: %{public}f, y: %{public}f", x, y);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
@@ -117,8 +113,8 @@ void SetCanvasLineTo(ArkUINodeHandle node, float x, float y)
 
 void SetCanvasStrokeStyle(ArkUINodeHandle node, int color)
 {
-    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasStrokStyle:node:%{public}p, color: %{public}d",
-        node, color);
+    TAG_LOGD(
+        AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasStrokStyle: color: %{public}d", color);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
@@ -135,8 +131,8 @@ ArkUI_Int32 GetCanvasStrokeStyle(ArkUINodeHandle node)
 
 void SetCanvasLineWidth(ArkUINodeHandle node, float width)
 {
-    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasStrokStyle:node:%{public}p, width: %{public}f",
-        node, width);
+    TAG_LOGD(
+        AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasStrokStyle: width: %{public}f", width);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
@@ -153,7 +149,6 @@ ArkUI_Float32 GetCanvasLineWidth(ArkUINodeHandle node)
 
 void SetCanvasStroke(ArkUINodeHandle node)
 {
-    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasStroke:node:%{public}p", node);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
@@ -164,8 +159,7 @@ void SetCanvasStroke(ArkUINodeHandle node)
 
 void SetCanvasAntiAlias(ArkUINodeHandle node, ArkUI_Bool antialias)
 {
-    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasAntiAlias:node:%{public}p, antialias:%{public}d",
-        node, antialias);
+    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasAntiAlias: antialias:%{public}d", antialias);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
@@ -176,8 +170,8 @@ void SetCanvasAntiAlias(ArkUINodeHandle node, ArkUI_Bool antialias)
 
 void SetCanvasFillColor(ArkUINodeHandle node, int color)
 {
-    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasFillColor:node:%{public}p, color: %{public}d",
-        node, color);
+    TAG_LOGD(
+        AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasFillColor: color: %{public}d", color);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
@@ -211,8 +205,9 @@ ArkUI_Float32 GetCanvasGlobalAlpha(ArkUINodeHandle node)
 
 void SetCanvasFillRect(ArkUINodeHandle node, float x, float y, float w, float h)
 {
-    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasFillRect 1:node:%{public}p, x: %{public}f, \
-        y: %{public}f, w: %{public}f, h: %{public}f", node, x, y, w, h);
+    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasFillRect: x: %{public}f, \
+        y: %{public}f, w: %{public}f, h: %{public}f",
+        x, y, w, h);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
@@ -228,8 +223,9 @@ void SetCanvasFillRect(ArkUINodeHandle node, float x, float y, float w, float h)
 
 void SetCanvasFillText(ArkUINodeHandle node, const char *value, float x, float y, float maxWidth)
 {
-    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasFillText:node:%{public}p, value:%{public}s, \
-        x: %{public}f, y: %{public}f, maxWith: %{public}f", node, value, x, y, maxWidth);
+    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasFillText: value:%{public}s, \
+        x: %{public}f, y: %{public}f, maxWith: %{public}f",
+        value, x, y, maxWidth);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
