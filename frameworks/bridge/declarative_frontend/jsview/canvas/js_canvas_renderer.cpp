@@ -1532,16 +1532,12 @@ std::shared_ptr<Pattern> JSCanvasRenderer::GetPatternPtr(int32_t id)
 void JSCanvasRenderer::SetTransform(unsigned int id, const TransformParam& transform)
 {
     if (id >= 0 && id <= patternCount_) {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-            renderingContext2DModel_->SetTransform(pattern_[id], transform);
-        } else {
-            pattern_[id]->SetScaleX(transform.scaleX);
-            pattern_[id]->SetScaleY(transform.scaleY);
-            pattern_[id]->SetSkewX(transform.skewX);
-            pattern_[id]->SetSkewY(transform.skewY);
-            pattern_[id]->SetTranslateX(transform.translateX);
-            pattern_[id]->SetTranslateY(transform.translateY);
-        }
+        pattern_[id]->SetScaleX(transform.scaleX);
+        pattern_[id]->SetScaleY(transform.scaleY);
+        pattern_[id]->SetSkewX(transform.skewX);
+        pattern_[id]->SetSkewY(transform.skewY);
+        pattern_[id]->SetTranslateX(transform.translateX);
+        pattern_[id]->SetTranslateY(transform.translateY);
     }
 }
 
