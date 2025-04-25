@@ -556,6 +556,9 @@ void ServiceCollaborationMenuAceHelper::AddClickEventToMainMenu(
     gestureHub->AddClickEvent(clickEvent);
 }
 
+
+
+
 // Callback
 
 void ServiceCollaborationAceCallback::CreateText(const std::string& value, const RefPtr<FrameNode>& parent)

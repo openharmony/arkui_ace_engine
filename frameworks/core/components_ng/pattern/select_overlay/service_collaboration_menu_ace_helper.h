@@ -59,6 +59,8 @@ public:
         std::function<RefPtr<FrameNode>(void)> subDeviceMenuCreator);
     void AddClickEventToMainMenu(const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& menuWrapper,
         std::function<RefPtr<FrameNode>(void)> subDeviceMenuCreator);
+
+    
     
 
     bool subMenuIsHover_ = false;
