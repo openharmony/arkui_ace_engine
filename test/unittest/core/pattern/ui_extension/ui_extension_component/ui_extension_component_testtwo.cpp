@@ -87,8 +87,7 @@ public:
 
 void UIExtensionComponentTestTwoNg::SetUp() {}
 
-void UIExtensionComponentTestTwoNg::TearDown() {
-}
+void UIExtensionComponentTestTwoNg::TearDown() {}
 
 /**
  * @tc.name: UIExtensionComponentTestTwoNg
