@@ -678,15 +678,15 @@ void ImageModelNG::SetPixelMap(FrameNode* frameNode, void* drawableDescriptor)
 #endif
 }
 
-bool ImageModelNG::SetPixelMapArray(FrameNode* frameNode, void* animatedDrawableDescriptor)
+void ImageModelNG::SetPixelMapArray(FrameNode* frameNode, void* animatedDrawableDescriptor)
 {
 #ifndef ACE_UNITTEST
-    CHECK_NULL_RETURN(animatedDrawableDescriptor, false);
+    CHECK_NULL_VOID(animatedDrawableDescriptor);
     std::vector<RefPtr<PixelMap>> pixelMaps;
     int32_t duration = -1;
     int32_t iterations = 1;
     if (!PixelMap::GetPxielMapListFromAnimatedDrawable(animatedDrawableDescriptor, pixelMaps, duration, iterations)) {
-        return false;
+        return;
     }
     std::vector<ImageProperties> images;
     for (int32_t i = 0; i < static_cast<int32_t>(pixelMaps.size()); i++) {
@@ -697,16 +697,16 @@ bool ImageModelNG::SetPixelMapArray(FrameNode* frameNode, void* animatedDrawable
 
     if (frameNode->GetChildren().empty()) {
         auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
-        CHECK_NULL_RETURN(imageNode, false);
+        CHECK_NULL_VOID(imageNode);
         auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
-        CHECK_NULL_RETURN(imageLayoutProperty, false);
+        CHECK_NULL_VOID(imageLayoutProperty);
         imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
-        frameNode->AddChild(imageNode, false);
+        frameNode->AddChild(imageNode);
     }
 
     auto pattern = AceType::DynamicCast<ImagePattern>(frameNode->GetPattern());
-    CHECK_NULL_RETURN(pattern, false);
+    CHECK_NULL_VOID(pattern);
 
     pattern->StopAnimation();
     pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
@@ -714,9 +714,6 @@ bool ImageModelNG::SetPixelMapArray(FrameNode* frameNode, void* animatedDrawable
     pattern->SetDuration(duration);
     pattern->SetIteration(iterations);
     pattern->StartAnimation();
-    return true;
-#else
-    return false;
 #endif
 }
 
