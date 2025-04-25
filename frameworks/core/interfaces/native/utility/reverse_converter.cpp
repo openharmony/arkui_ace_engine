@@ -268,6 +268,13 @@ void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, Converter::Con
     dst.value = ArkValue<Ark_String>(u8Value, ctx);
 }
 
+void AssignArkValue(Ark_PreviewText& dst, const PreviewTextInfo& src, Converter::ConvContext *ctx)
+{
+    dst.offset = ArkValue<Ark_Number>(src.offset.value_or(0.0f));
+    std::string u8Value = UtfUtils::Str16DebugToStr8(src.value.value_or(u""));
+    dst.value = ArkValue<Ark_String>(u8Value, ctx);
+}
+
 void AssignArkValue(Ark_Length& dst, const int& src)
 {
     dst.type = INTEROP_RUNTIME_NUMBER;

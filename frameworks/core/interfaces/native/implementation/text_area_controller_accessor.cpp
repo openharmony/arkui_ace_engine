@@ -15,16 +15,20 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/implementation/text_area_controller_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextAreaControllerAccessor {
 void DestroyPeerImpl(Ark_TextAreaController peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->controller_ = nullptr;
+    delete peer;
 }
 Ark_TextAreaController CtorImpl()
 {
-    return nullptr;
+    return new TextAreaControllerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -33,15 +37,25 @@ Ark_NativePointer GetFinalizerImpl()
 void CaretPositionImpl(Ark_TextAreaController peer,
                        const Ark_Number* value)
 {
+    CHECK_NULL_VOID(peer && value && peer->controller_);
+    peer->controller_->CaretPosition(std::max(Converter::Convert<int32_t>(*value), 0));
 }
 void SetTextSelectionImpl(Ark_TextAreaController peer,
                           const Ark_Number* selectionStart,
                           const Ark_Number* selectionEnd,
                           const Opt_SelectionOptions* options)
 {
+    CHECK_NULL_VOID(peer && selectionStart && selectionEnd && peer->controller_);
+    auto selectionOptions = options ? Converter::OptConvert<SelectionOptions>(*options) : std::nullopt;
+    peer->controller_->SetTextSelection(
+        Converter::Convert<int32_t>(*selectionStart),
+        Converter::Convert<int32_t>(*selectionEnd),
+        selectionOptions);
 }
 void StopEditingImpl(Ark_TextAreaController peer)
 {
+    CHECK_NULL_VOID(peer && peer->controller_);
+    peer->controller_->StopEditing();
 }
 } // TextAreaControllerAccessor
 const GENERATED_ArkUITextAreaControllerAccessor* GetTextAreaControllerAccessor()
