@@ -271,15 +271,6 @@ class ObserveV2 {
 
     let iterationCount: number = 0;
 
-    for (let id in this.id2targets_) {
-      if (iterationCount++ % 100 === 0 && Date.now() >= deadline - 1) {
-        return;
-      }
-      if (!this.id2targets_[id]?.size) {
-        delete this.id2targets_[id];
-      }
-    }
-
     // only need to clean up the ComputedId and MonitorId here, 
     // element id will clean up in aboutToBeDeletedInternal and unregisterElmtIdsFromIViews
     for (let id in this.id2Computed_) {
@@ -421,7 +412,11 @@ class ObserveV2 {
 
     this.id2targets_[id] ??= new Set<WeakRef<Object>>();
     this.id2targets_[id].add(weakRef);
-    WeakRefPool.register(target, id, () => this.id2targets_?.[id]?.delete(weakRef) );
+    WeakRefPool.register(target, id, () => {
+      if (this.id2targets_?.[id]?.delete(weakRef) && this.id2targets_[id].size === 0) {
+        delete this.id2targets_[id];
+      }
+    });
   }
 
   /**
