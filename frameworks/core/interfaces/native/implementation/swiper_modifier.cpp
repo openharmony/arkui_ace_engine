@@ -178,7 +178,16 @@ inline void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_SwiperNes
 template<>
 SwiperAutoPlayOptions Convert(const Ark_AutoPlayOptions& src)
 {
-    return { .stopWhenTouched = src.stopWhenTouched };
+    return {
+        .stopWhenTouched = src.stopWhenTouched
+    };
+}
+
+void AssignArkValue(Ark_SwiperContentWillScrollResult &dst, const SwiperContentWillScrollResult& src)
+{
+    dst.currentIndex = Converter::ArkValue<Ark_Number>(src.currentIndex);
+    dst.comingIndex = Converter::ArkValue<Ark_Number>(src.comingIndex);
+    dst.offset = Converter::ArkValue<Ark_Number>(src.offset);
 }
 } // namespace OHOS::Ace::NG::Converter
 
@@ -456,8 +465,14 @@ void OnSelectedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SwiperModelNG::SetOnSelected(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onSelected = [arkCallback = CallbackHelper(*value), weakNode](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        CHECK_NULL_VOID(swiperInfo);
+        PipelineContext::SetCallBackNode(weakNode);
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(swiperInfo->GetIndex()));
+    };
+    SwiperModelNG::SetOnSelected(frameNode, std::move(onSelected));
 }
 void IndicatorStyleImpl(Ark_NativePointer node,
                         const Opt_IndicatorStyle* value)
@@ -480,8 +495,14 @@ void OnUnselectedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SwiperModelNG::SetOnUnselected(frameNode, convValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onUnselected = [arkCallback = CallbackHelper(*value), weakNode](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        CHECK_NULL_VOID(swiperInfo);
+        PipelineContext::SetCallBackNode(weakNode);
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(swiperInfo->GetIndex()));
+    };
+    SwiperModelNG::SetOnUnselected(frameNode, std::move(onUnselected));
 }
 void OnAnimationStartImpl(Ark_NativePointer node,
                           const OnSwiperAnimationStartCallback* value)
@@ -603,8 +624,13 @@ void OnContentWillScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SwiperModelNG::SetOnContentWillScroll(frameNode, convValue);
+    auto onEvent = [arkCallback = CallbackHelper(*value)](
+        const SwiperContentWillScrollResult& resultIn) -> bool {
+        auto arkResult = Converter::ArkValue<Ark_SwiperContentWillScrollResult>(resultIn);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(arkResult);
+        return Converter::Convert<bool>(result);
+    };
+    SwiperModelNG::SetOnContentWillScroll(frameNode, std::move(onEvent));
 }
 void DisplayArrowImpl(Ark_NativePointer node,
                       const Ark_Union_ArrowStyle_Boolean* value,
