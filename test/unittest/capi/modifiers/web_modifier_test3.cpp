@@ -68,6 +68,20 @@ void AssignArkValue(Ark_SelectionMenuOptionsExt& dst, const SelectionMenuOptions
     dst.preview = Converter::ArkValue<Opt_CustomNodeBuilder>(src.preview);
     dst.menuType = Converter::ArkValue<Opt_MenuType>(src.menuType);
 }
+std::string MenuPreviewModeToString(const std::optional<MenuPreviewMode>& src)
+{
+    if (!src.has_value()) {
+        return "std::nullopt";
+    }
+    switch (src.value()) {
+        case MenuPreviewMode::NONE: return "NONE";
+        case MenuPreviewMode::IMAGE: return "IMAGE";
+        case MenuPreviewMode::CUSTOM: return "CUSTOM";
+        default:
+            LOGE("Unexpected MenuPreviewMode value: %{public}d", static_cast<int>(src.value()));
+    }
+    return std::string("MenuPreviewMode invalid value: ") + std::to_string(static_cast<int>(src.value()));
+}
 } // namespace Converter
 
 namespace {
@@ -85,6 +99,19 @@ const auto ATTRIBUTE_ENABLE_WEB_AVSESSION_DEFAULT_VALUE = "true";
 const auto ATTRIBUTE_OPTIMIZE_PARSER_BUDGET_NAME = "optimizeParserBudget";
 const auto ATTRIBUTE_OPTIMIZE_PARSER_BUDGET_DEFAULT_VALUE = "false";
 
+static const std::optional<Callback_Void> emptyCallbackVoid = Callback_Void{
+    .resource = {},
+    .call = +[](const Ark_Int32) {},
+    .callSync = +[](Ark_VMContext, const Ark_Int32) {}
+};
+static SelectionMenuOptionsExt g_selectionMenuOptions = {
+    .onAppear = emptyCallbackVoid, .onDisappear = emptyCallbackVoid, .preview = std::nullopt,
+    .menuType = INVALID_ENUM_VAL<Ark_MenuType> };
+using OneTestStepBindSelectionMenu = std::tuple<Ark_MenuType, std::optional<MenuPreviewMode>>;
+static const std::vector<OneTestStepBindSelectionMenu> testFixtureBindSelectionMenu = {
+    {ARK_MENU_TYPE_PREVIEW_MENU, std::optional<MenuPreviewMode>(MenuPreviewMode::CUSTOM)},
+    {Ark_MenuType::ARK_MENU_TYPE_SELECTION_MENU, std::nullopt},
+};
 const std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringValidValues = {
     { "\"abc\"", Converter::ArkValue<Ark_String>("abc"), "abc" },
     { "\"\"", Converter::ArkValue<Ark_String>(""), "UTF-8" },
@@ -184,9 +211,9 @@ HWTEST_F(WebModifierTest3, bindSelectionMenuTestCustomNodeBuilder, TestSize.Leve
     auto spanType = Ark_WebElementType::ARK_WEB_ELEMENT_TYPE_IMAGE;
     auto responseType = Ark_WebResponseType::ARK_WEB_RESPONSE_TYPE_LONG_PRESS;
 
-    auto selectionMenuOptions = SelectionMenuOptionsExt {.onAppear = std::nullopt, .onDisappear = std::nullopt,
-        .preview = std::nullopt, .menuType = Ark_MenuType::ARK_MENU_TYPE_SELECTION_MENU};
-    auto options = Converter::ArkValue<Opt_SelectionMenuOptionsExt>(selectionMenuOptions);
+    g_selectionMenuOptions.menuType = Ark_MenuType::ARK_MENU_TYPE_SELECTION_MENU;
+    g_selectionMenuOptions.preview = builder;
+    auto options = Converter::ArkValue<Opt_SelectionMenuOptionsExt>(g_selectionMenuOptions);
 
     int callsCount = 0;
     modifier_->setBindSelectionMenu(node_, spanType, &builder, responseType, &options);
@@ -198,50 +225,78 @@ HWTEST_F(WebModifierTest3, bindSelectionMenuTestCustomNodeBuilder, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest3, bindSelectionMenuTestValidValues, TestSize.Level1)
+HWTEST_F(WebModifierTest3, DISABLED_bindSelectionMenuTestValidOptions, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    // #ifndef WEB_SUPPORTED_TEST
-    // #define WEB_SUPPORTED_TEST
     CustomNodeBuilderTestHelper<WebModifierTest3> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
-    using OneTestStep = std::tuple<Ark_WebElementType, CustomNodeBuilder, Ark_WebResponseType>;
+    auto options = Converter::ArkValue<Opt_SelectionMenuOptionsExt>(g_selectionMenuOptions);
 
-    static const std::vector<OneTestStep> testPlan = {
-        {ARK_WEB_ELEMENT_TYPE_IMAGE, builder, ARK_WEB_RESPONSE_TYPE_LONG_PRESS},
-    };
-
-    std::unique_ptr<JsonValue> fullJson;
-    std::string resultValue;
-    SelectionMenuOptionsExt selectionMenuOptions = {.onAppear = std::nullopt, .onDisappear = std::nullopt,
-        .preview = std::nullopt, .menuType = Ark_MenuType::ARK_MENU_TYPE_SELECTION_MENU};
-    auto options = Converter::ArkValue<Opt_SelectionMenuOptionsExt>(selectionMenuOptions);
-
-    int callsCount = 0;
+    int callsCount = 1;
     auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
     ASSERT_NE(webPattern, nullptr);
 
-    for (auto [spanType, builder, responseType]: testPlan) {
-        modifier_->setBindSelectionMenu(node_, spanType, &builder, responseType, &options);
-        EXPECT_EQ(builderHelper.GetCallsCountAll(), ++callsCount); 
-        // WebElementType convType = Converter::OptConvert<WebElementType>(spanType).value();
-        // ResponseType convResponseType = Converter::OptConvert<ResponseType>(responseType).value();
-        // std::shared_ptr<WebPreviewSelectionMenuParam> reviewSelectionMenuParams =
-        //     webPattern->GetPreviewSelectionMenuParams(convType, convResponseType);
-        // ASSERT_NE(reviewSelectionMenuParams, nullptr);
-        // reviewSelectionMenuParams->menuBuilder();
+    auto spanType = Ark_WebElementType::ARK_WEB_ELEMENT_TYPE_IMAGE;
+    auto responseType = Ark_WebResponseType::ARK_WEB_RESPONSE_TYPE_LONG_PRESS;
 
-        // fullJson = GetJsonValue(node_);
-        // std::cout << "\nfullJson = " << fullJson->ToString() << std::endl;
-        // resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BIND_SELECTION_MENU_NAME);
-        // std::cout << "\nresultValue = " << resultValue << std::endl;
-    }
+    modifier_->setBindSelectionMenu(node_, spanType, &builder, responseType, &options);
+    EXPECT_EQ(builderHelper.GetCallsCountAll(), ++callsCount);
+
+    auto fullJson = GetJsonValue(node_);
+    auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BIND_SELECTION_MENU_NAME);
     std::string expectedValue = "";
     EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
-    // #endif // WEB_SUPPORTED_TEST
+}
+
+/*
+ * @tc.name: bindSelectionMenuTestValidValues2
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest3, bindSelectionMenuTestValidOptions2, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    ASSERT_NE(webPattern, nullptr);
+    auto inputSpanType = Ark_WebElementType::ARK_WEB_ELEMENT_TYPE_IMAGE;
+    auto expectedSpanType = WebElementType::IMAGE;
+    auto inputResponseType = Ark_WebResponseType::ARK_WEB_RESPONSE_TYPE_LONG_PRESS;
+    auto expectedResponseType = ResponseType::LONG_PRESS;
+    auto expectedMenuBindType = MenuBindingType::LONG_PRESS;
+    auto expectedContextMenuRegisterType = ContextMenuRegisterType::CUSTOM_TYPE;
+    auto expectedMenuType = MenuType::CONTEXT_MENU;
+
+    Opt_SelectionMenuOptionsExt options;
+    CustomNodeBuilderTestHelper<WebModifierTest3> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
+    g_selectionMenuOptions.preview = builder;
+
+    for (auto [inputMenuType, expectedPreviewMode] : testFixtureBindSelectionMenu) {
+        g_selectionMenuOptions.menuType = inputMenuType;
+        options = Converter::ArkValue<Opt_SelectionMenuOptionsExt>(g_selectionMenuOptions);
+        modifier_->setBindSelectionMenu(node_, inputSpanType, &builder, inputResponseType, &options);
+
+        WebElementType convType = Converter::OptConvert<WebElementType>(inputSpanType).value();
+        ResponseType convResponseType = Converter::OptConvert<ResponseType>(inputResponseType).value();
+        auto previewSelectionMenuParams = webPattern->GetPreviewSelectionMenuParams(convType, convResponseType);
+        ASSERT_EQ(previewSelectionMenuParams->type, expectedSpanType) << "Passed value is: WebElementType::IMAGE";
+        ASSERT_EQ(previewSelectionMenuParams->responseType, expectedResponseType)
+            << "Passed value is: ResponseType::LONG_PRESS";
+        ASSERT_EQ(previewSelectionMenuParams->menuParam.menuBindType, expectedMenuBindType)
+            << "Passed value is: MenuBindingType::LONG_PRESS";
+        ASSERT_EQ(previewSelectionMenuParams->menuParam.contextMenuRegisterType, expectedContextMenuRegisterType)
+            << "Passed value is: ContextMenuRegisterType::CUSTOM_TYPE";
+        ASSERT_EQ(previewSelectionMenuParams->menuParam.type, expectedMenuType)
+            << "Passed value is: MenuType::CONTEXT_MENU";
+        auto expectedPreviewModeStr = Converter::MenuPreviewModeToString(expectedPreviewMode);
+        ASSERT_EQ(previewSelectionMenuParams->menuParam.previewMode, expectedPreviewMode)
+            << "Passed value is: " << expectedPreviewModeStr;
+    }
 }
 
 /*

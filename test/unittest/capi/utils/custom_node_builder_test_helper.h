@@ -137,7 +137,7 @@ public:
     {
         CustomNodeBuilder builder;
         builder.resource = {.resourceId = uniqueId_, .hold = [](InteropInt32){}, .release = [](InteropInt32){}};
-        builder.call =  [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+        builder.call = [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                 const Callback_Pointer_Void continuation) {
                 auto testHelper = TestHelperManager::GetInstance().GetHelperById(resourceId);
                 ASSERT_NE(testHelper, nullptr);
@@ -163,7 +163,7 @@ public:
     }
 
     void TestFunction(const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
-                    const Callback_Pointer_Void continuation)
+                      const Callback_Pointer_Void continuation)
     {
         asyncCallbackCounter_++;
         EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode_);
@@ -171,7 +171,7 @@ public:
     }
 
     void TestFunctionSync(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
-                    const Callback_Pointer_Void continuation)
+                          const Callback_Pointer_Void continuation)
     {
         syncCallbackCounter_++;
         EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode_);

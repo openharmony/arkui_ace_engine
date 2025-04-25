@@ -463,4 +463,52 @@ std::shared_ptr<WebPreviewSelectionMenuParam> WebPattern::GetPreviewSelectionMen
     TAG_LOGD(AceLogTag::ACE_WEB, "The key not in previewSelectionMenuMap_");
     return nullptr;
 }
+
+void WebPattern::RemovePreviewMenuNode()
+{
+    if (!previewImageNodeId_.has_value()) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "RemovePreviewMenuNode");
+    curContextMenuResult_ = false;
+    auto previewNode =
+        FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, previewImageNodeId_.value());
+    CHECK_NULL_VOID(previewNode);
+    auto parent = previewNode->GetParent();
+    CHECK_NULL_VOID(parent);
+    parent->RemoveChild(previewNode);
+    previewImageNodeId_.reset();
+    parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void WebPattern::SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
+{
+    CHECK_NULL_VOID(param);
+    auto onPreviewMenuDisappear = [weak = AceType::WeakClaim(this),
+        onDisappear = std::move(param->menuParam.onDisappear)]() {
+        TAG_LOGD(AceLogTag::ACE_WEB, "onPreviewMenuDisappear");
+        if (onDisappear) {
+            onDisappear();
+        }
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->RemovePreviewMenuNode();
+        CHECK_NULL_VOID(webPattern->contextMenuResult_);
+        webPattern->contextMenuResult_->Cancel();
+    };
+    param->menuParam.onDisappear = std::move(onPreviewMenuDisappear);
+    auto key = std::make_pair(param->type, param->responseType);
+    auto it = previewSelectionMenuMap_.find(key);
+    if (it != previewSelectionMenuMap_.end()) {
+        if (param->menuBuilder == nullptr) {
+            previewSelectionMenuMap_.erase(it);
+            return;
+        }
+        it->second = param;
+        return;
+    }
+    previewSelectionMenuMap_[key] = param;
+    TAG_LOGD(AceLogTag::ACE_WEB, "menuParam hapticFeedbackMode:%{public}d", param->menuParam.hapticFeedbackMode);
+}
+
 } // namespace OHOS::Ace::NG
