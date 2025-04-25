@@ -15,10 +15,6 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_line.h"
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/utils/SkParsePath.h"
-#endif
-
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components/transform/rosen_render_transform.h"
 
@@ -40,17 +36,10 @@ void RosenRenderSvgLine::Paint(RenderContext& context, const Offset& offset)
         RosenRenderTransform::SyncTransformToRsNode(rsNode, transform);
     }
 
-#ifndef USE_ROSEN_DRAWING
-    SkAutoCanvasRestore save(canvas, false);
-    PaintMaskLayer(context, offset, offset);
-
-    SkPath path;
-#else
     RSAutoCanvasRestore save(*canvas, false);
     PaintMaskLayer(context, offset, offset);
 
     RSPath path;
-#endif
     GetPath(path);
     UpdateGradient(fillState_);
     RosenSvgPainter::SetFillStyle(canvas, path, fillState_, opacity_);
@@ -67,15 +56,6 @@ void RosenRenderSvgLine::PaintDirectly(RenderContext& context, const Offset& off
         return;
     }
 
-#ifndef USE_ROSEN_DRAWING
-    SkAutoCanvasRestore save(canvas, true);
-    if (NeedTransform()) {
-        canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
-    }
-    PaintMaskLayer(context, offset, offset);
-
-    SkPath path;
-#else
     RSAutoCanvasRestore save(*canvas, true);
     if (NeedTransform()) {
         canvas->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(GetTransformMatrix4Raw()));
@@ -83,7 +63,6 @@ void RosenRenderSvgLine::PaintDirectly(RenderContext& context, const Offset& off
     PaintMaskLayer(context, offset, offset);
 
     RSPath path;
-#endif
     GetPath(path);
     UpdateGradient(fillState_);
     RosenSvgPainter::SetFillStyle(canvas, path, fillState_, opacity_);
@@ -102,31 +81,16 @@ void RosenRenderSvgLine::UpdateMotion(const std::string& path, const std::string
 
 Rect RosenRenderSvgLine::GetPaintBounds(const Offset& offset)
 {
-#ifndef USE_ROSEN_DRAWING
-    SkPath path;
-    GetPath(path);
-    auto& bounds = path.getBounds();
-    return Rect(bounds.left(), bounds.top(), bounds.width(), bounds.height());
-#else
     RSPath path;
     GetPath(path);
     auto bounds = path.GetBounds();
     return Rect(bounds.GetLeft(), bounds.GetTop(), bounds.GetWidth(), bounds.GetHeight());
-#endif
 }
 
-#ifndef USE_ROSEN_DRAWING
-void RosenRenderSvgLine::GetPath(SkPath& path)
-{
-    path.moveTo(ConvertDimensionToPx(x1_, LengthType::HORIZONTAL), ConvertDimensionToPx(y1_, LengthType::VERTICAL));
-    path.lineTo(ConvertDimensionToPx(x2_, LengthType::HORIZONTAL), ConvertDimensionToPx(y2_, LengthType::VERTICAL));
-}
-#else
 void RosenRenderSvgLine::GetPath(RSPath& path)
 {
     path.MoveTo(ConvertDimensionToPx(x1_, LengthType::HORIZONTAL), ConvertDimensionToPx(y1_, LengthType::VERTICAL));
     path.LineTo(ConvertDimensionToPx(x2_, LengthType::HORIZONTAL), ConvertDimensionToPx(y2_, LengthType::VERTICAL));
 }
-#endif
 
 } // namespace OHOS::Ace

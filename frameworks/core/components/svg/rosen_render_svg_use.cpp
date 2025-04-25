@@ -43,38 +43,20 @@ void RosenRenderSvgUse::Paint(RenderContext& context, const Offset& offset)
 void RosenRenderSvgUse::PaintDirectly(RenderContext& context, const Offset& offset)
 {
     const auto renderContext = static_cast<RosenRenderContext*>(&context);
-#ifndef USE_ROSEN_DRAWING
-    auto skCanvas = renderContext->GetCanvas();
-    if (!skCanvas) {
-#else
     auto canvas = renderContext->GetCanvas();
     if (!canvas) {
-#endif
         LOGE("Paint canvas is null");
         return;
     }
 
-#ifndef USE_ROSEN_DRAWING
-    SkAutoCanvasRestore save(skCanvas, true);
-#else
     RSAutoCanvasRestore save(*canvas, true);
-#endif
     bool translateXY = GreatNotEqual(x_.Value(), 0.0) || GreatNotEqual(y_.Value(), 0.0);
     if (translateXY) {
-#ifndef USE_ROSEN_DRAWING
-        skCanvas->translate(
-            ConvertDimensionToPx(x_, LengthType::HORIZONTAL), ConvertDimensionToPx(y_, LengthType::VERTICAL));
-#else
         canvas->Translate(
             ConvertDimensionToPx(x_, LengthType::HORIZONTAL), ConvertDimensionToPx(y_, LengthType::VERTICAL));
-#endif
     }
     if (NeedTransform()) {
-#ifndef USE_ROSEN_DRAWING
-        skCanvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
-#else
         canvas->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(GetTransformMatrix4Raw()));
-#endif
     }
     PaintMaskLayer(context, offset, offset);
 

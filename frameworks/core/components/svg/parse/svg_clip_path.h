@@ -30,11 +30,7 @@ public:
 
     void AppendChild(const RefPtr<SvgNode>& child) override;
 
-#ifndef USE_ROSEN_DRAWING
-    SkPath AsPath(const Size& viewPort) const override;
-#else
     RSPath AsPath(const Size& viewPort) const override;
-#endif
 };
 
 } // namespace OHOS::Ace
