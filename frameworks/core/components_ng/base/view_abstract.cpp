@@ -5915,12 +5915,14 @@ void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
 }
 
 void ViewAbstract::SetNextFocus(FrameNode* frameNode, FocusIntension key,
-    std::variant<WeakPtr<AceType>, std::string> nextFocus)
+    const std::optional<std::variant<WeakPtr<AceType>, std::string>>& nextFocus)
 {
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->SetNextFocus(key, nextFocus);
+    if (nextFocus.has_value()) {
+        focusHub->SetNextFocus(key, nextFocus.value());
+    }
 }
 
 void ViewAbstract::ResetNextFocus(FrameNode* frameNode)

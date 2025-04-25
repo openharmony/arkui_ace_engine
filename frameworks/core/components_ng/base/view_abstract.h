@@ -766,8 +766,8 @@ public:
     static void SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange);
     static void SetDrawCompleteEvent(FrameNode* frameNode, std::function<void()>&& onDraw);
     static void SetLayoutEvent(FrameNode* frameNode, std::function<void()>&& onLayout);
-    static void SetNextFocus(
-        FrameNode* frameNode, FocusIntension key, const std::variant<WeakPtr<AceType>, std::string> nextFocus);
+    static void SetNextFocus(FrameNode* frameNode, FocusIntension key,
+        const std::optional<std::variant<WeakPtr<AceType>, std::string>>& nextFocus);
     static void ResetNextFocus(FrameNode* frameNode);
     static void SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG::FocusBoxStyle>& style);
     static void SetClickDistance(FrameNode* frameNode, double clickDistance);

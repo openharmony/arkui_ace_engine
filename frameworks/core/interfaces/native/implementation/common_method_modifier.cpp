@@ -241,6 +241,15 @@ struct SheetCallbacks {
     std::function<void()> sheetSpringBack;
 };
 
+struct SetFocusData {
+    std::optional<std::string> forward;
+    std::optional<std::string> backward;
+    std::optional<std::string> up;
+    std::optional<std::string> down;
+    std::optional<std::string> left;
+    std::optional<std::string> right;
+};
+
 using PositionWithLocalization = std::pair<std::optional<OffsetT<Dimension>>, bool>;
 
 using OffsetOrEdgesParam = std::variant<
@@ -665,6 +674,19 @@ void ValidateByRange(std::optional<InvertVariant>& value, const float& left, con
 } // namespace Validator
 
 namespace Converter {
+template<>
+SetFocusData Convert(const Ark_FocusMovement& src)
+{
+    return {
+        .forward = OptConvert<std::string>(src.forward),
+        .backward = OptConvert<std::string>(src.backward),
+        .up = OptConvert<std::string>(src.up),
+        .down = OptConvert<std::string>(src.down),
+        .left = OptConvert<std::string>(src.left),
+        .right = OptConvert<std::string>(src.right)
+    };
+}
+
 template<>
 MenuPreviewAnimationOptions Convert(const Ark_AnimationRange_Number& options)
 {
@@ -2936,8 +2958,18 @@ void NextFocusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetNextFocus(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto setFocusData = Converter::OptConvert<SetFocusData>(*value);
+    ViewAbstract::ResetNextFocus(frameNode);
+    if (!setFocusData) {
+        return;
+    }
+    ViewAbstract::SetNextFocus(frameNode, FocusIntension::TAB, setFocusData->forward);
+    ViewAbstract::SetNextFocus(frameNode, FocusIntension::SHIFT_TAB, setFocusData->backward);
+    ViewAbstract::SetNextFocus(frameNode, FocusIntension::UP, setFocusData->up);
+    ViewAbstract::SetNextFocus(frameNode, FocusIntension::DOWN, setFocusData->down);
+    ViewAbstract::SetNextFocus(frameNode, FocusIntension::LEFT, setFocusData->left);
+    ViewAbstract::SetNextFocus(frameNode, FocusIntension::RIGHT, setFocusData->right);
 }
 void TabStopImpl(Ark_NativePointer node,
                  Ark_Boolean value)
