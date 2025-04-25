@@ -732,7 +732,7 @@ ArkUINativeModuleValue TabsBridge::SetTabsOptionsBarModifier(ArkUIRuntimeCallInf
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     std::function<void(WeakPtr<NG::FrameNode>)> onApply;
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
-    Framework::JSViewAbstract::SetSymbolOptionApply(runtimeCallInfo, onApply, info[1]);
+    Framework::JSTabs::SetBarModifierApply(runtimeCallInfo, onApply, info[1]);
     GetArkUINodeModifiers()->getTabsModifier()->setTabsOptionsBarModifier(
         nativeNode, reinterpret_cast<void*>(&onApply));
     return panda::JSValueRef::Undefined(runtimeCallInfo->GetVM());
