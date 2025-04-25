@@ -123,28 +123,88 @@ SizeF CalculateFitScaleDown(const SizeF& videoSize, const SizeF& layoutSize)
     return CalculateFitContain(videoSize, layoutSize);
 }
 
-SizeF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayoutProperty>& layoutProperty)
+RectF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayoutProperty>& layoutProperty)
 {
     if (!layoutProperty || !layoutProperty->HasVideoSize()) {
-        return layoutSize;
+        return {0.0f, 0.0f, layoutSize.Width(), layoutSize.Height()};
     }
 
     auto videoSize = layoutProperty->GetVideoSizeValue(SizeF(0, 0));
+    auto videoFrameSize = videoSize;
     auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
+    auto rect = RectF();
     switch (imageFit) {
         case ImageFit::CONTAIN:
-            return CalculateFitContain(videoSize, layoutSize);
+            videoFrameSize = CalculateFitContain(videoSize, layoutSize);
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoFrameSize.Width(), videoFrameSize.Height()};
+            break;
         case ImageFit::FILL:
-            return CalculateFitFill(layoutSize);
+            videoFrameSize = CalculateFitFill(layoutSize);
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoFrameSize.Width(), videoFrameSize.Height()};
+            break;
         case ImageFit::COVER:
-            return CalculateFitCover(videoSize, layoutSize);
+            videoFrameSize = CalculateFitCover(videoSize, layoutSize);
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoFrameSize.Width(), videoFrameSize.Height()};
+            break;
         case ImageFit::NONE:
-            return CalculateFitNone(videoSize);
+            videoFrameSize = CalculateFitNone(videoSize);
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoFrameSize.Width(), videoFrameSize.Height()};
+            break;
         case ImageFit::SCALE_DOWN:
-            return CalculateFitScaleDown(videoSize, layoutSize);
+            videoFrameSize = CalculateFitScaleDown(videoSize, layoutSize);
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoFrameSize.Width(), videoFrameSize.Height()};
+            break;
+        case ImageFit::TOP_LEFT:
+            rect = RectF{0.0f, 0.0f, videoSize.Width(), videoSize.Height()};
+            break;
+        case ImageFit::TOP:
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE, 0.0f,
+                videoSize.Width(), videoSize.Height()};
+            break;
+        case ImageFit::TOP_END:
+            rect = RectF{layoutSize.Width() - videoFrameSize.Width(), 0.0f, videoSize.Width(), videoSize.Height()};
+            break;
+        case ImageFit::START:
+            rect = RectF{0.0f, (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoSize.Width(), videoSize.Height()};
+            break;
+        case ImageFit::CENTER:
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoSize.Width(), videoSize.Height()};
+            break;
+        case ImageFit::END:
+            rect = RectF{layoutSize.Width() - videoFrameSize.Width(),
+                (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoSize.Width(), videoSize.Height()};
+            break;
+        case ImageFit::BOTTOM_START:
+            rect = RectF{0.0f, layoutSize.Height() - videoFrameSize.Height(), videoSize.Width(), videoSize.Height()};
+            break;
+        case ImageFit::BOTTOM:
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                layoutSize.Height() - videoFrameSize.Height(), videoSize.Width(), videoSize.Height()};
+            break;
+        case ImageFit::BOTTOM_END:
+            rect = RectF{layoutSize.Width() - videoFrameSize.Width(), layoutSize.Height() - videoFrameSize.Height(),
+                videoSize.Width(), videoSize.Height()};
+            break;
         default:
-            return CalculateFitContain(videoSize, layoutSize);
+            videoFrameSize = CalculateFitContain(videoSize, layoutSize);
+            rect = RectF{(layoutSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                (layoutSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoFrameSize.Width(), videoFrameSize.Height()};
+            break;
     }
+    return rect;
 }
 
 float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor)
@@ -1235,18 +1295,17 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto videoNodeSize = geometryNode->GetContentSize();
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
+    auto videoFrameRect = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
+    auto videoFrameSize = SizeF(videoFrameRect.Width(), videoFrameRect.Height());
     // Change the surface layout for drawing video frames
     if (renderContextForMediaPlayer_) {
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            auto rect = AdjustPaintRect((videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
-                (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
-                videoFrameSize.Height(), true);
+            auto rect = AdjustPaintRect(videoFrameRect.GetX(), videoFrameRect.GetY(),
+                videoFrameRect.Width(), videoFrameRect.Height(), true);
             renderContextForMediaPlayer_->SetBounds(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
         } else {
-            renderContextForMediaPlayer_->SetBounds((videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
-                (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
-                videoFrameSize.Height());
+            renderContextForMediaPlayer_->SetBounds(videoFrameRect.GetX(), videoFrameRect.GetY(),
+                videoFrameRect.Width(), videoFrameRect.Height());
         }
     }
 
@@ -1290,7 +1349,8 @@ void VideoPattern::OnAreaChangedInner()
         auto videoNodeSize = geometryNode->GetContentSize();
         auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
+        auto videoFrameRect = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
+        auto videoFrameSize = SizeF(videoFrameRect.Width(), videoFrameRect.Height());
         auto transformRelativeOffset = host->GetTransformRelativeOffset();
 
         Rect rect =
