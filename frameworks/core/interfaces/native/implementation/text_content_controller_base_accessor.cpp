@@ -13,18 +13,24 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/text_content_controller_base_peer.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextContentControllerBaseAccessor {
 void DestroyPeerImpl(Ark_TextContentControllerBase peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->controller_ = nullptr;
+    delete peer;
 }
 Ark_TextContentControllerBase CtorImpl()
 {
-    return nullptr;
+    return new TextContentControllerBasePeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,15 +38,21 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_CaretOffset GetCaretOffsetImpl(Ark_TextContentControllerBase peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer && peer->controller_, {});
+    auto offset = peer->controller_->GetCaretPosition();
+    return Converter::ArkValue<Ark_CaretOffset>(offset);
 }
 Ark_RectResult GetTextContentRectImpl(Ark_TextContentControllerBase peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer && peer->controller_, {});
+    auto rect = peer->controller_->GetTextContentRect();
+    return Converter::ArkValue<Ark_RectResult>(rect);
 }
 Ark_Number GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
 {
-    return {};
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer && peer->controller_, errValue);
+    return Converter::ArkValue<Ark_Number>(peer->controller_->GetTextContentLinesNum());
 }
 Ark_Number AddTextImpl(Ark_TextContentControllerBase peer,
                        const Ark_String* text,

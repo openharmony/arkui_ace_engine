@@ -13,18 +13,25 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/symbol_effect_peer.h"
+#include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HierarchicalSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_HierarchicalSymbolEffect peer)
 {
+    delete peer;
 }
 Ark_HierarchicalSymbolEffect CtorImpl(const Opt_EffectFillStyle* fillStyle)
 {
-    return nullptr;
+    std::optional<OHOS::Ace::FillStyle> optFillStyle;
+    if (fillStyle) {
+        optFillStyle = Converter::OptConvert<OHOS::Ace::FillStyle>(*fillStyle);
+    }
+    return new HierarchicalSymbolEffectPeer(optFillStyle);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,11 +39,24 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Opt_EffectFillStyle GetFillStyleImpl(Ark_HierarchicalSymbolEffect peer)
 {
-    return {};
+    //ToDo need check
+    Opt_EffectFillStyle effectFillStyle = { INTEROP_TAG_INT32, ARK_EFFECT_FILL_STYLE_CUMULATIVE };
+    CHECK_NULL_RETURN(peer, effectFillStyle);
+    CHECK_NULL_RETURN(peer->fillStyle, effectFillStyle);
+    switch (peer->fillStyle.value()) {
+        case OHOS::Ace::FillStyle::ITERATIVE:
+            effectFillStyle.value = ARK_EFFECT_FILL_STYLE_ITERATIVE;
+            break;
+        default:
+            break;
+    }
+    return effectFillStyle;
 }
 void SetFillStyleImpl(Ark_HierarchicalSymbolEffect peer,
                       Ark_EffectFillStyle fillStyle)
 {
+    CHECK_NULL_VOID(peer);
+    peer->fillStyle = Converter::OptConvert<OHOS::Ace::FillStyle>(fillStyle);
 }
 } // HierarchicalSymbolEffectAccessor
 const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor()
