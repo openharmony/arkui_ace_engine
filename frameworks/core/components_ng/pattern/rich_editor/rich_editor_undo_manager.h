@@ -44,6 +44,12 @@ struct UndoRedoRecord {
         styledStringAfter = styledString;
     }
 
+    void CopyOperationAfter(const UndoRedoRecord& record)
+    {
+        rangeAfter = record.rangeAfter;
+        styledStringAfter = record.styledStringAfter;
+    }
+
     void AddUpdateSpanType(SpanType type)
     {
         updateSpanTypes.insert(type);
@@ -97,16 +103,25 @@ struct UndoRedoRecord {
 class RichEditorUndoManager {
 public:
     RichEditorUndoManager(const WeakPtr<RichEditorPattern>& pattern): pattern_(pattern) {}
+    virtual ~RichEditorUndoManager() = default;
+    virtual bool IsStyledUndoRedoSupported() = 0;
+    virtual bool BeforeChangeByRecord(const UndoRedoRecord& record, bool isUndo = false) = 0;
+    virtual void AfterChangeByRecord(const UndoRedoRecord& record, bool isUndo = false) = 0;
+    virtual void ExecuteUndo(const UndoRedoRecord& record) = 0;
+    virtual void ExecuteRedo(const UndoRedoRecord& record) = 0;
+    virtual void ApplyOperationToRecord(int32_t start, int32_t length, const std::u16string& string,
+        UndoRedoRecord& record) = 0;
+    virtual void ApplyOperationToRecord(int32_t start, int32_t length, const RefPtr<SpanString>& styledString,
+        UndoRedoRecord& record) {}
+    virtual void SetOperationBefore(TextRange range, TextRange selection, CaretAffinityPolicy caretAffinity,
+        UndoRedoRecord& record) = 0;
+    virtual void UpdateRecordAfterChange(int32_t start, int32_t length, UndoRedoRecord& record) = 0;
+
     void UndoByRecords();
     void RedoByRecords();
-    void ApplyOperationToRecord(int32_t start, int32_t length, const std::u16string& string,
-        UndoRedoRecord& record);
-    void ApplyOperationToRecord(int32_t start, int32_t length, const RefPtr<SpanString>& styledString,
-        UndoRedoRecord& record);
     void RecordSelectionBefore();
     void UpdateRecordBeforeChange(
         int32_t start, int32_t length, UndoRedoRecord& record, bool isOnlyStyleChange = false);
-    void UpdateRecordAfterChange(int32_t start, int32_t length, UndoRedoRecord& record);
     void RecordOperation(const UndoRedoRecord& record, bool isFromRedo = false);
     void RecordPreviewInputtingStart(int32_t start, int32_t length);
     bool RecordPreviewInputtingEnd(const UndoRedoRecord& record);
@@ -129,7 +144,7 @@ public:
         ClearSelectionBefore();
     }
 
-private:
+protected:
     void RecordOperation(const UndoRedoRecord& record, size_t index);
     void RecordUndoOperation(const UndoRedoRecord& record);
     bool IsPreviewInputStartWithSelection()
@@ -165,6 +180,23 @@ private:
     TextRange selectionBefore_;
     size_t recordCount_ = 0;
     bool isCountingRecord_ = false;
+};
+
+class StyledStringUndoManager : public RichEditorUndoManager {
+public:
+    StyledStringUndoManager(const WeakPtr<RichEditorPattern>& pattern): RichEditorUndoManager(pattern) {}
+    bool IsStyledUndoRedoSupported() override;
+    bool BeforeChangeByRecord(const UndoRedoRecord& record, bool isUndo = false) override;
+    void AfterChangeByRecord(const UndoRedoRecord& record, bool isUndo = false) override;
+    void ExecuteUndo(const UndoRedoRecord& record) override;
+    void ExecuteRedo(const UndoRedoRecord& record) override;
+    void ApplyOperationToRecord(int32_t start, int32_t length, const std::u16string& string,
+        UndoRedoRecord& record) override;
+    void ApplyOperationToRecord(int32_t start, int32_t length, const RefPtr<SpanString>& styledString,
+        UndoRedoRecord& record) override;
+    void SetOperationBefore(TextRange range, TextRange selection, CaretAffinityPolicy caretAffinity,
+        UndoRedoRecord& record) override;
+    void UpdateRecordAfterChange(int32_t start, int32_t length, UndoRedoRecord& record) override;
 };
 }
 

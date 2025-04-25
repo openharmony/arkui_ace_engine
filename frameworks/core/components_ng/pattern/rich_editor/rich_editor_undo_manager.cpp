@@ -23,14 +23,14 @@ void RichEditorUndoManager::UndoByRecords()
     CHECK_NULL_VOID(!undoRecords_.empty());
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
+    CHECK_NULL_VOID(IsStyledUndoRedoSupported());
     CHECK_NULL_VOID(!pattern->IsPreviewTextInputting());
     auto record = undoRecords_.back();
     auto sizeBefore = undoRecords_.size();
     auto recordIndex = sizeBefore - 1;
     undoRecords_.pop_back();
     StartCountingRecord();
-    bool isPreventChange = !pattern->BeforeStyledStringChange(record, true);
+    bool isPreventChange = !BeforeChangeByRecord(record, true);
     auto recordCount = EndCountingRecord();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UndoByRecord [%{public}s] isPreventChange=%{public}d",
         record.ToString().c_str(), isPreventChange);
@@ -42,9 +42,9 @@ void RichEditorUndoManager::UndoByRecords()
         IF_TRUE(moveLength <= recordIndex, RecordOperation(record, recordIndex - moveLength));
         return;
     }
-    pattern->HandleUndoInStyledString(record);
+    ExecuteUndo(record);
     RecordUndoOperation(record);
-    pattern->AfterStyledStringChange(record, true);
+    AfterChangeByRecord(record, true);
 }
 
 void RichEditorUndoManager::RedoByRecords()
@@ -52,44 +52,21 @@ void RichEditorUndoManager::RedoByRecords()
     CHECK_NULL_VOID(!redoRecords_.empty());
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
+    CHECK_NULL_VOID(IsStyledUndoRedoSupported());
     CHECK_NULL_VOID(!pattern->IsPreviewTextInputting());
     auto record = redoRecords_.back();
     redoRecords_.pop_back();
-    CHECK_NULL_VOID(pattern->BeforeStyledStringChange(record));
-    pattern->HandleRedoInStyledString(record);
+    CHECK_NULL_VOID(BeforeChangeByRecord(record));
+    ExecuteRedo(record);
     RecordOperation(record, true);
-    pattern->AfterStyledStringChange(record);
-}
-
-void RichEditorUndoManager::ApplyOperationToRecord(
-    int32_t start, int32_t length, const std::u16string& string, UndoRedoRecord& record)
-{
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
-    auto styledString = pattern->CreateStyledStringByStyleBefore(start, string);
-    ApplyOperationToRecord(start, length, styledString, record);
-}
-
-void RichEditorUndoManager::ApplyOperationToRecord(
-    int32_t start, int32_t length, const RefPtr<SpanString>& styledString, UndoRedoRecord& record)
-{
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
-    UpdateRecordBeforeChange(start, length, record);
-    CHECK_NULL_VOID(styledString);
-    auto stringLength = styledString->GetLength();
-    auto rangeAfter = TextRange{ start, start + stringLength };
-    record.SetOperationAfter(rangeAfter, styledString);
+    AfterChangeByRecord(record);
 }
 
 void RichEditorUndoManager::RecordSelectionBefore()
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
+    CHECK_NULL_VOID(IsStyledUndoRedoSupported());
     auto caretPosition = pattern->caretPosition_;
     auto& textSelector = pattern->textSelector_;
     selectionBefore_ = textSelector.SelectNothing() ? TextRange{ caretPosition, caretPosition }
@@ -102,13 +79,12 @@ void RichEditorUndoManager::UpdateRecordBeforeChange(
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
+    CHECK_NULL_VOID(IsStyledUndoRedoSupported());
     record.isOnlyStyleChange = isOnlyStyleChange;
     auto rangeBefore = TextRange{ start, start + length };
-    auto styledStringBefore = pattern->styledString_->GetSubSpanString(start, length);
     auto caretAffinityBefore = pattern->caretAffinityPolicy_;
     if (selectionBefore_.IsValid()) {
-        record.SetOperationBefore(rangeBefore, styledStringBefore, selectionBefore_, caretAffinityBefore);
+        SetOperationBefore(rangeBefore, selectionBefore_, caretAffinityBefore, record);
         ClearSelectionBefore();
         return;
     }
@@ -116,18 +92,7 @@ void RichEditorUndoManager::UpdateRecordBeforeChange(
     auto& textSelector = pattern->textSelector_;
     auto selection = textSelector.SelectNothing() ? TextRange{ caretPosition, caretPosition }
         : TextRange{ textSelector.GetStart(), textSelector.GetEnd() };
-    record.SetOperationBefore(rangeBefore, styledStringBefore, selection, caretAffinityBefore);
-}
-
-void RichEditorUndoManager::UpdateRecordAfterChange(int32_t start, int32_t length, UndoRedoRecord& record)
-{
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
-    auto styledString = pattern->styledString_->GetSubSpanString(start, length);
-    CHECK_NULL_VOID(styledString);
-    auto rangeAfter = TextRange{ start, start + length };
-    record.SetOperationAfter(rangeAfter, styledString);
+    SetOperationBefore(rangeBefore, selection, caretAffinityBefore, record);
 }
 
 void RichEditorUndoManager::RecordOperation(const UndoRedoRecord& record, size_t index)
@@ -175,12 +140,7 @@ void RichEditorUndoManager::RecordPreviewInputtingStart(int32_t start, int32_t l
 bool RichEditorUndoManager::RecordPreviewInputtingEnd(const UndoRedoRecord& record)
 {
     CHECK_NULL_RETURN(IsPreviewInputStartWithSelection(), false);
-    auto start = record.rangeAfter.start;
-    auto styledString = record.styledStringAfter;
-    CHECK_NULL_RETURN(styledString, false);
-    auto stringLength = styledString->GetLength();
-    auto rangeAfter = TextRange{ start, start + stringLength };
-    previewInputRecord_.SetOperationAfter(rangeAfter, styledString);
+    previewInputRecord_.CopyOperationAfter(record);
     CHECK_NULL_RETURN(previewInputRecord_.IsValid(), false);
     RecordOperation(previewInputRecord_);
     ClearPreviewInputRecord();
@@ -193,5 +153,83 @@ void RichEditorUndoManager::RecordInsertOperation(const UndoRedoRecord& record)
     CHECK_NULL_VOID(!RecordPreviewInputtingEnd(record));
     RecordOperation(record);
     ClearPreviewInputRecord();
+}
+
+bool StyledStringUndoManager::IsStyledUndoRedoSupported()
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsStyledStringModeEnabled();
+}
+
+bool StyledStringUndoManager::BeforeChangeByRecord(const UndoRedoRecord& record, bool isUndo)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->BeforeStyledStringChange(record, isUndo);
+}
+
+void StyledStringUndoManager::AfterChangeByRecord(const UndoRedoRecord& record, bool isUndo)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->AfterStyledStringChange(record, isUndo);
+}
+
+void StyledStringUndoManager::ExecuteUndo(const UndoRedoRecord& record)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->HandleUndoInStyledString(record);
+}
+
+void StyledStringUndoManager::ExecuteRedo(const UndoRedoRecord& record)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->HandleRedoInStyledString(record);
+}
+
+void StyledStringUndoManager::ApplyOperationToRecord(
+    int32_t start, int32_t length, const std::u16string& string, UndoRedoRecord& record)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
+    auto styledString = pattern->CreateStyledStringByStyleBefore(start, string);
+    ApplyOperationToRecord(start, length, styledString, record);
+}
+
+void StyledStringUndoManager::ApplyOperationToRecord(
+    int32_t start, int32_t length, const RefPtr<SpanString>& styledString, UndoRedoRecord& record)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
+    UpdateRecordBeforeChange(start, length, record);
+    CHECK_NULL_VOID(styledString);
+    auto stringLength = styledString->GetLength();
+    auto rangeAfter = TextRange{ start, start + stringLength };
+    record.SetOperationAfter(rangeAfter, styledString);
+}
+
+void StyledStringUndoManager::SetOperationBefore(
+    TextRange range, TextRange selection, CaretAffinityPolicy caretAffinity, UndoRedoRecord& record)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto styledStringBefore = pattern->GetStyledString()->GetSubSpanString(range.start, range.GetLength());
+    record.SetOperationBefore(range, styledStringBefore, selection, caretAffinity);
+}
+
+void StyledStringUndoManager::UpdateRecordAfterChange(int32_t start, int32_t length, UndoRedoRecord& record)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
+    auto styledString = pattern->GetStyledString()->GetSubSpanString(start, length);
+    CHECK_NULL_VOID(styledString);
+    auto rangeAfter = TextRange{ start, start + length };
+    record.SetOperationAfter(rangeAfter, styledString);
 }
 }
