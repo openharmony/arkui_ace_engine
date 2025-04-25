@@ -40,6 +40,7 @@ struct IndexPage {
     new TextList(6, 'WaterFlow_AttributeUpdater', 'pages/Scrollable/WaterFlow_AttributeUpdater'),
     new TextList(7, 'StickyNestedScroll', 'pages/Scrollable/StickyNestedScroll'),
     new TextList(8, 'EnabledScroll', 'pages/Scrollable/EnabledScroll'),
+    new TextList(9, 'NestedWeb', 'pages/Scrollable/NestedWeb'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
