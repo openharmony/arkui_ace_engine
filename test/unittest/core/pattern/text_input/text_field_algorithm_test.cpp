@@ -14,10 +14,15 @@
  */
 
 #include "text_input_base.h"
+#include "ui/base/geometry/dimension.h"
+#include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const Color STROKE_COLOR_VALUE_0 = Color::FromRGB(255, 100, 100);
+const Color STORKE_COLOR_VALUE_1 = Color::FromRGB(255, 255, 100);
+} // namespace
 
 class TextFieldAlgorithmTest : public TextInputBases {
 public:
@@ -210,6 +215,31 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyle002, TestSize.Level1)
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
     textInputLayoutAlgorithm->UpdateTextStyle(frameNode_, layoutProperty_, textFieldTheme, textStyle, false);
     textInputLayoutAlgorithm->UpdateTextStyle(frameNode_, layoutProperty_, textFieldTheme, textStyle, true);
+}
+
+/**
+ * @tc.name: UpdateTextStyle003
+ * @tc.desc: Test strokeWidth and strokeColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyle003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetStrokeWidth(Dimension(2.0f));
+        model.SetStrokeColor(STORKE_COLOR_VALUE_1);
+    });
+    auto pipeline = frameNode_->GetContext();
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    pattern_->AddCounterNode();
+    FlushLayoutTask(frameNode_);
+    TextStyle textStyle;
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+
+    textInputLayoutAlgorithm->UpdateTextStyle(frameNode_, layoutProperty_, textFieldTheme, textStyle, true);
+
+    EXPECT_EQ(layoutProperty_->GetStrokeWidth(), Dimension(2.0f));
+    EXPECT_EQ(layoutProperty_->GetStrokeColor(), STORKE_COLOR_VALUE_1);
 }
 
 /**

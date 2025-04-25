@@ -395,6 +395,9 @@ public:
     virtual void SetEnableHapticFeedback(bool state) = 0;
     virtual void SetStopBackPress(bool isStopBackPress) {};
     virtual void SetKeyboardAppearance(KeyboardAppearance value) = 0;
+    virtual void SetStrokeWidth(const Dimension& value) {};
+    virtual void SetStrokeColor(const Color& value) {};
+    virtual void ResetStrokeColor() {};
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

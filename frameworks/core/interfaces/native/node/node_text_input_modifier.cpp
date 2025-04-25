@@ -20,6 +20,7 @@
 #include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/native/node/node_model.h"
 
 namespace OHOS::Ace::NG {
@@ -1956,6 +1957,47 @@ void ResetTextInputOnWillChange(ArkUINodeHandle node)
     TextFieldModelNG::SetOnWillChangeEvent(frameNode, nullptr);
 }
 
+void SetTextInputStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStrokeWidth(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetTextInputStrokeWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStrokeWidth(frameNode, 0.0_px);
+}
+
+ArkUI_Float32 GetTextInputStrokeWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetStrokeWidth(frameNode).Value();
+}
+
+void SetTextInputStrokeColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStrokeColor(frameNode, Color(color));
+}
+
+void ResetTextInputStrokeColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ResetStrokeColor(frameNode);
+}
+
+ArkUI_Uint32 GetTextInputStrokeColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return TextFieldModelNG::GetStrokeColor(frameNode).GetValue();
+}
 } // namespace
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
@@ -2171,6 +2213,12 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .setTextInputKeyboardAppearance = SetTextInputKeyboardAppearance,
         .getTextInputKeyboardAppearance = GetTextInputKeyboardAppearance,
         .resetTextInputKeyboardAppearance = ResetTextInputKeyboardAppearance,
+        .setTextInputStrokeWidth = SetTextInputStrokeWidth,
+        .resetTextInputStrokeWidth = ResetTextInputStrokeWidth,
+        .getTextInputStrokeWidth = GetTextInputStrokeWidth,
+        .setTextInputStrokeColor = SetTextInputStrokeColor,
+        .resetTextInputStrokeColor = ResetTextInputStrokeColor,
+        .getTextInputStrokeColor = GetTextInputStrokeColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

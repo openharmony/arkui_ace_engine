@@ -231,6 +231,12 @@ void SearchLayoutAlgorithm::UpdateFontFeature(LayoutWrapper* layoutWrapper)
     if (layoutProperty->HasFontFeature()) {
         textFieldLayoutProperty->UpdateFontFeature(layoutProperty->GetFontFeature().value());
     }
+    if (layoutProperty->HasStrokeWidth()) {
+        textFieldLayoutProperty->UpdateStrokeWidth(layoutProperty->GetStrokeWidth().value());
+    }
+    if (layoutProperty->HasStrokeColor()) {
+        textFieldLayoutProperty->UpdateStrokeColor(layoutProperty->GetStrokeColor().value());
+    }
 }
 
 void SearchLayoutAlgorithm::UpdateTextFieldSize(LayoutWrapper* layoutWrapper)

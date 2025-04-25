@@ -173,6 +173,8 @@ public:
         FontStyle, TextDecoration, std::vector<TextDecoration>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationStyle, TextDecorationStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, StrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, StrokeColor, Color, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(TextLineStyle, TextLineStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextAlign, TextAlign, PROPERTY_UPDATE_MEASURE_SELF);
