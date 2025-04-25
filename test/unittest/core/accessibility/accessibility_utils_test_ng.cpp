@@ -221,4 +221,68 @@ HWTEST_F(AccessibilityUtilsTestNg, AccessibilityUtilsTest005, TestSize.Level1)
     tempBest.SetLeft(20.0);
     EXPECT_FALSE(CheckBetterRect(nodeRect, FOCUS_DIRECTION_RIGHT, itemRect, tempBest));
 }
+
+/**
+ * @tc.name: AccessibilityUtilsTest006
+ * @tc.desc: GetPageModeType_NormalCases
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityUtilsTestNg, AccessibilityUtilsTest006, TestSize.Level1)
+{
+    /**
+     * @tc.step1: use nornal input to GetPageModeType.
+     * @tc.expected: GetPageModeType return right result.
+     */
+    EXPECT_EQ(AccessibilityUtils::GetPageModeType(0), "SEMI_SILENT");
+    EXPECT_EQ(AccessibilityUtils::GetPageModeType(1), "FULL_SILENT");
+}
+
+/**
+ * @tc.name: AccessibilityUtilsTest007
+ * @tc.desc: GetPageModeType_AbnormalCases
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityUtilsTestNg, AccessibilityUtilsTest007, TestSize.Level1)
+{
+    /**
+     * @tc.step1: use abnormal input to GetPageModeType.
+     * @tc.expected: GetPageModeType return empty string.
+     */
+    EXPECT_EQ(AccessibilityUtils::GetPageModeType(-1), "");
+    EXPECT_EQ(AccessibilityUtils::GetPageModeType(2), "");
+    EXPECT_EQ(AccessibilityUtils::GetPageModeType(INT_MAX), "");
+    EXPECT_EQ(AccessibilityUtils::GetPageModeType(INT_MIN), "");
+}
+
+/**
+ * @tc.name: AccessibilityUtilsTest008
+ * @tc.desc: GetFocusDrawLevel_NormalCases
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityUtilsTestNg, AccessibilityUtilsTest008, TestSize.Level1)
+{
+    /**
+     * @tc.step1: use nornal input to GetFocusDrawLevel.
+     * @tc.expected: GetFocusDrawLevel return right result.
+     */
+    EXPECT_EQ(AccessibilityUtils::GetFocusDrawLevel(0), 0);
+    EXPECT_EQ(AccessibilityUtils::GetFocusDrawLevel(1), 1);
+}
+
+/**
+ * @tc.name: AccessibilityUtilsTest009
+ * @tc.desc: GetFocusDrawLevel_AbnormalCases
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityUtilsTestNg, AccessibilityUtilsTest009, TestSize.Level1)
+{
+    /**
+     * @tc.step1: use abnormal input to GetFocusDrawLevel.
+     * @tc.expected: GetFocusDrawLevel return -1.
+     */
+    EXPECT_EQ(AccessibilityUtils::GetFocusDrawLevel(-1), -1);
+    EXPECT_EQ(AccessibilityUtils::GetFocusDrawLevel(2), -1);
+    EXPECT_EQ(AccessibilityUtils::GetFocusDrawLevel(INT_MAX), -1);
+    EXPECT_EQ(AccessibilityUtils::GetFocusDrawLevel(INT_MIN), -1);
+}
 } // namespace OHOS::Ace::NG
