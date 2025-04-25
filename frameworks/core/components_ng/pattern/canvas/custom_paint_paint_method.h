@@ -305,6 +305,7 @@ protected:
     void UpdatePaintShader(RSPen* pen, RSBrush* brush, const Ace::Gradient& gradient);
     void UpdatePaintShader(const Ace::Pattern& pattern, RSPen* pen, RSBrush* brush);
     bool UpdateFillParagraph(const std::string& text);
+    void UpdateFillTxtStyle(RSTextStyle& txtStyle);
     bool UpdateStrokeParagraph(const std::string& text);
     void UpdateStrokeShadowParagraph(const std::string& text, const RSPen* pen, const RSParagraphStyle& style);
     void InitPaintBlend(RSBrush& brush);
