@@ -77,6 +77,7 @@ public:
 
     void OnForceSplitConfigUpdate()
     {
+        CHECK_NULL_VOID(stagePattern_);
         stagePattern_->OnForceSplitConfigUpdate();
     }
 
