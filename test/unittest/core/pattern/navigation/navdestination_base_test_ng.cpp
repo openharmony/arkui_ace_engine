@@ -40,6 +40,7 @@ constexpr float DEFAULT_HEIGHT = 0.f;
 constexpr float DEFAULT_ROOT_WIDTH = 480.f;
 constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
 constexpr float REMOVE_CLIP_SIZE = 100000.0f;
+constexpr float CONTENT_OFFSET_PERCENT = 0.2f;
 
 RefPtr<NavDestinationNodeBase> CreateNavDestinationNodeBase()
 {
@@ -701,6 +702,287 @@ HWTEST_F(NavDestinationBaseTestNg, CalcFullClipRectForTransitionTest003, TestSiz
 }
 
 /**
+ * @tc.name: CalcHalfClipRectForTransitionTest001
+ * @tc.desc: Branch: auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => false
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ *                   if (AceApplicationInfo::GetInstance().IsRightToLeft()) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcHalfClipRectForTransitionTest001, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_FALSE(angle.has_value());
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto rect = node->CalcHalfClipRectForTransition(frameSize);
+    auto offset = rect.GetOffset();
+    auto size = rect.GetSize();
+    EXPECT_EQ(offset, OffsetF(FRAME_WIDTH * HALF, 0.0f));
+    EXPECT_EQ(size, SizeF(FRAME_WIDTH * HALF, REMOVE_CLIP_SIZE));
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcHalfClipRectForTransitionTest002
+ * @tc.desc: Branch: auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => false
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ *                   if (AceApplicationInfo::GetInstance().IsRightToLeft()) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcHalfClipRectForTransitionTest002, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_FALSE(angle.has_value());
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto rect = node->CalcHalfClipRectForTransition(frameSize);
+    auto offset = rect.GetOffset();
+    auto size = rect.GetSize();
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(size, SizeF(FRAME_WIDTH * HALF, REMOVE_CLIP_SIZE));
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+ /**
+ * @tc.name: CalcHalfClipRectForTransitionTest003
+ * @tc.desc: Branch: auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ *                   if (AceApplicationInfo::GetInstance().IsRightToLeft()) { => false
+ *                   } else if (angle == ROTATION_0) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcHalfClipRectForTransitionTest003, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->SetPageRotateAngle(0);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_0);
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto rect = node->CalcHalfClipRectForTransition(frameSize);
+    auto offset = rect.GetOffset();
+    auto size = rect.GetSize();
+    EXPECT_EQ(offset, OffsetF(FRAME_WIDTH * HALF, 0.0f));
+    EXPECT_EQ(size, SizeF(FRAME_WIDTH * HALF, REMOVE_CLIP_SIZE));
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcHalfClipRectForTransitionTest004
+ * @tc.desc: Branch: auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ *                   if (AceApplicationInfo::GetInstance().IsRightToLeft()) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcHalfClipRectForTransitionTest004, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->SetPageRotateAngle(0);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_0);
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto rect = node->CalcHalfClipRectForTransition(frameSize);
+    auto offset = rect.GetOffset();
+    auto size = rect.GetSize();
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(size, SizeF(FRAME_WIDTH * HALF, REMOVE_CLIP_SIZE));
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcHalfClipRectForTransitionTest005
+ * @tc.desc: Branch: auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => true
+ *                   if (AceApplicationInfo::GetInstance().IsRightToLeft()) { => false
+ *                   if (angle == ROTATION_90) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcHalfClipRectForTransitionTest005, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->SetPageRotateAngle(90);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_90);
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto rect = node->CalcHalfClipRectForTransition(frameSize);
+    auto offset = rect.GetOffset();
+    auto size = rect.GetSize();
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(size, SizeF(REMOVE_CLIP_SIZE, FRAME_HEIGHT * HALF));
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcHalfClipRectForTransitionTest006
+ * @tc.desc: Branch: auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => true
+ *                   if (AceApplicationInfo::GetInstance().IsRightToLeft()) { => true
+ *                   if (angle == ROTATION_90) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcHalfClipRectForTransitionTest006, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->SetPageRotateAngle(90);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_90);
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto rect = node->CalcHalfClipRectForTransition(frameSize);
+    auto offset = rect.GetOffset();
+    auto size = rect.GetSize();
+    EXPECT_EQ(offset, OffsetF(0.0f, FRAME_HEIGHT * HALF));
+    EXPECT_EQ(size, SizeF(REMOVE_CLIP_SIZE, FRAME_HEIGHT * HALF));
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcHalfClipRectForTransitionTest007
+ * @tc.desc: Branch: auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ *                   if (AceApplicationInfo::GetInstance().IsRightToLeft()) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcHalfClipRectForTransitionTest007, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->SetPageRotateAngle(180);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_180);
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto rect = node->CalcHalfClipRectForTransition(frameSize);
+    auto offset = rect.GetOffset();
+    auto size = rect.GetSize();
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(size, SizeF(FRAME_WIDTH * HALF, REMOVE_CLIP_SIZE));
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcHalfClipRectForTransitionTest008
+ * @tc.desc: Branch: auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ *                   if (AceApplicationInfo::GetInstance().IsRightToLeft()) { => true
+ *                   } else if (angle == ROTATION_180) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcHalfClipRectForTransitionTest008, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->SetPageRotateAngle(180);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_180);
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto rect = node->CalcHalfClipRectForTransition(frameSize);
+    auto offset = rect.GetOffset();
+    auto size = rect.GetSize();
+    EXPECT_EQ(offset, OffsetF(FRAME_WIDTH * HALF, 0.0f));
+    EXPECT_EQ(size, SizeF(FRAME_WIDTH * HALF, REMOVE_CLIP_SIZE));
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcHalfClipRectForTransitionTest009
+ * @tc.desc: Branch: auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => true
+ *                   if (AceApplicationInfo::GetInstance().IsRightToLeft()) { => false
+ *                   if (angle == ROTATION_270) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcHalfClipRectForTransitionTest009, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->SetPageRotateAngle(270);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_270);
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto rect = node->CalcHalfClipRectForTransition(frameSize);
+    auto offset = rect.GetOffset();
+    auto size = rect.GetSize();
+    EXPECT_EQ(offset, OffsetF(0.0f, FRAME_HEIGHT * HALF));
+    EXPECT_EQ(size, SizeF(REMOVE_CLIP_SIZE, FRAME_HEIGHT * HALF));
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcHalfClipRectForTransitionTest010
+ * @tc.desc: Branch: auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => true
+ *                   if (AceApplicationInfo::GetInstance().IsRightToLeft()) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcHalfClipRectForTransitionTest010, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    node->SetPageRotateAngle(270);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_270);
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto rect = node->CalcHalfClipRectForTransition(frameSize);
+    auto offset = rect.GetOffset();
+    auto size = rect.GetSize();
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(size, SizeF(REMOVE_CLIP_SIZE, FRAME_HEIGHT * HALF));
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
  * @tc.name: CalcTranslateForTransitionPushStartTest001
  * @tc.desc: Branch: if (!transitionIn) { => true
  * @tc.type: FUNC
@@ -773,6 +1055,636 @@ HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushStartTest004, T
     auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
     auto offset = node->CalcTranslateForTransitionPushStart(frameSize, true);
     EXPECT_EQ(offset, OffsetF(FRAME_HEIGHT * HALF * isRTL, 0.0f));
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPushEndTest001
+ * @tc.desc: Branch: if (transitionIn) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushEndTest001, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto offset = node->CalcTranslateForTransitionPushEnd(frameSize, true);
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPushEndTest002
+ * @tc.desc: Branch: if (transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => false
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => false
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushEndTest002, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_FALSE(angle.has_value());
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto offset = node->CalcTranslateForTransitionPushEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(-FRAME_WIDTH * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPushEndTest003
+ * @tc.desc: Branch: if (transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => false
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushEndTest003, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_FALSE(angle.has_value());
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto offset = node->CalcTranslateForTransitionPushEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(FRAME_WIDTH * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPushEndTest004
+ * @tc.desc: Branch: if (transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => false
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushEndTest004, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    node->SetPageRotateAngle(0);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_0);
+    auto offset = node->CalcTranslateForTransitionPushEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(-FRAME_WIDTH * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    node->SetPageRotateAngle(180);
+    angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_180);
+    offset = node->CalcTranslateForTransitionPushEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(-FRAME_WIDTH * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPushEndTest005
+ * @tc.desc: Branch: if (transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushEndTest005, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    node->SetPageRotateAngle(0);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_0);
+    auto offset = node->CalcTranslateForTransitionPushEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(FRAME_WIDTH * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    node->SetPageRotateAngle(180);
+    angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_180);
+    offset = node->CalcTranslateForTransitionPushEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(FRAME_WIDTH * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPushEndTest006
+ * @tc.desc: Branch: if (transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => false
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushEndTest006, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    node->SetPageRotateAngle(90);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_90);
+    auto offset = node->CalcTranslateForTransitionPushEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(-FRAME_HEIGHT * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    node->SetPageRotateAngle(270);
+    angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_270);
+    offset = node->CalcTranslateForTransitionPushEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(-FRAME_HEIGHT * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPushEndTest007
+ * @tc.desc: Branch: if (transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPushEndTest007, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    node->SetPageRotateAngle(90);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_90);
+    auto offset = node->CalcTranslateForTransitionPushEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(FRAME_HEIGHT * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    node->SetPageRotateAngle(270);
+    angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_270);
+    offset = node->CalcTranslateForTransitionPushEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(FRAME_HEIGHT * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPopStartTest001
+ * @tc.desc: Branch: if (!transitionIn) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopStartTest001, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto offset = node->CalcTranslateForTransitionPopStart(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPopStartTest002
+ * @tc.desc: Branch: if (!transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => false
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => false
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopStartTest002, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_FALSE(angle.has_value());
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto offset = node->CalcTranslateForTransitionPopStart(frameSize, true);
+    EXPECT_EQ(offset, OffsetF(-FRAME_WIDTH * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPopStartTest003
+ * @tc.desc: Branch: if (!transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => false
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopStartTest003, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_FALSE(angle.has_value());
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto offset = node->CalcTranslateForTransitionPopStart(frameSize, true);
+    EXPECT_EQ(offset, OffsetF(FRAME_WIDTH * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPopStartTest004
+ * @tc.desc: Branch: if (!transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => false
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopStartTest004, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    node->SetPageRotateAngle(0);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_0);
+    auto offset = node->CalcTranslateForTransitionPopStart(frameSize, true);
+    EXPECT_EQ(offset, OffsetF(-FRAME_WIDTH * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    node->SetPageRotateAngle(180);
+    angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_180);
+    offset = node->CalcTranslateForTransitionPopStart(frameSize, true);
+    EXPECT_EQ(offset, OffsetF(-FRAME_WIDTH * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPopStartTest005
+ * @tc.desc: Branch: if (!transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopStartTest005, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    node->SetPageRotateAngle(0);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_0);
+    auto offset = node->CalcTranslateForTransitionPopStart(frameSize, true);
+    EXPECT_EQ(offset, OffsetF(FRAME_WIDTH * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    node->SetPageRotateAngle(180);
+    angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_180);
+    offset = node->CalcTranslateForTransitionPopStart(frameSize, true);
+    EXPECT_EQ(offset, OffsetF(FRAME_WIDTH * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPopStartTest006
+ * @tc.desc: Branch: if (!transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => false
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopStartTest006, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    node->SetPageRotateAngle(90);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_90);
+    auto offset = node->CalcTranslateForTransitionPopStart(frameSize, true);
+    EXPECT_EQ(offset, OffsetF(-FRAME_HEIGHT * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    node->SetPageRotateAngle(270);
+    angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_270);
+    offset = node->CalcTranslateForTransitionPopStart(frameSize, true);
+    EXPECT_EQ(offset, OffsetF(-FRAME_HEIGHT * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPopStartTest007
+ * @tc.desc: Branch: if (!transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopStartTest007, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    node->SetPageRotateAngle(90);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_90);
+    auto offset = node->CalcTranslateForTransitionPopStart(frameSize, true);
+    EXPECT_EQ(offset, OffsetF(FRAME_HEIGHT * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    node->SetPageRotateAngle(270);
+    angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_270);
+    offset = node->CalcTranslateForTransitionPopStart(frameSize, true);
+    EXPECT_EQ(offset, OffsetF(FRAME_HEIGHT * CONTENT_OFFSET_PERCENT, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPopEndTest001
+ * @tc.desc: Branch: if (transitionIn) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopEndTest001, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto offset = node->CalcTranslateForTransitionPopEnd(frameSize, true);
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPopEndTest002
+ * @tc.desc: Branch: if (transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => false
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => false
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopEndTest002, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_FALSE(angle.has_value());
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto offset = node->CalcTranslateForTransitionPopEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(FRAME_WIDTH * HALF, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPopEndTest003
+ * @tc.desc: Branch: if (transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => false
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopEndTest003, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_FALSE(angle.has_value());
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    auto offset = node->CalcTranslateForTransitionPopEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(-FRAME_WIDTH * HALF, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPopEndTest004
+ * @tc.desc: Branch: if (transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => false
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopEndTest004, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    node->SetPageRotateAngle(0);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_0);
+    auto offset = node->CalcTranslateForTransitionPopEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(FRAME_WIDTH * HALF, 0.0f));
+
+    node->SetPageRotateAngle(180);
+    angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_180);
+    offset = node->CalcTranslateForTransitionPopEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(FRAME_WIDTH * HALF, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPopEndTest005
+ * @tc.desc: Branch: if (transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopEndTest005, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    node->SetPageRotateAngle(0);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_0);
+    auto offset = node->CalcTranslateForTransitionPopEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(-FRAME_WIDTH * HALF, 0.0f));
+
+    node->SetPageRotateAngle(180);
+    angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_180);
+    offset = node->CalcTranslateForTransitionPopEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(-FRAME_WIDTH * HALF, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPopEndTest006
+ * @tc.desc: Branch: if (transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => false
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopEndTest006, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    node->SetPageRotateAngle(90);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_90);
+    auto offset = node->CalcTranslateForTransitionPopEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(FRAME_HEIGHT * HALF, 0.0f));
+
+    node->SetPageRotateAngle(270);
+    angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_270);
+    offset = node->CalcTranslateForTransitionPopEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(FRAME_HEIGHT * HALF, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcTranslateForTransitionPopEndTest007
+ * @tc.desc: Branch: if (transitionIn) { => false
+ *                   auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
+ *                       rotateAngle_.has_value() => true
+ *                   GetLanguageDirection()
+ *                       AceApplicationInfo::GetInstance().IsRightToLeft() => true
+ *                   if (angle == ROTATION_90 || angle == ROTATION_270) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, CalcTranslateForTransitionPopEndTest007, TestSize.Level1)
+{
+    auto node = CreateNavDestinationNodeBase();
+    ASSERT_NE(node, nullptr);
+
+    auto frameSize = SizeF{ FRAME_WIDTH, FRAME_HEIGHT };
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    node->SetPageRotateAngle(90);
+    auto angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_90);
+    auto offset = node->CalcTranslateForTransitionPopEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(-FRAME_HEIGHT * HALF, 0.0f));
+
+    node->SetPageRotateAngle(270);
+    angle = node->GetPageRotateAngle();
+    ASSERT_TRUE(angle.has_value());
+    ASSERT_EQ(angle.value(), ROTATION_270);
+    offset = node->CalcTranslateForTransitionPopEnd(frameSize, false);
+    EXPECT_EQ(offset, OffsetF(-FRAME_HEIGHT * HALF, 0.0f));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
 }
 
 /**
