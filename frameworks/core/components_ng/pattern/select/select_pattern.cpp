@@ -143,6 +143,9 @@ void SelectPattern::OnModifyDone()
     CHECK_NULL_VOID(menuPattern);
     menuPattern->UpdateSelectIndex(selected_);
     InitFocusEvent();
+    for (const auto& option : options_) {
+        option->MarkModifyDone();
+    }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto selectPaintProperty = host->GetPaintProperty<SelectPaintProperty>();
@@ -853,16 +856,13 @@ void SelectPattern::SetFontColor(const Color& color)
 void SelectPattern::SetOptionBgColor(const Color& color)
 {
     optionBgColor_ = color;
-    for (size_t i = 0; i < options_.size(); ++i) {
-        if (static_cast<int32_t>(i) == selected_ && selectedBgColor_.has_value()) {
-            continue;
-        }
-        auto pattern = options_[i]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetBgColor(color);
-        pattern->SetIsBGColorSetByUser(true);
-        pattern->SetOptionBgColor(color);
-        pattern->SetIsOptionBgColorSetByUser(true);
+    if (!optionBgColor_.has_value()) {
+        return;
+    }
+    for (const auto& option : options_) {
+        auto paintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdateOptionBgColor(optionBgColor_.value());
     }
 }
 
@@ -922,14 +922,18 @@ void SelectPattern::SetOptionFontColor(const Color& color)
 {
     optionFont_.FontColor = color;
     for (size_t i = 0; i < options_.size(); ++i) {
+        if (optionFont_.FontColor.has_value()) {
+            auto paintProperty = options_[i]->GetPaintProperty<MenuItemPaintProperty>();
+            CHECK_NULL_VOID(paintProperty);
+            paintProperty->UpdateOptionFontColor(optionFont_.FontColor.value());
+        }
+
         if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontColor.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetFontColor(color);
         pattern->SetOptionFontColor(color);
-        pattern->SetIsOptionFontColorSetByUser(true);
     }
 }
 
@@ -937,11 +941,13 @@ void SelectPattern::SetOptionFontColor(const Color& color)
 void SelectPattern::SetSelectedOptionBgColor(const Color& color)
 {
     selectedBgColor_ = color;
-    if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
-        auto pattern = options_[selected_]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetBgColor(color);
-        pattern->SetIsBGColorSetByUser(true);
+    if (!selectedBgColor_.has_value()) {
+        return;
+    }
+    for (const auto& option : options_) {
+        auto paintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdateSelectedOptionBgColor(selectedBgColor_.value());
     }
 }
 
@@ -988,12 +994,13 @@ void SelectPattern::SetSelectedOptionFontFamily(const std::vector<std::string>& 
 void SelectPattern::SetSelectedOptionFontColor(const Color& color)
 {
     selectedFont_.FontColor = color;
-    if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
-        auto pattern = options_[selected_]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetFontColor(color);
-        pattern->SetSelectFontColor(color);
-        pattern->SetIsTextColorSetByUser(true);
+    if (!selectedFont_.FontColor.has_value()) {
+        return;
+    }
+    for (const auto& option : options_) {
+        auto paintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdateSelectedOptionFontColor(selectedFont_.FontColor.value());
     }
 }
 
@@ -1086,10 +1093,6 @@ void SelectPattern::ResetLastSelectedOptionFlags(const RefPtr<MenuItemPattern>& 
 {
     optionPattern->SetSelected(false);
     optionPattern->UpdateNextNodeDivider(true);
-    optionPattern->SetIsBGColorSetByUser(false);
-    optionPattern->SetIsTextColorSetByUser(false);
-    optionPattern->SetIsOptionFontColorSetByUser(false);
-    optionPattern->SetIsOptionBgColorSetByUser(false);
 }
 
 void SelectPattern::ResetOptionProps()
@@ -1100,10 +1103,6 @@ void SelectPattern::ResetOptionProps()
         pattern->SetSelected(false);
         ResetOptionToInitProps(pattern);
         UpdateOptionCustomProperties(pattern);
-        pattern->SetIsBGColorSetByUser(false);
-        pattern->SetIsTextColorSetByUser(false);
-        pattern->SetIsOptionFontColorSetByUser(false);
-        pattern->SetIsOptionBgColorSetByUser(false);
     }
 }
 
@@ -1120,23 +1119,8 @@ void SelectPattern::UpdateLastSelectedProps(int32_t index)
         ResetOptionToInitProps(lastSelected, newSelected);
         UpdateOptionCustomProperties(lastSelected);
         ResetLastSelectedOptionFlags(lastSelected);
-        if (selectedBgColor_.has_value()) {
-            newSelected->SetIsBGColorSetByUser(true);
-            newSelected->SetBgColor(selectedBgColor_.value());
-        }
-        if (selectedFont_.FontColor.has_value()) {
-            newSelected->SetIsTextColorSetByUser(true);
-            newSelected->SetSelectFontColor(selectedFont_.FontColor.value());
-        }
         if (optionFont_.FontColor.has_value()) {
-            lastSelected->SetIsOptionFontColorSetByUser(true);
             lastSelected->SetOptionFontColor(optionFont_.FontColor.value());
-            newSelected->SetIsOptionFontColorSetByUser(false);
-        }
-        if (optionBgColor_.has_value()) {
-            lastSelected->SetIsOptionBgColorSetByUser(true);
-            lastSelected->SetOptionBgColor(optionBgColor_.value());
-            newSelected->SetIsOptionBgColorSetByUser(false);
         }
         if (selected_ != 0) {
             auto lastSelectedNode = lastSelected->GetHost();
