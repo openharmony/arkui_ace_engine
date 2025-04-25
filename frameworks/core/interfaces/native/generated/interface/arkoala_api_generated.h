@@ -19814,7 +19814,7 @@ typedef struct GENERATED_ArkUICheckboxModifier {
     void (*setContentModifier1)(Ark_NativePointer node,
                                 const Opt_ContentModifier* value);
     void (*set_onChangeEvent_select)(Ark_NativePointer node,
-                                     const Callback_Opt_Boolean_Void* callback);
+                                     const Opt_Callback_Boolean_Void* callback);
 } GENERATED_ArkUICheckboxModifier;
 
 typedef struct GENERATED_ArkUICheckboxGroupModifier {
@@ -19847,7 +19847,7 @@ typedef struct GENERATED_ArkUICheckboxGroupModifier {
     void (*setCheckboxShape1)(Ark_NativePointer node,
                               const Opt_CheckBoxShape* value);
     void (*set_onChangeEvent_selectAll)(Ark_NativePointer node,
-                                        const Callback_Opt_Boolean_Void* callback);
+                                        const Opt_Callback_Boolean_Void* callback);
 } GENERATED_ArkUICheckboxGroupModifier;
 
 typedef struct GENERATED_ArkUICircleModifier {
@@ -20619,7 +20619,7 @@ typedef struct GENERATED_ArkUIMenuItemModifier {
     void (*setLabelFontColor)(Ark_NativePointer node,
                               const Opt_ResourceColor* value);
     void (*set_onChangeEvent_selected)(Ark_NativePointer node,
-                                       const Callback_Opt_Boolean_Void* callback);
+                                       const Opt_Callback_Boolean_Void* callback);
 } GENERATED_ArkUIMenuItemModifier;
 
 typedef struct GENERATED_ArkUIMenuItemGroupModifier {

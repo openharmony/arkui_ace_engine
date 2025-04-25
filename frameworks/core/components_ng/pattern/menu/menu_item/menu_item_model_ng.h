@@ -41,7 +41,7 @@ public:
     void SetSelectIconSymbol(std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetSelected(FrameNode* frameNode, bool isSelected = false);
+    static void SetSelected(FrameNode* frameNode,  const std::optional<bool>& isSelected = false);
     static void SetLabelFontColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetLabelFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize);
     static void SetLabelFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& weight);

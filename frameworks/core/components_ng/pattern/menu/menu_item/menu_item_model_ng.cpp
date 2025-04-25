@@ -308,15 +308,20 @@ void MenuItemModelNG::SetSelectedChangeEvent(FrameNode* frameNode, std::function
     eventHub->SetSelectedChangeEvent(std::move(selectedChangeEvent));
 }
 
-void MenuItemModelNG::SetSelected(FrameNode* frameNode, bool isSelected)
+void MenuItemModelNG::SetSelected(FrameNode* frameNode, const std::optional<bool>& isSelected)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetSelected(isSelected);
     auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
+    if (isSelected.has_value()) {
+        pattern->SetSelected(isSelected.value());
+        eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected.value());
+    } else {
+        pattern->SetSelected(false);
+        eventHub->SetCurrentUIState(UI_STATE_SELECTED, false);
+    }
 }
 
 void MenuItemModelNG::SetLabelFontColor(FrameNode* frameNode, const std::optional<Color>& color)
