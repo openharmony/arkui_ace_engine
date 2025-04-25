@@ -58,6 +58,7 @@ TabsModel* TabsModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
+constexpr int32_t PARAM_COUNT = 2;
 constexpr int32_t SM_COLUMN_NUM = 4;
 constexpr int32_t MD_COLUMN_NUM = 8;
 constexpr int32_t LG_COLUMN_NUM = 12;
@@ -786,7 +787,7 @@ void JSTabs::SetBarModifier(const JSCallbackInfo& info, const JsiRef<JsiValue>& 
     TabsModel::GetInstance()->SetBarModifier(std::move(onApply));
 }
 
-void JSTabs::SetBarModifier(const JSCallbackInfo& info,
+void JSTabs::SetBarModifierApply(const JSCallbackInfo& info,
     std::function<void(WeakPtr<NG::FrameNode>)>& barModiferApply, const JSRef<JSVal> val)
 {
     auto vm = info.GetVm();
@@ -805,11 +806,11 @@ void JSTabs::SetBarModifier(const JSCallbackInfo& info,
             CHECK_NULL_VOID(func);
             auto node = frameNode.Upgrade();
             CHECK_NULL_VOID(node);
-            JSRef<JSVal> params[2];
+            JSRef<JSVal> params[PARAM_COUNT];
             params[0] = modifierParam;
             params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
             PipelineContext::SetCallBackNode(node);
-            func->ExecuteJS(2, params);
+            func->ExecuteJS(PARAM_COUNT, params);
         };
         barModiferApply = onApply;
     }

@@ -25,7 +25,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
     static void Pop();
-    static void SetBarModifier(const JSCallbackInfo& info,
+    static void SetBarModifierApply(const JSCallbackInfo& info,
         std::function<void(WeakPtr<NG::FrameNode>)>& barModiferApply, const JSRef<JSVal> val);
 
 protected:
