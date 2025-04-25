@@ -90,6 +90,7 @@ public:
     virtual void SetClipRuleForPath(const CanvasFillRule& fillRule) = 0;
     virtual void SetClipRuleForPath2D(const CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path) = 0;
     virtual void AddRect(const Rect& rect) = 0;
+    virtual void AddRoundRect(const Rect& rect, const std::vector<double>& radii) {};
     virtual void BeginPath() = 0;
     virtual void ClosePath() = 0;
     virtual void Restore() = 0;

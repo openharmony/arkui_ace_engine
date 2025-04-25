@@ -800,4 +800,50 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo026, Te
     paintMethod->SetFilterParam("sepia(90)");
     EXPECT_NE(paintMethod->colorFilter_, nullptr);
 }
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTestTwo027
+ * @tc.desc: Test the function 'AddRoundRect' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo027, TestSize.Level1)
+{
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+
+    Rect rect(0, 0, 100, 100);
+    std::vector<double> radii = { 10, 10, 10 };
+    paintMethod->isPathChanged_ = false;
+    paintMethod->AddRoundRect(rect, radii);
+    EXPECT_FALSE(paintMethod->isPathChanged_);
+
+    radii = { 10, 10, 10, 10 };
+    paintMethod->isPathChanged_ = false;
+    paintMethod->AddRoundRect(rect, radii);
+    EXPECT_TRUE(paintMethod->isPathChanged_);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTestTwo028
+ * @tc.desc: Test the function 'Path2DRoundRect' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo028, TestSize.Level1)
+{
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+
+    PathArgs args;
+    args.para1 = 0;
+    args.para2 = 0;
+    args.para3 = 100;
+    args.para4 = 100;
+    args.para5 = 10;
+    args.para6 = 20;
+    args.para7 = 30;
+    args.para8 = 40;
+    paintMethod->isPath2dChanged_ = false;
+    paintMethod->Path2DRoundRect(args);
+    EXPECT_TRUE(paintMethod->isPath2dChanged_);
+}
 } // namespace OHOS::Ace::NG

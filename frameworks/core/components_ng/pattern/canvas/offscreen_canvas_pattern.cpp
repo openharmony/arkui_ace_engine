@@ -111,6 +111,11 @@ void OffscreenCanvasPattern::AddRect(const Rect& rect)
     offscreenPaintMethod_->AddRect(rect);
 }
 
+void OffscreenCanvasPattern::AddRoundRect(const Rect& rect, const std::vector<double>& radii)
+{
+    offscreenPaintMethod_->AddRoundRect(rect, radii);
+}
+
 void OffscreenCanvasPattern::Ellipse(const EllipseParam& param)
 {
     offscreenPaintMethod_->Ellipse(param);

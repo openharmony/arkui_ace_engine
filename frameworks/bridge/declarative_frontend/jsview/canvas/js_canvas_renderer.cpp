@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
+#include "bridge/declarative_frontend/jsview/canvas/js_canvas_util.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components/common/properties/paint_state.h"
@@ -1347,6 +1348,18 @@ void JSCanvasRenderer::JsRect(const JSCallbackInfo& info)
         info.GetDoubleArg(3, height, isJudgeSpecialValue_)) { // Index3: the 4th arg.
         renderingContext2DModel_->AddRect(Rect(x, y, width, height) * GetDensity());
     }
+}
+
+// roundRect(x: number, y: number, width: number, height: number, radius: number|Array<number>): void
+void JSCanvasRenderer::JsRoundRect(const JSCallbackInfo& info)
+{
+    Rect rect;
+    std::vector<double> radii;
+    double density = GetDensity();
+    if (!ParseRoundRect(info, rect, radii, density, isJudgeSpecialValue_)) {
+        return;
+    }
+    renderingContext2DModel_->AddRoundRect(rect * density, radii);
 }
 
 // beginPath(): void
