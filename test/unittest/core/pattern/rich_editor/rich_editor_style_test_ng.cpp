@@ -215,6 +215,12 @@ HWTEST_F(RichEditorStyleTestNg, TextbackgroundStyle003, TestSize.Level1)
     ASSERT_NE(newSpan, nullptr);
     EXPECT_TRUE(newSpan->GetTextBackgroundStyle().has_value());
     EXPECT_EQ(newSpan->GetTextBackgroundStyle().value(), textBackgroundStyle);
+
+    richEditorController->UpdateSpanStyle(0, 2, style, imageStyle);
+    newSpan = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    ASSERT_NE(newSpan, nullptr);
+    EXPECT_TRUE(newSpan->GetTextBackgroundStyle().has_value());
+    EXPECT_EQ(newSpan->GetTextBackgroundStyle().value().groupId, newSpan->groupId_);
 }
 
 /**

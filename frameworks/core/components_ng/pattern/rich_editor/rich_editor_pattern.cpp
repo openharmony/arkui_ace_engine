@@ -1387,9 +1387,13 @@ void RichEditorPattern::UpdateTextBackgroundStyle(
 {
     CHECK_NULL_VOID(style.has_value());
     TextBackgroundStyle backgroundStyle = style.value();
+    backgroundStyle.needCompareGroupId = false;
+    if (backgroundStyle == spanNode->GetTextBackgroundStyle()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "text background style is same");
+        return;
+    }
     backgroundStyle.needCompareGroupId = true;
-    backgroundStyle.groupId = ElementRegister::GetInstance()->MakeUniqueId();
-    spanNode->UpdateTextBackgroundFromParent(backgroundStyle);
+    spanNode->SetTextBackgroundStyle(backgroundStyle);
 }
 
 void RichEditorPattern::UpdateUrlStyle(RefPtr<SpanNode>& spanNode, const std::optional<std::u16string>& urlAddressOpt)
