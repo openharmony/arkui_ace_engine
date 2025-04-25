@@ -49,11 +49,9 @@ constexpr double TIME_WIDTH_PERCENT_TWO = 0.6363;
 constexpr Dimension BUTTON_BOTTOM_TOP_MARGIN = 10.0_vp;
 constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
 constexpr Dimension CHECKBOX_SIZE = 24.0_vp;
-constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
 constexpr Dimension TITLE_HEIGHT = 40.0_vp;
 constexpr Dimension TITLE_BUTTON_HEIGHT = 32.0_vp;
 constexpr Dimension TITLE_PADDING_HORIZONTAL = 16.0_vp;
-constexpr Dimension PICKER_MARGIN_FROM_TITLE_AND_BUTTON = 8.0_vp;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
 constexpr int32_t RATIO_SEVEN = 7;
@@ -1311,18 +1309,22 @@ void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& conten
     auto checkboxLayoutProps = checkbox->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(checkboxLayoutProps);
     MarginProperty marginCheckbox;
-    marginCheckbox.left = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
-    marginCheckbox.right = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    marginCheckbox.left = isRtl ? CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON)
+                                : CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+    marginCheckbox.right = isRtl ? CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE)
+                                 : CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
     checkboxLayoutProps->UpdateMargin(marginCheckbox);
     checkboxLayoutProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(CHECKBOX_SIZE), CalcLength(CHECKBOX_SIZE)));
     checkbox->MarkModifyDone();
     checkbox->MountToParent(contentRow);
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetLunarSwitchCheckbox(checkbox);
 
     auto textNode = CreateLunarSwitchTextNode();
     CHECK_NULL_VOID(textNode);
     textNode->MountToParent(contentRow);
-    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
-    CHECK_NULL_VOID(datePickerPattern);
     datePickerPattern->SetLunarSwitchTextNode(textNode);
 
     contentRow->MountToParent(contentColumn);
