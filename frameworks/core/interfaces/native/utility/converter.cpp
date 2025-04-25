@@ -2040,6 +2040,14 @@ LightSource Convert(const Ark_LightSource& src)
 }
 
 template<>
+Point Convert(const Ark_Tuple_Number_Number& src)
+{
+    auto x = Converter::Convert<double>(src.value0);
+    auto y = Converter::Convert<double>(src.value1);
+    return Point(x, y);
+}
+
+template<>
 PointLightStyle Convert(const Ark_PointLightStyle& src)
 {
     PointLightStyle pointLightStyle;
@@ -2050,6 +2058,14 @@ PointLightStyle Convert(const Ark_PointLightStyle& src)
     pointLightStyle.bloom = Converter::OptConvert<float>(src.bloom);
     Validator::ValidateBloom(pointLightStyle.bloom);
     return pointLightStyle;
+}
+
+template<>
+PointT<int32_t> Convert(const Ark_Point& src)
+{
+    auto x = Converter::Convert<int32_t>(src.x);
+    auto y = Converter::Convert<int32_t>(src.y);
+    return PointT<int32_t>(x, y);
 }
 
 template<>

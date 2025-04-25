@@ -517,7 +517,9 @@ namespace Converter {
     template<> PickerTime Convert(const Ark_TimePickerResult& src);
     template<> PickerValueType Convert(const Ark_String& src);
     template<> PickerValueType Convert(const Array_String& src);
+    template<> Point Convert(const Ark_Tuple_Number_Number& src);
     template<> PointLightStyle Convert(const Ark_PointLightStyle& src);
+    template<> PointT<int32_t> Convert(const Ark_Point& src);
     template<> RadioStyle Convert(const Ark_RadioStyle& src);
     template<> Radius Convert(const Ark_Vector2& src);
     template<> RangeContent Convert(const Ark_TextPickerRangeContent& src);
