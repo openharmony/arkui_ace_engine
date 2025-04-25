@@ -6011,6 +6011,6 @@ void PipelineContext::SetForceSplitEnable(bool isForceSplit, const std::string& 
     isForceSplit_ = isForceSplit;
     homePageConfig_ = homePage;
     CHECK_NULL_VOID(stageManager_);
-    stageManager_->OnForceSplitConfigUpdated();
+    stageManager_->OnForceSplitConfigUpdate();
 }
 } // namespace OHOS::Ace::NG
