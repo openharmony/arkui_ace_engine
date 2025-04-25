@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 using PositionUpdatedEvent = std::function<void(uint32_t)>;
 using SeekDoneEvent = std::function<void(uint32_t)>;
 using StateChangedEvent = std::function<void(PlaybackStatus)>;
+using VideoErrorEvent = std::function<void(int32_t code, const std::string& message)>;
 using CommonEvent = std::function<void()>;
 using TextureRefreshEnVent = std::function<void(uint32_t, uint64_t)>;
 // MediaPlayer is used to show and play meida
@@ -67,6 +68,11 @@ public:
 
     virtual void RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent,
         StateChangedEvent&& stateChangedEvent, CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent,
+        CommonEvent&& startRenderFrameEvent)
+    {}
+
+    virtual void RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent,
+        StateChangedEvent&& stateChangedEvent, VideoErrorEvent&& errorEvent, CommonEvent&& resolutionChangeEvent,
         CommonEvent&& startRenderFrameEvent)
     {}
 

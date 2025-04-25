@@ -90,11 +90,15 @@ public:
     {
         onError_ = std ::move(onError);
     }
-    void FireErrorEvent()
+    void FireErrorEvent(int32_t code, const std::string& message)
     {
         auto json = JsonUtil::Create(true);
-        json->Put("error", "");
+        const std::string name = "BusinessError";
+        json->Put("code", code);
+        json->Put("name", name.c_str());
+        json->Put("message", message.c_str());
         auto param = json->ToString();
+
         if (onError_) {
             // onError_ may be overwritten in its invoke so we copy it first
             auto onError = onError_;

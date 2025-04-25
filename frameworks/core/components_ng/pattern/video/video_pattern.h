@@ -220,7 +220,7 @@ public:
 
     void OnCurrentTimeChange(uint32_t currentPos);
 
-    void OnError(const std::string& errorId);
+    void OnError(int32_t code, const std::string& message);
 
     void OnResolutionChange() const;
 
@@ -359,7 +359,7 @@ private:
     void checkNeedAutoPlay();
 
     // Fire error manually, eg. src is not existed. It must run on ui.
-    void FireError();
+    void FireError(int32_t code, const std::string& message);
 
     HiddenChangeEvent CreateHiddenChangeEvent();
 
