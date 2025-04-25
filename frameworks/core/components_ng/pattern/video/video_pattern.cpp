@@ -320,12 +320,12 @@ void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPt
             }, "ArkUIVideoPlayerStatusChange");
     };
 
-    auto&& errorEvent = [weak, uiTaskExecutor, instanceId]() {
-        uiTaskExecutor.PostTask([weak, instanceId] {
+    auto&& errorEvent = [weak, uiTaskExecutor, instanceId](int32_t code, const std::string& message) {
+        uiTaskExecutor.PostTask([weak, instanceId, code, message] {
             auto video = weak.Upgrade();
             CHECK_NULL_VOID(video);
             ContainerScope scope(instanceId);
-            video->OnError("");
+            video->OnError(code, message);
             }, "ArkUIVideoError");
     };
 
@@ -408,7 +408,7 @@ void VideoPattern::ResetMediaPlayerOnBg()
             uiTaskExecutor.PostTask([weak]() {
                 auto videoPattern = weak.Upgrade();
                 CHECK_NULL_VOID(videoPattern);
-                videoPattern->FireError();
+                videoPattern->FireError(ERROR_CODE_VIDEO_SOURCE_INVALID, "Not a valid source");
                 }, "ArkUIVideoFireError");
             return;
         }
@@ -443,7 +443,7 @@ void VideoPattern::ResetMediaPlayer()
         TAG_LOGW(AceLogTag::ACE_VIDEO, "Video set source for mediaPlayer failed.");
 
         // It need post on ui thread.
-        FireError();
+        FireError(ERROR_CODE_VIDEO_SOURCE_INVALID, "Not a valid source");
         return;
     }
 
@@ -487,7 +487,7 @@ void VideoPattern::PrepareMediaPlayer()
 
     if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
         // It need post on ui thread.
-        FireError();
+        FireError(ERROR_CODE_VIDEO_CREATE_PLAYER_FAILED, "MediaPlayer create failed");
         return;
     }
 
@@ -636,7 +636,7 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
     ChangePlayerStatus(status);
 }
 
-void VideoPattern::OnError(const std::string& errorId)
+void VideoPattern::OnError(int32_t code, const std::string& message)
 {
     AddChild();
     auto host = GetHost();
@@ -647,7 +647,7 @@ void VideoPattern::OnError(const std::string& errorId)
 
     auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireErrorEvent();
+    eventHub->FireErrorEvent(code, message);
 }
 
 void VideoPattern::OnResolutionChange() const
@@ -1772,7 +1772,7 @@ void VideoPattern::Stop()
     SetIsSeeking(false);
 }
 
-void VideoPattern::FireError()
+void VideoPattern::FireError(int32_t code, const std::string& message)
 {
     ContainerScope scope(instanceId_);
     auto host = GetHost();
@@ -1781,11 +1781,11 @@ void VideoPattern::FireError()
     CHECK_NULL_VOID(context);
 
     // OnError function must be excuted on ui, so get the uiTaskExecutor.
-    auto task = [weak = WeakClaim(this)] {
+    auto task = [weak = WeakClaim(this), code, message] {
         auto videoPattern = weak.Upgrade();
         CHECK_NULL_VOID(videoPattern);
         ContainerScope scope(videoPattern->instanceId_);
-        videoPattern->OnError("");
+        videoPattern->OnError(code, message);
     };
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     if (uiTaskExecutor.IsRunOnCurrentThread()) {
