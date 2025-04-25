@@ -892,4 +892,21 @@ void TextClockPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("isInVisibleArea: ", isInVisibleArea_ ? "true" : "false");
     DumpLog::GetInstance().AddDesc("isStart: ", isStart_ ? "true" : "false");
 }
+
+void TextClockPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_VOID(textClockLayoutProperty);
+    auto optionJson = JsonUtil::Create(true);
+    optionJson->Put("hour",
+        TimeFormat::GetHourFormat(
+            static_cast<int32_t>(textClockLayoutProperty->GetPrefixHourValue(ZeroPrefixType::AUTO)), is24H_)
+            .c_str());
+    json->PutExtAttr("dateTimeOptions", optionJson->ToString().c_str(), filter);
+}
 } // namespace OHOS::Ace::NG
