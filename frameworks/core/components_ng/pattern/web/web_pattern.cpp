@@ -4372,10 +4372,10 @@ bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessa
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_RETURN(taskExecutor, false);
         bool fillRet = taskExecutor->PostDelayedTask(
-            [weak = WeakClaim(this)] () {
+            [weak = WeakClaim(this), nodeInfos = pageNodeInfo_] () {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_RETURN(pattern, false);
-                return pattern->RequestAutoFill(pattern->GetFocusedType());
+                return pattern->RequestAutoFill(pattern->GetFocusedType(), nodeInfos);
             },
             TaskExecutor::TaskType::UI, AUTOFILL_DELAY_TIME, "ArkUIWebHandleAutoFillEvent");
         return fillRet;
@@ -4394,6 +4394,11 @@ bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessa
 
 bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
 {
+    return RequestAutoFill(autoFillType, pageNodeInfo_);
+}
+
+bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, const std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos)
+{
     TAG_LOGI(AceLogTag::ACE_WEB, "RequestAutoFill");
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -4404,12 +4409,13 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
     ContainerScope scope(instanceId);
 
     auto offset = GetCoordinatePoint().value_or(OffsetF());
-    for (auto& nodeInfo : pageNodeInfo_) {
+    for (auto& nodeInfo : nodeInfos) {
         auto rect = nodeInfo->GetPageNodeRect();
         NG::RectF rectF;
         rectF.SetRect(rect.GetX() + offset.GetX(), rect.GetY()+ offset.GetY(), rect.Width(), rect.Height());
         nodeInfo->SetPageNodeRect(rectF);
     }
+    pageNodeInfo_ = nodeInfos;
 
     auto container = Container::Current();
     if (container == nullptr) {
