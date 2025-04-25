@@ -2678,11 +2678,13 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
         auto iconSymbol = layoutProperty->GetSearchIconSymbol();
         if (iconSymbol != nullptr) {
             iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconFrameNode)));
+            symbolLayoutProperty->OnPropertyChangeMeasure();
         }
     } else {
         auto iconSymbol = layoutProperty->GetCancelIconSymbol();
         if (iconSymbol != nullptr) {
             iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconFrameNode)));
+            symbolLayoutProperty->OnPropertyChangeMeasure();
         }
     }
     // reset symbol effect
