@@ -6001,7 +6001,9 @@ void PipelineContext::OnRotationAnimationEnd()
 
 void PipelineContext::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
 {
-    TAG_LOGI(AceLogTag::ACE_ROUTER, "set force split %{public}s", isForceSplit ? "enable" : "disable");
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "SetForceSplitEnable, isForceSplit: %{public}u, homePage: %{public}s",
+        isForceSplit, homePage.c_str());
+    //app support split mode, whether force split is enable or disable, the homepage will be recognized
     isDetectPrimaryPage_ = true;
     if (isForceSplit_ == isForceSplit && homePageConfig_ == homePage) {
         return;

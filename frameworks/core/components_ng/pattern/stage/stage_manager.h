@@ -77,7 +77,6 @@ public:
 
     void OnForceSplitConfigUpdated ()
     {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "OnForceSplitConfigUpdated");
         stagePattern_->OnForceSplitConfigUpdated();
     }
 
