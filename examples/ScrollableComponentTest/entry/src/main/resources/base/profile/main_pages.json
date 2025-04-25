@@ -15,6 +15,8 @@
     "pages/Tabs/TabsedgeEffect_pan",
     "pages/waterflow/WaterFlowMainPage",
     "pages/waterflow/demo01/WaterFlowDemo",
+    "pages/waterflow/demo01/WaterFlowPinchToZoom1",
+    "pages/waterflow/demo01/WaterFlowPinchToZoom2",
     "pages/Swiper/SwiperMainPage",
     "pages/Swiper/OnContentWillScrollNormal",
     "pages/Swiper/OnContentWillScrollNestList",
