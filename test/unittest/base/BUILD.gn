@@ -26,6 +26,7 @@ ace_unittest("geometry_test") {
     "quaternion_test.cpp",
     "subwindow_manager_test.cpp",
     "transform_util_test.cpp",
+    "size_t_test.cpp",
   ]
 }
 
