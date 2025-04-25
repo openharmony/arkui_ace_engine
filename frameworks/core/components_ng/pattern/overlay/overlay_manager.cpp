@@ -3985,12 +3985,21 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
             return OVERLAY_EXISTS;
         }
         auto dialogPattern = DynamicCast<DialogPattern>(pattern);
+        if (dialogPattern->GetDialogProperties().isUECHostMask) {
+            OverlayMaskManager::GetInstance().SendDialogMaskEventToUEA(overlay, UECHostMaskAction::PRESS_BACK);
+            return OVERLAY_REMOVE;
+        }
+
         CHECK_NULL_RETURN(dialogPattern, OVERLAY_EXISTS);
         if (dialogPattern->CallDismissInNDK(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK))) {
             return OVERLAY_REMOVE;
         } else if (dialogPattern->ShouldDismiss()) {
             OverlayDoDismiss(overlay, pattern);
             return OVERLAY_REMOVE;
+        }
+
+        if (dialogPattern->GetDialogProperties().isMask) {
+            dialogPattern->CloseDialog();
         }
         return RemoveDialog(overlay, isBackPressed, isPageRouter) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
