@@ -430,13 +430,14 @@ void MaxLengthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    CHECK_NULL_VOID(value->tag != InteropTag::INTEROP_TAG_UNDEFINED);
-    auto maxLength = Converter::Convert<int>(value->value);
-    if (GreatOrEqual(maxLength, 0)) {
-        SearchModelNG::SetMaxLength(frameNode, maxLength);
-    } else {
-        SearchModelNG::ResetMaxLength(frameNode);
+    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto maxLength = Converter::Convert<int>(value->value);
+        if (GreatOrEqual(maxLength, 0)) {
+            SearchModelNG::SetMaxLength(frameNode, maxLength);
+            return;
+        }
     }
+    SearchModelNG::ResetMaxLength(frameNode);
 }
 void TextAlignImpl(Ark_NativePointer node,
                    const Opt_TextAlign* value)
@@ -450,17 +451,21 @@ void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value->tag != InteropTag::INTEROP_TAG_UNDEFINED);
-    SearchModelNG::RequestKeyboardOnFocus(frameNode, Converter::Convert<bool>(value->value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    SearchModelNG::RequestKeyboardOnFocus(frameNode, convValue? convValue.value() : true);
 }
 void SelectionMenuHiddenImpl(Ark_NativePointer node,
                              const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value->tag != InteropTag::INTEROP_TAG_UNDEFINED);
-    auto isHidden = Converter::Convert<bool>(value->value);
-    SearchModelNG::SetSelectionMenuHidden(frameNode, isHidden);
+    CHECK_NULL_VOID(value);
+    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto isHidden = Converter::Convert<bool>(value->value);
+        SearchModelNG::SetSelectionMenuHidden(frameNode, isHidden);
+    } else {
+        SearchModelNG::SetSelectionMenuHidden(frameNode, false);
+    }
 }
 void MinFontSizeImpl(Ark_NativePointer node,
                      const Opt_Union_Number_String_Resource* value)
@@ -540,8 +545,10 @@ void FontFeatureImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    CHECK_NULL_VOID(value->tag != InteropTag::INTEROP_TAG_UNDEFINED);
-    auto fontFeatureSettings = Converter::Convert<std::string>(value->value);
+    std::string fontFeatureSettings = "";
+    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        fontFeatureSettings = Converter::Convert<std::string>(value->value);
+    }
     SearchModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(fontFeatureSettings));
 }
 void OnWillInsertImpl(Ark_NativePointer node,
@@ -633,16 +640,24 @@ void EnablePreviewTextImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value->tag != InteropTag::INTEROP_TAG_UNDEFINED);
-    SearchModelNG::SetEnablePreviewText(frameNode, Converter::Convert<bool>(value->value));
+    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto convValue = Converter::Convert<bool>(value->value);
+        SearchModelNG::SetEnablePreviewText(frameNode, convValue);
+    } else {
+        SearchModelNG::SetEnablePreviewText(frameNode, true);
+    }
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
                               const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value->tag != InteropTag::INTEROP_TAG_UNDEFINED);
-    SearchModelNG::SetEnableHapticFeedback(frameNode, Converter::Convert<bool>(value->value));
+    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto convValue = Converter::Convert<bool>(value->value);
+        SearchModelNG::SetEnableHapticFeedback(frameNode, convValue);
+    } else {
+        SearchModelNG::SetEnableHapticFeedback(frameNode, true);
+    }
 }
 void AutoCapitalizationModeImpl(Ark_NativePointer node,
                                 const Opt_AutoCapitalizationMode* value)
