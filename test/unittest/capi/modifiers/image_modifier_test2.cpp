@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
- #undef UNITEST_FRIEND_CLASS
- #define UNITEST_FRIEND_CLASS friend class ImageModifierTest2
+#undef UNITEST_FRIEND_CLASS
+#define UNITEST_FRIEND_CLASS friend class ImageModifierTest2
 
 #include <gtest/gtest.h>
 
