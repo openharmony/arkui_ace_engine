@@ -75,7 +75,7 @@ public:
         stageInTrasition_ = stageInTrasition;
     }
 
-    void OnForceSplitConfigUpdate ()
+    void OnForceSplitConfigUpdate()
     {
         stagePattern_->OnForceSplitConfigUpdate();
     }
