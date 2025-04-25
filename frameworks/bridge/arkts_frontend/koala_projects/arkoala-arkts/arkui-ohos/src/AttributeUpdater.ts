@@ -20,14 +20,14 @@ export type Initializer<T> = (...params:Object[]) => T;
 export class AttributeUpdater<T, C = Initializer<T>> implements AttributeModifier<T> {
 
     applyNormalAttribute(instance: T): void {
-    } 
+    }
     applyPressedAttribute(instance: T): void {
     }
     applyFocusedAttribute(instance: T): void {
     }
     applyDisabledAttribute(instance: T): void {
     }
-    applySelectedAttribute(instance: T): void {  
+    applySelectedAttribute(instance: T): void {
     }
     initializeModifier(instance: T): void {
     }
@@ -35,7 +35,7 @@ export class AttributeUpdater<T, C = Initializer<T>> implements AttributeModifie
     }
     private value: T | undefined = undefined;
     private constructorParams: C | undefined = undefined;
-    
+
     public set attribute(value: T) {
         this.value = value
     }

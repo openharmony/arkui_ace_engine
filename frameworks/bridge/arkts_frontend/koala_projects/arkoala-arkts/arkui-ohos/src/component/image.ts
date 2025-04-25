@@ -32,10 +32,11 @@ import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
 import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
 import { PathShape } from "./../generated/ArkPathShapeMaterialized"
 import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
+import { AttributeModifier } from "./../component/common"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
 import { ArkImageComponent } from "./../generated/ArkImage"
 import { ArkImagePeer } from "./../generated/peers/ArkImagePeer"
+import { ArkImageNode } from "../handwritten/modifiers/ArkImageNode"
 export interface DrawableDescriptor {
     _DrawableDescriptorStub: string;
 }
@@ -153,11 +154,14 @@ export interface ImageAttribute extends CommonMethod {
     /** @memo */
     enhancedImageQuality(value: ResolutionQuality): this
 }
+
+export type ImageInterface = (...param: Object[]) => ArkImageNode
+
 /** @memo */
 export function Image(
   /** @memo */
   style: ((attributes: ImageAttribute) => void) | undefined,
-  src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions | undefined, 
+  src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions | undefined,
   /** @memo */
   content_?: () => void,
 ) {
