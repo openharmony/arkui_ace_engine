@@ -13,29 +13,35 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ContainerSpanModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
+Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 {
-    return {};
+    auto spanNode = SpanModelNG::CreateContainerSpanNode(id);
+    CHECK_NULL_RETURN(spanNode, nullptr);
+    spanNode->IncRefCount();
+    return AceType::RawPtr(spanNode);
 }
-} // ContainerSpanModifier
+} // namespace ContainerSpanModifier
 namespace ContainerSpanInterfaceModifier {
-void SetContainerSpanOptionsImpl(Ark_NativePointer node)
-{
-}
-} // ContainerSpanInterfaceModifier
+void SetContainerSpanOptionsImpl(Ark_NativePointer node) {}
+} // namespace ContainerSpanInterfaceModifier
 namespace ContainerSpanAttributeModifier {
-void TextBackgroundStyleImpl(Ark_NativePointer node,
-                             const Opt_TextBackgroundStyle* value)
+void TextBackgroundStyleImpl(Ark_NativePointer node, const Opt_TextBackgroundStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvert<TextBackgroundStyle>(*value);
+    SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, convValue.value_or(TextBackgroundStyle()));
 }
-} // ContainerSpanAttributeModifier
+} // namespace ContainerSpanAttributeModifier
 const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier()
 {
     static const GENERATED_ArkUIContainerSpanModifier ArkUIContainerSpanModifierImpl {
@@ -46,4 +52,4 @@ const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier()
     return &ArkUIContainerSpanModifierImpl;
 }
 
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

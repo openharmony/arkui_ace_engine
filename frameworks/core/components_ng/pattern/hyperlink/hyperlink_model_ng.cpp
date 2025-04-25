@@ -73,6 +73,31 @@ void HyperlinkModelNG::SetTextStyle(
     hyperlinkNode->MarkDirtyNode();
 }
 
+void HyperlinkModelNG::SetTextStyle(
+    FrameNode* hyperlinkNode, const std::string& address, const std::optional<std::string>& content)
+{
+    CHECK_NULL_VOID(hyperlinkNode);
+    auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto textStyle = PipelineBase::GetCurrentContext()->GetTheme<TextTheme>()->GetTextStyle();
+    auto contentValue = content.value_or("");
+    textLayoutProperty->UpdateContent(contentValue.empty() ? address : contentValue);
+    textLayoutProperty->UpdateAddress(address);
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<HyperlinkTheme>();
+    CHECK_NULL_VOID(theme);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
+    textLayoutProperty->UpdateTextColor(theme->GetTextColor());
+    textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
+    textLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
+    textLayoutProperty->UpdateAdaptMinFontSize(10.0_vp);
+    textLayoutProperty->UpdateAdaptMaxFontSize(textStyle.GetFontSize());
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    hyperlinkNode->MarkModifyDone();
+    hyperlinkNode->MarkDirtyNode();
+}
+
+
 void HyperlinkModelNG::SetDraggable(bool draggable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

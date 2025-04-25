@@ -17,6 +17,8 @@
 
 #include "base/log/log_wrapper.h"
 #include "base/utils/macros.h"
+#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/interfaces/native/implementation/text_controller_peer_impl.h"
@@ -25,9 +27,6 @@
 #include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/common/properties/text_style_parser.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::Converter {
 namespace WeightNum {
@@ -575,12 +574,12 @@ void EnableDataDetectorImpl(Ark_NativePointer node, const Opt_Boolean* value)
 }
 void DataDetectorConfigImpl(Ark_NativePointer node, const Opt_TextDataDetectorConfig* value)
 {
-    // toDo
-    //  auto frameNode = reinterpret_cast<FrameNode *>(node);
-    //  CHECK_NULL_VOID(frameNode);
-    //  CHECK_NULL_VOID(value);
-    //  auto convValue = Converter::OptConvert<TextDetectConfig>(*value);
-    //  TextModelNG::SetTextDetectConfig(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvert<TextDetectConfig>(*value);
+    CHECK_NULL_VOID(convValue.has_value());
+    TextModelNG::SetTextDetectConfig(frameNode, convValue.value());
 }
 void OnTextSelectionChangeImpl(Ark_NativePointer node, const Opt_Callback_Number_Number_Void* value)
 {
@@ -595,12 +594,12 @@ void OnTextSelectionChangeImpl(Ark_NativePointer node, const Opt_Callback_Number
 }
 void FontFeatureImpl(Ark_NativePointer node, const Opt_String* value)
 {
-    // Todo
-    //  auto frameNode = reinterpret_cast<FrameNode *>(node);
-    //  CHECK_NULL_VOID(frameNode);
-    //  CHECK_NULL_VOID(value);
-    //  auto fontFeatureSettings = Converter::OptConvert<std::string>(*value);
-    //  TextModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(fontFeatureSettings));
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto fontFeatureSettings = Converter::OptConvert<std::string>(*value);
+    CHECK_NULL_VOID(fontFeatureSettings.has_value());
+    TextModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(fontFeatureSettings.value()));
 }
 void MarqueeOptionsImpl(Ark_NativePointer node, const Opt_TextMarqueeOptions* value) {}
 void OnMarqueeStateChangeImpl(Ark_NativePointer node, const Opt_Callback_MarqueeState_Void* value) {}
