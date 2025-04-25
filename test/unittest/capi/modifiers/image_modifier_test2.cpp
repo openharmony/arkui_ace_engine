@@ -311,7 +311,7 @@ HWTEST_F(ImageModifierTest2, SetImageOptions_SetPixMapviaAnimatedDrawableDescrip
     Ace::RefPtr<Ace::PixelMap> pixMap2RefPtr = AceType::MakeRefPtr<Ace::PixelMapStub>();
     std::vector<RefPtr<PixelMap>> timeline = {pixMap1RefPtr, pixMap2RefPtr};
 
-    auto animatedDrawablePeer = 
+    auto animatedDrawablePeer =
         PeerUtils::CreatePeer<AnimatedDrawableDescriptorPeer>(timeline, duration, iterations);
     ASSERT_TRUE(animatedDrawablePeer);
     auto drawableDescriptor = AceType::DynamicCast<DrawableDescriptorPeer>(animatedDrawablePeer);
@@ -354,7 +354,7 @@ HWTEST_F(ImageModifierTest2, SetImageOptions1_SetPixMapviaAnimatedDrawableDescri
     Ace::RefPtr<Ace::PixelMap> pixMap2RefPtr = AceType::MakeRefPtr<Ace::PixelMapStub>();
     std::vector<RefPtr<PixelMap>> timeline = {pixMap1RefPtr, pixMap2RefPtr};
 
-    auto animatedDrawablePeer = 
+    auto animatedDrawablePeer =
         PeerUtils::CreatePeer<AnimatedDrawableDescriptorPeer>(timeline, duration, iterations);
     ASSERT_TRUE(animatedDrawablePeer);
     auto drawableDescriptor = AceType::DynamicCast<DrawableDescriptorPeer>(animatedDrawablePeer);
