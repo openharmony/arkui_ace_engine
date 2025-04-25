@@ -159,6 +159,7 @@ void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
     ToJsonValueForCapsuleStyleOptions(json, filter);
     json->PutExtAttr("enableSmoothEffect",
         paintProperty->GetEnableSmoothEffectValue(true) ? "true" : "false", filter);
+    json->PutExtAttr("privacySensitive", paintProperty->GetIsSensitive().value_or(false)? "true": "false", filter);
 }
 
 void ProgressPattern::InitFocusEvent()
