@@ -1287,6 +1287,16 @@ void AssignCast(std::optional<TransitionType>& dst, const Ark_TransitionType& sr
 }
 
 template<>
+void AssignCast(std::optional<FocusDrawLevel>& dst, const Ark_FocusDrawLevel& src)
+{
+    switch (src) {
+        case ARK_FOCUS_DRAW_LEVEL_SELF: dst = FocusDrawLevel::SELF; break;
+        case ARK_FOCUS_DRAW_LEVEL_TOP: dst = FocusDrawLevel::TOP; break;
+        default: LOGE("Unexpected enum value in Ark_FocusDrawLevel: %{public}d", src);
+    }
+}
+
+template<>
 ScaleOptions Convert(const Ark_ScaleOptions& src)
 {
     ScaleOptions scaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
@@ -2719,8 +2729,18 @@ void OnHoverMoveImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetOnHoverMove(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ViewAbstract::DisableOnHoverMove(frameNode);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onHover = [arkCallback = CallbackHelper(*optValue), node = weakNode](HoverInfo& hoverInfo) {
+        PipelineContext::SetCallBackNode(node);
+        const auto event = Converter::ArkHoverEventSync(hoverInfo);
+        arkCallback.InvokeSync(event.ArkValue());
+    };
+    ViewAbstract::SetOnHoverMove(frameNode, std::move(onHover));
 }
 void OnAccessibilityHoverImpl(Ark_NativePointer node,
                               const Opt_AccessibilityCallback* value)
@@ -4337,7 +4357,7 @@ void Mask0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto mask = Converter::OptConvertPtr<Ark_ProgressMask>(value);
+    auto mask = Converter::GetOptPtr(value);
     if (!mask) return;
     const auto& progressMask = mask.value()->GetProperty();
     ViewAbstract::SetProgressMask(frameNode, progressMask);
@@ -4345,44 +4365,26 @@ void Mask0Impl(Ark_NativePointer node,
 void Mask1Impl(Ark_NativePointer node,
                const Opt_ProgressMask* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    Mask0Impl(node, value);
 }
 void Mask2Impl(Ark_NativePointer node,
                const Opt_ProgressMask* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    LOGE("setMask2 is DEPRECATED. Use a setMaskShape0 instead");
+    Mask0Impl(node, value);
 }
 void MaskShape0Impl(Ark_NativePointer node,
                     const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto addr = value->value.value0;
-    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
-    if (!convValue) {
-        return;
-    }
-    if (!convValue->shape) {
-        return;
-    }
-    ViewAbstract::SetMask(frameNode, convValue->shape);
+    auto convValue = Converter::OptConvertPtr<RefPtr<BasicShape>>(value);
+    ViewAbstract::SetMask(frameNode, convValue.value_or(nullptr));
 }
 void MaskShape1Impl(Ark_NativePointer node,
                     const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto addr = value->value.value0;
-    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
-    if (!convValue) {
-        return;
-    }
-    if (!convValue->shape) {
-        return;
-    }
-    ViewAbstract::SetMask(frameNode, convValue->shape);
+    MaskShape0Impl(node, value);
 }
 void KeyImpl(Ark_NativePointer node,
              const Opt_String* value)
@@ -4993,16 +4995,9 @@ void AccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    int32_t drawLevel = 0;
-    auto convValue = Converter::OptConvertPtr<Ark_FocusDrawLevel>(value);
-    if (convValue.has_value()) {
-        drawLevel = AccessibilityStaticUtils::GetFocusDrawLevel(static_cast<int32_t>(convValue.value()));
-        if (drawLevel == -1) {
-            drawLevel = 0;
-        }
-    }
-    ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, drawLevel);
+    auto convValue = Converter::OptConvertPtr<FocusDrawLevel>(value);
+    ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode,
+        static_cast<int32_t>(convValue.value_or(FocusDrawLevel::SELF)));
 }
 void CustomPropertyImpl(Ark_NativePointer node,
                         const Opt_String* name,
@@ -5889,19 +5884,18 @@ void OnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
     if (expectedUpdateInterval < 0) {
         expectedUpdateInterval = DEFAULT_DURATION;
     }
+    std::function<void(bool, double)> onVisibleAreaChange = nullptr;
     auto optEvent = Converter::GetOptPtr(event);
-    if (!optEvent) {
-        // TODO: Reset value
-        return;
+    if (optEvent) {
+        auto weakNode = AceType::WeakClaim(frameNode);
+        onVisibleAreaChange =
+            [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
+                Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+                Ark_Number currentRatio = Converter::ArkValue<Ark_Number>(static_cast<float>(ratio));
+                PipelineContext::SetCallBackNode(node);
+                arkCallback.Invoke(isExpanding, currentRatio);
+            };
     }
-    auto weakNode = AceType::WeakClaim(frameNode);
-    auto onVisibleAreaChange = [arkCallback = CallbackHelper(*optEvent), node = weakNode](
-                                   bool visible, double ratio) {
-        Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
-        Ark_Number currentRatio = Converter::ArkValue<Ark_Number>(static_cast<float>(ratio));
-        PipelineContext::SetCallBackNode(node);
-        arkCallback.Invoke(isExpanding, currentRatio);
-    };
     ViewAbstract::SetOnVisibleAreaApproximateChange(
         frameNode, std::move(onVisibleAreaChange), ratioVec, expectedUpdateInterval);
 }
