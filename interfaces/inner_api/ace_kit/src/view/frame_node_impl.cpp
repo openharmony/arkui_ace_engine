@@ -249,6 +249,32 @@ int32_t FrameNodeImpl::GetId() const
     return frameNode_->GetId();
 }
 
+void FrameNodeImpl::SetMeasureCallback(const std::function<void(RefPtr<FrameNode>)>& measureCallback)
+{
+    CHECK_NULL_VOID(frameNode_);
+    auto frameNode = frameNode_;
+    auto onMeasureCallback = [frameNode, measureCallback](int32_t nodeId) {
+        RefPtr<FrameNode> node = frameNode->GetKitNode();
+        if (!node) {
+            node = AceType::MakeRefPtr<FrameNodeImpl>(frameNode);
+        }
+        measureCallback(node);
+    };
+    frameNode_->SetMeasureCallback(std::move(onMeasureCallback));
+}
+
+int32_t FrameNodeImpl::GetMeasureWidth()
+{
+    CHECK_NULL_RETURN(frameNode_, 0);
+    return frameNode_->GetGeometryNode()->GetFrameSize().Width();
+}
+
+int32_t FrameNodeImpl::GetMeasureHeight()
+{
+    CHECK_NULL_RETURN(frameNode_, 0);
+    return frameNode_->GetGeometryNode()->GetFrameSize().Height();
+}
+
 void FrameNodeImpl::SetOnNodeDestroyCallback(const std::function<void(RefPtr<FrameNode>)>& destroyCallback)
 {
     CHECK_NULL_VOID(frameNode_);

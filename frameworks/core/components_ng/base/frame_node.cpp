@@ -1612,6 +1612,11 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     RebuildRenderContextTree();
 }
 
+void FrameNode::SetMeasureCallback(const std::function<void(RefPtr<Kit::FrameNode>)>& measureCallback)
+{
+    measureCallback_ = std::move(measureCallback);
+}
+
 void FrameNode::SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode)
 {
     CHECK_NULL_VOID(customNode);
@@ -4503,6 +4508,10 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
         auto size = geometryNode_->GetFrameSize();
         geometryNode_->SetFrameSize(SizeF({ round(size.Width()), round(size.Height()) }));
+    }
+
+    if (measureCallback_) {
+        measureCallback_(kitNode_);
     }
 
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);

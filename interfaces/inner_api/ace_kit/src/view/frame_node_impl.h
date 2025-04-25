@@ -72,6 +72,9 @@ public:
     void ResetSafeAreaPadding() override;
     void SetLinearGradient(const NG::Gradient& gradient) override;
     void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara) override;
+    void SetMeasureCallback(const std::function<void(RefPtr<FrameNode>)>& callback) override;
+    int32_t GetMeasureWidth() override;
+    int32_t GetMeasureHeight() override;
 
 private:
     void PushAceNode(const RefPtr<AceNode>& node);
