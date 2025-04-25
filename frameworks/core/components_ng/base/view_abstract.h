@@ -351,6 +351,7 @@ public:
     static void SetTouchable(bool touchable);
     static void SetHitTestMode(HitTestMode hitTestMode);
     static void SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTest);
+    static void SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest);
     static void SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback);
     static void SetDraggable(bool draggable);
     static void SetDragPreviewOptions(const DragPreviewOption& previewOption);

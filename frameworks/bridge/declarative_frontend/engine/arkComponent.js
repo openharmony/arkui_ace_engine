@@ -3299,6 +3299,59 @@ class NextFocusModifier extends ModifierWithKey {
   }
 }
 NextFocusModifier.identity = Symbol('nextFocus');
+class OnVisibleAreaChangeModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnVisibleAreaChange(node);
+    } 
+    else {
+      getUINativeModule().common.setOnVisibleAreaChange(node, this.value.ratios, this.value.event);
+    }
+  }
+}
+OnVisibleAreaChangeModifier.identity = Symbol('onVisibleAreaChange');
+class PreDragModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnPreDrag(node);
+    } else {
+      getUINativeModule().common.setOnPreDrag(node, this.value);
+    }
+  }
+}
+PreDragModifier.identity = Symbol('onPreDrag');
+class OnTouchInterceptModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnTouchIntercept(node);
+    } else {
+      getUINativeModule().common.setOnTouchIntercept(node, this.value);
+    }
+  }
+}
+OnTouchInterceptModifier.identity = Symbol('onTouchIntercept');
+class OnChildTouchTestModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+        getUINativeModule().common.resetOnChildTouchTest(node);
+    } else {
+        getUINativeModule().common.setOnChildTouchTest(node, this.value);
+    }
+  }
+}
+OnChildTouchTestModifier.identity = Symbol('onChildTouchTest');
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 const isString = (val) => typeof val === 'string';
 const isNumber = (val) => typeof val === 'number';
@@ -4487,7 +4540,9 @@ class ArkComponent {
     return this;
   }
   onPreDrag(event) {
-    throw new Error('Method not implemented.');
+    this._onPreDragEvent = event;
+    modifierWithKey(this._modifiersWithKeys, PreDragModifier.identity, PreDragModifier, event);
+    return this;
   }
   allowDrop(value) {
     modifierWithKey(this._modifiersWithKeys, AllowDropModifier.identity, AllowDropModifier, value);
@@ -4655,7 +4710,26 @@ class ArkComponent {
     return this;
   }
   onVisibleAreaChange(ratios, event) {
-    throw new Error('Method not implemented.');
+    let onVisibleAreaChange = new ArkOnVisibleAreaChange();
+    onVisibleAreaChange.ratios = ratios;
+    onVisibleAreaChange.event = event;
+    this._onVisibleAreaChange = onVisibleAreaChange;
+    if (typeof ratios === 'undefined' || typeof event === 'undefined') {
+      modifierWithKey(this._modifiersWithKeys, OnVisibleAreaChangeModifier.identity, OnVisibleAreaChangeModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, OnVisibleAreaChangeModifier.identity, OnVisibleAreaChangeModifier, onVisibleAreaChange);
+    }
+    return this;
+  }
+  onTouchIntercept(callback) {
+    this._touchInterceptEvent = callback;
+    modifierWithKey(this._modifiersWithKeys, OnTouchInterceptModifier.identity, OnTouchInterceptModifier, callback);
+    return this;
+  }
+  onChildTouchTest(event) {
+    this._onChildTouchTestEvent = event;
+    modifierWithKey(this._modifiersWithKeys, OnChildTouchTestModifier.identity, OnChildTouchTestModifier, event);
+    return this;
   }
   sphericalEffect(value) {
     modifierWithKey(this._modifiersWithKeys, SphericalEffectModifier.identity, SphericalEffectModifier, value);
@@ -17566,7 +17640,15 @@ class TextDataDetectorConfig {
     (this.decorationColor=== another.decorationColor) && (this.decorationStyle === another.decorationStyle);
   }
 }
-
+class ArkOnVisibleAreaChange {
+  constructor(ratios, event) {
+    this.ratios = ratios;
+    this.event = event;
+  }
+  isEqual(another) {
+    return this.ratios === another.ratios && this.event === another.event;
+  }
+}
 class ArkSliderTips {
   constructor(value, content) {
     this.showTip = value;

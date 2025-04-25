@@ -100,6 +100,8 @@ constexpr double WIDTH_BREAKPOINT_840VP = 840.0;
 constexpr double WIDTH_BREAKPOINT_1440VP = 1440.0;
 constexpr double HEIGHT_ASPECTRATIO_THRESHOLD1 = 0.8; // window height/width = 0.8
 constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
+constexpr double VISIBLE_RATIO_MIN = 0.0;
+constexpr double VISIBLE_RATIO_MAX = 1.0;
 
 enum class WidthBreakpoint {WIDTH_XS, WIDTH_SM, WIDTH_MD, WIDTH_LG, WIDTH_XL};
 enum class HeightBreakpoint {HEIGHT_SM, HEIGHT_MD, HEIGHT_LG};
@@ -9327,6 +9329,258 @@ ArkUINativeModuleValue CommonBridge::ResetOnAxisEvent(ArkUIRuntimeCallInfo* runt
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     ViewAbstract::DisableOnAxisEvent(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnPreDrag(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    auto obj = secondeArg->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    panda::Local<panda::FunctionRef> func = obj;
+    auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
+    auto onPreDrag = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                         node = AceType::WeakClaim(frameNode), containerId](const PreDragStatus& preDragStatus) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_EQUAL_VOID(function.IsEmpty(), true);
+        CHECK_EQUAL_VOID(function->IsFunction(vm), false);
+        PipelineContext::SetCallBackNode(node);
+        auto preDragStatusParam = panda::NumberRef::New(vm, static_cast<int32_t>(preDragStatus));
+        panda::Local<panda::JSValueRef> params[] = { preDragStatusParam };
+        function->Call(vm, function.ToLocal(), params, NUM_1);
+    };
+    NG::ViewAbstract::SetOnPreDrag(frameNode, std::move(onPreDrag));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnPreDrag(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstract::DisableOnPreDrag(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnVisibleAreaChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    std::vector<double> ratioList;
+    if (secondeArg->IsArray(vm)) {
+        auto arrayObj = secondeArg->ToObject(vm);
+        uint32_t length = 0;
+        bool isArrayOrSharedArray = false;
+        bool isPendingException = false;
+        arrayObj->TryGetArrayLength(vm, &isPendingException, &isArrayOrSharedArray, &length);
+        for (uint32_t i = 0; i < length; ++i) {
+            auto element = arrayObj->Get(vm, i);
+            double ratio = 0.0;
+            bool isNumber = true;
+            element->GetValueDouble(isNumber);
+            if (isNumber) {
+                ratio = element->ToNumber(vm)->Value();
+                ratio = std::max(std::min(ratio, VISIBLE_RATIO_MAX), VISIBLE_RATIO_MIN);
+                ratioList.push_back(ratio);
+            }
+        }
+    }
+    CHECK_NULL_RETURN(thirdArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    auto event = thirdArg->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    panda::Local<panda::FunctionRef> func = event;
+    auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
+    auto onVisibleAreaChange = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                                   node = AceType::WeakClaim(frameNode),
+                                   containerId](bool isVisible, double visibleRatio) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_EQUAL_VOID(function.IsEmpty(), true);
+        CHECK_EQUAL_VOID(function->IsFunction(vm), false);
+        PipelineContext::SetCallBackNode(node);
+        auto isVisibles = panda::BooleanRef::New(vm, isVisible);
+        auto visibleRatios = panda::NumberRef::New(vm, visibleRatio);
+        panda::Local<panda::JSValueRef> params[NUM_2] = { isVisibles, visibleRatios };
+        function->Call(vm, function.ToLocal(), params, NUM_2);
+    };
+    NG::ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioList);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnVisibleAreaChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstract::ResetVisibleChange(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> ConvertHitTestMode(EcmaVM* vm, HitTestMode mode)
+{
+    switch (mode) {
+        case HitTestMode::HTMDEFAULT:
+            return panda::StringRef::NewFromUtf8(vm, "default");
+        case HitTestMode::HTMBLOCK:
+            return panda::StringRef::NewFromUtf8(vm, "block");
+        case HitTestMode::HTMTRANSPARENT:
+            return panda::StringRef::NewFromUtf8(vm, "transparent");
+        case HitTestMode::HTMNONE:
+            return panda::StringRef::NewFromUtf8(vm, "none");
+        case HitTestMode::HTMTRANSPARENT_SELF:
+            return panda::StringRef::NewFromUtf8(vm, "transparent_self");
+        default:
+            return panda::StringRef::NewFromUtf8(vm, "unknown");
+    }
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnTouchIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    auto obj = secondeArg->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    panda::Local<panda::FunctionRef> func = obj;
+    auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
+    auto onTouchIntercept = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                                node = AceType::WeakClaim(frameNode),
+                                containerId](TouchEventInfo& info) -> NG::HitTestMode {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_EQUAL_RETURN(function.IsEmpty(), true, HitTestMode::HTMDEFAULT);
+        CHECK_EQUAL_RETURN(function->IsFunction(vm), false, HitTestMode::HTMDEFAULT);
+        PipelineContext::SetCallBackNode(node);
+        auto touchEventObj = FrameNodeBridge::CreateTouchEventInfo(vm, info);
+        HitTestMode hitTestMode = NG::HitTestMode::HTMDEFAULT;
+        auto hitTestModeValue = ConvertHitTestMode(vm, hitTestMode);
+        panda::Local<panda::JSValueRef> params[NUM_2] = { touchEventObj, hitTestModeValue };
+        auto value = function->Call(vm, function.ToLocal(), params, NUM_2);
+        if (value->IsNumber()) {
+            return static_cast<NG::HitTestMode>(value->ToNumber(vm)->Value());
+        }
+        return hitTestMode;
+    };
+    NG::ViewAbstract::SetOnTouchIntercept(frameNode, std::move(onTouchIntercept));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnTouchIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstract::SetOnTouchIntercept(frameNode, nullptr);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+Local<panda::ObjectRef> CommonBridge::CreateTouchTestInfo(EcmaVM *vm, const NG::TouchTestInfo &info)
+{
+    const char *keys[] = {"windowX", "windowY", "parentX", "parentY", "x", "y", "rect", "id"};
+    Local<JSValueRef> values[] = {
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(info.windowPoint.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(info.windowPoint.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(info.currentCmpPoint.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(info.currentCmpPoint.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(info.subCmpPoint.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(info.subCmpPoint.GetY())),
+        CreateRectangle(vm, info.subRect),
+        panda::StringRef::NewFromUtf8(vm, info.id.c_str())};
+    auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    return obj;
+}
+
+Local<panda::ObjectRef> CommonBridge::CreateRectangle(EcmaVM *vm, const NG::RectF &rect)
+{
+    const char *rectKeys[] = {"x", "y", "width", "height"};
+    Local<JSValueRef> rectValues[] = {panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(rect.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(rect.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(rect.Width())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(rect.Height()))};
+
+    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(rectKeys), rectKeys, rectValues);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnChildTouchTest(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    auto containerId = Container::CurrentId();
+    panda::Local<panda::FunctionRef> func = secondeArg->ToObject(vm);
+    auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
+    auto onChildTouchTest = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                                node = AceType::WeakClaim(frameNode),
+                                containerId](const std::vector<TouchTestInfo>& touchTestInfo) -> TouchResult {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        PipelineContext::SetCallBackNode(node);
+        auto touchEventArr = panda::ArrayRef::New(vm);
+        for (size_t i = 0; i < touchTestInfo.size(); i++) {
+            auto touchEventObj = CreateTouchTestInfo(vm, touchTestInfo[i]);
+            touchEventArr->SetValueAt(vm, touchEventArr, i, touchEventObj);
+        }
+        NG::TouchResult returnValue;
+        returnValue.strategy = TouchTestStrategy::DEFAULT;
+        returnValue.id = "";
+        auto function = func.Lock();
+        CHECK_EQUAL_RETURN(function.IsEmpty(), true, returnValue);
+        CHECK_EQUAL_RETURN(function->IsFunction(vm), false, returnValue);
+        panda::Local<panda::JSValueRef> params[] = { touchEventArr };
+        auto value = function->Call(vm, function.ToLocal(), params, NUM_1);
+        if (!value->IsObject(vm)) {
+            return returnValue;
+        }
+        auto retObj = value->ToObject(vm);
+        auto strategy = retObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "strategy"));
+        if (!strategy->IsNumber()) {
+            return returnValue;
+        }
+        auto id = retObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+        if (!id->IsString(vm)) {
+            return returnValue;
+        }
+        returnValue.strategy = static_cast<NG::TouchTestStrategy>(strategy->ToNumber(vm)->Value());
+        returnValue.id = id->ToString(vm)->ToString(vm);
+        return returnValue;
+    };
+    ViewAbstract::SetOnTouchTestFunc(frameNode, std::move(onChildTouchTest));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnChildTouchTest(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstract::SetOnTouchTestFunc(frameNode, nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
