@@ -42,6 +42,7 @@ struct TabsMainPage {
     new TextList(8, 'TabsBarOverLap', 'pages/Tabs/TabsBarOverLap_safeAreaPadding'),
     new TextList(9, 'TabsBarOverLap', 'pages/Tabs/TabsBarOverLap_ContentEndOffset'),
     new TextList(10, 'TabsedgeEffect', 'pages/Tabs/TabsedgeEffect_pan'),
+    new TextList(11, 'TabBarPaddingAndAlign', 'pages/Tabs/TabBarPaddingAndAlign'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

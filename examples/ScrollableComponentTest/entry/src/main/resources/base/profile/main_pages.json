@@ -16,6 +16,7 @@
     "pages/Tabs/TabsBarOverLap_safeAreaPadding",
     "pages/Tabs/TabsBarOverLap_ContentEndOffset",
     "pages/Tabs/TabsedgeEffect_pan",
+    "pages/Tabs/TabBarPaddingAndAlign",
     "pages/waterflow/WaterFlowMainPage",
     "pages/waterflow/demo01/WaterFlowDemo",
     "pages/Swiper/SwiperMainPage",
@@ -32,6 +33,7 @@
     "pages/alphabetIndexer/PopupPosition",
     "pages/refresh/RefreshMainPage",
     "pages/refresh/RefreshingContent",
+    "pages/refresh/RefreshAndLoad",
     "pages/grid/GridMainPage",
     "pages/grid/GridObjectSort"
   ]
