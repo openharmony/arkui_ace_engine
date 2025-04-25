@@ -7209,6 +7209,7 @@ void WebPattern::RegisterTranslateTextJavaScript()
     methods.push_back(g_translateTextData.registerFunctionName);
     auto lambda = [weak = AceType::WeakClaim(this)](const std::vector<std::string>& param) {
         auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
         if (webPattern && param.size() > 0) {
             webPattern->GetTranslateTextCallback(param[0]);
         }
@@ -7247,12 +7248,14 @@ void WebPattern::GetTranslateText(std::string extraData, std::function<void(std:
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask([weak = AceType::WeakClaim(this), jsonData = extraData]() {
         std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(jsonData);
+        CHECK_NULL_VOID(json);
         g_translateTextData.registerObjectName = json->GetString("registerObjectName");
         g_translateTextData.registerFunctionName = json->GetString("registerFunctionName");
         g_translateTextData.translateScript = json->GetString("translateScript");
         g_translateTextData.initScript = json->GetString("initScript");
 
         auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
         TAG_LOGI(AceLogTag::ACE_WEB, "GetTranslateText WebId:%{public}d", webPattern->GetWebId());
         TAG_LOGI(AceLogTag::ACE_WEB,
             "GetTranslateText 'registerObjectName':%{public}s; 'registerFunctionName':%{public}s",
@@ -7288,6 +7291,7 @@ void WebPattern::EndTranslate()
         g_translateTextData.translateScript = "";
         g_translateTextData.initScript = "";
         auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
         if (webPattern->isRegisterJsObject_) {
             CHECK_NULL_VOID(webPattern->delegate_);
             std::string p = g_translateTextData.registerObjectName;
