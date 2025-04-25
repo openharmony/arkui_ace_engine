@@ -123,7 +123,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg001, TestSize.Level1)
      * @tc.steps: step2. Create EventHub.
      * @tc.expected: EventHub created successfully.
      */
-    auto eventHub = pattern->GetEventHub<DialogEventHub>();
+    auto eventHub = pattern->GetOrCreateEventHub<DialogEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->MarkModifyDone();
     /**

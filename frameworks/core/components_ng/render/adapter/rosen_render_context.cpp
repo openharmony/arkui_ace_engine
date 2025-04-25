@@ -317,7 +317,7 @@ void RosenRenderContext::OnNodeAppear(bool recursive)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // restore eventHub state when node appears.
-    auto eventHub = host->GetEventHubOnly<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->RestoreEnabled();
     }

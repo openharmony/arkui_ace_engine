@@ -95,7 +95,7 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest001, TestSize.Level1)
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(host, nullptr);
     host->draggable_ = true;
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto pattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -145,7 +145,7 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest002, TestSize.Level1)
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(host, nullptr);
     host->draggable_ = true;
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto pattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -199,7 +199,7 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest003, TestSize.Level1)
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(host, nullptr);
     host->draggable_ = true;
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto pattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -239,7 +239,7 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest004, TestSize.Level1)
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(host, nullptr);
     host->draggable_ = true;
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto pattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -434,11 +434,12 @@ HWTEST_F(RichEditorDragTestNg, HandleDraggableFlag001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto eventHubRefPtr = AceType::MakeRefPtr<EventHub>();
     auto eventHubWeakPtr = AceType::WeakClaim(AceType::RawPtr(eventHubRefPtr));
-    richEditorNode_->GetEventHub<EventHub>()->gestureEventHub_ = AceType::MakeRefPtr<GestureEventHub>(eventHubWeakPtr);
+    richEditorNode_->GetOrCreateEventHub<EventHub>()->gestureEventHub_ =
+        AceType::MakeRefPtr<GestureEventHub>(eventHubWeakPtr);
     richEditorPattern->copyOption_ = CopyOptions::InApp;
-    richEditorNode_->GetEventHub<EventHub>()->gestureEventHub_->isTextDraggable_ = true;
+    richEditorNode_->GetOrCreateEventHub<EventHub>()->gestureEventHub_->isTextDraggable_ = true;
     richEditorPattern->HandleDraggableFlag(true);
-    EXPECT_FALSE(richEditorNode_->GetEventHub<EventHub>()->gestureEventHub_->isTextDraggable_);
+    EXPECT_FALSE(richEditorNode_->GetOrCreateEventHub<EventHub>()->gestureEventHub_->isTextDraggable_);
 }
 
 /**
@@ -628,7 +629,7 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDrop002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -668,7 +669,7 @@ HWTEST_F(RichEditorDragTestNg, RichEditorPatternTestClearDragDropEvent001, TestS
 
     auto host = richEditorPattern->GetHost();
     ASSERT_NE(host, nullptr);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_EQ(eventHub->onDragStart_, nullptr);
 }

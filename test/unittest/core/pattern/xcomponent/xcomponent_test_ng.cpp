@@ -228,7 +228,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
      * @tc.steps: step2. call FireLoadEvent, FireDestroyEvent
      * @tc.expected: three checkKeys has changed
      */
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
     xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
@@ -249,7 +249,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
 
     auto frameNode2 = CreateXComponentNode(testProperty);
     EXPECT_TRUE(frameNode2);
-    xComponentEventHub = frameNode2->GetEventHub<XComponentEventHub>();
+    xComponentEventHub = frameNode2->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
     xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
@@ -730,7 +730,7 @@ HWTEST_F(XComponentTestNg, XComponentSetDetachEventTest021, TestSize.Level1)
      * @tc.steps: step2. call FireDetachEvent
      * @tc.expected: three checkKeys has changed
      */
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
 
     bool detachFlage = false;
@@ -822,7 +822,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest023, TestSize.Level1)
      * @tc.steps: step3. call FireLoadEvent, FireDestroyEvent
      * @tc.expected: three checkKeys not changed
      */
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
     xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
@@ -877,7 +877,7 @@ HWTEST_F(XComponentTestNg, XComponentDetachCallbackTest024, TestSize.Level1)
      * @tc.steps: step2. call FireDetachEvent
      * @tc.expected: three checkKeys has changed
      */
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireDetachEvent(XCOMPONENT_ID);
     EXPECT_FALSE(onDetachKey == CHECK_KEY);
@@ -986,7 +986,7 @@ HWTEST_F(XComponentTestNg, XComponentExtSurfaceCallbackClient026, TestSize.Level
      * @tc.steps: step2. call FireDetachEvent
      * @tc.expected: three checkKeys has changed
      */
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
 
     std::string surfaceInitFlage;
@@ -1337,7 +1337,7 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
     testProperty.surfaceDestroyedEvent = std::move(onSurfaceDestroyed);
     auto frameNode = CreateXComponentNode(testProperty);
     ASSERT_TRUE(frameNode);
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     EXPECT_FALSE(xComponentEventHub->surfaceInitEvent_);
     auto pattern = frameNode->GetPattern<XComponentPattern>();

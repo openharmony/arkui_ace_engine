@@ -51,7 +51,7 @@ void PatternLockTestNg::GetInstance()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<PatternLockPattern>();
-    eventHub_ = frameNode_->GetEventHub<PatternLockEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<PatternLockEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<PatternLockLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<PatternLockPaintProperty>();
 }
@@ -711,7 +711,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest014, TestSize.Level1)
 
     frameNode_->GetGeometryNode()->SetContentSize(SizeF(CONTENT_SIZE_FLOAT, CONTENT_SIZE_FLOAT));
     frameNode_->GetGeometryNode()->SetContentOffset(OffsetF(CONTENT_OFFSET_FLOAT, CONTENT_OFFSET_FLOAT));
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputEventHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputEventHub);

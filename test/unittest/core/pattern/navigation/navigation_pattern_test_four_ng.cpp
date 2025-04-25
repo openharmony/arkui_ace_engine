@@ -637,7 +637,7 @@ HWTEST_F(NavigationPatternTestFourNg, FireNavigationLifecycle002, TestSize.Level
     auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navigation02Stack->Add(PAGE01, navDestination01Node);
-    auto navDestination01EventHub = navDestination01Node->GetEventHub<NavDestinationEventHub>();
+    auto navDestination01EventHub = navDestination01Node->GetOrCreateEventHub<NavDestinationEventHub>();
     ASSERT_NE(navDestination01EventHub, nullptr);
     int32_t onWillDisAppearCalled = false;
     navDestination01EventHub->onWillDisAppear_ = [&onWillDisAppearCalled]() { onWillDisAppearCalled = true; };

@@ -313,7 +313,7 @@ HWTEST_F(DialogLayoutTestNg, DialogPatternTest010, TestSize.Level1)
         frameNode);
     dialogLayoutAlgorithm.Measure(layoutWrapper.rawPtr_);
     dialogLayoutAlgorithm.Layout(layoutWrapper.rawPtr_);
-    auto hub = dialog->GetEventHub<DialogEventHub>();
+    auto hub = dialog->GetOrCreateEventHub<DialogEventHub>();
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     std::vector<DimensionRect> mouseResponseRegion;
     DimensionRect Rect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_));

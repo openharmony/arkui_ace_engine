@@ -401,7 +401,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg006, TestSize.Level1)
     DimensionRect dimensionRect;
     FRAME_NODE2->AddHotZoneRect(dimensionRect);
     FRAME_NODE2->RemoveLastHotZoneRect();
-    EXPECT_NE(FRAME_NODE2->GetEventHub<EventHub>(), nullptr);
+    EXPECT_NE(FRAME_NODE2->GetOrCreateEventHub<EventHub>(), nullptr);
 
     FRAME_NODE->ProcessOffscreenNode(FRAME_NODE3);
     FRAME_NODE->GetTransformRectRelativeToWindow();
@@ -651,7 +651,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
      * @tc.steps: step3.set callback and release lastParentOffsetToWindow_
      * @tc.expected: expect flag is still false
      */
-    FRAME_NODE2->GetEventHub<EventHub>()->SetOnAreaChanged(std::move(onAreaChanged));
+    FRAME_NODE2->GetOrCreateEventHub<EventHub>()->SetOnAreaChanged(std::move(onAreaChanged));
     FRAME_NODE2->lastParentOffsetToWindow_ = nullptr;
     FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_2);
     EXPECT_FALSE(flag);
@@ -948,7 +948,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest0026, TestSize.Level1)
      * @tc.expected: expect The function return value is OUT_OF_REGION.
      */
     FRAME_NODE2->isActive_ = false;
-    FRAME_NODE2->GetEventHub<EventHub>()->SetEnabled(false);
+    FRAME_NODE2->GetOrCreateEventHub<EventHub>()->SetEnabled(false);
     auto test = FRAME_NODE2->TouchTest(
         globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
     EXPECT_EQ(test, HitTestResult::OUT_OF_REGION);
@@ -970,9 +970,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest0027, TestSize.Level1)
     const PointF parentRevertPoint;
     TouchRestrict touchRestrict;
     AxisTestResult onAxisResult;
-    FRAME_NODE2->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+    FRAME_NODE2->GetOrCreateEventHub<EventHub>()->GetOrCreateInputEventHub();
     FRAME_NODE2->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
-    EXPECT_NE(FRAME_NODE2->GetEventHub<EventHub>()->inputEventHub_, nullptr);
+    EXPECT_NE(FRAME_NODE2->GetOrCreateEventHub<EventHub>()->inputEventHub_, nullptr);
 }
 
 /**
@@ -1162,11 +1162,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAnimateHoverEffect0034, TestSize.Level1)
      * @tc.expected: AnimateHoverEffectScale has been called
      */
     auto one = FrameNode::GetOrCreateFrameNode("one", 12, []() { return AceType::MakeRefPtr<Pattern>(); });
-    one->GetEventHub<EventHub>()->inputEventHub_ = nullptr;
+    one->GetOrCreateEventHub<EventHub>()->inputEventHub_ = nullptr;
     auto renderContext = AceType::DynamicCast<MockRenderContext>(one->renderContext_);
     EXPECT_CALL(*renderContext, AnimateHoverEffectScale(_));
     one->AnimateHoverEffect(false);
-    auto inputEventHub = one->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+    auto inputEventHub = one->GetOrCreateEventHub<EventHub>()->GetOrCreateInputEventHub();
     inputEventHub->hoverEffectType_ = HoverEffectType::UNKNOWN;
     one->AnimateHoverEffect(false);
     inputEventHub->hoverEffectType_ = HoverEffectType::AUTO;
@@ -1407,7 +1407,7 @@ HWTEST_F(FrameNodeTestNg, SwapDirtyLayoutWrapperOnMainThread040, TestSize.Level1
     frameNode->geometryNode_->SetParentLayoutConstraint(layoutConstraintF_);
     layoutProperty->UpdateLayoutConstraint(layoutConstraintF_);
 
-    frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub();
+    frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateFocusHub();
     frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
     EXPECT_NE(frameNode->eventHub_, nullptr);
 
@@ -1415,9 +1415,9 @@ HWTEST_F(FrameNodeTestNg, SwapDirtyLayoutWrapperOnMainThread040, TestSize.Level1
      * @tc.steps: step5. set currentFocus_ is true and call SwapDirtyLayoutWrapperOnMainThread.
      * @tc.expected: expect cover branch IsCurrentFocus() is true and function is run ok .
      */
-    frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub()->currentFocus_ = true;
+    frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateFocusHub()->currentFocus_ = true;
     frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
-    EXPECT_TRUE(frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub()->IsCurrentFocus());
+    EXPECT_TRUE(frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateFocusHub()->IsCurrentFocus());
 }
 
 /**

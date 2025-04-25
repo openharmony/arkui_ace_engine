@@ -1636,7 +1636,8 @@ HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest001, TestSize.Level1)
     info.SetInputEventType(InputEventType::AXIS);
     info.SetSourceTool(SourceTool::MOUSE);
     info.SetMainDelta(-10.f);
-    auto panEvent = frameNode_->GetEventHub<EventHub>()->gestureEventHub_->panEventActuator_->panEvents_.front();
+    auto panEvent = frameNode_->GetOrCreateEventHub<EventHub>()
+        ->gestureEventHub_->panEventActuator_->panEvents_.front();
     panEvent->actionStart_(info);
     EXPECT_TRUE(pattern_->isFirstAxisAction_);
     panEvent->actionUpdate_(info);
@@ -1664,7 +1665,8 @@ HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest002, TestSize.Level1)
     info.SetInputEventType(InputEventType::AXIS);
     info.SetSourceTool(SourceTool::MOUSE);
     info.SetMainDelta(-10.f);
-    auto panEvent = frameNode_->GetEventHub<EventHub>()->gestureEventHub_->panEventActuator_->panEvents_.front();
+    auto panEvent = frameNode_->GetOrCreateEventHub<EventHub>()
+        ->gestureEventHub_->panEventActuator_->panEvents_.front();
     panEvent->actionStart_(info);
     EXPECT_TRUE(pattern_->isFirstAxisAction_);
     // axis update event will flip page, and isFirstAxisAction_ will be marked

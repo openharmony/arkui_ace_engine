@@ -236,7 +236,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoEventTest003, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::MOVING_PHOTO_ETS_TAG);
-    auto movingPhotoEventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
+    auto movingPhotoEventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
     EXPECT_TRUE(movingPhotoEventHub != nullptr);
 
     movingPhotoEventHub->FireStartEvent();
@@ -470,7 +470,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest008, TestSize.Level1)
     ASSERT_TRUE(pattern);
 
     // set MovingPhotoEvent
-    auto movingPhotoEventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
+    auto movingPhotoEventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
     ASSERT_TRUE(movingPhotoEventHub);
 
     auto movingPhotoLayoutProperty = pattern->GetLayoutProperty<MovingPhotoLayoutProperty>();
@@ -508,7 +508,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest009, TestSize.Level1)
      * @tc.steps: step2. MovingPhoto stop
      * @tc.expected: step3. MovingPhoto stop successfully
      */
-    auto movingPhotoEventHub = pattern->GetEventHub<MovingPhotoEventHub>();
+    auto movingPhotoEventHub = pattern->GetOrCreateEventHub<MovingPhotoEventHub>();
     ASSERT_TRUE(movingPhotoEventHub);
     pattern->Stop();
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), PrepareAsync())

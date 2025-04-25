@@ -988,7 +988,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest008, TestSize.Level1)
      * @tc.steps: step3. test GetMouseResponseRegion function.
      * @tc.expected: step3. return width equal to widthDimen.
      */
-    auto hub = dialog->GetEventHub<DialogEventHub>();
+    auto hub = dialog->GetOrCreateEventHub<DialogEventHub>();
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     std::vector<DimensionRect> mouseResponseRegion;
     std::vector<DimensionRect> initMouseResponseRegion;
@@ -1031,7 +1031,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest009, TestSize.Level1)
      * @tc.steps: step3. test GetMouseResponseRegion function.
      * @tc.expected: step3. return width equal to 100.0_pct.
      */
-    auto hub = dialog->GetEventHub<DialogEventHub>();
+    auto hub = dialog->GetOrCreateEventHub<DialogEventHub>();
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     std::vector<DimensionRect> mouseResponseRegion;
     std::vector<DimensionRect> initMouseResponseRegion;
@@ -1819,7 +1819,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest029, TestSize.Level1)
      * @tc.steps: step3. test GetMouseResponseRegion function.
      * @tc.expected: step3. return width equal to widthDimen.
      */
-    auto hub = dialog->GetEventHub<DialogEventHub>();
+    auto hub = dialog->GetOrCreateEventHub<DialogEventHub>();
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     std::vector<DimensionRect> mouseResponseRegion;
     mouseResponseRegion = gestureHub->GetMouseResponseRegion();

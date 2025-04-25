@@ -1529,7 +1529,7 @@ HWTEST_F(GridRowTestNg, Breakpoint, TestSize.Level1)
     float columnWidth = frameRect.Width();
     EXPECT_EQ(columnWidth, DEFAULT_GRID_ROW_WIDTH / mdCols); // expect md
 
-    auto eventHub = rowNode_->GetEventHub<GridRowEventHub>();
+    auto eventHub = rowNode_->GetOrCreateEventHub<GridRowEventHub>();
     bool eventTriggerFlag = false;
     eventHub->SetOnBreakpointChange([&eventTriggerFlag, expectSize = std::string("lg")](const std::string& size) {
         eventTriggerFlag = true;

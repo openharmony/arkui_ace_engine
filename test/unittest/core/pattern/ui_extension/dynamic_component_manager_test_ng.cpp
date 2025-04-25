@@ -87,7 +87,7 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg001, TestSize.L
     EXPECT_TRUE(geometryNode->GetMarginFrameSize().IsPositive());
     DynamicComponentManager::TriggerOnAreaChangeCallback(frameNode, 1);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_FALSE(eventHub->HasOnAreaChanged());
     DynamicComponentManager::TriggerOnAreaChangeCallback(frameNode, 1);
@@ -116,7 +116,7 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg002, TestSize.L
     /**
      * @tc.steps: step2. test method HandleDynamicRenderOnAreaChange
      */
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_FALSE(eventHub->HasInnerOnAreaChanged());
     RectF rectF(5, 5, 1, 1);

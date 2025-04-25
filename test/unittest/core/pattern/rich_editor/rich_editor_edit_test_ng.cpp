@@ -720,7 +720,7 @@ HWTEST_F(RichEditorEditTestNg, HandleOnCopy002, TestSize.Level1)
     auto pipeline = MockPipelineContext::GetCurrent();
     auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     richEditorPattern->clipboard_ = clipboard;
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isEventCalled = false;
     auto onCopyWithEvent = [&isEventCalled](NG::TextCommonEvent& event) { isEventCalled = true; };
@@ -759,7 +759,7 @@ HWTEST_F(RichEditorEditTestNg, HandleOnCopy003, TestSize.Level1)
     auto pipeline = MockPipelineContext::GetCurrent();
     auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     richEditorPattern->clipboard_ = clipboard;
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isEventCalled = false;
     auto onCopyWithEvent = [&isEventCalled](NG::TextCommonEvent& event) {
@@ -797,7 +797,7 @@ HWTEST_F(RichEditorEditTestNg, HandleOnCut002, TestSize.Level1)
     ASSERT_NE(host, nullptr);
     auto richEditorPattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isEventCalled = false;
     auto onCutWithEvent = [&isEventCalled](NG::TextCommonEvent& event) { isEventCalled = true; };
@@ -836,7 +836,7 @@ HWTEST_F(RichEditorEditTestNg, HandleOnCut003, TestSize.Level1)
     ASSERT_NE(host, nullptr);
     auto richEditorPattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isEventCalled = false;
     auto onCutWithEvent = [&isEventCalled](NG::TextCommonEvent& event) {

@@ -71,7 +71,7 @@ public:
 HWTEST_F(TextFieldPatternTestEight, SwapIfLarger001, TestSize.Level0)
 {
     CreateTextField();
-    auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -92,7 +92,7 @@ HWTEST_F(TextFieldPatternTestEight, SwapIfLarger001, TestSize.Level0)
 HWTEST_F(TextFieldPatternTestEight, CalculateBoundsRect001, TestSize.Level0)
 {
     CreateTextField();
-    auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -114,7 +114,7 @@ HWTEST_F(TextFieldPatternTestEight, CalculateBoundsRect001, TestSize.Level0)
 HWTEST_F(TextFieldPatternTestEight, CreateObscuredText001, TestSize.Level0)
 {
     CreateTextField();
-    auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -141,7 +141,7 @@ HWTEST_F(TextFieldPatternTestEight, CreateObscuredText001, TestSize.Level0)
 HWTEST_F(TextFieldPatternTestEight, SetAccessibilityUnitAction001, TestSize.Level0)
 {
     CreateTextField();
-    auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -163,7 +163,7 @@ HWTEST_F(TextFieldPatternTestEight, SetAccessibilityUnitAction001, TestSize.Leve
 HWTEST_F(TextFieldPatternTestEight, HandleContentSizeChange001, TestSize.Level0)
 {
     CreateTextField();
-    auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -175,7 +175,7 @@ HWTEST_F(TextFieldPatternTestEight, HandleContentSizeChange001, TestSize.Level0)
         return;
     };
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
     eventHub->SetOnContentSizeChange(func);
     pattern_->HandleContentSizeChange(rect);
 }
@@ -188,7 +188,7 @@ HWTEST_F(TextFieldPatternTestEight, HandleContentSizeChange001, TestSize.Level0)
 HWTEST_F(TextFieldPatternTestEight, CancelDelayProcessOverlay001, TestSize.Level0)
 {
     CreateTextField();
-    auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -211,7 +211,7 @@ HWTEST_F(TextFieldPatternTestEight, CancelDelayProcessOverlay001, TestSize.Level
 HWTEST_F(TextFieldPatternTestEight, OnThemeScopeUpdate001, TestSize.Level0)
 {
     CreateTextField();
-    auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -239,7 +239,7 @@ HWTEST_F(TextFieldPatternTestEight, OnThemeScopeUpdate001, TestSize.Level0)
 HWTEST_F(TextFieldPatternTestEight, NotifyImfFinishTextPreview001, TestSize.Level0)
 {
     CreateTextField();
-    auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()
         ->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
@@ -261,7 +261,7 @@ HWTEST_F(TextFieldPatternTestEight, NotifyImfFinishTextPreview001, TestSize.Leve
 HWTEST_F(TextFieldPatternTestEight, CharLineChanged001, TestSize.Level0)
 {
     CreateTextField();
-    auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -293,7 +293,7 @@ HWTEST_F(TextFieldPatternTestEight, CharLineChanged001, TestSize.Level0)
 HWTEST_F(TextFieldPatternTestEight, HandleCloseKeyboard001, TestSize.Level0)
 {
     CreateTextField();
-    auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -329,7 +329,7 @@ HWTEST_F(TextFieldPatternTestEight, UpdateRectByTextAlign001, TestSize.Level0)
 HWTEST_F(TextFieldPatternTestEight, ToJsonValue001, TestSize.Level0)
 {
     CreateTextField();
-    auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -372,7 +372,7 @@ HWTEST_F(TextFieldPatternTestEight, GetDumpTextValue001, TestSize.Level0)
 HWTEST_F(TextFieldPatternTestEight, DumpViewDataPageNode001, TestSize.Level0)
 {
     CreateTextField();
-    auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -403,7 +403,7 @@ HWTEST_F(TextFieldPatternTestEight, DumpViewDataPageNode001, TestSize.Level0)
 HWTEST_F(TextFieldPatternTestEight, ClearTextContent001, TestSize.Level0)
 {
     CreateTextField();
-    auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -428,7 +428,7 @@ HWTEST_F(TextFieldPatternTestEight, ClearTextContent001, TestSize.Level0)
 HWTEST_F(TextFieldPatternTestEight, HandleButtonMouseEvent001, TestSize.Level0)
 {
     CreateTextField();
-    auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -453,7 +453,7 @@ HWTEST_F(TextFieldPatternTestEight, HandleButtonMouseEvent001, TestSize.Level0)
 HWTEST_F(TextFieldPatternTestEight, CursorMove001, TestSize.Level0)
 {
     CreateTextField();
-    auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -540,7 +540,7 @@ HWTEST_F(TextFieldPatternTestEight, HandleOnUndoAction001, TestSize.Level0)
     TextEditingValueNG t1;
     pattern_->operationRecords_.push_back(t1);
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
     auto func = [](const ChangeValueInfo& info) {
         return false;
     };
@@ -575,7 +575,7 @@ HWTEST_F(TextFieldPatternTestEight, HandleOnRedoAction001, TestSize.Level0)
     TextEditingValueNG t1;
     pattern_->redoOperationRecords_.push_back(t1);
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
     auto func = [](const ChangeValueInfo& info) {
         return false;
     };
@@ -606,7 +606,7 @@ HWTEST_F(TextFieldPatternTestEight, HandleOnCopy001, TestSize.Level0)
     pattern->contentController_->content_ = u"Test";
     ASSERT_NE(pattern->selectController_, nullptr);
     pattern->selectController_->UpdateHandleIndex(0, 4);
-    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = textFieldNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool calledOnCopy = false;
     eventHub->SetOnCopy([&calledOnCopy](const std::u16string& value) {
@@ -631,7 +631,7 @@ HWTEST_F(TextFieldPatternTestEight, HandleOnPaste001, TestSize.Level0)
     GetFocus();
 
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
     auto func = [](const std::u16string& str, OHOS::Ace::NG::TextCommonEvent& event) {
         event.preventDefault_ = true;
         return;
@@ -901,7 +901,7 @@ HWTEST_F(TextFieldPatternTestEight, FilterInitializeText001, TestSize.Level0)
     pattern_->showCountBorderStyle_ = true;
     pattern_->isFilterChanged_ = true;
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
     auto func = [](const ChangeValueInfo& info) {
         return false;
     };
@@ -977,7 +977,7 @@ HWTEST_F(TextFieldPatternTestEight, InitValueText001, TestSize.Level0)
     pattern_->deleteBackwardOperations_.pop();
     content = u"";
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
     auto func = [](const ChangeValueInfo& info) {
         return false;
     };
@@ -1261,7 +1261,7 @@ HWTEST_F(TextFieldPatternTestEight, InsertValueByController001, TestSize.Level0)
     std::u16string insertValue = u"test";
     int32_t offset = 0;
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
     auto func = [](const ChangeValueInfo& info) {
         return false;
     };
@@ -1291,7 +1291,7 @@ HWTEST_F(TextFieldPatternTestEight, ExecuteInsertValueCommand001, TestSize.Level
     });
     GetFocus();
 
-    auto eventHub = pattern_->GetHost()->GetEventHub<TextFieldEventHub>();
+    auto eventHub = pattern_->GetHost()->GetOrCreateEventHub<TextFieldEventHub>();
     auto state = false;
     auto callback = [&state](const InsertValueInfo&){ return (state = true); };
     eventHub->SetOnWillInsertValueEvent(callback);
@@ -1587,7 +1587,7 @@ HWTEST_F(TextFieldPatternTestEight, DeleteForwardOperation001, TestSize.Level0)
     GetFocus();
 
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
     auto func = [](const ChangeValueInfo&) {
         return false;
     };
@@ -1729,7 +1729,7 @@ HWTEST_F(TextFieldPatternTestEight, NotifyFillRequestSuccess001, TestSize.Level0
     pattern_->contentController_ = AceType::MakeRefPtr<ContentController>(pattern_);
     pattern_->contentController_->content_ = u"test";
     auto host = pattern_->GetHost();
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
     auto func = [](const ChangeValueInfo&) {
         return false;
     };

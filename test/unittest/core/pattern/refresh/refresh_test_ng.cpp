@@ -67,7 +67,7 @@ void RefreshTestNg::GetRefresh()
 {
     frameNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     pattern_ = frameNode_->GetPattern<RefreshPattern>();
-    eventHub_ = frameNode_->GetEventHub<RefreshEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<RefreshEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<RefreshLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<RefreshAccessibilityProperty>();
 }

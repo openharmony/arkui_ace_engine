@@ -88,7 +88,7 @@ void RichEditorUrlStyleTest::InitContentChangeCallback()
         onWillChangeValue = changeValue;
         return true;
     };
-    auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetOnWillChange(std::move(onWillChange));
 }
@@ -474,7 +474,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleIMEInputTest001, TestSize.Lev
     ASSERT_NE(richEditorController, nullptr);
     RichEditorCommonTestNg::ClearSpan();
 
-    auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     std::u16string urlAddress = u"unCalled";
     auto func = [&urlAddress](const RichEditorAbstractSpanResult& info) { urlAddress = info.GetUrlAddress(); };
@@ -510,7 +510,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleAboutToDeleteTest001, TestSiz
     ASSERT_NE(richEditorController, nullptr);
     RichEditorCommonTestNg::ClearSpan();
 
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     std::vector<RichEditorAbstractSpanResult> spanResults;
     auto func = [&spanResults](const RichEditorDeleteValue& deleteValue) {
@@ -614,7 +614,7 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnSelectTest001, TestSize.Lev
     RichEditorCommonTestNg::ClearSpan();
     std::vector<ResultObject> spanResults;
 
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto func = [&spanResults](const BaseEventInfo* info) {
         const SelectionInfo* eventInfo = TypeInfoHelper::DynamicCast<SelectionInfo>(info);
