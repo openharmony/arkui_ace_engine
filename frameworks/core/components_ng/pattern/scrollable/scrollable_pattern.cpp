@@ -4197,7 +4197,8 @@ void ScrollablePattern::GetRepeatCountInfo(
         if (AceType::InstanceOf<RepeatVirtualScroll2Node>(child)) {
             auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(child);
             auto repeatRealCount = repeat2->FrameCount();
-            auto repeatVirtualCount = repeat2->GetTotalCount();
+            auto repeatVirtualCount =
+                (repeat2->GetTotalCount() <= INT_MAX) ? static_cast<int32_t>(repeat2->GetTotalCount()) : INT_MAX;
             if (repeatVirtualCount > static_cast<uint32_t>(repeatRealCount) && firstRepeatCount == 0) {
                 firstRepeatCount = totalChildCount + repeatRealCount;
             }

@@ -7363,8 +7363,13 @@ bool SwiperPattern::HasRepeatTotalCountDifference(RefPtr<UINode> node) const
     auto& children = node->GetChildren();
     for (const auto& child : children) {
         auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(child);
-        if (repeat2 && repeat2->GetTotalCount() > repeat2->FrameCount()) {
-            return true;
+        if (repeat2) {
+            auto repeatRealCount = repeat2->FrameCount();
+            auto repeatVirtualCount =
+                (repeat2->GetTotalCount() <= INT_MAX) ? static_cast<int32_t>(repeat2->GetTotalCount()) : INT_MAX;
+            if (repeatVirtualCount > repeatRealCount) {
+                return true;
+            }
         } else if (AceType::InstanceOf<FrameNode>(child) || AceType::InstanceOf<LazyForEachNode>(child) ||
                    AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child) ||
                    AceType::InstanceOf<CustomNode>(child)) {
