@@ -1191,6 +1191,7 @@ export struct ArcSlider {
         .onDigitalCrown((event: CrownEvent) => {
           if (event) {
             this.onDigitalCrownEvent(event);
+            event.stopPropagation();
           }
           this.options.onChange?.(this.options.valueOptions.progress);
         })
