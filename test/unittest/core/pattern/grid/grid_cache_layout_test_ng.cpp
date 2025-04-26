@@ -640,7 +640,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem002, TestSize.Level1)
     model.SetCachedCount(3, true);
     CreateFixedItems(40);
     CreateDone();
-
+    ChangeRadio();
     EXPECT_EQ(pattern_->info_.startIndex_, 0);
     EXPECT_EQ(pattern_->info_.endIndex_, 7);
     EXPECT_EQ(pattern_->info_.endMainLineIndex_, 3);

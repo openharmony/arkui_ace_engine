@@ -615,6 +615,7 @@ HWTEST_F(GridOptionLayoutTestNg, GetEndOffset004, TestSize.Level1)
     // make content smaller than viewport
     ViewAbstract::SetHeight(CalcLength(700.0f));
     CreateDone();
+    ChangeRadio();
     auto& info = pattern_->info_;
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
     // line height + gap = 105
@@ -863,6 +864,7 @@ HWTEST_F(GridOptionLayoutTestNg, OutOfBounds001, TestSize.Level1)
     CreateFixedHeightItems(30, 200.0f);
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateDone();
+    ChangeRadio();
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(GetChildRect(frameNode_, 29).Bottom(), HEIGHT);
     EXPECT_FALSE(pattern_->IsOutOfBoundary(true));
@@ -1054,6 +1056,8 @@ HWTEST_F(GridOptionLayoutTestNg, Refresh001, TestSize.Level1)
     model.SetLayoutOptions({});
     CreateGridItems(3); // 0-height items
     CreateDone();
+    ChangeRadio();
+    refreshNode->GetPattern<RefreshPattern>()->SetRatio(1.848f);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.0f);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 0);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().startMainLineIndex_, 0);
@@ -1208,7 +1212,7 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll001, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(15);
     CreateDone();
-
+    ChangeRadio();
     GestureEvent info;
     info.SetMainVelocity(-1000.f);
     info.SetMainDelta(-100.f);

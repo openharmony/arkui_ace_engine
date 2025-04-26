@@ -87,6 +87,7 @@ HWTEST_F(WaterFlowScrollerTestNg, UpdateCurrentOffset002, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, false);
     CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
     CreateDone();
+    ChangeRadio();
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 10);
     EXPECT_TRUE(pattern_->layoutInfo_->itemStart_);
@@ -464,6 +465,7 @@ HWTEST_F(WaterFlowScrollerTestNg, SpringAnimation001, TestSize.Level1)
     CreateWaterFlowItems();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateDone();
+    ChangeRadio();
     GestureEvent gesture;
     gesture.SetInputEventType(InputEventType::TOUCH_SCREEN);
     gesture.SetMainVelocity(10.0f);
@@ -526,7 +528,8 @@ HWTEST_F(WaterFlowScrollerTestNg, Refresh001, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateWaterFlowItems(3);
     CreateDone();
-
+    ChangeRadio();
+    refreshNode->GetPattern<RefreshPattern>()->SetRatio(1.848f);
     GestureEvent info;
     info.SetMainVelocity(1200.f);
     info.SetMainDelta(100.f);
@@ -893,6 +896,7 @@ HWTEST_F(WaterFlowScrollerTestNg, ReachStart002, TestSize.Level1)
     int32_t reached = 0;
     model.SetOnReachStart([&reached]() { ++reached; });
     CreateDone();
+    ChangeRadio();
     EXPECT_EQ(reached, 1);
     UpdateCurrentOffset(-100.0f);
 
@@ -1103,6 +1107,7 @@ HWTEST_F(WaterFlowScrollerTestNg, SetEffectEdge003, TestSize.Level1)
     CreateWaterFlowItems(20);
     model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::START);
     CreateDone();
+    ChangeRadio();
     EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::START);
 
     GestureEvent gesture;
@@ -1141,6 +1146,7 @@ HWTEST_F(WaterFlowScrollerTestNg, SetEffectEdge004, TestSize.Level1)
     CreateWaterFlowItems(20);
     model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::END);
     CreateDone();
+    ChangeRadio();
     EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::END);
     UpdateCurrentOffset(-200);
 
