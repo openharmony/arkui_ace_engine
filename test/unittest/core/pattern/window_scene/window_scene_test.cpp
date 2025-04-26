@@ -404,4 +404,65 @@ HWTEST_F(WindowSceneTest, OnAddRemoveSnapshot, TestSize.Level1)
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(windowScene->session_->GetSnapshot(), nullptr);
 }
+
+/**
+ * @tc.name: IsMainSessionRecent
+ * @tc.desc: check main session recent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, IsMainSessionRecent, TestSize.Level1)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = "ABILITY_NAME",
+        .bundleName_ = "BUNDLE_NAME",
+        .moduleName_ = "MODULE_NAME",
+    };
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    ASSERT_NE(windowScene, nullptr);
+
+    Rosen::RSSurfaceNodeConfig config = {
+        .SurfaceNodeName = "SurfaceNode"
+    };
+    session->surfaceNode_ = Rosen::RSSurfaceNode::Create(config);
+    ASSERT_NE(session->surfaceNode_, nullptr);
+    ASSERT_EQ(windowScene->IsMainSessionRecent(), false);
+}
+
+/**
+ * @tc.name: SetSubSessionVisible
+ * @tc.desc: set sub session visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, SetSubSessionVisible, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create windowScene.
+     */
+    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    ASSERT_NE(windowScene, nullptr);
+    /**
+     * @tc.steps: step2. Set sub session.
+     */
+    Rosen::SessionInfo subSessionInfo = {
+        .abilityName_ = "SUB_ABILITY_NAME",
+        .bundleName_ = "SUB_BUNDLE_NAME",
+        .moduleName_ = "SUB_MODULE_NAME",
+    };
+    auto subSession = ssm_->RequestSceneSession(subSessionInfo);
+    ASSERT_NE(subSession, nullptr);
+    Rosen::RSSurfaceNodeConfig config = {
+        .SurfaceNodeName = "SurfaceNode"
+    };
+    subSession->surfaceNode_ = Rosen::RSSurfaceNode::Create(config);
+    ASSERT_NE(subSession->surfaceNode_, nullptr);
+    subSession->surfaceNode_->SetVisible(false);
+    windowScene->weakSubSessions_.push_back(subSession);
+    /**
+     * @tc.steps: step3. Test and check
+     */
+    windowScene->SetSubSessionVisible();
+    ASSERT_EQ(subSession->surfaceNode_->GetStagingProperties().GetVisible(), true);
+}
 } // namespace OHOS::Ace::NG
