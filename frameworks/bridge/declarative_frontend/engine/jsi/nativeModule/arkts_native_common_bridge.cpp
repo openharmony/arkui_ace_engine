@@ -8176,7 +8176,7 @@ ArkUINativeModuleValue CommonBridge::SetOnGestureJudgeBegin(ArkUIRuntimeCallInfo
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
     auto onGestureJudgeBegin = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode),
-                                   containerId, obj](const RefPtr<GestureInfo>& gestureInfo,
+                                   containerId](const RefPtr<GestureInfo>& gestureInfo,
                                    const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
@@ -8191,10 +8191,8 @@ ArkUINativeModuleValue CommonBridge::SetOnGestureJudgeBegin(ArkUIRuntimeCallInfo
             returnValue = static_cast<GestureJudgeResult>(value->ToNumber(vm)->Value());
         }
         if (gestureInfo->GetType() == GestureTypeName::TAP_GESTURE) {
-            auto tapGuestureInfo = CreateTapGestureLocationInfo(vm, gestureInfo->GetType(), info);
-            obj->Set(
-                vm, panda::StringRef::NewFromUtf8(vm, "tapLocation"), tapGuestureInfo);
-            panda::Local<panda::JSValueRef> params[] = { obj };
+            auto tapGuestureEventObj = CreateTapGestureLocationEvent(vm, gestureInfo->GetType(), info);
+            panda::Local<panda::JSValueRef> params[1] = { tapGuestureEventObj };
             func->Call(vm, func.ToLocal(), params, 1);
         }
         return returnValue;
@@ -8203,10 +8201,17 @@ ArkUINativeModuleValue CommonBridge::SetOnGestureJudgeBegin(ArkUIRuntimeCallInfo
     return panda::JSValueRef::Undefined(vm);
 }
 
-Local<panda::ObjectRef> CommonBridge::CreateTapGestureLocationInfo(
+Local<panda::ObjectRef> CommonBridge::CreateTapGestureLocationEvent(
     EcmaVM* vm, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info)
 {
-    CHECK_NULL_RETURN(vm, panda::ObjectRef::New(vm));
+    auto obj = SetUniqueAttributes(vm, typeName, info);
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tapLocation"), CreateTapGestureLocationInfo(vm, info));
+    return obj;
+}
+
+Local<panda::ObjectRef> CommonBridge::CreateTapGestureLocationInfo(
+    EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info)
+{
     const std::list<FingerInfo>& fingerList = info->GetFingerList();
     if (fingerList.empty()) {
         return panda::ObjectRef::New(vm);
