@@ -869,4 +869,26 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest023, TestSize.Level1)
     EXPECT_EQ(option->GetOnFinishEvent(), nullptr);
 #endif
 }
+
+/**
+ * @tc.name: DynamicPatternTest024
+ * @tc.desc: Test HandleErrorCallback case DC_WORKER_EXCEED_MAX_NUM
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest024, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. get DynamicPattern.
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    ASSERT_NE(dynamicPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleErrorCallback with DCWORKEREXCEEDMAXNUM.
+     * @tc.expected: expect FireOnErrorCallbackOnUI is called with the correct parameters.
+     */
+    dynamicPattern->HandleErrorCallback(DCResultCode::DC_WORKER_EXCEED_MAX_NUM);
+#endif
+}
 } // namespace OHOS::Ace::NG
