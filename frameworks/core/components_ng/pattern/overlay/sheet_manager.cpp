@@ -299,7 +299,7 @@ bool SheetManager::RemoveSheetByESC()
     }
     auto overlayManager = sheetPattern->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
-    TAG_LOGI(AceLogTag::ACE_SHEET, "sheet will colse by esc, id is : %{public}d", sheetFocusId_.value());
+    TAG_LOGI(AceLogTag::ACE_SHEET, "sheet will close by esc, id is : %{public}d", sheetFocusId_.value());
     return overlayManager->RemoveModalInOverlay();
 }
 
