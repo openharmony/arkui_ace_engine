@@ -38,13 +38,6 @@ enum class TextInputAction {
     END = NEW_LINE,
 };
 
-enum class AutoCapitalizationMode {
-    NONE = 0,
-    WORDS = 1,
-    SENTENCES = 2,
-    ALL_CHARACTERS = 3,
-};
-
 enum class KeyBoardType {
     SOFT_KEYBOARD = 0,
     STATUS_BAR,
@@ -57,8 +50,6 @@ struct KeyBoardInfo {
 
 // For convenience of convert int value from Java
 TextInputAction CastToTextInputAction(int32_t value);
-
-AutoCapitalizationMode CastToAutoCapitalizationMode(int32_t value);
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_IME_TEXT_INPUT_ACTION_H
