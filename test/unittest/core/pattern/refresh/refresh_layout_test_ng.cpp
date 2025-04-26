@@ -14,6 +14,7 @@
  */
 
 #include "refresh_test_ng.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
@@ -414,5 +415,72 @@ HWTEST_F(RefreshLayoutTestNg, LoadingText002, TestSize.Level1)
     EXPECT_EQ(loadingTextRenderContext->GetOpacityValue(), 1);
     pattern_->HandleDragEnd(0.f);
     EXPECT_EQ(loadingTextRenderContext->GetOpacityValue(), 1);
+}
+
+/**
+ * @tc.name: CustomBuilderNodeVisibility001
+ * @tc.desc: Test CustomBuilderNode's visibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, CustomBuilderNodeVisibility001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. SetCustomBuilder
+     * @tc.expected: custom node exists, and default visibility is invisible.
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto builder = CreateCustomNode();
+    RefreshModelNG model = CreateRefresh();
+    model.SetCustomBuilder(builder);
+    model.SetIsCustomBuilderExist(true);
+    CreateDone();
+    EXPECT_EQ(pattern_->progressChild_, nullptr);
+    EXPECT_EQ(pattern_->customBuilder_, builder);
+    auto customBuilderLayoutProperty = pattern_->customBuilder_->GetLayoutProperty();
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::INVISIBLE);
+
+    /**
+     * @tc.steps: step2.  start Refreshing
+     * @tc.expected: Update Visibility to VISIBLE
+     */
+    layoutProperty_->UpdateIsRefreshing(true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
+
+    /**
+     * @tc.steps: step3.  end Refreshing
+     * @tc.expected: Update Visibility to INVISIBLE
+     */
+    layoutProperty_->UpdateIsRefreshing(false);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::INVISIBLE);
+
+    /**
+     * @tc.steps: step4.  user has setted visibility and  start Refreshing
+     * @tc.expected: don't change visibility
+     */
+    customBuilderLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE, false, true);
+    layoutProperty_->UpdateIsRefreshing(true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(customBuilderLayoutProperty->IsUserSetVisibility());
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::INVISIBLE);
+
+    /**
+     * @tc.steps: step5.  user has setted visibility and  end Refreshing
+     * @tc.expected: don't change visibility
+     */
+    customBuilderLayoutProperty->UpdateVisibility(VisibleType::VISIBLE, false, true);
+    layoutProperty_->UpdateIsRefreshing(false);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(customBuilderLayoutProperty->IsUserSetVisibility());
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
 }
 } // namespace OHOS::Ace::NG
