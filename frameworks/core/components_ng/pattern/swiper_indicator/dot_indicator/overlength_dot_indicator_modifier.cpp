@@ -496,7 +496,7 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnLongPointMove(const Linea
     animationEndIndicatorWidth_ = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, true);
     animationEndIndicatorHeight_ = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, false);
 
-    if (touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
+    if (isLoop_ && touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
         animationStartCenterX_.resize(maxDisplayCount_);
         animationEndCenterX_.resize(maxDisplayCount_);
         animationStartIndicatorWidth_.resize(maxDisplayCount_);
