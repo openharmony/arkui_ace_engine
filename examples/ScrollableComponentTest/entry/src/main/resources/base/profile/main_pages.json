@@ -36,6 +36,11 @@
     "pages/refresh/RefreshingContent",
     "pages/refresh/RefreshAndLoad",
     "pages/grid/GridMainPage",
-    "pages/grid/GridObjectSort"
+    "pages/grid/GridObjectSort",
+    "pages/Scroll/ScrollMainPage",
+    "pages/Scroll/InfiniteScrolling",
+    "pages/Scroll/CustomSnap",
+    "pages/Scroll/NestedScrollBar",
+    "pages/Scroll/RecycleView/Index"
   ]
 }
