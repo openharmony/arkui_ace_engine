@@ -1076,13 +1076,10 @@ void ScrollPattern::CaleSnapOffsetsByPaginations(ScrollSnapAlign scrollSnapAlign
 
 bool ScrollPattern::NeedScrollSnapToSide(float delta)
 {
-    CHECK_NULL_RETURN(IsScrollSnap(), false);
-    auto finalPosition = currentOffset_ + delta;
-    if (IsEnablePagingValid() && GetEdgeEffect() != EdgeEffect::SPRING) {
-        return Positive(finalPosition) || LessNotEqual(finalPosition, -scrollableDistance_);
-    }
+    CHECK_NULL_RETURN(GetScrollSnapAlign() != ScrollSnapAlign::NONE, false);
     CHECK_NULL_RETURN(!IsSnapToInterval(), false);
     CHECK_NULL_RETURN(static_cast<int32_t>(snapOffsets_.size()) > 2, false);
+    auto finalPosition = currentOffset_ + delta;
     if (!enableSnapToSide_.first) {
         if (GreatOrEqual(currentOffset_, *(snapOffsets_.begin() + 1)) &&
             LessOrEqual(finalPosition, *(snapOffsets_.begin() + 1))) {
@@ -1155,22 +1152,17 @@ float ScrollPattern::GetSelectScrollWidth()
 float ScrollPattern::GetPagingOffset(float delta, float dragDistance, float velocity)  const
 {
     // handle last page
-    auto currentOffset = currentOffset_;
     if (GreatNotEqual(lastPageLength_, 0.f) &&
-        LessNotEqual(currentOffset - dragDistance, -scrollableDistance_ + lastPageLength_)) {
-        if (LessOrEqual(dragDistance, lastPageLength_)) {
-            return currentOffset - dragDistance + GetPagingDelta(dragDistance, velocity, lastPageLength_);
-        }
-        if (GreatNotEqual(dragDistance, lastPageLength_)) {
-            dragDistance -= lastPageLength_;
-        }
+        LessNotEqual(currentOffset_, -scrollableDistance_ + lastPageLength_)) {
+        auto offset = fmod(currentOffset_, lastPageLength_);
+        return currentOffset_ - offset + GetPagingDelta(offset, velocity, lastPageLength_);
     }
     // handle other pages
     float head = 0.0f;
     float tail = -scrollableDistance_;
-    dragDistance = fmod(dragDistance, viewPortLength_);
-    auto pagingPosition = currentOffset - dragDistance + GetPagingDelta(dragDistance, velocity, viewPortLength_);
-    auto finalPosition = currentOffset + delta;
+    auto offset = fmod(currentOffset_, viewPortLength_);
+    auto pagingPosition = currentOffset_ - offset + GetPagingDelta(offset, velocity, viewPortLength_);
+    auto finalPosition = currentOffset_ + delta;
     auto useFinalPosition = (GreatOrEqual(pagingPosition, head) && !GreatOrEqual(finalPosition, head)) ||
                       (LessOrEqual(pagingPosition, tail) && !LessOrEqual(finalPosition, tail));
     return useFinalPosition ? finalPosition : pagingPosition;
