@@ -108,7 +108,7 @@ HWTEST_F(ListAlgorithmTestNg, Measure001, TestSize.Level1)
     ListItemInfo listItemInfo { 2, 2.0f, 4.0f, true };
     listLayoutAlgorithm->itemPosition_[0] = listItemInfo;
     RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
-    PositionInfo positionInfo { 2.0f, 4.0f, true };
+    ListPositionInfo positionInfo { 2.0f, 4.0f, true };
     listPositionMap->posMap_[0] = positionInfo;
     listLayoutAlgorithm->posMap_ = listPositionMap;
     listLayoutAlgorithm->totalItemCount_ = 0;
