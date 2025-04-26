@@ -97,6 +97,19 @@ constexpr int32_t JUMP_NEAR_VALUE = 3;
 constexpr int32_t MIN_DUMP_VELOCITY_THRESHOLD = 500;
 constexpr float MAX_INDICATOR_VELOCITY = 1200.0f;
 constexpr Dimension DEFAULT_INDICATOR_HEAD_DISTANCE = 14.0_vp;
+
+MoveStep GetKeyMoveStep(const KeyEvent& event, Axis axis, bool isRtl)
+{
+    if ((axis == Axis::HORIZONTAL && event.code == (isRtl ? KeyCode::KEY_DPAD_RIGHT : KeyCode::KEY_DPAD_LEFT)) ||
+        (axis == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
+        return MoveStep::PREV;
+    }
+    if ((axis == Axis::HORIZONTAL && event.code == (isRtl ? KeyCode::KEY_DPAD_LEFT : KeyCode::KEY_DPAD_RIGHT)) ||
+        (axis == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
+        return MoveStep::NEXT;
+    }
+    return MoveStep::NONE;
+}
 } // namespace
 
 SwiperPattern::SwiperPattern()
@@ -2768,43 +2781,66 @@ bool SwiperPattern::IsContentFocused()
     return ret;
 }
 
+bool SwiperPattern::IsContentChildFocusable(int32_t childIndex) const
+{
+    auto child = GetCurrentFrameNode(childIndex);
+    CHECK_NULL_RETURN(child, false);
+    auto focusHub = child->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->IsFocusable();
+}
+
+bool SwiperPattern::FindFocusableContentIndex(MoveStep moveStep)
+{
+    if (itemPosition_.empty()) {
+        return false;
+    }
+    if (!IsContentFocused() || GetDisplayCount() <= 1) {
+        return false;
+    }
+    if (moveStep == MoveStep::PREV) {
+        auto endIndex = itemPosition_.begin()->first;
+        for (auto i = currentFocusIndex_ - 1; i >= endIndex; --i) {
+            currentFocusIndex_ = i;
+            if (IsContentChildFocusable(i)) {
+                return true;
+            }
+        }
+    } else if (moveStep == MoveStep::NEXT) {
+        auto endIndex = itemPosition_.rbegin()->first;
+        for (auto i = currentFocusIndex_ + 1; i <= endIndex; ++i) {
+            currentFocusIndex_ = i;
+            if (IsContentChildFocusable(i)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if ((GetDirection() == Axis::HORIZONTAL && event.code == (IsHorizontalAndRightToLeft() ? KeyCode::KEY_DPAD_RIGHT :
-        KeyCode::KEY_DPAD_LEFT)) || (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
-        auto onlyFlushFocus = IsContentFocused() && GetDisplayCount() > 1 && currentFocusIndex_ > currentIndex_;
-        if (onlyFlushFocus) {
-            currentFocusIndex_ =
-                IsLoop() ? currentFocusIndex_ - 1 : std::clamp(currentFocusIndex_ - 1, 0, TotalCount() - 1);
-            FlushFocus(GetCurrentFrameNode(currentFocusIndex_));
-        } else {
+    auto step = GetKeyMoveStep(event, GetDirection(), IsHorizontalAndRightToLeft());
+    if (step == MoveStep::NONE) {
+        return false;
+    }
+    if (FindFocusableContentIndex(step)) {
+        FlushFocus(GetCurrentFrameNode(currentFocusIndex_));
+    } else {
+        if (step == MoveStep::PREV) {
             ShowPrevious(true);
             currentFocusIndex_ =
                 IsLoop() ? currentFocusIndex_ - 1 : std::clamp(currentFocusIndex_ - 1, 0, TotalCount() - 1);
-        }
-
-        return true;
-    }
-    if ((GetDirection() == Axis::HORIZONTAL && event.code == (IsHorizontalAndRightToLeft() ? KeyCode::KEY_DPAD_LEFT :
-        KeyCode::KEY_DPAD_RIGHT)) || (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
-        auto onlyFlushFocus =
-            IsContentFocused() && GetDisplayCount() > 1 && currentFocusIndex_ < currentIndex_ + GetDisplayCount() - 1;
-        if (onlyFlushFocus) {
-            currentFocusIndex_ =
-                IsLoop() ? currentFocusIndex_ + 1 : std::clamp(currentFocusIndex_ + 1, 0, TotalCount() - 1);
-            FlushFocus(GetCurrentFrameNode(currentFocusIndex_));
         } else {
             ShowNext(true);
             currentFocusIndex_ =
                 IsLoop() ? currentFocusIndex_ + 1 : std::clamp(currentFocusIndex_ + 1, 0, TotalCount() - 1);
         }
-
-        return true;
     }
-    return false;
+    return true;
 }
 
 void SwiperPattern::StopAutoPlay()
@@ -4516,7 +4552,7 @@ bool SwiperPattern::IsAtEnd() const
 
 bool SwiperPattern::AutoLinearIsOutOfBoundary(float mainOffset) const
 {
-    // Check the scenario where all child nodes are within the window but isloop is true。
+    // Check the scenario where all child nodes are within the window but isloop is true
     if (!IsLoop() || itemPosition_.empty() || static_cast<int32_t>(itemPosition_.size()) < TotalCount()) {
         return false;
     }
