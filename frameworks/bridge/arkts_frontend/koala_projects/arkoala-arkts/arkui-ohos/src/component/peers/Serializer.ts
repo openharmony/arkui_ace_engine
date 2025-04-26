@@ -114,7 +114,7 @@ import { Matrix4Transit, Matrix4TransitInternal, TranslateOption, ScaleOption, R
 import { Tuple_Number_Number, Tuple_Number_Number_Number } from "./../arkui-synthetics"
 import { NavigationType } from "./../navigator"
 import { NavRouteMode, RouteInfo } from "./../navRouter"
-import { NodeController } from "./../ohos.arkui.node"
+import { NodeController } from "../../NodeController"
 import { Offset_componentutils, RotateResult, ScaleResult, TranslateResult, ComponentInfo, Matrix4Result } from "./../arkui-componentutils"
 import { PanelHeight, PanelMode, PanelType, Callback_Number_Number_PanelMode_Void, Callback_Opt_PanelMode_Void } from "./../panel"
 import { PatternLockChallengeResult, PatternLockController, PatternLockControllerInternal, Callback_Array_Number_Void, CircleStyleOptions } from "./../patternLock"

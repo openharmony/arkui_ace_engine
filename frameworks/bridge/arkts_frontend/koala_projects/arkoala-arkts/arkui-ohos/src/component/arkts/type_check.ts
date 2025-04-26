@@ -88,7 +88,7 @@ import { Tuple_Number_Number, Tuple_Number_Number_Number } from "./../arkui-synt
 import { NavDestinationActiveReason, NestedScrollInfo, NavDestinationAttribute, Callback_Boolean, Callback_Object_Void, NavDestinationMode, Callback_NavDestinationContext_Void, NavDestinationContext, NavigationSystemTransitionType, Callback_NavDestinationActiveReason_Void, NavDestinationTransitionDelegate, Orientation, NavDestinationCommonTitle, NavDestinationCustomTitle, NavDestinationTransition, RouteMapConfig } from "./../navDestination"
 import { NavigationType, Literal_String_target_NavigationType_type } from "./../navigator"
 import { NavRouteMode, RouteInfo } from "./../navRouter"
-import { NodeController } from "./../ohos.arkui.node"
+import { NodeController } from "../../NodeController"
 import { Offset_componentutils, RotateResult, ScaleResult, TranslateResult, ComponentInfo, Matrix4Result } from "./../arkui-componentutils"
 import { OnFoldStatusChangeInfo, FolderStackOptions, HoverEventParam } from "./../folderStack"
 import { PanelHeight, PanelMode, PanelType } from "./../panel"

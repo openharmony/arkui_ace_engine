@@ -115,7 +115,6 @@ import { Matrix4Transit, Matrix4TransitInternal, TranslateOption, ScaleOption, R
 import { Tuple_Number_Number, Tuple_Number_Number_Number } from "./../arkui-synthetics"
 import { NavigationType } from "./../navigator"
 import { NavRouteMode, RouteInfo } from "./../navRouter"
-import { NodeController } from "./../ohos.arkui.node"
 import { Offset_componentutils, RotateResult, ScaleResult, TranslateResult, ComponentInfo, Matrix4Result } from "./../arkui-componentutils"
 import { PanelHeight, PanelMode, PanelType, Callback_Number_Number_PanelMode_Void, Callback_Opt_PanelMode_Void } from "./../panel"
 import { PatternLockChallengeResult, PatternLockController, PatternLockControllerInternal, Callback_Array_Number_Void, CircleStyleOptions } from "./../patternLock"
@@ -509,10 +508,6 @@ export class Deserializer extends DeserializerBase {
         const scrollForward_result : NestedScrollMode = TypeChecker.NestedScrollMode_FromNumeric(valueDeserializer.readInt32())
         const scrollBackward_result : NestedScrollMode = TypeChecker.NestedScrollMode_FromNumeric(valueDeserializer.readInt32())
         let value : NestedScrollOptions = ({scrollForward: scrollForward_result, scrollBackward: scrollBackward_result} as NestedScrollOptions)
-        return value
-    }
-    readNodeController(): NodeController {
-        let value : NodeController = ({} as NodeController)
         return value
     }
     readOffscreenCanvas(): OffscreenCanvas {

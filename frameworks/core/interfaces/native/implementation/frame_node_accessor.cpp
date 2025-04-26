@@ -22,8 +22,12 @@
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FrameNodeAccessor {
+void DestroyPeerImpl(Ark_FrameNode peer)
+{
+    FrameNodePeer::Destroy(peer);
 }
 Ark_FrameNode CtorImpl()
 {

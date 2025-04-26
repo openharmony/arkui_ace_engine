@@ -10596,14 +10596,21 @@ void impl_NodeContainerInterface_setOnTouchEvent(
 {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
-        Callback_TouchEvent_Void value_value = { thisDeserializer.readCallbackResource(),
-            reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_TouchEvent event)>(
-                thisDeserializer.readPointerOrDefault(
-                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_TouchEvent_Void)))),
-            reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event)>(
-                thisDeserializer.readPointerOrDefault(
-                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_TouchEvent_Void)))) };
-        GetNodeModifiers()->getCommonMethodModifier()->setOnTouch(self, (const Callback_TouchEvent_Void*)&value_value);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Callback_TouchEvent_Void value_value_buf = {};
+        value_value_buf.tag =
+            value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType)) {
+            value_value_buf.value = { thisDeserializer.readCallbackResource(),
+                reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_TouchEvent event)>(
+                    thisDeserializer.readPointerOrDefault(
+                        reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_TouchEvent_Void)))),
+                reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event)>(
+                    thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
+                        getManagedCallbackCallerSync(Kind_Callback_TouchEvent_Void)))) };
+        }
+        Opt_Callback_TouchEvent_Void value_value = value_value_buf;
+        GetNodeModifiers()->getCommonMethodModifier()->setOnTouch(self, (const Opt_Callback_TouchEvent_Void*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(NodeContainerInterface_setOnTouchEvent, Ark_NativePointer, KSerializerBuffer, Ark_Int32)
 void impl_GaugeAttribute_trackShadow(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -15040,7 +15047,7 @@ KOALA_INTEROP_DIRECT_2(NodeContainer_construct, Ark_NativePointer, Ark_Int32, Ar
 void impl_NodeContainerInterface_setNodeContainerOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
-        Ark_NodeController controller_value = thisDeserializer.readNodeController();;
+        Ark_NodeController controller_value = thisDeserializer.readNodeController();
         GetNodeModifiers()->getNodeContainerModifier()->setNodeContainerOptions(self, (const Ark_NodeController*)&controller_value);
 }
 KOALA_INTEROP_DIRECT_V3(NodeContainerInterface_setNodeContainerOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
@@ -22396,10 +22403,6 @@ void impl_SwiperAttribute_onAnimationEnd(Ark_NativePointer thisPtr, KSerializerB
         Opt_OnSwiperAnimationEndCallback value_value = value_value_buf;;
         GetNodeModifiers()->getSwiperModifier()->setOnAnimationEnd(self, (const Opt_OnSwiperAnimationEndCallback*)&value_value);
     }
-KOALA_INTEROP_DIRECT_V2(ReplaceSymbolEffect_setScope, Ark_NativePointer, Ark_Int32)
-Ark_NativePointer impl_FrameNode_ctor(KSerializerBuffer thisArray, int32_t thisLength) {
-        return GetAccessors()->getFrameNodeAccessor()->ctor();
-}
 KOALA_INTEROP_DIRECT_V3(SwiperAttribute_onAnimationEnd, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_SwiperAttribute_onGestureSwipe(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
@@ -33554,10 +33557,10 @@ void impl_ReplaceSymbolEffect_setScope(Ark_NativePointer thisPtr, Ark_Int32 scop
         GetAccessors()->getReplaceSymbolEffectAccessor()->setScope(self, static_cast<Ark_EffectScope>(scope));
 }
 KOALA_INTEROP_DIRECT_V2(ReplaceSymbolEffect_setScope, Ark_NativePointer, Ark_Int32)
-Ark_NativePointer impl_FrameNode_ctor(Ark_NativePointer uiContext) {
-        return GetAccessors()->getFrameNodeAccessor()->ctor(static_cast<Ark_UIContext>(uiContext));
+Ark_NativePointer impl_FrameNode_ctor(KSerializerBuffer thisArray, int32_t thisLength) {
+        return GetAccessors()->getFrameNodeAccessor()->ctor();
 }
-KOALA_INTEROP_DIRECT_1(FrameNode_ctor, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_2(FrameNode_ctor, Ark_NativePointer, KSerializerBuffer, Ark_Int32)
 Ark_NativePointer impl_FrameNode_getFinalizer() {
         return GetAccessors()->getFrameNodeAccessor()->getFinalizer();
 }

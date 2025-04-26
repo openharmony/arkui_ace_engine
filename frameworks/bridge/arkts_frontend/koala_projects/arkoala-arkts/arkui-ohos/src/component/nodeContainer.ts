@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, TouchEvent } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -82,7 +82,13 @@ export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
     }
     onTouchEventAttribute(value: ((event: TouchEvent) => void)) {
         const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(value)
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
         ArkUIGeneratedNativeModule._NodeContainerInterface_setOnTouchEvent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }

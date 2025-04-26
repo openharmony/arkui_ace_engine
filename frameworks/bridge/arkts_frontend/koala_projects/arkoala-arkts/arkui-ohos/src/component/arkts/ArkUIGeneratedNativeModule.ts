@@ -4110,7 +4110,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ReplaceSymbolEffect_setScope(ptr: KPointer, scope: KInt): void
     @ani.unsafe.Direct
-    native static _FrameNode_ctor(uiContext: KPointer): KPointer
+    native static _FrameNode_ctor(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _FrameNode_getFinalizer(): KPointer
     @ani.unsafe.Direct

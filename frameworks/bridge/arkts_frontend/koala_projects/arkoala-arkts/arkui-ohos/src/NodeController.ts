@@ -17,7 +17,7 @@ import { FrameNode } from "./FrameNode";
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Size } from "./Graphics";
 import { TouchEvent } from "./component/common";
-import { ArkNodeContainerComponent } from "./generated/ArkNodeContainer";
+import { ArkNodeContainerComponent } from "./component/nodeContainer";
 
 export abstract class NodeController {
     _nodeContainer: ArkNodeContainerComponent | null = null
