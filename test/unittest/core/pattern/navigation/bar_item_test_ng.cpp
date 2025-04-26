@@ -216,6 +216,50 @@ HWTEST_F(BarItemTestNg, GetIconNode001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetIconNodeWhenHideTextValue001
+ * @tc.desc: Test SetIconNode interface.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarItemTestNg, SetIconNodeWhenHideTextValue001, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    int32_t iconNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    barItemNode->SetIsHideItemText(true);
+    auto barItemIcon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG, iconNodeId,
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    barItemNode->SetIconNode(barItemIcon);
+
+    EXPECT_EQ(barItemNode->isHideText_, true);
+    EXPECT_NE(barItemNode->icon_, nullptr);
+    auto icon = barItemNode->icon_;
+    EXPECT_EQ(icon->GetId(), iconNodeId);
+}
+
+/**
+ * @tc.name: SetIconNodeWhenHideTextValue002
+ * @tc.desc: Test GetIconNode interface.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarItemTestNg, SetIconNodeWhenHideTextValue002, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    int32_t iconNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    barItemNode->SetIsHideItemText(false);
+    auto barItemIcon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG, iconNodeId,
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    barItemNode->SetIconNode(barItemIcon);
+
+    EXPECT_EQ(barItemNode->isHideText_, false);
+    EXPECT_NE(barItemNode->icon_, nullptr);
+    auto icon = barItemNode->icon_;
+    EXPECT_EQ(icon->GetId(), iconNodeId);
+}
+
+/**
  * @tc.name: BarItemPattern001
  * @tc.desc: Test barItem pattern.
  * @tc.type: FUNC
@@ -230,6 +274,56 @@ HWTEST_F(BarItemTestNg, BarItemPattern001, TestSize.Level1)
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     ASSERT_NE(iconNode, nullptr);
     frameNode_->SetIconNode(iconNode);
+
+    /**
+     * @tc.steps: step2. test whether active icon can be set successful.
+     * @tc.expected: active icon getting from Get function is equal to icon by setting function.
+     */
+    ImageSourceInfo activeIconInfo("");
+    barItemPattern_->SetActiveIconImageSourceInfo(activeIconInfo);
+    EXPECT_EQ(barItemPattern_->GetActiveIconImageSourceInfo(), activeIconInfo);
+
+    /**
+     * @tc.steps: step3. test whether initial icon can be set successful.
+     * @tc.expected: initial icon getting from Get function is equal to icon by Set function.
+     */
+    ImageSourceInfo initialIconInfo("");
+    barItemPattern_->SetInitialIconImageSourceInfo(initialIconInfo);
+    EXPECT_EQ(barItemPattern_->GetInitialIconImageSourceInfo(), initialIconInfo);
+
+    /**
+     * @tc.steps: step4. test whether toolbar item status is active.
+     * @tc.expected: toolbar item status is active.
+     */
+    barItemPattern_->SetToolbarItemStatus(NavToolbarItemStatus::ACTIVE);
+    EXPECT_EQ(barItemPattern_->GetToolbarItemStatus(), NavToolbarItemStatus::ACTIVE);
+
+    /**
+     * @tc.steps: step5. test whether toolbar icon status is initial.
+     * @tc.expected: toolbar icon status is initial.
+     */
+    barItemPattern_->SetCurrentIconStatus(ToolbarIconStatus::INITIAL);
+    EXPECT_EQ(barItemPattern_->GetCurrentIconStatus(), ToolbarIconStatus::INITIAL);
+    DestroyBarItemObject();
+}
+
+/**
+ * @tc.name: BarItemPattern001
+ * @tc.desc: Test barItem pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarItemTestNg, BarItemPattern002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialization.
+     */
+    InitBarItemTestNg();
+    auto iconNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(iconNode, nullptr);
+    frameNode_->SetIconNode(iconNode);
+    bool hideText = true;
+    frameNode_->SetIsHideItemText(hideText);
 
     /**
      * @tc.steps: step2. test whether active icon can be set successful.

@@ -70,8 +70,10 @@ constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
+const Dimension FONT_SIZE_VALUE_VP = Dimension(30.1, DimensionUnit::VP);
 const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
+const Ace::FontWeight FONT_WEIGHT_VALUE_LIGHTER = Ace::FontWeight::LIGHTER;
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Color BG_COLOR_VALUE = Color::FromRGB(100, 255, 100);
 const std::vector<SelectParam> CREATE_VALUE = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
@@ -354,6 +356,74 @@ HWTEST_F(SelectPatternTestControlSizeNg, SetControlSize006, TestSize.Level1)
      */
     pattern->SetControlSize({});
     EXPECT_NE(pattern->GetControlSize(), ControlSize::SMALL);
+}
+
+/**
+ * @tc.name: SetControlSize007
+ * @tc.desc: Test SelectPattern SetControlSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestControlSizeNg, SetControlSize007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, select frame node and select pattern.
+     * @tc.expected: Objects are created successfully.
+     */
+    TestProperty testProperty;
+    testProperty.FontSize = std::make_optional(FONT_SIZE_VALUE_VP);
+    testProperty.FontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
+    testProperty.FontWeight = std::make_optional(FONT_WEIGHT_VALUE);
+    testProperty.FontColor = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.FontFamily = std::make_optional(FONT_FAMILY_VALUE);
+    auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get ControlSize, compare the set value with the ControlSize.
+     * @tc.expected: SelectPattern's ControlSize and the set value are equal. Restore the default value.
+     */
+    auto backupControlSize = pattern->GetControlSize();
+    auto settingControlSize = ControlSize::NORMAL;
+    pattern->SetControlSize(settingControlSize);
+    EXPECT_EQ(pattern->GetControlSize(), settingControlSize);
+    pattern->SetControlSize(backupControlSize);
+    EXPECT_EQ(pattern->GetControlSize(), backupControlSize);
+}
+
+/**
+ * @tc.name: SetControlSize008
+ * @tc.desc: Test SelectPattern SetControlSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestControlSizeNg, SetControlSize008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, select frame node and select pattern.
+     * @tc.expected: Objects are created successfully.
+     */
+    TestProperty testProperty;
+    testProperty.FontSize = std::make_optional(FONT_SIZE_VALUE);
+    testProperty.FontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
+    testProperty.FontWeight = std::make_optional(FONT_WEIGHT_VALUE_LIGHTER);
+    testProperty.FontColor = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.FontFamily = std::make_optional(FONT_FAMILY_VALUE);
+    auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get ControlSize, compare the set value with the ControlSize.
+     * @tc.expected: SelectPattern's ControlSize and the set value are equal. Restore the default value.
+     */
+    auto backupControlSize = pattern->GetControlSize();
+    auto settingControlSize = ControlSize::NORMAL;
+    pattern->SetControlSize(settingControlSize);
+    EXPECT_EQ(pattern->GetControlSize(), settingControlSize);
+    pattern->SetControlSize(backupControlSize);
+    EXPECT_EQ(pattern->GetControlSize(), backupControlSize);
 }
 
 /**
@@ -869,6 +939,102 @@ HWTEST_F(SelectPatternTestControlSizeNg, SetTextModifierApply003, TestSize.Level
     EXPECT_EQ(property->GetTextColor(), Color::RED);
     EXPECT_EQ(property->GetFontWeight(), Ace::FontWeight::BOLD);
     EXPECT_EQ(property->GetTextAlign(), TextAlign::JUSTIFY);
+}
+/**
+ * @tc.name: SetTextModifierApply004
+ * @tc.desc: Test SelectPattern SetTextModifierApply
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestControlSizeNg, SetTextModifierApply004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto frameNode = selectPattern->text_;
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. Set text and init some props.
+     */
+    auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateMaxLines(20);
+    /**
+     * @tc.steps: step3. set applyFunc dont eq nullptr and set some props.
+     */
+    auto applyFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto textNode = weakNode.Upgrade();
+        auto property = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateMaxLines(8);
+        property->UpdateFontSize(Dimension(80));
+        property->UpdateTextColor(Color::GREEN);
+        property->UpdateFontWeight(Ace::FontWeight::W600);
+        property->UpdateTextAlign(TextAlign::JUSTIFY);
+    };
+    selectModelInstance.SetTextModifierApply(applyFunc);
+    property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(property->GetMaxLines(), 8);
+    EXPECT_EQ(property->GetFontSize(), Dimension(80));
+    EXPECT_EQ(property->GetTextColor(), Color::GREEN);
+    EXPECT_EQ(property->GetFontWeight(), Ace::FontWeight::W600);
+    EXPECT_EQ(property->GetTextAlign(), TextAlign::JUSTIFY);
+}
+/**
+ * @tc.name: SetTextModifierApply005
+ * @tc.desc: Test SelectPattern SetTextModifierApply
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestControlSizeNg, SetTextModifierApply005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto frameNode = selectPattern->text_;
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. Set text and init some props.
+     */
+    auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateMaxLines(10);
+    property->UpdateFontSize(Dimension(100));
+    property->UpdateTextColor(Color::RED);
+    property->UpdateFontWeight(Ace::FontWeight::BOLD);
+    property->UpdateTextAlign(TextAlign::LEFT);
+    /**
+     * @tc.steps: step3. set applyFunc dont eq nullptr and set some props.
+     */
+    auto applyFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto textNode = weakNode.Upgrade();
+        auto property = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateMaxLines(15);
+        property->UpdateFontSize(Dimension(60));
+        property->UpdateTextColor(Color::BLUE);
+        property->UpdateFontWeight(Ace::FontWeight::MEDIUM);
+        property->UpdateTextAlign(TextAlign::CENTER);
+    };
+    selectModelInstance.SetTextModifierApply(applyFunc);
+    property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(property->GetMaxLines(), 15);
+    EXPECT_EQ(property->GetFontSize(), Dimension(60));
+    EXPECT_EQ(property->GetTextColor(), Color::BLUE);
+    EXPECT_EQ(property->GetFontWeight(), Ace::FontWeight::MEDIUM);
+    EXPECT_EQ(property->GetTextAlign(), TextAlign::CENTER);
 }
 /**
  * @tc.name: SetArrowModifierApplyTest001
