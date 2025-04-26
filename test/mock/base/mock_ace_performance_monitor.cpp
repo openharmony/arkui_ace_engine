@@ -17,18 +17,19 @@
 
 namespace OHOS::Ace {
 using namespace std::chrono;
-ScopedMonitor::ScopedMonitor(MonitorTag tag, int32_t instanceId) : tag_(tag), instanceId_(instanceId)
+ScopedMonitor::ScopedMonitor(MonitorTag tag) : tag_(tag)
 {
     begin_ = steady_clock::now();
     end_ = steady_clock::now();
-    ArkUIPerfMonitor::GetPerfMonitor(instanceId)->SetRecordingStatus(tag_, MonitorStatus::RUNNING);
+    ArkUIPerfMonitor::GetInstance().SetRecordingStatus(tag_, MonitorStatus::RUNNING);
 }
 
 ScopedMonitor::~ScopedMonitor() = default;
 
-std::shared_ptr<ArkUIPerfMonitor> ArkUIPerfMonitor::GetPerfMonitor(int32_t instanceId)
+ArkUIPerfMonitor& ArkUIPerfMonitor::GetInstance()
 {
-    return std::make_shared<ArkUIPerfMonitor>();
+    static ArkUIPerfMonitor instance;
+    return instance;
 }
 
 ArkUIPerfMonitor::ArkUIPerfMonitor() {}

@@ -41,7 +41,6 @@ public:
     void ResetPlaceholderColor() override {};
     void SetPlaceholderFont(const Font& value) override;
     void SetEnterKeyType(TextInputAction value) override;
-    void SetCapitalizationMode(AutoCapitalizationMode value) override {};
     void SetTextAlign(TextAlign value) override;
     void SetLineBreakStrategy(LineBreakStrategy value) override {};
     void SetCaretColor(const Color& value) override;

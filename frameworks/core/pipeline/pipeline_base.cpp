@@ -86,14 +86,6 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
     window_->SetVsyncCallback(vsyncCallback);
 }
 
-std::shared_ptr<ArkUIPerfMonitor> PipelineBase::GetPerfMonitor()
-{
-    if (!perfMonitor_) {
-        perfMonitor_ = std::make_shared<ArkUIPerfMonitor>();
-    }
-    return perfMonitor_;
-}
-
 PipelineBase::~PipelineBase()
 {
     std::lock_guard lock(destructMutex_);
