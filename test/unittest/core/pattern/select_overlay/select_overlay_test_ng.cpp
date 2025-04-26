@@ -5739,11 +5739,18 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems005, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextOverlayTheme>();
+        } else if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
+        } else {
+            return AceType::MakeRefPtr<SelectTheme>();
+        }
+    });
+    auto textOverlayTheme = MockPipelineContext::GetCurrent()->GetTheme<TextOverlayTheme>();
     ASSERT_NE(textOverlayTheme, nullptr);
     InitTextOverlayTheme(textOverlayTheme);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillRepeatedly(Return(textOverlayTheme));
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
@@ -5759,10 +5766,10 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems005, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Call AddCreateMenuItems and verify the return value.
-     * @tc.expected: The function returns -1.
+     * @tc.expected: The function returns 0, index != -1 indicates successful creation of menu.
      */
     int32_t index = selectOverlayNode->AddCreateMenuItems(menuOptionItems, infoPtr, maxWidth);
-    EXPECT_EQ(index, -1);
+    EXPECT_EQ(index, 0);
 
     /**
      * @tc.expected: OH_DEFAULT_PASTE menu item is handled correctly.

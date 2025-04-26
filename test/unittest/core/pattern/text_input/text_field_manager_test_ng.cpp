@@ -16,7 +16,6 @@
 #include <memory>
 #include <utility>
 
-#include "foundation/graphic/graphic_utils_lite/interfaces/kits/gfx_utils/graphic_types.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "text_input_base.h"

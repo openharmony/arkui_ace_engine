@@ -16,9 +16,13 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("video_test_ng") {
   type = "new"
   sources = [
+    "$ace_root/test/mock/base/mock_background_task_helper.cpp",
     "video_property_test_ng.cpp",
     "video_test_ng.cpp",
     "video_test_ng_add.cpp",
     "video_test_ng_extra_add.cpp",
   ]
+  if (current_os == "ohos") {
+    external_deps = [ "napi:ace_napi" ]
+  }
 }

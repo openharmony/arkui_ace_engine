@@ -32,6 +32,7 @@
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/components/button/button_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -163,6 +164,8 @@ void MenuTestNg::MockPipelineContextGetTheme()
             return AceType::MakeRefPtr<IconTheme>();
         } else if (type == SelectTheme::TypeId()) {
             return AceType::MakeRefPtr<SelectTheme>();
+        } else if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
         } else {
             return AceType::MakeRefPtr<MenuTheme>();
         }
@@ -1483,6 +1486,8 @@ HWTEST_F(MenuTestNg, MenuViewTestNgTextMaxLines001, TestSize.Level1)
             return AceType::MakeRefPtr<IconTheme>();
         } else if (type == SelectTheme::TypeId()) {
             return AceType::MakeRefPtr<SelectTheme>();
+        } else if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
         } else {
             return AceType::MakeRefPtr<MenuTheme>();
         }

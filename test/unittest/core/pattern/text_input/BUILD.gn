@@ -54,4 +54,9 @@ ace_unittest("TextInputTest") {
     "text_input_wordbreak_test.cpp",
   ]
   cflags = [ "-fno-access-control" ]
+
+  external_deps = [
+    "icu:shared_icui18n",
+    "icu:shared_icuuc",
+  ]
 }

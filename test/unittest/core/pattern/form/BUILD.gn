@@ -37,6 +37,10 @@ ace_unittest("form_test_ng") {
     "form_test_ng.cpp",
   ]
 
+  if (ohos_indep_compiler_enable) {
+    include_dirs = indep_compile_includes
+  }
+
   if (is_ohos_standard_system) {
     external_deps = [
       "ability_base:want",
@@ -48,6 +52,8 @@ ace_unittest("form_test_ng") {
       "form_fwk:form_manager",
       "graphic_2d:librender_service_client",
       "i18n:intl_util",
+      "icu:shared_icui18n",
+      "icu:shared_icuuc",
       "input:libmmi-client",
       "resource_management:global_resmgr",
     ]
@@ -79,6 +85,10 @@ ace_unittest("form_node_test") {
     "form_node_test.cpp",
   ]
 
+  if (ohos_indep_compiler_enable) {
+    include_dirs = indep_compile_includes
+  }
+
   if (is_ohos_standard_system) {
     external_deps = [
       "ability_base:want",
@@ -90,6 +100,8 @@ ace_unittest("form_node_test") {
       "form_fwk:form_manager",
       "graphic_2d:librender_service_client",
       "i18n:intl_util",
+      "icu:shared_icui18n",
+      "icu:shared_icuuc",
       "input:libmmi-client",
       "resource_management:global_resmgr",
     ]
@@ -121,6 +133,10 @@ ace_unittest("form_pattern_test") {
     "form_pattern_test.cpp",
   ]
 
+  if (ohos_indep_compiler_enable) {
+    include_dirs = indep_compile_includes
+  }
+
   if (is_ohos_standard_system) {
     external_deps = [
       "ability_base:want",
@@ -132,6 +148,8 @@ ace_unittest("form_pattern_test") {
       "form_fwk:form_manager",
       "graphic_2d:librender_service_client",
       "i18n:intl_util",
+      "icu:shared_icui18n",
+      "icu:shared_icuuc",
       "input:libmmi-client",
       "resource_management:global_resmgr",
     ]

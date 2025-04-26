@@ -21,7 +21,6 @@ group("unittest") {
   deps = []
   if (!is_asan) {
     deps += [
-      ":linux_unittest",
       "adapter:adapter_unittest",
       "base:base_unittest",
       "bridge:bridge_unittest",
@@ -29,6 +28,9 @@ group("unittest") {
       "frameworks:frameworks_unittest",
       "interfaces:interfaces_unittest",
     ]
+    if (!ohos_indep_compiler_enable) {
+      deps += [ ":linux_unittest" ]
+    }
   }
 }
 
@@ -65,18 +67,28 @@ config("ace_unittest_config") {
 
   configs = [ ":ace_circle_config" ]
 
-  include_dirs = [
-    "$ace_root",
-    "$ace_root/frameworks",
-    "$hilog_root/interfaces/native/innerkits/include",
-    "$ace_root/interfaces/inner_api/ace_kit/include",
-    "$root_out_dir/arkui/framework",
-    "//third_party/icu/icu4c/source/common",
-    "//third_party/skia",
-    "//foundation/window/window_manager/interfaces/innerkits",
-    "//commonlibrary/c_utils/base/include/",
-    "//third_party/node/src",
-  ]
+  if (current_os == "ohos") {
+    include_dirs = [
+      "$ace_root",
+      "$ace_root/frameworks",
+      "$ace_root/interfaces/inner_api/ace_kit/include",
+      "$root_out_dir/arkui/framework",
+    ]
+  } else {
+    include_dirs = [
+      "$ace_root",
+      "$ace_root/frameworks",
+      "$hilog_root/interfaces/native/innerkits/include",
+      "$ace_root/interfaces/inner_api/ace_kit/include",
+      "$root_out_dir/arkui/framework",
+      "//third_party/icu/icu4c/source/common",
+      "//third_party/skia",
+      "//foundation/window/window_manager/interfaces/innerkits",
+      "//commonlibrary/c_utils/base/include/",
+      "//third_party/node/src",
+    ]
+  }
+
   if ((ace_engine_feature_enable_split_mode || ace_engine_feature_wearable) &&
       defined(vendor_configs.ace_engine_advanced_split_mode_dirs)) {
     include_dirs += vendor_configs.ace_engine_advanced_split_mode_dirs
@@ -238,6 +250,9 @@ ohos_source_set("ace_components_base") {
   }
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   configs = [ ":ace_unittest_config" ]
+  if (current_os == "ohos") {
+    external_deps = [ "c_utils:utils" ]
+  }
 }
 
 # ace components event
@@ -275,6 +290,9 @@ ohos_source_set("ace_components_event") {
   ]
   configs = [ ":ace_unittest_config" ]
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  if (current_os == "ohos") {
+    external_deps = [ "c_utils:utils" ]
+  }
 }
 
 # ace components gestures
@@ -307,6 +325,9 @@ ohos_source_set("ace_components_gestures") {
   ]
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   configs = [ ":ace_unittest_config" ]
+  if (current_os == "ohos") {
+    external_deps = [ "c_utils:utils" ]
+  }
 }
 
 # ace components layout
@@ -324,6 +345,9 @@ ohos_source_set("ace_components_layout") {
   ]
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   configs = [ ":ace_unittest_config" ]
+  if (current_os == "ohos") {
+    external_deps = [ "c_utils:utils" ]
+  }
 }
 
 # ace components property
@@ -347,6 +371,9 @@ ohos_source_set("ace_components_property") {
   ]
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   configs = [ ":ace_unittest_config" ]
+  if (current_os == "ohos") {
+    external_deps = [ "c_utils:utils" ]
+  }
 }
 
 ohos_source_set("ace_components_manager") {
@@ -389,6 +416,9 @@ ohos_source_set("ace_components_manager") {
   ]
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   configs = [ ":ace_unittest_config" ]
+  if (current_os == "ohos") {
+    external_deps = [ "c_utils:utils" ]
+  }
 }
 
 # ace components syntax
@@ -417,6 +447,9 @@ ohos_source_set("ace_components_syntax") {
   ]
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   configs = [ ":ace_unittest_config" ]
+  if (current_os == "ohos") {
+    external_deps = [ "c_utils:utils" ]
+  }
 }
 
 # ace components token theme
@@ -456,6 +489,9 @@ ohos_source_set("ace_components_render") {
   ]
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   configs = [ ":ace_unittest_config" ]
+  if (current_os == "ohos") {
+    external_deps = [ "c_utils:utils" ]
+  }
 }
 
 # ace base
@@ -493,16 +529,20 @@ ohos_source_set("ace_base") {
     "$ace_root/frameworks/base/utils/utils.cpp",
   ]
 
-  deps = [
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/cJSON:cjson_static",
-    "//third_party/icu/icu4c:static_icui18n",
-    "//third_party/icu/icu4c:static_icuuc",
+  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "cJSON:cjson_static",
+    "icu:static_icui18n",
+    "icu:static_icuuc",
   ]
   if (current_os == "ohos") {
-    external_deps = [ "zlib:shared_libz" ]
+    external_deps += [
+      "c_utils:utils",
+      "zlib:shared_libz",
+    ]
   }
+
   configs = [ ":ace_unittest_config" ]
 }
 
@@ -530,6 +570,9 @@ ohos_source_set("ace_core_animation") {
   ]
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   configs = [ ":ace_unittest_config" ]
+  if (current_os == "ohos") {
+    external_deps = [ "c_utils:utils" ]
+  }
 }
 
 # ace components extra - special
@@ -603,15 +646,17 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/test/mock/core/common/mock_icon_theme.cpp",
   ]
 
-  deps = [
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "//third_party/icu/icu4c:static_icuuc",
-  ]
+  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   external_deps = [
     "googletest:gmock",
     "googletest:gtest_main",
+    "icu:static_icui18n",
+    "icu:static_icuuc",
   ]
   configs = [ ":ace_unittest_config" ]
+  if (current_os == "ohos") {
+    external_deps += [ "c_utils:utils" ]
+  }
 }
 
 ohos_source_set("ace_engine_unittest_flutter_deps") {
@@ -727,6 +772,13 @@ ohos_source_set("ace_components_mock") {
     "googletest:gtest_main",
   ]
   configs = [ ":ace_unittest_config" ]
+  if (current_os == "ohos") {
+    external_deps += [
+      "c_utils:utils",
+      "napi:ace_napi",
+      "skia:skia_canvaskit",
+    ]
+  }
 }
 
 ohos_source_set("ace_components_pattern") {
@@ -1374,6 +1426,16 @@ ohos_source_set("ace_components_pattern") {
   }
 
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
-  external_deps = [ "bounds_checking_function:libsec_static" ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "icu:shared_icui18n",
+    "icu:shared_icuuc",
+  ]
   configs = [ ":ace_unittest_config" ]
+  if (current_os == "ohos") {
+    external_deps += [
+      "c_utils:utils",
+      "skia:skia_canvaskit",
+    ]
+  }
 }

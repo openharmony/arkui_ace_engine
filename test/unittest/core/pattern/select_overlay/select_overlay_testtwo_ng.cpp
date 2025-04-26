@@ -919,8 +919,15 @@ HWTEST_F(SelectOverlayTestTwoNg, BuildButtonPasteButton, TestSize.Level1)
     EXPECT_NE(selectOverlayNode->selectMenuInner_, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
-
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextOverlayTheme>();
+        } else if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
+        } else {
+            return AceType::MakeRefPtr<SelectTheme>();
+        }
+    });
     /**
      * @tc.steps: step2. call ShowPaste.
      */
@@ -943,7 +950,7 @@ HWTEST_F(SelectOverlayTestTwoNg, BuildButtonPasteButton, TestSize.Level1)
         GestureEvent gestureEvent = GestureEvent();
         playClickCallback(gestureEvent);
     }
-    EXPECT_EQ(pasteCount, 0);
+    EXPECT_EQ(pasteCount, 1);
 }
 
 /**
