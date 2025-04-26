@@ -38,6 +38,9 @@ struct TabsMainPage {
     new TextList(4, 'OnContentWillScrollListNest', 'pages/Swiper/OnContentWillScrollListNest'),
     new TextList(5, 'CachedCountIsShownNormal', 'pages/Swiper/CachedCountIsShownNormal'),
     new TextList(6, 'MultiIndicator', 'pages/Swiper/MultiIndicator'),
+    new TextList(7, 'SwiperChangeIndex', 'pages/Swiper/SwiperChangeIndex'),
+    new TextList(8, 'SwiperNestSwiper', 'pages/Swiper/SwiperNestSwiper'),
+    new TextList(9, 'SwiperNestList', 'pages/Swiper/SwiperNestList'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
