@@ -438,7 +438,7 @@ int32_t ReadTouchAccelarateMode()
 
 bool IsAsyncInitializeEnabled()
 {
-    return system::GetBoolParameter("persist.ace.async.initialize", true);
+    return system::GetBoolParameter("persist.ace.async.initialize", false);
 }
 
 std::string InitSysBrand()
