@@ -51,7 +51,7 @@ void DynamicComponentRendererImpl::SetUIContentType(UIContentType uIContentType)
 
 bool DynamicComponentRendererImpl::IsRestrictedWorkerThread() { return false; }
 
-bool DynamicComponentRendererImpl::HasWorkerUsing(void *worker) { return false; }
+bool DynamicComponentRendererImpl::CheckDCMaxConstraintInWorker(void *worker) { return false; }
 
 void DynamicComponentRendererImpl::AddWorkerUsing(void *worker) {}
 
@@ -112,7 +112,7 @@ bool DynamicComponentRendererImpl::GetBackgroundTransparent() const
     return true;
 }
 
-bool DynamicComponentRendererImpl::CheckWorkerMaxConstraint()
+bool DynamicComponentRendererImpl::CheckWorkerMaxConstraint(void *worker)
 {
     return true;
 }
