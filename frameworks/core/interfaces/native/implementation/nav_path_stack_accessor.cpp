@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -21,10 +22,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavPathStackAccessor {
 void DestroyPeerImpl(Ark_NavPathStack peer)
 {
+    if (peer) {
+        delete peer;
+        peer = nullptr;
+    }
 }
 Ark_NavPathStack CtorImpl()
 {
-    return nullptr;
+    return new NavPathStackPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

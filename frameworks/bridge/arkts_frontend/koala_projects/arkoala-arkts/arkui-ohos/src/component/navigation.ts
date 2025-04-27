@@ -1439,7 +1439,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if ((RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+            if (value_value_type == RuntimeType.STRING || TypeChecker.isResource(value, false, false, false, false, false)) {
                 thisSerializer.writeInt8(0 as int32)
                 const value_value_0  = value_value as ResourceStr
                 let value_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -1673,7 +1673,7 @@ export interface NavigationAttribute extends CommonMethod {
     backButtonIcon(icon: string | PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this
     hideNavBar(value: boolean | undefined): this
     subTitle(value: string | undefined): this
-    hideTitleBar(hide: boolean | undefined, animated?: boolean): this
+    hideTitleBar(hide: boolean | undefined, animated: boolean | undefined): this
     hideBackButton(value: boolean | undefined): this
     titleMode(value: NavigationTitleMode | undefined): this
     menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this
@@ -1799,7 +1799,7 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     public subTitle(value: string | undefined): this {
         return this
     }
-    public hideTitleBar(hide: boolean | undefined, animated?: boolean): this {
+    public hideTitleBar(hide: boolean | undefined, animated: boolean | undefined): this {
         return this
     }
     public hideBackButton(value: boolean | undefined): this {
@@ -1880,8 +1880,12 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
     /** @memo */
     public setNavigationOptions(pathInfos?: NavPathStack): this {
         if (this.checkPriority("setNavigationOptions")) {
+            let info: NavPathStack = new NavPathStack();
             const pathInfos_type = runtimeType(pathInfos)
-            this.getPeer()?.setNavigationOptions0Attribute()
+            if (pathInfos_type != RuntimeType.UNDEFINED) {
+                info = pathInfos!
+            }
+            this.getPeer()?.setNavigationOptions1Attribute(info)
             return this
         }
         return this
@@ -1970,7 +1974,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         return this
     }
     /** @memo */
-    public hideTitleBar(hide: boolean | undefined, animated?: boolean): this {
+    public hideTitleBar(hide: boolean | undefined, animated: boolean | undefined): this {
         if (this.checkPriority("hideTitleBar")) {
             const hide_type = runtimeType(hide)
             const animated_type = runtimeType(animated)
@@ -2150,7 +2154,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
     public title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined, options?: NavigationTitleOptions): this {
         if (this.checkPriority("title")) {
             const value_casted = value as (ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined)
-            const options_casted = options as (NavigationTitleOptions)
+            const options_casted = options as (NavigationTitleOptions | undefined)
             this.getPeer()?.titleAttribute(value_casted, options_casted)
             return this
         }
