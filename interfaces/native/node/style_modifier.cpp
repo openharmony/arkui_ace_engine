@@ -9862,9 +9862,6 @@ void ResetTextPickerEnableHapticFeedback(ArkUI_NodeHandle node)
 int32_t SetTextPickerSelectedBackgroundStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
-    if (!InRegion(NUM_0,NUM_5,item->size)) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
     ArkUI_Bool getValue[5] = {false, false, false, false, false};
     ArkUI_Uint32 color = DEFAULT_PICKER_SELECTED_BACKGROUND_COLOR;
     ArkUI_Float32 value[NUM_4] = {DEFAULT_PICKER_SELECTED_BACKGROUND_BORDERRADIUS,
@@ -9877,6 +9874,13 @@ int32_t SetTextPickerSelectedBackgroundStyle(ArkUI_NodeHandle node, const ArkUI_
     CHECK_NULL_RETURN(modifiers, ERROR_CODE_INTERNAL_ERROR);
     auto textPickerModifier = modifiers->getTextPickerModifier();
     CHECK_NULL_RETURN(textPickerModifier, ERROR_CODE_INTERNAL_ERROR);
+    if (!item) {
+        textPickerModifier->setTextPickerSelectedBackgroundStyle(node->uiNodeHandle, getValue, color, value, unit);
+        return ERROR_CODE_NO_ERROR;
+    }
+    if (!InRegion(NUM_0,NUM_5,item->size)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (item->size > NUM_0) {
         color = item->value[NUM_0].u32;
         getValue[0] = true;
@@ -9889,7 +9893,7 @@ int32_t SetTextPickerSelectedBackgroundStyle(ArkUI_NodeHandle node, const ArkUI_
     }
     if (item->size == NUM_2 && GreatOrEqual(item->value[NUM_1].f32,NUM_0)) {
         for (int i = NUM_1; i < NUM_4; ++i) {
-            value[i] = item->value[i].f32;
+            value[i] = item->value[NUM_1].f32;
             getValue[i + NUM_1] = true;
         }
     }
