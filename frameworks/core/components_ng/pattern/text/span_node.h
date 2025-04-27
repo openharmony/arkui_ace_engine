@@ -579,6 +579,8 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(StrokeWidth, Dimension, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(StrokeColor, Color, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, std::vector<TextDecoration>, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color, ChangeFlag::RE_LAYOUT);

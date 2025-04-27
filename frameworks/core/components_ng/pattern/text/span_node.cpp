@@ -454,11 +454,13 @@ void SpanItem::UpdateFontStyle(TextStyle& spanTextStyle, const TextStyle& textSt
         UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
         UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
         UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, LetterSpacing, LetterSpacing);
+        UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, StrokeWidth, StrokeWidth);
     } else {
         UPDATE_SPAN_TEXT_STYLE(fontStyle, FontSize, FontSize);
         UPDATE_SPAN_TEXT_STYLE(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
         UPDATE_SPAN_TEXT_STYLE(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
         UPDATE_SPAN_TEXT_STYLE(fontStyle, LetterSpacing, LetterSpacing);
+        UPDATE_SPAN_TEXT_STYLE(fontStyle, StrokeWidth, StrokeWidth);
     }
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextColor, TextColor);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextShadow, TextShadows);
@@ -466,6 +468,7 @@ void SpanItem::UpdateFontStyle(TextStyle& spanTextStyle, const TextStyle& textSt
     UPDATE_SPAN_TEXT_STYLE(fontStyle, FontWeight, FontWeight);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, FontFeature, FontFeatures);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecoration, TextDecoration);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, StrokeColor, StrokeColor);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecorationColor, TextDecorationColor);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecorationStyle, TextDecorationStyle);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, LineThicknessScale, LineThicknessScale);
@@ -826,6 +829,8 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
     COPY_TEXT_STYLE(fontStyle, FontWeight, UpdateFontWeight);
     COPY_TEXT_STYLE(fontStyle, FontFamily, UpdateFontFamily);
     COPY_TEXT_STYLE(fontStyle, FontFeature, UpdateFontFeature);
+    COPY_TEXT_STYLE(fontStyle, StrokeWidth, UpdateStrokeWidth);
+    COPY_TEXT_STYLE(fontStyle, StrokeColor, UpdateStrokeColor);
     COPY_TEXT_STYLE(fontStyle, TextDecoration, UpdateTextDecoration);
     COPY_TEXT_STYLE(fontStyle, TextDecorationColor, UpdateTextDecorationColor);
     COPY_TEXT_STYLE(fontStyle, TextDecorationStyle, UpdateTextDecorationStyle);

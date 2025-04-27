@@ -43,6 +43,8 @@ public:
     static void ParseJsFontWeight(const JSRef<JSObject>& obj, Font& font);
     static void ParseJsFontFamily(const JSRef<JSObject>& obj, Font& font);
     static void ParseJsFontStyle(const JSRef<JSObject>& obj, Font& font);
+    static void ParseJsStrokeWidth(const JSRef<JSObject>& obj, Font& font);
+    static void ParseJsStrokeColor(const JSRef<JSObject>& obj, Font& font);
     void GetFontColor(const JSCallbackInfo& info);
     void SetFontColor(const JSCallbackInfo& info);
     void GetFontFamily(const JSCallbackInfo& info);
@@ -53,6 +55,10 @@ public:
     void SetFontWeight(const JSCallbackInfo& info);
     void GetFontStyle(const JSCallbackInfo& info);
     void SetFontStyle(const JSCallbackInfo& info);
+    void GetStrokeWidth(const JSCallbackInfo& info);
+    void SetStrokeWidth(const JSCallbackInfo& info);
+    void GetStrokeColor(const JSCallbackInfo& info);
+    void SetStrokeColor(const JSCallbackInfo& info);
 
     const RefPtr<FontSpan>& GetFontSpan();
     void SetFontSpan(const RefPtr<FontSpan>& fontSpan);

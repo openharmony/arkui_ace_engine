@@ -199,6 +199,8 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableVariableFontWeight, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFeature, FONT_FEATURES_LIST);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeWidth, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, std::vector<TextDecoration>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationStyle, TextDecorationStyle);

@@ -104,6 +104,14 @@ void FontSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
     if (font_.fontWeight.has_value()) {
         spanItem->fontStyle->UpdateFontWeight(font_.fontWeight.value());
     }
+
+    if (font_.strokeWidth.has_value()) {
+        spanItem->fontStyle->UpdateStrokeWidth(font_.strokeWidth.value());
+    }
+
+    if (font_.strokeColor.has_value()) {
+        spanItem->fontStyle->UpdateStrokeColor(font_.strokeColor.value());
+    }
 }
 
 void FontSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
@@ -113,6 +121,8 @@ void FontSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
     spanItem->fontStyle->ResetFontSize();
     spanItem->fontStyle->ResetItalicFontStyle();
     spanItem->fontStyle->ResetFontWeight();
+    spanItem->fontStyle->ResetStrokeWidth();
+    spanItem->fontStyle->ResetStrokeColor();
 }
 
 Font FontSpan::GetFont() const
@@ -150,6 +160,12 @@ std::string FontSpan::ToString() const
     }
     if (font_.fontWeight.has_value()) {
         ss << " FontWeight:" << static_cast<int32_t>(font_.fontWeight.value());
+    }
+    if (font_.strokeWidth.has_value()) {
+        ss << " StrokeWidth:" << font_.strokeWidth.value().ToString();
+    }
+    if (font_.strokeColor.has_value()) {
+        ss << " StrokeColor:" << font_.strokeColor.value().ColorToString();
     }
     std::string output = ss.str();
     return output;
