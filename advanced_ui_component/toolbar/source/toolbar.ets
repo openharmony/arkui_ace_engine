@@ -629,14 +629,20 @@ struct ToolBarDialog {
   }
 
   async aboutToAppear(): Promise<void> {
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.mainWindowStage = context.windowStage.getMainWindowSync();
-    let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
-    let rect = properties.windowRect;
-    if (px2vp(rect.height) > this.screenWidth) {
-      this.maxLines = this.verticalScreenLines;
-    } else {
-      this.maxLines = this.horizontalsScreenLines;
+    try {
+      let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+      this.mainWindowStage = context.windowStage.getMainWindowSync();
+      let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
+      let rect = properties.windowRect;
+      if (px2vp(rect.height) > this.screenWidth) {
+        this.maxLines = this.verticalScreenLines;
+      } else {
+        this.maxLines = this.horizontalsScreenLines;
+      }
+    } catch (err) {
+      let code: number = (err as BusinessError)?.code;
+      let message: string = (err as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace', `Faild to ToolBarDialog aboutToAppear, code: ${code}, message: ${message}`);
     }
   }
 }

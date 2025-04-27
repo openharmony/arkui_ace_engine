@@ -1341,15 +1341,21 @@ class i1 extends ViewPU {
     If.pop();
   }
   async aboutToAppear() {
-    let context = this.getUIContext().getHostContext();
-    this.mainWindowStage = context.windowStage.getMainWindowSync();
-    let properties = this.mainWindowStage.getWindowProperties();
-    let rect = properties.windowRect;
-    if (px2vp(rect.height) > this.screenWidth) {
-      this.maxLines = this.verticalScreenLines;
-    }
-    else {
-      this.maxLines = this.horizontalsScreenLines;
+    try {
+      let context = this.getUIContext().getHostContext();
+      this.mainWindowStage = context.windowStage.getMainWindowSync();
+      let properties = this.mainWindowStage.getWindowProperties();
+      let rect = properties.windowRect;
+      if (px2vp(rect.height) > this.screenWidth) {
+        this.maxLines = this.verticalScreenLines;
+      }
+      else {
+        this.maxLines = this.horizontalsScreenLines;
+      }
+    } catch (err) {
+      let code = err?.code;
+      let message = err?.message;
+      hilog.error(0x3900, 'Ace', `Faild to ToolBarDialog aboutToAppear, code: ${code}, message: ${message}`);
     }
   }
   rerender() {
