@@ -2954,7 +2954,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
     CHECK_NULL_VOID(config);
 
     RefPtr<ResourceAdapter> adapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager, instanceId_);
-    ResourceManager::GetInstance().UpdateResourceAdapter(bundleName_, moduleName_, instanceId_, adapter);
+    ResourceManager::GetInstance().UpdateMainResourceAdapter(bundleName_, moduleName_, instanceId_, adapter);
 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
