@@ -126,6 +126,11 @@ bool SystemProperties::GetIsUseMemoryMonitor()
     return false;
 }
 
+bool SystemProperties::GetMultiInstanceEnabled()
+{
+    return false;
+}
+
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
     return false;

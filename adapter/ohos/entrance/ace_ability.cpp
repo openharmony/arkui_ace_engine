@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
+#include "adapter/ohos/entrance/rs_adapter.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/geometry/rect.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -323,11 +324,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
 #ifndef NG_BUILD
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
-        rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        auto surfaceNode = window->GetSurfaceNode();
-        rsUiDirector->SetRSSurfaceNode(surfaceNode);
-        rsUiDirector->SetCacheDir(cacheDir);
-        rsUiDirector->Init();
+        RsAdapter::RsUIDirectorInit(rsUiDirector, window, cacheDir);
     }
 #endif
 #endif
@@ -423,13 +420,23 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         callback = [window, id = abilityId_, aceView, rsUiDirector](
                        const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
             if (rsUiDirector) {
-                rsUiDirector->SetUITaskRunner(
-                    [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id](
-                        const std::function<void()>& task, uint32_t delay) {
-                        ContainerScope scope(id);
-                        taskExecutor->PostDelayedTask(
-                            task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
-                    }, id);
+                if (!SystemProperties::GetMultiInstanceEnabled()) {
+                    rsUiDirector->SetUITaskRunner(
+                        [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id](
+                            const std::function<void()>& task, uint32_t delay) {
+                            ContainerScope scope(id);
+                            taskExecutor->PostDelayedTask(
+                                task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
+                        }, id);
+                } else {
+                    rsUiDirector->SetUITaskRunner(
+                        [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id](
+                            const std::function<void()>& task, uint32_t delay) {
+                            ContainerScope scope(id);
+                            taskExecutor->PostDelayedTask(
+                                task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
+                        }, 0, true);
+                }
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);
                 }

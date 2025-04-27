@@ -172,7 +172,8 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
     // Execute the function.
     jsAnimateToFunc->Call(jsAnimateToFunc);
     pipelineContext->FlushOnceVsyncTask();
-    AceEngine::Get().NotifyContainersOrderly([triggerId](const RefPtr<Container>& container) {
+    AceEngine::Get().NotifyContainersOrderly([triggerId,
+        multiInstanceEnabled = SystemProperties::GetMultiInstanceEnabled()](const RefPtr<Container>& container) {
         if (!CheckContainer(container)) {
             return;
         }
@@ -183,6 +184,9 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
             return;
         }
         context->PrepareCloseImplicitAnimation();
+        if (multiInstanceEnabled) {
+            AnimationUtils::CloseImplicitAnimation(context);
+        }
     });
     pipelineContext->CloseImplicitAnimation();
     pipelineContext->SetSyncAnimationOption(previousOption);
@@ -230,7 +234,8 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
             "param is [option:%{public}s]", option.ToString().c_str());
     }
     NG::ScopedViewStackProcessor scopedProcessor;
-    AceEngine::Get().NotifyContainersOrderly([triggerId](const RefPtr<Container>& container) {
+    AceEngine::Get().NotifyContainersOrderly([triggerId, &option,
+        multiInstanceEnabled = SystemProperties::GetMultiInstanceEnabled()](const RefPtr<Container>& container) {
         if (!CheckContainer(container)) {
             return;
         }
@@ -241,6 +246,9 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
             return;
         }
         context->PrepareOpenImplicitAnimation();
+        if (multiInstanceEnabled) {
+            AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr, context);
+        }
     });
     pipelineContext->PrepareOpenImplicitAnimation();
     FlushDirtyNodesWhenExist(pipelineContext, option, count,

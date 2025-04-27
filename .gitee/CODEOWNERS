@@ -73,6 +73,8 @@ adapter/ohos/entrance/pa_engine/ @jayleehw
 adapter/ohos/entrance/platform_event_callback.h @arkuiframework
 adapter/ohos/entrance/plugin_utils_impl.cpp @arkuiabilitygroup
 adapter/ohos/entrance/plugin_utils_impl.h @arkuiabilitygroup
+adapter/ohos/entrance/rs_adapter.h @arkuiframework
+adapter/ohos/entrance/rs_adapter.cpp @arkuiframework
 adapter/ohos/entrance/subwindow/ @arkuipopupwindow
 adapter/ohos/entrance/timepicker/ @arkui_image
 adapter/ohos/entrance/touch_event_convertor.cpp @arkuievent

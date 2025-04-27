@@ -59,6 +59,7 @@
 #include "core/components_ng/property/safe_area_insets.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
+#include "adapter/ohos/entrance/rs_adapter.h"
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/transaction/rs_sync_transaction_controller.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -1945,12 +1946,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
-        rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        if (rsUiDirector) {
-            rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
-            rsUiDirector->SetCacheDir(context->GetCacheDir());
-            rsUiDirector->Init();
-        }
+        RsAdapter::RsUIDirectorInit(rsUiDirector, window, context->GetCacheDir());
     }
 #endif
 #endif
@@ -2234,13 +2230,23 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                        const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) {
             if (rsUiDirector) {
                 ACE_SCOPED_TRACE("OHOS::Rosen::RSUIDirector::Create()");
-                rsUiDirector->SetUITaskRunner(
-                    [taskExecutor = container->GetTaskExecutor(), id](
-                        const std::function<void()>& task, uint32_t delay) {
-                        ContainerScope scope(id);
-                        taskExecutor->PostDelayedTask(
-                            task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
-                    }, id);
+                if (!SystemProperties::GetMultiInstanceEnabled()) {
+                    rsUiDirector->SetUITaskRunner(
+                        [taskExecutor = container->GetTaskExecutor(), id](
+                            const std::function<void()>& task, uint32_t delay) {
+                            ContainerScope scope(id);
+                            taskExecutor->PostDelayedTask(
+                                task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
+                        }, id);
+                } else {
+                    rsUiDirector->SetUITaskRunner(
+                        [taskExecutor = container->GetTaskExecutor(), id](
+                            const std::function<void()>& task, uint32_t delay) {
+                            ContainerScope scope(id);
+                            taskExecutor->PostDelayedTask(
+                                task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
+                        }, 0, true);
+                }
                 auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);

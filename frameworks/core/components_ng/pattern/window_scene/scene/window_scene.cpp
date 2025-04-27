@@ -93,7 +93,11 @@ std::shared_ptr<Rosen::RSSurfaceNode> WindowScene::CreateLeashWindowNode()
     name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
     Rosen::RSSurfaceNodeConfig config;
     config.SurfaceNodeName = "WindowScene_" + name + std::to_string(session_->GetPersistentId());
-    auto surfaceNode = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::LEASH_WINDOW_NODE);
+    auto rsUIContext = session_->GetRSUIContext(__func__);
+    auto surfaceNode = Rosen::RSSurfaceNode::Create(
+        config, Rosen::RSSurfaceNodeType::LEASH_WINDOW_NODE, true, false, rsUIContext);
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "Create RSSurfaceNode: %{public}s",
+             WindowSceneHelper::RSNodeToStr(surfaceNode).c_str());
     CHECK_NULL_RETURN(surfaceNode, nullptr);
     surfaceNode->SetLeashPersistentId(static_cast<int64_t>(session_->GetPersistentId()));
     return surfaceNode;
@@ -261,9 +265,8 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     session_->SetBounds(originBounds);
     windowRect.posX_ = std::round(bounds.x_ + session_->GetOffsetX());
     windowRect.posY_ = std::round(bounds.y_ + session_->GetOffsetY());
-    auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
-    auto transaction = transactionController && session_->GetSessionRect() != windowRect ?
-        transactionController->GetRSTransaction() : nullptr;
+    auto transaction = session_->GetSessionRect() != windowRect ?
+        WindowSceneHelper::GetRSTransaction(session_) : nullptr;
     auto ret = session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged", transaction);
     auto sizeChangeReason = session_->GetSizeChangeReason();
     if ((sizeChangeReason >= Rosen::SizeChangeReason::MAXIMIZE &&

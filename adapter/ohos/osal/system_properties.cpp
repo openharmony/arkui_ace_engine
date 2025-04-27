@@ -258,6 +258,11 @@ bool IsContainerDeleteFlag()
     return (system::GetParameter("persist.container.delete", "true") == "true");
 }
 
+bool IsMultiInstanceEnabled()
+{
+    return (system::GetParameter("persist.rosen.rsclientmultiinstance.enabled", "0") != "0");
+}
+
 bool IsLayoutDetectEnabled()
 {
     return (system::GetParameter("persist.ace.layoutdetect.enabled", "0") == "1");
@@ -552,6 +557,7 @@ ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationE
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
 ACE_WEAK_SYM DebugFlags SystemProperties::debugFlags_ = GetDebugFlags();
 ACE_WEAK_SYM bool SystemProperties::containerDeleteFlag_ = IsContainerDeleteFlag();
+ACE_WEAK_SYM bool SystemProperties::multiInstanceEnabled_ = IsMultiInstanceEnabled();
 ACE_WEAK_SYM bool SystemProperties::layoutDetectEnabled_ = IsLayoutDetectEnabled();
 bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
 bool SystemProperties::astcEnabled_ = GetAstcEnabled();
@@ -704,6 +710,7 @@ void SystemProperties::InitDeviceInfo(
     debugEnabled_ = IsDebugEnabled();
     debugFlags_ = GetDebugFlags();
     layoutDetectEnabled_ = IsLayoutDetectEnabled();
+    multiInstanceEnabled_ = IsMultiInstanceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
     layoutTraceEnable_.store(IsLayoutTraceEnabled() && developerModeOn_);
     traceInputEventEnable_.store(IsTraceInputEventEnabled() && developerModeOn_);
@@ -786,6 +793,11 @@ ACE_WEAK_SYM bool SystemProperties::GetDebugEnabled()
 ACE_WEAK_SYM bool SystemProperties::GetLayoutDetectEnabled()
 {
     return layoutDetectEnabled_;
+}
+
+ACE_WEAK_SYM bool SystemProperties::GetMultiInstanceEnabled()
+{
+    return multiInstanceEnabled_;
 }
 
 std::string SystemProperties::GetLanguage()

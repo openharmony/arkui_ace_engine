@@ -19,6 +19,7 @@
 #include "core/common/container.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "render_service_client/core/ui/rs_root_node.h"
 #include "transaction/rs_interfaces.h"
 #endif
 
@@ -119,7 +120,8 @@ void FormRenderWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
         auto height = static_cast<float>(calcLayoutConstraint->maxSize->Height()->GetDimension().Value());
         rootSRNode->SetBounds(0, 0, width, height);
         CHECK_NULL_VOID(rsUIDirector_);
-        rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
+        rsUIDirector_->SetRSRootNode(
+            Rosen::RSNode::ReinterpretCast<Rosen::RSRootNode>(rosenRenderContext->GetRSNode()));
     }
     CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SendMessages();

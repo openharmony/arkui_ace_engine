@@ -351,14 +351,28 @@ void SubwindowOhos::InitContainer()
 #ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
-        rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        if (rsUiDirector != nullptr) {
+        if (!SystemProperties::GetMultiInstanceEnabled()) {
+            rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+            if (rsUiDirector != nullptr) {
+                rsUiDirector->SetRSSurfaceNode(window_->GetSurfaceNode());
+                auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
+                if (context != nullptr) {
+                    context->SetRSUIDirector(rsUiDirector);
+                }
+                rsUiDirector->Init();
+                TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "UIContent Init Rosen Backend");
+            }
+        } else {
+            rsUiDirector = window_->GetRSUIDirector();
+            if (!rsUiDirector) {
+                rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+            }
             rsUiDirector->SetRSSurfaceNode(window_->GetSurfaceNode());
             auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
             if (context != nullptr) {
                 context->SetRSUIDirector(rsUiDirector);
             }
-            rsUiDirector->Init();
+            rsUiDirector->Init(true, true);
             TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "UIContent Init Rosen Backend");
         }
     }
@@ -1476,14 +1490,27 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
 
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
-        rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        if (rsUiDirector != nullptr) {
+        if (!SystemProperties::GetMultiInstanceEnabled()) {
+            rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+            if (rsUiDirector != nullptr) {
+                rsUiDirector->SetRSSurfaceNode(dialogWindow_->GetSurfaceNode());
+                auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
+                if (context != nullptr) {
+                    context->SetRSUIDirector(rsUiDirector);
+                }
+                rsUiDirector->Init();
+            }
+        } else {
+            rsUiDirector = dialogWindow_->GetRSUIDirector();
+            if (!rsUiDirector) {
+                rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+            }
             rsUiDirector->SetRSSurfaceNode(dialogWindow_->GetSurfaceNode());
             auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
             if (context != nullptr) {
                 context->SetRSUIDirector(rsUiDirector);
             }
-            rsUiDirector->Init();
+            rsUiDirector->Init(true, true);
         }
     }
 #endif

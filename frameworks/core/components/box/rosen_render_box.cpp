@@ -26,11 +26,14 @@
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/flex/render_flex.h"
 #include "core/components/image/image_component.h"
+#include "core/components_ng/render/animation_utils.h"
 #ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_image.h"
 #else
 #include "core/components_ng/render/adapter/drawing_image.h"
 #endif
+#include "render_service_client/core/ui/rs_ui_context.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -1617,6 +1620,14 @@ void RosenRenderBox::OnAttachContext()
     });
 }
 
+std::shared_ptr<Rosen::RSUIContext> RosenRenderBox::GetUIContext(const RefPtr<PipelineContext>& context)
+{
+    CHECK_NULL_RETURN(context, nullptr);
+    auto rsUIDirector = context->GetRSUIDirector();
+    CHECK_NULL_RETURN(rsUIDirector, nullptr);
+    return rsUIDirector->GetRSUIContext();
+}
+
 void RosenRenderBox::AnimateMouseHoverEnter()
 {
     if (hoverAnimationType_ == HoverAnimationType::SCALE) {
@@ -1630,7 +1641,10 @@ void RosenRenderBox::AnimateMouseHoverEnter()
         rsNode->SetScale(scaleBegin);
         Rosen::RSAnimationTimingProtocol protocol;
         protocol.SetDuration(HOVER_ANIMATION_DURATION);
-        RSNode::Animate(protocol, SCALE_ANIMATION_TIMING_CURVE, [rsNode, scaleEnd]() {
+        auto pipeline = context_.Upgrade();
+        auto rsUIContext = GetUIContext(pipeline);
+        RSNode::Animate(rsUIContext,
+            protocol, SCALE_ANIMATION_TIMING_CURVE, [rsNode, scaleEnd]() {
             if (rsNode) {
                 rsNode->SetScale(scaleEnd);
             }
@@ -1672,7 +1686,10 @@ void RosenRenderBox::AnimateMouseHoverExit()
         }
         Rosen::RSAnimationTimingProtocol protocol;
         protocol.SetDuration(HOVER_ANIMATION_DURATION);
-        RSNode::Animate(protocol, SCALE_ANIMATION_TIMING_CURVE, [rsNode, scaleEnd]() {
+        auto pipeline = context_.Upgrade();
+        auto rsUIContext = GetUIContext(pipeline);
+        RSNode::Animate(rsUIContext,
+            protocol, SCALE_ANIMATION_TIMING_CURVE, [rsNode, scaleEnd]() {
             if (rsNode) {
                 rsNode->SetScale(scaleEnd);
             }

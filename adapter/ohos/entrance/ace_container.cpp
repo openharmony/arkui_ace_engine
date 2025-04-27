@@ -2685,9 +2685,22 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_->SetDataProviderManager(dataProviderManager);
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
-    pipelineContext_->SetPostRTTaskCallBack([](std::function<void()>&& task) {
+    pipelineContext_->SetPostRTTaskCallBack([pipelineWeak =
+        AceType::WeakClaim(AceType::RawPtr(pipelineContext_))](std::function<void()>&& task) {
         auto syncTask = std::make_shared<AceRosenSyncTask>(std::move(task));
-        Rosen::RSTransactionProxy::GetInstance()->ExecuteSynchronousTask(syncTask);
+        if (!SystemProperties::GetMultiInstanceEnabled()) {
+            Rosen::RSTransactionProxy::GetInstance()->ExecuteSynchronousTask(syncTask);
+        } else {
+            auto pipeline = pipelineWeak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            auto rsUiDirector = pipeline->GetWindow()->GetRSUIDirector();
+            auto rsUiContext = rsUiDirector->GetRSUIContext();
+            if (rsUiDirector && rsUiContext) {
+                rsUiContext->GetRSTransaction()->ExecuteSynchronousTask(syncTask);
+            } else {
+                Rosen::RSTransactionProxy::GetInstance()->ExecuteSynchronousTask(syncTask);
+            }
+        }
     });
 #endif
     if (IsUIExtensionWindow()) {

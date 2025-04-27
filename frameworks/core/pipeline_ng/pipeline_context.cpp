@@ -22,6 +22,8 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
+#include "render_service_client/core/ui/rs_ui_context.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
 #endif
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
@@ -1294,15 +1296,17 @@ void PipelineContext::SetupRootElement()
         rootNode_->AddChild(atomicService ? atomicService : stageNode);
     }
 #ifdef ENABLE_ROSEN_BACKEND
+    std::shared_ptr<Rosen::RSUIDirector> rsUIDirector;
     if (!IsJsCard() && !isFormRender_) {
         auto window = GetWindow();
         if (window) {
-            auto rsUIDirector = window->GetRSUIDirector();
+            rsUIDirector = window->GetRSUIDirector();
             if (rsUIDirector) {
                 rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
             }
         }
     }
+    FlushImplicitTransaction(rsUIDirector);
 #endif
     accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
     stageManager_ = ViewAdvancedRegister::GetInstance()->GenerateStageManager(stageNode);
@@ -1357,6 +1361,24 @@ void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback)
         }, TaskExecutor::TaskType::UI, "ArkUISetOnWindowFocusedCallback");
 }
 
+void PipelineContext::FlushImplicitTransaction(const std::shared_ptr<Rosen::RSUIDirector>& rsUIDirector)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetMultiInstanceEnabled() && rsUIDirector) {
+        auto surfaceNode = rsUIDirector->GetRSSurfaceNode();
+        if (surfaceNode) {
+            auto rsUIContext = surfaceNode->GetRSUIContext();
+            if (rsUIContext) {
+                auto rsTransaction = rsUIContext->GetRSTransaction();
+                if (rsTransaction) {
+                    rsTransaction->FlushImplicitTransaction();
+                }
+            }
+        }
+    }
+#endif
+}
+
 void PipelineContext::SetupSubRootElement()
 {
     CHECK_RUN_ON(UI);
@@ -1382,15 +1404,17 @@ void PipelineContext::SetupSubRootElement()
     rootNode_->AttachToMainTree(false, this);
 
 #ifdef ENABLE_ROSEN_BACKEND
+    std::shared_ptr<Rosen::RSUIDirector> rsUIDirector;
     if (!IsJsCard()) {
         auto window = GetWindow();
         if (window) {
-            auto rsUIDirector = window->GetRSUIDirector();
+            rsUIDirector = window->GetRSUIDirector();
             if (rsUIDirector) {
                 rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
             }
         }
     }
+    FlushImplicitTransaction(rsUIDirector);
 #endif
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
@@ -4293,15 +4317,17 @@ void PipelineContext::SetAppBgColor(const Color& color)
 {
     appBgColor_ = color;
 #ifdef ENABLE_ROSEN_BACKEND
+    std::shared_ptr<Rosen::RSUIDirector> rsUIDirector;
     if (!IsJsCard()) {
         auto window = GetWindow();
         if (window) {
-            auto rsUIDirector = window->GetRSUIDirector();
+            rsUIDirector = window->GetRSUIDirector();
             if (rsUIDirector) {
                 rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
             }
         }
     }
+    FlushImplicitTransaction(rsUIDirector);
 #endif
     CHECK_NULL_VOID(stageManager_);
     auto stage = stageManager_->GetStageNode();
@@ -6038,5 +6064,16 @@ void PipelineContext::OnRotationAnimationEnd()
             callback();
         }
     }
+}
+
+std::shared_ptr<Rosen::RSUIDirector> PipelineContext::GetRSUIDirector()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    auto window = GetWindow();
+    if (window) {
+        return window->GetRSUIDirector();
+    }
+#endif
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

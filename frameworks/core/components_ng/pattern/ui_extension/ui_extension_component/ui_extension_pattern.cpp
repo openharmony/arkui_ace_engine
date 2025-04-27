@@ -510,6 +510,16 @@ void UIExtensionPattern::OnConnect()
         return;
     }
     context->SetRSNode(surfaceNode);
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        auto pipelineContext = host->GetContext();
+        if (pipelineContext) {
+            auto rsUIDirector = pipelineContext->GetWindow()->GetRSUIDirector();
+            if (rsUIDirector) {
+                auto rsUIContext = rsUIDirector->GetRSUIContext();
+                surfaceNode->SetRSUIContext(rsUIContext);
+            }
+        }
+    }
     if (curPlaceholderType_ != PlaceholderType::INITIAL) {
         host->AddChild(contentNode_, 0);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

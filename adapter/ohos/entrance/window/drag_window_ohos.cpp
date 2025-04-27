@@ -20,6 +20,7 @@
 #include "include/core/SkCanvas.h"
 #include "include/core/SkSamplingOptions.h"
 
+#include "adapter/ohos/entrance/rs_adapter.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
 #include "base/image/pixel_map.h"
@@ -32,6 +33,9 @@
 #include "core/components_ng/render/adapter/drawing_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
+#include "render_service_client/core/ui/rs_root_node.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
 
 using namespace OHOS::Rosen;
 
@@ -230,26 +234,25 @@ void DragWindowOhos::Destroy() const
     }
 }
 
-void DragWindowOhos::DrawFrameNode(const RefPtr<NG::FrameNode>& rootNode)
+void DragWindowOhos::FlushImplicitTransaction()
 {
-#ifdef ENABLE_ROSEN_BACKEND
-    CHECK_NULL_VOID(rootNode);
-
-    auto surfaceNode = dragWindow_->GetSurfaceNode();
-    rsUiDirector_ = Rosen::RSUIDirector::Create();
-    rsUiDirector_->Init();
     auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
     }
-    rsUiDirector_->SetRSSurfaceNode(surfaceNode);
+}
 
+void DragWindowOhos::DrawFrameNode(const RefPtr<NG::FrameNode>& rootNode)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    CHECK_NULL_VOID(rootNode);
+    auto surfaceNode = dragWindow_->GetSurfaceNode();
+    RsAdapter::RsFlushImplicitTransaction(rsUiDirector_, dragWindow_, surfaceNode);
     auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootNode->GetRenderContext());
     CHECK_NULL_VOID(renderContext);
     auto rsNode = renderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode);
-
-    rsUiDirector_->SetRoot(rsNode->GetId());
+    rsUiDirector_->SetRSRootNode(Rosen::RSNode::ReinterpretCast<Rosen::RSRootNode>(rsNode));
     rsUiDirector_->SendMessages();
 #endif
 }
@@ -259,17 +262,11 @@ void DragWindowOhos::DrawPixelMap(const RefPtr<PixelMap>& pixelmap)
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(pixelmap);
     auto surfaceNode = dragWindow_->GetSurfaceNode();
-    rsUiDirector_ = Rosen::RSUIDirector::Create();
-    rsUiDirector_->Init();
-    auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    }
-    rsUiDirector_->SetRSSurfaceNode(surfaceNode);
-    rootNode_ = Rosen::RSRootNode::Create();
+    RsAdapter::RsFlushImplicitTransactionWithRoot(rsUiDirector_, dragWindow_, surfaceNode, rootNode_);
+    CHECK_NULL_VOID(rootNode_);
     rootNode_->SetBounds(0, 0, static_cast<float>(width_), static_cast<float>(height_));
     rootNode_->SetFrame(0, 0, static_cast<float>(width_), static_cast<float>(height_));
-    rsUiDirector_->SetRoot(rootNode_->GetId());
+    rsUiDirector_->SetRSRootNode(Rosen::RSNode::ReinterpretCast<Rosen::RSRootNode>(rootNode_));
     auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
     auto drawing = canvasNode->BeginRecording(width_, height_);
     DrawPixelMapInner(drawing, pixelmap, width_, height_);
@@ -287,17 +284,11 @@ void DragWindowOhos::DrawImage(void* drawingImage)
     RefPtr<NG::DrawingImage> canvasImage = AceType::DynamicCast<NG::DrawingImage>(*canvasImagePtr);
     CHECK_NULL_VOID(canvasImage);
     auto surfaceNode = dragWindow_->GetSurfaceNode();
-    rsUiDirector_ = Rosen::RSUIDirector::Create();
-    rsUiDirector_->Init();
-    auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    }
-    rsUiDirector_->SetRSSurfaceNode(surfaceNode);
-    rootNode_ = Rosen::RSRootNode::Create();
+    RsAdapter::RsFlushImplicitTransactionWithRoot(rsUiDirector_, dragWindow_, surfaceNode, rootNode_);
+    CHECK_NULL_VOID(rootNode_);
     rootNode_->SetBounds(0, 0, static_cast<float>(width_), static_cast<float>(height_));
     rootNode_->SetFrame(0, 0, static_cast<float>(width_), static_cast<float>(height_));
-    rsUiDirector_->SetRoot(rootNode_->GetId());
+    rsUiDirector_->SetRSRootNode(Rosen::RSNode::ReinterpretCast<Rosen::RSRootNode>(rootNode_));
     auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
     auto drawing = canvasNode->BeginRecording(width_, height_);
     auto rsImage = canvasImage->GetImage();
@@ -314,17 +305,11 @@ void DragWindowOhos::DrawText(
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(paragraph);
     auto surfaceNode = dragWindow_->GetSurfaceNode();
-    rsUiDirector_ = Rosen::RSUIDirector::Create();
-    rsUiDirector_->Init();
-    auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    }
-    rsUiDirector_->SetRSSurfaceNode(surfaceNode);
-    rootNode_ = Rosen::RSRootNode::Create();
+    RsAdapter::RsFlushImplicitTransactionWithRoot(rsUiDirector_, dragWindow_, surfaceNode, rootNode_);
+    CHECK_NULL_VOID(rootNode_);
     rootNode_->SetBounds(0, 0, static_cast<float>(width_), static_cast<float>(height_));
     rootNode_->SetFrame(0, 0, static_cast<float>(width_), static_cast<float>(height_));
-    rsUiDirector_->SetRoot(rootNode_->GetId());
+    rsUiDirector_->SetRSRootNode(Rosen::RSNode::ReinterpretCast<Rosen::RSRootNode>(rootNode_));
     auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
     RSRecordingPath path;
     if (renderText->GetStartOffset().GetY() == renderText->GetEndOffset().GetY()) {
@@ -373,22 +358,13 @@ void DragWindowOhos::DrawTextNG(const RefPtr<NG::Paragraph>& paragraph, const Re
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(paragraph);
     auto surfaceNode = dragWindow_->GetSurfaceNode();
-    rsUiDirector_ = Rosen::RSUIDirector::Create();
-    CHECK_NULL_VOID(rsUiDirector_);
-    rsUiDirector_->Init();
-    auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    }
-    rsUiDirector_->SetRSSurfaceNode(surfaceNode);
-
-    rootNode_ = Rosen::RSRootNode::Create();
+    RsAdapter::RsFlushImplicitTransactionWithRoot(rsUiDirector_, dragWindow_, surfaceNode, rootNode_);
     CHECK_NULL_VOID(rootNode_);
     rootNode_->SetBounds(Window_EXTERN.ConvertToPx(), Window_EXTERN.ConvertToPx(), static_cast<float>(width_),
         static_cast<float>(height_));
     rootNode_->SetFrame(Window_EXTERN.ConvertToPx(), Window_EXTERN.ConvertToPx(), static_cast<float>(width_),
         static_cast<float>(height_));
-    rsUiDirector_->SetRoot(rootNode_->GetId());
+    rsUiDirector_->SetRSRootNode(Rosen::RSNode::ReinterpretCast<Rosen::RSRootNode>(rootNode_));
     auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
     CHECK_NULL_VOID(canvasNode);
     Offset globalOffset;

@@ -44,6 +44,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "pointer_event.h"
 #include "string_wrapper.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
+#include "render_service_client/core/ui/rs_ui_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1205,16 +1207,45 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     reason_ = (uint32_t)reason;
     auto persistentId = parentSession ? parentSession->GetPersistentId() : session_->GetPersistentId();
     int32_t duration = 0;
-    if (reason == Rosen::SizeChangeReason::ROTATION) {
-        if (transaction_.lock()) {
-            transaction = transaction_.lock();
-            transaction_.reset();
-        } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
-            transaction = transactionController->GetRSTransaction();
+    std::shared_ptr<Rosen::RSUIDirector> rsUIDirector;
+    auto window = pipeline->GetWindow();
+    if (window) {
+        rsUIDirector = window->GetRSUIDirector();
+    }
+    if (!rsUIDirector) {
+        if (reason == Rosen::SizeChangeReason::ROTATION) {
+            if (transaction_.lock()) {
+                transaction = transaction_.lock();
+                transaction_.reset();
+            } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
+                transaction = transactionController->GetRSTransaction();
+            }
+            if (transaction && parentSession) {
+                duration = pipeline->GetSyncAnimationOption().GetDuration();
+                transaction->SetDuration(duration);
+            }
         }
-        if (transaction && parentSession) {
-            duration = pipeline->GetSyncAnimationOption().GetDuration();
-            transaction->SetDuration(duration);
+    } else {
+        auto rsUIContext = rsUIDirector->GetRSUIContext();
+        if (reason == Rosen::SizeChangeReason::ROTATION) {
+            if (transaction_.lock()) {
+                transaction = transaction_.lock();
+                transaction_.reset();
+            } else if (pipeline && rsUIContext) {
+                auto transactionController = rsUIContext->GetSyncTransactionHandler();
+                if (transactionController) {
+                    transaction = transactionController->GetRSTransaction();
+                }
+            } else {
+                auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
+                if (transactionController) {
+                    transaction = transactionController->GetRSTransaction();
+                }
+            }
+            if (transaction && parentSession) {
+                duration = pipeline->GetSyncAnimationOption().GetDuration();
+                transaction->SetDuration(duration);
+            }
         }
     }
     ACE_SCOPED_TRACE("NotifyDisplayArea displayArea[%s], curWindow[%s], reason[%d], duration[%d], componentId[%d]",
