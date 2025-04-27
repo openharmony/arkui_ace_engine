@@ -117,7 +117,7 @@ private:
     static NG::RectF UpdateClipRect(NG::RectF& clipRect, NG::RectF& paintRect);
     static NG::RectF UpdatePaintRect(NG::RectF& paintRect, NG::RectF& clipRect);
     static bool CheckSecurityComponentStatus(const RefPtr<UINode>& root, NodeMaps& maps,
-        int32_t secNodeId, std::string& message, NG::RectF& clipRect);
+        int32_t secNodeId, NG::RectF& clipRect, std::string& message);
     static bool CheckRectIntersect(const RectF& dest, int32_t secNodeId,
         const std::unordered_map<int32_t, std::pair<std::string, NG::RectF>>& nodeId2Rect,
         std::unordered_map<int32_t, int32_t>& nodeId2Zindex, std::string& message);
