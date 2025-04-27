@@ -35,6 +35,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/subwindow/subwindow.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
@@ -204,7 +205,11 @@ public:
         napi_value thisVar = nullptr;
         napi_value cb = nullptr;
         size_t argc = ParseArgs(env, info, thisVar, cb);
-        NAPI_ASSERT(env, (argc == ARG_COUNT_2 && thisVar != nullptr && cb != nullptr), "Invalid arguments");
+        if (argc != ARG_COUNT_2 || thisVar == nullptr || cb == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_DRAG, "Invalid arguments");
+            napi_close_handle_scope(env, scope);
+            return nullptr;
+        }
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, cb, &valueType);
         if (valueType != napi_function) {
@@ -279,7 +284,11 @@ public:
         napi_value thisVar = nullptr;
         napi_value cb = nullptr;
         size_t argc = ParseArgs(env, info, thisVar, cb);
-        NAPI_ASSERT(env, (argc == 0 && thisVar != nullptr), "Invalid arguments");
+        if (argc != 0 || thisVar == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_DRAG, "Invalid arguments");
+            napi_close_escapable_handle_scope(env, scope);
+            return nullptr;
+        }
         DragAction* dragAction = ConvertDragAction(env, thisVar);
         if (!dragAction) {
             NapiThrow(env, "convert drag action failed.", ERROR_CODE_INTERNAL_ERROR);
@@ -502,13 +511,49 @@ void CallBackForJs(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, napi_value 
     asyncCtx->hasHandle = false;
 }
 
+DragRet TranslateDragResult(Msdp::DeviceStatus::DragResult dragResult)
+{
+    switch (dragResult) {
+        case Msdp::DeviceStatus::DragResult::DRAG_SUCCESS:
+            return DragRet::DRAG_SUCCESS;
+        case Msdp::DeviceStatus::DragResult::DRAG_FAIL:
+            return DragRet::DRAG_FAIL;
+        case Msdp::DeviceStatus::DragResult::DRAG_CANCEL:
+            return DragRet::DRAG_CANCEL;
+        default:
+            return DragRet::DRAG_FAIL;
+    }
+}
+bool SetDragEventForJs(
+    std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const napi_value& eventNapi, const DragNotifyMsg& dragNotifyMsg)
+{
+    CHECK_NULL_RETURN(asyncCtx, false);
+    auto localRef = NapiValueToLocalValue(eventNapi);
+    if (localRef->IsNull()) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "napi value convert to local value failed.");
+        return false;
+    }
+    auto vm = reinterpret_cast<NativeEngine*>(asyncCtx->env)->GetEcmaVm();
+    auto* jsDragEvent =
+        static_cast<Framework::JsDragEvent*>(Local<panda::ObjectRef>(localRef)->GetNativePointerField(vm, 0));
+    CHECK_NULL_RETURN(jsDragEvent, false);
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>();
+    if (!dragEvent) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "create dragEvent failed.");
+        return false;
+    }
+    dragEvent->SetResult(TranslateDragResult(dragNotifyMsg.result));
+    dragEvent->SetDragBehavior(static_cast<DragBehavior>(dragNotifyMsg.dragBehavior));
+    jsDragEvent->SetDragEvent(dragEvent);
+    return true;
+}
+
 void GetCallBackDataForJs(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const DragNotifyMsg& dragNotifyMsg,
     const DragStatus dragStatus)
 {
     CHECK_NULL_VOID(asyncCtx);
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(asyncCtx->env, &scope);
-    auto resultCode = dragNotifyMsg.result;
     napi_value result = nullptr;
     napi_get_undefined(asyncCtx->env, &result);
     napi_create_object(asyncCtx->env, &result);
@@ -525,21 +570,11 @@ void GetCallBackDataForJs(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, cons
         napi_close_handle_scope(asyncCtx->env, scope);
         return;
     }
-    auto localRef = NapiValueToLocalValue(eventNapi);
-    if (localRef->IsNull()) {
-        TAG_LOGE(AceLogTag::ACE_DRAG, "napi value convert to local value failed.");
+    if (!SetDragEventForJs(asyncCtx, eventNapi, dragNotifyMsg)) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "set dragEvent for JS failed.");
         napi_close_handle_scope(asyncCtx->env, scope);
         return;
     }
-    auto vm = reinterpret_cast<NativeEngine*>(asyncCtx->env)->GetEcmaVm();
-    auto* jsDragEvent =
-        static_cast<Framework::JsDragEvent*>(Local<panda::ObjectRef>(localRef)->GetNativePointerField(vm, 0));
-    CHECK_NULL_VOID(jsDragEvent);
-    auto dragEvent = AceType::MakeRefPtr<DragEvent>();
-    CHECK_NULL_VOID(dragEvent);
-    dragEvent->SetResult(static_cast<DragRet>(resultCode));
-    dragEvent->SetDragBehavior(static_cast<DragBehavior>(dragNotifyMsg.dragBehavior));
-    jsDragEvent->SetDragEvent(dragEvent);
     napi_set_named_property(asyncCtx->env, result, "event", eventNapi);
 
     napi_value extraParamsNapi = nullptr;
@@ -961,6 +996,7 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
     Msdp::DeviceStatus::ShadowInfo shadowInfo;
     asyncCtxData = {asyncCtx->instanceId, asyncCtx->hasTouchPoint, asyncCtx->dragPointerEvent,
         asyncCtx->dragPreviewOption, asyncCtx->touchPoint, asyncCtx->pixelMapList};
+    auto subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
     for (auto& pixelMap: asyncCtx->pixelMapList) {
         if (!pixelMap) {
             TAG_LOGD(AceLogTag::ACE_DRAG, "Skipping null pixelMap");
@@ -972,7 +1008,6 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
         }
         shadowInfos.push_back(shadowInfo);
     }
-    auto subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
     std::optional<Msdp::DeviceStatus::DragData> dragData;
     if (!EnvelopedDragData(asyncCtx, dragData, shadowInfos)) {
         return;
@@ -992,6 +1027,7 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
         std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
 #endif
     if (ret == 0) {
+        asyncCtxData.dragPointerEvent = asyncCtx->dragPointerEvent;
         if (NG::DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
             asyncCtx->isSwitchedToSubWindow = true;
         }
@@ -1168,11 +1204,11 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     Msdp::DeviceStatus::ShadowInfo shadowInfo;
     asyncCtxData = {asyncCtx->instanceId, asyncCtx->hasTouchPoint, asyncCtx->dragPointerEvent,
         asyncCtx->dragPreviewOption, asyncCtx->touchPoint, asyncCtx->pixelMapList};
+    auto subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
     auto ret = CreatePreviewNodeAndScale(asyncCtx, data, asyncCtxData, shadowInfo, asyncCtx->pixelMap);
     if (!ret) {
         return false;
     }
-    auto subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
     Msdp::DeviceStatus::DragData dragData;
     if (!PrepareDragData(asyncCtx, dragData, shadowInfo)) {
         TAG_LOGW(AceLogTag::ACE_DRAG, "prepare drag data failed!");
@@ -1184,6 +1220,7 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     };
     NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(
         asyncCtx->dragPointerEvent.pointerId, asyncCtx->instanceId);
+    LogDragInfoInner(asyncCtx, dragData);
 #ifdef CROSS_PLATFORM
     int32_t result = StartDrag(asyncCtx, dragData, false);
 #else
@@ -1787,6 +1824,9 @@ void HandleStopDragCallback(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, co
         asyncCtx->dragState = DragState::REJECT;
     }
     if (needPostStopDrag) {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->ResetDragging();
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         auto windowId = container->GetWindowId();
@@ -1838,6 +1878,7 @@ static bool CheckDragging(const RefPtr<Container>& container)
 
 static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
 {
+    TAG_LOGI(AceLogTag::ACE_DRAG, "executeDrag fuction called.");
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(env, &scope);
 
@@ -1926,6 +1967,12 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
     napi_create_object(env, &result);
     DragAction* dragAction = new DragAction(dragAsyncContext);
     dragAction->NapiSerializer(env, result);
+    if (!result) {
+        dragAction->DeleteRef();
+        delete dragAction;
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     dragAsyncContext->dragAction = dragAction;
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
@@ -1938,6 +1985,10 @@ static napi_value JSGetDragPreview(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     napi_create_object(env, &result);
     dragPreview->NapiSerializer(env, result);
+    if (!result) {
+        delete dragPreview;
+        return nullptr;
+    }
     return result;
 }
 #else

@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 
+#include "core/components/checkable/checkable_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -29,7 +32,6 @@ void CheckBoxGroupPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, c
         PaintProperty::ToJsonValue(json, filter);
         return;
     }
-    
 
     PaintProperty::ToJsonValue(json, filter);
     json->PutExtAttr("selectAll", GetCheckBoxGroupSelect().value_or(false) ? "true" : "false", filter);

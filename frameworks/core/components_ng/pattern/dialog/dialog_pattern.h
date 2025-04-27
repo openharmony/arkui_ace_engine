@@ -293,6 +293,7 @@ public:
 
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
+    void UpdateHostWindowRect();
     void UpdateFontScale();
 
     bool GetIsSuitOldMeasure()
@@ -311,10 +312,24 @@ public:
     }
 
     bool IsShowInFreeMultiWindow();
+    bool IsWaterfallWindowMode();
     bool IsShowInFloatingWindow();
+    void AddExtraMaskNode(const DialogProperties& props);
 
     void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
     RefPtr<OverlayManager> GetEmbeddedOverlay(const RefPtr<OverlayManager>& context);
+    void MountMaskToUECHost();
+    void CloseDialog();
+    void CloseDialogByEvent(DialogDismissReason reason = DialogDismissReason::DIALOG_TOUCH_OUTSIDE);
+    void SetUECHostMaskInfo(UECHostMaskInfo maskInfo)
+    {
+        hostMaskInfo_ = maskInfo;
+    }
+
+    UECHostMaskInfo GetUECHostMaskInfo()
+    {
+        return hostMaskInfo_;
+    }
 
 private:
     bool AvoidKeyboard() const override
@@ -377,6 +392,8 @@ private:
     void UpdateButtonsPropertyForEachButton(RefPtr<FrameNode> buttonFrameNode, int32_t btnindex);
     void UpdateButtonsProperty();
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
+    void UpdateTitleAndContentColor();
+    void UpdateDialogTextColor(const RefPtr<FrameNode>& textNode, const TextStyle& textStyle);
     void UpdateAlignmentAndOffset();
     void DumpBoolProperty();
     void DumpBoolProperty(std::unique_ptr<JsonValue>& json);
@@ -394,6 +411,7 @@ private:
     void CheckScrollHeightIsNegative(const RefPtr<UINode>& contentColumn, const DialogProperties& props);
     RefPtr<OverlayManager> GetOverlayManager(const RefPtr<FrameNode>& host);
     void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -435,6 +453,7 @@ private:
     std::unordered_map<DialogContentNode, RefPtr<FrameNode>> contentNodeMap_;
     bool isUIExtensionSubWindow_ = false;
     RectF hostWindowRect_;
+    UECHostMaskInfo hostMaskInfo_;
 };
 } // namespace OHOS::Ace::NG
 

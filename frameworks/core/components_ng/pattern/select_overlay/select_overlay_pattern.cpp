@@ -22,6 +22,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/offset.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/components/menu/menu_component.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -45,11 +46,14 @@ void SelectOverlayPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
 
     UpdateHandleHotZone();
     auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
     if (overlayMode_ == SelectOverlayMode::MENU_ONLY) {
         gesture->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
         return;
@@ -66,6 +70,7 @@ void SelectOverlayPattern::SetGestureEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
     clickEvent_ = MakeRefPtr<ClickEvent>([weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -94,7 +99,9 @@ void SelectOverlayPattern::SetGestureEvent()
     };
     panEvent_ =
         MakeRefPtr<PanEvent>(std::move(panStart), std::move(panUpdate), std::move(panEnd), std::move(panCancel));
-    gesture->AddPanEvent(panEvent_, { PanDirection::ALL }, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gesture->AddPanEvent(panEvent_, { PanDirection::ALL }, 1, distanceMap);
 
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
@@ -111,7 +118,7 @@ void SelectOverlayPattern::InitMouseEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -178,9 +185,11 @@ void SelectOverlayPattern::UpdateHandleHotZone()
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
     auto hotZone = theme->GetHandleHotZoneRadius().ConvertToPx();
-    firstHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 + firstHandle.Height() });
+    info_->firstHandle.isTouchable ? firstHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 + firstHandle.Height() })
+        : firstHandleRegion_.Reset();
     auto firstHandleOffsetX = (firstHandle.Left() + firstHandle.Right()) / 2;
-    secondHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 + secondHandle.Height() });
+    info_->secondHandle.isTouchable ? secondHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 + secondHandle.Height() })
+        : secondHandleRegion_.Reset();
     auto secondHandleOffsetX = (secondHandle.Left() + secondHandle.Right()) / 2;
     std::vector<DimensionRect> responseRegion;
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
@@ -832,7 +841,7 @@ void SelectOverlayPattern::OnDpiConfigurationUpdate()
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    host->UpdateToolBar(true, true);
+    host->UpdateToolBarFromMainWindow(true, true);
 }
 
 void SelectOverlayPattern::SwitchHandleToOverlayMode(bool afterRender)
@@ -865,6 +874,13 @@ void SelectOverlayPattern::OnColorConfigurationUpdate()
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
     host->UpdateSelectMenuBg();
-    host->UpdateToolBar(true, true);
+    host->UpdateToolBarFromMainWindow(true, true);
+}
+
+void SelectOverlayPattern::OnLanguageConfigurationUpdate()
+{
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    host->UpdateToolBarFromMainWindow(true, true);
 }
 } // namespace OHOS::Ace::NG

@@ -14,7 +14,6 @@
  */
 
 /// <reference path='./import.ts' />
-/// <reference path="../../state_mgmt/src/lib/common/utils.ts" />
 const arkUINativeModule = globalThis.getArkUINativeModule();
 function getUINativeModule(): any {
   if (arkUINativeModule) {
@@ -150,14 +149,7 @@ function isResource(variable: any): variable is Resource {
 }
 
 function isResourceEqual(stageValue: Resource, value: Resource): boolean {
-  if (Utils.isApiVersionEQAbove(16)) {
-    return false;
-  }
-  return (stageValue.bundleName === value.bundleName) &&
-    (stageValue.moduleName === value.moduleName) &&
-    (stageValue.id === value.id) &&
-    (stageValue.params === value.params) &&
-    (stageValue.type === value.type);
+  return false;
 }
 function isBaseOrResourceEqual(stageValue: any, value: any): boolean {
   if (isResource(stageValue) && isResource(value)) {
@@ -270,6 +262,48 @@ class BindMenuModifier extends ModifierWithKey<ArkBindMenu> {
       getUINativeModule().common.resetBindMenu(node);
     } else {
       getUINativeModule().common.setBindMenu(node, this.value.content, this.value.options);
+    }
+  }
+}
+
+class SearchAutoCapitalizationModifier extends ModifierWithKey<ArkSearchAutoCapitalization> {
+  constructor(value: ArkSearchAutoCapitalization) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchAutoCapitalization');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetAutoCapitalizationMode(node);
+    } else {
+      getUINativeModule().search.setAutoCapitalizationMode(node, this.value);
+    }
+  }
+}
+
+class TextAreaAutoCapitalizationModifier extends ModifierWithKey<ArkTextAreaAutoCapitalization> {
+  constructor(value: ArkTextAreaAutoCapitalization) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaAutoCapitalization');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetAutoCapitalizationMode(node);
+    } else {
+      getUINativeModule().textArea.setAutoCapitalizationMode(node, this.value);
+    }
+  }
+}
+
+class TextInputAutoCapitalizationModifier extends ModifierWithKey<ArkTextInputAutoCapitalization> {
+  constructor(value: ArkTextInputAutoCapitalization) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputAutoCapitalization');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetAutoCapitalizationMode(node);
+    } else {
+      getUINativeModule().textInput.setAutoCapitalizationMode(node, this.value);
     }
   }
 }
@@ -1975,6 +2009,23 @@ class OnKeyPreImeModifier extends ModifierWithKey<Callback<KeyEvent, boolean>> {
   }
 }
 
+class OnKeyEventDispatchModifier extends ModifierWithKey<Callback<KeyEvent, boolean>> {
+  private _onKeyEventDispatch: Callback<KeyEvent, boolean> = null;
+  constructor(value: Callback<KeyEvent, boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onKeyEventDispatch');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      this._onKeyEventDispatch = null;
+      getUINativeModule().common.resetOnKeyEventDispatch(node);
+    } else {
+      this._onKeyEventDispatch = this.value;
+      getUINativeModule().common.setOnKeyEventDispatch(node, this.value);
+    }
+  }
+}
+
 class OnFocusModifier extends ModifierWithKey<VoidCallback> {
   constructor(value: VoidCallback) {
     super(value);
@@ -2466,6 +2517,20 @@ class AccessibilityFocusCallbackModifier extends ModifierWithKey<AccessibilityFo
       getUINativeModule().common.resetAccessibilityFocusCallback(node);
     } else {
       getUINativeModule().common.setAccessibilityFocusCallback(node, this.value);
+    }
+  }
+}
+
+class AccessibilityActionInterceptCallbackModifier extends ModifierWithKey<AccessibilityActionInterceptCallback> {
+  constructor(value: AccessibilityActionInterceptCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAccessibilityActionIntercept');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnAccessibilityActionIntercept(node);
+    } else {
+      getUINativeModule().common.setOnAccessibilityActionIntercept(node, this.value);
     }
   }
 }
@@ -3072,6 +3137,71 @@ class FlexBasisModifier extends ModifierWithKey<number | string> {
   }
 }
 
+class BindTipsModifier extends ModifierWithKey<ArkBindTipsOptions> {
+  constructor(value: ArkBindTipsOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('bindTips');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBindTips(node);
+    } else {
+      if (this.value.message === undefined) {
+        return;
+      }
+      getUINativeModule().common.setBindTips(
+        node,
+        this.value.message,
+        this.value.options?.appearingTime,
+        this.value.options?.disappearingTime,
+        this.value.options?.appearingTimeWithContinuousOperation,
+        this.value.options?.disappearingTimeWithContinuousOperation,
+        this.value.options?.enableArrow,
+        this.value.options?.arrowPointPosition,
+        this.value.options?.arrowWidth,
+        this.value.options?.arrowHeight
+      );
+    }
+  }
+  checkObjectDiff(): boolean {
+    return (
+      !isBaseOrResourceEqual(this.stageValue.message, this.value.message) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.appearingTime,
+        this.value.options.appearingTime
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.disappearingTime,
+        this.value.options.disappearingTime
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.appearingTimeWithContinuousOperation,
+        this.value.options.appearingTimeWithContinuousOperation
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.disappearingTimeWithContinuousOperation,
+        this.value.options.disappearingTimeWithContinuousOperation
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.enableArrow,
+        this.value.options.enableArrow
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.arrowPointPosition,
+        this.value.options.arrowPointPosition
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.arrowWidth,
+        this.value.options.arrowWidth
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.arrowHeight,
+        this.value.options.arrowHeight
+      )
+    );
+  }
+}
+
 class LayoutWeightModifier extends ModifierWithKey<number | string> {
   constructor(value: number | string) {
     super(value);
@@ -3211,6 +3341,20 @@ class AccessibilityScrollTriggerableModifier extends ModifierWithKey<boolean> {
       getUINativeModule().common.resetAccessibilityScrollTriggerable(node);
     } else {
       getUINativeModule().common.setAccessibilityScrollTriggerable(node, this.value);
+    }
+  }
+}
+
+class AccessibilityFocusDrawLevelModifier extends ModifierWithKey<FocusDrawLevel> {
+  constructor(value: FocusDrawLevel) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityFocusDrawLevel');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityFocusDrawLevel(node);
+    } else {
+      getUINativeModule().common.setAccessibilityFocusDrawLevel(node, this.value);
     }
   }
 }
@@ -3506,11 +3650,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   getOrCreateGestureEvent() {
-    if (this._gestureEvent !== null) {
+    if (this._gestureEvent === null || this._gestureEvent === undefined) {
       this._gestureEvent = new UIGestureEvent();
       this._gestureEvent.setNodePtr(this.nativePtr);
       this._gestureEvent.setWeakNodePtr(this._weakPtr);
-      this._gestureEvent.registerFrameNodeDeletedCallback(this.nativePtr);
+      if (!this._weakPtr?.invalid()) {
+        this._gestureEvent.registerFrameNodeDeletedCallback(this.nativePtr);
+      }
     }
     return this._gestureEvent;
   }
@@ -3669,6 +3815,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     if (typeof value === 'object') {
       arkDragPreviewOptions.mode = value.mode;
       arkDragPreviewOptions.numberBadge = value.numberBadge;
+      arkDragPreviewOptions.sizeChangeEffect = value.sizeChangeEffect;
     }
     if (typeof options === 'object') {
       arkDragPreviewOptions.isMultiSelectionEnabled = options.isMultiSelectionEnabled;
@@ -4099,6 +4246,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   onKeyPreIme(event: Callback<KeyEvent, boolean>): this {
     modifierWithKey(this._modifiersWithKeys, OnKeyPreImeModifier.identity, OnKeyPreImeModifier, event);
+    return this;
+  }
+
+  onKeyEventDispatch(event: Callback<KeyEvent, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, OnKeyEventDispatchModifier.identity, OnKeyEventDispatchModifier, event);
     return this;
   }
 
@@ -4733,11 +4885,40 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     throw new Error('Method not implemented.');
   }
 
+  bindTips(message: TipsMessageType, options?: TipsOptions): this {
+    let arkBindTipsOptions = new ArkBindTipsOptions();
+    arkBindTipsOptions.message = message;
+    arkBindTipsOptions.options = options;
+    modifierWithKey(this._modifiersWithKeys, BindTipsModifier.identity, BindTipsModifier, arkBindTipsOptions);
+    return this;
+  }
+
   bindMenu(content: Array<MenuElement> | CustomBuilder, options?: MenuOptions): this {
     let arkBindMenu = new ArkBindMenu();
     arkBindMenu.content = content;
     arkBindMenu.options = options;
     modifierWithKey(this._modifiersWithKeys, BindMenuModifier.identity, BindMenuModifier, arkBindMenu);
+    return this;
+  }
+
+  searchAutoCapitalization(autoCapitalizationMode: AutoCapitalizationMode): this {
+    let ArkSearchAutoCapitalization = new ArkSearchAutoCapitalization();
+    ArkSearchAutoCapitalization.autoCapitalizationMode = autoCapitalizationMode;
+    modifierWithKey(this._modifiersWithKeys, SearchAutoCapitalizationModifier.identity, SearchAutoCapitalizationModifier, ArkSearchAutoCapitalization);
+    return this;
+  }
+
+  textAreaAutoCapitalization(autoCapitalizationMode: AutoCapitalizationMode): this {
+    let ArkTextAreaAutoCapitalization = new ArkTextAreaAutoCapitalization();
+    ArkTextAreaAutoCapitalization.autoCapitalizationMode = autoCapitalizationMode;
+    modifierWithKey(this._modifiersWithKeys, TextAreaAutoCapitalizationModifier.identity, TextAreaAutoCapitalizationModifier, ArkTextAreaAutoCapitalization);
+    return this;
+  }
+
+  textInputAutoCapitalization(autoCapitalizationMode: AutoCapitalizationMode): this {
+    let ArkTextInputAutoCapitalization = new ArkTextInputAutoCapitalization();
+    ArkTextInputAutoCapitalization.autoCapitalizationMode = autoCapitalizationMode;
+    modifierWithKey(this._modifiersWithKeys, TextAreaAutoCapitalizationModifier.identity, TextAreaAutoCapitalizationModifier, ArkTextInputAutoCapitalization);
     return this;
   }
 
@@ -4826,20 +5007,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   accessibilityText(value: string): this {
-    if (typeof value === 'string') {
-      modifierWithKey(this._modifiersWithKeys, AccessibilityTextModifier.identity, AccessibilityTextModifier, value);
-    } else {
-      modifierWithKey(this._modifiersWithKeys, AccessibilityTextModifier.identity, AccessibilityTextModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, AccessibilityTextModifier.identity, AccessibilityTextModifier, value);
     return this;
   }
 
   accessibilityDescription(value: string): this {
-    if (typeof value !== 'string') {
-      modifierWithKey(this._modifiersWithKeys, AccessibilityDescriptionModifier.identity, AccessibilityDescriptionModifier, undefined);
-    } else {
-      modifierWithKey(this._modifiersWithKeys, AccessibilityDescriptionModifier.identity, AccessibilityDescriptionModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, AccessibilityDescriptionModifier.identity, AccessibilityDescriptionModifier, value);
     return this;
   }
 
@@ -4859,6 +5032,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   onAccessibilityFocus(value: AccessibilityFocusCallback): this {
     modifierWithKey(this._modifiersWithKeys, AccessibilityFocusCallbackModifier.identity, AccessibilityFocusCallbackModifier, value);
+    return this;
+  }
+
+  onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback): this {
+    modifierWithKey(this._modifiersWithKeys,
+      AccessibilityActionInterceptCallbackModifier.identity, AccessibilityActionInterceptCallbackModifier, value);
     return this;
   }
 
@@ -4919,6 +5098,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       property.key = key;
       property.value = value;
       modifierWithKey(this._modifiersWithKeys, CustomPropertyModifier.identity, CustomPropertyModifier, property);
+      getUINativeModule().frameNode.setRemoveCustomProperties(this.nativePtr);
     }
     return this;
   }
@@ -5063,6 +5243,92 @@ class UICommonEvent {
   }
 }
 
+class UIScrollableCommonEvent extends UICommonEvent {
+  private _onReachStartEvent?: () => void;
+  private _onReachEndEvent?: () => void;
+  private _onScrollStartEvent?: () => void;
+  private _onScrollStopEvent?: () => void;
+  private _onScrollFrameBeginEvent?: (offset: number, state: ScrollState) => { offsetRemain: number; };
+  private _onWillScrollEvent?: (scrollOffset: number,
+    scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult;
+  private _onDidScrollEvent?: (offset: number, scrollState: ScrollState) => void;
+
+  setOnReachStart(callback: () => void): void {
+    this._onReachStartEvent = callback;
+    getUINativeModule().frameNode.setOnReachStart(this._nodePtr, callback, this._instanceId);
+  }
+  setOnReachEnd(callback: () => void): void {
+    this._onReachEndEvent = callback;
+    getUINativeModule().frameNode.setOnReachEnd(this._nodePtr, callback, this._instanceId);
+  }
+  setOnScrollStart(callback: () => void): void {
+    this._onScrollStartEvent = callback;
+    getUINativeModule().frameNode.setOnScrollStart(this._nodePtr, callback, this._instanceId);
+  }
+  setOnScrollStop(callback): void {
+    this._onScrollStopEvent = callback;
+    getUINativeModule().frameNode.setOnScrollStop(this._nodePtr, callback, this._instanceId);
+  }
+  setOnScrollFrameBegin(callback: (offset: number, state: ScrollState) => { offsetRemain: number; }): void {
+    this._onScrollFrameBeginEvent = callback;
+    getUINativeModule().frameNode.setOnScrollFrameBegin(this._nodePtr, callback, this._instanceId);
+  }
+  setOnWillScroll(callback: (scrollOffset: number,
+    scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): void {
+    this._onWillScrollEvent = callback;
+    getUINativeModule().frameNode.setOnWillScroll(this._nodePtr, callback, this._instanceId);
+  }
+  setOnDidScroll(callback: (scrollOffset: number,
+    scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): void {
+    this._onDidScrollEvent = callback;
+    getUINativeModule().frameNode.setOnDidScroll(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+class UIListEvent extends UIScrollableCommonEvent {
+  private _onScrollIndexEvent?: (start: number, end: number, center: number) => void;
+  private _onScrollVisibleContentEvent?: OnScrollVisibleContentChangeCallback;
+  setOnScrollIndex(callback: (start: number, end: number, center: number) => void): void {
+    this._onScrollIndexEvent = callback;
+    getUINativeModule().frameNode.setOnListScrollIndex(this._nodePtr, callback, this._instanceId);
+  }
+  setOnScrollVisibleContentChange(callback: OnScrollVisibleContentChangeCallback): void {
+    this._onScrollVisibleContentEvent = callback;
+    getUINativeModule().frameNode.setOnScrollVisibleContentChange(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+class UIScrollEvent extends UIScrollableCommonEvent {
+  private _onWillScrollEvent?: (xOffset: number, yOffset: number,
+    scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult;
+  private _onDidScrollEvent?: (xOffset: number, yOffset: number, scrollState: ScrollState) => void;
+  setOnWillScroll(callback: (xOffset: number, yOffset: number,
+    scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): void {
+    this._onWillScrollEvent = callback;
+    getUINativeModule().frameNode.setOnScrollWillScroll(this._nodePtr, callback, this._instanceId);
+  }
+  setOnDidScroll(callback: (xOffset: number, yOffset: number, scrollState: ScrollState) => void): void {
+    this._onDidScrollEvent = callback;
+    getUINativeModule().frameNode.setOnScrollDidScroll(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+class UIGridEvent extends UIScrollableCommonEvent {
+  private _onGridScrollIndexEvent?: (first: number, last: number) => void;
+  setOnScrollIndex(callback: (first: number, last: number) => void): void {
+    this._onGridScrollIndexEvent = callback;
+    getUINativeModule().frameNode.setOnGridScrollIndex(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+class UIWaterFlowEvent extends UIScrollableCommonEvent {
+  private _onScrollIndexEvent?: (first: number, last: number) => void;
+  setOnScrollIndex(callback: (first: number, last: number) => void): void {
+    this._onScrollIndexEvent = callback;
+    getUINativeModule().frameNode.setOnWaterFlowScrollIndex(this._nodePtr, callback, this._instanceId);
+  }
+}
+
 function attributeModifierFunc<T>(modifier: AttributeModifier<T>,
   componentBuilder: (nativePtr: KNode) => ArkComponent,
   modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
@@ -5155,7 +5421,7 @@ class UIGestureEvent {
     getUINativeModule().common.registerFrameNodeDestructorCallback(nodePtr, this._destructorCallback);
   }
   addGesture(gesture: GestureHandler, priority?: GesturePriority, mask?: GestureMask): void {
-    if (this._weakNodePtr.invalid()) {
+    if (this._weakNodePtr?.invalid()) {
       return;
     }
     if (this._gestures === undefined) {
@@ -5182,8 +5448,8 @@ class UIGestureEvent {
         let panGesture: PanGestureHandler = gesture as PanGestureHandler;
         getUINativeModule().common.addPanGesture(this._nodePtr, priority, mask, panGesture.gestureTag,
           panGesture.allowedTypes, panGesture.fingers, panGesture.direction, panGesture.distance,
-          panGesture.limitFingerCount, panGesture.onActionStartCallback, panGesture.onActionUpdateCallback,
-          panGesture.onActionEndCallback, panGesture.onActionCancelCallback);
+          panGesture.limitFingerCount, panGesture.distanceMap, panGesture.onActionStartCallback,
+          panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback);
         break;
       }
       case CommonGestureType.SWIPE_GESTURE: {
@@ -5228,7 +5494,7 @@ class UIGestureEvent {
     this.addGesture(gesture, GesturePriority.PARALLEL, mask);
   }
   removeGestureByTag(tag: string): void {
-    if (this._weakNodePtr.invalid()) {
+    if (this._weakNodePtr?.invalid()) {
       return;
     }
     getUINativeModule().common.removeGestureByTag(this._nodePtr, tag);
@@ -5244,7 +5510,7 @@ class UIGestureEvent {
     }
   }
   clearGestures(): void {
-    if (this._weakNodePtr.invalid()) {
+    if (this._weakNodePtr?.invalid()) {
       return;
     }
     getUINativeModule().common.clearGestures(this._nodePtr);
@@ -5283,8 +5549,9 @@ function addGestureToGroup(nodePtr: Object | null, gesture: any, gestureGroupPtr
     case CommonGestureType.PAN_GESTURE: {
       let panGesture: PanGestureHandler = gesture as PanGestureHandler;
       getUINativeModule().common.addPanGestureToGroup(nodePtr, panGesture.gestureTag, panGesture.allowedTypes,
-        panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.limitFingerCount, panGesture.onActionStartCallback,
-        panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback, gestureGroupPtr);
+        panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.limitFingerCount,
+        panGesture.distanceMap, panGesture.onActionStartCallback, panGesture.onActionUpdateCallback,
+        panGesture.onActionEndCallback, panGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.SWIPE_GESTURE: {
@@ -5334,6 +5601,9 @@ function applyGesture(modifier: GestureModifier, component: ArkComponent): void 
 
 globalThis.__mapOfModifier__ = new Map();
 function __gestureModifier__(modifier) {
+  if (modifier === undefined || modifier === null) {
+    return;
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   if (globalThis.__mapOfModifier__.get(elmtId)) {
@@ -5399,6 +5669,31 @@ function __getCustomPropertyString__(nodeId: number, key: string): string | unde
   }
 
   return undefined;
+}
+
+function __getCustomPropertyMapString__(nodeId: number): string | undefined {
+  const customProperties = __elementIdToCustomProperties__.get(nodeId);
+  if (customProperties === undefined) {
+    return undefined;
+  }
+  const resultObj = Object.create(null);
+  const obj = Object.fromEntries(customProperties);
+  Object.keys(obj).forEach(key => {
+    const value = obj[key];
+    let str = "{}";
+    try {
+      str = JSON.stringify(value);
+    } catch (err) {
+      resultObj[key] = "Unsupported Type";
+      return;
+    }
+    if ((value !== "{}" && str === "{}") || str == null) {
+      resultObj[key] = "Unsupported Type";
+    } else {
+      resultObj[key] = value;
+    }
+  });
+  return JSON.stringify(resultObj);
 }
 
 function __setCustomProperty__(nodeId: number, key: string, value: Object): boolean {

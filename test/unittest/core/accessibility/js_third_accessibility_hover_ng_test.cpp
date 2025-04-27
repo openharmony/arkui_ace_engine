@@ -388,7 +388,7 @@ HWTEST_F(JsThirdAccessibilityHoverNgTest, JsThirdAccessibilityHoverNgTest006, Te
     NG::AccessibilityHoverEventType eventType = NG::AccessibilityHoverEventType::ENTER;
     TimeStamp time = std::chrono::high_resolution_clock::now();
     Framework::AccessibilityHoverForThirdConfig config
-        {hostElementId, point, sourceType, eventType, time, frameNode, context};
+        {hostElementId, point, sourceType, eventType, time, context};
 
     jsAccessibilityManager->HandleAccessibilityHoverForThird(config);
     // tbm  mock client to check event;

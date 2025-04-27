@@ -16,6 +16,7 @@
 #include "core/components_ng/event/drag_drop_event.h"
 
 #include "base/log/ace_trace.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -36,15 +37,20 @@ constexpr PanDirection DEFAULT_DRAG_DIRECTION = { PanDirection::ALL };
 } // namespace
 
 DragDropEventActuator::DragDropEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub)
-    : DragEventActuator(
-          gestureEventHub, DEFAULT_DRAG_DIRECTION, DEFAULT_DRAG_FINGERS, DEFAULT_DRAG_DISTANCE.ConvertToPx()),
-      gestureEventHub_(gestureEventHub)
+    : DragEventActuator(gestureEventHub), gestureEventHub_(gestureEventHub)
 {
     panRecognizer_ =
         MakeRefPtr<PanRecognizer>(DEFAULT_DRAG_FINGERS, DEFAULT_DRAG_DIRECTION, DEFAULT_DRAG_DISTANCE.ConvertToPx());
     panRecognizer_->SetIsForDrag(true);
     panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
-    panRecognizer_->SetMouseDistance(DRAG_PAN_DISTANCE_MOUSE.ConvertToPx());
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto dragPanDistanceMouse = DRAG_PAN_DISTANCE_MOUSE;
+    auto appTheme = pipeline->GetTheme<AppTheme>();
+    if (appTheme) {
+        dragPanDistanceMouse = appTheme->GetDragPanDistanceMouse();
+    }
+    panRecognizer_->SetMouseDistance(dragPanDistanceMouse.ConvertToPx());
     longPressRecognizer_ =
         AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, DEFAULT_DRAG_FINGERS, false, true);
     longPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
@@ -52,6 +58,7 @@ DragDropEventActuator::DragDropEventActuator(const WeakPtr<GestureEventHub>& ges
         AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_RECOGNIZER, DEFAULT_DRAG_FINGERS, false, true);
     previewLongPressRecognizer_->SetGestureInfo(
         MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
+    previewLongPressRecognizer_->SetGestureHub(gestureEventHub_);
     auto frameNode = gestureEventHub.Upgrade()->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     dragDropInitiatingHandler_ = AceType::MakeRefPtr<DragDropInitiatingHandler>(frameNode);
@@ -116,6 +123,7 @@ void DragDropEventActuator::InitLongPressAction()
 void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, ResponseLinkResult& responseLinkResult)
 {
+    InitDragDropStatusToIdle();
     auto gestureHub = gestureEventHub_.Upgrade();
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
@@ -126,7 +134,9 @@ void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset
         !DragDropFuncWrapper::IsSelectedItemNode(frameNode))) {
         return;
     }
+    CHECK_NULL_VOID(dragDropInitiatingHandler_);
     auto touchEvent = touchRestrict.touchEvent;
+    RecordTouchDownPoint(touchEvent);
     dragDropInitiatingHandler_->NotifyHitTesting(touchEvent);
     InitPanAction();
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -148,7 +158,6 @@ void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset
         return;
     }
     InitLongPressAction();
-    previewLongPressRecognizer_->SetGestureHub(gestureEventHub_);
     std::vector<RefPtr<NGGestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };
     SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
     SequencedRecognizer_->RemainChildOnResetStatus();
@@ -209,7 +218,9 @@ bool DragDropEventActuator::GetIsNotInPreviewState() const
 
 RefPtr<PixelMap> DragDropEventActuator::GetPreScaledPixelMapForDragThroughTouch(float& preScale)
 {
-    if (dragDropInitiatingHandler_) {
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_RETURN(gestureHub, nullptr);
+    if (dragDropInitiatingHandler_ && !gestureHub->GetTextDraggable()) {
         return dragDropInitiatingHandler_->GetPreScaledPixelMapForDragThroughTouch(preScale);
     }
     return nullptr;
@@ -252,7 +263,9 @@ void DragDropEventActuator::HandleTouchEvent(const TouchEventInfo& info, bool is
         TouchEvent touchEvent;
         touchEvent.type = info.GetTouches().front().GetTouchType();
         touchEvent.x = info.GetTouches().front().GetGlobalLocation().GetX();
-        touchEvent.x = info.GetTouches().front().GetGlobalLocation().GetY();
+        touchEvent.y = info.GetTouches().front().GetGlobalLocation().GetY();
+        touchEvent.screenX = info.GetTouches().front().GetScreenLocation().GetX();
+        touchEvent.screenY = info.GetTouches().front().GetScreenLocation().GetY();
         touchEvent.id = info.GetTouches().front().GetFingerId();
         dragDropInitiatingHandler_->NotifyTouchEvent(touchEvent);
     }
@@ -270,6 +283,13 @@ void DragDropEventActuator::NotifyDragEnd()
 {
     if (dragDropInitiatingHandler_) {
         dragDropInitiatingHandler_->NotifyDragEnd();
+    }
+}
+
+void DragDropEventActuator::NotifyPreDragStatus(const PreDragStatus preDragStatus)
+{
+    if (dragDropInitiatingHandler_) {
+        dragDropInitiatingHandler_->NotifyPreDragStatus(preDragStatus);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -74,7 +74,7 @@ void JSTabContent::Create(const JSCallbackInfo& info)
 
 void JSTabContent::CreateForPartialUpdate(const JSCallbackInfo& info)
 {
-    if (info.Length() <= 0 && !info[0]->IsFunction()) {
+    if (info.Length() <= 0 || !info[0]->IsFunction()) {
         TabContentModel::GetInstance()->Create();
         return;
     }

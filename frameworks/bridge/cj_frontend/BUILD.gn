@@ -87,6 +87,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/base/cj_base_ffi.cpp",
       "interfaces/cj_ffi/cj_action_sheet_ffi.cpp",
       "interfaces/cj_ffi/cj_alert_dialog_ffi.cpp",
+      "interfaces/cj_ffi/cj_alert_dialog_ffi_v2.cpp",
       "interfaces/cj_ffi/cj_alphabet_indexer_ffi.cpp",
       "interfaces/cj_ffi/cj_animate_param_ffi.cpp",
       "interfaces/cj_ffi/cj_badge_ffi.cpp",
@@ -99,6 +100,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_circle_ffi.cpp",
       "interfaces/cj_ffi/cj_collection_ffi.cpp",
       "interfaces/cj_ffi/cj_column_ffi.cpp",
+      "interfaces/cj_ffi/cj_column_split_ffi.cpp",
       "interfaces/cj_ffi/cj_common_ffi.cpp",
       "interfaces/cj_ffi/cj_component_id_ffi.cpp",
       "interfaces/cj_ffi/cj_component_utils_ffi.cpp",
@@ -163,14 +165,19 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_richeditor_controller_ffi.cpp",
       "interfaces/cj_ffi/cj_richeditor_ffi.cpp",
       "interfaces/cj_ffi/cj_row_ffi.cpp",
+      "interfaces/cj_ffi/cj_row_split_ffi.cpp",
       "interfaces/cj_ffi/cj_scroll_ffi.cpp",
       "interfaces/cj_ffi/cj_scrollable_ffi.cpp",
       "interfaces/cj_ffi/cj_scrollbar_ffi.cpp",
       "interfaces/cj_ffi/cj_search_ffi.cpp",
+      "interfaces/cj_ffi/cj_select_ffi.cpp",
       "interfaces/cj_ffi/cj_shape_ffi.cpp",
+      "interfaces/cj_ffi/cj_side_bar_container_ffi.cpp",
       "interfaces/cj_ffi/cj_slider_ffi.cpp",
       "interfaces/cj_ffi/cj_span_ffi.cpp",
       "interfaces/cj_ffi/cj_stack_ffi.cpp",
+      "interfaces/cj_ffi/cj_stepper_ffi.cpp",
+      "interfaces/cj_ffi/cj_stepper_item_ffi.cpp",
       "interfaces/cj_ffi/cj_swiper_ffi.cpp",
       "interfaces/cj_ffi/cj_symbol_glyph_ffi.cpp",
       "interfaces/cj_ffi/cj_symbol_span_ffi.cpp",
@@ -211,17 +218,6 @@ template("cj_frontend") {
       "interfaces/cj_ffi/utils.cpp",
       "runtime/cj_runtime_delegate.cpp",
     ]
-
-    if (!ace_engine_feature_wearable) {
-      sources += [
-        "interfaces/cj_ffi/cj_column_split_ffi.cpp",
-        "interfaces/cj_ffi/cj_row_split_ffi.cpp",
-        "interfaces/cj_ffi/cj_select_ffi.cpp",
-        "interfaces/cj_ffi/cj_side_bar_container_ffi.cpp",
-        "interfaces/cj_ffi/cj_stepper_ffi.cpp",
-        "interfaces/cj_ffi/cj_stepper_item_ffi.cpp",
-      ]
-    }
 
     deps += [ "$ace_root/build:libace_compatible" ]
 

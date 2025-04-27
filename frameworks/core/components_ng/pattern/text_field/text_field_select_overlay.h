@@ -20,10 +20,8 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
-#include "core/components_ng/pattern/text/text_base.h"
-#include "core/event/ace_events.h"
+
 namespace OHOS::Ace::NG {
 
 class TextFieldSelectOverlay : public BaseTextSelectOverlay {

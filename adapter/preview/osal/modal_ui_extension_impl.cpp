@@ -32,4 +32,29 @@ void ModalUIExtension::SetBindModalCallback(const RefPtr<NG::FrameNode>& uiExtNo
     std::function<void()>&& bindModalCallback)
 {
 }
+
+UECHostMaskInfo ModalUIExtension::GetUECHostMaskInfoFromWant(const AAFwk::Want& data)
+{
+    return {};
+}
+
+void ModalUIExtension::RegisterBusinessConsumeCallbackOnUEA(const RefPtr<NG::UIExtensionManager>& uiExtMgr,
+    NG::UIContentBusinessCode code, BusinessDataUECConsumeCallback callback)
+{}
+
+void ModalUIExtension::RegisterBusinessConsumeCallbackOnHost(
+    const RefPtr<NG::FrameNode>& uiExtNode, NG::UIContentBusinessCode code, BusinessDataUECConsumeCallback callback)
+{}
+
+bool ModalUIExtension::SendOverlayMaskInfoToUEA(const RefPtr<NG::FrameNode>& uiExtNode, const UECHostMaskInfo& info,
+    NG::UIContentBusinessCode code, NG::BusinessDataSendType type)
+{
+    return false;
+}
+
+bool ModalUIExtension::SendOverlayMaskInfoToHost(const RefPtr<NG::UIExtensionManager>& uiExtMgr,
+    const UECHostMaskInfo& info, NG::UIContentBusinessCode code, NG::BusinessDataSendType type)
+{
+    return false;
+}
 } // namespace OHOS::Ace

@@ -312,7 +312,7 @@ void TimePickerModelNG::SetOnChange(TimeChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -320,7 +320,7 @@ void TimePickerModelNG::SetOnChange(TimeChangeEvent&& onChange)
 void TimePickerModelNG::SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -329,7 +329,7 @@ void TimePickerModelNG::SetOnEnterSelectedArea(TimeChangeEvent&& onEnterSelected
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
 }
@@ -451,7 +451,7 @@ void TimePickerModelNG::SetChangeEvent(TimeChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
 }
@@ -654,7 +654,7 @@ void TimePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontSize,
         ConvertFontScaleValue(selectedStyle.GetFontSize()), frameNode);
-    ResetTimePickerTextStyleColor(frameNode.GetRawPtr(), &TimePickerLayoutProperty::GetSelectedTextStyle);
+    ResetTimePickerTextStyleColor(Referenced::RawPtr(frameNode), &TimePickerLayoutProperty::GetSelectedTextStyle);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedWeight, selectedStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, SelectedFontFamily, selectedStyle.GetFontFamilies(), frameNode);
@@ -665,7 +665,7 @@ void TimePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, DisappearFontSize,
         ConvertFontScaleValue(disappearStyle.GetFontSize()), frameNode);
-    ResetTimePickerTextStyleColor(frameNode.GetRawPtr(), &TimePickerLayoutProperty::GetDisappearTextStyle);
+    ResetTimePickerTextStyleColor(Referenced::RawPtr(frameNode), &TimePickerLayoutProperty::GetDisappearTextStyle);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, DisappearWeight, disappearStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -676,7 +676,7 @@ void TimePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize,
         ConvertFontScaleValue(normalStyle.GetFontSize()), frameNode);
-    ResetTimePickerTextStyleColor(frameNode.GetRawPtr(), &TimePickerLayoutProperty::GetTextStyle);
+    ResetTimePickerTextStyleColor(Referenced::RawPtr(frameNode), &TimePickerLayoutProperty::GetTextStyle);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Weight, normalStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontFamily, normalStyle.GetFontFamilies(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontStyle, normalStyle.GetFontStyle(), frameNode);
@@ -902,6 +902,15 @@ void TimePickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t
     CHECK_NULL_VOID(timePickerPattern);
     timePickerPattern->SetDigitalCrownSensitivity(crownSensitivity);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DigitalCrownSensitivity, crownSensitivity, frameNode);
+}
+
+void TimePickerModelNG::UpdateUserSetSelectColor()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerPattern);
+    timePickerPattern->UpdateUserSetSelectColor();
 }
 
 } // namespace OHOS::Ace::NG

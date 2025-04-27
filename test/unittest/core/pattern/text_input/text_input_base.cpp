@@ -86,6 +86,20 @@ void TextInputBases::ExpectCallParagraphMethods(ExpectParagraphParams params)
     EXPECT_CALL(*paragraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(paragraphStyle));
 }
 
+void TextInputBases::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
+{
+    frameNode->SetActive();
+    frameNode->isLayoutDirtyMarked_ = true;
+    frameNode->CreateLayoutTask();
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    auto wrapper = frameNode->CreatePaintWrapper();
+    if (wrapper != nullptr) {
+        wrapper->FlushRender();
+    }
+    paintProperty->CleanDirty();
+    frameNode->SetActive(false);
+}
+
 void TextInputBases::CreateTextField(
     const std::string& text, const std::string& placeHolder, const std::function<void(TextFieldModelNG&)>& callback)
 {
@@ -99,7 +113,7 @@ void TextInputBases::CreateTextField(
     stack->StopGetAccessRecording();
     frameNode_ = AceType::DynamicCast<FrameNode>(stack->Finish());
     pattern_ = frameNode_->GetPattern<TextFieldPattern>();
-    eventHub_ = frameNode_->GetEventHub<TextFieldEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
     FlushLayoutTask(frameNode_);

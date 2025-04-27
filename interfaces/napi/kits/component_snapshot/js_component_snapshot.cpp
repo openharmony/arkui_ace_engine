@@ -403,6 +403,7 @@ static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
             SEC_PARAM(componentId.c_str()));
         auto callback = helper.CreateCallback(&result);
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        napi_close_escapable_handle_scope(env, scope);
         return result;
     }
 
@@ -434,6 +435,7 @@ static napi_value JSSnapshotFromBuilder(napi_env env, napi_callback_info info)
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Can't get delegate of ace_engine. ");
         auto callback = helper.CreateCallback(&result);
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 

@@ -20,13 +20,16 @@
 #include "core/components/calendar/calendar_data_adapter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/picker/picker_base_component.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 
 namespace OHOS::Ace::NG {
+class ButtonLayoutProperty;
+class TextLayoutProperty;
+class PipelineContext;
+
 class ACE_EXPORT CalendarDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProperties, const CalendarSettingData& settingData,
@@ -43,14 +46,7 @@ public:
         previousOrientation_ = SystemProperties::GetDeviceOrientation();
     }
 
-    static bool CheckOrientationChange()
-    {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_RETURN(pipeline, true);
-        return (!(SystemProperties::GetDeviceOrientation() == previousOrientation_)
-                    ? Dimension(pipeline->GetRootWidth()).ConvertToVp() < deviceHeightLimit
-                    : Dimension(pipeline->GetRootHeight()).ConvertToVp() < deviceHeightLimit);
-    }
+    static bool CheckOrientationChange();
 
     static DeviceOrientation GetPreviousOrientation()
     {

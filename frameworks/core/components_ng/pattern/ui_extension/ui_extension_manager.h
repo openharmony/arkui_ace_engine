@@ -167,10 +167,23 @@ public:
 
     void NotifyWindowMode(Rosen::WindowMode mode);
 
+    void SendPageModeToProvider(const int32_t nodeId, const std::string& pageMode);
     void SendPageModeRequestToHost(const RefPtr<PipelineContext>& pipeline);
     void TransferAccessibilityRectInfo();
     void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
+    void SetInstanceId(int32_t id)
+    {
+        instanceId_ = id;
+    }
+    void SetPipelineContext(const WeakPtr<PipelineContext>& pipeline)
+    {
+        pipeline_ = pipeline;
+    }
+    void NotifyUECProviderIfNeedded();
+
 private:
+    void RegisterListenerIfNeeded();
+    void UnregisterListenerIfNeeded();
     bool UIExtBusinessDataSendValid();
     WeakPtr<UIExtensionPattern> uiExtensionFocused_;
     WeakPtr<SecurityUIExtensionPattern> securityUiExtensionFocused_;
@@ -184,6 +197,11 @@ private:
     std::map<UIContentBusinessCode, UIExtBusinessDataConsumeReplyCallback> businessDataConsumeReplyCallbacks_;
     UIExtBusinessSendToHostReplyFunc businessSendToHostReplyFunc_;
     UIExtBusinessSendToHostFunc businessSendToHostFunc_;
+
+    int32_t instanceId_ = -1;
+    WeakPtr<PipelineContext> pipeline_;
+    bool hasRegisterListener_ = false;
+    int32_t containerModalListenerId_ = -1;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MANAGER_H

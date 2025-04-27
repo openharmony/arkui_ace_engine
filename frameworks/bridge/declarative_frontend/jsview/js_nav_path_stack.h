@@ -60,10 +60,16 @@ public:
     }
 
     void OnPopCallback(const JSCallbackInfo& info);
+    void GetPathStack(const JSCallbackInfo& info);
+    void SetPathStack(const JSCallbackInfo& info);
 
 private:
     static void Constructor(const JSCallbackInfo& info);
     static void Destructor(JSNavPathStack* stack);
+
+    void CopyPathInfo(const JSRef<JSArray>& origin, JSRef<JSArray>& dest, size_t index);
+    bool FindNavInfoInPreArray(
+        JSRef<JSObject>& destInfo, JSRef<JSArray>& originArray, std::string& navIdStr, std::string& nameStr);
 
     std::function<void()> onStateChangedCallback_;
     std::function<void(const JSRef<JSVal>)> onPopCallback_;

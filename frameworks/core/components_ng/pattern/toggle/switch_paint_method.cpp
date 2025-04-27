@@ -65,6 +65,7 @@ void SwitchModifier::InitializeParam(int32_t themeScopeId)
     inactiveColor_ = switchTheme->GetInactiveColor();
     clickEffectColor_ = switchTheme->GetInteractivePressedColor();
     hoverColor_ = switchTheme->GetInteractiveHoverColor();
+    focusColor_ = switchTheme->GetFocusedBGColorUnselected();
     userActiveColor_ = activeColor_;
     hoverDuration_ = switchTheme->GetHoverDuration();
     hoverToTouchDuration_ = switchTheme->GetHoverToTouchDuration();
@@ -215,12 +216,12 @@ float SwitchModifier::GetSwitchWidth(const SizeF& contentSize) const
 
 int32_t SwitchPaintMethod::GetThemeScopeId(PaintWrapper* paintWrapper) const
 {
-    const int32_t defaultValue = 0;
-    CHECK_NULL_RETURN(paintWrapper, defaultValue);
+    const int32_t defaultThemeScopeId = 0;
+    CHECK_NULL_RETURN(paintWrapper, defaultThemeScopeId);
     auto renderContext = paintWrapper->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, defaultValue);
+    CHECK_NULL_RETURN(renderContext, defaultThemeScopeId);
     auto host = renderContext->GetHost();
-    CHECK_NULL_RETURN(host, defaultValue);
+    CHECK_NULL_RETURN(host, defaultThemeScopeId);
     return host->GetThemeScopeId();
 }
 } // namespace OHOS::Ace::NG

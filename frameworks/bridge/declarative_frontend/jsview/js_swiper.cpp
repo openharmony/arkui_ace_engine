@@ -29,8 +29,9 @@
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
-#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
+#include "bridge/declarative_frontend/jsview/js_indicator.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -77,7 +78,6 @@ SwiperModel* SwiperModel::GetInstance()
 
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
-WeakPtr<JSIndicatorController> JSSwiper::jSIndicatorController_;
 namespace {
 
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
@@ -521,6 +521,27 @@ std::optional<Dimension> JSSwiper::ParseIndicatorDimension(const JSRef<JSVal>& v
     return indicatorDimension;
 }
 
+std::optional<Dimension> JSSwiper::ParseIndicatorBottom(const JSRef<JSVal>& bottomValue, bool hasIgnoreSize)
+{
+    std::optional<Dimension> bottom;
+    if (bottomValue->IsUndefined()) {
+        return bottom;
+    }
+    if (!hasIgnoreSize) {
+        bottom = ParseIndicatorDimension(bottomValue);
+        return bottom;
+    } else {
+        CalcDimension dimBottom;
+        bool parseOk = ParseLengthMetricsToDimension(bottomValue, dimBottom);
+        if (!parseOk) {
+            bottom = ParseIndicatorDimension(bottomValue);
+            return bottom;
+        }
+        dimBottom = parseOk && dimBottom.ConvertToPx() >= 0.0f ? dimBottom : 0.0_vp;
+        return dimBottom;
+    }
+}
+
 SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
 {
     JSRef<JSVal> leftValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT_VALUE));
@@ -534,6 +555,10 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     JSRef<JSVal> selectedItemWidthValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_ITEM_WIDTH_VALUE));
     JSRef<JSVal> selectedItemHeightValue =
         obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_ITEM_HEIGHT_VALUE));
+    JSRef<JSVal> spaceValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SPACE_VALUE));
+    JSRef<JSVal> ignoreSizeValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::IGNORE_SIZE_VALUE));
+    JSRef<JSVal> setIgnoreSizeValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SET_IGNORE_SIZE_VALUE));
+    
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -542,12 +567,32 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.dimLeft = ParseIndicatorDimension(leftValue);
     swiperParameters.dimTop = ParseIndicatorDimension(topValue);
     swiperParameters.dimRight = ParseIndicatorDimension(rightValue);
-    swiperParameters.dimBottom = ParseIndicatorDimension(bottomValue);
+    auto hasIgnoreSizeValue = false;
+    
+    if (setIgnoreSizeValue->IsBoolean()) {
+        hasIgnoreSizeValue = setIgnoreSizeValue->ToBoolean();
+        swiperParameters.setIgnoreSizeValue = hasIgnoreSizeValue;
+    }
+
+    if (ignoreSizeValue->IsBoolean()) {
+        auto ignoreSize = ignoreSizeValue->ToBoolean();
+        swiperParameters.ignoreSizeValue = ignoreSize;
+    }
+    swiperParameters.dimBottom = ParseIndicatorBottom(bottomValue, hasIgnoreSizeValue);
     CalcDimension dimStart;
     CalcDimension dimEnd;
+    CalcDimension dimSpace;
+
     std::optional<Dimension> indicatorDimension;
     swiperParameters.dimStart =  ParseLengthMetricsToDimension(startValue, dimStart) ? dimStart : indicatorDimension;
     swiperParameters.dimEnd =  ParseLengthMetricsToDimension(endValue, dimEnd) ? dimEnd : indicatorDimension;
+ 
+    auto parseSpaceOk = ParseSpace(spaceValue, dimSpace) &&
+        (dimSpace.Unit() !=  DimensionUnit::PERCENT) ;
+    auto defalutSpace = swiperIndicatorTheme->GetIndicatorDotItemSpace();
+    swiperParameters.dimSpace =  (parseSpaceOk && !(dimSpace < 0.0_vp)) ? dimSpace : defalutSpace;
+    bool ignoreSize = ignoreSizeValue->IsBoolean() ? ignoreSizeValue->ToBoolean() : false;
+    swiperParameters.ignoreSizeValue = ignoreSize;
 
     CalcDimension dimPosition;
     bool parseItemWOk =
@@ -617,6 +662,28 @@ bool JSSwiper::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDi
     return false;
 }
 
+bool JSSwiper::ParseSpace(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    if (jsValue->IsNumber()) {
+        result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::VP);
+        return true;
+    }
+    if (jsValue->IsString()) {
+        auto value = jsValue->ToString();
+        StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::VP);
+        return true;
+    }
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        double value = jsObj->GetProperty("value")->ToNumber<double>();
+        auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
+        result = CalcDimension(value, unit);
+        return true;
+    }
+
+    return false;
+}
+
 SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& obj)
 {
     JSRef<JSVal> dotLeftValue = obj->GetProperty("leftValue");
@@ -629,6 +696,8 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     JSRef<JSVal> selectedFontColorValue = obj->GetProperty("selectedFontColorValue");
     JSRef<JSVal> digitFontValue = obj->GetProperty("digitFontValue");
     JSRef<JSVal> selectedDigitFontValue = obj->GetProperty("selectedDigitFontValue");
+    JSRef<JSVal> ignoreSizeValue = obj->GetProperty("ignoreSizeValue");
+    JSRef<JSVal> setIgnoreSizeValue = obj->GetProperty("setIgnoreSizeValue");
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperDigitalParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -637,12 +706,22 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     digitalParameters.dimLeft = ParseIndicatorDimension(dotLeftValue);
     digitalParameters.dimTop = ParseIndicatorDimension(dotTopValue);
     digitalParameters.dimRight = ParseIndicatorDimension(dotRightValue);
-    digitalParameters.dimBottom = ParseIndicatorDimension(dotBottomValue);
+
+    bool hasIgnoreSizeValue = setIgnoreSizeValue->IsBoolean() ? setIgnoreSizeValue->ToBoolean() : false;
+    auto bottom = ParseIndicatorBottom(dotBottomValue, hasIgnoreSizeValue);
+    digitalParameters.dimBottom = bottom;
     std::optional<Dimension> indicatorDimension;
     CalcDimension dimStart;
     CalcDimension dimEnd;
     digitalParameters.dimStart =  ParseLengthMetricsToDimension(startValue, dimStart) ? dimStart : indicatorDimension;
     digitalParameters.dimEnd =  ParseLengthMetricsToDimension(endValue, dimEnd) ? dimEnd : indicatorDimension;
+
+    if (ignoreSizeValue->IsBoolean()) {
+        auto ignoreSize = ignoreSizeValue->ToBoolean();
+        digitalParameters.ignoreSizeValue = ignoreSize;
+    } else {
+        digitalParameters.ignoreSizeValue = false;
+    }
 
     Color fontColor;
     auto parseOk = JSViewAbstract::ParseJsColor(fontColorValue, fontColor);
@@ -782,16 +861,11 @@ void JSSwiper::SetIndicatorController(const JSCallbackInfo& info)
     if (!jsIndicatorController) {
         return;
     }
-    jSIndicatorController_ = jsIndicatorController;
     SwiperModel::GetInstance()->SetBindIndicator(true);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    jsIndicatorController->SetSwiperNode(targetNode);
-}
-
-void JSSwiper::ResetSwiperNode()
-{
-    if (jSIndicatorController_.Upgrade()) {
-        jSIndicatorController_.Upgrade()->ResetSwiperNode();
+    auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto resetFunc = jsIndicatorController->SetSwiperNodeBySwiper(targetNode);
+    if (resetFunc) {
+        SwiperModel::GetInstance()->SetJSIndicatorController(resetFunc);
     }
 }
 
@@ -809,7 +883,6 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[0]);
         SwiperModel::GetInstance()->SetIndicatorIsBoolean(false);
-        ResetSwiperNode();
 
         JSRef<JSVal> typeParam = obj->GetProperty("type");
         if (typeParam->IsString()) {
@@ -861,6 +934,7 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         JSRef<JSVal> maskValue = obj->GetProperty("mask");
         JSRef<JSVal> colorValue = obj->GetProperty("color");
         JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColor");
+        JSRef<JSVal> ignoreSizeValue = obj->GetProperty("ignoreSize");
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -881,6 +955,12 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         if (maskValue->IsBoolean()) {
             auto mask = maskValue->ToBoolean();
             swiperParameters.maskValue = mask;
+        }
+        if (ignoreSizeValue->IsBoolean()) {
+            auto ignoreSize = ignoreSizeValue->ToBoolean();
+            swiperParameters.ignoreSizeValue = ignoreSize;
+        } else {
+            swiperParameters.ignoreSizeValue = false;
         }
         Color colorVal;
         parseOk = ParseJsColor(colorValue, colorVal);
@@ -1437,7 +1517,7 @@ void JSSwiperController::NewPreloadItems(const JSCallbackInfo& args)
 
 void JSSwiperController::PreloadItems(const JSCallbackInfo& args)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && args.Length() == 1) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && args.Length() == 1) {
         NewPreloadItems(args);
         return;
     }

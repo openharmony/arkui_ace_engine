@@ -60,9 +60,9 @@ public:
     MockNavigationPattern() : NavigationPattern() {}
     ~MockNavigationPattern() = default;
 
-    void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode) override
+    void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode, bool skipCheck = false) override
     {
-        NavigationPattern::MarkAllNavDestinationDirtyIfNeeded(hostNode);
+        NavigationPattern::MarkAllNavDestinationDirtyIfNeeded(hostNode, skipCheck);
         callTime_++;
     }
 

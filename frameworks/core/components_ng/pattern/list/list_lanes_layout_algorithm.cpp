@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#include "base/log/event_report.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
+
+#include "base/log/event_report.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -51,7 +53,7 @@ float ListLanesLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, int
     float mainLen = 0.0f;
     int32_t laneCeil = GetLanesCeil(layoutWrapper, childIndex);
     for (int32_t index = GetLanesFloor(layoutWrapper, childIndex); index <= laneCeil; index++) {
-        mainLen = std::max(mainLen, childrenSize_->GetChildSize(index));
+        mainLen = std::max(mainLen, childrenSize_->GetChildSize(index, isStackFromEnd_));
     }
     return mainLen;
 }
@@ -153,7 +155,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
         } else if (CheckNeedMeasure(wrapper)) {
             MeasureItem(wrapper, currentIndex, true);
         }
-        mainLen = std::max(mainLen, childrenSize_ ? childrenSize_->GetChildSize(currentIndex) :
+        mainLen = std::max(mainLen, childrenSize_ ? childrenSize_->GetChildSize(currentIndex, isStackFromEnd_) :
             GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
     }
     if (cnt > 0) {
@@ -206,7 +208,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
         } else if (CheckNeedMeasure(wrapper)) {
             MeasureItem(wrapper, currentIndex, false);
         }
-        mainLen = std::max(mainLen, childrenSize_ ? childrenSize_->GetChildSize(currentIndex) :
+        mainLen = std::max(mainLen, childrenSize_ ? childrenSize_->GetChildSize(currentIndex, isStackFromEnd_) :
             GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
         if (CheckCurRowMeasureFinished(layoutWrapper, currentIndex, isGroup)) {
             break;
@@ -326,7 +328,7 @@ void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& 
     float laneGutter = 0.0f;
     if (layoutProperty->GetLaneGutter().has_value()) {
         laneGutter = ConvertToPx(layoutProperty->GetLaneGutter().value(),
-            layoutConstraint.scaleProperty, crossSizeOptional.value_or(0.0)).value();
+            layoutConstraint.scaleProperty, crossSizeOptional.value_or(0.0)).value_or(0.0f);
         SetLaneGutter(laneGutter);
     }
     lanes_ = CalculateLanesParam(minLaneLength_, maxLaneLength_, lanes, crossSizeOptional, laneGutter);
@@ -588,7 +590,7 @@ std::pair<bool, bool> ListLanesLayoutAlgorithm::CheckACachedItem(
     }
     bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
     if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper))) {
-        if (isDirty) {
+        if (isDirty && !wrapper->GetHostNode()->IsLayoutComplete()) {
             return std::make_pair(true, true);
         }
         return std::make_pair(false, true);

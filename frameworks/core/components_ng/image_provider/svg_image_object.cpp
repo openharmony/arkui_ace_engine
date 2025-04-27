@@ -15,7 +15,7 @@
 
 #include "core/components_ng/image_provider/svg_image_object.h"
 
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 

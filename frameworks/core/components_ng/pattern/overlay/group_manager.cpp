@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -134,7 +135,7 @@ WeakPtr<GroupManager> GroupManager::GetGroupManager()
         CHECK_NULL_RETURN(stageManager, nullptr);
         auto pageNode = stageManager->GetLastPage();
         CHECK_NULL_RETURN(pageNode, nullptr);
-        auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
+        auto pageEventHub = pageNode->GetOrCreateEventHub<NG::PageEventHub>();
         CHECK_NULL_RETURN(pageEventHub, nullptr);
         groupManager = pageEventHub->GetGroupManager();
     }

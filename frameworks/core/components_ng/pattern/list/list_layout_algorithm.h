@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -323,7 +323,23 @@ public:
 
     float GetChainOffset(int32_t index) const
     {
-        return chainOffsetFunc_ ? chainOffsetFunc_(index) : 0.0f;
+        if (!chainOffsetFunc_) {
+            return 0.0f;
+        }
+        if (!isStackFromEnd_) {
+            return chainOffsetFunc_(index);
+        }
+        return -chainOffsetFunc_(totalItemCount_ - index - 1);
+    }
+
+    void SetTotalItemCount(int32_t totalItemCount)
+    {
+        totalItemCount_ = totalItemCount;
+    }
+
+    void SetFirstRepeatCount(int32_t firstRepeatCount)
+    {
+        firstRepeatCount_ = firstRepeatCount;
     }
 
     void SetChainInterval(float interval)
@@ -352,7 +368,7 @@ public:
 
     void HandleJumpAuto(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t endIndex);
 
-    void HandleJumpCenter(LayoutWrapper* layoutWrapper);
+    virtual void HandleJumpCenter(LayoutWrapper* layoutWrapper);
 
     void HandleJumpStart(LayoutWrapper* layoutWrapper);
 
@@ -372,7 +388,7 @@ public:
 
     virtual float GetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex)
     {
-        return childrenSize_->GetChildSize(childIndex);
+        return childrenSize_->GetChildSize(childIndex, isStackFromEnd_);
     }
 
     virtual int32_t GetLanes() const
@@ -441,6 +457,13 @@ public:
     int32_t GetLaneIdx4Divider() const
     {
         return laneIdx4Divider_;
+    }
+
+    void CalculateTotalCountByRepeat(LayoutWrapper* layoutWrapper);
+
+    void SetIsRoundingMode()
+    {
+        isRoundingMode_ = true;
     }
 
 protected:
@@ -598,6 +621,7 @@ protected:
     bool expandSafeArea_ = false;
 
     int32_t totalItemCount_ = 0;
+    int32_t firstRepeatCount_ = 0;
 
     bool needEstimateOffset_ = false;
 
@@ -613,6 +637,7 @@ protected:
     OffsetF paddingOffset_;
     bool isLayouted_ = true;
     std::function<float(int32_t)> chainOffsetFunc_;
+    bool isStackFromEnd_ = false;
 
     int32_t itemStartIndex_ = 0;
 
@@ -641,6 +666,7 @@ private:
     bool forwardFeature_ = false;
     bool backwardFeature_ = false;
     bool isNeedCheckOffset_ = false;
+    bool isRoundingMode_ = false;
 
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 
@@ -650,7 +676,6 @@ private:
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
 
     float chainInterval_ = 0.0f;
-    bool isStackFromEnd_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include "mock_image_loader.h"
 
 #include "core/components_ng/image_provider/image_utils.h"
+
 namespace {
 constexpr unsigned int MAX_THREADS = 2;
 } // namespace
@@ -42,5 +43,9 @@ void ImageUtils::PostToBg(
     }
     g_threads.emplace_back(std::thread(task));
 }
+
+void ImageUtils::PostDelayedTaskToUI(std::function<void()>&& task, uint32_t delayTime, const std::string& name,
+    const int32_t containerId, PriorityType priorityType)
+{}
 } // namespace NG
 } // namespace OHOS::Ace

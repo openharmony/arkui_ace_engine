@@ -40,6 +40,11 @@ public:
         return pixelMap_;
     }
 
+    bool IsHdrPixelMap() override
+    {
+        return pixelMap_ && pixelMap_->IsHdr();
+    }
+
     void Cache(const std::string& key) override;
 
     RefPtr<CanvasImage> Clone() override;

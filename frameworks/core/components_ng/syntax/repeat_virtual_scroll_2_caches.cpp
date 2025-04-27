@@ -48,6 +48,7 @@ GetFrameChildResult RepeatVirtualScroll2Caches::GetFrameChild(IndexType index, b
 {
     TAG_LOGD(AceLogTag::ACE_REPEAT, "GetFrameChild(index %{public}d, needBuild: %{public}d)", index,
         static_cast<int32_t>(needBuild));
+    index = ConvertFromToIndex(index);
     OptCacheItem optCacheItem = GetL1CacheItem4Index(index);
     if (optCacheItem.has_value()) {
         return std::pair<uint32_t, CacheItem>(OnGetRid4IndexResult::UNCHANGED_NODE, optCacheItem.value());
@@ -176,11 +177,12 @@ std::optional<IndexType> RepeatVirtualScroll2Caches::GetL1Index4Node(const RefPt
     }
 
     for (const auto iter : l1Rid4Index_) {
+        const IndexType index = iter.first;
         const RIDType rid = iter.second;
 
         OptCacheItem cacheItemOpt = GetCacheItem4RID(rid);
         if (cacheItemOpt.has_value() && cacheItemOpt.value()->node_ == frameNode) {
-            return iter.first; // index in index -> RID
+            return ConvertFromToIndexRevert(index); // index in index -> RID
         }
     }
     return std::nullopt;
@@ -317,7 +319,8 @@ bool RepeatVirtualScroll2Caches::RebuildL1(const std::function<bool(int32_t inde
 
         OptCacheItem optCacheItem = GetCacheItem4RID(rid);
         if (optCacheItem.has_value()) {
-            if (optCacheItem.value()->node_ != nullptr && cbFunc(index, optCacheItem.value())) {
+            IndexType indexMapped = ConvertFromToIndexRevert(index);
+            if (optCacheItem.value()->node_ != nullptr && cbFunc(indexMapped, optCacheItem.value())) {
                 // keep in L1
                 l1Rid4Index_[index] = rid;
                 optCacheItem.value()->isL1_ = true;
@@ -345,11 +348,40 @@ void RepeatVirtualScroll2Caches::ForEachL1Node(
     }
 }
 
+void RepeatVirtualScroll2Caches::ForEachL1NodeWithOnMove(const std::function<void(const RefPtr<UINode>& node)>& cbFunc)
+{
+    std::map<IndexType, RIDType> mappedL1Rid4Index;
+    for (const auto& iter : l1Rid4Index_) {
+        const IndexType index = ConvertFromToIndex(iter.first);
+        const RIDType rid = iter.second;
+        mappedL1Rid4Index.emplace(index, rid);
+    }
+    for (const auto& iter : mappedL1Rid4Index) {
+        const RIDType rid = iter.second;
+        OptCacheItem optCacheItem = GetCacheItem4RID(rid);
+        if (optCacheItem.has_value()) {
+            cbFunc(optCacheItem.value()->node_);
+        }
+    }
+}
+
 void RepeatVirtualScroll2Caches::ForEachCacheItem(
     const std::function<void(RIDType rid, const CacheItem& cacheItem)>& cbFunc)
 {
     for (auto cacheItemIter : cacheItem4Rid_) {
         cbFunc(cacheItemIter.first, cacheItemIter.second);
+    }
+}
+
+void RepeatVirtualScroll2Caches::UpdateMoveFromTo(int32_t from, int32_t to)
+{
+    if (moveFromTo_) {
+        moveFromTo_.value().second = to;
+        if (moveFromTo_.value().second == moveFromTo_.value().first) {
+            moveFromTo_.reset();
+        }
+    } else {
+        moveFromTo_ = { from, to };
     }
 }
 

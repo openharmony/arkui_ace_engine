@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -119,7 +120,7 @@ RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
     auto divider = layoutProperty->GetDivider().value_or(itemDivider);
     auto drawVertical = (axis_ == Axis::HORIZONTAL);
     ListItemGroupPaintInfo listItemGroupPaintInfo { layoutDirection_, mainSize_, drawVertical, lanes_,
-        spaceWidth_, laneGutter_, itemTotalCount_ };
+        spaceWidth_, laneGutter_, itemTotalCount_, listContentSize_ };
     return MakeRefPtr<ListItemGroupPaintMethod>(
         divider, listItemGroupPaintInfo, itemPosition_, cachedItemPosition_, pressedItem_);
 }
@@ -170,6 +171,7 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     endFooterPos_ = layoutAlgorithm->GetEndFooterPos();
     adjustRefPos_ = layoutAlgorithm->GetAdjustReferenceDelta();
     adjustTotalSize_ = layoutAlgorithm->GetAdjustTotalSize();
+    listContentSize_ = layoutAlgorithm->GetListContentSize();
     layouted_ = true;
     CheckListDirectionInCardStyle();
     auto host = GetHost();
@@ -179,7 +181,7 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
         accessibilityProperty->SetCollectionItemCounts(layoutAlgorithm->GetTotalItemCount());
     }
     auto listLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
-    return listLayoutProperty && listLayoutProperty->GetDivider().has_value() && !itemPosition_.empty();
+    return listLayoutProperty && listLayoutProperty->GetDivider().has_value();
 }
 
 float ListItemGroupPattern::GetPaddingAndMargin() const
@@ -311,6 +313,10 @@ RefPtr<ListChildrenMainSize> ListItemGroupPattern::GetOrCreateListChildrenMainSi
         context->RequestFrame();
     };
     childrenSize_->SetOnDataChange(callback);
+    auto pipeline = GetContext();
+    if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+        childrenSize_->SetIsRoundingMode();
+    }
     return childrenSize_;
 }
 
@@ -319,6 +325,10 @@ void ListItemGroupPattern::SetListChildrenMainSize(
 {
     childrenSize_ = AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, defaultSize);
     OnChildrenSizeChanged({ -1, -1, -1 }, LIST_UPDATE_CHILD_SIZE);
+    auto pipeline = GetContext();
+    if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+        childrenSize_->SetIsRoundingMode();
+    }
 }
 
 void ListItemGroupPattern::OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag)

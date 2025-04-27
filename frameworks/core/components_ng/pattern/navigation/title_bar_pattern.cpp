@@ -147,7 +147,7 @@ void HandleDefaultIconForNavDestination(
     CHECK_NULL_VOID(navDestinationNode);
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto navDestinationEventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     auto paintProperty = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -361,6 +361,50 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
         }
         backButtonNode->MarkModifyDone();
         return;
+    }
+}
+
+void SetBackgroundBlurStyle(RefPtr<FrameNode>& host, const BlurStyleOption& bgBlurStyle)
+{
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (bgBlurStyle.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        pipeline->AddWindowFocusChangedCallback(host->GetId());
+    } else {
+        pipeline->RemoveWindowFocusChangedCallback(host->GetId());
+    }
+    auto renderContext = host->GetRenderContext();
+    if (renderContext) {
+        if (renderContext->GetBackgroundEffect().has_value()) {
+            renderContext->UpdateBackgroundEffect(std::nullopt);
+        }
+        renderContext->UpdateBackBlurStyle(bgBlurStyle);
+        if (renderContext->GetBackBlurRadius().has_value()) {
+            renderContext->UpdateBackBlurRadius(Dimension());
+        }
+    }
+}
+
+void SetBackgroundEffect(RefPtr<FrameNode>& host, const EffectOption &effectOption)
+{
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (effectOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        pipeline->AddWindowFocusChangedCallback(host->GetId());
+    } else {
+        pipeline->RemoveWindowFocusChangedCallback(host->GetId());
+    }
+    auto renderContext = host->GetRenderContext();
+    if (renderContext) {
+        if (renderContext->GetBackBlurRadius().has_value()) {
+            renderContext->UpdateBackBlurRadius(Dimension());
+        }
+        if (renderContext->GetBackBlurStyle().has_value()) {
+            renderContext->UpdateBackBlurStyle(std::nullopt);
+        }
+        renderContext->UpdateBackgroundEffect(effectOption);
     }
 }
 } // namespace
@@ -1358,6 +1402,9 @@ void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
     if (options_.textOptions.subTitleApplyFunc && !opt.textOptions.subTitleApplyFunc) {
         shouldResetSubTitleProperty_ = true;
     }
+    if (options_.bgOptions.blurStyleOption->blurOption != opt.bgOptions.blurStyleOption->blurOption) {
+        needUpdateBgOptions = true;
+    }
     options_ = std::move(opt);
     if (!needUpdateBgOptions) {
         return;
@@ -1377,12 +1424,15 @@ void TitleBarPattern::UpdateBackgroundStyle(RefPtr<FrameNode>& host)
     } else {
         renderContext->ResetBackgroundColor();
     }
-    if (options_.bgOptions.blurStyle.has_value()) {
-        BlurStyleOption blur;
-        blur.blurStyle = options_.bgOptions.blurStyle.value();
-        renderContext->UpdateBackBlurStyle(blur);
+    if (options_.bgOptions.blurStyleOption.has_value()) {
+        BlurStyleOption styleOption = options_.bgOptions.blurStyleOption.value();
+        SetBackgroundBlurStyle(host, styleOption);
     } else {
         renderContext->ResetBackBlurStyle();
+    }
+    if (options_.bgOptions.effectOption.has_value()) {
+        EffectOption effectOption = options_.bgOptions.effectOption.value();
+        SetBackgroundEffect(host, effectOption);
     }
 }
 
@@ -1424,7 +1474,8 @@ void TitleBarPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(titleBarNode);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
-    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    auto theme = NavigationGetTheme();
+    std::string message = theme ? theme->GetNavigationBack() : "";
     NavigationTitleUtil::SetAccessibility(backButtonNode, message);
 }
 
@@ -1676,4 +1727,10 @@ void TitleBarPattern::HandleMenuLongPressActionEnd()
     SetLargeFontPopUpDialogNode(nullptr);
 }
 
+bool TitleBarPattern::CustomizeExpandSafeArea()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    return RunCustomizeExpandIfNeeded(host);
+}
 } // namespace OHOS::Ace::NG

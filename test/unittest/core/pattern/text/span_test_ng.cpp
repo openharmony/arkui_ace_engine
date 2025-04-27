@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
 
+#include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/symbol_span_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/image/image_model_ng.h"
-
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
@@ -41,7 +42,7 @@ const Ace::TextCase TEXT_CASE_VALUE = Ace::TextCase::LOWERCASE;
 const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
 void onClickFunc(const BaseEventInfo* info) {};
 const std::string FONT_SIZE = "fontSize";
-const std::string FONT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\":\"16.00fp\",\"weight\":"
+const std::string FONT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\":\"14.00px\",\"weight\":"
                                        "\"FontWeight.Normal\",\"family\":\"HarmonyOS Sans\"}";
 const std::string FONT_EQUALS_VALUE =
     R"({"style":"FontStyle.Italic","size":"20.10px","weight":"FontWeight.Bold","family":"cursive"})";
@@ -72,7 +73,24 @@ constexpr double HEIGHT = 500.0;
 const std::string SYMBOL_SPAN_FONT_FAMILY = "Symbol Test";
 } // namespace
 
-class SpanTestNg : public testing::Test {};
+class SpanTestNg : public testing::Test {
+    public:
+        void SetUp() override;
+        void TearDown() override;
+};
+    
+void SpanTestNg::SetUp()
+{
+    MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+}
+
+void SpanTestNg::TearDown()
+{
+    MockPipelineContext::TearDown();
+}
 
 class TestNode : public UINode {
     DECLARE_ACE_TYPE(TestNode, UINode);
@@ -485,7 +503,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph004, TestSize.Level1)
  */
 HWTEST_F(SpanTestNg, SpanItemUpdateParagraph005, TestSize.Level1)
 {
-    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<ImageSpanItem>();
+    RefPtr<ImageSpanItem> spanItem = AceType::MakeRefPtr<ImageSpanItem>();
     ASSERT_NE(spanItem, nullptr);
     TextStyle textStyle;
     ParagraphStyle paraStyle = { .direction = TextDirection::LTR,
@@ -504,15 +522,20 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph005, TestSize.Level1)
     placeholderStyle.width = 9.0;
     placeholderStyle.height = 10.0;
     placeholderStyle.verticalAlign = VerticalAlign::TOP;
-    auto index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
+    spanItem->UpdatePlaceholderRun(placeholderStyle);
+    auto index = spanItem->UpdateParagraph(nullptr, paragraph, false);
     placeholderStyle.verticalAlign = VerticalAlign::CENTER;
-    index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
+    spanItem->UpdatePlaceholderRun(placeholderStyle);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, false);
     placeholderStyle.verticalAlign = VerticalAlign::BOTTOM;
-    index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
+    spanItem->UpdatePlaceholderRun(placeholderStyle);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, false);
     placeholderStyle.verticalAlign = VerticalAlign::BASELINE;
-    index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
+    spanItem->UpdatePlaceholderRun(placeholderStyle);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, false);
     placeholderStyle.verticalAlign = VerticalAlign::NONE;
-    index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
+    spanItem->UpdatePlaceholderRun(placeholderStyle);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, false);
 
     MockParagraph::TearDown();
 }
@@ -643,6 +666,13 @@ HWTEST_F(SpanTestNg, SpanItemGetFont001, TestSize.Level1)
     spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(spanNode, nullptr);
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    spanNode->spanItem_->SetTextPattern(textPattern);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
     spanModelNG.SetFontWeight(FontWeight::NORMAL);
 
     /**
@@ -703,6 +733,8 @@ HWTEST_F(SpanTestNg, SpanDecorationToJsonValue001, TestSize.Level1)
     spanModelNG.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(spanNode, nullptr);
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    spanNode->spanItem_->SetTextPattern(pattern);
     auto json = JsonUtil::Create(true);
     spanNode->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
@@ -733,6 +765,10 @@ HWTEST_F(SpanTestNg, SpanDecorationToJsonValue002, TestSize.Level1)
     spanModelNG.SetFontSize(FONT_SIZE_VALUE);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(spanNode, nullptr);
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    spanNode->spanItem_->SetTextPattern(textPattern);
     auto json = JsonUtil::Create(true);
     spanNode->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
@@ -764,6 +800,8 @@ HWTEST_F(SpanTestNg, SpanDecorationToJsonValue003, TestSize.Level1)
     spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(spanNode, nullptr);
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    spanNode->spanItem_->SetTextPattern(pattern);
     auto json = JsonUtil::Create(true);
     spanNode->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
@@ -1048,7 +1086,7 @@ HWTEST_F(SpanTestNg, SymbolSpanPropertyTest005, TestSize.Level1)
      */
     auto node = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, 1);
 
-    auto* frameNode = reinterpret_cast<FrameNode*>(node.GetRawPtr());
+    auto* frameNode = reinterpret_cast<FrameNode*>(Referenced::RawPtr(node));
 
     ASSERT_NE(frameNode, nullptr);
     SymbolSpanModelNG::InitialCustomSymbol(frameNode, SYMBOL_ID, SYMBOL_SPAN_FONT_FAMILY.c_str());
@@ -1117,7 +1155,7 @@ HWTEST_F(SpanTestNg, ImageSpanEventTest001, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
     LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 1);
     eventHub->FireCompleteEvent(loadImageSuccessEvent);
@@ -1145,7 +1183,7 @@ HWTEST_F(SpanTestNg, ImageSpanEventTest002, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
     LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!");
     eventHub->FireErrorEvent(loadImageFailEvent);
@@ -1172,9 +1210,9 @@ HWTEST_F(SpanTestNg, SpanModelSetFont002, TestSize.Level1)
      */
     Font font;
     std::optional<Dimension> fontSize;
-    UINode* uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode().GetRawPtr();
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     spanModelNG.SetFont(font);
-    spanModelNG.SetFont(uiNode, font);
+    spanModelNG.SetFont(AceType::RawPtr(uiNode), font);
     EXPECT_EQ(spanNode->GetFontSize(), fontSize);
     /**
      * @tc.steps: step3. Set Font, call SetFont
@@ -1184,7 +1222,7 @@ HWTEST_F(SpanTestNg, SpanModelSetFont002, TestSize.Level1)
     font.fontWeight = FontWeight::BOLD;
     font.fontFamilies = FONT_FAMILY_VALUE;
     font.fontStyle = ITALIC_FONT_STYLE_VALUE;
-    spanModelNG.SetFont(uiNode, font);
+    spanModelNG.SetFont(AceType::RawPtr(uiNode), font);
     /**
      * @tc.steps: step4. Gets the relevant properties of the Font
      * @tc.expected: Check the font value

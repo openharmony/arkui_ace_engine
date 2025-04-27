@@ -56,6 +56,8 @@ constexpr int32_t HOT_ZONE_HEIGHT_CANDIDATE = 2;
 constexpr int32_t HOT_ZONE_HEIGHT_DISAPPEAR = 4;
 constexpr char PICKER_DRAG_SCENE[] = "picker_drag_scene";
 const int32_t HALF_NUMBER = 2;
+const uint32_t NEXT_COLOUM_DIFF = 1;
+const std::string AMPM = "amPm";
 } // namespace
 
 void TimePickerColumnPattern::OnAttachToFrameNode()
@@ -66,7 +68,7 @@ void TimePickerColumnPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -85,7 +87,7 @@ void TimePickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     if (hapticController_) {
         hapticController_->Stop();
     }
-    UnregisterWindowStateChangedCallback();
+    UnregisterWindowStateChangedCallback(frameNode);
 }
 
 void TimePickerColumnPattern::OnModifyDone()
@@ -174,6 +176,21 @@ void TimePickerColumnPattern::StopHaptic()
     stopHaptic_ = true;
 }
 
+bool TimePickerColumnPattern::IsStartEndTimeDefined()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(blendNode, false);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_RETURN(stackNode, false);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_RETURN(parentNode, false);
+    auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, false);
+    return timePickerRowPattern->IsStartEndTimeDefined();
+}
+
 void TimePickerColumnPattern::RegisterWindowStateChangedCallback()
 {
     auto host = GetHost();
@@ -183,13 +200,12 @@ void TimePickerColumnPattern::RegisterWindowStateChangedCallback()
     pipeline->AddWindowStateChangedCallback(host->GetId());
 }
 
-void TimePickerColumnPattern::UnregisterWindowStateChangedCallback()
+void TimePickerColumnPattern::UnregisterWindowStateChangedCallback(FrameNode* frameNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveWindowStateChangedCallback(host->GetId());
+    pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
 }
 
 void TimePickerColumnPattern::OnWindowHide()
@@ -251,7 +267,7 @@ void TimePickerColumnPattern::InitMouseAndPressEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto columnEventHub = host->GetEventHub<EventHub>();
+    auto columnEventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(columnEventHub);
     RefPtr<TouchEventImpl> touchListener = CreateItemTouchEventListener();
     CHECK_NULL_VOID(touchListener);
@@ -263,7 +279,7 @@ void TimePickerColumnPattern::InitMouseAndPressEvent()
     auto midSize = childSize / 2;
     middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(midSize));
     CHECK_NULL_VOID(middleChild);
-    auto eventHub = middleChild->GetEventHub<EventHub>();
+    auto eventHub = middleChild->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ParseMouseEvent();
@@ -280,7 +296,7 @@ void TimePickerColumnPattern::InitMouseAndPressEvent()
         param->itemIndex_ = i;
         param->itemTotalCounts_ = childSize;
 
-        auto eventHub = childNode->GetEventHub<EventHub>();
+        auto eventHub = childNode->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         if (i != midSize) {
             RefPtr<ClickEvent> clickListener = CreateItemClickEventListener(param);
@@ -577,8 +593,12 @@ void TimePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty)
 {
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    if (selectedMarkPaint_) {
-        textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
+    if (pickerTheme->IsCircleDial() && !isUserSetSelectColor_) {
+        if (selectedMarkPaint_) {
+            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
+        } else {
+            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(false, false).GetTextColor());
+        }
     } else {
         textLayoutProperty->UpdateTextColor(
             timePickerLayoutProperty->GetSelectedColor().value_or(
@@ -785,12 +805,8 @@ void TimePickerColumnPattern::TextPropertiesLinearAnimation(
     textLayoutProperty->UpdateFontSize(updateSize);
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, distancePercent_);
-    if (selectedMarkPaint_ && (index == (showCount / PICKER_SELECT_AVERAGE))) {
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-        CHECK_NULL_VOID(pickerTheme);
-        updateColor = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+    if (selectedColumnId_ == AMPM) {
+        GetAnimationColor(index, showCount, updateColor);
     }
 
     textLayoutProperty->UpdateTextColor(updateColor);
@@ -866,7 +882,9 @@ void TimePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
 }
 
 void TimePickerColumnPattern::HandleDragStart(const GestureEvent& event)
@@ -1600,6 +1618,8 @@ void TimePickerColumnPattern::SetSelectedMarkPaint(bool paint)
 
 void TimePickerColumnPattern::UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme)
 {
+    UpdateAnimationColor(pickerTheme);
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto blendNode = DynamicCast<FrameNode>(host->GetParent());
@@ -1626,6 +1646,60 @@ void TimePickerColumnPattern::UpdateSelectedTextColor(const RefPtr<PickerTheme>&
 
     textNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
     host->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
+}
+
+void TimePickerColumnPattern::GetAnimationColor(uint32_t index, uint32_t showCount, Color& color, bool selectedMark)
+{
+    CHECK_EQUAL_VOID(index == showCount / PICKER_SELECT_AVERAGE, false);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto layoutProperty = parentNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    if (pickerTheme->IsCircleDial() && !isUserSetSelectColor_) {
+        if (!selectedMarkPaint_) {
+            color = pickerTheme->GetOptionStyle(false, false).GetTextColor();
+        } else if (selectedMark) {
+            color = pickerTheme->GetOptionStyle(true, false).GetTextColor();
+        }
+    } else if (selectedMark) {
+        color = layoutProperty->GetSelectedColor().value_or(
+            pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    }
+}
+
+void TimePickerColumnPattern::UpdateUserSetSelectColor()
+{
+    isUserSetSelectColor_ = true;
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    UpdateSelectedTextColor(pickerTheme);
+}
+
+void TimePickerColumnPattern::UpdateAnimationColor(const RefPtr<PickerTheme>& pickerTheme)
+{
+    Color color;
+    uint32_t showCount = GetShowCount();
+    uint32_t middleIndex = showCount / PICKER_SELECT_AVERAGE;
+    GetAnimationColor(middleIndex, showCount, color, true);
+    if (middleIndex - NEXT_COLOUM_DIFF >= 0 && animationProperties_.size() > middleIndex) {
+        animationProperties_[middleIndex - NEXT_COLOUM_DIFF].downColor = color;
+        animationProperties_[middleIndex + NEXT_COLOUM_DIFF].upColor = color;
+        animationProperties_[middleIndex].currentColor = color;
+    }
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -1714,7 +1788,7 @@ void TimePickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
 
     TimePickerScrollDirection dir =
         GreatNotEqual(scrollDelta_, 0.0f) ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
-    int32_t middleIndex = GetShowCount() / MIDDLE_CHILD_INDEX;
+    auto middleIndex = static_cast<int32_t>(GetShowCount()) / MIDDLE_CHILD_INDEX;
     auto shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                 : optionProperties_[middleIndex].nextDistance;
     auto shiftThreshold = shiftDistance / MIDDLE_CHILD_INDEX;

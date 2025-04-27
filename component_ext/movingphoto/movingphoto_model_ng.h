@@ -19,7 +19,6 @@
 #include "movingphoto_event_hub.h"
 #include "movingphoto_controller.h"
 #include "movingphoto_utils.h"
-#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -46,6 +45,8 @@ public:
     void SetImageAIOptions(void* options);
     void SetMovingPhotoFormat(MovingPhotoFormat format);
     void SetDynamicRangeMode(DynamicRangeMode rangeMode);
+    void SetWaterMask(bool enabled);
+    void GetXmageHeight();
 
 private:
     static std::unique_ptr<MovingPhotoModelNG> instance_;

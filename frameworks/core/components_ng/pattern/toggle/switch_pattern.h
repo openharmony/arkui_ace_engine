@@ -144,6 +144,7 @@ public:
 
     void SetSwitchIsOn(bool value);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void DumpInfo() override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -177,7 +178,6 @@ private:
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
     void OnIsFocusActiveUpdate(bool isFocusAcitve);
-    void UpdateSwitchStyle();
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -211,7 +211,6 @@ private:
     bool isTouch_ = false;
     bool isHover_ = false;
     bool isFocus_ = false;
-    bool isBgColorUnselectFocus_ = false;
     bool isUserSetResponseRegion_ = false;
     bool showHoverEffect_ = true;
 

@@ -62,9 +62,10 @@ void FontManager::RegisterFont(const std::string& familyName, const std::string&
     });
 }
 
-void FontManager::SetFontFamily(const char* familyName, const char* familySrc)
+void FontManager::SetFontFamily(const char* familyName, const std::vector<std::string>& familySrc)
 {
-    RefPtr<FontLoader> fontLoader = FontLoader::Create(familyName, familySrc);
+    RefPtr<FontLoader> fontLoader = FontLoader::CreateFontLoader(familyName, familySrc);
+    CHECK_NULL_VOID(fontLoader);
     fontLoader->SetDefaultFontFamily(familyName, familySrc);
     FontNodeChangeStyleNG();
 }
@@ -276,7 +277,10 @@ void FontManager::RebuildFontNodeNG()
 {
     for (auto iter = fontNodesNG_.begin(); iter != fontNodesNG_.end();) {
         auto fontNode = iter->Upgrade();
-        CHECK_NULL_VOID(fontNode);
+        if (!fontNode) {
+            iter = fontNodesNG_.erase(iter);
+            continue;
+        }
         auto uiNode = DynamicCast<NG::UINode>(fontNode);
         if (uiNode) {
             uiNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
@@ -291,7 +295,6 @@ void FontManager::RebuildFontNodeNG()
     }
     for (auto iter = observers_.begin(); iter != observers_.end();) {
         auto fontNode = iter->Upgrade();
-        CHECK_NULL_VOID(fontNode);
         if (fontNode) {
             fontNode->OnFontChanged();
             ++iter;
@@ -352,15 +355,13 @@ void FontManager::NotifyVariationNodes()
 bool FontManager::RegisterCallbackNG(
     const WeakPtr<NG::UINode>& node, const std::string& familyName, const std::function<void()>& callback)
 {
-    bool hasFontLoader = false;
     CHECK_NULL_RETURN(callback, false);
     for (auto& fontLoader : fontLoaders_) {
         if (fontLoader->GetFamilyName() == familyName) {
             fontLoader->SetOnLoadedNG(node, callback);
-            hasFontLoader = true;
         }
     }
-    return hasFontLoader;
+    return false;
 }
 
 void FontManager::AddFontNodeNG(const WeakPtr<NG::UINode>& node)
@@ -411,4 +412,35 @@ std::vector<std::string> FontManager::GetFontNames()
     return fontNames_;
 }
 
+#ifdef ACE_ENABLE_VK
+void FontManager::AddHybridRenderNode(const WeakPtr<NG::UINode>& node)
+{
+    std::lock_guard<std::mutex> lock(hybridRenderNodesMutex_);
+    if (hybridRenderNodes_.find(node) == hybridRenderNodes_.end()) {
+        hybridRenderNodes_.emplace(node);
+    }
+}
+
+void FontManager::RemoveHybridRenderNode(const WeakPtr<NG::UINode>& node)
+{
+    std::lock_guard<std::mutex> lock(hybridRenderNodesMutex_);
+    hybridRenderNodes_.erase(node);
+}
+
+void FontManager::UpdateHybridRenderNodes()
+{
+    std::lock_guard<std::mutex> lock(hybridRenderNodesMutex_);
+    for (auto iter = hybridRenderNodes_.begin(); iter != hybridRenderNodes_.end();) {
+        auto hybridNode = iter->Upgrade();
+        CHECK_NULL_VOID(hybridNode);
+        auto uiNode = DynamicCast<NG::UINode>(hybridNode);
+        if (uiNode != nullptr) {
+            uiNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+            ++iter;
+        } else {
+            iter = hybridRenderNodes_.erase(iter);
+        }
+    }
+}
+#endif
 } // namespace OHOS::Ace

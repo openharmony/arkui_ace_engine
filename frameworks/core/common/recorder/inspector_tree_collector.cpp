@@ -18,52 +18,72 @@
 #include <string>
 
 namespace OHOS::Ace::Recorder {
-InspectorTreeCollector& InspectorTreeCollector::Get()
+InspectorTreeCollector::InspectorTreeCollector(OnInspectorTreeResult&& callback, bool isBackground)
+    : onResultFunc_(std::move(callback)), isBackground_(isBackground)
 {
-    static InspectorTreeCollector instance;
-    return instance;
-}
-
-void InspectorTreeCollector::GetTree(GetInspectorTree&& getTreeFunc, OnInspectorTreeResult&& callback)
-{
-    if (taskNum_ != 0) {
-        onResultFuncList_.emplace_back(std::move(callback));
-        return;
-    }
     root_ = JsonUtil::Create(true);
-    taskNum_ = 0;
-    onResultFuncList_.emplace_back(std::move(callback));
-    IncreaseTaskNum();
-    getTreeFunc();
-    DecreaseTaskNum();
 }
 
 void InspectorTreeCollector::IncreaseTaskNum()
 {
-    UpdateTaskNum(1);
+    if (isBackground_) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        UpdateTaskNum(1);
+    } else {
+        UpdateTaskNum(1);
+    }
 }
 
 void InspectorTreeCollector::DecreaseTaskNum()
 {
-    UpdateTaskNum(-1);
+    if (isBackground_) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        UpdateTaskNum(-1);
+    } else {
+        UpdateTaskNum(-1);
+    }
 }
 
 void InspectorTreeCollector::UpdateTaskNum(int32_t num)
 {
     taskNum_ += num;
     if (taskNum_ == 0) {
-        if (!onResultFuncList_.empty()) {
-            for (const auto& func : onResultFuncList_) {
-                func(std::make_shared<std::string>(root_->ToString()));
-            }
-            onResultFuncList_.clear();
+        if (!root_) {
+            return;
         }
+        if (!onResultFunc_) {
+            root_ = JsonUtil::Create(true);
+            return;
+        }
+        onResultFunc_(std::make_shared<std::string>(root_->ToString()));
         root_ = JsonUtil::Create(true);
+        if (taskExecutor_ && isBackground_) {
+            taskExecutor_->PostTask(
+                [collector = shared_from_this()]() {
+                    collector->cacheNodes_.clear();
+                },
+                TaskExecutor::TaskType::UI, "InspectorTreeCollector");
+        }
     }
+}
+
+void InspectorTreeCollector::CreateJson()
+{
+    root_ = JsonUtil::Create(true);
 }
 
 std::unique_ptr<JsonValue>& InspectorTreeCollector::GetJson()
 {
     return root_;
+}
+
+void InspectorTreeCollector::RetainNode(const RefPtr<NG::UINode>& node)
+{
+    cacheNodes_.emplace_back(node);
+}
+
+void InspectorTreeCollector::SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor)
+{
+    taskExecutor_ = taskExecutor;
 }
 } // namespace OHOS::Ace::Recorder

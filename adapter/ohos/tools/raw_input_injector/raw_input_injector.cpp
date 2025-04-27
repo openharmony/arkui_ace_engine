@@ -15,12 +15,9 @@
 
 #include "raw_input_injector.h"
 
-#include <chrono>
-#include <getopt.h>
 #include <iostream>
 #include <thread>
 
-#include "injector_utils.h"
 #include "string_ex.h"
 
 namespace OHOS {

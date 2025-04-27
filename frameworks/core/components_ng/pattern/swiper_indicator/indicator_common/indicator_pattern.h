@@ -57,16 +57,35 @@ public:
         return MakeRefPtr<IndicatorEventHub>();
     }
 
+    void InitIndicatorController()
+    {
+        CHECK_NULL_VOID(indicatorController_);
+        indicatorController_->SetIndicatorPattern(AceType::Claim(this));
+        indicatorController_->ResetJSIndicatorController();
+    }
+
     const RefPtr<IndicatorController>& GetIndicatorController() const
     {
         return indicatorController_;
+    }
+
+    void ResetSwiperNode() const
+    {
+        CHECK_NULL_VOID(indicatorController_);
+        indicatorController_->ResetSwiperNode();
+    }
+
+    void ResetJSIndicatorController()
+    {
+        CHECK_NULL_VOID(indicatorController_);
+        indicatorController_->ResetJSIndicatorController();
     }
 
     void UpdateChangeEvent(ChangeEvent&& event)
     {
         if (!changeEvent_) {
             changeEvent_ = std::make_shared<ChangeEvent>(event);
-            auto eventHub = GetEventHub<IndicatorEventHub>();
+            auto eventHub = GetOrCreateEventHub<IndicatorEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddOnChangeEvent(changeEvent_);
         } else {
@@ -97,7 +116,7 @@ public:
         auto controller = GetIndicatorController();
         CHECK_NULL_RETURN(controller, nullptr);
         auto weakUINode = controller->GetSwiperNode();
-        return WeakUINode2RefFrameNode(weakUINode);
+        return weakUINode.Upgrade();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
@@ -150,6 +169,7 @@ public:
 
         if (!GetDotIndicatorModifier()) {
             SetDotIndicatorModifier(AceType::MakeRefPtr<DotIndicatorModifier>());
+            singleGestureState_ = GestureState::GESTURE_STATE_INIT;
         }
         GetDotIndicatorModifier()->SetAnimationDuration(INDICATOR_DEFAULT_DURATION);
         float motionVelocity = 0.0f;
@@ -180,6 +200,7 @@ public:
         }
         paintMethod->SetMouseClickIndex(GetOptinalMouseClickIndex());
         paintMethod->SetIsTouchBottom(GetTouchBottomType());
+        paintMethod->SetTouchBottomRate(touchBottomRate_);
         paintMethod->SetTouchBottomTypeLoop(singleIndicatorTouchBottomTypeLoop_);
         singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
         paintMethod->SetFirstIndex(lastIndex_);
@@ -212,9 +233,16 @@ public:
     void OnModifyDone() override;
     int32_t GetTouchCurrentIndex() const override;
     std::pair<int32_t, int32_t> CalMouseClickIndexStartAndEnd(int32_t itemCount, int32_t currentIndex) override;
+    bool CheckIsTouchBottom(const TouchLocationInfo& info);
+    void HandleDragEnd(double dragVelocity) override;
     void HandleLongDragUpdate(const TouchLocationInfo& info) override;
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    std::shared_ptr<SwiperParameters> GetIndicatorParameters() const
+    {
+        return swiperParameters_;
+    }
+
     int32_t currentIndexInSingleMode_ = 0;
     int32_t hasSetInitialIndex_ = false;
 
@@ -228,7 +256,6 @@ protected:
     bool IsLoopFromProperty() const;
 
 private:
-    void InitIndicatorController();
     std::shared_ptr<SwiperParameters> GetSwiperParameters();
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters();
     void SaveDotIndicatorProperty();
@@ -242,6 +269,7 @@ private:
     bool isCustomSize_ = false;
     TouchBottomTypeLoop singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     int32_t lastIndex_ = 0;
+    float touchBottomRate_ = 1.0f;
 };
 } // namespace OHOS::Ace::NG
 

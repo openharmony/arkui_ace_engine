@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> DialogView::CreateDialogNode(
@@ -24,23 +25,26 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     return CreateDialogNode(nodeId, param, customNode);
 }
 
-void SetDialogTransitionEffects(RefPtr<FrameNode> dialog,
-                                RefPtr<FrameNode> frameNode,
-                                const DialogProperties& param,
-                                RefPtr<DialogPattern> pattern)
+void SetDialogTransitionEffects(
+    const RefPtr<FrameNode>& dialog, const DialogProperties& param, RefPtr<DialogPattern> pattern)
 {
     auto dialogContext = dialog->GetRenderContext();
-    if (param.transitionEffect != nullptr) {
+    if (param.maskTransitionEffect != nullptr || param.dialogTransitionEffect != nullptr) {
+        dialogContext->UpdateBackgroundColor(Color(0x00000000));
+        if (param.dialogTransitionEffect != nullptr) {
+            auto contentNode = AceType::DynamicCast<FrameNode>(dialog->GetChildByIndex(0));
+            CHECK_NULL_VOID(contentNode);
+            contentNode->GetRenderContext()->UpdateChainedTransition(param.dialogTransitionEffect);
+        }
+        if (param.maskTransitionEffect != nullptr) {
+            auto maskNode = AceType::DynamicCast<FrameNode>(dialog->GetChildByIndex(1));
+            CHECK_NULL_VOID(maskNode);
+            maskNode->GetRenderContext()->UpdateChainedTransition(param.maskTransitionEffect);
+        }
+    } else if (param.transitionEffect != nullptr) {
         dialogContext->UpdateChainedTransition(param.transitionEffect);
     }
-    if (param.maskTransitionEffect != nullptr) {
-        dialogContext->UpdateChainedTransition(param.maskTransitionEffect);
-    }
-    if (param.dialogTransitionEffect != nullptr) {
-        frameNode->GetRenderContext()->UpdateChainedTransition(param.dialogTransitionEffect);
-    }
-    if (param.transitionEffect == nullptr &&
-        param.dialogTransitionEffect == nullptr &&
+    if (param.transitionEffect == nullptr && param.dialogTransitionEffect == nullptr &&
         param.maskTransitionEffect == nullptr) {
         // set open and close animation
         pattern->SetOpenAnimation(param.openAnimation);
@@ -80,8 +84,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     dialogLayoutProp->UpdateShowInSubWindow(param.isShowInSubWindow);
     dialogLayoutProp->UpdateDialogButtonDirection(param.buttonDirection);
     dialogLayoutProp->UpdateIsModal(param.isModal);
-    dialogLayoutProp->UpdateIsScenceBoardDialog(param.isScenceBoardDialog);
-    dialogLayoutProp->UpdateEnableHoverMode(param.enableHoverMode);
+    dialogLayoutProp->UpdateIsSceneBoardDialog(param.isSceneBoardDialog);
     if (param.width.has_value() && NonNegative(param.width.value().Value())) {
         dialogLayoutProp->UpdateWidth(param.width.value());
     } else {
@@ -89,6 +92,9 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     }
     if (param.height.has_value() && NonNegative(param.height.value().Value())) {
         dialogLayoutProp->UpdateHeight(param.height.value());
+    }
+    if (param.enableHoverMode.has_value()) {
+        dialogLayoutProp->UpdateEnableHoverMode(param.enableHoverMode.value());
     }
     if (param.hoverModeArea.has_value()) {
         dialogLayoutProp->UpdateHoverModeArea(param.hoverModeArea.value());
@@ -100,18 +106,17 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     CHECK_NULL_RETURN(pattern, dialog);
     pattern->SetDialogProperties(param);
 
-    auto isSubWindow = dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow();
-    if ((isSubWindow && dialogLayoutProp->GetIsModal().value_or(true)) ||
-        !dialogLayoutProp->GetIsModal().value_or(true)) {
+    if (dialogLayoutProp->GetShowInSubWindowValue(false) || !dialogLayoutProp->GetIsModal().value_or(true)) {
         dialogContext->UpdateBackgroundColor(Color(0x00000000));
     } else {
         dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
     }
-    if (dialogLayoutProp->GetIsScenceBoardDialog().value_or(false)) {
+    if (dialogLayoutProp->GetIsSceneBoardDialog().value_or(false)) {
         dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
     }
+    SetDialogAccessibilityHoverConsume(dialog);
     // set onCancel callback
-    auto hub = dialog->GetEventHub<DialogEventHub>();
+    auto hub = dialog->GetOrCreateEventHub<DialogEventHub>();
     CHECK_NULL_RETURN(hub, dialog);
     hub->SetOnCancel(param.onCancel);
     hub->SetOnSuccess(param.onSuccess);
@@ -120,8 +125,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     pattern->SetOnWillDismiss(param.onWillDismiss);
     pattern->SetOnWillDismissByNDK(param.onWillDismissCallByNDK);
 
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(customNode);
-    SetDialogTransitionEffects(dialog, frameNode, param, pattern);
+    SetDialogTransitionEffects(dialog, param, pattern);
 
     dialog->MarkModifyDone();
     return dialog;
@@ -144,6 +148,26 @@ std::string DialogView::GetDialogTag(const DialogProperties& param)
             break;
     }
     return tag;
+}
+
+void DialogView::SetDialogAccessibilityHoverConsume(const RefPtr<FrameNode>& dialog)
+{
+    auto dialogAccessibilityProperty = dialog->GetAccessibilityProperty<DialogAccessibilityProperty>();
+    CHECK_NULL_VOID(dialogAccessibilityProperty);
+    dialogAccessibilityProperty->SetAccessibilityHoverConsume(
+        [weak = AceType::WeakClaim(AceType::RawPtr(dialog))](const NG::PointF& point) {
+            auto dialogNode = weak.Upgrade();
+            CHECK_NULL_RETURN(dialogNode, true);
+            auto dialogLayoutProp = dialogNode->GetLayoutProperty<DialogLayoutProperty>();
+            CHECK_NULL_RETURN(dialogLayoutProp, true);
+            auto pattern = dialogNode->GetPattern<DialogPattern>();
+            CHECK_NULL_RETURN(pattern, true);
+            if (!dialogLayoutProp->GetIsModal().value_or(true) ||
+                (dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow())) {
+                return false;
+            }
+            return true;
+        });
 }
 
 } // namespace OHOS::Ace::NG

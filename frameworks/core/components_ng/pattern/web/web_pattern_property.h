@@ -71,12 +71,12 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CopyOptionMode, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MetaViewport, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedModeEnabled, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(IntrinsicSizeEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextAutosizing, bool);
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(SmoothDragResizeEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(KeyboardAvoidMode, WebKeyboardAvoidMode);

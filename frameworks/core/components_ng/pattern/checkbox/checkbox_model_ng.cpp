@@ -15,8 +15,10 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
@@ -32,7 +34,7 @@ void CheckBoxModelNG::Create(
         FrameNode::GetOrCreateFrameNode(tagName, nodeId, []() { return AceType::MakeRefPtr<CheckBoxPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (name.has_value()) {
         eventHub->SetName(name.value());
@@ -55,7 +57,7 @@ void CheckBoxModelNG::SetSelect(bool isSelected)
     CHECK_NULL_VOID(stack);
     const auto& frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
 
@@ -113,7 +115,7 @@ void CheckBoxModelNG::SetOnChange(ChangeEvent&& onChange)
     CHECK_NULL_VOID(stack);
     auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -139,7 +141,7 @@ void CheckBoxModelNG::SetChangeEvent(ChangeEvent&& changeEvent)
     CHECK_NULL_VOID(stack);
     auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
@@ -221,7 +223,7 @@ void CheckBoxModelNG::SetCheckboxStyle(FrameNode* frameNode, CheckBoxStyle check
 void CheckBoxModelNG::SetCheckboxName(FrameNode* frameNode, const std::optional<std::string>& name)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (name.has_value()) {
         eventHub->SetName(name.value());
@@ -231,7 +233,7 @@ void CheckBoxModelNG::SetCheckboxName(FrameNode* frameNode, const std::optional<
 void CheckBoxModelNG::SetCheckboxGroup(FrameNode* frameNode, const std::optional<std::string>& groupName)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (groupName.has_value()) {
         eventHub->SetGroupName(groupName.value());
@@ -339,7 +341,7 @@ void CheckBoxModelNG::SetChangeValue(FrameNode* frameNode, bool value)
 void CheckBoxModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -347,7 +349,7 @@ void CheckBoxModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
 std::string CheckBoxModelNG::GetCheckboxName(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, "");
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_RETURN(eventHub, "");
     return eventHub->GetName();
 }
@@ -355,7 +357,7 @@ std::string CheckBoxModelNG::GetCheckboxName(FrameNode* frameNode)
 std::string CheckBoxModelNG::GetCheckboxGroup(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, "");
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_RETURN(eventHub, "");
     return eventHub->GetGroupName();
 }

@@ -43,6 +43,7 @@ namespace {
 struct PositionInfo {
     float mainPos;
     float mainSize;
+    bool isGroup;
 };
 
 enum class ListPosMapUpdate {
@@ -60,7 +61,17 @@ public:
 
     void UpdatePos(int32_t index, PositionInfo posInfo)
     {
-        posMap_[index] = { posInfo.mainPos, posInfo.mainSize };
+        posMap_[index] = posInfo;
+    }
+
+    void UpdatePosRange(int32_t startIndex, int32_t endIndex, PositionInfo posInfo, float space, int32_t lanes)
+    {
+        for (int32_t i = startIndex; i < endIndex; i++) {
+            posMap_[i] = posInfo;
+            if (lanes >= 1 && (i % lanes == lanes - 1)) {
+                posInfo.mainPos = posInfo.mainPos + posInfo.mainSize + space;
+            }
+        }
     }
 
     void UpdatePosWithCheck(int32_t index, PositionInfo posInfo)
@@ -70,6 +81,7 @@ public:
             posMap_[index] = posInfo;
             return;
         }
+        iter->second.isGroup = posInfo.isGroup;
         if (LessNotEqual(iter->second.mainSize, posInfo.mainSize)) {
             iter->second.mainSize = posInfo.mainSize;
         }
@@ -318,14 +330,6 @@ public:
         totalHeight_ = totalHeight_ - space_ + footerSize_;
     }
 
-    void PosMapUpdateAllSize()
-    {
-        float curPos = 0.0f;
-        for (int32_t index = 0; index < totalItemCount_; index++) {
-            posMap_[index] = { curPos, curRowHeight_ };
-        }
-    }
-
     virtual void UpdatePosMap(LayoutWrapper* layoutWrapper, int32_t lanes, float space,
         RefPtr<ListChildrenMainSize>& childrenSize)
     {
@@ -509,6 +513,26 @@ public:
             rowHeight = posMap_[endIndex + 1].mainPos  - posMap_[endIndex].mainPos - space_;
         }
         return { endIndex, rowHeight };
+    }
+
+    void ReversePosMap()
+    {
+        totalHeight_ = 0.0f;
+        float curRowHeight = posMap_.begin()->second.mainSize;
+        std::map<int32_t, PositionInfo> posMap;
+        for (int32_t index = totalItemCount_ - 1; index >= 0; --index) {
+            auto posIndex = totalItemCount_ - index - 1;
+            posMap[posIndex] = {totalHeight_, posMap_[posIndex].mainSize};
+            if (index > 0 && !NearEqual(posMap_[index].mainPos, posMap_[index - 1].mainPos)) {
+                curRowHeight = std::max(posMap_[posIndex].mainSize, curRowHeight);
+                totalHeight_ += (curRowHeight + space_);
+                curRowHeight = 0.0f;
+            } else {
+                curRowHeight = std::max(posMap_[posIndex].mainSize, curRowHeight);
+            }
+        }
+        posMap_ = std::move(posMap);
+        totalHeight_ += curRowHeight;
     }
 protected:
     RefPtr<ListChildrenMainSize> childrenSize_;

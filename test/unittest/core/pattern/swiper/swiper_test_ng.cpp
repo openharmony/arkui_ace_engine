@@ -18,6 +18,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components/button/button_theme.h"
@@ -81,7 +82,7 @@ void SwiperTestNg::GetSwiper()
 {
     frameNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     pattern_ = frameNode_->GetPattern<SwiperPattern>();
-    eventHub_ = frameNode_->GetEventHub<SwiperEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<SwiperEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<SwiperLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<SwiperPaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<SwiperAccessibilityProperty>();
@@ -103,6 +104,8 @@ void SwiperTestNg::CreateSwiperDone()
     if (pattern_->HasRightButtonNode()) {
         rightArrowNode_ = GetChildFrameNode(frameNode_, index);
     }
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_);
+    mockRenderContext->paintRect_ = RectF(0.f, 0.f, SWIPER_WIDTH, SWIPER_HEIGHT);
 }
 
 SwiperModelNG SwiperTestNg::CreateSwiper()
@@ -1239,7 +1242,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternComputeSwipePageNextIndex001, TestSize.Level
     layoutProperty_->UpdateLoop(false);
     pattern_->currentIndex_ = 0;
     dragVelocity = 500.0f;
-    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 0);
+    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 3);
 
     pattern_->currentIndex_ = 3;
     dragVelocity = -500.0f;
@@ -1520,5 +1523,168 @@ HWTEST_F(SwiperTestNg, WearableSwiperOnModifyDone001, TestSize.Level1)
     indicatorPattern->swiperController_->addSwiperEventCallback_();
     indicatorPattern->OnAfterModifyDone();
     EXPECT_EQ(indicatorPattern->lastSwiperIndicatorType_, SwiperIndicatorType::ARC_DOT);
+}
+
+/**
++ * @tc.name: SwiperPattern_OnDirtyLayoutWrapperSwap001
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPattern_OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto swiperPaintProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    RefPtr<LayoutWrapper> dirty = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, swiperPaintProperty);
+    DirtySwapConfig config;
+    auto result = swiperPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    EXPECT_FALSE(result);
+}
+
+/**
++ * @tc.name: SwiperPattern_OnDirtyLayoutWrapperSwap002
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPattern_OnDirtyLayoutWrapperSwap002, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto swiperPaintProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    RefPtr<LayoutWrapper> dirty = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, swiperPaintProperty);
+    DirtySwapConfig config;
+    config.skipLayout = true;
+    config.skipMeasure = true;
+    auto result = swiperPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    EXPECT_FALSE(result);
+}
+
+/**
++ * @tc.name: SwiperPattern_OnDirtyLayoutWrapperSwap003
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPattern_OnDirtyLayoutWrapperSwap003, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->isInit_ = false;
+    swiperPattern->currentIndex_ = 2;
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto swiperPaintProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    RefPtr<LayoutWrapper> dirty = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, swiperPaintProperty);
+    DirtySwapConfig config;
+    config.skipLayout = true;
+    config.skipMeasure = true;
+    swiperPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    EXPECT_EQ(swiperPattern->oldIndex_, 2);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest001
+ * @tc.desc: test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, OnInjectionEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    int32_t currentIndex = 3;
+    auto onChange = [&currentIndex](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (swiperInfo != nullptr) {
+            currentIndex = swiperInfo->GetIndex();
+        }
+    };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnChange(std::move(onChange));
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string command = R"({"cmd":"changeIndex","params":{"index":2}})";
+    pattern->OnInjectionEvent(command);
+    EXPECT_EQ(currentIndex, 2);
+    command = R"({"cmd":"changeIndex","params":{"index":100}})";
+    pattern->OnInjectionEvent(command);
+    EXPECT_EQ(currentIndex, 0);
+    command = R"({"cmd":"changeIndex","params":{"index":-10}})";
+    EXPECT_EQ(currentIndex, 0);
+    pattern->OnInjectionEvent(command);
+}
+
+/**
+ * @tc.name: SwipeAutoLinearIsOutOfBoundary001
+ * @tc.desc: Test SwiperPattern AutoLinearIsOutOfBoundary test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwipeAutoLinearIsOutOfBoundary001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper with SwiperDisplayMode::AUTO_LINEAR
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    model.SetLoop(false);
+    CreateItemWithSize(SWIPER_WIDTH, SWIPER_HEIGHT);
+    CreateSwiperDone();
+    EXPECT_FALSE(pattern_->itemPosition_.empty());
+    EXPECT_FALSE(pattern_->itemPosition_.size() < pattern_->TotalCount());
+    EXPECT_FALSE(pattern_->AutoLinearIsOutOfBoundary(0.f));
+}
+
+/**
+ * @tc.name: CustomAnimationHandleDragEnd001
+ * @tc.desc: Test SwiperPattern HandleDragEnd on custom animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CustomAnimationHandleDragEnd001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    SwiperContentAnimatedTransition transitionInfo;
+    transitionInfo.timeout = 0;
+    transitionInfo.transition = [](const RefPtr<SwiperContentTransitionProxy>& proxy) {};
+    model.SetCustomContentTransition(transitionInfo);
+    auto onContentDidScroll = [](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {};
+    model.SetOnContentDidScroll(std::move(onContentDidScroll));
+    CreateSwiperItems();
+    CreateSwiperDone();
+    pattern_->contentMainSize_ = SWIPER_WIDTH;
+    EXPECT_TRUE(pattern_->SupportSwiperCustomAnimation());
+
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    info.SetSourceTool(SourceTool::TOUCHPAD);
+    info.SetGlobalLocation(Offset(100.f, 100.f));
+    info.SetMainDelta(100.0f);
+    info.SetMainVelocity(2000.f);
+
+    pattern_->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->itemPosition_.empty());
+    auto offset = pattern_->itemPosition_[0].startPos;
+    EXPECT_EQ(offset, 100.0f);
+
+    pattern_->HandleDragEnd(2000.f, 0.0f);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->itemPosition_.empty());
+
+    offset = pattern_->itemPosition_[0].startPos;
+    EXPECT_EQ(offset, 100.0f);
 }
 } // namespace OHOS::Ace::NG

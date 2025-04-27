@@ -74,6 +74,7 @@ protected:
     static void TearDownTestSuite();
     void TearDown() override;
 
+    void FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
     void CreateTextField(const std::string& text = "", const std::string& placeHolder = "",
         const std::function<void(TextFieldModelNG&)>& callback = nullptr);
     static void ExpectCallParagraphMethods(ExpectParagraphParams params);
@@ -148,6 +149,20 @@ void TextInputModifyBase::ExpectCallParagraphMethods(ExpectParagraphParams param
     EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(params.lineCount));
 }
 
+void TextInputModifyBase::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
+{
+    frameNode->SetActive();
+    frameNode->isLayoutDirtyMarked_ = true;
+    frameNode->CreateLayoutTask();
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    auto wrapper = frameNode->CreatePaintWrapper();
+    if (wrapper != nullptr) {
+        wrapper->FlushRender();
+    }
+    paintProperty->CleanDirty();
+    frameNode->SetActive(false);
+}
+
 void TextInputModifyBase::CreateTextField(
     const std::string& text, const std::string& placeHolder, const std::function<void(TextFieldModelNG&)>& callback)
 {
@@ -161,7 +176,7 @@ void TextInputModifyBase::CreateTextField(
     stack->StopGetAccessRecording();
     frameNode_ = AceType::DynamicCast<FrameNode>(stack->Finish());
     pattern_ = frameNode_->GetPattern<TextFieldPattern>();
-    eventHub_ = frameNode_->GetEventHub<TextFieldEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
     FlushLayoutTask(frameNode_);
@@ -486,7 +501,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback003, TestSize.Level1)
      * @tc.expected: Check if return true.
      */
 
-    pattern_->GetFocusHub()->onFocusInternal_.operator()();
+    pattern_->GetFocusHub()->onFocusInternal_.operator()(pattern_->GetFocusHub()->focusReason_);
     RoundRect roundRect;
     pattern_->GetFocusHub()->getInnerFocusRectFunc_.operator()(roundRect);
     EXPECT_TRUE(pattern_->isFocusedBeforeClick_);
@@ -1000,7 +1015,7 @@ HWTEST_F(TextFieldModifyTest, OnScrollEndMenuVisibile001, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
     EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
     pattern_->selectOverlay_ = mockSelectOverlay;
 
@@ -1379,7 +1394,7 @@ HWTEST_F(TextFieldModifyTest, DumpViewDataPageNode001, TestSize.Level1)
      * @tc.steps: step3. call DumpViewDataPageNode.
      */
     pattern_->NotifyFillRequestSuccess(viewData, info, autoFillType);
-    EXPECT_EQ(pattern_->selectController_->caretInfo_.index, 26);
+    EXPECT_EQ(pattern_->selectController_->caretInfo_.index, 0);
 }
 
 /**

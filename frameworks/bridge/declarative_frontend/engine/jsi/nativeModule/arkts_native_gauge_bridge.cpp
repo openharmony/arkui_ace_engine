@@ -561,4 +561,35 @@ ArkUINativeModuleValue GaugeBridge::SetContentModifierBuilder(ArkUIRuntimeCallIn
         });
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue GaugeBridge::SetGaugePrivacySensitive(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    uint32_t sensitive = false;
+    if (secondArg->IsBoolean()) {
+        sensitive = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+    }
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getCommonModifier()->setPrivacySensitive(nativeNode, sensitive);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue GaugeBridge::ResetGaugePrivacySensitive(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getCommonModifier()->resetPrivacySensitive(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

@@ -16,12 +16,66 @@
 #include "core/components_ng/event/scrollable_event.h"
 
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+ScrollableEvent::ScrollableEvent(Axis axis) : axis_(axis) {};
+ScrollableEvent::~ScrollableEvent() = default;
 
 ScrollableActuator::ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEventHub)
     : gestureEventHub_(gestureEventHub)
 {}
+
+void ScrollableEvent::SetAxis(Axis axis)
+{
+    axis_ = axis;
+    if (scrollable_) {
+        scrollable_->SetAxis(axis);
+    }
+}
+
+void ScrollableEvent::SetScrollable(const RefPtr<Scrollable>& scrollable)
+{
+    scrollable_ = scrollable;
+}
+
+const RefPtr<Scrollable>& ScrollableEvent::GetScrollable() const
+{
+    return scrollable_;
+}
+
+bool ScrollableEvent::Idle() const
+{
+    if (scrollable_) {
+        return scrollable_->Idle();
+    }
+    return true;
+}
+
+bool ScrollableEvent::IsHitTestBlock(const PointF& localPoint, SourceType source) const
+{
+    if (source == SourceType::MOUSE && InBarRectRegion(localPoint, source)) {
+        return false;
+    }
+    if (scrollable_ && !scrollable_->Idle() &&
+        std::abs(scrollable_->GetCurrentVelocity()) > PipelineBase::Vp2PxWithCurrentDensity(HTMBLOCK_VELOCITY)) {
+        return true;
+    }
+    if (getAnimateVelocityCallback_) {
+        return std::abs(getAnimateVelocityCallback_()) > PipelineBase::Vp2PxWithCurrentDensity(HTMBLOCK_VELOCITY);
+    }
+    return false;
+}
+
+void ScrollableEvent::AddPreviewMenuHandleDragEnd(GestureEventFunc&& actionEnd)
+{
+    if (scrollable_) {
+        scrollable_->AddPreviewMenuHandleDragEnd(std::move(actionEnd));
+    }
+}
 
 void ScrollableActuator::AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& effect)
 {

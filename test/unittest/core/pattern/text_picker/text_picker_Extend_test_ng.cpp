@@ -972,7 +972,7 @@ HWTEST_F(TextPickerExTestNg, TextPickerFireChangeEventTest001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->OnModifyDone();
-    auto textPickerEventHub = frameNode->GetEventHub<NG::TextPickerEventHub>();
+    auto textPickerEventHub = frameNode->GetOrCreateEventHub<NG::TextPickerEventHub>();
     ASSERT_NE(textPickerEventHub, nullptr);
     textPickerEventHub->SetOnSelectedChangeEvent(std::move(onSelectedChange));
     textPickerEventHub->SetOnValueChangeEvent(std::move(onValueChange));
@@ -987,97 +987,109 @@ HWTEST_F(TextPickerExTestNg, TextPickerFireChangeEventTest001, TestSize.Level1)
 
 /**
  * @tc.name: TextPickerKeyEvent001
- * @tc.desc: test OnKeyEvent
+ * @tc.desc: test OnKeyEvent when event.action is not DOWN.
  * @tc.type: FUNC
  */
 HWTEST_F(TextPickerExTestNg, TextPickerKeyEvent001, TestSize.Level1)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
+    TextPickerModelNG::GetInstance()->SetRange(range);
+
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto focusHub = frameNode->GetEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetOrCreateEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
     frameNode->MarkModifyDone();
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
+    textPickerPattern->OnModifyDone();
+
     auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     pickerNodeLayout->UpdateCanLoop(true);
     textPickerPattern->InitOnKeyEvent(focusHub);
-    // before space key down, tab key down
+
+    /**
+     * @tc.cases: case. test OnKeyEvent when event.action is not DOWN.
+     */
     KeyEvent event;
-    event.action = KeyAction::DOWN;
-    event.code = KeyCode::KEY_TAB;
+    event.action = KeyAction::UP;
+    event.code = KeyCode::KEY_DPAD_UP;
     bool result = textPickerPattern->OnKeyEvent(event);
-    EXPECT_EQ(result, false);
-    // space key down, operation on
-    event.code = KeyCode::KEY_SPACE;
-    result = textPickerPattern->OnKeyEvent(event);
-    bool operationOn = textPickerPattern->operationOn_;
-    EXPECT_EQ(operationOn, true);
-    EXPECT_EQ(result, true);
-    // tab key down when opeartion is on
-    event.code = KeyCode::KEY_TAB;
-    result = textPickerPattern->OnKeyEvent(event);
-    operationOn = textPickerPattern->operationOn_;
-    EXPECT_EQ(operationOn, false);
-    EXPECT_EQ(result, false);
-    // escape key down, operation off
-    textPickerPattern->operationOn_ = true;
-    event.code = KeyCode::KEY_ESCAPE;
-    result = textPickerPattern->OnKeyEvent(event);
-    operationOn = textPickerPattern->operationOn_;
-    EXPECT_EQ(operationOn, true);
-    EXPECT_EQ(result, false);
+    EXPECT_FALSE(result);
 }
 
 /**
  * @tc.name: TextPickerKeyEvent002
- * @tc.desc: test OnKeyEvent
+ * @tc.desc: test OnKeyEvent when event.action is DOWN.
  * @tc.type: FUNC
  */
 HWTEST_F(TextPickerExTestNg, TextPickerKeyEvent002, TestSize.Level1)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
+    TextPickerModelNG::GetInstance()->SetRange(range);
+
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto focusHub = frameNode->GetEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetOrCreateEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
     frameNode->MarkModifyDone();
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
+    textPickerPattern->OnModifyDone();
+
     auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     pickerNodeLayout->UpdateCanLoop(true);
     textPickerPattern->InitOnKeyEvent(focusHub);
+
     KeyEvent event;
-
-    /**
-     * @tc.cases: case. cover branch KeyAction is not DOWN.
-     */
-    event.action = KeyAction::UP;
-    event.code = KeyCode::KEY_TAB;
-    bool result = textPickerPattern->OnKeyEvent(event);
-    EXPECT_FALSE(result);
-
-    /**
-     * @tc.cases: case. cover branch event code is KEY_ENTER and operationOn_ is false.
-     */
     event.action = KeyAction::DOWN;
-    event.code = KeyCode::KEY_ENTER;
-    textPickerPattern->operationOn_ = false;
-    result = textPickerPattern->OnKeyEvent(event);
-    EXPECT_TRUE(result);
 
     /**
-     * @tc.cases: case. cover branch operationOn_ is not true.
+     * @tc.cases: case1. event code is KEY_DPAD_UP.
+     */
+    event.code = KeyCode::KEY_DPAD_UP;
+    EXPECT_TRUE(textPickerPattern->OnKeyEvent(event));
+
+    /**
+     * @tc.cases: case2. event code is KEY_DPAD_DOWN.
+     */
+    event.code = KeyCode::KEY_DPAD_DOWN;
+    EXPECT_TRUE(textPickerPattern->OnKeyEvent(event));
+
+    /**
+     * @tc.cases: case3. event code is KEY_MOVE_HOME.
+     */
+    event.code = KeyCode::KEY_MOVE_HOME;
+    EXPECT_TRUE(textPickerPattern->OnKeyEvent(event));
+ 
+     /**
+      * @tc.cases: case4. event code is KEY_MOVE_END.
+      */
+    event.code = KeyCode::KEY_MOVE_END;
+    EXPECT_TRUE(textPickerPattern->OnKeyEvent(event));
+
+    /**
+     * @tc.cases: case5. event code is KEY_DPAD_LEFT.
+     */
+    event.code = KeyCode::KEY_DPAD_LEFT;
+    EXPECT_TRUE(textPickerPattern->OnKeyEvent(event));
+
+    /**
+     * @tc.cases: case6. event code is KEY_DPAD_RIGHT.
      */
     event.code = KeyCode::KEY_DPAD_RIGHT;
-    textPickerPattern->operationOn_ = true;
-    result = textPickerPattern->OnKeyEvent(event);
-    EXPECT_TRUE(result);
+    EXPECT_TRUE(textPickerPattern->OnKeyEvent(event));
+
+    /**
+     * @tc.cases: case7. event code is KEY_SPACE.
+     */
+    EXPECT_FALSE(textPickerPattern->HandleDirectionKey(KeyCode::KEY_SPACE));
 }
 
 /**
@@ -1225,7 +1237,7 @@ HWTEST_F(TextPickerExTestNg, TextEventActionsTest001, TestSize.Level1)
      * @tc.steps: step1. Create textPickerColumn.
      */
     InitTextPickerExTestNg();
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);

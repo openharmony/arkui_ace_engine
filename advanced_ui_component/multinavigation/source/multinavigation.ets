@@ -816,7 +816,7 @@ export class MultiNavPathStack extends NavPathStack {
           this.subStackList[i].secondaryStack.popToIndex(index - removeIndex);
           this.subStackList[i].secondaryStack.policyInfoList.splice(index - removeIndex + 1);
           this.totalStack.splice(index + 1);
-          this.clearTrashStack(i + 1,result,animated);
+          this.clearTrashStack(i + 1, result, animated);
         }
         removeIndex += secondaryStackSize[i];
       }
@@ -868,7 +868,7 @@ export class MultiNavPathStack extends NavPathStack {
         this.subStackList[i].secondaryStack.popToIndex(index - removeIndex);
         this.subStackList[i].secondaryStack.policyInfoList.splice(index - removeIndex + 1);
         this.totalStack.splice(index + 1);
-        this.clearTrashStack(i + 1,result,animated);
+        this.clearTrashStack(i + 1, result, animated);
       }
       removeIndex += secondaryStackSize[i];
     }

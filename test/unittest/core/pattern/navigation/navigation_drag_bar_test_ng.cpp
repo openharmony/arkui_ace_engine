@@ -123,6 +123,7 @@ HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest002, TestSize.Level1)
      * @tc.steps: step1. create NavigationGroupNode.
      */
     CreateNavigationModel();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -170,6 +171,7 @@ HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest003, TestSize.Level1)
      * @tc.steps: step1. create NavigationGroupNode.
      */
     CreateNavigationModel();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -205,6 +207,7 @@ HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest004, TestSize.Level1)
      * @tc.steps: step1. create NavigationGroupNode and dragBar.
      */
     CreateNavigationModel();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -220,7 +223,7 @@ HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest004, TestSize.Level1)
      * @tc.steps: step2. Initialize dragBar pan and touch event.
      * @tc.expected: The gesture events of dragBar are not empty .
      */
-    auto eventHub = dragBarNode->GetEventHub<EventHub>();
+    auto eventHub = dragBarNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
@@ -243,6 +246,7 @@ HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest005, TestSize.Level1)
      * @tc.steps: step1. create NavigationGroupNode and dragBar.
      */
     CreateNavigationModel();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -266,7 +270,7 @@ HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest005, TestSize.Level1)
     /**
      * @tc.steps: step3. test drag bar pan event callback.
      */
-    auto eventHub = dragBarNode->GetEventHub<EventHub>();
+    auto eventHub = dragBarNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
@@ -333,7 +337,7 @@ HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest007, TestSize.Level1)
     /**
      * @tc.steps: step2. set dragBar touch event.
      */
-    auto eventHub = dragBarNode->GetEventHub<EventHub>();
+    auto eventHub = dragBarNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
@@ -380,7 +384,7 @@ HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest008, TestSize.Level1)
     /**
      * @tc.steps: step2. set dragBar touch event.
      */
-    auto eventHub = dragBarNode->GetEventHub<EventHub>();
+    auto eventHub = dragBarNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);

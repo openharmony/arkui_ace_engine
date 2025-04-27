@@ -75,6 +75,10 @@ public:
     {
         return isHandleMoving_ && IsSingleHandle();
     }
+    bool NeedRefreshMenu()
+    {
+        return needRefreshMenu_;
+    }
     void OnHandleIsHidden() override;
     void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
     void OnHandleMouseEvent(const MouseInfo& event) override;
@@ -103,6 +107,7 @@ private:
     std::shared_ptr<SelectionMenuParams> lastMenuParams_ = nullptr;
     std::pair<TextSpanType, TextResponseType> lastSelectResponseComb_;
     bool needRefreshMenu_ = false;
+    bool recreateAfterMoveDone_ = false;
     bool handleIsHidden_ = true;
     std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
 

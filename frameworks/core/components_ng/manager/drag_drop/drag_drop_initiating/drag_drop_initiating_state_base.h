@@ -34,6 +34,7 @@ struct DragDropInitiatingParams {
     float preScaleValue = 1.0f;
     bool isThumbnailCallbackTriggered = false;
     bool isNeedGather = false;
+    bool hasGatherNode = false;
     RefPtr<PixelMap> preScaledPixelMap;
     std::function<void(Offset)> getTextThumbnailPixelMapCallback;
     CancelableCallback<void()> getThumbnailPixelMapCallback;
@@ -42,7 +43,8 @@ struct DragDropInitiatingParams {
     CancelableCallback<void()> preDragStatusCallback;
     OptionsAfterApplied optionsAfterApplied;
     WeakPtr<FrameNode> frameNode;
-    SourceType triggeredSourceType;
+    SourceType triggeredSourceType = SourceType::TOUCH;
+    Offset touchOffset { 0.0, 0.0 };
 
     RefPtr<FrameNode> GetFrameNode()
     {
@@ -57,11 +59,12 @@ struct DragDropInitiatingParams {
         triggeredSourceType = SourceType::TOUCH;
         isThumbnailCallbackTriggered = false;
         isNeedGather = false;
-        getTextThumbnailPixelMapCallback = nullptr;
+        hasGatherNode = false;
         getThumbnailPixelMapCallback.Cancel();
         notifyPreDragCallback.Cancel();
         showGatherCallback.Cancel();
         preDragStatusCallback.Cancel();
+        touchOffset.Reset();
     }
 };
 
@@ -89,6 +92,7 @@ public:
     virtual void HandlePullEvent(const DragPointerEvent& dragPointerEvent) {}
     virtual void HandleReStartDrag(const GestureEvent& info) {}
     virtual void HandleDragStart() {}
+    virtual void HandlePreDragStatus(const PreDragStatus preDragStatus) {}
 
     virtual void Init(int32_t currentState) {}
 
@@ -97,7 +101,8 @@ protected:
     {
         return stateMachine_.Upgrade();
     }
-
+    void UpdatePointInfoForFinger(const TouchEvent& touchEvent);
+    void OnActionEnd(const GestureEvent& info);
     bool IsAllowedDrag();
     void UpdateDragPreviewOptionFromModifier();
     void ResetBorderRadiusAnimation();
@@ -109,6 +114,10 @@ protected:
     bool CheckStatusForPanActionBegin(const RefPtr<FrameNode>& frameNode, const GestureEvent& info);
     int32_t GetCurDuration(const TouchEvent& touchEvent, int32_t curDuration);
     void FireCustomerOnDragEnd();
+    void SetTextPixelMap();
+    void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
+    void HandleTextDragCallback();
+    void HandleTextDragStart(const RefPtr<FrameNode>& frameNode, const GestureEvent& info);
 private:
     WeakPtr<DragDropInitiatingStateMachine> stateMachine_;
 };

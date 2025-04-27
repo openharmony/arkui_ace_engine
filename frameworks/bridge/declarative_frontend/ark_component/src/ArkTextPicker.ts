@@ -92,7 +92,7 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
   }
   onScrollStop(callback: (value: string | string[], index: number | number[]) => void) : this{
     modifierWithKey(
-      this._modifiersWithKeys,TextpickerOnScrollStopModifier.identity,TextpickerOnScrollStopModifier,callback);
+      this._modifiersWithKeys, TextpickerOnScrollStopModifier.identity, TextpickerOnScrollStopModifier, callback);
     return this;
   }
 }

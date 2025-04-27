@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/manager/drag_animation_helper_test_ng.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 
@@ -64,8 +65,8 @@ std::pair<RefPtr<FrameNode>, std::list<RefPtr<FrameNode>>> DragAnimationHelperTe
     auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::GRID_ETS_TAG, nodeId,
         []() {return AceType::MakeRefPtr<GridPattern>(); });
-    ViewAbstract::SetWidth(frameNode.GetRawPtr(), CalcLength(GRID_WIDTH));
-    ViewAbstract::SetHeight(frameNode.GetRawPtr(), CalcLength(GRID_HEIGHT));
+    ViewAbstract::SetWidth(Referenced::RawPtr(frameNode), CalcLength(GRID_WIDTH));
+    ViewAbstract::SetHeight(Referenced::RawPtr(frameNode), CalcLength(GRID_HEIGHT));
     std::list<RefPtr<FrameNode>> childNodes;
 
     for (size_t i = 0; i < childCount; ++i) {
@@ -76,8 +77,8 @@ std::pair<RefPtr<FrameNode>, std::list<RefPtr<FrameNode>>> DragAnimationHelperTe
         if (!childNode) {
             continue;
         }
-        ViewAbstract::SetWidth(childNode.GetRawPtr(), CalcLength(ITEM_WIDTH));
-        ViewAbstract::SetHeight(childNode.GetRawPtr(), CalcLength(ITEM_HEIGHT));
+        ViewAbstract::SetWidth(Referenced::RawPtr(childNode), CalcLength(ITEM_WIDTH));
+        ViewAbstract::SetHeight(Referenced::RawPtr(childNode), CalcLength(ITEM_HEIGHT));
 
         auto gridItemPattern = childNode->GetPattern<GridItemPattern>();
         if (gridItemPattern) {
@@ -610,5 +611,105 @@ HWTEST_F(DragAnimationHelperTestNg, HideDragNodeCopy, TestSize.Level1)
     DragAnimationHelper::HideDragNodeCopy(overlayManager);
     opacity = renderContext->GetOpacity().value_or(0);
     EXPECT_EQ(opacity, 0.0f);
+}
+
+/**
+ * @tc.name: DragStartAnimation
+ * @tc.desc: Test DragStartAnimation func with Offset(10.0, 10.0). TranslateOptions value will be right after drag
+ * animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, DragStartAnimation, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create overlayManager and dragDropManager.
+     * @tc.expected: overlayManager and dragDropManager is not null.
+     */
+    int32_t containerId = 100;
+    auto pipelineContext = PipelineContext::GetContextByContainerId(containerId);
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create imageNode and dragPreviewInfo.
+     * @tc.expected: dragPreviewInfo's imageNode is not nullptr.
+     */
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> refPixelMap = PixelMap::CreatePixelMap(voidPtr);
+    auto imageNode = DragAnimationHelper::CreateImageNode(refPixelMap);
+    ASSERT_NE(imageNode, nullptr);
+    DragDropManager::DragPreviewInfo dragPreviewInfo;
+    dragPreviewInfo.imageNode = imageNode;
+    ASSERT_NE(dragPreviewInfo.imageNode, nullptr);
+    dragDropManager->SetDragPreviewInfo(dragPreviewInfo);
+
+    /**
+     * @tc.steps: step3. Call DragStartAnimation with Offset(10.0, 10.0).
+     * @tc.expected: TranslateOptions x value is 10.0f.
+     */
+    auto newOffset = Offset(10.0, 10.0);
+    auto gatherNodeCenter =
+        NG::DragDropFuncWrapper::GetPaintRectCenter(dragDropManager->GetDragPreviewInfo().imageNode);
+    Point point = { 0, 0 };
+    DragAnimationHelper::DragStartAnimation(newOffset, overlayManager, gatherNodeCenter, point, containerId);
+    auto renderContext = imageNode->GetRenderContext();
+    TranslateOptions result = renderContext->GetTransformTranslate().value();
+    TranslateOptions expectValue { 10.0f, 10.0f, 0.0f };
+    EXPECT_EQ(result.x.CalcValue(), expectValue.x.CalcValue());
+}
+
+/**
+ * @tc.name: CreateBadgeTextNodeTest001
+ * @tc.desc: Test CreateBadgeTextNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CreateBadgeTextNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke CreateBadgeTextNode.
+     */
+    auto textNode = DragAnimationHelper::CreateBadgeTextNode(2);
+    EXPECT_NE(textNode, nullptr);
+}
+
+/**
+ * @tc.name: ShowMenuHideAnimation001
+ * @tc.desc: Test ShowMenuHideAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, ShowMenuHideAnimation001, TestSize.Level1)
+{
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, GetElmtId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    DragPreviewOption previewOption;
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
+    imageNode->SetDragPreviewOptions(previewOption);
+    PreparedInfoForDrag data;
+    DragAnimationHelper::ShowMenuHideAnimation(imageNode, data);
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
+    imageNode->SetDragPreviewOptions(previewOption);
+    auto menuNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_TAG, GetElmtId(), []() { return AceType::MakeRefPtr<MenuPattern>(0, "", MenuType::MENU); });
+    data.menuNode = menuNode;
+    DragAnimationHelper::ShowMenuHideAnimation(imageNode, data);
+    EXPECT_EQ(data.menuNode, menuNode);
 }
 } // namespace OHOS::Ace::NG

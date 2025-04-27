@@ -20,6 +20,7 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/common/ime/input_method_manager.h"
+#include "base/ressched/ressched_report.h"
 
 #if !defined(ACE_UNITTEST)
 #include "core/components_ng/base/transparent_node_detector.h"
@@ -37,9 +38,9 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     CHECK_NULL_VOID(page);
     auto pagePattern = page->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    auto eventHub = page->GetEventHub<EventHub>();
+    auto eventHub = page->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (transitionType == PageTransitionType::EXIT_POP) {
             eventHub->SetEnabled(false);
         }
@@ -84,12 +85,19 @@ void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPt
     auto sharedManager = pipeline->GetSharedOverlayManager();
     CHECK_NULL_VOID(sharedManager);
     sharedManager->StartSharedTransition(srcPage, destPage);
+    animationSrcPage_ = srcPage;
     destPageNode_ = destPage;
     TAG_LOGI(AceLogTag::ACE_ANIMATION, "start pageTransition, from node %{public}d to %{public}d",
         srcPage ? srcPage->GetId() : -1, destPage ? destPage->GetId() : -1);
     // don't need to add animation id when routeType is none
     if (type == RouteType::NONE) {
         return;
+    }
+    if (srcPage) {
+        srcPage->SetNodeFreeze(true);
+    }
+    if (destPage) {
+        destPage->SetNodeFreeze(false);
     }
     animationId_++;
     if (type == RouteType::PUSH) {
@@ -119,9 +127,9 @@ void StageManager::PageChangeCloseKeyboard()
         if (!container) {
             return;
         }
-        if (!container->IsScenceBoardWindow()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container not ScenceBoardWindow.");
-            InputMethodManager::GetInstance()->CloseKeyboard();
+        if (!container->IsSceneBoardWindow()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container not SceneBoardWindow.");
+            InputMethodManager::GetInstance()->CloseKeyboard(false);
         }
     }
 #endif
@@ -328,12 +336,11 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
     if (popSize == 0) {
         return true;
     }
-
+    auto outPageNode = AceType::DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
     bool firstPageTransition = true;
-    auto outPageNode = AceType::DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     auto iter = children.rbegin();
     for (int32_t current = 0; current < popSize; ++current) {
         auto pageNode = *iter;
@@ -581,7 +588,7 @@ RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
         return nullptr;
     }
     if (stageInTrasition_) {
-        return DynamicCast<FrameNode>(srcPageNode_.Upgrade());
+        return DynamicCast<FrameNode>(animationSrcPage_.Upgrade());
     }
     return DynamicCast<FrameNode>(children.front());
 }
@@ -613,6 +620,7 @@ void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, cons
     CHECK_NULL_VOID(destPageInfo);
     auto destFullPath = destPageInfo->GetFullPath();
 
+    ResSchedReport::GetInstance().HandlePageTransition(GetPagePath(srcPage), destPageInfo->GetPagePath(), "Rounter");
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
 }
 
@@ -636,7 +644,7 @@ void StageManager::SyncPageSafeArea(bool keyboardSafeArea)
 bool StageManager::CheckPageFocus()
 {
     auto pageNode = GetLastPage();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         pageNode = GetLastPageWithTransition();
     }
     CHECK_NULL_RETURN(pageNode, true);
@@ -696,11 +704,11 @@ void StageManager::StopPageTransition(bool needTransition)
     if (needTransition) {
         return;
     }
-    auto srcNode = srcPageNode_.Upgrade();
+    auto srcNode = animationSrcPage_.Upgrade();
     if (srcNode) {
         auto pattern = srcNode->GetPattern<PagePattern>();
         pattern->StopPageTransition();
-        srcPageNode_ = nullptr;
+        animationSrcPage_ = nullptr;
     }
     auto destNode = destPageNode_.Upgrade();
     if (destNode) {
@@ -736,4 +744,15 @@ std::vector<std::string> StageManager::GetTopPagePaths() const
     }
     return paths;
 }
+
+std::string StageManager::GetPagePath(const RefPtr<FrameNode>& pageNode)
+{
+    CHECK_NULL_RETURN(pageNode, "");
+    auto pattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pattern, "");
+    auto info = pattern->GetPageInfo();
+    CHECK_NULL_RETURN(info, "");
+    return info->GetPagePath();
+}
+
 } // namespace OHOS::Ace::NG

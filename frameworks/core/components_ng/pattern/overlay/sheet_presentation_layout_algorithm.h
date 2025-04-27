@@ -76,6 +76,10 @@ public:
 
     void CalculateSheetHeightInOtherScenes(LayoutWrapper* layoutWrapper);
     void CalculateSheetOffsetInOtherScenes(LayoutWrapper* layoutWrapper);
+
+    void LayoutTitleBuilder(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
+    void LayoutScrollNode(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
+    void LayoutCloseIcon(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
 private:
     float GetWidthByScreenSizeType(const float maxWidth, LayoutWrapper* layoutWrapper) const;
     float GetHeightByScreenSizeType(const float maxHeight, const float maxWidth, LayoutWrapper* layoutWrapper) const;
@@ -94,6 +98,9 @@ private:
     void AddArrowHeightToSheetSize();
     void RemeasureForPopup(const RefPtr<LayoutWrapper>& layoutWrapper);
     void MinusSubwindowDistance(const RefPtr<FrameNode>& sheetWrapper);
+    float GetCenterDefaultWidth(const RefPtr<FrameNode>& host) const;
+    void MeasureOperation(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint);
+    void MeasureCloseIcon(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint);
 
     float sheetHeight_ = 0.0f;
     float sheetWidth_ = 0.0f;

@@ -29,10 +29,15 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/lru/count_limit_lru.h"
+#include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace {
 
-struct CachedImage;
+struct CachedImage {
+    explicit CachedImage(const std::shared_ptr<RSImage>& image) : imagePtr(image) {}
+    std::shared_ptr<RSImage> imagePtr;
+    uint32_t uniqueId = 0;
+};
 class ImageObject;
 
 namespace NG {
@@ -40,13 +45,13 @@ class ImageObject;
 class ImageData;
 } // namespace NG
 
-class ACE_EXPORT ImageCache : public AceType {
+class ACE_FORCE_EXPORT ImageCache : public AceType {
     DECLARE_ACE_TYPE(ImageCache, AceType);
 
 public:
     static RefPtr<ImageCache> Create();
-    ImageCache() = default;
-    ~ImageCache() override = default;
+    ImageCache();
+    ~ImageCache() override;
 
     void CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image);
     std::shared_ptr<CachedImage> GetCacheImage(const std::string& key);

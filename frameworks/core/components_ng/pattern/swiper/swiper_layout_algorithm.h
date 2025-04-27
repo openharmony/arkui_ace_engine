@@ -371,6 +371,7 @@ private:
     void AdjustItemPositionOnCachedShow();
     void AdjustOffsetOnForward(float currentEndPos);
     void AdjustOffsetOnBackward(float currentStartPos);
+    float GetHeightForDigit(LayoutWrapper* layoutWrapper, float height) const;
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
@@ -425,6 +426,7 @@ private:
     bool isFrameAnimation_ = false;
     float ignoreBlankOffset_ = 0.0f;
     float currentIgnoreBlankOffset_ = 0.0f;
+    bool prevMarginIgnoreBlank_ = false;
     std::set<int32_t> measuredItems_;
     std::set<int32_t> activeItems_;
     std::set<int32_t> cachedItems_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@ constexpr int32_t TIME_4000 = 4000; // 4000 ms
 constexpr int32_t LOADING_ANIMATION_DURATION = 2000;
 constexpr float DEFAULT_MAX_VALUE = 100.0f;
 constexpr float DEFAULT_SCALE_WIDTH = 10.0f;
+constexpr float DEFAULT_MIN_PROGRESS_WIDTH = 0.0f;
 constexpr int32_t DEFAULT_SCALE_COUNT = 100;
 constexpr double DEFAULT_CAPSULE_BORDER_WIDTH = 0.0;
 constexpr float FLOAT_ZERO_FIVE = 0.5f;
@@ -45,7 +46,8 @@ constexpr float RING_SHADOW_VALID_RADIUS_MIN = 10.0f;
 constexpr float RING_SHADOW_OPACITY = 0.4f;
 constexpr Dimension LINEAR_SWEEPING_LEN = 80.0_vp;
 } // namespace
-ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAnimatableProperty_)
+ProgressModifier::ProgressModifier(const WeakPtr<FrameNode>& host,
+    const ProgressAnimatableProperty& progressAnimatableProperty_)
     : strokeWidth_(AceType::MakeRefPtr<AnimatablePropertyFloat>(progressAnimatableProperty_.strokeWidth)),
       color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.color))),
       bgColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.bgColor))),
@@ -74,7 +76,8 @@ ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAni
       useContentModifier_(AceType::MakeRefPtr<PropertyBool>(false)),
       isRightToLeft_(AceType::MakeRefPtr<PropertyBool>(false)),
       progressUpdate_(AceType::MakeRefPtr<PropertyBool>(false)),
-      capsuleBorderRadius_(AceType::MakeRefPtr<PropertyFloat>(0.0f))
+      capsuleBorderRadius_(AceType::MakeRefPtr<PropertyFloat>(0.0f)),
+      host_(host)
 {
     AttachProperty(strokeWidth_);
     AttachProperty(color_);
@@ -105,7 +108,7 @@ ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAni
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>();
+    auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(theme);
 
     pressBlendColor_ = theme->GetClickEffect();
@@ -304,7 +307,7 @@ void ProgressModifier::StartRingLoadingHeadAnimation()
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    bool isFormRender = context->IsFormRender();
+    bool isFormRender = context->IsFormRender() && !IsDynamicComponent();
     AnimationOption optionHead = AnimationOption();
     auto curveHead = AceType::MakeRefPtr<TailingHeadCurve>();
     optionHead.SetDuration(LOADING_ANIMATION_DURATION);
@@ -326,7 +329,7 @@ void ProgressModifier::StartRingLoadingTailAnimation()
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    bool isFormRender = context->IsFormRender();
+    bool isFormRender = context->IsFormRender() && !IsDynamicComponent();
     AnimationOption optionTail = AnimationOption();
     auto curveTail = AceType::MakeRefPtr<CubicCurve>(0.33f, 0.00f, 0.66f, 0.10f);
     optionTail.SetDuration(LOADING_ANIMATION_DURATION);
@@ -413,7 +416,7 @@ void ProgressModifier::StartRingSweepingAnimationImpl(float date, float speed)
 
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    bool isFormRender = context->IsFormRender();
+    bool isFormRender = context->IsFormRender() && !IsDynamicComponent();
     isSweeping_ = true;
     AnimationOption option = AnimationOption();
     speed = NearZero(speed) ? 1.0f : speed;
@@ -581,7 +584,7 @@ void ProgressModifier::StartLinearSweepingAnimationImpl(float date, float speed)
 
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    bool isFormRender = context->IsFormRender();
+    bool isFormRender = context->IsFormRender() && !IsDynamicComponent();
     isSweeping_ = true;
     sweepingDate_->Set(0.0f);
     speed = NearZero(speed) ? 1.0f : speed;
@@ -719,7 +722,7 @@ void ProgressModifier::ContentDrawWithFunction(DrawingContext& context)
             } else {
                 PaintVerticalCapsuleForApiNine(canvas, offset_->Get(), contentSize);
             }
-        } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             if (contentSize.Width() >= contentSize.Height()) {
                 PaintCapsule(canvas, offset_->Get(), contentSize, contentSize.Height() / INT32_TWO);
             } else {
@@ -754,7 +757,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
             radius, radius });
         canvas.DetachBrush();
         // progress selected part
-        CHECK_NULL_VOID(Positive(dateLength));
+        CHECK_NULL_VOID(Positive(value_->Get()));
         brush.SetColor(ToRSColor((color_->Get())));
         canvas.AttachBrush(brush);
 #ifndef USE_ROSEN_DRAWING
@@ -785,7 +788,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
             radius, radius });
         canvas.DetachBrush();
         // progress selected part
-        CHECK_NULL_VOID(Positive(dateLength));
+        CHECK_NULL_VOID(Positive(value_->Get()));
         brush.SetColor(ToRSColor((color_->Get())));
         canvas.AttachBrush(brush);
 #ifndef USE_ROSEN_DRAWING
@@ -968,7 +971,7 @@ std::vector<GradientColor> ProgressModifier::GetRingProgressGradientColors() con
     if (gradientColors.empty()) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, gradientColors);
-        auto theme = pipeline->GetTheme<ProgressTheme>();
+        auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
         CHECK_NULL_RETURN(theme, gradientColors);
         GradientColor endColor;
         GradientColor beginColor;
@@ -1579,6 +1582,7 @@ void ProgressModifier::PaintCapsuleProgressLessRadiusScene(
     float offsetY = offset.GetY();
     float progressWidth =
         std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Width(), contentSize.Width());
+    progressWidth = std::max(progressWidth, DEFAULT_MIN_PROGRESS_WIDTH);
     bool isDefault = GreatOrEqual(borderRadius, contentSize.Height() / INT32_TWO);
     if (isDefault) {
         if (!isRightToLeft_->Get()) {
@@ -2005,5 +2009,11 @@ void ProgressModifier::PaintVerticalCapsuleForApiNine(
     }
     canvas.DrawPath(path);
     canvas.DetachBrush();
+}
+
+uint32_t ProgressModifier::GetThemeScopeId() const
+{
+    auto host = host_.Upgrade();
+    return host ? host->GetThemeScopeId() : 0;
 }
 } // namespace OHOS::Ace::NG

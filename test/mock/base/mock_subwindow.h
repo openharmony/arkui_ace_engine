@@ -28,6 +28,7 @@ public:
     MOCK_METHOD0(InitContainer, void());
     MOCK_METHOD0(ResizeWindow, void());
     MOCK_METHOD0(ResizeWindowForMenu, void());
+    MOCK_METHOD1(SetFollowParentWindowLayoutEnabled, void(bool enable));
     MOCK_METHOD0(GetRect, NG::RectF());
     MOCK_METHOD0(UpdatePreviewPosition, void());
     MOCK_METHOD1(GetMenuPreviewCenter, bool(NG::OffsetF& offset));
@@ -38,6 +39,7 @@ public:
         void(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
             const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset));
     MOCK_METHOD1(ShowPreviewNG, bool(bool isStartDraggingFromSubWindow));
+    MOCK_METHOD1(SetWindowTouchable, void(bool touchable));
     MOCK_METHOD0(HidePreviewNG, void());
     MOCK_METHOD2(HideMenuNG, void(const RefPtr<NG::FrameNode>& menu, int32_t targetId));
     MOCK_METHOD2(HideMenuNG, void(bool showPreviewAnimation, bool startDrag));
@@ -49,6 +51,9 @@ public:
     MOCK_METHOD4(ShowPopupNG, void(int32_t targetId, const NG::PopupInfo& popupInfo,
                                   const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss));
     MOCK_METHOD1(HidePopupNG, void(int32_t targetId));
+    MOCK_METHOD5(ShowTipsNG, void(int32_t targetId, const NG::PopupInfo& popupInfo, int32_t appearingTime,
+                                 int32_t appearingTimeWithContinuousOperation, bool isSubwindow));
+    MOCK_METHOD2(HideTipsNG, void(int32_t targetId, int32_t disappearingTime));
     MOCK_METHOD0(ClearPopupNG, void());
     MOCK_METHOD2(GetPopupInfoNG, void(int32_t targetId, NG::PopupInfo& popupInfo));
     MOCK_METHOD1(CancelPopup, bool(const std::string& id));
@@ -121,6 +126,7 @@ public:
     MOCK_METHOD1(HideSheetSubWindow, void(int32_t containerId));
     MOCK_METHOD0(GetAttachState, MenuWindowState());
     MOCK_METHOD0(GetDetachState, MenuWindowState());
+    MOCK_CONST_METHOD0(GetWindowRect, NG::RectF());
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

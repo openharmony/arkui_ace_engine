@@ -18,6 +18,7 @@
 #include "base/log/event_report.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -137,7 +138,7 @@ void FolderStackLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto displayInfo = pattern->GetDisplayInfo();
         if (displayInfo) {
             FolderEventInfo event(displayInfo->GetFoldStatus());
-            auto eventHub = layoutWrapper->GetHostNode()->GetEventHub<FolderStackEventHub>();
+            auto eventHub = layoutWrapper->GetHostNode()->GetOrCreateEventHub<FolderStackEventHub>();
             if (eventHub) {
                 eventHub->OnFolderStateChange(event);
             }
@@ -303,7 +304,7 @@ void FolderStackLayoutAlgorithm::OnHoverStatusChange(LayoutWrapper* layoutWrappe
     if (isIntoFolderStack_ == pattern->IsInHoverMode() || !OHOS::Ace::SystemProperties::IsBigFoldProduct()) {
         return;
     }
-    auto eventHub = layoutWrapper->GetHostNode()->GetEventHub<FolderStackEventHub>();
+    auto eventHub = layoutWrapper->GetHostNode()->GetOrCreateEventHub<FolderStackEventHub>();
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();

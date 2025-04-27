@@ -50,7 +50,7 @@ class ACE_EXPORT TextLayoutAlgorithm : public MultipleParagraphLayoutAlgorithm, 
 public:
     TextLayoutAlgorithm();
     explicit TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> paragraphManager_,
-        bool isSpanStringMode, bool isMarquee = false);
+        bool isSpanStringMode, const TextStyle& textStyle, const bool isMarquee = false);
     ~TextLayoutAlgorithm() override = default;
 
     void OnReset() override;
@@ -59,14 +59,16 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
     void GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper) override {};
-    bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::u16string& content,
+    bool CreateParagraphAndLayout(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) override;
+    bool ReLayoutParagraphs(const TextStyle& textStyle, LayoutWrapper* layoutWrapper, const SizeF& maxSize);
+    bool LayoutParagraphs(float maxWidth);
 
     float GetBaselineOffset() const override;
 
     size_t GetLineCount() const;
 
-    std::optional<TextStyle> GetTextStyle() const;
+    const TextStyle& GetTextStyle() const;
 
     RefPtr<Paragraph> GetParagraph() const override
     {
@@ -116,9 +118,9 @@ private:
     bool AdaptMaxTextSize(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     void UpdateSensitiveContent(std::u16string& content);
-    void CheckNeedReCreateParagraph(
-        const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<TextPattern>& textPattern);
-    void ResetNeedReCreateParagraph(const RefPtr<TextLayoutProperty>& textLayoutProperty, bool needRemain);
+    void CheckNeedReCreateParagraph(LayoutWrapper* layoutWrapper, const TextStyle& textStyle);
+    void ResetNeedReCreateParagraph(LayoutWrapper* layoutWrapper);
+    bool AlwaysReCreateParagraph(LayoutWrapper* layoutWrapper);
     std::pair<bool, double> GetSuitableSize(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     std::pair<bool, double> GetSuitableSizeLD(TextStyle& textStyle, const std::u16string& content,

@@ -29,7 +29,7 @@ void DragDropInitiatingStatePress::HandlePreviewLongPressOnAction(const GestureE
 {
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
 }
 
 void DragDropInitiatingStatePress::HandleSequenceOnActionCancel(const GestureEvent& info)
@@ -44,7 +44,7 @@ void DragDropInitiatingStatePress::HandleSequenceOnActionCancel(const GestureEve
     CHECK_NULL_VOID(gestureHub);
     bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
     if (!isMenuShow) {
-        machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+        machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
     }
 }
 
@@ -58,11 +58,15 @@ void DragDropInitiatingStatePress::HandleOnDragStart(RefPtr<FrameNode> frameNode
     if (!CheckStatusForPanActionBegin(frameNode, info)) {
         return;
     }
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (gestureHub->GetTextDraggable()) {
+        HandleTextDragStart(frameNode, info);
+        return;
+    }
     dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
     HideEventColumn();
     DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(frameNode->GetId());
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
     auto gestureEvent = info;
     gestureHub->HandleOnDragStart(gestureEvent);
 }
@@ -86,7 +90,10 @@ void DragDropInitiatingStatePress::HandlePanOnReject()
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    if (manager->IsGatherWithMenu()) {
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    if (manager->IsGatherWithMenu() || !params.hasGatherNode) {
         return;
     }
     auto preDragStatus = DragDropGlobalController::GetInstance().GetPreDragStatus();
@@ -99,32 +106,12 @@ void DragDropInitiatingStatePress::HandlePanOnReject()
 
 void DragDropInitiatingStatePress::HandleTouchEvent(const TouchEvent& touchEvent)
 {
-    if (touchEvent.type == TouchType::MOVE) {
-        auto point = Point(touchEvent.x, touchEvent.y, touchEvent.screenX, touchEvent.screenY);
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto dragDropManager = pipeline->GetDragDropManager();
-        CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->SetDragMoveLastPoint(point);
-    }
+    UpdatePointInfoForFinger(touchEvent);
 }
 
 void DragDropInitiatingStatePress::HandlePanOnActionEnd(const GestureEvent& info)
 {
-    TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action end.");
-    DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    if (dragDropManager->IsAboutToPreview()) {
-        dragDropManager->ResetDragging();
-    }
-    dragDropManager->SetIsDragNodeNeedClean(false);
-    dragDropManager->SetIsDisableDefaultDropAnimation(true);
-    auto machine = GetStateMachine();
-    CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+    OnActionEnd(info);
 }
 
 void DragDropInitiatingStatePress::Init(int32_t currentState)
@@ -138,7 +125,7 @@ void DragDropInitiatingStatePress::Init(int32_t currentState)
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (!params.isThumbnailCallbackTriggered) {
+    if (!params.isThumbnailCallbackTriggered && !gestureHub->GetTextDraggable()) {
         auto getPixelMapFinishCallback = [weak = AceType::WeakClaim(this)](
                                              RefPtr<PixelMap> pixelMap, bool immediately) {
             auto stateReady = weak.Upgrade();

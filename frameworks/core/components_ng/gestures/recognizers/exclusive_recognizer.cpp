@@ -93,10 +93,6 @@ void ExclusiveRecognizer::OnBlocked()
 
 bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
 {
-    if (point.type == TouchType::DOWN || point.type == TouchType::UP) {
-        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, exclusive %{public}d type: %{public}d",
-            point.touchEventId, point.id, static_cast<int32_t>(point.type));
-    }
     switch (point.type) {
         case TouchType::MOVE:
         case TouchType::DOWN: {

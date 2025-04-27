@@ -18,8 +18,8 @@
 
 #include <cstddef>
 
+#include "base/utils/string_utils.h"
 #include "cj_lambda.h"
-
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
 
@@ -49,8 +49,14 @@ void NativeXComponentController::SetXComponentControllerOnCreated(
         auto func = CJRuntimeDelegate::GetInstance()->GetCJXcompCtrFuncs().atCXComponentControllerOnSurfaceCreated;
         if (!func) {
             LOGE("CJXcompCtr: OnSurfaceCreated is empty.");
+            return;
         }
-        func(remoteId, std::stoll(surfaceId));
+        auto surfaceIdLongInt = StringUtils::StringToLongInt(surfaceId);
+        if (surfaceIdLongInt == 0) {
+            LOGE("surfaceId is not a long int.");
+            return;
+        }
+        func(remoteId, surfaceIdLongInt);
     };
     XComponentModel::GetInstance()->SetControllerOnCreated(std::move(onSurfaceCreated));
 }
@@ -66,9 +72,15 @@ void NativeXComponentController::SetXComponentControllerOnChanged(
         auto func = CJRuntimeDelegate::GetInstance()->GetCJXcompCtrFuncs().atCXComponentControllerOnSurfaceChanged;
         if (!func) {
             LOGE("CJXcompCtr: OnSurfaceChanged is empty.");
+            return;
         }
         CJRectResult rectRes { rect.Left(), rect.Top(), rect.Width(), rect.Height() };
-        func(remoteId, std::stoll(surfaceId), rectRes);
+        auto surfaceIdLongInt = StringUtils::StringToLongInt(surfaceId);
+        if (surfaceIdLongInt == 0) {
+            LOGE("surfaceId is not a long int.");
+            return;
+        }
+        func(remoteId, surfaceIdLongInt, rectRes);
     };
     XComponentModel::GetInstance()->SetControllerOnChanged(std::move(onSurfaceChanged));
 }
@@ -85,8 +97,14 @@ void NativeXComponentController::SetXComponentControllerOnDestroyed(
         auto func = CJRuntimeDelegate::GetInstance()->GetCJXcompCtrFuncs().atCXComponentControllerOnSurfaceDestroyed;
         if (!func) {
             LOGE("CJXcompCtr: OnSurfaceDestroyed is empty.");
+            return;
         }
-        func(remoteId, std::stoll(surfaceId));
+        auto surfaceIdLongInt = StringUtils::StringToLongInt(surfaceId);
+        if (surfaceIdLongInt == 0) {
+            LOGE("surfaceId is not a long int.");
+            return;
+        }
+        func(remoteId, surfaceIdLongInt);
     };
     XComponentModel::GetInstance()->SetControllerOnDestroyed(std::move(onSurfaceDestroyed));
 }

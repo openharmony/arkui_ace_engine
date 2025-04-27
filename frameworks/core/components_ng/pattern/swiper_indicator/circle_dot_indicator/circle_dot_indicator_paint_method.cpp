@@ -90,6 +90,10 @@ void CircleDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWra
     auto paintProperty = DynamicCast<CircleDotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     circleDotIndicatorModifier_->SetAxis(axis_);
+    if (isHorizontalAndRightToLeft_) {
+        currentIndex_ = itemCount_ - 1 - currentIndex_;
+    }
+
     circleDotIndicatorModifier_->SetCurrentIndex(currentIndex_);
     arcDirection_ = paintProperty->GetArcDirectionValue(SwiperArcDirection::SIX_CLOCK_DIRECTION);
     circleDotIndicatorModifier_->SetArcDirection(
@@ -616,12 +620,33 @@ float CircleDotIndicatorPaintMethod::GetBlackPointAngle(
     return itemCenterAngle + offset;
 }
 
+std::pair<int32_t, int32_t> CircleDotIndicatorPaintMethod::GetIndexOnRTL(int32_t index)
+{
+    int32_t startCurrentIndex = index;
+    auto isInvalid = NearEqual(turnPageRate_, 0.0f) || LessOrEqualCustomPrecision(turnPageRate_, -1.0f) ||
+                     GreatOrEqualCustomPrecision(turnPageRate_, 1.0f);
+    if (!isInvalid) {
+        startCurrentIndex = LessNotEqualCustomPrecision(turnPageRate_, 0.0f) ? index - 1 : index + 1;
+    }
+
+    if (startCurrentIndex == -1) {
+        startCurrentIndex = itemCount_ - 1;
+    }
+
+    return { startCurrentIndex, index };
+}
+
 std::pair<int32_t, int32_t> CircleDotIndicatorPaintMethod::GetIndex(int32_t index)
 {
     if (mouseClickIndex_ || gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT ||
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         turnPageRate_ = 0;
     }
+
+    if (isHorizontalAndRightToLeft_) {
+        return GetIndexOnRTL(index);
+    }
+
     // item may be invalid in auto linear scene
     if (nextValidIndex_ >= 0) {
         int32_t startCurrentIndex = index;

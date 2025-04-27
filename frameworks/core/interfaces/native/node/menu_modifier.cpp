@@ -58,13 +58,14 @@ void SetMenuDivider(ArkUINodeHandle node, ArkUIMenuDividerOptions* dividerInfo, 
         static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->strokeWidth.units));
     divider.color = Color(dividerInfo->color);
     divider.startMargin = Dimension(dividerInfo->startMargin.value,
-        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->startMargin.units));;
+        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->startMargin.units));
     divider.endMargin = Dimension(dividerInfo->endMargin.value,
-        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->endMargin.units));;
+        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->endMargin.units));
+    DividerMode mode = dividerInfo->mode == 1 ? DividerMode::EMBEDDED_IN_MENU: DividerMode::FLOATING_ABOVE_MENU;
     if (isGroupDivider) {
-        MenuModelNG::SetItemGroupDivider(frameNode, divider);
+        MenuModelNG::SetItemGroupDivider(frameNode, divider, mode);
     } else {
-        MenuModelNG::SetItemDivider(frameNode, divider);
+        MenuModelNG::SetItemDivider(frameNode, divider, mode);
     }
 }
 
@@ -78,9 +79,9 @@ void ResetMenuDivider(ArkUINodeHandle node, bool isGroupDivider)
     divider.startMargin = Dimension(0.0);
     divider.endMargin = Dimension(0.0);
     if (isGroupDivider) {
-        MenuModelNG::SetItemGroupDivider(frameNode, divider);
+        MenuModelNG::SetItemGroupDivider(frameNode, divider, DividerMode::FLOATING_ABOVE_MENU);
     } else {
-        MenuModelNG::SetItemDivider(frameNode, divider);
+        MenuModelNG::SetItemDivider(frameNode, divider, DividerMode::FLOATING_ABOVE_MENU);
     }
 }
 

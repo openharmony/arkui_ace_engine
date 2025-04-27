@@ -1881,7 +1881,7 @@ typedef enum {
      * .value[2].f32：grayscale blur settings that control the darkness of the white color.\n
      * The value range is [0, 127].\n
      *
-     * @since 16
+     * @since 15
      */
     NODE_BACKDROP_BLUR = 99,
 
@@ -1901,7 +1901,7 @@ typedef enum {
      * .value[2].f32：width of the right edge. The unit is vp. \n
      * .value[3].f32：width of the bottom edge. The unit is vp. \n
      *
-     * @since 16
+     * @since 18
      */
     NODE_BACKGROUND_IMAGE_RESIZABLE_WITH_SLICE = 100,
     
@@ -3496,12 +3496,12 @@ typedef enum {
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].i32: button type. The parameter type is {@link ArkUI_ButtonType}.
      * The default value is <b>ARKUI_BUTTON_TYPE_CAPSULE</b>. \n
-     * After api 16 the default value change to  <b>ARKUI_BUTTON_ROUNDED_RECTANGLE</b>.
+     * After api 18 the default value change to  <b>ARKUI_BUTTON_ROUNDED_RECTANGLE</b>.
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: button type. The parameter type is {@link ArkUI_ButtonType}.
      * The default value is <b>ARKUI_BUTTON_TYPE_CAPSULE</b>. \n
-     * After api 16 the default value change to  <b>ARKUI_BUTTON_ROUNDED_RECTANGLE</b>.
+     * After api 18 the default value change to  <b>ARKUI_BUTTON_ROUNDED_RECTANGLE</b>.
      *
      */
     NODE_BUTTON_TYPE,
@@ -3515,7 +3515,7 @@ typedef enum {
     * Format of the return value {@link ArkUI_AttributeItem}:\n
     * .value[0].f32: minimum font scale, in fp.
     *
-    * @since 16
+    * @since 18
     */
     NODE_BUTTON_MIN_FONT_SCALE,
 
@@ -3528,7 +3528,7 @@ typedef enum {
     * Format of the return value {@link ArkUI_AttributeItem}:\n
     * .value[0].f32: maximum font scale, in fp.
     *
-    * @since 16
+    * @since 18
     */
     NODE_BUTTON_MAX_FONT_SCALE,
 
@@ -3748,7 +3748,7 @@ typedef enum {
      * .value[1].i32: The vertical offset of the surface relative to XComponent, in pixels. \n
      * .value[2].i32: The width of the surface created by XComponent, in pixels. \n
      * .value[3].i32: The height of the surface created by XComponent, in pixels. \n
-     * @since 16
+     * @since 18
      */
     NODE_XCOMPONENT_SURFACE_RECT,
     /**
@@ -3760,7 +3760,7 @@ typedef enum {
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * value[0].i32: The parameter type is 1 or 0.
-     * @since 16
+     * @since 18
      */
     NODE_XCOMPONENT_ENABLE_ANALYZER,
 
@@ -3894,7 +3894,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * value[0].i32: the mode. The value is and enum of {@link ArkUI_DatePickerMode}.\n.
      *
-     * @since 16
+     * @since 18
      */
     NODE_DATE_PICKER_MODE = 13007,
     /**
@@ -3908,7 +3908,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * value[0].i32: whether to feedback.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_DATE_PICKER_ENABLE_HAPTIC_FEEDBACK = 13008,
     /**
@@ -4018,7 +4018,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .string: time. The default value is <b>"00:00:00"</b>.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_TIME_PICKER_START = 14005,
     /**
@@ -4031,7 +4031,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .string: time. The default value is <b>"23:59:59"</b>.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_TIME_PICKER_END = 14006,
 
@@ -4045,7 +4045,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: whether to enable cascade.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_TIME_PICKER_ENABLE_CASCADE = 14007,
 
@@ -4219,7 +4219,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * value[0].i32: whether to feedback.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_TEXT_PICKER_ENABLE_HAPTIC_FEEDBACK = 15010,
     /**
@@ -4301,7 +4301,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .string: date. \n
      *
-     * @since 16
+     * @since 18
      */
     NODE_CALENDAR_PICKER_START = 16004,
     /**
@@ -4314,7 +4314,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .string: date. \n
      *
-     * @since 16
+     * @since 18
      */
     NODE_CALENDAR_PICKER_END = 16005,
     /**
@@ -4555,7 +4555,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * value[0].i32: whether to feedback.\n
      *
-     * @since 16
+     * @since 18
      */
     NODE_SLIDER_ENABLE_HAPTIC_FEEDBACK = 17013,
 
@@ -5036,7 +5036,7 @@ typedef enum {
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0]i.32: whether the scrollable scrolls back to top when status bar is clicked. \n
      * 
-     * @since 16
+     * @since 15
      */
     NODE_SCROLL_BACK_TO_TOP = 1002021,
     
@@ -5848,6 +5848,19 @@ typedef enum {
      *
      */
     NODE_REFRESH_PULL_TO_REFRESH = 1009004,
+    /**
+     * @brief Set the max pull down distance for Refresh.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: max pull-down distance, in vp.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: max pull-down distance, in vp.
+     *
+     * @since 20
+     */
+    NODE_REFRESH_MAX_PULL_DOWN_DISTANCE = 1009005,
 
     /**
      * @brief Defines the main axis direction of the <b><WaterFlow></b> component layout.
@@ -5950,12 +5963,19 @@ typedef enum {
     NODE_WATER_FLOW_NODE_ADAPTER,
 
     /**
-    * @brief Sets the number of cached items in the water flow adapter.
-    * This attribute can be set, reset, and obtained as required through APIs.
-    *
-    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-    * .value[0].i32: number of cached items in the water flow adapter. \n
-    */
+     * @brief Sets the number of cached items in the water flow adapter.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .value[0].i32: number of cached items in the water flow adapter. \n
+     * .value[1]?.i32: whether to the cached items will be displayed, 0: not displayed, 1: displayed, default value: 0.
+     * This parameter is supported since API version 16. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: number of cached items in the water flow adapter. \n
+     * .value[1].i32: whether to the cached items will be displayed, 0: not displayed, 1: displayed.
+     * This parameter is supported since API version 16. \n
+     */
     NODE_WATER_FLOW_CACHED_COUNT,
     /**
      * @brief 设置瀑布流组件末尾的自定义显示组件。
@@ -6114,7 +6134,7 @@ typedef enum {
     * ...\n
     * value[n].f32: percentage of total width.\n
     *
-    * @since 16
+    * @since 18
     */
     NODE_TEXT_PICKER_COLUMN_WIDTHS = 15009,
     /**
@@ -6575,7 +6595,7 @@ typedef enum {
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
      * 
-     * @since 16
+     * @since 15
      */
     NODE_DISPATCH_KEY_EVENT = 24,
 
@@ -6585,16 +6605,17 @@ typedef enum {
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_UIInputEvent}. \n
      * 
-     * @since 16
+     * @since 17
      */
     NODE_ON_AXIS = 25,
 
-    /* @brief Defines the event triggered when the bound component is clicked.
+    /**
+     * @brief Defines the event triggered when the bound component is clicked.
      *
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_UIInputEvent}.  \n
      *
-     * @since 16
+     * @since 18
      */
     NODE_ON_CLICK_EVENT = 26,
 
@@ -6605,7 +6626,7 @@ typedef enum {
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_UIInputEvent}. \n
      *
-     *@since 16
+     *@since 17
      */
     NODE_ON_HOVER_EVENT = 27,
 
@@ -6624,7 +6645,7 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: ratio of the component's visible area to its total area
      * when this callback is invoked. \n
      *
-     * @since 16
+     * @since 17
      */
     NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT = 28,
 
@@ -6635,7 +6656,7 @@ typedef enum {
      * within the component. \n
      * When the event callback occurs, the {@link ArkUI_NodeEvent} object can be obtained from the
      * {@link ArkUI_UIInputEvent} object. \n
-     * @since16
+     * @since15
     */
     NODE_ON_HOVER_MOVE = 29,
 
@@ -8887,8 +8908,7 @@ int32_t OH_ArkUI_NodeUtils_GetNodeType(ArkUI_NodeHandle node);
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetAttachedNodeHandleById(const char* id, ArkUI_NodeHandle* node);
 
@@ -8900,9 +8920,8 @@ int32_t OH_ArkUI_NodeUtils_GetAttachedNodeHandleById(const char* id, ArkUI_NodeH
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} C-API initialization error.
  *         {@link ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE} The node is not mounted.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetWindowInfo(ArkUI_NodeHandle node, ArkUI_HostWindowInfo** info);
 
@@ -9091,7 +9110,6 @@ int32_t OH_ArkUI_GetNodeSnapshot(ArkUI_NodeHandle node, ArkUI_SnapshotOptions* s
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
  * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option);
@@ -9104,7 +9122,6 @@ int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
  * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option);
@@ -9117,7 +9134,6 @@ int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
  * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index);
@@ -9130,7 +9146,6 @@ int32_t OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(ArkUI_NodeHandle node
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
  * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index);
@@ -9145,7 +9160,6 @@ int32_t OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand(ArkUI_NodeHandle node,
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
  * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t position,
@@ -9160,7 +9174,7 @@ int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetPositionToParent(ArkUI_NodeHandle node, ArkUI_IntOffset* globalOffset);
 

@@ -44,7 +44,7 @@ void DragDropGlobalController::PublishMenuStatusWithNode(bool isShowing, const R
     }
     auto frameNode = menuLiftingTargetNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -192,6 +192,25 @@ int32_t DragDropGlobalController::NotifyDragEndPendingDone(int32_t requestId)
     stopDragCallback_ = nullptr;
     dragResult_ = DragRet::DRAG_FAIL;
     return 0;
+}
+
+void DragDropGlobalController::SetIsAppGlobalDragEnabled(bool isAppGlobalDragEnabled)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    isAppGlobalDragEnabled_ = isAppGlobalDragEnabled;
+    isAlreadyGetAppGlobalDrag_ = true;
+}
+
+bool DragDropGlobalController::IsAppGlobalDragEnabled() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return isAppGlobalDragEnabled_;
+}
+
+bool DragDropGlobalController::IsAlreadyGetAppGlobalDrag() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return isAlreadyGetAppGlobalDrag_;
 }
 
 } // namespace OHOS::Ace

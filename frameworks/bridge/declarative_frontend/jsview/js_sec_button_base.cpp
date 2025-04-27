@@ -38,7 +38,7 @@ void JSSecButtonBase::SetIconSize(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
 
     CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
+    if (!ParseJsDimensionVpNG(info[0], value, false) || value.IsNegative()) {
         SecurityComponentModelNG::SetIconSize(theme->GetIconSize());
     } else {
         SecurityComponentModelNG::SetIconSize(value);
@@ -63,7 +63,7 @@ void JSSecButtonBase::SetFontSize(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
 
     CalcDimension value;
-    if (!ParseJsDimensionFp(info[0], value)) {
+    if (!ParseJsDimensionFpNG(info[0], value, false) || value.IsNegative()) {
         SecurityComponentModelNG::SetFontSize(theme->GetFontSize());
     } else {
         SecurityComponentModelNG::SetFontSize(value);
@@ -87,10 +87,6 @@ void JSSecButtonBase::SetFontStyle(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetFontWeight(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsString()) {
-        SecurityComponentModelNG::SetFontWeight(FontWeight::MEDIUM);
-        return;
-    }
     std::string value = info[0]->ToString();
     SecurityComponentModelNG::SetFontWeight(ConvertStrToFontWeight(value));
 }

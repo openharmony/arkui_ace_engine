@@ -50,6 +50,7 @@ protected:
     static void TearDownTestSuite();
     void TearDown() override;
 
+    void FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
     void CreateTextField(const std::string& text = "", const std::string& placeHolder = "",
         const std::function<void(TextFieldModelNG&)>& callback = nullptr);
     static void ExpectCallParagraphMethods(ExpectParagraphParams params);
@@ -124,6 +125,20 @@ void TextAreaDecorationBase::ExpectCallParagraphMethods(ExpectParagraphParams pa
     EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(params.lineCount));
 }
 
+void TextAreaDecorationBase::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
+{
+    frameNode->SetActive();
+    frameNode->isLayoutDirtyMarked_ = true;
+    frameNode->CreateLayoutTask();
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    auto wrapper = frameNode->CreatePaintWrapper();
+    if (wrapper != nullptr) {
+        wrapper->FlushRender();
+    }
+    paintProperty->CleanDirty();
+    frameNode->SetActive(false);
+}
+
 void TextAreaDecorationBase::CreateTextField(
     const std::string& text, const std::string& placeHolder, const std::function<void(TextFieldModelNG&)>& callback)
 {
@@ -137,7 +152,7 @@ void TextAreaDecorationBase::CreateTextField(
     stack->StopGetAccessRecording();
     frameNode_ = AceType::DynamicCast<FrameNode>(stack->Finish());
     pattern_ = frameNode_->GetPattern<TextFieldPattern>();
-    eventHub_ = frameNode_->GetEventHub<TextFieldEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
     FlushLayoutTask(frameNode_);

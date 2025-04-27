@@ -26,6 +26,10 @@
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 
 namespace OHOS::Ace {
+    FRCSceneFpsInfo EventReport::curFRCSceneFpsInfo_;
+    int64_t EventReport::calTime_ = 0;
+    int32_t EventReport::calFrameRate_ = 0;
+
 namespace {
 
 constexpr char EVENT_KEY_ERROR_TYPE[] = "ERROR_TYPE";
@@ -94,6 +98,16 @@ constexpr char EVENT_KEY_PAGE_NAME[] = "PAGE_NAME";
 constexpr char EVENT_KEY_FILTER_TYPE[] = "FILTER_TYPE";
 constexpr char EVENT_KEY_FORM_NAME[] = "FORM_NAME";
 constexpr char EVENT_KEY_DIMENSION[] = "DIMENSION";
+constexpr char EVENT_KEY_SCENE[] = "SCENE";
+constexpr char EVENT_KEY_PACNAME[] = "PACNAME";
+constexpr char EVENT_KEY_DURATION_60[] = "DURATION_60";
+constexpr char EVENT_KEY_DURATION_72[] = "DURATION_72";
+constexpr char EVENT_KEY_DURATION_90[] = "DURATION_90";
+constexpr char EVENT_KEY_DURATION_120[] = "DURATION_120";
+constexpr int32_t FRAME_60 = 60;
+constexpr int32_t FRAME_72 = 72;
+constexpr int32_t FRAME_90 = 90;
+constexpr int32_t FRAME_120 = 120;
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
@@ -128,6 +142,13 @@ constexpr char EVENT_KEY_NODE_TYPE[] = "NODE_TYPE";
 constexpr char EVENT_KEY_SUB_ERROR_TYPE[] = "SUB_ERROR_TYPE";
 constexpr char EVENT_KEY_TARGET_API_VERSION[] = "TARGET_API_VERSION";
 constexpr char EVENT_KEY_REUSED_NODE_SKIP_MEASURE[] = "REUSED_NODE_SKIP_MEASURE";
+constexpr char EVENT_KEY_PAGE_SLID_INFO[] = "PAGE_SLID_INFO";
+constexpr char EVENT_KEY_GESTURE_VELOCITY[] = "GESTURE_VELOCITY";
+constexpr char EVENT_KEY_VELOCITY_SCALE[] = "VELOCITY_SCALE";
+constexpr char EVENT_KEY_DRAG_GAIN[] = "DRAG_GAIN";
+constexpr char EVENT_KEY_MAX_FLING_VELOCITY[] = "MAX_FLING_VELOCITY";
+constexpr char EVENT_KEY_SLIP_FACTOR[] = "SLIP_FACTOR";
+constexpr char EVENT_KEY_FRICTION[] = "FRICTION";
 
 void StrTrim(std::string& str)
 {
@@ -159,6 +180,87 @@ void EventReport::SendJsCardRenderTimeEvent(
         OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
         EVENT_KEY_SESSIONID, sessionID,
         STATISTIC_DURATION, timeDelay);
+}
+
+void EventReport::FrameRateDurationsStatistics(int32_t expectedRate, const std::string& scene, NG::SceneStatus status)
+{
+    switch (status) {
+        case NG::SceneStatus::START: {
+            curFRCSceneFpsInfo_ = FRCSceneFpsInfo();
+            calTime_ = 0;
+            calFrameRate_ = 0;
+            return;
+        }
+        case NG::SceneStatus::RUNNING: {
+            if (calTime_ == 0) {
+                calTime_ = GetSysTimestamp();
+                calFrameRate_ = expectedRate;
+            }
+            if (expectedRate != calFrameRate_) {
+                int64_t endTime = GetSysTimestamp();
+                int64_t duration = endTime - calTime_;
+                calTime_ = endTime;
+            AddFrameRateDuration(calFrameRate_, duration);
+            }
+            calFrameRate_ = expectedRate;
+            return;
+        }
+        case NG::SceneStatus::END: {
+            int64_t endTime = GetSysTimestamp();
+            int64_t duration = endTime - calTime_;
+            calTime_ = endTime;
+            AddFrameRateDuration(calFrameRate_, duration);
+            EventReport::SendDiffFrameRatesDuring(scene, curFRCSceneFpsInfo_);
+            return;
+        }
+        default:
+            return;
+    }
+}
+
+void EventReport::AddFrameRateDuration(int32_t frameRate, int64_t duration)
+{
+    switch (frameRate) {
+        case FRAME_120: {
+            curFRCSceneFpsInfo_.duration_120 += duration;
+            break;
+        }
+        case FRAME_90: {
+            curFRCSceneFpsInfo_.duration_90 += duration;
+            break;
+        }
+        case FRAME_72: {
+            curFRCSceneFpsInfo_.duration_72 += duration;
+            break;
+        }
+        case FRAME_60: {
+            curFRCSceneFpsInfo_.duration_60 += duration;
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void EventReport::SendDiffFrameRatesDuring(const std::string& scene, const FRCSceneFpsInfo& curFRCSceneFpsInfo_)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    std::string eventName = "FRC_SCENE_INFO";
+    if (packageName.size() > MAX_PACKAGE_NAME_LENGTH) {
+        StrTrim(packageName);
+    }
+    int32_t frameRateDuring_60_ms = static_cast<int32_t>(curFRCSceneFpsInfo_.duration_60 / NS_TO_MS);
+    int32_t frameRateDuring_72_ms = static_cast<int32_t>(curFRCSceneFpsInfo_.duration_72 / NS_TO_MS);
+    int32_t frameRateDuring_90_ms = static_cast<int32_t>(curFRCSceneFpsInfo_.duration_90 / NS_TO_MS);
+    int32_t frameRateDuring_120_ms = static_cast<int32_t>(curFRCSceneFpsInfo_.duration_120 / NS_TO_MS);
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_SCENE, scene,
+        EVENT_KEY_PACNAME, packageName,
+        EVENT_KEY_DURATION_120, frameRateDuring_120_ms,
+        EVENT_KEY_DURATION_90, frameRateDuring_90_ms,
+        EVENT_KEY_DURATION_72, frameRateDuring_72_ms,
+        EVENT_KEY_DURATION_60, frameRateDuring_60_ms);
 }
 
 void EventReport::SendAppStartException(AppStartExcepType type)
@@ -525,8 +627,8 @@ void EventReport::ReportEventJankFrame(DataBase& data)
         EVENT_KEY_NOTE, note,
         EVENT_KEY_DISPLAY_ANIMATOR, isDisplayAnimator);
     ACE_SCOPED_TRACE("INTERACTION_APP_JANK: sceneId =%s, startTime=%lld(ms),"
-        "maxFrameTime=%lld(ms)", sceneId.c_str(),
-        static_cast<long long>(startTime), static_cast<long long>(maxFrameTime));
+        "maxFrameTime=%lld(ms)， pageName=%s", sceneId.c_str(), static_cast<long long>(startTime),
+        static_cast<long long>(maxFrameTime), data.baseInfo.pageName.c_str());
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     if (isDisplayAnimator && maxFrameTime > MAX_JANK_FRAME_TIME) {
         ReportAppFrameDropToRss(true, bundleName, maxFrameTime);
@@ -768,6 +870,16 @@ void EventReport::ReportReusedNodeSkipMeasureApp()
     auto progressName = AceApplicationInfo::GetInstance().GetProcessName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_REUSED_NODE_SKIP_MEASURE,
         OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC, EVENT_KEY_PACKAGE_NAME, progressName);
-        
+}
+
+void EventReport::ReportPageSlidInfo(NG::SlidInfo &slidInfo)
+{
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_PAGE_SLID_INFO,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_GESTURE_VELOCITY, slidInfo.gestureVelocity,
+        EVENT_KEY_VELOCITY_SCALE, slidInfo.velocityScale, EVENT_KEY_DRAG_GAIN,
+        slidInfo.gain, EVENT_KEY_MAX_FLING_VELOCITY, slidInfo.maxFlingVelocity,
+        EVENT_KEY_SLIP_FACTOR, slidInfo.slipFactor, EVENT_KEY_FRICTION,
+        slidInfo.friction);
 }
 } // namespace OHOS::Ace

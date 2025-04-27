@@ -79,6 +79,7 @@ public:
         CHECK_NULL_VOID(pipeline);
         auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetHost() : nullptr;
         auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>(host ? host->GetThemeScopeId() : 0);
+        CHECK_NULL_VOID(checkboxTheme);
         auto horizontalPadding = checkboxTheme->GetHotZoneHorizontalPadding().ConvertToPx();
         auto verticalPadding = checkboxTheme->GetHotZoneVerticalPadding().ConvertToPx();
         float boundsRectOriginX = offset.GetX() - horizontalPadding;
@@ -114,7 +115,7 @@ public:
     {
         auto host = checkBoxgroupPaintProperty->GetHost();
         CHECK_NULL_VOID(host);
-        auto eventHub = host->GetEventHub<EventHub>();
+        auto eventHub = host->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         auto inputEventHub = eventHub->GetInputEventHub();
         HoverEffectType hoverEffectType = HoverEffectType::AUTO;

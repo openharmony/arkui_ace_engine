@@ -42,7 +42,7 @@ HWTEST_F(ImagePatternTestNg, TriggerVisibleAreaChangeForChild001, TestSize.Level
     for (auto& child : frameNode->GetChildren()) {
         auto childNode = AceType::DynamicCast<FrameNode>(child);
         EXPECT_NE(childNode, nullptr);
-        childNode->GetEventHub<EventHub>()->GetVisibleAreaCallback(true).callback = callback;
+        childNode->GetOrCreateEventHub<EventHub>()->GetVisibleAreaCallback(true).callback = callback;
     }
     auto testNode = TestNode::CreateTestNode(ElementRegister::GetInstance()->MakeUniqueId());
     frameNode->AddChild(testNode);
@@ -295,7 +295,7 @@ HWTEST_F(ImagePatternTestNg, AddImageLoadSuccessEvent001, TestSize.Level1)
     imagePattern->cacheImages_.emplace_back(cacheImageStruct);
     LoadImageSuccessEvent info(300, 200, 400, 500);
     info.loadingStatus_ = 1;
-    auto eventHub = imageNode->GetEventHub<ImageEventHub>();
+    auto eventHub = imageNode->GetOrCreateEventHub<ImageEventHub>();
     EXPECT_NE(eventHub, nullptr);
     eventHub->FireCompleteEvent(info);
     auto ret = imagePattern->GetNextIndex(0);
@@ -397,7 +397,7 @@ HWTEST_F(ImagePatternTestNg, OnVisibleAreaChange001, TestSize.Level1)
     imagePattern->animator_->AttachScheduler(pipeline);
     SystemProperties::debugEnabled_ = true;
     imagePattern->animator_->status_ = OHOS::Ace::Animator::Status::PAUSED;
-    imagePattern->imageType_ = ImageType::ANIMATION;
+    imagePattern->imageType_ = ImageType::ANIMATED_DRAWABLE;
     imagePattern->OnVisibleAreaChange(true, 1.0f);
     EXPECT_EQ(imagePattern->animator_->status_, OHOS::Ace::Animator::Status::RUNNING);
 }
@@ -490,10 +490,11 @@ HWTEST_F(ImagePatternTestNg, TriggerFirstVisibleAreaChange001, TestSize.Level1)
 {
     auto frameNode = CreatePixelMapAnimator();
     EXPECT_NE(frameNode, nullptr);
+    frameNode->onMainTree_ = true;
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     imagePattern->isComponentSnapshotNode_ = true;
     imagePattern->TriggerFirstVisibleAreaChange();
-    EXPECT_FALSE(imagePattern->isFormAnimationStart_);
+    EXPECT_TRUE(imagePattern->isFormAnimationStart_);
 }
 
 /**
@@ -512,7 +513,7 @@ HWTEST_F(ImagePatternTestNg, OnAreaChangedInner001, TestSize.Level1)
     imagePattern->OnAreaChangedInner();
     imagePattern->selectOverlay_->Close();
     imagePattern->OnAreaChangedInner();
-    EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->selectOverlay_, nullptr);
 }
 
 /**
@@ -529,7 +530,7 @@ HWTEST_F(ImagePatternTestNg, DumpRenderInfo001, TestSize.Level1)
     EXPECT_EQ(imagePattern->IsSupportImageAnalyzerFeature(), false);
     auto frameNodePtr = AceType::Claim(frameNode);
     imagePattern->AddImageLoadSuccessEvent(frameNodePtr);
-    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
     EXPECT_NE(eventHub->completeEvent_, nullptr);
     std::vector<float> matrix = { 1.1f };
     ImageModelNG::SetColorFilterMatrix(frameNode, matrix);
@@ -630,12 +631,14 @@ HWTEST_F(ImagePatternTestNg, UpdateFormDurationByRemainder001, TestSize.Level1)
 {
     auto frameNode = CreatePixelMapAnimator();
     ASSERT_NE(frameNode, nullptr);
+    frameNode->onMainTree_ = true;
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
     auto pipeline = MockPipelineContext::GetCurrentContext();
     pipeline->SetIsFormRender(true);
     EXPECT_EQ(imagePattern->IsFormRender(), true);
     imagePattern->animator_->duration_ = 2000;
+    imagePattern->ResetFormAnimationStartTime();
     imagePattern->UpdateFormDurationByRemainder();
     ASSERT_NE(imagePattern->animator_->duration_, 2000);
 }
@@ -764,6 +767,13 @@ HWTEST_F(ImagePatternTestNg, ImagePatternOnKeyEvent001, TestSize.Level1)
     auto focusHub = frameNode->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     EXPECT_EQ(focusHub->IsDefaultFocus(), false);
+
+    /**
+     * @tc.steps: step1. init onKey event.
+     */
+    imagePattern->keyEventCallback_ = [](const KeyEvent& event) -> bool {return false;};
+    imagePattern->InitOnKeyEvent();
+    ASSERT_NE(imagePattern->keyEventCallback_, nullptr);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
@@ -1213,7 +1223,7 @@ HWTEST_F(ImagePatternTestNg, ImageRemoveAreaChangeInner001, TestSize.Level1)
     imagePattern->cacheImages_.emplace_back(cacheImageStruct);
     LoadImageSuccessEvent info(300, 200, 400, 500);
     info.loadingStatus_ = 1;
-    auto eventHub = imageNode->GetEventHub<ImageEventHub>();
+    auto eventHub = imageNode->GetOrCreateEventHub<ImageEventHub>();
     EXPECT_NE(eventHub, nullptr);
     bool flag = false;
     OnAreaChangedFunc onAreaChanged = [&flag](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect,
@@ -1270,13 +1280,13 @@ HWTEST_F(ImagePatternTestNg, ImageHandleCopyTest001, TestSize.Level1)
 
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->HandleCopy();
-    EXPECT_NE(imagePattern->clipboard_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->clipboard_, nullptr);
 
     /**
      * @tc.steps: step5. HandleCopy again.
      */
     imagePattern->HandleCopy();
-    EXPECT_NE(imagePattern->clipboard_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->clipboard_, nullptr);
 }
 
 /**
@@ -1547,5 +1557,162 @@ HWTEST_F(ImagePatternTestNg, SetImageAnalyzerConfig, TestSize.Level1)
     auto isEnableAnalyzer = imagePattern->isEnableAnalyzer_;
     imagePattern->SetImageAnalyzerConfig(voidPtr);
     EXPECT_TRUE(isEnableAnalyzer);
+}
+
+/**
+ * @tc.name: RecycleImageData001
+ * @tc.desc: RecycleImageData001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, RecycleImageData001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create Image frameNode.
+    */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    /**
+    * @tc.steps: step2. set isShow true and call RecycleImageData.
+    * @tc.expected: Returned value is false.
+    */
+    imagePattern->isShow_ = true;
+    EXPECT_FALSE(imagePattern->RecycleImageData());
+}
+
+/**
+* @tc.name: RecycleImageData002
+* @tc.desc: RecycleImageData002
+* @tc.type: FUNC
+*/
+HWTEST_F(ImagePatternTestNg, RecycleImageData002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create Image frameNode.
+    */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    /**
+    * @tc.steps: step2. set isShow false and call RecycleImageData.
+    * @tc.expected: Returned value is false.
+    */
+    imagePattern->isShow_ = false;
+    imagePattern->OnRecycle();
+    EXPECT_FALSE(imagePattern->RecycleImageData());
+}
+
+/**
+* @tc.name: RecycleImageData003
+* @tc.desc: RecycleImageData003
+* @tc.type: FUNC
+*/
+HWTEST_F(ImagePatternTestNg, RecycleImageData003, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create Image frameNode.
+    */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    /**
+    * @tc.steps: step2. set isShow false and call RecycleImageData.
+    * @tc.expected: Returned value is false.
+    */
+    imagePattern->isShow_ = false;
+    EXPECT_FALSE(imagePattern->RecycleImageData());
+}
+
+/**
+* @tc.name: RecycleImageData004
+* @tc.desc: RecycleImageData004
+* @tc.type: FUNC
+*/
+HWTEST_F(ImagePatternTestNg, RecycleImageData004, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create Image frameNode.
+    */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    /**
+    * @tc.steps: step2. set isShow false and call RecycleImageData.
+    * @tc.expected: Returned value is true.
+    */
+    imagePattern->isShow_ = false;
+    imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    EXPECT_TRUE(imagePattern->RecycleImageData());
+}
+
+/**
+* @tc.name: AllowVisibleAreaCheck001
+* @tc.desc: AllowVisibleAreaCheck001
+* @tc.type: FUNC
+*/
+HWTEST_F(ImagePatternTestNg, AllowVisibleAreaCheck001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create Image frameNode.
+    */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<FrameNode> parent = FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(parent, nullptr);
+    frameNode->SetParent(parent);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    /**
+    * @tc.steps: step2. call AllowVisibleAreaCheck.
+    * @tc.expected: Returned value is false.
+    */
+    EXPECT_FALSE(imagePattern->AllowVisibleAreaCheck());
 }
 } // namespace OHOS::Ace::NG

@@ -399,43 +399,6 @@ HWTEST_F(WebPatternWindowTestNg, SetFullScreenExitHandlerTest001, TestSize.Level
 }
 
 /**
- * @tc.name: OnSmoothDragResizeEnabledUpdateTest001
- * @tc.desc: Test OnSmoothDragResizeEnabledUpdate.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWindowTestNg, OnSmoothDragResizeEnabledUpdateTest001, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    webPattern->delegate_ = nullptr;
-    webPattern->OnSmoothDragResizeEnabledUpdate(true);
-    EXPECT_EQ(webPattern->delegate_, nullptr);
-}
-
-/**
- * @tc.name: OnSmoothDragResizeEnabledUpdateTest002
- * @tc.desc: Test OnSmoothDragResizeEnabledUpdate.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWindowTestNg, OnSmoothDragResizeEnabledUpdateTest002, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    webPattern->delegate_ =
-        AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
-    webPattern->OnSmoothDragResizeEnabledUpdate(true);
-    EXPECT_NE(webPattern->delegate_, nullptr);
-}
-
-/**
  * @tc.name: ShowDateTimeSuggestionDialogTest001
  * @tc.desc: Test ShowDateTimeSuggestionDialog.
  * @tc.type: FUNC
@@ -1048,36 +1011,6 @@ HWTEST_F(WebPatternWindowTestNg, OnWindowHide001, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateTouchHandleForOverlay001
- * @tc.desc: UpdateTouchHandleForOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWindowTestNg, UpdateTouchHandleForOverlay001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    EXPECT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern->delegate_, nullptr);
-    bool ret = false;
-    webPattern->UpdateTouchHandleForOverlay(ret);
-    EXPECT_FALSE(ret);
-    webPattern->selectTemporarilyHidden_ = false;
-    webPattern->selectTemporarilyHiddenByScroll_ = true;
-    webPattern->UpdateTouchHandleForOverlay(ret);
-    EXPECT_TRUE(webPattern->selectTemporarilyHiddenByScroll_);
-    webPattern->selectTemporarilyHidden_ = true;
-    EXPECT_TRUE(webPattern->selectTemporarilyHidden_);
-#endif
-}
-
-/**
  * @tc.name: CalculateTooltipOffset_001
  * @tc.desc: CalculateTooltipOffset
  * @tc.type: FUNC
@@ -1105,6 +1038,59 @@ HWTEST_F(WebPatternWindowTestNg, CalculateTooltipOffset_001, TestSize.Level1)
     pipeline->rootHeight_ = 0;
     webPattern->CalculateTooltipOffset(tooltipNode, *tooltipOffset);
     MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: InitRotationEventCallback_001
+ * @tc.desc: InitRotationEventCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, InitRotationEventCallback_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->rotationEndCallbackId_ = 0;
+    MockPipelineContext::SetUp();
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    webPattern->InitRotationEventCallback();
+    MockPipelineContext::TearDown();
+    ASSERT_NE(webPattern->rotationEndCallbackId_, 0);
+#endif
+}
+
+/**
+ * @tc.name: UninitRotationEventCallback_001
+ * @tc.desc: UninitRotationEventCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, UninitRotationEventCallback_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    webPattern->UninitRotationEventCallback();
+    MockPipelineContext::TearDown();
+    EXPECT_EQ(webPattern->rotationEndCallbackId_, 0);
 #endif
 }
 } // namespace OHOS::Ace::NG

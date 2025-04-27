@@ -34,6 +34,7 @@ public:
     static RefPtr<MockPipelineContext> GetCurrent();
     void SetRootSize(double rootWidth, double rootHeight);
     void SetInstanceId(int32_t instanceId);
+    void SetContainerModalButtonsRect(bool hasModalButtonsRect);
 
     MOCK_CONST_METHOD0(GetSafeAreaWithoutProcess, SafeAreaInsets());
     MOCK_CONST_METHOD0(GetSelectOverlayManager, SafeAreaInsets());
@@ -75,6 +76,8 @@ public:
         return false;
     }
     void SetEnableSwipeBack(bool isEnable) {}
+
+    void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode);
 
 protected:
     float fontScale_ = 1.0f;

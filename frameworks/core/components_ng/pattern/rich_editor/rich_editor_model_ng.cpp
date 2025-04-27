@@ -86,7 +86,7 @@ void RichEditorModelNG::SetOnReady(std::function<void()>&& func)
 void RichEditorModelNG::SetOnReady(FrameNode* frameNode, std::function<void()>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReady(std::move(callback));
 }
@@ -102,7 +102,7 @@ void RichEditorModelNG::SetOnSelect(std::function<void(const BaseEventInfo*)>&& 
 void RichEditorModelNG::SetOnSelect(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(callback));
 }
@@ -126,7 +126,7 @@ void RichEditorModelNG::SetAboutToIMEInput(FrameNode* frameNode,
     std::function<bool(const RichEditorInsertValue&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetAboutToIMEInput(std::move(callback));
 }
@@ -151,7 +151,7 @@ void RichEditorModelNG::SetOnIMEInputComplete(FrameNode* frameNode,
     std::function<void(const RichEditorAbstractSpanResult&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnIMEInputComplete(std::move(callback));
 }
@@ -159,7 +159,7 @@ void RichEditorModelNG::SetOnIMEInputComplete(FrameNode* frameNode,
 void RichEditorModelNG::SetOnDidIMEInput(FrameNode* frameNode, std::function<void(const TextRange&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidIMEInput(std::move(callback));
 }
@@ -191,7 +191,7 @@ void RichEditorModelNG::SetOnDeleteComplete(std::function<void()>&& func)
 void RichEditorModelNG::SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDeleteComplete(std::move(callback));
 }
@@ -241,43 +241,45 @@ void RichEditorModelNG::SetOnPaste(FrameNode* frameNode, std::function<void(NG::
 void RichEditorModelNG::SetPlaceholder(PlaceholderOptions& options)
 {
     if (options.value.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Placeholder, options.value.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, Placeholder, options.value.value());
     }
     if (options.fontSize.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderFontSize, options.fontSize.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontSize, options.fontSize.value());
     }
     if (options.fontStyle.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderItalicFontStyle, options.fontStyle.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderItalicFontStyle, options.fontStyle.value());
     }
     if (options.fontWeight.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderFontWeight, options.fontWeight.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontWeight, options.fontWeight.value());
     }
     if (options.fontColor.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderTextColor, options.fontColor.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderTextColor, options.fontColor.value());
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderFontFamily, options.fontFamilies);
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontFamily, options.fontFamilies);
 }
 
 void RichEditorModelNG::SetPlaceholder(FrameNode* frameNode, PlaceholderOptions& options)
 {
     if (options.value.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Placeholder, options.value.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, Placeholder, options.value.value(), frameNode);
     }
     if (options.fontSize.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderFontSize, options.fontSize.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            RichEditorLayoutProperty, PlaceholderFontSize, options.fontSize.value(), frameNode);
     }
     if (options.fontStyle.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, PlaceholderItalicFontStyle, options.fontStyle.value(), frameNode);
+            RichEditorLayoutProperty, PlaceholderItalicFontStyle, options.fontStyle.value(), frameNode);
     }
     if (options.fontWeight.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, PlaceholderFontWeight, options.fontWeight.value(), frameNode);
+            RichEditorLayoutProperty, PlaceholderFontWeight, options.fontWeight.value(), frameNode);
     }
     if (options.fontColor.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderTextColor, options.fontColor.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            RichEditorLayoutProperty, PlaceholderTextColor, options.fontColor.value(), frameNode);
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderFontFamily, options.fontFamilies, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontFamily, options.fontFamilies, frameNode);
 }
 
 void RichEditorModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions)
@@ -323,7 +325,7 @@ void RichEditorModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDete
 void RichEditorModelNG::SetOnSelectionChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelectionChange(std::move(callback));
 }
@@ -377,7 +379,7 @@ void RichEditorModelNG::SetOnEditingChange(std::function<void(const bool&)>&& fu
 void RichEditorModelNG::SetOnEditingChange(FrameNode* frameNode, std::function<void(const bool&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnEditingChange(std::move(callback));
 }
@@ -413,7 +415,7 @@ void RichEditorModelNG::SetOnSubmit(FrameNode* frameNode,
     std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSubmit(std::move(callback));
 }
@@ -430,7 +432,7 @@ void RichEditorModelNG::SetOnWillChange(std::function<bool(const RichEditorChang
 void RichEditorModelNG::SetOnWillChange(FrameNode* frameNode, std::function<bool(const RichEditorChangeValue&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnWillChange(std::move(func));
 }
@@ -446,7 +448,7 @@ void RichEditorModelNG::SetOnDidChange(std::function<void(const RichEditorChange
 void RichEditorModelNG::SetOnDidChange(FrameNode* frameNode, std::function<void(const RichEditorChangeValue&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidChange(std::move(func));
 }

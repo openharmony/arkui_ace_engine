@@ -39,9 +39,7 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(int32_t width, int32_t he
     InitBitmap();
     // The default value of the font size in canvas is 14px.
     SetFontSize(DEFAULT_FONT_SIZE);
-    // The default value of TextAlign is TextAlign::START.
-    SetDefaultTextAlign();
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
         isPathChanged_ = false;
         isPath2dChanged_ = false;
     }
@@ -93,6 +91,11 @@ void OffscreenCanvasPaintMethod::Reset()
     InitBitmap();
 }
 
+TextDirection OffscreenCanvasPaintMethod::GetSystemDirection()
+{
+    return AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+}
+
 void OffscreenCanvasPaintMethod::UpdateSize(int32_t width, int32_t height)
 {
     width_ = width;
@@ -131,7 +134,7 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
     double scaledLeft = left + std::min(width, 0.0);
     double scaledTop = top + std::min(height, 0.0);
     // copy the bitmap to tempCanvas
-    RSBitmapFormat format = GetBitmapFormat();
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_PREMUL };
     int32_t size = dirtyWidth * dirtyHeight;
     auto srcRect =
         RSRect(scaledLeft, scaledTop, dirtyWidth + scaledLeft, dirtyHeight + scaledTop);

@@ -16,10 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_ANIMATOR_IMAGE_ANIMATOR_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_ANIMATOR_IMAGE_ANIMATOR_PATTERN_H
 
-#include "core/animation/animator.h"
-#include "core/animation/picture_animation.h"
 #include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/image_animator/controlled_animator.h"
 #include "core/components_ng/pattern/image_animator/image_animator_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -33,7 +32,7 @@ public:
     ImageAnimatorPattern();
     ~ImageAnimatorPattern() override
     {
-        animator_ = nullptr;
+        controlledAnimator_ = nullptr;
     }
 
     struct CacheImageStruct {
@@ -63,6 +62,10 @@ public:
 
     void SetImages(std::vector<ImageProperties>&& images)
     {
+        if (images_.size() == images.size() && images_ == images) {
+            isImagesSame_ = true;
+            return;
+        }
         images_ = std::move(images);
         durationTotal_ = 0;
         for (const auto& childImage : images_) {
@@ -73,14 +76,14 @@ public:
         imagesChangedFlag_ = true;
     }
 
-    void SetStatus(Animator::Status status)
+    void SetStatus(ControlledAnimator::ControlStatus status)
     {
         status_ = status;
     }
 
     void SetFillMode(FillMode fillMode)
     {
-        animator_->SetFillMode(fillMode);
+        controlledAnimator_->SetFillMode(fillMode);
     }
 
     void SetPreDecode(int32_t preDecode) {}
@@ -97,15 +100,16 @@ public:
 
     void OnInActive() override
     {
-        if (status_ == Animator::Status::RUNNING) {
-            animator_->Pause();
+        if (status_ == ControlledAnimator::ControlStatus::RUNNING) {
+            controlledAnimator_->Pause();
         }
     }
 
     void OnActive() override
     {
-        if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
-            isReverse_ ? animator_->Backward() : animator_->Forward();
+        if (status_ == ControlledAnimator::ControlStatus::RUNNING &&
+            controlledAnimator_->GetControlStatus() != ControlledAnimator::ControlStatus::RUNNING) {
+            isReverse_ ? controlledAnimator_->Backward() : controlledAnimator_->Forward();
         }
     }
 
@@ -121,10 +125,10 @@ public:
     }
 
     int32_t GetDuration() {
-        return animator_->GetDuration();
+        return controlledAnimator_->GetDuration();
     }
 
-    Animator::Status GetStatus() {
+    ControlledAnimator::ControlStatus GetStatus() {
         return status_;
     }
 
@@ -133,7 +137,7 @@ public:
     }
 
     FillMode GetFillMode() {
-        return animator_->GetFillMode();
+        return controlledAnimator_->GetFillMode();
     }
 
     int32_t GetImagesSize()
@@ -152,7 +156,7 @@ public:
     }
 
 private:
-    RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
+    std::vector<PictureInfo> CreatePictureAnimation(int32_t size);
     void UpdateEventCallback();
     std::string ImagesToString() const;
     void AdaptSelfSize();
@@ -180,16 +184,16 @@ private:
     void OnVisibleAreaChange(bool visible = true, double ratio = 0.0);
 
     int32_t iteration_ = 1;
-    RefPtr<Animator> animator_;
+    RefPtr<ControlledAnimator> controlledAnimator_;
     std::vector<ImageProperties> images_;
     std::list<CacheImageStruct> cacheImages_;
-    Animator::Status status_ = Animator::Status::IDLE;
+    ControlledAnimator::ControlStatus status_ = ControlledAnimator::ControlStatus::IDLE;
     int32_t durationTotal_ = 0;
     int32_t nowImageIndex_ = 0;
-    uint64_t repeatCallbackId_ = 0;
     bool isReverse_ = false;
     bool fixedSize_ = true;
 
+    bool isImagesSame_ = false;
     bool imagesChangedFlag_ = false;
     bool firstUpdateEvent_ = true;
     bool isLayouted_ = false;

@@ -700,7 +700,7 @@ void TabContentModelNG::SetOnWillShow(std::function<void()>&& onWillShow)
 {
     auto tabContentNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabContentNode);
-    auto tabContentEventHub = tabContentNode->GetEventHub<TabContentEventHub>();
+    auto tabContentEventHub = tabContentNode->GetOrCreateEventHub<TabContentEventHub>();
     CHECK_NULL_VOID(tabContentEventHub);
     tabContentEventHub->SetOnWillShow(onWillShow);
 }
@@ -709,7 +709,7 @@ void TabContentModelNG::SetOnWillHide(std::function<void()>&& onWillHide)
 {
     auto tabContentNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabContentNode);
-    auto tabContentEventHub = tabContentNode->GetEventHub<TabContentEventHub>();
+    auto tabContentEventHub = tabContentNode->GetOrCreateEventHub<TabContentEventHub>();
     CHECK_NULL_VOID(tabContentEventHub);
     tabContentEventHub->SetOnWillHide(onWillHide);
 }
@@ -737,5 +737,20 @@ void TabContentModelNG::SetTabBarLabel(FrameNode* node, const std::string& label
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetTabBar(label, "", std::nullopt, nullptr);
     frameNodePattern->SetTabBarWithContent(nullptr);
+}
+
+void TabContentModelNG::SetOnWillShow(FrameNode* tabContentNode, std::function<void()>&& onWillShow)
+{
+    CHECK_NULL_VOID(tabContentNode);
+    auto tabContentEventHub = tabContentNode->GetOrCreateEventHub<TabContentEventHub>();
+    CHECK_NULL_VOID(tabContentEventHub);
+    tabContentEventHub->SetOnWillShow(onWillShow);
+}
+void TabContentModelNG::SetOnWillHide(FrameNode* tabContentNode, std::function<void()>&& onWillHide)
+{
+    CHECK_NULL_VOID(tabContentNode);
+    auto tabContentEventHub = tabContentNode->GetOrCreateEventHub<TabContentEventHub>();
+    CHECK_NULL_VOID(tabContentEventHub);
+    tabContentEventHub->SetOnWillHide(onWillHide);
 }
 } // namespace OHOS::Ace::NG

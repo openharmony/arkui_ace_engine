@@ -102,6 +102,26 @@ struct FfiHeader {
     ExternalString value;
 };
 
+struct FfiNativeEmbedInfo {
+    const char* id;
+    const char* type;
+    const char* src;
+    int32_t width;
+    int32_t height;
+    const char* url;
+    const char* tag;
+    int32_t x;
+    int32_t y;
+    VectorHeaderHandle params;
+};
+
+struct FfiNativeEmbedDataInfo {
+    int32_t status;
+    const char* surfaceId;
+    const char* embedId;
+    FfiNativeEmbedInfo info;
+};
+
 typedef void (*RequestResultCallback)(void*, CArrString, void*);
 
 CJ_EXPORT void FfiOHOSAceFrameworkWebHandleCancel(void* result);
@@ -119,6 +139,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkWebZoomAccessEnabled(bool isZoomAccessEnabled)
 CJ_EXPORT void FfiOHOSAceFrameworkWebGeolocationAccessEnabled(bool isGeolocationAccessEnabled);
 CJ_EXPORT void FfiOHOSAceFrameworkWebVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccess);
 CJ_EXPORT void FfiOHOSAceFrameworkNestedScroll(int32_t nestedScrollNum, int32_t scrollBackwardNum);
+CJ_EXPORT void FfiOHOSAceFrameworkNestedScrollExt(
+    int32_t scrollUp, int32_t scrollDown, int32_t scrollLeft, int32_t scrollRight);
 CJ_EXPORT void FfiOHOSAceFrameworkWebUserAgent(const std::string& userAgent);
 CJ_EXPORT void FfiOHOSAceFrameworkWebBackgroundColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkWebDarkMode(int32_t darkMode);
@@ -127,7 +149,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkWebForceDarkAccess(bool access);
 CJ_EXPORT void FfiOHOSAceFrameworkWebOnAlert(bool (*callback)(FfiWebEvent event));
 CJ_EXPORT void FfiOHOSAceFrameworkWebOnPageStart(void (*callback)(const char* url));
 CJ_EXPORT void FfiOHOSAceFrameworkWebOnPageFinish(void (*callback)(const char* url));
-CJ_EXPORT void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(void* event));
+CJ_EXPORT void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(FfiWebResourceRequest event));
 CJ_EXPORT void FfiOHOSAceFrameworkWebJavaScriptProxy(
     VectorInt64Handle funcList, const char* name, VectorStringHandle methodList, int64_t controllerId);
 CJ_EXPORT void FfiOHOSAceFrameworkWebSetCallback(RequestResultCallback cb);
@@ -188,7 +210,7 @@ CJ_EXPORT int32_t FfiWebConsoleGetMessageLevel(void* msg);
 CJ_EXPORT ExternalString FfiWebConsoleGetSourceId(void* msg);
 CJ_EXPORT void FfiWebFreeConsoleMessage(void* msg);
 CJ_EXPORT void FfiWebOnDownloadStart(void (*callback)(FfiOnDownloadStartEvent event));
-CJ_EXPORT void FfiWebOnErrorReceive(void (*callback)(void* request, void* error));
+CJ_EXPORT void FfiWebOnErrorReceive(void (*callback)(FfiWebResourceRequest request, void* error));
 CJ_EXPORT ExternalString FfiWebGetErrorInfo(void* error);
 CJ_EXPORT int32_t FfiWebGetErrorCode(void* error);
 CJ_EXPORT void FfiWebFreeResourceError(void* error);
@@ -228,5 +250,12 @@ CJ_EXPORT void FfiWebContextMenuResultCopy(void* ptr);
 CJ_EXPORT void FfiWebContextMenuResultPaste(void* ptr);
 CJ_EXPORT void FfiWebContextMenuResultCut(void* ptr);
 CJ_EXPORT void FfiWebContextMenuResultSelectAll(void* ptr);
+CJ_EXPORT void FfiOHOSAceFrameworkWebOnShowFileSelector(bool (*callback)(void* param, void* result));
+CJ_EXPORT void FfiWebFileSelectorResultSetHandleFileList(VectorStringHandle listPtr, void* ptr);
+CJ_EXPORT ExternalString FfiWebFileSelectorParamGetTitle(void* ptr);
+CJ_EXPORT int32_t FfiWebFileSelectorParamGetMode(void* ptr);
+CJ_EXPORT VectorStringHandle FfiWebFileSelectorParamGetAcceptType(void* ptr);
+CJ_EXPORT bool FfiWebFileSelectorParamIsCapture(void* ptr);
+CJ_EXPORT void FfiOHOSAceFrameworkWebOnNativeEmbedLifecyccleChange(void (*callback)(FfiNativeEmbedDataInfo datainfo));
 };
 #endif // OHOS_ACE_FRAMEWORK_CJ_WEB_H

@@ -14,6 +14,8 @@
  */
 
 #include "test/unittest/core/base/view_abstract_test_ng.h"
+
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/event/focus_hub.h"
 
 using namespace testing;
@@ -1633,7 +1635,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnAppearByFrameNodeTest, TestSiz
     ASSERT_NE(node, nullptr);
     std::function<void()> onAppearCallback = []() {};
     ViewAbstract::SetOnAppear(AceType::RawPtr(node), std::move(onAppearCallback));
-    auto eventHub = node->GetEventHub<EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<EventHub>();
     auto& callback = eventHub->onAppear_;
     EXPECT_NE(callback, nullptr);
 
@@ -1667,7 +1669,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnDisAppearByFrameNodeTest, Test
     ASSERT_NE(node, nullptr);
     std::function<void()> onDiaAppearCallback = []() {};
     ViewAbstract::SetOnDisappear(AceType::RawPtr(node), std::move(onDiaAppearCallback));
-    auto eventHub = node->GetEventHub<EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<EventHub>();
     auto& callback = eventHub->onDisappear_;
     EXPECT_NE(callback, nullptr);
 
@@ -1703,7 +1705,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnAreaChangeByFrameNodeTest, Tes
         onAreaChangeCallback =
             [](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {};
     ViewAbstract::SetOnAreaChanged(AceType::RawPtr(node), std::move(onAreaChangeCallback));
-    auto eventHub = node->GetEventHub<EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<EventHub>();
     auto& callback = eventHub->onAreaChanged_;
     EXPECT_NE(callback, nullptr);
 
@@ -1768,7 +1770,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractSetOnSizeChangeByFrameNodeTest, TestSiz
     std::function<void(const RectF& oldRect, const RectF& rect)> onSizeChangeCallback = [](const RectF& oldRect,
                                                                                             const RectF& rect) {};
     ViewAbstract::SetOnSizeChanged(AceType::RawPtr(node), std::move(onSizeChangeCallback));
-    auto eventHub = node->GetEventHub<EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<EventHub>();
     auto& callback = eventHub->onSizeChanged_;
     EXPECT_NE(callback, nullptr);
 }

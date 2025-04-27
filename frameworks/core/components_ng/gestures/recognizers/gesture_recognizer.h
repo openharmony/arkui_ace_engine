@@ -37,7 +37,7 @@ struct DelayedTask {
 
 enum class RefereeState { READY, DETECTING, PENDING, PENDING_BLOCKED, SUCCEED_BLOCKED, SUCCEED, FAIL };
 
-enum class CallbackState { READY, START, UPDATE, END, CANCEL};
+enum class CurrentCallbackState { READY, START, UPDATE, END, CANCEL};
 
 inline std::string TransRefereeState(RefereeState state)
 {
@@ -50,12 +50,15 @@ inline std::string TransRefereeState(RefereeState state)
 
 class FrameNode;
 
-class ACE_EXPORT NGGestureRecognizer : public TouchEventTarget {
+class ACE_FORCE_EXPORT NGGestureRecognizer : public TouchEventTarget {
     DECLARE_ACE_TYPE(NGGestureRecognizer, TouchEventTarget)
 
 public:
     // IsRealTime is true when using real-time layouts.
     static void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false,
+        bool isPostEventResult = false, int32_t postEventNodeId = -1);
+
+    static std::vector<Matrix4> GetTransformMatrix(const WeakPtr<FrameNode>& node, bool isRealTime = false,
         bool isPostEventResult = false, int32_t postEventNodeId = -1);
 
     // Triggered when the gesture referee finishes collecting gestures and begin a gesture referee.
@@ -421,6 +424,9 @@ public:
 
     void CheckPendingRecognizerIsInAttachedNode(const TouchEvent& event);
 
+    void TransformForRecognizer(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false,
+        bool isPostEventResult = false, int32_t postEventNodeId = -1);
+
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -431,7 +437,6 @@ protected:
 
     virtual void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) {}
     virtual void OnFinishGestureReferee(int32_t touchId, bool isBlocked = false) {}
-    virtual void CheckCallbackState() {}
 
     virtual void HandleTouchDownEvent(const TouchEvent& event) = 0;
     virtual void HandleTouchUpEvent(const TouchEvent& event) = 0;
@@ -457,8 +462,6 @@ protected:
     void HandleTouchUp(const TouchEvent& point);
     void HandleTouchCancel(const TouchEvent& point);
 
-    void UpdateCallbackState(const std::unique_ptr<GestureEventFunc>& callback);
-
     RefereeState refereeState_ = RefereeState::READY;
 
     GestureDisposal disposal_ = GestureDisposal::NONE;
@@ -467,7 +470,7 @@ protected:
 
     GestureMask priorityMask_ = GestureMask::Normal;
 
-    CallbackState callbackState_ = CallbackState::READY;
+    CurrentCallbackState currentCallbackState_ = CurrentCallbackState::READY;
 
     bool isExternalGesture_ = false;
     bool fromCardOrUIExtension_ = false;
@@ -481,6 +484,7 @@ protected:
 
     int64_t deviceId_ = 0;
     SourceType deviceType_ = SourceType::NONE;
+    SourceTool deviceTool_ = SourceTool::UNKNOWN;
     InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
     int32_t transId_ = 0;
 
@@ -498,6 +502,7 @@ protected:
     // raised.
     bool isNeedResetVoluntarily_ = false;
     bool isNeedResetRecognizerState_ = false;
+    std::vector<Matrix4> localMatrix_ = {};
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
     WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;

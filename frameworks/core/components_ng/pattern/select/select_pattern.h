@@ -38,6 +38,7 @@
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class MenuItemPattern;
 
 class SelectPattern : public Pattern {
     DECLARE_ACE_TYPE(SelectPattern, Pattern);
@@ -189,6 +190,7 @@ public:
     void SetSpace(const Dimension& value);
     void SetArrowPosition(const ArrowPosition value);
     void SetMenuAlign(const MenuAlign& menuAlign);
+    void SetAvoidance(AvoidanceMode mode);
 
     std::string GetValue();
     std::string ProvideRestoreInfo() override;
@@ -204,6 +206,7 @@ public:
     void SetHasOptionWidth(bool hasOptionWidth);
     void SetControlSize(const ControlSize& controlSize);
     void SetDivider(const SelectDivider& divider);
+    void SetDividerMode(const std::optional<DividerMode>& mode);
     ControlSize GetControlSize();
     void SetLayoutDirection(TextDirection value);
     Dimension GetSelectLeftRightMargin() const;
@@ -213,6 +216,22 @@ public:
         return MakeRefPtr<SelectPaintProperty>();
     }
     void ResetFontColor();
+    void SetMenuOutline(const MenuParam& menuParam);
+    void SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply);
+    void SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply);
+    void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply);
+    void SetSelectedOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply);
+    std::function<void(WeakPtr<NG::FrameNode>)>& GetTextModifier();
+    std::function<void(WeakPtr<NG::FrameNode>)>& GetArrowModifier();
+    void ResetOptionToInitProps(
+        const RefPtr<MenuItemPattern>& optionPattern, const RefPtr<MenuItemPattern>& selectingOptionPattern = nullptr);
+    void ResetSelectedOptionToInitProps(const RefPtr<MenuItemPattern>& optionPattern);
+    void UpdateOptionCustomProperties(const RefPtr<MenuItemPattern>& optionPattern);
+    void UpdateSelectedOptionCustomProperties(const RefPtr<MenuItemPattern>& optionPattern);
+    void ResetLastSelectedOptionFlags(const RefPtr<MenuItemPattern>& optionPattern);
+    void UpdateOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern);
+    void UpdateSelectedOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern);
+    void DumpInfo() override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -284,7 +303,7 @@ private:
     // update text to selected option's text
     void UpdateText(int32_t index);
 
-    void InitTextProps(const RefPtr<TextLayoutProperty>& textProps, const RefPtr<SelectTheme>& theme);
+    void InitTextProps(const RefPtr<TextLayoutProperty>& textProps);
     void InitSpinner(
         const RefPtr<FrameNode>& spinner, const RefPtr<IconTheme>& iconTheme, const RefPtr<SelectTheme>& selectTheme);
     void InitSpinner(const RefPtr<FrameNode>& spinner, const RefPtr<SelectTheme>& selectTheme);
@@ -292,6 +311,7 @@ private:
     void UpdateOptionsWidth(float selectWidth);
     void UpdateTargetSize();
     bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
+    void ShowScrollBar();
 
     std::vector<RefPtr<FrameNode>> options_;
     RefPtr<FrameNode> menuWrapper_ = nullptr;
@@ -321,6 +341,7 @@ private:
     void ToJsonOptionAlign(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonMenuBackgroundStyle(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonDivider(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonOptionMaxlines(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     // XTS inspector helper functions
     std::string InspectorGetOptions() const;
     std::string InspectorGetSelectedFont() const;
@@ -343,6 +364,10 @@ private:
     bool focusEventInitialized_ = false;
     bool focusTextColorModify_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
+    std::function<void(WeakPtr<NG::FrameNode>)> arrowApply_ = nullptr;
+    std::function<void(WeakPtr<NG::FrameNode>)> textApply_ = nullptr;
+    std::function<void(WeakPtr<NG::FrameNode>)> textOptionApply_ = nullptr;
+    std::function<void(WeakPtr<NG::FrameNode>)> textSelectOptionApply_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG

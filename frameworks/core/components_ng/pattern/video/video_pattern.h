@@ -258,7 +258,6 @@ public:
     {
         return isPrepared_;
     }
-
     static void RegisterMediaPlayerEvent(const WeakPtr<VideoPattern>& weak, const RefPtr<MediaPlayer>& mediaPlayer,
         const std::string& videoSrc, int32_t instanceId);
 
@@ -267,6 +266,8 @@ public:
 
     void SetCurrentVolume(float currentVolume);
     float GetCurrentVolume() const;
+    static bool ParseCommand(const std::string& command);
+    int32_t OnInjectionEvent(const std::string& command) override;
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
@@ -297,6 +298,7 @@ private:
     void InitKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleSliderKeyEvent(const KeyEventInfo& event);
+    void AddChild();
 
     // Set properties for media player.
     void PrepareMediaPlayer();
@@ -351,7 +353,6 @@ private:
     void ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn);
     void ResetStatus();
     void HiddenChange(bool hidden);
-    void PrintPlayerStatus(PlaybackStatus status);
 
     void UpdateFsState();
     void checkNeedAutoPlay();
@@ -374,7 +375,7 @@ private:
 #endif
 
     void RegisterRenderContextCallBack();
-    void ChangePlayerStatus(bool isPlaying, const PlaybackStatus& status);
+    void ChangePlayerStatus(const PlaybackStatus& status);
 
     bool IsSupportImageAnalyzer();
     bool ShouldUpdateImageAnalyzer();

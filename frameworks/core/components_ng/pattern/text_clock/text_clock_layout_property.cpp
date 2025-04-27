@@ -92,7 +92,7 @@ void TextClockLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
     auto themeScopeId = host ? host->GetThemeScopeId() : 0;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>(themeScopeId);
+    auto theme = pipelineContext->GetTheme<TextClockTheme>(themeScopeId);
     auto defaultColor = theme ? theme->GetTextStyleClock().GetTextColor() : Color::BLACK;
 
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {

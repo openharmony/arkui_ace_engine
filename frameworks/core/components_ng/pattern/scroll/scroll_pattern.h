@@ -147,7 +147,7 @@ public:
     ScrollOffsetAbility GetScrollOffsetAbility() override;
 
     bool IsAtTop() const override;
-    bool IsAtBottom() const override;
+    bool IsAtBottom(bool considerRepeat = false) const override;
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
 
@@ -218,6 +218,15 @@ public:
             scrollSnapUpdate_ = true;
         }
     }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void StartVibrateFeedback();
+
+    void SetReachBoundary(bool flag)
+    {
+        reachBoundary_ = flag;
+    }
+#endif
 
     Dimension GetIntervalSize() const
     {
@@ -371,6 +380,13 @@ public:
 
     SizeF GetChildrenExpandedSize() override;
 
+    void TriggerScrollBarDisplay();
+
+    bool IsEnablePagingValid() override
+    {
+        return enablePagingStatus_ == ScrollPagingStatus::VALID && GetScrollSnapAlign() == ScrollSnapAlign::NONE;
+    }
+
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 
@@ -385,10 +401,6 @@ private:
     bool IsScrollOutOnEdge(float delta) const;
     void HandleCrashTop();
     void HandleCrashBottom();
-    bool IsEnablePagingValid() const
-    {
-        return enablePagingStatus_ == ScrollPagingStatus::VALID && GetScrollSnapAlign() == ScrollSnapAlign::NONE;
-    }
 
     void RegisterScrollBarEventTask();
     void HandleScrollEffect();
@@ -397,8 +409,8 @@ private:
     void HandleScrollPosition(float scroll);
     float FireTwoDimensionOnWillScroll(float scroll);
     void FireOnDidScroll(float scroll);
-    void FireOnReachStart(const OnReachEvent& onReachStart) override;
-    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
+    void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void UpdateScrollBarOffset() override;
     void SetAccessibilityAction() override;
@@ -447,6 +459,12 @@ private:
     // dump info
     std::list<ScrollLayoutInfo> scrollLayoutInfos_;
     std::list<ScrollMeasureInfo> scrollMeasureInfos_;
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    int32_t crownEventNum_ = 0;
+    bool reachBoundary_ = false;
+    int64_t lastTime_ = 0;
+#endif
 };
 
 } // namespace OHOS::Ace::NG

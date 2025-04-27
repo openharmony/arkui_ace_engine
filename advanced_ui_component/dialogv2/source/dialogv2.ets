@@ -23,6 +23,7 @@ import { ColorMetrics, LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import accessibility from '@ohos.accessibility';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
+import { i18n } from '@kit.LocalizationKit';
 
 const TITLE_MAX_LINES: number = 2;
 const HORIZON_BUTTON_MAX_COUNT: number = 2;
@@ -79,6 +80,7 @@ const ALERT_BUTTON_STYLE: number = getNumberByResourceId(125831085, 2, true);
 // 'sys.float.alert_title_alignment'
 const ALERT_TITLE_ALIGNMENT: number = getEnumNumberByResourceId(125831126, 1);
 const SCROLL_BAR_OFFSET: number = 20;
+const SELECT_DIALOG_SCROLL_BAR_OFFSET: number = 4;
 
 export type AdvancedDialogV2OnCheckedChange = (checked: boolean) => void;
 
@@ -265,8 +267,12 @@ export struct TipsDialogV2 {
           maxWidth: this.imageSize?.width ?? DEFAULT_IMAGE_SIZE,
           maxHeight: this.imageSize?.height ?? DEFAULT_IMAGE_SIZE
         })
-        .borderColor(this.imageBorderColor?.color)
-        .borderWidth(toLengthString(this.imageBorderWidth))
+        .outline({
+          width: `${lengthMetricsToPX(this.imageBorderWidth)}px`,
+          radius: `${lengthMetricsToPX(LengthMetrics.resource($r('sys.float.corner_radius_level6'))) +
+          lengthMetricsToPX(this.imageBorderWidth)}px`,
+          color: this.imageBorderColor?.color
+        })
     }
     .width('100%')
   }
@@ -310,10 +316,11 @@ export struct TipsDialogV2 {
           }
         }
       }
-      .margin({ end: LengthMetrics.resource($r('sys.float.padding_level8')) })
+      .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
+      .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
     }
     .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-    .margin({ end: LengthMetrics.vp(this.marginOffset) })
+    .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) })
   }
 
   aboutToAppear(): void {
@@ -509,6 +516,7 @@ export struct SelectDialogV2 {
                       .fontWeight(FontWeight.Medium)
                       .fontColor(this.fontColorWithTheme)
                       .layoutWeight(1)
+                      .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
                     Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                       .checked(this.selectedIndexInner === index)
@@ -517,6 +525,7 @@ export struct SelectDialogV2 {
                       .focusable(false)
                       .accessibilityLevel('no')
                       .visibility(this.selectedIndex === index ? Visibility.Visible : Visibility.Hidden)
+                      .radioStyle({ uncheckedBorderColor: Color.Transparent })
                       .onFocus(() => {
                         this.isFocus = true;
                         this.currentFocusIndex = index;
@@ -587,6 +596,7 @@ export struct SelectDialogV2 {
         this.isFocus = false;
       }
     })
+    .margin({ end: LengthMetrics.vp(SELECT_DIALOG_SCROLL_BAR_OFFSET) })
   }
 
   build() {
@@ -682,8 +692,8 @@ export struct ConfirmDialogV2 {
     this.checkedInner = monitor.value<boolean>('checked')?.now;
   }
 
-  @Param primaryButton?: AdvancedDialogV2Button = new AdvancedDialogV2Button({ content: '' });
-  @Param secondaryButton?: AdvancedDialogV2Button = new AdvancedDialogV2Button({ content: '' });
+  @Param primaryButton?: AdvancedDialogV2Button = undefined;
+  @Param secondaryButton?: AdvancedDialogV2Button = undefined;
   @Local fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @Param onCheckedChange?: AdvancedDialogV2OnCheckedChange = undefined;
   private contentScroller: Scroller = new Scroller();
@@ -730,10 +740,11 @@ export struct ConfirmDialogV2 {
             })
             .width('100%')
         }
-        .margin({ end: LengthMetrics.resource($r('sys.float.padding_level8')) })
+        .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
+        .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
       }
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-      .margin({ end: LengthMetrics.vp(this.marginOffset) })
+      .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) })
     }
   }
 
@@ -1037,6 +1048,8 @@ struct CustomDialogContentComponent {
   private primaryTitleMinFontSize: Length = `${BODY_L}fp`;
   private secondaryTitleMaxFontSize: Length = `${SUBTITLE_S}fp`;
   private secondaryTitleMinFontSize: Length = `${BODY_S}fp`;
+  @Param@once isHasDefaultFocus: boolean = false;
+  @Param@once isAllFocusFalse: boolean = false;
 
   build() {
     Scroll() {
@@ -1060,7 +1073,8 @@ struct CustomDialogContentComponent {
         }
       }
       .constraintSize({ maxHeight: this.contentMaxHeight })
-      .backgroundBlurStyle(this.customStyle ? BlurStyle.Thick : BlurStyle.NONE)
+      .backgroundBlurStyle(this.customStyle ?
+        BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true })
       .borderRadius(this.customStyle ? $r('sys.float.ohos_id_corner_radius_dialog') : 0)
       .margin(this.customStyle ? {
         start: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_start')),
@@ -1069,6 +1083,7 @@ struct CustomDialogContentComponent {
       } : { left: 0, right: 0, bottom: 0 })
       .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
     }
+    .edgeEffect(EdgeEffect.None, { alwaysEnabled: false })
     .backgroundColor(Color.Transparent)
   }
 
@@ -1101,11 +1116,18 @@ struct CustomDialogContentComponent {
   }
 
   aboutToAppear(): void {
-    let uiContext: UIContext = this.getUIContext();
-    this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
-    this.appMaxFontScale = uiContext.getMaxFontScale();
+    try {
+      let uiContext: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale();
+      this.appMaxFontScale = uiContext?.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError)?.code;
+      let message: string = (err as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}, message: ${message}`);
+    }
     this.fontSizeScale = this.updateFontScale();
     this.initTitleTextAlign();
+    this.setDefaultFocusState(this.buttons);
   }
 
   private updateFontSize(): void {
@@ -1131,6 +1153,29 @@ struct CustomDialogContentComponent {
       let message: string = (exception as BusinessError).message;
       hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${code}, message: ${message}`);
       return 1;
+    }
+  }
+
+  /**
+   * set state of button focus
+   */
+  private setDefaultFocusState(buttonList?: AdvancedDialogV2Button[]): void {
+    if (!buttonList) {
+      return;
+    }
+    let falseNum: number = 0;
+    buttonList.forEach((button: AdvancedDialogV2Button) => {
+      // 遍历查询按钮中存在是否存在默认按钮
+      if (button.defaultFocus) {
+        this.isHasDefaultFocus = true;
+      }
+      if (button.defaultFocus === false) {
+        falseNum++;
+      }
+    });
+    // 所有按钮defaultFocus都设置为false
+    if (falseNum === buttonList.length) {
+      this.isAllFocusFalse = true;
     }
   }
 
@@ -1316,26 +1361,30 @@ struct CustomDialogContentComponent {
   buildSingleButton(index: number): void {
     if (this.isNewPropertiesHighPriority(index)) {
       Button(this.buttons?.[index].content)
-        .setButtonProperties(this.buttons?.[index], this.buttons, this.getDialogController())
+        .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, 
+          this.isAllFocusFalse, this.getDialogController())
         .role(this.buttons?.[index].role ?? ButtonRole.NORMAL)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else if (this.buttons?.[index].background !== undefined && this.buttons?.[index].fontColor !== undefined) {
       Button(this.buttons?.[index].content)
-        .setButtonProperties(this.buttons?.[index], this.buttons, this.getDialogController())
+        .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, 
+          this.isAllFocusFalse, this.getDialogController())
         .backgroundColor(this.buttons?.[index].background?.color)
         .fontColor(this.buttons?.[index].fontColor?.color)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else if (this.buttons?.[index].background !== undefined) {
       Button(this.buttons?.[index].content)
-        .setButtonProperties(this.buttons?.[index], this.buttons, this.getDialogController())
+        .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, 
+          this.isAllFocusFalse, this.getDialogController())
         .backgroundColor(this.buttons?.[index].background?.color)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else {
       Button(this.buttons?.[index].content)
-        .setButtonProperties(this.buttons?.[index], this.buttons, this.getDialogController())
+        .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, 
+          this.isAllFocusFalse, this.getDialogController())
         .fontColor(this.buttons?.[index]?.fontColor?.color)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
@@ -1458,9 +1507,8 @@ struct CustomDialogContentComponent {
 }
 
 @Extend(Button)
-function setButtonProperties(
-  buttonOptions?: AdvancedDialogV2Button,
-  buttonList?: AdvancedDialogV2Button[],
+function setButtonProperties(buttonOptions?: AdvancedDialogV2Button,
+  isHasDefaultFocus?: boolean, isAllFocusFalse?: boolean,
   controller?: PromptActionDialogController) {
   .onKeyEvent((event: KeyEvent) => {
     if (!event) {
@@ -1481,7 +1529,7 @@ function setButtonProperties(
     }
     controller?.close();
   })
-  .defaultFocus(buttonOptions?.defaultFocus ? true : isHasDefaultFocus(buttonList) ? false : true)
+  .defaultFocus(isDefaultFocus(buttonOptions, isHasDefaultFocus, isAllFocusFalse))
   .buttonStyle(buttonOptions?.buttonStyle ?? ALERT_BUTTON_STYLE)
   .layoutWeight(BUTTON_LAYOUT_WEIGHT)
   .type(ButtonType.ROUNDED_RECTANGLE)
@@ -1489,25 +1537,32 @@ function setButtonProperties(
 }
 
 /**
- * is button list has default focus
+ * is button set default focus
  *
- * @param buttonList button list
+ * @param singleButton button options
+ * @param isHasDefaultFocus is button list has default focus button
+ * @param isAllFocusFalse is all button in button list default focus false
  * @returns boolean
  */
-function isHasDefaultFocus(buttonList?: AdvancedDialogV2Button[]): boolean {
+function isDefaultFocus(singleButton?: AdvancedDialogV2Button, isHasDefaultFocus?: boolean,
+  isAllFocusFalse?: boolean): boolean {
   try {
-    let isHasDefaultFocus: boolean = false;
-    buttonList?.forEach((button) => {
-      if (button.defaultFocus) {
-        isHasDefaultFocus = true;
-      }
-    })
-    return isHasDefaultFocus;
+    // 当前按钮为默认按钮
+    if (singleButton?.defaultFocus) {
+      return true;
+    }
+    let isDefaultFocus: boolean = false;
+    if (isHasDefaultFocus || isAllFocusFalse) {
+      isDefaultFocus = false; // 存在默认按钮或者所有按钮的defaultFocus都为false
+    } else {
+      isDefaultFocus = true; // 默认第一个按钮获焦
+    }
+    return isDefaultFocus;
   } catch (error) {
     let code: number = (error as BusinessError).code;
     let message: string = (error as BusinessError).message;
     hilog.error(0x3900, 'Ace', `get defaultFocus exist error, code: ${code}, message: ${message}`);
-    return false;
+    return true;
   }
 }
 
@@ -1794,4 +1849,24 @@ function toLengthString(value?: LengthMetrics): string | undefined {
   }
   return lengthString;
 }
+
+function lengthMetricsToPX(value?: LengthMetrics): number {
+  if (!value) {
+    return 0;
+  }
+  const length: number = value.value;
+  switch (value.unit) {
+    case LengthUnit.PX:
+      return length;
+    case LengthUnit.FP:
+      return fp2px(length);
+    case LengthUnit.LPX:
+      return lpx2px(length);
+    case LengthUnit.VP:
+      return vp2px(length);
+    default:
+      return 0;
+  }
+}
+
 export declare interface PopoverDialogV2Options extends CustomPopupOptions {}

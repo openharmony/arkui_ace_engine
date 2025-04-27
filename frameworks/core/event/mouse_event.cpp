@@ -28,6 +28,8 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
     if (!onHoverEventCallback_) {
         return false;
     }
+    ACE_SCOPED_TRACE("HandleHoverEvent node:%d/%s isHovered:%d", GetNodeId(), GetNodeName().c_str(), isHovered);
+    lastHoverState_ = isHovered;
     HoverInfo hoverInfo;
     hoverInfo.SetTimeStamp(event.time);
     hoverInfo.SetDeviceId(event.deviceId);
@@ -35,6 +37,7 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
     hoverInfo.SetSourceTool(event.sourceTool);
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
     hoverInfo.SetPressedKeyCodes(event.pressedKeyCodes_);
+    hoverInfo.SetMouseAction(event.action);
     // onHoverEventCallback_ may be overwritten in its invoke so we copy it first
     auto onHoverEventCallback = onHoverEventCallback_;
     onHoverEventCallback(isHovered, hoverInfo);
@@ -56,6 +59,9 @@ bool HoverEventTarget::HandlePenHoverEvent(bool isHovered, const TouchEvent& eve
     }
     if (event.tiltY.has_value()) {
         hoverInfo.SetTiltY(event.tiltY.value_or(0.0f));
+    }
+    if (event.rollAngle.has_value()) {
+        hoverInfo.SetRollAngle(event.rollAngle.value_or(0.0f));
     }
     NG::PointF lastLocalPoint(event.x, event.y);
     NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
@@ -87,6 +93,9 @@ bool HoverEventTarget::HandlePenHoverMoveEvent(const TouchEvent& event)
     }
     if (event.tiltY.has_value()) {
         hoverInfo.SetTiltY(event.tiltY.value_or(0.0f));
+    }
+    if (event.rollAngle.has_value()) {
+        hoverInfo.SetRollAngle(event.rollAngle.value_or(0.0f));
     }
     NG::PointF lastLocalPoint(event.x, event.y);
     NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
@@ -167,17 +176,11 @@ bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
     info.SetAction(event.action);
     info.SetPullAction(event.pullAction);
     info.SetGlobalLocation(event.GetOffset());
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        NG::PointF localPoint(event.x, event.y);
-        NG::NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
-        auto localX = static_cast<float>(localPoint.GetX());
-        auto localY = static_cast<float>(localPoint.GetY());
-        info.SetLocalLocation(Offset(localX, localY));
-    } else {
-        Offset localLocation = Offset(
-            event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
-        info.SetLocalLocation(localLocation);
-    }
+    NG::PointF localPoint(event.x, event.y);
+    NG::NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    auto localX = static_cast<float>(localPoint.GetX());
+    auto localY = static_cast<float>(localPoint.GetY());
+    info.SetLocalLocation(Offset(localX, localY));
     info.SetScreenLocation(event.GetScreenOffset());
     info.SetTimeStamp(event.time);
     info.SetDeviceId(event.deviceId);

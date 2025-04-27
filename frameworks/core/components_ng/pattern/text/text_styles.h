@@ -166,6 +166,7 @@ struct ImageSpanOptions : SpanOptionBase {
 };
 } // namespace OHOS::Ace
 namespace OHOS::Ace::NG {
+class TextLayoutProperty;
 constexpr Dimension TEXT_DEFAULT_FONT_SIZE = 16.0_fp;
 using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 struct FontStyle {
@@ -215,6 +216,7 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineBreakStrategy, LineBreakStrategy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HalfLeading, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AllowScale, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ParagraphSpacing, Dimension);
 };
 
 struct HandleInfoNG {
@@ -233,7 +235,6 @@ struct HandleInfoNG {
 
     bool operator==(const HandleInfoNG& handleInfo) const
     {
-
         return rect == handleInfo.rect && index == handleInfo.index;
     }
 
@@ -248,14 +249,16 @@ struct HandleInfoNG {
 };
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
-    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme);
+    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
 
-TextStyle CreateTextStyleUsingThemeWithText(const RefPtr<FrameNode> frameNode,
-    const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
-    const RefPtr<TextTheme>& textTheme);
+void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
+    TextStyle& textStyle, bool isSymbol = false);
 
-void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
-    const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle);
+void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
+    TextStyle& textStyle, bool isSymbol = false);
+
+void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
+    const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
 
 std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value);
 std::string GetFontStyleInJson(const std::optional<Ace::FontStyle>& value);

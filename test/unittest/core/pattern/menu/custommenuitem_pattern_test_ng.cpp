@@ -216,7 +216,7 @@ HWTEST_F(CustomMenuItemPatternTestNg, Create001, TestSize.Level1)
     ASSERT_TRUE(itemNode);
     auto pattern = itemNode->GetPattern<CustomMenuItemPattern>();
     ASSERT_TRUE(pattern);
-    ASSERT_TRUE(itemNode->GetEventHub<EventHub>());
+    ASSERT_TRUE(itemNode->GetOrCreateEventHub<EventHub>());
     auto touch = itemNode->GetOrCreateGestureEventHub()->touchEventActuator_;
     ASSERT_TRUE(touch);
     ASSERT_FALSE(touch->touchEvents_.empty());
@@ -327,7 +327,7 @@ HWTEST_F(CustomMenuItemPatternTestNg, MenuItemPatternTestBasicNg028, TestSize.Le
     ASSERT_TRUE(itemNode);
     auto pattern = itemNode->GetPattern<CustomMenuItemPattern>();
     ASSERT_TRUE(pattern);
-    ASSERT_TRUE(itemNode->GetEventHub<EventHub>());
+    ASSERT_TRUE(itemNode->GetOrCreateEventHub<EventHub>());
     auto touch = itemNode->GetOrCreateGestureEventHub()->touchEventActuator_;
     ASSERT_TRUE(touch);
     ASSERT_FALSE(touch->touchEvents_.empty());

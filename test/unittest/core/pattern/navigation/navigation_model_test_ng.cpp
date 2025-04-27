@@ -345,7 +345,7 @@ HWTEST_F(NavigationModelTestNg, CreateToolbarItemInContainer001, TestSize.Level1
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
-    auto eventHub = navigationGroupNode->GetEventHub<EventHub>();
+    auto eventHub = navigationGroupNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->enabled_ = true;
     std::vector<NG::BarItem> toolBarItems;
@@ -391,7 +391,7 @@ HWTEST_F(NavigationModelTestNg, CreateToolbarItemInContainer002, TestSize.Level1
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
-    auto eventHub = navigationGroupNode->GetEventHub<EventHub>();
+    auto eventHub = navigationGroupNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->enabled_ = false;
     std::vector<NG::BarItem> toolBarItems;
@@ -458,7 +458,7 @@ HWTEST_F(NavigationModelTestNg, BuildToolbarMoreItemNode001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
-    auto eventHub = navigationGroupNode->GetEventHub<EventHub>();
+    auto eventHub = navigationGroupNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->enabled_ = true;
     std::vector<NG::BarItem> toolBarItems;
@@ -722,7 +722,7 @@ HWTEST_F(NavigationModelTestNg, SetTitleMode001, TestSize.Level1)
     ASSERT_NE(titleBarNode, nullptr);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     ASSERT_NE(titleBarLayoutProperty, nullptr);
-    auto navigationEventHub = navigationGroupNode->GetEventHub<EventHub>();
+    auto navigationEventHub = navigationGroupNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(navigationEventHub, nullptr);
 
     // Make !IsEnabled return false
@@ -1310,7 +1310,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility001, TestSize.Leve
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     navDestinationPattern->customNode_ = remainChild;
 
-    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_FALSE(index == static_cast<int32_t>(destinationSize) - 1);
     EXPECT_FALSE(index < navigationNode->lastStandardIndex_);
     EXPECT_TRUE(navDestinationPattern->GetCustomNode() == remainChild);
@@ -1339,7 +1339,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility002, TestSize.Leve
     int32_t index = 0;
     size_t destinationSize = 1;
 
-    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_TRUE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
     bool ret = navigationNode->UpdateNavDestinationVisibility(
@@ -1371,7 +1371,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility003, TestSize.Leve
     // Make hasChanged false
     navDestinationNode->GetLayoutProperty()->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
 
-    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_FALSE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
     auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
@@ -1413,7 +1413,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility004, TestSize.Leve
     calcSize.height_ = CalcLength("auto");
     calcLayoutConstraint->selfIdealSize = calcSize;
 
-    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_FALSE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
     EXPECT_TRUE(NavigationLayoutAlgorithm::IsAutoHeight(navigationLayoutProperty));
@@ -1448,7 +1448,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility005, TestSize.Leve
     // Make IsOnAnimation return true
     navDestinationNode->isOnAnimation_ = true;
 
-    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_NE(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_TRUE(index < navigationNode->lastStandardIndex_);
     EXPECT_TRUE(navDestinationNode->IsOnAnimation());
@@ -1492,7 +1492,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility006, TestSize.Leve
     // Make GetCustomNode is remainChild
     navDestinationPattern->customNode_ = remainChild;
 
-    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_NE(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_TRUE(index < navigationNode->lastStandardIndex_);
     EXPECT_FALSE(navDestinationNode->IsOnAnimation());
@@ -1538,7 +1538,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility007, TestSize.Leve
     // Make GetCustomNode is not remainChild
     navDestinationPattern->customNode_ = nullptr;
 
-    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_NE(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_TRUE(index < navigationNode->lastStandardIndex_);
     EXPECT_FALSE(navDestinationNode->IsOnAnimation());
@@ -1581,7 +1581,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility008, TestSize.Leve
     // Make IsOnAnimation return true
     navDestinationNode->isOnAnimation_ = true;
 
-    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_NE(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_FALSE(index < navigationNode->lastStandardIndex_);
     EXPECT_TRUE(navDestinationPattern->GetCustomNode() != remainChild);
@@ -1623,7 +1623,7 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility009, TestSize.Leve
     // Make IsOnAnimation return false
     navDestinationNode->isOnAnimation_ = false;
 
-    EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
+    EXPECT_NE(navDestinationNode->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_NE(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_FALSE(index < navigationNode->lastStandardIndex_);
     EXPECT_TRUE(navDestinationPattern->GetCustomNode() != remainChild);
@@ -1839,7 +1839,9 @@ HWTEST_F(NavigationModelTestNg, SetTitlebarOptions001, TestSize.Level1)
     ASSERT_NE(titleBarNode, nullptr);
     NavigationTitlebarOptions opt;
     opt.bgOptions.color = std::make_optional(Color(0xff0000ff));
-    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::NO_MATERIAL);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
     opt.brOptions.barStyle = std::make_optional(BarStyle::STACK);
     opt.brOptions.paddingStart = std::make_optional(DEFAULT_PADDING);
     opt.brOptions.paddingEnd = std::make_optional(DEFAULT_PADDING);
@@ -1853,8 +1855,8 @@ HWTEST_F(NavigationModelTestNg, SetTitlebarOptions001, TestSize.Level1)
     EXPECT_TRUE(options.bgOptions.color.has_value());
     EXPECT_EQ(options.bgOptions.color.value(), Color(0xff0000ff));
 
-    EXPECT_TRUE(options.bgOptions.blurStyle.has_value());
-    EXPECT_EQ(options.bgOptions.blurStyle.value(), BlurStyle::NO_MATERIAL);
+    EXPECT_TRUE(options.bgOptions.blurStyleOption.has_value());
+    EXPECT_EQ(options.bgOptions.blurStyleOption->blurStyle, BlurStyle::NO_MATERIAL);
 
     EXPECT_TRUE(options.brOptions.barStyle.has_value());
     EXPECT_EQ(options.brOptions.barStyle.value(), BarStyle::STACK);
@@ -1887,7 +1889,9 @@ HWTEST_F(NavigationModelTestNg, SetTitlebarOptions002, TestSize.Level1)
     ASSERT_NE(titleBarNode, nullptr);
     NavigationTitlebarOptions opt;
     opt.bgOptions.color = std::make_optional(Color(0xff00ff00));
-    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::REGULAR);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::REGULAR;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
     opt.brOptions.barStyle = std::make_optional(BarStyle::STANDARD);
     opt.brOptions.paddingStart = std::make_optional(DEFAULT_PADDING);
     opt.brOptions.paddingEnd = std::make_optional(DEFAULT_PADDING);
@@ -1901,8 +1905,8 @@ HWTEST_F(NavigationModelTestNg, SetTitlebarOptions002, TestSize.Level1)
     EXPECT_TRUE(options.bgOptions.color.has_value());
     EXPECT_EQ(options.bgOptions.color.value(), Color(0xff00ff00));
 
-    EXPECT_TRUE(options.bgOptions.blurStyle.has_value());
-    EXPECT_EQ(options.bgOptions.blurStyle.value(), BlurStyle::REGULAR);
+    EXPECT_TRUE(options.bgOptions.blurStyleOption.has_value());
+    EXPECT_EQ(options.bgOptions.blurStyleOption->blurStyle, BlurStyle::REGULAR);
 
     EXPECT_TRUE(options.brOptions.barStyle.has_value());
     EXPECT_EQ(options.brOptions.barStyle.value(), BarStyle::STANDARD);
@@ -2004,13 +2008,16 @@ HWTEST_F(NavigationModelTestNg, SetEnableToolBarAdaptation, TestSize.Level1)
     navigationModel.SetTitle("navigationModel", false);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     ASSERT_NE(navBarNode, nullptr);
     EXPECT_FALSE(navBarNode->GetPrevToolBarIsCustom().value_or(false));
-    auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
-    EXPECT_TRUE(toolbarNode->enableToolBarAdaptation_);
+    auto navigatonLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigatonLayoutProperty, nullptr);
+    EXPECT_TRUE(navigatonLayoutProperty->GetEnableToolBarAdaptationValue(true));
     navigationModel.SetEnableToolBarAdaptation(false);
-    EXPECT_FALSE(toolbarNode->enableToolBarAdaptation_);
+    EXPECT_FALSE(navigatonLayoutProperty->GetEnableToolBarAdaptationValue(false));
 }
 } // namespace OHOS::Ace::NG

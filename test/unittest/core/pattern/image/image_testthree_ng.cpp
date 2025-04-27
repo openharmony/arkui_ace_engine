@@ -154,7 +154,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0026, TestSize.Level1)
      * @tc.steps: step1. Test status
      * @tc.expected: IDLE
      */
-    EXPECT_EQ(imagePattern->status_, Animator::Status::IDLE);
+    EXPECT_EQ(imagePattern->status_, AnimatorStatus::IDLE);
 
     //切换Image数据源
     std::vector<ImageProperties> images;
@@ -178,7 +178,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0026, TestSize.Level1)
      * @tc.steps: step2. Test status
      * @tc.expected: STATE_START
      */
-    EXPECT_EQ(imagePattern->status_, static_cast<Animator::Status>(STATE_START));
+    EXPECT_EQ(imagePattern->status_, static_cast<AnimatorStatus>(STATE_START));
 }
 
 /**
@@ -386,7 +386,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0030, TestSize.Level1)
      * @tc.steps: step2. Test ImageType
      * @tc.expected: ANIMATION
      */
-    EXPECT_EQ(imagePattern->imageType_, ImageType::ANIMATION);
+    EXPECT_EQ(imagePattern->imageType_, ImageType::ANIMATED_DRAWABLE);
 }
 
 /**
@@ -884,7 +884,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0040, TestSize.Level1)
      * @tc.steps: step1. Test status
      * @tc.expected: IDLE
      */
-    EXPECT_EQ(imagePattern->status_, Animator::Status::IDLE);
+    EXPECT_EQ(imagePattern->status_, AnimatorStatus::IDLE);
 
     //切换Image数据源
     std::vector<ImageProperties> images;
@@ -908,7 +908,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0040, TestSize.Level1)
      * @tc.steps: step2. Test status
      * @tc.expected: STATE_START
      */
-    EXPECT_EQ(imagePattern->status_, static_cast<Animator::Status>(STATE_START));
+    EXPECT_EQ(imagePattern->status_, static_cast<AnimatorStatus>(STATE_START));
 }
 
 /**
@@ -1116,7 +1116,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0044, TestSize.Level1)
      * @tc.steps: step2. Test ImageType
      * @tc.expected: ANIMATION
      */
-    EXPECT_EQ(imagePattern->imageType_, ImageType::ANIMATION);
+    EXPECT_EQ(imagePattern->imageType_, ImageType::ANIMATED_DRAWABLE);
 }
 
 /**
@@ -1189,7 +1189,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternCalAndUpdateSelectOverlay, TestSize.Level
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->OpenSelectOverlay();
     imagePattern->CalAndUpdateSelectOverlay();
-    EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->selectOverlay_, nullptr);
     auto info = imagePattern->selectOverlay_->GetSelectOverlayMangerInfo();
     info.onHandleMoveDone(RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH), true);
     info.menuCallback.onCopy();
@@ -1225,7 +1225,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->OpenSelectOverlay();
     imagePattern->OnAreaChangedInner();
-    EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->selectOverlay_, nullptr);
 }
 
 /**
@@ -1331,7 +1331,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternHandleCopy, TestSize.Level1)
     ASSERT_NE(imagePattern->image_, nullptr);
 
     imagePattern->HandleCopy();
-    EXPECT_NE(imagePattern->clipboard_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->clipboard_, nullptr);
 }
 
 /**
@@ -1567,7 +1567,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternhasSceneChanged, TestSize.Level1)
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
     bool b = imagePattern->hasSceneChanged();
-    EXPECT_FALSE(b);
+    EXPECT_TRUE(b);
 }
 
 /**
@@ -1717,7 +1717,7 @@ void ImagePatternMethods01()
     EXPECT_EQ(imagePattern->IsSupportImageAnalyzerFeature(), false);
     auto frameNodePtr = AceType::Claim(frameNode);
     imagePattern->AddImageLoadSuccessEvent(frameNodePtr);
-    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
     EXPECT_NE(eventHub->completeEvent_, nullptr);
     LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT);
     eventHub->FireCompleteEvent(loadImageSuccessEvent);
@@ -1859,7 +1859,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner111, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->OpenSelectOverlay();
     imagePattern->OnAreaChangedInner();
-    EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->selectOverlay_, nullptr);
 }
 
 /**
@@ -1898,7 +1898,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnDirtyLayoutWrapperSwap0051, TestSize.Le
     DirtySwapConfig config;
     config.skipMeasure = false;
     imagePattern->isLayouted_ = false;
-    imagePattern->imageType_ = ImageType::ANIMATION;
+    imagePattern->imageType_ = ImageType::ANIMATED_DRAWABLE;
     imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(imagePattern->isLayouted_);
     imagePattern->isLayouted_ = false;
@@ -1906,7 +1906,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnDirtyLayoutWrapperSwap0051, TestSize.Le
     imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(imagePattern->isLayouted_);
     imagePattern->isLayouted_ = true;
-    imagePattern->imageType_ = ImageType::ANIMATION;
+    imagePattern->imageType_ = ImageType::ANIMATED_DRAWABLE;
     imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(imagePattern->isLayouted_);
 }
@@ -1920,7 +1920,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnImageModifyDone0052, TestSize.Level1)
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    imagePattern->imageType_ = ImageType::UNDEFINED;
+    imagePattern->imageType_ = ImageType::BASE;
     imagePattern->OnModifyDone();
     imagePattern->OnImageModifyDone();
     EXPECT_FALSE(imagePattern->isSelected_);
@@ -1935,14 +1935,15 @@ HWTEST_F(ImageTestThreeNg, ImagePatternControlAnimation0053, TestSize.Level1)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
+    frameNode->onMainTree_ = true;
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    imagePattern->status_ = Animator::Status::IDLE;
+    imagePattern->status_ = AnimatorStatus::IDLE;
     imagePattern->ControlAnimation(2);
     EXPECT_TRUE(imagePattern->isFormAnimationStart_);
-    imagePattern->status_ = Animator::Status::PAUSED;
+    imagePattern->status_ = AnimatorStatus::PAUSED;
     imagePattern->ControlAnimation(2);
     EXPECT_TRUE(imagePattern->isFormAnimationStart_);
-    imagePattern->status_ = Animator::Status::RUNNING;
+    imagePattern->status_ = AnimatorStatus::RUNNING;
     imagePattern->isFormAnimationEnd_ = true;
     imagePattern->ControlAnimation(2);
     EXPECT_FALSE(imagePattern->isFormAnimationEnd_);
@@ -1963,7 +1964,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner0054, TestSize.Level1)
     imagePattern->parentGlobalOffset_ = OffsetF(1, 1);
     imagePattern->OpenSelectOverlay();
     imagePattern->OnAreaChangedInner();
-    EXPECT_NE(imagePattern->selectOverlay_.GetRawPtr(), nullptr);
+    EXPECT_NE(imagePattern->selectOverlay_, nullptr);
 }
 
 /**
@@ -2078,7 +2079,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnAttachToFrameNode0060, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
-    imagePattern->imageType_ = ImageType::ANIMATION;
+    imagePattern->imageType_ = ImageType::ANIMATED_DRAWABLE;
     imagePattern->OnAttachToFrameNode();
     EXPECT_TRUE(imagePattern->GetIsAnimation());
 }
@@ -2178,7 +2179,7 @@ HWTEST_F(ImageTestThreeNg, ImageCreator0063, TestSize.Level1)
     auto imageType = ImageType::BASE;
     auto res = imagePattern->GetImageType();
     EXPECT_EQ(res, imageType);
-    imageType = ImageType::ANIMATION;
+    imageType = ImageType::ANIMATED_DRAWABLE;
     imagePattern->SetImageType(imageType);
     imagePattern->hasSizeChanged = false;
     image.Create(imageInfoConfig, pixMap);
@@ -2214,7 +2215,7 @@ HWTEST_F(ImageTestThreeNg, ImageCreator0064, TestSize.Level1)
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     auto res = imagePattern->GetImageType();
-    auto imageType = ImageType::ANIMATION;
+    auto imageType = ImageType::ANIMATED_DRAWABLE;
     imagePattern->SetImageType(imageType);
     imagePattern->hasSizeChanged = true;
     image.Create(imageInfoConfig, pixMap);
@@ -2249,7 +2250,7 @@ HWTEST_F(ImageTestThreeNg, ResetImage0065, TestSize.Level1)
     imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    auto imageType = ImageType::UNDEFINED;
+    auto imageType = ImageType::BASE;
     auto res = imagePattern->GetImageType();
     imagePattern->SetImageType(imageType);
     imagePattern->hasSizeChanged = false;
@@ -2258,7 +2259,7 @@ HWTEST_F(ImageTestThreeNg, ResetImage0065, TestSize.Level1)
      * @tc.steps: step3. call ResetImage.
      * @tc.expected: GetImageType value is ANIMATION.
      */
-    imageType = ImageType::ANIMATION;
+    imageType = ImageType::ANIMATED_DRAWABLE;
     imagePattern->SetImageType(imageType);
     image.ResetImage();
     EXPECT_NE(res, imageType);
@@ -2289,7 +2290,7 @@ HWTEST_F(ImageTestThreeNg, ResetImage0066, TestSize.Level1)
      */
     RefPtr<PixelMap> pixMap = nullptr;
     auto res = imagePattern->GetImageType();
-    auto imageType = ImageType::ANIMATION;
+    auto imageType = ImageType::ANIMATED_DRAWABLE;
     imagePattern->SetImageType(imageType);
     imagePattern->hasSizeChanged = true;
     image.ResetImage();

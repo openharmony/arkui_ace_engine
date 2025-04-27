@@ -168,6 +168,9 @@ public:
         if (!NearEqual(tempo_, 1.0f)) {
             result.append(", tempo:").append(std::to_string(tempo_));
         }
+        if (direction_ != AnimationDirection::NORMAL) {
+            result.append(", playMode:").append(std::to_string(static_cast<int32_t>(direction_)));
+        }
         return result;
     }
 

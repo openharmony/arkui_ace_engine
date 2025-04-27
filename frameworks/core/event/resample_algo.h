@@ -77,6 +77,10 @@ public:
     static ResamplePoint GetResampleCoord(const std::vector<PointerEvent>&& history,
         const std::vector<PointerEvent>&& current, uint64_t nanoTimeStamp,
         bool isScreen);
+
+    template<class T>
+    static bool GetResamplePointerEvent(std::vector<T>& events,
+        uint64_t resampleTime, PointerEvent& resample, ResamplePoint& slope);
 };
 } // namespace OHOS::Ace
 #endif

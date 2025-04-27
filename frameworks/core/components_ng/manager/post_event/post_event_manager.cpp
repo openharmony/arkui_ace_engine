@@ -15,6 +15,7 @@
 
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 
+#include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -82,6 +83,11 @@ bool PostEventManager::PostDownEvent(const RefPtr<NG::UINode>& targetNode, const
     if (!result) {
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "PostDownEvent id: %{public}d touch test result is empty", touchEvent.id);
         return false;
+    }
+    if (StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(
+        scalePoint, eventManager->postEventTouchTestResults_)) {
+        eventManager->ClearTouchTestTargetForPenStylus(scalePoint);
+        return true;
     }
     HandlePostEvent(targetNode, touchEvent);
     return true;

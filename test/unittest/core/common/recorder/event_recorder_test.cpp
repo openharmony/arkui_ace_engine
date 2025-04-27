@@ -640,7 +640,7 @@ HWTEST_F(EventRecorderTest, EventRecorderTest011, TestSize.Level1)
     EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId() == 2, true);
     // windowName = "pages/Index",foreground = false
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, id, false);
-    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId() == -1, true);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId() == 2, true);
 }
 
 /**
@@ -666,9 +666,12 @@ HWTEST_F(EventRecorderTest, EventRecorderTest012, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, SetContainerInfo001, TestSize.Level1)
 {
+    Recorder::EventRecorder::Get().containerId_ = 1;
+    Recorder::EventRecorder::Get().focusContainerId_ = 2;
     std::string windowName = "$HA_FLOAT_WINDOW$";
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, 0, true);
-    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), -1);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), 2);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(false), 1);
 }
 
 /**
@@ -690,9 +693,11 @@ HWTEST_F(EventRecorderTest, SetContainerInfo002, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, SetContainerInfo003, TestSize.Level1)
 {
+    Recorder::EventRecorder::Get().containerId_ = 1;
+    Recorder::EventRecorder::Get().focusContainerId_ = 2;
     std::string windowName = "";
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, 0, false);
-    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), -1);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), 2);
 }
 
 /**
@@ -702,9 +707,11 @@ HWTEST_F(EventRecorderTest, SetContainerInfo003, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, SetFocusContainerInfo001, TestSize.Level1)
 {
+    Recorder::EventRecorder::Get().containerId_ = 1;
+    Recorder::EventRecorder::Get().focusContainerId_ = 2;
     std::string windowName = "$HA_FLOAT_WINDOW$";
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, 0);
-    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), -1);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), 2);
 }
 
 /**
@@ -714,9 +721,11 @@ HWTEST_F(EventRecorderTest, SetFocusContainerInfo001, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, SetFocusContainerInfo002, TestSize.Level1)
 {
+    Recorder::EventRecorder::Get().containerId_ = 1;
+    Recorder::EventRecorder::Get().focusContainerId_ = 2;
     std::string windowName = "";
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, 0);
-    EXPECT_NE(Recorder::EventRecorder::Get().GetContainerId(), 0);
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetContainerId(), 0);
 }
 
 /**
@@ -1177,7 +1186,7 @@ HWTEST_F(EventRecorderTest, ApplyNewestConfig001, TestSize.Level1)
     builder1.SetId("hello").SetPageUrl("pages/Index").SetText("world");
     auto params = builder1.build();
     Recorder::EventController::Get().clientList_.clear();
-    Recorder::EventController::Get().ApplyNewestConfig(false, false);
+    Recorder::EventController::Get().ApplyNewestConfig(false);
     Recorder::EventController::Get().NotifyEvent(
         Recorder::EventCategory::CATEGORY_COMPONENT, Recorder::EventType::CHANGE, std::move(params));
     EXPECT_TRUE(Recorder::EventController::Get().clientList_.empty());
@@ -1275,40 +1284,12 @@ HWTEST_F(EventRecorderTest, IsPageParamRecordEnable001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SaveJavascriptItems001
- * @tc.desc: Test SaveJavascriptItems.
+ * @tc.name: FillWebJsCode001
+ * @tc.desc: Test FillWebJsCode.
  * @tc.type: FUNC
  */
-HWTEST_F(EventRecorderTest, SaveJavascriptItems001, TestSize.Level1)
+HWTEST_F(EventRecorderTest, FillWebJsCode001, TestSize.Level1)
 {
-    std::map<std::string, std::vector<std::string>> items;
-    EventRecorder::Get().SaveJavascriptItems(items);
-    std::optional<std::map<std::string, std::vector<std::string>>> input;
-    std::optional<std::vector<std::string>> orderItems;
-    EventRecorder::Get().HandleJavascriptItems(input, orderItems);
-
-    input = std::make_optional<std::map<std::string, std::vector<std::string>>>();
-    EventRecorder::Get().HandleJavascriptItems(input, orderItems);
-    EXPECT_TRUE(input.has_value());
-
-    input = std::nullopt;
-    items["hello"] = { "world" };
-    EventController::Get().hasCached_ = false;
-    EventController::Get().hasWebProcessed_ = true;
-    EventRecorder::Get().SaveJavascriptItems(items);
-    EXPECT_FALSE(Recorder::EventRecorder::Get().cacheScriptItems_.has_value());
-    EventRecorder::Get().HandleJavascriptItems(input, orderItems);
-    EXPECT_FALSE(input.has_value());
-
-    EventController::Get().hasCached_ = false;
-    EventController::Get().hasWebProcessed_ = false;
-    EventRecorder::Get().SaveJavascriptItems(items);
-    EXPECT_TRUE(EventRecorder::Get().cacheScriptItems_.has_value());
-    input = std::nullopt;
-    EventRecorder::Get().HandleJavascriptItems(input, orderItems);
-    EXPECT_TRUE(input.has_value());
-    EXPECT_FALSE(EventRecorder::Get().cacheScriptItems_.has_value());
-
     int32_t index = static_cast<int32_t>(EventCategory::CATEGORY_WEB);
     EventRecorder::Get().globalSwitch_[index] = true;
     EventRecorder::Get().eventSwitch_[index] = true;
@@ -1323,9 +1304,6 @@ HWTEST_F(EventRecorderTest, SaveJavascriptItems001, TestSize.Level1)
     EventRecorder::Get().FillWebJsCode(scriptItems);
     EXPECT_TRUE(scriptItems.has_value());
 
-    EventController::Get().cacheJsCode_ = "hello";
-    EXPECT_FALSE(EventRecorder::Get().GetCacheJsCode().empty());
-
     EXPECT_TRUE(EventRecorder::Get().IsMessageValid("test", "abc"));
     EXPECT_FALSE(EventRecorder::Get().IsMessageValid("", "abc"));
     EXPECT_FALSE(EventRecorder::Get().IsMessageValid("ttt", "abc"));
@@ -1339,13 +1317,11 @@ HWTEST_F(EventRecorderTest, SaveJavascriptItems001, TestSize.Level1)
 HWTEST_F(EventRecorderTest, InspectorTreeCollectorTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. call the GetTree.
-     * @tc.expected: step1. GetTree success.
+     * @tc.steps: step1. call the Constructor.
+     * @tc.expected: step1. Constructor success.
      */
-    InspectorTreeCollector::Get().taskNum_ = 0;
-    InspectorTreeCollector::Get().GetTree([]() { InspectorTreeCollector::Get().GetJson()->Put("test", "123"); },
-        [](const std::shared_ptr<std::string> tree) { EXPECT_EQ(*tree, "{\"test\":\"123\"}"); });
-    EXPECT_TRUE(InspectorTreeCollector::Get().root_ != nullptr);
+    InspectorTreeCollector collector([](const std::shared_ptr<std::string> tree) {}, false);
+    EXPECT_TRUE(collector.root_ != nullptr);
 }
 
 /**
@@ -1355,24 +1331,90 @@ HWTEST_F(EventRecorderTest, InspectorTreeCollectorTest001, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, InspectorTreeCollectorTest002, TestSize.Level1)
 {
-    InspectorTreeCollector::Get().taskNum_ = 0;
+    InspectorTreeCollector collector([](const std::shared_ptr<std::string> tree) {}, false);
+    collector.taskNum_ = 0;
     /**
      * @tc.steps: step1. call the IncreaseTaskNum.
      * @tc.expected: step1. IncreaseTaskNum success.
      */
-    InspectorTreeCollector::Get().IncreaseTaskNum();
-    EXPECT_EQ(InspectorTreeCollector::Get().taskNum_, 1);
+    collector.IncreaseTaskNum();
+    EXPECT_EQ(collector.taskNum_, 1);
     /**
      * @tc.steps: step2. call the DecreaseTaskNum.
      * @tc.expected: step2. DecreaseTaskNum success.
      */
-    InspectorTreeCollector::Get().DecreaseTaskNum();
-    EXPECT_EQ(InspectorTreeCollector::Get().taskNum_, 0);
+    collector.DecreaseTaskNum();
+    EXPECT_EQ(collector.taskNum_, 0);
     /**
      * @tc.steps: step3. call the UpdateTaskNum.
      * @tc.expected: step3. UpdateTaskNum success.
      */
-    InspectorTreeCollector::Get().UpdateTaskNum(2);
-    EXPECT_EQ(InspectorTreeCollector::Get().taskNum_, 2);
+    collector.UpdateTaskNum(2);
+    EXPECT_EQ(collector.taskNum_, 2);
+}
+
+/**
+ * @tc.name: AddApiTest001
+ * @tc.desc: FillExtraTextIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, AddApiTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    Recorder::EventParamsBuilder builder;
+    string value = "";
+    builder.params_->emplace(KEY_TEXT, value);
+    auto pageNode = CreatePageNode("pages/Index");
+    builder.eventType_ = Recorder::EventType::CLICK;
+    builder.SetHost(pageNode);
+
+    /**
+     * @tc.steps: step2. set different variables to meet the conditional values and test OnWebEvent.
+     */
+    EventRecorder::Get().globalSwitch_[10] = true;
+    EventRecorder::Get().eventSwitch_[10] = true;
+    builder.SetHost(pageNode);
+
+    /**
+     * @tc.steps: step2. set the different variables to test.
+     */
+    auto pageNode2 = CreatePageNode("pages/Index2");
+    pageNode->AddChild(pageNode2, 1, false);
+    builder.SetHost(pageNode);
+    EXPECT_EQ(builder.params_->empty(), false);
+}
+
+/**
+ * @tc.name: AddApiTest002
+ * @tc.desc: SetHostOnWebEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, AddApiTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    Recorder::EventParamsBuilder builder;
+    auto pageNode = CreatePageNode("pages/Index");
+    EventRecorder::Get().globalSwitch_[6] = true;
+    EventRecorder::Get().eventSwitch_[6] = true;
+
+    /**
+     * @tc.steps: step2. test SetHost.
+     */
+    builder.SetHost(pageNode);
+
+    /**
+     * @tc.steps: step3. set the variables to meet the conditional values and test OnWebEvent.
+     */
+    auto pageNode2 = CreatePageNode("pages/Index");
+    vector<std::string> params;
+    Recorder::EventRecorder::Get().OnWebEvent(pageNode2, params);
+    vector<std::string> params2 = {"df", "rfds", "fd"};
+    EventRecorder::Get().globalSwitch_[7] = true;
+    Recorder::EventRecorder::Get().OnWebEvent(pageNode2, params2);
+    EXPECT_EQ(builder.params_->empty(), false);
 }
 } // namespace OHOS::Ace

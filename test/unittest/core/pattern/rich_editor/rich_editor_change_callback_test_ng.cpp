@@ -131,7 +131,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest001, TestSize.Lev
     ASSERT_NE(host, nullptr);
     auto richEditorPattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isWillCalled = false;
     int32_t originalCount = 0;
@@ -179,7 +179,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest002, TestSize.Lev
     ASSERT_NE(host, nullptr);
     auto richEditorPattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isWillCalled = false;
     int32_t originalCount = 0;
@@ -249,7 +249,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest003, TestSize.Lev
     ASSERT_NE(host, nullptr);
     auto richEditorPattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isWillCalled = false;
     int32_t replacedCount = 0;
@@ -313,7 +313,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest004, TestSize.Lev
     ASSERT_NE(host, nullptr);
     auto richEditorPattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isWillCalled = false;
     int32_t originalCount = 0;
@@ -377,7 +377,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest005, TestSize.Lev
     ASSERT_NE(host, nullptr);
     auto richEditorPattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isWillCalled = false;
     int32_t originalCount = 0;
@@ -426,7 +426,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest006, TestSize.Lev
     ASSERT_NE(host, nullptr);
     auto richEditorPattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isWillCalled = false;
     int32_t originalCount = 0;
@@ -486,7 +486,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest007, TestSize.Lev
     ASSERT_NE(host, nullptr);
     auto richEditorPattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isWillCalled = false;
     int32_t originalCount = 0;
@@ -550,7 +550,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest008, TestSize.Lev
     ASSERT_NE(host, nullptr);
     auto richEditorPattern = host->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isWillCalled = false;
     int32_t originalCount = 0;
@@ -666,7 +666,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest010, TestSize.Lev
     auto& spanResult = onWillReplacedSpans[0];
     EXPECT_EQ(spanResult.spanIndex_, 0);
     EXPECT_EQ(spanResult.value_, u"hhello11");
-    EXPECT_EQ(spanResult.fontSize_, TEXT_STYLE_1.fontSize_.ConvertToPx());
+    EXPECT_EQ(spanResult.fontSize_, TEXT_STYLE_1.fontSize_.value.ConvertToPx());
     EXPECT_EQ(spanResult.offsetInSpan_, 1);
     EXPECT_EQ(spanResult.eraseLength_, 6);
 
@@ -716,7 +716,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest011, TestSize.Lev
     auto& spanResult = onWillReplacedSpans[0];
     EXPECT_EQ(spanResult.spanIndex_, 0);
     EXPECT_EQ(spanResult.value_, u"hhello1");
-    EXPECT_EQ(spanResult.fontSize_, TEXT_STYLE_1.fontSize_.ConvertToPx());
+    EXPECT_EQ(spanResult.fontSize_, TEXT_STYLE_1.fontSize_.value.ConvertToPx());
     EXPECT_EQ(spanResult.offsetInSpan_, 1);
     EXPECT_EQ(spanResult.eraseLength_, 6);
 
@@ -1272,7 +1272,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, OnSubmitTest, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. initalize span properties
@@ -1310,47 +1310,6 @@ HWTEST_F(RichEditorChangeCallbackTestNg, OnSubmitTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnScrollCallback
- * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorChangeCallbackTestNg, OnScrollCallback, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-
-    int32_t SCROLL_FROM_START = 10;
-    EXPECT_TRUE(richEditorPattern->OnScrollCallback(0, SCROLL_FROM_START));
-
-    int32_t SCROLL_FROM_UPDATE = 1;
-    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
-    EXPECT_FALSE(richEditorPattern->OnScrollCallback(10, SCROLL_FROM_UPDATE)) << "Reach Top Boundary";
-
-    richEditorPattern->richTextRect_ = RectF(0, -40, 100, 140);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
-    EXPECT_FALSE(richEditorPattern->OnScrollCallback(-10, SCROLL_FROM_UPDATE)) << "Reach Bottom Boundary";
-
-    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
-    EXPECT_TRUE(richEditorPattern->OnScrollCallback(-10, SCROLL_FROM_UPDATE)) << "Scroll Up 10";
-    EXPECT_EQ(richEditorPattern->scrollOffset_, -10);
-    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), -10);
-
-    EXPECT_TRUE(richEditorPattern->OnScrollCallback(-50, SCROLL_FROM_UPDATE)) << "Scroll Up 50";
-    EXPECT_EQ(richEditorPattern->scrollOffset_, -40);
-    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), -40);
-
-    EXPECT_TRUE(richEditorPattern->OnScrollCallback(10, SCROLL_FROM_UPDATE)) << "Scroll Down 10";
-    EXPECT_EQ(richEditorPattern->scrollOffset_, -30);
-    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), -30);
-
-    EXPECT_TRUE(richEditorPattern->OnScrollCallback(50, SCROLL_FROM_UPDATE)) << "Scroll Down 50";
-    EXPECT_EQ(richEditorPattern->scrollOffset_, 0);
-    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), 0);
-}
-
-/**
  * @tc.name: onIMEInputComplete
  * @tc.desc: test onIMEInputComplete
  * @tc.type: FUNC
@@ -1378,7 +1337,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete, TestSize.Level1)
     auto info = richEditorController->GetSpansInfo(0, 6);
     EXPECT_EQ(info.selection_.resultObjects.size(), 1);
 
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     TextStyleResult textStyle;
     auto func = [&textStyle](const RichEditorAbstractSpanResult& info) { textStyle = info.GetTextStyle(); };
@@ -1434,7 +1393,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete002, TestSize.Level1)
         EXPECT_EQ(pair.first, "subs");
         EXPECT_EQ(pair.second, 1);
     }
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     TextStyleResult textStyle;
     auto func = [&textStyle](const RichEditorAbstractSpanResult& info) { textStyle = info.GetTextStyle(); };
@@ -1487,7 +1446,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete003, TestSize.Level1)
         EXPECT_EQ(pair.first, "subs");
         EXPECT_EQ(pair.second, 0);
     }
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     TextStyleResult textStyle;
     auto func = [&textStyle](const RichEditorAbstractSpanResult& info) { textStyle = info.GetTextStyle(); };
@@ -1519,7 +1478,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, RichEditorModel008, TestSize.Level1)
     ASSERT_NE(richEditorNode, nullptr);
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     SelectionInfo selection;
     eventHub->FireOnSelect(&selection);
@@ -1540,7 +1499,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, OnHandleMoveDone001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto func = [](const BaseEventInfo* info) { testOnSelect = 1; };
-    auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->onSelect_ = std::move(func);
     richEditorPattern->OnHandleMoveDone(RectF(0.0f, 0.0f, 10.0f, 10.0f), true);
@@ -1577,7 +1536,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect, TestSize.Level1)
     richEditorModel.Create();
     auto func = [](const BaseEventInfo* info) { testOnSelect = 1; };
     richEditorModel.SetOnSelect(std::move(func));
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     SelectionInfo selection;
     eventHub->FireOnSelect(&selection);
@@ -1619,7 +1578,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect2, TestSize.Level1)
     richEditorModel.Create();
     auto func = [](const BaseEventInfo* info) { testOnSelect = 1; };
     richEditorModel.SetOnSelect(std::move(func));
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     SelectionInfo selection;
     eventHub->FireOnSelect(&selection);
@@ -1768,215 +1727,4 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleSurfaceChanged001, TestSize.Level
     }
 }
 
-/**
- * @tc.name: AutoScrollByEdgeDetection001
- * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorChangeCallbackTestNg, AutoScrollByEdgeDetection001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    richEditorPattern->richTextRect_ = RectF(0, -10, 100, 140);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
-
-    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE };
-    Dimension AUTO_SCROLL_EDGE_DISTANCE = 15.0_vp;
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    auto edgeDistance = AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
-
-    param.handleRect = RectF(50, richEditorPattern->contentRect_.GetY() + edgeDistance + 1, 20, 20);
-    richEditorPattern->AutoScrollByEdgeDetection(
-        param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "handle move up but not reach top edge";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    param.handleRect = RectF(50, richEditorPattern->contentRect_.GetY() + edgeDistance - 1, 20, 20);
-    richEditorPattern->AutoScrollByEdgeDetection(
-        param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->IsReachTop()) << "handle reach top edge";
-    richEditorPattern->StopAutoScroll();
-
-    auto handleHeight = 20;
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    param.handleRect =
-        RectF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - 1 - handleHeight, 20, handleHeight);
-    richEditorPattern->AutoScrollByEdgeDetection(
-        param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "handle move down but not reach bottom edge";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    param.handleRect =
-        RectF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - handleHeight + 1, 20, handleHeight);
-    richEditorPattern->AutoScrollByEdgeDetection(
-        param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->IsReachBottom()) << "handle reach bottom edge";
-    richEditorPattern->StopAutoScroll();
-
-    pipeline->taskExecutor_.Reset();
-}
-
-/**
- * @tc.name: AutoScrollByEdgeDetection002
- * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorChangeCallbackTestNg, AutoScrollByEdgeDetection002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    richEditorPattern->richTextRect_ = RectF(0, -10, 100, 140);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::MOUSE };
-    Dimension AUTO_SCROLL_EDGE_DISTANCE = 15.0_vp;
-    auto edgeDistance = AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
-
-    richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, richEditorPattern->contentRect_.GetY() + edgeDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "mouse move up but not reach top edge";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, richEditorPattern->contentRect_.GetY() + edgeDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->IsReachTop()) << "mouse reach top edge";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "mouse move down but not reach bottom edge";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->IsReachBottom()) << "mouse reach bottom edge";
-    richEditorPattern->StopAutoScroll();
-
-    pipeline->taskExecutor_.Reset();
-}
-
-/**
- * @tc.name: AutoScrollByEdgeDetection003
- * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorChangeCallbackTestNg, AutoScrollByEdgeDetection003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    richEditorPattern->richTextRect_ = RectF(0, -10, 100, 540);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, 500);
-    richEditorPattern->frameRect_ = RectF(0, 0, 100, 500);
-
-    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::DRAG };
-    Dimension AUTO_SCROLL_DRAG_EDGE_DISTANCE = 58.0_vp;
-    auto dragDistance = AUTO_SCROLL_DRAG_EDGE_DISTANCE.ConvertToPx();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->AutoScrollByEdgeDetection(
-        param, OffsetF(50, dragDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "drag move up but not reach top edge";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->AutoScrollByEdgeDetection(
-        param, OffsetF(50, dragDistance - 10), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->IsReachTop()) << "drag reach top edge";
-    auto speed = richEditorPattern->CalcDragSpeed(dragDistance, 0, dragDistance - 10);
-    EXPECT_EQ(richEditorPattern->currentScrollParam_.offset, speed) << "darg speed move up";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, richEditorPattern->frameRect_.Bottom() - dragDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "drag move down but not reach bottom edge";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    auto pointY = richEditorPattern->frameRect_.Bottom() - dragDistance + 10;
-    richEditorPattern->AutoScrollByEdgeDetection(param, OffsetF(50, pointY), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->IsReachBottom()) << "drag reach bottom edge";
-    speed = richEditorPattern->CalcDragSpeed(
-        richEditorPattern->frameRect_.Bottom() - dragDistance, richEditorPattern->frameRect_.Bottom(), pointY);
-    EXPECT_EQ(richEditorPattern->currentScrollParam_.offset, -speed) << "darg speed move down";
-    richEditorPattern->StopAutoScroll();
-
-    pipeline->taskExecutor_.Reset();
-}
-
-/**
- * @tc.name: AutoScrollByEdgeDetection004
- * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorChangeCallbackTestNg, AutoScrollByEdgeDetection004, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
-
-    Dimension AUTO_SCROLL_EDGE_DISTANCE = 15.0_vp;
-    auto edgeDistance = AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(50, 50);
-    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE, .handleRect = RectF(50, 50, 20, 20) };
-    richEditorPattern->AutoScrollByEdgeDetection(param, OffsetF(50, 50), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "the touch point is the same as the last time";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, edgeDistance - 1);
-    richEditorPattern->AutoScrollByEdgeDetection(
-        param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "content height is too small.";
-    richEditorPattern->StopAutoScroll();
-
-    pipeline->taskExecutor_.Reset();
-}
-
-/**
- * @tc.name: CheckScrollable
- * @tc.desc: test CheckScrollable.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorChangeCallbackTestNg, CheckScrollable, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
-
-    richEditorPattern->CheckScrollable();
-    EXPECT_FALSE(richEditorPattern->scrollable_);
-
-    AddSpan(TEST_INSERT_VALUE);
-    richEditorPattern->CheckScrollable();
-    EXPECT_TRUE(richEditorPattern->scrollable_);
-
-    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 80);
-    richEditorPattern->CheckScrollable();
-    EXPECT_FALSE(richEditorPattern->scrollable_);
-
-    ClearSpan();
-}
 } // namespace OHOS::Ace::NG

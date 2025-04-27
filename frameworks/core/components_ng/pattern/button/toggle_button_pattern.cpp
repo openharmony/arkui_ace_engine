@@ -37,20 +37,19 @@ void ToggleButtonPattern::OnAttachToFrameNode()
 
 void ToggleButtonPattern::InitParameters()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
-    CHECK_NULL_VOID(toggleTheme);
-    checkedColor_ = toggleTheme->GetCheckedColor();
-    unCheckedColor_ = toggleTheme->GetBackgroundColor();
-    textMargin_ = toggleTheme->GetTextMargin();
-    buttonMargin_ = toggleTheme->GetButtonMargin();
-    buttonHeight_ = toggleTheme->GetButtonHeight();
-    buttonRadius_ = toggleTheme->GetButtonRadius();
-    textFontSize_ = toggleTheme->GetTextFontSize();
-    textColor_ = toggleTheme->GetTextColor();
-    disabledAlpha_ = toggleTheme->GetDisabledAlpha();
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    toggleTheme_ = context->GetTheme<ToggleTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(toggleTheme_);
+    checkedColor_ = toggleTheme_->GetCheckedColor();
+    unCheckedColor_ = toggleTheme_->GetBackgroundColor();
+    textMargin_ = toggleTheme_->GetTextMargin();
+    buttonRadius_ = toggleTheme_->GetButtonRadius();
+    textFontSize_ = toggleTheme_->GetTextFontSize();
+    textColor_ = toggleTheme_->GetTextColor();
+    auto buttonTheme = context->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     clickedColor_ = buttonTheme->GetClickedColor();
 }
@@ -59,6 +58,7 @@ void ToggleButtonPattern::OnModifyDone()
 {
     Pattern::CheckLocalized();
     CheckLocalizedBorderRadiuses();
+    InitParameters();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();
@@ -80,24 +80,20 @@ void ToggleButtonPattern::OnModifyDone()
         changed = isOn ^ isOn_.value();
         isOn_ = isOn;
     }
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto toggleTheme = pipeline->GetTheme<ToggleTheme>(host->GetThemeScopeId());
-    CHECK_NULL_VOID(toggleTheme);
     const auto& renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (!UseContentModifier()) {
         if (isOn_.value_or(false)) {
-            auto selectedColor = buttonPaintProperty->GetSelectedColor().value_or(toggleTheme->GetCheckedColor());
+            auto selectedColor = buttonPaintProperty->GetSelectedColor().value_or(checkedColor_);
             renderContext->UpdateBackgroundColor(selectedColor);
         } else {
-            auto bgColor = buttonPaintProperty->GetBackgroundColor().value_or(toggleTheme->GetBackgroundColor());
+            auto bgColor = buttonPaintProperty->GetBackgroundColor().value_or(unCheckedColor_);
             renderContext->UpdateBackgroundColor(bgColor);
         }
         HandleOnOffStyle(!isOn_.value(), isFocus_);
     }
     if (changed) {
-        auto toggleButtonEventHub = GetEventHub<ToggleButtonEventHub>();
+        auto toggleButtonEventHub = GetOrCreateEventHub<ToggleButtonEventHub>();
         CHECK_NULL_VOID(toggleButtonEventHub);
         toggleButtonEventHub->UpdateChangeEvent(isOn_.value());
     }
@@ -146,7 +142,7 @@ void ToggleButtonPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<ToggleButtonEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -172,7 +168,7 @@ void ToggleButtonPattern::HandleHoverEvent(bool isHover)
     isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto inputEventHub = host->GetOrCreateInputEventHub();
@@ -186,6 +182,14 @@ void ToggleButtonPattern::HandleHoverEvent(bool isHover)
         CHECK_NULL_VOID(renderContext);
         AnimateTouchAndHover(renderContext, isHover ? TYPE_CANCEL : TYPE_HOVER, isHover ? TYPE_HOVER : TYPE_CANCEL,
             MOUSE_HOVER_DURATION, Curves::FRICTION);
+        if (isHover) {
+            SetToggleScale(renderContext);
+        } else {
+            if (isScale_) {
+                isScale_ = false;
+                renderContext->SetScale(1.0f, 1.0f);
+            }
+        }
     }
     auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textNode);
@@ -197,11 +201,6 @@ void ToggleButtonPattern::HandleHoverEvent(bool isHover)
 
 void ToggleButtonPattern::HandleOverlayStyle()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    toggleTheme_ = pipeline->GetTheme<ToggleTheme>();
     HandleBorderAndShadow();
     HandleFocusStyle();
 }
@@ -336,8 +335,6 @@ void ToggleButtonPattern::SetFocusButtonStyle(RefPtr<FrameNode>& textNode,
     CHECK_NULL_VOID(textLayoutProperty);
     CHECK_NULL_VOID(toggleTheme_);
     CHECK_NULL_VOID(renderContext);
-    auto&& transform = renderContext->GetOrCreateTransform();
-    CHECK_NULL_VOID(transform);
 
     isTextColor_ = textLayoutProperty->GetTextColor() == toggleTheme_->GetTextColor();
     if (isTextColor_) {
@@ -345,12 +342,7 @@ void ToggleButtonPattern::SetFocusButtonStyle(RefPtr<FrameNode>& textNode,
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode();
     }
-    float sacleFocus = toggleTheme_->GetScaleFocus();
-    VectorF scale(sacleFocus, sacleFocus);
-    if (!transform->HasTransformScale() || transform->GetTransformScaleValue() == scale) {
-        isScale_ = true;
-        renderContext->SetScale(sacleFocus, sacleFocus);
-    }
+    SetToggleScale(renderContext);
     Shadow shadowValue = isOffState
         ? Shadow::CreateShadow(static_cast<ShadowStyle>(toggleTheme_->GetShadowNormal()))
         : Shadow::CreateShadow(ShadowStyle::None);
@@ -383,7 +375,7 @@ void ToggleButtonPattern::HandleFocusStyle()
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "status button handle focus event");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -418,6 +410,19 @@ void ToggleButtonPattern::HandleBlurEvent()
     SetIsFocus(false);
     RemoveIsFocusActiveUpdateEvent();
     UpdateButtonStyle();
+}
+
+void ToggleButtonPattern::SetToggleScale(RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_VOID(toggleTheme_);
+    auto&& transform = renderContext->GetOrCreateTransform();
+    CHECK_NULL_VOID(transform);
+    float sacleHoverOrFocus = toggleTheme_->GetScaleHoverOrFocus();
+    VectorF scale(sacleHoverOrFocus, sacleHoverOrFocus);
+    if (!transform->HasTransformScale() || transform->GetTransformScaleValue() == scale) {
+        isScale_ = true;
+        renderContext->SetScale(sacleHoverOrFocus, sacleHoverOrFocus);
+    }
 }
 
 void ToggleButtonPattern::SetAccessibilityAction()
@@ -455,7 +460,7 @@ void ToggleButtonPattern::MarkIsSelected(bool isSelected)
         return;
     }
     isOn_ = isSelected;
-    auto eventHub = GetEventHub<ToggleButtonEventHub>();
+    auto eventHub = GetOrCreateEventHub<ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateChangeEvent(isSelected);
     auto host = GetHost();
@@ -517,7 +522,7 @@ void ToggleButtonPattern::OnTouchDown()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto buttonEventHub = GetEventHub<ButtonEventHub>();
+    auto buttonEventHub = GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
@@ -544,7 +549,7 @@ void ToggleButtonPattern::OnTouchUp()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto buttonEventHub = GetEventHub<ButtonEventHub>();
+    auto buttonEventHub = GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
@@ -606,7 +611,7 @@ void ToggleButtonPattern::OnClick()
     paintProperty->UpdateIsOn(!isLastSelected);
     isOn_ = !isLastSelected;
     renderContext->UpdateBackgroundColor(selectedColor);
-    auto buttonEventHub = GetEventHub<ToggleButtonEventHub>();
+    auto buttonEventHub = GetOrCreateEventHub<ToggleButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->UpdateChangeEvent(!isLastSelected);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -636,7 +641,7 @@ void ToggleButtonPattern::InitButtonAndText()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         layoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         layoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -658,7 +663,7 @@ void ToggleButtonPattern::InitButtonAndText()
         layoutProperty->UpdateFontSize(textLayoutProperty->GetFontSizeValue(textFontSize_));
     }
     layoutProperty->UpdateLabel(UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(u"")));
-    if (!textLayoutProperty->GetTextColor().has_value()) {
+    if (!textLayoutProperty->GetTextColorFlagByUserValue(false)) {
         textLayoutProperty->UpdateTextColor(textColor_);
     }
 
@@ -722,27 +727,15 @@ void ToggleButtonPattern::OnRestoreInfo(const std::string& restoreInfo)
 
 void ToggleButtonPattern::OnColorConfigurationUpdate()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto toggleTheme = pipeline->GetTheme<ToggleTheme>(host->GetThemeScopeId());
-    CHECK_NULL_VOID(toggleTheme);
-    checkedColor_ = toggleTheme->GetCheckedColor();
-    unCheckedColor_ = toggleTheme->GetBackgroundColor();
     OnModifyDone();
 }
 
 bool ToggleButtonPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
+    InitParameters();
     bool result = false;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-
-    auto pipeline = host->GetContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto toggleTheme = pipeline->GetTheme<ToggleTheme>(themeScopeId);
-    CHECK_NULL_RETURN(toggleTheme, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
 
@@ -750,11 +743,11 @@ bool ToggleButtonPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     CHECK_NULL_RETURN(paintProperty, false);
 
     if (isOn_.value_or(false) && !paintProperty->HasSelectedColor()) {
-        renderContext->UpdateBackgroundColor(toggleTheme->GetCheckedColor());
+        renderContext->UpdateBackgroundColor(checkedColor_);
         result = true;
     }
     if (!isOn_.value_or(false) && !paintProperty->HasBackgroundColor()) {
-        renderContext->UpdateBackgroundColor(toggleTheme->GetBackgroundColor());
+        renderContext->UpdateBackgroundColor(unCheckedColor_);
         result = true;
     }
     host->MarkDirtyNode();
@@ -765,7 +758,7 @@ void ToggleButtonPattern::SetButtonPress(bool isSelected)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -814,7 +807,7 @@ RefPtr<FrameNode> ToggleButtonPattern::BuildContentModifierNode()
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     auto paintProperty = host->GetPaintProperty<ToggleButtonPaintProperty>();

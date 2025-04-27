@@ -66,14 +66,17 @@ void ThemeConstants::InitDeviceType()
 
 const ResValueWrapper* ThemeConstants::GetPlatformConstants(uint32_t key)
 {
+#ifdef WEARABLE_PRODUCT
     if (g_deviceType == DeviceType::WATCH && key < ThemeConstants::WatchMapCount &&
         ThemeConstants::styleMapWatch[key] != nullptr) {
         return ThemeConstants::styleMapWatch[key];
     }
+#else
     if (g_deviceType == DeviceType::TV && key < ThemeConstants::TvMapCount &&
         ThemeConstants::styleMapTv[key] != nullptr) {
         return ThemeConstants::styleMapTv[key];
     }
+#endif
     if (key < ThemeConstants::DefaultMapCount) {
         return ThemeConstants::styleMapDefault[key];
     }
@@ -357,6 +360,14 @@ uint32_t ThemeConstants::GetSymbolByName(const char* name) const
     return resAdapter_->GetSymbolByName(name);
 }
 
+uint32_t ThemeConstants::GetSymbolById(uint32_t resId) const
+{
+    if (!resAdapter_) {
+        return ERROR_VALUE_UINT;
+    }
+    return resAdapter_->GetSymbolById(resId);
+}
+
 std::vector<uint32_t> ThemeConstants::GetIntArray(uint32_t key) const
 {
     if (IsGlobalResource(key)) {
@@ -571,7 +582,7 @@ RefPtr<ThemeStyle> ThemeConstants::GetPatternByName(const std::string& patternNa
 {
     // if LocalColorMode is different from SystemColorMode, GetPattern from SysResMgr directly by LocolColorMode
     if (auto pipelineContext = NG::PipelineContext::GetCurrentContext(); pipelineContext) {
-        ColorMode systemMode = SystemProperties::GetColorMode();
+        ColorMode systemMode = pipelineContext->GetColorMode();
         ColorMode localMode = pipelineContext->GetLocalColorMode();
         if (localMode != ColorMode::COLOR_MODE_UNDEFINED && localMode != systemMode) {
             // currentThemeStyle_ contains patterns for different color scheme, so need to get pattern from resAdapter_

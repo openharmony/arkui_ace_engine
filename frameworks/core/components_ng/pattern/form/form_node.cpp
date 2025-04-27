@@ -351,7 +351,7 @@ RefPtr<FormNode> FormNode::GetOrCreateFormNode(
 
 void FormNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
-    auto eventHub = GetEventHub<FormEventHub>();
+    auto eventHub = GetOrCreateEventHub<FormEventHub>();
     eventHub->FireOnCache();
     FrameNode::OnDetachFromMainTree(recursive, context);
 }
@@ -420,5 +420,13 @@ void FormNode::ClearAccessibilityChildTreeRegisterFlag()
 {
     CHECK_NULL_VOID(accessibilityChildTreeCallback_);
     accessibilityChildTreeCallback_->OnClearRegisterFlag();
+}
+
+int32_t FormNode::GetImageId()
+{
+    if (!imageId_.has_value()) {
+        imageId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    }
+    return imageId_.value();
 }
 } // namespace OHOS::Ace::NG

@@ -183,7 +183,7 @@ typedef struct OH_UdmfData OH_UdmfData;
 /**
  * @brief Defines a struct for UDMF to get data with progress info.
  *
- * @since 16
+ * @since 15
  */
 typedef struct OH_UdmfGetDataParams OH_UdmfGetDataParams;
 
@@ -466,7 +466,7 @@ int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, uint64_t
 *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
 *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 *         Returns {@link ARKUI_ERROR_CODE_DRAG_DATA_SYNC_FAILED } if the data sync is not allowed or failed.
-* @since 16
+* @since 15
 */
 int32_t OH_ArkUI_DragEvent_StartDataLoading(
     ArkUI_DragEvent* event, OH_UdmfGetDataParams* options, char* key, unsigned int keyLen);
@@ -481,7 +481,7 @@ int32_t OH_ArkUI_DragEvent_StartDataLoading(
 *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
 *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 *         Returns {@link ARKUI_ERROR_CODE_OPERATION_FAILED} if no any data sync is in progress.
-* @since 16
+* @since 15
 */
 int32_t OH_ArkUI_CancelDataLoading(ArkUI_ContextHandle uiContext, const char* key);
 
@@ -499,7 +499,7 @@ int32_t OH_ArkUI_CancelDataLoading(ArkUI_ContextHandle uiContext, const char* ke
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_DisableDropDataPrefetchOnNode(ArkUI_NodeHandle node, bool disabled);
 
@@ -876,7 +876,7 @@ int32_t OH_ArkUI_StartDrag(ArkUI_DragAction* dragAction);
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
  *         Returns {@link ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED} if current is not during the drop handing.
- * @since 16
+ * @since 18
  */
 int32_t OH_ArkUI_DragEvent_RequestDragEndPending(ArkUI_DragEvent* event, int32_t* requestIdentify);
 
@@ -890,7 +890,8 @@ int32_t OH_ArkUI_DragEvent_RequestDragEndPending(ArkUI_DragEvent* event, int32_t
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 16
+ *         Returns {@link ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED} if current is not during the drop handing.
+ * @since 18
  */
 int32_t OH_ArkUI_NotifyDragResult(int32_t requestIdentify, ArkUI_DragResult result);
 
@@ -901,7 +902,8 @@ int32_t OH_ArkUI_NotifyDragResult(int32_t requestIdentify, ArkUI_DragResult resu
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 16
+ *         Returns {@link ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED} if current is not during the drop handing.
+ * @since 18
  */
 int32_t OH_ArkUI_NotifyDragEndPendingDone(int32_t requestIdentify);
 #ifdef __cplusplus

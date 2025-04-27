@@ -280,7 +280,7 @@ public:
 
     RefPtr<WebEventHub> GetWebEventHub()
     {
-        return GetEventHub<WebEventHub>();
+        return GetOrCreateEventHub<WebEventHub>();
     }
 
     FocusPattern GetFocusPattern() const override
@@ -368,11 +368,11 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SmoothDragResizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MetaViewport, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CopyOptionMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, IntrinsicSizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
@@ -495,6 +495,8 @@ public:
 
     bool IsPreviewMenuNotNeedShowPreview();
 
+    bool RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback);
+
     void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
         const ScriptItemsByOrder& scriptItemsByOrder);
 
@@ -562,7 +564,6 @@ private:
     void OnBlurOnKeyboardHideModeUpdate(const int32_t mode);
     void OnTextAutosizingUpdate(bool isTextAutosizing);
     void OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config);
-    void OnSmoothDragResizeEnabledUpdate(bool value);
     void OnMetaViewportUpdate(bool value);
     void OnOverlayScrollbarEnabledUpdate(bool value);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
@@ -592,6 +593,7 @@ private:
     void CalculateVerticalDrawRect();
     void UpdateSlideOffset(bool isNeedReset = false);
     void OnNativeEmbedModeEnabledUpdate(bool value) {};
+    void OnIntrinsicSizeEnabledUpdate(bool value);
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnCopyOptionModeUpdate(const int32_t value);

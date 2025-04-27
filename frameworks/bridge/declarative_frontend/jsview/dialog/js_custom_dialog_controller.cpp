@@ -76,7 +76,6 @@ void ParseCustomDialogLevelOrder(DialogProperties& properties, JSRef<JSObject> o
         return;
     }
 
-    properties.levelOrder = std::make_optional(NG::LevelOrder::ORDER_DEFAULT);
     auto levelOrderValue = obj->GetProperty("levelOrder");
     if (!levelOrderValue->IsObject()) {
         return;
@@ -98,6 +97,15 @@ void ParseCustomDialogLevelOrder(DialogProperties& properties, JSRef<JSObject> o
 
     double order = levelOrder->GetOrder();
     properties.levelOrder = std::make_optional(order);
+}
+
+void ParseCustomDialogFocusable(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto focusableValue = obj->GetProperty("focusable");
+    if (!focusableValue->IsBoolean()) {
+        return;
+    }
+    properties.focusable = focusableValue->ToBoolean();
 }
 
 static std::atomic<int32_t> controllerId = 0;
@@ -314,6 +322,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 
         // Parse levelOrder.
         ParseCustomDialogLevelOrder(instance->dialogProperties_, constructorArg);
+        ParseCustomDialogFocusable(instance->dialogProperties_, constructorArg);
 
         instance->dialogProperties_.controllerId = controllerId.fetch_add(1, std::memory_order_relaxed);
         JSViewAbstract::SetDialogProperties(constructorArg, instance->dialogProperties_);
@@ -371,8 +380,8 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     });
 
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow() && !dialogProperties_.windowScene.Upgrade()) {
-        dialogProperties_.isScenceBoardDialog = true;
+    if (container && container->IsSceneBoardWindow() && !dialogProperties_.windowScene.Upgrade()) {
+        dialogProperties_.isSceneBoardDialog = true;
         auto viewNode = this->ownerView_->GetViewNode();
         CHECK_NULL_VOID(viewNode);
         auto parentCustom = AceType::DynamicCast<NG::CustomNode>(viewNode);

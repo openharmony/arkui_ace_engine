@@ -108,9 +108,9 @@ const Param = (proto: Object, propertyKey: string): void => {
       }
       if (val !== this[storeProp]) {
         this[storeProp] = val;
-        if (this[ObserveV2.SYMBOL_REFS]) { // This condition can improve performance.
-          ObserveV2.getObserve().fireChange(this, propertyKey);
-        }
+        // the bindings <*, target, propertyKey> might not have been recorded yet (!)
+        // fireChange will run idleTasks to record pending bindings, if any
+        ObserveV2.getObserve().fireChange(this, propertyKey);
       }
     },
     // @param can not be assigned, no setter

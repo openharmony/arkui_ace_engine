@@ -238,7 +238,7 @@ HWTEST_F(VideoTestExtraAddNg, OnPlayerStatusTest001, TestSize.Level1)
     ASSERT_TRUE(playBtnGestureEventHub);
 
     // set videoEvent
-    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -309,7 +309,7 @@ HWTEST_F(VideoTestExtraAddNg, OnPlayerStatusTest002, TestSize.Level1)
     auto playBtnGestureEventHub = playBtn->GetOrCreateGestureEventHub();
 
     // set videoEvent
-    auto videoEventHub2 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub2 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub2);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -381,7 +381,7 @@ HWTEST_F(VideoTestExtraAddNg, OnPlayerStatusTest003, TestSize.Level1)
     auto playBtnGestureEventHub = playBtn->GetOrCreateGestureEventHub();
 
     // set videoEvent
-    auto videoEventHub3 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub3 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
     std::string pauseCheck;
@@ -453,7 +453,7 @@ HWTEST_F(VideoTestExtraAddNg, OnPlayerStatusTest004, TestSize.Level1)
     auto playBtnGestureEventHub = playBtn->GetOrCreateGestureEventHub();
 
     // set videoEvent
-    auto videoEventHub4 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub4 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
     std::string pauseCheck;
@@ -526,7 +526,7 @@ HWTEST_F(VideoTestExtraAddNg, OnPlayerStatusTest005, TestSize.Level1)
     auto playBtnGestureEventHub = playBtn->GetOrCreateGestureEventHub();
 
     // set videoEvent
-    auto videoEventHub5 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub5 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
     std::string pauseCheck;
@@ -605,7 +605,7 @@ HWTEST_F(VideoTestExtraAddNg, VideoPatternTest006, TestSize.Level1)
     ASSERT_TRUE(playBtnGestureEventHub);
 
     // set videoEvent
-    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -724,6 +724,13 @@ HWTEST_F(VideoTestExtraAddNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     constraint.selfIdealSize =
         CalcSize(CalcLength(10, DimensionUnit::PERCENT), CalcLength(10, DimensionUnit::PERCENT));
     videoLayoutProperty->UpdateCalcLayoutProperty(constraint);
+    EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+    /**
+     * @tc.steps: step2. Call function while ObjectFit is not ImageFit::COVER or imageFit == ImageFit::NONE.
+     * @tc.expected: step2. LayoutWrapper swap failed.
+     */
+    videoLayoutProperty->UpdateObjectFit(ImageFit::FILL);
     EXPECT_FALSE(videoPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
 }
 
@@ -1183,11 +1190,12 @@ HWTEST_F(VideoTestExtraAddNg, ChangePlayerStatus001, TestSize.Level1)
     PlaybackStatus status = PlaybackStatus::PREPARED;
 
     auto mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();
+    videoPattern->muted_ = true;
     EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
     videoPattern->mediaPlayer_ = mockMediaPlayer;
 
     videoPattern->duration_ = 0;
-    videoPattern->ChangePlayerStatus(true, status);
+    videoPattern->ChangePlayerStatus(status);
     EXPECT_EQ(videoPattern->duration_, 0);
 
     mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();
@@ -1195,13 +1203,13 @@ HWTEST_F(VideoTestExtraAddNg, ChangePlayerStatus001, TestSize.Level1)
     videoPattern->mediaPlayer_ = mockMediaPlayer;
 
     videoPattern->duration_ = 0;
-    videoPattern->ChangePlayerStatus(true, status);
+    videoPattern->ChangePlayerStatus(status);
     EXPECT_EQ(videoPattern->duration_, 0);
 
     videoPattern->mediaPlayer_ = nullptr;
 
     videoPattern->duration_ = 0;
-    videoPattern->ChangePlayerStatus(true, status);
+    videoPattern->ChangePlayerStatus(status);
     EXPECT_EQ(videoPattern->duration_, 0);
 }
 
@@ -1385,6 +1393,10 @@ HWTEST_F(VideoTestExtraAddNg, SetCurrentTime001, TestSize.Level1)
     videoPattern->mediaPlayer_ = mockMediaPlayer;
 
     videoPattern->SetCurrentTime(10, OHOS::Ace::SeekMode::SEEK_PREVIOUS_SYNC);
+    EXPECT_EQ(seekPos, 0);
+
+    videoPattern->isPrepared_ = true;
+    videoPattern->SetCurrentTime(-1, OHOS::Ace::SeekMode::SEEK_PREVIOUS_SYNC);
     EXPECT_EQ(seekPos, 0);
 
     mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();

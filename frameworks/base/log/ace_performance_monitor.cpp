@@ -20,6 +20,7 @@
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "core/common/container.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 using namespace std;

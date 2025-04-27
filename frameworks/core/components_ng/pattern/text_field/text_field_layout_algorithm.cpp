@@ -399,7 +399,7 @@ float TextFieldLayoutAlgorithm::CalculateContentWidth(const LayoutConstraintF& c
     }
     auto counterWidth = contentWidth;
     auto maxParagraphWidth = paragraph_->GetMaxWidth();
-    if (IsNeedUpdateCounterWidth(contentConstraint, maxParagraphWidth, contentWidth)) {
+    if (autoWidth_ || IsNeedUpdateCounterWidth(contentConstraint, maxParagraphWidth, contentWidth)) {
         counterWidth = maxParagraphWidth;
     }
     CounterNodeMeasure(counterWidth, layoutWrapper);
@@ -684,8 +684,8 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
     bool isCustomFont = false;
     for (const auto& familyName : fontFamilies) {
         bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
-        if (!customFont) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "FontRegister failed id:%{public}d", frameNode->GetId());
+        if (customFont) {
+            isCustomFont = true;
         }
     }
     if (isCustomFont || fontManager->IsDefaultFontChanged()) {
@@ -868,36 +868,6 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     modifier->SetTextOverflow(textStyle.GetTextOverflow());
     modifier->SetTextDecoration(textStyle.GetTextDecoration(), textStyle.GetTextDecorationColor(),
         textStyle.GetTextDecorationStyle());
-}
-
-void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)
-{
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto children = frameNode->GetChildren();
-    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
-    CHECK_NULL_VOID(content);
-    auto contentSize = content->GetRect().GetSize();
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto layoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
-    if (!children.empty() && layoutProperty->GetShowUnderlineValue(false) &&
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-        CHECK_NULL_VOID(childWrapper);
-        auto textGeometryNode = childWrapper->GetGeometryNode();
-        CHECK_NULL_VOID(textGeometryNode);
-        auto childFrameSize = textGeometryNode->GetFrameSize();
-        unitWidth_ = childFrameSize.Width();
-        textGeometryNode->SetFrameOffset(
-            OffsetF({ content->GetRect().GetX() + contentSize.Width() - childFrameSize.Width(), 0.0 }));
-        if (childFrameSize.Height() < size.Height()) {
-            childWrapper->GetGeometryNode()->SetFrameSize(SizeF({ unitWidth_, size.Height() }));
-        }
-        childWrapper->Layout();
-    }
 }
 
 bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyle,
@@ -1089,7 +1059,7 @@ bool TextFieldLayoutAlgorithm::IsInlineFocusAdaptMinExceedLimit(const SizeF& max
     return didExceedMaxLines;
 }
 
-bool TextFieldLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::u16string& content,
+bool TextFieldLayoutAlgorithm::CreateParagraphAndLayout(TextStyle& textStyle, const std::u16string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout)
 {
     if (!CreateParagraphEx(textStyle, content, contentConstraint, layoutWrapper)) {

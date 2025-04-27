@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 
 namespace OHOS::Ace::NG {
+class RosenRenderContext;
 class WindowScene : public WindowPattern {
     DECLARE_ACE_TYPE(WindowScene, WindowPattern);
 
@@ -46,6 +47,7 @@ protected:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void OnActivation() override;
+    void OnAttachToMainTree() override;
     void OnConnect() override;
     void OnDisconnect() override;
     void OnLayoutFinished() override;
@@ -68,11 +70,17 @@ private:
     void CleanBlankWindow();
     void SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
     void SetOpacityAnimation(RefPtr<FrameNode>& window);
+    RefPtr<RosenRenderContext> GetContextByDisableDelegator(bool isAbilityHook, bool isBufferAvailable);
+    void SubWindowAttachToFrameNode(sptr<Rosen::Session>& session);
+    void SetSubSessionVisible();
+    bool IsMainSessionRecent();
 
     bool destroyed_ = false;
     OHOS::Rosen::WindowMode initWindowMode_ = OHOS::Rosen::WindowMode::WINDOW_MODE_UNDEFINED;
     CancelableCallback<void()> deleteWindowTask_;
     CancelableCallback<void()> removeStartingWindowTask_;
+    CancelableCallback<void()> removeSnapshotWindowTask_;
+    std::vector<wptr<Rosen::Session>> weakSubSessions_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
 };

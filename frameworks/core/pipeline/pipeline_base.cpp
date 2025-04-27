@@ -96,6 +96,9 @@ std::shared_ptr<ArkUIPerfMonitor> PipelineBase::GetPerfMonitor()
 
 PipelineBase::~PipelineBase()
 {
+    if (eventManager_) {
+        eventManager_->FlushCursorStyleRequests();
+    }
     std::lock_guard lock(destructMutex_);
     LOGI("PipelineBase destroyed");
 }
@@ -141,6 +144,13 @@ double PipelineBase::GetCurrentDensity()
         return wmDensity;
     }
     return pipelineContext->GetDensity();
+}
+
+ColorMode PipelineBase::GetCurrentColorMode()
+{
+    auto currentContainer = Container::CurrentSafely();
+    CHECK_NULL_RETURN(currentContainer, ColorMode::LIGHT);
+    return currentContainer->GetColorMode();
 }
 
 double PipelineBase::Px2VpWithCurrentDensity(double px)
@@ -267,8 +277,9 @@ bool PipelineBase::NeedTouchInterpolation()
     auto container = Container::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     auto uIContentType = container->GetUIContentType();
-    return uIContentType == UIContentType::SECURITY_UI_EXTENSION ||
-        uIContentType == UIContentType::MODAL_UI_EXTENSION;
+    return SystemProperties::IsNeedResampleTouchPoints() &&
+        (uIContentType == UIContentType::SECURITY_UI_EXTENSION ||
+        uIContentType == UIContentType::MODAL_UI_EXTENSION);
 }
 
 void PipelineBase::SetFontWeightScale(float fontWeightScale)
@@ -610,7 +621,7 @@ std::string PipelineBase::GetUnexecutedFinishCount() const
 std::function<void()> PipelineBase::GetWrappedAnimationCallback(
     const AnimationOption& option, const std::function<void()>& finishCallback, const std::optional<int32_t>& count)
 {
-    if (!IsFormRender() && !finishCallback) {
+    if (!IsFormRenderExceptDynamicComponent() && !finishCallback) {
         return nullptr;
     }
     auto finishPtr = std::make_shared<std::function<void()>>(finishCallback);
@@ -632,13 +643,13 @@ std::function<void()> PipelineBase::GetWrappedAnimationCallback(
             context->finishCount_.erase(count.value());
         }
         if (!(*finishPtr)) {
-            if (context->IsFormRender()) {
+            if (context->IsFormRenderExceptDynamicComponent()) {
                 TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
                 context->SetIsFormAnimation(false);
             }
             return;
         }
-        if (context->IsFormRender()) {
+        if (context->IsFormRenderExceptDynamicComponent()) {
             TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
             context->SetFormAnimationFinishCallback(true);
             (*finishPtr)();
@@ -707,7 +718,7 @@ void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const R
 {
 #ifdef ENABLE_ROSEN_BACKEND
     auto wrapFinishCallback = GetWrappedAnimationCallback(option, finishCallback, count);
-    if (IsFormRender()) {
+    if (IsFormRenderExceptDynamicComponent()) {
         SetIsFormAnimation(true);
         if (!IsFormAnimationFinishCallback()) {
             SetFormAnimationStartTime(GetMicroTickCount());
@@ -1051,7 +1062,7 @@ void PipelineBase::Destroy()
     virtualKeyBoardCallback_.clear();
     formLinkInfoMap_.clear();
     TAG_LOGI(AceLogTag::ACE_ANIMATION,
-        "pipeline destroyed, has %{public}zu finish callbacks not executed, finish count is %{public}s",
+        "Pipeline destroyed, %{public}zu finish callbacks unexecuted, count: %{public}s",
         finishFunctions_.size(), GetUnexecutedFinishCount().c_str());
     finishFunctions_.clear();
     finishCount_.clear();
@@ -1083,8 +1094,9 @@ void PipelineBase::OnFormRecover(const std::string& statusData)
 
 void PipelineBase::SetUiDvsyncSwitch(bool on)
 {
-    if (window_) {
+    if (window_ && lastUiDvsyncStatus_ != on) {
         window_->SetUiDvsyncSwitch(on);
     }
+    lastUiDvsyncStatus_ = on;
 }
 } // namespace OHOS::Ace

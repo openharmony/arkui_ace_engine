@@ -15,7 +15,9 @@
 
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/image_animator/controlled_animator.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -58,7 +60,7 @@ void ImageAnimatorModelNG::SetImages(const std::vector<ImageProperties>& images)
 
 void ImageAnimatorModelNG::SetState(int32_t state)
 {
-    GetImageAnimatorPattern()->SetStatus(static_cast<Animator::Status>(state));
+    GetImageAnimatorPattern()->SetStatus(static_cast<ControlledAnimator::ControlStatus>(state));
 }
 
 void ImageAnimatorModelNG::SetDuration(int32_t duration)
@@ -95,7 +97,7 @@ void ImageAnimatorModelNG::SetOnStart(std::function<void()>&& OnStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetStartEvent(OnStart);
 }
@@ -104,7 +106,7 @@ void ImageAnimatorModelNG::SetOnPause(std::function<void()>&& OnPause)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetPauseEvent(OnPause);
 }
@@ -113,7 +115,7 @@ void ImageAnimatorModelNG::SetOnRepeat(std::function<void()>&& OnRepeat)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetRepeatEvent(OnRepeat);
 }
@@ -122,7 +124,7 @@ void ImageAnimatorModelNG::SetOnCancel(std::function<void()>&& OnCancel)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCancelEvent(OnCancel);
 }
@@ -131,7 +133,7 @@ void ImageAnimatorModelNG::SetOnFinish(std::function<void()>&& OnFinish)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetStopEvent(OnFinish);
 }
@@ -190,7 +192,7 @@ void ImageAnimatorModelNG::SetDuration(FrameNode* frameNode, int32_t duration)
 
 void ImageAnimatorModelNG::SetState(FrameNode* frameNode, int32_t state)
 {
-    GetImageAnimatorPattern(frameNode)->SetStatus(static_cast<Animator::Status>(state));
+    GetImageAnimatorPattern(frameNode)->SetStatus(static_cast<ControlledAnimator::ControlStatus>(state));
 }
 
 void ImageAnimatorModelNG::SetFixedSize(FrameNode* frameNode, bool fixedSize)
@@ -272,7 +274,7 @@ int32_t ImageAnimatorModelNG::GetImagesSize(FrameNode* frameNode)
 void ImageAnimatorModelNG::SetOnStart(FrameNode* frameNode, std::function<void()>&& onStart)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetStartEvent(onStart);
 }
@@ -280,7 +282,7 @@ void ImageAnimatorModelNG::SetOnStart(FrameNode* frameNode, std::function<void()
 void ImageAnimatorModelNG::SetOnPause(FrameNode* frameNode, std::function<void()>&& onPause)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetPauseEvent(onPause);
 }
@@ -288,7 +290,7 @@ void ImageAnimatorModelNG::SetOnPause(FrameNode* frameNode, std::function<void()
 void ImageAnimatorModelNG::SetOnRepeat(FrameNode* frameNode, std::function<void()>&& onRepeat)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetRepeatEvent(onRepeat);
 }
@@ -296,7 +298,7 @@ void ImageAnimatorModelNG::SetOnRepeat(FrameNode* frameNode, std::function<void(
 void ImageAnimatorModelNG::SetOnCancel(FrameNode* frameNode, std::function<void()>&& onCancel)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCancelEvent(onCancel);
 }
@@ -304,7 +306,7 @@ void ImageAnimatorModelNG::SetOnCancel(FrameNode* frameNode, std::function<void(
 void ImageAnimatorModelNG::SetOnFinish(FrameNode* frameNode, std::function<void()>&& onFinish)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetStopEvent(onFinish);
 }

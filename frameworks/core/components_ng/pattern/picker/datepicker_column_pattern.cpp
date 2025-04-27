@@ -65,6 +65,7 @@ constexpr int32_t BUFFER_NODE_NUMBER = 2;
 constexpr int32_t HOT_ZONE_HEIGHT_CANDIDATE = 2;
 constexpr int32_t HOT_ZONE_HEIGHT_DISAPPEAR = 4;
 constexpr char PICKER_DRAG_SCENE[] = "picker_drag_scene";
+constexpr uint32_t NEXT_COLOUM_DIFF = 1;
 } // namespace
 
 void DatePickerColumnPattern::OnAttachToFrameNode()
@@ -75,7 +76,7 @@ void DatePickerColumnPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -94,7 +95,7 @@ void DatePickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     if (hapticController_) {
         hapticController_->Stop();
     }
-    UnregisterWindowStateChangedCallback();
+    UnregisterWindowStateChangedCallback(frameNode);
 }
 
 void DatePickerColumnPattern::OnModifyDone()
@@ -147,6 +148,9 @@ void DatePickerColumnPattern::OnModifyDone()
 
 void DatePickerColumnPattern::InitHapticController()
 {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto blendNode = DynamicCast<FrameNode>(host->GetParent());
@@ -185,13 +189,12 @@ void DatePickerColumnPattern::RegisterWindowStateChangedCallback()
     pipeline->AddWindowStateChangedCallback(host->GetId());
 }
 
-void DatePickerColumnPattern::UnregisterWindowStateChangedCallback()
+void DatePickerColumnPattern::UnregisterWindowStateChangedCallback(FrameNode* frameNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveWindowStateChangedCallback(host->GetId());
+    pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
 }
 
 void DatePickerColumnPattern::OnWindowHide()
@@ -256,7 +259,7 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto columnEventHub = host->GetEventHub<EventHub>();
+    auto columnEventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(columnEventHub);
     RefPtr<TouchEventImpl> touchListener = CreateItemTouchEventListener();
     CHECK_NULL_VOID(touchListener);
@@ -268,7 +271,7 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
     auto midSize = childSize / 2;
     middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(midSize));
     CHECK_NULL_VOID(middleChild);
-    auto eventHub = middleChild->GetEventHub<EventHub>();
+    auto eventHub = middleChild->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ParseMouseEvent();
@@ -284,7 +287,7 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
         param->instance_ = childNode;
         param->itemIndex_ = i;
         param->itemTotalCounts_ = childSize;
-        auto eventHub = childNode->GetEventHub<EventHub>();
+        auto eventHub = childNode->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         if (i != midSize) {
             RefPtr<ClickEvent> clickListener = CreateItemClickEventListener(param);
@@ -709,8 +712,12 @@ void DatePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
 {
     UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    if (selectedMarkPaint_) {
-        textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
+    if (pickerTheme->IsCircleDial() && !isUserSetSelectColor_) {
+        if (selectedMarkPaint_) {
+            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
+        } else {
+            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(false, false).GetTextColor());
+        }
     } else {
         textLayoutProperty->UpdateTextColor(dataPickerRowLayoutProperty->GetSelectedColor().value_or(
             pickerTheme->GetOptionStyle(true, false).GetTextColor()));
@@ -877,13 +884,6 @@ void DatePickerColumnPattern::TextPropertiesLinearAnimation(
     textLayoutProperty->UpdateFontSize(updateSize);
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, distancePercent_);
-    if (selectedMarkPaint_ && (index == (showCount / PICKER_SELECT_AVERAGE))) {
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-        CHECK_NULL_VOID(pickerTheme);
-        updateColor = pickerTheme->GetOptionStyle(true, true).GetTextColor();
-    }
 
     textLayoutProperty->UpdateTextColor(updateColor);
     if (scale < FONTWEIGHT) {
@@ -989,7 +989,9 @@ void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
 }
 
 void DatePickerColumnPattern::HandleDragStart(const GestureEvent& event)
@@ -1585,6 +1587,8 @@ void DatePickerColumnPattern::SetSelectedMarkPaint(bool paint)
 
 void DatePickerColumnPattern::UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme)
 {
+    UpdateAnimationColor(pickerTheme);
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto blendNode = DynamicCast<FrameNode>(host->GetParent());
@@ -1610,6 +1614,50 @@ void DatePickerColumnPattern::UpdateSelectedTextColor(const RefPtr<PickerTheme>&
     UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, dataPickerRowLayoutProperty);
     textNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
     host->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
+}
+
+void DatePickerColumnPattern::UpdateUserSetSelectColor()
+{
+    isUserSetSelectColor_ = true;
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    UpdateSelectedTextColor(pickerTheme);
+}
+
+void DatePickerColumnPattern::UpdateAnimationColor(const RefPtr<PickerTheme>& pickerTheme)
+{
+    CHECK_NULL_VOID(pickerTheme);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto layoutProperty = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    Color color;
+
+    if (pickerTheme->IsCircleDial() && !isUserSetSelectColor_) {
+        if (selectedMarkPaint_) {
+            color = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+        } else {
+            color = pickerTheme->GetOptionStyle(false, false).GetTextColor();
+        }
+    } else {
+        color = layoutProperty->GetSelectedColor().value_or(
+            pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    }
+
+    uint32_t middleIndex = GetShowCount() / PICKER_SELECT_AVERAGE;
+    if (middleIndex - NEXT_COLOUM_DIFF >= 0 && animationProperties_.size() > middleIndex) {
+        animationProperties_[middleIndex - NEXT_COLOUM_DIFF].downColor = color;
+        animationProperties_[middleIndex + NEXT_COLOUM_DIFF].upColor = color;
+        animationProperties_[middleIndex].currentColor = color;
+    }
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -1698,7 +1746,7 @@ void DatePickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
     }
     DatePickerScrollDirection dir =
         GreatNotEqual(scrollDelta_, 0.0f) ? DatePickerScrollDirection::DOWN : DatePickerScrollDirection::UP;
-    int32_t middleIndex = GetShowCount() / 2;
+    auto middleIndex = static_cast<int32_t>(GetShowCount()) / 2;
     auto shiftDistance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                 : optionProperties_[middleIndex].nextDistance;
     auto shiftThreshold = shiftDistance / 2;

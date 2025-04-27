@@ -76,7 +76,7 @@ void DumpLog::Print(int32_t depth, const std::string& content)
     for (int32_t i = 0; i < depth; ++i) {
         ostream_->write(space.c_str(), space.length());
     }
-    std::string data = content + separator_;
+    std::string data = content + (isUIExt_ ? ";" : "\n");
     ostream_->write(data.c_str(), data.length());
 }
 
@@ -122,10 +122,12 @@ bool DumpLog::OutPutBySize()
 {
     if (!ostream_->good()) {
         result_.clear();
+        std::string tmp;
+        result_.swap(tmp);
         return false;
     }
     // if current result size > max size, dump will output as file
-    if (result_.size() + 1 > DumpLog::MAX_DUMP_LENGTH) {
+    if (result_.size() + 1 > DumpLog::MAX_DUMP_LENGTH || isUIExt_) {
         auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
         std::unique_ptr<std::ostream> ostream = std::make_unique<std::ofstream>(dumpFilePath);
         if (!ostream) {
@@ -133,12 +135,16 @@ bool DumpLog::OutPutBySize()
             result_.append("Dump output failed,please try again");
             ostream_->write(result_.c_str(), result_.length());
             result_.clear();
+            std::string tmp;
+            result_.swap(tmp);
         }
         CHECK_NULL_RETURN(ostream, false);
         DumpLog::GetInstance().SetDumpFile(std::move(ostream));
     }
     ostream_->write(result_.c_str(), result_.length());
     result_.clear();
+    std::string tmp;
+    result_.swap(tmp);
     ostream_->flush();
     return true;
 }
@@ -147,10 +153,14 @@ void DumpLog::OutPutDefault()
 {
     if (!ostream_ || !ostream_->good()) {
         result_.clear();
+        std::string tmp;
+        result_.swap(tmp);
         return;
     }
     ostream_->write(result_.c_str(), result_.length());
     result_.clear();
+    std::string tmp;
+    result_.swap(tmp);
     ostream_->flush();
 }
 
@@ -260,6 +270,8 @@ void DumpLog::OutPutByCompress()
 {
     if (!ostream_ || !ostream_->good()) {
         result_.clear();
+        std::string tmp;
+        result_.swap(tmp);
         return;
     }
     std::string compressString;
@@ -273,6 +285,8 @@ void DumpLog::OutPutByCompress()
     ostream_->write(result_.c_str(), result_.length());
 #endif
     result_.clear();
+    std::string tmp;
+    result_.swap(tmp);
     ostream_->flush();
 }
 } // namespace OHOS::Ace

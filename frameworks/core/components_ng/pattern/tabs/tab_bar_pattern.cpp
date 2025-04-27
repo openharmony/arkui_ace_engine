@@ -31,7 +31,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
@@ -41,6 +40,7 @@
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 namespace OHOS::Ace::NG {
@@ -73,6 +73,10 @@ const std::string TAB_BAR_PROPERTY_NAME = "tabBar";
 const std::string INDICATOR_OFFSET_PROPERTY_NAME = "indicatorOffset";
 const std::string INDICATOR_WIDTH_PROPERTY_NAME = "translateWidth";
 } // namespace
+
+TabBarPattern::TabBarPattern() = default;
+
+TabBarPattern::~TabBarPattern() = default;
 
 void TabBarPattern::SetController(const RefPtr<SwiperController>& controller)
 {
@@ -436,7 +440,8 @@ void TabBarPattern::InitSurfaceChangedCallback()
 
 void TabBarPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    auto pipeline = GetContext();
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
@@ -466,7 +471,7 @@ void TabBarPattern::AddTabBarItemClickAndTouchEvent(const RefPtr<FrameNode>& tab
     if (clickEvents_.find(tabBarItemId) != clickEvents_.end()) {
         return;
     }
-    auto eventHub = tabBarItem->GetEventHub<EventHub>();
+    auto eventHub = tabBarItem->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -513,6 +518,7 @@ void TabBarPattern::AddTabBarItemCallBack(const RefPtr<FrameNode>& tabBarItem)
             auto host = tabBar->GetHost();
             CHECK_NULL_VOID(host);
             auto index = host->GetChildFlatIndex(tabBarItemId).second;
+            tabBar->accessibilityFocusIndicator_ = index;
             tabBar->FocusCurrentOffset(index);
         }
     });
@@ -532,7 +538,7 @@ void TabBarPattern::AddMaskItemClickEvent()
             continue;
         }
 
-        auto eventHub = maskNode->GetEventHub<EventHub>();
+        auto eventHub = maskNode->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         auto gestureHub = eventHub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -762,7 +768,7 @@ void TabBarPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = GetHost()->GetEventHub<EventHub>();
+    auto eventHub = GetHost()->GetOrCreateEventHub<EventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
 
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
@@ -782,7 +788,7 @@ void TabBarPattern::InitMouseEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = GetHost()->GetEventHub<EventHub>();
+    auto eventHub = GetHost()->GetOrCreateEventHub<EventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     auto mouseTask = [weak = WeakClaim(this)](const MouseInfo& info) {
         auto pattern = weak.Upgrade();
@@ -1027,37 +1033,19 @@ void TabBarPattern::FocusCurrentOffset(int32_t index)
     auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
-    auto childCount = tabBarNode->TotalChildCount() - MASK_COUNT;
     auto mainSize = GetContentSize().MainSize(axis);
 
     if (barMode == TabBarMode::SCROLLABLE && !visibleItemPosition_.empty()) {
-        auto visibleItemStartIndex = visibleItemPosition_.begin()->first;
-        auto visibleItemEndIndex = visibleItemPosition_.rbegin()->first;
-        auto visibleItemStartPos = visibleItemPosition_.begin()->second.startPos;
-        auto visibleItemEndPos = visibleItemPosition_.rbegin()->second.endPos;
-        if (index == visibleItemStartIndex) {
-            auto delta = -visibleItemStartPos;
-            if (index == 0) {
-                delta = scrollMargin_ - visibleItemStartPos;
+        auto iter = visibleItemPosition_.find(index);
+        if (iter != visibleItemPosition_.end()) {
+            auto startPos = iter->second.startPos;
+            auto endPos = iter->second.endPos;
+            if (GreatOrEqual(startPos, 0.0f) && LessOrEqual(endPos, mainSize)) {
+                return;
             }
-            if (isRTL_ && axis_ == Axis::HORIZONTAL) {
-                delta -= delta;
-            }
-            UpdateCurrentOffset(delta);
-        } else if (index == visibleItemEndIndex) {
-            auto delta = mainSize - visibleItemEndPos;
-            if (index == childCount - 1) {
-                delta = mainSize - scrollMargin_ - visibleItemEndPos;
-            }
-            if (isRTL_ && axis_ == Axis::HORIZONTAL) {
-                delta -= delta;
-            }
-            UpdateCurrentOffset(delta);
-        } else if ((index >= 0  && index < visibleItemStartIndex) ||
-            (index <= childCount - 1 && index > visibleItemEndIndex)) {
-            focusIndex_ = index;
-            tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
+        focusIndex_ = index;
+        tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
 }
 
@@ -1066,7 +1054,7 @@ void TabBarPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -1079,7 +1067,7 @@ void TabBarPattern::OnModifyDone()
     CHECK_NULL_VOID(theme);
     InitTabBarProperties(theme);
     UpdateBackBlurStyle(theme);
-    
+
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     InitScrollableEvent(layoutProperty, gestureHub);
@@ -1107,6 +1095,21 @@ void TabBarPattern::OnModifyDone()
     auto tabBarDirection = layoutProperty->GetLayoutDirection();
     isRTL_ = tabBarDirection == TextDirection::RTL ||
              (tabBarDirection == TextDirection::AUTO && tabsDirection == TextDirection::RTL);
+}
+
+void TabBarPattern::ResetOnForceMeasure(int32_t index)
+{
+    auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetIndicatorValue(0) != index) {
+        jumpIndex_ = index;
+        focusIndicator_ = index;
+        UpdateSubTabBoard(index);
+        UpdateTextColorAndFontWeight(index);
+        UpdateIndicator(index);
+        UpdatePaintIndicator(index, true);
+        HandleBottomTabBarChange(index);
+    }
 }
 
 void TabBarPattern::UpdateBackBlurStyle(const RefPtr<TabTheme>& tabTheme)
@@ -1148,7 +1151,7 @@ void TabBarPattern::RemoveTabBarEventCallback()
         CHECK_NULL_VOID(tabBarPattern);
         auto host = tabBarPattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto hub = host->GetEventHub<EventHub>();
+        auto hub = host->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(hub);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -1168,7 +1171,7 @@ void TabBarPattern::RemoveTabBarEventCallback()
             CHECK_NULL_VOID(childNode);
             auto frameNode = AceType::DynamicCast<FrameNode>(childNode);
             CHECK_NULL_VOID(frameNode);
-            auto childHub = frameNode->GetEventHub<EventHub>();
+            auto childHub = frameNode->GetOrCreateEventHub<EventHub>();
             CHECK_NULL_VOID(childHub);
             auto childGestureHub = childHub->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(childGestureHub);
@@ -1193,7 +1196,7 @@ void TabBarPattern::AddTabBarEventCallback()
         CHECK_NULL_VOID(tabBarPattern);
         auto host = tabBarPattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto hub = host->GetEventHub<EventHub>();
+        auto hub = host->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(hub);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -1206,7 +1209,7 @@ void TabBarPattern::AddTabBarEventCallback()
             CHECK_NULL_VOID(childNode);
             auto frameNode = AceType::DynamicCast<FrameNode>(childNode);
             CHECK_NULL_VOID(frameNode);
-            auto childHub = frameNode->GetEventHub<EventHub>();
+            auto childHub = frameNode->GetOrCreateEventHub<EventHub>();
             CHECK_NULL_VOID(childHub);
             auto childGestureHub = childHub->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(childGestureHub);
@@ -1337,10 +1340,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     isFirstLayout_ = false;
     if (focusIndex_) {
         focusIndex_.reset();
-        if (accessibilityScroll_) {
-            host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-            accessibilityScroll_ = false;
-        }
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     }
     indicator_ = layoutProperty->GetIndicatorValue(0);
 
@@ -1407,7 +1407,7 @@ void TabBarPattern::InitLongPressAndDragEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -2955,10 +2955,9 @@ void TabBarPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(frameNode);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
             frameNode->TotalChildCount() - MASK_COUNT > 1) {
-            auto visibleItemEndIndex = pattern->visibleItemPosition_.rbegin()->first;
-            visibleItemEndIndex == frameNode->TotalChildCount() - MASK_COUNT - 1 ?
-                pattern->FocusCurrentOffset(visibleItemEndIndex) : pattern->FocusCurrentOffset(visibleItemEndIndex + 1);
-            pattern->accessibilityScroll_ = true;
+            auto index =
+                std::clamp(pattern->accessibilityFocusIndicator_ + 1, 0, frameNode->TotalChildCount() - MASK_COUNT - 1);
+            pattern->FocusCurrentOffset(index);
             // AccessibilityEventType::SCROLL_END
         }
     });
@@ -2972,10 +2971,9 @@ void TabBarPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(frameNode);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
            frameNode->TotalChildCount() - MASK_COUNT > 1) {
-            auto visibleItemStartIndex = pattern->visibleItemPosition_.begin()->first;
-            visibleItemStartIndex == 0 ? pattern->FocusCurrentOffset(visibleItemStartIndex) :
-                pattern->FocusCurrentOffset(visibleItemStartIndex - 1);
-            pattern->accessibilityScroll_ = true;
+            auto index =
+                std::clamp(pattern->accessibilityFocusIndicator_ - 1, 0, frameNode->TotalChildCount() - MASK_COUNT - 1);
+            pattern->FocusCurrentOffset(index);
             // AccessibilityEventType::SCROLL_END
         }
     });
@@ -3225,7 +3223,7 @@ void TabBarPattern::InitTurnPageRateEvent()
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!animationStartEvent_) {
         AnimationStartEvent animationStartEvent =
@@ -3508,7 +3506,7 @@ void TabBarPattern::InitFocusEvent()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
 
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -3702,5 +3700,19 @@ void TabBarPattern::UpdateTabBarInfo(std::vector<T>& info, const std::set<int32_
     }
 
     std::swap(newInfo, info);
+}
+
+void TabBarPattern::ChangeIndex(int32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto totalCount = host->TotalChildCount() - MASK_COUNT;
+    if (NonPositive(totalCount)) {
+        return;
+    }
+    if (index < 0 || index >= totalCount) {
+        index = 0;
+    }
+    HandleClick(SourceType::NONE, index);
 }
 } // namespace OHOS::Ace::NG

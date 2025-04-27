@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/animation/page_transition_listener.h"
+#include "core/animation/shared_transition.h"
 #include "core/components/common/properties/tween_option.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/element.h"
@@ -28,11 +29,6 @@ class SharedTransitionElement;
 class OverlayElement;
 class Animator;
 class TweenElement;
-
-enum class SharedTransitionEffectType {
-    SHARED_EFFECT_STATIC,
-    SHARED_EFFECT_EXCHANGE,
-};
 
 class ACE_EXPORT SharedTransitionEffect : public AceType {
     DECLARE_ACE_TYPE(SharedTransitionEffect, AceType);

@@ -21,6 +21,7 @@
 #include "gtest/gtest.h"
 
 #define private public
+#define protected public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/render/mock_render_surface.h"
@@ -34,6 +35,8 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_surface_holder.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
@@ -225,7 +228,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
      * @tc.steps: step2. call FireLoadEvent, FireDestroyEvent
      * @tc.expected: three checkKeys has changed
      */
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
     xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
@@ -246,7 +249,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
 
     auto frameNode2 = CreateXComponentNode(testProperty);
     EXPECT_TRUE(frameNode2);
-    xComponentEventHub = frameNode2->GetEventHub<XComponentEventHub>();
+    xComponentEventHub = frameNode2->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
     xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
@@ -540,7 +543,7 @@ HWTEST_F(XComponentTestNg, XComponentKeyEventTest010, TestSize.Level1)
      * @tc.steps: step4. call focusHub's focus & blur event
      * @tc.expected: the callbacks registered in step3 are called
      */
-    focusHub->onFocusInternal_();
+    focusHub->onFocusInternal_(focusHub->focusReason_);
     EXPECT_TRUE(isFocus);
     focusHub->onBlurInternal_();
     EXPECT_FALSE(isFocus);
@@ -727,7 +730,7 @@ HWTEST_F(XComponentTestNg, XComponentSetDetachEventTest021, TestSize.Level1)
      * @tc.steps: step2. call FireDetachEvent
      * @tc.expected: three checkKeys has changed
      */
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
 
     bool detachFlage = false;
@@ -819,7 +822,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest023, TestSize.Level1)
      * @tc.steps: step3. call FireLoadEvent, FireDestroyEvent
      * @tc.expected: three checkKeys not changed
      */
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
     xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
@@ -874,7 +877,7 @@ HWTEST_F(XComponentTestNg, XComponentDetachCallbackTest024, TestSize.Level1)
      * @tc.steps: step2. call FireDetachEvent
      * @tc.expected: three checkKeys has changed
      */
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireDetachEvent(XCOMPONENT_ID);
     EXPECT_FALSE(onDetachKey == CHECK_KEY);
@@ -983,7 +986,7 @@ HWTEST_F(XComponentTestNg, XComponentExtSurfaceCallbackClient026, TestSize.Level
      * @tc.steps: step2. call FireDetachEvent
      * @tc.expected: three checkKeys has changed
      */
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
 
     std::string surfaceInitFlage;
@@ -1334,7 +1337,7 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
     testProperty.surfaceDestroyedEvent = std::move(onSurfaceDestroyed);
     auto frameNode = CreateXComponentNode(testProperty);
     ASSERT_TRUE(frameNode);
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     EXPECT_FALSE(xComponentEventHub->surfaceInitEvent_);
     auto pattern = frameNode->GetPattern<XComponentPattern>();

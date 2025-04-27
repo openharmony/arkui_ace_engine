@@ -16,7 +16,6 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SWIPER_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SWIPER_H
 
-#include "bridge/declarative_frontend/jsview/js_indicator.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
@@ -66,6 +65,7 @@ protected:
         const RefPtr<SwiperIndicatorTheme>& swiperIndicatorTheme);
     static SwiperDigitalParameters GetDigitIndicatorInfo(const JSRef<JSObject>& obj);
     static std::optional<Dimension> ParseIndicatorDimension(const JSRef<JSVal>& value);
+    static std::optional<Dimension> ParseIndicatorBottom(const JSRef<JSVal>& bottomValue, bool hasIgnoreSize);
     static void SetIsIndicatorCustomSize(const Dimension& dimPosition, bool parseOk);
     static bool GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& swiperArrowParameters);
     static void SetNestedScroll(const JSCallbackInfo& info);
@@ -77,10 +77,9 @@ protected:
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static void GetAutoPlayOptionsInfo(const JSRef<JSObject>& obj, SwiperAutoPlayOptions& swiperAutoPlayOptions);
     static void SetIndicatorController(const JSCallbackInfo& info);
-    static void ResetSwiperNode();
 
     private:
-        static WeakPtr<JSIndicatorController> jSIndicatorController_;
+        static bool ParseSpace(const JSRef<JSVal>& jsValue, CalcDimension& result);
 };
 
 class JSSwiperController final : public Referenced {

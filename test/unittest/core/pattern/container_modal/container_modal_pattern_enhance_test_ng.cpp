@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd. All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -124,7 +125,7 @@ RefPtr<PaintWrapper> ContainerModalPatternEnhanceTestNg::FlushLayoutTask(const R
     return wrapper;
 }
 
-RefPtr<FrameNode> ContainerModalViewEnhanceTestNg ::CreateContent()
+RefPtr<FrameNode> ContainerModalPatternEnhanceTestNg ::CreateContent()
 {
     return AceType::MakeRefPtr<FrameNode>("content", 0, AceType::MakeRefPtr<Pattern>());
 }
@@ -168,7 +169,7 @@ HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest003
     auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
     auto subwindow = AceType::MakeRefPtr<MockSubwindow>();
     SubwindowManager::GetInstance()->SetCurrentSubwindow(subwindow);
-    EXPECT_CALL(*subwindow, GetShown()).WillOnce(testing::Return(true));
+    containerModalPatternEnhance->isHoveredMenu_ = true;
     containerModalPatternEnhance->OnWindowUnfocused();
     auto result = containerModalPatternEnhance->GetIsHoveredMenu();
     EXPECT_TRUE(result);
@@ -559,60 +560,272 @@ HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest021
 
 /**
  * @tc.name: ContainerModalPatternEnhanceTest022
- * @tc.desc: Test EnableContainerModalGesture
+ * @tc.desc: Test GetContainerModalComponentRect
  * @tc.type: FUNC
  * @tc.author:
  */
 HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest022, TestSize.Level1)
 {
-    CreateContainerModal();
+    RectF containerModal(0.0f, 0.0f, 0.0f, 0.0f);
+    RectF buttons(0.0f, 0.0f, 0.0f, 0.0f);
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto textNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<TextPickerColumnPattern>());
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(textNode);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    auto ret = containerPattern->GetContainerModalComponentRect(containerModal, buttons);
+    EXPECT_EQ(containerModal.Width(), 0);
+    EXPECT_FALSE(ret);
 
-    // EnableContainerModalGesture to false
-    pattern_->EnableContainerModalGesture(false);
+    auto textGeometryNode = textNode->GetGeometryNode();
+    textGeometryNode->frame_.rect_.width_ = 50.0f;
+    textGeometryNode->frame_.rect_.height_ = 50.0f;
+    ret = containerPattern->GetContainerModalComponentRect(containerModal, buttons);
+    EXPECT_EQ(containerModal.Width(), 50.0f);
+    EXPECT_FALSE(ret);
 
-    // all events are null
-    auto floatingTitleRow = GetFloatingTitleRow();
-    EXPECT_NE(floatingTitleRow, nullptr);
-    auto floatingTitleRowEventHub = floatingTitleRow->GetOrCreateGestureEventHub();
-    EXPECT_NE(floatingTitleRowEventHub, nullptr);
-    EXPECT_EQ(floatingTitleRowEventHub->IsGestureEmpty(), true);
+    containerPattern->customTitleSettedShow_ = false;
+    ret = containerPattern->GetContainerModalComponentRect(containerModal, buttons);
+    EXPECT_EQ(containerModal.Width(), 50.0f);
+    EXPECT_FALSE(ret);
+}
 
-    auto customTitleRow = GetCustomTitleRow();
-    EXPECT_NE(customTitleRow, nullptr);
-    auto customTitleRowEventHub = customTitleRow->GetOrCreateGestureEventHub();
-    EXPECT_NE(customTitleRowEventHub, nullptr);
-    EXPECT_EQ(customTitleRowEventHub->IsGestureEmpty(), true);
-    EXPECT_EQ(customTitleRowEventHub->IsPanEventEmpty(), true);
+/**
+ * @tc.name: ContainerModalPatternEnhanceTest023
+ * @tc.desc: Test GetContainerModalButtonsRect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest023, TestSize.Level1)
+{
+    RectF containerModal(0.0f, 0.0f, 0.0f, 0.0f);
+    RectF buttons(0.0f, 0.0f, 0.0f, 0.0f);
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto textNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<TextPickerColumnPattern>());
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(textNode);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    auto ret = containerPattern->GetContainerModalButtonsRect(containerModal, buttons);
+    EXPECT_EQ(containerModal.Width(), 0);
+    EXPECT_FALSE(ret);
 
-    auto gestureRow = GetGestureRow();
-    EXPECT_NE(gestureRow, nullptr);
-    auto gestureRowEventHub = gestureRow->GetOrCreateGestureEventHub();
-    EXPECT_NE(gestureRowEventHub, nullptr);
-    EXPECT_EQ(gestureRowEventHub->IsGestureEmpty(), true);
-    EXPECT_EQ(gestureRowEventHub->IsPanEventEmpty(), true);
+    auto textGeometryNode = textNode->GetGeometryNode();
+    textGeometryNode->frame_.rect_.width_ = 50.0f;
+    textGeometryNode->frame_.rect_.height_ = 50.0f;
+    ret = containerPattern->GetContainerModalButtonsRect(containerModal, buttons);
+    EXPECT_EQ(containerModal.Width(), 50.0f);
+    EXPECT_FALSE(ret);
 
-    // EnableContainerModalGesture to true
-    pattern_->EnableContainerModalGesture(true);
+    containerPattern->customTitleSettedShow_ = false;
+    ret = containerPattern->GetContainerModalButtonsRect(containerModal, buttons);
+    EXPECT_EQ(containerModal.Width(), 50.0f);
+    EXPECT_FALSE(ret);
+}
 
-    // all events are not null
-    auto floatingTitleRow = GetFloatingTitleRow();
-    EXPECT_NE(floatingTitleRow, nullptr);
-    auto floatingTitleRowEventHub = floatingTitleRow->GetOrCreateGestureEventHub();
-    EXPECT_NE(floatingTitleRowEventHub, nullptr);
-    EXPECT_EQ(floatingTitleRowEventHub->IsGestureEmpty(), false);
+/**
+ * @tc.name: ContainerModalPatternEnhanceTest024
+ * @tc.desc: Test use GetContainerModalButtonsRect after SetContainerModalTitleVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest024, TestSize.Level1)
+{
+    RectF containerModal(0.0f, 0.0f, 1000.0f, 1000.0f);
+    RectF buttons(0.0f, 0.0f, 50.0f, 50.0f);
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto textNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<TextPickerColumnPattern>());
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(textNode);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(buttonNode);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    auto pattern = containerModalNode->GetPattern<ContainerModalPattern>();
+    pattern->SetContainerModalTitleVisible(false, false);
+    EXPECT_EQ(pattern->GetContainerModalTitleVisible(true), false);
+}
 
-    auto customTitleRow = GetCustomTitleRow();
-    EXPECT_NE(customTitleRow, nullptr);
-    auto customTitleRowEventHub = customTitleRow->GetOrCreateGestureEventHub();
-    EXPECT_NE(customTitleRowEventHub, nullptr);
-    EXPECT_EQ(customTitleRowEventHub->IsGestureEmpty(), false);
-    EXPECT_EQ(customTitleRowEventHub->IsPanEventEmpty(), false);
+/**
+ * @tc.name: ContainerModalPatternEnhanceTest025
+ * @tc.desc: Test use GetContainerModalButtonsRect after SetContainerModalTitleVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest025, TestSize.Level1)
+{
+    RectF containerModal(0.0f, 0.0f, 1000.0f, 1000.0f);
+    RectF buttons(0.0f, 0.0f, 50.0f, 50.0f);
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto textNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<TextPickerColumnPattern>());
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(textNode);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(buttonNode);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    auto pattern = containerModalNode->GetPattern<ContainerModalPattern>();
+    pattern->SetContainerModalTitleVisible(false, false);
+    auto ret = containerPattern->GetContainerModalButtonsRect(containerModal, buttons);
+    EXPECT_FALSE(ret);
+}
 
-    auto gestureRow = GetGestureRow();
-    EXPECT_NE(gestureRow, nullptr);
-    auto gestureRowEventHub = gestureRow->GetOrCreateGestureEventHub();
-    EXPECT_NE(gestureRowEventHub, nullptr);
-    EXPECT_EQ(gestureRowEventHub->IsGestureEmpty(), false);
-    EXPECT_EQ(gestureRowEventHub->IsPanEventEmpty(), false);
+/**
+ * @tc.name: ContainerModalPatternEnhanceTest026
+ * @tc.desc: Test SetContainerModalTitleHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest026, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto textNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<TextPickerColumnPattern>());
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(textNode);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(buttonNode);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    auto pattern = containerModalNode->GetPattern<ContainerModalPattern>();
+    pattern->SetContainerModalTitleHeight(100.0f);
+    EXPECT_EQ(pattern->GetContainerModalTitleHeight(), 100.0f);
+}
+
+/**
+ * @tc.name: ContainerModalPatternEnhanceTest027
+ * @tc.desc: Test SetWindowContainerColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest027, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto textNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<TextPickerColumnPattern>());
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(textNode);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(buttonNode);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    auto pattern = containerModalNode->GetPattern<ContainerModalPattern>();
+    pattern->InitContainerColor();
+    uint32_t value = 1;
+    auto activeColor = Color(value);
+    auto inactiveColor = Color(value);
+    pattern->SetWindowContainerColor(activeColor, inactiveColor);
+    auto windowscolor = pattern->GetContainerColor(true);
+    EXPECT_EQ(windowscolor, activeColor);
+}
+
+/**
+ * @tc.name: ContainerModalPatternEnhanceTest028
+ * @tc.desc: Test ShowTitle
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest028, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto textNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<TextPickerColumnPattern>());
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(textNode);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(buttonNode);
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    bool isExecute = false;
+    auto windowModeCallback = [isExecute](
+                                  const std::string& name, const std::string& value) mutable { isExecute = true; };
+    windowManager->SetWindowCallNativeCallback(std::move(windowModeCallback));
+    windowManager->FireWindowCallNativeCallback("name", "value");
+    EXPECT_EQ(isExecute, false);
+}
+
+/**
+ * @tc.name: ContainerModalPatternEnhanceTest029
+ * @tc.desc: Test ShowTitle
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest029, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto textNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<TextPickerColumnPattern>());
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(textNode);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(buttonNode);
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    bool isExecute = false;
+    auto windowModeCallback = [isExecute](
+                                  const std::string& name, const std::string& value) mutable { isExecute = true; };
+    windowManager->SetWindowCallNativeCallback(std::move(windowModeCallback));
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->windowManager_ = windowManager;
+    auto pattern = containerModalNode->GetPattern<ContainerModalPattern>();
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    containerPattern->OnContainerModalEvent("name", "value");
+    EXPECT_NE(containerPattern, nullptr);
+}
+
+/**
+ * @tc.name: ContainerModalPatternEnhanceTest030
+ * @tc.desc: Test ShowTitle
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest030, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto textNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<TextPickerColumnPattern>());
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(textNode);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(buttonNode);
+    const auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    bool isExecute = false;
+    auto windowModeCallback = [isExecute](
+                                  const std::string& name, const std::string& value) mutable { isExecute = true; };
+    windowManager->SetWindowCallNativeCallback(std::move(windowModeCallback));
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(containerModalNode, nullptr);
+    ASSERT_NE(pipeline, nullptr);
+    containerModalNode->AttachContext(AceType::RawPtr(pipeline));
+    pipeline->windowManager_ = windowManager;
+    auto pattern = containerModalNode->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    ASSERT_NE(containerPattern, nullptr);
+    containerPattern->CallContainerModalNative("name", "value");
+    EXPECT_NE(containerPattern, nullptr);
 }
 } // namespace OHOS::Ace::NG

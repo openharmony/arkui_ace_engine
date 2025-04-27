@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,12 +105,14 @@ public:
     static void TearDownTestCase();
     std::function<RefPtr<UINode>()> builderFunc_;
     std::function<RefPtr<UINode>()> titleBuilderFunc_;
-
+    RefPtr<FrameNode> sheetContentNode_;
+    std::function<RefPtr<UINode>()> sheetTitleBuilderFunc_;
 protected:
     static RefPtr<FrameNode> CreateBubbleNode(const TestProperty& testProperty);
     static RefPtr<FrameNode> CreateTargetNode();
     static void CreateSheetStyle(SheetStyle& sheetStyle);
     void CreateSheetBuilder();
+    void CreateSheetContentNode();
     int32_t minPlatformVersion_ = 0;
 };
 
@@ -151,7 +153,10 @@ void OverlayManagerTestNg::SetUpTestCase()
         } else if (type == ToastTheme::TypeId()) {
             return AceType::MakeRefPtr<ToastTheme>();
         } else if (type == SheetTheme::TypeId()) {
-            return AceType::MakeRefPtr<SheetTheme>();
+            auto  sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+            sheetTheme->closeIconButtonWidth_ = SHEET_CLOSE_ICON_WIDTH;
+            sheetTheme->centerDefaultWidth_ = SHEET_LANDSCAPE_WIDTH;
+            return sheetTheme;
         } else {
             return nullptr;
         }
@@ -206,6 +211,24 @@ void OverlayManagerTestNg::CreateSheetBuilder()
     titleBuilderFunc_ = buildTitleNodeFunc;
 }
 
+void OverlayManagerTestNg::CreateSheetContentNode()
+{
+    sheetContentNode_ =
+    FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+    ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    sheetContentNode_->AddChild(childFrameNode);
+    sheetTitleBuilderFunc_ = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+}
 
 /**
  * @tc.name: DeleteModal001
@@ -705,6 +728,80 @@ HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext002, TestSize.Level1)
     EXPECT_TRUE(currentStyle.scrollSizeMode.has_value());
     EXPECT_TRUE(currentStyle.shadow.has_value());
     EXPECT_TRUE(currentStyle.width.has_value());
+}
+
+/**
+ * @tc.name: UpdateBindSheetByUIContext003
+ * @tc.desc: Test OverlayManager::UpdateBindSheetByUIContext create sheet page.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set api version over api 11.
+     */
+    int32_t orignApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    int32_t targetId = targetNode->GetId();
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step3. create sheetNode, get sheetPattern.
+     */
+    CreateSheetContentNode();
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    SheetKey sheetKey = SheetKey(true, sheetContentNode_->GetId(), targetId);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OpenBindSheetByUIContext(sheetContentNode_, std::move(sheetTitleBuilderFunc_), sheetStyle, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(topSheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step4. test set pageHeight = 1000.
+     * @tc.expected: over api11 mediumPercent = 0.6, height = pageHeight_ * 0.6 = 1000 * 0.6 = 600.
+     */
+    topSheetPattern->pageHeight_ = 1000;
+    float expectSheetHeight = topSheetPattern->pageHeight_ * 0.6;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, expectSheetHeight));
+
+    /**
+     * @tc.steps: step5. UpdateBindSheetByUIContext
+     * @tc.expected: related property is isPartialUpdate.
+     */
+    SheetStyle updateSheetStyle;
+    updateSheetStyle.backgroundColor = Color::BLACK;
+    overlayManager->UpdateBindSheetByUIContext(sheetContentNode_, updateSheetStyle, targetId, true);
+
+    auto sheetNode = overlayManager->sheetMap_[sheetKey].Upgrade();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    auto currentStyle = layoutProperty->GetSheetStyleValue();
+    ASSERT_TRUE(currentStyle.sheetHeight.sheetMode.has_value());
+    EXPECT_EQ(currentStyle.sheetHeight.sheetMode, sheetStyle.sheetHeight.sheetMode);
+    EXPECT_EQ(currentStyle.backgroundColor, updateSheetStyle.backgroundColor);
+    EXPECT_EQ(overlayManager->sheetHeight_, expectSheetHeight);
+
+    /**
+     * @tc.steps: step7. recover api version info.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(orignApiVersion);
 }
 
 /**
@@ -1604,6 +1701,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea3, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -1987,6 +2085,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea6, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -2170,6 +2269,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea7, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -2355,6 +2455,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea8, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -2516,6 +2617,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea9, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -2678,6 +2780,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea10, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -2857,6 +2960,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea11, TestSize.Level1)
     scroll->MountToParent(sheetNode);
     sheetNode->GetFocusHub()->currentFocus_ = true;
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
     sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     auto renderContext = sheetNode->GetRenderContext();
     auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
@@ -3025,6 +3129,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidaiBar, TestSize.Level1)
     ASSERT_NE(sheetPattern, nullptr);
     auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
     ASSERT_NE(scrollNode, nullptr);
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
     auto scrollLayoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
@@ -4003,7 +4108,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern14, TestSize.Level1)
     sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(topSheetNode, topSheetNode->GetGeometryNode(),
         topSheetNode->GetLayoutProperty());
-    auto widthVal = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), layoutWrapper.GetRawPtr());
+    auto widthVal = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), Referenced::RawPtr(layoutWrapper));
     auto onWidthDidChangeFunc = [&widthVal](float width) { widthVal = width; };
     topSheetPattern->UpdateOnWidthDidChange(onWidthDidChangeFunc);
     topSheetPattern->FireOnWidthDidChange(topSheetNode);
@@ -4364,6 +4469,11 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage004, TestSize.Level1)
     /**
      * @tc.steps: step1. create sheet page.
      */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->centerDefaultWidth_ = SHEET_LANDSCAPE_WIDTH;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sheetTheme));
     auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto callback = [](const std::string&) {};
@@ -4403,10 +4513,10 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage004, TestSize.Level1)
     auto maxSize = SizeF(10.0f, 10.0f);
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(sheetNode, sheetNode->GetGeometryNode(),
         sheetNode->GetLayoutProperty());
-    auto width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), layoutWrapper.GetRawPtr());
+    auto width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), Referenced::RawPtr(layoutWrapper));
     EXPECT_EQ(width, SHEET_LANDSCAPE_WIDTH.ConvertToPx());
     sheetLayoutAlgorithm->sheetType_ = SHEET_POPUP;
-    width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), layoutWrapper.GetRawPtr());
+    width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize.Width(), Referenced::RawPtr(layoutWrapper));
     EXPECT_EQ(width, SHEET_POPUP_WIDTH.ConvertToPx());
 }
 

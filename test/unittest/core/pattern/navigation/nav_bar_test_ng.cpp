@@ -449,7 +449,7 @@ HWTEST_F(NavBarTestNg, NarBarPattern002, TestSize.Level1)
     EXPECT_NE(navigationPattern, nullptr);
 
     GestureEvent info;
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
@@ -626,7 +626,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern009, TestSize.Level1)
      * HideToolBar is false, NavigationMode is AUTO, MostMenuItemCountInBar is 0, MinPlatformVersion is 0 and MenuItem
      * text is not empty.
      */
-    auto navigationGroupEventHub = testParameters.navigationGroupNode->GetEventHub<EventHub>();
+    auto navigationGroupEventHub = testParameters.navigationGroupNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(navigationGroupEventHub, nullptr);
     navigationGroupEventHub->enabled_ = false;
     auto menuNodeId = ElementRegister::GetInstance()->MakeUniqueId();

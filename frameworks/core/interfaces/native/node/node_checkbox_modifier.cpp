@@ -16,6 +16,7 @@
 
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components/checkable/checkable_theme.h"
 
 namespace OHOS::Ace::NG {

@@ -184,14 +184,15 @@ RefPtr<ResourceObject> GetResourceObject(const NativeResourceObject& obj)
         }
         resObjParamsList.push_back(resObjParams);
     }
-    auto resourceObject =
-        AceType::MakeRefPtr<ResourceObject>(obj.id, obj.type, resObjParamsList, obj.bundleName, obj.moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+        obj.id, obj.type, resObjParamsList, obj.bundleName, obj.moduleName, Container::CurrentIdSafely());
     return resourceObject;
 }
 
 RefPtr<ResourceObject> GetResourceObjectByBundleAndModule(const NativeResourceObject& obj)
 {
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(obj.bundleName, obj.moduleName);
+    auto resourceObject =
+        AceType::MakeRefPtr<ResourceObject>(obj.bundleName, obj.moduleName, Container::CurrentIdSafely());
     return resourceObject;
 }
 
@@ -219,7 +220,7 @@ RefPtr<ResourceWrapper> CreateResourceWrapper()
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
         if (!resourceAdapter) {
             return nullptr;
         }
@@ -468,6 +469,22 @@ bool ViewAbstract::ParseCjSymbolId(NativeResourceObject& obj, uint32_t& result)
     auto resourceWrapper = CreateResourceWrapper(obj, resourceObject);
     if (!resourceWrapper) {
         return false;
+    }
+    if (obj.id == -1) {
+        if (!obj.paramsJsonStr) {
+            return false;
+        }
+        auto params = JsonUtil::ParseJsonString(obj.paramsJsonStr);
+        if (!params->IsArray()) {
+            return false;
+        }
+        auto param = params->GetArrayItem(0);
+        auto symbol = resourceWrapper->GetSymbolByName(param->GetString().c_str());
+        if (!symbol) {
+            return false;
+        }
+        result = symbol;
+        return true;
     }
     if (obj.type == static_cast<int32_t>(ResourceType::SYMBOL)) {
         result = resourceWrapper->GetSymbolById(static_cast<uint32_t>(obj.id));

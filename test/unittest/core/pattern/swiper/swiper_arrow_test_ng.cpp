@@ -14,6 +14,7 @@
  */
 
 #include "swiper_test_ng.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components/swiper/swiper_indicator_theme.h"
@@ -413,6 +414,240 @@ HWTEST_F(SwiperArrowTestNg, HoverEvent002, TestSize.Level1)
      */
     pattern_->hoverEvent_->GetOnHoverEventFunc()(true);
     EXPECT_TRUE(VerifyArrowVisible(false, false));
+}
+
+/**
+ * @tc.name: HoverEvent003
+ * @tc.desc: When has no indicator, check hover event time sequence of swiper and arrow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, HoverEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Hide indicator
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetShowIndicator(false); // hide indicator
+    model.SetDisplayArrow(true);   // show arrow
+    model.SetHoverShow(true);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
+    auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
+
+    /**
+     * @tc.steps: step2. Hover swiper
+     * @tc.expected: Only show right arrow
+     */
+    pattern_->hoverEvent_->GetOnHoverEventFunc()(true);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step3. Hover from swiper to left arrow
+     * @tc.expected: Only show right arrow
+     */
+    leftArrowPattern->ButtonOnHover(leftArrowNode_, true);
+    pattern_->hoverEvent_->GetOnHoverEventFunc()(false);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step4. Hover from left arrow to swiper
+     * @tc.expected: Only show right arrow
+     */
+    pattern_->hoverEvent_->GetOnHoverEventFunc()(true);
+    leftArrowPattern->ButtonOnHover(leftArrowNode_, false);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step5. Hover from swiper to right arrow
+     * @tc.expected: Only show right arrow
+     */
+    rightArrowPattern->ButtonOnHover(rightArrowNode_, true);
+    pattern_->hoverEvent_->GetOnHoverEventFunc()(false);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step6. Hover out of arrow
+     * @tc.expected: Do not show arrow
+     */
+    rightArrowPattern->ButtonOnHover(rightArrowNode_, false);
+    EXPECT_TRUE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+}
+
+/**
+ * @tc.name: HoverEvent004
+ * @tc.desc: When has indicator, check hover event time sequence of arrow and indicator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, HoverEvent004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Show indicator
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetShowIndicator(true); // show indicator
+    model.SetDisplayArrow(true);   // show arrow
+    model.SetHoverShow(true);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
+
+    /**
+     * @tc.steps: step2. Hover arrow
+     * @tc.expected: Only show right arrow
+     */
+    leftArrowPattern->ButtonOnHover(leftArrowNode_, true);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step3. Hover from arrow to indicator
+     * @tc.expected: Only show right arrow
+     */
+    indicatorPattern->HandleHoverEvent(true);
+    leftArrowPattern->ButtonOnHover(leftArrowNode_, false);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step4. Hover from indicator to arrow
+     * @tc.expected: Only show right arrow
+     */
+    leftArrowPattern->ButtonOnHover(leftArrowNode_, true);
+    indicatorPattern->HandleHoverEvent(false);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step5. Hover out of arrow
+     * @tc.expected: Do not show arrow
+     */
+    leftArrowPattern->ButtonOnHover(leftArrowNode_, false);
+    EXPECT_TRUE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+}
+
+/**
+ * @tc.name: HoverEvent005
+ * @tc.desc: When has indicator, test arrow status when hover attribute changes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, HoverEvent005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Show indicator
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetShowIndicator(true); // show indicator
+    model.SetDisplayArrow(true);   // show arrow
+    model.SetHoverShow(true);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
+
+    /**
+     * @tc.steps: step2. Hover arrow
+     * @tc.expected: Only show right arrow
+     */
+    rightArrowPattern->ButtonOnHover(rightArrowNode_, true);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step3. Change hover show to false
+     * @tc.expected: Only show right arrow
+     */
+    layoutProperty_->UpdateHoverShow(false);
+    frameNode_->MarkModifyDone();
+    EXPECT_TRUE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step4. Hover out of arrow
+     * @tc.expected: Only show right arrow
+     */
+    rightArrowPattern->ButtonOnHover(rightArrowNode_, false);
+    EXPECT_TRUE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step5. Change hover show to true
+     * @tc.expected: Do not show arrow
+     */
+    layoutProperty_->UpdateHoverShow(true);
+    frameNode_->MarkModifyDone();
+    EXPECT_TRUE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+}
+
+/**
+ * @tc.name: HoverEvent006
+ * @tc.desc: Test arrow status when indicator changes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, HoverEvent006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Hide indicator
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetShowIndicator(false); // hide indicator
+    model.SetDisplayArrow(true);   // show arrow
+    model.SetHoverShow(true);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
+
+    /**
+     * @tc.steps: step2. Hover swiper
+     * @tc.expected: Only show right arrow
+     */
+    pattern_->hoverEvent_->GetOnHoverEventFunc()(true);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    /**
+     * @tc.steps: step3. Show indicator
+     * @tc.expected: Do not show arrow
+     */
+    layoutProperty_->UpdateShowIndicator(true);
+    frameNode_->MarkModifyDone();
+    EXPECT_TRUE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    /**
+     * @tc.steps: step4. Hover arrow
+     * @tc.expected: Only show right arrow
+     */
+    rightArrowPattern->ButtonOnHover(rightArrowNode_, true);
+    EXPECT_FALSE(pattern_->IsHoverNone());
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
 }
 
 /**
@@ -922,13 +1157,14 @@ HWTEST_F(SwiperArrowTestNg, InitButtonEventCallBack002, TestSize.Level1)
     auto buttonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
     ASSERT_NE(buttonNode, nullptr);
     auto arrowGestureHub = buttonNode->GetOrCreateGestureEventHub();
+    auto leftArrowGestureHub = leftArrowNode_->GetOrCreateGestureEventHub();
     /**
      * @tc.steps: step1 trigger click event.
      */
     ChangeIndex(2);
     GestureEvent info;
     info.SetSourceDevice(SourceType::KEYBOARD);
-    auto actuatorClick = arrowGestureHub->clickEventActuator_;
+    auto actuatorClick = leftArrowGestureHub->clickEventActuator_;
     auto eventsClick = actuatorClick->clickEvents_;
     ASSERT_FALSE(eventsClick.empty());
     auto event = eventsClick.front();
@@ -1091,9 +1327,7 @@ HWTEST_F(SwiperArrowTestNg, Arrow005, TestSize.Level1)
     ASSERT_NE(indicatorPattern, nullptr);
     auto controller = indicatorPattern->GetIndicatorController();
     ASSERT_NE(controller, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    controller->SetSwiperNode(targetNode, indicatorNode);
+    controller->SetSwiperNode(frameNode_);
     EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameRect(), RectF(0.f, 0.f, 0.f, 0.f)));
     indicatorPattern->SaveDotIndicatorProperty();
     FlushUITasks();
@@ -1136,5 +1370,85 @@ HWTEST_F(SwiperArrowTestNg, InitAccessibilityText002, TestSize.Level1)
     buttonAccessibilityProperty->SetAccessibilityText("right");
     auto text = buttonAccessibilityProperty->GetAccessibilityText();
     EXPECT_EQ(text, "right");
+}
+
+/**
+ * @tc.name: InitOnKeyEvent002
+ * @tc.desc: Test InitOnKeyEvent method and callback is called.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, InitOnKeyEvent002, TestSize.Level1)
+{
+    auto arrowNode = FrameNode::GetOrCreateFrameNode(
+        V2::SWIPER_LEFT_ARROW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    auto pattern = arrowNode->GetPattern<SwiperArrowPattern>();
+    arrowNode->GetOrCreateFocusHub();
+    pattern->InitOnKeyEvent();
+    auto focusHub = arrowNode->GetFocusHub();
+    auto events = focusHub->onKeyEventsInternal_;
+    auto it = events.find(OnKeyEventType::DEFAULT);
+    ASSERT_NE(it, events.end());
+    /**
+     * @tc.steps: step1. Test key event with KeyCode::KEY_LEFT_KNOB and KeyAction::DOWN.
+     */
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_LEFT_KNOB;
+    keyEvent.action = KeyAction::DOWN;
+    EXPECT_FALSE(it->second(keyEvent));
+    /**
+     * @tc.steps: step2. Test key event with KeyCode::KEY_ENTER and KeyAction::DOWN.
+     */
+    keyEvent.code = KeyCode::KEY_ENTER;
+    keyEvent.action = KeyAction::DOWN;
+    EXPECT_TRUE(it->second(keyEvent));
+    /**
+     * @tc.steps: step3. Test key event with KeyCode::KEY_ENTER and KeyAction::UP.
+     */
+    keyEvent.code = KeyCode::KEY_SPACE;
+    keyEvent.action = KeyAction::UP;
+    EXPECT_FALSE(it->second(keyEvent));
+}
+
+/**
+ * @tc.name: UpdateArrowContent003
+ * @tc.desc: Test UpdateArrowContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, UpdateArrowContent003, TestSize.Level1)
+{
+    g_isNeedSymbol = false;
+    /**
+     * @tc.steps: step1. Set arrow
+     * @tc.expected: Vertify symbol type/color
+     */
+    CreateWithArrow();
+    auto leftButtonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
+    EXPECT_EQ(leftButtonNode->GetTag(), V2::BUTTON_ETS_TAG);
+    g_isNeedSymbol = true;
+}
+
+/**
+ * @tc.name: UpdateArrowContent004
+ * @tc.desc: Test UpdateArrowContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, UpdateArrowContent004, TestSize.Level1)
+{
+    g_isNeedSymbol = false;
+    /**
+     * @tc.steps: step1. Set VERTICAL and enabled:false
+     * @tc.expected: Vertify symbol type/color
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(false);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    model.SetEnabled(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto leftButtonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
+    EXPECT_EQ(leftButtonNode->GetTag(), V2::BUTTON_ETS_TAG);
+    g_isNeedSymbol = true;
 }
 } // namespace OHOS::Ace::NG

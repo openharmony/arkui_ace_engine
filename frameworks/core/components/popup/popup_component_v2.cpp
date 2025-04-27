@@ -21,6 +21,7 @@
 #include "core/components/padding/padding_component.h"
 #include "core/components/popup/popup_element_v2.h"
 #include "core/components/text/text_component_v2.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

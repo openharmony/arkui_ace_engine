@@ -212,7 +212,7 @@ HWTEST_F(TextPickerModelTestNg, SetOnCascadeChange001, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto textPickerEventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     ASSERT_NE(textPickerEventHub, nullptr);
     
     EXPECT_NE(textPickerEventHub->TextChangeEvent_, nullptr);
@@ -241,7 +241,7 @@ HWTEST_F(TextPickerModelTestNg, SetOnScrollStop001, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto textPickerEventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     ASSERT_NE(textPickerEventHub, nullptr);
 
     EXPECT_NE(textPickerEventHub->onScrollStopEvent_, nullptr);
@@ -668,7 +668,7 @@ HWTEST_F(TextPickerModelTestNg, StaticSetOnCascadeChange001, TestSize.Level1)
 {
     auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     ASSERT_NE(frameNode, nullptr);
-    auto textPickerEventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     ASSERT_NE(textPickerEventHub, nullptr);
     int32_t callbackInfo = 0;
     auto onChangeFunc = [&callbackInfo](const std::vector<std::string>& value, const std::vector<double>& index) {
@@ -692,7 +692,7 @@ HWTEST_F(TextPickerModelTestNg, StaticSetOnScrollStop001, TestSize.Level1)
 {
     auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     ASSERT_NE(frameNode, nullptr);
-    auto textPickerEventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto textPickerEventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     ASSERT_NE(textPickerEventHub, nullptr);
     int32_t callbackInfo = 0;
     auto onScrollStopFunc = [&callbackInfo](const std::vector<std::string>& value, const std::vector<double>& index) {
@@ -941,8 +941,8 @@ HWTEST_F(TextPickerModelTestNg, getTextPickerRange001, TestSize.Level1)
     auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(node, nullptr);
 
-    textPickerModelNG.options_.clear();
-    textPickerModelNG.rangeValue_.clear();
+    textPickerModelNG.SetCascadeColumns({});
+    textPickerModelNG.SetRange({});
     textPickerModelNG.isSingleRange_ = false;
 
     auto result = textPickerModelNG.getTextPickerRange(node);
@@ -1048,5 +1048,81 @@ HWTEST_F(TextPickerModelTestNg, SetDefaultTextStyle003, TestSize.Level1)
     EXPECT_EQ(Dimension(10.0_vp), pickerProperty->GetDefaultMinFontSize().value_or(Dimension()));
     EXPECT_EQ(Dimension(30.0_vp), pickerProperty->GetDefaultMaxFontSize().value_or(Dimension()));
     EXPECT_EQ(TextOverflow::NONE, pickerProperty->GetDefaultTextOverflow().value_or(TextOverflow::CLIP));
+}
+
+/**
+ * @tc.name: TextPickerModelNGSetEnableHapticFeedback001
+ * @tc.desc: Test SetEnableHapticFeedback
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelNGSetEnableHapticFeedback001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    TextPickerModelNG::SetEnableHapticFeedback(AceType::RawPtr(frameNode), false);
+    EXPECT_FALSE(textPickerPattern->isEnableHaptic_);
+    auto result = TextPickerModelNG::GetEnableHapticFeedback(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetIsCascade001
+ * @tc.desc: Test SetIsCascade.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetIsCascade001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    TextPickerModelNG::SetIsCascade(AceType::RawPtr(frameNode), true);
+    EXPECT_TRUE(textPickerPattern->isCascade_);
+}
+
+/**
+ * @tc.name: SetColumnKind001
+ * @tc.desc: Test SetColumnKind.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetColumnKind001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    TextPickerModelNG::SetColumnKind(AceType::RawPtr(frameNode), TEXT);
+    EXPECT_EQ(textPickerPattern->columnsKind_, TEXT);
+    TextPickerModelNG::SetColumnKind(AceType::RawPtr(frameNode), MIXTURE);
+    EXPECT_EQ(textPickerPattern->columnsKind_, MIXTURE);
+}
+
+/**
+ * @tc.name: TextPickerModelNGSetDisableTextStyleAnimation001
+ * @tc.desc: Test SetDisableTextStyleAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelNGSetDisableTextStyleAnimation001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    /**
+     * @tc.cases: case1. The default value of isDisableTextStyleAnimation_ is false.
+     */
+    EXPECT_FALSE(textPickerPattern->isDisableTextStyleAnimation_);
+
+    /**
+     * @tc.cases: case2. Set the value of isDisableTextStyleAnimation_ to true.
+     */
+    TextPickerModelNG::SetDisableTextStyleAnimation(AceType::RawPtr(frameNode), true);
+    EXPECT_TRUE(textPickerPattern->isDisableTextStyleAnimation_);
 }
 } // namespace OHOS::Ace::NG

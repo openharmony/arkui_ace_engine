@@ -181,6 +181,14 @@ public:
      */
     uint32_t GetSymbolByName(const char *name) const;
 
+     /*
+     * Get int value from platform constants.
+     * NOTE: false will be returned if not found or value is not uint32_t.
+     * @param[in] key Target key.
+     * @return uint32_t value corresponding to the name.
+     */
+    uint32_t GetSymbolById(uint32_t resId) const;
+
     /*
      * Get int array value from platform constants.
      * NOTE: empty array will be returned if not found or value is not boolean.
@@ -354,6 +362,11 @@ public:
         }
     }
 
+    void UpdateResourceAdapter(const RefPtr<ResourceAdapter>& adapter)
+    {
+        resAdapter_ = adapter;
+    }
+
     uint32_t GetResourceLimitKeys() const
     {
         CHECK_NULL_RETURN(resAdapter_, 0);
@@ -370,10 +383,13 @@ private:
     static const ResValueWrapper* GetPlatformConstants(uint32_t key);
     static const ResValueWrapper* styleMapDefault[];
     static uint32_t DefaultMapCount;
+#ifdef WEARABLE_PRODUCT
     static const ResValueWrapper* styleMapWatch[];
     static uint32_t WatchMapCount;
+#else
     static const ResValueWrapper* styleMapTv[];
     static uint32_t TvMapCount;
+#endif
 
     ResValueWrapper GetValue(uint32_t key) const;
     double GetBlendAlpha(const BlendAlpha& blendAlpha) const;

@@ -20,47 +20,6 @@
 #include "core/gestures/gesture_event.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct ArkUI_GestureRecognizer {
-    int32_t type = -1;
-    ArkUIGesture* gesture = nullptr;
-    void* extraData = nullptr;
-    void* attachNode = nullptr;
-    bool capi = true;
-    void* recognizer = nullptr;
-    ArkUIGestureEventTargetInfo targetInfo = {};
-};
-
-struct ArkUI_GestureEventTargetInfo {
-    void* uiNode = nullptr;
-};
-
-#ifdef __cplusplus
-};
-
-// the ArkUI_GestureEvent struct actually same as ArkUIAPIEventGestureAsyncEvent;
-struct ArkUI_GestureEvent {
-    ArkUIAPIEventGestureAsyncEvent eventData;
-    void* attachNode;
-};
-
-struct ArkUI_GestureInterruptInfo {
-    ArkUIGestureInterruptInfo interruptData;
-};
-
-struct ArkUI_ParallelInnerGestureEvent {
-    ArkUIGestureRecognizer* current = nullptr;
-    ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;
-    void* userData = nullptr;
-    int32_t count;
-};
-
-#endif
-
-
 ArkUI_GestureEventActionType OH_ArkUI_GestureEvent_GetActionType(const ArkUI_GestureEvent* event)
 {
     ArkUI_GestureEventActionType ret;
@@ -387,7 +346,7 @@ void* OH_ArkUI_GestureInterrupter_GetUserData(ArkUI_GestureInterruptInfo* event)
     if (!event) {
         return nullptr;
     }
-    return event->interruptData.userData;
+    return event->interruptData.customUserData;
 }
 
 ArkUI_GestureRecognizer* OH_ArkUI_ParallelInnerGestureEvent_GetCurrentRecognizer(ArkUI_ParallelInnerGestureEvent* event)
@@ -431,7 +390,7 @@ int32_t OH_ArkUI_GetGestureParam_DirectMask(ArkUI_GestureRecognizer* recognizer,
     }
     switch (recognizer->type) {
         case SWIPE_GESTURE: {
-            ArkUISwipeGestureDirection direction = ArkUISwipeGestureDirection::ArkUI_SWIPE_GESTURE_DIRECTION_ALL;
+            ArkUIGestureDirection direction = ArkUIGestureDirection::ArkUI_GESTURE_DIRECTION_ALL;
             auto result = OHOS::Ace::NodeModel::GetFullImpl()
                               ->getNodeModifiers()
                               ->getGestureModifier()
@@ -650,6 +609,46 @@ int32_t OH_ArkUI_GetGestureParam_distanceThreshold(ArkUI_GestureRecognizer* reco
     return ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED;
 }
 
+ArkUI_ErrorCode OH_ArkUI_PanGesture_SetDistanceMap(
+    ArkUI_GestureRecognizer* recognizer, int size, int* toolTypeArray, double* distanceArray)
+{
+    if (!recognizer || !toolTypeArray || !distanceArray) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* gesture = reinterpret_cast<ArkUIGesture*>(recognizer->gesture);
+    if (!gesture) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (recognizer->type == PAN_GESTURE) {
+        auto result = OHOS::Ace::NodeModel::GetFullImpl()
+                          ->getNodeModifiers()
+                          ->getGestureModifier()
+                          ->setDistanceMap(gesture, size, toolTypeArray, distanceArray);
+        return static_cast<ArkUI_ErrorCode>(result);
+    }
+    return ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED;
+}
+
+ArkUI_ErrorCode OH_ArkUI_PanGesture_GetDistanceByToolType(
+    ArkUI_GestureRecognizer* recognizer, int toolType, double* distance)
+{
+    if (!recognizer || !distance) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (recognizer->type == PAN_GESTURE) {
+        auto result = OHOS::Ace::NodeModel::GetFullImpl()
+                            ->getNodeModifiers()
+                            ->getGestureModifier()
+                            ->getDistanceByToolType(gestureRecognizer, toolType, distance);
+        return static_cast<ArkUI_ErrorCode>(result);
+    }
+    return ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED;
+}
+
 namespace OHOS::Ace::GestureModel {
 
 constexpr int32_t DEFAULT_PAN_FINGERS = 1;
@@ -677,8 +676,7 @@ ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers)
     return ndkGesture;
 }
 
-ArkUI_GestureRecognizer* CreateTapGestureWithDistanceThreshold(
-    int32_t count, int32_t fingers, double distanceThreshold)
+ArkUI_GestureRecognizer* CreateTapGestureWithDistanceThreshold(int32_t count, int32_t fingers, double distanceThreshold)
 {
     count = std::max(count, DEFAULT_TAP_COUNT);
     fingers = std::clamp(fingers, DEFAULT_TAP_FINGERS, MAX_TAP_FINGERS);

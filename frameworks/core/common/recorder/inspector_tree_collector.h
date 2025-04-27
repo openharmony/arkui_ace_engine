@@ -19,30 +19,34 @@
 #include <list>
 
 #include "base/json/json_util.h"
+#include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/base/ui_node.h"
 #include "interfaces/inner_api/ace/ui_event_observer.h"
 
 namespace OHOS::Ace::Recorder {
-using GetInspectorTree = std::function<void()>;
-
-class InspectorTreeCollector final {
+class InspectorTreeCollector final : public std::enable_shared_from_this<InspectorTreeCollector> {
 public:
-    static InspectorTreeCollector& Get();
-    void GetTree(GetInspectorTree&& getTreeFunc, OnInspectorTreeResult&& callback);
+    InspectorTreeCollector(OnInspectorTreeResult&& callback, bool isBackground);
+    ~InspectorTreeCollector() = default;
     void IncreaseTaskNum();
     void DecreaseTaskNum();
+    void CreateJson();
     std::unique_ptr<JsonValue>& GetJson();
+    void RetainNode(const RefPtr<NG::UINode>& node);
+    void SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor);
 
 private:
-    InspectorTreeCollector() {};
-    ~InspectorTreeCollector() = default;
     void UpdateTaskNum(int32_t num);
 
     std::unique_ptr<JsonValue> root_;
     int32_t taskNum_ = 0;
-    std::list<OnInspectorTreeResult> onResultFuncList_;
+    OnInspectorTreeResult onResultFunc_;
+    bool isBackground_;
+    std::mutex mutex_;
 
-    ACE_DISALLOW_COPY_AND_MOVE(InspectorTreeCollector);
+    RefPtr<TaskExecutor> taskExecutor_;
+    std::list<RefPtr<NG::UINode>> cacheNodes_;
 };
 } // namespace OHOS::Ace::Recorder
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_RECORDER_INSPRCTOR_TREE_COLLECTOR_H

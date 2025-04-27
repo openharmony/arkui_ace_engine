@@ -154,6 +154,8 @@ public:
 
     void UpdateSelectedState(const RefPtr<FrameNode>& swiperNode, const RefPtr<TabBarPattern>& tabBarPattern,
         const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int index);
+    int32_t OnInjectionEvent(const std::string& command) override;
+    void ReportComponentChangeEvent(int32_t currentIndex);
 
 private:
     void OnAttachToFrameNode() override;
@@ -170,9 +172,8 @@ private:
         const RefPtr<FrameNode>& swiperNode, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty);
     void InitFocusEvent();
     RefPtr<FocusHub> GetCurrentFocusNode(FocusIntension intension);
-    void SetLastWeakFocusNode(const RefPtr<FrameNode>& tabsNode, const RefPtr<FrameNode>& tabBarNode,
-        const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int32_t index);
-
+    void InitAccessibilityZIndex();
+    bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;
     bool isInit_ = true;
@@ -187,6 +188,7 @@ private:
     AnimationEndEventPtr animationEndEvent_;
     std::function<bool(int32_t, int32_t)> callback_;
     bool interceptStatus_ = false;
+    BarPosition barPosition_ = BarPosition::END; // default accessibilityZIndex is consistent with BarPosition::END
 };
 
 } // namespace OHOS::Ace::NG

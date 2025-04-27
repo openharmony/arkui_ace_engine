@@ -398,4 +398,19 @@ HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg005, TestSize.Level1)
     retVal = ParseTemplateArgs(args, size, gap, childrenCount);
     EXPECT_EQ(gap, 100);
 }
+
+/**
+ * @tc.name: TemplatesParserTestNg006
+ * @tc.desc: Test ParseArgsWithoutAutoFill with large repeat number
+ * @tc.type: FUNC
+ */
+HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg006, TestSize.Level1)
+{
+    std::string args = "repeat(10000000, 2px)";
+    double size = 100;
+    double gap = 2;
+    int32_t childrenCount = 10;
+    auto retVal = ParseTemplateArgs(args, size, gap, childrenCount);
+    EXPECT_EQ(retVal.first.size(), size);
+}
 } // namespace OHOS::Ace::NG

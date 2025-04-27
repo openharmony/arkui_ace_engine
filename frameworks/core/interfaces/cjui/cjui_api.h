@@ -59,8 +59,8 @@ struct CJUICommonModifier {
     void (*resetOpacity)(ArkUINodeHandle node);
     void (*setAlign)(ArkUINodeHandle node, ArkUI_Int32 align);
     void (*resetAlign)(ArkUINodeHandle node);
-    void (*setBackdropBlur)(
-        ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
+    void (*setBackdropBlur)(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues,
+        ArkUI_Int32 blurValuesSize, ArkUI_Bool disableSystemAdaptation);
     void (*resetBackdropBlur)(ArkUINodeHandle node);
     void (*setHueRotate)(ArkUINodeHandle node, ArkUI_Float32 deg);
     void (*resetHueRotate)(ArkUINodeHandle node);
@@ -78,8 +78,8 @@ struct CJUICommonModifier {
     void (*resetContrast)(ArkUINodeHandle node);
     void (*setBrightness)(ArkUINodeHandle node, ArkUI_Float64 brightness);
     void (*resetBrightness)(ArkUINodeHandle node);
-    void (*setBlur)(
-        ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
+    void (*setBlur)(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues,
+        ArkUI_Int32 blurValuesSize, ArkUI_Bool disableSystemAdaptation);
     void (*resetBlur)(ArkUINodeHandle node);
     void (*setLinearGradient)(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
         const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength);
@@ -99,14 +99,14 @@ struct CJUICommonModifier {
     void (*setBorderImageGradient)(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
         const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength);
     void (*setForegroundBlurStyle)(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
-        const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
+        const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize, ArkUI_Bool disableSystemAdaptation);
     void (*resetForegroundBlurStyle)(ArkUINodeHandle node);
     void (*setLinearGradientBlur)(ArkUINodeHandle node, ArkUI_Float32 blurRadius, const ArkUI_Float32* stops,
         ArkUI_Uint32 stopsLength, ArkUI_Int32 directionValue);
     void (*resetLinearGradientBlur)(ArkUINodeHandle node);
     void (*setBackgroundBlurStyle)(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[5], ArkUI_Float32 scale,
         const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize, ArkUI_Bool isValidColor,
-        ArkUI_Uint32 inactiveColorArg);
+        ArkUI_Uint32 inactiveColorArg, ArkUI_Bool disableSystemAdaptation);
     void (*resetBackgroundBlurStyle)(ArkUINodeHandle node);
     void (*setBorder)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
         const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize, ArkUI_Bool isLocalizedBorderWidth,
@@ -243,7 +243,7 @@ struct CJUICommonModifier {
     void (*setBackgroundEffect)(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 saturation,
         ArkUI_Float32 brightness, ArkUI_Uint32 color, ArkUI_Int32 adaptiveColor, const ArkUI_Float32* blurValues,
         ArkUI_Int32 blurValuesSize, ArkUI_Int32 policy, ArkUI_Int32 blurType, ArkUI_Bool isValidColor,
-        ArkUI_Uint32 inactiveColorArg);
+        ArkUI_Uint32 inactiveColorArg, ArkUI_Bool disableSystemAdaptation);
     void (*resetBackgroundEffect)(ArkUINodeHandle node);
     void (*setBackgroundBrightness)(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree);
     void (*resetBackgroundBrightness)(ArkUINodeHandle node);
@@ -1518,6 +1518,12 @@ struct CJUINavDestinationModifier {
     void (*resetIgnoreLayoutSafeArea)(ArkUINodeHandle node);
     void (*setNavDestinationSystemTransition)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetNavDestinationSystemTransition)(ArkUINodeHandle node);
+    void (*setPreferredOrientation)(ArkUINodeHandle node, ArkUI_Int32 orientation);
+    void (*resetPreferredOrientation)(ArkUINodeHandle node);
+    void (*setEnableStatusBar)(ArkUINodeHandle node, ArkUIOptionalBool enable, ArkUIOptionalBool animated);
+    void (*resetEnableStatusBar)(ArkUINodeHandle node);
+    void (*setEnableNavigationIndicator)(ArkUINodeHandle node, ArkUIOptionalBool enable);
+    void (*resetEnableNavigationIndicator)(ArkUINodeHandle node);
 };
 
 struct CJUITextAreaModifier {
@@ -1872,7 +1878,24 @@ struct CJUIWebModifier {
     void (*setWebOptions)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setWebSrcResources)(ArkUINodeHandle node, ArkUI_Int32 id, ArkUI_Int32 type, ArkUI_CharPtr name,
         ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName);
-    void (*setWebMixedMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*setJavaScriptAccess)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetJavaScriptAccess)(ArkUINodeHandle node);
+    void (*setFileAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetFileAccessEnabled)(ArkUINodeHandle node);
+    void (*setDomStorageAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetDomStorageAccessEnabled)(ArkUINodeHandle node);
+    void (*setMixedMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetMixedMode)(ArkUINodeHandle node);
+    void (*setZoomAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetZoomAccessEnabled)(ArkUINodeHandle node);
+    void (*setCacheMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetCacheMode)(ArkUINodeHandle node);
+    void (*setDarkMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetDarkMode)(ArkUINodeHandle node);
+    void (*setMultiWindowAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetMultiWindowAccessEnabled)(ArkUINodeHandle node);
+    void (*setAllowWindowOpenMethod)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetAllowWindowOpenMethod)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {
@@ -2767,6 +2790,11 @@ struct CJUISelectModifier {
     void (*resetSelectDividerNull)(ArkUINodeHandle node);
     void (*setSelectDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
     void (*resetSelectDirection)(ArkUINodeHandle node);
+    void (*setAvoidance)(ArkUINodeHandle node, ArkUI_Int32 mode);
+    void (*resetAvoidance)(ArkUINodeHandle node);
+    void (*setMenuOutline)(ArkUINodeHandle node, const ArkUI_Float32* width, ArkUI_Int32 widthSize,
+        const ArkUI_Uint32* color, ArkUI_Int32 colorSize);
+    void (*resetMenuOutline)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/

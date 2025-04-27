@@ -20,7 +20,9 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
@@ -28,6 +30,10 @@ enum class ExpandMode : uint32_t {
     NOT_EXPAND = 0,
     EXPAND,
     LAZY_EXPAND,
+};
+
+enum EventQueryType {
+    ON_CLICK = 0,
 };
 
 ArkUI_Bool IsModifiable(ArkUINodeHandle node)
@@ -429,8 +435,11 @@ ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
         return nullptr;
     }
 
-    if (!AceType::InstanceOf<NG::FrameNode>(node)) {
+    if (!AceType::InstanceOf<NG::FrameNode>(node) || AceType::InstanceOf<NG::CustomMeasureLayoutNode>(node)) {
         auto parent = node->GetParent();
+        if (parent && parent->GetTag() == V2::RECYCLE_VIEW_ETS_TAG) {
+            parent = parent->GetParent();
+        }
         if (parent && parent->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
             node = parent;
         } else {
@@ -606,6 +615,22 @@ ArkUI_Bool CheckIfCanCrossLanguageAttributeSetting(ArkUINodeHandle node)
     return currentNode -> IsCNode() ? currentNode->isCrossLanguageAttributeSetting() : false;
 }
 
+EventBindingInfo GetInteractionEventBindingInfo(ArkUINodeHandle node, int eventType)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    EventBindingInfo bindingInfo {};
+    CHECK_NULL_RETURN(currentNode, bindingInfo);
+    if (eventType != EventQueryType::ON_CLICK) {
+        return bindingInfo;
+    }
+    auto info = currentNode->GetInteractionEventBindingInfo();
+    bindingInfo.baseEventRegistered = info.baseEventRegistered;
+    bindingInfo.nodeEventRegistered = info.nodeEventRegistered;
+    bindingInfo.nativeEventRegistered= info.nativeEventRegistered;
+    bindingInfo.builtInEventRegistered= info.builtInEventRegistered;
+    return bindingInfo;
+}
+
 ArkUI_Int32 SetSystemFontStyleChangeEvent(ArkUINodeHandle node, void* userData, void* onFontStyleChange)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -651,14 +676,17 @@ void FreeCustomPropertyCharPtr(char* value, ArkUI_Uint32 size)
     value = nullptr;
 }
 
-void SetCustomPropertyModiferByKey(ArkUINodeHandle node, void* callback, void* getCallback)
+void SetCustomPropertyModiferByKey(ArkUINodeHandle node, void* callback, void* getCallback,
+    void* getCustomPropertyMap)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::function<bool()>* func = reinterpret_cast<std::function<bool()>*>(callback);
     std::function<std::string(const std::string&)>* getFunc =
         reinterpret_cast<std::function<std::string(const std::string&)>*>(getCallback);
-    frameNode->SetJSCustomProperty(*func, *getFunc);
+    std::function<std::string()>* getMapFunc =
+        reinterpret_cast<std::function<std::string()>*>(getCustomPropertyMap);
+    frameNode->SetJSCustomProperty(*func, *getFunc, std::move(*getMapFunc));
 }
 
 void AddCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, ArkUI_CharPtr value)
@@ -864,6 +892,7 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     static const std::vector<const char*> nodeTypeArray = {
         OHOS::Ace::V2::STACK_ETS_TAG,
         OHOS::Ace::V2::XCOMPONENT_ETS_TAG,
+        OHOS::Ace::V2::EMBEDDED_COMPONENT_ETS_TAG,
     };
     auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), moveNode->GetTag());
     if (pos == nodeTypeArray.end()) {
@@ -875,16 +904,17 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     }
     auto oldParent = moveNode->GetParent();
     moveNode->setIsMoving(true);
+    auto moveNodeRef = AceType::Claim(moveNode);
     if (oldParent) {
-        oldParent->RemoveChild(AceType::Claim(moveNode));
+        oldParent->RemoveChild(moveNodeRef);
         oldParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     int32_t childCount = toNode->TotalChildCount();
     if (index >= childCount || index < 0) {
-        toNode->AddChild(AceType::Claim(moveNode));
+        toNode->AddChild(moveNodeRef);
     } else {
         auto indexChild = toNode->GetChildAtIndex(index);
-        toNode->AddChildBefore(AceType::Claim(moveNode), indexChild);
+        toNode->AddChildBefore(moveNodeRef, indexChild);
     }
     toNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     moveNode->setIsMoving(false);
@@ -976,6 +1006,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .getCrossLanguageOptions = GetCrossLanguageOptions,
         .checkIfCanCrossLanguageAttributeSetting = CheckIfCanCrossLanguageAttributeSetting,
         .setKeyProcessingMode = SetKeyProcessingMode,
+        .getInteractionEventBindingInfo = GetInteractionEventBindingInfo,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

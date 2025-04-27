@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
+
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 
@@ -28,7 +30,15 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Container is null.");
         return;
     }
-    if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
+    
+    auto isSubContainer = container->IsSubContainer();
+    auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
+    if (!expandDisplay && isSubContainer && dialogProperties.isShowInSubWindow) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "subwindow can not open dialog in subwindow");
+        return;
+    }
+
+    if (isSubContainer && (!dialogProperties.isShowInSubWindow || expandDisplay)) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
         if (!container) {
@@ -91,7 +101,7 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseOpenDialogTask(int32_t cu
         if (dialogProperties.isShowInSubWindow) {
             dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
             CHECK_NULL_VOID(dialog);
-            if (dialogProperties.isModal && !dialogProperties.isScenceBoardDialog &&
+            if (dialogProperties.isModal && !dialogProperties.isSceneBoardDialog &&
                 !container->IsUIExtensionWindow()) {
                 auto mask = overlayManager->SetDialogMask(dialogProperties);
                 if (!mask) {
@@ -141,7 +151,8 @@ RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProper
     RefPtr<NG::FrameNode> dialog;
     if (dialogProperties.isShowInSubWindow) {
         dialog = SubwindowManager::GetInstance()->ShowDialogNGWithNode(dialogProperties, customNode);
-        if (dialogProperties.isModal && !dialogProperties.isScenceBoardDialog && !container->IsUIExtensionWindow()) {
+        CHECK_NULL_RETURN(dialog, nullptr);
+        if (dialogProperties.isModal && !dialogProperties.isSceneBoardDialog && !container->IsUIExtensionWindow()) {
             DialogProperties Maskarg;
             Maskarg.isMask = true;
             Maskarg.autoCancel = dialogProperties.autoCancel;

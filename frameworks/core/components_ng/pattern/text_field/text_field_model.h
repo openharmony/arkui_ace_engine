@@ -139,6 +139,7 @@ enum class CleanNodeStyle {
 };
 
 enum class MenuPolicy { DEFAULT = 0, HIDE, SHOW };
+enum class HandlePolicy { DEFAULT = 0, HIDE, SHOW };
 
 enum class CancelButtonStyle {
     CONSTANT,
@@ -148,6 +149,7 @@ enum class CancelButtonStyle {
 
 struct SelectionOptions {
     MenuPolicy menuPolicy = MenuPolicy::DEFAULT;
+    HandlePolicy handlePolicy = HandlePolicy::DEFAULT;
 };
 
 enum class PreviewTextStyle {
@@ -191,6 +193,8 @@ public:
     virtual int32_t AddText(std::u16string text, int32_t offset) { return 0; }
     virtual void DeleteText(int32_t start, int32_t end) {}
     virtual SelectionInfo GetSelection() { return {}; }
+    virtual void ClearPreviewText() {}
+    virtual std::u16string GetText() { return u""; }
 
     void SetGetCaretIndex(std::function<int32_t()>&& setGetCaretIndex)
     {
@@ -239,7 +243,7 @@ public:
                 auto nextChar = value.substr(i, 1);
                 auto mapTuple = escapeMap.find(nextChar);
                 if (mapTuple == escapeMap.end()) {
-                    TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Find escape \\%{private}s failed", nextChar.c_str());
+                    TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Find escape \\ failed");
                     return false;
                 }
                 ch = mapTuple->second;
@@ -276,6 +280,7 @@ public:
     virtual void ResetPlaceholderColor() = 0;
     virtual void SetPlaceholderFont(const Font& value) = 0;
     virtual void SetEnterKeyType(TextInputAction value) = 0;
+    virtual void SetCapitalizationMode(AutoCapitalizationMode value) = 0;
     virtual void SetTextAlign(TextAlign value) = 0;
     virtual void SetLineBreakStrategy(LineBreakStrategy lineBreakStrategy) = 0;
     virtual void SetCaretColor(const Color& value) = 0;

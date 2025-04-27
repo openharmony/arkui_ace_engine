@@ -120,13 +120,7 @@ public:
         if (value.empty()) {
             return;
         }
-        range_.clear();
-        for (size_t i = 0; i < value.size(); i++) {
-            RangeContent content;
-            content.icon_ = value[i].icon_;
-            content.text_ = value[i].text_;
-            range_.emplace_back(content);
-        }
+        range_ = value;
     }
 
     std::vector<NG::RangeContent> GetRange() const
@@ -526,6 +520,12 @@ public:
     }
 
     void ColumnPatternInitHapticController();
+    void UpdateUserSetSelectColor();
+    std::string GetTextPickerRange() const;
+    inline void SetSingleRange(bool isSingleRange)
+    {
+        isSingleRange_ = isSingleRange;
+    }
 
 private:
     void OnModifyDone() override;
@@ -579,14 +579,17 @@ private:
         std::vector<NG::RangeContent>& rangeContents, uint32_t patterIndex);
     void ProcessCascadeOptionsValues(const std::vector<std::string>& rangeResultValue, uint32_t index);
     void SetFocusCornerRadius(RoundRect& paintRect);
-    void UpdateConfirmButtonMargin(
-        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
-    void UpdateCancelButtonMargin(
-        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
+    void UpdateButtonMargin(
+        const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmOrNextNode);
     void CheckFocusID(int32_t childSize);
-    bool ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textPickerColumnPattern, KeyCode& code, int32_t childSize);
+    bool ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textPickerColumnPattern, KeyCode& code,
+        uint32_t totalOptionCount, int32_t childSize);
+    RectF CalculatePaintRect(int32_t currentFocusIndex,
+        float centerX, float centerY, float paintRectWidth, float paintRectHeight, float columnWidth);
+    void AdjustFocusBoxOffset(float& centerX, float& centerY);
     float CalculateColumnSize(int32_t index, float childCount, const SizeF& pickerContentSize);
     int32_t CalculateIndex(RefPtr<FrameNode>& frameNode);
+    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext);
 
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
@@ -616,9 +619,6 @@ private:
     bool resizeFlag_ = false;
     bool isShowInDialog_ = false;
     bool canloop_ = true;
-
-    // inner focus switch
-    bool operationOn_ = false;
 
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;
@@ -651,6 +651,7 @@ private:
     bool isEnableHaptic_ = true;
     bool isHapticChanged_ = false;
     int32_t selectedColumnId_ = INVALID_SELECTED_COLUMN_INDEX;
+    bool isSingleRange_ = true;
 };
 } // namespace OHOS::Ace::NG
 

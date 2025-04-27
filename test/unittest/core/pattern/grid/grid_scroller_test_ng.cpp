@@ -14,6 +14,7 @@
  */
 
 #include "grid_test_ng.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -776,7 +777,7 @@ HWTEST_F(GridScrollerTestNg, ScrollToEdge002, TestSize.Level1)
      * @tc.expected: Scroll to bottom with animation
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, 200.0f);
-    EXPECT_TRUE(Position(-492.0f));
+    EXPECT_TRUE(Position(-592.0f));
 
     /**
      * @tc.steps: step2. SCROLL_TOP

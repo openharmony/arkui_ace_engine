@@ -69,6 +69,7 @@ void TextDragTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto textTheme = AceType::MakeRefPtr<TextTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
 }
 
 void TextDragTestNg::TearDownTestSuite()
@@ -170,7 +171,7 @@ void TextDragTestNg::GetInstance()
     pattern_->dragNode_ = dragNode_;
     dragPattern_ = dragNode_->GetPattern<TextDragPattern>();
     dragContext_ = dragNode_->GetRenderContext();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void TextDragTestNg::SetMockParagraphExpectCallParas(MockParagraphExpectCallParas params)

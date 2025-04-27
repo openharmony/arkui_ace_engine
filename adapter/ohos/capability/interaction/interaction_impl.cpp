@@ -47,9 +47,9 @@ int32_t InteractionImpl::UpdateShadowPic(const OHOS::Ace::ShadowInfoCore& shadow
     return InteractionManager::GetInstance()->UpdateShadowPic(msdpShadowInfo);
 }
 
-int32_t InteractionImpl::SetDragWindowVisible(bool visible)
+int32_t InteractionImpl::SetDragWindowVisible(bool visible, const std::shared_ptr<Rosen::RSTransaction>& rSTransaction)
 {
-    return InteractionManager::GetInstance()->SetDragWindowVisible(visible);
+    return InteractionManager::GetInstance()->SetDragWindowVisible(visible, false, rSTransaction);
 }
 
 int32_t InteractionImpl::SetMouseDragMonitorState(bool state)
@@ -173,6 +173,16 @@ int32_t InteractionImpl::SetDraggableState(bool state)
     return InteractionManager::GetInstance()->SetDraggableState(state);
 }
 
+int32_t InteractionImpl::GetAppDragSwitchState(bool& state)
+{
+    return InteractionManager::GetInstance()->GetAppDragSwitchState(state);
+}
+
+void InteractionImpl::SetDraggableStateAsync(bool state, int64_t downTime)
+{
+    InteractionManager::GetInstance()->SetDraggableStateAsync(state, downTime);
+}
+
 Msdp::DeviceStatus::DragCursorStyle TranslateDragCursorStyle(OHOS::Ace::DragCursorStyleCore style)
 {
     switch (style) {
@@ -242,7 +252,7 @@ DragRet TranslateDragResult(Msdp::DeviceStatus::DragResult dragResult)
         case Msdp::DeviceStatus::DragResult::DRAG_CANCEL:
             return DragRet::DRAG_CANCEL;
         default:
-            return DragRet::DRAG_SUCCESS;
+            return DragRet::DRAG_FAIL;
     }
 }
 

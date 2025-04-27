@@ -15,6 +15,8 @@
 
 #include "core/common/frontend.h"
 
+#include "base/thread/task_executor.h"
+
 namespace OHOS::Ace {
 Frontend::~Frontend()
 {
@@ -47,5 +49,10 @@ std::string Frontend::stateToString(int state)
         "UNDEFINE",
     };
     return stateMap[state];
+}
+
+RefPtr<TaskExecutor> Frontend::GetTaskExecutor() const
+{
+    return taskExecutor_;
 }
 } // namespace OHOS::Ace

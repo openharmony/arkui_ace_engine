@@ -25,6 +25,7 @@
 #include "display_manager.h"
 #include "dm_common.h"
 #include "interfaces/inner_api/ace/arkui_rect.h"
+#include "interfaces/inner_api/ace/viewport_config.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
 
@@ -59,6 +60,12 @@ class FontManager;
 }
 
 namespace OHOS::Ace::Platform {
+#ifdef ACE_ENABLE_VK
+namespace {
+class HighContrastObserver;
+}
+#endif
+
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AbilityOnQueryCallback = std::function<void(const std::string& queryWord)>;
@@ -94,7 +101,7 @@ struct SingleHandTransform {
     SingleHandTransform() = default;
     SingleHandTransform(float x, float y, float scaleX, float scaleY)
         : x_(x), y_(y), scaleX_(scaleX), scaleY_(scaleY) {}
- 
+
     float x_ = 0.0f;
     float y_ = 0.0f;
     float scaleX_ = 1.0f;
@@ -305,6 +312,12 @@ public:
         auto dmOrientation = static_cast<Rosen::Orientation>(static_cast<uint32_t>(orientation));
         uiWindow_->SetRequestedOrientation(dmOrientation);
     }
+
+    RefPtr<PageViewportConfig> GetCurrentViewportConfig() const override;
+    RefPtr<PageViewportConfig> GetTargetViewportConfig(Orientation orientation,
+        bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator) override;
+    void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) override;
+    Orientation GetRequestedOrientation() override;
 
     uint64_t GetDisplayId() const override
     {
@@ -577,7 +590,7 @@ public:
     void ProcessColorModeUpdate(
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void UpdateConfiguration(
-        const ParsedConfig& parsedConfig, const std::string& configuration);
+        const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel = false);
     void UpdateConfigurationSyncForAll(
         const ParsedConfig& parsedConfig, const std::string& configuration);
 
@@ -591,7 +604,7 @@ public:
 
     void RemoveOnConfigurationChange(int32_t instanceId)
     {
-        configurationChangedCallbacks_.erase(instanceId_);
+        configurationChangedCallbacks_.erase(instanceId);
     }
 
     void HotReload() override;
@@ -645,7 +658,7 @@ public:
         const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len);
 
     bool IsLauncherContainer() override;
-    bool IsScenceBoardWindow() override;
+    bool IsSceneBoardWindow() override;
     bool IsCrossAxisWindow() override;
     bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;
@@ -768,7 +781,7 @@ public:
     }
 
     void UpdateResourceOrientation(int32_t orientation);
-    void UpdateResourceDensity(double density);
+    void UpdateResourceDensity(double density, bool isUpdateResConfig);
     void SetDrawReadyEventCallback();
 
     bool IsFreeMultiWindow() const override
@@ -776,6 +789,13 @@ public:
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->GetFreeMultiWindowModeEnabledState();
     }
+
+    bool IsWaterfallWindow() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->IsWaterfallModeEnabled();
+    }
+
     Rect GetUIExtensionHostWindowRect(int32_t instanceId) override
     {
         CHECK_NULL_RETURN(IsUIExtensionWindow(), Rect());
@@ -789,11 +809,6 @@ public:
     {
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
-    }
-
-    void SetTouchEventsPassThroughMode(bool isTouchEventsPassThrough)
-    {
-        isTouchEventsPassThrough_ = isTouchEventsPassThrough;
     }
 
     void SetSingleHandTransform(const SingleHandTransform& singleHandTransform)
@@ -817,6 +832,21 @@ public:
     void SetFontScaleAndWeightScale(int32_t instanceId);
 
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
+
+    void SetFoldStatusFromListener(FoldStatus foldStatus)
+    {
+        foldStatusFromListener_ = foldStatus;
+    }
+
+    FoldStatus GetFoldStatusFromListener() override
+    {
+        return foldStatusFromListener_;
+    }
+
+    void InitFoldStatusFromListener() override
+    {
+        foldStatusFromListener_ = GetCurrentFoldStatus();
+    }
 
 private:
     virtual bool MaybeRelease() override;
@@ -852,6 +882,20 @@ private:
     bool FireUIExtDataSendToHostReply(
         NG::UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply);
 
+    void RegisterAvoidInfoCallback();
+    void RegisterAvoidInfoDataProcessCallback();
+
+    void RegisterOrientationUpdateListener();
+    void RegisterOrientationChangeListener();
+    void InitSystemBarConfig();
+    bool IsPcOrPadFreeMultiWindowMode() const override;
+    bool IsFullScreenWindow() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN;
+    }
+    bool SetSystemBarEnabled(SystemBarType type, bool enable, bool animation) override;
+
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -880,6 +924,7 @@ private:
     float windowScale_ = 1.0f;
     sptr<IRemoteObject> token_;
     sptr<IRemoteObject> parentToken_;
+    FoldStatus foldStatusFromListener_ = FoldStatus::UNKNOWN;
 
     bool isSubContainer_ = false;
     bool isFormRender_ = false;
@@ -923,14 +968,22 @@ private:
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
     std::unordered_map<int32_t, std::list<StopDragCallback>> stopDragCallbackMap_;
     std::map<int32_t, std::shared_ptr<MMI::PointerEvent>> currentEvents_;
+    friend class WindowFreeContainer;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
     RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();
 
     // for Ui Extension dump param get
     std::vector<std::string> paramUie_;
-    std::optional<bool> isTouchEventsPassThrough_;
 
     SingleHandTransform singleHandTransform_;
+
+    bool lastThemeHasSkin_ = false;
+
+#ifdef ACE_ENABLE_VK
+    void SubscribeHighContrastChange();
+    void UnsubscribeHighContrastChange();
+    std::shared_ptr<HighContrastObserver> highContrastObserver_ = nullptr;
+#endif
 };
 
 } // namespace OHOS::Ace::Platform

@@ -25,6 +25,7 @@
 #include "base/thread/task_executor.h"
 #include "core/common/dynamic_component_renderer.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 
 namespace OHOS::Ace::NG {
 
@@ -52,11 +53,11 @@ public:
     void Dump(RendererDumpInfo &rendererDumpInfo) override;
     void RegisterErrorEventHandler();
     void FireOnErrorCallback(int32_t code, const std::string& name, const std::string& msg);
-    void InitUiContent(
-        OHOS::AbilityRuntime::Context *abilityContext, const std::shared_ptr<Framework::JsValue>& jsContext);
+    void InitUiContent(OHOS::AbilityRuntime::Context *abilityContext);
     void SetUIContentType(UIContentType uIContentType) override;
     bool IsRestrictedWorkerThread() override;
     bool HasWorkerUsing(void *worker) override;
+    bool CheckWorkerMaxConstraint() override;
 
     void SearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
@@ -81,16 +82,33 @@ public:
     void NotifyForeground() override;
     void NotifyBackground() override;
 
+    static std::shared_ptr<AnimationOption> CopyAnimationOption(AnimationOption animationOpt)
+    {
+        // CustomCurve and FinishCallback cannot be passed to child thread
+        std::shared_ptr<AnimationOption> animationOption;
+        if (animationOpt.GetCurve() && AceType::TypeId(animationOpt.GetCurve()) == Ace::CustomCurve::TypeId()) {
+            animationOption = std::make_shared<AnimationOption>();
+        } else {
+            animationOption = std::make_shared<AnimationOption>(animationOpt);
+        }
+        if (animationOption) {
+            animationOption->SetOnFinishEvent(nullptr);
+        }
+
+        return animationOption;
+    }
+
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
     RefPtr<TaskExecutor> GetHostTaskExecutor();
     void AddWorkerUsing(void *worker);
     void DeleteWorkerUsing(void *worker);
+    void OnDestroyContent();
+    void AfterDestroyContent();
 
     void CreateIsolatedContent();
     void CreateDynamicContent();
-    void SetUIContentJsContext(
-        const std::shared_ptr<Framework::JsValue>& jsContext);
+    void SetUIContentJsContext();
 
     void AttachRenderContext();
     void AttachRenderContextInIsolatedComponent();
@@ -103,6 +121,9 @@ private:
     SizeF ComputeAdaptiveSize(const SizeF& size) const;
     void HandleCardSizeChangeEvent(const SizeF& size);
     void InitializeDynamicAccessibility();
+    void BuildDynamicInitialConfig(DynamicInitialConfig& dynamicInitialConfig);
+    RefPtr<SystemWindowScene> GetWindowScene();
+    int32_t GetWindowSceneId();
 
     bool contentReady_ = false;
     std::function<void()> contentReadyCallback_;
@@ -125,6 +146,7 @@ private:
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
     AceLogTag aceLogTag_ = AceLogTag::ACE_DEFAULT_DOMAIN;
     bool isForeground_ = true;
+    std::weak_ptr<Framework::JsValue> hostJsContext_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DynamicComponentRendererImpl);
 };

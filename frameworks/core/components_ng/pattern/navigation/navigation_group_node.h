@@ -45,7 +45,7 @@ struct TransitionUnitInfo {
     {}
 };
 
-class ACE_EXPORT NavigationGroupNode : public GroupNode {
+class ACE_FORCE_EXPORT NavigationGroupNode : public GroupNode {
     DECLARE_ACE_TYPE(NavigationGroupNode, GroupNode)
 public:
     NavigationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
@@ -203,11 +203,12 @@ public:
     void StartDialogtransition(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
         bool isTransitionIn);
 
-    void InitPopPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& preNavList);
+    void InitPopPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& preNavList,
+        const std::vector<WeakPtr<FrameNode>>& curNavList);
     void InitPopCurList(const RefPtr<FrameNode>& curNode, std::vector<WeakPtr<FrameNode>>& curNavList,
         bool isNavbarNeedAnimation);
     void InitPushPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& prevNavList,
-        bool isNavbarNeedAnimation);
+        const std::vector<WeakPtr<FrameNode>>& curNavList, bool isNavbarNeedAnimation);
     void InitPushCurList(const RefPtr<FrameNode>& curNode, std::vector<WeakPtr<FrameNode>>& curNavList);
 
     std::vector<WeakPtr<NavDestinationGroupNode>> FindNodesPoped(const RefPtr<FrameNode>& preNode,
@@ -254,7 +255,7 @@ public:
 
     float CheckLanguageDirection();
 
-    void RemoveDialogDestination(bool isReplace = false);
+    void RemoveDialogDestination(bool isReplace = false, bool isTriggerByInteractiveCancel = false);
     void AddDestinationNode(const RefPtr<UINode>& parent);
     WeakPtr<NavDestinationGroupNode> GetParentDestinationNode() const
     {
@@ -314,6 +315,7 @@ public:
     bool CheckAnimationIdValid(const RefPtr<FrameNode>& curNode, const int32_t animationId);
 
     std::string ToDumpString();
+
 protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;

@@ -197,7 +197,7 @@ float SearchLayoutAlgorithm::CalculateTextFieldWidth(
 
     auto searchWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
     auto searchButtonNode = searchWrapper->GetHostNode();
-    auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
+    auto searchButtonEvent = searchButtonNode->GetOrCreateEventHub<ButtonEventHub>();
     auto searchButtonLayoutProperty = searchButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(searchButtonLayoutProperty, 0.0f);
     auto needToDisable = searchButtonLayoutProperty->GetAutoDisable().value_or(false);
@@ -298,12 +298,12 @@ CalcSize SearchLayoutAlgorithm::searchButtonCalcSize(const RefPtr<SearchTheme>& 
 {
     // calculate theme space from search button to font
     auto spaceHeight = searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx() -
-                       searchTheme->GetFontSize().ConvertToPxDistribute(minFontScale, maxFontScale);
+                       searchTheme->GetButtonFontSize().ConvertToPxDistribute(minFontScale, maxFontScale);
     // calculate search button height
     auto defaultButtonHeight =
         searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx();
     auto searchButtonHeight = std::max(defaultButtonHeight,
-        layoutProperty->GetSearchButtonFontSizeValue(searchTheme->GetFontSize()).ConvertToPxDistribute(
+        layoutProperty->GetSearchButtonFontSizeValue(searchTheme->GetButtonFontSize()).ConvertToPxDistribute(
             minFontScale, maxFontScale) + spaceHeight);
     searchButtonHeight = std::min(searchButtonHeight, searchHeight_);
     CalcSize searchButtonCalcSize;
@@ -378,7 +378,7 @@ void SearchLayoutAlgorithm::DividerMeasure(LayoutWrapper* layoutWrapper)
 
     auto iconHeight = searchTheme->GetIconHeight().ConvertToPx();
     auto dividerHeight = std::min(static_cast<float>(searchHeight_), static_cast<float>(iconHeight));
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         auto defaultDividerHeight = DEFAULT_DIVIDER_HEIGHT.ConvertToPx();
         dividerHeight = std::min(static_cast<float>(searchHeight_), static_cast<float>(defaultDividerHeight));
     }
@@ -412,7 +412,7 @@ double SearchLayoutAlgorithm::CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper
     // search button height
     auto buttonNode = searchBtnWrapper->GetHostNode();
     CHECK_NULL_RETURN(buttonNode, true);
-    auto searchButtonEvent = buttonNode->GetEventHub<ButtonEventHub>();
+    auto searchButtonEvent = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(searchButtonEvent, true);
     auto searchButtonHeight = searchButtonSizeMeasure_.Height() + 2 *
         searchTheme->GetSearchButtonSpace().ConvertToPxDistribute(minFontScale_, maxFontScale_);
@@ -426,7 +426,7 @@ double SearchLayoutAlgorithm::CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper
     // cancel button height
     auto cancelButtonNode = cancelBtnLayoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(cancelButtonNode, 0);
-    auto cancelButtonEvent = cancelButtonNode->GetEventHub<ButtonEventHub>();
+    auto cancelButtonEvent = cancelButtonNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(cancelButtonEvent, 0);
     auto cancelBtnHight = cancelBtnSizeMeasure_.Height() + 2 *
         searchTheme->GetSearchButtonSpace().ConvertToPxDistribute(minFontScale_, maxFontScale_);
@@ -715,6 +715,14 @@ void SearchLayoutAlgorithm::LayoutSearchIcon(const LayoutSearchParams& params)
     auto iconUserHeight =
         searchIconConstraint->selfIdealSize.Height().value_or(params.searchTheme->GetIconHeight().ConvertToPx());
     float imageVerticalOffset = topPadding;
+    auto host = params.layoutWrapper->GetHostNode();
+    if (host) {
+        auto pipeline = host->GetContext();
+        if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+            // height is rounded in framenode's measure function, iconFrameHeight has no fractional part
+            iconUserHeight = std::floor(iconUserHeight + 0.5f);
+        }
+    }
     if (NearEqual(iconUserHeight, iconFrameHeight)) {
         float iconInterval = (params.searchFrameHeight - iconUserHeight) / 2;
         if (topPadding <= iconInterval && bottomPadding <= iconInterval) {
@@ -819,7 +827,7 @@ void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
     auto cancelButtonHorizontalOffset = 0;
     auto cancelButtonVerticalOffset = (params.searchFrameHeight - cancelButtonFrameHeight) / 2;
     auto searchButtonNode = searchButtonWrapper->GetHostNode();
-    auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
+    auto searchButtonEvent = searchButtonNode->GetOrCreateEventHub<ButtonEventHub>();
     auto buttonSpace = params.searchTheme->GetSearchButtonSpace().ConvertToPx();
     auto searchButtonLayoutProperty = searchButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(searchButtonLayoutProperty);

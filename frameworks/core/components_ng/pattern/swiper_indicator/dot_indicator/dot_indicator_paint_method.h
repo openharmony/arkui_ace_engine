@@ -46,10 +46,12 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     virtual void PaintNormalIndicator(const PaintWrapper* paintWrapper);
     void PaintHoverIndicator(const PaintWrapper* paintWrapper);
-    void PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide);
+    void PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide,
+        const Dimension& indicatorDotItemSpace);
     void PaintPressIndicator(const PaintWrapper* paintWrapper);
-    void CalculateNormalMargin(
-        const LinearVector<float>& itemHalfSizes, const SizeF& frameSize, const int32_t displayCount);
+    virtual void CalculateNormalMargin(
+        const LinearVector<float>& itemHalfSizes, const SizeF& frameSize, const int32_t displayCount,
+        const Dimension& indicatorDotItemSpace, bool ignoreSize);
     virtual std::pair<float, float> CalculatePointCenterX(
         const LinearVector<float>& itemHalfSizes, float margin, float padding, float space, int32_t index);
     void CalculateHoverIndex(const LinearVector<float>& itemHalfSizes);
@@ -65,6 +67,11 @@ public:
     void SetItemCount(int32_t itemCount)
     {
         itemCount_ = itemCount;
+    }
+
+    void SetIsAutoLinear(bool isAutoLinear)
+    {
+        isAutoLinear_ = isAutoLinear;
     }
 
     void SetTotalItemCount(int32_t totalItemCount)
@@ -120,6 +127,11 @@ public:
     void SetGroupTurnPageRate(float groupTurnPageRate)
     {
         groupTurnPageRate_ = groupTurnPageRate;
+    }
+
+    GestureState GetGestureState()
+    {
+        return gestureState_;
     }
 
     void SetGestureState(GestureState gestureState)
@@ -229,6 +241,7 @@ protected:
     int32_t itemCount_ = 0;
     int32_t totalItemCount_ = 0;
     int32_t displayCount_ = 1;
+    bool isAutoLinear_ = false;
     float turnPageRate_ = 0.0f;
     float groupTurnPageRate_ = 0.0f;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;

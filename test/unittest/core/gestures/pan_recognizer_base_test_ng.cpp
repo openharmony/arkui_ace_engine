@@ -384,7 +384,7 @@ HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerBaseTest001, TestSize.Level1)
      */
     panGestureOption->SetDistance(-1);
     panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
-    EXPECT_EQ(panRecognizer->distance_, 5);
+    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN], 5);
     /**
      * @tc.steps: step3. create PanRecognizer with illegal direction.
      * @tc.expected: step3. direction_ equals.
@@ -537,7 +537,8 @@ HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerBaseTest004, TestSize.Level1)
      * @tc.expected: step5. refereeState_ equals.
      */
     panRecognizer->OnResetStatus();
-    downEvent.SetId(0).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f).SetSourceType(SourceType::MOUSE);
+    downEvent.SetId(0).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f)
+        .SetSourceType(SourceType::MOUSE).SetSourceTool(SourceTool::MOUSE);
     CreateTouchMoveEvents(PointF { 100.0f, 100.0f }, 5.0f, moveEvents);
     panRecognizer->HandleEvent(downEvent);
     for (auto& item : moveEvents) {

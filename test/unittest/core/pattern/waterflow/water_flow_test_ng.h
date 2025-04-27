@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #undef private
 #undef protected
@@ -40,6 +41,7 @@ constexpr float WATER_FLOW_HEIGHT = 800.f;
 constexpr int32_t TOTAL_LINE_NUMBER = 10;
 constexpr int32_t VIEW_LINE_NUMBER = 8;
 constexpr float BIG_ITEM_MAIN_SIZE = ITEM_MAIN_SIZE * 2;
+#define TOP_TO_DOWN pattern_->layoutInfo_->Mode() == WaterFlowLayoutMode::TOP_DOWN
 
 class WaterFlowMockLazy : public Framework::MockLazyForEachBuilder {
 public:
@@ -93,6 +95,8 @@ protected:
     RefPtr<FrameNode> GetItem(int32_t index, bool isCache = false);
     void AddItemInLazyForEach(int32_t index);
     void DeleteItemInLazyForEach(int32_t index);
+    RefPtr<WaterFlowPaintMethod> UpdateOverlayModifier();
+    RefPtr<WaterFlowPaintMethod> UpdateContentModifier();
 
     RefPtr<WaterFlowPattern> pattern_;
     RefPtr<WaterFlowEventHub> eventHub_;

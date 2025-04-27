@@ -214,6 +214,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     id(value: string): this;
     geometryTransition(id: string): this;
     bindPopup(show: boolean, popup: PopupOptions | CustomPopupOptions): this;
+    bindTips(message: TipsMessageType, options?: TipsOptions): this;
     bindMenu(content: Array<MenuElement> | CustomBuilder, options?: MenuOptions): this;
     bindContextMenu(content: CustomBuilder, responseType: ResponseType, options?: ContextMenuOptions): this;
     bindContentCover(isShow: boolean, builder: CustomBuilder, type?: ModalTransition | ContentCoverOptions): this;
@@ -369,6 +370,7 @@ declare class ArkImageComponent extends ArkComponent implements ImageAttribute {
     border(value: BorderOptions): this;
     opacity(value: number | Resource): this;
     transition(value: TransitionOptions | TransitionEffect): this;
+    resizable(value: ResizableOptions): this;
 }
 declare class ImageAnimatorImagesModifier extends ModifierWithKey<Array<ImageFrameInfo>> {
     constructor(value: Array<ImageFrameInfo>);
@@ -895,6 +897,7 @@ declare class ArkRefreshComponent extends ArkComponent implements RefreshAttribu
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;
     onStateChange(callback: (state: RefreshStatus) => void): this;
     onRefreshing(callback: () => void): this;
+    onOffsetChange(callback: Callback<number>): this;
 }
 declare class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -958,6 +961,8 @@ declare class ArkSelectComponent extends ArkComponent implements SelectAttribute
     space(value: Length): this;
     arrowPosition(value: ArrowPosition): this;
     menuAlign(alignType: MenuAlignType, offset?: Offset): this;
+    avoidance(mode: AvoidanceMode): this;
+    menuOutline(outline: MenuOutlineOptions): this;
 }
 declare class ArkRadioComponent extends ArkComponent implements RadioAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -2065,4 +2070,11 @@ declare class ArkComponent3DComponent extends ArkComponent implements Component3
 declare class ArkContainerSpanComponent extends ArkComponent implements ContainerSpanAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     textBackgroundStyle(value: TextBackgroundStyle): ContainerSpanAttribute;
+}
+
+declare class ArkLazyVGridLayoutComponent extends ArkComponent implements LazyVGridLayoutAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    columnsTemplate(value: string): this;
+    columnsGap(value: LengthMetrics): this;
+    rowsGap(value: LengthMetrics): this;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "core/components/progress/progress_theme.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 constexpr float PROGRSS_MAX_VALUE = 100.f;
@@ -26,7 +27,7 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     PaintProperty::ToJsonValue(json, filter);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(progressTheme);
 
     json->PutExtAttr("constructor", ProgressOptions().c_str(), filter);
@@ -45,6 +46,8 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
         defaultBackgroundColor = progressTheme->GetCapsuleBgColor();
     } else if (progressType == ProgressType::RING) {
         defaultBackgroundColor = progressTheme->GetRingProgressBgColor();
+    } else if (progressType == ProgressType::SCALE) {
+        defaultColor = progressTheme->GetScaleTrackSelectedColor();
     }
     json->PutExtAttr("color", (GetColor().value_or(defaultColor)).ColorToString().c_str(), filter);
     json->PutExtAttr("backgroundColor",
@@ -72,7 +75,7 @@ std::string ProgressPaintProperty::ToJsonGradientColor() const
     } else {
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, "");
-        auto theme = pipelineContext->GetTheme<ProgressTheme>();
+        auto theme = pipelineContext->GetTheme<ProgressTheme>(GetThemeScopeId());
         auto endColor = theme->GetRingProgressEndSideColor();
         auto beginColor = theme->GetRingProgressBeginSideColor();
         GradientColor gradientColorEnd;
@@ -94,5 +97,12 @@ std::string ProgressPaintProperty::ToJsonGradientColor() const
         jsonArray->Put(std::to_string(index).c_str(), gradientColorJson);
     }
     return jsonArray->ToString();
+}
+
+int32_t ProgressPaintProperty::GetThemeScopeId() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0);
+    return host->GetThemeScopeId();
 }
 } // namespace OHOS::Ace::NG

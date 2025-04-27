@@ -73,7 +73,7 @@ public:
     void SetName(const std::string& name)
     {
         name_ = name;
-        auto eventHub = GetEventHub<NavDestinationEventHub>();
+        auto eventHub = GetOrCreateEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetName(name);
     }
@@ -162,7 +162,7 @@ public:
 
     NavDestinationState GetNavDestinationState() const
     {
-        auto eventHub = GetEventHub<NavDestinationEventHub>();
+        auto eventHub = GetOrCreateEventHub<NavDestinationEventHub>();
         CHECK_NULL_RETURN(eventHub, NavDestinationState::NONE);
         auto state = eventHub->GetState();
         return state;
@@ -325,6 +325,11 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void CloseLongPressDialog();
+    void CheckIfOrientationChanged();
+    void StopAnimation();
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void CheckIfStatusBarConfigChanged();
+    void CheckIfNavigationIndicatorConfigChagned();
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
@@ -345,6 +350,9 @@ private:
     RefPtr<NavDestinationScrollableProcessor> scrollableProcessor_;
     HideBarOnSwipeContext titleBarSwipeContext_;
     HideBarOnSwipeContext toolBarSwipeContext_;
+    bool isFirstTimeCheckOrientation_ = true;
+    bool isFirstTimeCheckStatusBarConfig_ = true;
+    bool isFirstTimeCheckNavigationIndicatorConfig_ = true;
 };
 } // namespace OHOS::Ace::NG
 

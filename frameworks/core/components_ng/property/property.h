@@ -24,6 +24,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 

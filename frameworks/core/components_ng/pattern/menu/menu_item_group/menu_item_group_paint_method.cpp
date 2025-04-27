@@ -27,6 +27,9 @@ CanvasDrawFunction MenuItemGroupPaintMethod::GetOverlayDrawFunction(PaintWrapper
             CHECK_NULL_VOID(paintWrapper);
             auto props = DynamicCast<MenuItemGroupPaintProperty>(paintWrapper->GetPaintProperty());
             CHECK_NULL_VOID(props);
+            if (props->GetDividerModeValue(DividerMode::FLOATING_ABOVE_MENU) == DividerMode::EMBEDDED_IN_MENU) {
+                return;
+            }
             bool needHeaderPadding = props->GetNeedHeaderPadding().value_or(false);
             auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);

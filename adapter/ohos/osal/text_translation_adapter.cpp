@@ -15,7 +15,6 @@
 
 #include "core/common/ai/text_translation_adapter.h"
 
-#include "adapter/ohos/entrance/ace_container.h"
 #include "core/common/ai/text_translation_mgr.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

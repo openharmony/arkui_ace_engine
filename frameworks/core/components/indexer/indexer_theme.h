@@ -229,9 +229,7 @@ private:
         theme->selectedTextColor_ = indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR));
         theme->popupTextColor_ = indexerPattern->GetAttr<Color>("popup_text_color", Color(POPUP_TEXT_COLOR));
         theme->selectedBackgroundColorArc_ =
-            indexerPattern->GetAttr<Color>("selected_background_color_arc", Color(SELECT_BACKGROUD_COLOR_ARC))
-            .ChangeOpacity(
-                indexerPattern->GetAttr<double>("selected_background_color_opacity", SELECT_BACKGROUND_OPACITY));
+            indexerPattern->GetAttr<Color>("selected_background_color_arc", Color(SELECT_BACKGROUD_COLOR_ARC));
         theme->selectedBackgroundColor_ =
             indexerPattern->GetAttr<Color>("selected_background_color", Color(SELECT_BACKGROUD_COLOR)).ChangeOpacity(
                 indexerPattern->GetAttr<double>("selected_background_color_opacity", SELECT_BACKGROUND_OPACITY));
@@ -254,8 +252,6 @@ private:
             indexerPattern->GetAttr<Color>("popup_clicked_bg_area_color", Color(POPUP_CLICKED_BG_AREA_COLOR));
         theme->popupTitleBackground_ =
             indexerPattern->GetAttr<Color>("popup_title_color", Color(POPUP_TITLE_BG_AREA_COLOR));
-        theme->popupUnclickedBgAreaColor_ =
-            indexerPattern->GetAttr<Color>("popup_unclicked_bg_area_color", Color(POPUP_UNCLICKED_BG_AREA_COLOR));
     }
 
     static void ParseDimensionAttributes(const RefPtr<ThemeStyle>& indexerPattern,
@@ -309,6 +305,8 @@ private:
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             theme->popupBackgroundColor_ = indexerPattern->GetAttr<Color>(
                 "popup_background_color_api_twelve", Color(POPUP_BACKGROUND_COLOR_API_TWELVE));
+            theme->popupUnclickedBgAreaColor_ =
+                indexerPattern->GetAttr<Color>("popup_unclicked_bg_area_color", Color(POPUP_UNCLICKED_BG_AREA_COLOR));
             theme->hoverTextSize_ = indexerPattern->GetAttr<Dimension>(
                 "hover_text_size_api_twelve", Dimension(HOVER_TEXT_SIZE_API_TWELVE, DimensionUnit::FP));
             theme->seletctTextStyle_.SetFontSize(indexerPattern->GetAttr<Dimension>(
@@ -319,6 +317,8 @@ private:
             theme->defaultTextStyle_.SetFontWeight(FontWeight::MEDIUM);
         } else {
             theme->popupBackgroundColor_ =
+                indexerPattern->GetAttr<Color>("popup_background_color", Color(POPUP_BACKGROUND_COLOR));
+            theme->popupUnclickedBgAreaColor_ =
                 indexerPattern->GetAttr<Color>("popup_background_color", Color(POPUP_BACKGROUND_COLOR));
             theme->hoverTextSize_ =
                 indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP));

@@ -31,11 +31,8 @@ RefPtr<FrameNode> AbstractViewFactory::CreateFrameNode(
     auto frameNode = AceType::DynamicCast<FrameNodeImpl>(aceFrameNode->GetKitNode());
     if (frameNode == nullptr) {
         frameNode = AceType::MakeRefPtr<FrameNodeImpl>(aceFrameNode, pattern);
-        aceFrameNode->SetKitNode(frameNode);
         frameNode->InitializePatternAndContext();
         pattern->SetHost(frameNode);
-    } else {
-        frameNode->PushAceNode(aceFrameNode);
     }
 
     return frameNode;

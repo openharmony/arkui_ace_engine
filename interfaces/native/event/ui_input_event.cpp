@@ -142,8 +142,8 @@ int32_t HandleCHoverEventSourceType(const ArkUI_UIInputEvent* event)
 int32_t HandleAxisEventSourceType(const ArkUI_UIInputEvent* event)
 {
     const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
-    if (!axisEvent || !axisEvent->axisSupportSourceTypeAndSourceTool) {
-        return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_UNKNOWN);
+    if (!axisEvent) {
+        return static_cast<int32_t>(UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
     }
     return static_cast<int32_t>(axisEvent->sourceType);
 }
@@ -227,7 +227,7 @@ int32_t HandleCFocusAxisEventToolType(const ArkUI_UIInputEvent* event)
 int32_t HandleAxisEventToolType(const ArkUI_UIInputEvent* event)
 {
     const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
-    if (!axisEvent || !axisEvent->axisSupportSourceTypeAndSourceTool) {
+    if (!axisEvent) {
         return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_UNKNOWN);
     }
     return OHOS::Ace::NodeModel::ConvertToCInputEventToolType(static_cast<int32_t>(axisEvent->sourceTool));
@@ -1311,6 +1311,50 @@ float OH_ArkUI_PointerEvent_GetTiltY(const ArkUI_UIInputEvent* event, uint32_t p
             break;
     }
     return 0.0f;
+}
+
+int32_t OH_ArkUI_PointerEvent_GetRollAngle(const ArkUI_UIInputEvent* event, double* rollAngle)
+{
+    if (rollAngle == nullptr || event == nullptr) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (touchEvent && touchEvent->subKind == ON_HOVER_MOVE) {
+                *rollAngle = touchEvent->actionTouchPoint.rollAngle;
+                return ARKUI_ERROR_CODE_NO_ERROR;
+            }
+            if (touchEvent && touchEvent->subKind == ON_TOUCH) {
+                *rollAngle = touchEvent->rollAngle;
+                return ARKUI_ERROR_CODE_NO_ERROR;
+            }
+            if (!touchEvent || touchEvent->touchPointSize <= 0) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            *rollAngle = touchEvent->touchPointes[touchEvent->touchPointSize - 1].rollAngle;
+            return ARKUI_ERROR_CODE_NO_ERROR;
+        }
+        case C_CLICK_EVENT_ID: {
+            const auto* clickEvent = reinterpret_cast<ArkUIClickEvent*>(event->inputEvent);
+            if (!clickEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            *rollAngle = clickEvent->rollAngle;
+            return ARKUI_ERROR_CODE_NO_ERROR;
+        }
+        case C_HOVER_EVENT_ID: {
+            const auto* hoverEvent = reinterpret_cast<ArkUIHoverEvent*>(event->inputEvent);
+            if (!hoverEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            *rollAngle = hoverEvent->rollAngle;
+            return ARKUI_ERROR_CODE_NO_ERROR;
+        }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 int32_t OH_ArkUI_PointerEvent_GetInteractionHand(const ArkUI_UIInputEvent *event, ArkUI_InteractionHand *hand)
@@ -2637,87 +2681,69 @@ float OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionY(const ArkUI_UIInputEve
 int32_t HandleCMouseEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
-    if (!mouseEvent) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    return static_cast<int32_t>(mouseEvent->modifierKeyState);
+    *keys = mouseEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t HandleCTouchEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-    if (!touchEvent) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    return static_cast<int32_t>(touchEvent->modifierKeyState);
+    *keys = touchEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t HandleCHoverEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* hoverEvent = reinterpret_cast<ArkUIHoverEvent*>(event->inputEvent);
-    if (!hoverEvent) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    return static_cast<int32_t>(hoverEvent->modifierKeyState);
+    *keys = hoverEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t HandleCClickEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* clickEvent = reinterpret_cast<ArkUIClickEvent*>(event->inputEvent);
-    if (!clickEvent) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    return static_cast<int32_t>(clickEvent->modifierKeyState);
+    *keys = clickEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t HandleCAxisEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
-    if (!axisEvent) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    return static_cast<int32_t>(axisEvent->modifierKeyState);
+    *keys = axisEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t HandleCKeyEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
-    if (!keyEvent) {
-        return 0.0f;
-    }
-    return static_cast<int32_t>(keyEvent->modifierKeyState);
+    *keys = keyEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t HandleCFocusAxisEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* focusAxisEvent = reinterpret_cast<ArkUIFocusAxisEvent*>(event->inputEvent);
-    if (!focusAxisEvent) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    return static_cast<int32_t>(focusAxisEvent->modifierKeyState);
+    *keys = focusAxisEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t HandleAxisEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
-    if (!axisEvent) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    return static_cast<int32_t>(axisEvent->modifierKeyState);
+    *keys = axisEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t HandleTouchEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* touchEvent = reinterpret_cast<const OHOS::Ace::TouchEvent*>(event->inputEvent);
-    if (!touchEvent) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    return static_cast<int32_t>(touchEvent->modifierKeyState);
+    *keys = touchEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t OH_ArkUI_UIInputEvent_GetModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
-    if (!event) {
+    if (!event || !keys) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     std::map<ArkUIEventTypeId, std::function<int32_t(ArkUI_UIInputEvent*, uint64_t*)>> eventHandlers = {
@@ -2812,18 +2838,18 @@ int32_t OH_ArkUI_PointerEvent_CreateClonedEvent(const ArkUI_UIInputEvent* event,
     if (!event) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    ArkUI_UIInputEvent* currentEvent = new ArkUI_UIInputEvent();
-    currentEvent->inputType = event->inputType;
-    currentEvent->eventTypeId = event->eventTypeId;
     auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
     if (!touchEvent) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    ArkUITouchEvent* touchEventCloned = new ArkUITouchEvent();
     auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!fullImpl) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
+    ArkUI_UIInputEvent* currentEvent = new ArkUI_UIInputEvent();
+    currentEvent->inputType = event->inputType;
+    currentEvent->eventTypeId = event->eventTypeId;
+    ArkUITouchEvent* touchEventCloned = new ArkUITouchEvent();
     fullImpl->getNodeModifiers()->getCommonModifier()->createClonedTouchEvent(touchEventCloned, touchEvent);
     currentEvent->inputEvent = touchEventCloned;
     currentEvent->isCloned = true;

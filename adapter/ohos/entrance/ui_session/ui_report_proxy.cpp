@@ -185,6 +185,24 @@ void UiReportProxy::SendCurrentLanguage(const std::string& data)
     }
 }
 
+void UiReportProxy::SendCurrentPageName(const std::string& data)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendCurrentPageName write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(data)) {
+        LOGW("SendCurrentPageName write data  failed");
+        return;
+    }
+    if (Remote()->SendRequest(SEND_CURRENT_PAGE_NAME, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendCurrentPageName send request failed");
+    }
+}
+
 void UiReportProxy::SendWebText(int32_t nodeId, std::string res)
 {
     MessageParcel messageData;
@@ -224,6 +242,7 @@ void UiReportProxy::SendShowingImage(std::vector<std::pair<int32_t, std::shared_
     MessageParcel messageData;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
+    LOGI("before send images,collect map size:%{public}u", maps.size());
     if (!messageData.WriteInterfaceToken(GetDescriptor())) {
         LOGW("SendShowingImage write interface token failed");
         return;
@@ -247,6 +266,7 @@ void UiReportProxy::SendShowingImage(std::vector<std::pair<int32_t, std::shared_
         }
         // Set the read/write mode of the ashme.
         if (!ashmem->MapReadAndWriteAshmem()) {
+            ClearAshmem(ashmem);
             LOGW("Map shared memory fail");
             return;
         }

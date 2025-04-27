@@ -1046,7 +1046,7 @@ class ArkThemeScopeManager {
     static getInstance() {
         if (!ArkThemeScopeManager.instance) {
             ArkThemeScopeManager.instance = new ArkThemeScopeManager();
-            PUV2ViewBase.setArkThemeScopeManager(ArkThemeScopeManager.instance);
+            ViewBuildNodeBase.setArkThemeScopeManager(ArkThemeScopeManager.instance);
         }
         return ArkThemeScopeManager.instance;
     }
@@ -1078,11 +1078,9 @@ ArkThemeWhiteList.whiteList = [
     'Badge',
     'Button',
     'DataPanel',
-    'LoadingProgress',
     'Menu',
     'MenuItem',
     'PatternLock',
-    'Progress',
     'QRCode',
     'Radio',
     'Scroll',

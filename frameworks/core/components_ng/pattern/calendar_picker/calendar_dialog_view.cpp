@@ -24,14 +24,18 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -49,6 +53,15 @@ constexpr size_t CANCEL_BUTTON_BACKGROUND_COLOR_INDEX = 1;
 constexpr size_t ACCEPT_BUTTON_FONT_COLOR_INDEX = 2;
 constexpr size_t ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX = 3;
 } // namespace
+
+bool CalendarDialogView::CheckOrientationChange()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, true);
+    return (!(SystemProperties::GetDeviceOrientation() == previousOrientation_)
+                ? Dimension(pipeline->GetRootWidth()).ConvertToVp() < deviceHeightLimit
+                : Dimension(pipeline->GetRootHeight()).ConvertToVp() < deviceHeightLimit);
+}
 
 DeviceOrientation CalendarDialogView::previousOrientation_ { DeviceOrientation::PORTRAIT };
 
@@ -167,7 +180,7 @@ void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
         renderContext->UpdateBorderRadius(radius);
         auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
         if (shadowTheme) {
-            auto colorMode = SystemProperties::GetColorMode();
+            auto colorMode = pipelineContext->GetColorMode();
             renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, colorMode));
         }
     }
@@ -455,6 +468,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
     DialogEvent changeEvent = GetChangeEvent(settingData, calendarDialogNode, dialogEvent); // do not check nullptr
     for (int32_t i = 0; i < SWIPER_MONTHS_COUNT; i++) {
         auto monthFrameNode = CreateCalendarMonthNode(calendarNodeId, settingData, changeEvent);
+        CHECK_NULL_RETURN(monthFrameNode, nullptr);
         auto monthLayoutProperty = monthFrameNode->GetLayoutProperty();
         CHECK_NULL_RETURN(monthLayoutProperty, nullptr);
         if (i == CURRENT_MONTH_INDEX) {
@@ -544,7 +558,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarMonthNode(int32_t calendarNo
     auto monthPattern = monthFrameNode->GetPattern<CalendarMonthPattern>();
     CHECK_NULL_RETURN(monthPattern, nullptr);
     monthPattern->SetCalendarDialogFlag(true);
-    auto calendarEventHub = monthPattern->GetEventHub<CalendarEventHub>();
+    auto calendarEventHub = monthPattern->GetOrCreateEventHub<CalendarEventHub>();
     CHECK_NULL_RETURN(calendarEventHub, nullptr);
     auto selectedChangeEvent = [calendarNodeId, changeEvent, settingData](const std::string& callbackInfo) {
         OnSelectedChangeEvent(calendarNodeId, callbackInfo, std::move(changeEvent), settingData);
@@ -587,7 +601,7 @@ void CalendarDialogView::UpdateCalendarMonthData(const RefPtr<FrameNode>& calend
 void CalendarDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CalendarEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogChange(std::move(onChange));
 }
@@ -595,7 +609,7 @@ void CalendarDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, Dia
 void CalendarDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onAccept)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CalendarEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogAcceptEvent(std::move(onAccept));
 }
@@ -616,8 +630,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     CHECK_NULL_RETURN(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(
-        Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
+    textLayoutProperty->UpdateContent(isConfirm ? dialogTheme->GetConfirmText() : dialogTheme->GetCancelText());
 
     auto fontSizeScale = pipeline->GetFontScale();
     auto fontSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
@@ -635,7 +648,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     textNode->MountToParent(buttonNode);
 
     UpdateButtonLayoutProperty(buttonNode, isConfirm, buttonInfos, pipeline);
-    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    auto buttonEventHub = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonEventHub, nullptr);
     buttonEventHub->SetStateEffect(true);
 
@@ -666,11 +679,10 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
             buttonInfos[index].fontSize.has_value() || buttonInfos[index].fontColor.has_value() ||
             buttonInfos[index].fontWeight.has_value() || buttonInfos[index].fontStyle.has_value() ||
             buttonInfos[index].fontFamily.has_value())) {
-        buttonLayoutProperty->UpdateLabel(
-            Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
+        buttonLayoutProperty->UpdateLabel(isConfirm ? dialogTheme->GetConfirmText() : dialogTheme->GetCancelText());
     }
     buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (buttonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -782,7 +794,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateConfirmNode(
         auto calendarPattern = calendarNode->GetPattern<CalendarPattern>();
         CHECK_NULL_VOID(calendarPattern);
         auto str = calendarPattern->GetSelectDate();
-        auto calendarEventHub = calendarNode->GetEventHub<CalendarEventHub>();
+        auto calendarEventHub = calendarNode->GetOrCreateEventHub<CalendarEventHub>();
         CHECK_NULL_VOID(calendarEventHub);
         calendarEventHub->FireDialogAcceptEvent(str);
     };
@@ -970,7 +982,7 @@ void CalendarDialogView::InitOnRequestDataEvent(
         calendarNode->MarkModifyDone();
         calendarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     };
-    auto eventHub = calendarNode->GetEventHub<CalendarEventHub>();
+    auto eventHub = calendarNode->GetOrCreateEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRequestDataEvent(std::move(callback));
 }
@@ -999,7 +1011,7 @@ void CalendarDialogView::OnSelectedChangeEvent(int32_t calendarNodeId, const std
 
     auto entryNode = settingData.entryNode.Upgrade();
     CHECK_NULL_VOID(entryNode);
-    auto eventHub = entryNode->GetEventHub<CalendarPickerEventHub>();
+    auto eventHub = entryNode->GetOrCreateEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateOnChangeEvent(callbackInfo);
 }
@@ -1266,15 +1278,17 @@ bool CalendarDialogView::ReportChangeEvent(const RefPtr<FrameNode>& frameNode, c
 bool CalendarDialogView::ReportChangeEvent(int32_t nodeId, const std::string& compName,
     const std::string& eventName, const PickerDate& pickerDate)
 {
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    auto value = InspectorJsonUtil::Create();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_RETURN(params, false);
+    params->Put("year", static_cast<int32_t>(pickerDate.GetYear()));
+    params->Put("month", static_cast<int32_t>(pickerDate.GetMonth()));
+    params->Put("day", static_cast<int32_t>(pickerDate.GetDay()));
+    auto value = JsonUtil::Create();
     CHECK_NULL_RETURN(value, false);
+    value->Put("nodeId", nodeId);
     value->Put(compName.c_str(), eventName.c_str());
-    value->Put("year", pickerDate.GetYear());
-    value->Put("month", pickerDate.GetMonth());
-    value->Put("day", pickerDate.GetDay());
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value);
-#endif
+    value->Put("params", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString());
     return true;
 }
 

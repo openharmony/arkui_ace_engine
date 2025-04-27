@@ -587,6 +587,13 @@ void WebModelImpl::SetNativeEmbedModeEnabled(bool isEmbedModeEnabled)
     webComponent->SetNativeEmbedModeEnabled(isEmbedModeEnabled);
 }
 
+void WebModelImpl::SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetIntrinsicSizeEnabled(isIntrinsicSizeEnabled);
+}
+
 void WebModelImpl::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -633,13 +640,6 @@ void WebModelImpl::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetNativeVideoPlayerConfig(enable, shouldOverlay);
-}
-
-void WebModelImpl::SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
-{
-    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    CHECK_NULL_VOID(webComponent);
-    webComponent->SetSmoothDragResizeEnabled(isSmoothDragResizeEnabled);
 }
 
 void WebModelImpl::SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback)

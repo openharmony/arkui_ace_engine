@@ -17,6 +17,7 @@
 #include "ui/resource/resource_parser.h"
 
 #include "base/utils/system_properties.h"
+#include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 
@@ -28,11 +29,11 @@ static RefPtr<Ace::ResourceAdapter> CreateResourceWrapper(const ResourceInfo& in
 
     RefPtr<Ace::ResourceAdapter> resourceAdapter = nullptr;
     if (bundleName.has_value() && moduleName.has_value()) {
-        auto resourceObject =
-            AceType::MakeRefPtr<Ace::ResourceObject>(bundleName.value_or(""), moduleName.value_or(""));
+        auto resourceObject = AceType::MakeRefPtr<Ace::ResourceObject>(
+            bundleName.value_or(""), moduleName.value_or(""), Container::CurrentIdSafely());
         resourceAdapter = Ace::ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
     } else {
-        resourceAdapter = Ace::ResourceManager::GetInstance().GetResourceAdapter();
+        resourceAdapter = Ace::ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
     }
     return resourceAdapter;
 }

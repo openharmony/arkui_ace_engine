@@ -227,8 +227,8 @@ bool ContainerModalViewEnhance::GetContainerModalComponentRect(
     return pattern->GetContainerModalComponentRect(floatContainerModal, floatButtons);
 }
 
-void ContainerModalViewEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> pipeline, uint32_t buttonsize,
-    uint32_t spacingBetweenButtons, uint32_t closeButtonRightMargin, int32_t colorMode)
+void ContainerModalViewEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> pipeline,
+    const Ace::DecorButtonStyle& buttonStyle)
 {
     CHECK_NULL_VOID(pipeline);
     if (!pipeline || pipeline->GetWindowModal() != WindowModal::CONTAINER_MODAL) {
@@ -242,14 +242,22 @@ void ContainerModalViewEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> 
     CHECK_NULL_VOID(containerPattern);
     auto controlButtonsNode = containerPattern->GetCustomButtonNode();
     CHECK_NULL_VOID(controlButtonsNode);
-    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SPACING_CHANGE, std::to_string(spacingBetweenButtons));
-    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SIZE_CHANGE, std::to_string(buttonsize));
-    controlButtonsNode->FireCustomCallback(EVENT_NAME_COLOR_CONFIGURATION_LOCKED, std::to_string(colorMode));
-    if (colorMode != static_cast<int32_t>(ColorMode::DARK) && colorMode != static_cast<int32_t>(ColorMode::LIGHT)) {
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SPACING_CHANGE,
+        std::to_string(buttonStyle.spacingBetweenButtons));
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SIZE_CHANGE,
+        std::to_string(buttonStyle.buttonBackgroundSize));
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_COLOR_CONFIGURATION_LOCKED,
+        std::to_string(buttonStyle.colorMode));
+    if (buttonStyle.colorMode != static_cast<int32_t>(ColorMode::DARK) &&
+        buttonStyle.colorMode != static_cast<int32_t>(ColorMode::LIGHT)) {
         containerPattern->OnColorConfigurationUpdate();
     }
     controlButtonsNode->FireCustomCallback(
-        EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE, std::to_string(closeButtonRightMargin));
+        EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE, std::to_string(buttonStyle.closeButtonRightMargin));
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_ICON_SIZE_CHANGE,
+        std::to_string(buttonStyle.buttonIconSize));
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_BACKGROUND_CORNER_RADIUS_CHANGE,
+        std::to_string(buttonStyle.buttonBackgroundCornerRadius));
     containerPattern->CallButtonsRectChange();
 }
 

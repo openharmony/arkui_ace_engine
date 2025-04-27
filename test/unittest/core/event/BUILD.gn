@@ -69,10 +69,18 @@ ace_unittest("focus_hub_test_ng") {
   module_output = "events"
   sources = [
     "focus_core/focus_api_test.cpp",
+    "focus_core/focus_area_test.cpp",
+    "focus_core/focus_creatbox_test.cpp",
+    "focus_core/focus_request_test.cpp",
     "focus_core/focus_test_base.cpp",
     "focus_core/focus_window_test.cpp",
+    "focus_core/linear_focus_test.cpp",
+    "focus_core/lost_focus_to_view_root_test.cpp",
+    "focus_core/page_focus_switch_test.cpp",
+    "focus_core/passive_last_focus_test.cpp",
     "focus_hub_test_ng.cpp",
     "focus_hub_test_ng_branch_coverage.cpp",
+    "focus_hub_test_ng_for_paint_focus_state.cpp",
     "focus_hub_test_ng_for_property_config.cpp",
     "focus_hub_test_ng_new.cpp",
   ]
@@ -85,6 +93,7 @@ ace_unittest("gesture_event_hub_test_ng") {
     "gesture_event_hub_test_ng.cpp",
     "gesture_event_hub_test_ng_coverage.cpp",
     "gesture_event_hub_test_ng_property_config.cpp",
+    "gesture_event_hub_test_three_ng.cpp",
     "gesture_event_hub_test_two_ng.cpp",
   ]
 }
@@ -144,6 +153,10 @@ ace_unittest("input_event_test_ng") {
   type = "new"
   module_output = "events"
   sources = [ "input_event_test_ng.cpp" ]
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
 }
 
 ace_unittest("focus_box_test_ng") {

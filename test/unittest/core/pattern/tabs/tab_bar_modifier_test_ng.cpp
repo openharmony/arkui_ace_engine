@@ -65,7 +65,7 @@ HWTEST_F(TabBarModifierTestNg, SetIndicator001, TestSize.Level1)
      * @tc.steps3: Change selected item
      * @tc.expected: Would change underline offset
      */
-    SwipeToWithoutAnimation(1);
+    ChangeIndex(1);
     EXPECT_TRUE(CurrentIndex(1));
     tabBarModifier = OnDraw();
     EXPECT_EQ(tabBarModifier->indicatorLeft_->Get(), 260.0f);
@@ -482,9 +482,9 @@ HWTEST_F(TabBarModifierTestNg, TabBarPatternOnModifyDone002, TestSize.Level1)
     tabBarNode_->focusHub_ = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(tabBarNode_)));
     ASSERT_NE(tabBarNode_->focusHub_, nullptr);
     tabBarPattern_->OnModifyDone();
-    tabBarPattern_->swiperController_->removeTabBarEventCallback_();
-    tabBarPattern_->swiperController_->addTabBarEventCallback_();
-    EXPECT_NE(tabBarPattern_->swiperController_, nullptr);
+    swiperController_->GetRemoveTabBarEventCallback()();
+    swiperController_->GetAddTabBarEventCallback()();
+    EXPECT_NE(swiperController_, nullptr);
 }
 
 /**

@@ -16,7 +16,6 @@
 #include "gtest/gtest.h"
 
 #include "interfaces/inner_api/drawable_descriptor/drawable_descriptor.h"
-#include "interfaces/inner_api/drawable_descriptor/image_converter.h"
 #include "interfaces/inner_api/drawable_descriptor/js_drawable_descriptor.h"
 #include "node_extened.h"
 #include "native_drawable_descriptor.h"
@@ -124,33 +123,4 @@ HWTEST_F(JsDrawableDescriptorTest, JsDrawableDescriptorTest006, TestSize.Level1)
     EXPECT_EQ(result, nullptr);
     free(JsDrawableDescriptor::pixelMapConstructor_);
 }
-
-/**
- * @tc.name: JsDrawableDescriptorTest007
- * @tc.desc: test GetPixelMapFromNapi function;
- * @tc.type: FUNC
- */
-HWTEST_F(JsDrawableDescriptorTest, JsDrawableDescriptorTest007, TestSize.Level1)
-{
-    napi_env env = nullptr;
-    napi_value exports = nullptr;
-    JsDrawableDescriptor jsDrawableDescriptor;
-    std::shared_ptr<Media::PixelMap> result = jsDrawableDescriptor.GetPixelMapFromNapi(env, exports);
-    EXPECT_EQ(result, nullptr);
-}
-
-/**
- * @tc.name: JsDrawableDescriptorTest008
- * @tc.desc: test GetPixelMapFromDrawableNapi function;
- * @tc.type: FUNC
- */
-HWTEST_F(JsDrawableDescriptorTest, JsDrawableDescriptorTest008, TestSize.Level1)
-{
-    napi_env env = nullptr;
-    napi_value exports = nullptr;
-    JsDrawableDescriptor jsDrawableDescriptor;
-    std::shared_ptr<Media::PixelMap> result = jsDrawableDescriptor.GetPixelMapFromDrawableNapi(env, exports);
-    EXPECT_EQ(result, nullptr);
-}
-
 } // namespace OHOS::Ace

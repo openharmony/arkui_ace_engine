@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,27 +20,27 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class GridScrollLayoutTestNg : public GridTestNg {
 public:
     void UpdateLayoutInfo();
-    void UpdateLayoutWrapper(RefPtr<FrameNode>& frameNode, float width = WIDTH, float height = HEIGHT);
+    RefPtr<GridPaintMethod> UpdateOverlayModifier();
+    RefPtr<GridPaintMethod> UpdateContentModifier();
 };
 
 void GridScrollLayoutTestNg::UpdateLayoutInfo()
 {
     GetGrid();
     ViewStackProcessor::GetInstance()->Finish();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     pattern_->info_.lineHeightMap_[0] = ITEM_MAIN_SIZE;
     pattern_->info_.gridMatrix_[0][0] = 0;
     pattern_->info_.gridMatrix_[0][1] = 1;
@@ -48,15 +48,20 @@ void GridScrollLayoutTestNg::UpdateLayoutInfo()
     pattern_->info_.gridMatrix_[1][1] = 1;
 }
 
-void GridScrollLayoutTestNg::UpdateLayoutWrapper(RefPtr<FrameNode>& frameNode, float width, float height)
+RefPtr<GridPaintMethod> GridScrollLayoutTestNg::UpdateOverlayModifier()
 {
-    LayoutConstraintF LayoutConstraint;
-    LayoutConstraint.parentIdealSize = { WIDTH, HEIGHT };
-    LayoutConstraint.percentReference = { WIDTH, HEIGHT };
-    LayoutConstraint.selfIdealSize = { width, height };
-    LayoutConstraint.maxSize = { width, HEIGHT };
-    frameNode->Measure(LayoutConstraint);
-    frameNode->Layout();
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
+    RefPtr<GridPaintMethod> paintMethod = AceType::DynamicCast<GridPaintMethod>(paintWrapper->nodePaintImpl_);
+    paintMethod->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    return paintMethod;
+}
+
+RefPtr<GridPaintMethod> GridScrollLayoutTestNg::UpdateContentModifier()
+{
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
+    RefPtr<GridPaintMethod> paintMethod = AceType::DynamicCast<GridPaintMethod>(paintWrapper->nodePaintImpl_);
+    paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    return paintMethod;
 }
 
 /**
@@ -130,7 +135,8 @@ HWTEST_F(GridScrollLayoutTestNg, ScrollLayout001, TestSize.Level1)
     auto gridFocus = frameNode_->GetOrCreateFocusHub();
     gridFocus->RequestFocusImmediately();
     // change grid height and trigger Measure
-    UpdateLayoutWrapper(frameNode_, WIDTH, smallerHeight);
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(smallerHeight));
+    FlushUITasks();
     float gridHeight = frameNode_->GetGeometryNode()->GetFrameSize().Height();
     EXPECT_FLOAT_EQ(gridHeight, smallerHeight);
 }
@@ -162,7 +168,8 @@ HWTEST_F(GridScrollLayoutTestNg, ScrollLayout002, TestSize.Level1)
     pattern_->info_.axis_ = Axis::HORIZONTAL;
     const float smallerHeight = HEIGHT - ITEM_MAIN_SIZE;
     // change grid height and trigger Measure
-    UpdateLayoutWrapper(frameNode_, WIDTH, smallerHeight);
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(smallerHeight));
+    FlushUITasks();
     float currentOffset = pattern_->info_.currentOffset_;
     EXPECT_FLOAT_EQ(currentOffset, 0);
 
@@ -170,10 +177,12 @@ HWTEST_F(GridScrollLayoutTestNg, ScrollLayout002, TestSize.Level1)
      * @tc.steps: step2. While Grid !IsCurrentFocus()
      * @tc.expected: currentOffset_ would not change
      */
-    UpdateLayoutWrapper(frameNode_, WIDTH, HEIGHT); // reset Grid height
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(HEIGHT));
+    FlushUITasks();
     pattern_->info_.axis_ = Axis::VERTICAL;
     // change grid height and trigger Measure
-    UpdateLayoutWrapper(frameNode_, WIDTH, smallerHeight);
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(smallerHeight));
+    FlushUITasks();
     currentOffset = pattern_->info_.currentOffset_;
     EXPECT_FLOAT_EQ(currentOffset, 0);
 
@@ -181,10 +190,12 @@ HWTEST_F(GridScrollLayoutTestNg, ScrollLayout002, TestSize.Level1)
      * @tc.steps: step3. While clickPosition is in Grid
      * @tc.expected: currentOffset_ would not change
      */
-    UpdateLayoutWrapper(frameNode_, WIDTH, HEIGHT); // reset Grid height
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(HEIGHT));
+    FlushUITasks();
     pattern_->info_.axis_ = Axis::VERTICAL;
     // change grid height and trigger Measure
-    UpdateLayoutWrapper(frameNode_, WIDTH, smallerHeight);
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(smallerHeight));
+    FlushUITasks();
     currentOffset = pattern_->info_.currentOffset_;
     EXPECT_FLOAT_EQ(currentOffset, 0);
 }
@@ -414,7 +425,7 @@ HWTEST_F(GridScrollLayoutTestNg, UpdateGridMatrix001, TestSize.Level1)
      * @tc.expected: Scroll to the correct position,lineHeightMap_ size is 25
      */
     pattern_->ScrollToIndex(99, true, ScrollAlign::END);
-    EXPECT_TRUE(IsEqual<int32_t>(pattern_->info_.lineHeightMap_.size(), 25));
+    EXPECT_TRUE(IsEqual(pattern_->info_.lineHeightMap_.size(), 25));
 }
 
 /**
@@ -479,18 +490,10 @@ HWTEST_F(GridScrollLayoutTestNg, UpdateOverlayModifier001, TestSize.Level1)
     CreateDone();
 
     /**
-     * @tc.steps: step1. create paintMethod
-     */
-    auto paintMethod = AceType::DynamicCast<GridPaintMethod>(pattern_->CreateNodePaintMethod());
-    auto paintProperty = pattern_->CreatePaintProperty();
-    PaintWrapper paintWrapper(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty);
-    paintMethod->UpdateOverlayModifier(nullptr);
-
-    /**
-     * @tc.steps: step2. call UpdateOverlayModifier
+     * @tc.steps: step1. call UpdateOverlayModifier
      * @tc.expected: scrollBar is nullptr
      */
-    paintMethod->UpdateOverlayModifier(&paintWrapper);
+    auto paintMethod = UpdateOverlayModifier();
     auto scrollBar = paintMethod->scrollBar_.Upgrade();
     EXPECT_EQ(scrollBar, nullptr);
 }
@@ -512,10 +515,7 @@ HWTEST_F(GridScrollLayoutTestNg, UpdateOverlayModifier002, TestSize.Level1)
      * @tc.expected: scrollBar is !nullptr
      */
     pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
-    auto paintMethod = AceType::DynamicCast<GridPaintMethod>(pattern_->CreateNodePaintMethod());
-    auto paintProperty = pattern_->CreatePaintProperty();
-    PaintWrapper paintWrapper(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty);
-    paintMethod->UpdateOverlayModifier(nullptr);
+    auto paintMethod = UpdateOverlayModifier();
     auto scrollBar = paintMethod->scrollBar_.Upgrade();
     EXPECT_NE(scrollBar, nullptr);
 
@@ -523,7 +523,7 @@ HWTEST_F(GridScrollLayoutTestNg, UpdateOverlayModifier002, TestSize.Level1)
      * @tc.steps: step2. call UpdateOverlayModifier
      * @tc.expected: AnimationTyp is correct
      */
-    paintMethod->UpdateOverlayModifier(&paintWrapper);
+    paintMethod = UpdateOverlayModifier();
     EXPECT_EQ(scrollBar->GetOpacityAnimationType(), OpacityAnimationType::NONE);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
 
@@ -536,7 +536,7 @@ HWTEST_F(GridScrollLayoutTestNg, UpdateOverlayModifier002, TestSize.Level1)
     paintMethod->SetScrollBarOverlayModifier(pattern_->GetScrollBarOverlayModifier());
     auto scrollBarOverlayModifier = paintMethod->scrollBarOverlayModifier_.Upgrade();
     EXPECT_EQ(scrollBarOverlayModifier, nullptr);
-    paintMethod->UpdateOverlayModifier(&paintWrapper);
+    paintMethod = UpdateOverlayModifier();
     EXPECT_EQ(scrollBar->GetOpacityAnimationType(), OpacityAnimationType::NONE);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     scrollBar = nullptr;
@@ -561,8 +561,6 @@ HWTEST_F(GridScrollLayoutTestNg, UpdateOverlayModifier003, TestSize.Level1)
     pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
     pattern_->scrollBar_->SetScrollable(true);
     auto paintMethod = AceType::DynamicCast<GridPaintMethod>(pattern_->CreateNodePaintMethod());
-    auto paintProperty = pattern_->CreatePaintProperty();
-    PaintWrapper paintWrapper(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty);
     EXPECT_TRUE(pattern_->scrollBar_->NeedPaint());
     pattern_->CreateScrollBarOverlayModifier();
     EXPECT_NE(pattern_->scrollBarOverlayModifier_, nullptr);
@@ -576,7 +574,7 @@ HWTEST_F(GridScrollLayoutTestNg, UpdateOverlayModifier003, TestSize.Level1)
      * @tc.steps: step2. call UpdateOverlayModifier
      * @tc.expected: AnimationTyp is correct
      */
-    paintMethod->UpdateOverlayModifier(&paintWrapper);
+    paintMethod = UpdateOverlayModifier();
     EXPECT_EQ(scrollBar->GetOpacityAnimationType(), OpacityAnimationType::NONE);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
 
@@ -585,7 +583,7 @@ HWTEST_F(GridScrollLayoutTestNg, UpdateOverlayModifier003, TestSize.Level1)
      * @tc.expected: AnimationTyp is correct
      */
     scrollBar->SetPositionMode(PositionMode::BOTTOM);
-    paintMethod->UpdateOverlayModifier(&paintWrapper);
+    paintMethod = UpdateOverlayModifier();
     scrollBar = paintMethod->scrollBar_.Upgrade();
     EXPECT_EQ(scrollBar->GetOpacityAnimationType(), OpacityAnimationType::NONE);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
@@ -669,16 +667,16 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollTest006, TestSize.Level1)
 
     auto pattern = frameNode_->GetPattern<GridPattern>();
     EXPECT_TRUE(pattern->isConfigScrollable_);
-    auto eventHub = frameNode_->GetEventHub<GridEventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<GridEventHub>();
     EXPECT_FALSE(eventHub->onScrollToIndex_);
 }
 
 /**
- * @tc.name: GridSCroll001
+ * @tc.name: GridScroll001
  * @tc.desc: Test SetSelected Function.
  * @tc.type: FUNC
  */
-HWTEST_F(GridScrollLayoutTestNg, GridSCroll001, TestSize.Level1)
+HWTEST_F(GridScrollLayoutTestNg, GridScroll001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create GridItemModelNG object
@@ -1375,7 +1373,8 @@ HWTEST_F(GridScrollLayoutTestNg, SetEffectEdge002, TestSize.Level1)
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
 
     UpdateCurrentOffset(-200);
-    ASSERT_TRUE(Negative(GetChildY(frameNode_, 0)));
+    
+    EXPECT_LE(GetChildY(frameNode_, 0), 0);
 }
 
 /**
@@ -1410,7 +1409,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest001, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -34.397873);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -126.00447);
 
     /**
      * @tc.steps: step2. play spring animation frame by frame, and increase grid height during animation
@@ -1420,7 +1419,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest001, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT + 50))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -67.198936);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -63.002243);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
@@ -1463,7 +1462,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest002, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -34.397873);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -126.00447);
 
     /**
      * @tc.steps: step2. play spring animation frame by frame, and decrease grid height during animation
@@ -1472,7 +1471,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest002, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT - 50))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -67.198936);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -63.002243);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
@@ -1515,7 +1514,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest003, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 193.94336);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 279.38562);
 
     /**
      * @tc.steps: step2. play spring animation frame by frame, and increase grid height during animation
@@ -1524,7 +1523,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest003, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT + 50))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 96.97168);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 139.69281);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
@@ -1567,7 +1566,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest004, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 193.94336);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 279.38562);
 
     /**
      * @tc.steps: step2. play spring animation frame by frame, and decrease grid height during animation
@@ -1576,7 +1575,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest004, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT - 50))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 96.97168);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 139.69281);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
@@ -2005,5 +2004,378 @@ HWTEST_F(GridScrollLayoutTestNg, CachedCount003, TestSize.Level1)
     auto cacheEnd = algo->CalculateEndCachedCount(option, 2);
     EXPECT_EQ(cacheStart, 0);
     EXPECT_EQ(cacheEnd, 2);
+}
+
+/**
+ * @tc.name: Test Calculate CacheCount
+ * @tc.desc: Test Calculate CacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, CachedCount004, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 50 };
+    model.SetLayoutOptions(option);
+    CreateFixedItems(50);
+    CreateDone();
+
+    pattern_->info_.startMainLineIndex_ = 1;
+    pattern_->info_.endMainLineIndex_ = 3;
+    pattern_->info_.startIndex_ = 9;
+    pattern_->info_.endIndex_ = 17;
+    pattern_->info_.gridMatrix_  = {
+        { 1, { { 0, 9 }, { 1, 10 }, { 2, 11 } } },
+        { 2, { { 0, 12 }, { 1, 13 }, { 2, 14 } } },
+        { 3, { { 0, 15 }, { 1, 16 }, { 2, 17 } } },
+    };
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto algo =
+        AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    auto cacheStart = algo->CalculateStartCachedCount(option, 2);
+    auto cacheEnd = algo->CalculateEndCachedCount(option, 2);
+    EXPECT_EQ(cacheStart, 6);
+    EXPECT_EQ(cacheEnd, 6);
+}
+
+HWTEST_F(GridScrollLayoutTestNg, isFadingBottomTest001, TestSize.Level1) {
+    // Arrange
+    auto pattern = AceType::MakeRefPtr<GridPattern>();
+    pattern->info_.lastMainSize_ = 100.0f;
+    pattern->info_.contentEndPadding_ = 10.0f;
+    pattern->info_.startIndex_ = 0;
+    pattern->info_.endIndex_ = 10;
+    pattern->info_.childrenCount_ = 11;
+    pattern->info_.totalHeightOfItemsInView_ = 90.0f;
+    pattern->info_.currentOffset_ = 50.0f;
+    pattern->info_.offsetEnd_ = false;
+
+    // Act
+    bool result = pattern->IsFadingBottom();
+
+    // Assert
+    EXPECT_TRUE(result);
+}
+
+HWTEST_F(GridScrollLayoutTestNg, isFadingBottomTest002, TestSize.Level1) {
+    // Arrange
+    auto pattern = AceType::MakeRefPtr<GridPattern>();
+    pattern->info_.lastMainSize_ = 100.0f;
+    pattern->info_.contentEndPadding_ = 10.0f;
+    pattern->info_.startIndex_ = 0;
+    pattern->info_.endIndex_ = 10;
+    pattern->info_.childrenCount_ = 11;
+    pattern->info_.totalHeightOfItemsInView_ = 110.0f;
+    pattern->info_.currentOffset_ = 50.0f;
+    pattern->info_.offsetEnd_ = true;
+
+    // Act
+    bool result = pattern->IsFadingBottom();
+
+    // Assert
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: FadingEdge001
+ * @tc.desc: Test FadingEdge property
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, FadingEdge001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to grid
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    GridModelNG model = CreateGrid();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    EXPECT_TRUE(paintProperty_->GetFadingEdge().value_or(false));
+    EXPECT_EQ(paintProperty_->GetFadingEdgeLength().value(), fadingEdgeLength);
+
+    /**
+     * @tc.steps: step2. Change FadingEdge to false
+     * @tc.expected: There is no fading edge
+     */
+    ScrollableModelNG::SetFadingEdge(AceType::RawPtr(frameNode_), false, fadingEdgeLength);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    EXPECT_FALSE(paintProperty_->GetFadingEdge().value_or(false));
+}
+
+/**
+ * @tc.name: FadingEdge002
+ * @tc.desc: Test FadingEdge property
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, FadingEdge002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to grid
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    GridModelNG model = CreateGrid();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(10);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+
+    /**
+     * @tc.steps: step2. The grid at top
+     * @tc.expected: Fading bottom
+     */
+    auto paintMethod = UpdateContentModifier();
+    EXPECT_FALSE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+
+    /**
+     * @tc.steps: step3. The grid at middle
+     * @tc.expected: Fading both
+     */
+    ScrollTo(100.0f);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+
+    /**
+     * @tc.steps: step4. The grid at bottom
+     * @tc.expected: Fading top
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_FALSE(paintMethod->isFadingBottom_);
+}
+
+/*
+ * @tc.name: Test IsPredictOutOfCacheRange
+ * @tc.desc: Test Normal range with valid cache
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, IsPredictOutOfCacheRange001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    model.SetLayoutOptions(option);
+    CreateFixedItems(50);
+    CreateDone();
+
+    pattern_->info_.startIndex_ = 10;
+    pattern_->info_.endIndex_ = 20;
+    pattern_->info_.defCachedCount_ = 2;
+    pattern_->info_.crossCount_ = 3; // cacheCount = 2*3=6 → range [4,26]
+
+    // Boundary checks
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(4));  // start - cacheCount
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(26)); // end + cacheCount
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(3));   // below extended range
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(27));  // above extended range
+}
+
+/**
+ * @tc.name: Test IsPredictOutOfCacheRange
+ * @tc.desc: Test Zero cache count (only check original range)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, IsPredictOutOfCacheRange002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    model.SetCachedCount(0, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    model.SetLayoutOptions(option);
+    CreateFixedItems(50);
+    CreateDone();
+
+    pattern_->info_.startIndex_ = 5;
+    pattern_->info_.endIndex_ = 5;
+    pattern_->info_.defCachedCount_ = 0; // cacheCount = 0 → range [5,5]
+    pattern_->info_.crossCount_ = 1;
+
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(4)); // below
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(5)); // exact
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(6)); // above
+}
+
+/*
+ * @tc.name: Test IsPredictOutOfCacheRange
+ * @tc.desc: Test Normal range with valid cache.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, IsPredictOutOfCacheRange003, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    model.SetLayoutOptions(option);
+    CreateFixedItems(50);
+    CreateDone();
+
+    pattern_->info_.startIndex_ = 10;
+    pattern_->info_.endIndex_ = 20;
+    pattern_->info_.defCachedCount_ = 1;
+    pattern_->info_.crossCount_ = 3; // cacheCount = 2*3=6 → range [7-9,21-23]
+
+    // Boundary checks
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(10));
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(20));
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(9));
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(21));
+
+    pattern_->info_.startIndex_ = INT32_MIN;
+    pattern_->info_.endIndex_ = INT32_MAX;
+
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(INT32_MIN)); // Lower bound
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(0));         // Mid value
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(INT32_MAX)); // Upper bound
+}
+
+/*
+ * @tc.name: Test IsPredictOutOfCacheRange
+ * @tc.desc: Test Normal range with valid cache.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, IsPredictOutOfCacheRange004, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    model.SetLayoutOptions(option);
+    CreateFixedItems(50);
+    CreateDone();
+
+    pattern_->info_.startIndex_ = INT32_MIN;
+    pattern_->info_.endIndex_ = INT32_MAX - 1;
+    pattern_->info_.childrenCount_ = INT32_MAX;
+
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(INT32_MIN));     // Lower bound
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(0));             // Mid value
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(INT32_MAX - 1)); // Upper bound
+
+    pattern_->info_.startIndex_ = -2;
+    pattern_->info_.endIndex_ = 2;
+    // cacheCount = 1*3=3 → range is [-5, -3] and [3, 5]
+    pattern_->info_.defCachedCount_ = 1;
+    pattern_->info_.crossCount_ = 3;
+
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(-2));  // Lower bound
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(0));   // Mid value (zero)
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(2));   // Upper bound
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(-3)); // Below lower bound
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(3));  // Above upper bound
+
+    pattern_->info_.startIndex_ = -5;
+    pattern_->info_.endIndex_ = -1;
+    // cacheCount = 1*3=3 → range is [-11, -6] and [0, 5]
+    pattern_->info_.defCachedCount_ = 2;
+    pattern_->info_.crossCount_ = 3;
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(-5));  // Lower bound
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(-3));  // Mid value
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(-1));  // Upper bound
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(-6)); // Below lower bound
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(0));  // Above upper bound
+}
+
+/*
+ * @tc.name: Test IsPredictOutOfCacheRange
+ * @tc.desc: Test cache range when the firstRepeatCount is less than childrenCount.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, IsPredictOutOfCacheRange005, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    model.SetLayoutOptions(option);
+    CreateFixedItems(50);
+    CreateDone();
+    EXPECT_EQ(pattern_->info_.GetChildrenCount(), 50);
+
+    pattern_->info_.startIndex_ = 10;
+    pattern_->info_.endIndex_ = 20;
+    pattern_->info_.defCachedCount_ = 1;
+
+    // cacheCount = 1*3=3 → range is [7, 9] and [21, 23]
+    pattern_->info_.crossCount_ = 3;
+    pattern_->info_.firstRepeatCount_ = 22;
+
+    EXPECT_EQ(pattern_->info_.GetChildrenCount(), 22);
+    // Boundary checks
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(20));
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(21));
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(22));
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(23));
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(9));
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(10));
+}
+
+HWTEST_F(GridScrollLayoutTestNg, UpdateCurrentOffset001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    model.SetCachedCount(0, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    model.SetLayoutOptions(option);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(1);
+    CreateDone();
+
+    pattern_->UpdateCurrentOffset(-10.f, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -10.f);
+    FlushUITasks();
+
+    pattern_->UpdateCurrentOffset(10.f, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 10.f);
+}
+
+/**
+ * @tc.name: Test GetTotalOffset
+ * @tc.desc: Test GetTotalOffset when updating an item's height in the viewport
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, GetTotalOffsetTest001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    CreateItemsInLazyForEach(50, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    CreateDone();
+
+    pattern_->ScrollToIndex(30, false, ScrollAlign::START);
+    FlushUITasks();
+    auto offset = pattern_->GetTotalOffset();
+    auto gridItemProp = GetChildLayoutProperty<GridItemLayoutProperty>(frameNode_, 29);
+    EXPECT_NE(gridItemProp, nullptr);
+    gridItemProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(ITEM_MAIN_SIZE + 50))));
+    FlushUITasks();
+    EXPECT_EQ(offset, pattern_->GetTotalOffset());
 }
 } // namespace OHOS::Ace::NG

@@ -44,9 +44,9 @@ void MultiFingersRecognizerTestNg::TearDownTestSuite()
  */
 HWTEST_F(MultiFingersRecognizerTestNg, Test001, TestSize.Level1)
 {
-    auto clicRecognizerFirst = new ClickRecognizer(5, 5);
-    auto clicRecognizerSecond = new ClickRecognizer(10, 5);
-    auto clicRecognizerThird = new ClickRecognizer(-1, 5);
+    RefPtr<ClickRecognizer> clicRecognizerFirst = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<ClickRecognizer> clicRecognizerSecond = AceType::MakeRefPtr<ClickRecognizer>(10, 5);
+    RefPtr<ClickRecognizer> clicRecognizerThird = AceType::MakeRefPtr<ClickRecognizer>(-1, 5);
     clicRecognizerFirst->InitGlobalValue(SourceType::MOUSE);
     clicRecognizerSecond->InitGlobalValue(SourceType::MOUSE);
     clicRecognizerThird->InitGlobalValue(SourceType::MOUSE);
@@ -60,8 +60,8 @@ HWTEST_F(MultiFingersRecognizerTestNg, Test001, TestSize.Level1)
  */
 HWTEST_F(MultiFingersRecognizerTestNg, Test002, TestSize.Level1)
 {
-    auto clicRecognizerFirst = new ClickRecognizer(5, 5);
-    MultiFingersRecognizer* fingersRecognizer = clicRecognizerFirst;
+    RefPtr<ClickRecognizer> clicRecognizerFirst = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clicRecognizerFirst;
     auto status = fingersRecognizer->IsNeedResetStatus();
     EXPECT_EQ(status, true);
 }
@@ -73,8 +73,8 @@ HWTEST_F(MultiFingersRecognizerTestNg, Test002, TestSize.Level1)
  */
 HWTEST_F(MultiFingersRecognizerTestNg, Test003, TestSize.Level1)
 {
-    auto clicRecognizerFirst = new ClickRecognizer(5, 5);
-    MultiFingersRecognizer* fingersRecognizer = clicRecognizerFirst;
+    RefPtr<ClickRecognizer> clicRecognizerFirst = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clicRecognizerFirst;
     AxisEvent event;
     event.id = 1;
     event.x = 10.1;
@@ -104,8 +104,8 @@ HWTEST_F(MultiFingersRecognizerTestNg, Test004, TestSize.Level1)
 {
     MockReferenced<MultiFingersRecognizer> test;
     EXPECT_CALL(test, Claim(_)).WillRepeatedly(Return(nullptr));
-    auto clicRecognizerFirst = new ClickRecognizer(5, 5);
-    MultiFingersRecognizer* fingersRecognizer = clicRecognizerFirst;
+    RefPtr<ClickRecognizer> clicRecognizerFirst = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clicRecognizerFirst;
     AxisEvent event;
     event.id = 1;
     event.x = 10.1;
@@ -136,8 +136,8 @@ HWTEST_F(MultiFingersRecognizerTestNg, Test005, TestSize.Level1)
     listTest.resize(10, nullptr);
     MockRecognizerGroup groupTest;
     EXPECT_CALL(groupTest, GetGroupRecognizer()).WillRepeatedly(ReturnRef(listTest));
-    auto clicRecognizerFirst = new ClickRecognizer(5, 5);
-    MultiFingersRecognizer* fingersRecognizer = clicRecognizerFirst;
+    RefPtr<ClickRecognizer> clicRecognizerFirst = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clicRecognizerFirst;
     AxisEvent event;
     event.id = 1;
     event.x = 10.1;
@@ -205,8 +205,8 @@ HWTEST_F(MultiFingersRecognizerTestNg, Test006, TestSize.Level1)
 {
     std::list<RefPtr<NGGestureRecognizer>> listTest;
     listTest.resize(10, nullptr);
-    auto clicRecognizerFirst = new ClickRecognizer(5, 5);
-    MultiFingersRecognizer* fingersRecognizer = clicRecognizerFirst;
+    RefPtr<ClickRecognizer> clicRecognizerFirst = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clicRecognizerFirst;
     AxisEvent event;
     event.id = 1;
     event.x = 10.1;
@@ -227,8 +227,8 @@ HWTEST_F(MultiFingersRecognizerTestNg, Test006, TestSize.Level1)
  */
 HWTEST_F(MultiFingersRecognizerTestNg, Test007, TestSize.Level1)
 {
-    auto clicRecognizerFirst = new ClickRecognizer(5, 5);
-    auto fingersRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(clicRecognizerFirst);
+    RefPtr<ClickRecognizer> clicRecognizerFirst = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clicRecognizerFirst;
     fingersRecognizer->refereeState_ = RefereeState::SUCCEED;
     fingersRecognizer->currentFingers_ = 0;
     fingersRecognizer->MultiFingersRecognizer::CleanRecognizerState();

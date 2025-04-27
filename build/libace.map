@@ -65,6 +65,8 @@
       OHOS::Ace::Platform::AceApplicationInfoImpl::*;
       OHOS::Ace::Platform::AceContainer::*;
       OHOS::Ace::Platform::FlutterAceView::*;
+      "OHOS::Ace::Platform::WindowFreeContainer::CreateWindowFreeContainer(void*, void*)";
+      "OHOS::Ace::Platform::WindowFreeContainer::DestroyWindowFreeContainer()";
       OHOS::Ace::PluginComponentManager::*;
       OHOS::Ace::Scheduler::*;
       OHOS::Ace::ScopedDelegate::*;
@@ -95,6 +97,9 @@
       OHOS::Ace::WindowUtils::*;
       OHOS::Ace::NG::ParallelPagePattern::*;
       OHOS::Ace::NG::ViewAdvancedRegister::*;
+      "OHOS::Ace::AnimatableColor::AnimatableColor()";
+      "OHOS::Ace::AnimatableColor::~AnimatableColor()";
+      "OHOS::Ace::NG::LayoutProperty::~LayoutProperty()";
 
       OHOS::Ace::ColumnModel::*;
       OHOS::Ace::FlexModel::*;
@@ -262,6 +267,8 @@
       OHOS::Ace::PipelineBase::GetSystemFontList*;
       OHOS::Ace::PipelineBase::GetSystemFont*;
       OHOS::Ace::PipelineBase::GetUIFontConfig*;
+      OHOS::Ace::PipelineBase::GetImageCache*;
+      OHOS::Ace::ImageCache::ClearCacheImgObj*;
       OHOS::Ace::NG::ViewAbstract::*;
       OHOS::Ace::NG::Inspector::*;
       OHOS::Ace::V2::Inspector::*;
@@ -276,6 +283,8 @@
       OHOS::Ace::NG::RichEditorChangeValue::*;
       OHOS::Ace::TabController::*;
       OHOS::Ace::ParseFontFeatureSettings*;
+      OHOS::Ace::UnParseFontFeatureSetting*;
+      OHOS::Ace::NG::ConvertToCalcPaddingProperty*;
       OHOS::Ace::StorageProxy::*;
       OHOS::Ace::EnvironmentProxy::*;
       OHOS::Ace::AceScoringLog::*;
@@ -302,6 +311,7 @@
       OHOS::Ace::ImageAnalyzerMgr::UpdateConfig*;
       OHOS::Ace::ImageAnalyzerMgr::Release*;
       OHOS::Ace::ImageAnalyzerMgr::UpdateOverlayStatus*;
+      "OHOS::Ace::NG::GeometryNode::SetMarginFrameOffset(OHOS::Ace::NG::OffsetT<float> const&)";
 
       OHOS::Ace::NG::InspectorFilter::*;
       OHOS::Ace::NG::ServiceCollaborationMenuAceHelper::*;
@@ -384,10 +394,12 @@
       OHOS::Ace::BorderImage::*;
       OHOS::Ace::ContainerScope::*;
       OHOS::Ace::Dimension::*;
+      OHOS::Ace::ImageSource::*;
       OHOS::Ace::ImageSourceInfo::*;
       OHOS::Ace::JsonUtil::*;
       OHOS::Ace::Recorder::*;
       OHOS::Ace::Referenced::*;
+      OHOS::Ace::SystemBarStyle::*;
       OHOS::Ace::Recorder::IsCacheAvaliable*;
       OHOS::Ace::Recorder::EventRecorder::*;
       OHOS::Ace::Recorder::EventParamsBuilder::*;
@@ -417,7 +429,7 @@
       OHOS::Ace::ShadowTheme::*;
       OHOS::Ace::TouchLocationInfo::*;
       OHOS::Ace::ACE_FORCE_EXPORT::*;
-      OHOS::Ace::LifeCycleCheckable::~LifeCycleCheckable*;
+      OHOS::Ace::LifeCycleCheckable::*;
       OHOS::Ace::Kit::ViewStackProcessor::*;
       OHOS::Ace::Kit::AbstractViewFactory::*;
       OHOS::Ace::Kit::BoxLayoutAlgorithm::*;
@@ -439,12 +451,16 @@
       OHOS::Ace::Kit::Property::*;
       OHOS::Ace::Kit::ParseColor*;
       OHOS::Ace::Kit::ParseDimension*;
+      OHOS::Ace::Kit::ParseScroller*;
       OHOS::Ace::Kit::AnimationUtils::*;
       OHOS::Ace::Kit::View::*;
       OHOS::Ace::Kit::Column::*;
+      OHOS::Ace::Kit::CustomNode::*;
       OHOS::Ace::Kit::Text::*;
+      OHOS::Ace::Kit::Tabs::*;
       OHOS::Ace::NG::NavigationStack::*;
       OHOS::Ace::NG::CustomNode::*;
+      OHOS::Ace::NG::NavigationGroupNode::*;
       OHOS::Ace::NavDestinationModel::*;
       OHOS::Ace::NavDestinationModelNG::*;
 
@@ -474,6 +490,7 @@
 
       virtual?thunk?to?OHOS::Ace::NG::UINode::*;
       virtual?thunk?to?OHOS::Ace::NG::FrameNode::*;
+      virtual?thunk?to?OHOS::Ace::NG::LayoutProperty::*;
 
       vtable?for?OHOS::Ace::NG::AccessibilityProperty;
       vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
@@ -498,7 +515,9 @@
       vtable?for?OHOS::Ace::NG::ScrollableModelNG;
       vtable?for?OHOS::Ace::NG::NavigationStack;
       vtable?for?OHOS::Ace::NG::CustomNode;
+      vtable?for?OHOS::Ace::NG::NavigationGroupNode;
       vtable?for?OHOS::Ace::NavDestinationModel;
+      vtable?for?OHOS::Ace::SystemBarStyle;
       vtable?for?OHOS::Ace::NG::NavDestinationModelNG;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
@@ -516,6 +535,10 @@
       "OHOS::Ace::NG::Gradient::AddColor(OHOS::Ace::NG::GradientColor const&)";
       "OHOS::Ace::Framework::JsConverter::ConvertNapiValueToJsVal(napi_value__*)";
       "OHOS::Ace::Framework::JsiObject::JsiObject(panda::CopyableGlobal<panda::ObjectRef> const&)";
+      OHOS::Ace::NG::NGGestureRecognizer::IsInResponseLinkRecognizers*;
+      OHOS::Ace::TouchEventTarget::GetAttachedNode*;
+      "OHOS::Ace::CheckThread(OHOS::Ace::TaskExecutor::TaskType)";
+      OHOS::Ace::NG::PanRecognizer::GetDistance*;
     };
   local:
     *;

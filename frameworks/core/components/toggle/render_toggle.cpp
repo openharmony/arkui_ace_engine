@@ -15,6 +15,7 @@
 
 #include "core/components/toggle/render_toggle.h"
 
+#include "core/event/ace_event_helper.h"
 namespace OHOS::Ace {
 namespace {
 

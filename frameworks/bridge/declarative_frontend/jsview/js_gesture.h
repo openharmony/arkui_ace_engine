@@ -104,6 +104,8 @@ public:
     ~JSPanGesture() override = default;
 
     static void Create(const JSCallbackInfo& args);
+    static napi_value ParsePanDistanceMap(JSRef<JSVal> jsDistanceMap, PanDistanceMap& distanceMap);
+    static void ParsePanDistance(const JSRef<JSObject>& obj, PanDistanceMap& distanceMap);
 };
 
 class JSSwipeGesture : public JSGesture {
@@ -161,4 +163,3 @@ public:
 };
 } // namespace OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JSVIEW_JS_GESTURE_H
-

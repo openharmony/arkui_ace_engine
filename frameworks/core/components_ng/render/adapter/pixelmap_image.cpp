@@ -23,9 +23,10 @@
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/image_painter_utils.h"
-#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#include "core/components_ng/render/adapter/drawing_image.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_forward.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -107,16 +108,6 @@ std::string GetDynamicModeString(DynamicRangeMode dynamicMode)
     }
 }
 
-#ifndef USE_ROSEN_DRAWING
-void UpdateSKFilter(const ImagePaintConfig& config, SKPaint& paint)
-{
-    if (config.colorFilter_.colorFilterMatrix_) {
-        paint.setColorFilter(SkColorFilters::Matrix(config.colorFilter_.colorFilterMatrix_->data()));
-    } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
-        paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
-    }
-}
-#else
 void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
 {
     if (config.colorFilter_.colorFilterMatrix_) {
@@ -135,7 +126,6 @@ void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
         filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
     }
 }
-#endif
 
 int32_t CalculateRotateDegree(ImageRotateOrientation orientation)
 {
@@ -189,7 +179,6 @@ bool PixelMapImage::StretchImageWithLattice(
     const auto& config = GetPaintConfig();
     auto drawingLattice = config.resizableLattice_;
     CHECK_NULL_RETURN(drawingLattice, false);
-#ifdef ENABLE_ROSEN_BACKEND
     auto latticeSptrAddr =
         static_cast<std::shared_ptr<Rosen::Drawing::Lattice>*>(drawingLattice->GetDrawingLatticeSptrAddr());
     CHECK_NULL_RETURN((latticeSptrAddr && (*latticeSptrAddr)), false);
@@ -232,8 +221,6 @@ bool PixelMapImage::StretchImageWithLattice(
     recordingCanvas.DrawImageLattice(rsImage.get(), lattice, dstRect, filterMode);
     recordingCanvas.DetachBrush();
     return true;
-#endif
-    return false;
 }
 
 bool PixelMapImage::StretchImageWithSlice(
@@ -245,7 +232,6 @@ bool PixelMapImage::StretchImageWithSlice(
     CHECK_NULL_RETURN(slice.Valid(), false);
     RectF centerRect;
     CHECK_NULL_RETURN(ConvertSlice(config, centerRect, pixmap->GetWidth(), pixmap->GetHeight()), false);
-#ifdef ENABLE_ROSEN_BACKEND
     RSBrush brush;
     auto filterMode = RSFilterMode::NEAREST;
     switch (config.imageInterpolation_) {
@@ -283,8 +269,6 @@ bool PixelMapImage::StretchImageWithSlice(
     recordingCanvas.DrawImageNine(rsImage.get(), rsCenterRect, dstRect, filterMode, &brush);
     recordingCanvas.DetachBrush();
     return true;
-#endif
-    return false;
 }
 
 bool PixelMapImage::CheckIfNeedForStretching(
@@ -331,13 +315,10 @@ void PixelMapImage::DrawToRSCanvas(
             dfxConfig.ToStringWithoutSrc().c_str());
         return;
     }
-#ifdef ENABLE_ROSEN_BACKEND
     if (CheckIfNeedForStretching(canvas, srcRect, dstRect, radiusXY)) {
         return;
     }
     const auto& config = GetPaintConfig();
-    ACE_SCOPED_TRACE("DrawToRSCanvas %s-[%d x %d]-[%s]", dfxConfig.ToStringWithSrc().c_str(), pixmap->GetWidth(),
-        pixmap->GetHeight(), dfxConfig.borderRadiusValue_.c_str());
     RSBrush brush;
     RSSamplingOptions options;
     ImagePainterUtils::AddFilter(brush, options, config);
@@ -370,29 +351,10 @@ void PixelMapImage::DrawToRSCanvas(
     NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap);
     recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();
-#endif
 }
 
 void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
 {
-#ifndef USE_ROSEN_DRAWING
-#ifdef ENABLE_ROSEN_BACKEND
-    auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
-    CHECK_NULL_VOID(rsCanvas);
-    auto skCanvas = rsCanvas->ExportSkCanvas();
-    CHECK_NULL_VOID(skCanvas);
-    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
-    CHECK_NULL_VOID(recordingCanvas);
-    SkPaint paint;
-    SkSamplingOptions option { SkFilterMode::kLinear, SkMipmapMode::kLinear };
-    SkRect dst { dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom() };
-
-    CHECK_NULL_VOID(pixelMap_);
-    auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
-    recordingCanvas->DrawPixelMapRect(pixelMap, dst, option, &paint);
-#endif
-#else
-#ifdef ENABLE_ROSEN_BACKEND
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     RSBrush brush;
     RSSamplingOptions options { RSFilterMode::LINEAR, RSMipmapMode::LINEAR };
@@ -404,29 +366,11 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
     recordingCanvas.AttachBrush(brush);
     recordingCanvas.DrawPixelMapRect(pixelMap, src, dst, options);
     recordingCanvas.DetachBrush();
-#endif
-#endif
 }
 
 void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect)
 {
     auto pixelMapPtr = GetPixelMap();
-#ifndef USE_ROSEN_DRAWING
-    auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
-    CHECK_NULL_VOID(rsCanvas);
-    auto skCanvas = rsCanvas->ExportSkCanvas();
-    CHECK_NULL_VOID(skCanvas);
-
-    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
-    CHECK_NULL_VOID(recordingCanvas);
-    SkPaint paint;
-    SkSamplingOptions option;
-    SkRect dst { dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom() };
-
-    CHECK_NULL_VOID(pixelMapPtr);
-    auto pixelMap = pixelMapPtr->GetPixelMapSharedPtr();
-    recordingCanvas->DrawPixelMapRect(pixelMap, dst, option, &paint);
-#else
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     RSBrush brush;
     RSSamplingOptions options;
@@ -439,12 +383,11 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRe
     recordingCanvas.AttachBrush(brush);
     recordingCanvas.DrawPixelMapRect(pixelMap, src, dst, options);
     recordingCanvas.DetachBrush();
-#endif
 }
 
 void PixelMapImage::Cache(const std::string& key)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto cache = pipeline->GetImageCache();
     CHECK_NULL_VOID(cache);
@@ -453,7 +396,7 @@ void PixelMapImage::Cache(const std::string& key)
 
 RefPtr<CanvasImage> PixelMapImage::QueryFromCache(const std::string& key)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto cache = pipeline->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);

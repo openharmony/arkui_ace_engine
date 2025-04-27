@@ -38,9 +38,12 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_container_handler.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "pointer_event.h"
+#include "string_wrapper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -61,6 +64,7 @@ constexpr char LIFECYCLE_TIMEOUT_NAME[] = "extension_lifecycle_timeout";
 constexpr char LIFECYCLE_TIMEOUT_MESSAGE[] = "the lifecycle of extension ability is timeout, please check AMS log.";
 constexpr char EVENT_TIMEOUT_NAME[] = "handle_event_timeout";
 constexpr char EVENT_TIMEOUT_MESSAGE[] = "the extension ability has timed out processing the key event.";
+constexpr char UIEXTENSION_HOST_UICONTENT_TYPE[] = "ohos.ace.uiextension.hostUicontentType";
 // Defines the want parameter to control the soft-keyboard area change of the provider.
 constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupiedAreaChange";
 // Set the UIExtension type of the EmbeddedComponent.
@@ -593,6 +597,24 @@ void SessionWrapperImpl::InitAllCallback()
     InitNotifyExtensionEventFunc();
     InitGetStatusBarHeightFunc();
 }
+
+void SessionWrapperImpl::UpdateInstanceId(int32_t instanceId)
+{
+    if (instanceId_ == instanceId) {
+        UIEXT_LOGW("InstanceId(%{public}d) has not changed when UpdateInstanceId.", instanceId);
+        return;
+    }
+
+    UIEXT_LOGI("Update instanceId %{public}d to %{public}d.", instanceId_, instanceId);
+    auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    instanceId_ = instanceId;
+    taskExecutor_ = taskExecutor;
+    InitAllCallback();
+    UIEXT_LOGI("Update instanceId success.");
+}
 /************************************************ End: Initialization *************************************************/
 
 /************************************************ Begin: About session ************************************************/
@@ -723,9 +745,28 @@ void SessionWrapperImpl::UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr)
     auto container = Platform::AceContainer::GetContainer(GetInstanceIdFromHost());
     CHECK_NULL_VOID(container);
     container->GetExtensionConfig(configParam);
+    auto str = UIExtensionContainerHandler::FromUIContentTypeToStr(container->GetUIContentType());
+    configParam.SetParam(UIEXTENSION_HOST_UICONTENT_TYPE, AAFwk::String::Box(str));
     AAFwk::WantParams wantParam(wantPtr->GetParams());
     wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
     wantPtr->SetParams(wantParam);
+}
+
+void SessionWrapperImpl::ReDispatchWantParams()
+{
+    CHECK_NULL_VOID(session_);
+    auto dataHandler = session_->GetExtensionDataHandler();
+    CHECK_NULL_VOID(dataHandler);
+    AAFwk::WantParams configParam;
+    auto container = Platform::AceContainer::GetContainer(GetInstanceIdFromHost());
+    CHECK_NULL_VOID(container);
+    container->GetExtensionConfig(configParam);
+    AAFwk::WantParams wantParam(customWant_->GetParams());
+    wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    AAFwk::Want dataToSend;
+    dataToSend.SetParams(wantParam);
+    dataHandler->SendDataAsync(Rosen::SubSystemId::WM_UIEXT,
+        static_cast<uint32_t>(OHOS::Rosen::Extension::Businesscode::SYNC_WANT_PARAMS), dataToSend);
 }
 
 bool SessionWrapperImpl::IsSessionValid()
@@ -838,11 +879,19 @@ bool SessionWrapperImpl::NotifyBackPressedAsync()
 }
 bool SessionWrapperImpl::NotifyPointerEventAsync(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    if (session_ && pointerEvent) {
-        UIEXT_LOGI("Transfer pointer event with 'id = %{public}d' to uiextension, persistentid = %{public}d,"
-            " componentId=%{public}d.", pointerEvent->GetId(), GetSessionId(), GetFrameNodeId());
-        session_->TransferPointerEvent(pointerEvent);
+    if (!pointerEvent) {
+        UIEXT_LOGE("Transfer pointer event to uiextension fail with null pointerEvent,"
+            " componentId=%{public}d.", GetFrameNodeId());
+        return false;
     }
+
+    if (!session_) {
+        UIEXT_LOGE("Transfer pointer event to uiextension fail with null session, 'id = %{public}d',"
+            " componentId=%{public}d.", pointerEvent->GetId(), GetFrameNodeId());
+        return false;
+    }
+
+    session_->TransferPointerEvent(pointerEvent);
     return false;
 }
 bool SessionWrapperImpl::NotifyKeyEventAsync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent)
@@ -901,6 +950,23 @@ Rosen::WSRect SessionWrapperImpl::GetWindowSceneRect()
     return hostSession->GetSessionRect();
 }
 
+RectF SessionWrapperImpl::GetDisplayAreaWithWindowScene()
+{
+    RectF displayArea = displayArea_;
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, displayArea);
+    auto curWindow = pipeline->GetCurrentWindowRect();
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, displayArea);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, displayArea);
+    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate(false, true);
+    displayArea.SetOffset(displayOffset);
+    displayArea = displayArea + OffsetF(curWindow.Left(), curWindow.Top());
+    return displayArea;
+}
+
 void SessionWrapperImpl::NotifyForeground()
 {
     ContainerScope scope(instanceId_);
@@ -912,9 +978,9 @@ void SessionWrapperImpl::NotifyForeground()
     auto hostWindowId = pipeline->GetFocusWindowId();
     int32_t windowSceneId = GetWindowSceneId();
     UIEXT_LOGI("NotifyForeground, persistentid = %{public}d, hostWindowId = %{public}u,"
-        " windowSceneId = %{public}d, IsScenceBoardWindow: %{public}d, componentId=%{public}d.",
-        session_->GetPersistentId(), hostWindowId, windowSceneId, container->IsScenceBoardWindow(), GetFrameNodeId());
-    if (container->IsScenceBoardWindow() && windowSceneId != INVALID_WINDOW_ID) {
+        " windowSceneId = %{public}d, IsSceneBoardWindow: %{public}d, componentId=%{public}d.",
+        session_->GetPersistentId(), hostWindowId, windowSceneId, container->IsSceneBoardWindow(), GetFrameNodeId());
+    if (container->IsSceneBoardWindow() && windowSceneId != INVALID_WINDOW_ID) {
         hostWindowId = static_cast<uint32_t>(windowSceneId);
     }
     auto pattern = hostPattern_.Upgrade();
@@ -925,6 +991,9 @@ void SessionWrapperImpl::NotifyForeground()
     }
     auto wantPtr = session_->EditSessionInfo().want;
     UpdateWantPtr(wantPtr);
+    if (foregroundCallback_ == nullptr) {
+        InitForegroundCallback();
+    }
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
         session_, hostWindowId, std::move(foregroundCallback_));
 }
@@ -1150,7 +1219,7 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     }
     ACE_SCOPED_TRACE("NotifyDisplayArea displayArea[%s], curWindow[%s], reason[%d], duration[%d], componentId[%d]",
         displayArea_.ToString().c_str(), displayAreaWindow_.ToString().c_str(), reason, duration, GetFrameNodeId());
-    UIEXT_LOGI("NotifyDisplayArea displayArea=%{public}s, curWindow=%{public}s, "
+    UIEXT_LOGD("NotifyDisplayArea displayArea=%{public}s, curWindow=%{public}s, "
         "reason=%{public}d, duration=%{public}d, persistentId=%{public}d, componentId=%{public}d.",
         displayArea_.ToString().c_str(), displayAreaWindow_.ToString().c_str(),
         reason, duration, persistentId, GetFrameNodeId());
@@ -1173,7 +1242,7 @@ void SessionWrapperImpl::NotifySizeChangeReason(
 void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const
 {
     CHECK_NULL_VOID(session_);
-    UIEXT_LOGI("NotifyAvoidArea, type: %{public}d, topRect=(%{public}d, %{public}d)-[%{public}d, %{public}d], "
+    UIEXT_LOGD("NotifyAvoidArea, type: %{public}d, topRect=(%{public}d, %{public}d)-[%{public}d, %{public}d], "
         "bottomRect=(%{public}d,%{public}d)-[%{public}d,%{public}d],persistentId=%{public}d,componentId=%{public}d.",
         type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
         (int32_t)avoidArea.topRect_.height_, avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
@@ -1244,25 +1313,27 @@ bool SessionWrapperImpl::InnerNotifyOccupiedAreaChangeInfo(
     auto curWindow = pipeline->GetCurrentWindowRect();
     auto container = Platform::AceContainer::GetContainer(GetInstanceIdFromHost());
     CHECK_NULL_RETURN(container, false);
-    if (container->IsScenceBoardWindow()) {
+    auto displayArea = displayArea_;
+    if (container->IsSceneBoardWindow()) {
         Rosen::WSRect rect = GetWindowSceneRect();
         curWindow.SetRect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        displayArea = GetDisplayAreaWithWindowScene();
     }
     if (keyboardHeight > 0) {
-        if (curWindow.Bottom() >= displayArea_.Bottom()) {
-            int32_t spaceWindow = std::max(curWindow.Bottom() - displayArea_.Bottom(), 0.0);
+        if (curWindow.Bottom() >= displayArea.Bottom()) {
+            int32_t spaceWindow = std::max(curWindow.Bottom() - displayArea.Bottom(), 0.0);
             keyboardHeight = static_cast<int32_t>(std::max(keyboardHeight - spaceWindow, 0));
         } else {
-            keyboardHeight = keyboardHeight + (displayArea_.Bottom() - curWindow.Bottom());
+            keyboardHeight = keyboardHeight + (displayArea.Bottom() - curWindow.Bottom());
         }
     }
     sptr<Rosen::OccupiedAreaChangeInfo> newInfo = new Rosen::OccupiedAreaChangeInfo(
         info->type_, info->rect_, info->safeHeight_, info->textFieldPositionY_, info->textFieldHeight_);
     newInfo->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
-    UIEXT_LOGI("OccupiedArea keyboardHeight = %{public}d, displayArea = %{public}s, "
-        "curWindow = %{public}s, persistentid = %{public}d, componentId=%{public}d.",
-        keyboardHeight, displayArea_.ToString().c_str(), curWindow.ToString().c_str(), GetSessionId(),
-        GetFrameNodeId());
+    UIEXT_LOGI("OccupiedArea keyboardHeight = %{public}d, displayOffset = %{public}s, displayArea = %{public}s, "
+               "curWindow = %{public}s, persistentid = %{public}d, componentId=%{public}d.",
+        keyboardHeight, displayArea.GetOffset().ToString().c_str(), displayArea_.ToString().c_str(),
+        curWindow.ToString().c_str(), GetSessionId(), GetFrameNodeId());
     session_->NotifyOccupiedAreaChangeInfo(newInfo);
     return true;
 }
@@ -1285,9 +1356,11 @@ void SessionWrapperImpl::UpdateSessionViewportConfig()
 /************************************************ Begin: The interface to send the data for ArkTS *********************/
 void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 {
-    UIEXT_LOGI("The data is asynchronously send and the session is %{public}s, componentId=%{public}d.",
-        session_ ? "valid" : "invalid", GetFrameNodeId());
-    CHECK_NULL_VOID(session_);
+    if (!session_) {
+        UIEXT_LOGE(
+            "The data is synchronously send and the session is invalid, componentId=%{public}d.", GetFrameNodeId());
+        return;
+    }
     session_->TransferComponentData(params);
 }
 
@@ -1357,18 +1430,18 @@ bool SessionWrapperImpl::SendBusinessData(
     if (type == BusinessDataSendType::ASYNC) {
         dataHandler->SendDataAsync(static_cast<OHOS::Rosen::SubSystemId>(subSystemId),
             static_cast<uint32_t>(code), data);
-        UIEXT_LOGI("SendBusinessData ASYNC Success, businessCode=%{public}u, compontId=%{public}d.",
+        UIEXT_LOGD("SendBusinessData ASYNC Success, businessCode=%{public}u, compontId=%{public}d.",
             code, GetFrameNodeId());
         return true;
     }
     auto result = dataHandler->SendDataSync(static_cast<OHOS::Rosen::SubSystemId>(subSystemId),
         static_cast<uint32_t>(code), data);
     if (result != Rosen::DataHandlerErr::OK) {
-        UIEXT_LOGW("SendBusinessData Sync Fail, businesCode=%{public}u, result=%{public}u, compontId=%{public}d.",
+        UIEXT_LOGD("SendBusinessData Sync Fail, businesCode=%{public}u, result=%{public}u, compontId=%{public}d.",
             code, result, GetFrameNodeId());
         return false;
     }
-    UIEXT_LOGI("SendBusinessData SYNC Success, businessCode=%{public}u, componentId=%{public}d.",
+    UIEXT_LOGD("SendBusinessData SYNC Success, businessCode=%{public}u, componentId=%{public}d.",
         code, GetFrameNodeId());
     return true;
 }

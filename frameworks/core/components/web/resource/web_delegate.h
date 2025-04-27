@@ -609,6 +609,16 @@ private:
     WeakPtr<PipelineBase> context_;
 };
 
+class WebWindowFocusChangedListener : public Rosen::IWindowLifeCycle {
+public:
+    explicit WebWindowFocusChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
+    ~WebWindowFocusChangedListener() = default;
+
+    void AfterFocused() override;;
+private:
+    WeakPtr<WebDelegate> webDelegate_;
+};
+
 enum class ScriptItemType {
     DOCUMENT_START = 0,
     DOCUMENT_END = 1,
@@ -785,6 +795,7 @@ public:
     void HideWebView();
     void OnRenderToBackground();
     void OnRenderToForeground();
+    void SetSurfaceDensity(const double& density);
     void Resize(const double& width, const double& height, bool isKeyboard = false);
     int32_t GetRosenWindowId()
     {
@@ -840,6 +851,7 @@ public:
     void UpdateOverScrollMode(const int32_t overscrollModeValue);
     void UpdateBlurOnKeyboardHideMode(const int32_t isBlurOnKeyboardHideEnable);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
+    void UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled);
     void UpdateNativeEmbedRuleTag(const std::string& tag);
     void UpdateNativeEmbedRuleType(const std::string& type);
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
@@ -864,7 +876,7 @@ public:
         const double& vx, const double& vy, const std::vector<int32_t>& pressedCodes);
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     void WebHandleAxisEvent(const double& x, const double& y,
-        const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes);
+        const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes, const int32_t source);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
     bool WebOnKeyEvent(int32_t keyCode, int32_t keyAction, const std::vector<int32_t>& pressedCodes);
     bool SendKeyboardEvent(const std::shared_ptr<OHOS::NWeb::NWebKeyboardEvent>& keyboardEvent);
@@ -911,7 +923,7 @@ public:
     {
         richtextData_ = richtextData;
     }
-    void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
+    void HandleAccessibilityHoverEvent(int32_t x, int32_t y, bool isHoverEnter);
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
@@ -949,7 +961,7 @@ public:
     bool OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
-    void OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType);
+    void OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
     void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler, int videoNaturalWidth,
@@ -1040,7 +1052,6 @@ public:
         const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
         TouchEventInfo& touchEventInfo);
-    void UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled);
     bool GetIsSmoothDragResizeEnabled();
     void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
     void SetDragResizeStartFlag(bool isDragResizeStart);
@@ -1048,6 +1059,7 @@ public:
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
     bool CloseImageOverlaySelection();
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
+    void RestoreRenderFit();
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);
@@ -1155,6 +1167,8 @@ public:
         }
     }
 
+    bool SetFocusByPosition(float x, float y);
+
     void StartVibraFeedback(const std::string& vibratorType);
 
     RefPtr<TaskExecutor> GetTaskExecutor() const
@@ -1165,6 +1179,8 @@ public:
     bool GetAccessibilityVisible(int64_t accessibilityId);
 
     void SetTransformHint(uint32_t rotation);
+
+    void MaximizeResize();
 
     void ExecuteTypeScript(const std::string& jscode, const std::function<void(std::string)>&& callback);
 
@@ -1178,6 +1194,19 @@ public:
     void UpdateWebMediaAVSessionEnabled(bool isEnabled);
 
     std::string GetCurrentLanguage();
+    void RegisterNativeJavaScriptProxy(const std::string& obj, const std::vector<std::string>& method,
+        std::vector<std::function<void(const std::vector<std::string>&)>> callbackImpl,
+        bool isAync, const std::string& permission, bool isNeedRefresh);
+
+    void RegisterWebWindowFocusChangedListener();
+
+    void UnRegisterWebWindowFocusChangedListener();
+    
+    void OnDragAttach();
+
+    bool IsNWebEx();
+
+    void SetNativeInnerWeb(bool isInnerWeb);
 
 private:
     void InitWebEvent();
@@ -1196,6 +1225,8 @@ private:
     void TextBlurReportByFocusEvent(int64_t accessibilityId);
     void WebComponentClickReport(int64_t accessibilityId);
     void TextBlurReportByBlurEvent(int64_t accessibilityId);
+    void AccessibilityReleasePageEvent();
+    void AccessibilitySendPageChange();
 
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();
@@ -1256,7 +1287,9 @@ private:
     EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
     void SurfaceOcclusionCallback(float visibleRatio);
     void RegisterSurfaceOcclusionChangeFun();
+    void SetPartitionPoints(std::vector<float>& partition);
     void ratioStrToFloat(const std::string& str);
+    void ratioStrToFloatV2(const std::string& str);
     // Return canonical encoding name according to the encoding alias name.
     std::string GetCanonicalEncodingName(const std::string& alias_name) const;
     void RegisterAvoidAreaChangeListener(int32_t instanceId);
@@ -1365,6 +1398,8 @@ private:
     float visibleRatio_ = 1.0;
     uint32_t delayTime_ = 500;
     float lowerFrameRateVisibleRatio_ = 0.1;
+    float halfFrameRateVisibleRatio_ = 0.3;
+    bool isHalfFrame_ = false;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
     std::optional<ScriptItems> onHeadReadyScriptItems_;
@@ -1378,7 +1413,6 @@ private:
     std::map<std::string, std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo>> embedDataInfo_;
     std::string tag_;
     std::string tag_type_;
-    bool isSmoothDragResizeEnabled_ = false;
     double resizeWidth_ = 0.0;
     double resizeHeight_ = 0.0;
     double resizeVisibleWidth_ = -1.0;
@@ -1390,6 +1424,7 @@ private:
     sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
     int32_t instanceId_;
     std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_ = nullptr;
+    sptr<WebWindowFocusChangedListener> webWindowFocusChangedListener_ = nullptr;
     std::string sharedRenderProcessToken_;
     int64_t lastFocusInputId_ = 0;
     int64_t lastFocusReportId_ = 0;

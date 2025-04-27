@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
+#include "ui/view/components/tabs/tabs_constants.h"
 
 namespace OHOS::Ace {
 
@@ -42,6 +43,11 @@ enum class ButtonType {
     ICON,
     CUSTOM,
     ROUNDED_RECTANGLE,
+};
+
+enum class ToolBarItemPlacement {
+    TOP_BAR_LEADING,
+    TOP_BAR_TRAILING
 };
 
 enum class RectWidthStyle {
@@ -195,6 +201,11 @@ enum class AccessibilityRoleType {
 enum class AccessibilitySamePageMode {
     SEMI_SILENT = 0,
     FULL_SILENT = 1,
+};
+
+enum class FocusDrawLevel {
+    SELF = 0,
+    TOP = 1,
 };
 
 enum class ButtonStyleMode { NORMAL, EMPHASIZE, TEXT };
@@ -664,6 +675,11 @@ enum class PixelRoundCalcPolicy {
     FORCE_FLOOR = 2,
 };
 
+enum class PixelRoundMode {
+    PIXEL_ROUND_ON_LAYOUT_FINISH = 0,
+    PIXEL_ROUND_AFTER_MEASURE = 1,
+};
+
 enum class LayoutCalPolicy {
     NO_MATCH = 0,
     MATCH_PARENT = 1,
@@ -775,12 +791,6 @@ enum class RefreshType {
     PULL_DOWN,
 };
 
-enum class TabBarMode {
-    FIXED,
-    SCROLLABLE,
-    FIXED_START,
-};
-
 enum class TabAnimateMode {
     CONTENT_FIRST = 0,
     ACTION_FIRST,
@@ -832,11 +842,6 @@ inline std::string ToString(const VerticalAlign& verticalAlign)
     return iter != -1 ? table[iter].value : "";
 }
 } // namespace StringUtils
-
-enum class BarPosition {
-    START,
-    END,
-};
 
 enum class CalendarType {
     NORMAL = 0,
@@ -944,6 +949,13 @@ enum class XComponentType {
     COMPONENT,
     TEXTURE,
     NODE,
+};
+
+enum class XComponentNodeType {
+    UNKNOWN = -1,
+    TYPE_NODE = 0,
+    DECLARATIVE_NODE,
+    CNODE,
 };
 
 enum class RenderMode { ASYNC_RENDER = 0, SYNC_RENDER };
@@ -1069,7 +1081,20 @@ enum class Orientation : uint32_t {
     AUTO_ROTATION_PORTRAIT_RESTRICTED = 9,
     AUTO_ROTATION_LANDSCAPE_RESTRICTED = 10,
     LOCKED = 11,
-    END = LOCKED,
+    FOLLOW_RECENT = 12,
+    AUTO_ROTATION_UNSPECIFIED = 13,
+    USER_ROTATION_PORTRAIT = 14,
+    USER_ROTATION_LANDSCAPE = 15,
+    USER_ROTATION_PORTRAIT_INVERTED = 16,
+    USER_ROTATION_LANDSCAPE_INVERTED = 17,
+    FOLLOW_DESKTOP = 18,
+    END = FOLLOW_DESKTOP,
+};
+
+enum class SystemBarType : uint32_t {
+    STATUS = 1,
+    NAVIGATION = 2,
+    NAVIGATION_INDICATOR = 4,
 };
 
 enum class NodeRenderType : uint32_t {
@@ -1100,6 +1125,11 @@ enum class SwiperAnimationMode {
     DEFAULT_ANIMATION,
     FAST_ANIMATION,
     MAX_VALUE,
+};
+
+enum class DividerMode {
+    FLOATING_ABOVE_MENU = 0,
+    EMBEDDED_IN_MENU = 1,
 };
 } // namespace OHOS::Ace
 

@@ -45,10 +45,17 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         }
         auto* uiNodePtr = reinterpret_cast<OHOS::Ace::NG::UINode*>(nativePtr);
         uiNodePtr->IncRefCount();
+        // check whether it is bind to native XComponent.
+        bool isBindNativeXComponent = impl && impl->getNodeModifiers()->getXComponentModifier()
+            ->getXComponentIsBindNative(reinterpret_cast<ArkUINodeHandle>(nativePtr));
         *handle = new ArkUI_Node({ .type = -1,
             .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(nativePtr),
             .cNode = false,
             .buildNode = true });
+        if (isBindNativeXComponent) {
+            OHOS::Ace::NodeModel::RegisterBindNativeNode(*handle);
+            (*handle)->isBindNative = true;
+        }
         if (impl) {
             impl->getExtendedAPI()->setAttachNodePtr((*handle)->uiNodeHandle, reinterpret_cast<void*>(*handle));
         }

@@ -621,7 +621,6 @@ public:
     {
         return nextAccessibilityText_;
     }
-
 protected:
     SwiperIndicatorTheme() = default;
 

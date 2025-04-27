@@ -297,6 +297,12 @@ let PixelRoundCalcPolicy;
   PixelRoundCalcPolicy[PixelRoundCalcPolicy.FORCE_FLOOR = 2] = 'FORCE_FLOOR';
 })(PixelRoundCalcPolicy || (PixelRoundCalcPolicy = {}));
 
+let PixelRoundMode;
+(function (PixelRoundMode) {
+  PixelRoundMode[PixelRoundMode.PIXEL_ROUND_ON_LAYOUT_FINISH = 0] = 'PIXEL_ROUND_ON_LAYOUT_FINISH';
+  PixelRoundMode[PixelRoundMode.PIXEL_ROUND_AFTER_MEASURE = 1] = 'PIXEL_ROUND_AFTER_MEASURE';
+})(PixelRoundMode || (PixelRoundMode = {}));
+
 let VerticalAlign;
 (function (VerticalAlign) {
   VerticalAlign[VerticalAlign.Top = 1] = 'Top';
@@ -754,6 +760,7 @@ let FormDimension;
   FormDimension.DIMENSION_6_4 = 7;
   FormDimension.DIMENSION_2_3 = 8;
   FormDimension.DIMENSION_3_3 = 9;
+  FormDimension.DIMENSION_3_4 = 10;
 })(FormDimension || (FormDimension = {}));
 
 let FormShape;
@@ -1025,6 +1032,14 @@ let SearchType;
   SearchType[SearchType.URL = 13] = 'URL';
 })(SearchType || (SearchType = {}));
 
+let AutoCapitalizationMode;
+(function (AutoCapitalizationMode) {
+  AutoCapitalizationMode[AutoCapitalizationMode["NONE"] = 0] = "NONE";
+  AutoCapitalizationMode[AutoCapitalizationMode["WORDS"] = 1] = "WORDS";
+  AutoCapitalizationMode[AutoCapitalizationMode["SENTENCES"] = 2] = "SENTENCES";
+  AutoCapitalizationMode[AutoCapitalizationMode["ALL_CHARACTERS"] = 3] = "ALL_CHARACTERS";
+})(AutoCapitalizationMode || (AutoCapitalizationMode = {}));
+
 let TextAreaType;
 (function (TextAreaType) {
   TextAreaType[TextAreaType.NORMAL = 0] = 'NORMAL';
@@ -1143,6 +1158,13 @@ let MenuPreviewMode;
   MenuPreviewMode[MenuPreviewMode.NONE = 0] = 'NONE';
   MenuPreviewMode[MenuPreviewMode.IMAGE = 1] = 'IMAGE';
 })(MenuPreviewMode || (MenuPreviewMode = {}));
+
+let HapticFeedbackMode;
+(function (HapticFeedbackMode) {
+  HapticFeedbackMode[HapticFeedbackMode.DISABLED = 0] = 'DISABLED';
+  HapticFeedbackMode[HapticFeedbackMode.ENABLED = 1] = 'ENABLED';
+  HapticFeedbackMode[HapticFeedbackMode.AUTO = 2] = 'AUTO';
+})(HapticFeedbackMode || (HapticFeedbackMode = {}));
 
 let DismissReason;
 (function (DismissReason) {
@@ -1940,8 +1962,16 @@ class Indicator {
     this.rightValue = value;
     return this;
   }
-  bottom(value) {
-    this.bottomValue = value;
+  bottom(...args) {
+    if (args.length === 1) {
+      this.bottomValue = args[0];
+      this.setIgnoreSizeValue = false;
+    }
+    if (args.length === 2) {
+      this.bottomValue = args[0];
+      this.ignoreSizeValue = args[1];
+      this.setIgnoreSizeValue = true;
+    }
     return this;
   }
   start(value) {
@@ -1995,6 +2025,10 @@ class DotIndicator extends Indicator {
   }
   maxDisplayCount(value) {
     this.maxDisplayCountValue = value;
+    return this;
+  }
+  space(value) {
+    this.spaceValue = value;
     return this;
   }
 }
@@ -2252,6 +2286,8 @@ class NavPathInfo {
     this.isEntry = isEntry;
     this.fromRecovery = false;
     this.mode = undefined;
+    this.singletonMoved = false;
+    this.isForceSet = undefined;
   }
 }
 
@@ -2273,6 +2309,13 @@ class NavPathStack {
     this.parentStack = undefined;
     this.popArray = [];
     this.interception = undefined;
+    this.hasSingletonMoved = false;
+  }
+  getPathStack() {
+    return this.nativeStack?.getPathStack(this);
+  }
+  setPathStack(pathStack, animated) {
+    this.nativeStack?.setPathStack(this, pathStack, animated);
   }
   getJsIndexFromNativeIndex(index) {
     for (let i = 0; i < this.pathArray.length; i++) {
@@ -2395,6 +2438,8 @@ class NavPathStack {
         this.pathArray[index].onPop = info.onPop;
         this.pathArray[index].needUpdate = true;
         this.pathArray[index].isEntry = info.isEntry;
+        this.pathArray[index].singletonMoved = true;
+        this.hasSingletonMoved = true;
         if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
           this.moveIndexToTop(index, animated);
         } else {
@@ -3021,6 +3066,12 @@ let MenuAlignType;
   MenuAlignType[MenuAlignType.END = 2] = 'END';
 })(MenuAlignType || (MenuAlignType = {}));
 
+let AvoidanceMode;
+(function (AvoidanceMode) {
+  AvoidanceMode[AvoidanceMode.COVER_TARGET = 0] = 'COVER_TARGET';
+  AvoidanceMode[AvoidanceMode.AVOID_AROUND_TARGET = 1] = 'AVOID_AROUND_TARGET';
+})(AvoidanceMode || (AvoidanceMode = {}));
+
 let ToolbarItemStatus;
 (function (ToolbarItemStatus) {
   ToolbarItemStatus[ToolbarItemStatus.NORMAL = 0] = 'NORMAL';
@@ -3373,8 +3424,16 @@ let DragPreviewMode;
   DragPreviewMode.ENABLE_DEFAULT_SHADOW = 3;
   DragPreviewMode.ENABLE_DEFAULT_RADIUS = 4;
   DragPreviewMode.ENABLE_DRAG_ITEM_GRAY_EFFECT = 5;
-  DragPreviewMode.ENABLE_MULTI_TILE_EFFECT  = 6;
+  DragPreviewMode.ENABLE_MULTI_TILE_EFFECT = 6;
+  DragPreviewMode.ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW = 7;
 })(DragPreviewMode || (DragPreviewMode = {}));
+
+let DraggingSizeChangeEffect;
+(function (DraggingSizeChangeEffect) {
+    DraggingSizeChangeEffect.DEFAULT = 0;
+    DraggingSizeChangeEffect.SIZE_TRANSITION = 1;
+    DraggingSizeChangeEffect.SIZE_CONTENT_TRANSITION = 2;
+})(DraggingSizeChangeEffect || (DraggingSizeChangeEffect = {}));
 
 let FoldStatus;
 (function (FoldStatus) {
@@ -3422,6 +3481,12 @@ let ImageAnalyzerType;
   ImageAnalyzerType[ImageAnalyzerType.TEXT = 1] = 'TEXT';
   ImageAnalyzerType[ImageAnalyzerType.OBJECT_LOOKUP = 2] = 'OBJECT_LOOKUP';
 })(ImageAnalyzerType || (ImageAnalyzerType = {}));
+
+let DividerMode;
+(function (DividerMode) {
+  DividerMode[DividerMode.FLOATING_ABOVE_MENU = 0] = 'FLOATING_ABOVE_MENU';
+  DividerMode[DividerMode.EMBEDDED_IN_MENU = 1] = 'EMBEDDED_IN_MENU';
+})(DividerMode || (DividerMode = {}));
 
 function wrapBuilder(builder) {
   return new WrappedBuilder(builder);
@@ -3818,6 +3883,25 @@ let AccessibilitySamePageMode;
   AccessibilitySamePageMode[AccessibilitySamePageMode.FULL_SILENT = 1] = 'FULL_SILENT';
 })(AccessibilitySamePageMode || (AccessibilitySamePageMode = {}));
 
+let FocusDrawLevel;
+(function (FocusDrawLevel) {
+  FocusDrawLevel[FocusDrawLevel.SELF = 0] = 'SELF';
+  FocusDrawLevel[FocusDrawLevel.TOP = 1] = 'TOP';
+})(FocusDrawLevel || (FocusDrawLevel = {}));
+
+let AccessibilityAction;
+(function (AccessibilityAction) {
+  AccessibilityAction[AccessibilityAction.UNDEFINED_ACTION = 0] = 'UNDEFINED_ACTION';
+  AccessibilityAction[AccessibilityAction.ACCESSIBILITY_CLICK = 1] = 'ACCESSIBILITY_CLICK';
+})(AccessibilityAction || (AccessibilityAction = {}));
+
+let AccessibilityActionInterceptResult;
+(function (AccessibilityActionInterceptResult) {
+  AccessibilityActionInterceptResult[AccessibilityActionInterceptResult.ACTION_INTERCEPT = 0] = 'ACTION_INTERCEPT';
+  AccessibilityActionInterceptResult[AccessibilityActionInterceptResult.ACTION_CONTINUE = 1] = 'ACTION_CONTINUE';
+  AccessibilityActionInterceptResult[AccessibilityActionInterceptResult.ACTION_RISE = 2] = 'ACTION_RISE';
+})(AccessibilityActionInterceptResult || (AccessibilityActionInterceptResult = {}));
+
 let TextMenuShowMode;
 (function (TextMenuShowMode) {
   TextMenuShowMode[TextMenuShowMode.DEFAULT = 0] = 'DEFAULT';
@@ -3829,3 +3913,30 @@ let KeyProcessingMode;
   KeyProcessingMode[KeyProcessingMode.FOCUS_NAVIGATION = 0] = 'FOCUS_NAVIGATION';
   KeyProcessingMode[KeyProcessingMode.ANCESTOR_EVENT = 1] = 'ANCESTOR_EVENT';
 })(KeyProcessingMode || (KeyProcessingMode = {}));
+
+let AxisAction;
+(function (AxisAction) {
+  AxisAction[AxisAction.NONE = 0] = 'NONE';
+  AxisAction[AxisAction.BEGIN = 1] = 'BEGIN';
+  AxisAction[AxisAction.UPDATE = 2] = 'UPDATE';
+  AxisAction[AxisAction.END = 3] = 'END';
+  AxisAction[AxisAction.CANCEL = 4] = 'CANCEL';
+})(AxisAction || (AxisAction = {}));
+
+let EventQueryType;
+(function (EventQueryType) {
+  EventQueryType[EventQueryType.ON_CLICK = 0] = 'ON_CLICK';
+})(EventQueryType || (EventQueryType = {}));
+
+let RichEditorDeleteDirection;
+(function (RichEditorDeleteDirection) {
+  RichEditorDeleteDirection[RichEditorDeleteDirection.BACKWARD = 0] = 'BACKWARD';
+  RichEditorDeleteDirection[RichEditorDeleteDirection.FORWARD = 1] = 'FORWARD';
+})(RichEditorDeleteDirection || (RichEditorDeleteDirection = {}));
+
+let InteractionHand;
+(function (InteractionHand) {
+  InteractionHand[InteractionHand.NONE = 0] = 'NONE';
+  InteractionHand[InteractionHand.LEFT = 1] = 'LEFT';
+  InteractionHand[InteractionHand.RIGHT = 2] = 'RIGHT';
+})(InteractionHand || (InteractionHand = {}));

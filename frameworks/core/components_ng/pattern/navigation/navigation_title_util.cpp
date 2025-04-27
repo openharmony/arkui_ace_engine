@@ -56,9 +56,19 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<Nav
     CHECK_NULL_RETURN(barItemNode, false);
     auto menuItemNode = CreateMenuItemButton(theme);
     CHECK_NULL_RETURN(menuItemNode, false);
+    CHECK_NULL_RETURN(nodeBase, false);
+    auto navDestinationPattern = nodeBase->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(navDestinationPattern, false);
     MenuParam menuParam;
     menuParam.isShowInSubWindow = false;
     menuParam.placement = Placement::BOTTOM_RIGHT;
+    NavigationMenuOptions menuOptions = navDestinationPattern->GetMenuOptions();
+    if (menuOptions.mbOptions.bgOptions.blurStyleOption.has_value()) {
+        menuParam.backgroundBlurStyleOption = menuOptions.mbOptions.bgOptions.blurStyleOption.value();
+    }
+    if (menuOptions.mbOptions.bgOptions.effectOption.has_value()) {
+        menuParam.backgroundEffectOption = menuOptions.mbOptions.bgOptions.effectOption.value();
+    }
     auto barMenuNode = MenuView::Create(
         std::move(params), menuItemNode->GetId(), menuItemNode->GetTag(), MenuType::NAVIGATION_MENU, menuParam);
     BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode);
@@ -77,7 +87,6 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<Nav
     menuItemNode->MarkModifyDone();
     CHECK_NULL_RETURN(menuNode, false);
     menuNode->AddChild(menuItemNode);
-    CHECK_NULL_RETURN(nodeBase, false);
     if (isCreateLandscapeMenu) {
         nodeBase->SetLandscapeMenuNode(barMenuNode);
     } else {
@@ -161,7 +170,7 @@ uint32_t NavigationTitleUtil::GetOrInitMaxMenuNums(
 void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode,
     const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode)
 {
-    auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
+    auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto context = PipelineContext::GetCurrentContext();
@@ -381,7 +390,7 @@ void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& butto
         gestureEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(clickCallback));
     }
 
-    auto buttonEvent = buttonNode->GetEventHub<ButtonEventHub>();
+    auto buttonEvent = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEvent);
     buttonEvent->SetEnabled(isButtonEnabled);
     auto focusHub = buttonNode->GetFocusHub();
@@ -404,7 +413,7 @@ void NavigationTitleUtil::UpdateBarItemNodeWithItem(const RefPtr<BarItemNode>& b
         barItemNode->AddChild(iconNode);
     }
     if (barItem.action) {
-        auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
+        auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetItemAction(barItem.action);
     }
@@ -879,10 +888,5 @@ void NavigationTitleUtil::UpdateTitleOrToolBarTranslateYAndOpacity(const RefPtr<
 bool NavigationTitleUtil::IsTitleBarHasOffsetY(const RefPtr<FrameNode>& titleBarNode)
 {
     return titleBarNode && titleBarNode->IsVisible() && !NearZero(CalculateTitlebarOffset(titleBarNode));
-}
-
-bool NavigationTitleUtil::NeedAvoidContainerModal(PipelineContext* pipeline)
-{
-    return pipeline && !pipeline->GetContainerCustomTitleVisible() && pipeline->GetContainerControlButtonVisible();
 }
 } // namespace OHOS::Ace::NG

@@ -118,7 +118,7 @@ ArkUI_Int64 GetUIState(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, 0);
     return eventHub->GetCurrentUIState();
 }
@@ -127,7 +127,7 @@ void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->AddSupportedState(static_cast<uint64_t>(state));
 }
@@ -136,7 +136,7 @@ void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     std::function<void(uint64_t)>* func = reinterpret_cast<std::function<void(uint64_t)>*>(callback);
     eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false);
@@ -147,7 +147,7 @@ void RemoveSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->RemoveSupportedUIState(static_cast<uint64_t>(state), false);
 }
@@ -553,7 +553,6 @@ const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetListItemOnSelect,
 };
 
-#ifndef ARKUI_WEARABLE
 const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWillScroll,
     NodeModifier::SetOnWaterFlowReachEnd,
@@ -564,7 +563,6 @@ const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWaterFlowScrollIndex,
     NodeModifier::SetOnWaterFlowReachStart,
 };
-#endif
 
 const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
@@ -593,11 +591,9 @@ const ComponentAsyncEventHandler RADIO_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnRadioChange,
 };
 
-#ifndef ARKUI_WEARABLE
 const ComponentAsyncEventHandler SELECT_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnSelectSelect,
 };
-#endif
 
 const ComponentAsyncEventHandler IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetImageAnimatorOnStart,
@@ -769,7 +765,6 @@ const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[
     NodeModifier::ResetListItemOnSelect,
 };
 
-#ifndef ARKUI_WEARABLE
 const ResetComponentAsyncEventHandler WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnWillScroll,
     NodeModifier::ResetOnWaterFlowReachEnd,
@@ -780,7 +775,6 @@ const ResetComponentAsyncEventHandler WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[
     NodeModifier::ResetOnWaterFlowScrollIndex,
     NodeModifier::ResetOnWaterFlowReachStart,
 };
-#endif
 
 const ResetComponentAsyncEventHandler GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
@@ -997,7 +991,6 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-#ifndef ARKUI_WEARABLE
         case ARKUI_WATER_FLOW: {
             // swiper event type.
             if (subKind >= sizeof(WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -1007,7 +1000,6 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-#endif
         case ARKUI_GRID: {
             // grid event type.
             if (subKind >= sizeof(GRID_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -1044,7 +1036,6 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = RADIO_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-#ifndef ARKUI_WEARABLE
         case ARKUI_SELECT: {
             // select event type.
             if (subKind >= sizeof(SELECT_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -1054,7 +1045,6 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = SELECT_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-#endif
         case ARKUI_IMAGE_ANIMATOR: {
             // imageAnimator event type.
             if (subKind >= sizeof(IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -1274,7 +1264,6 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             eventHandle = LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-#ifndef ARKUI_WEARABLE
         case ARKUI_WATER_FLOW: {
             // swiper event type.
             if (subKind >=
@@ -1286,7 +1275,6 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             eventHandle = WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-#endif
         case ARKUI_GRID: {
             // grid event type.
             if (subKind >= sizeof(GRID_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
@@ -1460,8 +1448,13 @@ void* GetAttachNodePtr(ArkUINodeHandle node)
 ArkUI_Int32 MeasureLayoutAndDraw(ArkUIVMContext vmContext, ArkUINodeHandle rootPtr)
 {
     auto* root = reinterpret_cast<FrameNode*>(rootPtr);
-    float width = root->GetGeometryNode()->GetFrameSize().Width();
-    float height = root->GetGeometryNode()->GetFrameSize().Height();
+    auto geometryNode = root->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return 0;
+    }
+    float width = geometryNode->GetFrameSize().Width();
+    float height = geometryNode->GetFrameSize().Height();
     // measure
     ArkUI_Float32 measureData[] = { width, height, width, height, width, height };
     MeasureNode(vmContext, rootPtr, &measureData[0]);
@@ -1530,7 +1523,12 @@ void SetMeasureWidth(ArkUINodeHandle node, ArkUI_Int32 value)
     if (!frameNode) {
         return;
     }
-    frameNode->GetGeometryNode()->SetFrameWidth(value);
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return;
+    }
+    geometryNode->SetFrameWidth(value);
 }
 
 ArkUI_Int32 GetMeasureWidth(ArkUINodeHandle node)
@@ -1539,7 +1537,12 @@ ArkUI_Int32 GetMeasureWidth(ArkUINodeHandle node)
     if (!frameNode) {
         return 0;
     }
-    return frameNode->GetGeometryNode()->GetFrameSize().Width();
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return 0;
+    }
+    return geometryNode->GetFrameSize().Width();
 }
 
 void SetMeasureHeight(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -1549,7 +1552,12 @@ void SetMeasureHeight(ArkUINodeHandle node, ArkUI_Int32 value)
     if (!frameNode) {
         return;
     }
-    frameNode->GetGeometryNode()->SetFrameHeight(value);
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return;
+    }
+    geometryNode->SetFrameHeight(value);
 }
 
 ArkUI_Int32 GetMeasureHeight(ArkUINodeHandle node)
@@ -1558,7 +1566,12 @@ ArkUI_Int32 GetMeasureHeight(ArkUINodeHandle node)
     if (!frameNode) {
         return 0;
     }
-    return frameNode->GetGeometryNode()->GetFrameSize().Height();
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return 0;
+    }
+    return geometryNode->GetFrameSize().Height();
 }
 
 void SetX(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -1568,7 +1581,12 @@ void SetX(ArkUINodeHandle node, ArkUI_Int32 value)
     if (!frameNode) {
         return;
     }
-    frameNode->GetGeometryNode()->SetMarginFrameOffsetX(value);
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return;
+    }
+    geometryNode->SetMarginFrameOffsetX(value);
 }
 
 void SetY(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -1578,7 +1596,12 @@ void SetY(ArkUINodeHandle node, ArkUI_Int32 value)
     if (!frameNode) {
         return;
     }
-    frameNode->GetGeometryNode()->SetMarginFrameOffsetY(value);
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return;
+    }
+    geometryNode->SetMarginFrameOffsetY(value);
 }
 
 ArkUI_Int32 GetX(ArkUINodeHandle node)
@@ -1587,7 +1610,12 @@ ArkUI_Int32 GetX(ArkUINodeHandle node)
     if (!frameNode) {
         return 0;
     }
-    return frameNode->GetGeometryNode()->GetMarginFrameOffset().GetX();
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return 0;
+    }
+    return geometryNode->GetMarginFrameOffset().GetX();
 }
 
 ArkUI_Int32 GetY(ArkUINodeHandle node)
@@ -1596,7 +1624,12 @@ ArkUI_Int32 GetY(ArkUINodeHandle node)
     if (!frameNode) {
         return 0;
     }
-    return frameNode->GetGeometryNode()->GetMarginFrameOffset().GetY();
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return 0;
+    }
+    return geometryNode->GetMarginFrameOffset().GetY();
 }
 
 void SetCustomMethodFlag(ArkUINodeHandle node, ArkUI_Int32 flag)
@@ -1974,6 +2007,119 @@ ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle handle, ArkUI_Float64 levelOrder)
     return CustomDialog::SetLevelOrder(handle, levelOrder);
 }
 
+ArkUI_Int32 RegisterOnWillAppear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnWillAppearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 RegisterOnDidAppear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnDidAppearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 RegisterOnWillDisappear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnWillDisappearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 RegisterOnDidDisappear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnDidDisappearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 SetDialogBorderWidth(ArkUIDialogHandle handle, ArkUI_Float32 top, ArkUI_Float32 right, ArkUI_Float32 bottom,
+    ArkUI_Float32 left, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetDialogBorderWidth(handle, top, right, bottom, left, unit);
+}
+
+ArkUI_Int32 SetDialogBorderColor(ArkUIDialogHandle handle, uint32_t top, uint32_t right, uint32_t bottom, uint32_t left)
+{
+    return CustomDialog::SetDialogBorderColor(handle, top, right, bottom, left);
+}
+
+ArkUI_Int32 SetDialogBorderStyle(ArkUIDialogHandle handle, int32_t top, int32_t right, int32_t bottom, int32_t left)
+{
+    return CustomDialog::SetDialogBorderStyle(handle, top, right, bottom, left);
+}
+
+ArkUI_Int32 SetDialogWidth(ArkUIDialogHandle handle, float width, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetWidth(handle, width, unit);
+}
+
+ArkUI_Int32 SetDialogHeight(ArkUIDialogHandle handle, float height, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetHeight(handle, height, unit);
+}
+
+ArkUI_Int32 SetDialogShadow(ArkUIDialogHandle handle, ArkUI_Int32 shadow)
+{
+    return CustomDialog::SetShadow(handle, shadow);
+}
+
+ArkUI_Int32 SetDialogCustomShadow(ArkUIDialogHandle handle, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length)
+{
+    return CustomDialog::SetDialogCustomShadow(handle, shadows, length);
+}
+
+ArkUI_Int32 SetDialogBackgroundBlurStyle(ArkUIDialogHandle handle, ArkUI_Int32 blurStyle)
+{
+    return CustomDialog::SetBackgroundBlurStyle(handle, blurStyle);
+}
+
+ArkUI_Int32 SetDialogKeyboardAvoidMode(ArkUIDialogHandle handle, ArkUI_Int32 keyboardAvoidMode)
+{
+    return CustomDialog::SetKeyboardAvoidMode(handle, keyboardAvoidMode);
+}
+
+ArkUI_Int32 EnableDialogHoverMode(ArkUIDialogHandle handle, ArkUI_Bool enableHoverMode)
+{
+    return CustomDialog::EnableHoverMode(handle, enableHoverMode);
+}
+
+ArkUI_Int32 SetDialogHoverModeArea(ArkUIDialogHandle handle, ArkUI_Int32 hoverModeAreaType)
+{
+    return CustomDialog::SetHoverModeArea(handle, hoverModeAreaType);
+}
+
+ArkUI_Int32 SetDialogFocusable(ArkUIDialogHandle handle, ArkUI_Bool focusable)
+{
+    return CustomDialog::SetFocusable(handle, focusable);
+}
+
+ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void(*callback)(ArkUI_Int32 dialogId))
+{
+    return CustomDialog::OpenCustomDialog(handle, callback);
+}
+
+ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void(*callback)(int32_t dialogId))
+{
+    return CustomDialog::UpdateCustomDialog(handle, callback);
+}
+
+ArkUI_Int32 CloseCustomDialog(ArkUI_Int32 dialogId)
+{
+    return CustomDialog::CloseCustomDialog(dialogId);
+}
+
+ArkUI_Int32 SetDialogSubwindowMode(ArkUIDialogHandle handle, ArkUI_Bool showInSubWindow)
+{
+    return CustomDialog::SetDialogSubwindowMode(handle, showInSubWindow);
+}
+
+ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle handle, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
+    ArkUI_Uint32 (*uintArray)[3], ArkUI_Bool isValidColor)
+{
+    return CustomDialog::SetBackgroundBlurStyleOptions(handle, intArray, scale, uintArray, isValidColor);
+}
+
+ArkUI_Int32 SetBackgroundEffect(ArkUIDialogHandle handle, ArkUI_Float32 (*floatArray)[3], ArkUI_Int32 (*intArray)[2],
+    ArkUI_Uint32 (*uintArray)[4], ArkUI_Bool isValidColor)
+{
+    return CustomDialog::SetBackgroundEffect(handle, floatArray, intArray, uintArray, isValidColor);
+}
+
 const ArkUIDialogAPI* GetDialogAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -2001,6 +2147,28 @@ const ArkUIDialogAPI* GetDialogAPI()
         .setLevelUniqueId = SetDialogLevelUniqueId,
         .setImmersiveMode = SetDialogImmersiveMode,
         .setLevelOrder = SetLevelOrder,
+        .registerOnWillAppear = RegisterOnWillAppear,
+        .registerOnDidAppear = RegisterOnDidAppear,
+        .registerOnWillDisappear = RegisterOnWillDisappear,
+        .registerOnDidDisappear = RegisterOnDidDisappear,
+        .setBorderWidth = SetDialogBorderWidth,
+        .setBorderColor = SetDialogBorderColor,
+        .setBorderStyle = SetDialogBorderStyle,
+        .setWidth = SetDialogWidth,
+        .setHeight = SetDialogHeight,
+        .setShadow = SetDialogShadow,
+        .setCustomShadow = SetDialogCustomShadow,
+        .setBackgroundBlurStyle = SetDialogBackgroundBlurStyle,
+        .setKeyboardAvoidMode = SetDialogKeyboardAvoidMode,
+        .enableHoverMode = EnableDialogHoverMode,
+        .setHoverModeArea = SetDialogHoverModeArea,
+        .setFocusable = SetDialogFocusable,
+        .openCustomDialog = OpenCustomDialog,
+        .updateCustomDialog = UpdateCustomDialog,
+        .closeCustomDialog = CloseCustomDialog,
+        .setSubwindowMode = SetDialogSubwindowMode,
+        .setBackgroundBlurStyleOptions = SetBackgroundBlurStyleOptions,
+        .setBackgroundEffect = SetBackgroundEffect
     };
     CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
     return &dialogImpl;
@@ -2329,7 +2497,8 @@ ArkUI_Int32 UnmarshallStyledStringDescriptor(
     CHECK_NULL_RETURN(buffer && descriptor && bufferSize > 0, ARKUI_ERROR_CODE_PARAM_INVALID);
     std::vector<uint8_t> vec(buffer, buffer + bufferSize);
     SpanString* spanString = new SpanString(u"");
-    spanString->DecodeTlvExt(vec, spanString);
+    std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)> unmarshallCallback;
+    spanString->DecodeTlvExt(vec, spanString, std::move(unmarshallCallback));
     descriptor->spanString = reinterpret_cast<void*>(spanString);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }

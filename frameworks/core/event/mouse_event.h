@@ -20,6 +20,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/memory/ace_type.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -113,8 +114,10 @@ struct MouseEvent final : public PointerEvent {
     int32_t originalId = 0;
     std::vector<KeyCode> pressedKeyCodes_;
     std::vector<MouseEvent> history;
+    WeakPtr<NG::FrameNode> node;
     bool isInjected = false;
     bool isPrivacyMode = false;
+    bool isMockWindowTransFlag = false;
 
     Offset GetOffset() const
     {
@@ -141,6 +144,11 @@ struct MouseEvent final : public PointerEvent {
             return pressedButtons + MOUSE_BASE_ID + pointerId;
         }
         return static_cast<int32_t>(button) + MOUSE_BASE_ID + pointerId;
+    }
+
+    int32_t GetTargetDisplayId() const
+    {
+        return targetDisplayId;
     }
 
     MouseEvent CloneWith(float scale) const
@@ -392,6 +400,12 @@ public:
         return *this;
     }
 
+    HoverInfo& SetMouseAction(MouseAction mouseAction)
+    {
+        mouseAction_ = mouseAction;
+        return *this;
+    }
+
     const Offset& GetScreenLocation() const
     {
         return screenLocation_;
@@ -407,6 +421,11 @@ public:
         return globalLocation_;
     }
 
+    MouseAction GetMouseAction() const
+    {
+        return mouseAction_;
+    }
+
 private:
     // global position at which the touch point contacts the screen.
     Offset globalLocation_;
@@ -415,6 +434,7 @@ private:
     Offset localLocation_;
 
     Offset screenLocation_;
+    MouseAction mouseAction_ = MouseAction::NONE;
 };
 
 class AccessibilityHoverInfo : public BaseEventInfo {
@@ -592,7 +612,13 @@ public:
 
     AccessibilityHoverAction ConvertAccessibilityHoverAction(TouchType type);
 
+    std::optional<bool> GetLastHoverState() const
+    {
+        return lastHoverState_;
+    }
+
 private:
+    std::optional<bool> lastHoverState_;
     OnHoverEventFunc onHoverCallback_;
     OnHoverFunc onHoverEventCallback_;
     OnAccessibilityHoverFunc onAccessibilityHoverCallback_;

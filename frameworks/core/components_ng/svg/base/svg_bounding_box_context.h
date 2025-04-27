@@ -18,34 +18,47 @@
 namespace OHOS::Ace::NG {
 class SvgCoordinateSystemContext {
 public:
-    SvgCoordinateSystemContext(Rect boundingBoxBase, Rect containerViewPortBase)
-        : boundingBoxBase_(boundingBoxBase), containerViewPortBase_(containerViewPortBase) {}
-    const Rect& GetBoundingBoxRect() const
+    SvgCoordinateSystemContext(Rect containerRect, Size viewPort) : containerRect_(containerRect),
+        viewPort_(viewPort) {}
+    const Rect& GetContainerRect() const
     {
-        return boundingBoxBase_;
+        return containerRect_;
     }
-    SvgLengthScaleRule BuildScaleRule(SvgLengthScaleUnit scaleUnit) const
+    
+    const Size& GetViewPort() const
     {
-        if (scaleUnit == SvgLengthScaleUnit::USER_SPACE_ON_USE) {
-            return SvgLengthScaleRule(containerViewPortBase_, SvgLengthScaleUnit::USER_SPACE_ON_USE);
-        }
-        Rect boundingBoxRect(boundingBoxBase_.Left(), boundingBoxBase_.Top(),
-            boundingBoxBase_.Width(), boundingBoxBase_.Height());
-        return SvgLengthScaleRule(boundingBoxRect, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+        return viewPort_;
     }
 
-    SvgLengthScaleRule BuildScaleRule(const std::string& scaleUnit) const
+    SvgLengthScaleRule BuildScaleRule(SvgLengthScaleUnit scaleUnit) const
     {
-        if (scaleUnit == "userSpaceOnUse") {
-            return SvgLengthScaleRule(containerViewPortBase_, SvgLengthScaleUnit::USER_SPACE_ON_USE);
-        }
-        Rect boundingBoxRect(boundingBoxBase_.Left(), boundingBoxBase_.Top(),
-            boundingBoxBase_.Width(), boundingBoxBase_.Height());
-        return SvgLengthScaleRule(boundingBoxRect, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+        return SvgLengthScaleRule(containerRect_, viewPort_, scaleUnit);
     }
+
+    SvgLengthScaleRule BuildScaleRule(const std::string& strScaleUnit) const
+    {
+        SvgLengthScaleUnit scaleUnit = SvgLengthScaleUnit::USER_SPACE_ON_USE;
+        if (strScaleUnit == "objectBoundingBox") {
+            return SvgLengthScaleRule(containerRect_, viewPort_, SvgLengthScaleUnit::USER_SPACE_ON_USE);
+            scaleUnit = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+        }
+        return SvgLengthScaleRule(containerRect_, viewPort_, scaleUnit);
+    }
+
+    bool UseFillColor() const
+    {
+        return useFillColor_;
+    }
+
+    void SetUseFillColor(bool useFillColor)
+    {
+        useFillColor_ = useFillColor;
+    }
+
 private:
-    Rect boundingBoxBase_;
-    Rect containerViewPortBase_;
+    Rect containerRect_;
+    Size viewPort_;
+    bool useFillColor_ = true;
 };
 }
 #endif

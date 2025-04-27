@@ -103,7 +103,6 @@ void SharedOverlayManager::PrepareSharedTransition(const RefPtr<FrameNode>& page
     CHECK_NULL_VOID(patternDest);
     auto patternSrc = pageSrc->GetPattern<PagePattern>();
     CHECK_NULL_VOID(patternSrc);
-    pageOffset_ = pageDest->GetRenderContext()->GetPaintRectWithoutTransform().GetOffset();
     const auto& srcMap = patternSrc->GetSharedTransitionMap();
     const auto& destMap = patternDest->GetSharedTransitionMap();
     std::list<RefPtr<SharedTransitionEffect>> effects;
@@ -220,9 +219,8 @@ bool SharedOverlayManager::CheckIn(const RefPtr<SharedTransitionEffect>& effect)
 void SharedOverlayManager::PassengerAboard(
     const RefPtr<SharedTransitionEffect>& effect, const RefPtr<FrameNode>& passenger)
 {
-    auto ticket = passenger->GetPaintRectOffsetToPage();
     // Get offset relative to stage(or overlay), for safeArea
-    ticket += pageOffset_;
+    auto ticket = passenger->GetPaintRectOffsetToStage();
     TAG_LOGD(AceLogTag::ACE_ANIMATION, "Transition passenger offset is %{public}s, id = %{public}s",
         ticket.ToString().c_str(), effect->GetShareId().c_str());
     auto initialPosition = passenger->GetRenderContext()->GetPosition();
@@ -254,7 +252,7 @@ void SharedOverlayManager::PassengerAboard(
     passenger->GetRenderContext()->UpdateZIndex(effect->GetZIndex());
     passenger->GetRenderContext()->UpdatePosition(offset);
     passenger->GetRenderContext()->OnModifyDone();
-    passenger->GetEventHub<EventHub>()->SetEnabledInternal(false);
+    passenger->GetOrCreateEventHub<EventHub>()->SetEnabledInternal(false);
 }
 
 bool SharedOverlayManager::AboardShuttle(const RefPtr<SharedTransitionEffect>& effect)
@@ -310,7 +308,7 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
         }
         // restore initialFrameOffset for static type sharedTransition, because it may not layout again
         ReplaceFrameNode(passengerHolder, passenger);
-        passenger->GetEventHub<EventHub>()->RestoreEnabled();
+        passenger->GetOrCreateEventHub<EventHub>()->RestoreEnabled();
         auto isPassengerCurrentFocused = effect->GetPassengerCurrentFocused();
         if (isPassengerCurrentFocused) {
             auto passengerFocusHub = passenger->GetFocusHub();

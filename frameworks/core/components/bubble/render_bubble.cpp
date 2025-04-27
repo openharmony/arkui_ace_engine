@@ -16,7 +16,9 @@
 #include "core/components/bubble/render_bubble.h"
 
 #include "base/log/event_report.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components/stack/stack_element.h"
+#include "core/event/ace_event_helper.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
 #endif

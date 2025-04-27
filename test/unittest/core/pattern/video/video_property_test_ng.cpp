@@ -85,19 +85,19 @@ constexpr bool SHOW_FIRST_FRAME = false;
 const ImageFit VIDEO_IMAGE_FIT = ImageFit::COVER;
 const std::string VIDEO_SRC = "common/video.mp4";
 const std::string VIDEO_POSTER_URL = "common/img2.png";
-const std::string VIDEO_START_EVENT = "start";
-const std::string VIDEO_PAUSE_EVENT = "pause";
-const std::string VIDEO_FINISH_EVENT = "finish";
-const std::string VIDEO_ERROR_EVENT = "error";
-const std::string VIDEO_PREPARED_EVENT = "prepared";
-const std::string VIDEO_SEEKING_EVENT = "seeking";
-const std::string VIDEO_SEEKED_EVENT = "seeked";
-const std::string VIDEO_UPDATE_EVENT = "update";
-const std::string VIDEO_FULLSCREEN_EVENT = "fullScreen";
+const std::string VIDEO_START_EVENT = R"({"start":""})";
+const std::string VIDEO_PAUSE_EVENT = R"({"pause":""})";
+const std::string VIDEO_FINISH_EVENT = R"({"finish":""})";
+const std::string VIDEO_ERROR_EVENT = R"({"error":""})";
+const std::string VIDEO_PREPARED_EVENT = R"({"duration":0})";
+const std::string VIDEO_SEEKING_EVENT = R"({"time":0})";
+const std::string VIDEO_SEEKED_EVENT = R"({"time":0})";
+const std::string VIDEO_UPDATE_EVENT = R"({"time":0})";
+const std::string VIDEO_FULLSCREEN_EVENT = R"({"fullscreen":true})";
 const std::string EXTRA_INFO_KEY = "extraInfo";
 const std::string VIDEO_ERROR_ID = "";
 const std::string VIDEO_CALLBACK_RESULT = "result_ok";
-const std::string VIDEO_STOP_EVENT = "stop";
+const std::string VIDEO_STOP_EVENT = R"({"stop":""})";
 constexpr float MAX_WIDTH = 400.0f;
 constexpr float MAX_HEIGHT = 400.0f;
 constexpr float VIDEO_WIDTH = 300.0f;
@@ -286,28 +286,28 @@ HWTEST_F(VideoPropertyTestNg, VideoEventTest003, TestSize.Level1)
 
     auto frameNode =ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::VIDEO_ETS_TAG);
-    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     EXPECT_TRUE(videoEventHub != nullptr);
 
-    videoEventHub->FireStartEvent(VIDEO_START_EVENT);
+    videoEventHub->FireStartEvent();
     EXPECT_EQ(unknownVideoEvent, VIDEO_START_EVENT);
-    videoEventHub->FirePauseEvent(VIDEO_PAUSE_EVENT);
+    videoEventHub->FirePauseEvent();
     EXPECT_EQ(unknownVideoEvent, VIDEO_PAUSE_EVENT);
-    videoEventHub->FireFinishEvent(VIDEO_FINISH_EVENT);
+    videoEventHub->FireFinishEvent();
     EXPECT_EQ(unknownVideoEvent, VIDEO_FINISH_EVENT);
-    videoEventHub->FireErrorEvent(VIDEO_ERROR_EVENT);
+    videoEventHub->FireErrorEvent();
     EXPECT_EQ(unknownVideoEvent, VIDEO_ERROR_EVENT);
-    videoEventHub->FirePreparedEvent(VIDEO_PREPARED_EVENT);
+    videoEventHub->FirePreparedEvent(0.0);
     EXPECT_EQ(unknownVideoEvent, VIDEO_PREPARED_EVENT);
-    videoEventHub->FireSeekingEvent(VIDEO_SEEKING_EVENT);
+    videoEventHub->FireSeekingEvent(0.0);
     EXPECT_EQ(unknownVideoEvent, VIDEO_SEEKING_EVENT);
-    videoEventHub->FireSeekedEvent(VIDEO_SEEKED_EVENT);
+    videoEventHub->FireSeekedEvent(0.0);
     EXPECT_EQ(unknownVideoEvent, VIDEO_SEEKED_EVENT);
-    videoEventHub->FireUpdateEvent(VIDEO_UPDATE_EVENT);
+    videoEventHub->FireUpdateEvent(0.0);
     EXPECT_EQ(unknownVideoEvent, VIDEO_UPDATE_EVENT);
-    videoEventHub->FireFullScreenChangeEvent(VIDEO_FULLSCREEN_EVENT);
+    videoEventHub->FireFullScreenChangeEvent(true);
     EXPECT_EQ(unknownVideoEvent, VIDEO_FULLSCREEN_EVENT);
-    videoEventHub->FireStopEvent(VIDEO_STOP_EVENT);
+    videoEventHub->FireStopEvent();
     EXPECT_EQ(unknownVideoEvent, VIDEO_STOP_EVENT);
 }
 
@@ -375,6 +375,7 @@ HWTEST_F(VideoPropertyTestNg, VideoMeasureContentTest004, TestSize.Level1)
  */
 HWTEST_F(VideoPropertyTestNg, VideoMeasureTest005, TestSize.Level1)
 {
+    MockPipelineContext::GetCurrent()->SetRootSize(SCREEN_WIDTH_MEDIUM, SCREEN_HEIGHT_MEDIUM);
     VideoModelNG video;
     auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
     video.Create(videoController);
@@ -439,6 +440,24 @@ HWTEST_F(VideoPropertyTestNg, VideoMeasureTest005, TestSize.Level1)
             EXPECT_EQ(child->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0.0, VIDEO_WIDTH - controlBarHeight));
         }
     }
+
+    //Call Measure and Layout while video in full screen mode.
+    videoPattern->FullScreen();
+    ASSERT_TRUE(videoPattern->GetFullScreenNode());
+    videoLayoutAlgorithm->Measure(&layoutWrapper);
+    videoLayoutAlgorithm->Layout(&layoutWrapper);
+    // check size.
+    auto fullScreenNode = videoPattern->GetFullScreenNode();
+    auto fullScreenPattern = fullScreenNode->GetPattern();
+    ASSERT_TRUE(fullScreenPattern);
+    auto fullScreenLayout = fullScreenPattern->CreateLayoutAlgorithm();
+    auto fullScreenGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode fullScreenLayoutWrapper =
+        LayoutWrapperNode(fullScreenNode, fullScreenGeometryNode, fullScreenNode->GetLayoutProperty());
+    fullScreenLayoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(fullScreenLayout));
+    auto videoSize =
+        fullScreenLayout->MeasureContent(layoutConstraint, &fullScreenLayoutWrapper).value_or(SizeF(0.0f, 0.0f));
+    EXPECT_EQ(videoSize, SCREEN_SIZE_MEDIUM);
 }
 
 /**
@@ -982,6 +1001,15 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest023, TestSize.Level1)
     videoPattern->currentPos_ = 0;
     videoPattern->isStop_ = false;
     videoPattern->OnCurrentTimeChange(1);
+
+    /**
+     * @tc.steps: step3. Call OnCurrentTimeChange while mediaPlayer_ is nullptr.
+     * @tc.expected: GetDuration will not be called.
+     */
+    videoPattern->duration_ = 0;
+    videoPattern->mediaPlayer_ = nullptr;
+    videoPattern->OnCurrentTimeChange(2);
+    EXPECT_EQ(videoPattern->duration_, 0);
 }
 
 /**
@@ -1070,14 +1098,13 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest025, TestSize.Level1)
 HWTEST_F(VideoPropertyTestNg, VideoPatternTest026, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create Video and get videoPattern.
+     * @tc.steps: step1. Create Video
+     * @tc.expected: step1. Create Video successfully
      */
-    VideoModelNG video;
-    video.Create(AceType::MakeRefPtr<VideoControllerV2>());
-    auto videoNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(videoNode, nullptr);
-    auto videoPattern = videoNode->GetPattern<VideoPattern>();
-    ASSERT_NE(videoPattern, nullptr);
+    auto frameNode = CreateVideoNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto videoPattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(videoPattern);
 
     /**
      * @tc.steps: step2. Call hiddenChangeEvent while video not in full screen mode.
@@ -1250,6 +1277,10 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest030, TestSize.Level1)
     auto videoPattern = videoNode->GetPattern<VideoPattern>();
     ASSERT_NE(videoPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. Call EnableAnalyzer and set true.
+     * @tc.expected: step2. videoPattern->isEnableAnalyzer_ will be true
+     */
     videoPattern->EnableAnalyzer(true);
     EXPECT_TRUE(videoPattern->isEnableAnalyzer_);
 
@@ -1258,6 +1289,13 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest030, TestSize.Level1)
     } else {
         EXPECT_FALSE(videoPattern->IsSupportImageAnalyzer());
     }
+
+    /**
+     * @tc.steps: step3. Call EnableAnalyzer and set false.
+     * @tc.expected: step3. videoPattern->isEnableAnalyzer_ will be false
+     */
+    videoPattern->EnableAnalyzer(false);
+    EXPECT_FALSE(videoPattern->isEnableAnalyzer_);
 
     videoPattern->imageAnalyzerManager_ = nullptr;
     EXPECT_FALSE(videoPattern->IsSupportImageAnalyzer());

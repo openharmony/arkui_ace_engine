@@ -54,6 +54,7 @@ private:
     template<typename T>
     int32_t GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
     static bool WriteInterfaceToken(MessageParcel &data);
+    int32_t SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
 
     static inline BrokerDelegator<FormRendererDispatcherProxy> delegator_;
 };

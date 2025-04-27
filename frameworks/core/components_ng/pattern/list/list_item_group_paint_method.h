@@ -54,6 +54,7 @@ public:
         totalItemCount_ = listItemGroupPaintInfo.totalItemCount;
         layoutDirection_ = listItemGroupPaintInfo.layoutDirection;
         mainSize_ = listItemGroupPaintInfo.mainSize;
+        listContentSize_ = listItemGroupPaintInfo.listContentSize;
         for (auto& [index, pos] : cachedItemPosition) {
             itemPosition_[index] = pos;
         }
@@ -90,6 +91,7 @@ private:
     int32_t totalItemCount_ = 0;
     TextDirection layoutDirection_ = TextDirection::LTR;
     float mainSize_ = 0.0f;
+    float listContentSize_ = FLT_MAX;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H

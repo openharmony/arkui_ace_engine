@@ -15,6 +15,7 @@
 
 #include "core/components/common/properties/decoration.h"
 
+#include "core/pipeline/pipeline_context.h"
 namespace OHOS::Ace {
 
 void Decoration::SetContextAndCallback(
@@ -55,6 +56,59 @@ double Decoration::HorizontalSpaceOccupied(double dipScale) const
     return border_.HorizontalWidth(dipScale) + padding_.HorizontalInPx(dipScale);
 }
 
+void Decoration::SetGradient(
+    const Gradient& gradient, const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+{
+    gradient_ = gradient;
+    if (callback) {
+        switch (gradient_.GetType()) {
+            case GradientType::LINEAR:
+                if (gradient_.GetLinearGradient().angle) {
+                    gradient_.GetLinearGradient().angle->SetContextAndCallbackAfterFirstAssign(context, callback);
+                }
+                break;
+            case GradientType::SWEEP:
+                if (gradient_.GetSweepGradient().centerX) {
+                    gradient_.GetSweepGradient().centerX->SetContextAndCallbackAfterFirstAssign(context, callback);
+                }
+                if (gradient_.GetSweepGradient().centerY) {
+                    gradient_.GetSweepGradient().centerY->SetContextAndCallbackAfterFirstAssign(context, callback);
+                }
+                if (gradient_.GetSweepGradient().startAngle) {
+                    gradient_.GetSweepGradient().startAngle->SetContextAndCallbackAfterFirstAssign(
+                        context, callback);
+                }
+                if (gradient_.GetSweepGradient().endAngle) {
+                    gradient_.GetSweepGradient().endAngle->SetContextAndCallbackAfterFirstAssign(context, callback);
+                }
+                if (gradient_.GetSweepGradient().rotation) {
+                    gradient_.GetSweepGradient().rotation->SetContextAndCallbackAfterFirstAssign(context, callback);
+                }
+                break;
+            case GradientType::RADIAL:
+                if (gradient_.GetRadialGradient().radialHorizontalSize) {
+                    gradient_.GetRadialGradient().radialHorizontalSize->SetContextAndCallbackAfterFirstAssign(
+                        context, callback);
+                }
+                if (gradient_.GetRadialGradient().radialVerticalSize) {
+                    gradient_.GetRadialGradient().radialVerticalSize->SetContextAndCallbackAfterFirstAssign(
+                        context, callback);
+                }
+                if (gradient_.GetRadialGradient().radialCenterX) {
+                    gradient_.GetRadialGradient().radialCenterX->SetContextAndCallbackAfterFirstAssign(
+                        context, callback);
+                }
+                if (gradient_.GetRadialGradient().radialCenterY) {
+                    gradient_.GetRadialGradient().radialCenterY->SetContextAndCallbackAfterFirstAssign(
+                        context, callback);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 void Gradient::AddColor(const GradientColor& color)
 {
     colors_.push_back(color);
@@ -63,6 +117,14 @@ void Gradient::AddColor(const GradientColor& color)
 void Gradient::ClearColors()
 {
     colors_.clear();
+}
+
+void BackgroundImage::SetSrc(const std::string& src, const RefPtr<ThemeConstants>& themeConstants)
+{
+    // If match the regex, src with the outer "url()" removed is returned.
+    // Otherwise return a copy of src directly.
+    auto imgSrc = std::regex_replace(src, std::regex(R"(^url\(\s*['"]?\s*([^()]+?)\s*['"]?\s*\)$)"), "$1");
+    src_ = ThemeUtils::ProcessImageSource(imgSrc, themeConstants);
 }
 
 void BackgroundImageSize::SetSizeTypeX(BackgroundImageSizeType type)
@@ -585,6 +647,13 @@ void BrightnessOption::ToJsonValue(
         return;
     }
     json->PutExtAttr(key.c_str(), GetJsonObject(), filter);
+}
+
+void BackgroundImagePosition::SetContextAndCallback(
+    const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+{
+    valueX_.SetContextAndCallback(context, callback);
+    valueY_.SetContextAndCallback(context, callback);
 }
 
 } // namespace OHOS::Ace

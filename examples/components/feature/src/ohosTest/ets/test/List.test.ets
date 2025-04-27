@@ -1,5 +1,3 @@
-import GaugeBootcampTest from './displays/GaugeBootcamp.test'
-
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +17,4 @@ import abilityTest from './Ability.test';
 
 export default function testsuite() {
   abilityTest();
-
-  GaugeBootcampTest()
 }

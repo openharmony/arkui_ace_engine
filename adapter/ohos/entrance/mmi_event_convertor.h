@@ -94,7 +94,7 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
     const NG::VectorF& scale, const int32_t udegree = 0);
 
 void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    MouseEvent& events, bool isScenceBoardWindow);
+    MouseEvent& events, bool isSceneBoardWindow);
 
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event);
 

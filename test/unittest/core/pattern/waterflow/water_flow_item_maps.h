@@ -308,6 +308,16 @@ const std::vector<WaterFlowSections::Section> SECTION_15 = {
     { .itemsCount = 4, .crossCount = 2, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC },
     { .itemsCount = 6, .crossCount = 1, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC },
 };
+
+const std::vector<WaterFlowSections::Section> SECTION_16 = {
+    { .itemsCount = 3, .crossCount = 3, .margin = MARGIN_2, .rowsGap = Dimension(5.0f) },
+    { .itemsCount = 2, .crossCount = 2, .margin = MARGIN_2, .rowsGap = Dimension(5.0f) },
+    { .itemsCount = 3, .crossCount = 3 },
+    { .itemsCount = 2, .crossCount = 2 },
+    { .itemsCount = 3, .crossCount = 3 },
+    { .itemsCount = 2, .crossCount = 2 },
+    { .itemsCount = 30, .crossCount = 3, .rowsGap = Dimension(5.0f) },
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_WATER_FLOW_ITEM_MAPS_H

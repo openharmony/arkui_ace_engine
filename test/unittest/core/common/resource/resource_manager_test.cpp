@@ -32,9 +32,11 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-std::string MakeCacheKey(const std::string& bundleName, const std::string& moduleName)
+constexpr int32_t DEFAULT_INSTANCE_ID = 0;
+
+std::string MakeCacheKey(const std::string& bundleName, const std::string& moduleName, int32_t instanceId)
 {
-    return bundleName + "." + moduleName;
+    return bundleName + "." + moduleName + "." + std::to_string(instanceId);
 }
 }
 class ResourceManagerTest : public testing::Test {};
@@ -52,7 +54,7 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest001, TestSize.Level1)
      * @tc.expect: resourceAdapters_ in ResourceManager is 1 (contains the default adapter)
      */
     auto resourceAdapter = ResourceAdapter::Create();
-    ResourceManager::GetInstance().AddResourceAdapter("", "", resourceAdapter);
+    ResourceManager::GetInstance().AddResourceAdapter("", "", DEFAULT_INSTANCE_ID, resourceAdapter);
     EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.size(), 1);
 
     /**
@@ -63,26 +65,27 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest001, TestSize.Level1)
      */
     std::string bundleName = "com.example.test";
     std::string moduleName = "entry";
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, DEFAULT_INSTANCE_ID);
     auto resAdapterCreate = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
     EXPECT_EQ(ResourceManager::GetInstance().cache_.size(), 1);
-    EXPECT_NE(ResourceManager::GetInstance().cache_.find(MakeCacheKey(bundleName, moduleName)),
+    EXPECT_NE(ResourceManager::GetInstance().cache_.find(MakeCacheKey(bundleName, moduleName, DEFAULT_INSTANCE_ID)),
         ResourceManager::GetInstance().cache_.end());
 
     /**
      * @tc.steps: step5. Get resource adapter by bundleName and moduleName.
      * @tc.expect: The resourceAdapter is equal to the adapter create in last step.
      */
-    auto resAdapterGet = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName);
+    auto resAdapterGet = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, DEFAULT_INSTANCE_ID);
     EXPECT_EQ(resAdapterCreate, resAdapterGet);
 
     /**
      * @tc.steps: step6. Delete resourceAdapter by bundleName and moduleName.
      * @tc.expect: The resourceAdapter of bundleName and moduleName is removed.
      */
-    ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName);
+    ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, DEFAULT_INSTANCE_ID);
     EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.size(), 1);
-    EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.find(MakeCacheKey(bundleName, moduleName)),
+    EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.find(
+                  MakeCacheKey(bundleName, moduleName, DEFAULT_INSTANCE_ID)),
         ResourceManager::GetInstance().resourceAdapters_.end());
 
     /**
@@ -96,7 +99,7 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest001, TestSize.Level1)
      * @tc.steps: step8. Get resourceAdapter with empty bundleName and moduleName.
      * @tc.expect: true.
      */
-    EXPECT_EQ(ResourceManager::GetInstance().GetResourceAdapter(), resourceAdapter);
+    EXPECT_EQ(ResourceManager::GetInstance().GetResourceAdapter(DEFAULT_INSTANCE_ID), resourceAdapter);
 
     ResourceManager::GetInstance().resourceAdapters_.clear();
 }
@@ -115,8 +118,8 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest002, TestSize.Level1)
      */
     std::string bundleName = "";
     std::string moduleName = "";
-    std::string key = ResourceManager::GetInstance().MakeCacheKey(bundleName, moduleName);
-    EXPECT_EQ(key, DEFAULT_RESOURCE_KEY);
+    std::string key = ResourceManager::GetInstance().MakeCacheKey(bundleName, moduleName, DEFAULT_INSTANCE_ID);
+    EXPECT_EQ(key, std::to_string(DEFAULT_INSTANCE_ID));
 
     /**
      * @tc.steps: step3. create bundleName and moduleName.
@@ -125,8 +128,8 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest002, TestSize.Level1)
      */
     bundleName = "com.example.test";
     moduleName = "entry";
-    key = ResourceManager::GetInstance().MakeCacheKey(bundleName, moduleName);
-    EXPECT_EQ(key, MakeCacheKey(bundleName, moduleName));
+    key = ResourceManager::GetInstance().MakeCacheKey(bundleName, moduleName, DEFAULT_INSTANCE_ID);
+    EXPECT_EQ(key, MakeCacheKey(bundleName, moduleName, DEFAULT_INSTANCE_ID));
 
     /**
      * @tc.steps: step5. create bundleName and moduleName.
@@ -135,8 +138,8 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest002, TestSize.Level1)
      */
     bundleName = "com.example.test";
     moduleName = "";
-    key = ResourceManager::GetInstance().MakeCacheKey(bundleName, moduleName);
-    EXPECT_EQ(key, MakeCacheKey(bundleName, moduleName));
+    key = ResourceManager::GetInstance().MakeCacheKey(bundleName, moduleName, DEFAULT_INSTANCE_ID);
+    EXPECT_EQ(key, MakeCacheKey(bundleName, moduleName, DEFAULT_INSTANCE_ID));
 
     /**
      * @tc.steps: step7. create bundleName and moduleName.
@@ -145,8 +148,8 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest002, TestSize.Level1)
      */
     bundleName = "";
     moduleName = "entry";
-    key = ResourceManager::GetInstance().MakeCacheKey(bundleName, moduleName);
-    EXPECT_EQ(key, MakeCacheKey(bundleName, moduleName));
+    key = ResourceManager::GetInstance().MakeCacheKey(bundleName, moduleName, DEFAULT_INSTANCE_ID);
+    EXPECT_EQ(key, MakeCacheKey(bundleName, moduleName, DEFAULT_INSTANCE_ID));
 
     ResourceManager::GetInstance().Reset();
     ResourceManager::GetInstance().resourceAdapters_.clear();
@@ -168,16 +171,16 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest003, TestSize.Level1)
      */
     std::string bundleName = "com.example.test";
     std::string moduleName = "entry";
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, DEFAULT_INSTANCE_ID);
     auto resAdapterCreate = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-    auto result = ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName);
+    auto result = ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, DEFAULT_INSTANCE_ID);
     EXPECT_TRUE(result);
 
     /**
      * @tc.steps: step5. call IsResourceAdapterRecord with empty bundleName and moduleName
      * @tc.expect: false.
      */
-    result = ResourceManager::GetInstance().IsResourceAdapterRecord("", "");
+    result = ResourceManager::GetInstance().IsResourceAdapterRecord("", "", DEFAULT_INSTANCE_ID);
     EXPECT_FALSE(result);
 
     /**
@@ -185,8 +188,8 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest003, TestSize.Level1)
      * @tc.steps: step7. call IsResourceAdapterRecord with bundleName and moduleName
      * @tc.expect: true.
      */
-    ResourceManager::GetInstance().RemoveResourceAdapter("", "");
-    result = ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName);
+    ResourceManager::GetInstance().RemoveResourceAdapter("", "", DEFAULT_INSTANCE_ID);
+    result = ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, DEFAULT_INSTANCE_ID);
     EXPECT_TRUE(result);
 
     /**
@@ -194,8 +197,8 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest003, TestSize.Level1)
      * @tc.steps: step9. call IsResourceAdapterRecord with bundleName and moduleName
      * @tc.expect: false.
      */
-    ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName);
-    result = ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName);
+    ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, DEFAULT_INSTANCE_ID);
+    result = ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, DEFAULT_INSTANCE_ID);
     EXPECT_FALSE(result);
 
     ResourceManager::GetInstance().Reset();
@@ -218,9 +221,9 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest004, TestSize.Level1)
      */
     std::string bundleName = "com.example.test";
     std::string moduleName = "entry";
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, DEFAULT_INSTANCE_ID);
     auto resAdapterCreate = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-    auto result = ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName);
+    auto result = ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, DEFAULT_INSTANCE_ID);
     EXPECT_TRUE(result);
 
     /**
@@ -231,8 +234,9 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest004, TestSize.Level1)
      */
     bundleName = "com.example.test";
     moduleName = "entry2";
-    ResourceManager::GetInstance().RegisterMainResourceAdapter(bundleName, moduleName, resAdapterCreate);
-    result = ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName);
+    ResourceManager::GetInstance().RegisterMainResourceAdapter(
+        bundleName, moduleName, DEFAULT_INSTANCE_ID, resAdapterCreate);
+    result = ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, DEFAULT_INSTANCE_ID);
     EXPECT_TRUE(result);
 
     /**

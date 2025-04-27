@@ -40,12 +40,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Dimension TIME_FOCUS_PAINT_WIDTH = 2.0_vp;
-
-enum class TimeFormatChange {
-    HOUR_CHANGE,
-    HOUR_UNCHANGE,
-    UNKNOWN
-};
 }
 
 class TimePickerRowPattern : public LinearLayoutPattern {
@@ -82,6 +76,16 @@ public:
     void SetConfirmNode(WeakPtr<FrameNode> buttonConfirmNode)
     {
         weakButtonConfirm_ = buttonConfirmNode;
+    }
+
+    void SetNextPrevButtonNode(WeakPtr<FrameNode> nextPrevButtonNode)
+    {
+        nextPrevButtonNode_ = nextPrevButtonNode;
+    }
+
+    void SetIsNext(bool isNext)
+    {
+        isNext_ = isNext;
     }
 
     void updateFontConfigurationEvent(const std::function<void()>& closeDialogEvent)
@@ -246,6 +250,9 @@ public:
     {
         isForceUpdate_ = value != hour24_;
         hour24_ = value;
+        if (!isClearFocus_) {
+            isClearFocus_ = isForceUpdate_;
+        }
     }
 
     bool GetHour24() const
@@ -491,6 +498,7 @@ public:
         json->PutExtAttr("selected", selectedTime_.ToString(false, false).c_str(), filter);
         json->PutExtAttr("start", startTime_.ToString(false, false).c_str(), filter);
         json->PutExtAttr("end", endTime_.ToString(false, false).c_str(), filter);
+        json->PutExtAttr("enableCascade", isEnableCascade_, filter);
         json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
     }
 
@@ -653,9 +661,11 @@ public:
     void ColumnPatternInitHapticController();
     void ColumnPatternStopHaptic();
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
+    bool IsStartEndTimeDefined();
+    void UpdateUserSetSelectColor();
 private:
     void SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,
-        const std::string &id, bool focus, const std::function<void(const std::string&)>& call);
+        const std::string &id, bool& focus, const std::function<void(const std::string&)>& call);
     void ClearFocus();
     void SetDefaultFocus();
     bool IsCircle();
@@ -687,10 +697,8 @@ private:
     void UpdateNodePositionForUg();
     void MountSecondNode(const RefPtr<FrameNode>& stackSecondNode);
     void RemoveSecondNode();
-    void UpdateConfirmButtonMargin(
-        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
-    void UpdateCancelButtonMargin(
-        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
+    void UpdateButtonMargin(
+        const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmOrNextNode);
     void CalcLeftTotalColumnWidth(const RefPtr<FrameNode>& host, float &leftTotalColumnWidth, float childSize);
     bool CheckFocusID(int32_t childSize);
     bool ParseDirectionKey(RefPtr<FrameNode>& host, RefPtr<TimePickerColumnPattern>& pattern, KeyCode& code,
@@ -702,12 +710,11 @@ private:
     void HandleMinColumnChange(const PickerTime& value);
     uint32_t ParseHourOf24(uint32_t hourOf24) const;
     PickerTime AdjustTime(const PickerTime& time);
-    bool IsStartEndTimeDefined();
     void HourChangeBuildTimeRange();
     void MinuteChangeBuildTimeRange(uint32_t hourOf24);
     void RecordHourAndMinuteOptions();
     void RecordHourMinuteValues();
-    int32_t GetOptionsIndex(const RefPtr<FrameNode>& frameNode, const std::string& value);
+    bool GetOptionsIndex(const RefPtr<FrameNode>& frameNode, const std::string& value, uint32_t& columnIndex);
     std::string GetOptionsCurrentValue(const RefPtr<FrameNode>& frameNode);
     std::string GetOptionsValueWithIndex(const RefPtr<FrameNode>& frameNode, uint32_t optionIndex);
     void HandleColumnsChangeTimeRange(const RefPtr<FrameNode>& tag);
@@ -723,6 +730,7 @@ private:
         const RefPtr<FrameNode>& columnFrameNode, bool isZeroPrefixTypeHide, uint32_t selectedTime);
     void InitFocusEvent();
     void SetCallBack();
+    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext);
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
@@ -751,6 +759,8 @@ private:
     std::optional<int32_t> DividerId_;
     WeakPtr<FrameNode> weakButtonConfirm_;
     WeakPtr<FrameNode> weakButtonCancel_;
+    WeakPtr<FrameNode> nextPrevButtonNode_;
+    bool isNext_ = true;
     std::function<void()> closeDialogEvent_;
     bool hasSecond_ = false;
     bool wheelModeEnabled_ = true;
@@ -795,6 +805,8 @@ private:
     std::string oldHourValue_;
     std::string oldMinuteValue_;
     std::string selectedColumnId_;
+    bool isUserSetSelectColor_ = false;
+    bool isClearFocus_ = true;
 };
 } // namespace OHOS::Ace::NG
 

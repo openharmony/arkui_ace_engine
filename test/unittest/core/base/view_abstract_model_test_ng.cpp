@@ -23,6 +23,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/referenced.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -350,9 +351,11 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg004, TestSize.Level1)
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     menuParam.isShowInSubWindow = false;
     buildFunc = []() { flag++; };
+    menuParam.hapticFeedbackMode = HapticFeedbackMode::ENABLED;
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     params.push_back(OptionParam());
     menuParam.setShow = true;
+    menuParam.hapticFeedbackMode = HapticFeedbackMode::AUTO;
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     EXPECT_NE(mainNode, nullptr);
 }
@@ -562,8 +565,13 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg009, TestSize.Level1)
     menuParam.previewMode = MenuPreviewMode::IMAGE;
     buildFunc = []() { flag++; };
     menuParam.isShowHoverImage = false;
+    menuParam.hapticFeedbackMode = HapticFeedbackMode::ENABLED;
+    viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
+    menuParam.hapticFeedbackMode = HapticFeedbackMode::AUTO;
     viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
     menuParam.previewMode = MenuPreviewMode::NONE;
+    viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
+    menuParam.hapticFeedbackMode = HapticFeedbackMode::ENABLED;
     viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
     EXPECT_NE(mainNode, nullptr);
 }
@@ -1449,5 +1457,210 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg023, TestSize.Level1)
     topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     EXPECT_EQ(topModalPattern->HasOnWillDismiss(), true);
     EXPECT_EQ(topModalPattern->HasTransitionEffect(), true);
+}
+
+/**
+ * @tc.name: SetAccessibilitySelected001
+ * @tc.desc: Test the SetAccessibilitySelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilitySelected001, TestSize.Level1)
+{
+    bool selected = true;
+    bool resetValue = true;
+    std::string tag = "uiNode1";
+    int32_t nodeId = 1;
+    auto frameNode = FrameNode::CreateFrameNode(
+        tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.push(frameNode);
+    viewAbstractModelNG.SetAccessibilitySelected(selected, resetValue);
+    EXPECT_FALSE(
+        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->accessibilityProperty_->isSelected_.has_value());
+
+    resetValue = false;
+    viewAbstractModelNG.SetAccessibilitySelected(selected, resetValue);
+    EXPECT_EQ(
+        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->accessibilityProperty_->isSelected_, selected);
+}
+
+/**
+ * @tc.name: SetAccessibilityChecked001
+ * @tc.desc: Test the SetAccessibilityChecked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityChecked001, TestSize.Level1)
+{
+    bool checked = true;
+    bool resetValue = true;
+    std::string tag = "uiNode1";
+    int32_t nodeId = 1;
+    auto frameNode = FrameNode::CreateFrameNode(
+        tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.push(frameNode);
+    viewAbstractModelNG.SetAccessibilityChecked(checked, resetValue);
+    EXPECT_FALSE(
+        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->accessibilityProperty_->checkedType_.has_value());
+
+    resetValue = false;
+    viewAbstractModelNG.SetAccessibilityChecked(checked, resetValue);
+    EXPECT_EQ(
+        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->accessibilityProperty_->checkedType_, checked);
+}
+
+/**
+ * @tc.name: SetAccessibilityScrollTriggerable001
+ * @tc.desc: Test the SetAccessibilityScrollTriggerable
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityScrollTriggerable001, TestSize.Level1)
+{
+    bool triggerable = true;
+    bool resetValue = true;
+    std::string tag = "uiNode1";
+    int32_t nodeId = 1;
+    auto frameNode = FrameNode::CreateFrameNode(
+        tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.push(frameNode);
+    viewAbstractModelNG.SetAccessibilityScrollTriggerable(triggerable, resetValue);
+    EXPECT_TRUE(
+        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->accessibilityProperty_->isUserScrollTriggerable_);
+
+    resetValue = false;
+    viewAbstractModelNG.SetAccessibilityScrollTriggerable(triggerable, resetValue);
+    EXPECT_TRUE(
+        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->accessibilityProperty_->isUserScrollTriggerable_);
+}
+
+/**
+ * @tc.name: SetAccessibilityRole001
+ * @tc.desc: Test the SetAccessibilityRole
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityRole001, TestSize.Level1)
+{
+    std::string role = "testRole";
+    bool resetValue = true;
+    std::string tag = "uiNode1";
+    int32_t nodeId = 1;
+    auto frameNode = FrameNode::CreateFrameNode(
+        tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.push(frameNode);
+    viewAbstractModelNG.SetAccessibilityRole(role, resetValue);
+    EXPECT_EQ(
+        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->accessibilityProperty_->accessibilityCustomRole_,
+        "");
+
+    resetValue = false;
+    viewAbstractModelNG.SetAccessibilityRole(role, resetValue);
+    EXPECT_EQ(
+        NG::ViewStackProcessor::GetInstance()->GetMainFrameNode()->accessibilityProperty_->accessibilityCustomRole_,
+        role);
+}
+
+/**
+ * @tc.name: SetAccessibilityUseSamePage001
+ * @tc.desc: Test the SetAccessibilityUseSamePage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityUseSamePage001, TestSize.Level1)
+{
+    std::string tag = "uiNode1";
+    std::string pageMode = "pageMode";
+    int32_t nodeId = 1;
+    FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    frameNode.accessibilityProperty_->SetAccessibilitySamePage(pageMode);
+
+    viewAbstractModelNG.SetAccessibilityUseSamePage(&frameNode, pageMode);
+    EXPECT_EQ(frameNode.accessibilityProperty_->accessibilityUseSamePage_, pageMode);
+
+    pageMode = "testMode";
+    viewAbstractModelNG.SetAccessibilityUseSamePage(&frameNode, pageMode);
+    EXPECT_EQ(frameNode.accessibilityProperty_->accessibilityUseSamePage_, pageMode);
+}
+
+/**
+ * @tc.name: SetAccessibilitySelected002
+ * @tc.desc: Test the SetAccessibilitySelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilitySelected002, TestSize.Level1)
+{
+    std::string tag = "uiNode1";
+    bool selected = true;
+    bool resetValue = true;
+    int32_t nodeId = 1;
+    FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    frameNode.accessibilityProperty_->SetUserSelected(selected);
+
+    viewAbstractModelNG.SetAccessibilitySelected(&frameNode, selected, resetValue);
+    EXPECT_EQ(frameNode.accessibilityProperty_->isSelected_.has_value(), false);
+
+    resetValue = false;
+    viewAbstractModelNG.SetAccessibilitySelected(&frameNode, selected, resetValue);
+    EXPECT_EQ(frameNode.accessibilityProperty_->isSelected_, selected);
+}
+
+/**
+ * @tc.name: SetAccessibilityChecked002
+ * @tc.desc: Test the SetAccessibilityChecked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityChecked002, TestSize.Level1)
+{
+    std::string tag = "uiNode1";
+    bool checked = true;
+    bool resetValue = true;
+    int32_t nodeId = 1;
+    FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+
+    frameNode.accessibilityProperty_->SetUserCheckedType(checked);
+    viewAbstractModelNG.SetAccessibilityChecked(&frameNode, checked, resetValue);
+    EXPECT_EQ(frameNode.accessibilityProperty_->checkedType_.has_value(), false);
+
+    resetValue = false;
+    viewAbstractModelNG.SetAccessibilityChecked(&frameNode, checked, resetValue);
+    EXPECT_EQ(frameNode.accessibilityProperty_->checkedType_, checked);
+}
+
+/**
+ * @tc.name: SetAccessibilityScrollTriggerable002
+ * @tc.desc: Test the SetAccessibilityScrollTriggerable
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityScrollTriggerable002, TestSize.Level1)
+{
+    std::string tag = "uiNode1";
+    bool triggerable = false;
+    bool resetValue = true;
+    int32_t nodeId = 1;
+    FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    frameNode.accessibilityProperty_->SetUserScrollTriggerable(triggerable);
+    viewAbstractModelNG.SetAccessibilityScrollTriggerable(&frameNode, triggerable, resetValue);
+    EXPECT_NE(frameNode.accessibilityProperty_->isUserScrollTriggerable_, triggerable);
+
+    resetValue = false;
+    viewAbstractModelNG.SetAccessibilityScrollTriggerable(&frameNode, triggerable, resetValue);
+    EXPECT_EQ(frameNode.accessibilityProperty_->isUserScrollTriggerable_, triggerable);
+}
+
+/**
+ * @tc.name: SetAccessibilityRole002
+ * @tc.desc: Test the SetAccessibilityRole
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, SetAccessibilityRole002, TestSize.Level1)
+{
+    std::string tag = "uiNode1";
+    std::string role = "testRole";
+    bool resetValue = true;
+    int32_t nodeId = 1;
+    FrameNode frameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
+    frameNode.accessibilityProperty_->SetAccessibilityCustomRole(role);
+    viewAbstractModelNG.SetAccessibilityRole(&frameNode, role, resetValue);
+    EXPECT_NE(frameNode.accessibilityProperty_->accessibilityCustomRole_, role);
+
+    resetValue = false;
+    viewAbstractModelNG.SetAccessibilityRole(&frameNode, role, resetValue);
+    EXPECT_EQ(frameNode.accessibilityProperty_->accessibilityCustomRole_, role);
 }
 } // namespace OHOS::Ace::NG

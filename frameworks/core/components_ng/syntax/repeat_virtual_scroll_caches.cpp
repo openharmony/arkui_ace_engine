@@ -446,27 +446,6 @@ void RepeatVirtualScrollCaches::ForEachL1IndexUINode(std::map<int32_t, RefPtr<UI
     }
 }
 
-void RepeatVirtualScrollCaches::RecycleItemsByIndex(int32_t index)
-{
-    if (!reusable_) {
-        return;
-    }
-    auto keyIter = key4index_.find(index);
-    if (keyIter != key4index_.end()) {
-        // STATE_MGMT_NOTE
-        // can not just remove from L1, also need to detach from tree!
-        // how to fix cause a call to RepeatVirtualScrollNode::DropFromL1 in
-        TAG_LOGD(
-            AceLogTag::ACE_REPEAT, "remove index %{public}d -> key %{public}s from L1", index, keyIter->second.c_str());
-
-        ACE_SCOPED_TRACE(
-            "RepeatVirtualScrollCaches::RecycleItemsByIndex index[%d] -> key [%s]", index, keyIter->second.c_str());
-
-        // don't fire OnRecycle here, as we manage reuse/recycle indepedently
-        RemoveKeyFromL1(keyIter->second, false);
-    }
-}
-
 /**
  * iterate over all entries of L1 and call function for each entry
  * if function returns true, entry is added to rebuild L1
@@ -754,20 +733,8 @@ bool RepeatVirtualScrollCaches::Purge()
         // improvement idea: in addition to distance from range use the
         // scroll direction for selecting these keys
         auto safeDist = std::min(cacheCount, static_cast<uint32_t>(l2Keys.size()));
-        auto itL2Key = l2Keys.begin();
-        auto itDivider = std::next(l2Keys.begin(), safeDist);
+        auto itL2Key = std::next(l2Keys.begin(), safeDist);
 
-        while (itL2Key != itDivider) {
-            // freeze the remaining nodes in L2
-            const auto& uiNodeIter = uiNode4Key.find(*itL2Key);
-            if (uiNodeIter != uiNode4Key.end()) {
-                TAG_LOGD(AceLogTag::ACE_REPEAT,
-                    "... freezing spare node cache item old key '%{public}s' -> node %{public}s, ttype: '%{public}s'",
-                    itL2Key->c_str(), DumpUINodeWithKey(*itL2Key).c_str(), ttype.c_str());
-                uiNodeIter->second->SetJSViewActive(false);
-            }
-            itL2Key++;
-        }
         while (itL2Key != l2Keys.end()) {
             // delete remaining keys
             TAG_LOGD(AceLogTag::ACE_REPEAT,

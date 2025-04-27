@@ -209,6 +209,36 @@ class UIUtils {
   static makeObserved(source) {
     return UIUtils.uiUtilsImpl_.makeObserved(source);
   }
+
+  /**
+   * Make non-observed data into observed V1 data.
+   * Support non-observed class
+   *
+   * @param { T } source input source object data.
+   * @returns { T } proxy object from the source object data.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @crossplatform
+   * @atomicservice
+   * @since 12
+   */
+  static makeV1Observed(source) {
+      return UIUtils.uiUtilsImpl_.makeV1Observed(source);
+  }
+
+  /**
+   * Enables V2 compatibility for the given object.
+   * Ensures that the object and its nested properties conform to V2 behaviour.
+   *
+   * @param {Object} source - The object to be made V2-compatible.
+   * @returns {Object} The processed object with V2 compatibility enabled.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @crossplatform
+   * @atomicservice
+   * @since 12
+   */
+  static enableV2Compatibility(source) {
+    return UIUtils.uiUtilsImpl_.enableV2Compatibility(source);
+  }
 }
 
 UIUtils.uiUtilsImpl_ = UIUtilsImpl.instance();

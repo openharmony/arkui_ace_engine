@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
@@ -329,7 +330,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest002, TestSize.Level1)
     EXPECT_NE(layoutAlgorithm, nullptr);
     auto paintMethod = bubblePattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
-    auto eventHub = bubblePattern->GetEventHub<BubbleEventHub>();
+    auto eventHub = bubblePattern->GetOrCreateEventHub<BubbleEventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -366,7 +367,7 @@ HWTEST_F(BubbleTestNg, PanelPatternTest003, TestSize.Level1)
      * @tc.steps: step2. set bubble event.
      * @tc.expected: step2. function is called.
      */
-    auto bubbleHub = frameNode->GetEventHub<BubbleEventHub>();
+    auto bubbleHub = frameNode->GetOrCreateEventHub<BubbleEventHub>();
     EXPECT_NE(bubbleHub, nullptr);
     std::string stateChange = STATE;
     auto onStateChange = [&stateChange](const std::string& change) { stateChange = change; };

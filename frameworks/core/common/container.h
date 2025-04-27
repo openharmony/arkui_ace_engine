@@ -28,7 +28,6 @@
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/shared_image_manager.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
@@ -43,6 +42,7 @@
 #include "core/common/display_info_utils.h"
 #include "core/common/frontend.h"
 #include "core/common/page_url_checker.h"
+#include "core/common/page_viewport_config.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/settings.h"
@@ -54,7 +54,6 @@
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -73,6 +72,8 @@ using DragEventCallBack = std::function<void(const DragPointerEvent&, const Drag
     const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
 using CrownEventCallback = std::function<bool(const CrownEvent&, const std::function<void()>&)>;
+
+class PipelineBase;
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
@@ -208,6 +209,33 @@ public:
         return Orientation::UNSPECIFIED;
     }
 
+    void SetCurrentDisplayOrientation(DisplayOrientation orientation)
+    {
+        displayOrientation_ = orientation;
+    }
+    DisplayOrientation GetCurrentDisplayOrientation() const
+    {
+        return displayOrientation_;
+    }
+    virtual RefPtr<PageViewportConfig> GetCurrentViewportConfig() const
+    {
+        return nullptr;
+    }
+    virtual RefPtr<PageViewportConfig> GetTargetViewportConfig(Orientation orientation,
+        bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator)
+    {
+        return nullptr;
+    }
+    virtual void SetRequestedOrientation(
+        Orientation orientation, bool needAnimation = true) {}
+    virtual Orientation GetRequestedOrientation()
+    {
+        return Orientation::UNSPECIFIED;
+    }
+    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
+    virtual bool IsFullScreenWindow() const { return true; }
+    virtual bool SetSystemBarEnabled(SystemBarType type, bool enable, bool animation) { return true; }
+
     virtual RefPtr<DisplayInfo> GetDisplayInfo();
 
     virtual void InitIsFoldable();
@@ -216,10 +244,14 @@ public:
 
     virtual FoldStatus GetCurrentFoldStatus();
 
-    virtual NG::SafeAreaInsets GetKeyboardSafeArea()
+    virtual FoldStatus GetFoldStatusFromListener()
     {
-        return {};
+        return GetCurrentFoldStatus();
     }
+
+    virtual void InitFoldStatusFromListener() {}
+
+    virtual NG::SafeAreaInsets GetKeyboardSafeArea();
 
     virtual std::string GetHapPath() const
     {
@@ -346,6 +378,7 @@ public:
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafelyWithCheck();
     static void UpdateCurrent(int32_t id);
+    static ColorMode CurrentColorMode();
 
     void SetUseNewPipeline()
     {
@@ -395,11 +428,7 @@ public:
         return container ? container->IsSubContainer() : false;
     }
 
-    Window* GetWindow() const
-    {
-        auto context = GetPipelineContext();
-        return context ? context->GetWindow() : nullptr;
-    }
+    Window* GetWindow() const;
 
     virtual uint64_t GetDisplayId() const
     {
@@ -502,7 +531,7 @@ public:
         return false;
     }
 
-    virtual bool IsScenceBoardWindow()
+    virtual bool IsSceneBoardWindow()
     {
         return false;
     }
@@ -558,65 +587,61 @@ public:
         return nullptr;
     }
 
-    /*
-     *this interface is just use before api12(not include api12),after api12 when you judge version,use
-     *LessThanAPITargetVersion(PlatformVersion version)
+    /**
+     * @description: [Deprecated]. Compare whether the min compatible api version of the application is less than the
+     * incoming target version. This interface is just use before api12(not include api12), after api12 when you judge
+     * version, use LessThanAPITargetVersion(PlatformVersion version).
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
      */
-    static bool LessThanAPIVersion(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 15
-                   ? PipelineBase::GetCurrentContext() &&
-                         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
-                   : LessThanAPITargetVersion(version);
-    }
+    static bool LessThanAPIVersion(PlatformVersion version);
 
-    /*
-     *this interface is just use before api12(not include api12),after api12 when you judge version,use
-     *GreatOrEqualAPITargetVersion(PlatformVersion version)
+    /**
+     * @description: [Deprecated]. Compare whether the min compatible api version of the application is less than the
+     * incoming target version. This interface is just use before api12(not include api12), after api12 when you judge
+     * version, use GreatOrEqualAPITargetVersion(PlatformVersion version).
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
      */
-    static bool GreatOrEqualAPIVersion(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 15
-                   ? PipelineBase::GetCurrentContext() &&
-                         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
-                   : GreatOrEqualAPITargetVersion(version);
-    }
+    static bool GreatOrEqualAPIVersion(PlatformVersion version);
 
-    /*
-     *this interface is just for when you use LessThanAPIVersion in instance does not exist situation
+    /**
+     * @description: Compare whether the min compatible api version of the application is less than the incoming target
+     * version. This interface is just for when you use LessThanAPIVersion in instance does not exist situation.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
      */
-    static bool LessThanAPIVersionWithCheck(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 14
-                   ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
-                         PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() <
-                             static_cast<int32_t>(version)
-                   : LessThanAPITargetVersion(version);
-    }
+    static bool LessThanAPIVersionWithCheck(PlatformVersion version);
 
-    /*
-     *this interface is just for when you use GreatOrEqualAPIVersion in instance does not exist situation
+    /**
+     * @description: Compare whether the min compatible api version of the application is greater than or equal to the
+     * incoming target version. This interface is just for when you use GreatOrEqualAPIVersion in instance does not
+     * exist situation.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
      */
-    static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 14
-                   ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
-                         PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >=
-                             static_cast<int32_t>(version)
-                   : GreatOrEqualAPITargetVersion(version);
-    }
+    static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version);
 
+    /**
+     * @description: Compare whether the target api version of the application is less than the incoming target
+     * version.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
-        if (!container) {
-            auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
-            return apiTargetVersion < static_cast<int32_t>(version);
-        }
+        CHECK_NULL_RETURN(container, false);
         auto apiTargetVersion = container->GetApiTargetVersion();
         return apiTargetVersion < static_cast<int32_t>(version);
     }
 
+    /**
+     * @description: Compare whether the target api version of the application is greater than or equal to the incoming
+     * target.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     static bool GreatOrEqualAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
@@ -657,11 +682,19 @@ public:
     static void SetFontScale(int32_t instanceId, float fontScale);
     static void SetFontWeightScale(int32_t instanceId, float fontScale);
 
+    /**
+     * @description: Get the target api version of the application.
+     * @return: The target api version of the application.
+     */
     int32_t GetApiTargetVersion() const
     {
         return apiTargetVersion_;
     }
 
+    /**
+     * @description: Set the target api version of the application.
+     * @param: The target api version of the application.
+     */
     void SetApiTargetVersion(int32_t apiTargetVersion)
     {
         apiTargetVersion_ = apiTargetVersion % 1000;
@@ -686,6 +719,11 @@ public:
         return false;
     }
 
+    virtual bool IsWaterfallWindow() const
+    {
+        return false;
+    }
+
     virtual Rect GetUIExtensionHostWindowRect(int32_t instanceId)
     {
         return Rect();
@@ -696,12 +734,12 @@ public:
         return false;
     }
 
-    void RegisterContainerHandler(const WeakPtr<ContainerHandler>& containerHandler)
+    void RegisterContainerHandler(const RefPtr<ContainerHandler>& containerHandler)
     {
         containerHandler_ = containerHandler;
     }
 
-    WeakPtr<ContainerHandler> GetContainerHandler()
+    RefPtr<ContainerHandler> GetContainerHandler()
     {
         return containerHandler_;
     }
@@ -714,6 +752,16 @@ public:
     uint64_t GetCurrentDisplayId() const
     {
         return currentDisplayId_;
+    }
+
+    virtual void SetColorMode(ColorMode mode)
+    {
+        colorMode_ = mode;
+    }
+
+    virtual ColorMode GetColorMode() const
+    {
+        return colorMode_;
     }
 
     virtual ResourceConfiguration GetResourceConfiguration() const = 0;
@@ -734,9 +782,11 @@ public:
         return Rect();
     }
 
+    static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
-    std::string GetFontFamilyName(std::string path);
+    std::vector<std::string> GetFontFamilyName(const std::string& path);
     bool endsWith(std::string str, std::string suffix);
 
 private:
@@ -752,7 +802,7 @@ protected:
     bool isFRSCardContainer_ = false;
     bool isDynamicRender_ = false;
     // for common handler
-    WeakPtr<ContainerHandler> containerHandler_;
+    RefPtr<ContainerHandler> containerHandler_;
     RefPtr<DisplayInfoUtils> displayManager_ = AceType::MakeRefPtr<DisplayInfoUtils>();
 
 private:
@@ -762,6 +812,7 @@ private:
     std::string filesDataPath_;
     std::string tempDir_;
     bool usePartialUpdate_ = false;
+    DisplayOrientation displayOrientation_ = DisplayOrientation::PORTRAIT;
     Settings settings_;
     RefPtr<PageUrlChecker> pageUrlChecker_;
     RefPtr<NG::NavigationRoute> navigationRoute_;
@@ -772,6 +823,7 @@ private:
     // Define the type of UI Content, for example, Security UIExtension.
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
     uint64_t currentDisplayId_ = 0;
+    ColorMode colorMode_ = ColorMode::LIGHT;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

@@ -108,16 +108,28 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostN
     return dragNode;
 }
 
-void TextDragPattern::CalculateFloatTitleOffset(RefPtr<FrameNode>& dragNode, OffsetF& offset)
+void TextDragPattern::CalculateOverlayOffset(RefPtr<FrameNode>& dragNode, OffsetF& offset)
 {
     auto pipeline = dragNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto stageManager = pipeline->GetStageManager();
-    CHECK_NULL_VOID(stageManager);
-    auto stageNode = stageManager->GetStageNode();
-    CHECK_NULL_VOID(stageNode);
-    auto stageOffset = stageNode->GetTransformRelativeOffset();
-    offset -= stageOffset;
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto rootGeometryNode = AceType::DynamicCast<FrameNode>(rootNode)->GetGeometryNode();
+    CHECK_NULL_VOID(rootGeometryNode);
+    auto rootOffset = rootGeometryNode->GetFrameOffset();
+    offset -= rootOffset;
+}
+
+void TextDragPattern::DropBlankLines(std::vector<RectF>& boxes)
+{
+    while (!boxes.empty() && NearZero(boxes.back().Width())) {
+        boxes.pop_back();
+    }
+    while (!boxes.empty() && NearZero(boxes.front().Width())) {
+        boxes.erase(boxes.begin());
+    }
 }
 
 TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode)
@@ -130,11 +142,9 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     float bothOffset = TEXT_DRAG_OFFSET.ConvertToPx() * CONSTANT_HALF;
     auto boxes = pattern->GetTextBoxes();
     CHECK_NULL_RETURN(!boxes.empty(), {});
-    while (!boxes.empty() && NearZero(boxes.back().Width())) {
-        boxes.pop_back();
-    }
+    DropBlankLines(boxes);
     auto globalOffset = pattern->GetParentGlobalOffset();
-    CalculateFloatTitleOffset(dragNode, globalOffset);
+    CalculateOverlayOffset(dragNode, globalOffset);
     RectF leftHandler = GetHandler(true, boxes, contentRect, globalOffset, textStartOffset);
     RectF rightHandler = GetHandler(false, boxes, contentRect, globalOffset, textStartOffset);
     AdjustHandlers(contentRect, leftHandler, rightHandler);

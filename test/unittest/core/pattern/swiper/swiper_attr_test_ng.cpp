@@ -1150,7 +1150,7 @@ HWTEST_F(SwiperAttrTestNg, SwiperModelNg002, TestSize.Level1)
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     auto layoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
     auto paintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
-    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SwiperEventHub>();
 
     /**
      * @tc.steps: step3.1. Test SetLoop function.
@@ -2166,9 +2166,7 @@ HWTEST_F(SwiperAttrTestNg, CheckSwiperModelNG001, TestSize.Level1)
     ASSERT_NE(indicatorPattern, nullptr);
     auto controller = indicatorPattern->GetIndicatorController();
     ASSERT_NE(controller, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    controller->SetSwiperNode(targetNode, indicatorNode);
+    controller->SetSwiperNode(frameNode_);
     EXPECT_EQ(indicatorPattern->GetNonAutoLayoutDirection(), TextDirection::LTR);
     auto overlongDotIndicatorPaintMethod = indicatorPattern->CreateOverlongDotIndicatorPaintMethod(pattern_);
     EXPECT_NE(overlongDotIndicatorPaintMethod, nullptr);

@@ -19,6 +19,9 @@
 #include "core/components_ng/pattern/grid_row/grid_row_model.h"
 
 namespace OHOS::Ace::NG {
+
+class FrameNode;
+
 class ACE_EXPORT GridRowModelNG : public GridRowModel {
 public:
     void Create() override;

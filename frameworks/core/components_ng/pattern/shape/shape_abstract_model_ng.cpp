@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 
 namespace OHOS::Ace::NG {

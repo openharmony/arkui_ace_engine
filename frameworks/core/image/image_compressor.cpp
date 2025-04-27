@@ -17,11 +17,9 @@
 #include <securec.h>
 #endif // ENABLE_OPENCL
 
-#ifdef USE_ROSEN_DRAWING
 #include "include/core/SkData.h"
 #include "image/bitmap.h"
 #include "utils/data.h"
-#endif
 
 #include "base/log/log.h"
 #include "base/log/ace_trace.h"
@@ -88,11 +86,7 @@ cl_program ImageCompressor::LoadShaderBin(cl_context context, cl_device_id devic
         LOGE("load cl shader failed");
         return nullptr;
     }
-#ifndef USE_ROSEN_DRAWING
     auto data = SkData::MakeFromFILE(file.get());
-#else
-    auto data = SkData::MakeFromFILE(file.get());
-#endif
     if (!data) {
         return nullptr;
     }
@@ -160,11 +154,7 @@ void ImageCompressor::ReleaseResource()
 }
 #endif // ENABLE_OPENCL
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> ImageCompressor::GpuCompress(std::string key, SkPixmap& pixmap, int32_t width, int32_t height)
-#else
 std::shared_ptr<RSData> ImageCompressor::GpuCompress(std::string key, RSBitmap& bitmap, int32_t width, int32_t height)
-#endif
 {
 #ifdef ENABLE_OPENCL
     std::lock_guard<std::mutex> lock(instanceMutex_);
@@ -194,11 +184,7 @@ std::shared_ptr<RSData> ImageCompressor::GpuCompress(std::string key, RSBitmap& 
     cl_image_format image_format = { CL_RGBA, CL_UNORM_INT8 };
     cl_image_desc desc = { CL_MEM_OBJECT_IMAGE2D, width, height };
     cl_mem inputImage = clCreateImage(context_, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-#ifndef USE_ROSEN_DRAWING
-        &image_format, &desc, const_cast<void*>(pixmap.addr()), &err);
-#else
         &image_format, &desc, bitmap.GetPixels(), &err);
-#endif
     cl_mem astcResult = clCreateBuffer(context_, CL_MEM_ALLOC_HOST_PTR, astc_size, NULL, &err);
     cl_mem partInfos = clCreateBuffer(context_, CL_MEM_COPY_HOST_PTR,
         sizeof(PartInfo) * parts_.size(), &parts_[0], &err);
@@ -231,14 +217,9 @@ std::shared_ptr<RSData> ImageCompressor::GpuCompress(std::string key, RSBitmap& 
         return nullptr;
     }
 
-#ifndef USE_ROSEN_DRAWING
-    auto astc_data = SkData::MakeUninitialized(astc_size);
-    clEnqueueReadBuffer(queue_, astcResult, CL_TRUE, 0, astc_size, astc_data->writable_data(), 0, NULL, NULL);
-#else
     auto astc_data = std::make_shared<RSData>();
     astc_data->BuildUninitialized(astc_size);
     clEnqueueReadBuffer(queue_, astcResult, CL_TRUE, 0, astc_size, astc_data->WritableData(), 0, NULL, NULL);
-#endif
     clReleaseMemObject(astcResult);
     return astc_data;
 #else
@@ -276,11 +257,7 @@ std::function<void()> ImageCompressor::ScheduleReleaseTask()
     return task;
 }
 
-#ifndef USE_ROSEN_DRAWING
-void ImageCompressor::WriteToFile(std::string srcKey, sk_sp<SkData> compressedData, Size imgSize)
-#else
 void ImageCompressor::WriteToFile(std::string srcKey, std::shared_ptr<RSData> compressedData, Size imgSize)
-#endif
 {
     if (!compressedData || srcKey.empty()) {
         return;
@@ -308,27 +285,16 @@ void ImageCompressor::WriteToFile(std::string srcKey, std::shared_ptr<RSData> co
             header.zsize[1] = 0;
             header.zsize[2] = 0;
 
-#ifndef USE_ROSEN_DRAWING
-            int32_t fileSize = compressedData->size() + sizeof(header);
-            sk_sp<SkData> toWrite = SkData::MakeUninitialized(fileSize);
-            uint8_t* toWritePtr = (uint8_t*) toWrite->writable_data();
-#else
             int32_t fileSize = compressedData->GetSize() + sizeof(header);
             auto toWrite = std::shared_ptr<RSData>();
             toWrite->BuildUninitialized(fileSize);
             uint8_t* toWritePtr = (uint8_t*) toWrite->WritableData();
-#endif
             if (memcpy_s(toWritePtr, fileSize, &header, sizeof(header)) != EOK) {
                 LOGE("astc write file failed");
                 return;
             }
-#ifndef USE_ROSEN_DRAWING
-            if (memcpy_s(toWritePtr + sizeof(header), compressedData->size(),
-                    compressedData->data(), compressedData->size()) != EOK) {
-#else
             if (memcpy_s(toWritePtr + sizeof(header), compressedData->GetSize(),
                     compressedData->GetData(), compressedData->GetSize()) != EOK) {
-#endif
                 LOGE("astc write file failed");
                 return;
             }
@@ -338,18 +304,6 @@ void ImageCompressor::WriteToFile(std::string srcKey, std::shared_ptr<RSData> co
 #endif
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> ImageCompressor::StripFileHeader(sk_sp<SkData> fileData)
-{
-    if (fileData) {
-        auto imageData = SkData::MakeSubset(fileData.get(), sizeof(AstcHeader), fileData->size() - sizeof(AstcHeader));
-        if (!imageData->isEmpty()) {
-            return imageData;
-        }
-    }
-    return nullptr;
-}
-#else
 std::shared_ptr<RSData> ImageCompressor::StripFileHeader(std::shared_ptr<RSData> fileData)
 {
     if (fileData) {
@@ -364,7 +318,6 @@ std::shared_ptr<RSData> ImageCompressor::StripFileHeader(std::shared_ptr<RSData>
     }
     return nullptr;
 }
-#endif
 
 /**
  * @brief Hash function used for procedural partition assignment.

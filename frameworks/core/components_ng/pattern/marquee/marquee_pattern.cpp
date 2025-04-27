@@ -35,7 +35,7 @@ void MarqueePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetUsingContentRectForRenderFrame(true);
     host->GetRenderContext()->SetClipToFrame(true);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowSizeChangeCallback(host->GetId());
     pipeline->AddWindowStateChangedCallback(host->GetId());
@@ -44,7 +44,7 @@ void MarqueePattern::OnAttachToFrameNode()
 
 void MarqueePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
@@ -154,7 +154,7 @@ void MarqueePattern::StartMarqueeAnimation()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto repeatCount = paintProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
-    if (pipeline->IsFormRender()) {
+    if (pipeline->IsFormRenderExceptDynamicComponent()) {
         repeatCount = 1;
     }
     FireStartEvent();
@@ -312,21 +312,21 @@ void MarqueePattern::PropertyCancelAnimationFinish()
 
 void MarqueePattern::FireStartEvent() const
 {
-    auto marqueeEventHub = GetEventHub<MarqueeEventHub>();
+    auto marqueeEventHub = GetOrCreateEventHub<MarqueeEventHub>();
     CHECK_NULL_VOID(marqueeEventHub);
     marqueeEventHub->FireStartEvent();
 }
 
 void MarqueePattern::FireBounceEvent() const
 {
-    auto marqueeEventHub = GetEventHub<MarqueeEventHub>();
+    auto marqueeEventHub = GetOrCreateEventHub<MarqueeEventHub>();
     CHECK_NULL_VOID(marqueeEventHub);
     marqueeEventHub->FireBounceEvent();
 }
 
 void MarqueePattern::FireFinishEvent() const
 {
-    auto marqueeEventHub = GetEventHub<MarqueeEventHub>();
+    auto marqueeEventHub = GetOrCreateEventHub<MarqueeEventHub>();
     CHECK_NULL_VOID(marqueeEventHub);
     marqueeEventHub->FireFinishEvent();
 }

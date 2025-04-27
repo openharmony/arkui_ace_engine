@@ -147,7 +147,7 @@ public:
     }
 
 private:
-    std::unique_ptr<ScopedViewStackProcessor> scopeStack_;
+    static thread_local std::unique_ptr<ScopedViewStackProcessor> scopeStack_;
 };
 
 } // namespace OHOS::Ace::NG

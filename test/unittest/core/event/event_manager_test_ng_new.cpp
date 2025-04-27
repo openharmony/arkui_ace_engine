@@ -1370,10 +1370,10 @@ HWTEST_F(EventManagerTestNg, EventManagerTest074, TestSize.Level1)
     frameNodeAlt->SetActive(true);
     frameNodeCtrlShift->SetActive(true);
 
-    auto eventHubCtrl = frameNodeCtrl->GetEventHub<NG::EventHub>();
-    auto eventHubShift = frameNodeShift->GetEventHub<NG::EventHub>();
-    auto eventHubAlt = frameNodeAlt->GetEventHub<NG::EventHub>();
-    auto eventHubCtrlShift = frameNodeCtrlShift->GetEventHub<NG::EventHub>();
+    auto eventHubCtrl = frameNodeCtrl->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHubShift = frameNodeShift->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHubAlt = frameNodeAlt->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHubCtrlShift = frameNodeCtrlShift->GetOrCreateEventHub<NG::EventHub>();
 
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeCtrl));
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeShift));
@@ -1403,7 +1403,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest075, TestSize.Level2)
     EXPECT_FALSE(eventManager->DispatchKeyboardShortcut(event));
 
     auto frameNodeCtrl = FrameNode::GetOrCreateFrameNode(CTRL, NODEID, nullptr);
-    auto eventHubCtrl = frameNodeCtrl->GetEventHub<NG::EventHub>();
+    auto eventHubCtrl = frameNodeCtrl->GetOrCreateEventHub<NG::EventHub>();
     frameNodeCtrl->SetActive(true);
 
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeCtrl));
@@ -1925,10 +1925,10 @@ HWTEST_F(EventManagerTestNg, DispatchTouchCancelToRecognizer, TestSize.Level1)
     EXPECT_EQ(touchTestResult.size(), fingerCnt);
     EXPECT_EQ(touchTestResult[0].size(), targetCnt);
     EXPECT_EQ(touchTestResult[1].size(), targetCnt);
-    eventManager->DispatchTouchCancelToRecognizer(targetRefs[0].GetRawPtr(), items[0]);
+    eventManager->DispatchTouchCancelToRecognizer(AceType::RawPtr(targetRefs[0]), items[0]);
     EXPECT_EQ(touchTestResult.size(), fingerCnt);
     EXPECT_EQ(touchTestResult[1].size(), 1);
-    eventManager->DispatchTouchCancelToRecognizer(targetRefs[1].GetRawPtr(), items[1]);
+    eventManager->DispatchTouchCancelToRecognizer(AceType::RawPtr(targetRefs[1]), items[1]);
     EXPECT_EQ(touchTestResult.size(), 0);
 }
 } // namespace OHOS::Ace::NG

@@ -79,18 +79,7 @@ public:
         return onFocusTextField_;
     }
 
-    void SetOnFocusTextField(const WeakPtr<Pattern>& onFocusTextField)
-    {
-        const auto& pattern = onFocusTextField.Upgrade();
-        if (pattern && pattern->GetHost()) {
-            onFocusTextFieldId_ = pattern->GetHost()->GetId();
-        }
-        if (onFocusTextField_ != onFocusTextField) {
-            SetImeAttached(false);
-            GetOnFocusTextFieldInfo(onFocusTextField);
-        }
-        onFocusTextField_ = onFocusTextField;
-    }
+    void SetOnFocusTextField(const WeakPtr<Pattern>& onFocusTextField);
 
     void GetOnFocusTextFieldInfo(const WeakPtr<Pattern>& onFocusTextField);
 
@@ -119,13 +108,7 @@ public:
 
     void UpdateScrollableParentViewPort(const RefPtr<FrameNode>& node);
 
-    bool GetImeShow() const override
-    {
-        if (!imeShow_ && imeAttachCalled_) {
-            TAG_LOGI(ACE_KEYBOARD, "imeNotShown but attach called, still consider that as shown");
-        }
-        return imeShow_ || imeAttachCalled_;
-    }
+    bool GetImeShow() const override;
 
     void SetImeShow(bool imeShow)
     {
@@ -301,14 +284,7 @@ public:
         return isImeAttached_;
     }
 
-    void AddAvoidKeyboardCallback(int32_t id, bool isCustomKeyboard, const std::function<void()>&& callback)
-    {
-        if (isCustomKeyboard) {
-            avoidCustomKeyboardCallbacks_.insert({ id, std::move(callback) });
-        } else {
-            avoidSystemKeyboardCallbacks_.insert({ id, std::move(callback) });
-        }
-    }
+    void AddAvoidKeyboardCallback(int32_t id, bool isCustomKeyboard, const std::function<void()>&& callback);
 
     void RemoveAvoidKeyboardCallback(int32_t id)
     {
@@ -316,16 +292,7 @@ public:
         avoidSystemKeyboardCallbacks_.erase(id);
     }
 
-    void OnAfterAvoidKeyboard(bool isCustomKeyboard)
-    {
-        auto callbacks =
-            isCustomKeyboard ? std::move(avoidCustomKeyboardCallbacks_) : std::move(avoidSystemKeyboardCallbacks_);
-        for (const auto& pair : callbacks) {
-            if (pair.second) {
-                pair.second();
-            }
-        }
-    }
+    void OnAfterAvoidKeyboard(bool isCustomKeyboard);
 
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);

@@ -81,8 +81,10 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void BubblePattern::OnModifyDone()
 {
-    if (SystemProperties::GetColorMode() != colorMode_ && !isCustomPopup_) {
-        colorMode_ = SystemProperties::GetColorMode();
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    if (context->GetColorMode() != colorMode_ && !isCustomPopup_) {
+        colorMode_ = context->GetColorMode();
         UpdateBubbleText();
     }
     UpdateAgingTextSize();
@@ -111,14 +113,18 @@ void BubblePattern::OnAttachToFrameNode()
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     hasOnAreaChange_ = pipelineContext->HasOnAreaChangeNode(targetNode->GetId());
-    auto eventHub = targetNode->GetEventHub<EventHub>();
+    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
-                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
-                                              const OffsetF& /* origin */) {
+    OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host), weak = WeakClaim(this)](
+                                              const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
+                                              const RectF& /* rect */, const OffsetF& /* origin */) {
         auto popupNode = popupNodeWk.Upgrade();
         CHECK_NULL_VOID(popupNode);
         popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->PopTipsBubble();
+        }
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 
@@ -158,7 +164,7 @@ void BubblePattern::InitTouchEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -396,6 +402,30 @@ void BubblePattern::PopBubble()
     }
 }
 
+void BubblePattern::PopTipsBubble()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineNg = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineNg);
+    auto overlayManager = pipelineNg->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto popupInfo = overlayManager->GetPopupInfo(targetNodeId_);
+    if (!popupInfo.isCurrentOnShow || !popupInfo.isTips) {
+        return;
+    }
+    popupInfo.markNeedUpdate = true;
+    CHECK_NULL_VOID(host);
+    auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+    if (showInSubWindow) {
+        SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_);
+    } else {
+        overlayManager->HidePopup(targetNodeId_, popupInfo);
+    }
+}
+
 RefPtr<PopupTheme> BubblePattern::GetPopupTheme()
 {
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -437,15 +467,16 @@ void BubblePattern::StartEnteringTransitionEffects(
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
     auto isBlock = layoutProp->GetBlockEventValue(true);
     auto& renderContext = popupNode->GetRenderContext();
+    auto isTips = layoutProp->GetIsTips().value_or(false);
     renderContext->SetTransitionInCallback(
-        [weak = WeakClaim(this), finish, showInSubWindow, popupId, isBlock]() {
+        [weak = WeakClaim(this), finish, showInSubWindow, popupId, isBlock, isTips]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (pattern->transitionStatus_ != TransitionStatus::ENTERING) {
                 return;
             }
             pattern->transitionStatus_ = TransitionStatus::NORMAL;
-            if (showInSubWindow) {
+            if (showInSubWindow && !isTips) {
                 std::vector<Rect> rects;
                 if (!isBlock) {
                     auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
@@ -542,6 +573,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
     auto isBlock = layoutProp->GetBlockEventValue(true);
+    auto isTips = layoutProp->GetIsTips().value_or(false);
     AnimationUtils::Animate(
         optionAlpha,
         [weak = WeakClaim(this)]() {
@@ -552,14 +584,14 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(VISIABLE_ALPHA);
         },
-        [weak = WeakClaim(this), finish, showInSubWindow, popupId, isBlock]() {
+        [weak = WeakClaim(this), finish, showInSubWindow, popupId, isBlock, isTips]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (pattern->transitionStatus_ != TransitionStatus::ENTERING) {
                 return;
             }
             pattern->transitionStatus_ = TransitionStatus::NORMAL;
-            if (showInSubWindow) {
+            if (showInSubWindow && !isTips) {
                 std::vector<Rect> rects;
                 if (!isBlock) {
                     auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
@@ -696,6 +728,7 @@ void BubblePattern::ResetToInvisible()
 
 void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "Popup OnWindowSizeChanged, reason: %d", type);
     switch (type) {
         case WindowSizeChangeReason::UNDEFINED:
         case WindowSizeChangeReason::MOVE:
@@ -728,6 +761,7 @@ void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
 
 void BubblePattern::OnWindowHide()
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "Popup OnWindowHide start");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineNg = host->GetContextRefPtr();
@@ -758,7 +792,9 @@ void BubblePattern::UpdateText(const RefPtr<UINode>& node, const RefPtr<PopupThe
         auto parentNode = node->GetParent();
         if (parentNode && parentNode->GetTag() == V2::BUTTON_ETS_TAG &&
             !(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
-            textLayoutProperty->UpdateTextColor(popupTheme->GetButtonFontColor());
+            if (popupTheme->GetPopupDoubleButtonIsSameStyle()) {
+                textLayoutProperty->UpdateTextColor(popupTheme->GetButtonFontColor());
+            }
         } else if (!isSetMessageColor_) {
             if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
                 textLayoutProperty->UpdateTextColor(popupTheme->GetFontColor());
@@ -790,6 +826,8 @@ void BubblePattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("targetSpace: " + dumpInfo_.targetSpace.ToString());
     DumpLog::GetInstance().AddDesc("originPlacement: " + dumpInfo_.originPlacement);
     DumpLog::GetInstance().AddDesc("finalPlacement: " + dumpInfo_.finalPlacement);
+    DumpLog::GetInstance().AddDesc("enableHoverMode: " + std::to_string(dumpInfo_.enableHoverMode));
+    DumpLog::GetInstance().AddDesc("avoidKeyboard: " + std::to_string(dumpInfo_.avoidKeyboard));
 }
 
 void BubblePattern::UpdateBubbleText()
@@ -810,8 +848,28 @@ void BubblePattern::OnColorConfigurationUpdate()
     if (isCustomPopup_) {
         return;
     }
-    colorMode_ = SystemProperties::GetColorMode();
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    colorMode_ = context->GetColorMode();
     UpdateBubbleText();
+    if (isTips_) {
+        auto host = GetHost();
+        auto popupTheme = GetPopupTheme();
+        auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+        CHECK_NULL_VOID(childNode);
+        auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
+        auto renderContext = childNode->GetRenderContext();
+        CHECK_NULL_VOID(popupTheme);
+        auto defaultBGcolor = popupTheme->GetDefaultBGColor();
+        auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(defaultBGcolor);
+        renderContext->UpdateBackgroundColor(backgroundColor);
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
+        styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
+        renderContext->UpdateBackBlurStyle(styleOption);
+        auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
+        renderContext->UpdateBackShadow(shadow);
+    }
 }
 
 void BubblePattern::UpdateAgingTextSize()

@@ -64,6 +64,10 @@ void RepeatVirtualScrollNode::UpdateTotalCount(uint32_t totalCount)
 {
     TAG_LOGD(AceLogTag::ACE_REPEAT, "Repeat(%{public}d).UpdateTotalCount TotalCount: %{public}d",
         static_cast<int32_t>(GetId()), totalCount);
+        // set active range when deleting all.
+        if (totalCount == 0 && totalCount != totalCount_) {
+            DoSetActiveChildRange(-1, -1, 0, 0, false);
+        }
     totalCount_ = totalCount;
 }
 
@@ -435,6 +439,11 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren(bool /*not
     return children_;
 }
 
+const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildrenForInspector() const
+{
+    return children_;
+}
+
 void RepeatVirtualScrollNode::OnRecycle()
 {
     for (auto& [key, child]: caches_.GetAllNodes()) {
@@ -472,11 +481,6 @@ void RepeatVirtualScrollNode::RecycleItems(int32_t from, int32_t to)
 
     offscreenItems_.from = from;
     offscreenItems_.to = to;
-    for (auto i = from; i < to; i++) {
-        if (i >= startIndex_ && i < startIndex_ + static_cast<int32_t>(totalCount_)) {
-            caches_.RecycleItemsByIndex(i - startIndex_);
-        }
-    }
 }
 
 void RepeatVirtualScrollNode::SetNodeIndexOffset(int32_t start, int32_t /*count*/)

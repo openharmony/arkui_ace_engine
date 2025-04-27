@@ -15,25 +15,15 @@
 
 #include "adapter/ohos/entrance/dialog_container.h"
 
-#include <mutex>
 
-#include "adapter/ohos/entrance/ace_application_info.h"
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
+
 #include "adapter/ohos/entrance/ace_view_ohos.h"
-#include "base/log/frame_report.h"
-#include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/common/container_scope.h"
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
-#include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_manager_impl.h"
-#include "core/pipeline/pipeline_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/base/subwindow/subwindow_manager.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
 
@@ -41,8 +31,8 @@ namespace OHOS::Ace::Platform {
 DialogContainer::DialogContainer(int32_t instanceId, FrontendType type) : AceContainer(instanceId, type)
 {}
 
-void DialogContainer::ShowToast(int32_t instanceId, const std::string& message, int32_t duration,
-    const std::string& bottom, std::function<void(int32_t)>&& callback)
+void DialogContainer::ShowToast(int32_t instanceId, const NG::ToastInfo& toastInfo,
+    std::function<void(int32_t)>&& callback)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
@@ -55,13 +45,9 @@ void DialogContainer::ShowToast(int32_t instanceId, const std::string& message, 
             AceContainer::HideWindow(instanceId);
         }
     });
-    auto toastInfo = NG::ToastInfo { .message = message,
-        .duration = duration,
-        .bottom = bottom,
-        .showMode = NG::ToastShowMode::DEFAULT,
-        .alignment = -1,
-        .offset = std::nullopt };
-    delegate->ShowToast(toastInfo, std::move(callback));
+    auto toastInfoNew = toastInfo;
+    toastInfoNew.showMode = NG::ToastShowMode::DEFAULT;
+    delegate->ShowToast(toastInfoNew, std::move(callback));
 }
 
 void DialogContainer::CloseToast(int32_t instanceId, int32_t toastId, std::function<void(int32_t)>&& callback)

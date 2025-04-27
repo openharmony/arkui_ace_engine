@@ -67,6 +67,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkSelectSetOptionWidth(double width, int32_t wid
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetOptionWidthWithMode(const char* value);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetOptionHeight(double height, int32_t heightUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetMenuBackgroundColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkSelectSetBackgroundColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetMenuBackgroundBlurStyle(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetSize(double width, int32_t widthUnit, double height, int32_t heightUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetPadding(double padding, uint32_t unit);

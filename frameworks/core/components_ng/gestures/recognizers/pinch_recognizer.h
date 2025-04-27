@@ -46,8 +46,6 @@ public:
         return distance_;
     }
 
-    void CheckCallbackState() override;
-
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -70,6 +68,8 @@ private:
 
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
+    bool ProcessAxisAbnormalCondition(const AxisEvent& event);
+    bool ProcessAxisReject();
 
     double distance_ = 0.0;
     double initialDev_ = 0.0;

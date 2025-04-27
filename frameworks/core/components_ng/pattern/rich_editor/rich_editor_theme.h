@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_RICH_EDITOR_RICH_EDITOR_THEME_H
 
 #include "base/geometry/dimension.h"
+#include "core/components/text/text_theme.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
@@ -75,7 +76,7 @@ public:
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
             auto dragBackgroundColor = pattern->GetAttr<Color>("drag_background_color", Color::WHITE);
-            if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+            if (Container::CurrentColorMode() == ColorMode::DARK) {
                 dragBackgroundColor = dragBackgroundColor.ChangeOpacity(DRAG_BACKGROUND_OPACITY);
             }
             theme->dragBackgroundColor_ = dragBackgroundColor;

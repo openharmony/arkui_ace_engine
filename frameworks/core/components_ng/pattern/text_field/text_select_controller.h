@@ -28,7 +28,6 @@
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 namespace {

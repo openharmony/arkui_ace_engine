@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/common/media_query/media_queryer.h"
+#include "bridge/common/media_query/media_queryer.h"
 
+#include "bridge/common/media_query/media_query_info.h"
+#include "bridge/common/utils/utils.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/common/container.h"
-#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

@@ -153,6 +153,10 @@ public:
     {
         return pageTransitionAmplitudeRatio_;
     }
+    Dimension GetDragPanDistanceMouse() const
+    {
+        return dragPanDistanceMouse_;
+    }
 
 protected:
     AppTheme() = default;
@@ -176,6 +180,7 @@ private:
     bool focusActiveByTab_ = true;
     bool focusHandleClick_ = true;
     float pageTransitionAmplitudeRatio_ = DEFAULT_AMPLITUDE_RATIO;
+    Dimension dragPanDistanceMouse_ = 1.0_vp; // General distance to accept pan gesture for dragging by mouse
 };
 
 } // namespace OHOS::Ace

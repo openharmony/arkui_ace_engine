@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,7 @@ const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasiz
 export struct ProgressButton {
   @Prop @Watch('getProgressContext') progress: number;
   @State textProgress: string = EMPTY_STRING;
-  @Prop content: string = EMPTY_STRING;
+  @Prop content: ResourceStr = EMPTY_STRING;
   @State @Watch('getLoadingProgress')isLoading: boolean = false;
   progressButtonWidth?: Length = BUTTON_NORMARL_WIDTH;
   clickCallback: () => void = () => {};

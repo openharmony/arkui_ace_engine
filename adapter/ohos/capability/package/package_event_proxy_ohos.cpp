@@ -18,7 +18,6 @@
 #include "common_event_support.h"
 
 #include "frameworks/core/common/container.h"
-#include "frameworks/core/common/container_scope.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<PackageEventProxy> PackageEventProxy::instance_;

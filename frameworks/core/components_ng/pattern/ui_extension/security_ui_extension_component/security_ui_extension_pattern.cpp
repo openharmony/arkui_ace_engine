@@ -253,6 +253,12 @@ void SecurityUIExtensionPattern::RemovePlaceholderNode()
     }
 }
 
+void SecurityUIExtensionPattern::ReDispatchWantParams()
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->ReDispatchWantParams();
+}
+
 void SecurityUIExtensionPattern::OnConnect()
 {
     CHECK_RUN_ON(UI);
@@ -296,6 +302,7 @@ void SecurityUIExtensionPattern::OnConnect()
         uiExtensionManager->RegisterSecurityUIExtensionInFocus(
             WeakClaim(this), sessionWrapper_);
     }
+    ReDispatchWantParams();
     InitializeAccessibility();
     InitBusinessDataHandleCallback();
 }
@@ -437,7 +444,7 @@ void SecurityUIExtensionPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
         const RectF& oldRect,
@@ -491,7 +498,7 @@ void SecurityUIExtensionPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -591,7 +598,7 @@ void SecurityUIExtensionPattern::FireOnRemoteReadyCallback()
     ContainerScope scope(instanceId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<UIExtensionHub>();
+    auto eventHub = host->GetOrCreateEventHub<UIExtensionHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnRemoteReadyCallback(
         MakeRefPtr<NG::SecurityUIExtensionProxy>(sessionWrapper_, Claim(this)));
@@ -616,7 +623,7 @@ void SecurityUIExtensionPattern::FireOnTerminatedCallback(
     ContainerScope scope(instanceId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<UIExtensionHub>();
+    auto eventHub = host->GetOrCreateEventHub<UIExtensionHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnTerminatedCallback(code, wantWrap);
 }
@@ -638,7 +645,7 @@ void SecurityUIExtensionPattern::FireOnReceiveCallback(const AAFwk::WantParams& 
     ContainerScope scope(instanceId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<UIExtensionHub>();
+    auto eventHub = host->GetOrCreateEventHub<UIExtensionHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnReceiveCallback(params);
 }
@@ -981,7 +988,7 @@ bool SecurityUIExtensionPattern::SendBusinessData(
     UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
     CHECK_NULL_RETURN(sessionWrapper_, false);
-    UIEXT_LOGI("SecurityUIExtension SendBusinessData businessCode=%{public}u.", code);
+    UIEXT_LOGD("SecurityUIExtension SendBusinessData businessCode=%{public}u.", code);
     return sessionWrapper_->SendBusinessData(code, data, type, subSystemId);
 }
 
@@ -1049,25 +1056,19 @@ AccessibilityParentRectInfo SecurityUIExtensionPattern::GetAccessibilityRectInfo
     AccessibilityParentRectInfo rectInfo;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, rectInfo);
-    auto rect = host->GetTransformRectRelativeToWindow(true);
-    VectorF finalScale = host->GetTransformScaleRelativeToWindow();
-    
-    rectInfo.left = static_cast<int32_t>(rect.Left());
-    rectInfo.top = static_cast<int32_t>(rect.Top());
-    rectInfo.scaleX = finalScale.x;
-    rectInfo.scaleY = finalScale.y;
     auto pipeline = host->GetContextRefPtr();
     if (pipeline) {
         auto accessibilityManager = pipeline->GetAccessibilityManager();
         if (accessibilityManager) {
-            auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
-            rectInfo.left =
-                rectInfo.left * windowInfo.scaleX + static_cast<int32_t>(windowInfo.left);
-            rectInfo.top = rectInfo.top * windowInfo.scaleY + static_cast<int32_t>(windowInfo.top);
-            rectInfo.scaleX *= windowInfo.scaleX;
-            rectInfo.scaleY *= windowInfo.scaleY;
+            return accessibilityManager->GetTransformRectInfoRelativeToWindow(host, pipeline);
         }
     }
+    auto rect = host->GetTransformRectRelativeToWindow(true);
+    VectorF finalScale = host->GetTransformScaleRelativeToWindow();
+    rectInfo.left = static_cast<int32_t>(rect.Left());
+    rectInfo.top = static_cast<int32_t>(rect.Top());
+    rectInfo.scaleX = finalScale.x;
+    rectInfo.scaleY = finalScale.y;
     return rectInfo;
 }
 
@@ -1083,8 +1084,14 @@ void SecurityUIExtensionPattern::TransferAccessibilityRectInfo(bool isForce)
     data.SetParam("top", parentRectInfo.top);
     data.SetParam("scaleX", parentRectInfo.scaleX);
     data.SetParam("scaleY", parentRectInfo.scaleY);
-    UIEXT_LOGI("SecUEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f].",
-        parentRectInfo.scaleX, parentRectInfo.scaleY);
+    data.SetParam("centerX", parentRectInfo.rotateTransform.centerX);
+    data.SetParam("centerY", parentRectInfo.rotateTransform.centerY);
+    data.SetParam("innerCenterX", parentRectInfo.rotateTransform.innerCenterX);
+    data.SetParam("innerCenterY", parentRectInfo.rotateTransform.innerCenterY);
+    data.SetParam("rotateDegree", parentRectInfo.rotateTransform.rotateDegree);
+    UIEXT_LOGI("SecUEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f],"
+        "rotateDegree: %{public}d.", parentRectInfo.scaleX, parentRectInfo.scaleY,
+        parentRectInfo.rotateTransform.rotateDegree);
     SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, data, BusinessDataSendType::ASYNC);
 }
 

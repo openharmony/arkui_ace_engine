@@ -20,7 +20,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_udmf.h"
 #include "test/mock/core/render/mock_paragraph.h"
-
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -139,7 +139,7 @@ HWTEST_F(TextFieldPatternTestTwo, InitDragDropCallBack001, TestSize.Level0)
     auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     std::string extraParams = "Test";
 
-    auto eventHub = textFieldNode->GetEventHub<EventHub>();
+    auto eventHub = textFieldNode->GetOrCreateEventHub<EventHub>();
     pattern->dragStatus_ = DragStatus::ON_DROP;
     pattern->isDetachFromMainTree_ = false;
     eventHub->onDragEnd_.operator()(event);
@@ -203,6 +203,7 @@ HWTEST_F(TextFieldPatternTestTwo, HandleClickEvent001, TestSize.Level0)
     layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
 
     pattern->obscureTickCountDown_ = 1;
+    pattern->multipleClickRecognizer_ = pattern->GetOrCreateMultipleClickRecognizer();
     pattern->multipleClickRecognizer_->clickCountTask_.Reset([] {});
     pattern->HandleClickEvent(info);
     pattern->multipleClickRecognizer_->clickCountTask_.Reset([] {});
@@ -275,7 +276,7 @@ HWTEST_F(TextFieldPatternTestTwo, HandleClickEvent002, TestSize.Level0)
     ASSERT_NE(selectOverlayNode, nullptr);
     auto geometryNode = selectOverlayNode->GetGeometryNode();
     geometryNode->frame_.rect_.SetRect(100, 100, 200, 200);
-
+    pattern->multipleClickRecognizer_ = pattern->GetOrCreateMultipleClickRecognizer();
     pattern->multipleClickRecognizer_->clickCountTask_.impl_ = nullptr;
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -563,7 +564,7 @@ HWTEST_F(TextFieldPatternTestTwo, OnModifyDone001, TestSize.Level0)
     pattern->deleteForwardOperations_.emplace(10);
     pattern->OnModifyDone();
 
-    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = textFieldNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(false);
     pattern->OnModifyDone();
@@ -690,6 +691,7 @@ HWTEST_F(TextFieldPatternTestTwo, SetSelectionFlag001, TestSize.Level0)
     pattern->SetSelectionFlag(start, end, options, true);
     EXPECT_EQ(pattern->IsShowHandle(), false);
     theme->textfieldShowHandle_ = false;
+    pattern->UpdateSelectionOffset();
 }
 
 /**

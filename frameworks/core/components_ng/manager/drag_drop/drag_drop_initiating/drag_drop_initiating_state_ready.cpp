@@ -22,6 +22,8 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_machine.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/gestures/drag_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
@@ -32,7 +34,13 @@ void DragDropInitiatingStateReady::HandleOnDragStart(RefPtr<FrameNode> frameNode
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
     if (!CheckStatusForPanActionBegin(frameNode, info)) {
+        return;
+    }
+    if (gestureHub->GetTextDraggable()) {
+        HandleTextDragStart(frameNode, info);
         return;
     }
     dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
@@ -42,8 +50,6 @@ void DragDropInitiatingStateReady::HandleOnDragStart(RefPtr<FrameNode> frameNode
     HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
     DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(frameNode->GetId());
     UpdateDragPreviewOptionFromModifier();
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
     auto gestureEvent = info;
     gestureHub->HandleOnDragStart(gestureEvent);
 }
@@ -77,37 +83,17 @@ void DragDropInitiatingStateReady::HandleLongPressOnAction(const GestureEvent& i
         dragDropManager->SetDragDampStartPoint(info.GetGlobalPoint());
         dragDropManager->SetDraggingPointer(info.GetPointerId());
     }
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::PRESS));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::PRESS));
 }
 
 void DragDropInitiatingStateReady::HandleTouchEvent(const TouchEvent& touchEvent)
 {
-    if (touchEvent.type == TouchType::MOVE) {
-        auto point = Point(touchEvent.x, touchEvent.y, touchEvent.screenX, touchEvent.screenY);
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto dragDropManager = pipeline->GetDragDropManager();
-        CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->SetDragMoveLastPoint(point);
-    }
+    UpdatePointInfoForFinger(touchEvent);
 }
 
 void DragDropInitiatingStateReady::HandlePanOnActionEnd(const GestureEvent& info)
 {
-    TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action end.");
-    DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    if (dragDropManager->IsAboutToPreview()) {
-        dragDropManager->ResetDragging();
-    }
-    dragDropManager->SetIsDragNodeNeedClean(false);
-    dragDropManager->SetIsDisableDefaultDropAnimation(true);
-    auto machine = GetStateMachine();
-    CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+    OnActionEnd(info);
 }
 
 void DragDropInitiatingStateReady::HandlePanOnReject()
@@ -117,7 +103,10 @@ void DragDropInitiatingStateReady::HandlePanOnReject()
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    if (manager->IsGatherWithMenu()) {
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    if (manager->IsGatherWithMenu() || !params.hasGatherNode) {
         return;
     }
     manager->RemoveGatherNode();
@@ -127,6 +116,6 @@ void DragDropInitiatingStateReady::HandleSequenceOnActionCancel(const GestureEve
 {
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
 }
 } // namespace OHOS::Ace::NG

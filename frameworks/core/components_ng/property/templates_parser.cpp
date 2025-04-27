@@ -260,7 +260,7 @@ std::pair<std::vector<double>, double> ParseArgsWithAutoFill(
     return std::make_pair(lens, gap);
 }
 
-void ConvertRepeatArgs(std::string& handledArg)
+void ConvertRepeatArgs(std::string& handledArg, double size)
 {
     if (handledArg.find(REPEAT_PREFIX) == std::string::npos) {
         return;
@@ -274,6 +274,7 @@ void ConvertRepeatArgs(std::string& handledArg)
     } else {
         if (handledArg.size() > REPEAT_MIN_SIZE && std::regex_match(handledArg, matches, REPEAT_NUM_REGEX)) {
             auto count = StringUtils::StringToInt(matches[1].str());
+            count = std::min(count, static_cast<int32_t>(size));
             std::string repeatString = matches[CROSS_WIDTH].str();
             while (count > 1) {
                 repeatString.append(" " + std::string(matches[CROSS_WIDTH].str()));
@@ -345,7 +346,7 @@ std::pair<std::vector<double>, double> ParseArgsWithoutAutoFill(const std::strin
     double frSum = 0.0; // Third priority: such as 2fr
     std::vector<std::string> strs;
     std::string handledArg = args;
-    ConvertRepeatArgs(handledArg);
+    ConvertRepeatArgs(handledArg, size);
     StringUtils::StringSplitter(handledArg, ' ', strs);
     if (!strs.empty() && strs[0] == UNIT_AUTO_FILL) {
         return ParseAutoFill(strs, size, gap);

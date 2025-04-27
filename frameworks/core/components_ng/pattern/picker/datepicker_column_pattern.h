@@ -287,6 +287,7 @@ public:
     void SetSelectedMarkListener(std::function<void(std::string& selectedColumnId)>& listener);
     void SetSelectedMark(bool focus = true, bool notify = true, bool reRender = true);
     void SetSelectedMarkId(const std::string &strColumnId);
+    void UpdateUserSetSelectColor();
 #ifdef SUPPORT_DIGITAL_CROWN
     std::string& GetSelectedColumnId();
     bool IsCrownEventEnded();
@@ -334,6 +335,7 @@ private:
     void HandleDragEnd();
     void SetSelectedMarkPaint(bool paint);
     void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme);
+    void UpdateAnimationColor(const RefPtr<PickerTheme>& pickerTheme);
 #ifdef SUPPORT_DIGITAL_CROWN
     void HandleCrownBeginEvent(const CrownEvent& event);
     void HandleCrownMoveEvent(const CrownEvent& event);
@@ -366,7 +368,7 @@ private:
     void InitTextFontFamily();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void RegisterWindowStateChangedCallback();
-    void UnregisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback(FrameNode* frameNode);
     void OnWindowHide() override;
     void OnWindowShow() override;
 
@@ -439,6 +441,7 @@ private:
     PickerColumnPatternCircleUtils<DatePickerColumnPattern> *circleUtils_ = nullptr;
     std::string selectedColumnId_ = "";
     std::function<void(std::string& selectedColumnId)> focusedListerner_ = nullptr;
+    bool isUserSetSelectColor_ = false;
 #ifdef SUPPORT_DIGITAL_CROWN
     bool isCrownEventEnded_ = true;
     int32_t crownSensitivity_ = INVALID_CROWNSENSITIVITY;

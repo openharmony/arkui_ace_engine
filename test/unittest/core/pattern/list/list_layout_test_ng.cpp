@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
 #define private public
@@ -31,8 +32,8 @@ class ListLayoutTestNg : public ListTestNg {
 public:
     void CreateGroupWithSettingWithComponentContent(
         int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
-    void UpdateContentModifier();
-    RefPtr<ListPaintMethod> UpdateOverlayModifier(RefPtr<PaintWrapper> paintWrapper);
+    RefPtr<ListPaintMethod> UpdateOverlayModifier();
+    RefPtr<ListPaintMethod> UpdateContentModifier();
     void UpdateDividerMap();
     void PaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber, bool isClip = false);
     void GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber);
@@ -52,18 +53,19 @@ void ListLayoutTestNg::CreateGroupWithSettingWithComponentContent(
     }
 }
 
-void ListLayoutTestNg::UpdateContentModifier()
+RefPtr<ListPaintMethod> ListLayoutTestNg::UpdateOverlayModifier()
 {
-    RefPtr<NodePaintMethod> paint = pattern_->CreateNodePaintMethod();
-    RefPtr<ListPaintMethod> listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
     auto paintWrapper = frameNode_->CreatePaintWrapper();
-    listPaint->UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    RefPtr<ListPaintMethod> paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
+    paintMethod->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    return paintMethod;
 }
 
-RefPtr<ListPaintMethod> ListLayoutTestNg::UpdateOverlayModifier(RefPtr<PaintWrapper> paintWrapper)
+RefPtr<ListPaintMethod> ListLayoutTestNg::UpdateContentModifier()
 {
-    auto paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
-    paintMethod->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
+    RefPtr<ListPaintMethod> paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
+    paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
     return paintMethod;
 }
 
@@ -701,17 +703,17 @@ HWTEST_F(ListLayoutTestNg, PaintMethod001, TestSize.Level1)
     model.SetScrollBar(DisplayMode::ON);
     CreateListItemGroup(V2::ListItemGroupStyle::NONE); // no ListItem in ListItemGroup
     CreateDone();
-    auto paintWrapper = frameNode_->CreatePaintWrapper();
 
     /**
      * @tc.steps: step2. UnScrollable List
      * @tc.expected: Not need paint scrollBar
      */
-    auto paintMethod = UpdateOverlayModifier(paintWrapper);
+    auto paintMethod = UpdateOverlayModifier();
     auto scrollBarOverlayModifier = paintMethod->scrollBarOverlayModifier_.Upgrade();
     auto scrollBar = paintMethod->scrollBar_.Upgrade();
     EXPECT_NE(scrollBar, nullptr);
     EXPECT_FALSE(scrollBar->NeedPaint());
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
     PaintDivider(paintWrapper, 0);
 
     /**
@@ -738,8 +740,7 @@ HWTEST_F(ListLayoutTestNg, PaintMethod002, TestSize.Level1)
     model.SetScrollBar(DisplayMode::ON);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
-    auto paintWrapper = frameNode_->CreatePaintWrapper();
-    RefPtr<ListPaintMethod> paintMethod = UpdateOverlayModifier(paintWrapper);
+    RefPtr<ListPaintMethod> paintMethod = UpdateOverlayModifier();
     auto scrollBarOverlayModifier = paintMethod->scrollBarOverlayModifier_.Upgrade();
     auto scrollBar = paintMethod->scrollBar_.Upgrade();
     EXPECT_EQ(scrollBarOverlayModifier->positionMode_, PositionMode::RIGHT);
@@ -754,8 +755,7 @@ HWTEST_F(ListLayoutTestNg, PaintMethod002, TestSize.Level1)
     model.SetListDirection(Axis::HORIZONTAL);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
-    paintWrapper = frameNode_->CreatePaintWrapper();
-    paintMethod = UpdateOverlayModifier(paintWrapper);
+    paintMethod = UpdateOverlayModifier();
     scrollBarOverlayModifier = paintMethod->scrollBarOverlayModifier_.Upgrade();
     scrollBar = paintMethod->scrollBar_.Upgrade();
     EXPECT_TRUE(scrollBar->NeedPaint());
@@ -769,8 +769,7 @@ HWTEST_F(ListLayoutTestNg, PaintMethod002, TestSize.Level1)
     model.SetScrollBar(DisplayMode::OFF);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
-    paintWrapper = frameNode_->CreatePaintWrapper();
-    paintMethod = UpdateOverlayModifier(paintWrapper);
+    paintMethod = UpdateOverlayModifier();
     scrollBar = paintMethod->scrollBar_.Upgrade();
     EXPECT_EQ(scrollBar, nullptr);
 }
@@ -2090,6 +2089,186 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetRepeatCountInfo001
+ * @tc.desc: Test the GetRepeatCountInfo when the child of List is Repeat.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, GetRepeatCountInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the List with Repeat.
+     */
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Check the totalCount of Repeat.
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    int32_t frameCount = repeat->FrameCount();
+    EXPECT_EQ(frameCount, 10);
+    EXPECT_NE(pattern_, nullptr);
+    auto repeatDifference = 0;
+    auto firstRepeatCount = 0;
+    auto totalChildCount = 0;
+    pattern_->GetRepeatCountInfo(frameNode_, repeatDifference, firstRepeatCount, totalChildCount);
+    EXPECT_EQ(repeatDifference, 0);
+    EXPECT_EQ(firstRepeatCount, 0);
+    EXPECT_EQ(totalChildCount, 10);
+
+    AddListItem();
+    repeatDifference = 0;
+    firstRepeatCount = 0;
+    totalChildCount = 0;
+    pattern_->GetRepeatCountInfo(frameNode_, repeatDifference, firstRepeatCount, totalChildCount);
+    EXPECT_EQ(repeatDifference, 0);
+    EXPECT_EQ(firstRepeatCount, 0);
+    EXPECT_EQ(totalChildCount, 11);
+}
+
+/**
+ * @tc.name: GetRepeatCountInfo002
+ * @tc.desc: Test the GetRepeatCountInfo when the child of List is LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, GetRepeatCountInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the List with LazyForEach.
+     */
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2, false);
+    CreateItemGroupsInLazyForEach(20);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Check the totalCount of LazyForEach.
+     */
+    auto lazyForEach = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(lazyForEach, nullptr);
+    int32_t frameCount = lazyForEach->FrameCount();
+    EXPECT_EQ(frameCount, 20);
+    EXPECT_NE(pattern_, nullptr);
+    auto repeatDifference = 0;
+    auto firstRepeatCount = 0;
+    auto totalChildCount = 0;
+    pattern_->GetRepeatCountInfo(frameNode_, repeatDifference, firstRepeatCount, totalChildCount);
+    EXPECT_EQ(repeatDifference, 0);
+    EXPECT_EQ(firstRepeatCount, 0);
+    EXPECT_EQ(totalChildCount, 20);
+
+    AddListItem();
+    repeatDifference = 0;
+    firstRepeatCount = 0;
+    totalChildCount = 0;
+    pattern_->GetRepeatCountInfo(frameNode_, repeatDifference, firstRepeatCount, totalChildCount);
+    EXPECT_EQ(repeatDifference, 0);
+    EXPECT_EQ(firstRepeatCount, 0);
+    EXPECT_EQ(totalChildCount, 21);
+}
+
+/**
+ * @tc.name: GetRepeatCountInfo003
+ * @tc.desc: Test the GetRepeatCountInfo when the child of List is CustomNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, GetRepeatCountInfo003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the List with CustomNode.
+     */
+    ListModelNG model = CreateList();
+    AddCustomNode();
+
+    /**
+     * @tc.steps: step2. Check the totalCount of CustomNode.
+     */
+    EXPECT_NE(pattern_, nullptr);
+    auto repeatDifference = 0;
+    auto firstRepeatCount = 0;
+    auto totalChildCount = 0;
+    pattern_->GetRepeatCountInfo(frameNode_, repeatDifference, firstRepeatCount, totalChildCount);
+    EXPECT_EQ(repeatDifference, 0);
+    EXPECT_EQ(firstRepeatCount, 0);
+    EXPECT_EQ(totalChildCount, 1);
+
+    AddListItem();
+    repeatDifference = 0;
+    firstRepeatCount = 0;
+    totalChildCount = 0;
+    pattern_->GetRepeatCountInfo(frameNode_, repeatDifference, firstRepeatCount, totalChildCount);
+    EXPECT_EQ(repeatDifference, 0);
+    EXPECT_EQ(firstRepeatCount, 0);
+    EXPECT_EQ(totalChildCount, 2);
+}
+
+/**
+ * @tc.name: ListCacheCount001
+ * @tc.desc: Window size drag not load cached node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListCacheCount001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Flush Idle Task
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    int32_t frameCount = repeat->FrameCount();
+    EXPECT_EQ(frameCount, 10);
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 5);
+    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT);
+
+    /**
+     * @tc.steps: step2. Flush Idle Task
+     * @tc.expected: Not pre load item.
+     */
+    frameNode_->GetContext()->SetIsWindowSizeDragging(true);
+    UpdateCurrentOffset(-250);
+    FlushIdleTask(listPattern);
+    childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 6);
+
+    /**
+     * @tc.steps: step3. Flush Idle Task
+     * @tc.expected: ListItem 1 and 7 is cached, ListItem 2,3,4,5,6 is active.
+     */
+    frameNode_->GetContext()->SetIsWindowSizeDragging(false);
+    FlushIdleTask(listPattern);
+    childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 7);
+    cachedItem = frameNode_->GetChildByIndex(1)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+    cachedItem = frameNode_->GetChildByIndex(7)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 1), -150.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 7), 450.0f);
+}
+
+/**
  * @tc.name: SetHeaderFooterComponent01
  * @tc.desc: Test HeaderComponent/FooterComponent of ListItemGroup
  * @tc.type: FUNC
@@ -2492,6 +2671,41 @@ HWTEST_F(ListLayoutTestNg, Cache003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NullLazyForEach001
+ * @tc.desc: Test List with null LazyForEach, GetOrCreateChildByIndex will not be called during measure and layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, NullLazyForEach001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List-LazyForEach, no child in LazyForEach.
+     */
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2, false);
+    auto handler = CreateItemsInLazyForEachWithHandle(0, 100.0f);
+    CreateDone();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+
+    /**
+     * @tc.steps: step2. first layout finish, and no child layouted.
+     * @tc.expected: itemPosition_ empty.
+     */
+    EXPECT_TRUE(pattern_->itemPosition_.empty());
+
+    /**
+     * @tc.steps: step3. add children to LazyForEach and reLayout.
+     * @tc.expected: item 0-3 layouted normally.
+     */
+    handler->SetTotalCount(6);
+    FlushUITasks();
+    EXPECT_TRUE(IsEqual(pattern_->itemPosition_.size(), 4));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 0));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 3));
+}
+
+/**
  * @tc.name: ListAddDelChildTest001
  * @tc.desc: Test list del child in snap end mode.
  * @tc.type: FUNC
@@ -2595,5 +2809,81 @@ HWTEST_F(ListLayoutTestNg, ListAddDelChildTest003, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     EXPECT_EQ(pattern_->GetEndIndex(), 5);
+}
+
+/**
+ * @tc.name: FadingEdge001
+ * @tc.desc: Test FadingEdge property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to list
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    EXPECT_TRUE(paintProperty_->GetFadingEdge().value_or(false));
+    EXPECT_EQ(paintProperty_->GetFadingEdgeLength().value(), fadingEdgeLength);
+
+    /**
+     * @tc.steps: step2. Change FadingEdge to false
+     * @tc.expected: There is no fading edge
+     */
+    ScrollableModelNG::SetFadingEdge(AceType::RawPtr(frameNode_), false, fadingEdgeLength);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    EXPECT_FALSE(paintProperty_->GetFadingEdge().value_or(false));
+}
+
+/**
+ * @tc.name: FadingEdge002
+ * @tc.desc: Test FadingEdge property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to list
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+
+    /**
+     * @tc.steps: step2. The list at top
+     * @tc.expected: Fading bottom
+     */
+    auto paintMethod = UpdateContentModifier();
+    EXPECT_FALSE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+
+    /**
+     * @tc.steps: step3. The list at middle
+     * @tc.expected: Fading both
+     */
+    ScrollTo(100.0f);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+
+    /**
+     * @tc.steps: step4. The list at bottom
+     * @tc.expected: Fading top
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_FALSE(paintMethod->isFadingBottom_);
 }
 } // namespace OHOS::Ace::NG

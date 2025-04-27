@@ -983,7 +983,7 @@ HWTEST_F(WaterFlowTestNg, OverScroll002, TestSize.Level1)
     pattern_->SetAnimateCanOverScroll(true);
     pattern_->layoutInfo_->UpdateOffset(100.0f);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildY(frameNode_, 0), 100.0f);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), 100.0f);
     EXPECT_EQ(pattern_->layoutInfo_->itemStart_, true);
@@ -998,7 +998,7 @@ HWTEST_F(WaterFlowTestNg, OverScroll002, TestSize.Level1)
     // layout in overScroll status at bottom.
     pattern_->layoutInfo_->UpdateOffset(-150.0f);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildY(frameNode_, 0), -50.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_,
         pattern_->layoutInfo_->Mode() == WaterFlowLayoutMode::TOP_DOWN ? 0 : Infinity<int32_t>());
@@ -1032,7 +1032,7 @@ HWTEST_F(WaterFlowTestNg, Delete006, TestSize.Level1)
         frameNode_->ChildrenUpdatedFrom(1);
     }
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
 }
 
@@ -1121,5 +1121,31 @@ HWTEST_F(WaterFlowTestNg, Footer001, TestSize.Level1)
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 20);
     EXPECT_EQ(frameNode_->GetChildrenUpdated(), 0);
     EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, -1);
+}
+
+/**
+ * @tc.name: CustomNode001
+ * @tc.desc: put empty CustomNode to waterflow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, CustomNode001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(0, [](int32_t i) { return 100.0f; });
+    CreateDone();
+
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, TOP_TO_DOWN ? 0 : Infinity<int32_t>());
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, TOP_TO_DOWN ? 0 : -1);
+
+    for (int32_t i = 0; i < 10; i++) {
+        auto child = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "test");
+        frameNode_->AddChild(child);
+    }
+    frameNode_->ChildrenUpdatedFrom(0);
+
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, TOP_TO_DOWN ? 0 : 9);
+    EXPECT_EQ(pattern_->layoutInfo_->childrenCount_, 10);
 }
 } // namespace OHOS::Ace::NG

@@ -16,8 +16,10 @@
 #include "movingphoto_model_ng.h"
 #include "movingphoto_node.h"
 
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -36,14 +38,6 @@ void MovingPhotoModelNG::Create(const RefPtr<MovingPhotoController>& controller)
     CHECK_NULL_VOID(movingPhotoNode);
     stack->Push(movingPhotoNode);
 
-    bool hasVideoNode = movingPhotoNode->HasVideoNode();
-    if (!hasVideoNode) {
-        auto videoId = movingPhotoNode->GetVideoId();
-        auto videoNode = FrameNode::GetOrCreateFrameNode(
-            V2::COLUMN_ETS_TAG, videoId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-        CHECK_NULL_VOID(videoNode);
-        movingPhotoNode->AddChild(videoNode);
-    }
     bool hasImageNode = movingPhotoNode->HasImageNode();
     if (!hasImageNode) {
         auto imageId = movingPhotoNode->GetImageId();
@@ -51,6 +45,23 @@ void MovingPhotoModelNG::Create(const RefPtr<MovingPhotoController>& controller)
             V2::IMAGE_ETS_TAG, imageId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
         CHECK_NULL_VOID(imageNode);
         movingPhotoNode->AddChild(imageNode);
+    }
+
+    bool hasColumnNode = movingPhotoNode->HasColumnNode();
+    if (!hasColumnNode) {
+        auto columnId = movingPhotoNode->GetColumnId();
+        auto columnNode = FrameNode::GetOrCreateFrameNode(
+            V2::COLUMN_ETS_TAG, columnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        CHECK_NULL_VOID(columnNode);
+        movingPhotoNode->AddChild(columnNode);
+        bool hasVideoNode = movingPhotoNode->HasVideoNode();
+        if (!hasVideoNode) {
+            auto videoId = movingPhotoNode->GetVideoId();
+            auto videoNode = FrameNode::GetOrCreateFrameNode(
+                V2::COLUMN_ETS_TAG, videoId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+            CHECK_NULL_VOID(videoNode);
+            columnNode->AddChild(videoNode);
+        }
     }
 }
 
@@ -83,6 +94,7 @@ void MovingPhotoModelNG::SetImageSrc(const std::string& value)
 
     int32_t fd = dataProvider->ReadMovingPhotoVideo(value);
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd);
+    GetXmageHeight();
 }
 
 void MovingPhotoModelNG::SetMuted(bool value)
@@ -102,7 +114,7 @@ void MovingPhotoModelNG::SetOnComplete(MovingPhotoEventFunc&& onComplete)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnComplete(std::move(onComplete));
 }
@@ -111,7 +123,7 @@ void MovingPhotoModelNG::SetOnStart(MovingPhotoEventFunc&& onStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStart(std::move(onStart));
 }
@@ -120,7 +132,7 @@ void MovingPhotoModelNG::SetOnStop(MovingPhotoEventFunc&& onStop)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStop(std::move(onStop));
 }
@@ -129,7 +141,7 @@ void MovingPhotoModelNG::SetOnPause(MovingPhotoEventFunc&& onPause)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPause(std::move(onPause));
 }
@@ -138,7 +150,7 @@ void MovingPhotoModelNG::SetOnFinish(MovingPhotoEventFunc&& onFinish)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFinish(std::move(onFinish));
 }
@@ -147,7 +159,7 @@ void MovingPhotoModelNG::SetOnError(MovingPhotoEventFunc&& onError)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(onError));
 }
@@ -206,6 +218,15 @@ void MovingPhotoModelNG::SetMovingPhotoFormat(MovingPhotoFormat format)
     movingPhotoPattern->SetMovingPhotoFormat(format);
 }
 
+void MovingPhotoModelNG::SetWaterMask(bool enabled)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
+    movingPhotoPattern->SetWaterMask(enabled);
+}
+
 void MovingPhotoModelNG::SetDynamicRangeMode(DynamicRangeMode rangeMode)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -213,5 +234,14 @@ void MovingPhotoModelNG::SetDynamicRangeMode(DynamicRangeMode rangeMode)
     auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(movingPhotoPattern);
     movingPhotoPattern->SetDynamicRangeMode(rangeMode);
+}
+
+void MovingPhotoModelNG::GetXmageHeight()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
+    movingPhotoPattern->GetXmageHeight();
 }
 } // namespace OHOS::Ace::NG

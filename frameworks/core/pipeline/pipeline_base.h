@@ -46,6 +46,7 @@
 #include "core/common/window_animation_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -132,6 +133,8 @@ public:
      */
     static double GetCurrentDensity();
 
+    static ColorMode GetCurrentColorMode();
+
     virtual void SetupRootElement() = 0;
 
     virtual uint64_t GetTimeFromExternalTimer();
@@ -176,11 +179,10 @@ public:
     virtual void RemoveScheduleTask(uint32_t id) = 0;
 
     // Called by view when touch event received.
-    virtual void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false, bool isEventsPassThrough = false) = 0;
+    virtual void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) = 0;
 
     // Called by ohos AceContainer when touch event received.
-    virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false,
-        bool isEventsPassThrough = false)
+    virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false)
     {}
 
     virtual void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
@@ -689,6 +691,14 @@ public:
         themeManager_ = std::move(theme);
     }
 
+    void UpdateThemeManager(const RefPtr<ResourceAdapter>& adapter) {
+        std::unique_lock<std::shared_mutex> lock(themeMtx_);
+        CHECK_NULL_VOID(themeManager_);
+        auto themeConstants = themeManager_->GetThemeConstants();
+        CHECK_NULL_VOID(themeConstants);
+        themeConstants->UpdateResourceAdapter(adapter);
+    }
+
     template<typename T>
     RefPtr<T> GetTheme() const
     {
@@ -782,6 +792,11 @@ public:
     bool IsFormRender() const
     {
         return isFormRender_;
+    }
+
+    bool IsFormRenderExceptDynamicComponent() const
+    {
+        return isFormRender_ && !isDynamicRender_;
     }
 
     void SetIsDynamicRender(bool isDynamicRender)
@@ -1069,6 +1084,16 @@ public:
         return false;
     }
 
+    void SetPixelRoundMode(PixelRoundMode pixelRoundMode)
+    {
+        pixelRoundMode_ = pixelRoundMode;
+    }
+
+    PixelRoundMode GetPixelRoundMode() const
+    {
+        return pixelRoundMode_;
+    }
+
     virtual void RequireSummary() {}
 
     void SetPluginOffset(const Offset& offset)
@@ -1092,11 +1117,12 @@ public:
     }
     virtual void NotifyMemoryLevel(int32_t level) {}
 
-    void SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
+    virtual void SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
     {
         displayWindowRectInfo_ = displayWindowRectInfo;
     }
 
+    virtual void SetWindowSizeChangeReason(WindowSizeChangeReason reason) {}
 
     // This method can get the coordinates and size of the current window,
     // which can be added to the return value of the GetGlobalOffset method to get the window coordinates of the node.
@@ -1379,6 +1405,10 @@ public:
 
     virtual bool IsDensityChanged() const = 0;
 
+    virtual bool IsNeedReloadDensity() const = 0;
+
+    virtual void SetIsNeedReloadDensity(bool isNeedReloadDensity) = 0;
+
     virtual std::string GetResponseRegion(const RefPtr<NG::FrameNode>& rootNode)
     {
         return "";
@@ -1478,9 +1508,53 @@ public:
     void FireAccessibilityEvents();
     void FireAccessibilityEventInner(uint32_t event, int64_t parameter);
 
+    virtual void SetTouchAccelarate(bool isEnable) {}
+    virtual void SetTouchPassThrough(bool isEnable) {}
     virtual void SetEnableSwipeBack(bool isEnable) {}
 
     std::shared_ptr<ArkUIPerfMonitor> GetPerfMonitor();
+
+    /**
+     * @description: Set the target api version of the application.
+     * @param: The target api version of the application.
+     */
+    void SetApiTargetVersion(int32_t apiTargetVersion)
+    {
+        apiTargetVersion_ = apiTargetVersion;
+    }
+
+    /**
+     * @description: Get the target api version of the application.
+     * @return: The target api version of the application.
+     */
+    int32_t GetApiTargetVersion() const
+    {
+        return apiTargetVersion_;
+    }
+
+    /**
+     * @description: Compare whether the target api version of the application is greater than or equal to the incoming
+     * target. If it is possible to obtain the pipeline without using GetCurrentContext, GetCurrentContextSafely, and
+     * GetCurrentContextSafelyWithCheck, the performance will be better than Container::GreatOrEqualApiTargetVersion.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
+    bool GreatOrEqualAPITargetVersion(PlatformVersion version) const
+    {
+        return apiTargetVersion_ >= static_cast<int32_t>(version);
+    }
+
+    /**
+     * @description: Compare whether the target api version of the application is less than the incoming target
+     * version. If it is possible to obtain the pipeline without using GetCurrentContext, GetCurrentContextSafely, and
+     * GetCurrentContextSafelyWithCheck, the performance will be better than Container::LessThanAPITargetVersion.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
+    bool LessThanAPITargetVersion(PlatformVersion version) const
+    {
+        return apiTargetVersion_ < static_cast<int32_t>(version);
+    }
 
 protected:
     virtual bool MaybeRelease() override;
@@ -1539,6 +1613,7 @@ protected:
 
     bool isJsPlugin_ = false;
     bool isOpenInvisibleFreeze_ = false;
+    PixelRoundMode pixelRoundMode_ = PixelRoundMode::PIXEL_ROUND_ON_LAYOUT_FINISH;
 
     std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
     std::unordered_map<int32_t, AceVsyncCallback> jsFormVsyncCallbacks_;
@@ -1667,6 +1742,8 @@ private:
     bool followSystem_ = false;
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;
+    int32_t apiTargetVersion_ = 0;
+    bool lastUiDvsyncStatus_ = false;
 
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;

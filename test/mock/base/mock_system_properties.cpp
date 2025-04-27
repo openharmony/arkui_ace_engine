@@ -20,6 +20,9 @@
 #include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
+namespace MockSystemProperties {
+bool g_isSuperFoldDisplayDevice = false;
+}
 namespace {
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
@@ -55,7 +58,6 @@ bool SystemProperties::debugEnabled_ = false;
 DebugFlags SystemProperties::debugFlags_ = 0;
 bool SystemProperties::containerDeleteFlag_ = false;
 bool SystemProperties::layoutDetectEnabled_ = false;
-ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 int32_t SystemProperties::deviceWidth_ = 720;
 int32_t SystemProperties::deviceHeight_ = 1280;
 bool SystemProperties::debugOffsetLogEnabled_ = false;
@@ -86,9 +88,12 @@ std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
+bool SystemProperties::pageTransitionFrzEnabled_ = false;
+bool SystemProperties::formSkeletonBlurEnabled_ = true;
 
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
+bool g_isNeedSymbol = true;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -247,6 +252,11 @@ double SystemProperties::GetScrollableDistance()
     return 0.0;
 }
 
+bool SystemProperties::GetWebDebugMaximizeResizeOptimize()
+{
+    return true;
+}
+
 bool SystemProperties::IsNeedResampleTouchPoints()
 {
     return true;
@@ -254,7 +264,7 @@ bool SystemProperties::IsNeedResampleTouchPoints()
 
 bool SystemProperties::IsNeedSymbol()
 {
-    return true;
+    return g_isNeedSymbol;
 }
 
 bool SystemProperties::GetResourceDecoupling()
@@ -269,11 +279,22 @@ int32_t SystemProperties::GetDragDropFrameworkStatus()
 
 bool SystemProperties::GetContainerDeleteFlag()
 {
-    return false;
+    return containerDeleteFlag_;
 }
 
 bool SystemProperties::IsSuperFoldDisplayDevice()
 {
-    return false;
+    return MockSystemProperties::g_isSuperFoldDisplayDevice;
 }
+
+bool SystemProperties::IsPageTransitionFreeze()
+{
+    return pageTransitionFrzEnabled_;
+}
+
+bool SystemProperties::IsFormSkeletonBlurEnabled()
+{
+    return formSkeletonBlurEnabled_;
+}
+
 } // namespace OHOS::Ace

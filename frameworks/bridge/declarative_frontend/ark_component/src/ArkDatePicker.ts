@@ -42,11 +42,11 @@ class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute
     return this;
   }
   onChange(callback: (value: DatePickerResult) => void): DatePickerAttribute {
-    modifierWithKey(this._modifiersWithKeys,DatePickerOnChangeModifier.identity,DatePickerOnChangeModifier,callback);
+    modifierWithKey(this._modifiersWithKeys, DatePickerOnChangeModifier.identity, DatePickerOnChangeModifier, callback);
     return this;
   }
   onDateChange(callback: Callback<Date>): this {
-    modifierWithKey(this._modifiersWithKeys,DatePickerOnDateChangeModifier.identity,DatePickerOnDateChangeModifier,callback);
+    modifierWithKey(this._modifiersWithKeys, DatePickerOnDateChangeModifier.identity, DatePickerOnDateChangeModifier, callback);
     return this;
   }
   backgroundColor(value: ResourceColor): this {

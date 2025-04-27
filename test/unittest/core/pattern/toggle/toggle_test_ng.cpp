@@ -268,7 +268,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest005, TestSize.Level1)
     auto checkBoxFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(checkBoxFrameNode, nullptr);
     EXPECT_EQ(checkBoxFrameNode->GetTag(), V2::CHECKBOX_ETS_TAG);
-    auto eventHub = checkBoxFrameNode->GetEventHub<CheckBoxEventHub>();
+    auto eventHub = checkBoxFrameNode->GetOrCreateEventHub<CheckBoxEventHub>();
     EXPECT_FALSE(eventHub == nullptr);
     eventHub->UpdateChangeEvent(false);
     EXPECT_EQ(stateChange, false);
@@ -306,7 +306,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest006, TestSize.Level1)
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(buttonFrameNode, nullptr);
     EXPECT_EQ(buttonFrameNode->GetTag(), V2::TOGGLE_ETS_TAG);
-    auto eventHub = buttonFrameNode->GetEventHub<ToggleButtonEventHub>();
+    auto eventHub = buttonFrameNode->GetOrCreateEventHub<ToggleButtonEventHub>();
     EXPECT_FALSE(eventHub == nullptr);
     eventHub->UpdateChangeEvent(false);
     EXPECT_EQ(stateChange, false);
@@ -345,7 +345,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest007, TestSize.Level1)
     auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(switchFrameNode, nullptr);
     EXPECT_EQ(switchFrameNode->GetTag(), V2::TOGGLE_ETS_TAG);
-    auto eventHub = switchFrameNode->GetEventHub<SwitchEventHub>();
+    auto eventHub = switchFrameNode->GetOrCreateEventHub<SwitchEventHub>();
     EXPECT_NE(eventHub, nullptr);
     eventHub->UpdateChangeEvent(true);
     EXPECT_EQ(stateChange, true);
@@ -489,7 +489,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0010, TestSize.Level1)
      * @tc.steps: step3  execute event function.
      * @tc.expected: step2. check whether event function is executed successfully.
      */
-    auto hub = switchPattern->GetEventHub<EventHub>();
+    auto hub = switchPattern->GetOrCreateEventHub<EventHub>();
     EXPECT_NE(hub, nullptr);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     EXPECT_NE(gestureHub, nullptr);
@@ -599,7 +599,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0011, TestSize.Level1)
     EXPECT_NE(checkboxPattern, nullptr);
     auto checkboxPaintProperty = checkboxPattern->GetPaintProperty<CheckBoxPaintProperty>();
     EXPECT_NE(checkboxPaintProperty, nullptr);
-    EXPECT_EQ(checkboxPaintProperty->GetCheckBoxSelectedColor(), checkboxTheme->GetActiveColor());
+    EXPECT_NE(checkboxPaintProperty->GetCheckBoxSelectedColor(), checkboxTheme->GetActiveColor());
 
     /**
      * @tc.steps: step2. test button
@@ -889,7 +889,8 @@ HWTEST_F(ToggleTestNg, TogglePaintTest001, TestSize.Level1)
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
      */
-    RefPtr<RenderContext> renderContext;
+    RefPtr<RenderContext> renderContext = switchFrameNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
     auto switchPaintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
     EXPECT_NE(switchPaintProperty, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1149,7 +1150,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0014, TestSize.Level1)
     /**
      * fire mouse event
      */
-    auto eventHub = switchFrameNode->GetEventHub<SwitchEventHub>();
+    auto eventHub = switchFrameNode->GetOrCreateEventHub<SwitchEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
     auto hoverEventActuator = inputHub->hoverEventActuator_;

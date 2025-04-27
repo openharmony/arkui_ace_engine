@@ -26,7 +26,6 @@
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_accessibility_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
@@ -36,11 +35,11 @@
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/event/mouse_event.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
-#include "frameworks/core/components/focus_animation/focus_animation_theme.h"
 #include "frameworks/core/components_ng/event/focus_hub.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class TextLayoutProperty;
 
 const auto TabBarPhysicalCurve = AceType::MakeRefPtr<InterpolatingSpring>(-1.0f, 1.0f, 228.0f, 30.f);
 
@@ -159,8 +158,8 @@ class TabBarPattern : public Pattern {
     DECLARE_ACE_TYPE(TabBarPattern, Pattern);
 
 public:
-    TabBarPattern() = default;
-    ~TabBarPattern() override = default;
+    TabBarPattern();
+    ~TabBarPattern() override;
 
     bool IsAtomicNode() const override
     {
@@ -561,6 +560,10 @@ public:
         focusIndicator_ = focusIndicator;
     }
 
+    void ChangeIndex(int32_t index);
+
+    void ResetOnForceMeasure(int32_t index);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -716,6 +719,7 @@ private:
     float maxScale_ = 0.0f;
     int32_t indicator_ = 0;
     int32_t focusIndicator_ = 0;
+    int32_t accessibilityFocusIndicator_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
     std::unordered_map<int32_t, TabBarParamType> tabBarType_;
     std::optional<int32_t> animationDuration_;
@@ -777,7 +781,6 @@ private:
     float barGridMargin_ = 0.0f;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
-    bool accessibilityScroll_ = false;
     bool isTabBarFocusActive_ = false;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     Color tabBarItemDefaultBgColor_ = Color::TRANSPARENT;

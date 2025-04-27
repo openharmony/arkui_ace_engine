@@ -14,10 +14,8 @@
  */
 
 #include "gtest/gtest.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
-#include "core/animation/animator.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
@@ -122,7 +120,7 @@ void ImageAnimatorPatternTestNg::GetInstance()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ImageAnimatorPattern>();
-    eventHub_ = frameNode_->GetEventHub<ImageAnimatorEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<ImageAnimatorEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty();
 }
 
@@ -219,9 +217,6 @@ HWTEST_F(ImageAnimatorPatternTestNg, CreatePictureAnimation, TestSize.Level1)
 
     auto imageAnimatorPattern_ = frameNode->GetPattern<ImageAnimatorPattern>();
     EXPECT_NE(imageAnimatorPattern_, nullptr);
-    auto pictureAnimation_ = imageAnimatorPattern_->CreatePictureAnimation(100);
-    EXPECT_NE(pictureAnimation_, nullptr);
-    pictureAnimation_->NotifyListener(100);
     EXPECT_EQ(imageAnimatorPattern_->images_.size(), 0);
 }
 
@@ -329,7 +324,7 @@ HWTEST_F(ImageAnimatorPatternTestNg, AddImageLoadSuccessEvent, TestSize.Level1)
     LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 1);
     LoadImageSuccessEvent loadImageSuccessEventError(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 0);
     pattern_->AddImageLoadSuccessEvent(newImageNode);
-    auto imageEventHub = newImageNode->GetEventHub<NG::ImageEventHub>();
+    auto imageEventHub = newImageNode->GetOrCreateEventHub<NG::ImageEventHub>();
     imageEventHub->FireCompleteEvent(loadImageSuccessEvent);
     imageEventHub->FireCompleteEvent(loadImageSuccessEventError);
     pattern_->nowImageIndex_ = 10;

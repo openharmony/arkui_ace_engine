@@ -18,17 +18,19 @@
 
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
+#include "core/components_ng/pattern/navigation/custom_safe_area_expander.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/tool_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-class NavToolbarPattern : public LinearLayoutPattern {
-    DECLARE_ACE_TYPE(NavToolbarPattern, LinearLayoutPattern);
+class NavToolbarPattern : public LinearLayoutPattern, public CustomSafeAreaExpander {
+    DECLARE_ACE_TYPE(NavToolbarPattern, LinearLayoutPattern, CustomSafeAreaExpander);
 
 public:
     NavToolbarPattern() : LinearLayoutPattern(false) {};
@@ -62,6 +64,12 @@ public:
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     void SetToolbarOptions(NavigationToolbarOptions&& opt);
+    void SetToolbarMoreButtonOptions(MoreButtonOptions&& opt);
+
+    MoreButtonOptions GetToolbarMoreButtonOptions() const
+    {
+        return moreButtonOptions_;
+    }
 
     RefPtr<FrameNode> GetDialogNode()
     {
@@ -74,17 +82,20 @@ public:
     }
 
 private:
+    bool CustomizeExpandSafeArea() override;
     void OnModifyDone() override;
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleLongPressEvent(const GestureEvent& info);
     void HandleLongPressActionEnd();
     void ShowDialogWithNode(const RefPtr<BarItemNode>& barItemNode);
+    void UpdateBarItemBackgroundColor(const RefPtr<FrameNode>& toolBarItemNode, const RefPtr<ButtonTheme>& buttonTheme);
 
     void SetDefaultBackgroundColorIfNeeded(RefPtr<FrameNode>& host);
     void UpdateBackgroundStyle();
 
     NavigationToolbarOptions options_;
+    MoreButtonOptions moreButtonOptions_;
     RefPtr<FrameNode> dialogNode_;
     std::optional<int32_t> moveIndex_;
 };

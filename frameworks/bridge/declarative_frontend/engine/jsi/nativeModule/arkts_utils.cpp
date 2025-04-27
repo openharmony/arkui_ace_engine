@@ -204,7 +204,8 @@ RefPtr<ResourceObject> GetResourceObject(const EcmaVM* vm, const Local<JSValueRe
         }
         resObjParamsList.emplace_back(resObjParams);
     }
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(id, type, resObjParamsList, bundleName, moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+        id, type, resObjParamsList, bundleName, moduleName, Container::CurrentIdSafely());
     return resourceObject;
 }
 
@@ -1194,7 +1195,7 @@ bool FillResultForResIdNumIsNegative(const EcmaVM* vm, const Local<JSValueRef>& 
     auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
     if (type->Uint32Value(vm) == static_cast<uint32_t>(ResourceType::STRING)) {
         auto originStr = resourceWrapper->GetStringByName(param->ToString(vm)->ToString(vm));
-        ReplaceHolder(vm, originStr, params, 0);
+        ReplaceHolder(vm, originStr, params, 1);
         result = originStr;
     } else if (type->Uint32Value(vm) == static_cast<uint32_t>(ResourceType::PLURAL)) {
         auto countJsVal = panda::ArrayRef::GetValueAt(vm, params, 1);
@@ -2213,5 +2214,14 @@ Local<panda::ObjectRef> ArkTSUtils::CreateJsTextRange(const EcmaVM* vm, const NG
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, menuItemParam.start),
         panda::NumberRef::New(vm, menuItemParam.end) };
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+}
+
+Local<panda::ArrayRef> ArkTSUtils::ChoosePointToJSValue(const EcmaVM* vm, std::vector<int> input)
+{
+    Local<panda::ArrayRef> arr = panda::ArrayRef::New(vm);
+    for (size_t i = 0; i < input.size(); i++) {
+        arr->SetValueAt(vm, arr, i, ToJSValueWithVM(vm, input[i]));
+    }
+    return arr;
 }
 } // namespace OHOS::Ace::NG

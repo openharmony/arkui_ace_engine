@@ -41,33 +41,6 @@ public:
 };
 
 /**
- * @tc.name: FormRenderDispatcherImplTest001
- * @tc.type: FUNC
- * Function: DispatchPointerEvent
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderDispatcherImplTest, FormRenderDispatcherImplTest001, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderDispatcherImplTest001");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    if (renderDispatcher != nullptr) {
-        std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent = OHOS::MMI::PointerEvent::Create();
-        pointerEvent->pointerAction_ = OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN;
-        SerializedGesture serializedGesture;
-        renderDispatcher->DispatchPointerEvent(pointerEvent, serializedGesture);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
  * @tc.name: FormRenderDispatcherImplTest002
  * @tc.type: FUNC
  * Function: DispatchPointerEvent

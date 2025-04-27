@@ -82,7 +82,6 @@ void JSGestureRecognizer::GetType(const JSCallbackInfo& args)
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(type))));
 }
 
-
 void JSGestureRecognizer::GetFingers(const JSCallbackInfo& args)
 {
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(fingers_)));
@@ -180,6 +179,48 @@ void JSGestureRecognizer::IsValid(const JSCallbackInfo& args)
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(isValid)));
 }
 
+void JSPanRecognizer::GetDirection(const JSCallbackInfo& args)
+{
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(direction_.type)));
+}
+
+void JSPanRecognizer::GetPanDistance(const JSCallbackInfo& args)
+{
+    auto recognizer = JSGestureRecognizer::GetRecognizer().Upgrade();
+    if (recognizer) {
+        auto context = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(context);
+        double distance = context->ConvertPxToVp(Dimension(distance_, DimensionUnit::PX));
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(RoundToMaxPrecision(distance))));
+    }
+}
+
+void JSPanRecognizer::GetPanDistanceMap(const JSCallbackInfo& args)
+{
+    auto vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto distanceMap = panda::MapRef::New(vm);
+    auto recognizer = JSGestureRecognizer::GetRecognizer().Upgrade();
+    if (!recognizer) {
+        args.SetReturnValue(JsiRef<JsiObject>(JsiObject(distanceMap)));
+        return;
+    }
+    auto panRecognizer = AceType::DynamicCast<NG::PanRecognizer>(recognizer);
+    if (!panRecognizer) {
+        args.SetReturnValue(JsiRef<JsiObject>(JsiObject(distanceMap)));
+        return;
+    }
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto panDistanceMap = panRecognizer->GetDistanceMap();
+    for (const auto& item : panDistanceMap) {
+        double distance = context->ConvertPxToVp(Dimension(item.second, DimensionUnit::PX));
+        distanceMap->Set(vm, panda::NumberRef::New(vm, static_cast<int32_t>(item.first)),
+            panda::NumberRef::New(vm, RoundToMaxPrecision(distance)));
+    }
+    args.SetReturnValue(JsiRef<JsiObject>(JsiObject(distanceMap)));
+}
+
 void JSPinchRecognizer::GetDistance(const JSCallbackInfo& args)
 {
     auto recognizer = JSGestureRecognizer::GetRecognizer().Upgrade();
@@ -187,7 +228,7 @@ void JSPinchRecognizer::GetDistance(const JSCallbackInfo& args)
         auto context = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(context);
         double distance = context->ConvertPxToVp(Dimension(distance_, DimensionUnit::PX));
-        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(distance)));
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(RoundToMaxPrecision(distance))));
     }
 }
 
@@ -243,7 +284,7 @@ void JSSwipeRecognizer::GetSpeed(const JSCallbackInfo& args)
         auto context = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(context);
         double speed = context->ConvertPxToVp(Dimension(speed_, DimensionUnit::PX));
-        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(speed)));
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(RoundToMaxPrecision(speed))));
     }
 }
 
@@ -295,6 +336,9 @@ void JSPanRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSPanRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
     JSClass<JSPanRecognizer>::CustomMethod("getPanGestureOptions", &JSPanRecognizer::GetPanGestureOptions);
     JSClass<JSPanRecognizer>::CustomMethod("isValid", &JSGestureRecognizer::IsValid);
+    JSClass<JSPanRecognizer>::CustomMethod("getDirection", &JSPanRecognizer::GetDirection);
+    JSClass<JSPanRecognizer>::CustomMethod("getDistance", &JSPanRecognizer::GetPanDistance);
+    JSClass<JSPanRecognizer>::CustomMethod("getDistanceMap", &JSPanRecognizer::GetPanDistanceMap);
     JSClass<JSPanRecognizer>::Inherit<JSGestureRecognizer>();
     JSClass<JSPanRecognizer>::Bind(globalObj, &JSPanRecognizer::Constructor, &JSPanRecognizer::Destructor);
 }

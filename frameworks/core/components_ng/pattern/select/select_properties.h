@@ -27,6 +27,7 @@ struct SelectDivider final {
     Dimension startMargin = 0.0_vp;
     Dimension endMargin = 0.0_vp;
     Color color = Color::TRANSPARENT;
+    bool isDividerStyle = false;
     bool isRtl = false;
     bool operator==(const SelectDivider& itemDivider) const
     {

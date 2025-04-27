@@ -51,15 +51,7 @@ public:
         return true;
     }
 
-    bool NeedToRequestKeyboardOnFocus() const override
-    {
-        auto textField = textField_.Upgrade();
-        CHECK_NULL_RETURN(textField, false);
-        auto pattern = textField->GetPattern();
-        CHECK_NULL_RETURN(pattern, false);
-        auto curPattern = DynamicCast<TextFieldPattern>(pattern);
-        return curPattern->NeedToRequestKeyboardOnFocus();
-    }
+    bool NeedToRequestKeyboardOnFocus() const override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -99,27 +91,7 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
-    static std::string ConvertCopyOptionsToString(CopyOptions copyOptions)
-    {
-        std::string result;
-        switch (copyOptions) {
-            case CopyOptions::None:
-                result = "CopyOptions.None";
-                break;
-            case CopyOptions::InApp:
-                result = "CopyOptions.InApp";
-                break;
-            case CopyOptions::Local:
-                result = "CopyOptions.Local";
-                break;
-            case CopyOptions::Distributed:
-                result = "CopyOptions.Distributed";
-                break;
-            default:
-                break;
-        }
-        return result;
-    }
+    static std::string ConvertCopyOptionsToString(CopyOptions copyOptions);
 
     enum class FocusChoice { SEARCH = 0, CANCEL_BUTTON, SEARCH_BUTTON };
 

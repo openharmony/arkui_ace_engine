@@ -48,9 +48,13 @@ GridSizeType GridContainerUtils::ProcessGridSizeType(const V2::BreakPoints& brea
     auto threshold = ParseBreakpoints(breakpoints);
     double windowWidth = 0.0;
     if (breakpoints.reference == BreakPointsReference::WindowSize) {
+        if (!pipeline) {
+            TAG_LOGI(AceLogTag::ACE_GRIDROW, "pipeline is null");
+            return GridSizeType::UNDEFINED;
+        }
         windowWidth = pipeline->GetDisplayWindowRectInfo().GetSize().Width();
         if (mode == WindowMode::WINDOW_MODE_FLOATING
-            && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
             windowWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
         }
     } else {
@@ -58,7 +62,7 @@ GridSizeType GridContainerUtils::ProcessGridSizeType(const V2::BreakPoints& brea
     }
     int index = 0;
     for (const auto& cur : threshold->sizeInfo) {
-        if (cur.ConvertToPx() > windowWidth) {
+        if (GreatNotEqual(cur.ConvertToPx(), windowWidth)) {
             break;
         }
         index++;
@@ -71,12 +75,13 @@ GridSizeType GridContainerUtils::ProcessGridSizeType(
 {
     auto threshold = ParseBreakpoints(breakpoints);
     double windowWidth = 0.0;
+    CHECK_NULL_RETURN(pipeline, GridSizeType::UNDEFINED);
     if (breakpoints->reference == BreakPointsReference::WindowSize) {
         windowWidth = GridSystemManager::GetInstance().GetScreenWidth();
         auto windowManager = pipeline->GetWindowManager();
         auto mode = windowManager->GetWindowMode();
         if (mode == WindowMode::WINDOW_MODE_FLOATING
-            && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
             windowWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
         }
     } else {

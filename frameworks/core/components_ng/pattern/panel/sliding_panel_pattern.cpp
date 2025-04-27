@@ -26,6 +26,7 @@ constexpr Dimension BLANK_MIN_HEIGHT = 8.0_vp;
 constexpr Dimension DRAG_UP_THRESHOLD = 48.0_vp;
 constexpr double VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
 constexpr int32_t FRAME_RATE = 120;
+constexpr char TRAILING_ANIMATION[] = "TRAILING_ANIMATION ";
 
 } // namespace
 
@@ -36,7 +37,7 @@ void SlidingPanelPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<SlidingPanelLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -417,7 +418,9 @@ void SlidingPanelPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub
     panEvent_ = type == PanelType::CUSTOM ? MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr,
      std::move(actionCancelTask)) : MakeRefPtr<PanEvent>(std::move(actionStartTask),
      std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distanceMap);
 }
 
 bool SlidingPanelPattern::IsNeedResetPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -754,7 +757,7 @@ PanelMode SlidingPanelPattern::GetPanelMode() const
 
 void SlidingPanelPattern::FireSizeChangeEvent()
 {
-    auto slidingPanelEventHub = GetEventHub<SlidingPanelEventHub>();
+    auto slidingPanelEventHub = GetOrCreateEventHub<SlidingPanelEventHub>();
     CHECK_NULL_VOID(slidingPanelEventHub);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -777,7 +780,7 @@ void SlidingPanelPattern::FireSizeChangeEvent()
 
 void SlidingPanelPattern::FireHeightChangeEvent()
 {
-    auto slidingPanelEventHub = GetEventHub<SlidingPanelEventHub>();
+    auto slidingPanelEventHub = GetOrCreateEventHub<SlidingPanelEventHub>();
     CHECK_NULL_VOID(slidingPanelEventHub);
     auto host = GetHost();
     CHECK_NULL_VOID(host);

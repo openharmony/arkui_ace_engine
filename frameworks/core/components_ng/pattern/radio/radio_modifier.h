@@ -44,6 +44,7 @@ enum class TouchHoverAnimationType {
     PRESS,
     HOVER_TO_PRESS,
     PRESS_TO_HOVER,
+    FOCUS,
 };
 
 class RadioModifier : public ContentModifier {

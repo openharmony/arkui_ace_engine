@@ -22,6 +22,10 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/property/progress_mask_property.h"
 
+namespace OHOS::Ace {
+class SpanString;
+}
+
 namespace OHOS::Ace::Framework {
 
 class ViewAbstractModelImpl : public ViewAbstractModel {
@@ -33,6 +37,7 @@ public:
 
     void SetWidth(const CalcDimension& width) override;
     void SetHeight(const CalcDimension& height) override;
+    void SetToolbarBuilder(std::function<void()>&& buildFunc) override;
     void ClearWidthOrHeight(bool isWidth) override {};
     void SetMinWidth(const CalcDimension& minWidth) override;
     void SetMinHeight(const CalcDimension& minHeight) override;
@@ -46,7 +51,7 @@ public:
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override;
     void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override;
     void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) override;
-    void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) override;
+    void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions) override;
     void SetPadding(const CalcDimension& value) override;
     void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
@@ -155,13 +160,13 @@ public:
     void SetClipEdge(bool isClip) override;
     void SetMask(const RefPtr<BasicShape>& shape) override;
 
-    void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) override;
+    void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override;
     void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override {};
     void SetDynamicDim(float DimDegree) override {};
     void SetDynamicLightUp(float rate, float lightUpDegree) override {};
     void SetBgDynamicBrightness(const BrightnessOption& brightnessOption) override {};
     void SetFgDynamicBrightness(const BrightnessOption& brightnessOption) override {};
-    void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
+    void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override;
     void SetBackShadow(const std::vector<Shadow>& shadows) override;
     void SetBlendMode(BlendMode blendMode) override;
     void SetBlendApplyType(BlendApplyType blendApplyType) override;
@@ -273,6 +278,7 @@ public:
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
+    void BindTips(const RefPtr<PopupParam>& param, const RefPtr<OHOS::Ace::SpanString>& sapnString) override;
     int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
     {
         return 0;
@@ -341,9 +347,12 @@ public:
     void SetAccessibilityRole(const std::string& role, bool resetValue) override;
     void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;
     void ResetOnAccessibilityFocus() override;
-    void SetAccessibilityDefaultFocus() override;
-    void SetAccessibilityUseSamePage(bool isFullSilent) override;
+    void SetOnAccessibilityActionIntercept(
+        NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) override;
+    void SetAccessibilityDefaultFocus(bool isFocus) override;
+    void SetAccessibilityUseSamePage(const std::string& pageMode) override;
     void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;
+    void SetAccessibilityFocusDrawLevel(int32_t drawLevel) override;
 
     void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}

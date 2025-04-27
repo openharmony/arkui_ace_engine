@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
+#include "core/components_ng/pattern/navigation/navdestination_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
@@ -132,7 +133,7 @@ void CreateContentNode(const RefPtr<NavDestinationGroupNode>& navDestinationNode
     int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId);
     auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        []() { return AceType::MakeRefPtr<NavDestinationContentPattern>(true); });
     navDestinationNode->AddChild(contentNode);
     navDestinationNode->SetContentNode(contentNode);
 
@@ -294,7 +295,7 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     }
 
     // read navdestination back button
-    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    std::string message = theme->GetNavigationBack();
     NavigationTitleUtil::SetAccessibility(backButtonNode, message);
     
     titleBarNode->AddChild(backButtonNode);
@@ -424,7 +425,8 @@ void NavDestinationModelNG::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
 
 void NavDestinationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
     const std::string& src, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
-    const std::vector<std::string>& nameList)
+    const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+    const std::string& backButtonAccessibilityText)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -441,6 +443,15 @@ void NavDestinationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<N
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
     titleBarLayoutProperty->SetBackIconSymbol(symbolApply);
     titleBarLayoutProperty->UpdateIsValidImage(imageOption.isValidImage);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    if (userDefinedAccessibilityText) {
+        NavigationTitleUtil::SetAccessibility(backButtonNode, backButtonAccessibilityText);
+    } else {
+        auto theme = NavigationGetTheme();
+        std::string message = theme ? theme->GetNavigationBack() : "";
+        NavigationTitleUtil::SetAccessibility(backButtonNode, message);
+    }
 }
 
 void NavDestinationModelNG::SetSubtitle(const std::string& subtitle)
@@ -500,7 +511,8 @@ void NavDestinationModelNG::SetOnShown(std::function<void()>&& onShow)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnShown(onShow);
 }
@@ -508,7 +520,8 @@ void NavDestinationModelNG::SetOnShown(std::function<void()>&& onShow)
 void NavDestinationModelNG::SetOnShown(FrameNode* frameNode, std::function<void()>&& onShow)
 {
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnShown(onShow);
 }
@@ -517,7 +530,8 @@ void NavDestinationModelNG::SetOnHidden(std::function<void()>&& onHidden)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnHidden(onHidden);
 }
@@ -525,7 +539,8 @@ void NavDestinationModelNG::SetOnHidden(std::function<void()>&& onHidden)
 void NavDestinationModelNG::SetOnHidden(FrameNode* frameNode, std::function<void()>&& onHidden)
 {
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnHidden(onHidden);
 }
@@ -534,7 +549,8 @@ void NavDestinationModelNG::SetOnBackPressed(std::function<bool()>&& onBackPress
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnBackPressed(onBackPressed);
 }
@@ -543,7 +559,8 @@ void NavDestinationModelNG::SetOnReady(std::function<void(RefPtr<NavDestinationC
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnReady(onReady);
 }
@@ -679,6 +696,17 @@ void NavDestinationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
     navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
 }
 
+void NavDestinationModelNG::SetMenuOptions(NavigationMenuOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->SetMenuOptions(std::move(opt));
+}
+
 void NavDestinationModelNG::SetBackgroundColor(const Color& color, bool isVaild)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -713,7 +741,8 @@ void NavDestinationModelNG::SetOnWillAppear(std::function<void()>&& willAppear)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillAppear(willAppear);
 }
@@ -722,7 +751,8 @@ void NavDestinationModelNG::SetOnWillHide(std::function<void()>&& willHide)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillHide(willHide);
 }
@@ -731,7 +761,8 @@ void NavDestinationModelNG::SetOnWillShow(std::function<void()>&& willShow)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillShow(willShow);
 }
@@ -740,7 +771,8 @@ void NavDestinationModelNG::SetOnWillDisAppear(std::function<void()>&& willDisAp
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillDisAppear(willDisAppear);
 }
@@ -862,7 +894,7 @@ void NavDestinationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& t
         AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
     CHECK_NULL_VOID(navdestinationGroupNode);
     bool enabled = false;
-    auto hub = navdestinationGroupNode->GetEventHub<EventHub>();
+    auto hub = navdestinationGroupNode->GetOrCreateEventHub<EventHub>();
     if (hub) {
         enabled = hub->IsEnabled();
     }
@@ -897,6 +929,16 @@ void NavDestinationModelNG::SetToolBarOptions(NavigationToolbarOptions&& opt)
         AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
     CHECK_NULL_VOID(navDestinationGroupNode);
     NavigationToolbarUtil::SetToolbarOptions(navDestinationGroupNode, std::move(opt));
+}
+
+void NavDestinationModelNG::SetToolbarMorebuttonOptions(MoreButtonOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    NavigationToolbarUtil::SetToolbarMoreButtonOptions(navDestinationGroupNode, std::move(opt));
 }
 
 void NavDestinationModelNG::SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems)
@@ -1073,7 +1115,7 @@ void NavDestinationModelNG::SetOnCoordScrollStartAction(
     CHECK_NULL_VOID(onCoordScrollStart);
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationGroupNode);
-    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnCoordScrollStartAction(std::move(onCoordScrollStart));
 }
@@ -1084,7 +1126,7 @@ void NavDestinationModelNG::SetOnCoordScrollUpdateAction(
     CHECK_NULL_VOID(onCoordScrollUpdate);
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationGroupNode);
-    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnCoordScrollUpdateAction(std::move(onCoordScrollUpdate));
 }
@@ -1094,7 +1136,7 @@ void NavDestinationModelNG::SetOnCoordScrollEndAction(FrameNode* frameNode, std:
     CHECK_NULL_VOID(onCoordScrollEnd);
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationGroupNode);
-    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnCoordScrollEndAction(std::move(onCoordScrollEnd));
 }
@@ -1125,7 +1167,7 @@ void NavDestinationModelNG::SetOnActive(std::function<void(int32_t)>&& onActive)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnActive(onActive);
 }
@@ -1134,7 +1176,7 @@ void NavDestinationModelNG::SetOnInactive(std::function<void(int32_t)>&& onInact
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnInactive(onInactive);
 }
@@ -1147,5 +1189,67 @@ void NavDestinationModelNG::SetCustomTransition(NG::NavDestinationTransitionDele
     auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
     CHECK_NULL_VOID(node);
     node->SetNavDestinationTransitionDelegate(std::move(transitionDelegate));
+}
+
+void NavDestinationModelNG::SetOnNewParam(NG::NavDestinationOnNewParamCallback&& onNewParamCallback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnNewParam(std::move(onNewParamCallback));
+}
+
+void NavDestinationModelNG::SetPreferredOrientation(const std::optional<Orientation>& ori)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetOrientation(ori);
+}
+
+void NavDestinationModelNG::SetPreferredOrientation(FrameNode* frameNode, const std::optional<Orientation>& ori)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetOrientation(ori);
+}
+
+void NavDestinationModelNG::SetEnableStatusBar(const std::optional<std::pair<bool, bool>>& statusBar)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetStatusBarConfig(statusBar);
+}
+
+void NavDestinationModelNG::SetEnableStatusBar(
+    FrameNode* frameNode, const std::optional<std::pair<bool, bool>>& statusBar)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetStatusBarConfig(statusBar);
+}
+
+void NavDestinationModelNG::SetEnableNavigationIndicator(const std::optional<bool>& navigationIndicator)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetNavigationIndicatorConfig(navigationIndicator);
+}
+
+void NavDestinationModelNG::SetEnableNavigationIndicator(
+    FrameNode* frameNode, const std::optional<bool>& navigationIndicator)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetNavigationIndicatorConfig(navigationIndicator);
 }
 } // namespace OHOS::Ace::NG

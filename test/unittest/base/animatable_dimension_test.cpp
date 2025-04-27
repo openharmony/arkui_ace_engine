@@ -19,6 +19,7 @@
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
+#include "core/animation/animator.h"
 #include "base/geometry/animatable_dimension.h"
 
 using namespace testing;
@@ -224,5 +225,32 @@ HWTEST_F(AnimatableDimensionTest, AnimatableDimensionTest006, TestSize.Level1)
     animatableDimensionObj1.SetContextAndCallback(nullptr, nullptr);
     animatableDimensionObj1 = animatableDimensionObj2;
     ASSERT_EQ(animatableDimensionObj1.animationCallback_, nullptr);
+}
+
+/**
+ * @tc.name: AnimatableDimensionTest007
+ * @tc.desc: Test the function GetAnimationStatus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnimatableDimensionTest, AnimatableDimensionTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: isFirstAssign_ is null and call the function GetAnimationStatus.
+     * @tc.expected: status1 is equal to IDLE.
+     */
+    AnimatableDimension animatableDimensionObj1;
+    bool flagCbk = false;
+    animatableDimensionObj1.SetContextAndCallback(nullptr, [&flagCbk]() { flagCbk = true; });
+    auto status1 = animatableDimensionObj1.GetAnimationStatus();
+    EXPECT_EQ(status1, AnimatorStatus::IDLE);
+
+    /**
+     * @tc.steps2: isFirstAssign_ is not null and call the function GetAnimationStatus.
+     * @tc.expected: status2 is equal to IDLE.
+     */
+    animatableDimensionObj1.animationController_ = AceType::MakeRefPtr<Animator>();
+    EXPECT_NE(animatableDimensionObj1.animationController_, nullptr);
+    auto status2 = animatableDimensionObj1.GetAnimationStatus();
+    EXPECT_EQ(status2, AnimatorStatus::IDLE);
 }
 } // namespace OHOS::Ace

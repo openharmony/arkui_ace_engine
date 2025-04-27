@@ -56,7 +56,11 @@ public:
         napi_value result = nullptr;
         void* data = nullptr;
         napi_get_cb_info(env, info, &argc, argv, &result, &data);
-        NAPI_ASSERT(env, argc == ARG_COUNT_1, "require 1 parameter");
+        if (argc != ARG_COUNT_1) {
+            TAG_LOGE(AceLogTag::ACE_DRAG, "require 1 parameter");
+            napi_close_handle_scope(env, scope);
+            return nullptr;
+        }
 
         Color foregroundColor;
         if (!ParseColor(env, argv[0], foregroundColor)) {
@@ -104,7 +108,11 @@ public:
         napi_value result = nullptr;
         void* data = nullptr;
         napi_get_cb_info(env, info, &argc, argv, &result, &data);
-        NAPI_ASSERT(env, argc == ARG_COUNT_2, "require 2 parameter");
+        if (argc != ARG_COUNT_2) {
+            TAG_LOGE(AceLogTag::ACE_DRAG, "require 2 parameter");
+            napi_close_handle_scope(env, scope);
+            return nullptr;
+        }
 
         DragPreview* dragPreview = nullptr;
         napi_unwrap(env, result, (void**)&dragPreview);

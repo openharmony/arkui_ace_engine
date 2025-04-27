@@ -243,6 +243,11 @@ void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
         formJsInfo.imageDataMap.size = %{public}zu.",
         formJsInfo.formData.size(),
         formJsInfo.imageDataMap.size());
+    if (!formRendererDelegate_) {
+        HILOG_ERROR("form renderer delegate is null!");
+        return;
+    }
+    formRendererDelegate_->OnUpdateFormDone(formJsInfo.formId);
 }
 
 void FormRenderer::RemoveFormDeathRecipient()
@@ -259,7 +264,7 @@ void FormRenderer::RemoveFormDeathRecipient()
 void FormRenderer::Destroy()
 {
     HILOG_INFO("Destroy FormRenderer start.");
-    if (formRendererDelegate_ != nullptr) {
+    if (formRendererDelegate_ != nullptr && uiContent_ != nullptr) {
         auto rsSurfaceNode = uiContent_->GetFormRootNode();
         if (rsSurfaceNode != nullptr) {
             HILOG_INFO("Form OnSurfaceRelease!");

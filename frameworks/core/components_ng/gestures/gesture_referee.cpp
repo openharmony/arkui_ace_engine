@@ -341,11 +341,7 @@ bool GestureReferee::QueryAllDone()
 bool GestureReferee::CheckEventTypeChange(SourceType type, bool isAxis) const
 {
     if (!isAxis && lastIsAxis_) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
-            return (type == SourceType::TOUCH || type == SourceType::MOUSE);
-        } else {
-            return (type == SourceType::TOUCH);
-        }
+        return (type == SourceType::TOUCH || type == SourceType::MOUSE);
     }
     return false;
 }
@@ -554,6 +550,11 @@ bool GestureReferee::HasGestureAccepted(size_t touchId) const
     const auto& scope = iter->second;
     CHECK_NULL_RETURN(scope, false);
     return scope->HasGestureAccepted();
+}
+
+bool GestureReferee::IsScopesEmpty() const
+{
+    return gestureScopes_.empty();
 }
 
 } // namespace OHOS::Ace::NG

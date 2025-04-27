@@ -47,6 +47,7 @@
 #include "core/components/page/page_component.h"
 #include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/event/visible_ratio_callback.h"
 #include "core/event/event_trigger.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_cache.h"
@@ -90,13 +91,6 @@ struct WindowBlurInfo {
     WindowBlurStyle style_;
     RRect innerRect_;
     std::vector<RRect> coords_;
-};
-
-struct VisibleCallbackInfo {
-    VisibleRatioCallback callback;
-    double visibleRatio = 1.0;
-    bool isCurrentVisible = false;
-    uint32_t period = 0;
 };
 
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
@@ -212,7 +206,7 @@ public:
     void RemoveScheduleTask(uint32_t id) override;
 
     // Called by view when touch event received.
-    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false, bool isEventsPassThrough = false) override;
+    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     // Used to determine whether the touched frameNode is the target
@@ -816,6 +810,16 @@ public:
         return isDensityUpdate_;
     }
 
+    bool IsNeedReloadDensity() const override
+    {
+        return isNeedReloadDensity_;
+    }
+
+    void SetIsNeedReloadDensity(bool isNeedReloadDensity) override
+    {
+        isNeedReloadDensity_ = isNeedReloadDensity;
+    }
+
 protected:
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
@@ -968,6 +972,7 @@ private:
     bool useLiteStyle_ = false;
     bool isFirstLoaded_ = true;
     bool isDensityUpdate_ = false;
+    bool isNeedReloadDensity_ = false;
     uint64_t flushAnimationTimestamp_ = 0;
     TimeProvider timeProvider_;
     int32_t modalHeight_ = 0;

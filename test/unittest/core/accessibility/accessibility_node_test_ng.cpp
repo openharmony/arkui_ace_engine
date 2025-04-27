@@ -29,6 +29,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const double TEST_NUMBER = 10.0;
+const double TEST_NUMBER_SECOND = 11.0;
 const char VALUE[] = "value";
 const char TYPE[] = "type";
 const char DISABLED[] = "disabled";
@@ -114,9 +115,14 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest002, TestSize.Level1)
 
     PositionInfo positionInfo;
     positionInfo.height = TEST_NUMBER;
+    positionInfo.width = TEST_NUMBER;
     accessibilityNode.SetPositionInfo(positionInfo);
-    EXPECT_EQ(accessibilityNode.rect_.Height(), TEST_NUMBER);
-
+    EXPECT_EQ(accessibilityNode.GetHeight(), TEST_NUMBER);
+    EXPECT_EQ(accessibilityNode.GetWidth(), TEST_NUMBER);
+    accessibilityNode.SetHeight(TEST_NUMBER_SECOND);
+    accessibilityNode.SetWidth(TEST_NUMBER_SECOND);
+    EXPECT_EQ(accessibilityNode.GetHeight(), TEST_NUMBER_SECOND);
+    EXPECT_EQ(accessibilityNode.GetWidth(), TEST_NUMBER_SECOND);
     accessibilityNode.focusChangeEventId_ = [](const std::string& str) {};
     accessibilityNode.SetFocusedState(false);
     accessibilityNode.SetFocusedState(true);
@@ -124,6 +130,11 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest002, TestSize.Level1)
     EXPECT_EQ(accessibilityNode.GetSupportAction().size(), 0);
     accessibilityNode.supportActions_ = static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
     EXPECT_EQ(accessibilityNode.GetSupportAction().size(), 1);
+
+    Rect testRect(10.0, 10.0, 5.0, 5.0);
+    accessibilityNode.SetRect(testRect);
+    EXPECT_EQ(accessibilityNode.GetWidth(), 5.0);
+    accessibilityNode.GetRect();
 }
 
 /**
@@ -184,6 +195,12 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest004, TestSize.Level1)
     accessibilityNode.AddEvent(0, vec);
     EXPECT_TRUE(accessibilityNode.isClickable_);
     EXPECT_TRUE(accessibilityNode.isLongClickable_);
+
+    accessibilityNode.GetAccessibilityEventMarker();
+    accessibilityNode.GetClickEventMarker();
+    accessibilityNode.GetLongPressEventMarker();
+    accessibilityNode.GetFocusEventMarker();
+    accessibilityNode.GetBlurEventMarker();
 }
 
 /**
@@ -226,6 +243,18 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest005, TestSize.Level1)
      */
     accessibilityNode.RemoveNode(child);
     EXPECT_EQ(accessibilityNode.children_.size(), 0);
+
+    /**
+     * @tc.steps: step6. ResetChildList.
+     * @tc.expected: .
+     */
+    NodeId idSecond = 11;
+    std::string nodeNameSecond = "textSecond";
+    AccessibilityNode accessibilityNodeSecond(idSecond, nodeNameSecond);
+    accessibilityNodeSecond.AddNode(child, 0);
+    accessibilityNodeSecond.AddNode(child, 1);
+    accessibilityNode.ResetChildList(accessibilityNodeSecond.children_);
+    EXPECT_EQ(accessibilityNode.children_.size(), 1);
 }
 
 /**
@@ -306,7 +335,47 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest006, TestSize.Level1)
     vec.pop_back();
     vec.emplace_back(std::make_pair(TYPE, INPUT_TYPE_PASSWORD));
     currentNode.SetAttr(vec);
-    EXPECT_TRUE(currentNode.isPassword_);
+    EXPECT_TRUE(currentNode.GetIsPassword());
+    int windowId = 233;
+    currentNode.SetWindowId(windowId);
+    EXPECT_EQ(currentNode.GetWindowId(), windowId);
+    currentNode.SetIsRootNode(false);
+    EXPECT_FALSE(currentNode.IsRootNode());
+    int pageId = 233;
+    currentNode.SetPageId(pageId);
+    EXPECT_EQ(currentNode.GetPageId(), pageId);
+    currentNode.SetHintText("233");
+    EXPECT_EQ(currentNode.GetHintText(), "233");
+    currentNode.SetAccessibilityLabel("yes");
+    EXPECT_EQ(currentNode.GetAccessibilityLabel(), "yes");
+    currentNode.SetCheckableState(true);
+    EXPECT_TRUE(currentNode.GetCheckableState());
+    currentNode.SetCheckedState(true);
+    EXPECT_TRUE(currentNode.GetCheckedState());
+    currentNode.SetEnabledState(false);
+    EXPECT_FALSE(currentNode.GetEnabledState());
+    currentNode.SetEditable(true);
+    EXPECT_TRUE(currentNode.GetEditable());
+    currentNode.SetFocusableState(true);
+    EXPECT_TRUE(currentNode.GetFocusableState());
+    currentNode.SetAccessibilityFocusedState(true);
+    EXPECT_TRUE(currentNode.GetAccessibilityFocusedState());
+    currentNode.SetSelectedState(true);
+    EXPECT_TRUE(currentNode.GetSelectedState());
+    currentNode.SetClickableState(true);
+    EXPECT_TRUE(currentNode.GetClickableState());
+    currentNode.SetScrollableState(true);
+    EXPECT_TRUE(currentNode.GetScrollableState());
+    currentNode.SetLongClickableState(true);
+    EXPECT_TRUE(currentNode.GetLongClickableState());
+    currentNode.SetIsMultiLine(true);
+    EXPECT_TRUE(currentNode.GetIsMultiLine());
+    currentNode.SetIsPassword(false);
+    EXPECT_FALSE(currentNode.GetIsPassword());
+    currentNode.SetAccessibilityHint("233");
+    EXPECT_EQ(currentNode.GetAccessibilityHint(), "233");
+    currentNode.SetVisible(true);
+    EXPECT_TRUE(currentNode.GetVisible());
 }
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,8 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_position_map.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -30,25 +32,54 @@ constexpr float DEFAULT_ITEM_HEIGHT = 64.f;
 }
 class ListHeightOffsetCalculator {
 public:
-    ListHeightOffsetCalculator(const ListLayoutAlgorithm::PositionMap& itemPosition, float space,
-        int32_t lanes, Axis axis) : axis_(axis), spaceWidth_(space), lanes_(lanes), itemPosition_(itemPosition)
+    ListHeightOffsetCalculator(const ListLayoutAlgorithm::PositionMap& itemPosition, float space, int32_t lanes,
+        Axis axis, int32_t itemStartIndex)
+        : axis_(axis), spaceWidth_(space), lanes_(lanes), itemPosition_(itemPosition), itemStartIndex_(itemStartIndex)
     {
         if (!itemPosition.empty()) {
             targetPos_ = { itemPosition.begin()->second.startPos, itemPosition.begin()->second.endPos };
             startIndex_ = itemPosition.begin()->first;
             endIndex_ = itemPosition.rbegin()->first;
             float itemsSize = itemPosition.rbegin()->second.endPos - itemPosition.begin()->second.startPos + space;
-            estimateItemHeight_ = itemsSize / itemPosition.size() - space;
             for (const auto& pos : itemPosition) {
                 if (pos.second.groupInfo && pos.second.groupInfo.value().averageHeight > 0) {
                     groupedItemHeight_ = pos.second.groupInfo.value().averageHeight;
                     groupHeaderHeight_ = pos.second.groupInfo.value().headerSize;
                     groupFooterHeight_ = pos.second.groupInfo.value().footerSize;
                     groupSpaceWidth_ = pos.second.groupInfo.value().spaceWidth;
+                    lanes = 1;
                     break;
                 }
             }
+            estimateItemHeight_ = itemsSize / GetLines(lanes, itemPosition.size()) - space;
         }
+    }
+
+    void CalculateListItemGroup(RefPtr<ListItemGroupPattern> listItemGroupPatten)
+    {
+        if (currentIndex_ > 0) {
+            estimateHeight_ += spaceWidth_;
+        }
+        if (currentIndex_ == startIndex_) {
+            estimateOffset_ = listItemGroupPatten->GetEstimateOffset(estimateHeight_, targetPos_,
+                groupHeaderHeight_, groupFooterHeight_);
+        }
+        if (currLane_ > 0) {
+            if (syncPosMap_ && posMap_) {
+                PositionInfo info = { estimateHeight_, currRowHeight_, false };
+                posMap_->UpdatePosRange(currentIndex_ - currLane_, currentIndex_, info, spaceWidth_, lanes_);
+            }
+            estimateHeight_ += currRowHeight_;
+            currLane_ = 0;
+            currRowHeight_ = 0.0f;
+        }
+        float height = listItemGroupPatten->GetEstimateHeight(groupedItemHeight_,
+            groupHeaderHeight_, groupFooterHeight_, groupSpaceWidth_);
+        if (syncPosMap_ && posMap_) {
+            posMap_->UpdatePos(currentIndex_, PositionInfo{ estimateHeight_, height, true });
+        }
+        estimateHeight_ += height;
+        currentIndex_++;
     }
 
     void CalculateFrameNode(RefPtr<FrameNode> frameNode)
@@ -56,21 +87,7 @@ public:
         CHECK_NULL_VOID(frameNode);
         auto listItemGroupPatten = frameNode->GetPattern<ListItemGroupPattern>();
         if (listItemGroupPatten) {
-            if (currentIndex_ > 0) {
-                estimateHeight_ += spaceWidth_;
-            }
-            if (currentIndex_ == startIndex_) {
-                estimateOffset_ = listItemGroupPatten->GetEstimateOffset(estimateHeight_, targetPos_,
-                    groupHeaderHeight_, groupFooterHeight_);
-            }
-            if (currLane_ > 0) {
-                estimateHeight_ += currRowHeight_;
-                currLane_ = 0;
-                currRowHeight_ = 0.0f;
-            }
-            estimateHeight_ += listItemGroupPatten->GetEstimateHeight(groupedItemHeight_,
-                groupHeaderHeight_, groupFooterHeight_, groupSpaceWidth_);
-            currentIndex_++;
+            CalculateListItemGroup(listItemGroupPatten);
             return;
         }
         auto listItemPatten = frameNode->GetPattern<ListItemPattern>();
@@ -88,7 +105,12 @@ public:
         }
         currRowHeight_ = std::max(currRowHeight_, height);
         currLane_++;
-        if (currLane_ == lanes_) {
+        if (currLane_ == lanes_ || (posMap_ &&
+            posMap_->GetPositionInfo(currentIndex_).mainPos != posMap_->GetPositionInfo(currentIndex_ + 1).mainPos)) {
+            if (syncPosMap_ && posMap_) {
+                PositionInfo info = { estimateHeight_, currRowHeight_, false };
+                posMap_->UpdatePosRange(currentIndex_ - (lanes_ - 1), currentIndex_ + 1, info, spaceWidth_, lanes_);
+            }
             estimateHeight_ += currRowHeight_;
             currLane_ = 0;
             currRowHeight_ = 0.0f;
@@ -100,22 +122,114 @@ public:
         }
     }
 
-    void CalculateUINode(RefPtr<UINode> node)
+    void CalculatePosMapNode()
+    {
+        if (currentIndex_ > 0 && currLane_ == 0) {
+            estimateHeight_ += spaceWidth_;
+        }
+        if (currentIndex_ == startIndex_) {
+            estimateOffset_ = estimateHeight_ - targetPos_.first;
+        }
+        PositionInfo posInfo = posMap_ ? posMap_->GetPositionInfo(currentIndex_) : PositionInfo{ -1.0f, -1.0f };
+        float height = posInfo.mainSize < 0 ? GetAverageItemHeight() : posInfo.mainSize;
+        currRowHeight_ = std::max(currRowHeight_, height);
+        currLane_++;
+        if (currLane_ == lanes_ || posInfo.isGroup) {
+            estimateHeight_ += currRowHeight_;
+            currLane_ = 0;
+            currRowHeight_ = 0.0f;
+        }
+        currentIndex_++;
+        if (posInfo.mainSize >= 0) {
+            totalItemHeight_ += height;
+            totalItemCount_++;
+        }
+    }
+
+    int32_t GetPosMapStartIndex()
+    {
+        if (!posMap_) {
+            return -1;
+        }
+        return posMap_->GetStartIndexAndPos().first;
+    }
+
+    int32_t GetPosMapEndIndex()
+    {
+        if (!posMap_) {
+            return -1;
+        }
+        return posMap_->GetEndIndexAndPos().first;
+    }
+
+    void CalculateLazyForEachNodeWithPosMap(RefPtr<UINode> node)
+    {
+        auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(node);
+        int32_t count = 0;
+        if (repeat2) {
+            auto totalCount = repeat2->GetTotalCount();
+            count = (totalCount <= INT_MAX) ? static_cast<int32_t>(totalCount) : INT_MAX;
+        } else {
+            count = node->FrameCount();
+        }
+        if (count <= 0) {
+            return;
+        }
+        int32_t lazyStartIndex = currentIndex_;
+        int32_t lazyEndIndex = currentIndex_ + count;
+        bool hasGroup = false;
+        while (currentIndex_ < lazyEndIndex) {
+            if (currentIndex_ < startIndex_) {
+                CalculatePosMapNode();
+            } else if (currentIndex_ <= endIndex_) {
+                auto child = node->GetFrameChildByIndex(currentIndex_ - lazyStartIndex, false);
+                auto frameNode = AceType::DynamicCast<FrameNode>(child);
+                if (!frameNode) {
+                    CalculatePosMapNode();
+                    continue;
+                }
+                float prevHeight = estimateHeight_;
+                CalculateFrameNode(frameNode);
+                if (frameNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
+                    totalItemHeight_ += estimateHeight_ - prevHeight - (currentIndex_ > 1 ? spaceWidth_ : 0);
+                    totalItemCount_++;
+                    hasGroup = true;
+                }
+            } else if (currentIndex_ < GetPosMapEndIndex()) {
+                CalculatePosMapNode();
+            } else if (currentIndex_ < lazyEndIndex) {
+                int32_t lanes = hasGroup ? 1 : lanes_;
+                int32_t remain = lazyEndIndex - currentIndex_;
+                estimateHeight_ += (GetAverageItemHeight() + spaceWidth_) * GetLines(lanes, remain);
+                currentIndex_ = lazyEndIndex;
+            }
+        }
+    }
+
+    void CalculateUINode(RefPtr<UINode> node, bool checkStart)
     {
         CHECK_NULL_VOID(node);
         auto children = node->GetChildren();
+        int32_t index = 0;
         for (const auto& child : children) {
+            index++;
+            if (checkStart && index <= itemStartIndex_) {  // ignore start header if exist
+                continue;
+            }
             if (AceType::InstanceOf<FrameNode>(child)) {
                 auto frameNode = AceType::DynamicCast<FrameNode>(child);
                 CalculateFrameNode(frameNode);
-            } else if (AceType::InstanceOf<LazyForEachNode>(child)) {
-                CalculateLazyForEachNode(child);
-            } else if (AceType::InstanceOf<RepeatVirtualScrollNode>(child)) {
-                CalculateLazyForEachNode(child);
-            } else if (AceType::InstanceOf<RepeatVirtualScroll2Node>(child)) {
-                CalculateLazyForEachNode(child);
+            } else if (AceType::InstanceOf<LazyForEachNode>(child) ||
+                AceType::InstanceOf<RepeatVirtualScrollNode>(child) ||
+                AceType::InstanceOf<RepeatVirtualScroll2Node>(child)) {
+                auto posMapStart = GetPosMapStartIndex();
+                if (posMapStart >= 0 && posMapStart <= currentIndex_ && !syncPosMap_) {
+                    CalculateLazyForEachNodeWithPosMap(child);
+                } else {
+                    CalculateLazyForEachNode(child);
+                }
             } else {
-                CalculateUINode(child);
+                CalculateUINode(child, false);
             }
         }
     }
@@ -183,11 +297,20 @@ public:
 
     void CalculateLazyForEachNode(RefPtr<UINode> node)
     {
+        auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(node);
         int32_t count = node->FrameCount();
+        if (repeat2) {
+            auto totalCount = repeat2->GetTotalCount();
+            count = (totalCount <= INT_MAX) ? static_cast<int32_t>(totalCount) : INT_MAX;
+        }
         if (count <= 0) {
             return;
         }
         if ((endIndex_ < currentIndex_) || (startIndex_ >= currentIndex_ + count)) {
+            if (syncPosMap_ && posMap_ && (startIndex_ >= currentIndex_ + count)) {
+                PositionInfo info = { estimateHeight_, estimateItemHeight_, false };
+                posMap_->UpdatePosRange(currentIndex_, startIndex_, info, spaceWidth_, lanes_);
+            }
             estimateHeight_ += (estimateItemHeight_ + spaceWidth_) * GetLines(lanes_, count);
             if (currentIndex_ > 0) {
                 estimateHeight_ -= spaceWidth_;
@@ -203,6 +326,10 @@ public:
         int32_t endIndex = std::min(currentIndex_ + count - 1, endIndex_);
         float averageHeight = GetLazyForEachIndexAverageHeight(node, startIndex, endIndex, hasGroup);
         int32_t lanes = hasGroup ? 1 : lanes_;
+        if (syncPosMap_ && posMap_) {
+            PositionInfo info = { estimateHeight_, averageHeight, hasGroup };
+            posMap_->UpdatePosRange(currentIndex_, startIndex_, info, spaceWidth_, lanes);
+        }
         if (startIndex == startIndex_) {
             int32_t curr = GetLines(lanes, startIndex_ - currentIndex_);
             estimateOffset_ = estimateHeight_ + (averageHeight + spaceWidth_) * curr;
@@ -214,7 +341,7 @@ public:
 
     bool GetEstimateHeightAndOffset(RefPtr<UINode> node)
     {
-        CalculateUINode(node);
+        CalculateUINode(node, true);
         if (currLane_ > 0) {
             estimateHeight_ += currRowHeight_;
             currLane_ = 0;
@@ -231,6 +358,12 @@ public:
     float GetEstimateOffset() const
     {
         return estimateOffset_;
+    }
+
+    void SetPosMap(const RefPtr<ListPositionMap>& posMap, bool syncPosMap = false)
+    {
+        posMap_ = posMap;
+        syncPosMap_ = syncPosMap;
     }
 
 private:
@@ -278,6 +411,9 @@ private:
     float currRowHeight_ = 0.0f;
 
     const ListLayoutAlgorithm::PositionMap& itemPosition_;
+    int32_t itemStartIndex_ = 0;
+    RefPtr<ListPositionMap> posMap_;
+    bool syncPosMap_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif

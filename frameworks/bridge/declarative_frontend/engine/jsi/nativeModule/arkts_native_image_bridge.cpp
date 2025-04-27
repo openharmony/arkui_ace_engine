@@ -43,6 +43,7 @@ constexpr int32_t BORDER_RADIUS_INDEX_2 = 3;
 constexpr int32_t BORDER_RADIUS_INDEX_3 = 4;
 constexpr int32_t BORDER_RADIUS_INDEX_4 = 4;
 constexpr int32_t BORDER_RADIUS_VALUE = 0;
+constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
 
 void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim, std::vector<ArkUI_Float32> &options)
 {
@@ -324,15 +325,19 @@ ArkUINativeModuleValue ImageBridge::SetResizableLattice(ArkUIRuntimeCallInfo* ru
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
-    if (info.Length() > 1 && info[1]->IsObject()) {
-        auto drawingLattice = Ace::Framework::CreateDrawingLattice(info[1]);
-        if (drawingLattice) {
-            Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(INDEX_0);
-            CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-            auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-            ImageModelNG::SetResizableLattice(reinterpret_cast<FrameNode*>(nativeNode), drawingLattice);
-        }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> latticeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (latticeArg->IsUndefined() || latticeArg->IsNull() || !latticeArg->IsObject(vm)) {
+        GetArkUINodeModifiers()->getImageModifier()->resetResizable(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto lattice = ArkTSUtils::UnwrapNapiValue(vm, latticeArg);
+    if (lattice) {
+        GetArkUINodeModifiers()->getImageModifier()->setResizableLattice(nativeNode, lattice);
+    } else {
+        GetArkUINodeModifiers()->getImageModifier()->resetResizableLattice(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -398,6 +403,38 @@ ArkUINativeModuleValue ImageBridge::ResetDynamicRangeMode(ArkUIRuntimeCallInfo* 
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getImageModifier()->resetDynamicRangeMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::SetHdrBrightness(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (secondArg->IsNumber()) {
+        float hdrBrightness = secondArg->ToNumber(vm)->Value();
+        nodeModifiers->getImageModifier()->setHdrBrightness(nativeNode, hdrBrightness);
+    } else {
+        nodeModifiers->getImageModifier()->setHdrBrightness(nativeNode, DEFAULT_HDR_BRIGHTNESS);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::ResetHdrBrightness(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getImageModifier()->resetHdrBrightness(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

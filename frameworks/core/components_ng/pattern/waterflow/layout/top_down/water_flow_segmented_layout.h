@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,8 @@ protected:
     {
         return !props_->GetShowCachedItemsValue(false) && (itemIdx < info->startIndex_ || itemIdx > info->endIndex_);
     }
+
+    virtual void MeasureRemainingLazyChild(int32_t startIdx, int32_t endIdx, bool forward) = 0;
 
     LayoutWrapper* wrapper_ {};
     RefPtr<WaterFlowLayoutProperty> props_;
@@ -139,7 +141,8 @@ private:
      * @param userDefMainSize user-defined main-axis size of the FlowItem.
      * @return LayoutWrapper of the FlowItem.
      */
-    RefPtr<LayoutWrapper> MeasureItem(int32_t idx, int32_t crossIdx, float userDefMainSize, bool isCache) const;
+    RefPtr<LayoutWrapper> MeasureItem(
+        int32_t idx, std::pair<int32_t, float> position, float userDefMainSize, bool isCache) const;
 
     /**
      * @brief Layout a FlowItem at [idx].
@@ -170,13 +173,19 @@ private:
 
     void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
 
+    void MeasureRemainingLazyChild(int32_t startIdx, int32_t endIdx, bool forward = true) override;
+
+    void MeasureLazyChild(int32_t startIdx, int32_t endIdx);
+
+    bool IsForWard() const;
+
     RefPtr<WaterFlowSections> sections_;
 
     // WaterFlow node's main-axis length
     float mainSize_ = 0.0f;
 
     // offset to apply after a ResetAndJump
-    std::optional<float> postJumpOffset_;
+    mutable std::optional<float> postJumpOffset_;
 
     RefPtr<WaterFlowLayoutInfo> info_;
 

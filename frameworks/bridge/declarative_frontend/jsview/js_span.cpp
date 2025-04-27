@@ -218,14 +218,18 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     } else {
         auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+        if (Container::CurrentColorMode() == ColorMode::DARK) {
             colorVal = theme->GetTextStyle().GetTextColor();
         } else {
             colorVal = Color::BLACK;
         }
     }
-    SpanModel::GetInstance()->SetTextDecoration(textDecoration.value());
-    SpanModel::GetInstance()->SetTextDecorationColor(colorVal.value());
+    if (textDecoration) {
+        SpanModel::GetInstance()->SetTextDecoration(textDecoration.value());
+    }
+    if (colorVal) {
+        SpanModel::GetInstance()->SetTextDecorationColor(colorVal.value());
+    }
     if (textDecorationStyle) {
         SpanModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
     }

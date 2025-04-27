@@ -36,6 +36,7 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "base/utils/measure_util.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
 #endif
@@ -56,8 +57,10 @@ bool NeedAvoidMenuBar(PipelineContext* pipeline)
 bool NeedAvoidContainerModal(
     PipelineContext* pipeline, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    return NavigationTitleUtil::NeedAvoidContainerModal(pipeline) &&
-        titleBarNode && titleBarNode->NeedAvoidContainerModal();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, false);
+    return avoidInfoMgr->NeedAvoidContainerModal() && titleBarNode && titleBarNode->NeedAvoidContainerModal();
 }
 } // namespace
 
@@ -277,7 +280,9 @@ float TitleBarLayoutAlgorithm::WidthAfterAvoidMenuBarAndContainerModal(
     if (NeedAvoidContainerModal(pipeline, titleBarNode)) {
         RectF containerModal;
         RectF buttonsRect;
-        if (pipeline->GetContainerModalButtonsRect(containerModal, buttonsRect)) {
+        auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+        CHECK_NULL_RETURN(avoidInfoMgr, afterAvoidWidth);
+        if (avoidInfoMgr->GetContainerModalButtonsRect(containerModal, buttonsRect)) {
             if (NearZero(avoidArea.Width())) {
                 avoidArea = buttonsRect;
             } else {
@@ -470,8 +475,10 @@ void TitleBarLayoutAlgorithm::MeasureMenu(LayoutWrapper* layoutWrapper, const Re
             menuOccupiedWidth_ = static_cast<float>(iconBackgroundWidth_.ConvertToPx()) * maxMenu +
                 static_cast<float>(menuCompPadding_.ConvertToPx()) * (maxMenu - 1);
         } else {
+            // the number of the padding between menuItem.
+            int32_t paddingAmount = std::max(menuItemNum - 1, 0);
             menuOccupiedWidth_ = static_cast<float>(iconBackgroundWidth_.ConvertToPx()) * menuItemNum +
-                static_cast<float>(menuCompPadding_.ConvertToPx()) * (menuItemNum - 1);
+                static_cast<float>(menuCompPadding_.ConvertToPx()) * paddingAmount;
         }
     } else {
         if (menuItemNum >= maxMenu) {

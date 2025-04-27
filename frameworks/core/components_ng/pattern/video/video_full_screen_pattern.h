@@ -46,11 +46,6 @@ public:
         return {};
     }
 
-    const RefPtr<VideoPattern> GetOriginVideoPattern()
-    {
-        return videoPattern_.Upgrade();
-    }
-
     const RefPtr<VideoPattern> GetVideoPattern()
     {
         return videoPattern_.Upgrade();

@@ -71,6 +71,7 @@ struct Index {
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .textAlign(TextAlign.Start)
         .opacity(this.iconOpacity)
+        .flexShrink(1)
     }
     .width('100%')
     .height(TITLE_ROW_HEIGHT)

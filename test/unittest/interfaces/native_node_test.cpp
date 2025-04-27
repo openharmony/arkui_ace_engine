@@ -23,7 +23,9 @@
 #include "native_type.h"
 #include "native_styled_string.h"
 #include "event_converter.h"
+#include "interfaces/native/node/node_extened.h"
 #include "interfaces/native/node/node_model.h"
+#include "interfaces/native/node/styled_string.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -1132,6 +1134,14 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(ON_REFRESH_REFRESHING));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_REFRESH_ON_OFFSET_CHANGE, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_REFRESH_ON_OFFSET_CHANGE));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_KEY_EVENT, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ArkUIEventSubKind::ON_KEY_EVENT));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_KEY_PRE_IME, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ArkUIEventSubKind::ON_KEY_PREIME));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_CLICK_EVENT, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ArkUIEventSubKind::ON_CLICK_EVENT));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_HOVER_EVENT, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ArkUIEventSubKind::ON_HOVER_EVENT));
 
     nodeType = static_cast<int32_t>(ARKUI_NODE_TOGGLE);
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_TOGGLE_ON_CHANGE, nodeType);
@@ -1176,6 +1186,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     nodeType = static_cast<int32_t>(ARKUI_NODE_SWIPER);
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SWIPER_EVENT_ON_CHANGE, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_SWIPER_CHANGE));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SWIPER_EVENT_ON_SELECTED, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_SWIPER_SELECTED));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SWIPER_EVENT_ON_ANIMATION_START, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_SWIPER_ANIMATION_START));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SWIPER_EVENT_ON_ANIMATION_END, nodeType);
@@ -1184,6 +1196,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(ON_SWIPER_GESTURE_SWIPE));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_SWIPER_DID_CONTENT_SCROLL));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SWIPER_EVENT_ON_UNSELECTED, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_SWIPER_UNSELECTED));
 
     nodeType = static_cast<int32_t>(ARKUI_NODE_TEXT);
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_TEXT_ON_DETECT_RESULT_UPDATE, nodeType);
@@ -1204,6 +1218,13 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(ON_IMAGE_ANIMATOR_ON_REPEAT));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_IMAGE_ANIMATOR_EVENT_ON_FINISH, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_IMAGE_ANIMATOR_ON_FINISH));
+
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_FOCUS_AXIS, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_FOCUS_AXIS));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_CHECKBOX_GROUP_CHANGE));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_AXIS, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_AXIS));
 }
 
 /**
@@ -1404,6 +1425,26 @@ HWTEST_F(NativeNodeTest, NativeNodeTest007, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_IMAGE_ANIMATOR_EVENT_ON_REPEAT));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_IMAGE_ANIMATOR_ON_FINISH);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_IMAGE_ANIMATOR_EVENT_ON_FINISH));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_KEY_EVENT);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_KEY_EVENT));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_KEY_PREIME);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_KEY_PRE_IME));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_KEY_DISPATCH);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_DISPATCH_KEY_EVENT));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_CLICK_EVENT);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_CLICK_EVENT));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_HOVER_EVENT);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_HOVER_EVENT));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_SWIPER_SELECTED);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SWIPER_EVENT_ON_SELECTED));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_SWIPER_UNSELECTED);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SWIPER_EVENT_ON_UNSELECTED));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_FOCUS_AXIS);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_FOCUS_AXIS));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_CHECKBOX_GROUP_CHANGE);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_AXIS);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_AXIS));
 }
 
 /**
@@ -5057,6 +5098,28 @@ HWTEST_F(NativeNodeTest, NativeNodeTest070, TestSize.Level1)
     origin.mouseEvent.subKind = ArkUIEventSubKind::ON_TEXT_AREA_WILL_INSERT;
     EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &event), false);
     EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &compatibleEvent), false);
+
+    origin.kind = ArkUIEventCategory::DRAG_EVENT;
+    origin.dragEvent.subKind = ArkUIEventSubKind::ON_DRAG_START;
+    EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &event), true);
+    origin.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
+    origin.dragEvent.subKind = ArkUIEventSubKind::ON_KEY_PREIME;
+    EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &event), true);
+    origin.kind = ArkUIEventCategory::FOCUS_AXIS_EVENT;
+    origin.dragEvent.subKind = ArkUIEventSubKind::ON_FOCUS_AXIS;
+    EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &event), true);
+    origin.kind = ArkUIEventCategory::TEXT_INPUT_CHANGE;
+    origin.dragEvent.subKind = ArkUIEventSubKind::ON_TEXT_INPUT_CHANGE;
+    EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &event), true);
+    origin.kind = ArkUIEventCategory::AXIS_EVENT;
+    origin.dragEvent.subKind = ArkUIEventSubKind::ON_AXIS;
+    EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &event), true);
+    origin.kind = ArkUIEventCategory::CLICK_EVENT;
+    origin.dragEvent.subKind = ArkUIEventSubKind::ON_CLICK_EVENT;
+    EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &event), true);
+    origin.kind = ArkUIEventCategory::HOVER_EVENT;
+    origin.dragEvent.subKind = ArkUIEventSubKind::ON_HOVER_EVENT;
+    EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &event), true);
 }
 
 /**
@@ -5081,6 +5144,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest071, TestSize.Level1)
     EXPECT_EQ(OHOS::Ace::NodeModel::ConvertToCMouseActionType(1), 1);
     EXPECT_EQ(OHOS::Ace::NodeModel::ConvertToCMouseActionType(2), 2);
     EXPECT_EQ(OHOS::Ace::NodeModel::ConvertToCMouseActionType(3), 3);
+    EXPECT_EQ(OHOS::Ace::NodeModel::ConvertToCMouseActionType(13), 13);
     EXPECT_EQ(OHOS::Ace::NodeModel::ConvertToCMouseActionType(0), 0);
 
     EXPECT_EQ(OHOS::Ace::NodeModel::ConvertToCMouseEventButtonType(1), 1);
@@ -5318,6 +5382,10 @@ HWTEST_F(NativeNodeTest, NativeNodeTest081, TestSize.Level1)
     EXPECT_NE(styleString, nullptr);
     EXPECT_NE(textStyle, nullptr);
     EXPECT_NE(placeholder, nullptr);
+    OH_ArkUI_StyledString_AddText(styleString, "test");
+    EXPECT_EQ(styleString->items.back()->content, "test");
+    OH_ArkUI_StyledString_PopTextStyle(styleString);
+    OH_ArkUI_StyledString_Destroy(styleString);
 }
 
 /**
@@ -5977,6 +6045,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest100, TestSize.Level1)
 
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_VISIBLE_AREA_APPROXIMATE_CHANGE);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT));
+    OH_ArkUI_VisibleAreaEventOptions_Dispose(option);
+    OH_ArkUI_VisibleAreaEventOptions_Dispose(nullptr);
 }
 
 /**
@@ -6009,6 +6079,1025 @@ HWTEST_F(NativeNodeTest, NativeNodeTest101, TestSize.Level1)
     EXPECT_EQ(getRatiosArray[1], 1.0f);
 
     EXPECT_EQ(OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(option), 1000);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest102
+ * @tc.desc: Test NODE_SWIPER_CACHED_COUNT function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest102, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto swiper = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    ASSERT_NE(swiper, nullptr);
+    ArkUI_NumberValue value[] = { 1, 1 };
+    ArkUI_AttributeItem item = { value, 2 };
+    value[0].i32 = 1;
+    value[1].i32 = 1;
+    EXPECT_EQ(nodeAPI->setAttribute(swiper, NODE_SWIPER_CACHED_COUNT, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    auto ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_CACHED_COUNT);
+    EXPECT_EQ(ret->value[1].i32, 1);
+    EXPECT_EQ(nodeAPI->resetAttribute(swiper, NODE_SWIPER_CACHED_COUNT), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_CACHED_COUNT);
+    EXPECT_EQ(ret->value[1].i32, 0);
+    value[1].i32 = -1;
+    EXPECT_EQ(nodeAPI->setAttribute(swiper, NODE_SWIPER_CACHED_COUNT, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_CACHED_COUNT);
+    EXPECT_EQ(ret->value[1].i32, 0);
+    nodeAPI->disposeNode(swiper);
+}
+
+/**
+ * @tc.name: NativeNodeTest103
+ * @tc.desc: Test NODE_SWIPER_AUTO_FILL function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest103, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto swiper = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    ASSERT_NE(swiper, nullptr);
+    ArkUI_NumberValue value[] = { 1, 1 };
+    ArkUI_AttributeItem item = { value, 2 };
+    value[0].f32 = 1;
+    value[1].i32 = 1;
+    EXPECT_EQ(nodeAPI->setAttribute(swiper, NODE_SWIPER_AUTO_FILL, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    auto ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_AUTO_FILL);
+    EXPECT_EQ(ret->value[0].f32, 1);
+    EXPECT_EQ(ret->value[1].i32, 1);
+    EXPECT_EQ(nodeAPI->resetAttribute(swiper, NODE_SWIPER_AUTO_FILL), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_AUTO_FILL);
+    EXPECT_EQ(ret->value[0].f32, 0);
+    EXPECT_EQ(ret->value[1].i32, 0);
+    value[0].f32 = -1;
+    value[1].i32 = -1;
+    EXPECT_EQ(nodeAPI->setAttribute(swiper, NODE_SWIPER_AUTO_FILL, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
+    ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_AUTO_FILL);
+    EXPECT_EQ(ret->value[0].f32, 0);
+    EXPECT_EQ(ret->value[1].i32, 0);
+    nodeAPI->disposeNode(swiper);
+}
+
+/**
+ * @tc.name: NativeNodeTest104
+ * @tc.desc: Test NODE_SWIPER_DISPLAY_COUNT function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest104, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto swiper = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    ASSERT_NE(swiper, nullptr);
+    ArkUI_NumberValue value[] = { {.i32 = 1}, {.i32 = 1} };
+    ArkUI_AttributeItem item = { .value = value, .string = "auto", .size = 2};
+    value[0].i32 = 1;
+    value[1].i32 = 1;
+    EXPECT_EQ(nodeAPI->setAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    auto ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT);
+    EXPECT_EQ(ret->value[0].i32, 1);
+    EXPECT_EQ(ret->value[1].i32, 1);
+    std::string str = "auto";
+    EXPECT_EQ(ret->string, str);
+    EXPECT_EQ(nodeAPI->resetAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT);
+    EXPECT_EQ(ret->value[0].i32, 1);
+    EXPECT_EQ(ret->value[1].i32, 0);
+    value[0].i32 = -1;
+    value[1].i32 = -1;
+    nodeAPI->setAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT, &item);
+    ret = nodeAPI->getAttribute(swiper, NODE_SWIPER_DISPLAY_COUNT);
+    EXPECT_EQ(ret->value[0].i32, 1);
+    EXPECT_EQ(ret->value[1].i32, 0);
+    nodeAPI->disposeNode(swiper);
+}
+
+/**
+ * @tc.name: NativeNodeTest105
+ * @tc.desc: Test NODE_SWIPER_SHOW_DISPLAY_ARROW function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest105, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ArkUI_NodeHandle swiper = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    const int size = 14;
+    const char* arr[size] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"};
+    
+    for (int j = 0; j < size; j++) {
+        ArkUI_NodeHandle textNode = nodeAPI->createNode(ARKUI_NODE_TEXT);
+        ArkUI_AttributeItem content = { .string = arr[j] };
+        nodeAPI->setAttribute(textNode, NODE_TEXT_CONTENT, &content);
+        
+        ArkUI_NumberValue value[] = {0};
+        ArkUI_AttributeItem item = {value, 1};
+        value[0].f32 = 400;
+        nodeAPI->setAttribute(textNode, NODE_WIDTH, &item);
+        value[0].f32 = 160;
+        nodeAPI->setAttribute(textNode, NODE_HEIGHT, &item);
+        value[0].u32 = 0xFFAFEEEE;
+        nodeAPI->setAttribute(textNode, NODE_BACKGROUND_COLOR, &item);
+        value[0].i32 = 0;
+        nodeAPI->setAttribute(textNode, NODE_TEXT_ALIGN, &item);
+        value[0].f32 = 30;
+        nodeAPI->setAttribute(textNode, NODE_FONT_SIZE, &item);
+        
+        ArkUI_AttributeItem textId = {.string = "SwiperAutoPlayText"};
+        nodeAPI->setAttribute(textNode, NODE_ID, &textId);
+        nodeAPI->addChild(swiper, textNode);
+    }
+    ArkUI_SwiperArrowStyle* arrowStyle = OH_ArkUI_SwiperArrowStyle_Create();
+    OH_ArkUI_SwiperArrowStyle_SetShowBackground(arrowStyle, 1);
+    OH_ArkUI_SwiperArrowStyle_SetShowSidebarMiddle(arrowStyle, 0);
+    OH_ArkUI_SwiperArrowStyle_SetBackgroundSize(arrowStyle, 25);
+    OH_ArkUI_SwiperArrowStyle_SetBackgroundColor(arrowStyle, 0xFF182431);
+    OH_ArkUI_SwiperArrowStyle_SetArrowSize(arrowStyle, 25);
+    OH_ArkUI_SwiperArrowStyle_SetArrowColor(arrowStyle, 0xFF182431);
+    
+    ArkUI_NumberValue valueTemp[1];
+    ArkUI_AttributeItem itemTemp = {.value=valueTemp, .size=1, .object = arrowStyle};
+    valueTemp[0].i32 = 2;
+    nodeAPI->setAttribute(swiper, NODE_SWIPER_SHOW_DISPLAY_ARROW, &itemTemp);
+    auto itemTempReturn = nodeAPI->getAttribute(swiper, NODE_SWIPER_SHOW_DISPLAY_ARROW);
+    auto returnObject = static_cast<ArkUI_SwiperArrowStyle*>(itemTempReturn->object);
+    ASSERT_NE(returnObject, nullptr);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetShowBackground(arrowStyle), 1);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetShowSidebarMiddle(arrowStyle), 0);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetBackgroundSize(arrowStyle), 25);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetBackgroundColor(arrowStyle), 0xFF182431);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetArrowSize(arrowStyle), 18.75);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetArrowColor(arrowStyle), 0xFF182431);
+    OH_ArkUI_SwiperArrowStyle_Destroy(arrowStyle);
+    nodeAPI->disposeNode(swiper);
+}
+
+/**
+ * @tc.name: NativeNodeTest106
+ * @tc.desc: Test NODE_BACKGROUND_IMAGE_RESIZABLE_WITH_SLICE function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest106, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    int32_t ret1 = nodeAPI->addChild(rootNode, childNode);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    float size = 100.0f;
+    float left = 6.0f;
+    float top = 7.0f;
+    float right  = 8.0f;
+    float bottom = 9.0f;
+    ArkUI_NumberValue value[] = {{.f32 = size}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+
+    ArkUI_NumberValue value2[] = {{.f32 = left}, {.f32 = top}, {.f32 = right}, {.f32 = bottom}};
+    ArkUI_AttributeItem item2 = {value2, sizeof(value2) / sizeof(ArkUI_NumberValue)};
+    
+    nodeAPI->setAttribute(rootNode, NODE_WIDTH, &item);
+    auto widthVal = nodeAPI->getAttribute(rootNode, NODE_WIDTH);
+    EXPECT_EQ(widthVal->value[0].f32, size);
+
+    nodeAPI->setAttribute(rootNode, NODE_HEIGHT, &item);
+    auto heightVal = nodeAPI->getAttribute(rootNode, NODE_HEIGHT);
+    EXPECT_EQ(heightVal->value[0].f32, size);
+
+    nodeAPI->setAttribute(rootNode, NODE_BACKGROUND_IMAGE_RESIZABLE_WITH_SLICE, &item2);
+    auto sliceVal = nodeAPI->getAttribute(rootNode, NODE_BACKGROUND_IMAGE_RESIZABLE_WITH_SLICE);
+    EXPECT_EQ(sliceVal->value[0].f32, left);
+    EXPECT_EQ(sliceVal->value[1].f32, top);
+    EXPECT_EQ(sliceVal->value[2].f32, right);
+    EXPECT_EQ(sliceVal->value[3].f32, bottom);
+}
+
+/**
+ * @tc.name: NativeNodeTest107
+ * @tc.desc: Test OH_ArkUI_LayoutConstraint_Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest107, TestSize.Level1)
+{
+    ArkUI_LayoutConstraint* layoutConstraint = OH_ArkUI_LayoutConstraint_Create();
+    EXPECT_TRUE(layoutConstraint);
+    OH_ArkUI_LayoutConstraint_Dispose(layoutConstraint);
+}
+
+/**
+ * @tc.name: NativeNodeTest108
+ * @tc.desc: Test OH_ArkUI_LayoutConstraint_Copy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest108, TestSize.Level1)
+{
+    ArkUI_LayoutConstraint* layoutConstraint = OH_ArkUI_LayoutConstraint_Create();
+    ArkUI_LayoutConstraint* layoutConstraintCopy = OH_ArkUI_LayoutConstraint_Copy(layoutConstraint);
+    EXPECT_TRUE(layoutConstraintCopy);
+    OH_ArkUI_LayoutConstraint_Dispose(layoutConstraint);
+    OH_ArkUI_LayoutConstraint_Dispose(layoutConstraintCopy);
+}
+
+/**
+ * @tc.name: NativeNodeTest109
+ * @tc.desc: Test OH_ArkUI_NodeCustomEvent_GetLayoutConstraintInMeasure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest109, TestSize.Level1)
+{
+    auto event = new ArkUICustomNodeEvent();
+    event->data[0] = 1;
+    event->data[1] = 2;
+    event->data[2] = 2;
+    event->data[3] = 2;
+    event->data[4] = 2;
+    event->data[5] = 2;
+    auto nodeEvent = new ArkUI_NodeCustomEvent();
+    nodeEvent->event = event;
+    auto layoutConstraint = OH_ArkUI_NodeCustomEvent_GetLayoutConstraintInMeasure(nodeEvent);
+    EXPECT_TRUE(layoutConstraint);
+    delete event;
+    OH_ArkUI_LayoutConstraint_Dispose(layoutConstraint);
+}
+
+/**
+ * @tc.name: NativeNodeTest110
+ * @tc.desc: Test OH_ArkUI_NodeCustomEvent_GetLayoutConstraintInLayout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest110, TestSize.Level1)
+{
+    auto event = new ArkUICustomNodeEvent();
+    event->data[0] = 1;
+    event->data[1] = 2;
+    auto nodeEvent = new ArkUI_NodeCustomEvent();
+
+    nodeEvent->event = event;
+    auto intOffset = OH_ArkUI_NodeCustomEvent_GetPositionInLayout(nodeEvent);
+    EXPECT_EQ(intOffset.x, 1);
+    EXPECT_EQ(intOffset.y, 2);
+    delete event;
+    delete nodeEvent;
+}
+
+/**
+ * @tc.name: NativeNodeTest111
+ * @tc.desc: Test OH_ArkUI_NodeCustomEvent_GetDrawContextInDraw.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest111, TestSize.Level1)
+{
+    ArkUICustomNodeEvent* event = new ArkUICustomNodeEvent();
+    event->data[2] = 1;
+    event->data[3] = 2;
+    ArkUI_NodeCustomEvent* nodeEvent = new ArkUI_NodeCustomEvent();
+    nodeEvent->event = event;
+
+    auto drawContext = OH_ArkUI_NodeCustomEvent_GetDrawContextInDraw(nodeEvent);
+    EXPECT_EQ(drawContext->width, 1);
+    EXPECT_EQ(drawContext->height, 2);
+    delete event;
+}
+
+/**
+ * @tc.name: NativeNodeTest112
+ * @tc.desc: Test OH_ArkUI_NodeCustomEvent_GetEventTargetId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest112, TestSize.Level1)
+{
+    ArkUI_NodeCustomEvent* event = new ArkUI_NodeCustomEvent;
+    event->targetId = 1;
+    auto targetId = OH_ArkUI_NodeCustomEvent_GetEventTargetId(event);
+    EXPECT_EQ(targetId, 1);
+    delete event;
+}
+
+/**
+ * @tc.name: NativeNodeTest113
+ * @tc.desc: Test OH_ArkUI_NodeCustomEvent_GetUserData.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest113, TestSize.Level1)
+{
+    ArkUI_NodeCustomEvent* event = new ArkUI_NodeCustomEvent;
+    event->userData = nullptr;
+    auto userData = OH_ArkUI_NodeCustomEvent_GetUserData(event);
+    EXPECT_EQ(userData, nullptr);
+    delete event;
+}
+
+/**
+ * @tc.name: NativeNodeTest114
+ * @tc.desc: Test OH_ArkUI_NodeCustomEvent_GetNodeHandle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest114, TestSize.Level1)
+{
+    ArkUI_NodeCustomEvent* event = new ArkUI_NodeCustomEvent;
+    event->node = nullptr;
+    auto node = OH_ArkUI_NodeCustomEvent_GetNodeHandle(event);
+    EXPECT_EQ(node, nullptr);
+    delete event;
+}
+
+/**
+ * @tc.name: NativeNodeTest115
+ * @tc.desc: Test OH_ArkUI_NodeCustomEvent_GetEventType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest115, TestSize.Level1)
+{
+    ArkUICustomNodeEvent* event = new ArkUICustomNodeEvent;
+    event->kind = 1;
+    ArkUI_NodeCustomEvent* nodeEvent = new ArkUI_NodeCustomEvent;
+    nodeEvent->event = event;
+    auto eventType = OH_ArkUI_NodeCustomEvent_GetEventType(nodeEvent);
+    EXPECT_EQ(eventType, ArkUI_NodeCustomEventType::ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE);
+    delete event;
+    delete nodeEvent;
+}
+
+/**
+ * @tc.name: NativeNodeTest116
+ * @tc.desc: Test OH_ArkUI_NodeCustomEvent_GetCustomSpanMeasureInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest116, TestSize.Level1)
+{
+    ArkUICustomNodeEvent* event = new ArkUICustomNodeEvent;
+    event->numberData[0].f32 = 1.0f;
+    ArkUI_NodeCustomEvent* nodeEvent = new ArkUI_NodeCustomEvent;
+    auto ret = OH_ArkUI_NodeCustomEvent_GetCustomSpanMeasureInfo(nullptr, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ret = OH_ArkUI_NodeCustomEvent_GetCustomSpanMeasureInfo(nodeEvent, nullptr);
+
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    nodeEvent->event = event;
+    ret = OH_ArkUI_NodeCustomEvent_GetCustomSpanMeasureInfo(nodeEvent, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_CustomSpanMeasureInfo* info = new ArkUI_CustomSpanMeasureInfo;
+    ret = OH_ArkUI_NodeCustomEvent_GetCustomSpanMeasureInfo(nodeEvent, info);
+    EXPECT_EQ(info->fontSize, 1.0f);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    delete event;
+    delete nodeEvent;
+    delete info;
+}
+
+/**
+ * @tc.name: NativeNodeTest117
+ * @tc.desc: Test OH_ArkUI_NodeCustomEvent_SetCustomSpanMetrics.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest117, TestSize.Level1)
+{
+    ArkUICustomNodeEvent* event = new ArkUICustomNodeEvent;
+    ArkUI_NodeCustomEvent* nodeEvent = new ArkUI_NodeCustomEvent;
+    auto ret = OH_ArkUI_NodeCustomEvent_SetCustomSpanMetrics(nullptr, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ret = OH_ArkUI_NodeCustomEvent_SetCustomSpanMetrics(nodeEvent, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    nodeEvent->event = event;
+    ret = OH_ArkUI_NodeCustomEvent_SetCustomSpanMetrics(nodeEvent, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_CustomSpanMetrics* metrics = new ArkUI_CustomSpanMetrics;
+    metrics->width = 1.0f;
+    metrics->height = 2.0f;
+    ret = OH_ArkUI_NodeCustomEvent_SetCustomSpanMetrics(nodeEvent, metrics);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    delete event;
+    delete nodeEvent;
+    delete metrics;
+}
+
+/**
+ * @tc.name: NativeNodeTest118
+ * @tc.desc: Test OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest118, TestSize.Level1)
+{
+    ArkUICustomNodeEvent* event = new ArkUICustomNodeEvent;
+    event->numberData[0].f32 = 1.0f;
+    ArkUI_NodeCustomEvent* nodeEvent = new ArkUI_NodeCustomEvent;
+    auto ret = OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo(nullptr, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ret = OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo(nodeEvent, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    nodeEvent->event = event;
+    ArkUI_CustomSpanDrawInfo* info = new ArkUI_CustomSpanDrawInfo;
+    ret = OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo(nodeEvent, info);
+    EXPECT_EQ(info->optionsX, 1.0f);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    delete event;
+    delete nodeEvent;
+    delete info;
+}
+
+/**
+ * @tc.name: NativeNodeTest119
+ * @tc.desc: Test OH_ArkUI_CustomSpanMeasureInfo_Dispose.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest119, TestSize.Level1)
+{
+    ArkUI_CustomSpanMeasureInfo* info = new ArkUI_CustomSpanMeasureInfo;
+    EXPECT_TRUE(info);
+    OH_ArkUI_CustomSpanMeasureInfo_Dispose(info);
+    OH_ArkUI_CustomSpanMeasureInfo_Dispose(nullptr);
+}
+
+/**
+ * @tc.name: NativeNodeTest120
+ * @tc.desc: Test OH_ArkUI_CustomSpanMeasureInfo_GetFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest120, TestSize.Level1)
+{
+    ArkUI_CustomSpanMeasureInfo* info = new ArkUI_CustomSpanMeasureInfo;
+    info->fontSize = 1.0f;
+    auto fontSize = OH_ArkUI_CustomSpanMeasureInfo_GetFontSize(info);
+    EXPECT_EQ(fontSize, 1.0f);
+    fontSize = OH_ArkUI_CustomSpanMeasureInfo_GetFontSize(nullptr);
+    EXPECT_EQ(fontSize, 0.0f);
+    OH_ArkUI_CustomSpanMeasureInfo_Dispose(info);
+}
+
+/**
+ * @tc.name: NativeNodeTest121
+ * @tc.desc: Test OH_ArkUI_CustomSpanMetrics_Dispose.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest121, TestSize.Level1)
+{
+    ArkUI_CustomSpanMetrics* metrics = new ArkUI_CustomSpanMetrics;
+    EXPECT_NE(metrics, nullptr);
+    OH_ArkUI_CustomSpanMetrics_Dispose(metrics);
+    OH_ArkUI_CustomSpanMetrics_Dispose(nullptr);
+}
+
+/**
+ * @tc.name: NativeNodeTest122
+ * @tc.desc: Test OH_ArkUI_CustomSpanMetrics_SetWidth and OH_ArkUI_CustomSpanMetrics_SetHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest122, TestSize.Level1)
+{
+    ArkUI_CustomSpanMetrics* metrics = new ArkUI_CustomSpanMetrics;
+    auto ret1 = OH_ArkUI_CustomSpanMetrics_SetWidth(metrics, 1.0f);
+    auto ret2 = OH_ArkUI_CustomSpanMetrics_SetHeight(metrics, 2.0f);
+    EXPECT_EQ(metrics->width, 1.0f);
+    EXPECT_EQ(metrics->height, 2.0f);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+    ret1 = OH_ArkUI_CustomSpanMetrics_SetWidth(nullptr, 1.0f);
+    ret2 = OH_ArkUI_CustomSpanMetrics_SetHeight(nullptr, 1.0f);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_CustomSpanMetrics_Dispose(metrics);
+}
+
+/**
+ * @tc.name: NativeNodeTest123
+ * @tc.desc: Test OH_ArkUI_CustomSpanDrawInfo_GetXXX Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest123, TestSize.Level1)
+{
+    auto info = OH_ArkUI_CustomSpanDrawInfo_Create();
+    EXPECT_TRUE(info);
+    info->optionsX = 1.0f;
+    info->optionsLineTop = 2.0f;
+    info->optionsLineBottom = 3.0f;
+    info->optionsBaseLine = 4.0f;
+    auto optionsX = OH_ArkUI_CustomSpanDrawInfo_GetXOffset(nullptr);
+    auto optionsLineTop = OH_ArkUI_CustomSpanDrawInfo_GetLineTop(nullptr);
+    auto optionsLineBottom = OH_ArkUI_CustomSpanDrawInfo_GetLineBottom(nullptr);
+    auto optionsBaseLine = OH_ArkUI_CustomSpanDrawInfo_GetBaseline(nullptr);
+    EXPECT_EQ(optionsX, 0.0f);
+    EXPECT_EQ(optionsLineTop, 0.0f);
+    EXPECT_EQ(optionsLineBottom, 0.0f);
+    EXPECT_EQ(optionsBaseLine, 0.0f);
+    optionsX = OH_ArkUI_CustomSpanDrawInfo_GetXOffset(info);
+    optionsLineTop = OH_ArkUI_CustomSpanDrawInfo_GetLineTop(info);
+    optionsLineBottom = OH_ArkUI_CustomSpanDrawInfo_GetLineBottom(info);
+    optionsBaseLine = OH_ArkUI_CustomSpanDrawInfo_GetBaseline(info);
+    EXPECT_EQ(optionsX, 1.0f);
+    EXPECT_EQ(optionsLineTop, 2.0f);
+    EXPECT_EQ(optionsLineBottom, 3.0f);
+    EXPECT_EQ(optionsBaseLine, 4.0f);
+    OH_ArkUI_CustomSpanDrawInfo_Dispose(info);
+}
+
+/**
+ * @tc.name: NativeNodeTest124
+ * @tc.desc: Test OH_ArkUI_DrawContext_GetSize Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest124, TestSize.Level1)
+{
+    auto intSize = OH_ArkUI_DrawContext_GetSize(nullptr);
+    EXPECT_EQ(intSize.height, 0);
+    EXPECT_EQ(intSize.width, 0);
+    auto drawContext = new ArkUI_DrawContext;
+    drawContext->width = 1.0f;
+    drawContext->height = 2.0f;
+    intSize = OH_ArkUI_DrawContext_GetSize(drawContext);
+    EXPECT_EQ(intSize.width, 1.0f);
+    EXPECT_EQ(intSize.height, 2.0f);
+    delete drawContext;
+}
+
+/**
+ * @tc.name: NativeNodeTest125
+ * @tc.desc: Test OH_ArkUI_SwiperIndicator_Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest125, TestSize.Level1)
+{
+    auto indicator = OH_ArkUI_SwiperIndicator_Create(ARKUI_SWIPER_INDICATOR_TYPE_DIGIT);
+    EXPECT_FALSE(indicator);
+    indicator = OH_ArkUI_SwiperIndicator_Create(ARKUI_SWIPER_INDICATOR_TYPE_DOT);
+    EXPECT_TRUE(indicator);
+    auto ret = OH_ArkUI_SwiperIndicator_SetMaxDisplayCount(indicator, 7);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    ret = OH_ArkUI_SwiperIndicator_SetMaxDisplayCount(indicator, 1);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ret = OH_ArkUI_SwiperIndicator_SetMaxDisplayCount(indicator, 10);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_SwiperIndicator_Dispose(indicator);
+}
+
+/**
+ * @tc.name: NativeNodeTest126
+ * @tc.desc: Test ArkUI_SwiperArrowStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest126, TestSize.Level1)
+{
+    auto arrowStyle = OH_ArkUI_SwiperArrowStyle_Create();
+    OH_ArkUI_SwiperArrowStyle_SetShowBackground(arrowStyle, 1);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetShowBackground(arrowStyle), 1);
+    OH_ArkUI_SwiperArrowStyle_SetShowBackground(arrowStyle, 0);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetShowBackground(arrowStyle), 0);
+    OH_ArkUI_SwiperArrowStyle_SetShowBackground(arrowStyle, 3);
+
+    OH_ArkUI_SwiperArrowStyle_SetShowSidebarMiddle(arrowStyle, 1);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetShowSidebarMiddle(arrowStyle), 1);
+    OH_ArkUI_SwiperArrowStyle_SetShowSidebarMiddle(arrowStyle, 0);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetShowSidebarMiddle(arrowStyle), 0);
+
+    OH_ArkUI_SwiperArrowStyle_SetBackgroundSize(arrowStyle, 25.0f);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetBackgroundSize(arrowStyle), 25.0f);
+    OH_ArkUI_SwiperArrowStyle_SetBackgroundColor(arrowStyle, 0xFF182431);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetBackgroundColor(arrowStyle), 0xFF182431);
+    OH_ArkUI_SwiperArrowStyle_SetArrowSize(arrowStyle, 25.0f);
+    EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetArrowSize(arrowStyle), 25.0f);
+    OH_ArkUI_SwiperArrowStyle_Destroy(arrowStyle);
+}
+
+/**
+ * @tc.name: NativeNodeTest127
+ * @tc.desc: Test OH_ArkUI_CustomSpanMeasureInfo_Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest127, TestSize.Level1)
+{
+    auto info = OH_ArkUI_CustomSpanMeasureInfo_Create();
+    EXPECT_NE(info, nullptr);
+}
+
+/**
+ * @tc.name: NativeNodeTest128
+ * @tc.desc: Test OH_ArkUI_CustomSpanMetrics_Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest128, TestSize.Level1)
+{
+    auto metrics = OH_ArkUI_CustomSpanMetrics_Create();
+    EXPECT_NE(metrics, nullptr);
+}
+
+/**
+ * @tc.name: NativeNodeTest129
+ * @tc.desc: Test OH_ArkUI_LayoutConstraint_Get.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest129, TestSize.Level1)
+{
+    auto maxWidth = OH_ArkUI_LayoutConstraint_GetMaxWidth(nullptr);
+    EXPECT_EQ(maxWidth, -1);
+    auto minWidth = OH_ArkUI_LayoutConstraint_GetMinWidth(nullptr);
+    EXPECT_EQ(minWidth, -1);
+    auto maxHeight = OH_ArkUI_LayoutConstraint_GetMaxHeight(nullptr);
+    EXPECT_EQ(maxHeight, -1);
+    auto minHeight = OH_ArkUI_LayoutConstraint_GetMinHeight(nullptr);
+    EXPECT_EQ(minHeight, -1);
+    auto percentReferWidth = OH_ArkUI_LayoutConstraint_GetPercentReferenceWidth(nullptr);
+    EXPECT_EQ(percentReferWidth, -1);
+    auto percentReferHeight = OH_ArkUI_LayoutConstraint_GetPercentReferenceHeight(nullptr);
+    EXPECT_EQ(percentReferHeight, -1);
+
+    auto constraint = new ArkUI_LayoutConstraint;
+    constraint->maxWidth = 1;
+    constraint->minWidth = 1;
+    constraint->maxHeight = 1;
+    constraint->minHeight = 1;
+    constraint->percentReferWidth = 1;
+    constraint->percentReferHeight = 1;
+    maxWidth = OH_ArkUI_LayoutConstraint_GetMaxWidth(constraint);
+    EXPECT_EQ(maxWidth, 1);
+    minWidth = OH_ArkUI_LayoutConstraint_GetMaxWidth(constraint);
+    EXPECT_EQ(minWidth, 1);
+    maxHeight = OH_ArkUI_LayoutConstraint_GetMaxWidth(constraint);
+    EXPECT_EQ(maxHeight, 1);
+    minHeight = OH_ArkUI_LayoutConstraint_GetMaxWidth(constraint);
+    EXPECT_EQ(minHeight, 1);
+    percentReferWidth = OH_ArkUI_LayoutConstraint_GetMaxWidth(constraint);
+    EXPECT_EQ(percentReferWidth, 1);
+    percentReferHeight = OH_ArkUI_LayoutConstraint_GetMaxWidth(constraint);
+    EXPECT_EQ(percentReferHeight, 1);
+
+    delete constraint;
+}
+
+/**
+ * @tc.name: NativeNodeTest130
+ * @tc.desc: Test OH_ArkUI_LayoutConstraint_Set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest130, TestSize.Level1)
+{
+    int32_t value = 2;
+    auto constraint = new ArkUI_LayoutConstraint;
+
+    OH_ArkUI_LayoutConstraint_SetMinWidth(nullptr, value);
+    OH_ArkUI_LayoutConstraint_SetMinWidth(constraint, value);
+    EXPECT_EQ(constraint->minWidth, value);
+    OH_ArkUI_LayoutConstraint_SetMaxWidth(nullptr, value);
+    OH_ArkUI_LayoutConstraint_SetMaxWidth(constraint, value);
+    EXPECT_EQ(constraint->maxWidth, value);
+    OH_ArkUI_LayoutConstraint_SetMaxHeight(nullptr, value);
+    OH_ArkUI_LayoutConstraint_SetMaxHeight(constraint, value);
+    EXPECT_EQ(constraint->maxHeight, value);
+    OH_ArkUI_LayoutConstraint_SetMinHeight(nullptr, value);
+    OH_ArkUI_LayoutConstraint_SetMinHeight(constraint, value);
+    EXPECT_EQ(constraint->minHeight, value);
+    OH_ArkUI_LayoutConstraint_SetPercentReferenceWidth(nullptr, value);
+    OH_ArkUI_LayoutConstraint_SetPercentReferenceWidth(constraint, value);
+    EXPECT_EQ(constraint->percentReferWidth, value);
+    OH_ArkUI_LayoutConstraint_SetPercentReferenceHeight(nullptr, value);
+    OH_ArkUI_LayoutConstraint_SetPercentReferenceHeight(constraint, value);
+    EXPECT_EQ(constraint->percentReferHeight, value);
+
+    delete constraint;
+}
+
+/**
+ * @tc.name: NativeNodeTest131
+ * @tc.desc: Test OH_ArkUI_SwiperIndicator_GetWithNullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest131, TestSize.Level1)
+{
+    float value = 1.0f;
+    value = OH_ArkUI_SwiperIndicator_GetStartPosition(nullptr);
+    EXPECT_EQ(value, 0.0f);
+    value = OH_ArkUI_SwiperIndicator_GetTopPosition(nullptr);
+    EXPECT_EQ(value, 0.0f);
+    value = OH_ArkUI_SwiperIndicator_GetEndPosition(nullptr);
+    EXPECT_EQ(value, 0.0f);
+    value = OH_ArkUI_SwiperIndicator_GetBottomPosition(nullptr);
+    EXPECT_EQ(value, 0.0f);
+    value = OH_ArkUI_SwiperIndicator_GetItemWidth(nullptr);
+    EXPECT_EQ(value, 0.0f);
+    value = OH_ArkUI_SwiperIndicator_GetItemHeight(nullptr);
+    EXPECT_EQ(value, 0.0f);
+    value = OH_ArkUI_SwiperIndicator_GetSelectedItemWidth(nullptr);
+    EXPECT_EQ(value, 0.0f);
+    value = OH_ArkUI_SwiperIndicator_GetSelectedItemHeight(nullptr);
+    EXPECT_EQ(value, 0.0f);
+    int32_t value1 = 1;
+    value1 = OH_ArkUI_SwiperIndicator_GetMask(nullptr);
+    EXPECT_EQ(value1, 0);
+    uint32_t value2 = 1;
+    value2 = OH_ArkUI_SwiperIndicator_GetColor(nullptr);
+    EXPECT_EQ(value2, 0);
+    value2 = OH_ArkUI_SwiperIndicator_GetSelectedColor(nullptr);
+    EXPECT_EQ(value2, 0);
+    value1 = OH_ArkUI_SwiperIndicator_GetMaxDisplayCount(nullptr);
+    EXPECT_EQ(value1, 0);
+    value = OH_ArkUI_SwiperIndicator_GetIgnoreSizeOfBottom(nullptr);
+    EXPECT_EQ(value, 0.0f);
+    value = OH_ArkUI_SwiperIndicator_GetSpace(nullptr);
+    EXPECT_EQ(value, 8.0f);
+}
+
+/**
+ * @tc.name: NativeNodeTest132
+ * @tc.desc: Test OH_ArkUI_SwiperIndicator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest132, TestSize.Level1)
+{
+    auto indicator = OH_ArkUI_SwiperIndicator_Create(ARKUI_SWIPER_INDICATOR_TYPE_DOT);
+    float setValueF = 1.0f;
+    int32_t setValueI = 1;
+    uint32_t setValueUi = 1;
+    OH_ArkUI_SwiperIndicator_SetStartPosition(indicator, setValueF);
+    float value = OH_ArkUI_SwiperIndicator_GetStartPosition(indicator);
+    EXPECT_EQ(value, setValueF);
+    OH_ArkUI_SwiperIndicator_SetTopPosition(indicator, setValueF);
+    value = OH_ArkUI_SwiperIndicator_GetTopPosition(indicator);
+    EXPECT_EQ(value, setValueF);
+    OH_ArkUI_SwiperIndicator_SetEndPosition(indicator, setValueF);
+    value = OH_ArkUI_SwiperIndicator_GetEndPosition(indicator);
+    EXPECT_EQ(value, setValueF);
+    OH_ArkUI_SwiperIndicator_SetBottomPosition(indicator, setValueF);
+    value = OH_ArkUI_SwiperIndicator_GetBottomPosition(indicator);
+    EXPECT_EQ(value, setValueF);
+    OH_ArkUI_SwiperIndicator_SetItemWidth(indicator, setValueF);
+    value = OH_ArkUI_SwiperIndicator_GetItemWidth(indicator);
+    EXPECT_EQ(value, setValueF);
+    OH_ArkUI_SwiperIndicator_SetItemHeight(indicator, setValueF);
+    value = OH_ArkUI_SwiperIndicator_GetItemHeight(indicator);
+    EXPECT_EQ(value, setValueF);
+    OH_ArkUI_SwiperIndicator_SetSelectedItemWidth(indicator, setValueF);
+    value = OH_ArkUI_SwiperIndicator_GetSelectedItemWidth(indicator);
+    EXPECT_EQ(value, setValueF);
+    OH_ArkUI_SwiperIndicator_SetSelectedItemHeight(indicator, setValueF);
+    value = OH_ArkUI_SwiperIndicator_GetSelectedItemHeight(indicator);
+    EXPECT_EQ(value, setValueF);
+    OH_ArkUI_SwiperIndicator_SetMask(indicator, setValueI);
+    int32_t value1 = OH_ArkUI_SwiperIndicator_GetMask(indicator);
+    EXPECT_EQ(value1, setValueI);
+    OH_ArkUI_SwiperIndicator_SetColor(indicator, setValueUi);
+    uint32_t value2 = OH_ArkUI_SwiperIndicator_GetColor(indicator);
+    EXPECT_EQ(value2, setValueUi);
+    OH_ArkUI_SwiperIndicator_SetSelectedColor(indicator, setValueUi);
+    value2 = OH_ArkUI_SwiperIndicator_GetSelectedColor(indicator);
+    EXPECT_EQ(value2, setValueUi);
+    OH_ArkUI_SwiperIndicator_SetMaxDisplayCount(indicator, setValueI);
+    value1 = OH_ArkUI_SwiperIndicator_GetMaxDisplayCount(indicator);
+    EXPECT_EQ(value1, 0);
+    OH_ArkUI_SwiperIndicator_SetIgnoreSizeOfBottom(indicator, setValueI);
+    value1 = OH_ArkUI_SwiperIndicator_GetIgnoreSizeOfBottom(indicator);
+    EXPECT_EQ(value1, setValueI);
+    OH_ArkUI_SwiperIndicator_SetSpace(indicator, setValueF);
+    value = OH_ArkUI_SwiperIndicator_GetSpace(indicator);
+    EXPECT_EQ(value, setValueF);
+    OH_ArkUI_SwiperIndicator_Dispose(indicator);
+}
+
+/**
+ * @tc.name: NativeNodeTest133
+ * @tc.desc: Test OH_ArkUI_SwiperDigitIndicator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest133, TestSize.Level1)
+{
+    auto indicator = OH_ArkUI_SwiperDigitIndicator_Create();
+    EXPECT_TRUE(indicator);
+    OH_ArkUI_SwiperDigitIndicator_Destroy(indicator);
+}
+
+/**
+ * @tc.name: NativeNodeTest134
+ * @tc.desc: Test NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest134, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    auto option = OH_ArkUI_VisibleAreaEventOptions_Create();
+    float* ratiosArray = new float[2];
+    ratiosArray[0] = -0.2f;
+    ratiosArray[1] = 1.0f;
+    OH_ArkUI_VisibleAreaEventOptions_SetRatios(option, ratiosArray, 2);
+    OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(option, 1000);
+    ArkUI_AttributeItem attributeItem = { .object = option };
+    nodeAPI->setAttribute(rootNode, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO, &attributeItem);
+
+    float* getRatiosArray = new float[4];
+    int size = 4;
+    OH_ArkUI_VisibleAreaEventOptions_GetRatios(option, getRatiosArray, &size);
+
+    EXPECT_EQ(getRatiosArray[0], 0.0f);
+    EXPECT_EQ(getRatiosArray[1], 1.0f);
+
+    EXPECT_EQ(OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(option), 1000);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest135
+ * @tc.desc: Test NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest135, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    auto option = OH_ArkUI_VisibleAreaEventOptions_Create();
+    float* ratiosArray = new float[2];
+    ratiosArray[0] = -0.2f;
+    ratiosArray[1] = 3.0f;
+    OH_ArkUI_VisibleAreaEventOptions_SetRatios(option, ratiosArray, 2);
+    OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(option, 1000);
+    ArkUI_AttributeItem attributeItem = { .object = option };
+    nodeAPI->setAttribute(rootNode, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO, &attributeItem);
+
+    float* getRatiosArray = new float[2];
+    int size = 2;
+    OH_ArkUI_VisibleAreaEventOptions_GetRatios(option, getRatiosArray, &size);
+
+    EXPECT_EQ(getRatiosArray[0], 0.0f);
+    EXPECT_EQ(getRatiosArray[1], 1.0f);
+
+    EXPECT_EQ(OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(option), 1000);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest136
+ * @tc.desc: Test NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest136, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    auto option = OH_ArkUI_VisibleAreaEventOptions_Create();
+    float* ratiosArray = new float[2];
+    ratiosArray[0] = 0.2f;
+    ratiosArray[1] = 1.2f;
+    OH_ArkUI_VisibleAreaEventOptions_SetRatios(option, ratiosArray, 2);
+    OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(option, 1000);
+    ArkUI_AttributeItem attributeItem = { .object = option };
+    nodeAPI->setAttribute(rootNode, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO, &attributeItem);
+
+    float* getRatiosArray = new float[2];
+    int size = 2;
+    OH_ArkUI_VisibleAreaEventOptions_GetRatios(option, getRatiosArray, &size);
+
+    EXPECT_EQ(getRatiosArray[0], 0.2f);
+    EXPECT_EQ(getRatiosArray[1], 1.0f);
+
+    EXPECT_EQ(OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(option), 1000);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest137
+ * @tc.desc: Test NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest137, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    auto option = OH_ArkUI_VisibleAreaEventOptions_Create();
+    float* ratiosArray = new float[2];
+    ratiosArray[0] = 1.2f;
+    ratiosArray[1] = 1.2f;
+    OH_ArkUI_VisibleAreaEventOptions_SetRatios(option, ratiosArray, 2);
+    OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(option, 1000);
+    ArkUI_AttributeItem attributeItem = { .object = option };
+    nodeAPI->setAttribute(rootNode, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO, &attributeItem);
+
+    float* getRatiosArray = new float[2];
+    int size = 2;
+    OH_ArkUI_VisibleAreaEventOptions_GetRatios(option, getRatiosArray, &size);
+
+    EXPECT_EQ(getRatiosArray[0], 1.0f);
+    EXPECT_EQ(getRatiosArray[1], 1.0f);
+
+    EXPECT_EQ(OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(option), 1000);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest138
+ * @tc.desc: Test NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest138, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    auto option = OH_ArkUI_VisibleAreaEventOptions_Create();
+    float* ratiosArray = new float[2];
+    ratiosArray[0] = 0.2f;
+    ratiosArray[1] = 1.0f;
+    OH_ArkUI_VisibleAreaEventOptions_SetRatios(option, ratiosArray, 2);
+    OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(option, -100);
+    ArkUI_AttributeItem attributeItem = { .object = option };
+    nodeAPI->setAttribute(rootNode, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO, &attributeItem);
+
+    float* getRatiosArray = new float[2];
+    int size = 2;
+    OH_ArkUI_VisibleAreaEventOptions_GetRatios(option, getRatiosArray, &size);
+
+    EXPECT_EQ(getRatiosArray[0], 0.2f);
+    EXPECT_EQ(getRatiosArray[1], 1.0f);
+
+    EXPECT_EQ(OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(option), 1000);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest139
+ * @tc.desc: Test NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest139, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    auto option = OH_ArkUI_VisibleAreaEventOptions_Create();
+    float* ratiosArray = new float[2];
+    ratiosArray[0] = 0.2f;
+    ratiosArray[1] = 1.0f;
+    OH_ArkUI_VisibleAreaEventOptions_SetRatios(option, ratiosArray, 2);
+    OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(option, 1200);
+    ArkUI_AttributeItem attributeItem = { .object = option };
+    nodeAPI->setAttribute(rootNode, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO, &attributeItem);
+
+    float* getRatiosArray = new float[2];
+    int size = 2;
+    OH_ArkUI_VisibleAreaEventOptions_GetRatios(option, getRatiosArray, &size);
+
+    EXPECT_EQ(getRatiosArray[0], 0.2f);
+    EXPECT_EQ(getRatiosArray[1], 1.0f);
+
+    EXPECT_EQ(OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(option), 1200);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest140
+ * @tc.desc: Test NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest140, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    auto option = OH_ArkUI_VisibleAreaEventOptions_Create();
+    float* ratiosArray = new float[2];
+    ratiosArray[0] = 0.2f;
+    ratiosArray[1] = 1.0f;
+    OH_ArkUI_VisibleAreaEventOptions_SetRatios(option, ratiosArray, 2);
+    OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(option, 200);
+    ArkUI_AttributeItem attributeItem = { .object = option };
+    nodeAPI->setAttribute(rootNode, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO, &attributeItem);
+
+    float* getRatiosArray = new float[2];
+    int size = 2;
+    OH_ArkUI_VisibleAreaEventOptions_GetRatios(option, getRatiosArray, &size);
+
+    EXPECT_EQ(getRatiosArray[0], 0.2f);
+    EXPECT_EQ(getRatiosArray[1], 1.0f);
+
+    EXPECT_EQ(OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(option), 200);
     nodeAPI->disposeNode(rootNode);
 }
 } // namespace OHOS::Ace

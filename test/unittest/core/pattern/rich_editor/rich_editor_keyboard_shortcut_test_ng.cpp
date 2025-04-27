@@ -205,12 +205,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts002, TestS
     richEditorPattern->SetCaretPosition(0);
     richEditorPattern->CursorMove(CaretMoveIntent::LineEnd);
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 6);
-    richEditorPattern->SetCaretPosition(0);
-    richEditorPattern->HandleSelect(CaretMoveIntent::LineEnd);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
-    richEditorPattern->SetCaretPosition(0);
-    richEditorPattern->HandleSelect(CaretMoveIntent::Down);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
 }
 
 /**
@@ -252,12 +246,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts101, TestS
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->HandleSelect(CaretMoveIntent::RightWord);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 21);
-    richEditorPattern->SetCaretPosition(20);
-    richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghBegin);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
-    richEditorPattern->SetCaretPosition(20);
-    richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghEnd);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), textOptions.value.length());
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->HandleSelect(CaretMoveIntent::LineBegin);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
@@ -452,7 +440,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeAddImage101, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateEventHub();
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto tempFunc1 = [](const RichEditorChangeValue&) { return true; };
     std::function<bool(const RichEditorChangeValue&)> func1 = tempFunc1;
@@ -484,7 +472,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeChangeText101, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateEventHub();
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto tempFunc1 = [](const RichEditorChangeValue&) { return true; };
     std::function<bool(const RichEditorChangeValue&)> func1 = tempFunc1;
@@ -518,6 +506,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetTextThemeFontSize101, TestSize.Lev
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     context->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
     auto theme = context->GetTheme<TextTheme>();
     ASSERT_NE(theme, nullptr);
     auto ret = richEditorPattern->GetTextThemeFontSize();
@@ -541,46 +530,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectWrapper101, TestSize.Leve
     int32_t fixedPos = 0;
     auto ret = richEditorPattern->HandleSelectWrapper(direction, fixedPos);
     EXPECT_EQ(ret, -1);
-}
-
-/**
- * @tc.name: HandleSelectFontStyleWrapper101
- * @tc.desc: test HandleSelectFontStyleWrapper
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectFontStyleWrapper101, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    KeyCode code;
-    TextStyle spanStyle;
-    /**
-     * @tc.steps: step2. change parameters and call function.
-     */
-    code = KeyCode::KEY_B;
-    spanStyle.SetFontWeight(Ace::FontWeight::BOLD);
-    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
-    EXPECT_EQ(spanStyle.GetFontWeight(), Ace::FontWeight::NORMAL);
-    /**
-     * @tc.steps: step3. change parameters and call function.
-     */
-    spanStyle.SetFontWeight(Ace::FontWeight::NORMAL);
-    code = KeyCode::KEY_I;
-    spanStyle.SetFontStyle(OHOS::Ace::FontStyle::ITALIC);
-    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
-    EXPECT_EQ(spanStyle.GetFontStyle(), OHOS::Ace::FontStyle::NORMAL);
-    /**
-     * @tc.steps: step4. change parameters and call function.
-     */
-    spanStyle.SetFontStyle(OHOS::Ace::FontStyle::NORMAL);
-    code = KeyCode::KEY_U;
-    spanStyle.SetTextDecoration(TextDecoration::UNDERLINE);
-    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
-    EXPECT_EQ(spanStyle.GetTextDecoration(), TextDecoration::NONE);
 }
 
 /**
@@ -740,69 +689,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, CheckTripClickEvent001, TestSize.Leve
 }
 
 /**
- * @tc.name: HandleOnDragDrop001
- * @tc.desc: test HandleOnDragDrop
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleOnDragDrop001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
-
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    ASSERT_NE(event, nullptr);
-    RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-    ASSERT_NE(unifiedData, nullptr);
-    std::string selectedStr = "test123";
-    OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
-    event->SetData(unifiedData);
-
-    auto focusHub = richEditorPattern->GetFocusHub();
-    EXPECT_NE(focusHub, nullptr);
-    focusHub->currentFocus_ = true;
-
-    richEditorPattern->HandleOnDragDrop(event);
-    EXPECT_NE(event->GetData(), nullptr);
-}
-
-/**
- * @tc.name: HandleSelectParagraghPos001
- * @tc.desc: test HandleSelectParagraghPos
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectParagraghPos001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->spans_.clear();
-    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
-    auto it = richEditorPattern->spans_.front();
-    it->content = u"test\n123";
-    it->position = 4;
-    richEditorPattern->caretPosition_ = 1;
-    richEditorPattern->isSpanStringMode_ = true;
-    auto ret = richEditorPattern->HandleSelectParagraghPos(true);
-    EXPECT_EQ(ret, 0);
-    ret = richEditorPattern->HandleSelectParagraghPos(false);
-    EXPECT_EQ(ret, 0);
-}
-
-/**
  * @tc.name: HandleSelectPosition001
  * @tc.desc: test HandleSelectPosition
  * @tc.type: FUNC
@@ -877,76 +763,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleMouseEvent001
- * @tc.desc: test HandleMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleMouseEvent001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    auto scrollBar = richEditorPattern->GetScrollBar();
-    ASSERT_NE(scrollBar, nullptr);
-    scrollBar->isHover_ = true;
-    scrollBar->isPressed_ = true;
-    MouseInfo info;
-    richEditorPattern->HandleMouseEvent(info);
-    auto mouseStyleManager = pipeline->eventManager_->GetMouseStyleManager();
-    EXPECT_TRUE(mouseStyleManager->mouseStyleNodeId_.has_value());
-}
-
-/**
- * @tc.name: HandleMouseLeftButtonRelease001
- * @tc.desc: test HandleMouseLeftButtonRelease
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleMouseLeftButtonRelease001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->dataDetectorAdapter_->pressedByLeftMouse_ = true;
-    richEditorPattern->mouseStatus_ = MouseStatus::PRESSED;
-    richEditorPattern->status_ = Status::ON_DROP;
-    MouseInfo info;
-    richEditorPattern->HandleMouseLeftButtonRelease(info);
-    EXPECT_FALSE(richEditorPattern->dataDetectorAdapter_->pressedByLeftMouse_);
-}
-
-/**
- * @tc.name: HandleMouseRightButton001
- * @tc.desc: test HandleMouseRightButton
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleMouseRightButton001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto focusHub = richEditorPattern->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->focusType_ = FocusType::DISABLE;
-    MouseInfo info;
-    richEditorPattern->HandleMouseRightButton(info);
-    EXPECT_FALSE(focusHub->IsFocusable());
-}
-
-/**
  * @tc.name: BeforeAddImage102
  * @tc.desc: test BeforeAddImage
  * @tc.type: FUNC
@@ -960,7 +776,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeAddImage102, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateEventHub();
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto tempFunc1 = [](const RichEditorChangeValue&) { return true; };
     std::function<bool(const RichEditorChangeValue&)> func1 = tempFunc1;
@@ -1004,7 +820,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeChangeText102, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateEventHub();
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto tempFunc1 = [](const RichEditorChangeValue&) { return true; };
     std::function<bool(const RichEditorChangeValue&)> func1 = tempFunc1;
@@ -1135,181 +951,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetSelectArea101, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleMouseRightButton002
- * @tc.desc: test HandleMouseRightButton
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleMouseRightButton002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto focusHub = richEditorPattern->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->focusType_ = FocusType::NODE;
-    focusHub->focusable_ = true;
-    focusHub->parentFocusable_ = true;
-    EXPECT_NE(richEditorPattern->GetFocusHub(), nullptr);
-    EXPECT_EQ(richEditorPattern->GetFocusHub()->IsFocusable(), true);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    MouseInfo info;
-    info.action_ = MouseAction::RELEASE;
-    info.button_ = MouseButton::EXTRA_BUTTON;
-    richEditorPattern->textSelector_.baseOffset = -2;
-    richEditorPattern->textSelector_.destinationOffset = -3;
-    richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
-    richEditorPattern->HandleMouseRightButton(info);
-    EXPECT_FALSE(richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_);
-    /**
-     * @tc.steps: step3. change parameter and call function.
-     */
-    info.globalLocation_.deltaX_ = 50.0;
-    info.globalLocation_.deltaY_ = 150.0;
-    richEditorPattern->textSelector_.baseOffset = 10;
-    richEditorPattern->textSelector_.destinationOffset = 50;
-    richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
-    richEditorPattern->copyOption_ = CopyOptions::InApp;
-    richEditorPattern->HandleMouseRightButton(info);
-    EXPECT_FALSE(richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_);
-}
-
-/**
- * @tc.name: HandleMouseLeftButtonMove001
- * @tc.desc: test HandleMouseLeftButtonMove
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleMouseLeftButtonMove001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto focusHub = richEditorPattern->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    EXPECT_NE(richEditorPattern->GetFocusHub(), nullptr);
-    EXPECT_EQ(richEditorPattern->GetFocusHub()->IsFocusable(), true);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    MouseInfo info;
-    info.action_ = MouseAction::RELEASE;
-    info.button_ = MouseButton::EXTRA_BUTTON;
-    richEditorPattern->blockPress_ = true;
-    richEditorPattern->leftMousePress_ = false;
-    richEditorPattern->HandleMouseLeftButtonMove(info);
-    EXPECT_FALSE(richEditorPattern->isMouseSelect_);
-    /**
-     * @tc.steps: step3. change parameter and call function.
-     */
-    richEditorPattern->dataDetectorAdapter_->pressedByLeftMouse_ = true;
-    richEditorPattern->blockPress_ = false;
-    richEditorPattern->leftMousePress_ = true;
-    richEditorPattern->HandleMouseLeftButtonMove(info);
-    EXPECT_TRUE(richEditorPattern->isMouseSelect_);
-    /**
-     * @tc.steps: step4. change parameter and call function.
-     */
-    richEditorPattern->dataDetectorAdapter_->pressedByLeftMouse_ = false;
-    focusHub->currentFocus_ = false;
-    richEditorPattern->blockPress_ = false;
-    richEditorPattern->leftMousePress_ = true;
-    richEditorPattern->HandleMouseLeftButtonMove(info);
-    EXPECT_TRUE(richEditorPattern->isMouseSelect_);
-    /**
-     * @tc.steps: step5. change parameter and call function.
-     */
-    richEditorPattern->dataDetectorAdapter_->pressedByLeftMouse_ = true;
-    focusHub->currentFocus_ = true;
-    richEditorPattern->blockPress_ = false;
-    richEditorPattern->leftMousePress_ = true;
-    richEditorPattern->textSelector_.baseOffset = 2;
-    richEditorPattern->textSelector_.destinationOffset = 3;
-    richEditorPattern->HandleMouseLeftButtonMove(info);
-    EXPECT_TRUE(richEditorPattern->isMouseSelect_);
-}
-
-/**
- * @tc.name: HandleTouchMove001
- * @tc.desc: test HandleTouchMove
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TouchLocationInfo touchLocationInfo(0);
-    touchLocationInfo.touchType_ = TouchType::MOVE;
-    touchLocationInfo.localLocation_ = Offset(10.0f, 20.0f);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    richEditorPattern->textSelector_.baseOffset = richEditorPattern->caretPosition_ - 1;
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->previewLongPress_ = true;
-    richEditorPattern->HandleTouchMove(touchLocationInfo);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, richEditorPattern->caretPosition_);
-    /**
-     * @tc.steps: step3. change parameter and call function.
-     */
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->previewLongPress_ = false;
-    richEditorPattern->HandleTouchMove(touchLocationInfo);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, richEditorPattern->caretPosition_);
-    /**
-     * @tc.steps: step4. change parameter and call function.
-     */
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->previewLongPress_ = false;
-    richEditorPattern->HandleTouchMove(touchLocationInfo);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, richEditorPattern->caretPosition_);
-    /**
-     * @tc.steps: step5. change parameter and call function.
-     */
-    richEditorPattern->isLongPress_ = false;
-    richEditorPattern->selectOverlay_->ProcessOverlay({ .animation = false });
-    auto manager = richEditorPattern->selectOverlay_->GetManager<SelectContentOverlayManager>();
-    ASSERT_NE(manager, nullptr);
-    SelectOverlayInfo info;
-    manager->CreateSelectOverlay(info);
-    ASSERT_NE(manager->shareOverlayInfo_, nullptr);
-    manager->shareOverlayInfo_->isSingleHandle = true;
-    richEditorPattern->HandleTouchMove(touchLocationInfo);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, richEditorPattern->caretPosition_);
-}
-
-/**
- * @tc.name: HandleTouchUp001
- * @tc.desc: test HandleTouchUp
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchUp001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->moveCaretState_.isTouchCaret = true;
-    richEditorPattern->previewLongPress_ = true;
-    richEditorPattern->magnifierController_->isShowMagnifier_ = true;
-    richEditorPattern->HandleTouchUp();
-    EXPECT_FALSE(richEditorPattern->previewLongPress_);
-}
-
-/**
  * @tc.name: SetCustomKeyboard001
  * @tc.desc: test SetCustomKeyboard
  * @tc.type: FUNC
@@ -1323,55 +964,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, SetCustomKeyboard001, TestSize.Level1
     bool result =
         ViewStackProcessor::GetInstance()->GetMainFrameNode()->GetPattern<RichEditorPattern>()->keyboardAvoidance_;
     EXPECT_TRUE(result);
-}
-
-/**
- * @tc.name: HandleTouchMove002
- * @tc.desc: test HandleTouchMove
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->previewLongPress_ = false;
-    richEditorPattern->editingLongPress_ = false;
-    richEditorPattern->moveCaretState_.isTouchCaret = true;
-    richEditorPattern->moveCaretState_.isMoveCaret = false;
-    richEditorPattern->moveCaretState_.touchDownOffset = Offset(5.0f, 5.0f);
-    richEditorPattern->caretTwinkling_ = true;
-    Offset offset(5.0f, 5.0f);
-    auto moveDistance = (offset - richEditorPattern->moveCaretState_.touchDownOffset).GetDistance();
-    ASSERT_GT(richEditorPattern->moveCaretState_.minDistance.ConvertToPx(), moveDistance);
-    TouchLocationInfo touchLocationInfo(1);
-    touchLocationInfo.SetGlobalLocation(offset);
-    richEditorPattern->HandleTouchMove(touchLocationInfo);
-    EXPECT_EQ(richEditorPattern->moveCaretState_.touchFingerId, touchLocationInfo.fingerId_);
-}
-
-/**
- * @tc.name: HandleTouchMove003
- * @tc.desc: test HandleTouchMove
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->previewLongPress_ = false;
-    richEditorPattern->editingLongPress_ = false;
-    richEditorPattern->moveCaretState_.isTouchCaret = true;
-    richEditorPattern->moveCaretState_.isMoveCaret = true;
-    richEditorPattern->moveCaretState_.touchDownOffset = Offset(5.0f, 5.0f);
-    Offset offset(5.01f, 5.01f);
-    auto moveDistance = (offset - richEditorPattern->moveCaretState_.touchDownOffset).GetDistance();
-    ASSERT_LE(moveDistance, richEditorPattern->moveCaretState_.minDistance.ConvertToPx() + 0.001f);
-    TouchLocationInfo touchLocationInfo(1);
-    touchLocationInfo.SetGlobalLocation(offset);
-    richEditorPattern->HandleTouchMove(touchLocationInfo);
-    EXPECT_NE(richEditorPattern->moveCaretState_.touchFingerId, touchLocationInfo.fingerId_);
 }
 
 /**
@@ -1547,5 +1139,65 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts207, TestS
 
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_R);
     EXPECT_EQ(newSpan2->GetFontWeight(), Ace::FontWeight::BOLD);
+}
+
+/**
+ * @tc.name: ShiftMultipleSelection001
+ * @tc.desc: test richEditor shift multiple selection function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, ShiftMultipleSelection001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_3;
+    richEditorController->AddTextSpan(textOptions);
+
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_SHIFT_LEFT);
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_DPAD_RIGHT);
+    richEditorPattern->UpdateShiftFlag(keyEvent);
+    EXPECT_TRUE(richEditorPattern->shiftFlag_);
+
+    MouseInfo mouseInfo;
+    mouseInfo.button_ = MouseButton::LEFT_BUTTON;
+    mouseInfo.action_ = MouseAction::PRESS;
+    richEditorPattern->mouseStatus_ = MouseStatus::NONE;
+    mouseInfo.SetGlobalLocation(Offset(0, 0));
+    richEditorPattern->SetCaretPosition(10);
+    richEditorPattern->HandleMouseLeftButton(mouseInfo);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 10);
+    richEditorPattern->textSelector_.Update(10, 20);
+    richEditorPattern->HandleMouseLeftButton(mouseInfo);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 10);
+
+    GestureEvent info;
+    info.localLocation_ = Offset(0, 0);
+    info.deviceType_ = SourceType::MOUSE;
+    richEditorPattern->SetCaretPosition(10);
+    richEditorPattern->HandleSingleClickEvent(info);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 10);
+    richEditorPattern->textSelector_.Update(10, 20);
+    richEditorPattern->HandleSingleClickEvent(info);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 10);
+
+    keyEvent.action = KeyAction::UP;
+    keyEvent.pressedCodes.pop_back();
+    richEditorPattern->UpdateShiftFlag(keyEvent);
+    EXPECT_TRUE(richEditorPattern->shiftFlag_);
+    keyEvent.pressedCodes.pop_back();
+    richEditorPattern->UpdateShiftFlag(keyEvent);
+    EXPECT_FALSE(richEditorPattern->shiftFlag_);
 }
 } // namespace OHOS::Ace::NG

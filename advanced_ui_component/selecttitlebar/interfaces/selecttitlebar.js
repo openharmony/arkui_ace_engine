@@ -996,10 +996,10 @@ class ImageMenuItem extends ViewPU {
             return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
         }
         else if (this.item.accessibilityText) {
-            return this.toStringFormat(this.item.accessibilityText);
+            return this.item.accessibilityText;
         }
         else if (this.item.label) {
-            return this.toStringFormat(this.item.label);
+            return this.item.label;
         }
         return ' ';
     }
@@ -1021,7 +1021,7 @@ class ImageMenuItem extends ViewPU {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
                         Button.accessibilityText(this.getAccessibilityReadText());
                         Button.accessibilityLevel(this.item?.accessibilityLevel ?? 'auto');
-                        Button.accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription));
+                        Button.accessibilityDescription(this.item?.accessibilityDescription);
                         Button.width(ImageMenuItem.imageHotZoneWidth);
                         Button.height(ImageMenuItem.imageHotZoneWidth);
                         Button.borderRadius(ImageMenuItem.buttonBorderRadius);
@@ -1145,7 +1145,7 @@ class ImageMenuItem extends ViewPU {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
                         Button.accessibilityText(this.getAccessibilityReadText());
                         Button.accessibilityLevel(this.item?.accessibilityLevel ?? 'auto');
-                        Button.accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription));
+                        Button.accessibilityDescription(this.item?.accessibilityDescription);
                         Button.width(ImageMenuItem.imageHotZoneWidth);
                         Button.height(ImageMenuItem.imageHotZoneWidth);
                         Button.borderRadius(ImageMenuItem.buttonBorderRadius);
@@ -1397,7 +1397,7 @@ class SelectTitleBarDialog extends ViewPU {
                         Column.create();
                         Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
                         Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
-                        Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
+                        Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true });
                         Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
                         Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                     }, Column);
@@ -1492,7 +1492,7 @@ class SelectTitleBarDialog extends ViewPU {
                         Column.create();
                         Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
                         Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
-                        Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
+                        Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true });
                         Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
                         Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Column.justifyContent(FlexAlign.Center);

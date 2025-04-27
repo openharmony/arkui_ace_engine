@@ -151,6 +151,7 @@ export class Index extends ViewPU {
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.textAlign(TextAlign.Start);
       Text.opacity(this.iconOpacity);
+      Text.flexShrink(1);
       Text.minFontScale(0.85);
       Text.maxFontScale(1.45);
       if (!isInitialRender) {
@@ -209,6 +210,8 @@ const f2 = 'arkui_button_size_change';
 const g2 = 'arkui_button_spacing_change';
 const h2 = 'arkui_color_mode_locked';
 const i2 = 'arkui_button_right_offset_change';
+const k2 = 'arkui_button_icon_size_change';
+const p2 = 'arkui_button_background_corner_radius_change';
 const j2 = {
     bundleName: '',
     moduleName: '',
@@ -372,6 +375,8 @@ class c3 extends ViewPU {
         this.l4 = new ObservedPropertySimplePU(28, this, "buttonSize");
         this.m4 = new ObservedPropertySimplePU(20, this, "buttonRightOffset");
         this.colorConfigurationLocked = false;
+        this.n4 = new ObservedPropertySimplePU(20, this, 'buttonIconSize');
+        this.o4 = new ObservedPropertySimplePU(4, this, 'buttonBackgroundCornerRadius');
         this.isFocused = true;
         this.isDark = false;
         this.isHoverShowMenu = false;
@@ -527,6 +532,8 @@ class c3 extends ViewPU {
         this.j4.purgeDependencyOnElmtId(rmElmtId);
         this.l4.purgeDependencyOnElmtId(rmElmtId);
         this.m4.purgeDependencyOnElmtId(rmElmtId);
+        this.n4.purgeDependencyOnElmtId(rmElmtId);
+        this.o4.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
         this.f3.aboutToBeDeleted();
@@ -559,6 +566,8 @@ class c3 extends ViewPU {
         this.j4.aboutToBeDeleted();
         this.l4.aboutToBeDeleted();
         this.m4.aboutToBeDeleted();
+        this.n4.aboutToBeDeleted();
+        this.o4.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -742,6 +751,18 @@ class c3 extends ViewPU {
     set buttonRightOffset(newValue) {
         this.m4.set(newValue);
     }
+    get buttonIconSize() {
+        return this.n4.get();
+    }
+    set buttonIconSize(newValue) {
+        this.n4.set(newValue);
+    }
+    get buttonBackgroundCornerRadius() {
+        return this.o4.get();
+    }
+    set buttonBackgroundCornerRadius(newValue) {
+        this.o4.set(newValue);
+    }
     onWindowFocused() {
         this.rowOpacity = 1.0;
         this.isFocused = true;
@@ -793,6 +814,12 @@ class c3 extends ViewPU {
         else if (eventName === f2) {
             this.setButtonButtonSize(param);
         }
+        else if (eventName === k2) {
+            this.setButtonIconSize(param);
+        }
+        else if (eventName === p2) {
+            this.setButtonBackgroundCornerRadius(param);
+        }
     }
     setButtonSpacing(param) {
         this.buttonSpacing = parseInt(param);
@@ -824,15 +851,17 @@ class c3 extends ViewPU {
         }
         return resource;
     }
+    setButtonIconSize(param) {
+        this.buttonIconSize = parseInt(param);
+    }
+    setButtonBackgroundCornerRadius(param) {
+        this.buttonBackgroundCornerRadius = parseInt(param);
+    }
     onMaximizeButtonClick() {
         this.onCancelMenuTimer();
-        this.onHoverMaximizeButton(false);
-        this.maximizeScale = 1.0;
         ContainerModal.callNative(l1);
     }
     onMinimizeButtonClick() {
-        this.onHoverMinimizeButton(false);
-        this.minimizeScale = 1.0;
         ContainerModal.callNative(m1);
     }
     onCloseButtonClick() {
@@ -931,6 +960,7 @@ class c3 extends ViewPU {
         }
     }
     onShowMenuWithTimer() {
+        this.onCancelMenuTimer();
         if (!this.hideSplit && this.isFocused) {
             this.showMenuTimeoutId = setTimeout(() => {
                 this.isShowMenu = true;
@@ -1085,6 +1115,11 @@ class c3 extends ViewPU {
             PanGesture.create();
             PanGesture.pop();
             Gesture.pop();
+            Row.onTouch((u) => {
+                if (u) {
+                    u.stopPropagation();
+                }
+            })
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild();
@@ -1093,7 +1128,7 @@ class c3 extends ViewPU {
             Button.width(this.buttonSize + 'vp');
             Button.height(this.buttonSize + 'vp');
             Button.type(ButtonType.Normal);
-            Button.borderRadius('4vp');
+            Button.borderRadius(this.buttonBackgroundCornerRadius + 'vp');
             Button.hoverEffect(HoverEffect.None);
             Button.responseRegion({
                 x: t,
@@ -1147,8 +1182,8 @@ class c3 extends ViewPU {
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.maximizeResource);
-            Image.width(i);
-            Image.height(i);
+            Image.width(this.buttonIconSize + 'vp');
+            Image.height(this.buttonIconSize + 'vp');
             Image.fillColor(ObservedObject.GetRawObject(this.maximizeFillColor));
             Image.draggable(false);
             Image.interpolation(ImageInterpolation.High);
@@ -1162,7 +1197,7 @@ class c3 extends ViewPU {
             Button.width(this.buttonSize + 'vp');
             Button.height(this.buttonSize + 'vp');
             Button.type(ButtonType.Normal);
-            Button.borderRadius('4vp');
+            Button.borderRadius(this.buttonBackgroundCornerRadius + 'vp');
             Button.hoverEffect(HoverEffect.None);
             Button.responseRegion({
                 x: t,
@@ -1192,8 +1227,8 @@ class c3 extends ViewPU {
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.minimizeResource);
-            Image.width(i);
-            Image.height(i);
+            Image.width(this.buttonIconSize + 'vp');
+            Image.height(this.buttonIconSize + 'vp');
             Image.fillColor(ObservedObject.GetRawObject(this.minimizeFillColor));
             Image.draggable(false);
             Image.interpolation(ImageInterpolation.High);
@@ -1207,7 +1242,7 @@ class c3 extends ViewPU {
             Button.width(this.buttonSize + 'vp');
             Button.height(this.buttonSize + 'vp');
             Button.type(ButtonType.Normal);
-            Button.borderRadius('4vp');
+            Button.borderRadius(this.buttonBackgroundCornerRadius + 'vp');
             Button.hoverEffect(HoverEffect.None);
             Button.responseRegion({
                 x: t,
@@ -1237,8 +1272,8 @@ class c3 extends ViewPU {
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.closeResource);
-            Image.width(i);
-            Image.height(i);
+            Image.width(this.buttonIconSize + 'vp');
+            Image.height(this.buttonIconSize + 'vp');
             Image.fillColor(ObservedObject.GetRawObject(this.closeFillColor));
             Image.draggable(false);
             Image.interpolation(ImageInterpolation.High);

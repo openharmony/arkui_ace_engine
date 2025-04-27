@@ -25,6 +25,7 @@ ohos_source_set("ace_kit_mock") {
     "$ace_root/test/mock/adapter/mock_input_manager.cpp",
     "$ace_root/test/mock/adapter/mock_modal_ui_extension.cpp",
     "$ace_root/test/mock/adapter/mock_system_bar_style_ohos.cpp",
+    "$ace_root/test/mock/adapter/mock_ui_session_manager.cpp",
     "$ace_root/test/mock/adapter/mock_view_data_wrap_ohos.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
@@ -83,6 +84,8 @@ ohos_source_set("ace_kit_mock") {
     "$ace_root/test/mock/core/image_provider/mock_image_cache.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_loading_context.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_utils.cpp",
+    "$ace_root/test/mock/core/manager/mock_display_manager.cpp",
     "$ace_root/test/mock/core/package/mock_package_event_proxy.cpp",
     "$ace_root/test/mock/core/pattern/mock_app_bar_utils.cpp",
     "$ace_root/test/mock/core/pattern/mock_app_bar_view.cpp",
@@ -123,6 +126,8 @@ ohos_source_set("ace_kit_mock") {
 ohos_unittest("ace_kit_test") {
   module_out_path = interface_test_output_path
 
+  defines = [ "USE_ARK_ENGINE" ]
+
   sources = [
     "$ace_root/interfaces/inner_api/ace_kit/src/agingadapation/aging_adapation_dialog_util.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/animation/animation_utils.cpp",
@@ -136,10 +141,8 @@ ohos_unittest("ace_kit_test") {
     "$ace_root/interfaces/inner_api/ace_kit/src/view/draw/modifier_adapter.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/extend_pattern.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/layout/box_layout_algorithm.cpp",
-    "$ace_root/interfaces/inner_api/ace_kit/src/view/overlay/overlay_manager_impl.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/theme/theme_factory.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/theme/theme_style_impl.cpp",
-    "$ace_root/interfaces/inner_api/ace_kit/src/view/ui_context_impl.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/view.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view_factory/abstract_view_factory.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view_stack/view_stack_processor.cpp",
@@ -153,10 +156,20 @@ ohos_unittest("ace_kit_test") {
 
   sources += [
     "abstract_view_factory_test.cpp",
+    "aging_adapation_dialog_util_test.cpp",
+    "animation_kit_test.cpp",
+    "box_layout_algorithm_test.cpp",
+    "color_test.cpp",
     "content_modifier_test.cpp",
+    "dimension_test.cpp",
     "frame_node_test.cpp",
+    "property_test.cpp",
+    "resource_parser_test.cpp",
     "view_stack_processor_test.cpp",
+    "view_test.cpp",
   ]
+
+  cflags = [ "-fno-access-control" ]
 
   sources += ace_kit_mock_sources
 

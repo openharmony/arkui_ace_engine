@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -347,7 +348,8 @@ void NavDestinationPatternBase::OnToolBarAnimationFinish()
 
 void NavDestinationPatternBase::AbortBarAnimation()
 {
-    for (const auto& pair : barAnimations_) {
+    auto barAnimations = barAnimations_;
+    for (const auto& pair : barAnimations) {
         if (pair.second) {
             AnimationUtils::StopAnimation(pair.second);
         }
@@ -392,8 +394,6 @@ void NavDestinationPatternBase::ExpandContentSafeAreaIfNeeded()
     auto&& opts = layoutProperty->GetSafeAreaExpandOpts();
     auto contentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
     if (opts && contentNode) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s SafeArea expand as %{public}s",
-            hostNode->GetTag().c_str(), opts->ToString().c_str());
         contentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
         contentNode->MarkModifyDone();
     }
@@ -421,5 +421,25 @@ void NavDestinationPatternBase::MarkSafeAreaPaddingChangedWithCheckTitleBar(floa
     if (titleBarNode && NavigationTitleUtil::CalculateTitlebarOffset(titleBarNode) != titleBarOffsetY_) {
         safeAreaPaddingChanged_ = true;
     }
+}
+
+bool NavDestinationPatternBase::CustomizeExpandSafeArea()
+{
+    auto host = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_RETURN(host, false);
+    return host->CustomizeExpandSafeArea();
+}
+
+void NavDestinationPatternBase::OnColorConfigurationUpdate()
+{
+    auto node = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_VOID(node);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(node->GetToolBarDividerNode());
+    CHECK_NULL_VOID(dividerNode);
+    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    dividerRenderProperty->UpdateDividerColor(theme->GetToolBarDividerColor());
 }
 } // namespace OHOS::Ace::NG

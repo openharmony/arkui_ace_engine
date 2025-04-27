@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
+#include "core/components/refresh/refresh_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -45,6 +46,9 @@ void GridTestNg::SetUpTestSuite()
     auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
+    auto refreshThemeConstants = CreateThemeConstants(THEME_PATTERN_REFRESH);
+    auto refreshTheme = RefreshTheme::Builder().Build(refreshThemeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(RefreshTheme::TypeId())).WillRepeatedly(Return(refreshTheme));
     auto container = Container::GetContainer(CONTAINER_ID_DIVIDE_SIZE);
     EXPECT_CALL(*(AceType::DynamicCast<MockContainer>(container)), GetWindowId()).Times(AnyNumber());
     MockAnimationManager::Enable(true);
@@ -80,6 +84,7 @@ void GridTestNg::TearDown()
     pattern_ = nullptr;
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
+    paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
     positionController_ = nullptr;
     ClearOldNodes(); // Each testCase will create new list at begin
@@ -94,9 +99,10 @@ void GridTestNg::GetGrid()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<GridPattern>();
-    eventHub_ = frameNode_->GetEventHub<GridEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<GridEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<GridLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<GridAccessibilityProperty>();
+    paintProperty_ = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
     positionController_ = pattern_->GetOrCreatePositionController();
 }
 

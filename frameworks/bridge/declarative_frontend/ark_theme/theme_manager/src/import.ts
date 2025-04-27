@@ -41,7 +41,7 @@ declare interface ViewPuInternal {
     onWillApplyTheme(theme: Theme): void;
 }
 
-declare class PUV2ViewBase {
+declare class ViewBuildNodeBase {
     static setArkThemeScopeManager(mgr: ArkThemeScopeManager): void;
 }
 

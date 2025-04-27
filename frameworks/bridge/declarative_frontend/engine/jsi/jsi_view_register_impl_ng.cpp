@@ -76,6 +76,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_indexer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_lazy_grid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_line.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
@@ -332,8 +333,9 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     const JSRef<JSVal> cleanUpIdleTask = globalObject->GetProperty("uiNodeCleanUpIdleTask");
     if (cleanUpIdleTask->IsFunction()) {
         const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
-        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
-            jsFunc->Call(globalObject);
+        const auto callback = [jsFunc = globalFunc, globalObject = globalObject](int64_t maxTimeInNs) {
+            auto params = ConvertToJSValues(maxTimeInNs / 1e6);
+            jsFunc->Call(globalObject, params.size(), params.data());
         };
         ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(callback);
     }
@@ -354,6 +356,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSStack::JSBind(globalObj);
     JSImage::JSBind(globalObj);
     JSLazyForEach::JSBind(globalObj);
+    JSLazyVGridLayout::JSBind(globalObj);
     JSList::JSBind(globalObj);
     JSListItem::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
@@ -386,6 +389,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSForEach::JSBind(globalObj);
     JSRepeat::JSBind(globalObj);
     JSRepeatVirtualScroll::JSBind(globalObj);
+    JSRepeatVirtualScroll2::JSBind(globalObj);
     JSIfElse::JSBind(globalObj);
     JSDivider::JSBind(globalObj);
     JSScroll::JSBind(globalObj);
@@ -469,11 +473,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSSlider::JSBind(globalObj);
     JSGridRow::JSBind(globalObj);
     JSGridCol::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSStepper::JSBind(globalObj);
     JSStepperItem::JSBind(globalObj);
-    JSSideBar::JSBind(globalObj);
-#endif
     JSBlank::JSBind(globalObj);
     JSCalendar::JSBind(globalObj);
     JSShape::JSBind(globalObj);
@@ -501,6 +502,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSTextArea::JSBind(globalObj);
     JSTextInput::JSBind(globalObj);
     JSTextClock::JSBind(globalObj);
+    JSSideBar::JSBind(globalObj);
     JSDataPanel::JSBind(globalObj);
     JSBadge::JSBind(globalObj);
     JSGauge::JSBind(globalObj);
@@ -518,9 +520,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRenderingContextSettings::JSBind(globalObj);
     JSMatrix2d::JSBind(globalObj);
     JSSearch::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSSelect::JSBind(globalObj);
-#endif
     JSSearchController::JSBind(globalObj);
     JSTextClockController::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
@@ -531,10 +531,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSCheckbox::JSBind(globalObj);
     JSCheckboxGroup::JSBind(globalObj);
     JSRefresh::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSWaterFlow::JSBind(globalObj);
     JSWaterFlowItem::JSBind(globalObj);
-#endif
     JSCommonView::JSBind(globalObj);
     JSRecycleView::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);
@@ -573,9 +571,9 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSPatternLockController::JSBind(globalObj);
 #endif
     // add missing binds to ng build
+    JSContextMenu::JSBind(globalObj);
 #ifndef CROSS_PLATFORM
     JSCalendarPicker::JSBind(globalObj);
-    JSContextMenu::JSBind(globalObj);
     JSTextMenu::JSBind(globalObj);
 #ifdef EFFECT_COMPONENT_SUPPORTED
     JSEffectComponent::JSBind(globalObj);

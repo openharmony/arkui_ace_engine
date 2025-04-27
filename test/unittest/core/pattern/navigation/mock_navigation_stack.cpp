@@ -79,6 +79,8 @@ bool MockNavigationStack::CreateNodeByIndex(int32_t index, const OHOS::Ace::Weak
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(frameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
     pattern->SetName(name);
+    auto navDestinationId = std::to_string(pattern->GetNavDestinationId());
+    mockPathArray_[index]->SetNavDestinationId(navDestinationId);
     return true;
 }
 
@@ -313,5 +315,77 @@ int32_t MockNavigationStack::MockMoveToTop(const std::string& name)
 void MockNavigationStack::SetIsEntryByIndex(int32_t index, bool isEntry)
 {
     mockIsEntryMap_[index] = isEntry;
+}
+
+std::vector<RefPtr<MockNavPathInfo>> MockNavigationStack::MockGetPathStack()
+{
+    std::vector<RefPtr<MockNavPathInfo>> pathArray;
+    for (int32_t index = 0; index < static_cast<int32_t>(mockPathArray_.size()); ++index) {
+        pathArray.push_back(mockPathArray_[index]);
+    }
+    return pathArray;
+}
+
+void MockNavigationStack::MockSetPathStack(std::vector<RefPtr<MockNavPathInfo>>& setPathArray, bool animated)
+{
+    Clear();
+    for (int32_t index = 0; index < static_cast<int32_t>(setPathArray.size()); ++index) {
+        mockPathArray_.push_back(setPathArray[index]);
+    }
+    animated_ = animated;
+}
+
+int32_t MockNavigationStack::GetRecoveredDestinationMode(int32_t index)
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return 0;
+    }
+
+    return mockPathArray_[index]->mode;
+}
+
+uint64_t MockNavigationStack::GetNavDestinationIdInt(int32_t index)
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return -1;
+    }
+
+    return std::atol(mockPathArray_[index]->GetNavDestinationId().c_str());
+}
+
+bool MockNavigationStack::GetIsForceSet(int32_t index)
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return false;
+    }
+
+    return mockPathArray_[index]->isForceSet;
+}
+
+void MockNavigationStack::ResetIsForceSetFlag(int32_t index)
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return;
+    }
+
+    mockPathArray_[index]->isForceSet = false;
+}
+
+bool MockNavigationStack::CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex)
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return false;
+    }
+
+    return mockPathArray_[index]->isReplaced;
+}
+
+void MockNavigationStack::SetRecoveryFromReplaceDestination(int32_t index, bool value)
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return;
+    }
+
+    mockPathArray_[index]->isReplaced = value;
 }
 } // namespace OHOS::Ace::NG

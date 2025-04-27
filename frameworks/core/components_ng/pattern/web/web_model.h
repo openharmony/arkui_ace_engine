@@ -159,6 +159,7 @@ public:
     virtual void SetAudioExclusive(bool audioExclusive) {};
     virtual void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) = 0;
+    virtual void SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) = 0;
     virtual void RegisterNativeEmbedRule(const std::string&, const std::string&) = 0;
     virtual void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
@@ -189,7 +190,6 @@ public:
     virtual void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetTextAutosizing(bool isTextAutosizing) {};
     virtual void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) = 0;
-    virtual void SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) = 0;
     virtual void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
     virtual void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
     virtual void SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption) {};

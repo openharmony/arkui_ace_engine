@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -42,11 +43,14 @@ enum class BindSheetDismissReason {
     CLOSE_BUTTON,
     SLIDE_DOWN,
 };
-class ACE_EXPORT SheetPresentationPattern :
-    public LinearLayoutPattern, public PopupBasePattern, public FocusView,
-        public NestableScrollContainer, public AutoFillTriggerStateHolder{
-    DECLARE_ACE_TYPE(SheetPresentationPattern,
-        LinearLayoutPattern, PopupBasePattern, FocusView, NestableScrollContainer, AutoFillTriggerStateHolder);
+class ACE_EXPORT SheetPresentationPattern : public LinearLayoutPattern,
+                                            public PopupBasePattern,
+                                            public FocusView,
+                                            public NestableScrollContainer,
+                                            public AutoFillTriggerStateHolder,
+                                            public IAvoidInfoListener {
+    DECLARE_ACE_TYPE(SheetPresentationPattern, LinearLayoutPattern, PopupBasePattern, FocusView,
+        NestableScrollContainer, AutoFillTriggerStateHolder, IAvoidInfoListener);
 
 public:
     SheetPresentationPattern(
@@ -441,6 +445,7 @@ public:
     void InitSheetMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
+    void GetSheetTypeWithCenter(SheetType& sheetType);
 
     void SetUIFirstSwitch(bool isFirstTransition, bool isNone);
 
@@ -568,6 +573,8 @@ public:
 
     void UpdateMaskBackgroundColorRender();
 
+    void UpdateTitleTextColor();
+
     Color GetMaskBackgroundColor() const
     {
         return sheetMaskColor_;
@@ -645,11 +652,14 @@ public:
         return detentsFinalIndex_;
     }
     bool IsScrollOutOfBoundary();
-    RefPtr<FrameNode> GetScrollNode();
 
     void UpdateSheetType()
     {
-        sheetType_ = GetSheetType();
+        auto sheetType = GetSheetType();
+        if (sheetType_ != sheetType) {
+            sheetType_ = sheetType;
+            typeChanged_ = true;
+        }
     }
 
     // Used for isolation of SHEET_BOTTOMLANDSPACE after version 12, such as support for height setting callback,
@@ -716,6 +726,36 @@ public:
 
     void FireCommonCallback();
 
+    void SetCloseButtonNode(const WeakPtr<FrameNode>& node) {
+        closeButtonNode_ = node;
+    }
+
+    void SetScrollNode(const WeakPtr<FrameNode>& node) {
+        scrolNode_ = node;
+    }
+
+    void SetTitleBuilderNode(const WeakPtr<FrameNode>& node) {
+        titleBuilderNode_ = node;
+    }
+    
+    RefPtr<FrameNode> GetSheetCloseIcon() const
+    {
+        auto closeButtonNode = closeButtonNode_.Upgrade();
+        return closeButtonNode;
+    }
+
+    RefPtr<FrameNode> GetTitleBuilderNode() const
+    {
+        auto titleBuilderNode = titleBuilderNode_.Upgrade();
+        return titleBuilderNode;
+    }
+
+    RefPtr<FrameNode> GetSheetScrollNode() const
+    {
+        auto scrollNode = scrolNode_.Upgrade();
+        return scrollNode;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
@@ -724,6 +764,9 @@ private:
     void OnAttachToFrameNode() override;
     void OnColorConfigurationUpdate() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnAvoidInfoChange(const ContainerModalAvoidInfo& info) override;
+    void RegisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode);
+    void UnRegisterAvoidInfoChangeListener(FrameNode* hostNode);
 
     void RegisterHoverModeChangeCallback();
     void InitScrollProps();
@@ -852,6 +895,7 @@ private:
     bool windowChanged_ = false;
     bool isDirectionUp_ = true;
     bool topSafeAreaChanged_ = false;
+    bool typeChanged_ = false;
     ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
     SheetEffectEdge sheetEffectEdge_ = SheetEffectEdge::ALL;
 
@@ -898,6 +942,9 @@ private:
     bool showArrow_ = true;
     SheetArrowPosition arrowPosition_ = SheetArrowPosition::NONE;
     SheetPopupInfo sheetPopupInfo_;
+    WeakPtr<FrameNode> closeButtonNode_;
+    WeakPtr<FrameNode> scrolNode_;
+    WeakPtr<FrameNode> titleBuilderNode_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -151,13 +151,12 @@ void MenuItemGroupPattern::ModifyDivider()
     CHECK_NULL_VOID(menu);
     auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuProperty);
-
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<MenuItemGroupPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
     auto divider = menuProperty->GetItemGroupDivider();
     if (divider.has_value()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto paintProperty = host->GetPaintProperty<MenuItemGroupPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
         paintProperty->UpdateStrokeWidth(divider->strokeWidth);
         paintProperty->UpdateStartMargin(divider->startMargin);
         paintProperty->UpdateEndMargin(divider->endMargin);
@@ -165,6 +164,7 @@ void MenuItemGroupPattern::ModifyDivider()
         paintProperty->UpdateNeedHeaderDivider(true);
         paintProperty->UpdateNeedFooterDivider(true);
     }
+    paintProperty->UpdateDividerMode(menuProperty->GetItemGroupDividerModeValue(DividerMode::FLOATING_ABOVE_MENU));
 }
 
 void MenuItemGroupPattern::OnExtItemPressed(bool press, bool beforeGroup)

@@ -18,26 +18,43 @@ build_component_ng("ui_extension_pattern_ng") {
   sources = [
     "accessibility_session_adapter_isolated_component.cpp",
     "accessibility_session_adapter_ui_extension.cpp",
+    "platform_container_handler.cpp",
+    "platform_event_proxy.cpp",
+    "platform_pattern.cpp",
+    "platform_utils.cpp",
+    "session_wrapper_factory.cpp",
+    "surface_proxy_node.cpp",
+    "ui_extension_container_handler.cpp",
+    "ui_extension_manager.cpp",
+    "ui_extension_model_ng.cpp",
+  ]
+
+  # security_ui_extension_component
+  sources += [
+    "security_ui_extension_component/security_session_wrapper_impl.cpp",
+    "security_ui_extension_component/security_ui_extension_pattern.cpp",
+    "security_ui_extension_component/security_ui_extension_proxy.cpp",
+  ]
+
+  # ui_extension_component
+  sources += [
+    "ui_extension_component/modal_ui_extension_proxy_impl.cpp",
+    "ui_extension_component/session_wrapper_impl.cpp",
+    "ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
+    "ui_extension_component/ui_extension_pattern.cpp",
+    "ui_extension_component/ui_extension_proxy.cpp",
+  ]
+
+  # dynamic_component
+  sources += [
     "dynamic_component/dynamic_component_manager.cpp",
     "dynamic_component/dynamic_model.cpp",
     "dynamic_component/dynamic_node.cpp",
     "dynamic_component/dynamic_pattern.cpp",
-    "isolated_component/isolated_pattern.cpp",
-    "platform_container_handler.cpp",
-    "platform_event_proxy.cpp",
-    "platform_pattern.cpp",
-    "security_ui_extension_component/security_session_wrapper_impl.cpp",
-    "security_ui_extension_component/security_ui_extension_pattern.cpp",
-    "security_ui_extension_component/security_ui_extension_proxy.cpp",
-    "session_wrapper_factory.cpp",
-    "surface_proxy_node.cpp",
-    "ui_extension_component/modal_ui_extension_proxy_impl.cpp",
-    "ui_extension_component/session_wrapper_impl.cpp",
-    "ui_extension_component/ui_extension_pattern.cpp",
-    "ui_extension_component/ui_extension_proxy.cpp",
-    "ui_extension_manager.cpp",
-    "ui_extension_model_ng.cpp",
   ]
+
+  # isolated_component
+  sources += [ "isolated_component/isolated_pattern.cpp" ]
 
   if (is_ohos_standard_system) {
     external_deps = [

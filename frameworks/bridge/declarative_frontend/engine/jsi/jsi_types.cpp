@@ -125,6 +125,15 @@ bool JsiValue::IsNull() const
     }
 }
 
+bool JsiValue::IsDate() const
+{
+    if (GetHandle().IsEmpty()) {
+        return false;
+    } else {
+        return GetHandle()->IsDate(GetEcmaVM());
+    }
+}
+
 std::string JsiValue::ToString() const
 {
     auto vm = GetEcmaVM();
@@ -154,6 +163,9 @@ std::u16string JsiValue::ToU16String() const
 
 bool JsiValue::ToBoolean() const
 {
+    if (SystemProperties::DetectJsObjTypeConvertion() && !IsBoolean()) {
+        LOGF_ABORT("bad call to ToBoolean.");
+    }
     return GetHandle()->BooleaValue(GetEcmaVM());
 }
 
@@ -383,7 +395,7 @@ JsiFunction::JsiFunction(panda::Local<panda::FunctionRef> val) : JsiType(val) {}
 
 JsiFunction::JsiFunction(const EcmaVM *vm, panda::Local<panda::FunctionRef> val) : JsiType(vm, val) {}
 
-JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<JsiValue> argv[]) const
+JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<JsiValue> argv[], bool isAnimation) const
 {
     int32_t id = -1;
     if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
@@ -403,10 +415,26 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
         arguments.emplace_back(argv[i].Get().GetLocalHandle());
     }
     auto thisObj = thisVal.Get().GetLocalHandle();
+    if (isAnimation) {
+        if (GetHandle().IsEmpty() || !GetHandle()->IsFunction(vm) || trycatch.HasCaught()) {
+            TAG_LOGW(AceLogTag::ACE_ANIMATION,
+                "call function handle is empty or not function, empty: %{public}d, hasError: %{public}d",
+                GetHandle().IsEmpty(), trycatch.HasCaught());
+        } else {
+            TAG_LOGI(
+                AceLogTag::ACE_ANIMATION, "call function: %{public}s", GetHandle()->GetName(vm)->ToString(vm).c_str());
+        }
+    }
     auto result = GetHandle()->Call(vm, thisObj, arguments.data(), argc);
+    if (isAnimation && !result.IsEmpty()) {
+        TAG_LOGI(
+            AceLogTag::ACE_ANIMATION, "call function result: %{public}s", result->ToString(vm)->ToString(vm).c_str());
+    }
     JSNApi::ExecutePendingJob(vm);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (result.IsEmpty() || trycatch.HasCaught()) {
+        LOGW("after call jsFunction hasError, empty: %{public}d, caught: %{public}d", result.IsEmpty(),
+            trycatch.HasCaught());
         runtime->HandleUncaughtException(trycatch);
         result = JSValueRef::Undefined(vm);
     }

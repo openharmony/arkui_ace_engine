@@ -26,7 +26,8 @@ DECLARE_ACE_TYPE(InteractionImpl, InteractionInterface);
 public:
     int32_t UpdateShadowPic(const ShadowInfoCore& shadowInfo) override;
 
-    int32_t SetDragWindowVisible(bool visible) override;
+    int32_t SetDragWindowVisible(bool visible,
+        const std::shared_ptr<Rosen::RSTransaction>& rSTransaction = nullptr) override;
 
     int32_t SetMouseDragMonitorState(bool state) override;
 
@@ -61,6 +62,10 @@ public:
     int32_t UnRegisterCoordinationListener() override;
 
     int32_t SetDraggableState(bool state) override;
+
+    int32_t GetAppDragSwitchState(bool& state) override;
+
+    void SetDraggableStateAsync(bool state, int64_t downTime) override;
 };
 
 } // namespace OHOS::Ace

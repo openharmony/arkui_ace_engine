@@ -48,6 +48,7 @@ public:
     void NotifyTransDragWindowToFwk() override;
     void NotifyMenuShow(bool isMenuShow) override;
     void NotifyDragEnd() override;
+    void NotifyPreDragStatus(const PreDragStatus preDragStatus) override;
 
 private:
     void InitPanAction();
@@ -55,10 +56,6 @@ private:
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
-    RefPtr<PanRecognizer> panRecognizer_;
-    RefPtr<LongPressRecognizer> longPressRecognizer_;
-    RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
-    RefPtr<SequencedRecognizer> SequencedRecognizer_;
     RefPtr<DragDropInitiatingHandler> dragDropInitiatingHandler_;
 };
 } // namespace OHOS::Ace::NG

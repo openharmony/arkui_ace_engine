@@ -236,13 +236,13 @@ void UpdatePickerDialogPositionInfo(const NativeDateDialogOptions& options, Pick
 {
     // parse alignment
     auto alignment = options.alignment;
-    if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+    if (alignment >= 0 && alignment < DIALOG_ALIGNMENT.size()) {
         pickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
-            alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
-            alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
+        if (alignment == static_cast<uint32_t>(DialogAlignment::TOP) ||
+            alignment == static_cast<uint32_t>(DialogAlignment::TOP_START) ||
+            alignment == static_cast<uint32_t>(DialogAlignment::TOP_END)) {
             pickerDialog.offset = DATEPICKER_OFFSET_DEFAULT_TOP;
         }
     }

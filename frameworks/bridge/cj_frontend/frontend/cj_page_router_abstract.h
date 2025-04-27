@@ -21,6 +21,10 @@
 
 namespace OHOS::Ace {
 
+namespace NG {
+class FrameNode;
+}
+
 class CJFrontendAbstract;
 
 extern "C" ACE_EXPORT void* OHOSAceFrameworkGetCJFrontendLoader();
@@ -95,10 +99,7 @@ public:
     virtual void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)> callback) = 0;
     virtual void DisableAlertBeforeBackPage() = 0;
     virtual bool AllowPopLastPage() = 0;
-    virtual RefPtr<NG::FrameNode> GetCurrentPageNode()
-    {
-        return nullptr;
-    }
+    virtual RefPtr<NG::FrameNode> GetCurrentPageNode();
     virtual bool PopWithExitCheck();
     virtual void StartPushPageWithCallback(const RouterPageInfo& target, const std::string& params) = 0;
     virtual void StartReplacePageWithCallback(const RouterPageInfo& target, const std::string& params) = 0;

@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navdestination_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
@@ -93,7 +94,7 @@ RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_RETURN(navigationGroupNode, nullptr);
-    auto hub = navigationGroupNode->GetEventHub<EventHub>();
+    auto hub = navigationGroupNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(hub, nullptr);
     if (!hub->IsEnabled()) {
         info.SetFillColor(theme->GetMenuIconColor().BlendOpacity(theme->GetAlphaDisabled()));
@@ -122,7 +123,7 @@ void UpdateBarItemNodeWithItem(const RefPtr<BarItemNode>& barItemNode, const Bar
         barItemNode->AddChild(iconNode);
     }
     if (barItem.action) {
-        auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
+        auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetItemAction(barItem.action);
     }
@@ -298,7 +299,7 @@ bool NavigationModelNG::CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>&
         int32_t navBarContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId);
         auto navBarContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId,
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+            []() { return AceType::MakeRefPtr<NavDestinationContentPattern>(true); });
         auto navBarContentRenderContext = navBarContentNode->GetRenderContext();
         CHECK_NULL_RETURN(navBarContentRenderContext, false);
         navBarContentRenderContext->UpdateClipEdge(true);
@@ -339,7 +340,7 @@ bool NavigationModelNG::CreateContentNodeIfNeeded(const RefPtr<NavigationGroupNo
         auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId,
             []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
         contentNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
-        contentNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+        contentNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
             HitTestMode::HTMTRANSPARENT_SELF);
         navigationGroupNode->AddChild(contentNode);
         navigationGroupNode->SetContentNode(contentNode);
@@ -532,7 +533,7 @@ void CreateSymbolBackIcon(const RefPtr<FrameNode>& backButtonNode, NavigationGro
     auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(symbolProperty);
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(theme->GetBackSymbolId()));
-    auto navigationEventHub = navigationGroupNode->GetEventHub<EventHub>();
+    auto navigationEventHub = navigationGroupNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(navigationEventHub);
     if (!navigationEventHub->IsEnabled()) {
         symbolProperty->UpdateSymbolColorList(
@@ -560,7 +561,7 @@ void CreateImageBackIcon(const RefPtr<FrameNode>& backButtonNode, NavigationGrou
     auto backReourceId = theme->GetBackResourceId();
 
     imageSourceInfo.SetResourceId(backReourceId);
-    auto navigationEventHub = navigationGroupNode->GetEventHub<EventHub>();
+    auto navigationEventHub = navigationGroupNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(navigationEventHub);
     if (!navigationEventHub->IsEnabled()) {
         imageSourceInfo.SetFillColor(iconColor.BlendOpacity(theme->GetAlphaDisabled()));
@@ -618,7 +619,8 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     }
 
     //read navigation back button
-    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    auto theme = NavigationGetTheme();
+    std::string message = theme ? theme->GetNavigationBack() : "";
     NavigationTitleUtil::SetAccessibility(backButtonNode, message);
 
     backButtonNode->MarkModifyDone();
@@ -730,19 +732,13 @@ void NavigationModelNG::SetHideNavBar(bool hideNavBar)
 
 void NavigationModelNG::SetEnableToolBarAdaptation(bool enable)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    CHECK_NULL_VOID(navigationGroupNode);
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
-    CHECK_NULL_VOID(navBarNode);
-    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
-    CHECK_NULL_VOID(toolBarNode);
-    toolBarNode->SetEnableToolBarAdaptation(enable);
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, EnableToolBarAdaptation, enable);
 }
 
 void NavigationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
     const std::string& src, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
-    const std::vector<std::string>& nameList)
+    const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+    const std::string& backButtonAccessibilityText)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -763,6 +759,15 @@ void NavigationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<NG::F
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
     titleBarLayoutProperty->SetBackIconSymbol(symbolApply);
     titleBarLayoutProperty->UpdateIsValidImage(imageOption.isValidImage);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    if (userDefinedAccessibilityText) {
+        NavigationTitleUtil::SetAccessibility(backButtonNode, backButtonAccessibilityText);
+    } else {
+        auto theme = NavigationGetTheme();
+        std::string message = theme ? theme->GetNavigationBack() : "";
+        NavigationTitleUtil::SetAccessibility(backButtonNode, message);
+    }
 }
 
 void NavigationModelNG::SetHideBackButton(bool hideBackButton)
@@ -855,7 +860,7 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     bool enabled = false;
-    auto hub = navigationGroupNode->GetEventHub<EventHub>();
+    auto hub = navigationGroupNode->GetOrCreateEventHub<EventHub>();
     if (hub) {
         enabled = hub->IsEnabled();
     }
@@ -926,7 +931,7 @@ void NavigationModelNG::SetOnTitleModeChange(std::function<void(NG::NavigationTi
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
-    auto eventHub = navigationGroupNode->GetEventHub<NavigationEventHub>();
+    auto eventHub = navigationGroupNode->GetOrCreateEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnTitleModeChange(std::move(eventInfo));
 }
@@ -935,7 +940,7 @@ void NavigationModelNG::SetOnNavBarWidthChangeEvent(OnNavBarWidthChangeEvent eve
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnNavBarWidthChangeEvent(std::move(event));
 }
@@ -1014,7 +1019,7 @@ void NavigationModelNG::SetOnNavBarStateChange(std::function<void(bool)>&& onNav
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navigationEventHub);
     navigationEventHub->SetOnNavBarStateChange(std::move(onNavBarStateChange));
 }
@@ -1023,7 +1028,7 @@ void NavigationModelNG::SetOnNavigationModeChange(std::function<void(NavigationM
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navigationEventHub);
     navigationEventHub->SetOnNavigationModeChange(std::move(modeChange));
 }
@@ -1374,7 +1379,8 @@ void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMo
     }
 
     //read navigation back button
-    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    auto theme = NavigationGetTheme();
+    std::string message = theme ? theme->GetNavigationBack() : "";
     NavigationTitleUtil::SetAccessibility(backButtonNode, message);
 
     backButtonNode->MarkModifyDone();
@@ -1412,13 +1418,7 @@ void NavigationModelNG::SetEnableDragBar(FrameNode* frameNode, bool enableDragBa
 
 void NavigationModelNG::SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable)
 {
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    CHECK_NULL_VOID(navigationGroupNode);
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
-    CHECK_NULL_VOID(navBarNode);
-    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
-    CHECK_NULL_VOID(toolBarNode);
-    toolBarNode->SetEnableToolBarAdaptation(enable);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, EnableToolBarAdaptation, enable, frameNode);
 }
 
 void NavigationModelNG::SetEnableDragBar(bool enableDragBar)
@@ -1485,6 +1485,30 @@ void NavigationModelNG::SetToolbarOptions(NavigationToolbarOptions&& opt)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     NavigationToolbarUtil::SetToolbarOptions(navBarNode, std::move(opt));
+}
+
+void NavigationModelNG::SetToolbarMorebuttonOptions(MoreButtonOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    NavigationToolbarUtil::SetToolbarMoreButtonOptions(navBarNode, std::move(opt));
+}
+
+void NavigationModelNG::SetMenuOptions(NavigationMenuOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_VOID(navBarPattern);
+    navBarPattern->SetMenuOptions(std::move(opt));
 }
 
 void NavigationModelNG::SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts)
@@ -1577,7 +1601,7 @@ RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
         auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId,
             []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
         contentNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
-        contentNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+        contentNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
             HitTestMode::HTMTRANSPARENT_SELF);
         navigationGroupNode->AddChild(contentNode);
         navigationGroupNode->SetContentNode(contentNode);
@@ -1814,7 +1838,7 @@ void NavigationModelNG::SetOnCoordScrollStartAction(FrameNode* frameNode, std::f
     CHECK_NULL_VOID(navBarNode);
     auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
     CHECK_NULL_VOID(navBarPattern);
-    auto navBarEventHub = navBarPattern->GetEventHub<NavBarEventHub>();
+    auto navBarEventHub = navBarPattern->GetOrCreateEventHub<NavBarEventHub>();
     CHECK_NULL_VOID(navBarEventHub);
     navBarEventHub->SetOnCoordScrollStartAction(std::move(onCoordScrollStart));
 }
@@ -1829,7 +1853,7 @@ void NavigationModelNG::SetOnCoordScrollUpdateAction(
     CHECK_NULL_VOID(navBarNode);
     auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
     CHECK_NULL_VOID(navBarPattern);
-    auto navBarEventHub = navBarPattern->GetEventHub<NavBarEventHub>();
+    auto navBarEventHub = navBarPattern->GetOrCreateEventHub<NavBarEventHub>();
     CHECK_NULL_VOID(navBarEventHub);
     navBarEventHub->SetOnCoordScrollUpdateAction(std::move(onCoordScrollUpdate));
 }
@@ -1843,7 +1867,7 @@ void NavigationModelNG::SetOnCoordScrollEndAction(FrameNode* frameNode, std::fun
     CHECK_NULL_VOID(navBarNode);
     auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
     CHECK_NULL_VOID(navBarPattern);
-    auto navBarEventHub = navBarPattern->GetEventHub<NavBarEventHub>();
+    auto navBarEventHub = navBarPattern->GetOrCreateEventHub<NavBarEventHub>();
     CHECK_NULL_VOID(navBarEventHub);
     navBarEventHub->SetOnCoordScrollEndAction(std::move(onCoordScrollEnd));
 }

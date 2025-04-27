@@ -47,8 +47,7 @@ RefPtr<PluginSubContainer> PluginManager::GetPluginSubContainer(int64_t pluginId
     }
 }
 
-void PluginManager::UpdateConfigurationInPlugin(
-    const ResourceConfiguration& resConfig, const RefPtr<TaskExecutor>& taskExecutor)
+void PluginManager::UpdateConfigurationInPlugin(const ResourceConfiguration& resConfig)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     for (const auto& pluginSubContainerMap : pluginSubContainerMap_) {
@@ -57,13 +56,17 @@ void PluginManager::UpdateConfigurationInPlugin(
         if (!pluginPipeline) {
             continue;
         }
+        auto instanceId = static_cast<int32_t>(pluginSubContainerMap.first);
+        ContainerScope scope(instanceId);
+        auto taskExecutor = Container::CurrentTaskExecutor();
+        if (!taskExecutor) {
+            continue;
+        }
         auto pluginThemeManager = pluginPipeline->GetThemeManager();
         pluginThemeManager->UpdateConfig(resConfig);
         pluginThemeManager->LoadResourceThemes();
-        CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [instanceId = static_cast<int32_t>(pluginSubContainerMap.first),
-                weak = AceType::WeakClaim(AceType::RawPtr(pluginSubContainer))]() {
+            [instanceId, weak = AceType::WeakClaim(AceType::RawPtr(pluginSubContainer))]() {
                 ContainerScope scope(instanceId);
                 auto pluginSubContainer = weak.Upgrade();
                 CHECK_NULL_VOID(pluginSubContainer);

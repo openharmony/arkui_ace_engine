@@ -1617,7 +1617,7 @@ void ImageModelNGTest001_MixedProperties01(ImageModelNG &image)
         IMAGE_WIDTH_DEFAULT, IMAGE_HEIGHT_DEFAULT, IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, -1);
     auto onComplete = [&successEvent](const LoadImageSuccessEvent& info) { successEvent = info; };
     ImageModelNG::SetOnComplete(frameNode, std::move(onComplete));
-    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
     LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 1);
     eventHub->FireCompleteEvent(loadImageSuccessEvent);
@@ -1640,7 +1640,7 @@ void ImageModelNGTest001_MixedProperties01(ImageModelNG &image)
 void ImageModelNGTest001_MixedProperties02(ImageModelNG &image)
 {
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
-    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto finishEventData = RADIUS_DEFAULT;
@@ -1690,7 +1690,7 @@ void ImageModelNGTest001_MixedProperties03(ImageModelNG &image)
 
     image.EnableAnalyzer(false);
     ImageModelNG::EnableAnalyzer(frameNode, true);
-    imagePattern->SetImageType(ImageType::ANIMATION);
+    imagePattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
     ImageModelNG::ResetImageSrc(frameNode);
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo();
     ASSERT_EQ(imageSourceInfo->GetSrc(), "");
@@ -1838,7 +1838,7 @@ void ImageModelNGFailedTest001_Properties02(ImageModelNG &image)
     EXPECT_EQ(imageLayoutProperty->GetFitOriginalSize().has_value(), false);
 
     int testData = 0;
-    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
     auto onError = [&testData](const LoadImageFailEvent& info) { testData = 1; };
     image.SetOnError(std::move(onError));
     eventHub->FireErrorEvent(LoadImageFailEvent(WIDTH, HEIGHT, "image load error!"));

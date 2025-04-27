@@ -211,28 +211,10 @@ public:
         state_.strokeState.SetTextAlign(align);
     }
 
-    void SetMeasureTextAlign(TextAlign align)
-    {
-        measureTextState_.SetTextAlign(align);
-    }
-
-    void SetDefaultTextAlign()
-    {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-            // The default value of TextAlign is TextAlign::START.
-            SetTextAlign(TextAlign::START);
-        }
-    }
-
     void SetTextBaseline(TextBaseline baseline)
     {
         state_.fillState.SetTextBaseline(baseline);
         state_.strokeState.SetTextBaseline(baseline);
-    }
-
-    void SetMeasureTextBaseline(TextBaseline baseline)
-    {
-        measureTextState_.SetTextBaseline(baseline);
     }
 
     void SetShadowColor(const Color& color)
@@ -277,20 +259,10 @@ public:
         state_.strokeState.SetLetterSpacing(letterSpacing);
     }
 
-    void SetMeasureFontSize(const Dimension& size)
-    {
-        measureTextState_.SetFontSize(size);
-    }
-
     void SetFontStyle(OHOS::Ace::FontStyle style)
     {
         state_.fillState.SetFontStyle(style);
         state_.strokeState.SetFontStyle(style);
-    }
-
-    void SetMeasureFontStyle(OHOS::Ace::FontStyle style)
-    {
-        measureTextState_.SetFontStyle(style);
     }
 
     void SetFontWeight(FontWeight weight)
@@ -299,27 +271,16 @@ public:
         state_.strokeState.SetFontWeight(weight);
     }
 
-    void SetMeasureFontWeight(FontWeight weight)
-    {
-        measureTextState_.SetFontWeight(weight);
-    }
-
     void SetFontFamilies(const std::vector<std::string>& fontFamilies)
     {
         state_.fillState.SetFontFamilies(fontFamilies);
         state_.strokeState.SetFontFamilies(fontFamilies);
     }
 
-    void SetMeasureFontFamilies(const std::vector<std::string>& fontFamilies)
-    {
-        measureTextState_.SetFontFamilies(fontFamilies);
-    }
-
     void SaveProperties();
     void RestoreProperties();
     void ResetTransformMatrix();
     void ResetLineDash();
-    void ResetMeasureTextState();
     void RotateMatrix(double angle);
     void ScaleMatrix(double x, double y);
     void SetTransformMatrix(const TransformParam& param);
@@ -344,6 +305,7 @@ protected:
     void UpdatePaintShader(RSPen* pen, RSBrush* brush, const Ace::Gradient& gradient);
     void UpdatePaintShader(const Ace::Pattern& pattern, RSPen* pen, RSBrush* brush);
     bool UpdateFillParagraph(const std::string& text);
+    void UpdateFillTxtStyle(RSTextStyle& txtStyle);
     bool UpdateStrokeParagraph(const std::string& text);
     void UpdateStrokeShadowParagraph(const std::string& text, const RSPen* pen, const RSParagraphStyle& style);
     void InitPaintBlend(RSBrush& brush);
@@ -410,16 +372,8 @@ protected:
     virtual void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle) = 0;
 #endif
     void ResetStates();
+    virtual TextDirection GetSystemDirection() = 0;
     void DrawImageInternal(const Ace::CanvasImage& canvasImage, const std::shared_ptr<RSImage>& image);
-
-    RSBitmapFormat GetBitmapFormat()
-    {
-        if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
-            return RSBitmapFormat { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_PREMUL };
-        } else {
-            return RSBitmapFormat { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
-        }
-    }
 
     // PaintHolder includes fillState, strokeState, globalState and shadow for save
     PaintHolder state_;
@@ -428,8 +382,6 @@ protected:
     RSMatrix matrix_;
     std::vector<RSMatrix> matrixStates_;
     std::vector<LineDashParam> lineDashStates_;
-    PaintState measureTextState_;
-    std::vector<PaintState> measureTextStates_;
 
     bool smoothingEnabled_ = true;
     std::string smoothingQuality_ = "low";

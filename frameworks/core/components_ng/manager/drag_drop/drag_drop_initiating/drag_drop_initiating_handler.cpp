@@ -106,6 +106,7 @@ void DragDropInitiatingHandler::NotifySequenceOnActionCancel(const GestureEvent&
 void DragDropInitiatingHandler::NotifyHitTesting(const TouchEvent& touchEvent)
 {
     CHECK_NULL_VOID(initiatingFlow_);
+    initiatingFlow_->InitializeState();
     initiatingFlow_->HandleHitTesting(touchEvent);
 }
 
@@ -124,6 +125,7 @@ void DragDropInitiatingHandler::NotifyPullEvent(const DragPointerEvent& dragPoin
 void DragDropInitiatingHandler::NotifyReStartDrag(const GestureEvent& info)
 {
     CHECK_NULL_VOID(initiatingFlow_);
+    initiatingFlow_->InitializeState();
     initiatingFlow_->HandleReStartDrag(info);
 }
 
@@ -180,5 +182,11 @@ bool DragDropInitiatingHandler::IsNeedGather()
         return params.isNeedGather;
     }
     return false;
+}
+
+void DragDropInitiatingHandler::NotifyPreDragStatus(const PreDragStatus preDragStatus)
+{
+    CHECK_NULL_VOID(initiatingFlow_);
+    initiatingFlow_->HandlePreDragStatus(preDragStatus);
 }
 } // namespace OHOS::Ace::NG

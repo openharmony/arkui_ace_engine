@@ -112,6 +112,7 @@ enum class AccessibilityEventType : size_t {
     ANNOUNCE_FOR_ACCESSIBILITY = 0x10000000,
     PAGE_OPEN = 0x20000000,
     ELEMENT_INFO_CHANGE = 0x40000000,
+    ANNOUNCE_FOR_ACCESSIBILITY_NOT_INTERRUPT = 0x40000001,
     SCROLLING_EVENT = 0x40000003,
     UNKNOWN,
 };
@@ -221,6 +222,28 @@ struct SubComponentInfo {
     std::string accessibilityLevel = "";
 };
 
+enum class NotifyChildActionType : uint32_t {
+    ACTION_CLICK = 1,
+};
+
+enum class AccessibilityActionResult : int32_t {
+    ACTION_OK = 0,
+    ACTION_ERROR = -1,
+    ///< need to  bubble up the action
+    ACTION_RISE = 2,
+};
+
+enum class AccessibilityInterfaceAction : uint32_t {
+    UNDEFINED_ACTION = 0,
+    ACCESSIBILITY_CLICK = 1,
+};
+
+enum class AccessibilityActionInterceptResult : uint32_t {
+    ACTION_INTERCEPT = 0,
+    ACTION_CONTINUE = 1,
+    ///< need to  bubble up the action
+    ACTION_RISE = 2,
+};
 bool CheckBetterRect(const Rect& nodeRect, int direction, const Rect& itemRect, const Rect& tempBest);
 
 } // namespace OHOS::Ace

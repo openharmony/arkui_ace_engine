@@ -54,7 +54,7 @@ void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, c
         auto toolBarMenuItems = navDestinationPattern->GetToolBarMenuItems();
 
         bool isButtonEnabled = false;
-        auto hub = navDestinationGroupNode->GetEventHub<EventHub>();
+        auto hub = navDestinationGroupNode->GetOrCreateEventHub<EventHub>();
         if (hub) {
             isButtonEnabled = hub->IsEnabled();
         }
@@ -165,6 +165,10 @@ void NavDestinationPattern::OnModifyDone()
     auto renderContext = hostNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     hostNode->UpdateUserSetOpacity(renderContext->GetOpacity().value_or(1.0f));
+
+    CheckIfOrientationChanged();
+    CheckIfStatusBarConfigChanged();
+    CheckIfNavigationIndicatorConfigChagned();
 }
 
 void NavDestinationPattern::OnLanguageConfigurationUpdate()
@@ -214,8 +218,6 @@ void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationG
     }
     if (hostNode->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set dialog background color: %{public}s",
-            renderContext->GetBackgroundColor()->ColorToString().c_str());
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -227,8 +229,6 @@ void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationG
         return;
     }
     renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Default background color: %{public}s",
-        renderContext->GetBackgroundColor()->ColorToString().c_str());
 }
 
 void NavDestinationPattern::MountTitleBar(
@@ -389,7 +389,7 @@ void NavDestinationPattern::DumpInfo()
 bool NavDestinationPattern::OverlayOnBackPressed()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
-    if (overlayManager_->isCurrentNodeProcessRemoveOverlay(GetHost(), false)) {
+    if (overlayManager_->IsCurrentNodeProcessRemoveOverlay(GetHost(), false)) {
         return overlayManager_->RemoveOverlay(true);
     }
     return false;
@@ -780,7 +780,7 @@ void NavDestinationPattern::OnCoordScrollStart()
 {
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(navDestinationGroupNode);
-    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->FireOnCoordScrollStartAction();
 }
@@ -789,7 +789,7 @@ float NavDestinationPattern::OnCoordScrollUpdate(float offset, float currentOffs
 {
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_RETURN(navDestinationGroupNode, 0.0f);
-    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(navDestinationEventHub, 0.0f);
     navDestinationEventHub->FireOnCoordScrollUpdateAction(currentOffset);
     return 0.0f;
@@ -799,8 +799,145 @@ void NavDestinationPattern::OnCoordScrollEnd()
 {
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(navDestinationGroupNode);
-    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->FireOnCoordScrollEndAction();
+}
+
+bool NavDestinationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    hostNode->AdjustRenderContextIfNeeded();
+    return false;
+}
+
+void NavDestinationPattern::CheckIfOrientationChanged()
+{
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    if (hostNode->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Setting Orientation is not supported in dialog mode");
+        return;
+    }
+
+    std::optional<Orientation> curOri = hostNode->GetOrientation();
+    std::optional<Orientation> preOri = hostNode->GetPreOrientation();
+    if (isFirstTimeCheckOrientation_) {
+        isFirstTimeCheckOrientation_ = false;
+        hostNode->SetPreOrientation(curOri);
+        return;
+    }
+    if (curOri == preOri) {
+        return;
+    }
+    hostNode->SetPreOrientation(curOri);
+
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigationNode_.Upgrade());
+    CHECK_NULL_VOID(navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    if (!navigationPattern->IsPageLevelConfigEnabled() || !navigationPattern->IsFullPageNavigation()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "conditions are not met, orientation won't change");
+        return;
+    }
+
+    if (hostNode->IsOnAnimation()) {
+        StopAnimation();
+    }
+
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto container = Container::GetContainer(context->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    if (!curOri.has_value()) {
+        auto mgr = context->GetNavigationManager();
+        CHECK_NULL_VOID(mgr);
+        curOri = mgr->GetOrientationByWindowApi();
+    }
+    container->SetRequestedOrientation(curOri.value(), true);
+}
+
+void NavDestinationPattern::StopAnimation()
+{
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigationNode_.Upgrade());
+    CHECK_NULL_VOID(navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->AbortAnimation(navigationNode);
+}
+
+void NavDestinationPattern::CheckIfStatusBarConfigChanged()
+{
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    if (hostNode->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "enable/disable statusBar is not supported in dialog mode");
+        return;
+    }
+
+    auto curConfig = hostNode->GetStatusBarConfig();
+    auto preConfig = hostNode->GetPreStatusBarConfig();
+    if (isFirstTimeCheckStatusBarConfig_) {
+        isFirstTimeCheckStatusBarConfig_ = false;
+        hostNode->SetPreStatusBarConfig(curConfig);
+        return;
+    }
+    if (curConfig == preConfig) {
+        return;
+    }
+    hostNode->SetPreStatusBarConfig(curConfig);
+
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigationNode_.Upgrade());
+    CHECK_NULL_VOID(navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    if (!navigationPattern->IsPageLevelConfigEnabled() || !navigationPattern->IsFullPageNavigation()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "conditions are not met, status won't change");
+        return;
+    }
+
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto mgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->SetStatusBarConfig(curConfig);
+}
+
+void NavDestinationPattern::CheckIfNavigationIndicatorConfigChagned()
+{
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    if (hostNode->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "enable/disable navIndicator is not supported in dialog mode");
+        return;
+    }
+
+    auto curConfig = hostNode->GetNavigationIndicatorConfig();
+    auto preConfig = hostNode->GetPreNavigationIndicatorConfig();
+    if (isFirstTimeCheckNavigationIndicatorConfig_) {
+        isFirstTimeCheckNavigationIndicatorConfig_ = false;
+        hostNode->SetPreNavigationIndicatorConfig(curConfig);
+        return;
+    }
+    if (curConfig == preConfig) {
+        return;
+    }
+    hostNode->SetPreNavigationIndicatorConfig(curConfig);
+
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigationNode_.Upgrade());
+    CHECK_NULL_VOID(navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    if (!navigationPattern->IsPageLevelConfigEnabled() || !navigationPattern->IsFullPageNavigation()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "conditions are not met, navigationIndicator won't change");
+        return;
+    }
+
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto mgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->SetNavigationIndicatorConfig(curConfig);
 }
 } // namespace OHOS::Ace::NG

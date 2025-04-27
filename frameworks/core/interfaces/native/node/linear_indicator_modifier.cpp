@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/linear_indicator/linear_indicator_theme.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 

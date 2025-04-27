@@ -16,6 +16,8 @@
 #include "core/accessibility/accessibility_node.h"
 
 #include "core/common/container.h"
+#include "core/event/ace_event_helper.h"
+
 namespace OHOS::Ace {
 using ChartValue = std::unordered_map<std::string, std::vector<std::pair<std::string, double>>>;
 namespace {

@@ -16,7 +16,6 @@
 #include "core/event/axis_event.h"
 
 #include "base/input_manager/input_manager.h"
-#include "core/common/ace_application_info.h"
 #include "core/event/key_event.h"
 
 namespace OHOS::Ace {
@@ -112,6 +111,11 @@ bool AxisEvent::HasKey(KeyCode expectCode) const
         ++curPressedCode;
     }
     return false;
+}
+
+int32_t AxisEvent::GetTargetDisplayId() const
+{
+    return targetDisplayId;
 }
 
 AxisInfo::AxisInfo(const AxisEvent& event, const Offset& localLocation, const EventTarget& target)
@@ -261,9 +265,6 @@ AxisEvent AxisInfo::ConvertToAxisEvent() const
     axisEvent.deviceId = GetDeviceId();
     // modifierkeystates
     axisEvent.modifierKeyState = CalculateModifierKeyState(GetPressedKeyCodes());
-    // check for api version
-    axisEvent.axisSupportSourceTypeAndSourceTool =
-        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN);
     return axisEvent;
 }
 

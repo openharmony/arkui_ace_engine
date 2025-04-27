@@ -73,7 +73,7 @@ void IndexerTestNg::GetIndexer()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<IndexerPattern>();
-    eventHub_ = frameNode_->GetEventHub<IndexerEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<IndexerEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<IndexerLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<IndexerPaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();
@@ -156,8 +156,7 @@ HWTEST_F(IndexerTestNg, IndexerPatternCoverage001, TestSize.Level1)
      * has no condition that has no popListData when showPopup.
      */
     pattern_->MoveIndexBySearch("C");
-    std::vector<std::string> bubbleData = std::vector<std::string>();
-    pattern_->UpdateBubbleSize(bubbleData);
+    pattern_->UpdateBubbleSize();
 }
 
 /**

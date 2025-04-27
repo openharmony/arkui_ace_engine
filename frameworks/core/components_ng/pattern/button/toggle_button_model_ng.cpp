@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -41,7 +42,7 @@ void ToggleButtonModelNG::SetIsOn(bool isOn)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
 

@@ -17,7 +17,6 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "core/common/share/text_share_mgr.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 void TextShareAdapter::StartTextShareTask(
@@ -43,5 +42,10 @@ void TextShareAdapter::StartTextShareTask(
                 abilityContext, anchorRect, windowName, shareText);
         },
         "ArkUITextInitTextShare", PriorityType::VIP);
+}
+
+uint64_t TextShareAdapter::GetMaxTextShareLength()
+{
+    return TextShareMgr::GetInstance().GetMaxTextLength();
 }
 } // namespace OHOS::Ace

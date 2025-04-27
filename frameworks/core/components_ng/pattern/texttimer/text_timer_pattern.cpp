@@ -41,7 +41,7 @@ TextTimerPattern::TextTimerPattern()
 
 void TextTimerPattern::FireChangeEvent()
 {
-    auto textTimerEventHub = GetEventHub<TextTimerEventHub>();
+    auto textTimerEventHub = GetOrCreateEventHub<TextTimerEventHub>();
     CHECK_NULL_VOID(textTimerEventHub);
     auto utcTime = GetFormatDuration(GetMilliseconds());
     auto elapsedTime = GetFormatDuration(elapsedTime_);
@@ -159,11 +159,12 @@ void TextTimerPattern::OnAttachToFrameNode()
 
 void TextTimerPattern::OnModifyDone()
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        Pattern::OnModifyDone();
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        Pattern::OnModifyDone();
+    }
 
     if (!textNode_) {
         textNode_ = GetTextNode();
@@ -369,7 +370,7 @@ RefPtr<FrameNode> TextTimerPattern::BuildContentModifierNode()
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto eventHub = host->GetEventHub<TextTimerEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextTimerEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     auto textTimerLayoutProperty = GetLayoutProperty<TextTimerLayoutProperty>();

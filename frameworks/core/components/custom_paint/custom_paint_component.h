@@ -194,13 +194,7 @@ public:
         height_ = height;
     }
 
-    void SetOnReadyEvent(const EventMarker& value, RefPtr<PipelineContext> context)
-    {
-        if (pool_) {
-            std::function<void()> onReadyEvent = AceAsyncEvent<void()>::Create(value, context);
-            pool_->SetOnReadyEvent(onReadyEvent);
-        }
-    }
+    void SetOnReadyEvent(const EventMarker& value, RefPtr<PipelineContext> context);
 
     const RefPtr<CanvasTaskPool>& GetTaskPool() const
     {

@@ -1,0 +1,12 @@
+{
+    "process": "mock_ui_sa",
+    "systemability": [
+        {
+            "name": 16666,
+            "libpath": "libmock_ui_sa.z.so",
+            "run-on-create": true,
+            "distributed": false,
+            "dump_level": 1
+        }
+    ]
+}

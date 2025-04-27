@@ -52,7 +52,6 @@ const Dimension LINE_WIDTH = 1.5_vp;
 const int32_t RATE = 2;
 const PickerTime START_DEFAULT_TIME = PickerTime(0, 0, 0);
 const PickerTime END_DEFAULT_TIME = PickerTime(23, 59, 59);
-const int32_t WRONG_INDEX = -1;
 const uint32_t INDEX_AM_0 = 0;
 const uint32_t INDEX_PM_1 = 1;
 const uint32_t INDEX_HOUR_STRAT = 0;
@@ -174,12 +173,10 @@ bool TimePickerRowPattern::IsCircle()
 }
 
 void TimePickerRowPattern::SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,
-    const std::string &id, bool focus, const std::function<void(const std::string&)>& call)
+    const std::string &id, bool& focus, const std::function<void(const std::string&)>& call)
 {
     auto column = it->second.Upgrade();
-    if (!column) {
-        return;
-    }
+    CHECK_NULL_VOID(column);
     auto tmpPattern = column->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(tmpPattern);
     tmpPattern->SetSelectedMarkId(id);
@@ -187,15 +184,17 @@ void TimePickerRowPattern::SetDefaultColoumnFocus(std::unordered_map<std::string
     if (focus) {
         tmpPattern->SetSelectedMark(true, false);
         selectedColumnId_ = id;
+        focus = false;
     }
 }
 
 void TimePickerRowPattern::ClearFocus()
 {
-    if (!IsCircle()) {
+    CHECK_EQUAL_VOID(IsCircle(), false);
+    if (!isClearFocus_ && (HasSecondNode() == hasSecond_)) {
         return ;
     }
-
+    isClearFocus_ = true;
     if (!selectedColumnId_.empty()) {
         auto it = allChildNode_.find(selectedColumnId_);
         if (it != allChildNode_.end()) {
@@ -212,10 +211,9 @@ void TimePickerRowPattern::ClearFocus()
 
 void TimePickerRowPattern::SetDefaultFocus()
 {
-    if (!IsCircle()) {
-        return ;
-    }
-
+    CHECK_EQUAL_VOID(IsCircle(), false);
+    CHECK_EQUAL_VOID(isClearFocus_, false);
+    isClearFocus_ = false;
     std::function<void(const std::string &focusId)> call =  [weak = WeakClaim(this)](const std::string &focusId) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -240,7 +238,6 @@ void TimePickerRowPattern::SetDefaultFocus()
         auto it = allChildNode_.find(columnName[i]);
         if (it != allChildNode_.end()) {
             SetDefaultColoumnFocus(it, columnName[i], setFocus, call);
-            setFocus = false;
         }
     }
 }
@@ -359,6 +356,9 @@ void TimePickerRowPattern::OnModifyDone()
     InitFocusEvent();
     UpdateTitleNodeContent();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (isUserSetSelectColor_) {
+        UpdateUserSetSelectColor();
+    }
     SetDefaultFocus();
 }
 
@@ -373,15 +373,27 @@ void TimePickerRowPattern::InitDisabled()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     enabled_ = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto opacity = curOpacity_;
     if (!enabled_) {
-        renderContext->UpdateOpacity(curOpacity_ * DISABLE_ALPHA);
-    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        renderContext->UpdateOpacity(curOpacity_);
+        opacity *= DISABLE_ALPHA;
+        renderContext->UpdateOpacity(opacity);
+    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        renderContext->UpdateOpacity(opacity);
+    }
+
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        for (const auto& child : host->GetChildren()) {
+            auto stackNode = DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(stackNode);
+            auto renderContext = stackNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateOpacity(opacity);
+        }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -559,7 +571,7 @@ void TimePickerRowPattern::SetEventCallback(EventCallback&& value)
 void TimePickerRowPattern::FireChangeEvent(bool refresh)
 {
     if (refresh) {
-        auto timePickerEventHub = GetEventHub<TimePickerEventHub>();
+        auto timePickerEventHub = GetOrCreateEventHub<TimePickerEventHub>();
         CHECK_NULL_VOID(timePickerEventHub);
         auto str = GetSelectedObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);
@@ -590,7 +602,7 @@ void TimePickerRowPattern::SetEnterSelectedAreaEventCallback(EventCallback&& val
 void TimePickerRowPattern::FireEnterSelectedAreaEvent(bool refresh)
 {
     if (refresh) {
-        auto timePickerEventHub = GetEventHub<TimePickerEventHub>();
+        auto timePickerEventHub = GetOrCreateEventHub<TimePickerEventHub>();
         CHECK_NULL_VOID(timePickerEventHub);
         auto str = GetEnterObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);
@@ -833,8 +845,8 @@ void TimePickerRowPattern::UpdateHourAndMinuteTimeRange(const RefPtr<FrameNode>&
     if (!GetHour24() && tag == amPmColumn) {
         // update Hour column option after changing ampm column
         // and set corresponding new index based on old value
-        auto newIndex = GetOptionsIndex(hourColumn, oldHourValue_);
-        if (newIndex == WRONG_INDEX) {
+        uint32_t newIndex = INDEX_HOUR_STRAT;
+        if (!GetOptionsIndex(hourColumn, oldHourValue_, newIndex)) {
             auto uintOldHour = StringUtils::StringToUint(oldHourValue_);
             if (((IsAmJudgeByAmPmColumn(amPmColumn) && uintOldHour == AM_PM_HOUR_12) ? INDEX_HOUR_STRAT : uintOldHour) <
                 startTime_.GetHour()) {
@@ -855,8 +867,8 @@ void TimePickerRowPattern::UpdateHourAndMinuteTimeRange(const RefPtr<FrameNode>&
     }
     MinuteChangeBuildTimeRange(currentHourOf24);
     if (tag != minuteColumn) {
-        auto newIndex = GetOptionsIndex(minuteColumn, oldMinuteValue_);
-        if (newIndex == WRONG_INDEX) {
+        uint32_t newIndex = INDEX_MINUTE_STRAT;
+        if (!GetOptionsIndex(minuteColumn, oldMinuteValue_, newIndex)) {
             if (StringUtils::StringToUint(oldMinuteValue_) < startTime_.GetMinute()) {
                 newIndex = INDEX_MINUTE_STRAT;
             } else {
@@ -961,21 +973,13 @@ void TimePickerRowPattern::Hour12ChangeBuildTimeRange()
 
 void TimePickerRowPattern::MinuteChangeBuildTimeRange(uint32_t hourOf24)
 {
-    uint32_t startTimeMinute = (startTime_.GetHour() == hourOf24) ? startTime_.GetMinute() : INDEX_MINUTE_STRAT;
-    uint32_t endTimeMinute = (endTime_.GetHour() == hourOf24) ? endTime_.GetMinute() : INDEX_MINUTE_END;
-
+    uint32_t startMinute = (hourOf24 == startTime_.GetHour()) ? startTime_.GetMinute() : INDEX_MINUTE_STRAT;
+    uint32_t endMinute = (hourOf24 == endTime_.GetHour()) ? endTime_.GetMinute() : INDEX_MINUTE_END;
     auto minuteColumn = allChildNode_["minute"].Upgrade();
     CHECK_NULL_VOID(minuteColumn);
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(minuteColumnPattern);
     optionsTotalCount_[minuteColumn] = 0;
-    uint32_t startMinute = 0;
-    uint32_t endMinute = 59;
-    if (hourOf24 == startTime_.GetHour()) {
-        startMinute = startTimeMinute;
-    } else if (hourOf24 == endTime_.GetHour()) {
-        endMinute = endTimeMinute;
-    }
     uint32_t index = 0;
     for (uint32_t minute = startMinute; minute <= endMinute; minute++) {
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
@@ -1006,31 +1010,39 @@ void TimePickerRowPattern::OnFontScaleConfigurationUpdate()
     closeDialogEvent_();
 }
 
-void TimePickerRowPattern::UpdateConfirmButtonMargin(
-    const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme)
+void TimePickerRowPattern::UpdateButtonMargin(
+    const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmOrNextNode)
 {
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    isRtl = isConfirmOrNextNode ? isRtl : !isRtl;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
     } else {
         DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, false, ModuleDialogType::TIMEPICKER_DIALOG);
     }
-    buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
+    buttonNode->GetLayoutProperty()->UpdateMargin(margin);
 }
 
-void TimePickerRowPattern::UpdateCancelButtonMargin(
-    const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme)
+void TimePickerRowPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext)
 {
-    MarginProperty margin;
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
-    } else {
-        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, false,
-            ModuleDialogType::TIMEPICKER_DIALOG);
-    }
-    buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
+    CHECK_NULL_VOID(buttonNode);
+    auto updateNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    CHECK_NULL_VOID(updateNode);
+    auto updateNodeLayout = updateNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(updateNodeLayout);
+
+    auto pipeline = updateNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    std::string lettersStr = isNext ? pickerTheme->GetNextText() : pickerTheme->GetPrevText();
+    updateNodeLayout->UpdateContent(lettersStr);
+
+    UpdateButtonMargin(buttonNode, dialogTheme, isNext);
+    updateNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void TimePickerRowPattern::OnLanguageConfigurationUpdate()
@@ -1056,9 +1068,6 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
             amPmNode->MovePosition(0);
         }
         UpdateNodePositionForUg();
-        auto layoutProperty = AceType::DynamicCast<FrameNode>(amPmNode)->GetLayoutProperty<LayoutProperty>();
-        layoutProperty->UpdateAlignment(Alignment::CENTER);
-        layoutProperty->UpdateLayoutWeight(1);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
@@ -1067,12 +1076,12 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(confirmNode);
     auto confirmNodeLayout = confirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(confirmNodeLayout);
-    confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
     auto pipeline = confirmNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
+    confirmNodeLayout->UpdateContent(dialogTheme->GetConfirmText());
+    UpdateButtonMargin(buttonConfirmNode, dialogTheme, true);
     confirmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto buttonCancelNode = weakButtonCancel_.Upgrade();
@@ -1081,9 +1090,12 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(cancelNode);
     auto cancelNodeLayout = cancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(cancelNodeLayout);
-    cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
-    UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
+    cancelNodeLayout->UpdateContent(dialogTheme->GetCancelText());
+    UpdateButtonMargin(buttonCancelNode, dialogTheme, false);
     cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    auto nextPrevButton = nextPrevButtonNode_.Upgrade();
+    UpdateDialogAgingButton(nextPrevButton, isNext_);
 }
 
 void TimePickerRowPattern::UpdateNodePositionForUg()
@@ -1242,19 +1254,21 @@ const std::string& TimePickerRowPattern::GetOptionsValue(const RefPtr<FrameNode>
     return options_[frameNode][optionIndex];
 }
 
-int32_t TimePickerRowPattern::GetOptionsIndex(const RefPtr<FrameNode>& frameNode, const std::string& value)
+bool TimePickerRowPattern::GetOptionsIndex(
+    const RefPtr<FrameNode>& frameNode, const std::string& value, uint32_t& columnIndex)
 {
-    auto columnIndex = WRONG_INDEX;
-    CHECK_NULL_RETURN(frameNode, columnIndex);
+    CHECK_NULL_RETURN(frameNode, false);
+    bool result = false;
     auto columnFound = options_.find(frameNode);
     if (columnFound != options_.end()) {
         for (const auto& option : columnFound->second) {
             if (option.second == value) {
                 columnIndex = option.first;
+                result = true;
             }
         }
     }
-    return columnIndex;
+    return result;
 }
 
 std::string TimePickerRowPattern::GetOptionsCurrentValue(const RefPtr<FrameNode>& frameNode)
@@ -2229,4 +2243,20 @@ bool TimePickerRowPattern::NeedAdaptForAging()
     }
     return false;
 }
+
+void TimePickerRowPattern::UpdateUserSetSelectColor()
+{
+    CHECK_EQUAL_VOID(IsCircle(), false);
+    isUserSetSelectColor_ = true;
+    for (auto iter = allChildNode_.begin(); iter != allChildNode_.end(); iter++) {
+        auto columnNode = iter->second.Upgrade();
+        if (columnNode) {
+            auto pattern = columnNode->GetPattern<TimePickerColumnPattern>();
+            if (pattern) {
+                pattern->UpdateUserSetSelectColor();
+            }
+        }
+    }
+}
+
 } // namespace OHOS::Ace::NG

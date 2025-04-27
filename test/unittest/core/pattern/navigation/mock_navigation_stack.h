@@ -63,6 +63,8 @@ public:
     bool needBuildNewInstance = false;
     bool fromRecovery = false;
     int32_t mode = 0; // 0 for standard and 1 for dialog
+    bool isForceSet = false;
+    bool isReplaced = false;
 
 private:
     std::function<void()> onPop_;
@@ -215,7 +217,23 @@ public:
 
     std::vector<int32_t> GetAllPathIndex() override;
 
+    std::vector<RefPtr<MockNavPathInfo>> MockGetPathStack();
+
+    void MockSetPathStack(std::vector<RefPtr<MockNavPathInfo>>& setPathArray, bool animated = true);
+
     void SetIsEntryByIndex(int32_t index, bool isEntry) override;
+
+    int32_t GetSize() const
+    {
+        return size_;
+    }
+
+    int32_t GetRecoveredDestinationMode(int32_t index);
+    uint64_t GetNavDestinationIdInt(int32_t index);
+    bool GetIsForceSet(int32_t index);
+    void ResetIsForceSetFlag(int32_t index);
+    bool CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex);
+    void SetRecoveryFromReplaceDestination(int32_t index, bool value);
 
     // ============================ operation above is for mock NavPathStack in arkTS ============================
 private:
@@ -228,6 +246,7 @@ private:
     std::vector<RefPtr<MockNavPathInfo>> mockPathArray_;
     std::vector<RefPtr<MockNavPathInfo>> mockPopArray_;
     std::map<int32_t, bool> mockIsEntryMap_;
+    int32_t size_ = 0;
 };
 } // namespace NG
 #endif

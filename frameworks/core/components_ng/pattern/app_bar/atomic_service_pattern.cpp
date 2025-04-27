@@ -83,8 +83,10 @@ void AtomicServicePattern::ColorConfigurationCallBack()
 {
     auto customAppBar = GetJSAppBarContainer();
     CHECK_NULL_VOID(customAppBar);
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
     customAppBar->FireCustomCallback(ARKUI_APP_BAR_COLOR_CONFIGURATION,
-        settedColorMode.has_value() ? !settedColorMode.value() : SystemProperties::GetColorMode() == ColorMode::DARK);
+        settedColorMode.has_value() ? !settedColorMode.value() : context->GetColorMode() == ColorMode::DARK);
 }
 
 void AtomicServicePattern::AppInfoCallBack()
@@ -182,16 +184,17 @@ void AtomicServicePattern::OnAttachToFrameNode()
     AppBgColorCallBack();
 }
 
-void AtomicServicePattern::OnLanguageConfigurationUpdate()
-{
-    UpdateLayout();
-}
-
 void AtomicServicePattern::OnColorConfigurationUpdate()
 {
     AppBgColorCallBack();
     ColorConfigurationCallBack();
 }
+
+void AtomicServicePattern::OnLanguageConfigurationUpdate()
+{
+    AppInfoCallBack();
+}
+
 RefPtr<CustomAppBarNode> AtomicServicePattern::GetJSAppBarContainer()
 {
     auto customAppBarNode = NG::ViewStackProcessor::GetInstance()->GetCustomAppBarNode();
@@ -251,7 +254,7 @@ void AtomicServicePattern::UpdateColor(std::optional<bool> isLight)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<AppBarTheme>();
     if (!(isLight.has_value())) {
-        isLight = SystemProperties::GetColorMode() != ColorMode::DARK;
+        isLight = pipeline->GetColorMode() != ColorMode::DARK;
     }
     auto menuButton = GetMenuButton();
     UpdateButtonColor(theme, menuButton, isLight.value());

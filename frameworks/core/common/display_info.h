@@ -51,6 +51,22 @@ enum class Rotation : uint32_t {
 };
 
 /**
+* source is Rosen::DisplayOrientation
+*/
+enum class DisplayOrientation : uint32_t {
+    PORTRAIT = 0,
+    LANDSCAPE,
+    PORTRAIT_INVERTED,
+    LANDSCAPE_INVERTED,
+};
+
+inline bool IsValidDisplayOrientation(DisplayOrientation ori)
+{
+    return static_cast<int32_t>(DisplayOrientation::PORTRAIT) <= static_cast<int32_t>(ori) &&
+        static_cast<int32_t>(DisplayOrientation::LANDSCAPE_INVERTED) >= static_cast<int32_t>(ori);
+}
+
+/**
  * souce is Rosen::WindowStatus
  */
 enum class WindowStatus : uint32_t {

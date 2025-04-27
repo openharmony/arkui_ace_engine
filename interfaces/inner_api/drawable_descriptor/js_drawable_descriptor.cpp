@@ -15,9 +15,17 @@
 
 #include "js_drawable_descriptor.h"
 
+#include "napi/native_api.h"
+#include "napi/native_common.h"
+#include "napi/native_node_api.h"
 #ifndef PREVIEW
 #include "pixel_map_napi.h"
+#else
+#include "image_source_preview.h"
 #endif
+#include "resource_manager.h"
+
+#include "base/log.h"
 
 namespace {
 constexpr char DRAWABLE_BASE[] = "DrawableDescriptor";
@@ -82,13 +90,12 @@ static bool GetPixelMapArray(napi_env env, napi_value arg, std::vector<std::shar
         if (pixmapNapi == nullptr) {
             continue;
         }
-        auto *pixelmap = pixmapNapi->GetPixelMap();
-        if (pixelmap == nullptr) {
-            continue;
-        }
-        pixelMaps.push_back(*(pixelmap));
+        pixelMaps.push_back(*(pixmapNapi->GetPixelMap()));
     }
-    return !pixelMaps.empty();
+    if (pixelMaps.size() <= 0) {
+        return false;
+    }
+    return true;
 }
 
 napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback_info info)
@@ -99,12 +106,19 @@ napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback
     size_t argc = 2;
     napi_value argv[2] = { nullptr };
     napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
+    napi_status status = napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     if (argc < 1) {
+        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
     if (!GetPixelMapArray(env, argv[0], pixelMaps)) {
+        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
@@ -122,11 +136,7 @@ napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback
     // create JsDrawable
     auto* animatedDrawable = new AnimatedDrawableDescriptor(pixelMaps, duration, iterations);
     // wrap to napi_value
-    auto napi_status = napi_wrap(env, thisVar, animatedDrawable, Destructor, nullptr, nullptr);
-    if (napi_status != napi_ok) {
-        delete animatedDrawable;
-        return nullptr;
-    }
+    napi_wrap(env, thisVar, animatedDrawable, Destructor, nullptr, nullptr);
     napi_escape_handle(env, scope, thisVar, &thisVar);
     napi_close_escapable_handle_scope(env, scope);
     return thisVar;
@@ -137,15 +147,16 @@ napi_value JsDrawableDescriptor::Constructor(napi_env env, napi_callback_info in
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(env, &scope);
     napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
+    napi_status status = napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     // create JsDrawable
     auto* drawable = new DrawableDescriptor;
     // wrap to napi_value
-    auto napi_status = napi_wrap(env, thisVar, drawable, Destructor, nullptr, nullptr);
-    if (napi_status != napi_ok) {
-        delete drawable;
-        return nullptr;
-    }
+    napi_wrap(env, thisVar, drawable, Destructor, nullptr, nullptr);
     napi_escape_handle(env, scope, thisVar, &thisVar);
     napi_close_escapable_handle_scope(env, scope);
     return thisVar;
@@ -158,15 +169,16 @@ napi_value JsDrawableDescriptor::PixelMapConstructor(napi_env env, napi_callback
     size_t argc = PARAMS_NUM_ONE;
     napi_value argv[argc];
     napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
+    napi_status status = napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     auto* drawable = new DrawableDescriptor;
     if (argc == 0) {
         HILOGW("JsDrawableDescriptor::PixelMapConstructor get null pixelMap param");
-        auto napi_status = napi_wrap(env, thisVar, drawable, Destructor, nullptr, nullptr);
-        if (napi_status != napi_ok) {
-            delete drawable;
-            return thisVar;
-        }
+        napi_wrap(env, thisVar, drawable, Destructor, nullptr, nullptr);
         napi_escape_handle(env, scope, thisVar, &thisVar);
         napi_close_escapable_handle_scope(env, scope);
         return thisVar;
@@ -182,11 +194,7 @@ napi_value JsDrawableDescriptor::PixelMapConstructor(napi_env env, napi_callback
     }
 
     // wrap to napi_value
-    auto napi_status = napi_wrap(env, thisVar, drawable, Destructor, nullptr, nullptr);
-    if (napi_status != napi_ok) {
-        delete drawable;
-        return thisVar;
-    }
+    napi_wrap(env, thisVar, drawable, Destructor, nullptr, nullptr);
     napi_escape_handle(env, scope, thisVar, &thisVar);
     napi_close_escapable_handle_scope(env, scope);
     return thisVar;
@@ -199,15 +207,16 @@ napi_value JsDrawableDescriptor::LayeredConstructor(napi_env env, napi_callback_
     size_t argc = PARAMS_NUM_THREE;
     napi_value argv[argc];
     napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
+    napi_status status = napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     auto pos = -1;
     auto* layeredDrawable = new LayeredDrawableDescriptor;
     if (argc == 0) {
-        auto napi_status = napi_wrap(env, thisVar, layeredDrawable, Destructor, nullptr, nullptr);
-        if (napi_status != napi_ok) {
-            delete layeredDrawable;
-            return thisVar;
-        }
+        napi_wrap(env, thisVar, layeredDrawable, Destructor, nullptr, nullptr);
         napi_escape_handle(env, scope, thisVar, &thisVar);
         napi_close_escapable_handle_scope(env, scope);
         return thisVar;
@@ -238,11 +247,7 @@ napi_value JsDrawableDescriptor::LayeredConstructor(napi_env env, napi_callback_
                 foregroundPixelMap = std::move(pixelMap);
         }
     }
-    auto napi_status = napi_wrap(env, thisVar, layeredDrawable, Destructor, nullptr, nullptr);
-    if (napi_status != napi_ok) {
-        delete layeredDrawable;
-        return thisVar;
-    }
+    napi_wrap(env, thisVar, layeredDrawable, Destructor, nullptr, nullptr);
     napi_escape_handle(env, scope, thisVar, &thisVar);
     napi_close_escapable_handle_scope(env, scope);
     return thisVar;
@@ -392,10 +397,19 @@ napi_value JsDrawableDescriptor::GetPixelMap(napi_env env, napi_callback_info in
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(env, &scope);
     napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
+    napi_status status = napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
     auto* drawable = reinterpret_cast<DrawableDescriptor*>(native);
+    if (!drawable) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     auto pixmap = drawable->GetPixelMap();
 
     napi_value result = Media::PixelMapNapi::CreatePixelMap(env, pixmap);
@@ -409,11 +423,17 @@ napi_value JsDrawableDescriptor::GetForeground(napi_env env, napi_callback_info 
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(env, &scope);
     napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
+    napi_status status = napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
     auto* drawable = reinterpret_cast<LayeredDrawableDescriptor*>(native);
     if (!drawable) {
+        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
@@ -429,11 +449,17 @@ napi_value JsDrawableDescriptor::GetBackground(napi_env env, napi_callback_info 
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(env, &scope);
     napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
+    napi_status status = napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
     auto* drawable = reinterpret_cast<LayeredDrawableDescriptor*>(native);
     if (!drawable) {
+        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
@@ -449,11 +475,17 @@ napi_value JsDrawableDescriptor::GetMask(napi_env env, napi_callback_info info)
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(env, &scope);
     napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
+    napi_status status = napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
     auto* drawable = reinterpret_cast<LayeredDrawableDescriptor*>(native);
     if (!drawable) {
+        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
