@@ -132,6 +132,30 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     return CreateCustomDialog(columnNode, themeScopeId);
 }
 
+RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(const std::u16string& message)
+{
+    int32_t themeScopeId = 0;
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>(themeScopeId);
+    CHECK_NULL_RETURN(dialogTheme, nullptr);
+    RefPtr<FrameNode> columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    Dimension dialogHeight;
+    if (message.empty()) {
+        float scale = context->GetFontScale();
+        if (NearEqual(scale, dialogTheme->GetBigFontSizeScale()) ||
+            NearEqual(scale, dialogTheme->GetLargeFontSizeScale())) {
+            dialogHeight = Dimension(dialogTheme->GetBigDialogWidth(), DimensionUnit::VP);
+        } else if (NearEqual(scale, dialogTheme->GetMaxFontSizeScale())) {
+            dialogHeight = Dimension(dialogTheme->GetMaxDialogWidth(), DimensionUnit::VP);
+        }
+        return CreateCustomDialog(columnNode, themeScopeId);
+    }
+    CreateDialogTextNode(columnNode, message, themeScopeId);
+    return CreateCustomDialog(columnNode, themeScopeId);
+}
+
 RefPtr<FrameNode> AgingAdapationDialogUtil::CreateCustomDialog(
     const RefPtr<FrameNode>& columnNode, int32_t themeScopeId)
 {

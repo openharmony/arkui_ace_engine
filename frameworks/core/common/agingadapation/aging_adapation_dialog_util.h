@@ -33,6 +33,7 @@ public:
         const std::string& message, ImageSourceInfo& imageSourceInfo, int32_t themeScopeId = 0);
     static RefPtr<FrameNode> ShowLongPressDialog(
         const std::u16string& message, ImageSourceInfo& imageSourceInfo, int32_t themeScopeId = 0);
+    static RefPtr<FrameNode> ShowLongPressDialog(const std::u16string& message);
     static float GetDialogBigFontSizeScale();
     static float GetDialogLargeFontSizeScale();
     static float GetDialogMaxFontSizeScale();
