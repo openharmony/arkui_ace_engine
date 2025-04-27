@@ -69,22 +69,22 @@ enum class FormChildNodeType : int32_t {
     /**
      * time limit text node
     */
-   TIME_LIMIT_TEXT_NODE,
+    TIME_LIMIT_TEXT_NODE,
 
-   /**
-    * time limit image node
-   */
-   TIME_LIMIT_IMAGE_NODE,
+    /**
+     * time limit image node
+    */
+    TIME_LIMIT_IMAGE_NODE,
 
-   /**
-    * app locked text node
-   */
-   APP_LOCKED_TEXT_NODE,
+    /**
+     * app locked text node
+    */
+    APP_LOCKED_TEXT_NODE,
 
-   /**
-    * app locked image node
-   */
-   APP_LOCKED_IMAGE_NODE,
+    /**
+     * app locked image node
+    */
+    APP_LOCKED_IMAGE_NODE,
 };
 
 class FormPattern : public Pattern {
@@ -159,7 +159,7 @@ public:
 
     void OnLanguageConfigurationUpdate() override;
 
-    void GetTimeLimitResource(std::string &content);
+    void GetResourceContent(std::string resourceName, std::string &content);
 
     void UnregisterAccessibility();
 
