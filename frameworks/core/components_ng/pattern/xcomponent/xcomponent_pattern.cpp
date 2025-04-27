@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,9 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "feature/anco_manager/rs_ext_node_operation.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#endif
+#ifdef RENDER_EXTRACT_SUPPORTED
+#include "core/components_ng/render/adapter/render_surface_impl.h"
 #endif
 
 #include "core/components_ng/event/input_event.h"
@@ -720,8 +723,8 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
             static_cast<int32_t>(transformRelativeOffset.GetY() + localPosition_.GetY()),
             static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
     }
-#endif
     HandleSurfaceChangeEvent(false, offsetChanged, sizeChanged, needFireNativeEvent, config.frameOffsetChange);
+#endif
     if (type_ == XComponentType::SURFACE && renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE) {
         AddAfterLayoutTaskForExportTexture();
     }
@@ -811,7 +814,8 @@ void XComponentPattern::XComponentSizeInit()
     
 #ifdef RENDER_EXTRACT_SUPPORTED
     if (xcomponentController_ && renderSurface_) {
-        xcomponentController_->SetSurfaceId(renderSurface_->GetUniqueId());
+        surfaceId_ = renderSurface_->GetUniqueId();
+        xcomponentController_->SetSurfaceId(surfaceId_);
     }
 #endif
     auto eventHub = host->GetEventHub<XComponentEventHub>();
@@ -1691,6 +1695,14 @@ void XComponentPattern::HandleSurfaceChangeEvent(
     if (renderSurface_) {
         renderSurface_->SetSurfaceDefaultSize(
             static_cast<int32_t>(paintRect_.Width()), static_cast<int32_t>(paintRect_.Height()));
+#ifdef RENDER_EXTRACT_SUPPORTED
+        if (!renderSurface_->IsTexture()) {
+            auto impl = AceType::DynamicCast<RenderSurfaceImpl>(renderSurface_);
+            if (impl != nullptr) {
+                impl->SetSurfaceRect(paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
+            }
+        }
+#endif
     }
     if (needForceRender) {
         auto host = GetHost();
@@ -2149,6 +2161,14 @@ void XComponentPattern::SetSurfaceRotation(bool isLock)
 
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     handlingSurfaceRenderContext_->SetSurfaceRotation(isLock);
+#ifdef RENDER_EXTRACT_SUPPORTED
+    CHECK_NULL_VOID(renderSurface_);
+    if (!renderSurface_->IsTexture()) {
+        auto impl = AceType::DynamicCast<RenderSurfaceImpl>(renderSurface_);
+        CHECK_NULL_VOID(impl);
+        impl->SetSurfaceRotation(isLock);
+    }
+#endif
 }
 
 void XComponentPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
