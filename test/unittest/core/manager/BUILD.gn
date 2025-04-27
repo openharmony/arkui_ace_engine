@@ -35,7 +35,7 @@ ace_unittest("drag_drop_func_wrapper_test_ng") {
   type = "new"
   module_output = "manager"
   sources = [
-    "drag_drop_func_wrapper_test_ng.cpp",
+    "./drag_drop/drag_drop_func_wrapper_test_ng_base.cpp",
     "drag_drop_func_wrapper_test_ng_coverage.cpp",
   ]
 }
