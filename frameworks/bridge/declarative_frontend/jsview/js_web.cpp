@@ -3535,7 +3535,6 @@ void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)
 
 void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
 {
-#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
     }
@@ -3560,6 +3559,7 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
 
         WebModel::GetInstance()->SetJsProxyCallback(jsProxyCallback);
     }
+#if !defined(CROSS_PLATFORM)
     auto jsWebController = controller->Unwrap<JSWebController>();
     if (jsWebController) {
         jsWebController->SetJavascriptInterface(args);
