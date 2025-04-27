@@ -199,13 +199,16 @@ void MenuPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(menuWarpper);
         auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(warpperPattern);
-        if (!warpperPattern->IsHide()) {
+        auto isMenuHide = warpperPattern->IsHide();
+        TAG_LOGI(AceLogTag::ACE_MENU, "the area of target node is changed, isMenuHide: %{public}d", isMenuHide);
+        if (!isMenuHide) {
             menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 
-    auto foldModeChangeCallback = [weak = WeakClaim(this)](FoldDisplayMode foldDisplayMode) {
+    auto foldStatusChangeCallback = [weak = WeakClaim(this)](FoldStatus foldStatus) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "foldStatus is changed: %{public}d", foldStatus);
         auto menuPattern = weak.Upgrade();
         CHECK_NULL_VOID(menuPattern);
         auto menuWrapper = menuPattern->GetMenuWrapper();
@@ -213,9 +216,10 @@ void MenuPattern::OnAttachToFrameNode()
         auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(wrapperPattern);
         wrapperPattern->SetHasFoldModeChangedTransition(true);
+        SubwindowManager::GetInstance()->HideMenuNG(false);
     };
-    foldDisplayModeChangedCallbackId_ =
-        pipelineContext->RegisterFoldDisplayModeChangedCallback(std::move(foldModeChangeCallback));
+    foldStatusChangedCallbackId_ =
+        pipelineContext->RegisterFoldStatusChangedCallback(std::move(foldStatusChangeCallback));
 }
 
 int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
@@ -258,10 +262,10 @@ void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(eventHub);
     eventHub->RemoveInnerOnAreaChangedCallback(frameNode->GetId());
 
-    if (foldDisplayModeChangedCallbackId_.has_value()) {
+    if (foldStatusChangedCallbackId_.has_value()) {
         auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
-        pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
+        pipeline->UnRegisterFoldStatusChangedCallback(foldStatusChangedCallbackId_.value_or(-1));
     }
 }
 
