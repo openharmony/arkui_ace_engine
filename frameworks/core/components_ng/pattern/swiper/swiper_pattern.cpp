@@ -2189,8 +2189,9 @@ bool SwiperPattern::ComputeTargetIndex(int32_t index, int32_t& targetIndex) cons
     index = CheckIndexRange(index);
     auto itemCount = TotalCount();
     auto displayCount = GetDisplayCount();
-    auto loopCount = itemCount == 0 ? 0 : std::abs(currentIndex_ / itemCount);
-    targetIndex = currentIndex_ >= 0 ? loopCount * itemCount + index : -(loopCount + 1) * itemCount + index;
+    auto loopCount =
+        itemCount == 0 ? 0 : (currentIndex_ >= 0 ? currentIndex_ / itemCount : (currentIndex_ + 1) / itemCount - 1);
+    targetIndex = loopCount * itemCount + index;
     targetIndex = IsSwipeByGroup() ? SwiperUtils::ComputePageIndex(targetIndex, displayCount) : targetIndex;
     if (targetIndex_.has_value() && targetIndex_.value() == targetIndex) {
         return false;
