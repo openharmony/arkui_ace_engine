@@ -134,8 +134,9 @@ private:
     bool InnerNotifyOccupiedAreaChangeInfo(
         sptr<Rosen::OccupiedAreaChangeInfo> info, bool isWaitTask, int64_t occupiedAreaTime);
     bool RegisterDataConsumer();
-    void PostBusinessDataConsumeAsync(uint32_t customId, AAFwk::Want&& data);
-    void PostBusinessDataConsumeSyncReply(uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    void PostBusinessDataConsumeAsync(uint32_t customId, const AAFwk::Want& data);
+    void PostBusinessDataConsumeSyncReply(
+        uint32_t customId, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
     void UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr);
 
     WeakPtr<UIExtensionPattern> hostPattern_;
