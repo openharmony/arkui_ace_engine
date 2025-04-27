@@ -27,5 +27,6 @@ ace_unittest("text_picker_test_ng") {
     "text_picker_pattern_test_ng.cpp",
     "text_picker_test_ng.cpp",
     "text_picker_test_update.cpp",
+    "text_picker_layout_algorithm_test_ng.cpp",
   ]
 }
