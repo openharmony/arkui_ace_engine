@@ -996,6 +996,7 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
     Msdp::DeviceStatus::ShadowInfo shadowInfo;
     asyncCtxData = {asyncCtx->instanceId, asyncCtx->hasTouchPoint, asyncCtx->dragPointerEvent,
         asyncCtx->dragPreviewOption, asyncCtx->touchPoint, asyncCtx->pixelMapList};
+    auto subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
     for (auto& pixelMap: asyncCtx->pixelMapList) {
         if (!pixelMap) {
             TAG_LOGD(AceLogTag::ACE_DRAG, "Skipping null pixelMap");
@@ -1007,7 +1008,6 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
         }
         shadowInfos.push_back(shadowInfo);
     }
-    auto subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
     std::optional<Msdp::DeviceStatus::DragData> dragData;
     if (!EnvelopedDragData(asyncCtx, dragData, shadowInfos)) {
         return;
@@ -1027,8 +1027,7 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
         std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
 #endif
     if (ret == 0) {
-        asyncCtxData = {asyncCtx->instanceId, asyncCtx->hasTouchPoint, asyncCtx->dragPointerEvent,
-            asyncCtx->dragPreviewOption, asyncCtx->touchPoint, asyncCtx->pixelMapList};
+        asyncCtxData.dragPointerEvent = asyncCtx->dragPointerEvent;
         if (NG::DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
             asyncCtx->isSwitchedToSubWindow = true;
         }
@@ -1205,11 +1204,11 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     Msdp::DeviceStatus::ShadowInfo shadowInfo;
     asyncCtxData = {asyncCtx->instanceId, asyncCtx->hasTouchPoint, asyncCtx->dragPointerEvent,
         asyncCtx->dragPreviewOption, asyncCtx->touchPoint, asyncCtx->pixelMapList};
+    auto subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
     auto ret = CreatePreviewNodeAndScale(asyncCtx, data, asyncCtxData, shadowInfo, asyncCtx->pixelMap);
     if (!ret) {
         return false;
     }
-    auto subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
     Msdp::DeviceStatus::DragData dragData;
     if (!PrepareDragData(asyncCtx, dragData, shadowInfo)) {
         TAG_LOGW(AceLogTag::ACE_DRAG, "prepare drag data failed!");
