@@ -503,6 +503,19 @@ void DatePickerPattern::UpdateLunarSwitch()
     lunarSwitchTextLayoutProperty->UpdateContent(pickerTheme->GetLunarSwitchText());
     lunarSwitchTextLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
     lunarSwitchNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    auto lunarSwitchCheckbox = weakLunarSwitchCheckbox_.Upgrade();
+    CHECK_NULL_VOID(lunarSwitchCheckbox);
+    auto checkboxLayoutProps = lunarSwitchCheckbox->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(checkboxLayoutProps);
+    MarginProperty marginCheckbox;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    marginCheckbox.left = isRtl ? CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON)
+                                : CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+    marginCheckbox.right = isRtl ? CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE)
+                                 : CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
+    checkboxLayoutProps->UpdateMargin(marginCheckbox);
+    lunarSwitchCheckbox->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void DatePickerPattern::UpdateDateOrder()

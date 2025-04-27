@@ -649,7 +649,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPatternTest002, 
     GestureEvent info;
     clickListener->callback_(info);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(eventHub->onAppear_, nullptr);
     ASSERT_NE(eventHub->onDisappear_, nullptr);
@@ -1098,7 +1098,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePatternTest002, Test
     GestureEvent info;
     clickListener->callback_(info);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(eventHub->onAppear_, nullptr);
     ASSERT_NE(eventHub->onDisappear_, nullptr);
@@ -1524,7 +1524,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePatternTest002, Tes
     GestureEvent info;
     clickListener->callback_(info);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(eventHub->onAppear_, nullptr);
     ASSERT_NE(eventHub->onDisappear_, nullptr);

@@ -153,12 +153,12 @@ void SwiperArrowPattern::InitEvent()
     CHECK_NULL_VOID(buttonNode);
 
     auto buttonGestureHub = buttonNode->GetOrCreateGestureEventHub();
-    auto touchCallback = [weak = WeakClaim(this), weakButton = WeakClaim(RawPtr(buttonNode))](
-                             const TouchEventInfo& info) {
+    auto touchCallback = [weak = WeakClaim(this), weakButton = WeakClaim(RawPtr(buttonNode))](TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto buttonNode = weakButton.Upgrade();
         CHECK_NULL_VOID(buttonNode);
+        info.SetStopPropagation(true);
         pattern->ButtonTouchEvent(buttonNode, info.GetTouches().front().GetTouchType());
     };
     buttonTouchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -373,7 +373,7 @@ std::tuple<bool, bool, bool> SwiperArrowPattern::CheckHoverStatus()
     auto displayCount = swiperPattern->GetDisplayCount();
     bool leftArrowIsHidden = (index_ == 0);
     bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displayCount);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && swiperPattern->IsSwipeByGroup()) {
+    if (!swiperPattern->IsAutoLinear() && swiperPattern->IsSwipeByGroup()) {
         leftArrowIsHidden = (index_ < displayCount);
         rightArrowIsHidden = (index_ >= swiperPattern->TotalCount() - displayCount);
     }
@@ -439,13 +439,10 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
         accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
         arrowAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
     } else {
-        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-        CHECK_NULL_VOID(swiperPattern);
-        auto totalCount = swiperPattern->RealTotalCount();
-        auto displayCount = swiperPattern->GetDisplayCount();
         accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         arrowAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
-        if (totalCount > displayCount) {
+        auto isArrowFocus = arrowAccessibilityProperty->GetAccessibilityFocusState();
+        if (isArrowFocus) {
             swiperNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
         }
     }

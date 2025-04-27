@@ -370,8 +370,6 @@ public:
     template<typename T>
     RefPtr<T> GetEventHub()
     {
-        CreateEventHubInner();
-        CHECK_NULL_RETURN(eventHub_, nullptr);
         return DynamicCast<T>(eventHub_);
     }
 
@@ -380,12 +378,6 @@ public:
     {
         CreateEventHubInner();
         CHECK_NULL_RETURN(eventHub_, nullptr);
-        return DynamicCast<T>(eventHub_);
-    }
-
-    template<typename T>
-    RefPtr<T> GetEventHubOnly()
-    {
         return DynamicCast<T>(eventHub_);
     }
 
@@ -1321,6 +1313,7 @@ public:
     }
 
     void SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback);
+    void SetMeasureCallback(const std::function<void(RefPtr<Kit::FrameNode>)>& measureCallback);
     void FireFrameNodeDestructorCallback();
 
     bool CheckTopWindowBoundary() const
@@ -1672,6 +1665,7 @@ private:
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
     float preOpacity_ = 1.0f;
     std::function<void(int32_t)> frameNodeDestructorCallback_;
+    std::function<void(RefPtr<Kit::FrameNode>&)> measureCallback_;
 
     bool topWindowBoundary_ = false;
 

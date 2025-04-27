@@ -92,6 +92,7 @@ public:
     virtual void HandlePullEvent(const DragPointerEvent& dragPointerEvent) {}
     virtual void HandleReStartDrag(const GestureEvent& info) {}
     virtual void HandleDragStart() {}
+    virtual void HandlePreDragStatus(const PreDragStatus preDragStatus) {}
 
     virtual void Init(int32_t currentState) {}
 

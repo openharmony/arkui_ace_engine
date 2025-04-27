@@ -34,6 +34,7 @@ struct RefreshMainPage {
   @State arr: TextList[] = [
     new TextList(1, 'Back', 'pages/Index'),
     new TextList(2, 'RefreshingContent', 'pages/refresh/RefreshingContent'),
+    new TextList(3, 'RefreshAndLoad', 'pages/refresh/RefreshAndLoad'),
   ]
   @State fontSize: Resource | undefined = undefined
 

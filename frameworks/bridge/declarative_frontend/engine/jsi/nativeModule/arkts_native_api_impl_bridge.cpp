@@ -993,6 +993,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnKeyPreIme));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnKeyPreIme"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnKeyPreIme));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnKeyEventDispatch"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnKeyEventDispatch));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnKeyEventDispatch"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnKeyEventDispatch));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFocusAxisEvent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnFocusAxisEvent));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFocusAxisEvent"),
@@ -2940,9 +2944,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterAlphabetIndexerAttributes(object, vm);
     RegisterGaugeAttributes(object, vm);
     RegisterSwiperAttributes(object, vm);
-#ifndef ARKUI_WEARABLE
     RegisterSelectAttributes(object, vm);
-#endif
     RegisterRadioAttributes(object, vm);
     RegisterSliderAttributes(object, vm);
     RegisterRatingAttributes(object, vm);
@@ -3337,7 +3339,6 @@ void ArkUINativeModule::RegisterRadioAttributes(Local<panda::ObjectRef> object, 
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "radio"), radio);
 }
 
-#ifndef ARKUI_WEARABLE
 void ArkUINativeModule::RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
 {
     auto select = panda::ObjectRef::New(vm);
@@ -3451,7 +3452,6 @@ void ArkUINativeModule::RegisterSelectAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetAvoidance));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "select"), select);
 }
-#endif
 
 void ArkUINativeModule::RegisterPanelAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
 {

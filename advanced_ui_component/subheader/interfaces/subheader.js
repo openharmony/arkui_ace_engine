@@ -1086,7 +1086,7 @@ export class SubHeader extends ViewPU {
         }
         d12.forEach((i12) => {
             e12.minHeight = Math.min(Number(this.getMinHeight()), Number(e12.maxHeight));
-            f12.height = i12.measure(e12).height;
+            f12.height = i12?.measure(e12).height;
             f12.width = Number(e12.maxWidth);
         });
         return f12;
@@ -2177,7 +2177,7 @@ class Util {
             return false;
         }
         let u1 = t1;
-        return u1.type === RESOURCE_TYPE_SYMBOL;
+        return u1?.type === RESOURCE_TYPE_SYMBOL;
     }
 
     static isResourceType(s1) {
@@ -2313,7 +2313,7 @@ class TextArrowLayout extends ViewPU {
             minHeight: e,
             maxHeight: e,
         };
-        i.measure(j);
+        i?.measure(j);
         return { width: d, height: e };
     }
 

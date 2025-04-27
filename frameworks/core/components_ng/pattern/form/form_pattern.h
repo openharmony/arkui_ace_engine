@@ -67,9 +67,24 @@ enum class FormChildNodeType : int32_t {
     FORM_FORBIDDEN_ROOT_NODE,
 
     /**
-     * forbidden form text node
+     * time limit text node
     */
-    FORM_SPECIAL_STYLE_NODE
+    TIME_LIMIT_TEXT_NODE,
+
+    /**
+     * time limit image node
+    */
+    TIME_LIMIT_IMAGE_NODE,
+
+    /**
+     * app locked text node
+    */
+    APP_LOCKED_TEXT_NODE,
+
+    /**
+     * app locked image node
+    */
+    APP_LOCKED_IMAGE_NODE,
 };
 
 class FormPattern : public Pattern {
@@ -144,7 +159,7 @@ public:
 
     void OnLanguageConfigurationUpdate() override;
 
-    void GetTimeLimitResource(std::string &content);
+    void GetResourceContent(std::string resourceName, std::string &content);
 
     void UnregisterAccessibility();
 
@@ -184,8 +199,8 @@ private:
     void UpdateFormComponent(const RequestFormInfo& info);
     void UpdateFormComponentSize(const RequestFormInfo& info);
     void UpdateSpecialStyleCfg();
-    void UpdateTimeLimitFontCfg();
-    void UpdateAppLockCfg();
+    void UpdateForbiddenIcon(FormChildNodeType nodeType);
+    void UpdateForbiddenText(FormChildNodeType nodeType);
 
     void HandleSnapshot(uint32_t delayTime, const std::string& nodeIdStr);
     void TakeSurfaceCaptureForUI();
@@ -214,8 +229,11 @@ private:
     void RemoveFormChildNode(FormChildNodeType formChildNodeType);
     int32_t GetFormDimensionHeight(int32_t dimension);
     RefPtr<FrameNode> CreateColumnNode(FormChildNodeType formChildNodeType);
-    RefPtr<FrameNode> CreateTimeLimitNode();
-    RefPtr<FrameNode> CreateAppLockNode();
+    RefPtr<FrameNode> CreateRowNode(FormChildNodeType formChildNodeType);
+    RefPtr<FrameNode> CreateTextNode(bool isRowStyle);
+    RefPtr<FrameNode> CreateIconNode();
+    RefPtr<FrameNode> CreateForbiddenImageNode(InternalResource::ResourceId resourceId);
+    RefPtr<FrameNode> CreateForbiddenTextNode(std::string resourceName, bool isRowStyle);
     RefPtr<FrameNode> CreateRectNode(const RefPtr<FrameNode>& parent, const CalcSize& idealSize,
         const MarginProperty& margin, uint32_t fillColor, double opacity);
     void CreateSkeletonView(const RefPtr<FrameNode>& parent, const std::shared_ptr<FormSkeletonParams>& params,
@@ -249,7 +267,6 @@ private:
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle, const RequestFormInfo& info);
     void UpdateForbiddenRootNodeStyle(const RefPtr<RenderContext> &renderContext);
     void ReAddStaticFormSnapshotTimer();
-    RefPtr<FrameNode> CreateActionNode();
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     void enhancesSubContainer(bool hasContainer);
     RefPtr<RenderContext> externalRenderContext_;

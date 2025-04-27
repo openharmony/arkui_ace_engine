@@ -34,6 +34,14 @@ public:
         const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox) override;
     void AppendChild(const RefPtr<SvgNode>& child) override;
     void Update(RefPtr<RenderNode>& node) override;
+    bool ProcessIteratively(const LayoutParam& layoutParam, std::stack<SvgCreateRenderInfo>& createRenderTaskSt,
+        SvgCreateRenderInfo& svgCreateRenderInfo) override;
+    bool BeforeChildrenProcessed(SvgCreateRenderInfo& svgCreateRenderInfo) override;
+
+    bool IsCreateRenderRecursive() const override
+    {
+        return true;
+    }
 
     RefPtr<Component> GetComponent() const override
     {

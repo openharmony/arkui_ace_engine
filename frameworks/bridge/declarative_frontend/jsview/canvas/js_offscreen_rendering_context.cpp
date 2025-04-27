@@ -157,11 +157,6 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
 
     double width = 0.0;
     double height = 0.0;
-    int32_t unit = 0;
-    if ((jsRenderContext->GetApiVersion() >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) &&
-        args.GetInt32Arg(3, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) { // 3: index of parameter
-        jsRenderContext->SetUnit(CanvasUnit::PX);
-    }
     double density = jsRenderContext->GetDensity();
     if (args.GetDoubleArg(0, width) && args.GetDoubleArg(1, height)) {
         width *= density;
@@ -184,8 +179,8 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
         bool anti = jsContextSetting->GetAntialias();
         jsRenderContext->SetAnti(anti);
         jsRenderContext->SetAntiAlias();
-        if ((jsRenderContext->GetApiVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) &&
-            args.GetInt32Arg(3, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) { // 3: index of parameter
+        int32_t unit = 0;
+        if (args.GetInt32Arg(3, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) { // 3: index of parameter
             jsRenderContext->SetUnit(CanvasUnit::PX);
         }
     }

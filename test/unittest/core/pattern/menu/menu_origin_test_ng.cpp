@@ -330,7 +330,7 @@ HWTEST_F(MenuTestNg, PerformActionTest001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
-    auto menuItemEventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    auto menuItemEventHub = frameNode->GetOrCreateEventHub<MenuItemEventHub>();
     ASSERT_NE(menuItemEventHub, nullptr);
     auto menuItemAccessibilityProperty = frameNode->GetAccessibilityProperty<MenuItemAccessibilityProperty>();
     ASSERT_NE(menuItemAccessibilityProperty, nullptr);
@@ -400,7 +400,7 @@ HWTEST_F(MenuTestNg, MenuAccessibilityEventTestNg001, TestSize.Level1)
      */
     int testIndex = SELECTED_INDEX;
     auto selectFunc = [optionPattern, testIndex](int index) { optionPattern->index_ = testIndex; };
-    auto optionEventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    auto optionEventHub = frameNode->GetOrCreateEventHub<MenuItemEventHub>();
     optionEventHub->SetOnSelect(selectFunc);
     optionPattern->RegisterOnClick();
 
@@ -1794,7 +1794,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNg007, TestSize.Level1)
     ASSERT_NE(previewNode, nullptr);
     menuNode->MountToParent(menuWrapperNode);
     previewNode->MountToParent(menuWrapperNode);
-    auto previewEventHub = previewNode->GetEventHub<EventHub>();
+    auto previewEventHub = previewNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(previewEventHub, nullptr);
     auto previewGestureEventHub = previewEventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(previewGestureEventHub, nullptr);
@@ -1805,7 +1805,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNg007, TestSize.Level1)
      */
     auto menuPreviewPattern = previewNode->GetPattern<MenuPreviewPattern>();
     ASSERT_NE(menuPreviewPattern, nullptr);
-    auto hub = previewNode->GetEventHub<EventHub>();
+    auto hub = previewNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     menuPreviewPattern->InitPanEvent(gestureHub);

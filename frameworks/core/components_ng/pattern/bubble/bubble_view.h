@@ -58,7 +58,7 @@ public:
     static RefPtr<OverlayManager> GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId);
 
 private:
-    static bool IsSupportBlurStyle(RefPtr<RenderContext>& renderContext, bool isShowInSubWindow);
+    static bool IsSupportBlurStyle(RefPtr<RenderContext>& renderContext, bool isShowInSubWindow, bool isTips = false);
 };
 } // namespace OHOS::Ace::NG
 

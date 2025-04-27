@@ -39,7 +39,7 @@ private:
     void AdjustRowColSpan(
         const RefPtr<LayoutWrapper>& itemLayoutWrapper, LayoutWrapper* layoutWrapper, int32_t itemIndex) override;
 
-    std::pair<int32_t, int32_t> GetCrossStartAndSpan(LayoutWrapper* layoutWrapper, int32_t itemIndex);
+    std::pair<int32_t, int32_t> GetCrossStartAndSpan(const GridLayoutOptions& options, int32_t itemIndex);
 
     std::pair<int32_t, int32_t> GetCrossStartAndSpanWithUserFunction(
         int32_t itemIndex, const GridLayoutOptions& options, int32_t firstIrregularIndex);
@@ -60,6 +60,11 @@ private:
     std::pair<int32_t, int32_t> CalculateCachedCount(LayoutWrapper* layoutWrapper, int32_t cachedCount) override;
     int32_t CalculateStartCachedCount(const GridLayoutOptions& options, int32_t cachedCount);
     int32_t CalculateEndCachedCount(const GridLayoutOptions& options, int32_t cachedCount);
+
+    void PreloadItems(LayoutWrapper* layoutWrapper) override;
+    static bool PredictBuildItem(FrameNode& host, int32_t itemIdx, const GridPredictLayoutParam& param,
+        std::map<int32_t, std::pair<int32_t, int32_t>> itemCrossMap);
+
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollWithOptionsLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

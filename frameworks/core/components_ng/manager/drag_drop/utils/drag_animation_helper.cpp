@@ -454,6 +454,7 @@ void DragAnimationHelper::ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& m
         auto menuNode = menuWrapperPattern->GetMenu();
         CHECK_NULL_VOID(menuNode);
         auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        DragAnimationHelper::HideDragNodeCopy(manager);
         DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
         DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
         DragAnimationHelper::ShowBadgeAnimation(textNode);

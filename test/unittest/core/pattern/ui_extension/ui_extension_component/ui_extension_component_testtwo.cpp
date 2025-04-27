@@ -87,8 +87,7 @@ public:
 
 void UIExtensionComponentTestTwoNg::SetUp() {}
 
-void UIExtensionComponentTestTwoNg::TearDown() {
-}
+void UIExtensionComponentTestTwoNg::TearDown() {}
 
 /**
  * @tc.name: UIExtensionComponentTestTwoNg
@@ -918,6 +917,145 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTwoTest003, TestSize
     host->setIsMoving(true);
     pattern->HandleVisibleAreaChange(false, 0.0);
     EXPECT_EQ(pattern->IsMoving(), true);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern OnAttachContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, OnAttachContext001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test OnAttachContext
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto newInstanceId = pipelineContext->GetInstanceId();
+    ASSERT_NE(newInstanceId, pattern->instanceId_);
+    pipelineContext->uiExtensionManager_ = nullptr;
+    pattern->OnAttachContext(AceType::RawPtr(pipelineContext));
+    ASSERT_EQ(newInstanceId, pattern->instanceId_);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern UpdateSessionInstanceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, UpdateSessionInstanceId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+
+    /**
+     * @tc.steps: step2. test UpdateSessionInstanceId
+     */
+    int32_t instanceId = 100;
+    auto sessionWrapperImpl = AceType::DynamicCast<SessionWrapperImpl>(pattern->sessionWrapper_);
+    ASSERT_NE(sessionWrapperImpl, nullptr);
+    ASSERT_NE(sessionWrapperImpl->instanceId_, instanceId);
+    pattern->UpdateSessionInstanceId(instanceId);
+    ASSERT_NE(sessionWrapperImpl->instanceId_, instanceId);
+    pattern->sessionWrapper_ = nullptr;
+    pattern->UpdateSessionInstanceId(instanceId);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern RegisterEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, RegisterEvent001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->hasDetachContext_ = true;
+
+    /**
+     * @tc.steps: step2. test RegisterEvent
+     */
+    int32_t instanceId = 100;
+    pattern->RegisterEvent(instanceId);
+    ASSERT_FALSE(pattern->hasDetachContext_);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern RegisterUIExtensionManagerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, RegisterUIExtensionManagerEvent001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test RegisterUIExtensionManagerEvent
+     */
+    pattern->frameNode_ = uiExtensionNode;
+    ASSERT_NE(pattern->GetHost(), nullptr);
+    int32_t instanceId = 100;
+    auto pipelineContext = PipelineContext::GetContextByContainerId(instanceId);
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->uiExtensionManager_ = AceType::MakeRefPtr<UIExtensionManager>();
+    auto uiExtensionManager = pipelineContext->GetUIExtensionManager();
+    ASSERT_NE(uiExtensionManager, nullptr);
+
+    auto focusHub = pattern->GetHost()->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = false;
+    EXPECT_FALSE(focusHub->IsCurrentFocus());
+    pattern->RegisterUIExtensionManagerEvent(instanceId);
+
+    focusHub->currentFocus_ = true;
+    EXPECT_NE(focusHub, nullptr);
+    EXPECT_TRUE(focusHub->IsCurrentFocus());
+    pattern->RegisterUIExtensionManagerEvent(instanceId);
 #endif
 }
 } // namespace OHOS::Ace::NG

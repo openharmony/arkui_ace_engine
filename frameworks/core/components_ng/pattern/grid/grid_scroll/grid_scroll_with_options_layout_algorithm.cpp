@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 
+#include "core/components_ng/pattern/grid/grid_utils.h"
+#include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -32,7 +34,10 @@ void UpdateGridItemRowAndColumnInfo(const RefPtr<LayoutWrapper>& itemLayoutWrapp
 void GridScrollWithOptionsLayoutAlgorithm::AdjustRowColSpan(
     const RefPtr<LayoutWrapper>& itemLayoutWrapper, LayoutWrapper* layoutWrapper, int32_t itemIndex)
 {
-    auto result = GetCrossStartAndSpan(layoutWrapper, itemIndex);
+    auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& options = *layoutProperty->GetLayoutOptions();
+    auto result = GetCrossStartAndSpan(options, itemIndex);
     if (info_.axis_ == Axis::VERTICAL) {
         currentItemColStart_ = result.first;
         currentItemColSpan_ = result.second;
@@ -86,12 +91,14 @@ void GridScrollWithOptionsLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(
                                  : 0;
     int32_t currentIndex = benchmarkIndex;
     int32_t headOfMainStartLine = currentIndex;
-
+    auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& options = *layoutProperty->GetLayoutOptions();
     while (currentIndex < targetIndex) {
         int32_t crossGridReserve = info_.crossCount_;
         /* go through a new line */
         while ((crossGridReserve > 0) && (currentIndex <= targetIndex)) {
-            auto crossPos = GetCrossStartAndSpan(layoutWrapper, currentIndex);
+            auto crossPos = GetCrossStartAndSpan(options, currentIndex);
             auto gridSpan = crossPos.second;
             if (crossGridReserve >= gridSpan) {
                 crossGridReserve -= gridSpan;
@@ -120,11 +127,8 @@ void GridScrollWithOptionsLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(
 }
 
 std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartAndSpan(
-    LayoutWrapper* layoutWrapper, int32_t itemIndex)
+    const GridLayoutOptions& options, int32_t itemIndex)
 {
-    auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(layoutProperty, std::make_pair(-1, 1));
-    const auto& options = *layoutProperty->GetLayoutOptions();
     if (options.irregularIndexes.empty()) {
         return std::make_pair(-1, 1);
     }
@@ -416,5 +420,67 @@ int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateEndCachedCount(
         return sum;
     }
     return end;
+}
+
+void GridScrollWithOptionsLayoutAlgorithm::PreloadItems(LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& options = *layoutProperty->GetLayoutOptions();
+    std::map<int32_t, std::pair<int32_t, int32_t>> itemCrossMap;
+    for (auto item : predictBuildList_) {
+        auto result = GetCrossStartAndSpan(options, item.idx);
+        itemCrossMap.emplace(item.idx, result);
+    }
+    GridLayoutUtils::PreloadGridItems(layoutWrapper->GetHostNode()->GetPattern<GridPattern>(),
+        std::move(predictBuildList_),
+        [param = GridPredictLayoutParam { cachedChildConstraint_, itemsCrossSize_, crossGap_ }, itemCrossMap](
+            const RefPtr<FrameNode>& host, int32_t itemIdx) {
+            CHECK_NULL_RETURN(host, false);
+            return PredictBuildItem(*host, itemIdx, param, itemCrossMap);
+        });
+}
+
+namespace {
+LayoutConstraintF GenerateCacheItemConstraint(
+    std::pair<int32_t, int32_t> cross, Axis axis, const GridPredictLayoutParam& param)
+{
+    auto constraint = param.layoutConstraint;
+    int32_t crossStart = cross.first;
+    int32_t crossSpan = cross.second;
+    if (crossSpan > 1) {
+        float itemCrossSize = param.crossGap * (crossSpan - 1);
+        for (int32_t index = 0; index < crossSpan; ++index) {
+            int32_t crossIndex = (crossStart + index) % static_cast<int32_t>(param.itemsCrossSizes.size());
+            if (crossIndex >= 0 && crossIndex < static_cast<int32_t>(param.itemsCrossSizes.size())) {
+                itemCrossSize += GetOrDefault(param.itemsCrossSizes, crossIndex, 0.0f);
+            }
+        }
+        constraint.maxSize.SetCrossSize(itemCrossSize, axis);
+        constraint.selfIdealSize.SetCrossSize(itemCrossSize, axis);
+    }
+    return constraint;
+}
+} // namespace
+
+bool GridScrollWithOptionsLayoutAlgorithm::PredictBuildItem(FrameNode& host, int32_t itemIdx,
+     const GridPredictLayoutParam& param, std::map<int32_t, std::pair<int32_t, int32_t>> itemCrossMap)
+{
+    // build callback
+    auto wrapper = host.GetOrCreateChildByIndex(itemIdx, false, true);
+    CHECK_NULL_RETURN(wrapper, false);
+    auto itemCross = itemCrossMap.find(itemIdx);
+    if (itemCross == itemCrossMap.end()) {
+        return false;
+    }
+    const Axis axis = host.GetPattern<GridPattern>()->GetAxis();
+
+    auto constraint = GenerateCacheItemConstraint(itemCross->second, axis, param);
+    wrapper->SetActive(false);
+    auto frameNode = wrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    frameNode->GetGeometryNode()->SetParentLayoutConstraint(constraint);
+    FrameNode::ProcessOffscreenNode(frameNode);
+    return true;
 }
 } // namespace OHOS::Ace::NG

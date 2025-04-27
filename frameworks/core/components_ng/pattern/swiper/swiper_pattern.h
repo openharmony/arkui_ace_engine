@@ -58,6 +58,12 @@ enum class PageFlipMode {
     SINGLE,
 };
 
+enum class MoveStep {
+    NEXT = 0,
+    PREV,
+    NONE
+};
+
 using SwiperHoverFlag = uint32_t;
 constexpr SwiperHoverFlag HOVER_NONE = 0;
 constexpr SwiperHoverFlag HOVER_SWIPER = 1;
@@ -606,6 +612,7 @@ public:
     int32_t RealTotalCount() const;
     bool IsSwipeByGroup() const;
     int32_t DisplayIndicatorTotalCount() const;
+    bool IsAutoLinear() const;
     std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
     int32_t GetDisplayCount() const;
     int32_t GetCachedCount() const;
@@ -667,12 +674,8 @@ public:
     }
     void UpdateNodeRate();
 #ifdef SUPPORT_DIGITAL_CROWN
-    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
-    {
-        crownSensitivity_ = sensitivity;
-    }
-    virtual void InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub);
-    double GetCrownRotatePx(const CrownEvent& event);
+    virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
+    virtual void InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub) {}
     virtual bool IsCrownSpring() const { return false; }
     virtual void SetIsCrownSpring(bool isCrownSpring) {}
 #endif
@@ -910,6 +913,8 @@ private:
     bool IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub);
     void FlushFocus(const RefPtr<FrameNode>& curShowFrame);
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
+    bool FindFocusableContentIndex(MoveStep moveStep);
+    bool IsContentChildFocusable(int32_t childIndex) const;
 
     // Init indicator
     void InitIndicator();
@@ -1031,7 +1036,6 @@ private:
     void StopSpringAnimationAndFlushImmediately();
     void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
     int32_t GetLoopIndex(int32_t index, int32_t childrenSize) const;
-    bool IsAutoLinear() const;
     bool AutoLinearAnimationNeedReset(float translate) const;
     void TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex);
     /**
@@ -1253,14 +1257,6 @@ private:
     void UpdateBottomTypeOnMultiple(int32_t currentFirstIndex);
     void UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex);
     void CheckTargetPositon(float& correctOffset);
-#ifdef SUPPORT_DIGITAL_CROWN
-    void HandleCrownEvent(const CrownEvent& event, const OffsetF& center, const OffsetF& offset);
-    void HandleCrownActionBegin(GestureEvent& info);
-    void HandleCrownActionUpdate(double degree, double mainDelta, GestureEvent& info);
-    void HandleCrownActionEnd(GestureEvent& info);
-    void UpdateCrownVelocity(double mainDelta);
-    void StartVibraFeedback();
-#endif
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1448,12 +1444,6 @@ private:
 
     std::list<int32_t> itemsLatestSwitched_;
     std::set<int32_t> itemsNeedClean_;
-#ifdef SUPPORT_DIGITAL_CROWN
-    CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
-    double crownAdjustedVelocity_ = 0.f;
-    double crownRealVelocity_ = 0.f;
-    bool isCrownActionStarted_ = false;
-#endif
 };
 } // namespace OHOS::Ace::NG
 

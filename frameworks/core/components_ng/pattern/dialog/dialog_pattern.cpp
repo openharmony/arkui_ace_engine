@@ -1938,7 +1938,12 @@ void DialogPattern::InitHostWindowRect()
 
     if (container->IsUIExtensionWindow()) {
         isUIExtensionSubWindow_ = true;
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(currentId, SubwindowType::TYPE_DIALOG);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto subContainerId = pipeline->GetInstanceId();
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(subContainerId, SubwindowType::TYPE_DIALOG);
         CHECK_NULL_VOID(subwindow);
         auto rect = subwindow->GetUIExtensionHostWindowRect();
         hostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
@@ -2289,6 +2294,17 @@ void DialogPattern::OnAttachToMainTree()
             subwindow->SetFollowParentWindowLayoutEnabled(true);
         }
     });
+}
+
+void DialogPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->RemoveDialogFromMapForcefully(host);
 }
 
 void DialogPattern::MountMaskToUECHost()

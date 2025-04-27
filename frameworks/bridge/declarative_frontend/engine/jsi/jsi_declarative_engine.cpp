@@ -1288,6 +1288,7 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
             "ArkUISetNativeEngineLoop");
     };
     nativeEngine_->SetPostTask(postTask);
+    nativeEngine_->SetInstanceId(instanceId_);
 }
 
 void JsiDeclarativeEngine::RegisterInitWorkerFunc()

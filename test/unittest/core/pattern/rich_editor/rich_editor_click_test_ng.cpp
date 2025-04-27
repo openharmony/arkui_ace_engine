@@ -192,7 +192,7 @@ HWTEST_F(RichEditorClickTestNg, HandleEnabled, TestSize.Level1)
     /**
      * @tc.steps: step2. create richEditorEventHub and SetEnabled false.
      */
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(false);
 
@@ -378,6 +378,25 @@ HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestRichEditorHandleTripleClickEvent001
+ * @tc.desc: test HandleTripleClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorClickTestNg, TestRichEditorHandleTripleClickEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    GestureEvent info;
+    richEditorPattern->HandleTripleClickEvent(info);
+    EXPECT_NE(richEditorPattern->GetFocusHub(), nullptr);
+    EXPECT_EQ(richEditorPattern->GetFocusHub()->IsFocusable(), true);
+}
+
+/**
  * @tc.name: ClickAISpan001
  * @tc.desc: test RichEditorPattern ClickAISpan
  * @tc.type: FUNC
@@ -395,25 +414,6 @@ HWTEST_F(RichEditorClickTestNg, ClickAISpan001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     bool res = richEditorPattern->ClickAISpan(textOffset, aiSpan);
     EXPECT_EQ(res, false);
-}
-
-/**
- * @tc.name: TestRichEditorHandleTripleClickEvent001
- * @tc.desc: test HandleTripleClickEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, TestRichEditorHandleTripleClickEvent001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    GestureEvent info;
-    richEditorPattern->HandleTripleClickEvent(info);
-    EXPECT_NE(richEditorPattern->GetFocusHub(), nullptr);
-    EXPECT_EQ(richEditorPattern->GetFocusHub()->IsFocusable(), true);
 }
 
 /**

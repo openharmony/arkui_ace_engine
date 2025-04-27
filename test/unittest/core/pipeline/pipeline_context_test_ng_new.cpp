@@ -77,7 +77,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg036, TestSize.Level1)
     ASSERT_NE(context_, nullptr);
     ASSERT_NE(frameNode_, nullptr);
     context_->rootNode_ = frameNode_;
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -90,7 +90,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg036, TestSize.Level1)
      * @tc.steps3: change host_,focusType_,enabled_,
                     focusable_,parentFocusable_,currentFocus_
      */
-    auto eventHub1 = frameNode_1->GetEventHub<EventHub>();
+    auto eventHub1 = frameNode_1->GetOrCreateEventHub<EventHub>();
     eventHub1->host_ = nullptr;
     focusHub->focusType_ = FocusType::NODE;
     eventHub->enabled_ = true;

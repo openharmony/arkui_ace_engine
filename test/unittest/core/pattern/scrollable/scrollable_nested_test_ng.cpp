@@ -168,7 +168,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest001, TestSize.Level1)
     FlushUITasks(listNode);
 
     auto listPattern = listNode->GetPattern<ListPattern>();
-    auto eventHub = listNode->GetEventHub<ListEventHub>();
+    auto eventHub = listNode->GetOrCreateEventHub<ListEventHub>();
     eventHub->SetOnScrollFrameBegin([weak = AceType::WeakClaim(AceType::RawPtr(listPattern))]
         (Dimension dy, ScrollState state) {
         auto pattern = weak.Upgrade();
@@ -248,7 +248,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest002, TestSize.Level1)
 
     auto listNode = GetChildFrameNode(rootNode, 1);
     auto listPattern = listNode->GetPattern<ListPattern>();
-    auto eventHub = listNode->GetEventHub<ListEventHub>();
+    auto eventHub = listNode->GetOrCreateEventHub<ListEventHub>();
     eventHub->SetOnScrollFrameBegin([weak = AceType::WeakClaim(AceType::RawPtr(listPattern))]
         (Dimension dy, ScrollState state) {
         auto pattern = weak.Upgrade();

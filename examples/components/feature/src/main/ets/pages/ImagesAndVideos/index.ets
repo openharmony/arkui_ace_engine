@@ -31,9 +31,9 @@ export const imagesAndVideosRoute: RouteGroup = {
 @Builder
 export function imagesAndVideosDestination(name: string, route: Route) {
   if (name === 'ImagesAndVideos/Image') {
-    ImageBootcamp({ title: route.label })
-  } else if (name === 'ImagesAndVideos/ImageAnimator') {
-    ImageAnimatorBootcamp({ title: route.label })
+    ImageBootcamp({title: route.label})
+  }else if (name === 'ImagesAndVideos/ImageAnimator'){
+    ImageAnimatorBootcamp({title: route.label})
   }
 
 }

@@ -225,6 +225,8 @@ private:
 
     bool HasLayoutOptions(LayoutWrapper* layoutWrapper);
 
+    virtual void PreloadItems(LayoutWrapper* layoutWrapper);
+
 protected:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
@@ -236,6 +238,10 @@ protected:
     int32_t currentItemColEnd_ = -1;
     float cellAveLength_ = -1.0f;
     float mainGap_ = 0;
+    float crossGap_ = 0;
+    std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
+    std::list<GridPreloadItem> predictBuildList_;
+    LayoutConstraintF cachedChildConstraint_;
 
 private:
     /**
@@ -252,10 +258,8 @@ private:
     SizeF frameSize_;
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
     int32_t moveToEndLineIndex_ = -1;         // place index in the last line when scroll to index after matrix
-    std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
     Axis axis_ = Axis::VERTICAL;
 
-    float crossGap_ = 0;
     float crossPaddingOffset_ = 0;
     int32_t lastCross_ = 0;
     bool isChildrenUpdated_ = false;
@@ -270,8 +274,6 @@ private:
     std::map<int32_t, float> itemsCrossPosition_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
     OffsetF childFrameOffset_;
-    std::list<GridPreloadItem> predictBuildList_;
-    LayoutConstraintF cachedChildConstraint_;
     GridReloadReason reason_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);

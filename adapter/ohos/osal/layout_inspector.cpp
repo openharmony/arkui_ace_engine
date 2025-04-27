@@ -220,12 +220,9 @@ void LayoutInspector::SetCallback(int32_t instanceId)
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     if (container->IsUseStageModel()) {
-        AddInstanceCallBack addInstanceCallBack = [](int32_t id) {
-            WebSocketManager::SetProfilerCallBack(
-                [](bool status) { return SetStateProfilerStatus(status); });
-            WebSocketManager::SetSwitchCallback([](int32_t containerId) { return CreateLayoutInfo(containerId); }, id);
-        };
-        WebSocketManager::RegisterAddInstanceCallback(addInstanceCallBack);
+        WebSocketManager::SetProfilerCallBack([](bool status) { return SetStateProfilerStatus(status); });
+        WebSocketManager::SetSwitchCallback(
+            [](int32_t containerId) { return CreateLayoutInfo(containerId); }, instanceId);
         WebSocketManager::SetRecordCallback(LayoutInspector::HandleStartRecord, LayoutInspector::HandleStopRecord);
         WebSocketManager::RegisterConnectServerCallback(LayoutInspector::ConnectServerCallback);
         isUseStageModel_ = true;

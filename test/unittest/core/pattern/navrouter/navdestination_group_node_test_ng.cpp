@@ -259,7 +259,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemFadeTransition001, TestSize.Leve
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->inCurrentStack_ = true;
-    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto eventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
 
@@ -283,7 +283,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemFadeTransition002, TestSize.Leve
     navDestinationNode->pattern_ = nullptr;
 
     navDestinationNode->DoSystemFadeTransition(true);
-    EXPECT_EQ(navDestinationNode->GetEventHub<EventHub>(), nullptr);
+    EXPECT_EQ(navDestinationNode->GetOrCreateEventHub<EventHub>(), nullptr);
     navDestinationNode->pattern_ = navDestinationPattern;
 }
 
@@ -298,7 +298,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemFadeTransition003, TestSize.Leve
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->inCurrentStack_ = false;
-    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto eventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
 
@@ -318,7 +318,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition001, TestSize.Lev
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->inCurrentStack_ = true;
-    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto eventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
     auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
@@ -352,7 +352,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition002, TestSize.Lev
     navDestinationRenderContext->translateXY_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(100.0f, 60.0f));
 
     navDestinationNode->DoSystemSlideTransition(NavigationOperation::PUSH, true);
-    EXPECT_EQ(navDestinationNode->GetEventHub<EventHub>(), nullptr);
+    EXPECT_EQ(navDestinationNode->GetOrCreateEventHub<EventHub>(), nullptr);
     EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetX(), 0.0f);
     EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetY(), 0.0f);
     navDestinationNode->pattern_ = navDestinationPattern;
@@ -372,7 +372,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition003, TestSize.Lev
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->inCurrentStack_ = false;
-    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto eventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
     auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
@@ -399,7 +399,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemEnterExplodeTransition001, TestS
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->inCurrentStack_ = true;
-    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto eventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
     auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
@@ -431,7 +431,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemEnterExplodeTransition002, TestS
     navDestinationRenderContext->SetActualForegroundColor(Color::RED);
 
     navDestinationNode->DoSystemEnterExplodeTransition(NavigationOperation::PUSH);
-    EXPECT_EQ(navDestinationNode->GetEventHub<EventHub>(), nullptr);
+    EXPECT_EQ(navDestinationNode->GetOrCreateEventHub<EventHub>(), nullptr);
     EXPECT_EQ(navDestinationRenderContext->actualForegroundColor_, Color::RED);
     navDestinationNode->pattern_ = navDestinationPattern;
 }
@@ -448,7 +448,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemEnterExplodeTransition003, TestS
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->inCurrentStack_ = false;
-    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto eventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
     auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
@@ -472,7 +472,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemExitExplodeTransition001, TestSi
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->inCurrentStack_ = true;
-    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto eventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
     auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
@@ -504,7 +504,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemExitExplodeTransition002, TestSi
     navDestinationRenderContext->SetActualForegroundColor(Color::RED);
 
     navDestinationNode->DoSystemExitExplodeTransition(NavigationOperation::POP);
-    EXPECT_EQ(navDestinationNode->GetEventHub<EventHub>(), nullptr);
+    EXPECT_EQ(navDestinationNode->GetOrCreateEventHub<EventHub>(), nullptr);
     EXPECT_EQ(navDestinationRenderContext->actualForegroundColor_, Color::RED);
     navDestinationNode->pattern_ = navDestinationPattern;
 }
@@ -521,7 +521,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemExitExplodeTransition003, TestSi
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->inCurrentStack_ = false;
-    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto eventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
     auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
@@ -978,7 +978,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoCustomTransition002, TestSize.Level1)
         return std::nullopt;
     };
     navDestinationNode->inCurrentStack_ = true;
-    auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto navDestinationEventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(navDestinationEventHub, nullptr);
     navDestinationEventHub->SetEnabledInternal(true);
 
@@ -1060,7 +1060,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoCustomTransition004, TestSize.Level1)
         return allTransitions;
     };
     navDestinationNode->inCurrentStack_ = false;
-    auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto navDestinationEventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(navDestinationEventHub, nullptr);
     navDestinationNode->animationId_ = 0;
 

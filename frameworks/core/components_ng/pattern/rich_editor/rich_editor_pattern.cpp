@@ -152,7 +152,7 @@ RichEditorPattern::RichEditorPattern() :
     twinklingInterval_ = SystemProperties::GetDebugEnabled()
         ? RICH_EDITOR_TWINKLING_INTERVAL_MS_DEBUG : RICH_EDITOR_TWINKLING_INTERVAL_MS;
     floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
-    undoManager_ = std::make_unique<RichEditorUndoManager>(WeakClaim(this));
+    undoManager_ = std::make_unique<StyledStringUndoManager>(WeakClaim(this));
 }
 
 RichEditorPattern::~RichEditorPattern()
@@ -824,8 +824,8 @@ void RichEditorPattern::UpdateSelectionAndHandleVisibility()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (isMouseOrTouchPad(sourceTool_) && releaseInDrop_) {
-        start = lastCaretPosition_;
-        end = insertValueLength_ + lastCaretPosition_;
+        start = caretPosition_ - insertValueLength_;
+        end = caretPosition_;
     }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateSelectionAndHandleVisibility range=[%{public}d--%{public}d]", start, end);
     textSelector_.Update(start, end);
@@ -1387,9 +1387,13 @@ void RichEditorPattern::UpdateTextBackgroundStyle(
 {
     CHECK_NULL_VOID(style.has_value());
     TextBackgroundStyle backgroundStyle = style.value();
+    backgroundStyle.needCompareGroupId = false;
+    if (backgroundStyle == spanNode->GetTextBackgroundStyle()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "text background style is same");
+        return;
+    }
     backgroundStyle.needCompareGroupId = true;
-    backgroundStyle.groupId = ElementRegister::GetInstance()->MakeUniqueId();
-    spanNode->UpdateTextBackgroundFromParent(backgroundStyle);
+    spanNode->SetTextBackgroundStyle(backgroundStyle);
 }
 
 void RichEditorPattern::UpdateUrlStyle(RefPtr<SpanNode>& spanNode, const std::optional<std::u16string>& urlAddressOpt)
@@ -5316,6 +5320,10 @@ bool RichEditorPattern::InitPreviewText(const std::u16string& previewTextValue, 
     record.endOffset = record.startOffset + length;
     auto spanCountBefore = spans_.size();
     ProcessInsertValue(previewTextValue, OperationType::IME, false);
+    if (!previewTextRecord_.previewTextHasStarted) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewText ends abnormally");
+        return false;
+    }
     record.isSpanSplit = spans_.size() - spanCountBefore > 1;
     record.previewContent = record.newPreviewContent;
     record.newPreviewContent.clear();
@@ -9957,6 +9965,7 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("maxLength", maxLength_.value_or(INT_MAX), filter);
     json->PutExtAttr("enableHapticFeedback", isEnableHapticFeedback_ ? "true" : "false", filter);
     json->PutExtAttr("barState", static_cast<int32_t>(GetBarDisplayMode()), filter);
+    json->PutExtAttr("enableKeyboardOnFocus", needToRequestKeyboardOnFocus_ ? "true" : "false", filter);
 }
 
 void RichEditorPattern::FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const

@@ -55,7 +55,7 @@ export default function Grid1Test() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('layoutDirection', JsonType.value),
         ],
-        assertEqual: 'FlexDirection.Column'
+        assertEqual: 'GridDirection.Column'
       })
 
       done();
@@ -76,7 +76,7 @@ export default function Grid1Test() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('layoutDirection', JsonType.value),
         ],
-        assertEqual: 'FlexDirection.ColumnReverse'
+        assertEqual: 'GridDirection.ColumnReverse'
       })
 
       done();
@@ -97,7 +97,7 @@ export default function Grid1Test() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('layoutDirection', JsonType.value),
         ],
-        assertEqual: 'FlexDirection.Row'
+        assertEqual: 'GridDirection.Row'
       })
 
       done();
@@ -118,7 +118,7 @@ export default function Grid1Test() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('layoutDirection', JsonType.value),
         ],
-        assertEqual: 'FlexDirection.RowReverse'
+        assertEqual: 'GridDirection.RowReverse'
       })
 
       done();
@@ -139,7 +139,7 @@ export default function Grid1Test() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('maxCount', JsonType.value),
         ],
-        assertEqual: '10'
+        assertEqual: 10
       })
 
       await sliderDrag({
@@ -153,7 +153,7 @@ export default function Grid1Test() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('maxCount', JsonType.value),
         ],
-        assertEqual: '1'
+        assertEqual: 1
       })
 
       done();
@@ -174,7 +174,7 @@ export default function Grid1Test() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('minCount', JsonType.value),
         ],
-        assertEqual: '10'
+        assertEqual: 10
       })
 
       await sliderDrag({
@@ -188,7 +188,7 @@ export default function Grid1Test() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('minCount', JsonType.value),
         ],
-        assertEqual: '1'
+        assertEqual: 1
       })
 
       done();
@@ -197,7 +197,7 @@ export default function Grid1Test() {
      * 测试组件cellLength且获取属性正确
      */
     it('ArkUI_Grid_0034', 0, async (done: Function) => {
-      await Search('参数列表', 'scrollBarWidth')
+      await Search('参数列表', 'cellLength')
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
@@ -209,7 +209,7 @@ export default function Grid1Test() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('cellLength', JsonType.value),
         ],
-        assertEqual: '10'
+        assertEqual: 10
       })
 
       await sliderDrag({
@@ -223,16 +223,16 @@ export default function Grid1Test() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('cellLength', JsonType.value),
         ],
-        assertEqual: '1'
+        assertEqual: 1
       })
 
       done();
     })
     /**
-     * 测试组件multiSelectable且获取属性正确
+     * 测试组件multiSelectable
      */
     it('ArkUI_Grid_0035', 0, async (done: Function) => {
-
+      //获取不到子组件状态
       await Search('参数列表', 'multiSelectable')
       await radioClick({
         radioClickObj: 0,
@@ -240,19 +240,12 @@ export default function Grid1Test() {
           toggleClickObj: 'multiSelectable',
           toggleClickType: ToggleClick.Open
         },
-        id: 'Grid',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('multiSelectable', JsonType.value),
-        ],
-        assertEqual: 'true'
       })
 
       done();
     })
 
     it('ArkUI_Grid_0036', 0, async (done: Function) => {
-
       await Search('参数列表', 'multiSelectable')
       await radioClick({
         radioClickObj: 1,
@@ -260,34 +253,22 @@ export default function Grid1Test() {
           toggleClickObj: 'multiSelectable',
           toggleClickType: ToggleClick.Close
         },
-        id: 'Grid',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('multiSelectable', JsonType.value),
-        ],
-        assertEqual: 'false'
       })
 
       done();
     })
     /**
-     * 测试组件supportAnimation且获取属性正确
+     * 测试组件supportAnimation
      */
     it('ArkUI_Grid_0037', 0, async (done: Function) => {
-
-      await Search('参数列表', 'supportAnimation')
+      //无法取到子组件状态
+      await titleSearch('参数列表', 'supportAnimation')
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
           toggleClickObj: 'supportAnimation',
           toggleClickType: ToggleClick.Open
         },
-        id: 'Grid',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('supportAnimation', JsonType.value),
-        ],
-        assertEqual: 'true'
       })
 
       done();
@@ -295,19 +276,13 @@ export default function Grid1Test() {
 
     it('ArkUI_Grid_0038', 0, async (done: Function) => {
 
-      await Search('参数列表', 'supportAnimation')
+      await titleSearch('参数列表', 'supportAnimation')
       await radioClick({
         radioClickObj: 1,
         toggleClick: {
           toggleClickObj: 'supportAnimation',
           toggleClickType: ToggleClick.Close
         },
-        id: 'Grid',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('supportAnimation', JsonType.value),
-        ],
-        assertEqual: 'false'
       })
 
       done();
@@ -328,8 +303,9 @@ export default function Grid1Test() {
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('edgeEffectOptions', JsonType.obj),
+          new KeyStruct('alwaysEnabled', JsonType.value),
         ],
-        assertEqual: '{"alwaysEnabled":true}'
+        assertEqual: true
       })
 
       done();
@@ -348,8 +324,10 @@ export default function Grid1Test() {
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('edgeEffectOptions', JsonType.obj),
+          new KeyStruct('alwaysEnabled', JsonType.value),
         ],
-        assertEqual: '{"alwaysEnabled":false}'
+        assertEqual: false
+
       })
 
       done();
@@ -369,9 +347,11 @@ export default function Grid1Test() {
         id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('nestedScroll', JsonType.value),
+          new KeyStruct('nestedScroll', JsonType.obj),
+          new KeyStruct('scrollForward', JsonType.value),
         ],
-        assertEqual: '{"scrollForward":"NestedScrollMode.SELF_ONLY","scrollBackward":"NestedScrollMode.SELF_ONLY"}'
+        assertEqual: 'NestedScrollMode.SELF_ONLY'
+
       })
 
       done();
@@ -390,9 +370,10 @@ export default function Grid1Test() {
         id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('layoutDirection', JsonType.value),
+          new KeyStruct('nestedScroll', JsonType.obj),
+          new KeyStruct('scrollForward', JsonType.value),
         ],
-        assertEqual: '{"scrollForward":"NestedScrollMode.SELF_FIRST","scrollBackward":"NestedScrollMode.SELF_ONLY"}'
+        assertEqual: 'NestedScrollMode.SELF_FIRST'
       })
 
       done();
@@ -411,9 +392,10 @@ export default function Grid1Test() {
         id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('nestedScroll', JsonType.value),
+          new KeyStruct('nestedScroll', JsonType.obj),
+          new KeyStruct('scrollForward', JsonType.value),
         ],
-        assertEqual: '{"scrollForward":"NestedScrollMode.PARENT_FIRST","scrollBackward":"NestedScrollMode.SELF_ONLY"}'
+        assertEqual: 'NestedScrollMode.PARENT_FIRST'
       })
 
       done();
@@ -432,9 +414,10 @@ export default function Grid1Test() {
         id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('nestedScroll', JsonType.value),
+          new KeyStruct('nestedScroll', JsonType.obj),
+          new KeyStruct('scrollForward', JsonType.value),
         ],
-        assertEqual: '{"scrollForward":"NestedScrollMode.PARALLEL","scrollBackward":"NestedScrollMode.SELF_ONLY"}'
+        assertEqual: 'NestedScrollMode.PARALLEL'
       })
 
       done();
@@ -454,9 +437,10 @@ export default function Grid1Test() {
         id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('nestedScroll.scrollBackward', JsonType.value),
+          new KeyStruct('nestedScroll', JsonType.obj),
+          new KeyStruct('scrollBackward', JsonType.value),
         ],
-        assertEqual: '{"scrollForward":"NestedScrollMode.SELF_ONLY","scrollBackward":"NestedScrollMode.SELF_ONLY"}'
+        assertEqual: 'NestedScrollMode.SELF_ONLY'
       })
 
       done();
@@ -475,9 +459,10 @@ export default function Grid1Test() {
         id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('nestedScroll.scrollBackward', JsonType.value),
+          new KeyStruct('nestedScroll', JsonType.obj),
+          new KeyStruct('scrollBackward', JsonType.value),
         ],
-        assertEqual: '{"scrollForward":"NestedScrollMode.SELF_ONLY","scrollBackward":"NestedScrollMode.SELF_FIRST"}'
+        assertEqual: "NestedScrollMode.SELF_FIRST"
       })
 
       done();
@@ -496,9 +481,10 @@ export default function Grid1Test() {
         id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('nestedScroll.scrollBackward', JsonType.value),
+          new KeyStruct('nestedScroll', JsonType.obj),
+          new KeyStruct('scrollBackward', JsonType.value),
         ],
-        assertEqual: '{"scrollForward":"NestedScrollMode.SELF_ONLY","scrollBackward":"NestedScrollMode.PARENT_FIRST"}'
+        assertEqual: "NestedScrollMode.PARENT_FIRST"
       })
 
       done();
@@ -517,9 +503,10 @@ export default function Grid1Test() {
         id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('nestedScroll.scrollBackward', JsonType.value),
+          new KeyStruct('nestedScroll', JsonType.obj),
+          new KeyStruct('scrollBackward', JsonType.value),
         ],
-        assertEqual: '{"scrollForward":"NestedScrollMode.SELF_ONLY","scrollBackward":"NestedScrollMode.PARALLEL"}'
+        assertEqual: "NestedScrollMode.PARALLEL"
       })
 
       done();
@@ -528,7 +515,8 @@ export default function Grid1Test() {
      * 测试组件friction且获取属性正确
      */
     it('ArkUI_Grid_0049', 0, async (done: Function) => {
-      await Search('参数列表', 'scrollBarWidth')
+
+      await Search('参数列表', 'friction')
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
@@ -540,7 +528,7 @@ export default function Grid1Test() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('friction', JsonType.value),
         ],
-        assertEqual: '1'
+        assertEqual: 1
       })
 
       await sliderDrag({
@@ -554,16 +542,16 @@ export default function Grid1Test() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('friction', JsonType.value),
         ],
-        assertEqual: '0'
+        assertEqual: 0.75
       })
 
       done();
     })
     /**
-     * 测试组件alignItems且获取属性正确
+     * 测试组件alignItems
      */
     it('ArkUI_Grid_0050', 0, async (done: Function) => {
-
+      //无法取到子组件状态
       await Search('参数列表', 'alignItems')
       await radioClick({
         radioClickObj: 0,
@@ -571,12 +559,6 @@ export default function Grid1Test() {
           toggleClickObj: 'alignItems',
           toggleClickType: ToggleClick.Open
         },
-        id: 'Grid',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('alignItems', JsonType.value),
-        ],
-        assertEqual: 'GridItemAlignment.DEFAULT'
       })
 
       done();
@@ -591,12 +573,6 @@ export default function Grid1Test() {
           toggleClickObj: 'alignItems',
           toggleClickType: ToggleClick.Close
         },
-        id: 'Grid',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('alignItems', JsonType.value),
-        ],
-        assertEqual: 'GridItemAlignment.STRETCH'
       })
 
       done();
@@ -604,14 +580,14 @@ export default function Grid1Test() {
     /**
      * 测试组件width且获取属性正确
      */
-    it('ArkUI_Column_Comp_0001', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0001', 0, async (done: Function) => {
       await titleSearch('基础属性', 'width');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('width', JsonType.value),
@@ -624,7 +600,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('width', JsonType.value),
@@ -637,14 +613,14 @@ export default function Grid1Test() {
     /**
      * 测试组件height且获取属性正确
      */
-    it('ArkUI_Column_Comp_0002', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0002', 0, async (done: Function) => {
       await titleSearch('基础属性', 'height');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('height', JsonType.value),
@@ -657,7 +633,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('height', JsonType.value),
@@ -670,14 +646,14 @@ export default function Grid1Test() {
     /**
      * 测试组件padding且获取属性正确
      */
-    it('ArkUI_Column_Comp_0003', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0003', 0, async (done: Function) => {
       await titleSearch('基础属性', 'padding');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        // id: 'Column',
+        // id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('padding', JsonType.value),
@@ -690,7 +666,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('padding', JsonType.value),
@@ -703,14 +679,14 @@ export default function Grid1Test() {
     /**
      * 测试组件margin且获取属性正确
      */
-    it('ArkUI_Column_Comp_0004', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0004', 0, async (done: Function) => {
       await titleSearch('基础属性', 'margin');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('margin', JsonType.value),
@@ -723,7 +699,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('margin', JsonType.value),
@@ -736,7 +712,7 @@ export default function Grid1Test() {
     /**
      * 测试开启constraintSize
      */
-    it('ArkUI_Column_Comp_0005', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0005', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'constraintSize');
       let toggle: Array<Component> =
@@ -748,7 +724,7 @@ export default function Grid1Test() {
     /**
      * 测试组件constraintSize.minWidth且获取属性正确
      */
-    it('ArkUI_Column_Comp_0006', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0006', 0, async (done: Function) => {
       await titleSearch('基础属性', 'constraintSize');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('constraintSize')))
@@ -761,7 +737,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('constraintSize', JsonType.obj)
@@ -774,7 +750,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('constraintSize', JsonType.obj)
@@ -787,7 +763,7 @@ export default function Grid1Test() {
     /**
      * 测试组件constraintSize.minHeight且获取属性正确
      */
-    it('ArkUI_Column_Comp_0007', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0007', 0, async (done: Function) => {
       await titleSearch('基础属性', 'constraintSize');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('constraintSize')))
@@ -800,7 +776,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('constraintSize', JsonType.obj)
@@ -813,7 +789,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('constraintSize', JsonType.obj)
@@ -826,7 +802,7 @@ export default function Grid1Test() {
     /**
      * 测试组件constraintSize.maxWidth且获取属性正确
      */
-    it('ArkUI_Column_Comp_0008', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0008', 0, async (done: Function) => {
       await titleSearch('基础属性', 'constraintSize');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('constraintSize')))
@@ -839,7 +815,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('constraintSize', JsonType.obj)
@@ -852,7 +828,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('constraintSize', JsonType.obj)
@@ -865,7 +841,7 @@ export default function Grid1Test() {
     /**
      * 测试组件constraintSize.maxHeight且获取属性正确
      */
-    it('ArkUI_Column_Comp_0009', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0009', 0, async (done: Function) => {
       await titleSearch('基础属性', 'constraintSize');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('constraintSize')))
@@ -878,7 +854,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('constraintSize', JsonType.obj)
@@ -891,7 +867,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('constraintSize', JsonType.obj)
@@ -904,7 +880,7 @@ export default function Grid1Test() {
     /**
      * 测试关闭constraintSize,无断言
      */
-    it('ArkUI_Column_Comp_0010', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0010', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'constraintSize');
       let toggle: Array<Component> =
@@ -919,7 +895,7 @@ export default function Grid1Test() {
     /**
      * 测试开启position
      */
-    it('ArkUI_Column_Comp_0011', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0011', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'position');
       let toggle: Array<Component> =
@@ -931,7 +907,7 @@ export default function Grid1Test() {
     /**
      * 测试组件position.top且获取属性正确
      */
-    it('ArkUI_Column_Comp_0012', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0012', 0, async (done: Function) => {
       //无值，只有xy的值
       await titleSearch('基础属性', 'position');
       let toggle: Component =
@@ -959,7 +935,7 @@ export default function Grid1Test() {
     /**
      * 测试组件position.bottom且获取属性正确
      */
-    it('ArkUI_Column_Comp_0013', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0013', 0, async (done: Function) => {
       //无值，只有xy的值
       await titleSearch('基础属性', 'position');
       let toggle: Component =
@@ -987,7 +963,7 @@ export default function Grid1Test() {
     /**
      * 测试组件position.left且获取属性正确
      */
-    it('ArkUI_Column_Comp_0014', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0014', 0, async (done: Function) => {
       await titleSearch('基础属性', 'position');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('position')))
@@ -1015,7 +991,7 @@ export default function Grid1Test() {
     /**
      * 测试组件position.right且获取属性正确
      */
-    it('ArkUI_Column_Comp_0015', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0015', 0, async (done: Function) => {
       //无值，只有xy的值
       await titleSearch('基础属性', 'position');
       let toggle: Component =
@@ -1043,7 +1019,7 @@ export default function Grid1Test() {
     /**
      * 测试关闭position
      */
-    it('ArkUI_Column_Comp_0016', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0016', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'position');
       let toggle: Array<Component> =
@@ -1058,7 +1034,7 @@ export default function Grid1Test() {
     /**
      * 测试开启markAnchor
      */
-    it('ArkUI_Column_Comp_0017', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0017', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'markAnchor');
       let toggle: Array<Component> =
@@ -1070,7 +1046,7 @@ export default function Grid1Test() {
     /**
      * 测试组件markAnchor.x且获取属性正确
      */
-    it('ArkUI_Column_Comp_0018', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0018', 0, async (done: Function) => {
       await titleSearch('基础属性', 'position');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('markAnchor')))
@@ -1083,7 +1059,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('markAnchor', JsonType.obj),
@@ -1097,7 +1073,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('markAnchor', JsonType.obj),
@@ -1111,7 +1087,7 @@ export default function Grid1Test() {
     /**
      * 测试组件markAnchor.y且获取属性正确
      */
-    it('ArkUI_Column_Comp_0019', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0019', 0, async (done: Function) => {
       await titleSearch('基础属性', 'position');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('markAnchor')))
@@ -1124,7 +1100,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('markAnchor', JsonType.obj),
@@ -1138,7 +1114,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('markAnchor', JsonType.obj),
@@ -1152,7 +1128,7 @@ export default function Grid1Test() {
     /**
      * 测试关闭markAnchor
      */
-    it('ArkUI_Column_Comp_0020', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0020', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'markAnchor');
       let toggle: Array<Component> =
@@ -1167,7 +1143,7 @@ export default function Grid1Test() {
     /**
      * 测试开启offset
      */
-    it('ArkUI_Column_Comp_0021', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0021', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'offset');
       let toggle: Array<Component> =
@@ -1179,7 +1155,7 @@ export default function Grid1Test() {
     /**
      * 测试组件offset.x且获取属性正确
      */
-    it('ArkUI_Column_Comp_0022', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0022', 0, async (done: Function) => {
       await titleSearch('基础属性', 'offset');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('offset')))
@@ -1192,7 +1168,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('offset', JsonType.obj),
@@ -1206,7 +1182,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('offset', JsonType.obj),
@@ -1220,7 +1196,7 @@ export default function Grid1Test() {
     /**
      * 测试组件offset.y且获取属性正确
      */
-    it('ArkUI_Column_Comp_0023', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0023', 0, async (done: Function) => {
       await titleSearch('基础属性', 'offset');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('offset')))
@@ -1233,7 +1209,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('offset', JsonType.obj),
@@ -1247,7 +1223,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('offset', JsonType.obj),
@@ -1261,7 +1237,7 @@ export default function Grid1Test() {
     /**
      * 测试关闭offset
      */
-    it('ArkUI_Column_Comp_0024', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0024', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'offset');
       let toggle: Array<Component> =
@@ -1276,14 +1252,14 @@ export default function Grid1Test() {
     /**
      * 测试组件borderStyle
      */
-    it('ArkUI_Column_Comp_0025', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0025', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderStyle');
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderStyle', JsonType.value)
@@ -1292,7 +1268,7 @@ export default function Grid1Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0026', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0026', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderStyle');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderStyle')))
@@ -1301,7 +1277,7 @@ export default function Grid1Test() {
       }
       await radioClick({
         radioClickObj: 1,
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderStyle', JsonType.value)
@@ -1310,7 +1286,7 @@ export default function Grid1Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0027', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0027', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderStyle');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderStyle')))
@@ -1322,7 +1298,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderStyle', JsonType.value)
@@ -1334,14 +1310,14 @@ export default function Grid1Test() {
     /**
      * 测试组件borderWidth
      */
-    it('ArkUI_Column_Comp_0028', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0028', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderWidth');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderWidth', JsonType.value),
@@ -1354,7 +1330,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderWidth', JsonType.value),
@@ -1368,14 +1344,14 @@ export default function Grid1Test() {
     /**
      * 测试组件borderColor
      */
-    it('ArkUI_Column_Comp_0029', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0029', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderColor');
       await buttonClick({
         buttonClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderColor', JsonType.value),
@@ -1386,7 +1362,7 @@ export default function Grid1Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0030', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0030', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderColor')))
@@ -1395,7 +1371,7 @@ export default function Grid1Test() {
       }
       await buttonClick({
         buttonClickObj: 1,
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderColor', JsonType.value),
@@ -1406,7 +1382,7 @@ export default function Grid1Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0031', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0031', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderColor')))
@@ -1415,7 +1391,7 @@ export default function Grid1Test() {
       }
       await buttonClick({
         buttonClickObj: 2,
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderColor', JsonType.value),
@@ -1425,7 +1401,7 @@ export default function Grid1Test() {
 
       done();
     })
-    it('ArkUI_Column_Comp_0032', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0032', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderColor')))
@@ -1434,7 +1410,7 @@ export default function Grid1Test() {
       }
       await buttonClick({
         buttonClickObj: 3,
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderColor', JsonType.value),
@@ -1445,7 +1421,7 @@ export default function Grid1Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0033', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0033', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderColor')))
@@ -1454,7 +1430,7 @@ export default function Grid1Test() {
       }
       await buttonClick({
         buttonClickObj: 4,
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderColor', JsonType.value),
@@ -1465,7 +1441,7 @@ export default function Grid1Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0034', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0034', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderColor')))
@@ -1477,7 +1453,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderColor', JsonType.value),
@@ -1491,14 +1467,14 @@ export default function Grid1Test() {
     /**
      * 测试组件borderRadius
      */
-    it('ArkUI_Column_Comp_0035', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0035', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderRadius');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderWidth', JsonType.value),
@@ -1511,7 +1487,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderWidth', JsonType.value),
@@ -1525,7 +1501,7 @@ export default function Grid1Test() {
     /**
      * 测试组件background.align
      */
-    it('ArkUI_Column_Comp_0036', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0036', 0, async (done: Function) => {
       await titleSearch('基础属性', 'background.align');
       // 无法取到子组件状态
       await radioClick({
@@ -1536,7 +1512,7 @@ export default function Grid1Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0037', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0037', 0, async (done: Function) => {
       // 无法取到子组件状态
       await titleSearch('基础属性', 'background.align');
       let toggle: Component =
@@ -1549,7 +1525,7 @@ export default function Grid1Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0038', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0038', 0, async (done: Function) => {
       // 无法取到子组件状态
       await titleSearch('基础属性', 'background.align');
       let toggle: Component =
@@ -1562,7 +1538,7 @@ export default function Grid1Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0039', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0039', 0, async (done: Function) => {
       // 无法取到子组件状态
       await titleSearch('基础属性', 'background.align');
       let toggle: Component =
@@ -1575,7 +1551,7 @@ export default function Grid1Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0040', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0040', 0, async (done: Function) => {
       // 无法取到子组件状态
       await titleSearch('基础属性', 'background.align');
       let toggle: Component =
@@ -1588,7 +1564,7 @@ export default function Grid1Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0041', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0041', 0, async (done: Function) => {
       // 无法取到子组件状态
       await titleSearch('基础属性', 'background.align');
       let toggle: Component =
@@ -1601,7 +1577,7 @@ export default function Grid1Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0042', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0042', 0, async (done: Function) => {
       // 无法取到子组件状态
       await titleSearch('基础属性', 'background.align');
       let toggle: Component =
@@ -1614,7 +1590,7 @@ export default function Grid1Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0043', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0043', 0, async (done: Function) => {
       // 无法取到子组件状态
       await titleSearch('基础属性', 'background.align');
       let toggle: Component =
@@ -1627,7 +1603,7 @@ export default function Grid1Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0044', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0044', 0, async (done: Function) => {
       // 无法取到子组件状态
       await titleSearch('基础属性', 'background.align');
       let toggle: Component =
@@ -1646,14 +1622,14 @@ export default function Grid1Test() {
     /**
      * 测试组件backgroundColor
      */
-    it('ArkUI_Column_Comp_0045', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0045', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundColor');
       await buttonClick({
         buttonClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundColor', JsonType.value),
@@ -1664,7 +1640,7 @@ export default function Grid1Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0046', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0046', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundColor')))
@@ -1673,7 +1649,7 @@ export default function Grid1Test() {
       }
       await buttonClick({
         buttonClickObj: 1,
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundColor', JsonType.value),
@@ -1684,7 +1660,7 @@ export default function Grid1Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0047', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0047', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundColor')))
@@ -1693,7 +1669,7 @@ export default function Grid1Test() {
       }
       await buttonClick({
         buttonClickObj: 2,
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundColor', JsonType.value),
@@ -1704,7 +1680,7 @@ export default function Grid1Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0048', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0048', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundColor')))
@@ -1713,7 +1689,7 @@ export default function Grid1Test() {
       }
       await buttonClick({
         buttonClickObj: 3,
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundColor', JsonType.value),
@@ -1724,7 +1700,7 @@ export default function Grid1Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0049', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0049', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundColor')))
@@ -1733,7 +1709,7 @@ export default function Grid1Test() {
       }
       await buttonClick({
         buttonClickObj: 4,
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundColor', JsonType.value),
@@ -1744,7 +1720,7 @@ export default function Grid1Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0050', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0050', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundColor')))
@@ -1756,7 +1732,7 @@ export default function Grid1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'Grid',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundColor', JsonType.value),
@@ -1770,7 +1746,7 @@ export default function Grid1Test() {
     /**
      * 测试组件backgroundImage.src
      */
-    it('ArkUI_Column_Comp_0051', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0051', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundImage.src');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundImage.src')))
@@ -1780,7 +1756,7 @@ export default function Grid1Test() {
       await driver.delayMs(1000)
       done();
     })
-    it('ArkUI_Column_Comp_0052', 0, async (done: Function) => {
+    it('ArkUI_Grid_Comp_0052', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundImage.src');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundImage.src')))

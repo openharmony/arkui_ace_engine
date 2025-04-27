@@ -89,7 +89,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest001, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration
@@ -129,7 +129,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest002, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration
@@ -169,7 +169,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest003, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration
@@ -209,7 +209,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest004, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration
@@ -249,7 +249,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest005, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration
@@ -289,7 +289,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest006, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration
@@ -329,7 +329,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest007, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration
@@ -369,7 +369,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest008, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration
@@ -410,7 +410,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest009, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration
@@ -451,7 +451,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest010, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration
@@ -491,7 +491,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest011, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration
@@ -531,7 +531,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest012, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration
@@ -571,7 +571,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest013, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration
@@ -611,7 +611,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest014, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration
@@ -651,7 +651,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest015, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration
@@ -691,7 +691,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest016, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration
@@ -731,7 +731,7 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest017, Test
     ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
     ASSERT_NE(loadingProgressPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step2. Set LoadingProgressConfiguration

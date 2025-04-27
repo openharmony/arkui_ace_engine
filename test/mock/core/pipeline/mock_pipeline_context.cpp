@@ -222,6 +222,11 @@ void PipelineContext::AddOrReplaceNavigationNode(const std::string& id, const We
 
 void PipelineContext::DeleteNavigationNode(const std::string& id) {}
 
+void PipelineContext::SetHostParentOffsetToWindow(const Offset& offset)
+{
+    lastHostParentOffsetToWindow_ = offset;
+}
+
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
     return MockPipelineContext::GetCurrent();

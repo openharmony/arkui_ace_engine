@@ -54,6 +54,13 @@ struct CheckDoShowPreviewTestCase {
     {}
 };
 
+struct HandlePreDragStatusTestCase {
+    bool isNeedGather = false;
+    bool defaultAnimationBeforeLifting = false;
+    PreDragStatus preDragStatus = PreDragStatus::ACTION_DETECTING_STATUS;
+    bool exceptResult = false;
+};
+
 const std::vector<DragDropInitiatingStateLiftingTestCase> DRAG_DROP_INITIATING_STATE_LIFTING_IMAGE_TEST_CASES = {
     DragDropInitiatingStateLiftingTestCase(DragDropInitiatingReceivedInput::HandleHitTesting,
         DragDropInitiatingStatus::LIFTING, false, false, SourceType::TOUCH),
@@ -170,6 +177,17 @@ const std::vector<CheckDoShowPreviewTestCase> DRAG_DROP_INITIATING_CHECK_DO_SHOW
     CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, false, false, true, true, false, false),
     CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, false, false, false, false, true, true),
     CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, false, false, false, false, false, false),
+};
+
+const std::vector<HandlePreDragStatusTestCase> DRAG_DROP_INITIATING_HANDLE_PRE_DRAG_STATUS_TEST_CASES = {
+    { false, false, PreDragStatus::ACTION_DETECTING_STATUS, false },
+    { false, false, PreDragStatus::PREVIEW_LIFT_FINISHED, false },
+    { false, true, PreDragStatus::ACTION_DETECTING_STATUS, false },
+    { false, true, PreDragStatus::PREVIEW_LIFT_FINISHED, false },
+    { true, false, PreDragStatus::ACTION_DETECTING_STATUS, false },
+    { true, false, PreDragStatus::PREVIEW_LIFT_FINISHED, false },
+    { true, true, PreDragStatus::ACTION_DETECTING_STATUS, false },
+    { true, true, PreDragStatus::PREVIEW_LIFT_FINISHED, true },
 };
 
 void DragDropInitiatingStateLiftingTestNG::SetUpTestCase()
@@ -351,6 +369,51 @@ HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTes
         frameNode->previewOption_.isDragPreviewEnabled = testCase.isDragPreviewEnabled;
         gestureEventHub->bindMenuStatus_.isBindLongPressMenu = testCase.isBindMenu;
         EXPECT_EQ(liftingState->CheckDoShowPreview(frameNode), testCase.exceptResult);
+    }
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateLiftingTestNG004
+ * @tc.desc: Test HandlePreDragStatus function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTestNG004, TestSize.Level1)
+{
+    for (const auto& testCase : DRAG_DROP_INITIATING_HANDLE_PRE_DRAG_STATUS_TEST_CASES) {
+        /**
+         * @tc.steps: step1. create DragDropEventActuator.
+         */
+        auto eventHub = AceType::MakeRefPtr<EventHub>();
+        ASSERT_NE(eventHub, nullptr);
+        auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+        ASSERT_NE(gestureEventHub, nullptr);
+        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        ASSERT_NE(frameNode, nullptr);
+        eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+        auto dragDropEventActuator =
+            AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+        ASSERT_NE(dragDropEventActuator, nullptr);
+        auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+        ASSERT_NE(handler, nullptr);
+        auto machine = handler->initiatingFlow_;
+        ASSERT_NE(machine, nullptr);
+        machine->InitializeState();
+        auto state = machine->dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::LIFTING)];
+        ASSERT_NE(state, nullptr);
+        auto liftingState = AceType::DynamicCast<DragDropInitiatingStateLifting>(state);
+        ASSERT_NE(liftingState, nullptr);
+
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        if (layoutProperty) {
+            layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        }
+        auto& params = machine->GetDragDropInitiatingParams();
+        params.isNeedGather = testCase.isNeedGather;
+        frameNode->previewOption_.defaultAnimationBeforeLifting = testCase.defaultAnimationBeforeLifting;
+        liftingState->HandlePreDragStatus(testCase.preDragStatus);
+        auto type = frameNode->GetLayoutProperty()->GetVisibilityValue(VisibleType::INVISIBLE);
+        EXPECT_EQ(type == VisibleType::VISIBLE, testCase.exceptResult);
     }
 }
 } // namespace OHOS::Ace::NG

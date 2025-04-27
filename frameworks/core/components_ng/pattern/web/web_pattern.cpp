@@ -76,6 +76,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/view_data_common.h"
 #include "core/components_ng/pattern/web/transitional_node_info.h"
@@ -387,84 +388,6 @@ const std::string FAKE_LINK_VAL = "https://xxx.xxx.xxx";
 #define DECIMAL_POINTS 2
 
 using Recorder::EventRecorder;
-
-class WebAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
-public:
-    WebAccessibilityChildTreeCallback(const WeakPtr<WebPattern> &weakPattern, int64_t accessibilityId)
-        : AccessibilityChildTreeCallback(accessibilityId), weakPattern_(weakPattern)
-    {}
-
-    ~WebAccessibilityChildTreeCallback() override = default;
-
-    bool OnRegister(uint32_t windowId, int32_t treeId) override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return false;
-        }
-        if (isReg_) {
-            return true;
-        }
-        if (!pattern->OnAccessibilityChildTreeRegister()) {
-            return false;
-        }
-        pattern->SetAccessibilityState(true, isDelayed_);
-        isDelayed_ = false;
-        isReg_ = true;
-        return true;
-    }
-
-    bool OnDeregister() override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return false;
-        }
-        if (!isReg_) {
-            return true;
-        }
-        if (!pattern->OnAccessibilityChildTreeDeregister()) {
-            return false;
-        }
-        pattern->SetAccessibilityState(false);
-        isReg_ = false;
-        return true;
-    }
-
-    bool OnSetChildTree(int32_t childWindowId, int32_t childTreeId) override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return false;
-        }
-        pattern->OnSetAccessibilityChildTree(childWindowId, childTreeId);
-        return true;
-    }
-
-    bool OnDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override
-    {
-        return false;
-    }
-
-    void OnClearRegisterFlag() override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return;
-        }
-        isReg_ = false;
-    }
-
-    void SetIsDelayed(bool isDelayed)
-    {
-        isDelayed_ = isDelayed;
-    }
-
-private:
-    bool isReg_ = false;
-    bool isDelayed_ = false;
-    WeakPtr<WebPattern> weakPattern_;
-};
 
 WebPattern::WebPattern()
 {
@@ -859,6 +782,11 @@ void WebPattern::OnAttachToFrameNode()
     pipeline->RegisterListenerForTranslate(WeakClaim(RawPtr(host)));
     EventRecorder::Get().OnAttachWeb(host);
 #endif
+    auto frontend = pipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->AddToPageEventController(host);
 }
 
 void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -2552,6 +2480,9 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
 
     drawSize_ = drawSize;
     drawSizeCache_ = drawSize_;
+    if(!GetCoordinatePoint().has_value()) {
+        return false;
+    }
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     if (!CheckSafeAreaIsExpand()) {
         TAG_LOGI(AceLogTag::ACE_WEB, "Not safe area, drawsize_ : %{public}s, web id : %{public}d",
@@ -4441,10 +4372,10 @@ bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessa
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_RETURN(taskExecutor, false);
         bool fillRet = taskExecutor->PostDelayedTask(
-            [weak = WeakClaim(this)] () {
+            [weak = WeakClaim(this), nodeInfos = pageNodeInfo_] () {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_RETURN(pattern, false);
-                return pattern->RequestAutoFill(pattern->GetFocusedType());
+                return pattern->RequestAutoFill(pattern->GetFocusedType(), nodeInfos);
             },
             TaskExecutor::TaskType::UI, AUTOFILL_DELAY_TIME, "ArkUIWebHandleAutoFillEvent");
         return fillRet;
@@ -4463,6 +4394,11 @@ bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessa
 
 bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
 {
+    return RequestAutoFill(autoFillType, pageNodeInfo_);
+}
+
+bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, const std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos)
+{
     TAG_LOGI(AceLogTag::ACE_WEB, "RequestAutoFill");
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -4473,12 +4409,13 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
     ContainerScope scope(instanceId);
 
     auto offset = GetCoordinatePoint().value_or(OffsetF());
-    for (auto& nodeInfo : pageNodeInfo_) {
+    for (auto& nodeInfo : nodeInfos) {
         auto rect = nodeInfo->GetPageNodeRect();
         NG::RectF rectF;
         rectF.SetRect(rect.GetX() + offset.GetX(), rect.GetY()+ offset.GetY(), rect.Width(), rect.Height());
         nodeInfo->SetPageNodeRect(rectF);
     }
+    pageNodeInfo_ = nodeInfos;
 
     auto container = Container::Current();
     if (container == nullptr) {
@@ -6011,6 +5948,9 @@ void WebPattern::UpdateSlideOffset()
 
 void WebPattern::CalculateHorizontalDrawRect()
 {
+    if (!GetCoordinatePoint().has_value()) {
+        return;
+    }
     fitContentOffset_ = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetWebOffset(fitContentOffset_.GetX());
@@ -6036,6 +5976,9 @@ void WebPattern::CalculateHorizontalDrawRect()
 
 void WebPattern::CalculateVerticalDrawRect()
 {
+    if (!GetCoordinatePoint().has_value()) {
+        return;
+    }
     fitContentOffset_ = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetWebOffset(fitContentOffset_.GetY());
@@ -7272,6 +7215,7 @@ void WebPattern::RegisterTranslateTextJavaScript()
     methods.push_back(g_translateTextData.registerFunctionName);
     auto lambda = [weak = AceType::WeakClaim(this)](const std::vector<std::string>& param) {
         auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
         if (webPattern && param.size() > 0) {
             webPattern->GetTranslateTextCallback(param[0]);
         }
@@ -7310,12 +7254,14 @@ void WebPattern::GetTranslateText(std::string extraData, std::function<void(std:
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask([weak = AceType::WeakClaim(this), jsonData = extraData]() {
         std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(jsonData);
+        CHECK_NULL_VOID(json);
         g_translateTextData.registerObjectName = json->GetString("registerObjectName");
         g_translateTextData.registerFunctionName = json->GetString("registerFunctionName");
         g_translateTextData.translateScript = json->GetString("translateScript");
         g_translateTextData.initScript = json->GetString("initScript");
 
         auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
         TAG_LOGI(AceLogTag::ACE_WEB, "GetTranslateText WebId:%{public}d", webPattern->GetWebId());
         TAG_LOGI(AceLogTag::ACE_WEB,
             "GetTranslateText 'registerObjectName':%{public}s; 'registerFunctionName':%{public}s",
@@ -7351,6 +7297,7 @@ void WebPattern::EndTranslate()
         g_translateTextData.translateScript = "";
         g_translateTextData.initScript = "";
         auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
         if (webPattern->isRegisterJsObject_) {
             CHECK_NULL_VOID(webPattern->delegate_);
             std::string p = g_translateTextData.registerObjectName;

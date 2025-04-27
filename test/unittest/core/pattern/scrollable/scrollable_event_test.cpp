@@ -111,7 +111,7 @@ HWTEST_F(ScrollableEventTest, SetOnScroll001, TestSize.Level1)
      */
     ScrollableModelNG::SetOnScroll(AceType::RawPtr(node_), std::move(onScrollCallback));
     pattern_->scrollSource_ = SCROLL_FROM_UPDATE;
-    auto eventHub = node_->GetEventHub<ScrollableEventHub>();
+    auto eventHub = node_->GetOrCreateEventHub<ScrollableEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto onScrollEvent = eventHub->GetOnScroll();
     pattern_->FireOnScroll(offsetExpected, onScrollEvent);
@@ -156,7 +156,7 @@ HWTEST_F(ScrollableEventTest, SetOnWillScroll001, TestSize.Level1)
      * @tc.steps: step3. Set onWillScroll callback to the ScrollableModelNG
      */
     ScrollableModelNG::SetOnWillScroll(std::move(onWillScroll));
-    auto eventHub = node_->GetEventHub<ScrollableEventHub>();
+    auto eventHub = node_->GetOrCreateEventHub<ScrollableEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     /**
@@ -178,7 +178,7 @@ HWTEST_F(ScrollableEventTest, SetOnWillScroll001, TestSize.Level1)
     EXPECT_FALSE(static_cast<bool>(cleared));
     isOnWillScrollCallBack = false;
     ScrollableModelNG::SetOnWillScroll(AceType::RawPtr(node_), std::move(onWillScroll));
-    eventHub = node_->GetEventHub<ScrollableEventHub>();
+    eventHub = node_->GetOrCreateEventHub<ScrollableEventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step6. Trigger the onWillScroll event by calling FireOnWillScroll
@@ -218,7 +218,7 @@ HWTEST_F(ScrollableEventTest, SetOnDidScroll001, TestSize.Level1)
      */
     ScrollableModelNG::SetOnDidScroll(std::move(onDidScroll));
     pattern_->scrollSource_ = SCROLL_FROM_UPDATE;
-    auto eventHub = node_->GetEventHub<ScrollableEventHub>();
+    auto eventHub = node_->GetOrCreateEventHub<ScrollableEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto onDidScrollEvent = eventHub->GetOnDidScroll();
 
@@ -244,7 +244,7 @@ HWTEST_F(ScrollableEventTest, SetOnDidScroll001, TestSize.Level1)
     EXPECT_FALSE(static_cast<bool>(cleared));
     ScrollableModelNG::SetOnDidScroll(AceType::RawPtr(node_), std::move(onDidScroll));
     pattern_->scrollSource_ = SCROLL_FROM_UPDATE;
-    eventHub = node_->GetEventHub<ScrollableEventHub>();
+    eventHub = node_->GetOrCreateEventHub<ScrollableEventHub>();
     ASSERT_NE(eventHub, nullptr);
     onDidScrollEvent = eventHub->GetOnDidScroll();
     offsetExpected = SCROLL_SET_EXPECTED_SECOND;
@@ -278,7 +278,7 @@ HWTEST_F(ScrollableEventTest, SetOnScrollStart001, TestSize.Level1)
      * @tc.steps: step2. Set onScrollStart callback to the ScrollableModelNG
      */
     ScrollableModelNG::SetOnScrollStart(AceType::RawPtr(node_), std::move(scrollStart));
-    auto eventHub = node_->GetEventHub<ScrollableEventHub>();
+    auto eventHub = node_->GetOrCreateEventHub<ScrollableEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto onScrollStartEvent = eventHub->GetOnScrollStart();
 
@@ -309,7 +309,7 @@ HWTEST_F(ScrollableEventTest, SetOnScrollStop001, TestSize.Level1)
      * @tc.expected: Callback set successfully.
      */
     ScrollableModelNG::SetOnScrollStop(AceType::RawPtr(node_), std::move(scrollStop));
-    auto eventHub = node_->GetEventHub<ScrollableEventHub>();
+    auto eventHub = node_->GetOrCreateEventHub<ScrollableEventHub>();
     ASSERT_NE(eventHub, nullptr);
     pattern_->scrollStop_ = true;
 
@@ -340,7 +340,7 @@ HWTEST_F(ScrollableEventTest, SetOnReachStart001, TestSize.Level1)
      * @tc.expected: Callback set successfully.
      */
     ScrollableModelNG::SetOnReachStart(AceType::RawPtr(node_), std::move(scrollOnReachStart));
-    auto eventHub = node_->GetEventHub<ScrollableEventHub>();
+    auto eventHub = node_->GetOrCreateEventHub<ScrollableEventHub>();
     ASSERT_NE(eventHub, nullptr);
     /**
      * @tc.steps: step3. Trigger OnReachStart event and verify callback is called
@@ -375,7 +375,7 @@ HWTEST_F(ScrollableEventTest, SetOnScrollFrameBegin001, TestSize.Level1)
      * @tc.expected: Callback set successfully.
      */
     ScrollableModelNG::SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
-    auto eventHub = node_->GetEventHub<ScrollableEventHub>();
+    auto eventHub = node_->GetOrCreateEventHub<ScrollableEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto onScrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
     onScrollFrameBeginEvent(scrollOffset, scrollState);
@@ -416,7 +416,7 @@ HWTEST_F(ScrollableEventTest, SetOnReachEnd001, TestSize.Level1)
      * @tc.expected: Callback set successfully.
      */
     ScrollableModelNG::SetOnReachEnd(AceType::RawPtr(node_), std::move(onReachEnd));
-    auto eventHub = node_->GetEventHub<ScrollableEventHub>();
+    auto eventHub = node_->GetOrCreateEventHub<ScrollableEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto onReachEndEvent = eventHub->GetOnReachEnd();
     onReachEndEvent();

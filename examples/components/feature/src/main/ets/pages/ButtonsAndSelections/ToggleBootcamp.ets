@@ -88,27 +88,6 @@ class MyModifier implements AttributeModifier<ToggleAttribute> {
   }
 }
 
-class MyGestureModifier1 implements GestureModifier {
-  applyGesture(event: UIGestureEvent): void {
-    event.addGesture(
-      new TapGestureHandler({ count: 2, fingers: 2 })
-        .tag('aaa')
-        .onAction((event: GestureEvent) => {
-          promptAction.showToast({
-            message: 'Two fingers double click',
-            duration: 2000,
-            bottom: 300
-          });
-        })
-    )
-  }
-}
-
-class MyGestureModifier2 implements GestureModifier {
-  applyGesture(event: UIGestureEvent): void {
-  }
-}
-
 @Component
 export struct ToggleBootcamp {
   @Require @Prop title: ResourceStr;
@@ -593,11 +572,6 @@ export struct ToggleBootcamp {
   @State modifier: MyModifier = new MyModifier()
   @State enableCompAttributeModifier: boolean = false;
   @State compAttributeModifier: boolean = false;
-  // Gesture Modifier
-  @State enableCompGestureModifier: boolean = false
-  @State compGestureModifier: boolean = false
-  myGestureModifier1: MyGestureModifier1 = new MyGestureModifier1()
-  myGestureModifier2: MyGestureModifier2 = new MyGestureModifier2()
   // Outline
   @State enableCompOutlineValueWidth: boolean = false
   @State compOutlineValueWidth: number = 0
@@ -1343,8 +1317,6 @@ export struct ToggleBootcamp {
       .attributeModifier(useEnabled(this.enableCompAttributeModifier, this.compAttributeModifier) ?
       this.modifier : null)
       //part3
-      .gestureModifier(useEnabled(this.enableCompGestureModifier, this.compGestureModifier) ?
-      this.myGestureModifier1 : this.myGestureModifier2)
       .outline({
         width: useEnabled(this.enableCompOutlineValueWidth, this.compOutlineValueWidth),
         color: useEnabled(this.enableCompOutlineValueColor, this.compOutlineValueColor),
@@ -2067,10 +2039,6 @@ export struct ToggleBootcamp {
             header: this.ListItemGroupHeaders('通用属性6')
           }) {
             if (this.selection === '通用属性6') {
-              CompGestureModifierBlocks({
-                enableCompGestureModifier: $enableCompGestureModifier,
-                compGestureModifier: $compGestureModifier
-              })
 
               CompOutlineBlocks({
                 enableCompOutlineValueWidth: $enableCompOutlineValueWidth,

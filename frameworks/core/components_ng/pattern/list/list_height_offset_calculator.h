@@ -165,7 +165,13 @@ public:
     void CalculateLazyForEachNodeWithPosMap(RefPtr<UINode> node)
     {
         auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(node);
-        int32_t count = repeat2 ? repeat2->GetTotalCount() : node->FrameCount();
+        int32_t count = 0;
+        if (repeat2) {
+            auto totalCount = repeat2->GetTotalCount();
+            count = (totalCount <= INT_MAX) ? static_cast<int32_t>(totalCount) : INT_MAX;
+        } else {
+            count = node->FrameCount();
+        }
         if (count <= 0) {
             return;
         }
@@ -294,7 +300,8 @@ public:
         auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(node);
         int32_t count = node->FrameCount();
         if (repeat2) {
-            count = repeat2->GetTotalCount();
+            auto totalCount = repeat2->GetTotalCount();
+            count = (totalCount <= INT_MAX) ? static_cast<int32_t>(totalCount) : INT_MAX;
         }
         if (count <= 0) {
             return;

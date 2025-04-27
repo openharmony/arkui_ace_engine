@@ -1124,18 +1124,18 @@ void TextFieldPattern::ClearFocusStyle()
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
 
-    if (isFocusBGColorSet_) {
+    if (isFocusBGColorSet_ && !paintProperty->HasBackgroundColor()) {
         renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
-        isFocusBGColorSet_ = false;
     }
-    if (isFocusTextColorSet_) {
+    if (isFocusTextColorSet_ && !paintProperty->HasTextColorFlagByUser()) {
         layoutProperty->UpdateTextColor(textFieldTheme->GetTextColor());
-        isFocusTextColorSet_ = false;
     }
-    if (isFocusPlaceholderColorSet_) {
+    if (isFocusPlaceholderColorSet_ && !paintProperty->GetPlaceholderColorFlagByUserValue(false)) {
         layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetPlaceholderColor());
-        isFocusPlaceholderColorSet_ = false;
     }
+    isFocusBGColorSet_ = false;
+    isFocusTextColorSet_ = false;
+    isFocusPlaceholderColorSet_ = false;
 }
 
 void TextFieldPattern::ProcessAutoFillOnFocus()
@@ -2671,8 +2671,9 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     CHECK_NULL_VOID(selectOverlay_);
-    CHECK_NULL_VOID(multipleClickRecognizer_);
-    if ((selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer_->IsValidClick(info)) ||
+    auto multipleClickRecognizer = GetOrCreateMultipleClickRecognizer();
+    CHECK_NULL_VOID(multipleClickRecognizer);
+    if ((selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer->IsValidClick(info)) ||
         !focusHub->IsFocusable()) {
         return;
     }
@@ -2697,11 +2698,11 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
     selectOverlay_->SetUsingMouse(info.GetSourceDevice() == SourceType::MOUSE);
     lastClickTimeStamp_ = info.GetTimeStamp();
-    multipleClickRecognizer_->StartCounting(info);
+    multipleClickRecognizer->StartCounting(info);
     // register click event
-    if (multipleClickRecognizer_->IsTripleClick()) {
+    if (multipleClickRecognizer->IsTripleClick()) {
         HandleTripleClickEvent(info);
-    } else if (multipleClickRecognizer_->IsDoubleClick()) {
+    } else if (multipleClickRecognizer->IsDoubleClick()) {
         HandleDoubleClickEvent(info);
     } else {
         HandleSingleClickEvent(info, firstGetFocus);
@@ -3516,8 +3517,6 @@ bool TextFieldPattern::FireOnTextChangeEvent()
         return false;
     }
     ResetOriginCaretPosition();
-    host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, UtfUtils::Str16DebugToStr8(textCache),
-        UtfUtils::Str16DebugToStr8(contentController_->GetTextUtf16Value()));
     AutoFillValueChanged();
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -3558,7 +3557,11 @@ void TextFieldPattern::AddTextFireOnChange()
         CHECK_NULL_VOID(eventHub);
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateValue(pattern->GetTextContentController()->GetTextUtf16Value());
+        auto textCache = layoutProperty->GetValueValue(u"");
+        auto newText = pattern->GetTextContentController()->GetTextUtf16Value();
+        layoutProperty->UpdateValue(newText);
+        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, UtfUtils::Str16DebugToStr8(textCache),
+            UtfUtils::Str16DebugToStr8(newText));
         ChangeValueInfo changeValueInfo;
         changeValueInfo.value = pattern->GetBodyTextValue();
         changeValueInfo.previewText.offset = pattern->hasPreviewText_ ? pattern->GetPreviewTextStart() : -1;
@@ -6193,7 +6196,7 @@ void TextFieldPattern::DeleteBackward(int32_t length)
     if (IsSelected()) {
         auto start = selectController_->GetStartIndex();
         auto end = selectController_->GetEndIndex();
-        DeleteRange(start, end);
+        DeleteTextRange(start, end, TextDeleteDirection::BACKWARD);
         return;
     }
     if (selectController_->GetCaretIndex() <= 0) {
@@ -6830,15 +6833,6 @@ RefPtr<TextFieldTheme> TextFieldPattern::GetTheme() const
     CHECK_NULL_RETURN(context, nullptr);
     auto theme = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
     return theme;
-}
-
-void TextFieldPattern::InitTheme()
-{
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto context = tmpHost->GetContext();
-    CHECK_NULL_VOID(context);
-    textFieldTheme_ = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
 }
 
 std::string TextFieldPattern::GetTextColor() const
@@ -8831,19 +8825,6 @@ void TextFieldPattern::CleanNodeResponseKeyEvent()
     }
 }
 
-void TextFieldPattern::RegisterWindowSizeCallback()
-{
-    if (isOritationListenerRegisted_) {
-        return;
-    }
-    isOritationListenerRegisted_ = true;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddWindowSizeChangeCallback(host->GetId());
-}
-
 void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     if (selectOverlay_) {
@@ -9750,6 +9731,36 @@ void TextFieldPattern::DeleteRange(int32_t start, int32_t end, bool isIME)
     if (isIME) {
         AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
     }
+    showCountBorderStyle_ = false;
+    HandleCountStyle();
+}
+
+void TextFieldPattern::DeleteTextRange(int32_t start, int32_t end, TextDeleteDirection direction)
+{
+    auto length = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
+    if (start > end) {
+        std::swap(start, end);
+    }
+    start = std::max(0, start);
+    end = std::min(length, end);
+    if (start > length || end < 0 || start == end) {
+        return;
+    }
+    auto value = contentController_->GetSelectedValue(start, end);
+    auto originCaretIndex =
+            TextRange { selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex() };
+    auto isDelete = BeforeIMEDeleteValue(value, direction, start);
+    CHECK_NULL_VOID(isDelete);
+    ResetObscureTickCountDown();
+    CheckAndUpdateRecordBeforeOperation();
+    auto oldContent = contentController_->GetTextUtf16Value();
+    Delete(start, end);
+    auto isOnWillChange = OnWillChangePreDelete(oldContent, start, end);
+    if (!isOnWillChange) {
+        RecoverTextValueAndCaret(oldContent, originCaretIndex);
+        return;
+    }
+    AfterIMEDeleteValue(value, direction);
     showCountBorderStyle_ = false;
     HandleCountStyle();
 }

@@ -207,4 +207,26 @@ HWTEST_F(RichEditorPatternTestSevenNg, IsStopBackPress001, TestSize.Level1)
     EXPECT_FALSE(result);
 }
 
+/**
+ * @tc.name: UpdateSelectionAndHandleVisibility001
+ * @tc.desc: test UpdateSelectionAndHandleVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, UpdateSelectionAndHandleVisibility001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->sourceTool_ = SourceTool::MOUSE;
+    richEditorPattern->releaseInDrop_ = true;
+    AddSpan("test--test");
+
+    richEditorPattern->textSelector_.Update(5, 10);
+    richEditorPattern->caretPosition_ = 5;
+    richEditorPattern->insertValueLength_ = 5;
+    richEditorPattern->UpdateSelectionAndHandleVisibility();
+    ASSERT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    ASSERT_EQ(richEditorPattern->textSelector_.destinationOffset, 5);
+}
+
 } // namespace OHOS::Ace::NG

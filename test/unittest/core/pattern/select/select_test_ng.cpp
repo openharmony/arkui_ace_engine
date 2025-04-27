@@ -359,7 +359,7 @@ HWTEST_F(SelectTestNg, OnModifyDone001, TestSize.Level1)
      */
     selectPattern->OnModifyDone();
     auto host = selectPattern->GetHost();
-    EXPECT_NE(host->GetEventHub<SelectEventHub>(), nullptr);
+    EXPECT_NE(host->GetOrCreateEventHub<SelectEventHub>(), nullptr);
 }
 /**
  * @tc.name: UpdateSelectedProps001
@@ -479,12 +479,14 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest004, TestSize.Level1)
         optionPattern->textTheme_ = AceType::MakeRefPtr<TextTheme>();
         EXPECT_EQ(optionPattern->GetText(), CREATE_VALUE[i].text);
         pattern->SetOptionBgColor(BG_COLOR_VALUE);
+        optionPattern->HandleOptionBackgroundColor();
         EXPECT_EQ(optionPattern->bgColor_, BG_COLOR_VALUE);
         pattern->SetOptionFontFamily(FONT_FAMILY_VALUE);
         pattern->SetOptionFontSize(FONT_SIZE_VALUE);
         pattern->SetOptionItalicFontStyle(ITALIC_FONT_STYLE_VALUE);
         pattern->SetOptionFontColor(TEXT_COLOR_VALUE);
         pattern->SetOptionFontWeight(FONT_WEIGHT_VALUE);
+        optionPattern->HandleOptionFontColor();
         EXPECT_EQ(optionPattern->GetFontColor(), TEXT_COLOR_VALUE);
         EXPECT_EQ(optionPattern->GetFontSize(), FONT_SIZE_VALUE);
         EXPECT_EQ(optionPattern->GetFontFamily(), FONT_FAMILY_VALUE);
@@ -1625,7 +1627,7 @@ HWTEST_F(SelectTestNg, OnAfterModifyDone001, TestSize.Level1)
      */
     selectPattern->OnAfterModifyDone();
     auto host = selectPattern->GetHost();
-    EXPECT_NE(host->GetEventHub<SelectEventHub>(), nullptr);
+    EXPECT_NE(host->GetOrCreateEventHub<SelectEventHub>(), nullptr);
 }
 
 /**

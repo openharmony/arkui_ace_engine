@@ -848,35 +848,5 @@ export default function DatePickerBootcampTest() {
       done();
     })
 
-    // disabled
-    it('ArkUI_DatePicker_034', 0, async (done: Function) => {
-
-      // 无该属性
-      await Search('参数列表', 'disabled')
-
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickObj: 'disabled'
-        },
-      })
-
-      done();
-    })
-
-    it('ArkUI_DatePicker_035', 0, async (done: Function) => {
-
-      await Search('参数列表', 'disabled')
-
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickObj: 'disabled',
-          toggleClickType: ToggleClick.Close
-        },
-      })
-
-      done();
-    })
   })
 }

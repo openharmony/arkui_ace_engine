@@ -286,7 +286,7 @@ HWTEST_F(VideoPropertyTestNg, VideoEventTest003, TestSize.Level1)
 
     auto frameNode =ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::VIDEO_ETS_TAG);
-    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     EXPECT_TRUE(videoEventHub != nullptr);
 
     videoEventHub->FireStartEvent();

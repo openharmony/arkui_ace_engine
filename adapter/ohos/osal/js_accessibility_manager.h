@@ -99,6 +99,14 @@ struct ActionParam {
     std::map<std::string, std::string> actionArguments;
 };
 
+struct AccessibilityFocusInfo {
+    int64_t currentFocusNodeId;
+    int64_t currentFocusVirtualNodeParentId;
+
+    explicit AccessibilityFocusInfo(int64_t nodeId = -1, int64_t parentId = -1)
+        : currentFocusNodeId(nodeId), currentFocusVirtualNodeParentId(parentId) {}
+};
+
 enum class DumpMode {
     TREE,
     NODE,
@@ -711,6 +719,7 @@ private:
     float scaleY_ = 1.0f;
     int64_t currentFocusNodeId_ = -1;
     bool isScreenReaderEnabled_ = false;
+    int64_t currentFocusVirtualNodeParentId_ = -1;
     bool isScreenReaderEnabledInitialized_ = false;
 
     int64_t lastElementId_ = -1;

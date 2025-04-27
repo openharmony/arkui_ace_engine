@@ -1512,7 +1512,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto context = NG::PipelineContext::GetCurrentContext();
     int64_t elementId = 0;
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->GetOrCreateGestureEventHub();
     auto gesture = eventHub->GetGestureEventHub();
@@ -1570,7 +1570,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto context = NG::PipelineContext::GetCurrentContext();
     int64_t elementId = 0;
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->GetOrCreateGestureEventHub();
     auto gesture = eventHub->GetGestureEventHub();
@@ -1617,7 +1617,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto context = NG::PipelineContext::GetCurrentContext();
     int64_t elementId = 0;
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->GetOrCreateGestureEventHub();
     auto gesture = eventHub->GetGestureEventHub();
@@ -1649,6 +1649,56 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     EXPECT_EQ(frameNode->GetNodeName(), "Click_DidClick");
     NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
     NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
+}
+
+/**
+ * @tc.name: ConvertActionTypeToBoolen004
+ * @tc.desc: Test clear currentFocusNodeId when elementId equals to currentFocusNodeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen004, TestSize.Level1)
+{
+    int64_t elementId = 2LL;
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode->GetRenderContext(), nullptr);
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->currentFocusNodeId_ = 2LL;
+    jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 3LL;
+
+    bool ret = jsAccessibilityManager->ConvertActionTypeToBoolen(
+        ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, frameNode, elementId, context);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, -1LL);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 3LL);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ConvertActionTypeToBoolen005
+ * @tc.desc: Test clear currentFocusNodeId when elementId not equals to currentFocusNodeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen005, TestSize.Level1)
+{
+    int64_t elementId = 6LL;
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode->GetRenderContext(), nullptr);
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->currentFocusNodeId_ = 4LL;
+    jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 5LL;
+
+    bool ret = jsAccessibilityManager->ConvertActionTypeToBoolen(
+        ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, frameNode, elementId, context);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, 4LL);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 5LL);
+    EXPECT_FALSE(ret);
 }
 
 /**

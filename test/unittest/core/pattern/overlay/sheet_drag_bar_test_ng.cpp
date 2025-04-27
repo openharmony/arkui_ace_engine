@@ -69,7 +69,7 @@ HWTEST_F(SheetDragBarTestNg, InitTouchEvent001, TestSize.Level1)
     ASSERT_NE(dragBarPattern, nullptr);
     auto host = dragBarPattern->GetHost();
     ASSERT_NE(host, nullptr);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);

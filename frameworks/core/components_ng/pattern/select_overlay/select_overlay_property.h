@@ -90,7 +90,8 @@ struct SelectHandleInfo {
 
     bool operator==(const SelectHandleInfo& info) const
     {
-        return (isShow == info.isShow) && (paintRect == info.paintRect) && (paintInfo == info.paintInfo);
+        return (isShow == info.isShow) && (paintRect == info.paintRect) && (paintInfo == info.paintInfo) &&
+               (localPaintRect == info.localPaintRect);
     }
 
     bool operator!=(const SelectHandleInfo& info) const

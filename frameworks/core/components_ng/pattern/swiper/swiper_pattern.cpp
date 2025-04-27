@@ -87,9 +87,7 @@ constexpr char APP_TABS_FLING[] = "APP_TABS_FLING";
 constexpr char APP_TABS_SCROLL[] = "APP_TABS_SCROLL";
 constexpr char APP_TABS_NO_ANIMATION_SWITCH[] = "APP_TABS_NO_ANIMATION_SWITCH";
 constexpr char APP_TABS_FRAME_ANIMATION[] = "APP_TABS_FRAME_ANIMATION";
-#ifdef SUPPORT_DIGITAL_CROWN
-constexpr char HAPTIC_STRENGTH3[] = "watchhaptic.feedback.crown.strength3";
-#endif
+
 constexpr int32_t COMPONENT_SWIPER_FLING = 1;
 constexpr int32_t PAGE_FLIP_MODE_SIZE = 2;
 const RefPtr<FrameRateRange> SWIPER_DEFAULT_FRAME_RATE =
@@ -99,6 +97,19 @@ constexpr int32_t JUMP_NEAR_VALUE = 3;
 constexpr int32_t MIN_DUMP_VELOCITY_THRESHOLD = 500;
 constexpr float MAX_INDICATOR_VELOCITY = 1200.0f;
 constexpr Dimension DEFAULT_INDICATOR_HEAD_DISTANCE = 14.0_vp;
+
+MoveStep GetKeyMoveStep(const KeyEvent& event, Axis axis, bool isRtl)
+{
+    if ((axis == Axis::HORIZONTAL && event.code == (isRtl ? KeyCode::KEY_DPAD_RIGHT : KeyCode::KEY_DPAD_LEFT)) ||
+        (axis == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
+        return MoveStep::PREV;
+    }
+    if ((axis == Axis::HORIZONTAL && event.code == (isRtl ? KeyCode::KEY_DPAD_LEFT : KeyCode::KEY_DPAD_RIGHT)) ||
+        (axis == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
+        return MoveStep::NEXT;
+    }
+    return MoveStep::NONE;
+}
 } // namespace
 
 SwiperPattern::SwiperPattern()
@@ -2770,43 +2781,66 @@ bool SwiperPattern::IsContentFocused()
     return ret;
 }
 
+bool SwiperPattern::IsContentChildFocusable(int32_t childIndex) const
+{
+    auto child = GetCurrentFrameNode(childIndex);
+    CHECK_NULL_RETURN(child, false);
+    auto focusHub = child->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->IsFocusable();
+}
+
+bool SwiperPattern::FindFocusableContentIndex(MoveStep moveStep)
+{
+    if (itemPosition_.empty()) {
+        return false;
+    }
+    if (!IsContentFocused() || GetDisplayCount() <= 1) {
+        return false;
+    }
+    if (moveStep == MoveStep::PREV) {
+        auto endIndex = itemPosition_.begin()->first;
+        for (auto i = currentFocusIndex_ - 1; i >= endIndex; --i) {
+            currentFocusIndex_ = i;
+            if (IsContentChildFocusable(i)) {
+                return true;
+            }
+        }
+    } else if (moveStep == MoveStep::NEXT) {
+        auto endIndex = itemPosition_.rbegin()->first;
+        for (auto i = currentFocusIndex_ + 1; i <= endIndex; ++i) {
+            currentFocusIndex_ = i;
+            if (IsContentChildFocusable(i)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if ((GetDirection() == Axis::HORIZONTAL && event.code == (IsHorizontalAndRightToLeft() ? KeyCode::KEY_DPAD_RIGHT :
-        KeyCode::KEY_DPAD_LEFT)) || (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
-        auto onlyFlushFocus = IsContentFocused() && GetDisplayCount() > 1 && currentFocusIndex_ > currentIndex_;
-        if (onlyFlushFocus) {
-            currentFocusIndex_ =
-                IsLoop() ? currentFocusIndex_ - 1 : std::clamp(currentFocusIndex_ - 1, 0, TotalCount() - 1);
-            FlushFocus(GetCurrentFrameNode(currentFocusIndex_));
-        } else {
+    auto step = GetKeyMoveStep(event, GetDirection(), IsHorizontalAndRightToLeft());
+    if (step == MoveStep::NONE) {
+        return false;
+    }
+    if (FindFocusableContentIndex(step)) {
+        FlushFocus(GetCurrentFrameNode(currentFocusIndex_));
+    } else {
+        if (step == MoveStep::PREV) {
             ShowPrevious(true);
             currentFocusIndex_ =
                 IsLoop() ? currentFocusIndex_ - 1 : std::clamp(currentFocusIndex_ - 1, 0, TotalCount() - 1);
-        }
-
-        return true;
-    }
-    if ((GetDirection() == Axis::HORIZONTAL && event.code == (IsHorizontalAndRightToLeft() ? KeyCode::KEY_DPAD_LEFT :
-        KeyCode::KEY_DPAD_RIGHT)) || (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
-        auto onlyFlushFocus =
-            IsContentFocused() && GetDisplayCount() > 1 && currentFocusIndex_ < currentIndex_ + GetDisplayCount() - 1;
-        if (onlyFlushFocus) {
-            currentFocusIndex_ =
-                IsLoop() ? currentFocusIndex_ + 1 : std::clamp(currentFocusIndex_ + 1, 0, TotalCount() - 1);
-            FlushFocus(GetCurrentFrameNode(currentFocusIndex_));
         } else {
             ShowNext(true);
             currentFocusIndex_ =
                 IsLoop() ? currentFocusIndex_ + 1 : std::clamp(currentFocusIndex_ + 1, 0, TotalCount() - 1);
         }
-
-        return true;
     }
-    return false;
+    return true;
 }
 
 void SwiperPattern::StopAutoPlay()
@@ -3025,8 +3059,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
     currentFirstIndex_ = currentPageStatus.second;
 
     groupTurnPageRate_ =
-        (IsSwipeByGroup() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ?
-        CalculateGroupTurnPageRate(additionalOffset) : 0.0f);
+        (!IsAutoLinear() && IsSwipeByGroup() ? CalculateGroupTurnPageRate(additionalOffset) : 0.0f);
     currentFirstIndex_ = nextIndex.value_or(currentFirstIndex_);
     UpdateNextValidIndex();
     currentFirstIndex_ = GetLoopIndex(currentFirstIndex_);
@@ -3120,10 +3153,9 @@ float SwiperPattern::CalculateGroupTurnPageRate(float additionalOffset)
 
 std::pair<int32_t, int32_t> SwiperPattern::CalculateStepAndItemCount() const
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (IsAutoLinear()) {
         return { RealTotalCount(), 1 };
     }
-
     auto displaycount = GetDisplayCount();
 
     int32_t itemCount = (IsSwipeByGroup() ? TotalCount() : DisplayIndicatorTotalCount());
@@ -4520,7 +4552,7 @@ bool SwiperPattern::IsAtEnd() const
 
 bool SwiperPattern::AutoLinearIsOutOfBoundary(float mainOffset) const
 {
-    // Check the scenario where all child nodes are within the window but isloop is true。
+    // Check the scenario where all child nodes are within the window but isloop is true
     if (!IsLoop() || itemPosition_.empty() || static_cast<int32_t>(itemPosition_.size()) < TotalCount()) {
         return false;
     }
@@ -4562,7 +4594,11 @@ float SwiperPattern::GetMainContentSize() const
     CHECK_NULL_RETURN(host, 0.0);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0);
-    return geometryNode->GetPaddingSize().Width();
+    auto props = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(props, 0.0);
+    auto size = props->GetDirection().value_or(Axis::HORIZONTAL) == Axis::VERTICAL ?
+        geometryNode->GetPaddingSize().Height() : geometryNode->GetPaddingSize().Width();
+    return size;
 }
 
 float SwiperPattern::GetItemSpace() const
@@ -4846,10 +4882,9 @@ int32_t SwiperPattern::RealTotalCount() const
 
 int32_t SwiperPattern::DisplayIndicatorTotalCount() const
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (IsAutoLinear()) {
         return RealTotalCount();
     }
-
     auto displayCount = GetDisplayCount();
     auto realTotalCount = RealTotalCount();
     if (realTotalCount <= 0) {
@@ -6529,7 +6564,7 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
     bool releaseLeftTouchBottomStart = (currentIndex == totalCount - 1);
     bool releaseLeftTouchBottomEnd = (currentFirstIndex == 0);
     bool releaseRightTouchBottom = (currentFirstIndex == totalCount - 1);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && IsSwipeByGroup()) {
+    if (!IsAutoLinear() && IsSwipeByGroup()) {
         commTouchBottom = (currentFirstIndex >= totalCount - displayCount);
         releaseLeftTouchBottomStart = (currentIndex == totalCount - displayCount);
         releaseRightTouchBottom = (currentFirstIndex >= totalCount - displayCount);
@@ -6601,7 +6636,7 @@ void SwiperPattern::HandleTouchBottomLoop()
 
     bool commTouchBottom = (currentFirstIndex == TotalCount() - 1);
     bool releaseTouchBottom = (currentIndex == TotalCount() - 1);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && IsSwipeByGroup()) {
+    if (!IsAutoLinear() && IsSwipeByGroup()) {
         commTouchBottom = currentFirstIndex >= TotalCount() - GetDisplayCount();
         releaseTouchBottom = currentIndex >= TotalCount() - GetDisplayCount();
     }
@@ -7364,8 +7399,13 @@ bool SwiperPattern::HasRepeatTotalCountDifference(RefPtr<UINode> node) const
     auto& children = node->GetChildren();
     for (const auto& child : children) {
         auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(child);
-        if (repeat2 && repeat2->GetTotalCount() > repeat2->FrameCount()) {
-            return true;
+        if (repeat2) {
+            auto repeatRealCount = repeat2->FrameCount();
+            auto repeatVirtualCount =
+                (repeat2->GetTotalCount() <= INT_MAX) ? static_cast<int32_t>(repeat2->GetTotalCount()) : INT_MAX;
+            if (repeatVirtualCount > repeatRealCount) {
+                return true;
+            }
         } else if (AceType::InstanceOf<FrameNode>(child) || AceType::InstanceOf<LazyForEachNode>(child) ||
                    AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child) ||
                    AceType::InstanceOf<CustomNode>(child)) {
@@ -7496,187 +7536,4 @@ void SwiperPattern::ReportComponentChangeEvent(
     result->Put("event", json);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
 }
-#ifdef SUPPORT_DIGITAL_CROWN
-void SwiperPattern::InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub)
-{
-    // Only Swiser supports crown events, Tabs does not support it.
-    if (hasTabsAncestor_) {
-        return;
-    }
-    auto host = GetHost();
-    auto onCrownEvent = [weak = WeakClaim(this), weakNode = AceType::WeakClaim(AceType::RawPtr(host))](
-                            const CrownEvent& event) -> bool {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_RETURN(pattern, false);
-        // Not responding to events during the flipping animation
-        if (pattern->DuringTranslateAnimation() || pattern->DuringFadeAnimation()) {
-            return true;
-        }
-        auto node = weakNode.Upgrade();
-        CHECK_NULL_RETURN(node, false);
-
-        auto offset = node->GetGeometryNode()->GetFrameOffset();
-        auto contentSize = node->GetGeometryNode()->GetFrameSize();
-        auto swiperPattern = node->GetPattern<SwiperPattern>();
-        float centerX = contentSize.Width() * 0.5 + offset.GetX();
-        float centerY = contentSize.Height() * 0.5 + offset.GetY();
-        OffsetF center;
-        center.SetX(centerX);
-        center.SetY(centerY);
-        pattern->HandleCrownEvent(event, center, offset);
-        return true;
-    };
-    focusHub->SetOnCrownEventInternal(std::move(onCrownEvent));
-    // focus blur need to call event end.
-    focusHub->SetOnBlurReasonInternal([weak = WeakClaim(this)](const BlurReason& blurReason) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        GestureEvent info;
-        info.SetSourceDevice(SourceType::CROWN);
-        info.SetSourceTool(SourceTool::UNKNOWN);
-        pattern->HandleCrownActionEnd(info);
-    });
-}
-
-void SwiperPattern::HandleCrownEvent(const CrownEvent& event, const OffsetF& center, const OffsetF& offset)
-{
-    DimensionOffset centerDimension(center);
-    Offset globalLocation(centerDimension.GetX().ConvertToPx(), centerDimension.GetY().ConvertToPx());
-    GestureEvent info;
-    info.SetSourceDevice(SourceType::CROWN);
-    info.SetSourceTool(SourceTool::UNKNOWN);
-    info.SetGlobalLocation(globalLocation);
-    double mainDelta = GetCrownRotatePx(event);
-    UpdateCrownVelocity(event.degree);
-    info.SetMainDelta(mainDelta);
-    info.SetMainVelocity(crownRealVelocity_);
-    switch (event.action) {
-        case CrownAction::BEGIN:
-            HandleCrownActionBegin(info);
-            break;
-        case CrownAction::UPDATE:
-            HandleCrownActionUpdate(event.degree, mainDelta, info);
-            break;
-        case CrownAction::END:
-            HandleCrownActionEnd(info);
-            break;
-        default:
-            // The event cancel is handled using event end.
-            HandleCrownActionEnd(info);
-            break;
-    }
-}
-
-double SwiperPattern::GetCrownRotatePx(const CrownEvent& event)
-{
-    double velocity = event.degree;
-    double px = 0.0;
-    auto pipelineContext = GetContext();
-    CHECK_NULL_RETURN(pipelineContext, 0.0);
-    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_RETURN(theme, 0.0);
-
-    if (LessOrEqualCustomPrecision(velocity, theme->GetSlowVelocityThreshold(), 0.01f)) {
-        px = theme->GetDisplayControlRatioVerySlow() * velocity;
-    } else if (LessOrEqualCustomPrecision(velocity, theme->GetMediumVelocityThreshold(), 0.01f)) {
-        px = theme->GetDisplayControlRatioSlow() * velocity;
-    } else if (LessOrEqualCustomPrecision(velocity, theme->GetFastVelocityThreshold(), 0.01f)) {
-        px = theme->GetDisplayControlRatioMedium() * velocity;
-    } else {
-        px = theme->GetDisplayControlRatioFast() * velocity;
-    }
-
-    switch (crownSensitivity_) {
-        case CrownSensitivity::LOW:
-            px *= theme->GetCrownSensitivityLow();
-            break;
-        case CrownSensitivity::MEDIUM:
-            px *= theme->GetCrownSensitivityMedium();
-            break;
-        case CrownSensitivity::HIGH:
-            px *= theme->GetCrownSensitivityHigh();
-            break;
-        default:
-            break;
-    }
-    return px;
-}
-
-void SwiperPattern::HandleCrownActionBegin(GestureEvent& info)
-{
-    ActionStartTask()(info);
-    isCrownActionStarted_ = true;
-}
-
-void SwiperPattern::HandleCrownActionUpdate(double degree, double mainDelta, GestureEvent& info)
-{
-    if (!isCrownActionStarted_) {
-        ActionStartTask()(info);
-        isCrownActionStarted_ = true;
-        return;
-    }
-    if (!IsLoop() && ((currentIndex_ == 0 && Positive(mainDelta)) ||
-                         (currentIndex_ == TotalCount() - GetDisplayCount() && Negative(mainDelta)))) {
-        ActionUpdateTask()(info);
-        return;
-    }
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID(theme);
-    if (GreatOrEqual(std::abs(degree), theme->GetSpringVelocityThreshold())) {
-        HandleDragEnd(crownAdjustedVelocity_);
-        StartVibraFeedback();
-        isCrownActionStarted_ = false;
-    } else {
-        auto firstItem = GetFirstItemInfoInVisibleArea();
-        auto halfItemLength = (firstItem.second.endPos - firstItem.second.startPos) * 0.5;
-        if ((Positive(mainDelta) && LessOrEqual(firstItem.second.endPos + mainDelta, halfItemLength)) ||
-            (Negative(mainDelta) && GreatOrEqual(firstItem.second.endPos + mainDelta, halfItemLength))) {
-            HandleDragEnd(crownAdjustedVelocity_);
-            StartVibraFeedback();
-            isCrownActionStarted_ = false;
-        }
-    }
-    // If the DragEnd is not triggered, DragUpdate need to be processed
-    if (isCrownActionStarted_) {
-        ActionUpdateTask()(info);
-    }
-}
-
-void SwiperPattern::HandleCrownActionEnd(GestureEvent& info)
-{
-    if (!isCrownActionStarted_) {
-        return;
-    }
-    ActionEndTask()(info);
-    isCrownActionStarted_ = false;
-}
-
-void SwiperPattern::UpdateCrownVelocity(double degree)
-{
-    auto turnVelocity = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? newMinTurnPageVelocity_
-                                                                                           : MIN_TURN_PAGE_VELOCITY;
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID(theme);
-
-    // Covert degree to velocity. crownAdjustedVelocity_ is only used in the scenario of initiating page flipping
-    if (GreatOrEqual(std::abs(degree), theme->GetSpringVelocityThreshold())) {
-        crownAdjustedVelocity_ = degree * turnVelocity / theme->GetSpringVelocityThreshold();
-    } else {
-        crownAdjustedVelocity_ = Positive(degree) ? turnVelocity + 1 : -turnVelocity - 1;
-    }
-    crownRealVelocity_ = degree * turnVelocity / theme->GetSpringVelocityThreshold();
-}
-
-void SwiperPattern::StartVibraFeedback()
-{
-    // Vibration is only triggered when starting the page flipping animation
-    if (DuringTranslateAnimation() || DuringFadeAnimation()) {
-        VibratorUtils::StartVibraFeedback(HAPTIC_STRENGTH3);
-    }
-}
-#endif
 } // namespace OHOS::Ace::NG

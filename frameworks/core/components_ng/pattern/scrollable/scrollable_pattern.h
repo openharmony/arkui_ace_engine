@@ -634,6 +634,11 @@ public:
         return false;
     }
 
+    virtual bool IsEnablePagingValid()
+    {
+        return false;
+    }
+
     void SetNeedLinked(bool needLinked)
     {
         needLinked_ = needLinked;
@@ -789,7 +794,7 @@ public:
         return SizeF();
     }
 
-    SizeF GetViewSizeMinusPadding();
+    SizeF GetViewSizeMinusPadding() const;
 
     void ScrollEndCallback(bool nestedScroll, float velocity);
 

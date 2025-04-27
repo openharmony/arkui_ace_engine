@@ -79,7 +79,6 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     scrollNode->MountToParent(sheetNode);
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     CreateCloseIconButtonNode(sheetNode, sheetStyle);
-    sheetNode->MarkModifyDone();
     return sheetNode;
 }
 

@@ -344,7 +344,7 @@ HWTEST_F(DatePickerTestFour, DatePickerColumnPatternTest008, TestSize.Level1)
      */
     columnPattern_->mouseEvent_ = nullptr;
     columnPattern_->touchListener_ = nullptr;
-    auto columnEventHub = columnNode_->GetEventHub<EventHub>();
+    auto columnEventHub = columnNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(columnEventHub, nullptr);
     auto columnGesture = columnEventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(columnGesture, nullptr);
@@ -536,7 +536,7 @@ HWTEST_F(DatePickerTestFour, DatePickerColumnPatternTest011, TestSize.Level1)
      * @tc.steps: step2. Call HandleDragMove while inputEventType is AXIS and sourceTool is MOUSE.
      * @tc.expected: animationBreak_ is set false.
      */
-    auto eventHub = columnNode_->GetEventHub<EventHub>();
+    auto eventHub = columnNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
@@ -1328,34 +1328,6 @@ HWTEST_F(DatePickerTestFour, DatePickerColumnLayoutAlgorithmAdjustFontSizeScale,
     auto res = datePickerColumnLayoutAlgorithm.AdjustFontSizeScale(fontSizeValue, fontScale);
     Dimension resultValue = 0.0_vp;
     EXPECT_EQ(res, resultValue);
-}
-
-/**
- * @tc.name: HandleMonthChange
- * @tc.desc: Test HandleMonthChange.
- * @tc.type: FUNC
- */
-HWTEST_F(DatePickerTestFour, HandleMonthChange, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create pipeline and pickerTheme.
-     */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    EXPECT_NE(pipeline, nullptr);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-    EXPECT_NE(pickerTheme, nullptr);
-    DatePickerColumnLayoutAlgorithm datePickerColumnLayoutAlgorithm;
-    /**
-     * @tc.steps: step2. Call ReCalcItemHeightScale.
-     * @tc.expected: set fontScale is not zero.
-     */
-    Dimension userSetHeight = 10.0_vp;
-    pipeline->fontScale_ = 0.0f;
-    pickerTheme->pickerDialogNormalFontScale_ = 0.00;
-    pickerTheme->pickerDialogMaxTwoFontScale_ = 0.00;
-    bool isDividerSpacing = true;
-    auto res = datePickerColumnLayoutAlgorithm.ReCalcItemHeightScale(userSetHeight, isDividerSpacing);
-    EXPECT_NE(res, 1.0f);
 }
 
 /**

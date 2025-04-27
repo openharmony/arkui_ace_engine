@@ -86,6 +86,9 @@ public:
     virtual void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara) = 0;
 
     virtual RefPtr<UIContext> GetUIContext() const = 0;
+    virtual void SetMeasureCallback(const std::function<void(RefPtr<FrameNode>)>& callback) = 0;
+    virtual int32_t GetMeasureWidth() = 0;
+    virtual int32_t GetMeasureHeight() = 0;
 };
 } // namespace OHOS::Ace::Kit
 

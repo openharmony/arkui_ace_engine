@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,12 +105,14 @@ public:
     static void TearDownTestCase();
     std::function<RefPtr<UINode>()> builderFunc_;
     std::function<RefPtr<UINode>()> titleBuilderFunc_;
-
+    RefPtr<FrameNode> sheetContentNode_;
+    std::function<RefPtr<UINode>()> sheetTitleBuilderFunc_;
 protected:
     static RefPtr<FrameNode> CreateBubbleNode(const TestProperty& testProperty);
     static RefPtr<FrameNode> CreateTargetNode();
     static void CreateSheetStyle(SheetStyle& sheetStyle);
     void CreateSheetBuilder();
+    void CreateSheetContentNode();
     int32_t minPlatformVersion_ = 0;
 };
 
@@ -209,6 +211,24 @@ void OverlayManagerTestNg::CreateSheetBuilder()
     titleBuilderFunc_ = buildTitleNodeFunc;
 }
 
+void OverlayManagerTestNg::CreateSheetContentNode()
+{
+    sheetContentNode_ =
+    FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+    ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    sheetContentNode_->AddChild(childFrameNode);
+    sheetTitleBuilderFunc_ = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+}
 
 /**
  * @tc.name: DeleteModal001
@@ -708,6 +728,80 @@ HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext002, TestSize.Level1)
     EXPECT_TRUE(currentStyle.scrollSizeMode.has_value());
     EXPECT_TRUE(currentStyle.shadow.has_value());
     EXPECT_TRUE(currentStyle.width.has_value());
+}
+
+/**
+ * @tc.name: UpdateBindSheetByUIContext003
+ * @tc.desc: Test OverlayManager::UpdateBindSheetByUIContext create sheet page.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set api version over api 11.
+     */
+    int32_t orignApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    int32_t targetId = targetNode->GetId();
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step3. create sheetNode, get sheetPattern.
+     */
+    CreateSheetContentNode();
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    SheetKey sheetKey = SheetKey(true, sheetContentNode_->GetId(), targetId);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OpenBindSheetByUIContext(sheetContentNode_, std::move(sheetTitleBuilderFunc_), sheetStyle, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(topSheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step4. test set pageHeight = 1000.
+     * @tc.expected: over api11 mediumPercent = 0.6, height = pageHeight_ * 0.6 = 1000 * 0.6 = 600.
+     */
+    topSheetPattern->pageHeight_ = 1000;
+    float expectSheetHeight = topSheetPattern->pageHeight_ * 0.6;
+    overlayManager->ComputeSheetOffset(sheetStyle, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, expectSheetHeight));
+
+    /**
+     * @tc.steps: step5. UpdateBindSheetByUIContext
+     * @tc.expected: related property is isPartialUpdate.
+     */
+    SheetStyle updateSheetStyle;
+    updateSheetStyle.backgroundColor = Color::BLACK;
+    overlayManager->UpdateBindSheetByUIContext(sheetContentNode_, updateSheetStyle, targetId, true);
+
+    auto sheetNode = overlayManager->sheetMap_[sheetKey].Upgrade();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    auto currentStyle = layoutProperty->GetSheetStyleValue();
+    ASSERT_TRUE(currentStyle.sheetHeight.sheetMode.has_value());
+    EXPECT_EQ(currentStyle.sheetHeight.sheetMode, sheetStyle.sheetHeight.sheetMode);
+    EXPECT_EQ(currentStyle.backgroundColor, updateSheetStyle.backgroundColor);
+    EXPECT_EQ(overlayManager->sheetHeight_, expectSheetHeight);
+
+    /**
+     * @tc.steps: step7. recover api version info.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(orignApiVersion);
 }
 
 /**

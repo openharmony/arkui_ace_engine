@@ -82,7 +82,7 @@ void SwiperTestNg::GetSwiper()
 {
     frameNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     pattern_ = frameNode_->GetPattern<SwiperPattern>();
-    eventHub_ = frameNode_->GetEventHub<SwiperEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<SwiperEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<SwiperLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<SwiperPaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<SwiperAccessibilityProperty>();
@@ -1646,5 +1646,45 @@ HWTEST_F(SwiperTestNg, SwipeAutoLinearIsOutOfBoundary001, TestSize.Level1)
     EXPECT_FALSE(pattern_->itemPosition_.empty());
     EXPECT_FALSE(pattern_->itemPosition_.size() < pattern_->TotalCount());
     EXPECT_FALSE(pattern_->AutoLinearIsOutOfBoundary(0.f));
+}
+
+/**
+ * @tc.name: CustomAnimationHandleDragEnd001
+ * @tc.desc: Test SwiperPattern HandleDragEnd on custom animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CustomAnimationHandleDragEnd001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    SwiperContentAnimatedTransition transitionInfo;
+    transitionInfo.timeout = 0;
+    transitionInfo.transition = [](const RefPtr<SwiperContentTransitionProxy>& proxy) {};
+    model.SetCustomContentTransition(transitionInfo);
+    auto onContentDidScroll = [](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {};
+    model.SetOnContentDidScroll(std::move(onContentDidScroll));
+    CreateSwiperItems();
+    CreateSwiperDone();
+    pattern_->contentMainSize_ = SWIPER_WIDTH;
+    EXPECT_TRUE(pattern_->SupportSwiperCustomAnimation());
+
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    info.SetSourceTool(SourceTool::TOUCHPAD);
+    info.SetGlobalLocation(Offset(100.f, 100.f));
+    info.SetMainDelta(100.0f);
+    info.SetMainVelocity(2000.f);
+
+    pattern_->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->itemPosition_.empty());
+    auto offset = pattern_->itemPosition_[0].startPos;
+    EXPECT_EQ(offset, 100.0f);
+
+    pattern_->HandleDragEnd(2000.f, 0.0f);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->itemPosition_.empty());
+
+    offset = pattern_->itemPosition_[0].startPos;
+    EXPECT_EQ(offset, 100.0f);
 }
 } // namespace OHOS::Ace::NG

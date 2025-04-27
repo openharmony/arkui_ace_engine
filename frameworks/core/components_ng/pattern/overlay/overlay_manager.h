@@ -193,6 +193,7 @@ public:
         return dismissDialogId_;
     }
 
+    void RemoveDialogFromMapForcefully(const RefPtr<FrameNode>& node);
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch = false,
         const HideMenuType& reason = HideMenuType::NORMAL);
@@ -520,7 +521,7 @@ public:
         std::function<void(const int32_t, const int32_t)> cleanViewContextMapCallback,
         const RefPtr<FrameNode>& targetNode);
     void UpdateBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode,
-        NG::SheetStyle& sheetStyle, int32_t targetId, bool isPartialUpdate);
+        const NG::SheetStyle& sheetStyle, int32_t targetId, bool isPartialUpdate);
     void CloseBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t targetId);
     void SetDismissTarget(const DismissTarget& dismissTarget)
     {
@@ -604,11 +605,11 @@ public:
 
     void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true);
 
-    void ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
+    void ComputeSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
-    void ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
+    void ComputeSingleGearSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
-    void ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
+    void ComputeDetentsSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
     void CheckDeviceInLandscape(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode, float& sheetTopSafeArea);
 
@@ -762,8 +763,9 @@ private:
         const RefPtr<FrameNode>& sheetPageNode, const RefPtr<UINode>& sheetContentNode,
         const RefPtr<FrameNode>& targetNode, bool isStartByUIContext);
     bool CheckTargetIdIsValid(int32_t targetId);
-    void UpdateSheetRender(const RefPtr<FrameNode>& sheetPageNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate);
-    void UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle,
+    void UpdateSheetRender(
+        const RefPtr<FrameNode>& sheetPageNode, const NG::SheetStyle& sheetStyle, bool isPartialUpdate);
+    void UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle,
         int32_t targetId, bool isStartByUIContext = false, bool isPartialUpdate = false,
         std::function<void()>&& onAppear = nullptr, std::function<void()>&& onDisappear = nullptr,
         std::function<void()>&& shouldDismiss = nullptr, std::function<void(const int32_t)>&& onWillDismiss = nullptr,
@@ -775,7 +777,8 @@ private:
         std::function<void()>&& sheetSpringBack = nullptr);
     SheetStyle UpdateSheetStyle(
         const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle, bool isPartialUpdate);
-    void UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& currentStyle, bool isPartialUpdate);
+    void UpdateSheetProperty(
+        const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& currentStyle, bool isPartialUpdate);
     void UpdateSheetMaskBackgroundColor(const RefPtr<FrameNode>& maskNode,
         const RefPtr<RenderContext>& maskRenderContext, const SheetStyle& sheetStyle);
     void UpdateSheetMask(const RefPtr<FrameNode>& maskNode,

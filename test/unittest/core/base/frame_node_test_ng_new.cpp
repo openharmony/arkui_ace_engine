@@ -59,7 +59,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest041, TestSize.Level1)
      * @tc.expected: expect The function return value is STOP_BUBBLING.
      */
     FRAME_NODE2->isActive_ = true;
-    FRAME_NODE2->GetEventHub<EventHub>()->SetEnabled(true);
+    FRAME_NODE2->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
     auto eventHub = FRAME_NODE2->GetOrCreateGestureEventHub();
     eventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
@@ -88,7 +88,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest042, TestSize.Level1)
      * @tc.steps: step2. set debugEnabled_ is true.
      */
     FRAME_NODE2->isActive_ = true;
-    FRAME_NODE2->GetEventHub<EventHub>()->SetEnabled(true);
+    FRAME_NODE2->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
     auto test = FRAME_NODE2->TouchTest(
         globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
@@ -140,12 +140,12 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest043, TestSize.Level1)
      * @tc.expected: expect The function return value is STOP_BUBBLING.
      */
     FRAME_NODE2->isActive_ = true;
-    FRAME_NODE2->GetEventHub<EventHub>()->SetEnabled(true);
+    FRAME_NODE2->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
     auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
         return GestureJudgeResult::REJECT;
     };
-    auto gestureEventHub = FRAME_NODE2->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto gestureEventHub = FRAME_NODE2->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
     gestureEventHub->SetOnGestureJudgeBegin(gestureJudgeFunc);
     auto test = FRAME_NODE2->TouchTest(
         globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
@@ -163,7 +163,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest044, TestSize.Level1)
      * @tc.steps: step1. construct parameters.
      */
     FRAME_NODE2->isActive_ = true;
-    FRAME_NODE2->GetEventHub<EventHub>()->SetEnabled(true);
+    FRAME_NODE2->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
     auto eventHub = FRAME_NODE2->GetOrCreateGestureEventHub();
     eventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
@@ -188,7 +188,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest045, TestSize.Level1)
      * @tc.steps: step1. construct parameters.
      */
     FRAME_NODE2->isActive_ = true;
-    FRAME_NODE2->GetEventHub<EventHub>()->SetEnabled(true);
+    FRAME_NODE2->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
 
     /**
@@ -210,7 +210,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest046, TestSize.Level1)
      * @tc.steps: step1. construct parameters.
      */
     FRAME_NODE2->isActive_ = true;
-    FRAME_NODE2->GetEventHub<EventHub>()->SetEnabled(true);
+    FRAME_NODE2->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
 
     int32_t extensionOffset = 1;
@@ -235,7 +235,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest048, TestSize.Level1)
      * @tc.steps: step1. construct parameters.
      */
     FRAME_NODE2->isActive_ = true;
-    FRAME_NODE2->GetEventHub<EventHub>()->SetEnabled(true);
+    FRAME_NODE2->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
 
@@ -259,7 +259,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest049, TestSize.Level1)
      * @tc.steps: step1. construct parameters.
      */
     FRAME_NODE2->isActive_ = true;
-    FRAME_NODE2->GetEventHub<EventHub>()->SetEnabled(true);
+    FRAME_NODE2->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
 
     DimensionRect responseRect(Dimension(0), Dimension(0), DimensionOffset(OFFSETF));
     std::vector<DimensionRect> mouseResponseRegion;
@@ -269,7 +269,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest049, TestSize.Level1)
      * @tc.steps: step2. call GetResponseRegionList.
      * @tc.expected: expect MouseResponseRegion is not empty.
      */
-    auto gestureEventHub = FRAME_NODE2->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto gestureEventHub = FRAME_NODE2->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
     gestureEventHub->SetMouseResponseRegion(mouseResponseRegion);
 
     auto paintRect = FRAME_NODE2->renderContext_->GetPaintRectWithoutTransform();
@@ -295,7 +295,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest050, TestSize.Level1)
      */
     std::vector<DimensionRect> responseRegion;
     responseRegion.push_back(DimensionRect());
-    auto gestureEventHub = FRAME_NODE2->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto gestureEventHub = FRAME_NODE2->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
     gestureEventHub->SetResponseRegion(responseRegion);
     auto paintRect = FRAME_NODE2->renderContext_->GetPaintRectWithoutTransform();
     FRAME_NODE2->GetResponseRegionList(paintRect, 1);
@@ -313,7 +313,7 @@ HWTEST_F(FrameNodeTestNg, DumpAdvanceInfo001, TestSize.Level1)
      * @tc.steps: step1. initialize parameters.
      */
     FRAME_NODE3->isActive_ = true;
-    FRAME_NODE3->GetEventHub<EventHub>()->SetEnabled(true);
+    FRAME_NODE3->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
 
     auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
@@ -646,7 +646,7 @@ HWTEST_F(FrameNodeTestNg, GetPreviewScaleVal001, TestSize.Level1)
      * @tc.steps: step1. initialize parameters.
      */
     frameNode->isActive_ = true;
-    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
+    frameNode->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
 
     /**
@@ -682,7 +682,7 @@ HWTEST_F(FrameNodeTestNg, GetPreviewScaleVal002, TestSize.Level1)
      * @tc.steps: step1. initialize parameters.
      */
     frameNode->isActive_ = true;
-    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
+    frameNode->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
 
     /**
@@ -716,7 +716,7 @@ HWTEST_F(FrameNodeTestNg, GetPreviewApplyVal001, TestSize.Level1)
      * @tc.steps: step1. initialize parameters.
      */
     frameNode->isActive_ = true;
-    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
+    frameNode->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
 
     /**
@@ -743,7 +743,7 @@ HWTEST_F(FrameNodeTestNg, GetPreviewScaleVal003, TestSize.Level1)
      * @tc.steps: step1. initialize parameters.
      */
     frameNode->isActive_ = true;
-    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
+    frameNode->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
 
     /**
@@ -768,7 +768,7 @@ HWTEST_F(FrameNodeTestNg, IsPreviewNeedScale001, TestSize.Level1)
      * @tc.steps: step1. initialize parameters.
      */
     FRAME_NODE->isActive_ = true;
-    FRAME_NODE->GetEventHub<EventHub>()->SetEnabled(true);
+    FRAME_NODE->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
 
     /**
@@ -798,7 +798,7 @@ HWTEST_F(FrameNodeTestNg, GetOffsetInScreen001, TestSize.Level1)
      * @tc.steps: step1. initialize parameters.
      */
     FRAME_NODE->isActive_ = true;
-    FRAME_NODE->GetEventHub<EventHub>()->SetEnabled(true);
+    FRAME_NODE->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
     auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     ASSERT_NE(mockRenderContext, nullptr);
@@ -823,7 +823,7 @@ HWTEST_F(FrameNodeTestNg, GetPixelMap001, TestSize.Level1)
      * @tc.steps: step1. initialize parameters.
      */
     FRAME_NODE->isActive_ = true;
-    FRAME_NODE->GetEventHub<EventHub>()->SetEnabled(true);
+    FRAME_NODE->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
     auto gestureHub = FRAME_NODE->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
@@ -967,7 +967,7 @@ HWTEST_F(FrameNodeTestNg, SetOnSizeChangeCallback001, TestSize.Level1)
     OnSizeChangedFunc callback = [](const RectF& oldRect, const RectF& rect) {};
     FRAME_NODE2->SetOnSizeChangeCallback(std::move(callback));
     EXPECT_NE(FRAME_NODE2->lastFrameNodeRect_, nullptr);
-    auto eventHub = FRAME_NODE2->GetEventHub<NG::EventHub>();
+    auto eventHub = FRAME_NODE2->GetOrCreateEventHub<NG::EventHub>();
     EXPECT_NE(eventHub, nullptr);
     EXPECT_TRUE(eventHub->HasOnSizeChanged());
 
@@ -1006,7 +1006,7 @@ HWTEST_F(FrameNodeTestNg, TriggerOnSizeChangeCallback001, TestSize.Level1)
      * @tc.steps: step3.set callback and release lastFrameNodeRect_
      * @tc.expected: expect flag is still false
      */
-    FRAME_NODE2->GetEventHub<EventHub>()->SetOnSizeChanged(std::move(onSizeChanged));
+    FRAME_NODE2->GetOrCreateEventHub<EventHub>()->SetOnSizeChanged(std::move(onSizeChanged));
     FRAME_NODE2->lastFrameNodeRect_ = nullptr;
     FRAME_NODE2->TriggerOnSizeChangeCallback();
     EXPECT_FALSE(flag);
@@ -1050,7 +1050,7 @@ HWTEST_F(FrameNodeTestNg, OnTouchInterceptTest001, TestSize.Level1)
     auto childEventHub = childNode->GetOrCreateGestureEventHub();
     childEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
     childNode->SetActive(true);
-    EXPECT_NE(childNode->GetEventHub<EventHub>()->GetGestureEventHub(), nullptr);
+    EXPECT_NE(childNode->GetOrCreateEventHub<EventHub>()->GetGestureEventHub(), nullptr);
     auto callback = [](TouchEventInfo& event) -> HitTestMode { return HitTestMode::HTMNONE; };
     childEventHub->SetOnTouchIntercept(callback);
 
@@ -2750,7 +2750,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSwapDirty002, TestSize.Level1)
     frameNode->geometryNode_->SetParentLayoutConstraint(layoutConstraintF_);
     layoutProperty->UpdateLayoutConstraint(layoutConstraintF_);
 
-    frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub();
+    frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateFocusHub();
     frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
     EXPECT_NE(frameNode->eventHub_, nullptr);
 }
@@ -2789,9 +2789,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSwapDirty003, TestSize.Level1)
     frameNode->geometryNode_->SetParentLayoutConstraint(layoutConstraintF_);
     layoutProperty->UpdateLayoutConstraint(layoutConstraintF_);
 
-    frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub()->currentFocus_ = true;
+    frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateFocusHub()->currentFocus_ = true;
     frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
-    EXPECT_TRUE(frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub()->IsCurrentFocus());
+    EXPECT_TRUE(frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateFocusHub()->IsCurrentFocus());
 }
 
 /**

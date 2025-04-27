@@ -21,6 +21,19 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double DEFAULT_DOUBLE_50 = 50.0;
 constexpr double DEFAULT_DOUBLE_100 = 100.0;
+
+struct MockClickRecognizerCase {
+    int32_t fingers;
+    int32_t count;
+    double distanceThreshold;
+    double moveDistance;
+    RefereeState refereeState;
+    int32_t expectedFingers;
+    int32_t expectedCount;
+    double expectedDistanceThreshold;
+    RefereeState expectedRefereeState;
+    std::vector<TouchEvent> inputTouchEvents;
+};
 } // namespace
 
 class ClickRecognizerTestNg : public GesturesCommonTestNg {
@@ -1785,5 +1798,116 @@ HWTEST_F(ClickRecognizerTestNg, UpdateInfoWithDownEventTest001, TestSize.Level1)
     clickRecognizer->AttachFrameNode(frameNode);
     clickRecognizer->UpdateInfoWithDownEvent(touchEvent);
     EXPECT_FALSE(clickRecognizer->equalsToFingers_);
+}
+
+
+/**
+ * @tc.name: ClickRecognizerBasicInfoTest001
+ * @tc.desc: Test case basic input info check.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerBasicInfoTest001, TestSize.Level1)
+ {
+    /**
+      * @tc.steps: step1. Create basic info testCases.
+      * @tc.expected: set clickRecognizer basic info correct.
+      */
+    const std::vector<MockClickRecognizerCase> mockClickRecognizerCases = {
+        {1, 1, std::numeric_limits<double>::infinity(), 1, RefereeState::READY, 1, 1, std::numeric_limits<double>::infinity(), RefereeState::READY, {}},
+        {-1, 1, std::numeric_limits<double>::infinity(), 1, RefereeState::READY, 1, 1, std::numeric_limits<double>::infinity(), RefereeState::READY, {}},
+        {1, -1, std::numeric_limits<double>::infinity(), 1, RefereeState::READY, 1, -1, std::numeric_limits<double>::infinity(), RefereeState::READY, {}},
+        {1, 1, -1, 1, RefereeState::READY, 1, 1, std::numeric_limits<double>::infinity(), RefereeState::READY, {}}
+    };
+    for (auto i = 0; i < mockClickRecognizerCases.size(); i++) {
+        RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(mockClickRecognizerCases[i].fingers, mockClickRecognizerCases[i].count, mockClickRecognizerCases[i].distanceThreshold);
+        clickRecognizer->refereeState_ = mockClickRecognizerCases[i].refereeState;
+        EXPECT_EQ(clickRecognizer->fingers_, mockClickRecognizerCases[i].expectedFingers);
+        EXPECT_EQ(clickRecognizer->count_, mockClickRecognizerCases[i].expectedCount);
+        EXPECT_EQ(clickRecognizer->distanceThreshold_, mockClickRecognizerCases[i].expectedDistanceThreshold);
+        EXPECT_EQ(clickRecognizer->refereeState_, mockClickRecognizerCases[i].expectedRefereeState);
+    }
+}
+
+/**
+ * @tc.name: ClickRecognizerInjectEventsTest001
+ * @tc.desc: Test case inject events.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerInjectEventsTest001, TestSize.Level1)
+ {
+    /**
+      * @tc.steps: step1. Create basic info testCases.
+      * @tc.expected: set clickRecognizer basic info correct.
+      */
+    TouchEvent downEvent = TouchEvent();
+    downEvent.type = TouchType::DOWN;
+    TouchEvent upEvent = TouchEvent();
+    upEvent.type = TouchType::UP;
+
+    const std::vector<MockClickRecognizerCase> mockClickRecognizerCases = {
+        {1, 1, std::numeric_limits<double>::infinity(), 1, RefereeState::READY, 1, 1, std::numeric_limits<double>::infinity(), RefereeState::SUCCEED, {downEvent, upEvent}},
+        {-1, 1, std::numeric_limits<double>::infinity(), 1, RefereeState::READY, 1, 1, std::numeric_limits<double>::infinity(), RefereeState::SUCCEED, {downEvent, upEvent}},
+        {1, -1, std::numeric_limits<double>::infinity(), 1, RefereeState::READY, 1, -1, std::numeric_limits<double>::infinity(), RefereeState::PENDING, {downEvent, upEvent}},
+        {1, 1, -1, 1, RefereeState::READY, 1, 1, std::numeric_limits<double>::infinity(), RefereeState::SUCCEED, {downEvent, upEvent}},
+        {1, 2, std::numeric_limits<double>::infinity(), 1, RefereeState::READY, 1, 2, std::numeric_limits<double>::infinity(), RefereeState::PENDING, {downEvent, upEvent}},
+        {1, 2, std::numeric_limits<double>::infinity(), 1, RefereeState::READY, 1, 2, std::numeric_limits<double>::infinity(), RefereeState::SUCCEED, {downEvent, upEvent, downEvent, upEvent}},
+    };
+    for (auto i = 0; i < mockClickRecognizerCases.size(); i++) {
+        RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(mockClickRecognizerCases[i].fingers, mockClickRecognizerCases[i].count, mockClickRecognizerCases[i].distanceThreshold);
+        clickRecognizer->refereeState_ = mockClickRecognizerCases[i].refereeState;
+        for (auto j = 0; j < mockClickRecognizerCases[i].inputTouchEvents.size(); j++) {
+            clickRecognizer->ProcessTouchEvent(mockClickRecognizerCases[i].inputTouchEvents[j]);
+        }
+        EXPECT_EQ(clickRecognizer->fingers_, mockClickRecognizerCases[i].expectedFingers);
+        EXPECT_EQ(clickRecognizer->count_, mockClickRecognizerCases[i].expectedCount);
+        EXPECT_EQ(clickRecognizer->distanceThreshold_, mockClickRecognizerCases[i].expectedDistanceThreshold);
+        EXPECT_EQ(clickRecognizer->refereeState_, mockClickRecognizerCases[i].expectedRefereeState);
+    }
+}
+
+/**
+ * @tc.name: ClickRecognizerInjectEventsTest002
+ * @tc.desc: Test case inject events.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerInjectEventsTest002, TestSize.Level1)
+ {
+    /**
+      * @tc.steps: step1. Create basic info testCases.
+      * @tc.expected: set clickRecognizer basic info correct.
+      */
+    TouchEvent downEventFinger0 = TouchEvent();
+    TouchEvent downEventFinger1 = TouchEvent();
+    downEventFinger0.type = TouchType::DOWN;
+    downEventFinger1.type = TouchType::DOWN;
+    downEventFinger0.id = 0;
+    downEventFinger1.id = 1;
+
+    TouchEvent upEventFinger0 = TouchEvent();
+    TouchEvent upEventFinger1 = TouchEvent();
+    upEventFinger0.type = TouchType::UP;
+    upEventFinger1.type = TouchType::UP;
+    upEventFinger0.id = 0;
+    upEventFinger1.id = 1;
+
+    const std::vector<MockClickRecognizerCase> mockClickRecognizerCases = {
+        {2, 1, std::numeric_limits<double>::infinity(), 1, RefereeState::READY, 2, 1, std::numeric_limits<double>::infinity(), RefereeState::FAIL, {downEventFinger0, upEventFinger0}},
+        {2, -1, std::numeric_limits<double>::infinity(), 1, RefereeState::READY, 2, -1, std::numeric_limits<double>::infinity(), RefereeState::FAIL, {downEventFinger0, upEventFinger0}},
+        {2, 1, -1, 1, RefereeState::READY, 2, 1, std::numeric_limits<double>::infinity(), RefereeState::FAIL, {downEventFinger0, upEventFinger0}},
+        {2, 2, std::numeric_limits<double>::infinity(), 1, RefereeState::READY, 2, 2, std::numeric_limits<double>::infinity(), RefereeState::FAIL, {downEventFinger0, upEventFinger0}},
+        {2, 2, std::numeric_limits<double>::infinity(), 1, RefereeState::READY, 2, 2, std::numeric_limits<double>::infinity(), RefereeState::FAIL, {downEventFinger0, upEventFinger0, downEventFinger0, upEventFinger0}},
+        {2, 1, std::numeric_limits<double>::infinity(), 1, RefereeState::READY, 2, 1, std::numeric_limits<double>::infinity(), RefereeState::SUCCEED, {downEventFinger0, downEventFinger1, upEventFinger0, upEventFinger1}},
+    };
+    for (auto i = 0; i < mockClickRecognizerCases.size(); i++) {
+        RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(mockClickRecognizerCases[i].fingers, mockClickRecognizerCases[i].count, mockClickRecognizerCases[i].distanceThreshold);
+        clickRecognizer->refereeState_ = mockClickRecognizerCases[i].refereeState;
+        for (auto j = 0; j < mockClickRecognizerCases[i].inputTouchEvents.size(); j++) {
+            clickRecognizer->ProcessTouchEvent(mockClickRecognizerCases[i].inputTouchEvents[j]);
+        }
+        EXPECT_EQ(clickRecognizer->fingers_, mockClickRecognizerCases[i].expectedFingers);
+        EXPECT_EQ(clickRecognizer->count_, mockClickRecognizerCases[i].expectedCount);
+        EXPECT_EQ(clickRecognizer->distanceThreshold_, mockClickRecognizerCases[i].expectedDistanceThreshold);
+        EXPECT_EQ(clickRecognizer->refereeState_, mockClickRecognizerCases[i].expectedRefereeState);
+    }
 }
 } // namespace OHOS::Ace::NG

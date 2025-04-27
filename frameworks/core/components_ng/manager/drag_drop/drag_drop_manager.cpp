@@ -40,6 +40,12 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/transaction/rs_transaction.h"
+#include "render_service_client/core/transaction/rs_sync_transaction_controller.h"
+#endif
+
+
 namespace OHOS::Ace::NG {
 namespace {
 int64_t g_proxyId = 0;
@@ -840,6 +846,7 @@ void DragDropManager::OnDragThrow(const DragPointerEvent& pointerEvent)
     ClearSummary();
     ClearExtraInfo();
     SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
+    isPullThrow_ = true;
 }
 
 void DragDropManager::OnDragPullCancel(const DragPointerEvent& pointerEvent)
@@ -1077,6 +1084,7 @@ void DragDropManager::DoDragReset()
     dampingOverflowCount_ = 0;
     isDragNodeNeedClean_ = false;
     isAnyDraggableHit_ = false;
+    isPullThrow_ = false;
     fingerPointInfo_.clear();
     DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
 }
@@ -1086,7 +1094,7 @@ void DragDropManager::ResetDraggingStatus(const TouchEvent& touchPoint)
     if (IsDraggingPressed(touchPoint.id)) {
         SetDraggingPressedState(false);
     }
-    if (!IsItemDragging() && IsDragging() && IsSameDraggingPointer(touchPoint.id)) {
+    if (!IsItemDragging() && IsDragging() && IsSameDraggingPointer(touchPoint.id) && !isPullThrow_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Reset dragging status, stop drag. pointerId: %{public}d", touchPoint.id);
         DragPointerEvent dragPointerEvent;
         DragDropFuncWrapper::ConvertPointerEvent(touchPoint, dragPointerEvent);
@@ -1477,9 +1485,33 @@ void DragDropManager::ExecuteStopDrag(const RefPtr<OHOS::Ace::DragEvent>& event,
 void DragDropManager::ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEvent>& event, DragDropRet dragDropRet)
 {
     CHECK_NULL_VOID(event);
-    event->ExecuteDropAnimation();
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
+
+#ifdef ENABLE_ROSEN_BACKEND
+    auto transactionController =  Rosen::RSSyncTransactionController::GetInstance();
+    if (transactionController) {
+        transactionController->OpenSyncTransaction();
+    }
+    event->ExecuteDropAnimation();
+    auto overlayManager = GetDragAnimationOverlayManager(pipeline->GetInstanceId());
+    if (overlayManager) {
+        overlayManager->RemoveDragPixelMap();
+        overlayManager->RemoveFilter();
+    }
+    HideSubwindowDragNode();
+    
+    if (transactionController) {
+        auto transaction = transactionController->GetRSTransaction();
+        InteractionInterface::GetInstance()->SetDragWindowVisible(false, transaction);
+        pipeline->FlushUITasks();
+        transactionController->CloseSyncTransaction();
+    } else {
+        InteractionInterface::GetInstance()->SetDragWindowVisible(false);
+        pipeline->FlushMessages();
+    }
+#else
+    event->ExecuteDropAnimation();
     auto overlayManager = GetDragAnimationOverlayManager(pipeline->GetInstanceId());
     if (overlayManager) {
         overlayManager->RemoveDragPixelMap();
@@ -1488,6 +1520,7 @@ void DragDropManager::ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEve
     HideSubwindowDragNode();
     InteractionInterface::GetInstance()->SetDragWindowVisible(false);
     pipeline->FlushMessages();
+#endif
     InteractionInterface::GetInstance()->StopDrag(dragDropRet);
 }
 

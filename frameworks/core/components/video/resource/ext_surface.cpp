@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,11 @@ const char SET_IS_FULLSCREEN[] = "setIsFullScreen";
 const char IS_FULLSCREEN[] = "isFullScreen";
 const char ATTACH_NATIVE_WINDOW[] = "attachNativeWindow";
 const char NATIVE_WINDOW[] = "nativeWindow";
+#ifdef RENDER_EXTRACT_SUPPORTED
+const char SET_SURFACE_ROTATION[] = "setSurfaceRotation";
+const char IS_LOCK[] = "isLock";
+const char SET_SURFACE_RECT[] = "setSurfaceRect";
+#endif
 
 ExtSurface::~ExtSurface()
 {
@@ -174,5 +179,25 @@ void* ExtSurface::AttachNativeWindow()
 
     return nativeWindow;
 }
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+void ExtSurface::SetSurfaceRotation(bool isLock)
+{
+    std::stringstream paramStream;
+    paramStream << IS_LOCK << PARAM_EQUALS << isLock;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(MakeMethodHash(SET_SURFACE_ROTATION), param);
+}
+
+void ExtSurface::SetSurfaceRect(float positionX, float positionY, float width, float height)
+{
+    std::stringstream paramStream;
+    paramStream << SURFACE_LEFT << PARAM_EQUALS << positionX << PARAM_AND << SURFACE_TOP << PARAM_EQUALS << positionY
+                << PARAM_AND << SURFACE_WIDTH << PARAM_EQUALS << width << PARAM_AND << SURFACE_HEIGHT << PARAM_EQUALS
+                << height;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(MakeMethodHash(SET_SURFACE_RECT), param);
+}
+#endif
 
 } // namespace OHOS::Ace
