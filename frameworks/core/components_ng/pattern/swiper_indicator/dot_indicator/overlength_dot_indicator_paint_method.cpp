@@ -46,6 +46,7 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
+    dotIndicatorModifier_->SetIsLoop(isLoop_);
     dotIndicatorModifier_->SetAxis(axis_);
     dotIndicatorModifier_->SetCurrentIndex(currentIndex_);
     dotIndicatorModifier_->SetMaxDisplayCount(maxDisplayCount_);
