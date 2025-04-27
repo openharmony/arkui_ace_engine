@@ -2404,6 +2404,7 @@ struct ArkUICommonModifier {
     void (*dispatchKeyEvent)(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent);
     ArkUI_Int32 (*postTouchEvent)(ArkUINodeHandle node, const ArkUITouchEvent* arkUItouchEvent);
     void (*createClonedTouchEvent)(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent);
+    void (*destroyTouchEvent)(ArkUITouchEvent* arkUITouchEvent);
     void (*resetEnableAnalyzer)(ArkUINodeHandle node);
     void (*setEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*setNodeBackdropBlur)(

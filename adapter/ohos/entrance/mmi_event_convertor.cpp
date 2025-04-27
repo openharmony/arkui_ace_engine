@@ -208,10 +208,24 @@ void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEven
     }
 }
 
-void SetPostPointerEvent(const MMI::PointerEvent* pointerEvent, TouchEvent& touchEvent)
+void SetPostPointerEvent(TouchEvent& touchEvent, ArkUITouchEvent* arkUITouchEventCloned)
 {
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEventCloned->rawPointerEvent);
+    if (pointerEvent) {
+        MMI::PointerEvent* clonedEvent = new MMI::PointerEvent(*pointerEvent);
+        arkUITouchEventCloned->rawPointerEvent = clonedEvent;
+    }
     std::shared_ptr<const MMI::PointerEvent> pointer(pointerEvent);
     touchEvent.SetPointerEvent(pointer);
+}
+
+void DestroyRawPointerEvent(ArkUITouchEvent* arkUITouchEvent)
+{
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
+    if (pointerEvent) {
+        delete pointerEvent;
+        pointerEvent = nullptr;
+    }
 }
 
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

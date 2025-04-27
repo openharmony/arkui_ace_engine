@@ -751,6 +751,23 @@ int32_t ConvertToCTouchActionType(int32_t originActionType)
     return -1;
 }
 
+int32_t ConvertToOriginTouchActionType(int32_t actionType)
+{
+    switch (actionType) {
+        case UI_TOUCH_EVENT_ACTION_DOWN:
+            return static_cast<int32_t>(ORIGIN_TOUCH_ACTION_DOWN);
+        case UI_TOUCH_EVENT_ACTION_UP:
+            return static_cast<int32_t>(ORIGIN_TOUCH_ACTION_UP);
+        case UI_TOUCH_EVENT_ACTION_MOVE:
+            return static_cast<int32_t>(ORIGIN_TOUCH_ACTION_MOVE);
+        case UI_TOUCH_EVENT_ACTION_CANCEL:
+            return static_cast<int32_t>(ORIGIN_TOUCH_ACTION_CANCEL);
+        default:
+            break;
+    }
+    return -1;
+}
+
 int32_t ConvertToCInputEventToolType(int32_t originSourceToolType)
 {
     switch (originSourceToolType) {
