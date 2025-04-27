@@ -272,7 +272,6 @@ private:
     void HandleTouchDown();
     void HandleTouchUp();
     void HandleDragStart(const GestureEvent& info);
-    virtual void HandleDragEnd(double dragVelocity);
     void GetMouseClickIndex();
     void UpdateTextContent(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
         const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode);
@@ -353,6 +352,7 @@ protected:
     virtual int32_t GetTouchCurrentIndex() const;
     virtual std::pair<int32_t, int32_t> CalMouseClickIndexStartAndEnd(int32_t itemCount, int32_t currentIndex);
     virtual void HandleLongDragUpdate(const TouchLocationInfo& info);
+    virtual void HandleDragEnd(double dragVelocity);
 
     RefPtr<SwiperPattern> GetSwiperPattern() const
     {

@@ -535,6 +535,9 @@ bool IndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
 
 void IndicatorPattern::HandleDragEnd(double dragVelocity)
 {
+    if (GetBindSwiperNode()) {
+        return SwiperIndicatorPattern::HandleDragEnd(dragVelocity);
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     SetTouchBottomType(TouchBottomType::NONE);
