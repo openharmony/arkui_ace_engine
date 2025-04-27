@@ -32,6 +32,7 @@ struct ImageExample001 {
             .width(110).height(110).margin(15)
             .overlay('gif', { align: Alignment.Bottom, offset: { x: 0, y: 20 } })
         }
+
         Row() {
           // 加载svg格式图片
           Image($r('app.media.svg'))
