@@ -1513,6 +1513,14 @@ public:
     ~WebWindowExitEvent() = default;
 };
 
+class ACE_EXPORT WebActivateContentEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebActivateContentEvent, BaseEventInfo);
+
+public:
+    WebActivateContentEvent() : BaseEventInfo("WebActivateContentEvent") {}
+    ~WebActivateContentEvent() = default;
+};
+
 class ACE_EXPORT PageVisibleEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(PageVisibleEvent, BaseEventInfo);
 

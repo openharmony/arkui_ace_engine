@@ -28714,6 +28714,9 @@ class ArkWebComponent extends ArkComponent {
   onAdsBlocked(callback) {
     throw new Error('Method not implemented.');
   }
+  onActivateContent(callback) {
+    throw new Error('Method not implemented.');
+  }
 }
 
 class WebJavaScriptAccessModifier extends ModifierWithKey {
