@@ -22,12 +22,12 @@
 
 namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
-std::recursive_mutex ElementRegister::mutex_;
+std::mutex ElementRegister::mutex_;
 
 ElementRegister* ElementRegister::GetInstance()
 {
     if (ElementRegister::instance_ == nullptr) {
-        std::lock_guard<std::recursive_mutex> lock(ElementRegister::mutex_);
+        std::lock_guard<std::mutex> lock(ElementRegister::mutex_);
         if (!ElementRegister::instance_) {
             ElementRegister::instance_ = new ElementRegister();
         }

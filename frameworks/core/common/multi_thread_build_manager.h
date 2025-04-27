@@ -28,6 +28,7 @@ namespace OHOS::Ace {
 class ACE_EXPORT MultiThreadBuildManager {
 public:
     static MultiThreadBuildManager& GetInstance();
+    static void InitOnUIThread();
     static bool IsOnUIThread();
     static bool CheckOnUIThread();
     static bool CheckNodeOnValidThread(NG::UINode* node);
@@ -45,7 +46,7 @@ private:
     void InitAysncUITaskQueue();
     static bool NeedPostUnSafeTask(const RefPtr<NG::UINode>& node);
     static thread_local bool isThreadSafeScope_;
-    static thread_local bool isMainThread_;
+    static thread_local bool isUIThread_;
     ACE_DISALLOW_COPY_AND_MOVE(MultiThreadBuildManager);
 };
 } // namespace OHOS::Ace

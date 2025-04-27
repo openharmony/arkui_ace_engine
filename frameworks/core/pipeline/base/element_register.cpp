@@ -20,18 +20,15 @@
 
 namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
-ElementRegister* ElementRegister::globalInstance_ = nullptr;
-std::recursive_mutex ElementRegister::mutex_;
+std::mutex ElementRegister::mutex_;
 
 ElementRegister* ElementRegister::GetGlobalInstance()
 {
-    if (ElementRegister::globalInstance_ == nullptr) {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        if (!ElementRegister::globalInstance_) {
-            ElementRegister::globalInstance_ = new ElementRegister();
-        }
+    if (!ElementRegister::instance_ && MultiThreadBuildManager::IsOnUIThread()) {
+        ElementRegister::instance_ = new ElementRegister();
     }
-    return (ElementRegister::globalInstance_);
+    static ElementRegister* globalInstance = ElementRegister::instance_;
+    return globalInstance;
 }
 
 ElementRegister* ElementRegister::GetInstance()
@@ -40,10 +37,9 @@ ElementRegister* ElementRegister::GetInstance()
         return GetGlobalInstance();
     }
     if (ElementRegister::instance_ == nullptr) {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
         if (!ElementRegister::instance_) {
-            ElementRegister::instance_ =
-                MultiThreadBuildManager::IsOnUIThread() ? GetGlobalInstance() : new ElementRegister();
+            ElementRegister::instance_ = new ElementRegister();
         }
     }
     return (ElementRegister::instance_);
