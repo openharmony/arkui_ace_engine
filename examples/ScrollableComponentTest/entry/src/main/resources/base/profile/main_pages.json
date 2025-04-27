@@ -46,6 +46,7 @@
     "pages/refresh/RefreshAndLoad",
     "pages/grid/GridMainPage",
     "pages/grid/GridObjectSort",
+    "pages/grid/GridPinchToZoom",
     "pages/Scroll/ScrollMainPage",
     "pages/Scroll/InfiniteScrolling",
     "pages/Scroll/CustomSnap",
