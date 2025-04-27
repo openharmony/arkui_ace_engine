@@ -2144,25 +2144,36 @@ OffsetF MenuLayoutAlgorithm::SelectLayoutAvoidAlgorithm(const RefPtr<MenuLayoutP
     float x = 0.0f;
     float y = 0.0f;
     float selectMenuHeight = geometryNode->GetFrameSize().Height();
-    Rect targetRect = Rect(targetOffset_.GetX(), targetOffset_.GetY(), targetSize_.Width(), targetSize_.Height());
-    auto bottomSpace = wrapperRect_.Bottom() - targetRect.Bottom() - targetSecurity_ - paddingBottom_;
+    Rect targetRect(targetOffset_.GetX(), targetOffset_.GetY(), targetSize_.Width(), targetSize_.Height());
+    float bottomSpace = wrapperRect_.Bottom() - targetRect.Bottom() - targetSecurity_ - paddingBottom_;
+
+    float xMinAvoid = paddingStart_;
+    float xMaxAvoid = wrapperRect_.Right() - size.Width() - paddingEnd_;
+    float yMinAvoid = wrapperRect_.Top() + paddingTop_;
+    float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - size.Height();
+
     if (GreatNotEqual(targetSize_.Width(), 0.0) || GreatNotEqual(targetSize_.Height(), 0.0)) {
         placement_ = Placement::BOTTOM_LEFT;
         ComputePlacementByAlignType(menuProp);
         if (layoutWrapper != nullptr) {
             PlacementRTL(layoutWrapper, placement_);
         }
-        auto selectChildOffset = GetSelectChildPosition(size, didNeedArrow, layoutWrapper);
-        if (selectMenuHeight < bottomSpace) {
-            selectChildOffset += ComputeMenuPositionByOffset(menuProp, geometryNode);
-        }
+        OffsetF selectChildOffset = GetSelectChildPosition(size, didNeedArrow, layoutWrapper);
         x = selectChildOffset.GetX();
         y = selectChildOffset.GetY();
+        OffsetF computedOffset = selectChildOffset + ComputeMenuPositionByOffset(menuProp, geometryNode);
+        bool isXOut = LessOrEqual(computedOffset.GetX(), xMinAvoid) ||
+            GreatOrEqual(computedOffset.GetX(), xMaxAvoid);
+        bool isYOut = LessOrEqual(computedOffset.GetY(), yMinAvoid) ||
+            GreatOrEqual(computedOffset.GetY(), yMaxAvoid);
+        bool hasEnoughSpace = GreatOrEqual(bottomSpace, selectMenuHeight);
+        if (!isXOut && !isYOut && hasEnoughSpace) {
+            x = computedOffset.GetX();
+            y = computedOffset.GetY();
+            return { x, y };
+        }
     }
-    x = std::clamp(static_cast<double>(x), static_cast<double>(paddingStart_),
-        static_cast<double>(wrapperRect_.Right() - size.Width() - paddingEnd_));
-    float yMinAvoid = wrapperRect_.Top() + paddingTop_;
-    float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - size.Height();
+    x = std::clamp(x, xMinAvoid, xMaxAvoid);
     y = std::clamp(y, yMinAvoid, yMaxAvoid);
     return { x, y };
 }
