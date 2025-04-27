@@ -40,6 +40,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/json/json_util.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/render/mock_rosen_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -965,5 +968,160 @@ HWTEST_F(InspectorTestNg, InspectorTestNg023, TestSize.Level1)
     }
     EXPECT_TRUE(foundCustomNode);
     context->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: InspectorTestNg024
+ * @tc.desc: Test the GetRectangleById
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg024, TestSize.Level1)
+{
+    // tc.steps: step1. add frameNode to arkui tree with inspector id test
+    // tc.expected: expect the function GetFrameNodeByKey get the frameNode
+    std::string inspectorId = "test";
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    frameNode->UpdateInspectorId(inspectorId);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->rootNode_ = rootNode;
+    context->rootNode_->SetGeometryNode(AceType::MakeRefPtr<GeometryNode>());
+    rootNode->AddChild(frameNode);
+    auto searchedNode = Inspector::GetFrameNodeByKey(inspectorId, true);
+    EXPECT_NE(searchedNode, nullptr);
+
+    OHOS::Ace::NG::Rectangle rect;
+    Inspector::GetRectangleById(inspectorId, rect);
+    EXPECT_EQ(rect.size.Width(), 0.0f);
+    auto renderContext = searchedNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->isDynamicRender_ = false;
+    auto pipeline = searchedNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    Offset offfset(1.0, 1.0);
+    pipeline->SetHostParentOffsetToWindow(Offset(offfset.GetX(), offfset.GetY()));
+
+    Inspector::GetRectangleById(inspectorId, rect);
+    EXPECT_EQ(rect.windowOffset, searchedNode->GetOffsetRelativeToWindow());
+
+    container->isDynamicRender_ = true;
+    container->uIContentType_ = UIContentType::UNDEFINED;
+    Inspector::GetRectangleById(inspectorId, rect);
+    EXPECT_EQ(rect.windowOffset, searchedNode->GetOffsetRelativeToWindow());
+
+    container->uIContentType_ = UIContentType::DYNAMIC_COMPONENT;
+    pipeline->GetHostParentOffsetToWindow();
+    Inspector::GetRectangleById(inspectorId, rect);
+    EXPECT_NE(rect.windowOffset, searchedNode->GetOffsetRelativeToWindow());
+}
+
+/**
+ * @tc.name: InspectorTestNg025
+ * @tc.desc: Test the GetRectangleById
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg025, TestSize.Level1)
+{
+    // tc.steps: step1. add frameNode to arkui tree with inspector id test
+    // tc.expected: expect the function GetFrameNodeByKey get the frameNode
+    std::string inspectorId = "test";
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    frameNode->UpdateInspectorId(inspectorId);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->rootNode_ = rootNode;
+    context->rootNode_->SetGeometryNode(AceType::MakeRefPtr<GeometryNode>());
+    rootNode->AddChild(frameNode);
+    auto searchedNode = Inspector::GetFrameNodeByKey(inspectorId, true);
+    EXPECT_NE(searchedNode, nullptr);
+
+    OHOS::Ace::NG::Rectangle rect;
+    Inspector::GetRectangleById(inspectorId, rect);
+    EXPECT_EQ(rect.size.Width(), 0.0f);
+    auto renderContext = AceType::DynamicCast<MockRenderContext>(searchedNode->GetRenderContext());
+    EXPECT_NE(renderContext, nullptr);
+
+    const double halfDimension = 200.0;
+    renderContext->paintRect_ = { 2.0f, 2.0f, 3.0f, 3.0f };
+    DimensionOffset offset = DimensionOffset(
+        Dimension(halfDimension, DimensionUnit::PX), Dimension(halfDimension, DimensionUnit::PX));
+    renderContext->UpdateTransformCenter(offset);
+    EXPECT_TRUE(renderContext->GetTransformCenter().has_value());
+    Inspector::GetRectangleById(inspectorId, rect);
+    EXPECT_EQ(rect.scale.centerX, offset.GetX().ConvertToVp());
+    EXPECT_EQ(rect.scale.centerY, offset.GetY().ConvertToVp());
+
+    offset = DimensionOffset(
+        Dimension(halfDimension, DimensionUnit::PX), Dimension(halfDimension, DimensionUnit::PERCENT));
+    renderContext->UpdateTransformCenter(offset);
+    Inspector::GetRectangleById(inspectorId, rect);
+    EXPECT_EQ(rect.scale.centerX, offset.GetX().ConvertToVp());
+    EXPECT_NE(rect.scale.centerY, offset.GetY().ConvertToVp());
+
+    offset = DimensionOffset(
+        Dimension(halfDimension, DimensionUnit::PERCENT), Dimension(halfDimension, DimensionUnit::PERCENT));
+    renderContext->UpdateTransformCenter(offset);
+    Inspector::GetRectangleById(inspectorId, rect);
+    EXPECT_NE(rect.scale.centerX, offset.GetX().ConvertToVp());
+    EXPECT_NE(rect.scale.centerY, offset.GetY().ConvertToVp());
+}
+
+/**
+ * @tc.name: InspectorTestNg026
+ * @tc.desc: Test the GetRectangleById
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg026, TestSize.Level1)
+{
+    // tc.steps: step1. add frameNode to arkui tree with inspector id test
+    // tc.expected: expect the function GetFrameNodeByKey get the frameNode
+    std::string inspectorId = "test";
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    frameNode->UpdateInspectorId(inspectorId);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->rootNode_ = rootNode;
+    context->rootNode_->SetGeometryNode(AceType::MakeRefPtr<GeometryNode>());
+    rootNode->AddChild(frameNode);
+    auto searchedNode = Inspector::GetFrameNodeByKey(inspectorId, true);
+    EXPECT_NE(searchedNode, nullptr);
+
+    OHOS::Ace::NG::Rectangle rect;
+    Inspector::GetRectangleById(inspectorId, rect);
+    EXPECT_EQ(rect.size.Width(), 0.0f);
+    auto renderContext = AceType::DynamicCast<MockRenderContext>(searchedNode->GetRenderContext());
+    EXPECT_NE(renderContext, nullptr);
+
+    CalcDimension x(30, DimensionUnit::VP);
+    CalcDimension y(20, DimensionUnit::VP);
+    CalcDimension z(20, DimensionUnit::VP);
+    renderContext->UpdateTransformTranslate(TranslateOptions(x, y, z));
+    Inspector::GetRectangleById(inspectorId, rect);
+    EXPECT_EQ(rect.translate.x, x.ConvertToVp());
+    EXPECT_EQ(rect.translate.y, y.ConvertToVp());
+
+    CalcDimension x2(30, DimensionUnit::PERCENT);
+    CalcDimension y2(20, DimensionUnit::PERCENT);
+    CalcDimension z2(20, DimensionUnit::PERCENT);
+    renderContext->UpdateTransformTranslate(TranslateOptions(x2, y2, z2));
+    Inspector::GetRectangleById(inspectorId, rect);
+    EXPECT_NE(rect.translate.x, x.ConvertToVp());
+    EXPECT_NE(rect.translate.y, y.ConvertToVp());
 }
 } // namespace OHOS::Ace::NG

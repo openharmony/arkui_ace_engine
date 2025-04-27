@@ -29,6 +29,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
     const float POSITIVE_SIZE = 600.0f;
+    const float NEGATIVE_SIZE = -1.0f;
 } // namespace
 
 class DynamicPatternManagerTestNg : public testing::Test {
@@ -136,5 +137,56 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg002, TestSize.L
     eventHub->SetOnAreaChanged(std::move(func));
     ASSERT_TRUE(eventHub->HasOnAreaChanged());
     DynamicComponentManager::HandleDynamicRenderOnAreaChange(frameNode, rectF, offsetF, offsetF2);
+}
+
+/**
+ * @tc.name: DynamicPatternManagerTestNg003
+ * @tc.desc: Test DynamicPattern TriggerOnAreaChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test method TriggerOnAreaChangeCallback
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    EXPECT_NE(context, nullptr);
+    auto stageManager = context->GetStageManager();
+    EXPECT_NE(stageManager, nullptr);
+    auto stageNode = stageManager->GetStageNode();
+    EXPECT_NE(stageNode, nullptr);
+    auto geometryNode = stageNode->GetGeometryNode();
+    EXPECT_NE(geometryNode, nullptr);
+    EXPECT_TRUE(geometryNode->GetMarginFrameSize().IsPositive());
+    auto frameNodeRef = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNodeRef, nullptr);
+    FrameNode* frameNode = &(*frameNodeRef);
+    geometryNode->frame_.rect_.SetWidth(NEGATIVE_SIZE);
+    geometryNode->frame_.rect_.SetHeight(NEGATIVE_SIZE);
+    EXPECT_FALSE(geometryNode->GetMarginFrameSize().IsPositive());
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto func = [](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {};
+    eventHub->SetOnAreaChanged(std::move(func));
+    ASSERT_TRUE(eventHub->HasOnAreaChanged());
+    frameNode->lastHostParentOffsetToWindow_ = std::make_shared<OffsetF>();
+    ASSERT_NE(frameNode->GetLastHostParentOffsetToWindow(), nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_EQ(renderContext->GetPositionProperty(), nullptr);
+
+    auto top = CalcDimension(1.0);
+    auto bottom = CalcDimension(2.0);
+    auto start = CalcDimension(3.0);
+    auto end = CalcDimension(4.0);
+
+    EdgesParam edges;
+    edges.SetTop(top);
+    edges.SetBottom(bottom);
+    edges.start = start;
+    edges.end = end;
+    renderContext->UpdateOffsetEdges(edges);
+    ASSERT_NE(renderContext->GetPositionProperty(), nullptr);
+    DynamicComponentManager::TriggerOnAreaChangeCallback(frameNode, 1);
 }
 } // namespace OHOS::Ace::NG
