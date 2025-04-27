@@ -422,9 +422,7 @@ public:
 
     void HandleSyncOnDragStart(DragStartRequestStatus dragStartRequestStatus);
 
-    void SetDragMoveLastPoint(Point point) noexcept;
-
-    const Point GetDragMoveLastPoint() const;
+    const Point GetDragMoveLastPointByCurrentPointer(int32_t pointerId);
 
     void SetDelayDragCallBack(const std::function<void()>& cb) noexcept;
 
@@ -659,6 +657,8 @@ public:
 
     bool CheckIsUIExtensionBoundary(float x, float y, int32_t instanceId);
 
+    void UpdatePointInfoForFinger(int32_t pointerId, Point point);
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -670,6 +670,7 @@ private:
         const RefPtr<FrameNode>& frameNode, const GestureEvent& event, bool isDragStartPending);
     bool UpdateDragMovePositionFinished(
         bool needDoDragMoveAnimate, bool isMenuShow, const Offset& newOffset, int32_t containerId);
+    void InitDragAnimationPointerEvent(const GestureEvent& event, bool isDragStartPending);
     void UpdateDragPreviewScale();
     bool GetDragPreviewInfo(const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>& overlayManager,
         DragPreviewInfo& dragPreviewInfo, const RefPtr<GestureEventHub>& gestureHub, PreparedInfoForDrag& data);
@@ -783,7 +784,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
     bool grayedState_ = false;
 
-    Point dragMoveLastPoint_{};
+    std::map<int32_t, Point> fingerPointInfo_;
     bool isStartAnimationFinished_{};
     bool animationStates_ = true;
 };

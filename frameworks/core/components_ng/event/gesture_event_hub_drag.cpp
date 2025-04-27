@@ -848,7 +848,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         auto geometryNode = rootNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         RectF rectF = geometryNode->GetFrameRect();
-        auto point = dragDropManager->GetDragMoveLastPoint();
+        auto point = dragDropManager->GetDragMoveLastPointByCurrentPointer(info.GetPointerId());
         if (!rectF.IsInRegion(PointF(static_cast<float>(point.GetX()), static_cast<float>(point.GetY())))) {
             needChangeFwkForLeaveWindow = true;
         }
@@ -979,7 +979,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, container->GetInstanceId());
     auto windowId = container->GetWindowId();
     ShadowInfoCore shadowInfo { pixelMapDuplicated, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
-    auto dragMoveLastPoint = dragDropManager->GetDragMoveLastPoint();
+    auto dragMoveLastPoint = dragDropManager->GetDragMoveLastPointByCurrentPointer(info.GetPointerId());
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
         static_cast<int32_t>(info.GetSourceTool()), dragMoveLastPoint.GetScreenX(),
