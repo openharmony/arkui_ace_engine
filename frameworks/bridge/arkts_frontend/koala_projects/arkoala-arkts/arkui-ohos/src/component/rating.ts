@@ -28,7 +28,7 @@ import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkRatingPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -204,7 +204,6 @@ export interface RatingAttribute extends CommonMethod {
     onChange(value: ((index: number) => void) | undefined | OnRatingChangeCallback | undefined): this
     contentModifier(value: ContentModifier | undefined): this
     _onChangeEvent_rating(callback: ((index: number) => void)): void
-    attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIRatingAttribute extends UICommonMethod {
     /** @memo */
@@ -220,7 +219,6 @@ export interface UIRatingAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_rating(callback: ((index: number) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttribute {
     stars_value?: number | undefined
@@ -245,10 +243,7 @@ export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttrib
     }
     public _onChangeEvent_rating(callback: ((index: number) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkRatingComponent extends ArkCommonMethodComponent implements UIRatingAttribute {
@@ -363,11 +358,7 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements UIRa
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

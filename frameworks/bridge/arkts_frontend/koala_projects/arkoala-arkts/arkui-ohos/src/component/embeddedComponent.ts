@@ -30,7 +30,7 @@ import { EmbeddedType } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkEmbeddedComponentPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -81,7 +81,6 @@ export interface TerminationInfo {
 export interface EmbeddedComponentAttribute extends CommonMethod {
     onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this
     onError(value: ErrorCallback | undefined): this
-    attributeModifier(value: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIEmbeddedComponentAttribute extends UICommonMethod {
     /** @memo */
@@ -89,7 +88,6 @@ export interface UIEmbeddedComponentAttribute extends UICommonMethod {
     /** @memo */
     onError(value: ErrorCallback | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkEmbeddedComponentStyle extends ArkCommonMethodStyle implements EmbeddedComponentAttribute {
     onTerminated_value?: ((parameter: TerminationInfo) => void) | undefined
@@ -99,10 +97,7 @@ export class ArkEmbeddedComponentStyle extends ArkCommonMethodStyle implements E
     }
     public onError(value: ErrorCallback | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export type Callback_TerminationInfo_Void = (parameter: TerminationInfo) => void;
 /** @memo:stable */
@@ -138,11 +133,7 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

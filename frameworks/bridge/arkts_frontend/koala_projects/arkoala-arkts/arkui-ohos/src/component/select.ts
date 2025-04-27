@@ -34,7 +34,7 @@ import { OptionWidthMode, Color } from "./enums"
 import { ControlSize } from "./button"
 import { DividerOptions } from "./textPicker"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export interface MenuItemConfiguration {
     value: ResourceStr
     icon?: ResourceStr | undefined
@@ -1259,7 +1259,6 @@ export interface SelectAttribute extends CommonMethod {
     menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this
     _onChangeEvent_selected(callback: ((selected: number | Resource | undefined) => void)): void
     _onChangeEvent_value(callback: ((value: ResourceStr | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UISelectAttribute extends UICommonMethod {
     /** @memo */
@@ -1323,7 +1322,6 @@ export interface UISelectAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_value(callback: ((value: ResourceStr | undefined) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttribute {
     selected_value?: number | Resource | undefined
@@ -1442,10 +1440,7 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     }
     public _onChangeEvent_value(callback: ((value: ResourceStr | undefined) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkSelectComponent extends ArkCommonMethodComponent implements UISelectAttribute {
@@ -1914,11 +1909,7 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

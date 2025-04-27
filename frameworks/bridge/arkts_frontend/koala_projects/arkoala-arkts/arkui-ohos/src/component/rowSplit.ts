@@ -26,7 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkRowSplitPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -57,22 +57,17 @@ export class ArkRowSplitPeer extends ArkCommonMethodPeer {
 export type RowSplitInterface = () => RowSplitAttribute;
 export interface RowSplitAttribute extends CommonMethod {
     resizeable(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<RowSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIRowSplitAttribute extends UICommonMethod {
     /** @memo */
     resizeable(value: boolean | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<RowSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkRowSplitStyle extends ArkCommonMethodStyle implements RowSplitAttribute {
     resizeable_value?: boolean | undefined
     public resizeable(value: boolean | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<RowSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkRowSplitComponent extends ArkCommonMethodComponent implements UIRowSplitAttribute {
@@ -96,11 +91,7 @@ export class ArkRowSplitComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<RowSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

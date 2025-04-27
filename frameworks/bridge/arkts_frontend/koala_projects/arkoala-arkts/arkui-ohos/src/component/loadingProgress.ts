@@ -30,7 +30,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkLoadingProgressPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -116,7 +116,6 @@ export interface LoadingProgressAttribute extends CommonMethod {
     color(value: ResourceColor | undefined): this
     enableLoading(value: boolean | undefined): this
     contentModifier(value: ContentModifier | undefined): this
-    attributeModifier(value: AttributeModifier<LoadingProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UILoadingProgressAttribute extends UICommonMethod {
     /** @memo */
@@ -126,7 +125,6 @@ export interface UILoadingProgressAttribute extends UICommonMethod {
     /** @memo */
     contentModifier(value: ContentModifier | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<LoadingProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkLoadingProgressStyle extends ArkCommonMethodStyle implements LoadingProgressAttribute {
     color_value?: ResourceColor | undefined
@@ -140,10 +138,7 @@ export class ArkLoadingProgressStyle extends ArkCommonMethodStyle implements Loa
     }
     public contentModifier(value: ContentModifier | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<LoadingProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export interface LoadingProgressConfiguration extends CommonConfiguration {
     enableLoading: boolean;
@@ -188,11 +183,7 @@ export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<LoadingProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

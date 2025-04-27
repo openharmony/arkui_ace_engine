@@ -43,7 +43,7 @@ export class Font {
         ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
         // let arrayResult_ = GlobalScope_ohos_font.getSystemFontList();
         ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
-        return [];
+        return new Array<string>();
     }
     // public getFontByName(fontName : string) : FontInfo {
     //     ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);

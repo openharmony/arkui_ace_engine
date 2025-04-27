@@ -30,7 +30,7 @@ import { AlignRuleOption, LocalizedAlignRuleOptions, ChainStyle } from "./common
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkSecurityComponentMethodPeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -755,7 +755,6 @@ export interface SecurityComponentMethod {
     heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this
     enabled(value: boolean | undefined): this
     chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this
-    attributeModifier(value: AttributeModifier<SecurityComponentMethod> | undefined): this
 }
 export interface UISecurityComponentMethod {
     /** @memo */
@@ -827,7 +826,6 @@ export interface UISecurityComponentMethod {
     /** @memo */
     chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<SecurityComponentMethod> | undefined): this
 }
 export class ArkSecurityComponentMethodStyle implements SecurityComponentMethod {
     iconSize_value?: Dimension | undefined
@@ -964,10 +962,7 @@ export class ArkSecurityComponentMethodStyle implements SecurityComponentMethod 
     }
     public chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<SecurityComponentMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkSecurityComponentMethodComponent extends ComponentBase implements UISecurityComponentMethod {
@@ -1299,11 +1294,7 @@ export class ArkSecurityComponentMethodComponent extends ComponentBase implement
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<SecurityComponentMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

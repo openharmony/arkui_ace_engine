@@ -32,7 +32,7 @@ import { TextTimerAttribute_onTimer_event_type } from "./type-replacements"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { Resource } from "global/resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class TextTimerControllerInternal {
     public static fromPtr(ptr: KPointer): TextTimerController {
         const obj : TextTimerController = new TextTimerController()
@@ -295,7 +295,6 @@ export interface TextTimerAttribute extends CommonMethod {
     onTimer(value: ((utc: int64,elapsedTime: int64) => void) | undefined): this
     textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this
     contentModifier(value: ContentModifier | undefined): this
-    attributeModifier(value: AttributeModifier<TextTimerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UITextTimerAttribute extends UICommonMethod {
     /** @memo */
@@ -317,7 +316,6 @@ export interface UITextTimerAttribute extends UICommonMethod {
     /** @memo */
     contentModifier(value: ContentModifier | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<TextTimerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkTextTimerStyle extends ArkCommonMethodStyle implements TextTimerAttribute {
     format_value?: string | undefined
@@ -355,10 +353,7 @@ export class ArkTextTimerStyle extends ArkCommonMethodStyle implements TextTimer
     }
     public contentModifier(value: ContentModifier | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<TextTimerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkTextTimerComponent extends ArkCommonMethodComponent implements UITextTimerAttribute {
@@ -455,11 +450,7 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<TextTimerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

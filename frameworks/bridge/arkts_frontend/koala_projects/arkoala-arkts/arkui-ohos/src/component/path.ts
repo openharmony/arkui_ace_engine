@@ -26,7 +26,7 @@ import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodCompon
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkPathPeer extends ArkCommonShapeMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -71,22 +71,17 @@ export interface PathOptions {
 export type PathInterface = (options?: PathOptions) => PathAttribute;
 export interface PathAttribute extends CommonShapeMethod {
     commands(value: string | undefined): this
-    attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIPathAttribute extends UICommonShapeMethod {
     /** @memo */
     commands(value: string | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkPathStyle extends ArkCommonShapeMethodStyle implements PathAttribute {
     commands_value?: string | undefined
     public commands(value: string | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkPathComponent extends ArkCommonShapeMethodComponent implements UIPathAttribute {
@@ -111,11 +106,7 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements U
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

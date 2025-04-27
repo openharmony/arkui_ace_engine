@@ -27,7 +27,7 @@ import { VerticalAlign, FlexAlign } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkRowPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -134,7 +134,6 @@ export interface RowAttribute extends CommonMethod {
     justifyContent(value: FlexAlign | undefined): this
     pointLight(value: PointLightStyle | undefined): this
     reverse(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<RowAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIRowAttribute extends UICommonMethod {
     /** @memo */
@@ -146,7 +145,6 @@ export interface UIRowAttribute extends UICommonMethod {
     /** @memo */
     reverse(value: boolean | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<RowAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkRowStyle extends ArkCommonMethodStyle implements RowAttribute {
     alignItems_value?: VerticalAlign | undefined
@@ -164,10 +162,7 @@ export class ArkRowStyle extends ArkCommonMethodStyle implements RowAttribute {
     }
     public reverse(value: boolean | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<RowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkRowComponent extends ArkCommonMethodComponent implements UIRowAttribute {
@@ -228,11 +223,7 @@ export class ArkRowComponent extends ArkCommonMethodComponent implements UIRowAt
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<RowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

@@ -27,7 +27,7 @@ import { Resource } from "global/resource"
 import { ResourceColor } from "./units"
 import { FontWeight, Color } from "./enums"
 import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./symbolglyph"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -173,7 +173,6 @@ export interface SymbolSpanAttribute extends CommonMethod {
     fontWeight(value: number | FontWeight | string | undefined): this
     effectStrategy(value: SymbolEffectStrategy | undefined): this
     renderingStrategy(value: SymbolRenderingStrategy | undefined): this
-    attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UISymbolSpanAttribute extends UICommonMethod {
     /** @memo */
@@ -187,7 +186,6 @@ export interface UISymbolSpanAttribute extends UICommonMethod {
     /** @memo */
     renderingStrategy(value: SymbolRenderingStrategy | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkSymbolSpanStyle extends ArkCommonMethodStyle implements SymbolSpanAttribute {
     fontSize_value?: number | string | Resource | undefined
@@ -195,7 +193,6 @@ export class ArkSymbolSpanStyle extends ArkCommonMethodStyle implements SymbolSp
     fontWeight_value?: number | FontWeight | string | undefined
     effectStrategy_value?: SymbolEffectStrategy | undefined
     renderingStrategy_value?: SymbolRenderingStrategy | undefined
-    attributeModifier_value?: AttributeModifier<SymbolSpanAttribute> | undefined
     public fontSize(value: number | string | Resource | undefined): this {
         return this
     }
@@ -210,10 +207,7 @@ export class ArkSymbolSpanStyle extends ArkCommonMethodStyle implements SymbolSp
     }
     public renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements UISymbolSpanAttribute {
@@ -274,11 +268,7 @@ export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

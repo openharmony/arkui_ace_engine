@@ -30,7 +30,7 @@ import { PixelMap } from "./arkui-pixelmap"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkShapePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -334,7 +334,6 @@ export interface ShapeAttribute extends CommonMethod {
     strokeWidth(value: number | string | undefined): this
     antiAlias(value: boolean | undefined): this
     mesh(value: Array<number>, column: number, row: number): this
-    attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIShapeAttribute extends UICommonMethod {
     /** @memo */
@@ -364,7 +363,6 @@ export interface UIShapeAttribute extends UICommonMethod {
     /** @memo */
     mesh(value: Array<number>, column: number, row: number): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribute {
     viewPort_value?: ViewportRect | undefined
@@ -417,10 +415,7 @@ export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribut
     }
     public mesh(value: Array<number>, column: number, row: number): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkShapeComponent extends ArkCommonMethodComponent implements UIShapeAttribute {
@@ -555,11 +550,7 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

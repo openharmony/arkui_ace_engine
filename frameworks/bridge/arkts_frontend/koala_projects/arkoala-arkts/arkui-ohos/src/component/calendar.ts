@@ -28,7 +28,6 @@ import { PeerNode } from "./../PeerNode"
 import { Axis } from "./enums"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ResourceColor } from "./units"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
 export class CalendarControllerInternal {
     public static fromPtr(ptr: KPointer): CalendarController {
         const obj : CalendarController = new CalendarController()
@@ -384,7 +383,6 @@ export interface CalendarAttribute {
     workStateStyle(value: WorkStateStyle | undefined): this
     onSelectChange(value: ((event: CalendarSelectedDate) => void) | undefined): this
     onRequestData(value: ((event: CalendarRequestedData) => void) | undefined): this
-    attributeModifier(value: AttributeModifier<CalendarAttribute> | undefined): this
 }
 export interface UICalendarAttribute {
     /** @memo */
@@ -413,8 +411,6 @@ export interface UICalendarAttribute {
     onSelectChange(value: ((event: CalendarSelectedDate) => void) | undefined): this
     /** @memo */
     onRequestData(value: ((event: CalendarRequestedData) => void) | undefined): this
-    /** @memo */
-    attributeModifier(value: AttributeModifier<CalendarAttribute> | undefined): this
 }
 export class ArkCalendarStyle implements CalendarAttribute {
     showLunar_value?: boolean | undefined
@@ -468,9 +464,6 @@ export class ArkCalendarStyle implements CalendarAttribute {
     }
     public onRequestData(value: ((event: CalendarRequestedData) => void) | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<CalendarAttribute> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 /** @memo:stable */
@@ -602,11 +595,6 @@ export class ArkCalendarComponent extends ComponentBase implements UICalendarAtt
             this.getPeer()?.onRequestDataAttribute(value_casted)
             return this
         }
-        return this
-    }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<CalendarAttribute> | undefined): this {
-        console.log("attributeModifier() not implemented")
         return this
     }
     public applyAttributesFinish(): void {

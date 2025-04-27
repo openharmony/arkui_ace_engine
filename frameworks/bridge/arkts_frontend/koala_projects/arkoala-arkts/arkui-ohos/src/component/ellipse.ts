@@ -26,7 +26,7 @@ import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodCompon
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkEllipsePeer extends ArkCommonShapeMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -57,16 +57,10 @@ export interface EllipseOptions {
 }
 export type EllipseInterface = (options?: EllipseOptions) => EllipseAttribute;
 export interface EllipseAttribute extends CommonShapeMethod {
-    attributeModifier(value: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIEllipseAttribute extends UICommonShapeMethod {
-    /** @memo */
-    attributeModifier(value: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkEllipseStyle extends ArkCommonShapeMethodStyle implements EllipseAttribute {
-    public attributeModifier(value: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
 }
 /** @memo:stable */
 export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implements UIEllipseAttribute {
@@ -82,11 +76,7 @@ export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implement
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

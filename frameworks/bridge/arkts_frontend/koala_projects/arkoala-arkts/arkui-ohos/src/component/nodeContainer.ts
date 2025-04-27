@@ -27,7 +27,7 @@ import { NodeController } from "./ohos.arkui.node"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -48,16 +48,10 @@ export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
 }
 export type NodeContainerInterface = (controller: NodeController) => NodeContainerAttribute;
 export interface NodeContainerAttribute extends CommonMethod {
-    attributeModifier(value: AttributeModifier<NodeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UINodeContainerAttribute extends UICommonMethod {
-    /** @memo */
-    attributeModifier(value: AttributeModifier<NodeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkNodeContainerStyle extends ArkCommonMethodStyle implements NodeContainerAttribute {
-    public attributeModifier(value: AttributeModifier<NodeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
 }
 /** @memo:stable */
 export class ArkNodeContainerComponent extends ArkCommonMethodComponent implements UINodeContainerAttribute {
@@ -73,11 +67,7 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<NodeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

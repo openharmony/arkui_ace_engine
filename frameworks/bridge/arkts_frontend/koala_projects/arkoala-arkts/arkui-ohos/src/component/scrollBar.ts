@@ -28,7 +28,7 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Scroller } from "./scroll"
 import { BarState } from "./enums"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkScrollBarPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -73,22 +73,17 @@ export interface ScrollBarOptions {
 export type ScrollBarInterface = (value: ScrollBarOptions) => ScrollBarAttribute;
 export interface ScrollBarAttribute extends CommonMethod {
     enableNestedScroll(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIScrollBarAttribute extends UICommonMethod {
     /** @memo */
     enableNestedScroll(value: boolean | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkScrollBarStyle extends ArkCommonMethodStyle implements ScrollBarAttribute {
     enableNestedScroll_value?: boolean | undefined
     public enableNestedScroll(value: boolean | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkScrollBarComponent extends ArkCommonMethodComponent implements UIScrollBarAttribute {
@@ -113,11 +108,7 @@ export class ArkScrollBarComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

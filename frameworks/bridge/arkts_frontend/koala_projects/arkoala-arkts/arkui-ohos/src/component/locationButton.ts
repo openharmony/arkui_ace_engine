@@ -29,7 +29,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ButtonType } from "./button"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkLocationButtonPeer extends ArkSecurityComponentMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -92,22 +92,17 @@ export enum LocationButtonOnClickResult {
 export type LocationButtonCallback = (event: ClickEvent, result: LocationButtonOnClickResult, error?: BusinessError<void>) => void;
 export interface LocationButtonAttribute extends SecurityComponentMethod {
     onClick(value: LocationButtonCallback | undefined): this
-    attributeModifier(value: AttributeModifier<LocationButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this
 }
 export interface UILocationButtonAttribute extends UISecurityComponentMethod {
     /** @memo */
     onClick(value: LocationButtonCallback | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<LocationButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this
 }
 export class ArkLocationButtonStyle extends ArkSecurityComponentMethodStyle implements LocationButtonAttribute {
     onClick_value?: LocationButtonCallback | undefined
     public onClick(value: LocationButtonCallback | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<LocationButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkLocationButtonComponent extends ArkSecurityComponentMethodComponent implements UILocationButtonAttribute {
@@ -132,11 +127,7 @@ export class ArkLocationButtonComponent extends ArkSecurityComponentMethodCompon
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<LocationButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

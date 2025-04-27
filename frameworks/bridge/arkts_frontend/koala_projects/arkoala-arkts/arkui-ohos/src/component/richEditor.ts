@@ -42,7 +42,7 @@ import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./symbolglyph"
 import { Callback_GestureEvent_Void, GestureEvent } from "./gesture"
 import { OnHoverCallback, MenuCallback } from "./sdk-stubs"
 import { ColorMetrics } from "./arkui-external"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 import { CustomNodeBuilder } from "./customBuilder"
 export class RichEditorBaseControllerInternal {
     public static fromPtr(ptr: KPointer): RichEditorBaseController {
@@ -946,7 +946,6 @@ export interface RichEditorAttribute extends CommonMethod {
     bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this
     customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
     placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this
-    attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIRichEditorAttribute extends UICommonMethod {
     /** @memo */
@@ -1016,7 +1015,6 @@ export interface UIRichEditorAttribute extends UICommonMethod {
     /** @memo */
     placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEditorAttribute {
     onReady_value?: (() => void) | undefined
@@ -1147,10 +1145,7 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     }
     public placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export interface CutEvent {
     preventDefault?: (() => void);
@@ -1489,11 +1484,7 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

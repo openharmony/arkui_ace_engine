@@ -28,7 +28,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { WindowStatusType } from "./arkui-external"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkFolderStackPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -128,7 +128,6 @@ export interface FolderStackAttribute extends CommonMethod {
     onHoverStatusChange(value: OnHoverStatusChangeCallback | undefined): this
     enableAnimation(value: boolean | undefined): this
     autoHalfFold(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<FolderStackAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIFolderStackAttribute extends UICommonMethod {
     /** @memo */
@@ -142,7 +141,6 @@ export interface UIFolderStackAttribute extends UICommonMethod {
     /** @memo */
     autoHalfFold(value: boolean | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<FolderStackAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkFolderStackStyle extends ArkCommonMethodStyle implements FolderStackAttribute {
     alignContent_value?: Alignment | undefined
@@ -164,10 +162,7 @@ export class ArkFolderStackStyle extends ArkCommonMethodStyle implements FolderS
     }
     public autoHalfFold(value: boolean | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<FolderStackAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export interface HoverEventParam {
     foldStatus: FoldStatus;
@@ -234,11 +229,7 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<FolderStackAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

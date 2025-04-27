@@ -29,7 +29,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Scene } from "./arkui-custom"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkComponent3DPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -210,7 +210,6 @@ export interface Component3DAttribute extends CommonMethod {
     renderWidth(value: Dimension | undefined): this
     renderHeight(value: Dimension | undefined): this
     customRender(uri: ResourceStr | undefined, selfRenderUpdate: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<Component3DAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIComponent3DAttribute extends UICommonMethod {
     /** @memo */
@@ -228,7 +227,6 @@ export interface UIComponent3DAttribute extends UICommonMethod {
     /** @memo */
     customRender(uri: ResourceStr | undefined, selfRenderUpdate: boolean | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<Component3DAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkComponent3DStyle extends ArkCommonMethodStyle implements Component3DAttribute {
     environment_value?: ResourceStr | undefined
@@ -257,10 +255,7 @@ export class ArkComponent3DStyle extends ArkCommonMethodStyle implements Compone
     }
     public customRender(uri: ResourceStr | undefined, selfRenderUpdate: boolean | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<Component3DAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkComponent3DComponent extends ArkCommonMethodComponent implements UIComponent3DAttribute {
@@ -340,11 +335,7 @@ export class ArkComponent3DComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<Component3DAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

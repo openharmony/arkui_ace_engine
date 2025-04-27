@@ -28,7 +28,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Length } from "./units"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkGridRowPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -124,7 +124,6 @@ export type GridRowInterface = (option?: GridRowOptions) => GridRowAttribute;
 export interface GridRowAttribute extends CommonMethod {
     onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this
     alignItems(value: ItemAlign | undefined): this
-    attributeModifier(value: AttributeModifier<GridRowAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIGridRowAttribute extends UICommonMethod {
     /** @memo */
@@ -132,7 +131,6 @@ export interface UIGridRowAttribute extends UICommonMethod {
     /** @memo */
     alignItems(value: ItemAlign | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<GridRowAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkGridRowStyle extends ArkCommonMethodStyle implements GridRowAttribute {
     onBreakpointChange_value?: ((breakpoints: string) => void) | undefined
@@ -142,10 +140,7 @@ export class ArkGridRowStyle extends ArkCommonMethodStyle implements GridRowAttr
     }
     public alignItems(value: ItemAlign | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<GridRowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkGridRowComponent extends ArkCommonMethodComponent implements UIGridRowAttribute {
@@ -179,11 +174,7 @@ export class ArkGridRowComponent extends ArkCommonMethodComponent implements UIG
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<GridRowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

@@ -32,7 +32,7 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { ResourceColor, Offset, VoidCallback } from "./units"
 import { DialogAlignment } from "./alertDialog"
 import { DateTimeOptions } from "./arkui-intl"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class DatePickerDialog {
     public static show(options?: DatePickerDialogOptions): undefined {
         const options_casted = options as (DatePickerDialogOptions | undefined)
@@ -266,7 +266,6 @@ export interface DatePickerAttribute extends CommonMethod {
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     enableHapticFeedback(value: boolean | undefined): this
     _onChangeEvent_selected(callback: ((parameter: Date) => void)): void
-    attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIDatePickerAttribute extends UICommonMethod {
     /** @memo */
@@ -288,7 +287,6 @@ export interface UIDatePickerAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_selected(callback: ((parameter: Date) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePickerAttribute {
     lunar_value?: boolean | undefined
@@ -325,10 +323,7 @@ export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePick
     }
     public _onChangeEvent_selected(callback: ((parameter: Date) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export interface LunarSwitchStyle {
     selectedColor?: ResourceColor;
@@ -508,11 +503,7 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

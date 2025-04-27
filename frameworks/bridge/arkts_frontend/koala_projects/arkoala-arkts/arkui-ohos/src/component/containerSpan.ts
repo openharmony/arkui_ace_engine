@@ -23,7 +23,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { TextBackgroundStyle } from "./span"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -57,23 +57,17 @@ export class ArkContainerSpanPeer extends PeerNode {
 export type ContainerSpanInterface = () => ContainerSpanAttribute;
 export interface ContainerSpanAttribute {
     textBackgroundStyle(value: TextBackgroundStyle | undefined): this
-    attributeModifier(value: AttributeModifier<ContainerSpanAttribute> | undefined): this
 }
 export interface UIContainerSpanAttribute {
     /** @memo */
     textBackgroundStyle(value: TextBackgroundStyle | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<ContainerSpanAttribute> | undefined): this
 }
 export class ArkContainerSpanStyle implements ContainerSpanAttribute {
     textBackgroundStyle_value?: TextBackgroundStyle | undefined
-    attributeModifier_value?: AttributeModifier<ContainerSpanAttribute> | undefined
     public textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<ContainerSpanAttribute> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkContainerSpanComponent extends ComponentBase implements UIContainerSpanAttribute {
@@ -97,11 +91,7 @@ export class ArkContainerSpanComponent extends ComponentBase implements UIContai
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ContainerSpanAttribute> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

@@ -34,7 +34,7 @@ import { ScrollState, ScrollSnapAlign } from "./list"
 import { Callback_Void } from "./abilityComponent"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics } from "../Graphics"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ScrollerInternal {
     public static fromPtr(ptr: KPointer): Scroller {
         const obj : Scroller = new Scroller()
@@ -586,7 +586,6 @@ export interface ScrollAttribute extends ScrollableCommonMethod {
     enablePaging(value: boolean | undefined): this
     initialOffset(value: OffsetOptions | undefined): this
     edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
-    attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIScrollAttribute extends UIScrollableCommonMethod {
     /** @memo */
@@ -628,7 +627,6 @@ export interface UIScrollAttribute extends UIScrollableCommonMethod {
     /** @memo */
     edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkScrollStyle extends ArkScrollableCommonMethodStyle implements ScrollAttribute {
     scrollable_value?: ScrollDirection | undefined
@@ -705,10 +703,7 @@ export class ArkScrollStyle extends ArkScrollableCommonMethodStyle implements Sc
     }
     public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export type ScrollOnScrollCallback = (xOffset: number, yOffset: number, scrollState: ScrollState) => void;
 export type ScrollOnWillScrollCallback = (xOffset: number, yOffset: number, scrollState: ScrollState, scrollSource: ScrollSource) => OffsetResult;
@@ -898,11 +893,7 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

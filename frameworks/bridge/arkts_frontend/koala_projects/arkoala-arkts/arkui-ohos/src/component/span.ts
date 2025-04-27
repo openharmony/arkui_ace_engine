@@ -31,7 +31,7 @@ import { Resource } from "global/resource"
 import { FontStyle, FontWeight, TextCase, Color } from "./enums"
 import { DecorationStyleInterface } from "./styledString"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkBaseSpanPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -326,7 +326,6 @@ export interface TextBackgroundStyle {
 export interface BaseSpan extends CommonMethod {
     textBackgroundStyle(value: TextBackgroundStyle | undefined): this
     baselineOffset(value: LengthMetrics | undefined): this
-    attributeModifier(value: AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIBaseSpan extends UICommonMethod {
     /** @memo */
@@ -334,7 +333,6 @@ export interface UIBaseSpan extends UICommonMethod {
     /** @memo */
     baselineOffset(value: LengthMetrics | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkBaseSpanStyle extends ArkCommonMethodStyle implements BaseSpan {
     textBackgroundStyle_value?: TextBackgroundStyle | undefined
@@ -344,10 +342,7 @@ export class ArkBaseSpanStyle extends ArkCommonMethodStyle implements BaseSpan {
     }
     public baselineOffset(value: LengthMetrics | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export type SpanInterface = (value: string | Resource) => SpanAttribute;
 export interface SpanAttribute extends BaseSpan {
@@ -362,7 +357,6 @@ export interface SpanAttribute extends BaseSpan {
     textCase(value: TextCase | undefined): this
     lineHeight(value: Length | undefined): this
     textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this
-    attributeModifier(value: AttributeModifier<SpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UISpanAttribute extends UIBaseSpan {
     /** @memo */
@@ -388,7 +382,6 @@ export interface UISpanAttribute extends UIBaseSpan {
     /** @memo */
     textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<SpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     font_value?: Font | undefined
@@ -434,10 +427,7 @@ export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     }
     public textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<SpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements UIBaseSpan {
@@ -462,11 +452,7 @@ export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
@@ -585,11 +571,7 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements UISpanAttr
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<SpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

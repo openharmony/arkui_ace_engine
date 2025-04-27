@@ -28,7 +28,6 @@ export * from "./ForeignFunctions"
 // export interface BaseCustomComponent { }
 // export interface CustomComponent { }
 // export interface CustomComponentV2 { }
-export interface AttributeModifier<T> { }
 export interface UICommonBase {}
 // export interface PageTransitionEnterInterface { }
 // export interface SystemBarStyle { }

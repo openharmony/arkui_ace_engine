@@ -36,7 +36,7 @@ import { CancelButtonOptions, CancelButtonSymbolOptions, Callback_InsertValue_Bo
 import { Resource } from "global/resource"
 import { Callback_ResourceStr_Void } from "./textArea"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export interface SubmitEvent {
     text: string
     keepEditableState(): void
@@ -1447,7 +1447,6 @@ export interface TextInputAttribute extends CommonMethod {
     customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
     showCounter(value: boolean | undefined, options?: InputCounterOptions): this
     _onChangeEvent_text(callback: ((text: ResourceStr) => void)): void
-    attributeModifier(value: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UITextInputAttribute extends UICommonMethod {
     /** @memo */
@@ -1597,7 +1596,6 @@ export interface UITextInputAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_text(callback: ((text: ResourceStr) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInputAttribute {
     type_value?: InputType | undefined
@@ -1887,10 +1885,7 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     }
     public _onChangeEvent_text(callback: ((text: ResourceStr) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkTextInputComponent extends ArkCommonMethodComponent implements UITextInputAttribute {
@@ -2575,11 +2570,7 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements U
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

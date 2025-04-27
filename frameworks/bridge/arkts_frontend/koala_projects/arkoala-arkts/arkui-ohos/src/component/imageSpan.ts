@@ -32,7 +32,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
 export class ArkImageSpanPeer extends ArkBaseSpanPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -165,7 +165,6 @@ export interface ImageSpanAttribute extends BaseSpan {
     onComplete(value: ImageCompleteCallback | undefined): this
     onError(value: ImageErrorCallback | undefined): this
     alt(value: PixelMap | undefined): this
-    attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIImageSpanAttribute extends UIBaseSpan {
     /** @memo */
@@ -181,7 +180,6 @@ export interface UIImageSpanAttribute extends UIBaseSpan {
     /** @memo */
     alt(value: PixelMap | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttribute {
     verticalAlign_value?: ImageSpanAlignment | undefined
@@ -207,10 +205,7 @@ export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttr
     }
     public alt(value: PixelMap | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export type ImageCompleteCallback = (result: ImageLoadResult) => void;
 export interface ImageLoadResult {
@@ -292,11 +287,7 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements UIIma
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

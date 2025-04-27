@@ -28,7 +28,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -112,22 +112,17 @@ export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
 export type HyperlinkInterface = (address: string | Resource, content?: string | Resource) => HyperlinkAttribute;
 export interface HyperlinkAttribute extends CommonMethod {
     color(value: Color | number | string | Resource | undefined): this
-    attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIHyperlinkAttribute extends UICommonMethod {
     /** @memo */
     color(value: Color | number | string | Resource | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkHyperlinkStyle extends ArkCommonMethodStyle implements HyperlinkAttribute {
     color_value?: Color | number | string | Resource | undefined
     public color(value: Color | number | string | Resource | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements UIHyperlinkAttribute {
@@ -153,11 +148,7 @@ export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

@@ -29,7 +29,7 @@ import { Color } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkMenuPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -175,7 +175,6 @@ export interface MenuAttribute extends CommonMethod {
     menuItemDivider(value: DividerStyleOptions | undefined): this
     menuItemGroupDivider(value: DividerStyleOptions | undefined): this
     subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this
-    attributeModifier(value: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIMenuAttribute extends UICommonMethod {
     /** @memo */
@@ -193,7 +192,6 @@ export interface UIMenuAttribute extends UICommonMethod {
     /** @memo */
     subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkMenuStyle extends ArkCommonMethodStyle implements MenuAttribute {
     fontSize_value?: Length | undefined
@@ -223,10 +221,7 @@ export class ArkMenuStyle extends ArkCommonMethodStyle implements MenuAttribute 
     }
     public subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkMenuComponent extends ArkCommonMethodComponent implements UIMenuAttribute {
@@ -304,11 +299,7 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements UIMenu
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

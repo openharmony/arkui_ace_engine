@@ -27,7 +27,7 @@ import { Callback_Void } from "./abilityComponent"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkRichTextPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -71,7 +71,6 @@ export type RichTextInterface = (content: string) => RichTextAttribute;
 export interface RichTextAttribute extends CommonMethod {
     onStart(value: (() => void) | undefined): this
     onComplete(value: (() => void) | undefined): this
-    attributeModifier(value: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIRichTextAttribute extends UICommonMethod {
     /** @memo */
@@ -79,7 +78,6 @@ export interface UIRichTextAttribute extends UICommonMethod {
     /** @memo */
     onComplete(value: (() => void) | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkRichTextStyle extends ArkCommonMethodStyle implements RichTextAttribute {
     onStart_value?: (() => void) | undefined
@@ -89,10 +87,7 @@ export class ArkRichTextStyle extends ArkCommonMethodStyle implements RichTextAt
     }
     public onComplete(value: (() => void) | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkRichTextComponent extends ArkCommonMethodComponent implements UIRichTextAttribute {
@@ -126,11 +121,7 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

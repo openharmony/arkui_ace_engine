@@ -27,7 +27,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Dimension } from "./units"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkColumnSplitPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -75,7 +75,6 @@ export interface ColumnSplitDividerStyle {
 export interface ColumnSplitAttribute extends CommonMethod {
     resizeable(value: boolean | undefined): this
     divider(value: ColumnSplitDividerStyle | undefined): this
-    attributeModifier(value: AttributeModifier<ColumnSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIColumnSplitAttribute extends UICommonMethod {
     /** @memo */
@@ -83,7 +82,6 @@ export interface UIColumnSplitAttribute extends UICommonMethod {
     /** @memo */
     divider(value: ColumnSplitDividerStyle | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<ColumnSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkColumnSplitStyle extends ArkCommonMethodStyle implements ColumnSplitAttribute {
     resizeable_value?: boolean | undefined
@@ -93,10 +91,7 @@ export class ArkColumnSplitStyle extends ArkCommonMethodStyle implements ColumnS
     }
     public divider(value: ColumnSplitDividerStyle | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<ColumnSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements UIColumnSplitAttribute {
@@ -129,11 +124,7 @@ export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ColumnSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

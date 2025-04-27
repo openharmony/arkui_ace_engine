@@ -32,7 +32,7 @@ import { Resource } from "global/resource"
 import { Color } from "./enums"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics } from "../Graphics"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class PatternLockControllerInternal {
     public static fromPtr(ptr: KPointer): PatternLockController {
         const obj : PatternLockController = new PatternLockController()
@@ -394,7 +394,6 @@ export interface PatternLockAttribute extends CommonMethod {
     onDotConnect(value: ((index: number) => void) | undefined): this
     activateCircleStyle(value: CircleStyleOptions | undefined): this
     skipUnselectedPoint(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIPatternLockAttribute extends UICommonMethod {
     /** @memo */
@@ -424,7 +423,6 @@ export interface UIPatternLockAttribute extends UICommonMethod {
     /** @memo */
     skipUnselectedPoint(value: boolean | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkPatternLockStyle extends ArkCommonMethodStyle implements PatternLockAttribute {
     sideLength_value?: Length | undefined
@@ -478,10 +476,7 @@ export class ArkPatternLockStyle extends ArkCommonMethodStyle implements Pattern
     }
     public skipUnselectedPoint(value: boolean | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkPatternLockComponent extends ArkCommonMethodComponent implements UIPatternLockAttribute {
@@ -614,11 +609,7 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

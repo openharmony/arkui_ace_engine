@@ -53,6 +53,10 @@ import { AnimationRange_Number } from "./type-replacements"
 import { ScrollState } from "./list"
 import { _animateTo } from "./../handwritten"
 import { GlobalScope } from "./GlobalScope"
+import { ArkCommonAttributeSet, applyUIAttributes } from "../handwritten/modifiers/ArkCommonModifier"
+import { CommonModifier } from "../CommonModifier"
+import { AttributeUpdater } from "../ohos.arkui.modifier"
+import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 export interface ICurve {
     interpolate(fraction: number): number
 }
@@ -1857,6 +1861,7 @@ export class GestureModifierInternal implements MaterializedBase,GestureModifier
     }
 }
 export class ArkCommonMethodPeer extends PeerNode {
+    _attributeSet?: ArkCommonAttributeSet;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -8271,7 +8276,6 @@ export interface CommonMethod {
     onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this
     onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): void
     keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this
-    attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UICommonMethod {
     /** @memo */
@@ -8653,7 +8657,7 @@ export interface UICommonMethod {
     /** @memo */
     keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this
+    attributeModifier<T>(value: AttributeModifier<T>): this
 }
 export class ArkCommonMethodStyle implements CommonMethod {
     width_value?: Length | undefined
@@ -9382,23 +9386,17 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
         return this
     }
-    public attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
 }
 export interface CommonAttribute extends CommonMethod {
-    attributeModifier(value: AttributeModifier<CommonAttribute> | AttributeModifier<CommonMethod> | undefined): this
+   
 }
 export interface UICommonAttribute extends UICommonMethod {
-    /** @memo */
-    attributeModifier(value: AttributeModifier<CommonAttribute> | AttributeModifier<CommonMethod> | undefined): this
+ 
 }
 export class ArkCommonStyle extends ArkCommonMethodStyle implements CommonAttribute {
-    public attributeModifier(value: AttributeModifier<CommonAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+  
 }
-export type CommonInterface = () => CommonAttribute;
+export type CommonInterface = (...params:Object[]) => CommonAttribute;
 export type CustomBuilder = 
 /** @memo */
 () => void;
@@ -9426,7 +9424,6 @@ export interface CommonShapeMethod extends CommonMethod {
     strokeWidth(value: Length | undefined): this
     antiAlias(value: boolean | undefined): this
     strokeDashArray(value: Array<Length> | undefined): this
-    attributeModifier(value: AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UICommonShapeMethod extends UICommonMethod {
     /** @memo */
@@ -9451,8 +9448,6 @@ export interface UICommonShapeMethod extends UICommonMethod {
     antiAlias(value: boolean | undefined): this
     /** @memo */
     strokeDashArray(value: Array<Length> | undefined): this
-    /** @memo */
-    attributeModifier(value: AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkCommonShapeMethodStyle extends ArkCommonMethodStyle implements CommonShapeMethod {
     stroke_value?: ResourceColor | undefined
@@ -9498,9 +9493,6 @@ export class ArkCommonShapeMethodStyle extends ArkCommonMethodStyle implements C
     }
     public strokeDashArray(value: Array<Length> | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 export interface LinearGradient_common {
@@ -9607,7 +9599,6 @@ export interface ScrollableCommonMethod extends CommonMethod {
     backToTop(value: boolean | undefined): this
     edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
     fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this
-    attributeModifier(value: AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIScrollableCommonMethod extends UICommonMethod {
     /** @memo */
@@ -9644,8 +9635,6 @@ export interface UIScrollableCommonMethod extends UICommonMethod {
     edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
     /** @memo */
     fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this
-    /** @memo */
-    attributeModifier(value: AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle implements ScrollableCommonMethod {
     public scrollBar(value: BarState | undefined): this {
@@ -9698,9 +9687,6 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
     }
     public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 export interface ScrollResult {
@@ -9789,6 +9775,27 @@ export interface DateRange {
 }
 /** @memo:stable */
 export class ArkCommonMethodComponent extends ComponentBase implements UICommonMethod {
+
+    protected _modifierHost: ArkBaseNode | undefined
+    setModifierHost(value: ArkBaseNode): void {
+        this._modifierHost = value
+    }
+    getModifierHost(): ArkBaseNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkBaseNode()
+            this._modifierHost!.setPeer(this.getPeer())
+        }
+        return this._modifierHost!
+    }
+    getAttributeSet(): ArkCommonAttributeSet | undefined {
+        if (this.getPeer()._attributeSet == null) {
+            return undefined;
+        }
+        return this.getPeer()._attributeSet as ArkCommonAttributeSet;
+    }
+    initAttributeSet():void {
+        this.getPeer()._attributeSet = new ArkCommonAttributeSet();
+    }
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
     }
@@ -12174,10 +12181,37 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         return this
     }
     /** @memo */
-    public attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
+    public attributeModifier<T>(modifier: AttributeModifier<T> ): this {
+        if (modifier == undefined) {
+            return this;
+        }
+        let peerNode = this.getPeer()
+        if (!this.getAttributeSet()) {
+            let isCommonModifier: boolean = (modifier instanceof CommonModifier);
+            if (isCommonModifier) {
+                let commonModifier = modifier as object as CommonModifier;
+                peerNode._attributeSet = commonModifier.attribute;
+            } else {
+                this.initAttributeSet();
+            }
+        }
+        applyUIAttributes(modifier!, peerNode);
+        let isAttributeUpdater: boolean = (modifier instanceof AttributeUpdater);
+        if (isAttributeUpdater) {
+            let attributeUpdater = modifier as object as AttributeUpdater<T, (...params:Object[]) => T>
+            attributeUpdater.initializeModifier(peerNode._attributeSet as T);
+            attributeUpdater.onComponentChanged(peerNode._attributeSet as T);
+            attributeUpdater.attribute = this.getModifierHost() as T
+            attributeUpdater.updateConstructorParams = (...params: Object[]) => {
+                let attribute = this.getModifierHost()! as T;
+                this.getModifierHost()!.constructParam(params);
+                return attribute;
+            };
+        }
+         this.getAttributeSet()!.applyModifierPatch(peerNode);
+        return this;
     }
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
@@ -12185,6 +12219,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
 }
 /** @memo:stable */
 export class ArkCommonComponent extends ArkCommonMethodComponent implements UICommonAttribute {
+
     getPeer(): ArkCommonPeer {
         return (this.peer as ArkCommonPeer)
     }
@@ -12194,11 +12229,6 @@ export class ArkCommonComponent extends ArkCommonMethodComponent implements UICo
             this.getPeer()?.setCommonOptionsAttribute()
             return this
         }
-        return this
-    }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<CommonAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
         return this
     }
     public applyAttributesFinish(): void {
@@ -12326,11 +12356,6 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent impl
             this.getPeer()?.strokeDashArrayAttribute(value_casted)
             return this
         }
-        return this
-    }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
         return this
     }
     public applyAttributesFinish(): void {
@@ -12496,11 +12521,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
             this.getPeer()?.fadingEdgeAttribute(enabled_casted, options_casted)
             return this
         }
-        return this
-    }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
         return this
     }
     public applyAttributesFinish(): void {
@@ -14011,49 +14031,30 @@ export namespace focusControl {
 }
 
 export interface AttributeModifier<T> {
-    /**
-     * Defines the normal update attribute function.
-     *
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @crossplatform
-     * @atomicservice
-     * @since 20
-     */
-    applyNormalAttribute?: (instance: T) => void;
-    /**
-     * Defines the pressed update attribute function.
-     *
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @crossplatform
-     * @atomicservice
-     * @since 20
-     */
-    applyPressedAttribute?: (instance: T) => void;
-    /**
-     * Defines the focused update attribute function.
-     *
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @crossplatform
-     * @atomicservice
-     * @since 20
-     */
-    applyFocusedAttribute?: (instance: T) => void;
-    /**
-     * Defines the disabled update attribute function.
-     *
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @crossplatform
-     * @atomicservice
-     * @since 20
-     */
-    applyDisabledAttribute?: (instance: T) => void;
-    /**
-     * Defines the selected update attribute function.
-     *
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @crossplatform
-     * @atomicservice
-     * @since 20
-     */
-    applySelectedAttribute?: (instance: T) => void;
+    applyNormalAttribute(instance: T) : void;
+    applyPressedAttribute(instance: T) : void;
+    applyFocusedAttribute(instance: T) : void;
+    applyDisabledAttribute(instance: T) : void;
+    applySelectedAttribute(instance: T) : void;
+}
+
+export interface Type_CommonMethod_linearGradient_value {
+    angle?: number | string;
+    direction?: GradientDirection;
+    colors: Array<[ ResourceColor, number ]>;
+    repeating?: boolean;
+}
+export interface Type_CommonMethod_sweepGradient_value {
+    center: [ Length, Length ];
+    start?: number | string;
+    end?: number | string;
+    rotation?: number | string;
+    colors: Array<[ ResourceColor, number ]>;
+    repeating?: boolean;
+}
+export interface Type_CommonMethod_radialGradient_value {
+    center: [ Length, Length ];
+    radius: number | string;
+    colors: Array<[ ResourceColor, number ]>;
+    repeating?: boolean;
 }

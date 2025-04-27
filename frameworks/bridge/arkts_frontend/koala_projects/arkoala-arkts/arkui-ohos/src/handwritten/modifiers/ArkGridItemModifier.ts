@@ -13,7 +13,6 @@
 //  * limitations under the License.
 //  */
 
-// import { AttributeModifier, GridItemAttribute } from "../..";
 // import { ArkGridItemPeer } from "../../component/peers/ArkGridItemPeer";
 // import { ArkCommonMethodPeer } from "../../component/peers/ArkCommonPeer";
 // import { ArkCommonAttributeSet, modifierNullWithKey, modifierWithKey, ModifierWithKey } from "./ArkCommonModifier";
@@ -141,7 +140,6 @@
 //     }
 // }
 
-// export class GridItemModifier extends ArkGridItemAttributeSet implements AttributeModifier<GridItemAttribute> {
    
 //     applyNormalAttribute(instance: GridItemAttribute){}
     

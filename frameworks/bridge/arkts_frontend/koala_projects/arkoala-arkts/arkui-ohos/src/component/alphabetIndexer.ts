@@ -29,7 +29,6 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
 export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -632,7 +631,6 @@ export interface AlphabetIndexerAttribute extends CommonMethod {
     enableHapticFeedback(value: boolean | undefined): this
     alignStyle(value: IndexerAlign | undefined, offset?: Length): this
     _onChangeEvent_selected(callback: ((selected: number | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIAlphabetIndexerAttribute extends UICommonMethod {
     /** @memo */
@@ -691,8 +689,6 @@ export interface UIAlphabetIndexerAttribute extends UICommonMethod {
     alignStyle(value: IndexerAlign | undefined, offset?: Length): this
     /** @memo */
     _onChangeEvent_selected(callback: ((selected: number | undefined) => void)): void
-    /** @memo */
-    attributeModifier(value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements AlphabetIndexerAttribute {
     onSelected_value?: ((index: number) => void) | undefined
@@ -804,9 +800,6 @@ export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements Alp
     }
     public _onChangeEvent_selected(callback: ((selected: number | undefined) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 /** @memo:stable */
@@ -1075,11 +1068,6 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
             return
         }
         return
-    }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public

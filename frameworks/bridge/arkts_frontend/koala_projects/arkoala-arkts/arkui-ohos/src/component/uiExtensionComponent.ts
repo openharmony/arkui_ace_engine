@@ -34,7 +34,7 @@ import { Callback_TerminationInfo_Void, TerminationInfo } from "./embeddedCompon
 import { Callback_Void } from "./abilityComponent"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent } from "./arkui-custom"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export interface UIExtensionProxy {
     send(data: Map<string, Object>): void
     sendSync(data: Map<string, Object>): Map<string, Object>
@@ -305,7 +305,6 @@ export interface UIExtensionComponentAttribute extends CommonMethod {
     onError(value: ErrorCallback | undefined): this
     onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this
     onDrawReady(value: (() => void) | undefined): this
-    attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIUIExtensionComponentAttribute extends UICommonMethod {
     /** @memo */
@@ -323,7 +322,6 @@ export interface UIUIExtensionComponentAttribute extends UICommonMethod {
     /** @memo */
     onDrawReady(value: (() => void) | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkUIExtensionComponentStyle extends ArkCommonMethodStyle implements UIExtensionComponentAttribute {
     onRemoteReady_value?: ((parameter: UIExtensionProxy) => void) | undefined
@@ -353,10 +351,7 @@ export class ArkUIExtensionComponentStyle extends ArkCommonMethodStyle implement
     }
     public onDrawReady(value: (() => void) | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export type Callback_Map_String_Object_Void = (parameter: Map<string, Object>) => void;
 export interface Literal_Number_code__want {
@@ -442,11 +437,7 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

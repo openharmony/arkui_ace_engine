@@ -26,7 +26,7 @@ import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodCompon
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkRectPeer extends ArkCommonShapeMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -167,7 +167,6 @@ export interface RectAttribute extends CommonShapeMethod {
     radiusWidth(value: number | string | undefined): this
     radiusHeight(value: number | string | undefined): this
     radius(value: number | string | Array<number | string> | undefined): this
-    attributeModifier(value: AttributeModifier<RectAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIRectAttribute extends UICommonShapeMethod {
     /** @memo */
@@ -177,7 +176,6 @@ export interface UIRectAttribute extends UICommonShapeMethod {
     /** @memo */
     radius(value: number | string | Array<number | string> | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<RectAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkRectStyle extends ArkCommonShapeMethodStyle implements RectAttribute {
     radiusWidth_value?: number | string | undefined
@@ -191,10 +189,7 @@ export class ArkRectStyle extends ArkCommonShapeMethodStyle implements RectAttri
     }
     public radius(value: number | string | Array<number | string> | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<RectAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkRectComponent extends ArkCommonShapeMethodComponent implements UIRectAttribute {
@@ -237,11 +232,7 @@ export class ArkRectComponent extends ArkCommonShapeMethodComponent implements U
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<RectAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

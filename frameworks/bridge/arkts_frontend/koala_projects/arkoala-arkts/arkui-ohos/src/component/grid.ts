@@ -34,7 +34,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Tuple_Number_Number } from "./arkui-synthetics"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -603,7 +603,6 @@ export interface GridAttribute extends ScrollableCommonMethod {
     onScrollStop(value: (() => void) | undefined): this
     onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
     edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this
-    attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIGridAttribute extends UIScrollableCommonMethod {
     /** @memo */
@@ -673,7 +672,6 @@ export interface UIGridAttribute extends UIScrollableCommonMethod {
     /** @memo */
     edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements GridAttribute {
     columnsTemplate_value?: string | undefined
@@ -806,10 +804,7 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     }
     public edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkGridComponent extends ArkScrollableCommonMethodComponent implements UIGridAttribute {
@@ -1135,11 +1130,7 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

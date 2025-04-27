@@ -28,7 +28,7 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { FlexDirection, FlexWrap, FlexAlign, ItemAlign } from "./enums"
 import { LengthMetrics } from "../Graphics"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkFlexPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -80,22 +80,17 @@ export interface FlexSpaceOptions {
 export type FlexInterface = (value?: FlexOptions) => FlexAttribute;
 export interface FlexAttribute extends CommonMethod {
     pointLight(value: PointLightStyle | undefined): this
-    attributeModifier(value: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIFlexAttribute extends UICommonMethod {
     /** @memo */
     pointLight(value: PointLightStyle | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkFlexStyle extends ArkCommonMethodStyle implements FlexAttribute {
     pointLight_value?: PointLightStyle | undefined
     public pointLight(value: PointLightStyle | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkFlexComponent extends ArkCommonMethodComponent implements UIFlexAttribute {
@@ -120,11 +115,7 @@ export class ArkFlexComponent extends ArkCommonMethodComponent implements UIFlex
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

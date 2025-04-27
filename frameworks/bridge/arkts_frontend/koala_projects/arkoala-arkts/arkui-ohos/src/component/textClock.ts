@@ -33,7 +33,7 @@ import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { DateTimeOptions } from "./arkui-intl"
 import { Resource } from "global/resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class TextClockControllerInternal {
     public static fromPtr(ptr: KPointer): TextClockController {
         const obj : TextClockController = new TextClockController()
@@ -313,7 +313,6 @@ export interface TextClockAttribute extends CommonMethod {
     fontFeature(value: string | undefined): this
     contentModifier(value: ContentModifier | undefined): this
     dateTimeOptions(value: DateTimeOptions | undefined): this
-    attributeModifier(value: AttributeModifier<TextClockAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UITextClockAttribute extends UICommonMethod {
     /** @memo */
@@ -339,7 +338,6 @@ export interface UITextClockAttribute extends UICommonMethod {
     /** @memo */
     dateTimeOptions(value: DateTimeOptions | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<TextClockAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkTextClockStyle extends ArkCommonMethodStyle implements TextClockAttribute {
     format_value?: string | undefined
@@ -385,9 +383,6 @@ export class ArkTextClockStyle extends ArkCommonMethodStyle implements TextClock
     }
     public dateTimeOptions(value: DateTimeOptions | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<TextClockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 /** @memo:stable */
@@ -503,11 +498,7 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<TextClockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

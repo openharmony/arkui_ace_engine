@@ -9109,6 +9109,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // LinearIndicatorInterfaceModifier
+    namespace UIStateModifier {
+        int64_t GetUIStateImpl(Ark_NativePointer node)
+        {
+            return 0;
+        }
+    } // namespace UIStateModifier
     namespace LinearIndicatorAttributeModifier {
     void IndicatorStyleImpl(Ark_NativePointer node,
                             const Opt_LinearIndicatorStyle* value)
@@ -11775,7 +11781,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &ArkUILinearIndicatorModifierImpl;
     }
-
+    const GENERATED_ArkUIStateModifier* GetUIStateModifier()
+    {
+        static const GENERATED_ArkUIStateModifier arkUiuiStateModifierImpl {
+            UIStateModifier::ConstructImpl,
+            UIStateModifier::GetUIStateImpl,
+        };
+        return &arkUiuiStateModifierImpl;
+    }
     const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
     {
         static const GENERATED_ArkUINodeModifiers modifiersImpl = {
@@ -11897,6 +11910,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetWaterFlowModifier,
             GetUIExtensionComponentModifier,
             GetLinearIndicatorModifier,
+            GetUIStateModifier,
         };
         return &modifiersImpl;
     }

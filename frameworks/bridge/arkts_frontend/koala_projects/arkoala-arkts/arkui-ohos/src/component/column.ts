@@ -28,7 +28,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource } from "global/resource"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkColumnPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -136,7 +136,6 @@ export interface ColumnAttribute extends CommonMethod {
     justifyContent(value: FlexAlign | undefined): this
     pointLight(value: PointLightStyle | undefined): this
     reverse(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIColumnAttribute extends UICommonMethod {
     /** @memo */
@@ -147,8 +146,6 @@ export interface UIColumnAttribute extends UICommonMethod {
     pointLight(value: PointLightStyle | undefined): this
     /** @memo */
     reverse(value: boolean | undefined): this
-    /** @memo */
-    attributeModifier(value: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkColumnStyle extends ArkCommonMethodStyle implements ColumnAttribute {
     alignItems_value?: HorizontalAlign | undefined
@@ -166,9 +163,6 @@ export class ArkColumnStyle extends ArkCommonMethodStyle implements ColumnAttrib
     }
     public reverse(value: boolean | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 /** @memo:stable */
@@ -230,11 +224,7 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements UICo
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

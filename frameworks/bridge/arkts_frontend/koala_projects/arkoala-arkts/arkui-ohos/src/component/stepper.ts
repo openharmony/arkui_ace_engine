@@ -29,7 +29,7 @@ import { Callback_Number_Void } from "./alphabetIndexer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkStepperPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -138,7 +138,6 @@ export interface StepperAttribute extends CommonMethod {
     onNext(value: ((first: number,last: number) => void) | undefined): this
     onPrevious(value: ((first: number,last: number) => void) | undefined): this
     _onChangeEvent_index(callback: ((index: number) => void)): void
-    attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIStepperAttribute extends UICommonMethod {
     /** @memo */
@@ -154,7 +153,6 @@ export interface UIStepperAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_index(callback: ((index: number) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttribute {
     onFinish_value?: (() => void) | undefined
@@ -179,10 +177,7 @@ export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttr
     }
     public _onChangeEvent_index(callback: ((index: number) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkStepperComponent extends ArkCommonMethodComponent implements UIStepperAttribute {
@@ -252,11 +247,7 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements UIS
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

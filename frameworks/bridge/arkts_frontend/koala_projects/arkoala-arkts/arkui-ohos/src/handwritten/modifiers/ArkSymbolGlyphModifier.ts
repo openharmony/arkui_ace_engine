@@ -15,7 +15,6 @@
 
 // import { RuntimeType, runtimeType } from "@koalaui/interop";
 // import { SymbolEffectStrategy, SymbolRenderingStrategy } from "../../component";
-// import { AttributeModifier } from "../..";
 // import { SymbolGlyphAttribute } from "../..";
 // import { Resource } from "../..";
 // import { FontWeight } from "../../component";
@@ -238,7 +237,6 @@
 //     }
 // }
 
-// export class SymbolGlyphModifier extends ArkSymbolGlyphAttributeSet implements AttributeModifier<SymbolGlyphAttribute> {
 //     _SymbolGlyphModifierStub: string = "";
    
 //       applyNormalAttribute(instance: SymbolGlyphAttribute){}

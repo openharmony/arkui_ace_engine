@@ -28,7 +28,7 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Dimension } from "./units"
 import { Axis } from "./enums"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkRelativeContainerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -127,7 +127,6 @@ export interface LocalizedBarrierStyle {
 export interface RelativeContainerAttribute extends CommonMethod {
     guideLine(value: Array<GuideLineStyle> | undefined): this
     barrier(value: Array<BarrierStyle> | undefined | Array<LocalizedBarrierStyle> | undefined): this
-    attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIRelativeContainerAttribute extends UICommonMethod {
     /** @memo */
@@ -135,7 +134,6 @@ export interface UIRelativeContainerAttribute extends UICommonMethod {
     /** @memo */
     barrier(value: Array<BarrierStyle> | undefined | Array<LocalizedBarrierStyle> | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkRelativeContainerStyle extends ArkCommonMethodStyle implements RelativeContainerAttribute {
     guideLine_value?: Array<GuideLineStyle> | undefined
@@ -145,10 +143,7 @@ export class ArkRelativeContainerStyle extends ArkCommonMethodStyle implements R
     }
     public barrier(value: Array<BarrierStyle> | undefined | Array<LocalizedBarrierStyle> | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkRelativeContainerComponent extends ArkCommonMethodComponent implements UIRelativeContainerAttribute {
@@ -190,11 +185,7 @@ export class ArkRelativeContainerComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

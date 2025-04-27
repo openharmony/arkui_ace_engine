@@ -26,7 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkFormLinkPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -55,16 +55,10 @@ export interface FormLinkOptions {
 }
 export type FormLinkInterface = (options: FormLinkOptions) => FormLinkAttribute;
 export interface FormLinkAttribute extends CommonMethod {
-    attributeModifier(value: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIFormLinkAttribute extends UICommonMethod {
-    /** @memo */
-    attributeModifier(value: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkFormLinkStyle extends ArkCommonMethodStyle implements FormLinkAttribute {
-    public attributeModifier(value: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
 }
 /** @memo:stable */
 export class ArkFormLinkComponent extends ArkCommonMethodComponent implements UIFormLinkAttribute {
@@ -80,11 +74,7 @@ export class ArkFormLinkComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

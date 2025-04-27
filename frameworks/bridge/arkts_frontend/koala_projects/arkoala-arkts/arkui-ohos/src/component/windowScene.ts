@@ -27,7 +27,7 @@ import { Position } from "./units"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkWindowScenePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -65,21 +65,16 @@ export class ArkWindowScenePeer extends ArkCommonMethodPeer {
 export type WindowSceneInterface = (persistentId: number) => WindowSceneAttribute;
 export interface WindowSceneAttribute extends CommonMethod {
     attractionEffect(destination: Position | undefined, fraction: number | undefined): this
-    attributeModifier(value: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIWindowSceneAttribute extends UICommonMethod {
     /** @memo */
     attractionEffect(destination: Position | undefined, fraction: number | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkWindowSceneStyle extends ArkCommonMethodStyle implements WindowSceneAttribute {
     public attractionEffect(destination: Position | undefined, fraction: number | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements UIWindowSceneAttribute {
@@ -105,11 +100,7 @@ export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

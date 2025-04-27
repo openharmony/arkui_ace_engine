@@ -31,7 +31,6 @@ import { LabelStyle } from "./arkui-external"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
 export class ArkButtonPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -365,7 +364,6 @@ export interface ButtonAttribute extends CommonMethod {
     labelStyle(value: LabelStyle | undefined): this
     minFontScale(value: number | Resource | undefined): this
     maxFontScale(value: number | Resource | undefined): this
-    attributeModifier(value: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIButtonAttribute extends UICommonMethod {
     /** @memo */
@@ -396,8 +394,6 @@ export interface UIButtonAttribute extends UICommonMethod {
     minFontScale(value: number | Resource | undefined): this
     /** @memo */
     maxFontScale(value: number | Resource | undefined): this
-    /** @memo */
-    attributeModifier(value: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkButtonStyle extends ArkCommonMethodStyle implements ButtonAttribute {
     type_value?: ButtonType | undefined
@@ -455,9 +451,6 @@ export class ArkButtonStyle extends ArkCommonMethodStyle implements ButtonAttrib
     }
     public maxFontScale(value: number | Resource | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 /** @memo:stable */
@@ -613,11 +606,6 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements UIBu
             this.getPeer()?.maxFontScaleAttribute(value_casted)
             return this
         }
-        return this
-    }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
         return this
     }
     public applyAttributesFinish(): void {

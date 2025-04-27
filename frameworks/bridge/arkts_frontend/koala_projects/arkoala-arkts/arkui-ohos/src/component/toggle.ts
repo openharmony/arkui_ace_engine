@@ -31,7 +31,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkTogglePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -189,7 +189,6 @@ export interface ToggleAttribute extends CommonMethod {
     switchPointColor(value: ResourceColor | undefined): this
     switchStyle(value: SwitchStyle | undefined): this
     _onChangeEvent_isOn(callback: ((isVisible: boolean) => void)): void
-    attributeModifier(value: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIToggleAttribute extends UICommonMethod {
     /** @memo */
@@ -205,7 +204,6 @@ export interface UIToggleAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_isOn(callback: ((isVisible: boolean) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkToggleStyle extends ArkCommonMethodStyle implements ToggleAttribute {
     onChange_value?: ((isVisible: boolean) => void) | undefined
@@ -230,10 +228,7 @@ export class ArkToggleStyle extends ArkCommonMethodStyle implements ToggleAttrib
     }
     public _onChangeEvent_isOn(callback: ((isVisible: boolean) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkToggleComponent extends ArkCommonMethodComponent implements UIToggleAttribute {
@@ -303,11 +298,7 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements UITo
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

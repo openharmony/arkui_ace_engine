@@ -36,7 +36,7 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { Position, ResourceStr } from "./units"
 import { PixelMap } from "./arkui-pixelmap"
 import { PreviewMenuOptions } from "./richEditor"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class WebKeyboardControllerInternal {
     public static fromPtr(ptr: KPointer): WebKeyboardController {
         const obj : WebKeyboardController = new WebKeyboardController()
@@ -3772,7 +3772,6 @@ export interface WebAttribute extends CommonMethod {
     nativeEmbedOptions(value: EmbedOptions | undefined): this
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this
     bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this
-    attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIWebAttribute extends UICommonMethod {
     /** @memo */
@@ -4030,7 +4029,6 @@ export interface UIWebAttribute extends UICommonMethod {
     /** @memo */
     bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     javaScriptAccess_value?: boolean | undefined
@@ -4538,10 +4536,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     }
     public bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export interface SslErrorEvent {
     handler: SslErrorHandler;
@@ -5740,11 +5735,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements UIWebAt
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

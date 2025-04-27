@@ -28,7 +28,7 @@ import { Callback_Opt_Boolean_Void } from "./checkbox"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkGridItemPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -173,7 +173,6 @@ export interface GridItemAttribute extends CommonMethod {
     selected(value: boolean | undefined): this
     onSelect(value: ((isVisible: boolean) => void) | undefined): this
     _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIGridItemAttribute extends UICommonMethod {
     /** @memo */
@@ -195,7 +194,6 @@ export interface UIGridItemAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAttribute {
     rowStart_value?: number | undefined
@@ -232,10 +230,7 @@ export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAt
     }
     public _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkGridItemComponent extends ArkCommonMethodComponent implements UIGridItemAttribute {
@@ -332,11 +327,7 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements UI
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

@@ -26,7 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkStepperItemPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -93,7 +93,6 @@ export interface StepperItemAttribute extends CommonMethod {
     prevLabel(value: string | undefined): this
     nextLabel(value: string | undefined): this
     status(value: ItemState | undefined): this
-    attributeModifier(value: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIStepperItemAttribute extends UICommonMethod {
     /** @memo */
@@ -103,7 +102,6 @@ export interface UIStepperItemAttribute extends UICommonMethod {
     /** @memo */
     status(value: ItemState | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkStepperItemStyle extends ArkCommonMethodStyle implements StepperItemAttribute {
     prevLabel_value?: string | undefined
@@ -117,10 +115,7 @@ export class ArkStepperItemStyle extends ArkCommonMethodStyle implements Stepper
     }
     public status(value: ItemState | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkStepperItemComponent extends ArkCommonMethodComponent implements UIStepperItemAttribute {
@@ -162,11 +157,7 @@ export class ArkStepperItemComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

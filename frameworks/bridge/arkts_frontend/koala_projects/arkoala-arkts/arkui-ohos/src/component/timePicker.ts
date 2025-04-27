@@ -33,7 +33,7 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { DialogAlignment } from "./alertDialog"
 import { Offset, ResourceColor } from "./units"
 import { Callback_Void } from "./abilityComponent"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class TimePickerDialog {
     public static show(options?: TimePickerDialogOptions): undefined {
         const options_casted = options as (TimePickerDialogOptions | undefined)
@@ -342,7 +342,6 @@ export interface TimePickerAttribute extends CommonMethod {
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     enableCascade(value: boolean | undefined): this
     _onChangeEvent_selected(callback: ((parameter: Date) => void)): void
-    attributeModifier(value: AttributeModifier<TimePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UITimePickerAttribute extends UICommonMethod {
     /** @memo */
@@ -370,7 +369,6 @@ export interface UITimePickerAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_selected(callback: ((parameter: Date) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<TimePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkTimePickerStyle extends ArkCommonMethodStyle implements TimePickerAttribute {
     useMilitaryTime_value?: boolean | undefined
@@ -419,10 +417,7 @@ export class ArkTimePickerStyle extends ArkCommonMethodStyle implements TimePick
     }
     public _onChangeEvent_selected(callback: ((parameter: Date) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<TimePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export interface TimePickerDialogOptions extends TimePickerOptions {
     useMilitaryTime?: boolean;
@@ -647,11 +642,7 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<TimePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

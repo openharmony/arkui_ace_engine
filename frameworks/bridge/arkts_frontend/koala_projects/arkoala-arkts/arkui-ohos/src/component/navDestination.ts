@@ -36,7 +36,7 @@ import { Scroller } from "./scroll"
 import { Resource } from "global/resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { TitleHeight, Curve } from "./enums"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export interface NavDestinationContext {
     pathInfo: NavPathInfo
     pathStack: NavPathStack
@@ -841,7 +841,6 @@ export interface NavDestinationAttribute extends CommonMethod {
     hideToolBar(hide: boolean | undefined, animated?: boolean): this
     ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this
     enableStatusBar(enabled: boolean | undefined, animated?: boolean): this
-    attributeModifier(value: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UINavDestinationAttribute extends UICommonMethod {
     /** @memo */
@@ -905,7 +904,6 @@ export interface UINavDestinationAttribute extends UICommonMethod {
     /** @memo */
     enableStatusBar(enabled: boolean | undefined, animated?: boolean): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavDestinationAttribute {
     hideTitleBar_value?: boolean | undefined
@@ -1022,10 +1020,7 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
     }
     public enableStatusBar(enabled: boolean | undefined, animated?: boolean): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export type NavDestinationTransitionDelegate = (operation: NavigationOperation, isEnter: boolean) => Array<NavDestinationTransition> | undefined;
 export type Callback_NavDestinationContext_Void = (parameter: NavDestinationContext) => void;
@@ -1350,11 +1345,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

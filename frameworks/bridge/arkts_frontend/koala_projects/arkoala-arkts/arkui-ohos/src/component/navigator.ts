@@ -26,7 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkNavigatorPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -128,7 +128,6 @@ export interface NavigatorAttribute extends CommonMethod {
     type(value: NavigationType | undefined): this
     target(value: string | undefined): this
     params(value: Object | undefined): this
-    attributeModifier(value: AttributeModifier<NavigatorAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UINavigatorAttribute extends UICommonMethod {
     /** @memo */
@@ -140,7 +139,6 @@ export interface UINavigatorAttribute extends UICommonMethod {
     /** @memo */
     params(value: Object | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<NavigatorAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkNavigatorStyle extends ArkCommonMethodStyle implements NavigatorAttribute {
     active_value?: boolean | undefined
@@ -158,10 +156,7 @@ export class ArkNavigatorStyle extends ArkCommonMethodStyle implements Navigator
     }
     public params(value: Object | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<NavigatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkNavigatorComponent extends ArkCommonMethodComponent implements UINavigatorAttribute {
@@ -213,11 +208,7 @@ export class ArkNavigatorComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<NavigatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

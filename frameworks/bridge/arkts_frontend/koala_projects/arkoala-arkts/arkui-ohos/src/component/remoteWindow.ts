@@ -26,7 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkRemoteWindowPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -60,16 +60,11 @@ export interface WindowAnimationTarget {
 }
 export type RemoteWindowInterface = (target: WindowAnimationTarget) => RemoteWindowAttribute;
 export interface RemoteWindowAttribute extends CommonMethod {
-    attributeModifier(value: AttributeModifier<RemoteWindowAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIRemoteWindowAttribute extends UICommonMethod {
-    /** @memo */
-    attributeModifier(value: AttributeModifier<RemoteWindowAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkRemoteWindowStyle extends ArkCommonMethodStyle implements RemoteWindowAttribute {
-    public attributeModifier(value: AttributeModifier<RemoteWindowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+    
 }
 /** @memo:stable */
 export class ArkRemoteWindowComponent extends ArkCommonMethodComponent implements UIRemoteWindowAttribute {
@@ -85,11 +80,7 @@ export class ArkRemoteWindowComponent extends ArkCommonMethodComponent implement
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<RemoteWindowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

@@ -31,7 +31,7 @@ import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { Color } from "./enums"
 import { Resource } from "global/resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class LinearGradientInternal {
     public static fromPtr(ptr: KPointer): LinearGradient {
         const obj : LinearGradient = new LinearGradient(undefined)
@@ -243,7 +243,6 @@ export interface DataPanelAttribute extends CommonMethod {
     strokeWidth(value: Length | undefined): this
     trackShadow(value: DataPanelShadowOptions | undefined): this
     contentModifier(value: ContentModifier | undefined): this
-    attributeModifier(value: AttributeModifier<DataPanelAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIDataPanelAttribute extends UICommonMethod {
     /** @memo */
@@ -259,7 +258,6 @@ export interface UIDataPanelAttribute extends UICommonMethod {
     /** @memo */
     contentModifier(value: ContentModifier | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<DataPanelAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkDataPanelStyle extends ArkCommonMethodStyle implements DataPanelAttribute {
     closeEffect_value?: boolean | undefined
@@ -285,10 +283,7 @@ export class ArkDataPanelStyle extends ArkCommonMethodStyle implements DataPanel
     }
     public contentModifier(value: ContentModifier | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<DataPanelAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkDataPanelComponent extends ArkCommonMethodComponent implements UIDataPanelAttribute {
@@ -358,11 +353,7 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<DataPanelAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

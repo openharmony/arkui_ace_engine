@@ -30,7 +30,7 @@ import { Color } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkPanelPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -298,7 +298,6 @@ export interface PanelAttribute extends CommonMethod {
     onChange(value: ((width: number,height: number,mode: PanelMode) => void) | undefined): this
     onHeightChange(value: ((index: number) => void) | undefined): this
     _onChangeEvent_mode(callback: ((mode: PanelMode | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<PanelAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIPanelAttribute extends UICommonMethod {
     /** @memo */
@@ -328,7 +327,6 @@ export interface UIPanelAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_mode(callback: ((mode: PanelMode | undefined) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<PanelAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkPanelStyle extends ArkCommonMethodStyle implements PanelAttribute {
     mode_value?: PanelMode | undefined
@@ -381,10 +379,7 @@ export class ArkPanelStyle extends ArkCommonMethodStyle implements PanelAttribut
     }
     public _onChangeEvent_mode(callback: ((mode: PanelMode | undefined) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<PanelAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPanelAttribute {
@@ -517,11 +512,7 @@ export class ArkPanelComponent extends ArkCommonMethodComponent implements UIPan
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<PanelAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

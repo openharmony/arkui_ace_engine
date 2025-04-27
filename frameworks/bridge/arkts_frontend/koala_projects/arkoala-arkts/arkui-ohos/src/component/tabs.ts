@@ -31,7 +31,7 @@ import { EdgeEffect, PageFlipMode, Color } from "./enums"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { Resource } from "global/resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class TabsControllerInternal {
     public static fromPtr(ptr: KPointer): TabsController {
         const obj : TabsController = new TabsController()
@@ -708,7 +708,6 @@ export interface TabsAttribute extends CommonMethod {
     barModeScrollable(options: ScrollableBarModeOptions | undefined): this
     cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this
     _onChangeEvent_index(callback: ((index: number) => void)): void
-    attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UITabsAttribute extends UICommonMethod {
     /** @memo */
@@ -770,7 +769,6 @@ export interface UITabsAttribute extends UICommonMethod {
     /** @memo */
     _onChangeEvent_index(callback: ((index: number) => void)): void
     /** @memo */
-    attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute {
     vertical_value?: boolean | undefined
@@ -885,10 +883,7 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     }
     public _onChangeEvent_index(callback: ((index: number) => void)): void {
         throw new Error("Unimplmented")
-    }
-    public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export type Callback_TabContentTransitionProxy_Void = (parameter: TabContentTransitionProxy) => void;
 export interface TabContentAnimatedTransition {
@@ -1193,11 +1188,7 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements UITabs
         }
         return
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

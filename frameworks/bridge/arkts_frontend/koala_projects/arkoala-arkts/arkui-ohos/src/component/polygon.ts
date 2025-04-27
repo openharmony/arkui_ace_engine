@@ -27,7 +27,7 @@ import { Point } from "./point"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkPolygonPeer extends ArkCommonShapeMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -75,22 +75,17 @@ export interface PolygonOptions {
 export type PolygonInterface = (options?: PolygonOptions) => PolygonAttribute;
 export interface PolygonAttribute extends CommonShapeMethod {
     points(value: Array<Point> | undefined): this
-    attributeModifier(value: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIPolygonAttribute extends UICommonShapeMethod {
     /** @memo */
     points(value: Array<Point> | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkPolygonStyle extends ArkCommonShapeMethodStyle implements PolygonAttribute {
     points_value?: Array<Point> | undefined
     public points(value: Array<Point> | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implements UIPolygonAttribute {
@@ -115,11 +110,7 @@ export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implement
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

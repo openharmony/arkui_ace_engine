@@ -32,7 +32,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics } from "../Graphics"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class ArkProgressPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -243,7 +243,6 @@ export interface ProgressAttribute extends CommonMethod {
     style(value: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined): this
     privacySensitive(value: boolean | undefined): this
     contentModifier(value: ContentModifier | undefined): this
-    attributeModifier(value: AttributeModifier<ProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIProgressAttribute extends UICommonMethod {
     /** @memo */
@@ -257,7 +256,6 @@ export interface UIProgressAttribute extends UICommonMethod {
     /** @memo */
     contentModifier(value: ContentModifier | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<ProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkProgressStyle extends ArkCommonMethodStyle implements ProgressAttribute {
     value_value?: number | undefined
@@ -279,10 +277,7 @@ export class ArkProgressStyle extends ArkCommonMethodStyle implements ProgressAt
     }
     public contentModifier(value: ContentModifier | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<ProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 export interface ProgressConfiguration extends CommonConfiguration {
     value: number;
@@ -347,11 +342,7 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<ProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

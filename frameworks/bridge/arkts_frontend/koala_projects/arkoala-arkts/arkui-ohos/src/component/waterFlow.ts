@@ -35,7 +35,7 @@ import { ScrollState } from "./list"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent } from "./arkui-custom"
 import { Scroller } from "./scroll"
-import { AttributeModifier, UICommonBase } from "./../handwritten"
+
 export class WaterFlowSectionsInternal {
     public static fromPtr(ptr: KPointer): WaterFlowSections {
         const obj : WaterFlowSections = new WaterFlowSections()
@@ -392,7 +392,6 @@ export interface WaterFlowAttribute extends ScrollableCommonMethod {
     onReachEnd(value: (() => void) | undefined): this
     onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
     onScrollIndex(value: ((first: number,last: number) => void) | undefined): this
-    attributeModifier(value: AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export interface UIWaterFlowAttribute extends UIScrollableCommonMethod {
     /** @memo */
@@ -424,7 +423,6 @@ export interface UIWaterFlowAttribute extends UIScrollableCommonMethod {
     /** @memo */
     onScrollIndex(value: ((first: number,last: number) => void) | undefined): this
     /** @memo */
-    attributeModifier(value: AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements WaterFlowAttribute {
     columnsTemplate_value?: string | undefined
@@ -482,10 +480,7 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
     }
     public onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
         return this
-    }
-    public attributeModifier(value: AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
+        }
 }
 /** @memo:stable */
 export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent implements UIWaterFlowAttribute {
@@ -638,11 +633,7 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
-    public attributeModifier(value: AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        console.log("attributeModifier() not implemented")
-        return this
-    }
+    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
