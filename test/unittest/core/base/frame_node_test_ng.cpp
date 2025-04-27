@@ -2335,8 +2335,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg098, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeGetOrCreate
- * @tc.desc: Test FrameNodeGetOrCreate.
+ * @tc.name: FrameNodeGetOrCreate001
+ * @tc.desc: Test FrameNodeGetOrCreate001.
  * @tc.type: FUNC
  */
 HWTEST_F(FrameNodeTestNg, FrameNodeGetOrCreate001, TestSize.Level1)
@@ -2377,6 +2377,59 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetOrCreate001, TestSize.Level1)
     frameNode1->AddChild(frameNode2, 1, true);
     auto children = frameNode1->GetChildren();
     EXPECT_EQ(children.size(), 1);
+}
+
+/**
+ * @tc.name: FrameNodeGetOrCreate002
+ * @tc.desc: Test FrameNodeGetOrCreate002.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetOrCreate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode1 = FrameNode::CreateFrameNodeWithTree("Row", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(frameNode1, nullptr);
+    EXPECT_EQ(frameNode1->GetId(), 1);
+    /**
+     * @tc.steps: step2. create child node.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode("Row", 2, []() { return AceType::MakeRefPtr<Pattern>(); });
+
+    EXPECT_NE(frameNode2, nullptr);
+    EXPECT_EQ(frameNode2->GetId(), 2);
+    frameNode1->AddChild(frameNode2, 1, true);
+    /**
+     * @tc.steps: step3. create child node.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode3 = FrameNode::GetOrCreateFrameNode("Row", 3, []() { return AceType::MakeRefPtr<Pattern>(); });
+    EXPECT_NE(frameNode2, nullptr);
+    EXPECT_EQ(frameNode2->GetId(), 2);
+    frameNode2->AddChild(frameNode2, 1, true);
+    /**
+     * @tc.steps: step4. test GetFrameNodeOnly
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode4 = FrameNode::GetFrameNodeOnly("Row", 3);
+    EXPECT_NE(frameNode4, nullptr);
+    /**
+     * @tc.steps: step5. test GetFrameNodeChildByIndex
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode5 = frameNode1->GetFrameNodeChildByIndex(0);
+    EXPECT_NE(frameNode5, nullptr);
+    auto frameNode6 = frameNode2->GetFrameNodeChildByIndex(0);
+    EXPECT_EQ(frameNode6, NULL);
+    /**
+     * @tc.steps: step6. test FrameCount
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameCount = frameNode1->FrameCount();
+    EXPECT_EQ(frameCount, 1);
 }
 
 /**
