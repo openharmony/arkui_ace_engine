@@ -80,6 +80,7 @@ public:
     void LayoutTitleBuilder(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
     void LayoutScrollNode(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
     void LayoutCloseIcon(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
+    void MinusSubwindowDistance(const RefPtr<FrameNode>& sheetWrapper);
 private:
     float GetWidthByScreenSizeType(const float maxWidth, LayoutWrapper* layoutWrapper) const;
     float GetHeightByScreenSizeType(const float maxHeight, const float maxWidth, LayoutWrapper* layoutWrapper) const;
