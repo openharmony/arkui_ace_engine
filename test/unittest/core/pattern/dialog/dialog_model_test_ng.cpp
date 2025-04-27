@@ -1708,6 +1708,7 @@ HWTEST_F(DialogModelTestNg, CustomDialogControllerGetStateTest2, TestSize.Level1
         .controllerId = 1001
     };
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+
     auto dialogNode =
         FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 2, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
     auto dialogPattern = dialogNode->GetPattern<DialogPattern>();

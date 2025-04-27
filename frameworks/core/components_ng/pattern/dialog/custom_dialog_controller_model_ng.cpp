@@ -285,7 +285,7 @@ void CustomDialogControllerModelNG::SetCloseDialogForNDK(FrameNode* dialogNode)
 PromptActionCommonState CustomDialogControllerModelNG::GetState(std::vector<WeakPtr<AceType>>& dialogs)
 {
     RefPtr<NG::FrameNode> dialog;
-    PromptActionCommonState state = PromptActionCommonState::UNINITIALIZED;
+    PromptActionCommonState state = PromptActionCommonState::INITIALIZED;
     while (!dialogs.empty()) {
         dialog = AceType::DynamicCast<NG::FrameNode>(dialogs.back().Upgrade());
         if (dialog) {
@@ -310,7 +310,7 @@ PromptActionCommonState CustomDialogControllerModelNG::GetState(std::vector<Weak
 
 PromptActionCommonState CustomDialogControllerModelNG::GetStateWithNode(FrameNode* dialogNode)
 {
-    PromptActionCommonState state = PromptActionCommonState::UNINITIALIZED;
+    PromptActionCommonState state = PromptActionCommonState::INITIALIZED;
     CHECK_NULL_RETURN(dialogNode, state);
     auto dialogRef = AceType::Claim(dialogNode);
     auto dialogPattern = dialogRef->GetPattern<DialogPattern>();

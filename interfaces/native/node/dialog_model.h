@@ -59,6 +59,7 @@ int32_t Show(ArkUI_NativeDialogHandle handle, bool showInSubWindow);
 int32_t Close(ArkUI_NativeDialogHandle handle);
 int32_t RegisterOnWillDismissWithUserData(
     ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event));
+int32_t GetState(ArkUI_NativeDialogHandle handle, ArkUI_DialogState* dialogState);
 int32_t SetKeyboardAvoidDistance(ArkUI_NativeDialogHandle handle, float distance, ArkUI_LengthMetricUnit unit);
 int32_t SetLevelMode(ArkUI_NativeDialogHandle handle, ArkUI_LevelMode levelMode);
 int32_t SetLevelUniqueId(ArkUI_NativeDialogHandle handle, int32_t uniqueId);
@@ -81,7 +82,6 @@ int32_t SetKeyboardAvoidMode(ArkUI_NativeDialogHandle handle, ArkUI_KeyboardAvoi
 int32_t EnableHoverMode(ArkUI_NativeDialogHandle handle, bool enableHoverMode);
 int32_t SetHoverModeArea(ArkUI_NativeDialogHandle handle, ArkUI_HoverModeAreaType hoverModeAreaType);
 int32_t SetFocusable(ArkUI_NativeDialogHandle handle, bool focusable);
-int32_t GetState(ArkUI_NativeDialogHandle handle, ArkUI_DialogState* dialogState);
 } // namespace OHOS::Ace::NG::DialogModel
 
 #endif // ARKUI_NATIVE_NODE_DIALOG_MODEL_H

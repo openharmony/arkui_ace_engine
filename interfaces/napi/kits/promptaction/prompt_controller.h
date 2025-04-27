@@ -36,6 +36,7 @@ public:
         CHECK_NULL_VOID(pattern);
         if (PromptActionCommonState::UNINITIALIZED == pattern->GetState()) {
             pattern->SetState(PromptActionCommonState::INITIALIZED);
+            TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is INITIALIZED.");
         }
         hasBind_ = true;
     }
