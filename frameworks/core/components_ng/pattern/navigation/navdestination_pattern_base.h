@@ -288,6 +288,10 @@ public:
     {
         return false;
     }
+    virtual bool IsNeedHandleScroll() const
+    {
+        return false;
+    }
     virtual float GetTitleBarHeightLessThanMaxBarHeight() const
     {
         return 0.0f;

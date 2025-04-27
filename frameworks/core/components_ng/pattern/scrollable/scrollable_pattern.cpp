@@ -464,7 +464,9 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
         float handledByNav = ProcessNavBarReactOnUpdate(offsetCoordinate);
         if (NearEqual(handledByNav, offsetCoordinate) && !NearZero(offset)) {
             // All offsets are handled by Navigation, list cannot scroll over.
-            SetCanOverScroll(false);
+            if (!navBarPattern_->IsNeedHandleScroll()) {
+                SetCanOverScroll(false);
+            }
             offset = offsetRemain;
         } else {
             offset = offsetRemain + (offsetCoordinate - handledByNav);
