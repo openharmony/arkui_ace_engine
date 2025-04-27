@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
+#include "core/components_ng/pattern/custom/custom_app_bar_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1542,5 +1543,120 @@ HWTEST_F(CustomTestNg, CustomTest037, TestSize.Level1)
     auto layoutWrapper = customNode->CreateLayoutWrapper();
     test.Measure(AceType::RawPtr(layoutWrapper));
     EXPECT_FALSE(measureFuncFlag);
+}
+
+/**
+ * @tc.name: CustomTest043
+ * @tc.desc: FireCustomCallback1
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest043, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CustomAppBarNode.
+     */
+    auto customAppBarNode = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
+    ViewStackProcessor::GetInstance()->SetCustomAppBarNode(customAppBarNode);
+
+    /**
+     * @tc.steps: step2. Set callback.
+     */
+    bool isExecute = false;
+    std::string name1 = "qw";
+    auto callback = [&isExecute, &name1](const std::string& name, const std::string& value) mutable {
+        name1 = name;
+        isExecute = true;
+    };
+
+    /**
+     * @tc.steps: step3. Add the callback in customAppBarNode.
+     */
+    customAppBarNode->SetCustomCallback(std::move(callback));
+    std::string event = "myEvent";
+    std::string param = "myParameter";
+
+    /**
+     * @tc.steps: step4. Expect the callback is used.
+     */
+    customAppBarNode->FireCustomCallback(event, param);
+    EXPECT_EQ(name1, "myEvent");
+    EXPECT_EQ(isExecute, true);
+}
+
+/**
+ * @tc.name: CustomTest044
+ * @tc.desc: FireCustomCallback2
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest044, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CustomAppBarNode.
+     */
+    auto customAppBarNode = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
+    ViewStackProcessor::GetInstance()->SetCustomAppBarNode(customAppBarNode);
+
+    /**
+     * @tc.steps: step2. Set callback.
+     */
+    bool isExecute = false;
+    std::string name1 = "qw";
+    auto callback = [&isExecute, &name1](const std::string& name, const std::string& value) mutable {
+        name1 = name;
+        isExecute = true;
+    };
+
+    /**
+     * @tc.steps: step3. Add the callback in customAppBarNode.
+     */
+    customAppBarNode->SetCustomCallback(std::move(callback));
+    std::string event = "myEvent";
+    auto value = true;
+
+    /**
+     * @tc.steps: step4. Expect the callback is used.
+     */
+    customAppBarNode->FireCustomCallback(event, value);
+    EXPECT_EQ(name1, "myEvent");
+    EXPECT_EQ(isExecute, true);
+}
+
+/**
+ * @tc.name: CustomTest045
+ * @tc.desc: FireCustomCallback2
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest045, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CustomAppBarNode , capturedPixelMap and callbackFired.
+     */
+    auto customAppBarNode =
+        CustomAppBarNode::CreateCustomAppBarNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ViewStackProcessor::GetInstance()->SetCustomAppBarNode(customAppBarNode);
+    bool callbackFired = false;
+    RefPtr<PixelMap> capturedPixelMap = nullptr;
+
+    /**
+     * @tc.steps: step2. Set callback.
+     */
+    auto appIconCallback = [&callbackFired, &capturedPixelMap](const RefPtr<PixelMap>& pixelMap) mutable {
+        callbackFired = true;
+        capturedPixelMap = pixelMap;
+    };
+
+    /**
+     * @tc.steps: step3. Add the callback in customAppBarNode.
+     */
+    customAppBarNode->SetAppIconCallback(std::move(appIconCallback));
+    auto testPixelMap = RefPtr<PixelMap>();
+
+    /**
+     * @tc.steps: step4. Expect the callback is used.
+     */
+    customAppBarNode->FireAppIconCallback(testPixelMap);
+    EXPECT_EQ(capturedPixelMap, nullptr);
+    EXPECT_EQ(capturedPixelMap, testPixelMap);
+    EXPECT_NE(customAppBarNode->appIconCallback_, nullptr);
 }
 } // namespace OHOS::Ace::NG
