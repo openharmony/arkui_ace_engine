@@ -80,6 +80,7 @@
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_adapter.h"
 
 namespace OHOS::Ace::NG::ViewModel {
 
@@ -309,6 +310,18 @@ void* createXComponentNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& par
     CHECK_NULL_RETURN(xcParams, nullptr);
     auto frameNode = XComponentModelNG::CreateTypeNode(nodeId, xcParams);
     frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+#endif
+
+#ifdef WINDOW_SCENE_SUPPORTED
+void* createEmbeddedComponent(ArkUI_Int32 nodeId)
+{
+    RefPtr<OHOS::Ace::WantWrap> want = nullptr;
+    auto frameNode = UIExtensionAdapter::CreateEmbeddedComponent(nodeId, want);
+    if (frameNode) {
+        frameNode->IncRefCount();
+    }
     return AceType::RawPtr(frameNode);
 }
 #endif
@@ -691,6 +704,11 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     nullptr,
 #endif
     createArcAlphabetIndexerNode,
+#ifdef WINDOW_SCENE_SUPPORTED
+    createEmbeddedComponent,
+#else
+    nullptr,
+#endif
 };
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)

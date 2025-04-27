@@ -95,6 +95,8 @@ struct _ArkUIRSNode;
 struct _ArkUI_OEMVisualEffectFunc;
 struct ArkUI_TextPickerRangeContentArray;
 struct ArkUI_TextCascadePickerRangeContentArray;
+struct ArkUI_EmbeddedComponentItem;
+struct AbilityBase_Want;
 
 typedef _ArkUINode* ArkUINodeHandle;
 typedef _ArkUIVMContext* ArkUIVMContext;
@@ -138,6 +140,7 @@ typedef ArkUI_ListChildrenMainSize* ArkUIListChildrenMainSize;
 
 typedef ArkUI_TextPickerRangeContentArray* ArkUITextPickerRangeContentArray;
 typedef ArkUI_TextCascadePickerRangeContentArray* ArkUITextCascadePickerRangeContentArray;
+typedef ArkUI_EmbeddedComponentItem* ArkUIEmbeddedComponentItemHandle;
 struct _ArkUICurve;
 typedef _ArkUICurve* ArkUICurveHandle;
 
@@ -964,6 +967,7 @@ enum ArkUINodeType {
     ARKUI_RATING,
     ARKUI_XCOMPONENT_TEXTURE,
     ARKUI_ARC_ALPHABET_INDEXER,
+    ARKUI_EMBEDDED_COMPONENT,
 };
 
 enum ArkUIEventCategory {
@@ -3160,6 +3164,11 @@ struct ArkUILazyGridLayoutModifier {
     void (*resetRowsGap)(ArkUINodeHandle node);
     void (*setColumnsTemplate)(ArkUINodeHandle node, ArkUI_CharPtr columnsTemplate);
     void (*resetColumnsTemplate)(ArkUINodeHandle node);
+};
+
+struct ArkUIEmbeddedComponentModifier {
+    void (*setEmbeddedComponentWant)(ArkUINodeHandle node, AbilityBase_Want* want);
+    void (*setEmbeddedComponentOption)(ArkUINodeHandle node, ArkUIEmbeddedComponentItemHandle option);
 };
 
 struct ArkUITimepickerModifier {
@@ -6135,6 +6144,7 @@ struct ArkUINodeModifiers {
     const ArkUILinearIndicatorModifier* (*getLinearIndicatorModifier)();
     const ArkUIIndicatorComponentModifier* (*getIndicatorComponentModifier)();
     const ArkUILazyGridLayoutModifier* (*getLazyGridLayoutModifier)();
+    const ArkUIEmbeddedComponentModifier* (*getEmbeddedComponentModifier)();
 };
 
 // same as inner defines in property.h

@@ -131,6 +131,11 @@ typedef enum {
     ARKUI_NODE_GRID_ITEM,
     /** Custom_Span. */
     ARKUI_NODE_CUSTOM_SPAN,
+    /**
+     * EmbeddedComponent.
+     * @since 20
+     */
+    ARKUI_NODE_EMBEDDED_COMPONENT,
 } ArkUI_NodeType;
 
 /**
@@ -6269,6 +6274,28 @@ typedef enum {
      * @since 16
      */
     NODE_CALENDAR_PICKER_MARK_TODAY = 16007,
+
+    /**
+     * @brief Defines the want used to start EmbeddedAbility.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * value[0].i32: want. The default value is <b>nullptr</b>.\n
+     *
+     * @since 20
+     */
+    NODE_EMBEDDED_COMPONENT_WANT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_EMBEDDED_COMPONENT,
+
+    /**
+     * @brief Set onError and onTerminated callbacks for EMBEDDED_COMPONENT.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: OH_ArkUI_EmbeddedComponentItem_SetOnError set onError callback.</b> \n
+     * OH_ArkUI_EmbeddedComponentItem_SetOnTerminated set onTerminated callback.\n
+     *
+     * @since 20
+     */
+    NODE_EMBEDDED_COMPONENT_OPTION,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
