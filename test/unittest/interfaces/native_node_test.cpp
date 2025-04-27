@@ -6680,4 +6680,22 @@ HWTEST_F(NativeNodeTest, NativeNodeTest127, TestSize.Level1)
         styleButton, settingUIStatus, nullptr, false, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(OH_ArkUI_RemoveSupportedUIStates(styleButton, settingUIStatus), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
+
+/**
+ * @tc.name: NativeNodeTest141
+ * @tc.desc: Test embeddedComponent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest141, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_EMBEDDED_COMPONENT);
+    ASSERT_NE(rootNode, nullptr);
+    ArkUI_AttributeItem item0 = {nullptr, 0, nullptr, nullptr};
+    nodeAPI->setAttribute(rootNode, NODE_EMBEDDED_COMPONENT_WANT, &item0);
+    nodeAPI->setAttribute(rootNode, NODE_EMBEDDED_COMPONENT_OPTION, &item0);
+    nodeAPI->disposeNode(rootNode);
+}
 } // namespace OHOS::Ace

@@ -322,7 +322,8 @@ static ArkUINodeType ParseNodeType(
         { "GridItem", ARKUI_GRID_ITEM }, { "SymbolGlyph", ARKUI_SYMBOL_GLYPH}, { "TextClock", ARKUI_TEXT_CLOCK },
         { "TextTimer", ARKUI_TEXT_TIMER }, { "Marquee", ARKUI_MARQUEE }, { "TextArea", ARKUI_TEXTAREA },
         { "Checkbox", ARKUI_CHECKBOX }, {"CheckboxGroup", ARKUI_CHECK_BOX_GROUP }, { "Rating", ARKUI_RATING},
-        { "Radio", ARKUI_RADIO }, { "Slider", ARKUI_SLIDER }, { "Select", ARKUI_SELECT }, { "Toggle", ARKUI_TOGGLE } };
+        { "Radio", ARKUI_RADIO }, { "Slider", ARKUI_SLIDER }, { "Select", ARKUI_SELECT }, { "Toggle", ARKUI_TOGGLE },
+        { "EmbeddedComponent", ARKUI_EMBEDDED_COMPONENT } };
     ArkUINodeType nodeType = ARKUI_CUSTOM;
     auto iter = typeMap.find(type);
     if (iter != typeMap.end()) {

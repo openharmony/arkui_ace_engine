@@ -272,6 +272,7 @@ std::unordered_map<uint32_t, std::string> ACCESSIBILITY_ROLE_CONVERT_PROPERTY_MA
     { static_cast<uint32_t>(ARKUI_NODE_GRID_ITEM), "GridItem" },
     { static_cast<uint32_t>(ARKUI_NODE_CUSTOM_SPAN), "CustomSpan" },
     { static_cast<uint32_t>(ARKUI_NODE_XCOMPONENT_TEXTURE), "XComponentTexture" },
+    { static_cast<uint32_t>(ARKUI_NODE_EMBEDDED_COMPONENT), "EmbeddedComponent" },
 };
 
 std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP = {
@@ -312,6 +313,7 @@ std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP 
     { "GridItem", static_cast<uint32_t>(ARKUI_NODE_GRID_ITEM) },
     { "CustomSpan", static_cast<uint32_t>(ARKUI_NODE_CUSTOM_SPAN) },
     { "XComponentTexture", static_cast<uint32_t>(ARKUI_NODE_XCOMPONENT_TEXTURE) },
+    { "EmbeddedComponent", static_cast<uint32_t>(ARKUI_NODE_EMBEDDED_COMPONENT) },
 };
 
 void ResetAttributeItem()
@@ -6815,6 +6817,28 @@ void ResetTextAreaSelectionMenuHidden(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaSelectionMenuHidden(node->uiNodeHandle);
+}
+
+int32_t SetEmbeddedComponentWant(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (node == nullptr || item == nullptr || item->object == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    auto* CWant = reinterpret_cast<AbilityBase_Want*>(item->object);
+    fullImpl->getNodeModifiers()->getEmbeddedComponentModifier()->setEmbeddedComponentWant(node->uiNodeHandle, CWant);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetEmbeddedComponentOption(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (node == nullptr || item == nullptr || item->object == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* EmbeddedComponentOption = reinterpret_cast<ArkUIEmbeddedComponentItemHandle>(item->object);
+    GetFullImpl()->getNodeModifiers()->getEmbeddedComponentModifier()->setEmbeddedComponentOption(
+        node->uiNodeHandle, EmbeddedComponentOption);
+    return ERROR_CODE_NO_ERROR;
 }
 
 // button
@@ -15470,6 +15494,16 @@ void ResetButtonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     return resetters[subTypeId](node);
 }
 
+int32_t SetEmbeddedComponentAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
+{
+    static Setter* setters[] = { SetEmbeddedComponentWant, SetEmbeddedComponentOption };
+    if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "embeddedComponent node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
+    }
+    return setters[subTypeId](node, item);
+}
+
 int32_t SetProgressAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     static Setter* setters[] = { SetProgressValue, SetProgressTotal, SetProgressColor, SetProgressType,
@@ -16400,7 +16434,7 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
         SetXComponentAttribute, SetCheckboxGroupAttribute, SetStackAttribute, SetSwiperAttribute, SetScrollAttribute,
         SetListAttribute, SetListItemAttribute, SetListItemGroupAttribute, SetColumnAttribute, SetRowAttribute,
         SetFlexAttribute, SetRefreshAttribute, SetWaterFlowAttribute, nullptr, SetRelativeContainerAttribute,
-        SetGridAttribute };
+        SetGridAttribute, nullptr, nullptr, SetEmbeddedComponentAttribute };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
