@@ -54,7 +54,7 @@ public:
     void ResetCheckMarkColor() override;
     
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetSelect(FrameNode* frameNode, bool isSelected);
+    static void SetSelect(FrameNode* frameNode, const std::optional<bool>& isSelected);
     static void SetSelectedColor(FrameNode* frameNode, const Color& color);
     static void SetUnSelectedColor(FrameNode* frameNode, const Color& color);
     static void SetWidth(FrameNode* frameNode, const Dimension& width);
@@ -64,6 +64,7 @@ public:
     static void SetCheckMarkWidth(FrameNode* frameNode, const Dimension& width);
     static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& padding);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
+    static void SetBuilder(FrameNode* frameNode, std::optional<std::function<void(void)>>& buildFunc);
     static void SetBuilderFunc(FrameNode* frameNode, NG::CheckBoxMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, bool value);
     static void SetCheckboxStyle(FrameNode* frameNode, const std::optional<CheckBoxStyle>& checkboxStyle);

@@ -15,56 +15,212 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "arkoala_api_generated.h"
+
+namespace OHOS::Ace::NG {
+using SelectIconType = std::variant<bool, std::optional<std::string>, Ark_SymbolGlyphModifier>;
+}
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+SelectIconType Convert(const Ark_Boolean& src)
+{
+    return Converter::Convert<bool>(src);
+}
+
+template<>
+SelectIconType Convert(const Ark_ResourceStr& src)
+{
+    return Converter::OptConvert<std::string>(src);
+}
+
+template<>
+SelectIconType Convert(const Ark_Resource& src)
+{
+    return Converter::OptConvert<std::string>(src);
+}
+
+template<>
+SelectIconType Convert(const Ark_String& src)
+{
+    return Converter::OptConvert<std::string>(src);
+}
+
+template<>
+SelectIconType Convert(const Ark_SymbolGlyphModifier& src)
+{
+    return nullptr;
+}
+
+template<>
+void AssignCast(std::optional<std::function<void(WeakPtr<NG::FrameNode>)>>& dst, const Ark_SymbolGlyphModifier& src)
+{
+    LOGE("MenuItemModifier::SetMenuItemOptionsImpl symbolStart and symbolEnd attributes are stubs.");
+    dst = std::nullopt;
+}
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuItemModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return {};
+    auto frameNode = MenuItemModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // MenuItemModifier
 namespace MenuItemInterfaceModifier {
-void SetMenuItemOptionsImpl(Ark_NativePointer node,
-                            const Opt_Union_MenuItemOptions_CustomBuilder* value)
+void SetMenuItemOptionsImpl(Ark_NativePointer node, const Opt_Union_MenuItemOptions_CustomBuilder* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    Converter::VisitUnion(
+        value->value,
+        [frameNode, node](const Ark_MenuItemOptions& value0) {
+            MenuItemProperties menuItemProps;
+            std::optional<std::string> content = Converter::OptConvert<std::string>(value0.content);
+            menuItemProps.content = content ? content.value() : "";
+            menuItemProps.startIcon = Converter::OptConvert<ImageSourceInfo>(value0.startIcon);
+            menuItemProps.endIcon = Converter::OptConvert<ImageSourceInfo>(value0.endIcon);
+            menuItemProps.labelInfo = Converter::OptConvert<std::string>(value0.labelInfo);
+            menuItemProps.buildFunc = std::nullopt;
+            auto builderOpt = Converter::OptConvert<CustomNodeBuilder>(value0.builder);
+            if (builderOpt.has_value()) {
+                auto builder = [callback = CallbackHelper(builderOpt.value()), node]() -> RefPtr<UINode> {
+                    return callback.BuildSync(node);
+                };
+                menuItemProps.buildFunc = builder;
+            }
+            menuItemProps.startApply = nullptr;
+            auto symbolStart = Converter::OptConvert<Ark_SymbolGlyphModifier>(value0.symbolStartIcon);
+            if (symbolStart.has_value()) {
+                auto startApply =
+                    Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(symbolStart.value());
+                menuItemProps.startApply = startApply ? startApply.value() : nullptr;
+            }
+            menuItemProps.endApply = nullptr;
+            auto symbolEnd = Converter::OptConvert<Ark_SymbolGlyphModifier>(value0.symbolEndIcon);
+            if (symbolEnd.has_value()) {
+                auto endApply = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(symbolEnd.value());
+                menuItemProps.endApply = endApply ? endApply.value() : nullptr;
+            }
+            LOGE("MenuItemModifier::SetMenuItemOptionsImpl symbolStart and symbolEnd attributes are stubs.");
+            MenuItemModelNG::AddRowChild(frameNode, menuItemProps);
+            MenuItemModelNG::UpdateMenuProperty(frameNode, menuItemProps);
+        },
+        [frameNode, node](const CustomNodeBuilder& value1) {
+            RefPtr<UINode> customNode;
+            customNode = CallbackHelper(value1).BuildSync(node);
+            if (customNode) {
+                MenuItemModelNG::AddChild(frameNode, customNode);
+            }
+        },
+        []() {});
 }
-} // MenuItemInterfaceModifier
+} // namespace MenuItemInterfaceModifier
 namespace MenuItemAttributeModifier {
-void SelectedImpl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
+void SelectedImpl(Ark_NativePointer node, const Opt_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MenuItemModelNG::SetSelected(frameNode, Converter::OptConvert<bool>(*value));
 }
-void SelectIconImpl(Ark_NativePointer node,
-                    const Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier* value)
+void SelectIconImpl(Ark_NativePointer node, const Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto iconOpt = Converter::OptConvert<SelectIconType>(*value);
+    if (iconOpt.has_value()) {
+        if (auto iconPtr = std::get_if<bool>(&(*iconOpt)); iconPtr) {
+            MenuItemModelNG::SetSelectIcon(frameNode, *iconPtr);
+        }
+        if (auto iconStrPtr = std::get_if<std::optional<std::string>>(&(*iconOpt)); iconStrPtr) {
+            MenuItemModelNG::SetSelectIcon(frameNode, true);
+            MenuItemModelNG::SetSelectIconSrc(frameNode, *iconStrPtr);
+        }
+        LOGE("MenuItemModifier::SelectIconImpl is not implemented, Ark_CustomObject is not supported!");
+    }
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const Opt_Callback_Boolean_Void* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onChange = [arkCallback = CallbackHelper(value->value)](
+                        const bool param) { arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(param)); };
+    MenuItemModelNG::SetOnChange(frameNode, onChange);
 }
-void ContentFontImpl(Ark_NativePointer node,
-                     const Opt_Font* value)
+void ContentFontImpl(Ark_NativePointer node, const Opt_Font* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto fontOpt = Converter::OptConvert<Font>(*value);
+    if (fontOpt.has_value()) {
+        MenuItemModelNG::SetFontSize(frameNode, fontOpt.value().fontSize);
+        MenuItemModelNG::SetFontWeight(frameNode, fontOpt.value().fontWeight);
+        MenuItemModelNG::SetFontStyle(frameNode, fontOpt.value().fontStyle);
+        MenuItemModelNG::SetFontFamily(frameNode, fontOpt.value().fontFamilies);
+    } else {
+        MenuItemModelNG::SetFontSize(frameNode, std::nullopt);
+        MenuItemModelNG::SetFontWeight(frameNode, std::nullopt);
+        MenuItemModelNG::SetFontStyle(frameNode, std::nullopt);
+        MenuItemModelNG::SetFontFamily(frameNode, std::nullopt);
+    }
 }
-void ContentFontColorImpl(Ark_NativePointer node,
-                          const Opt_ResourceColor* value)
+void ContentFontColorImpl(Ark_NativePointer node, const Opt_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    MenuItemModelNG::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
-void LabelFontImpl(Ark_NativePointer node,
-                   const Opt_Font* value)
+void LabelFontImpl(Ark_NativePointer node, const Opt_Font* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto fontOpt = Converter::OptConvert<Font>(*value);
+    if (fontOpt.has_value()) {
+        MenuItemModelNG::SetLabelFontSize(frameNode, fontOpt.value().fontSize);
+        MenuItemModelNG::SetLabelFontWeight(frameNode, fontOpt.value().fontWeight);
+        MenuItemModelNG::SetLabelFontStyle(frameNode, fontOpt.value().fontStyle);
+        MenuItemModelNG::SetLabelFontFamily(frameNode, fontOpt.value().fontFamilies);
+    } else {
+        MenuItemModelNG::SetLabelFontSize(frameNode, std::nullopt);
+        MenuItemModelNG::SetLabelFontWeight(frameNode, std::nullopt);
+        MenuItemModelNG::SetLabelFontStyle(frameNode, std::nullopt);
+        MenuItemModelNG::SetLabelFontFamily(frameNode, std::nullopt);
+    }
 }
-void LabelFontColorImpl(Ark_NativePointer node,
-                        const Opt_ResourceColor* value)
+void LabelFontColorImpl(Ark_NativePointer node, const Opt_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    MenuItemModelNG::SetLabelFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
-void _onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                 const Callback_Opt_Boolean_Void* callback)
+void _onChangeEvent_selectedImpl(Ark_NativePointer node, const Opt_Callback_Boolean_Void* callback)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(callback);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(callback->value), weakNode](bool selected) {
+        PipelineContext::SetCallBackNode(weakNode);
+        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(selected));
+    };
+    MenuItemModelNG::SetSelectedChangeEvent(frameNode, std::move(onEvent));
 }
-} // MenuItemAttributeModifier
+} // namespace MenuItemAttributeModifier
 const GENERATED_ArkUIMenuItemModifier* GetMenuItemModifier()
 {
     static const GENERATED_ArkUIMenuItemModifier ArkUIMenuItemModifierImpl {

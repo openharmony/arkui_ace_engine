@@ -1876,4 +1876,19 @@ void AssignCast(std::optional<OHOS::Ace::FillStyle>& dst, const Ark_EffectFillSt
         }
     }
 }
+
+template<>
+void AssignCast(std::optional<CheckBoxStyle>& dst, const Ark_CheckBoxShape& src)
+{
+    switch (src) {
+        case ARK_CHECK_BOX_SHAPE_CIRCLE:
+            dst = CheckBoxStyle::CIRCULAR_STYLE;
+            break;
+        case ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE:
+            dst = CheckBoxStyle::SQUARE_STYLE;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_CheckBoxShape: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

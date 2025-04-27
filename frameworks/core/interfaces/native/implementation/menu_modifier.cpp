@@ -15,49 +15,141 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/components_ng/pattern/menu/menu_model_ng.h"
+#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
+
+namespace OHOS::Ace::NG {
+using BorderRadiusesType = std::variant<std::optional<Dimension>, BorderRadiusProperty>;
+}
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+BorderRadiusesType Convert(const Ark_Length& src)
+{
+    return Converter::OptConvert<Dimension>(src);
+}
+
+template<>
+BorderRadiusesType Convert(const Ark_BorderRadiuses& src)
+{
+    return Converter::Convert<BorderRadiusProperty>(src);
+}
+
+template<>
+V2::ItemDivider Convert(const Ark_DividerStyleOptions& src)
+{
+    auto dst = V2::ItemDivider {}; // this struct is initialized by default
+    auto colorOpt = OptConvert<Color>(src.color);
+    if (colorOpt.has_value()) {
+        dst.color = colorOpt.value();
+    }
+    auto strokeWidth = OptConvert<Dimension>(src.strokeWidth);
+    Validator::ValidateNonNegative(strokeWidth);
+    if (strokeWidth.has_value()) {
+        dst.strokeWidth = strokeWidth.value();
+    }
+    auto startMargin = OptConvert<Dimension>(src.startMargin);
+    Validator::ValidateNonNegative(startMargin);
+    if (startMargin.has_value()) {
+        dst.startMargin = startMargin.value();
+    }
+    auto endMargin = OptConvert<Dimension>(src.endMargin);
+    Validator::ValidateNonNegative(endMargin);
+    if (endMargin.has_value()) {
+        dst.endMargin = endMargin.value();
+    }
+    return dst;
+}
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return {};
+    auto frameNode = MenuModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // MenuModifier
 namespace MenuInterfaceModifier {
 void SetMenuOptionsImpl(Ark_NativePointer node)
 {
+    // No implementation is required
 }
-} // MenuInterfaceModifier
+} // namespace MenuInterfaceModifier
 namespace MenuAttributeModifier {
-void FontSizeImpl(Ark_NativePointer node,
-                  const Opt_Length* value)
+void FontSizeImpl(Ark_NativePointer node, const Opt_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    MenuModelNG::SetFontSize(frameNode, Converter::OptConvert<Dimension>(*value));
 }
-void FontImpl(Ark_NativePointer node,
-              const Opt_Font* value)
+void FontImpl(Ark_NativePointer node, const Opt_Font* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto fontOpt = Converter::OptConvert<Font>(*value);
+    if (fontOpt.has_value()) {
+        MenuModelNG::SetFontSize(frameNode, fontOpt.value().fontSize);
+        MenuModelNG::SetFontWeight(frameNode, fontOpt.value().fontWeight);
+        MenuModelNG::SetFontStyle(frameNode, fontOpt.value().fontStyle);
+        MenuModelNG::SetFontFamily(frameNode, fontOpt.value().fontFamilies);
+    }
 }
-void FontColorImpl(Ark_NativePointer node,
-                   const Opt_ResourceColor* value)
+void FontColorImpl(Ark_NativePointer node, const Opt_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    MenuModelNG::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
-void RadiusImpl(Ark_NativePointer node,
-                const Opt_Union_Dimension_BorderRadiuses* value)
+void RadiusImpl(Ark_NativePointer node, const Opt_Union_Dimension_BorderRadiuses* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto radiusesOpt = Converter::OptConvert<BorderRadiusesType>(*value);
+    if (radiusesOpt) {
+        if (auto radiusPtr = std::get_if<std::optional<Dimension>>(&(*radiusesOpt)); radiusPtr) {
+            Validator::ValidateNonNegative(*radiusPtr);
+            MenuModelNG::SetBorderRadius(frameNode, *radiusPtr);
+        }
+        if (auto radiusPtr = std::get_if<BorderRadiusProperty>(&(*radiusesOpt)); radiusPtr) {
+            Validator::ValidateNonNegative(radiusPtr->radiusTopLeft);
+            Validator::ValidateNonNegative(radiusPtr->radiusTopRight);
+            Validator::ValidateNonNegative(radiusPtr->radiusBottomLeft);
+            Validator::ValidateNonNegative(radiusPtr->radiusBottomRight);
+            MenuModelNG::SetBorderRadius(frameNode, radiusPtr->radiusTopLeft, radiusPtr->radiusTopRight,
+                radiusPtr->radiusBottomLeft, radiusPtr->radiusBottomRight);
+        }
+    }
 }
-void MenuItemDividerImpl(Ark_NativePointer node,
-                         const Opt_DividerStyleOptions* value)
+void MenuItemDividerImpl(Ark_NativePointer node, const Opt_DividerStyleOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
+    MenuModelNG::SetItemDivider(frameNode, divider, DividerMode::FLOATING_ABOVE_MENU);
 }
-void MenuItemGroupDividerImpl(Ark_NativePointer node,
-                              const Opt_DividerStyleOptions* value)
+void MenuItemGroupDividerImpl(Ark_NativePointer node, const Opt_DividerStyleOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
+    MenuModelNG::SetItemGroupDivider(frameNode, divider, DividerMode::FLOATING_ABOVE_MENU);
 }
-void SubMenuExpandingModeImpl(Ark_NativePointer node,
-                              const Opt_SubMenuExpandingMode* value)
+void SubMenuExpandingModeImpl(Ark_NativePointer node, const Opt_SubMenuExpandingMode* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MenuModelNG::SetExpandingMode(frameNode, Converter::OptConvert<SubMenuExpandingMode>(*value));
 }
 } // MenuAttributeModifier
 const GENERATED_ArkUIMenuModifier* GetMenuModifier()

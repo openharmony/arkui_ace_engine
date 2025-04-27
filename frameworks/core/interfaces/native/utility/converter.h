@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/text/text_model.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
@@ -738,6 +739,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<TransitionEdge>& dst, const Ark_TransitionEdge& src);
     template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);
     template<> void AssignCast(std::optional<XComponentType>& dst, const Ark_XComponentType& src);
+    template<> void AssignCast(std::optional<CheckBoxStyle>& dst, const Ark_CheckBoxShape& src);
 
     template<>
     void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src);
