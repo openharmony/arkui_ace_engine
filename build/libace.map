@@ -317,6 +317,7 @@
       OHOS::Ace::NG::ServiceCollaborationMenuAceHelper::*;
       OHOS::Ace::NG::ServiceCollaborationAceCallback::*;
       OHOS::Ace::DumpLog::*;
+      OHOS::Ace::NG::UIExtensionAdapter::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;

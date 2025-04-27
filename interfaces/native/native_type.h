@@ -243,6 +243,20 @@ typedef struct ArkUI_ProgressLinearStyleOption ArkUI_ProgressLinearStyleOption;
 typedef struct ArkUI_CrossLanguageOption ArkUI_CrossLanguageOption;
 
 /**
+ * @brief Defines the Ability base want.
+ *
+ * @since 20
+ */
+typedef struct AbilityBase_Want AbilityBase_Want;
+
+/**
+ * @brief Define the EmbeddedComponentItem for the EmbeddedComponent.
+ *
+ * @since 20
+ */
+typedef struct ArkUI_EmbeddedComponentItem ArkUI_EmbeddedComponentItem;
+
+/**
  * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
@@ -4961,6 +4975,45 @@ void OH_ArkUI_TextCascadePickerRangeContentArray_SetChildAtIndex(
  *@since 18
  */
 void OH_ArkUI_TextCascadePickerRangeContentArray_Destroy(ArkUI_TextCascadePickerRangeContentArray* handle);
+
+/**
+ * @brief Create a configuration item for the EmbeddedComponentItem interface settings.
+ *
+ * @return EmbeddedComponent Item configuration item instance.
+ * @since 20
+ */
+ArkUI_EmbeddedComponentItem *OH_ArkUI_EmbeddedComponentItem_Create();
+
+/**
+ * @brief Destroy the EmbeddedComponentItem instance.
+ *
+ * @param item EmbeddedComponent Item  instance to be destroyed.
+ * @since 20
+ */
+void OH_ArkUI_EmbeddedComponentItem_Dispose(ArkUI_EmbeddedComponentItem *item);
+
+/**
+ * @brief Set the onError of EmbeddedComponentItem.
+ *
+ * @param item EmbeddedComponentItem instance.
+ * @param code Common error information about the API invoking failure.
+ * @param name Common error name information about the API invoking failure.
+ * @param message Common error message information about the API invoking failure.
+ * @since 20
+ */
+void OH_ArkUI_EmbeddedComponentItem_SetOnError(
+    ArkUI_EmbeddedComponentItem *item, void (*callback)(int32_t code, const char *name, const char *message));
+
+/**
+ * @brief Set the onTerminated of EmbeddedComponentItem.
+ *
+ * @param item EmbeddedComponentItem instance.
+ * @param code Result code returned when the EmbeddedUIExtensionAbility exits.
+ * @param want Data returned when the EmbeddedUIExtensionAbility exits.
+ * @since 20
+ */
+void OH_ArkUI_EmbeddedComponentItem_SetOnTerminated(
+    ArkUI_EmbeddedComponentItem *item, void (*callback)(int32_t code, AbilityBase_Want *want));
 #ifdef __cplusplus
 };
 #endif
