@@ -1029,7 +1029,7 @@ std::function<void(bool)> ParseTransitionCallback(const JSRef<JSFunc>& jsFunc, c
 }
 } // namespace
 
-RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj)
+RefPtr<ResourceObject> JSViewAbstract::GetResourceObject(const JSRef<JSObject>& jsObj)
 {
     auto id = jsObj->GetProperty("id")->ToNumber<int32_t>();
     auto type = jsObj->GetProperty("type")->ToNumber<int32_t>();
@@ -4324,8 +4324,15 @@ void JSViewAbstract::CompleteResourceObjectInner(
     }
 }
 
-bool JSViewAbstract::ParseJsDimensionNG(
-    const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent)
+bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimension& result,
+    DimensionUnit defaultUnit, bool isSupportPercent)
+{
+    RefPtr<ResourceObject> resObj;
+    return ParseJsDimensionNG(jsValue, result, defaultUnit, resObj, isSupportPercent);
+}
+
+bool JSViewAbstract::ParseJsDimensionNG(const JSRef<JSVal>& jsValue, CalcDimension& result,
+    DimensionUnit defaultUnit, RefPtr<ResourceObject>& resObj, bool isSupportPercent)
 {
     if (jsValue->IsNumber()) {
         result = CalcDimension(jsValue->ToNumber<double>(), defaultUnit);
@@ -4349,8 +4356,9 @@ bool JSViewAbstract::ParseJsDimensionNG(
         if (resType == UNKNOWN_RESOURCE_TYPE) {
             return false;
         }
-        auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
-        auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+        resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
+            GetResourceObjectByBundleAndModule(jsObj);
+        auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
         if (!resourceWrapper) {
             return false;
         }
@@ -4502,6 +4510,13 @@ bool JSViewAbstract::ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimen
     return ParseJsDimensionNG(jsValue, result, DimensionUnit::VP, isSupportPercent);
 }
 
+bool JSViewAbstract::ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result,
+    RefPtr<ResourceObject>& resObj, bool isSupportPercent)
+{
+    // 'vp' -> the value varies with pixel density of device.
+    return ParseJsDimensionNG(jsValue, result, DimensionUnit::VP, resObj, isSupportPercent);
+}
+
 bool JSViewAbstract::ParseJsLengthMetricsVp(const JSRef<JSObject>& jsObj, CalcDimension& result)
 {
     auto value = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
@@ -4534,6 +4549,13 @@ bool JSViewAbstract::ParseJsDimensionFpNG(const JSRef<JSVal>& jsValue, CalcDimen
 {
     // the 'fp' unit is used for text scenes.
     return ParseJsDimensionNG(jsValue, result, DimensionUnit::FP, isSupportPercent);
+}
+
+bool JSViewAbstract::ParseJsDimensionFpNG(const JSRef<JSVal>& jsValue, CalcDimension& result,
+    RefPtr<ResourceObject>& resObj, bool isSupportPercent)
+{
+    // the 'fp' unit is used for text scenes.
+    return ParseJsDimensionNG(jsValue, result, DimensionUnit::FP, resObj, isSupportPercent);
 }
 
 bool JSViewAbstract::ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result)
@@ -4592,7 +4614,8 @@ bool JSViewAbstract::ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& j
     return ParseLengthMetricsToDimension(jsValue, result) ? GreatOrEqual(result.Value(), 0.0f) : false;
 }
 
-bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result)
+bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result,
+    RefPtr<ResourceObject>& resObj)
 {
     if (!jsValue->IsObject()) {
         return false;
@@ -4613,8 +4636,9 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
         return false;
     }
 
-    auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
-    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
+        GetResourceObjectByBundleAndModule(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
     }
@@ -4672,6 +4696,13 @@ bool JSViewAbstract::ParseResourceToDoubleById(
 
 bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
 {
+    RefPtr<ResourceObject> resObj;
+    return ParseJsDouble(jsValue, result, resObj);
+}
+
+bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result,
+    RefPtr<ResourceObject>& resObj)
+{
     if (jsValue->IsNumber()) {
         result = jsValue->ToNumber<double>();
         return true;
@@ -4680,7 +4711,7 @@ bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
         return StringUtils::StringToDouble(jsValue->ToString(), result);
     }
     if (jsValue->IsObject()) {
-        return ParseResourceToDouble(jsValue, result);
+        return ParseResourceToDouble(jsValue, result, resObj);
     }
     return false;
 }
@@ -4729,7 +4760,8 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
     return true;
 }
 
-bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result)
+bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result,
+    RefPtr<ResourceObject>& resObj)
 {
     if (!jsValue->IsObject()) {
         return false;
@@ -4737,7 +4769,7 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
 
-    auto ok = JSViewAbstract::ParseJsObjColorFromResource(jsObj, result);
+    auto ok = JSViewAbstract::ParseJsObjColorFromResource(jsObj, result, resObj);
     if (ok) {
         JSRef<JSVal> jsOpacityRatio = jsObj->GetProperty("opacityRatio");
         if (jsOpacityRatio->IsNumber()) {
@@ -4748,15 +4780,17 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     return ok;
 }
 
-bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result)
+bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
+    RefPtr<ResourceObject>& resObj)
 {
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNumber()) {
         return false;
     }
 
-    auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
-    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
+        GetResourceObjectByBundleAndModule(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
     }
@@ -4796,6 +4830,13 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
 
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
 {
+    RefPtr<ResourceObject> resObj;
+    return ParseJsColor(jsValue, result, resObj);
+}
+
+bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
+    RefPtr<ResourceObject>& resObj)
+{
     if (jsValue->IsNumber()) {
         result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
         return true;
@@ -4804,12 +4845,19 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
         return Color::ParseColorString(jsValue->ToString(), result);
     }
     if (jsValue->IsObject()) {
-        return ParseJsColorFromResource(jsValue, result);
+        return ParseJsColorFromResource(jsValue, result, resObj);
     }
     return false;
 }
 
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result, const Color& defaultColor)
+{
+    RefPtr<ResourceObject> resObj;
+    return ParseJsColor(jsValue, result, defaultColor, resObj);
+}
+
+bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
+    const Color& defaultColor, RefPtr<ResourceObject>& resObj)
 {
     if (jsValue->IsNumber()) {
         result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
@@ -4821,7 +4869,7 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result, co
     if (!jsValue->IsObject()) {
         return false;
     }
-    return ParseJsColorFromResource(jsValue, result);
+    return ParseJsColorFromResource(jsValue, result, resObj);
 }
 
 bool JSViewAbstract::ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy)
@@ -4971,7 +5019,8 @@ bool JSViewAbstract::ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector
                 continue;
             } else {
                 Color color;
-                ParseJsColorFromResource(value, color);
+                RefPtr<ResourceObject> resObj;
+                ParseJsColorFromResource(value, color, resObj);
                 result.emplace_back(color);
             }
         }
@@ -4981,6 +5030,13 @@ bool JSViewAbstract::ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector
 }
 
 bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result)
+{
+    RefPtr<ResourceObject> resObj;
+    return ParseJsFontFamilies(jsValue, result, resObj);
+}
+
+bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result,
+    RefPtr<ResourceObject>& resObj)
 {
     result.clear();
     if (!jsValue->IsString() && !jsValue->IsObject()) {
@@ -4997,8 +5053,9 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
         return false;
     }
 
-    auto resourceObject = GetResourceObject(jsObj);
-    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
+        GetResourceObjectByBundleAndModule(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
     }
@@ -5021,7 +5078,8 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
     return true;
 }
 
-bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& result)
+bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& result,
+    RefPtr<ResourceObject>& resObj)
 {
     if (!jsValue->IsObject()) {
         return false;
@@ -5040,8 +5098,9 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
     if (!args->IsArray()) {
         return false;
     }
-    auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
-    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
+        GetResourceObjectByBundleAndModule(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
     }
@@ -5097,21 +5156,35 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
 
 bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& result)
 {
+    RefPtr<ResourceObject> resObj;
+    return ParseJsString(jsValue, result, resObj);
+}
+
+bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& result,
+    RefPtr<ResourceObject>& resObj)
+{
     if (jsValue->IsString()) {
         result = jsValue->ToString();
         return true;
     }
-    return ParseJsStringObj(jsValue, result);
+    return ParseJsStringObj(jsValue, result, resObj);
 }
 
 bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::u16string& result)
+{
+    RefPtr<ResourceObject> resObj;
+    return ParseJsString(jsValue, result, resObj);
+}
+
+bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::u16string& result,
+    RefPtr<ResourceObject>& resObj)
 {
     std::string u8Result;
     if (jsValue->IsString()) {
         result = jsValue->ToU16String();
         return true;
     }
-    bool ret = ParseJsStringObj(jsValue, u8Result);
+    bool ret = ParseJsStringObj(jsValue, u8Result, resObj);
     if (ret) {
         result = UtfUtils::Str8DebugToStr16(u8Result);
         return true;
@@ -5119,7 +5192,8 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::u16string& 
     return false;
 }
 
-bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& result)
+bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& result,
+    RefPtr<ResourceObject>& resObj)
 {
     if (!jsValue->IsObject() && !jsValue->IsString()) {
         return false;
@@ -5130,7 +5204,13 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
-    return ParseJSMediaInternal(jsObj, result);
+    return ParseJSMediaInternal(jsObj, result, resObj);
+}
+
+bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& result)
+{
+    RefPtr<ResourceObject> resObj;
+    return ParseJsMedia(jsValue, result, resObj);
 }
 
 bool JSViewAbstract::ParseJsMediaWithBundleName(
@@ -5145,29 +5225,38 @@ bool JSViewAbstract::ParseJsMediaWithBundleName(
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObjectWithBundleName(jsObj, bundleName, moduleName, resId);
-    return ParseJSMediaInternal(jsObj, result);
+    RefPtr<ResourceObject> resObj;
+    return ParseJSMediaInternal(jsObj, result, resObj);
 }
 
-bool JSViewAbstract::ParseJSMediaInternal(const JSRef<JSObject>& jsObj, std::string& result)
+bool JSViewAbstract::ParseJSMediaWithRawFile(const JSRef<JSObject>& jsObj, std::string& result,
+    RefPtr<ResourceWrapper>& resourceWrapper)
+{
+    JSRef<JSVal> args = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::PARAMS));
+    if (!args->IsArray()) {
+        return false;
+    }
+    JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+    auto fileName = params->GetValueAt(0);
+    if (!fileName->IsString()) {
+        return false;
+    }
+    result = resourceWrapper->GetRawfile(fileName->ToString());
+    return true;
+}
+
+bool JSViewAbstract::ParseJSMediaInternal(const JSRef<JSObject>& jsObj, std::string& result,
+    RefPtr<ResourceObject>& resObj)
 {
     int32_t type = jsObj->GetPropertyValue<int32_t>(static_cast<int32_t>(ArkUIIndex::TYPE), UNKNOWN_RESOURCE_TYPE);
     JSRef<JSVal> resId = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::ID));
     if (!resId->IsNull() && type != UNKNOWN_RESOURCE_TYPE && resId->IsNumber()) {
-        auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
-        auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+        resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
+            GetResourceObjectByBundleAndModule(jsObj);
+        auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
         CHECK_NULL_RETURN(resourceWrapper, false);
         if (type == static_cast<int32_t>(ResourceType::RAWFILE)) {
-            JSRef<JSVal> args = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::PARAMS));
-            if (!args->IsArray()) {
-                return false;
-            }
-            JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
-            auto fileName = params->GetValueAt(0);
-            if (!fileName->IsString()) {
-                return false;
-            }
-            result = resourceWrapper->GetRawfile(fileName->ToString());
-            return true;
+            return JSViewAbstract::ParseJSMediaWithRawFile(jsObj, result, resourceWrapper);
         }
         auto resIdNum = resId->ToNumber<int32_t>();
         if (resIdNum == -1) {
@@ -5239,6 +5328,13 @@ void JSViewAbstract::SetTabBarSymbolOptionApply(const JSCallbackInfo& info, TabB
 
 bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
 {
+    RefPtr<ResourceObject> resObj;
+    return ParseJsBool(jsValue, result, resObj);
+}
+
+bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result,
+    RefPtr<ResourceObject>& resObj)
+{
     if (!jsValue->IsBoolean() && !jsValue->IsObject()) {
         return false;
     }
@@ -5260,8 +5356,9 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
         return false;
     }
 
-    auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
-    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
+        GetResourceObjectByBundleAndModule(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
     }
@@ -5303,6 +5400,13 @@ bool JSViewAbstract::ParseJsInteger(const JSRef<JSVal>& jsValue, int32_t& result
 
 bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result)
 {
+    RefPtr<ResourceObject> resObj;
+    return ParseJsIntegerArray(jsValue, result, resObj);
+}
+
+bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result,
+    RefPtr<ResourceObject>& resObj)
+{
     if (!jsValue->IsArray() && !jsValue->IsObject()) {
         return false;
     }
@@ -5335,8 +5439,9 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
     if (!resId->IsNumber()) {
         return false;
     }
-    auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
-    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
+        GetResourceObjectByBundleAndModule(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
     }
@@ -5365,6 +5470,13 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
 }
 
 bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result)
+{
+    RefPtr<ResourceObject> resObj;
+    return ParseJsStrArray(jsValue, result, resObj);
+}
+
+bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result,
+    RefPtr<ResourceObject>& resObj)
 {
     if (!jsValue->IsArray() && !jsValue->IsObject()) {
         return false;
@@ -5398,8 +5510,9 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
     if (!resId->IsNumber()) {
         return false;
     }
-    auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
-    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
+        GetResourceObjectByBundleAndModule(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
     }
@@ -7759,6 +7872,13 @@ bool JSViewAbstract::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 }
 
 bool JSViewAbstract::ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    RefPtr<ResourceObject> resObj;
+    return ParseJsResource(jsValue, result, resObj);
+}
+
+bool JSViewAbstract::ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension& result,
+    RefPtr<ResourceObject>& resObj)
 {
     if (!jsValue->IsObject()) {
         return false;

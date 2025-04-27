@@ -267,6 +267,11 @@ bool SystemProperties::GetResourceDecoupling()
     return true;
 }
 
+bool SystemProperties::ConfigChangePerform()
+{
+    return false;
+}
+
 int32_t SystemProperties::GetDragDropFrameworkStatus()
 {
     return dragDropFrameworkStatus_;

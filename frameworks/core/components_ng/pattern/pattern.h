@@ -27,6 +27,7 @@
 #include "base/utils/utils.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/common/resource/pattern_resource_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -507,6 +508,7 @@ public:
     virtual void HandleDragEvent(const DragPointerEvent& info) {};
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
+    virtual void OnColorModeChange(uint32_t colorMode);
     virtual void OnDirectionConfigurationUpdate() {}
     virtual void OnDpiConfigurationUpdate() {}
     virtual void OnIconConfigurationUpdate() {}
@@ -658,6 +660,17 @@ public:
         return false;
     }
 
+    void AddResObj(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc);
+    
+    void RemoveResObj(const std::string& key);
+
+    void AddResCache(const std::string& key, const std::string& value);
+
+    std::string GetResCacheMapByKey(const std::string& key);
+
     int32_t GetThemeScopeId() const
     {
         auto host = GetHost();
@@ -697,6 +710,7 @@ protected:
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
 
     WeakPtr<FrameNode> frameNode_;
+    RefPtr<PatternResourceManager> resourceMgr_;
 
 private:
     bool onDetach_ = false;

@@ -578,6 +578,8 @@ public:
 
     static bool GetResourceDecoupling();
 
+    static bool ConfigChangePerform();
+
     static int32_t GetJankFrameThreshold();
 
     static bool GetTitleStyleEnabled();
@@ -762,6 +764,7 @@ private:
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
     static bool resourceDecoupling_;
+    static bool configChangePerform_;
     static bool enableScrollableItemPool_;
     static bool navigationBlurEnabled_;
     static bool gridCacheEnabled_;

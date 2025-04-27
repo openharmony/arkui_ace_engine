@@ -388,6 +388,8 @@ public:
     virtual void OnRecycle();
     virtual void OnReuse();
 
+    virtual void NotifyColorModeChange(uint32_t colorMode);
+
     virtual bool MarkRemoving();
 
     bool IsOnMainTree() const
@@ -909,6 +911,46 @@ public:
      */
     bool LessThanAPITargetVersion(PlatformVersion version) const;
 
+    void SetRerenderable(bool shouldRerender)
+    {
+        shouldRerender_ = shouldRerender;
+    }
+
+    bool GetRerenderable()
+    {
+        return shouldRerender_;
+    }
+
+    void SetDarkMode(bool isDarkMode)
+    {
+        isDarkMode_ = isDarkMode;
+    }
+
+    bool CheckIsDarkMode()
+    {
+        return isDarkMode_;
+    }
+
+    void SetMeasureAnyway(bool measureAnyWay)
+    {
+        measureAnyWay_  = measureAnyWay;
+    }
+
+    bool CheckMeasureAnyway()
+    {
+        return measureAnyWay_;
+    }
+
+    void SetShouldClearCache(bool shouldClearCache)
+    {
+        shouldClearCache_ = shouldClearCache;
+    }
+
+    bool CheckShouldClearCache()
+    {
+        return shouldClearCache_;
+    }
+
     bool IsArkTsRenderNode() const
     {
         return isArkTsRenderNode_;
@@ -1073,6 +1115,10 @@ private:
     // the flag to block dirty mark.
     bool isFreeze_ = false;
     bool allowReusableV2Descendant_ = true;
+    bool shouldRerender_ = true;
+    bool isDarkMode_;
+    bool measureAnyWay_ = false;
+    bool shouldClearCache_ = true;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
     bool isMoving_ = false;

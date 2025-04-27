@@ -44,6 +44,7 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         auto distributedUI = container->GetDistributedUI();
         CHECK_NULL_BREAK(distributedUI);
         distributedUI->AddNewNode(nodeId_);
+        isDarkMode_ = container->GetColorMode() == ColorMode::DARK ? 1 : 0;
     } while (false);
 #endif
     instanceId_ = Container::CurrentId();
@@ -1449,6 +1450,19 @@ void UINode::OnRecycle()
 {
     for (const auto& child : GetChildren()) {
         child->OnRecycle();
+    }
+}
+
+void UINode::NotifyColorModeChange(uint32_t colorMode)
+{
+    for (const auto& child : GetChildren()) {
+        child->SetShouldClearCache(CheckShouldClearCache());
+        child->SetRerenderable(GetRerenderable());
+        child->SetMeasureAnyway(CheckMeasureAnyway());
+        if (!AceType::DynamicCast<FrameNode>(child)) {
+            child->SetDarkMode(CheckIsDarkMode());
+        }
+        child->NotifyColorModeChange(colorMode);
     }
 }
 

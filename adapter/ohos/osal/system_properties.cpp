@@ -263,6 +263,11 @@ bool IsLayoutDetectEnabled()
     return (system::GetParameter("persist.ace.layoutdetect.enabled", "0") == "1");
 }
 
+bool IsConfigChangePerform()
+{
+    return system::GetBoolParameter("persist.sys.arkui.configchangeperform", false);
+}
+
 bool IsNavigationBlurEnabled()
 {
     return (system::GetParameter("persist.ace.navigation.blur.enabled", "0") == "1");
@@ -564,6 +569,7 @@ ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount()
 ACE_WEAK_SYM bool SystemProperties::windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
 bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
+bool SystemProperties::configChangePerform_ = IsConfigChangePerform();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
@@ -724,6 +730,7 @@ void SystemProperties::InitDeviceInfo(
     pageTransitionFrzEnabled_ = system::GetBoolParameter("const.arkui.pagetransitionfreeze", false);
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
     resourceDecoupling_ = IsResourceDecoupling();
+    configChangePerform_ = IsConfigChangePerform();
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
@@ -851,6 +858,11 @@ bool SystemProperties::IsFormAnimationLimited()
 bool SystemProperties::GetResourceDecoupling()
 {
     return resourceDecoupling_;
+}
+
+bool SystemProperties::ConfigChangePerform()
+{
+    return configChangePerform_;
 }
 
 bool SystemProperties::GetTitleStyleEnabled()

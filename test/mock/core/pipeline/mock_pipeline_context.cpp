@@ -1311,5 +1311,7 @@ void NG::PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reaso
 {
     windowSizeChangeReason_ = reason;
 }
+
+void NG::PipelineContext::NotifyColorModeChange(uint32_t colorMode) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

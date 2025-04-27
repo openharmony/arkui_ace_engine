@@ -5649,6 +5649,13 @@ void PipelineContext::NotifyAllWebPattern(bool isRegister)
     rootNode_->NotifyWebPattern(isRegister);
 }
 
+void PipelineContext::NotifyColorModeChange(uint32_t coloeMode)
+{
+    CHECK_NULL_VOID(rootNode_);
+    rootNode_->SetDarkMode(GetColorMode() == ColorMode::DARK ? 1 : 0);
+    rootNode_->NotifyColorModeChange(coloeMode);
+}
+
 void PipelineContext::UpdateHalfFoldHoverStatus(int32_t windowWidth, int32_t windowHeight)
 {
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
