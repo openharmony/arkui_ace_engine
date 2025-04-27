@@ -114,6 +114,7 @@ public:
     }
 
     void ResetExportTextureInfo();
+    void AddBaseNode(const RefPtr<UINode>& newNode);
 
 private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

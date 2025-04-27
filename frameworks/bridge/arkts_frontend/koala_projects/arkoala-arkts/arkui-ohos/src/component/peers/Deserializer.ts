@@ -26,7 +26,7 @@ import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJud
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
 import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, PointerStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme } from "./../arkui-custom"
-import {UIContext} from "@ohos/arkui/UIContext"
+import { UIContext } from "@ohos/arkui/UIContext"
 import { ContentDidScrollCallback, ContentWillScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperAnimationMode, SwiperAttribute, DotIndicator, DigitIndicator, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, SwiperContentWillScrollResult, AutoPlayOptions, ArrowStyle, SwiperAutoFill, SwiperContentTransitionProxy, SwiperContentTransitionProxyInternal, SwiperController, SwiperControllerInternal, Callback_SwiperContentTransitionProxy_Void, Indicator } from "./../swiper"
 import { CustomNodeBuilder } from "./../customBuilder"
 import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMode, KeyboardAppearance, LayoutManager, LayoutManagerInternal, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, EditMenuOptions, TextEditControllerEx, TextEditControllerExInternal, PreviewText, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, CaretStyle, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextBaseControllerInternal, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuItemIdInternal, TextMenuShowMode, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, DecorationStyleResult } from "./../textCommon"
@@ -115,7 +115,6 @@ import { Matrix4Transit, Matrix4TransitInternal, TranslateOption, ScaleOption, R
 import { Tuple_Number_Number, Tuple_Number_Number_Number } from "./../arkui-synthetics"
 import { NavigationType } from "./../navigator"
 import { NavRouteMode, RouteInfo } from "./../navRouter"
-import { NodeController } from "./../ohos.arkui.node"
 import { Offset_componentutils, RotateResult, ScaleResult, TranslateResult, ComponentInfo, Matrix4Result } from "./../arkui-componentutils"
 import { PanelHeight, PanelMode, PanelType, Callback_Number_Number_PanelMode_Void, Callback_Opt_PanelMode_Void } from "./../panel"
 import { PatternLockChallengeResult, PatternLockController, PatternLockControllerInternal, Callback_Array_Number_Void, CircleStyleOptions } from "./../patternLock"
@@ -509,10 +508,6 @@ export class Deserializer extends DeserializerBase {
         const scrollForward_result : NestedScrollMode = TypeChecker.NestedScrollMode_FromNumeric(valueDeserializer.readInt32())
         const scrollBackward_result : NestedScrollMode = TypeChecker.NestedScrollMode_FromNumeric(valueDeserializer.readInt32())
         let value : NestedScrollOptions = ({scrollForward: scrollForward_result, scrollBackward: scrollBackward_result} as NestedScrollOptions)
-        return value
-    }
-    readNodeController(): NodeController {
-        let value : NodeController = ({} as NodeController)
         return value
     }
     readOffscreenCanvas(): OffscreenCanvas {

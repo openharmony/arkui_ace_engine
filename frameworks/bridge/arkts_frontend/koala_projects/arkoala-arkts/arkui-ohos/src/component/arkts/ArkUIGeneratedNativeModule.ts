@@ -1702,6 +1702,20 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NodeContainerInterface_setNodeContainerOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _NodeContainerInterface_addNodeContainerRootNode(thisPtr: KPointer, ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _NodeContainerInterface_setAboutToAppear(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerInterface_setAboutToDisappear(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerInterface_setAboutToResize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerInterface_setOnAttach(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerInterface_setOnDetach(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerInterface_setOnTouchEvent(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _Panel_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _PanelInterface_setPanelOptions(ptr: KPointer, show: KInt): void
@@ -4096,7 +4110,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ReplaceSymbolEffect_setScope(ptr: KPointer, scope: KInt): void
     @ani.unsafe.Direct
-    native static _FrameNode_ctor(uiContext: KPointer): KPointer
+    native static _FrameNode_ctor(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _FrameNode_getFinalizer(): KPointer
     @ani.unsafe.Direct

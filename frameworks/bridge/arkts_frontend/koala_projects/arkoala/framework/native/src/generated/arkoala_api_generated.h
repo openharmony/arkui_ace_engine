@@ -20738,6 +20738,13 @@ typedef struct GENERATED_ArkUINodeContainerModifier {
                                    Ark_Int32 flags);
     void (*setNodeContainerOptions)(Ark_NativePointer node,
                                     const Ark_NodeController* controller);
+    void (*addNodeContainerRootNode)(Ark_NativePointer self, Ark_NativePointer value);
+    void (*setAboutToAppear)(Ark_NativePointer self, const Callback_Void* value);
+    void (*setAboutToDisappear)(Ark_NativePointer self, const Callback_Void* value);
+    void (*setAboutToResize)(Ark_NativePointer self, const Callback_Number_Number_Void* value);
+    void (*setOnAttach)(Ark_NativePointer self, const Callback_Void* value);
+    void (*setOnDetach)(Ark_NativePointer self, const Callback_Void* value);
+    void (*setOnTouchEvent)(Ark_NativePointer self, const Opt_Callback_TouchEvent_Void* value);
 } GENERATED_ArkUINodeContainerModifier;
 
 typedef struct GENERATED_ArkUIPanelModifier {
@@ -23461,7 +23468,7 @@ typedef struct GENERATED_ArkUIReplaceSymbolEffectAccessor {
 
 typedef struct GENERATED_ArkUIFrameNodeAccessor {
     void (*destroyPeer)(Ark_FrameNode peer);
-    Ark_FrameNode (*ctor)(Ark_UIContext uiContext);
+    Ark_FrameNode (*ctor)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Boolean (*isModifiable)(Ark_FrameNode peer);
     void (*appendChild)(Ark_FrameNode peer,

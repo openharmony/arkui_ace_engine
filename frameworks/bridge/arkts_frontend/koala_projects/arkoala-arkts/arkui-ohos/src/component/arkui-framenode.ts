@@ -38,7 +38,9 @@ export class FrameNode implements MaterializedBase {
         return this.peer
     }
     static ctor_framenode(uiContext: UIContext): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_ctor(toPeerPtr(uiContext))
+        const thisSerializer : Serializer = Serializer.hold()
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_ctor(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
     constructor(uiContext?: UIContext) {

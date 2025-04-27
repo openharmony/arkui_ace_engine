@@ -29,13 +29,13 @@ void DestroyPeerImpl(Ark_FrameNode peer)
 {
     FrameNodePeer::Destroy(peer);
 }
-Ark_FrameNode CtorImpl(Ark_UIContext uiContext)
+Ark_FrameNode CtorImpl()
 {
-    auto peer = FrameNodePeer::Create(&uiContext);
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    peer->node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
-    peer->node->SetExclusiveEventForChild(true);
-    peer->node->SetIsArkTsFrameNode(true);
+    auto customFrameNode = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+    customFrameNode->SetExclusiveEventForChild(true);
+    customFrameNode->SetIsArkTsFrameNode(true);
+    auto peer = FrameNodePeer::Create(customFrameNode);
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
