@@ -710,7 +710,7 @@ private:
     RefPtr<FrameNode> parentMenuItem_;
     RefPtr<FrameNode> showedSubMenu_;
     std::vector<RefPtr<FrameNode>> options_;
-    std::optional<int32_t> foldDisplayModeChangedCallbackId_;
+    std::optional<int32_t> foldStatusChangedCallbackId_;
     std::optional<int32_t> halfFoldHoverCallbackId_;
 
     bool isSelectMenu_ = false;
