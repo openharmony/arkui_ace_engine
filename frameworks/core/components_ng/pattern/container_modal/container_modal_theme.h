@@ -103,6 +103,8 @@ public:
             theme->backgroundColor_ = pattern->GetAttr<Color>("container_modal_background", Color());
             theme->backgroundUnfocusColor_ = pattern->GetAttr<Color>("container_modal_unfocus_background", Color());
             theme->titleTextColor_ = pattern->GetAttr<Color>("ohos_id_color_primary", Color());
+            theme->windowJaggedEdgeRenderColor_ =
+                pattern->GetAttr<Color>("container_modal_special_background", Color());
 
             auto resAdapter = themeConstants->GetResourceAdapter();
             CHECK_NULL_VOID(resAdapter);
@@ -140,6 +142,12 @@ public:
     {
         Color backGroundColor = isFocus ? backgroundColor_ : backgroundUnfocusColor_;
         return backGroundColor;
+    }
+
+    //The color of the immersive mode settings for windows during edge anti-aliasing.
+    Color GetWindowJaggedEdgeRenderColor()
+    {
+        return windowJaggedEdgeRenderColor_;
     }
 
     Color GetControlBtnColor(bool isCloseBtn, ControlBtnColorType type)
@@ -208,6 +216,7 @@ public:
 
 private:
     Color backgroundColor_;
+    Color windowJaggedEdgeRenderColor_;
     Color backgroundUnfocusColor_;
     Color titleTextColor_;
 
