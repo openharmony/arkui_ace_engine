@@ -1453,8 +1453,8 @@ ArkUI_Int32 MeasureLayoutAndDraw(ArkUIVMContext vmContext, ArkUINodeHandle rootP
         LOGW("WARNING geometryNode is nullptr");
         return 0;
     }
-    float width = root->GetGeometryNode()->GetFrameSize().Width();
-    float height = root->GetGeometryNode()->GetFrameSize().Height();
+    float width = geometryNode->GetFrameSize().Width();
+    float height = geometryNode->GetFrameSize().Height();
     // measure
     ArkUI_Float32 measureData[] = { width, height, width, height, width, height };
     MeasureNode(vmContext, rootPtr, &measureData[0]);
@@ -1528,7 +1528,7 @@ void SetMeasureWidth(ArkUINodeHandle node, ArkUI_Int32 value)
         LOGW("WARNING geometryNode is nullptr");
         return;
     }
-    frameNode->GetGeometryNode()->SetFrameWidth(value);
+    geometryNode->SetFrameWidth(value);
 }
 
 ArkUI_Int32 GetMeasureWidth(ArkUINodeHandle node)
@@ -1542,7 +1542,7 @@ ArkUI_Int32 GetMeasureWidth(ArkUINodeHandle node)
         LOGW("WARNING geometryNode is nullptr");
         return 0;
     }
-    return frameNode->GetGeometryNode()->GetFrameSize().Width();
+    return geometryNode->GetFrameSize().Width();
 }
 
 void SetMeasureHeight(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -1557,7 +1557,7 @@ void SetMeasureHeight(ArkUINodeHandle node, ArkUI_Int32 value)
         LOGW("WARNING geometryNode is nullptr");
         return;
     }
-    frameNode->GetGeometryNode()->SetFrameHeight(value);
+    geometryNode->SetFrameHeight(value);
 }
 
 ArkUI_Int32 GetMeasureHeight(ArkUINodeHandle node)
@@ -1571,7 +1571,7 @@ ArkUI_Int32 GetMeasureHeight(ArkUINodeHandle node)
         LOGW("WARNING geometryNode is nullptr");
         return 0;
     }
-    return frameNode->GetGeometryNode()->GetFrameSize().Height();
+    return geometryNode->GetFrameSize().Height();
 }
 
 void SetX(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -1586,7 +1586,7 @@ void SetX(ArkUINodeHandle node, ArkUI_Int32 value)
         LOGW("WARNING geometryNode is nullptr");
         return;
     }
-    frameNode->GetGeometryNode()->SetMarginFrameOffsetX(value);
+    geometryNode->SetMarginFrameOffsetX(value);
 }
 
 void SetY(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -1601,7 +1601,7 @@ void SetY(ArkUINodeHandle node, ArkUI_Int32 value)
         LOGW("WARNING geometryNode is nullptr");
         return;
     }
-    frameNode->GetGeometryNode()->SetMarginFrameOffsetY(value);
+    geometryNode->SetMarginFrameOffsetY(value);
 }
 
 ArkUI_Int32 GetX(ArkUINodeHandle node)
@@ -1615,7 +1615,7 @@ ArkUI_Int32 GetX(ArkUINodeHandle node)
         LOGW("WARNING geometryNode is nullptr");
         return 0;
     }
-    return frameNode->GetGeometryNode()->GetMarginFrameOffset().GetX();
+    return geometryNode->GetMarginFrameOffset().GetX();
 }
 
 ArkUI_Int32 GetY(ArkUINodeHandle node)
@@ -1629,7 +1629,7 @@ ArkUI_Int32 GetY(ArkUINodeHandle node)
         LOGW("WARNING geometryNode is nullptr");
         return 0;
     }
-    return frameNode->GetGeometryNode()->GetMarginFrameOffset().GetY();
+    return geometryNode->GetMarginFrameOffset().GetY();
 }
 
 void SetCustomMethodFlag(ArkUINodeHandle node, ArkUI_Int32 flag)
