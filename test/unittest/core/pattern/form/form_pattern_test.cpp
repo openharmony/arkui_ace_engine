@@ -353,7 +353,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_009, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<OHOS::Ace::NG::LinearLayoutPattern>(true));
     EXPECT_NE(columnNode, nullptr);
     pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
-    pattern->AddFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE, textNode);
+    pattern->AddFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE, textNode);
     EXPECT_EQ(pattern->formChildrenNodeMap_.size(), 2);
     pattern->HandleEnableForm(true);
     EXPECT_EQ(pattern->formChildrenNodeMap_.size(), 2);
@@ -365,7 +365,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_009, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<OHOS::Ace::NG::LinearLayoutPattern>(true));
     EXPECT_NE(columnNode2, nullptr);
     pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode2);
-    pattern->AddFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE, textNode2);
+    pattern->AddFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE, textNode2);
     pattern->HandleEnableForm(false);
     EXPECT_EQ(pattern->formChildrenNodeMap_.size(), 2);
 }
@@ -1059,7 +1059,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_026, TestSize.Level1)
     auto host = pattern->GetHost();
     RequestFormInfo info;
     info.width.SetValue(100);
-    pattern->UpdateTimeLimitFontCfg();
+    pattern->UpdateForbiddenText(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
     int32_t num = host->GetTotalChildCount();
     EXPECT_EQ(num, 0);
 
@@ -1069,30 +1069,30 @@ HWTEST_F(FormPatternTest, FormPatternTest_026, TestSize.Level1)
     pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
     RefPtr<RenderContext> renderContext = columnNode->GetRenderContext();
     columnNode->renderContext_ = nullptr;
-    pattern->UpdateTimeLimitFontCfg();
+    pattern->UpdateForbiddenText(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
     num = host->GetChildren().size();
     EXPECT_EQ(num, 0);
     columnNode->renderContext_ = renderContext;
 
-    pattern->UpdateTimeLimitFontCfg();
+    pattern->UpdateForbiddenText(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
     num = host->GetTotalChildCount();
     EXPECT_EQ(num, 0);
 
     RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    pattern->AddFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE, textNode);
+    pattern->AddFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE, textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     textNode->layoutProperty_ = nullptr;
-    pattern->UpdateTimeLimitFontCfg();
+    pattern->UpdateForbiddenText(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
     num = host->GetTotalChildCount();
     EXPECT_EQ(num, 0);
 
     textNode->layoutProperty_ = textLayoutProperty;
-    pattern->UpdateTimeLimitFontCfg();
+    pattern->UpdateForbiddenText(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
     num = host->GetTotalChildCount();
     EXPECT_EQ(num, 0);
 
-    pattern->UpdateTimeLimitFontCfg();
+    pattern->UpdateForbiddenText(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
     num = host->GetTotalChildCount();
     EXPECT_EQ(num, 0);
 }
@@ -1131,7 +1131,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_027, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     EXPECT_NE(columnNode, nullptr);
     pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
-    pattern->AddFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE, textNode);
+    pattern->AddFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE, textNode);
     pattern->LoadDisableFormStyle(info, false);
     num = host->GetTotalChildCount();
     EXPECT_EQ(num, 0);
@@ -1173,7 +1173,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_028, TestSize.Level1)
 
     RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    pattern->AddFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE, textNode);
+    pattern->AddFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE, textNode);
     RequestFormInfo info;
     auto host = pattern->GetHost();
     pattern->RemoveDisableFormStyle(info);
@@ -1310,7 +1310,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_031, TestSize.Level1)
 
 /**
  * @tc.name: FormPatternTest_032
- * @tc.desc: CreateTimeLimitNode
+ * @tc.desc: CreateTextNode
  * @tc.type: FUNC
  */
 HWTEST_F(FormPatternTest, FormPatternTest_032, TestSize.Level1)
@@ -1321,11 +1321,11 @@ HWTEST_F(FormPatternTest, FormPatternTest_032, TestSize.Level1)
 
     int32_t num = formNode->GetTotalChildCount();
     pattern->frameNode_ = nullptr;
-    RefPtr<FrameNode> node = pattern->CreateTimeLimitNode();
+    RefPtr<FrameNode> node = pattern->CreateTextNode(false);
     EXPECT_EQ(node, nullptr);
     pattern->frameNode_ = formNode;
 
-    node = pattern->CreateTimeLimitNode();
+    node = pattern->CreateTextNode(false);
     EXPECT_EQ(node, nullptr);
     EXPECT_EQ(num, 0);
 }
