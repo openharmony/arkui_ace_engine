@@ -1474,7 +1474,7 @@ HWTEST_F(FormTestNg, GetResourceContent, TestSize.Level1)
     auto pattern = frameNode->GetPattern<FormPattern>();
     ASSERT_NE(pattern, nullptr);
     std::string tmpStr = "action";
-    pattern->GetResourceContent(FormChildNodeType::TIME_LIMIT_TEXT_NODE, tmpStr);
+    pattern->GetResourceContent("form_disable_time_limit", tmpStr);
     EXPECT_EQ(tmpStr.empty(), false);
 }
 
@@ -1507,11 +1507,11 @@ HWTEST_F(FormTestNg, OnLanguageConfigurationUpdate, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateTimeLimitNode
- * @tc.desc: Test CreateTimeLimitNode in Form Pattern.
+ * @tc.name: CreateForbiddenTextNode
+ * @tc.desc: Test CreateForbiddenTextNode in Form Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(FormTestNg, CreateTimeLimitNode, TestSize.Level1)
+HWTEST_F(FormTestNg, CreateForbiddenTextNode, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
@@ -1523,7 +1523,7 @@ HWTEST_F(FormTestNg, CreateTimeLimitNode, TestSize.Level1)
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
     ASSERT_NE(layoutWrapper, nullptr);
     auto host = pattern->GetHost();
-    pattern->CreateTimeLimitNode();
+    pattern->CreateForbiddenTextNode("form_disable_time_limit", false);
     ASSERT_NE(host, nullptr);
 }
 
