@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 
@@ -26,6 +27,9 @@ template("ace_osal_ohos_source_set") {
     if (defined(vendor_configs.use_ext_surface) &&
         vendor_configs.use_ext_surface) {
       defines += [ "EXT_SURFACE_ENABLE" ]
+    }
+    if (use_new_skia) {
+      defines += [ "USE_NEW_SKIA" ]
     }
     if (is_ohos_standard_system) {
       external_deps = [

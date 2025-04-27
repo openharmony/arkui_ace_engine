@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("container_test") {
@@ -49,6 +50,10 @@ ohos_unittest("layout_inspector_test") {
     "layout_inspector_test.cpp",
     "$ace_root/adapter/ohos/osal/layout_inspector.cpp"
   ]
+  defines = []
+  if (use_new_skia) {
+    defines += [ "USE_NEW_SKIA" ]
+  }
 
   external_deps = [
      "ability_runtime:abilitykit_native",
