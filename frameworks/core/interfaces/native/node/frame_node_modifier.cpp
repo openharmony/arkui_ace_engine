@@ -631,6 +631,12 @@ EventBindingInfo GetInteractionEventBindingInfo(ArkUINodeHandle node, int eventT
     return bindingInfo;
 }
 
+void RunScopedTask(ArkUI_Int32 instanceId, void* userData, void (*callback)(void* userData))
+{
+    ContainerScope scope(instanceId);
+    callback(userData);
+}
+
 ArkUI_Int32 SetSystemFontStyleChangeEvent(ArkUINodeHandle node, void* userData, void* onFontStyleChange)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1007,6 +1013,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .checkIfCanCrossLanguageAttributeSetting = CheckIfCanCrossLanguageAttributeSetting,
         .setKeyProcessingMode = SetKeyProcessingMode,
         .getInteractionEventBindingInfo = GetInteractionEventBindingInfo,
+        .runScopedTask = RunScopedTask,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
