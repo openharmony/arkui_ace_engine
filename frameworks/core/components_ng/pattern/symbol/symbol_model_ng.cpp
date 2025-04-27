@@ -144,9 +144,15 @@ void SymbolModelNG::SetRenderingStrategy(FrameNode* frameNode, const std::option
     }
 }
 
-void SymbolModelNG::SetSymbolEffect(FrameNode* frameNode, const std::uint32_t effectStrategy)
+void SymbolModelNG::SetSymbolEffect(FrameNode* frameNode, const std::optional<uint32_t>& effectStrategy)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectStrategy, effectStrategy, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (effectStrategy.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectStrategy, effectStrategy.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, SymbolEffectStrategy,
+            PROPERTY_UPDATE_MEASURE, frameNode);
+    }
 }
 
 void SymbolModelNG::InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode)
