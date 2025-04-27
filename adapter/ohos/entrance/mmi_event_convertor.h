@@ -114,7 +114,9 @@ SourceTool GetSourceTool(int32_t orgToolType);
 
 void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEvent* arkUITouchEventCloned);
 
-void SetPostPointerEvent(const MMI::PointerEvent* pointerEvent, TouchEvent& touchEvent);
+void SetPostPointerEvent(TouchEvent& touchEvent, ArkUITouchEvent* arkUITouchEventCloned);
+
+void DestroyRawPointerEvent(ArkUITouchEvent* arkUITouchEvent);
 } // namespace OHOS::Ace::Platform
 
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_MMI_EVENT_CONVERTOR_H
