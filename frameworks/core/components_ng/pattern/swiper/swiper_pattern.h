@@ -58,6 +58,12 @@ enum class PageFlipMode {
     SINGLE,
 };
 
+enum class MoveStep {
+    NEXT = 0,
+    PREV,
+    NONE
+};
+
 using SwiperHoverFlag = uint32_t;
 constexpr SwiperHoverFlag HOVER_NONE = 0;
 constexpr SwiperHoverFlag HOVER_SWIPER = 1;
@@ -907,6 +913,8 @@ private:
     bool IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub);
     void FlushFocus(const RefPtr<FrameNode>& curShowFrame);
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
+    bool FindFocusableContentIndex(MoveStep moveStep);
+    bool IsContentChildFocusable(int32_t childIndex) const;
 
     // Init indicator
     void InitIndicator();
