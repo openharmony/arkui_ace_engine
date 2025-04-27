@@ -18,6 +18,7 @@
 #include "ani.h"
 #include "load.h"
 
+#include "utils/convert_utils.h"
 #include "web_module_methods.h"
 
 namespace OHOS::Ace::Ani {
@@ -58,6 +59,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Web_SetWebOptions",
             "JL@ohos/web/webview/webview/WebviewController;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWebOptions)
+        },
+        ani_native_function {
+            "_ConvertUtils_ConvertFromPixelMapAni",
+            "L@ohos/multimedia/image/image/PixelMap;:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConvertFromPixelMapAni)
+        },
+        ani_native_function {
+            "_ConvertUtils_ConvertToPixelMapAni",
+            "J:L@ohos/multimedia/image/image/PixelMap;",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConvertToPixelMapAni)
         }
     };
 

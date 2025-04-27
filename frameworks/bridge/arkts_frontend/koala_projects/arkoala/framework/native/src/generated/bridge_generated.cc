@@ -37341,7 +37341,7 @@ void impl_CanvasRenderer_drawImage0(Ark_NativePointer thisPtr, KSerializerBuffer
         }
         else if (image_value_buf_selector == 1) {
             image_value_buf.selector = 1;
-            image_value_buf.value1 = static_cast<Ark_PixelMap>(thisDeserializer.readPixelMap());
+            image_value_buf.value1 = static_cast<Ark_NativePointer>(thisDeserializer.readPointer());
         }
         else {
             INTEROP_FATAL("One of the branches for image_value_buf has to be chosen through deserialisation.");
@@ -37362,7 +37362,7 @@ void impl_CanvasRenderer_drawImage1(Ark_NativePointer thisPtr, KSerializerBuffer
         }
         else if (image_value_buf_selector == 1) {
             image_value_buf.selector = 1;
-            image_value_buf.value1 = static_cast<Ark_PixelMap>(thisDeserializer.readPixelMap());
+            image_value_buf.value1 = static_cast<Ark_NativePointer>(thisDeserializer.readPointer());
         }
         else {
             INTEROP_FATAL("One of the branches for image_value_buf has to be chosen through deserialisation.");
@@ -37383,7 +37383,7 @@ void impl_CanvasRenderer_drawImage2(Ark_NativePointer thisPtr, KSerializerBuffer
         }
         else if (image_value_buf_selector == 1) {
             image_value_buf.selector = 1;
-            image_value_buf.value1 = static_cast<Ark_PixelMap>(thisDeserializer.readPixelMap());
+            image_value_buf.value1 = static_cast<Ark_NativePointer>(thisDeserializer.readPointer());
         }
         else {
             INTEROP_FATAL("One of the branches for image_value_buf has to be chosen through deserialisation.");
@@ -37793,14 +37793,14 @@ void impl_CanvasRenderer_setPixelMap(Ark_NativePointer thisPtr, KSerializerBuffe
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_PixelMap value_value_buf = {};
+        Opt_NativePointer value_value_buf = {};
         value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
         {
-            value_value_buf.value = static_cast<Ark_PixelMap>(thisDeserializer.readPixelMap());
+            value_value_buf.value = static_cast<Ark_NativePointer>(thisDeserializer.readPointer());
         }
-        Opt_PixelMap value_value = value_value_buf;;
-        GetAccessors()->getCanvasRendererAccessor()->setPixelMap(self, (const Opt_PixelMap*)&value_value);
+        Opt_NativePointer value_value = value_value_buf;;
+        GetAccessors()->getCanvasRendererAccessor()->setPixelMap(self, (const Opt_NativePointer*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(CanvasRenderer_setPixelMap, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CanvasRenderer_transferFromImageBitmap(Ark_NativePointer thisPtr, Ark_NativePointer bitmap) {
