@@ -420,8 +420,9 @@ class ACE_EXPORT WebDialogEvent : public BaseEventInfo {
 
 public:
     WebDialogEvent(const std::string& url, const std::string& message, const std::string& value,
-        const DialogEventType& type, const RefPtr<Result>& result)
-        : BaseEventInfo("WebDialogEvent"), url_(url), message_(message), value_(value), type_(type), result_(result)
+        const DialogEventType& type, const RefPtr<Result>& result, bool isReload = false)
+        : BaseEventInfo("WebDialogEvent"), url_(url), message_(message), value_(value), type_(type), result_(result),
+          isReload_(isReload)
     {}
     ~WebDialogEvent() = default;
 
@@ -450,12 +451,18 @@ public:
         return type_;
     }
 
+    bool GetIsReload() const
+    {
+        return isReload_;
+    }
+
 private:
     std::string url_;
     std::string message_;
     std::string value_;
     DialogEventType type_;
     RefPtr<Result> result_;
+    bool isReload_;
 };
 
 class ACE_EXPORT AuthResult : public AceType {

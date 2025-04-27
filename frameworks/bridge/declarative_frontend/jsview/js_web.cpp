@@ -2085,7 +2085,9 @@ JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
         obj->SetProperty("value", eventInfo.GetValue());
     }
     obj->SetPropertyObject("result", resultObj);
-
+    if (eventInfo.GetType() == DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD) {
+        obj->SetProperty("isReload", eventInfo.GetIsReload());
+    }
     return JSRef<JSVal>::Cast(obj);
 }
 
