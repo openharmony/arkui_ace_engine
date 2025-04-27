@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -499,5 +500,218 @@ HWTEST_F(NavigationManagerTestNg, NavigationMapsTest002, TestSize.Level1)
 
     navigationManager->RemoveNavigation(navigationId2);
     ASSERT_EQ(navigationManager->navigationMaps_.size(), 1);
+}
+
+/**
+ * @tc.name: CheckNodeNeedCacheTest001
+ * @tc.desc: Branch: if navigation has no animation
+ * @tc.expect: can do renderNode cached
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, CheckNodeNeedCacheTest001, TestSize.Level1)
+{
+    std::cout << "[NEW_TDD] --- START ---" << std::endl;
+    /**
+     * @tc.steps: step1. get navigation manager
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    /**
+     * @tc.steps: step2. Do test.
+     */
+    ASSERT_NE(navigationManager, nullptr);
+    ASSERT_EQ(navigationManager->CheckNodeNeedCache(navigationGroupNode), true);
+}
+
+/**
+ * @tc.name: CheckNodeNeedCacheTest002
+ * @tc.desc: Branch: if navigation has sub animation
+ * @tc.expect: can do renderNode cached
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, CheckNodeNeedCacheTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    /**
+     * @tc.steps: step2. Do test.
+     */
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(navigationGroupNode->GetRenderContext());
+    ASSERT_NE(mockRenderContext, nullptr);
+    mockRenderContext->SetAnimationsCount(1);
+    ASSERT_NE(navigationManager, nullptr);
+    ASSERT_EQ(navigationManager->CheckNodeNeedCache(navigationGroupNode), false);
+}
+
+/**
+ * @tc.name: CheckNodeNeedCacheTest003
+ * @tc.desc: Branch: if navigation->GetOverlayNode() && overlay has no animation
+ * @tc.expect: can do renderNode cached
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, CheckNodeNeedCacheTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    /**
+     * @tc.steps: step2. mount overlayNode to navigation
+     */
+    auto overlayNode = FrameNode::CreateFrameNode(
+        "overlayNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    overlayNode->isActive_ = true;
+    overlayNode->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
+    navigationGroupNode->AddChild(overlayNode);
+    /**
+     * @tc.steps: step2. Do test, verify the target value.
+     */
+    ASSERT_NE(navigationManager, nullptr);
+    ASSERT_EQ(navigationManager->CheckNodeNeedCache(navigationGroupNode), true);
+}
+
+/**
+ * @tc.name: CheckNodeNeedCacheTest004
+ * @tc.desc: Branch: if navigation->GetOverlayNode() && overlay has animation
+ * @tc.expect: can do renderNode cached
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, CheckNodeNeedCacheTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    /**
+     * @tc.steps: step2. mount overlayNode to navigation
+     */
+    auto overlayNode = FrameNode::CreateFrameNode(
+        "overlayNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    overlayNode->isActive_ = true;
+    overlayNode->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
+    navigationGroupNode->AddChild(overlayNode);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(overlayNode->GetRenderContext());
+    ASSERT_NE(mockRenderContext, nullptr);
+    mockRenderContext->SetAnimationsCount(1);
+    /**
+     * @tc.steps: step2. Do test, verify the target value.
+     */
+    ASSERT_NE(navigationManager, nullptr);
+    ASSERT_EQ(navigationManager->CheckNodeNeedCache(navigationGroupNode), false);
+}
+
+/**
+ * @tc.name: CheckNodeNeedCacheTest005
+ * @tc.desc: Branch: if navigation->child->GetTag == UIExtension
+ * @tc.expect: can do renderNode cached
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, CheckNodeNeedCacheTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    /**
+     * @tc.steps: step2. mount UIExtension to navigation
+     */
+    auto uiExtensionNode = FrameNode::CreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    uiExtensionNode->isActive_ = true;
+    uiExtensionNode->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
+    navigationGroupNode->AddChild(uiExtensionNode);
+    /**
+     * @tc.steps: step2. Do test, verify the target value.
+     */
+    ASSERT_NE(navigationManager, nullptr);
+    ASSERT_EQ(navigationManager->CheckNodeNeedCache(navigationGroupNode), false);
+}
+
+
+/**
+ * @tc.name: CheckNodeNeedCacheTest006
+ * @tc.desc: Branch: if navigation->GetOverlayNode() && overlay->GetChild->GetTag == UIExtension
+ * @tc.expect: can do renderNode cached
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, CheckNodeNeedCacheTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    /**
+     * @tc.steps: step2. mount overlayNode to navigation and mount uiExtension to overlay
+     */
+    auto overlayNode = FrameNode::CreateFrameNode(
+        "overlayNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    overlayNode->isActive_ = true;
+    overlayNode->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
+    navigationGroupNode->AddChild(overlayNode);
+    auto uiExtensionNode = FrameNode::CreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    uiExtensionNode->isActive_ = true;
+    uiExtensionNode->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
+    overlayNode->AddChild(uiExtensionNode);
+        /**
+     * @tc.steps: step2. Do test, verify the target value.
+     */
+    ASSERT_NE(navigationManager, nullptr);
+    ASSERT_EQ(navigationManager->CheckNodeNeedCache(navigationGroupNode), false);
 }
 } // namespace OHOS::Ace::NG
