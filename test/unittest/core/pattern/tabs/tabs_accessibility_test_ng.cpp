@@ -349,4 +349,59 @@ HWTEST_F(TabsAccessibilityTestNg, TabBarItemAccessibilityProperty002, TestSize.L
     accessibilityProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("label"), textTest);
 }
+
+/**
+ * @tc.name: TabsAccessibilityZIndex001
+ * @tc.desc: Test ZIndex AccessibilityZIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAccessibilityTestNg, TabsAccessibilityZIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create tabs with builder.
+     */
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    const std::string textTest = "text_test";
+    TabContentModelNG tabContentModel = CreateTabContent();
+    auto tabBarItemFunc = []() {
+        TextModelNG model;
+        const std::u16string textU16Test = u"text_test";
+        model.Create(textU16Test);
+    };
+    tabContentModel.SetTabBar(textTest, "", std::nullopt, std::move(tabBarItemFunc), true);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. default zIndex.
+     * @tc.expected: swiper is -1, divider is -1 and tabBar is -1.
+     */
+    auto swiperAccessibilityProperty = swiperNode_->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    EXPECT_EQ(swiperAccessibilityProperty->GetAccessibilityZIndex(), -1);
+    auto dividerAccessibilityProperty = dividerNode_->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    EXPECT_EQ(dividerAccessibilityProperty->GetAccessibilityZIndex(), -1);
+    auto tabBarAccessibilityProperty = tabBarNode_->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    EXPECT_EQ(tabBarAccessibilityProperty->GetAccessibilityZIndex(), -1);
+
+    /**
+     * @tc.steps: step2. barPosition changes START.
+     * @tc.expected: swiper is 1, divider is -1 and tabBar is 0.
+     */
+    model.SetTabBarPosition(AceType::RawPtr(frameNode_), BarPosition::START);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    EXPECT_EQ(swiperAccessibilityProperty->GetAccessibilityZIndex(), 1);
+    EXPECT_EQ(dividerAccessibilityProperty->GetAccessibilityZIndex(), -1);
+    EXPECT_EQ(tabBarAccessibilityProperty->GetAccessibilityZIndex(), 0);
+
+    /**
+     * @tc.steps: step3. barPosition changes END.
+     * @tc.expected: swiper is 0, divider is -1 and tabBar is 1.
+     */
+    model.SetTabBarPosition(AceType::RawPtr(frameNode_), BarPosition::END);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    EXPECT_EQ(swiperAccessibilityProperty->GetAccessibilityZIndex(), 0);
+    EXPECT_EQ(dividerAccessibilityProperty->GetAccessibilityZIndex(), -1);
+    EXPECT_EQ(tabBarAccessibilityProperty->GetAccessibilityZIndex(), 1);
+}
 } // namespace OHOS::Ace::NG
