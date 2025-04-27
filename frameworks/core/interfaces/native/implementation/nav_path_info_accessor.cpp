@@ -14,20 +14,31 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/nav_path_info_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavPathInfoAccessor {
 void DestroyPeerImpl(Ark_NavPathInfo peer)
 {
+    if (peer) {
+        delete peer;
+        peer = nullptr;
+    }
 }
 Ark_NavPathInfo CtorImpl(const Ark_String* name,
                          const Ark_Object* param,
                          const Opt_Callback_PopInfo_Void* onPop,
                          const Opt_Boolean* isEntry)
 {
-    return nullptr;
+    CHECK_NULL_RETURN(name, nullptr);
+    auto peer = new NavPathInfoPeer();
+    CHECK_NULL_RETURN(peer, nullptr);
+    peer->data.name_ = Converter::Convert<std::string>(*name);
+    peer->data.isEntry_ = Converter::OptConvert<bool>(*isEntry).value_or(false);
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

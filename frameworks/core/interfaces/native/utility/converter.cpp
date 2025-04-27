@@ -2238,4 +2238,16 @@ ImageSpanSize Convert(const Ark_SizeOptions& value)
         .height = height,
     };
 }
+
+template<>
+void AssignCast(std::optional<NavigationTitlebarOptions>& dst, const Ark_NavigationTitleOptions& value)
+{
+    dst = NavigationTitlebarOptions();
+    if (value.backgroundColor.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        dst->bgOptions.color = Converter::OptConvert<Color>(value.backgroundColor);
+    }
+    if (value.paddingStart.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        dst->brOptions.paddingStart = Converter::OptConvert<Dimension>(value.paddingStart);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
