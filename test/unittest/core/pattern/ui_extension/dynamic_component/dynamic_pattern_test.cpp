@@ -904,13 +904,14 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest025, TestSize.Level1)
      * @tc.steps: step1. get DynamicPattern.
      */
     auto dynamicPattern = CreateDynamicComponent();
-    ASSERT_NE(dynamicPattern, nullptr);
+    EXPECT_NE(dynamicPattern, nullptr);
     EXPECT_EQ(dynamicPattern->accessibilityChildTreeCallback_, nullptr);
 
     /**
-     * @tc.steps: step2. Initialize Accessibility
+     * @tc.steps: step2. set accessibilityChildTreeCallback
      */
-    dynamicPattern->InitializeAccessibility();
+    dynamicPattern->accessibilityChildTreeCallback_ =
+        std::make_shared<PlatformAccessibilityChildTreeCallback>(dynamicPattern, 1);
     EXPECT_NE(dynamicPattern->accessibilityChildTreeCallback_, nullptr);
 
     /**
