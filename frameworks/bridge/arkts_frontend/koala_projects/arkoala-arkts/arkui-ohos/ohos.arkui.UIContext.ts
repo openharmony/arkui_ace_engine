@@ -17,10 +17,10 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { FrameNode, FrameNodeInternal } from "./src/FrameNode"
-// import { GlobalScope_ohos_font } from "./src/component/ArkGlobalScopeOhosFontMaterialized"
-// import { GlobalScope_ohos_measure_utils } from "./src/component/ArkGlobalScopeOhosMeasureUtilsMaterialized"
+import { GlobalScope_ohos_font } from "./src/component/arkui-external"
+import { GlobalScope_ohos_measure_utils } from "./src/component/arkui-external"
 import { FontOptions, FontInfo } from "@ohos/font/font"
-// import { MeasureOptions } from "@ohos/measure"
+import { MeasureOptions } from "@ohos/measure"
 import { SizeOptions } from "./src/component/units"
 import { ArkUIGeneratedNativeModule } from "#components"
 import { int32 } from "@koalaui/common"
@@ -36,21 +36,21 @@ export class Font {
     }
     public registerFont(options: FontOptions) : void {
         ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
-        // GlobalScope_ohos_font.registerFont(options);
+        GlobalScope_ohos_font.registerFont(options);
         ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
     }
     public getSystemFontList() : Array<string> {
         ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
-        // let arrayResult_ = GlobalScope_ohos_font.getSystemFontList();
+        let arrayResult_ = GlobalScope_ohos_font.getSystemFontList();
         ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
         return new Array<string>();
     }
-    // public getFontByName(fontName : string) : FontInfo {
-    //     ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
-    //     let fontInfo : FontInfo = GlobalScope_ohos_font.getFontByName(fontName);
-    //     ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
-    //     return fontInfo;
-    // }
+    public getFontByName(fontName : string) : FontInfo {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        let fontInfo : FontInfo = GlobalScope_ohos_font.getFontByName(fontName);
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        return fontInfo;
+    }
 }
 
 export class MeasureUtils {
@@ -58,18 +58,18 @@ export class MeasureUtils {
     constructor(instanceId: int32) {
         this.instanceId_ = instanceId;
     }
-    // public measureText(options: MeasureOptions) : number {
-    //     ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
-    //     // let width = GlobalScope_ohos_measure_utils.measureText(options);
-    //     ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
-    //     return 0;
-    // }
-    // public measureTextSize(options: MeasureOptions) : SizeOptions {
-    //     ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
-    //     // let sizeOptions = GlobalScope_ohos_measure_utils.measureTextSize(options);
-    //     ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
-    //     return {};
-    // }
+    public measureText(options: MeasureOptions) : number {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        let width = GlobalScope_ohos_measure_utils.measureText(options);
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        return 0;
+    }
+    public measureTextSize(options: MeasureOptions) : SizeOptions {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        let sizeOptions = GlobalScope_ohos_measure_utils.measureTextSize(options);
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        return {};
+    }
 }
 
 export class UIContext {
