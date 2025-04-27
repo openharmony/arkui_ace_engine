@@ -599,6 +599,7 @@ HWTEST_F(GridLayoutTestNg, SpringEffect001, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(40);
     CreateDone();
+    ChangeRadio();
 
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(pattern_->info_.startIndex_, 32);

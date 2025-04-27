@@ -1379,6 +1379,7 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll005, TestSize.Level1)
     model.SetRowsGap(Dimension(5.0));
     CreateFixedItems(6); // less than viewport
     CreateDone();
+    ChangeRadio();
 
     GestureEvent info;
     info.SetMainVelocity(-1000.f);
