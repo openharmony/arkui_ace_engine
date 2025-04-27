@@ -3912,7 +3912,7 @@ bool TextFieldPattern::AllowCopy()
 
 void TextFieldPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    CloseSelectOverlay();
+    selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
     auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
