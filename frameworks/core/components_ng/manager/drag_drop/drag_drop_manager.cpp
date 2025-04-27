@@ -1021,10 +1021,7 @@ void DragDropManager::OnDragMove(const DragPointerEvent& pointerEvent, const std
             FireOnDragEvent(preTargetFrameNode_, pointerEvent, DragEventType::LEAVE, extraInfo);
             preTargetFrameNode_ = nullptr;
         }
-
-        if (!isMouseDragged_ || isDragWindowShow_) {
-            UpdateDragStyle(DragCursorStyleCore::MOVE, pointerEvent.pointerEventId);
-        }
+        UpdateDragStyle(DragCursorStyleCore::MOVE, pointerEvent.pointerEventId);
         return;
     }
     HandleOnDragMove(pointerEvent, extraInfo, dragFrameNode);
@@ -1654,9 +1651,6 @@ void DragDropManager::FireOnDragEvent(
     FireOnEditableTextComponent(frameNode, type);
     FireOnDragEventWithDragType(eventHub, type, event, extraParams);
 
-    if (isMouseDragged_ && !isDragWindowShow_) {
-        return;
-    }
     UpdateDragCursorStyle(frameNode, event, pointerEvent.pointerEventId);
 }
 
