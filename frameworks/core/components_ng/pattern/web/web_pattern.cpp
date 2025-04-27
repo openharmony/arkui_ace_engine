@@ -7034,6 +7034,9 @@ bool WebPattern::OnAccessibilityChildTreeDeregister()
     CHECK_NULL_RETURN(pipeline, false);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_RETURN(accessibilityManager, false);
+    if (treeId_ == 0) {
+        return false;
+    }
     return accessibilityManager->DeregisterWebInteractionOperationAsChildTree(treeId_);
 }
 
