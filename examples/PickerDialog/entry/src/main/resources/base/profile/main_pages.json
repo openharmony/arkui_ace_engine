@@ -1,0 +1,27 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/datepickerdialog/DatePickerDialogExample001.ets",
+    "pages/datepickerdialog/DatePickerDialogExample002.ets",
+    "pages/datepickerdialog/DatePickerDialogExample003.ets",
+    "pages/datepickerdialog/DatePickerDialogExample004.ets",
+    "pages/datepickerdialog/DatePickerDialogExample005.ets",
+    "pages/datepickerdialog/DatePickerDialogExample006.ets",
+    "pages/datepickerdialog/DatePickerDialogExample007.ets",
+    "pages/datepickerdialog/DatePickerDialogExample008.ets",
+    "pages/textpickerdialog/TextPickerDialogExample001.ets",
+    "pages/textpickerdialog/TextPickerDialogExample002.ets",
+    "pages/textpickerdialog/TextPickerDialogExample003.ets",
+    "pages/textpickerdialog/TextPickerDialogExample004.ets",
+    "pages/textpickerdialog/TextPickerDialogExample005.ets",
+    "pages/textpickerdialog/TextPickerDialogExample006.ets",
+    "pages/textpickerdialog/TextPickerDialogExample007.ets",
+    "pages/timepickerdialog/TimePickerDialogExample001.ets",
+    "pages/timepickerdialog/TimePickerDialogExample002.ets",
+    "pages/timepickerdialog/TimePickerDialogExample003.ets",
+    "pages/timepickerdialog/TimePickerDialogExample004.ets",
+    "pages/timepickerdialog/TimePickerDialogExample005.ets",
+    "pages/timepickerdialog/TimePickerDialogExample006.ets",
+    "pages/timepickerdialog/TimePickerDialogExample007.ets"
+  ]
+}
