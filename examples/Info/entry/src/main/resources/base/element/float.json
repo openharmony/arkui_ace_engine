@@ -3,6 +3,50 @@
     {
       "name": "page_text_font_size",
       "value": "50fp"
+    },
+    {
+      "name": "float_0",
+      "value": "0"
+    },
+    {
+      "name": "float_03",
+      "value": "0.3"
+    },
+    {
+      "name": "float_1",
+      "value": "1"
+    },
+    {
+      "name": "float_10",
+      "value": "10"
+    },
+    {
+      "name": "float_15",
+      "value": "15"
+    },
+    {
+      "name": "float_20",
+      "value": "20"
+    },
+    {
+      "name": "float_30_6",
+      "value": "30.6"
+    },
+    {
+      "name": "float_40",
+      "value": "40"
+    },
+    {
+      "name": "float_50",
+      "value": "50"
+    },
+    {
+      "name": "float_120",
+      "value": "120"
+    },
+    {
+      "name": "float_fu20",
+      "value": "-20"
     }
   ]
 }

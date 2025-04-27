@@ -11,6 +11,54 @@
     {
       "name": "EntryAbility_label",
       "value": "label"
+    },
+    {
+      "name": "1vp",
+      "value": "1"
+    },
+    {
+      "name": "10vp",
+      "value": "10"
+    },
+    {
+      "name": "250vp",
+      "value": "250"
+    },
+    {
+      "name": "kong",
+      "value": " "
+    },
+    {
+      "name": "20fp",
+      "value": "20fp"
+    },
+    {
+      "name": "20lpx",
+      "value": "20lpx"
+    },
+    {
+      "name": "20",
+      "value": "20"
+    },
+    {
+      "name": "Color_green",
+      "value": "rgb(0,255,0)"
+    },
+    {
+      "name": "rRadius",
+      "value": "10.1"
+    },
+    {
+      "name": "rOffset",
+      "value": "20.1"
+    },
+    {
+      "name": "number_70",
+      "value": "70"
+    },
+    {
+      "name": "number_15",
+      "value": "15"
     }
   ]
 }
