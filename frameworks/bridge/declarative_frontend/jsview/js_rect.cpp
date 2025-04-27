@@ -81,7 +81,7 @@ void JSRect::Create(const JSCallbackInfo& info)
         }
         if ((propertyFlag & HAS_RADIUS) == HAS_RADIUS) {
             JSRef<JSVal> radius = obj->GetProperty("radius");
-            if (radius->IsNumber() || radius->IsString()) {
+            if (radius->IsNumber() || radius->IsString() || radius->IsObject()) {
                 SetRadiusWithJsVal(nullptr, radius);
             } else if (radius->IsArray()) {
                 SetRadiusWithArrayValue(nullptr, radius);

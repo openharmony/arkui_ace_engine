@@ -34077,12 +34077,7 @@ class CommandsModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (isString(this.stageValue) && isString(this.value)) {
-      return this.stageValue !== this.value;
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 CommandsModifier.identity = Symbol('commands');
@@ -34140,7 +34135,7 @@ class RectRadiusModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return !(this.stageValue === this.value);
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 RectRadiusModifier.identity = Symbol('rectRadius');
@@ -34187,8 +34182,10 @@ class ShapeViewPortModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return !(this.stageValue.x === this.value.x && this.stageValue.y === this.value.y &&
-      this.stageValue.width === this.value.width && this.stageValue.height === this.value.height);
+    return !(isBaseOrResourceEqual(this.stageValue.x, this.value.x) &&
+    isBaseOrResourceEqual(this.stageValue.y, this.value.y) &&
+    isBaseOrResourceEqual(this.stageValue.width, this.value.width) &&
+    isBaseOrResourceEqual(this.stageValue.height, this.value.height));
   }
 }
 ShapeViewPortModifier.identity = Symbol('shapeViewPort');
