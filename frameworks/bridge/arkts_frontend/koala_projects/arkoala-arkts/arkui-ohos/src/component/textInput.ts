@@ -676,7 +676,8 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+            if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) ||
+                (TypeChecker.isResource(value_value, false, false, false, false, false))) {
                 thisSerializer.writeInt8(0 as int32)
                 const value_value_0  = value_value as ResourceColor
                 let value_value_0_type : int32 = RuntimeType.UNDEFINED

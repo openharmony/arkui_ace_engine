@@ -760,6 +760,20 @@ void OnSecurityStateChangeImpl(Ark_NativePointer node,
 void OnWillInsertImpl(Ark_NativePointer node,
                       const Opt_Callback_InsertValue_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_NULL_VOID(value->tag != InteropTag::INTEROP_TAG_UNDEFINED);
+    auto onWillInsert = [callback = CallbackHelper(value->value)](const InsertValueInfo& value) -> bool {
+        std::string u8InsertValue = UtfUtils::Str16DebugToStr8(value.insertValue);
+        Ark_InsertValue insertValue = {
+            .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
+            .insertValue = Converter::ArkValue<Ark_String>(u8InsertValue)
+        };
+        return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(insertValue)
+            .value_or(true);
+    };
+    TextFieldModelNG::SetOnWillInsertValueEvent(frameNode, std::move(onWillInsert));
 }
 void OnDidInsertImpl(Ark_NativePointer node,
                      const Opt_Callback_InsertValue_Void* value)

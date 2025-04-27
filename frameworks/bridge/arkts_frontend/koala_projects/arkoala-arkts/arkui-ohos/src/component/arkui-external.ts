@@ -17,7 +17,9 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ResourceColor, Position, Length, SizeOptions, ResourceStr, Font } from "./units"
-import { Color, FontStyle, FontWeight, TextAlign, TextOverflow, TextCase, WordBreak, BorderStyle, TextHeightAdaptivePolicy } from "./enums"
+import { Color, TextOverflow, BorderStyle, TextHeightAdaptivePolicy } from "./enums"
+import { FontOptions, FontInfo } from "@ohos/font/font"
+import { MeasureOptions } from "@ohos/measure"
 import { Resource } from "global/resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
@@ -1143,39 +1145,6 @@ export interface RoundRectShapeOptions extends ShapeSize {
 }
 export interface PathShapeOptions {
     commands?: string;
-}
-export interface FontOptions {
-    familyName: string | Resource;
-    familySrc: string | Resource;
-}
-export interface FontInfo {
-    path: string;
-    postScriptName: string;
-    fullName: string;
-    family: string;
-    subfamily: string;
-    weight: number;
-    width: number;
-    italic: boolean;
-    monoSpace: boolean;
-    symbolic: boolean;
-}
-export interface MeasureOptions {
-    textContent: string | Resource;
-    constraintWidth?: number | string | Resource;
-    fontSize?: number | string | Resource;
-    fontStyle?: number | FontStyle;
-    fontWeight?: number | string | FontWeight;
-    fontFamily?: string | Resource;
-    letterSpacing?: number | string;
-    textAlign?: number | TextAlign;
-    overflow?: number | TextOverflow;
-    maxLines?: number;
-    lineHeight?: number | string | Resource;
-    baselineOffset?: number | string;
-    textCase?: number | TextCase;
-    textIndent?: number | string;
-    wordBreak?: WordBreak;
 }
 export enum EffectDirection {
     DOWN = 0,
