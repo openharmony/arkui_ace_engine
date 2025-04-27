@@ -439,13 +439,10 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
         accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
         arrowAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
     } else {
-        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-        CHECK_NULL_VOID(swiperPattern);
-        auto totalCount = swiperPattern->RealTotalCount();
-        auto displayCount = swiperPattern->GetDisplayCount();
         accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         arrowAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
-        if (totalCount > displayCount) {
+        auto isArrowFocus = arrowAccessibilityProperty->GetAccessibilityFocusState();
+        if (isArrowFocus) {
             swiperNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
         }
     }
