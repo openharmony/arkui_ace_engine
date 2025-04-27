@@ -16,9 +16,18 @@
 #include "grid_test_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 
+#include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void OnItemDragStartEvent(const ItemDragInfo&, int32_t)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel("label");
+};
+} // namespace
+
 class GridEventTestNg : public GridTestNg {
 public:
     void SetUp() override;
@@ -305,5 +314,266 @@ HWTEST_F(GridEventTestNg, HandleBoxSelectDragStart, TestSize.Level1)
 
     GetChildPattern<GridItemPattern>(frameNode_, 0)->SetSelected(true);
     EXPECT_TRUE(pattern_->IsItemSelected(50, 50));
+}
+
+/**
+ * @tc.name: OnItemDragWithAnimation001
+ * @tc.desc: Test drag animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEventTestNg, OnItemDragWithAnimation001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetEditable(true);
+    model.SetSupportAnimation(true);
+    model.SetOnItemDragStart(OnItemDragStartEvent);
+    CreateFixedItems(8);
+    CreateDone();
+    GestureEvent info;
+    Point firstItemPoint = Point(ITEM_MAIN_SIZE * 0.5, ITEM_MAIN_SIZE / 2);
+    info.SetGlobalPoint(firstItemPoint);
+    std::map<int32_t, std::map<int32_t, int32_t>> matrix = { { 0, { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 } } },
+        { 1, { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } } } };
+    float itemWidth = 60.f;
+
+    /**
+     * @tc.steps: step1. Trigger HandleOnItemDragStart,
+     * @tc.expected: Do nothing
+     */
+    eventHub_->HandleOnItemDragStart(info);
+    EXPECT_EQ(eventHub_->draggedIndex_, 0);
+    EXPECT_NE(eventHub_->dragDropProxy_, nullptr);
+    EXPECT_NE(eventHub_->draggingItem_, nullptr);
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+
+    /**
+     * @tc.steps: step2. Trigger drag animation
+     * @tc.expected: Nothing
+     */
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(itemWidth * 1.5);
+    dragInfo.SetY(ITEM_MAIN_SIZE / 2);
+    eventHub_->FireOnItemDragMove(dragInfo, 0, 1);
+    matrix = { { 0, { { 0, 1 }, { 1, 0 }, { 2, 2 }, { 3, 3 } } }, { 1, { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } } } };
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+
+    dragInfo.SetX(itemWidth * 3.5);
+    dragInfo.SetY(ITEM_MAIN_SIZE / 2);
+    eventHub_->FireOnItemDragMove(dragInfo, 0, 3);
+    matrix = { { 0, { { 0, 1 }, { 1, 2 }, { 2, 3 }, { 3, 0 } } }, { 1, { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } } } };
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+
+    dragInfo.SetX(itemWidth * 0.5);
+    dragInfo.SetY(ITEM_MAIN_SIZE * 1.5);
+    eventHub_->FireOnItemDragMove(dragInfo, 0, 4);
+    matrix = { { 0, { { 0, 1 }, { 1, 2 }, { 2, 3 }, { 3, 4 } } }, { 1, { { 0, 0 }, { 1, 5 }, { 2, 6 }, { 3, 7 } } } };
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+
+    dragInfo.SetX(itemWidth * 2.5);
+    dragInfo.SetY(ITEM_MAIN_SIZE * 1.5);
+    eventHub_->FireOnItemDragMove(dragInfo, 0, 7);
+    matrix = { { 0, { { 0, 1 }, { 1, 2 }, { 2, 3 }, { 3, 4 } } }, { 1, { { 0, 5 }, { 1, 6 }, { 2, 7 }, { 3, 0 } } } };
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+}
+
+/**
+ * @tc.name: OnItemDragWithAnimation002
+ * @tc.desc: Test drag animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEventTestNg, OnItemDragWithAnimation002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetEditable(true);
+    model.SetSupportAnimation(true);
+    model.SetOnItemDragStart(OnItemDragStartEvent);
+    CreateFixedItems(8);
+    CreateDone();
+    GestureEvent info;
+    Point firstItemPoint = Point(ITEM_MAIN_SIZE * 0.5, ITEM_MAIN_SIZE / 2);
+    info.SetGlobalPoint(firstItemPoint);
+    std::map<int32_t, std::map<int32_t, int32_t>> matrix = { { 0, { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 } } },
+        { 1, { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } } } };
+    float itemWidth = 60.f;
+
+    /**
+     * @tc.steps: step1. Trigger HandleOnItemDragStart,
+     * @tc.expected: Do nothing
+     */
+    eventHub_->HandleOnItemDragStart(info);
+    EXPECT_EQ(eventHub_->draggedIndex_, 0);
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+
+    /**
+     * @tc.steps: step2. Trigger drag animation
+     * @tc.expected: Expect every gridItem's position is correct.
+     */
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(itemWidth * 1.5);
+    dragInfo.SetY(ITEM_MAIN_SIZE / 2);
+    eventHub_->FireOnItemDragMove(dragInfo, 0, 1);
+    auto rect = pattern_->GetItemRect(0);
+    EXPECT_EQ(rect.x_, itemWidth);
+    EXPECT_EQ(rect.y_, 0);
+    auto rect1 = pattern_->GetItemRect(1);
+    EXPECT_EQ(rect1.x_, 0);
+    EXPECT_EQ(rect1.y_, 0);
+    auto rect2 = pattern_->GetItemRect(2);
+    EXPECT_EQ(rect2.x_, itemWidth * 2);
+    EXPECT_EQ(rect2.y_, 0);
+    auto rect3 = pattern_->GetItemRect(3);
+    EXPECT_EQ(rect3.x_, itemWidth * 3);
+    EXPECT_EQ(rect3.y_, 0);
+
+    dragInfo.SetX(ITEM_MAIN_SIZE * 2.5);
+    dragInfo.SetY(ITEM_MAIN_SIZE * 1.5);
+    eventHub_->FireOnItemDragMove(dragInfo, 0, 7);
+    auto rect0 = pattern_->GetItemRect(0);
+    EXPECT_EQ(rect0.x_, itemWidth * 3);
+    EXPECT_EQ(rect0.y_, ITEM_MAIN_SIZE);
+    auto rect5 = pattern_->GetItemRect(5);
+    EXPECT_EQ(rect5.x_, 0);
+    EXPECT_EQ(rect5.y_, ITEM_MAIN_SIZE);
+    auto rect6 = pattern_->GetItemRect(6);
+    EXPECT_EQ(rect6.x_, itemWidth);
+    EXPECT_EQ(rect6.y_, ITEM_MAIN_SIZE);
+    auto rect7 = pattern_->GetItemRect(7);
+    EXPECT_EQ(rect7.x_, itemWidth * 2);
+    EXPECT_EQ(rect7.y_, ITEM_MAIN_SIZE);
+}
+
+/**
+ * @tc.name: OnItemDragWithAnimation003
+ * @tc.desc: Test drag animation with layoutOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEventTestNg, OnItemDragWithAnimation003, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetEditable(true);
+    model.SetSupportAnimation(true);
+    model.SetOnItemDragStart(OnItemDragStartEvent);
+    model.SetLayoutOptions(option);
+    CreateFixedItems(8);
+    CreateDone();
+    GestureEvent info;
+    Point firstItemPoint = Point(ITEM_MAIN_SIZE * 0.5, ITEM_MAIN_SIZE / 2);
+    info.SetGlobalPoint(firstItemPoint);
+    std::map<int32_t, std::map<int32_t, int32_t>> matrix = { { 0, { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 } } },
+        { 1, { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } } } };
+    float itemWidth = 60.f;
+
+    /**
+     * @tc.steps: step1. Trigger HandleOnItemDragStart,
+     * @tc.expected: Do nothing
+     */
+    eventHub_->HandleOnItemDragStart(info);
+    EXPECT_EQ(eventHub_->draggedIndex_, 0);
+    EXPECT_NE(eventHub_->dragDropProxy_, nullptr);
+    EXPECT_NE(eventHub_->draggingItem_, nullptr);
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+
+    /**
+     * @tc.steps: step2. Trigger drag animation
+     * @tc.expected: Nothing
+     */
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(itemWidth * 1.5);
+    dragInfo.SetY(ITEM_MAIN_SIZE / 2);
+    eventHub_->FireOnItemDragMove(dragInfo, 0, 1);
+    matrix = { { 0, { { 0, 1 }, { 1, 0 }, { 2, 2 }, { 3, 3 } } }, { 1, { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } } } };
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+
+    dragInfo.SetX(itemWidth * 3.5);
+    dragInfo.SetY(ITEM_MAIN_SIZE / 2);
+    eventHub_->FireOnItemDragMove(dragInfo, 0, 3);
+    matrix = { { 0, { { 0, 1 }, { 1, 2 }, { 2, 3 }, { 3, 0 } } }, { 1, { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } } } };
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+
+    dragInfo.SetX(itemWidth * 0.5);
+    dragInfo.SetY(ITEM_MAIN_SIZE * 1.5);
+    eventHub_->FireOnItemDragMove(dragInfo, 0, 4);
+    matrix = { { 0, { { 0, 1 }, { 1, 2 }, { 2, 3 }, { 3, 4 } } }, { 1, { { 0, 0 }, { 1, 5 }, { 2, 6 }, { 3, 7 } } } };
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+
+    dragInfo.SetX(itemWidth * 2.5);
+    dragInfo.SetY(ITEM_MAIN_SIZE * 1.5);
+    eventHub_->FireOnItemDragMove(dragInfo, 0, 7);
+    matrix = { { 0, { { 0, 1 }, { 1, 2 }, { 2, 3 }, { 3, 4 } } }, { 1, { { 0, 5 }, { 1, 6 }, { 2, 7 }, { 3, 0 } } } };
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+}
+
+/**
+ * @tc.name: OnItemDragWithAnimation004
+ * @tc.desc: Test drag animation with layoutOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridEventTestNg, OnItemDragWithAnimation004, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetEditable(true);
+    model.SetSupportAnimation(true);
+    model.SetOnItemDragStart(OnItemDragStartEvent);
+    model.SetLayoutOptions(option);
+    CreateFixedItems(8);
+    CreateDone();
+    GestureEvent info;
+    Point firstItemPoint = Point(ITEM_MAIN_SIZE * 0.5, ITEM_MAIN_SIZE / 2);
+    info.SetGlobalPoint(firstItemPoint);
+    float itemWidth = 60.f;
+
+    /**
+     * @tc.steps: step1. Trigger HandleOnItemDragStart
+     * @tc.expected: Do nothing
+     */
+    eventHub_->HandleOnItemDragStart(info);
+    EXPECT_EQ(eventHub_->draggedIndex_, 0);
+
+    /**
+     * @tc.steps: step2. Trigger drag animation
+     * @tc.expected: Expect every gridItem's position is correct.
+     */
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(itemWidth * 1.5);
+    dragInfo.SetY(ITEM_MAIN_SIZE / 2);
+    eventHub_->FireOnItemDragMove(dragInfo, 0, 1);
+    auto rect = pattern_->GetItemRect(0);
+    EXPECT_EQ(rect.x_, itemWidth);
+    EXPECT_EQ(rect.y_, 0);
+    auto rect1 = pattern_->GetItemRect(1);
+    EXPECT_EQ(rect1.x_, 0);
+    EXPECT_EQ(rect1.y_, 0);
+    auto rect2 = pattern_->GetItemRect(2);
+    EXPECT_EQ(rect2.x_, itemWidth * 2);
+    EXPECT_EQ(rect2.y_, 0);
+    auto rect3 = pattern_->GetItemRect(3);
+    EXPECT_EQ(rect3.x_, itemWidth * 3);
+    EXPECT_EQ(rect3.y_, 0);
+
+    dragInfo.SetX(ITEM_MAIN_SIZE * 2.5);
+    dragInfo.SetY(ITEM_MAIN_SIZE * 1.5);
+    eventHub_->FireOnItemDragMove(dragInfo, 0, 7);
+    auto rect0 = pattern_->GetItemRect(0);
+    EXPECT_EQ(rect0.x_, itemWidth * 3);
+    EXPECT_EQ(rect0.y_, ITEM_MAIN_SIZE);
+    auto rect5 = pattern_->GetItemRect(5);
+    EXPECT_EQ(rect5.x_, 0);
+    EXPECT_EQ(rect5.y_, ITEM_MAIN_SIZE);
+    auto rect6 = pattern_->GetItemRect(6);
+    EXPECT_EQ(rect6.x_, itemWidth);
+    EXPECT_EQ(rect6.y_, ITEM_MAIN_SIZE);
+    auto rect7 = pattern_->GetItemRect(7);
+    EXPECT_EQ(rect7.x_, itemWidth * 2);
+    EXPECT_EQ(rect7.y_, ITEM_MAIN_SIZE);
 }
 } // namespace OHOS::Ace::NG
