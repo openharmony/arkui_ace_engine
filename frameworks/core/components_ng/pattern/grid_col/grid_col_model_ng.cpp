@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,12 @@
 namespace OHOS::Ace::NG {
 void GridColModelNG::Create()
 {
-    V2::GridContainerSize span = V2::GridContainerSize(1);
+    V2::GridContainerSize span;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        span = V2::GridContainerSize(1);
+    } else {
+        span = V2::GridContainerSize(NG::DEFAULT_SPAN_NUMBER);
+    }
     V2::GridContainerSize offset = V2::GridContainerSize(0);
     V2::GridContainerSize order = V2::GridContainerSize(0);
     Create(span, offset, order);

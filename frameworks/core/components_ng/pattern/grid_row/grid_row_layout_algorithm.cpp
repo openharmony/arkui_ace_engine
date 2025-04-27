@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,7 +126,12 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
         gridCol->UpdateSizeType(sizeType);
 
         /* Measure child */
-        auto span = std::min(gridCol->GetSpan(sizeType), columnNum);
+        int32_t span = 0;
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+            span = std::min(gridCol->GetSpan(sizeType), columnNum);
+        } else {
+            span = gridCol->GetSpan(sizeType) >= 0 ? std::min(gridCol->GetSpan(sizeType), columnNum) : columnNum;
+        }
 
         /* Calculate line break */
         NewLineOffset newLineOffset;
