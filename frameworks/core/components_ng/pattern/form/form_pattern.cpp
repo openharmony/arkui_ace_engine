@@ -1283,7 +1283,8 @@ RefPtr<FrameNode> FormPattern::CreateForbiddenImageNode(InternalResource::Resour
     auto imageRenderProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_RETURN(imageRenderProperty, nullptr);
     imageRenderProperty->UpdateSvgFillColor(newColor);
-    CalcSize idealSize = { CalcLength(FORBIDDEN_ICON_STYLE, DimensionUnit::VP), CalcLength(FORBIDDEN_ICON_STYLE, DimensionUnit::VP) };
+    CalcSize idealSize = { CalcLength(FORBIDDEN_ICON_STYLE, DimensionUnit::VP),
+        CalcLength(FORBIDDEN_ICON_STYLE, DimensionUnit::VP) };
     imageLayoutProperty->UpdateUserDefinedIdealSize(idealSize);
     auto externalContext = DynamicCast<NG::RosenRenderContext>(imageNode->GetRenderContext());
     CHECK_NULL_RETURN(externalContext, nullptr);
