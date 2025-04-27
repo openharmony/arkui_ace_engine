@@ -29,8 +29,10 @@
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
+#include "core/components_ng/pattern/overlay/overlay_container_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
@@ -1282,6 +1284,167 @@ HWTEST_F(NavigationModelTestNg, NavigationManager001, TestSize.Level1)
     ASSERT_EQ(navigationId, "");
     auto stack = result->pathStack;
     ASSERT_EQ(stack, navigationStack);
+}
+
+/**
+ * @tc.name: NavigationManager002
+ * @tc.desc: increase the coverage of CheckNodeNeedCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, NavigationManager002, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create navigation node and set navigation stack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationNode, nullptr);
+
+    auto stackCreator = []() -> RefPtr<MockNavigationStack> {
+        return AceType::MakeRefPtr<MockNavigationStack>();
+    };
+    auto stackUpdater = [&navigationModel](RefPtr<NG::NavigationStack> stack) {
+        navigationModel.SetNavigationStackProvided(false);
+        auto mockStack = AceType::DynamicCast<MockNavigationStack>(stack);
+        ASSERT_NE(mockStack, nullptr);
+    };
+    navigationModel.SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+
+    /**
+     * @tc.steps:step2. CheckNodeNeedCache return true
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto navigationMgr = context->GetNavigationManager();
+    ASSERT_NE(navigationMgr, nullptr);
+    auto ButtonframeNode = FrameNode::CreateFrameNode("button", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto result = navigationMgr->CheckNodeNeedCache(ButtonframeNode);
+    ASSERT_EQ(result, true);
+}
+
+/**
+ * @tc.name: NavigationManager003
+ * @tc.desc: coverage of CacheNavigationNodeAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, NavigationManager003, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. CacheNavigationNodeAnimation return void
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto navigationMgr = context->GetNavigationManager();
+    ASSERT_NE(navigationMgr, nullptr);
+    std::cout << "test1" << std::endl;
+    navigationMgr->hasCacheNavigationNodeEnable_ = true;
+    navigationMgr->isInAnimation_ = false;
+    navigationMgr->isNodeAddAnimation_ = true;
+    navigationMgr->CacheNavigationNodeAnimation();
+    std::cout << "test2" << std::endl;
+    ASSERT_EQ(navigationMgr->isNodeAddAnimation_, true);
+}
+
+/**
+ * @tc.name: NavigationManager004
+ * @tc.desc: coverage of AddNavigation, branch iter == navigationMaps_.end() == true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, NavigationManager004, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. AddNavigation return void
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto navigationMgr = context->GetNavigationManager();
+    ASSERT_NE(navigationMgr, nullptr);
+    navigationMgr->navigationMaps_.clear();
+    int32_t parentId = 1;
+    int32_t navigationId = 2;
+    navigationMgr->AddNavigation(parentId, navigationId);
+    ASSERT_EQ(navigationMgr->navigationMaps_.size(), 1);
+    ASSERT_EQ(navigationMgr->navigationMaps_[1].size(), 1);
+}
+
+/**
+ * @tc.name: NavigationManager005
+ * @tc.desc: coverage of AddNavigation, branch iter == navigationMaps_.end() == false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, NavigationManager005, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. AddNavigation return void
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto navigationMgr = context->GetNavigationManager();
+    ASSERT_NE(navigationMgr, nullptr);
+    navigationMgr->navigationMaps_.clear();
+    navigationMgr->navigationMaps_[1] = {2};
+    int32_t parentId = 1;
+    int32_t navigationId = 3;
+    navigationMgr->AddNavigation(parentId, navigationId);
+    ASSERT_EQ(navigationMgr->navigationMaps_.size(), 1);
+    ASSERT_EQ(navigationMgr->navigationMaps_[1].size(), 2);
+    navigationMgr->navigationMaps_.clear();
+}
+
+/**
+ * @tc.name: NavigationManager006
+ * @tc.desc: coverage of RemoveNavigation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, NavigationManager006, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. AddNavigation return void
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto navigationMgr = context->GetNavigationManager();
+    ASSERT_NE(navigationMgr, nullptr);
+    navigationMgr->navigationMaps_[1] = {2, 3};
+    ASSERT_EQ(navigationMgr->navigationMaps_.size(), 1);
+    ASSERT_EQ(navigationMgr->navigationMaps_[1].size(), 2);
+}
+
+/**
+ * @tc.name: NavigationManager007
+ * @tc.desc: coverage of IsOverlayValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, NavigationManager007, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. IsOverlayValid return bool, branch node->GetTag() == V2::OVERLAY_ETS_TAG
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto navigationMgr = context->GetNavigationManager();
+    ASSERT_NE(navigationMgr, nullptr);
+    std::optional<std::pair<bool, bool>> config;
+    navigationMgr->SetStatusBarConfig(config);
+    std::optional<bool> navigationConfig;
+    navigationMgr->SetNavigationIndicatorConfig(navigationConfig);
+    navigationMgr->FireSubWindowLifecycle(nullptr, 1, 1);
+    auto overlayNode = FrameNode::CreateCommonNode(V2::OVERLAY_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            true, AceType::MakeRefPtr<OverlayContainerPattern>());
+    auto overlayNodeProperty = overlayNode->GetLayoutProperty();
+    overlayNodeProperty->UpdateVisibility(VisibleType::VISIBLE);
+    bool result = navigationMgr->IsOverlayValid(overlayNode);
+    ASSERT_EQ(result, false);
 }
 
 /**
