@@ -61,6 +61,7 @@ public:
     void SetMaxLines(uint32_t value) override;
     void SetStopBackPress(bool isStopBackPress) override;
     void SetKeyboardAppearance(KeyboardAppearance value) override;
+    void SetSupportStyledUndo(bool enabled) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);

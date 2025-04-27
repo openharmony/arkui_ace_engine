@@ -326,4 +326,31 @@ HWTEST_F(RichEditorUndoRedoTest, ClearOperationRecords001, TestSize.Level1)
     ASSERT_EQ(richEditorPattern->operationRecords_.empty(), true);
 }
 
+/**
+ * @tc.name: SetUndoStyle001
+ * @tc.desc: test set UndoStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUndoRedoTest, SetUndoStyle001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_EQ(richEditorPattern->isStyledUndoSupported_, false);
+    RichEditorPattern::OperationRecord record;
+    richEditorPattern->operationRecords_.push_back(record);
+    richEditorPattern->redoOperationRecords_.push_back(record);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), 1);
+    EXPECT_EQ(richEditorPattern->redoOperationRecords_.size(), 1);
+
+    richEditorModel.SetSupportStyledUndo(true);
+    EXPECT_EQ(richEditorPattern->isStyledUndoSupported_, true);
+    EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
+    EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
+}
+
 } // namespace OHOS::Ace::NG
