@@ -375,7 +375,8 @@ void XComponentPattern::OnModifyDone()
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     auto bkColor = renderContext->GetBackgroundColor().value_or(Color::BLACK);
-    handlingSurfaceRenderContext_->UpdateBackgroundColor((bkColor.GetAlpha() < UINT8_MAX) ? Color::TRANSPARENT : bkColor);
+    handlingSurfaceRenderContext_->UpdateBackgroundColor(
+        (bkColor.GetAlpha() < UINT8_MAX) ? Color::TRANSPARENT : bkColor);
 }
 
 void XComponentPattern::OnAreaChangedInner()
@@ -564,7 +565,8 @@ void XComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("enableTransparentLayer", isTransparentLayer_ ? "true" : "false", filter);
     json->PutExtAttr("screenId", screenId_.has_value() ? std::to_string(screenId_.value()).c_str() : "", filter);
     if (type_ == XComponentType::SURFACE) {
-        json->PutExtAttr("renderFit", XComponentUtils::XComponentRenderFitToString(GetSurfaceRenderFit()).c_str(), filter);
+        json->PutExtAttr(
+            "renderFit", XComponentUtils::XComponentRenderFitToString(GetSurfaceRenderFit()).c_str(), filter);
     }
 }
 
@@ -1135,8 +1137,8 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
 
     if (nativeXComponent_ && nativeXComponentImpl_) {
         nativeXComponentImpl_->SetHistoricalPoint(SetHistoryPoint(info.GetHistory()));
-        nativeXComponentImpl_->SetCurrentSourceType(
-            { touchInfo.GetFingerId(), XComponentUtils::ConvertNativeXComponentEventSourceType(info.GetSourceDevice()) });
+        nativeXComponentImpl_->SetCurrentSourceType({ touchInfo.GetFingerId(),
+            XComponentUtils::ConvertNativeXComponentEventSourceType(info.GetSourceDevice()) });
     }
     NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
 
@@ -1235,7 +1237,8 @@ void XComponentPattern::SetTouchPoint(
         xcomponentTouchPoint.windowY = static_cast<float>(pointWindowOffset.GetY());
         xcomponentTouchPoint.displayX = static_cast<float>(pointDisplayOffset.GetX());
         xcomponentTouchPoint.displayY = static_cast<float>(pointDisplayOffset.GetY());
-        xcomponentTouchPoint.sourceToolType = XComponentUtils::ConvertNativeXComponentTouchToolType(pointTouchInfo.GetSourceTool());
+        xcomponentTouchPoint.sourceToolType =
+            XComponentUtils::ConvertNativeXComponentTouchToolType(pointTouchInfo.GetSourceTool());
         nativeXComponentTouchPoints_.emplace_back(xcomponentTouchPoint);
     }
     while (index < OH_MAX_TOUCH_POINTS_NUMBER) {

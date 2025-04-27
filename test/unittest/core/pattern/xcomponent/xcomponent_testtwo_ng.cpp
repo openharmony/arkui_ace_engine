@@ -1657,4 +1657,72 @@ HWTEST_F(XComponentTestTwoNg, GetXComponentSurfaceRectTest, TestSize.Level1)
     EXPECT_EQ(surfaceWidth, SURFACE_WIDTH_SIZE);
     EXPECT_EQ(surfaceHeight, SURFACE_HEIGHT_SIZE);
 }
+
+/**
+ * @tc.name: OnDetachContextTest
+ * @tc.desc: Test OnDetachContext Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, OnDetachContextTest, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create XComponent
+     * @tc.expected: Create XComponent Successfully
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    PipelineContext* context = frameNode->GetContext();
+    ASSERT_TRUE(context);
+
+    /**
+     * @tc.step2: Call OnDetachContext Func
+     * @tc.expected: onWindowStateChangedCallbacks_ can not find nodeId by the frameNode
+     */
+    pattern->OnDetachContext(context);
+    EXPECT_EQ(context->onWindowStateChangedCallbacks_.find(frameNode->GetId()),
+        context->onWindowStateChangedCallbacks_.end());
+}
+
+/**
+ * @tc.name: ToJsonValueTest
+ * @tc.desc: Test ToJsonValue Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, ToJsonValueTest, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create XComponent
+     * @tc.expected: Create XComponent Successfully
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    PipelineContext* context = frameNode->GetContext();
+    ASSERT_TRUE(context);
+
+    /**
+     * @tc.step2: Call ToJsonValueTest Func
+     * @tc.expected: EXPECT_EQ has no failure
+     */
+    pattern->isEnableAnalyzer_ = true;
+    pattern->isEnableSecure_ = true;
+    pattern->hdrBrightness_ = 0.5;
+    pattern->isTransparentLayer_ = true;
+    pattern->screenId_ = 12345;
+
+    InspectorFilter filter;
+    auto JsonValue = JsonUtil::Create(true);
+    pattern->ToJsonValue(JsonValue, filter);
+    EXPECT_EQ(JsonValue->GetString("enableAnalyzer"), "true");
+    EXPECT_EQ(JsonValue->GetString("enableSecure"), "true");
+    EXPECT_EQ(std::stof(JsonValue->GetString("hdrBrightness")), 0.5);
+    EXPECT_EQ(JsonValue->GetString("enableTransparentLayer"), "true");
+    EXPECT_EQ(std::stof(JsonValue->GetString("screenId")), 12345);
+    EXPECT_EQ(JsonValue->GetString("renderFit"), "RenderFit.RESIZE_FILL");
+}
 } // namespace OHOS::Ace::NG
