@@ -25,7 +25,6 @@ export class ArkImageNode extends ArkBaseNode {
 
     constructParam(...param: Object[]): this {
         let peerNode = this.getPeer() as ArkImagePeer
-        InteropNativeModule._NativeLog(`ark image node constuct params, param = ${JSON.stringify(param)}`)
         peerNode.setImageOptions0Attribute(param[0] as PixelMap | ResourceStr | DrawableDescriptor)
         return this
     }

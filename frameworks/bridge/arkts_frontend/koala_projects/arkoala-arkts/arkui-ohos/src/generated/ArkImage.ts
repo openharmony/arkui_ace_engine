@@ -325,7 +325,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         if (isAttributeUpdater) {
             let attributeUpdater = value as object as AttributeUpdater<ImageAttribute, ImageInterface>
             attributeUpdater.updateConstructorParams = (...params: Object[]) => {
-                InteropNativeModule._NativeLog(`image update constructor params`)
                 const node = this.getModifierHost()! as ArkImageNode
                 this.getModifierHost()!.constructParam(params)
                 return node
