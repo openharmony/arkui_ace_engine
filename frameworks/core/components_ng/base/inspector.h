@@ -58,6 +58,8 @@ public:
     static void HideAllMenus();
     static void AddOffscreenNode(RefPtr<FrameNode> node);
     static void RemoveOffscreenNode(RefPtr<FrameNode> node);
+    static RefPtr<UINode> GetInspectorByKey(
+        const RefPtr<FrameNode>& root, const std::string& key, bool notDetach = false);
     static void GetInspectorTree(InspectorTreeMap& treesInfo);
     static void GetOffScreenTreeNodes(InspectorTreeMap& nodes);
     static void GetRecordAllPagesNodes(InspectorTreeMap& treesInfo);

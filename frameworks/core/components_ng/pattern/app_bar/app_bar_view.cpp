@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/app_bar/app_bar_utils.h"
+#include "core/components_ng/base/inspector.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -102,30 +103,28 @@ void AppBarView::BindJSContainer()
     pattern->AppBgColorCallBack();
 }
 
-void AppBarView::AddContentToJSContainer()
+void AppBarView::BuildAppbar(RefPtr<PipelineBase> pipleline)
 {
-    auto atom = atomicService_.Upgrade();
+    CHECK_NULL_VOID(pipleline);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipleline);
+    CHECK_NULL_VOID(pipelineContext);
+    auto container = Container::GetContainer(pipelineContext->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    auto appbar = container->GetAppBar();
+    CHECK_NULL_VOID(appbar);
+    auto atom = appbar->atomicService_.Upgrade();
     CHECK_NULL_VOID(atom);
-    auto pattern = atom->GetPattern<AtomicServicePattern>();
-    CHECK_NULL_VOID(pattern);
-    auto stageNodeWrapper = pattern->GetStageNodeWrapper();
+    auto customAppBarNode = NG::ViewStackProcessor::GetInstance()->GetCustomAppBarNode();
+    CHECK_NULL_VOID(customAppBarNode);
+    customAppBarNode->Build(nullptr);
+    auto stageNodeWrapperNode = Inspector::GetInspectorByKey(atom, "AtomicServiceStageId");
+    CHECK_NULL_VOID(stageNodeWrapperNode);
+    auto stageNodeWrapper = AceType::DynamicCast<FrameNode>(stageNodeWrapperNode);
     CHECK_NULL_VOID(stageNodeWrapper);
-    CHECK_NULL_VOID(contentStage_);
-    stageNodeWrapper->AddChild(contentStage_);
+    CHECK_NULL_VOID(appbar->contentStage_);
+    stageNodeWrapper->AddChild(appbar->contentStage_);
     stageNodeWrapper->MarkModifyDone();
     stageNodeWrapper->MarkDirtyNode();
-
-    auto focusHub = contentStage_->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->AnyChildFocusHub([](const RefPtr<FocusHub>& child) {
-        auto node = child->GetFrameNode();
-        auto focusView = node ? node->GetPattern<FocusView>() : nullptr;
-        if (focusView) {
-            focusView->FocusViewShow();
-            return true;
-        }
-        return false;
-    });
 }
 
 RefPtr<FrameNode> AppBarView::BuildMenuBarRow()
