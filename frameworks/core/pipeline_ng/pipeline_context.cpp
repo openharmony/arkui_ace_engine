@@ -2960,12 +2960,13 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
     CHECK_RUN_ON(UI);
     if (!NearEqual(density, density_)) {
         isDensityChanged_ = true;
+        isNeedReloadDensity_ = true;
     }
     density_ = density;
     if (!NearZero(viewScale_)) {
         dipScale_ = density_ / viewScale_;
     }
-    if (isDensityChanged_) {
+    if (isNeedReloadDensity_) {
         UIObserverHandler::GetInstance().NotifyDensityChange(density_);
         PipelineBase::OnSurfaceDensityChanged(density);
     }
