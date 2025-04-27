@@ -1205,6 +1205,19 @@ public:
         return keyboardAppearance_;
     }
 
+    void SetSupportStyledUndo(bool enabled)
+    {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SupportStyledUndo:%{public}d->%{public}d", isStyledUndoSupported_, enabled);
+        CHECK_NULL_VOID(!isSpanStringMode_ && (isStyledUndoSupported_ != enabled));
+        ClearOperationRecords();
+        isStyledUndoSupported_ = enabled;
+    }
+
+    bool IsSupportStyledUndo() const
+    {
+        return isSpanStringMode_ || isStyledUndoSupported_;
+    }
+
     bool IsDragging() const override
     {
         return status_ == Status::DRAGGING || status_ == Status::FLOATING;
@@ -1748,6 +1761,7 @@ private:
     std::optional<int32_t> maxLength_ = std::nullopt;
     std::unique_ptr<OneStepDragController> oneStepDragController_;
     std::unique_ptr<RichEditorUndoManager> undoManager_;
+    bool isStyledUndoSupported_ = false;
     std::list<WeakPtr<ImageSpanNode>> imageNodes;
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
     bool isStopBackPress_ = true;

@@ -632,6 +632,13 @@ void RichEditorModelNG::SetKeyboardAppearance(KeyboardAppearance value)
     richEditorPattern->SetKeyboardAppearance(value);
 }
 
+void RichEditorModelNG::SetSupportStyledUndo(bool enabled)
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetSupportStyledUndo(enabled);
+}
+
 void RichEditorModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value)
 {
     CHECK_NULL_VOID(frameNode);
