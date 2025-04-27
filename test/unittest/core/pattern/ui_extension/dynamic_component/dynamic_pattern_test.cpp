@@ -891,4 +891,33 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest024, TestSize.Level1)
     dynamicPattern->HandleErrorCallback(DCResultCode::DC_WORKER_EXCEED_MAX_NUM);
 #endif
 }
+
+/**
+ * @tc.name: DynamicPatternTest025
+ * @tc.desc: Test DynamicPattern Accessibility02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest025, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. get DynamicPattern.
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    ASSERT_NE(dynamicPattern, nullptr);
+    EXPECT_EQ(dynamicPattern->accessibilityChildTreeCallback_, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize Accessibility
+     */
+    dynamicPattern->InitializeAccessibility();
+    EXPECT_NE(dynamicPattern->accessibilityChildTreeCallback_, nullptr);
+
+    /**
+     * @tc.steps: step3. Initialize Accessibility Again
+     */
+    dynamicPattern->InitializeAccessibility();
+    EXPECT_NE(dynamicPattern->accessibilityChildTreeCallback_, nullptr);
+#endif
+}
 } // namespace OHOS::Ace::NG
