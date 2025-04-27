@@ -29,6 +29,9 @@
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/image/sk_image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#ifdef USE_NEW_SKIA
+#include "include/codec/SkCodecAnimation.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {

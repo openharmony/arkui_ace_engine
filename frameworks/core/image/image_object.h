@@ -22,6 +22,9 @@
 #include "core/image/animated_image_player.h"
 #include "core/image/image_source_info.h"
 #include "frameworks/core/components/svg/parse/svg_dom.h"
+#ifdef USE_NEW_SKIA
+#include "include/core/SkStream.h"
+#endif
 
 namespace OHOS::Ace {
 
