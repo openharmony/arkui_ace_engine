@@ -59,6 +59,23 @@ public:
     static void SetSurfaceBackgroundColor(FrameNode* frameNode, Color color);
     static void SetShortcutKeyEnabled(FrameNode* frameNode, bool isEnableShortcutKey);
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetSrc(FrameNode* frameNode,
+        const std::string& src, const std::string& bundleName, const std::string& moduleName);
+    static void SetProgressRate(FrameNode* frameNode, double progressRate);
+    static void SetPosterSourceInfo(FrameNode* frameNode, const ImageSourceInfo& posterSourceInfo);
+    static void SetVideoController(FrameNode* frameNode, const RefPtr<VideoControllerV2>& videoController);
+    static void EnableAnalyzer(FrameNode* frameNode, bool enable);
+    static void SetOnStart(FrameNode* frameNode, VideoEventFunc&& onStart);
+    static void SetOnPause(FrameNode* frameNode, VideoEventFunc&& onPause);
+    static void SetOnFinish(FrameNode* frameNode, VideoEventFunc&& onFinish);
+    static void SetOnFullScreenChange(FrameNode* frameNode, VideoEventFunc&& onFullScreenChange);
+    static void SetOnPrepared(FrameNode* frameNode, VideoEventFunc&& onPrepared);
+    static void SetOnSeeking(FrameNode* frameNode, VideoEventFunc&& onSeeking);
+    static void SetOnSeeked(FrameNode* frameNode, VideoEventFunc&& onSeeked);
+    static void SetOnUpdate(FrameNode* frameNode, VideoEventFunc&& onUpdate);
+    static void SetOnError(FrameNode* frameNode, VideoEventFunc&& onError);
+    static void SetOnStop(FrameNode* frameNode, VideoEventFunc&& onStop);
 };
 
 } // namespace OHOS::Ace::NG

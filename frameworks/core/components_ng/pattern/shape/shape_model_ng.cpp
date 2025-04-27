@@ -191,4 +191,18 @@ void ShapeModelNG::SetBitmapMesh(FrameNode* frameNode, const std::vector<float>&
     ACE_UPDATE_NODE_PAINT_PROPERTY(
         ShapeContainerPaintProperty, ImageMesh, ImageMesh(mesh, (int32_t)column, (int32_t)row), frameNode);
 }
+
+void ShapeModelNG::InitBox(FrameNode* frameNode, const RefPtr<PixelMap>& pixMap)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        ImageSourceInfo pixelMapInfo(pixMap);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, PixelMapInfo, pixelMapInfo, frameNode);
+    }
+}
+
+RefPtr<NG::FrameNode> ShapeModelNG::CreateFrameNode(int32_t nodeId)
+{
+    return FrameNode::CreateFrameNode(
+        V2::SHAPE_ETS_TAG, nodeId, AceType::MakeRefPtr<ShapeContainerPattern>());
+}
 } // namespace OHOS::Ace::NG

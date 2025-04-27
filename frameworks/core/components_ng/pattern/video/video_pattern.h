@@ -268,6 +268,9 @@ public:
     void SetCurrentVolume(float currentVolume);
     float GetCurrentVolume() const;
 
+    void SetVideoController(const RefPtr<VideoControllerV2>& videoController);
+    RefPtr<VideoControllerV2> GetVideoController();
+
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
 #endif

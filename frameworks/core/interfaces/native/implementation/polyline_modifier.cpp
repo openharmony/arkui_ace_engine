@@ -46,11 +46,10 @@ namespace PolylineModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = PolygonModelNG::CreateFrameNode(id, false);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = PolygonModelNG::CreateFrameNode(id, false);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // PolylineModifier
 namespace PolylineInterfaceModifier {
@@ -63,9 +62,13 @@ void SetPolylineOptionsImpl(Ark_NativePointer node,
     auto opt = Converter::OptConvert<PolylineOptions>(*options);
     CHECK_NULL_VOID(opt);
     Validator::ValidateNonNegative(opt->width);
-    // ShapeAbstractModelNG::SetWidth(frameNode, opt->width);
+    if (opt->width) {
+        ShapeAbstractModelNG::SetWidth(frameNode, opt->width.value());
+    }
     Validator::ValidateNonNegative(opt->height);
-    // ShapeAbstractModelNG::SetHeight(frameNode, opt->height);
+    if (opt->height) {
+        ShapeAbstractModelNG::SetHeight(frameNode, opt->height.value());
+    }
 }
 } // PolylineInterfaceModifier
 namespace PolylineAttributeModifier {
@@ -76,11 +79,10 @@ void PointsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     CHECK_EQUAL_VOID(value->tag, InteropTag::INTEROP_TAG_UNDEFINED);
-    std::optional<ShapePoints> points = Converter::Convert<std::vector<ShapePoint>>(value->value);
-    if (points->size() < POINTS_NUMBER_MIN) {
-        points.reset();
+    auto points = Converter::Convert<std::vector<ShapePoint>>(value->value);
+    if (points.size() >= POINTS_NUMBER_MIN) {
+        PolygonModelNG::SetPoints(frameNode, points);
     }
-    // PolygonModelNG::SetPoints(frameNode, points);
 }
 } // PolylineAttributeModifier
 const GENERATED_ArkUIPolylineModifier* GetPolylineModifier()

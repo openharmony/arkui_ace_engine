@@ -47,6 +47,14 @@ public:
     static void SetStroke(FrameNode* frameNode, const Color& color);
     static void SetFill(FrameNode* frameNode, const Color& color);
     static void SetStrokeWidth(FrameNode* frameNode, const Ace::Dimension& lineWidth);
+    static void SetStrokeDashOffset(FrameNode* frameNode, const Ace::Dimension& dashOffset);
+    static void SetStrokeLineCap(FrameNode* frameNode, int lineCapStyle);
+    static void SetStrokeLineJoin(FrameNode* frameNode, int lineJoinStyle);
+    static void SetStrokeMiterLimit(FrameNode* frameNode, double miterLimit);
+    static void SetStrokeOpacity(FrameNode* frameNode, double opacity);
+    static void SetFillOpacity(FrameNode* frameNode, double opacity);
+    static void SetAntiAlias(FrameNode* frameNode, bool antiAlias);
+    static void SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ace::Dimension>& segments);
 };
 
 } // namespace OHOS::Ace::NG

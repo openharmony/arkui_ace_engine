@@ -46,5 +46,12 @@ void PolygonModelNG::SetPoints(FrameNode* frameNode, const ShapePoints& points)
     ACE_UPDATE_NODE_PAINT_PROPERTY(PolygonPaintProperty, Points, points, frameNode);
 }
 
+RefPtr<FrameNode> PolygonModelNG::CreateFrameNode(int32_t nodeId, bool isPolygon)
+{
+    return FrameNode::CreateFrameNode(
+        isPolygon ? V2::POLYGON_ETS_TAG : V2::POLYLINE_ETS_TAG,
+        nodeId, AceType::MakeRefPtr<PolygonPattern>(isPolygon));
+}
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_MODEL_NG_CPP

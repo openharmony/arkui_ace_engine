@@ -60,6 +60,9 @@ public:
     static void SetBitmapMesh(FrameNode* frameNode, const std::vector<float>& mesh, int32_t column, int32_t row);
     static void SetWidth(FrameNode* frameNode) {}
     static void SetHeight(FrameNode* frameNode) {}
+    // for arkts 1.2
+    static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId);
+    static void InitBox(FrameNode* frameNode, const RefPtr<PixelMap>& pixMap);
 };
 
 } // namespace OHOS::Ace::NG
