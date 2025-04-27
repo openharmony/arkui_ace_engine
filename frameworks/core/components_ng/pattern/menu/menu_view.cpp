@@ -877,14 +877,13 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
             isAllowedDrag = false;
         }
     }
-    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) != MenuPreviewMode::NONE ||
-        (isAllowedDrag && !isLiftingDisabled)) {
+    auto isLongPressDrag = menuParam.menuBindType == MenuBindingType::LONG_PRESS && isAllowedDrag && !isLiftingDisabled;
+    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) != MenuPreviewMode::NONE || isLongPressDrag) {
         DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
         SetFilter(targetNode, wrapperNode);
     }
     if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::IMAGE ||
-        (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::NONE &&
-            menuParam.menuBindType == MenuBindingType::LONG_PRESS && isAllowedDrag && !isLiftingDisabled) ||
+        (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::NONE && isLongPressDrag) ||
         menuParam.isShowHoverImage) {
         SetPixelMap(targetNode, wrapperNode, hoverImageStackNode, previewNode, menuParam);
     }
