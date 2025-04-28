@@ -180,6 +180,7 @@ void CanvasPattern::OnSizeChanged(const DirtySwapConfig& config, bool needReset)
 
 void CanvasPattern::SetAntiAlias(bool isEnabled)
 {
+    CHECK_NULL_VOID(paintMethod_);
 #ifndef USE_FAST_TASKPOOL
     auto task = [isEnabled](CanvasPaintMethod& paintMethod) {
         paintMethod.SetAntiAlias(isEnabled);
@@ -671,6 +672,7 @@ void CanvasPattern::UpdateShadowBlur(double blur)
 
 void CanvasPattern::UpdateShadowColor(const Color& color)
 {
+    CHECK_NULL_VOID(paintMethod_);
 #ifndef USE_FAST_TASKPOOL
     auto task = [color](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowColor(color);
@@ -1061,6 +1063,7 @@ void CanvasPattern::SetTextDirection(TextDirection direction)
     if (direction == TextDirection::INHERIT) {
         direction = directionCommon;
     }
+    CHECK_NULL_VOID(paintMethod_);
 #ifndef USE_FAST_TASKPOOL
     auto task = [direction](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTextDirection(direction);
@@ -1194,7 +1197,9 @@ void CanvasPattern::CreateAnalyzerOverlay()
 
 void CanvasPattern::UpdateAnalyzerOverlay()
 {
-    auto context = GetHost()->GetRenderContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
     auto pixelMap = context->GetThumbnailPixelMap();
     CHECK_NULL_VOID(pixelMap);
