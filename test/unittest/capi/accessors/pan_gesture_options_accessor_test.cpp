@@ -145,4 +145,32 @@ HWTEST_F(PanGestureOptionsAccessorTest, setFingersTest, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: getDistanceTestDefault
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanGestureOptionsAccessorTest, getDistanceTestDefault, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getDistance, nullptr);
+    auto distance = Converter::Convert<float>(accessor_->getDistance(peer_));
+    EXPECT_NEAR(distance, static_cast<float>(DEFAULT_PAN_DISTANCE.ConvertToPx()), FLT_EPSILON);
+}
+
+/**
+ * @tc.name: setDistanceTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanGestureOptionsAccessorTest, getDistanceTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getDistance, nullptr);
+
+    for (auto& [expected, actual] : SET_DISTANCE_TEST_PLAN) {
+        accessor_->setDistance(peer_, &actual);
+        auto result = Converter::Convert<float>(accessor_->getDistance(peer_));
+        EXPECT_NEAR(result, static_cast<float>(expected), FLT_EPSILON);
+    }
+}
+
 } // namespace OHOS::Ace::NG

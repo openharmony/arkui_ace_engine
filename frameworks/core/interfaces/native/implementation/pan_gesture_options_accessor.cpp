@@ -128,7 +128,12 @@ Ark_PanDirection GetDirectionImpl(Ark_PanGestureOptions peer)
 }
 Ark_Number GetDistanceImpl(Ark_PanGestureOptions peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(
+        static_cast<float>(DEFAULT_PAN_DISTANCE.ConvertToPx())));
+    CHECK_NULL_RETURN(peer->handler, Converter::ArkValue<Ark_Number>(
+        static_cast<float>(DEFAULT_PAN_DISTANCE.ConvertToPx())));
+    auto distance = peer->handler->GetDistance();
+    return Converter::ArkValue<Ark_Number>(static_cast<float>(distance));
 }
 } // PanGestureOptionsAccessor
 const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()
