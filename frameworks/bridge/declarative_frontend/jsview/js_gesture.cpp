@@ -681,7 +681,7 @@ void JSPanGestureOption::JSBind(BindingTarget globalObj)
 void JSPanGestureOption::SetDirection(const JSCallbackInfo& args)
 {
     if (args.Length() > 0 && args[0]->IsNumber()) {
-        PanDirection direction = { args[0]->ToNumber<int32_t>() };
+        PanDirection direction = { static_cast<uint32_t>(args[0]->ToNumber<int32_t>()) };
         panGestureOption_->SetDirection(direction);
     } else {
         PanDirection directionAll = { PanDirection::ALL };

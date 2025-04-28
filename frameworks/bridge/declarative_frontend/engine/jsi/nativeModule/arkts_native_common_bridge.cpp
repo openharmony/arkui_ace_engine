@@ -346,9 +346,9 @@ void PushDimensionsToVector(std::vector<ArkUIStringAndFloat>& results,
                 value.value = optDimension.value().Value();
             }
         }
-        results.push_back(ArkUIStringAndFloat { static_cast<double>(hasValue), nullptr });
+        results.push_back(ArkUIStringAndFloat { static_cast<ArkUI_Float32>(hasValue), nullptr });
         results.push_back(value);
-        results.push_back(ArkUIStringAndFloat { static_cast<double>(unit), nullptr });
+        results.push_back(ArkUIStringAndFloat { static_cast<ArkUI_Float32>(unit), nullptr });
     }
 }
 
@@ -402,8 +402,8 @@ bool ParseBorderImageRepeat(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& off
             repeatValue = BorderImageRepeat::STRETCH;
         }
     }
-    options.push_back(ArkUIStringAndFloat { static_cast<double>(repeatHasValue), nullptr });
-    options.push_back(ArkUIStringAndFloat { static_cast<double>(repeatValue), nullptr });
+    options.push_back(ArkUIStringAndFloat { static_cast<ArkUI_Float32>(repeatHasValue), nullptr });
+    options.push_back(ArkUIStringAndFloat { static_cast<ArkUI_Float32>(repeatValue), nullptr });
     if (repeatHasValue) {
         bitsets |= BorderImage::REPEAT_BIT;
     }
@@ -421,8 +421,8 @@ bool ParseBorderImageFill(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& offse
     auto fillArg = runtimeCallInfo->GetCallArgRef(offset);
     auto hasValue = fillArg->IsBoolean();
     auto fill = (hasValue) ? fillArg->BooleaValue(runtimeCallInfo->GetVM()) : false;
-    options.push_back(ArkUIStringAndFloat {static_cast<double>(hasValue), nullptr });
-    options.push_back(ArkUIStringAndFloat {static_cast<double>(fill), nullptr });
+    options.push_back(ArkUIStringAndFloat {static_cast<ArkUI_Float32>(hasValue), nullptr });
+    options.push_back(ArkUIStringAndFloat {static_cast<ArkUI_Float32>(fill), nullptr });
     offset += NUM_1;
     return true;
 }
@@ -2345,7 +2345,7 @@ ArkUINativeModuleValue CommonBridge::SetInvert(ArkUIRuntimeCallInfo *runtimeCall
     if (!invertValueArg->IsUndefined()) {
         double invertValue = 0.0;
         if (ArkTSUtils::ParseJsDouble(vm, invertValueArg, invertValue)) {
-            ArkUI_Float32 invert[] = { invertValue };
+            ArkUI_Float32 invert[] = { static_cast<ArkUI_Float32>(invertValue) };
             GetArkUINodeModifiers()->getCommonModifier()->setInvert(nativeNode, invert, NUM_1);
         } else {
             GetArkUINodeModifiers()->getCommonModifier()->resetInvert(nativeNode);
@@ -2588,12 +2588,12 @@ ArkUINativeModuleValue CommonBridge::SetLinearGradient(ArkUIRuntimeCallInfo *run
     ParseGradientAngle(vm, angleArg, values);
     int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
     ParseJsInt32(vm, directionArg, direction);
-    values.push_back({.i32 = static_cast<ArkUI_Float32>(direction)});
+    values.push_back({.i32 = static_cast<ArkUI_Int32>(direction)});
 
     std::vector<ArkUIInt32orFloat32> colors;
     ParseGradientColorStops(vm, colorsArg, colors);
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
-    values.push_back({.i32 = static_cast<ArkUI_Float32>(repeating)});
+    values.push_back({.i32 = static_cast<ArkUI_Int32>(repeating)});
     GetArkUINodeModifiers()->getCommonModifier()->setLinearGradient(nativeNode, values.data(), values.size(),
         colors.data(), colors.size());
     return panda::JSValueRef::Undefined(vm);
@@ -2766,7 +2766,7 @@ ArkUINativeModuleValue CommonBridge::SetBorderImage(ArkUIRuntimeCallInfo* runtim
     ParseBorderImageOutset(runtimeCallInfo, offset, outsetDimensions, bitsets); // use 4 args
     PushDimensionsToVector(options, outsetDimensions);
     ParseBorderImageFill(runtimeCallInfo, offset, options); // use 1 args
-    options.push_back(ArkUIStringAndFloat { static_cast<double>(bitsets), nullptr });
+    options.push_back(ArkUIStringAndFloat { static_cast<ArkUI_Float32>(bitsets), nullptr });
     GetArkUINodeModifiers()->getCommonModifier()->setBorderImage(nativeNode,
         src.c_str(), options.data(), options.size());
     ResetCalcDimensions(sliceDimensions);
@@ -3755,7 +3755,8 @@ ArkUINativeModuleValue CommonBridge::SetPixelStretchEffect(ArkUIRuntimeCallInfo 
     ArkTSUtils::ParseJsDimensionVp(vm, topArg, top);
     CalcDimension bottom;
     ArkTSUtils::ParseJsDimensionVp(vm, bottomArg, bottom);
-    ArkUI_Float32 values[] = { left.Value(), top.Value(), right.Value(), bottom.Value() };
+    ArkUI_Float32 values[] = { static_cast<ArkUI_Float32>(left.Value()), static_cast<ArkUI_Float32>(top.Value()),
+        static_cast<ArkUI_Float32>(right.Value()), static_cast<ArkUI_Float32>(bottom.Value()) };
     int units[] = { static_cast<int>(left.Unit()), static_cast<int>(top.Unit()), static_cast<int>(right.Unit()),
                     static_cast<int>(bottom.Unit()) };
     GetArkUINodeModifiers()->getCommonModifier()->setPixelStretchEffect(nativeNode, values, units,

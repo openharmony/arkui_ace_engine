@@ -814,7 +814,7 @@ std::vector<CJPageRouterAbstract::RouterState> CJPageRouterNG::GetStateByUrl(con
         if (name == url) {
             path = pageInfo->GetPagePath();
             params = GetParams();
-            ret.push_back({ index + 1, CopyStr(name), CopyStr(path), CopyStr(params) });
+            ret.push_back({ static_cast<int32_t>(index + 1), CopyStr(name), CopyStr(path), CopyStr(params) });
         }
         index++;
     }

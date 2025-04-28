@@ -1822,10 +1822,10 @@ void JsAccessibilityManager::UpdateVirtualNodeChildAccessibilityElementInfo(
     nodeInfo.SetVisible(node->IsVisible());
     if (node->IsVisible()) {
         auto rect = node->GetVirtualNodeTransformRectRelativeToWindow();
-        auto left = rect.Left() + commonProperty.windowLeft;
-        auto top = rect.Top() + commonProperty.windowTop;
-        auto right = rect.Right() + commonProperty.windowLeft;
-        auto bottom = rect.Bottom() + commonProperty.windowTop;
+        auto left = static_cast<int32_t>(rect.Left() + commonProperty.windowLeft);
+        auto top = static_cast<int32_t>(rect.Top() + commonProperty.windowTop);
+        auto right = static_cast<int32_t>(rect.Right() + commonProperty.windowLeft);
+        auto bottom = static_cast<int32_t>(rect.Bottom() + commonProperty.windowTop);
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
     }
@@ -1865,15 +1865,15 @@ void JsAccessibilityManager::UpdateVirtualNodeAccessibilityElementInfo(
     if (node->IsVisible()) {
         auto virtualNodeRect = node->GetTransformRectRelativeToWindow();
         auto parentRect = parent->GetTransformRectRelativeToWindow();
-        auto left = parentRect.Left() + commonProperty.windowLeft;
-        auto top = parentRect.Top() + commonProperty.windowTop;
-        auto right = parentRect.Left() + virtualNodeRect.Width() + commonProperty.windowLeft;
+        auto left = static_cast<int32_t>(parentRect.Left() + commonProperty.windowLeft);
+        auto top = static_cast<int32_t>(parentRect.Top() + commonProperty.windowTop);
+        auto right = static_cast<int32_t>(parentRect.Left() + virtualNodeRect.Width() + commonProperty.windowLeft);
         if (virtualNodeRect.Width() > (parentRect.Right() - parentRect.Left())) {
-            right = parentRect.Right() + commonProperty.windowLeft;
+            right = static_cast<int32_t>(parentRect.Right() + commonProperty.windowLeft);
         }
-        auto bottom = parentRect.Top() + virtualNodeRect.Height() + commonProperty.windowTop;
+        auto bottom = static_cast<int32_t>(parentRect.Top() + virtualNodeRect.Height() + commonProperty.windowTop);
         if (virtualNodeRect.Height() > (parentRect.Bottom() - parentRect.Top())) {
-            bottom = parentRect.Bottom() + commonProperty.windowTop;
+            bottom = static_cast<int32_t>(parentRect.Bottom() + commonProperty.windowTop);
         }
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
@@ -1971,10 +1971,10 @@ void SetRectInScreen(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo
 {
     if (node->IsAccessibilityVirtualNode()) {
         auto rect = node->GetVirtualNodeTransformRectRelativeToWindow();
-        auto left = rect.Left() + commonProperty.windowLeft;
-        auto top = rect.Top() + commonProperty.windowTop;
-        auto right = rect.Right() + commonProperty.windowLeft;
-        auto bottom = rect.Bottom() + commonProperty.windowTop;
+        auto left = static_cast<int32_t>(rect.Left() + commonProperty.windowLeft);
+        auto top = static_cast<int32_t>(rect.Top() + commonProperty.windowTop);
+        auto right = static_cast<int32_t>(rect.Right() + commonProperty.windowLeft);
+        auto bottom = static_cast<int32_t>(rect.Bottom() + commonProperty.windowTop);
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
     } else if (node->IsVisible()) {
@@ -1985,8 +1985,10 @@ void SetRectInScreen(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo
             AccessibilityRect rotateRect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
             rotateRect.Rotate(rotateTransformData.innerCenterX, rotateTransformData.innerCenterY, currentDegree);
             rotateRect.ApplyTransformation(rotateTransformData, commonProperty.scaleX, commonProperty.scaleY);
-            Accessibility::Rect bounds { rotateRect.GetX(), rotateRect.GetY(),
-                rotateRect.GetX() + rotateRect.GetWidth(), rotateRect.GetY() + rotateRect.GetHeight()};
+            Accessibility::Rect bounds { static_cast<int32_t>(rotateRect.GetX()),
+                static_cast<int32_t>(rotateRect.GetY()),
+                static_cast<int32_t>(rotateRect.GetX() + rotateRect.GetWidth()),
+                static_cast<int32_t>(rotateRect.GetY() + rotateRect.GetHeight()) };
             nodeInfo.SetRectInScreen(bounds);
             return;
         }
@@ -1994,10 +1996,10 @@ void SetRectInScreen(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo
             rect.SetRect(rect.GetX() * commonProperty.scaleX, rect.GetY() * commonProperty.scaleY,
                 rect.Width() * commonProperty.scaleX, rect.Height() * commonProperty.scaleY);
         }
-        auto left = rect.Left() + commonProperty.windowLeft;
-        auto top = rect.Top() + commonProperty.windowTop;
-        auto right = rect.Right() + commonProperty.windowLeft;
-        auto bottom = rect.Bottom() + commonProperty.windowTop;
+        auto left = static_cast<int32_t>(rect.Left() + commonProperty.windowLeft);
+        auto top = static_cast<int32_t>(rect.Top() + commonProperty.windowTop);
+        auto right = static_cast<int32_t>(rect.Right() + commonProperty.windowLeft);
+        auto bottom = static_cast<int32_t>(rect.Bottom() + commonProperty.windowTop);
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
     }
@@ -2097,10 +2099,10 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
         auto webNode = webPattern->GetHost();
         CHECK_NULL_VOID(webNode);
         auto webRect = webNode->GetTransformRectRelativeToWindow();
-        auto left = (webRect.Left() + node->GetRectX()) * scaleX_ + commonProperty.windowLeft;
-        auto top = (webRect.Top() + node->GetRectY()) * scaleY_ + commonProperty.windowTop;
-        auto right = left + node->GetRectWidth() * scaleX_;
-        auto bottom = top + node->GetRectHeight() * scaleY_;
+        auto left = static_cast<int32_t>((webRect.Left() + node->GetRectX()) * scaleX_ + commonProperty.windowLeft);
+        auto top = static_cast<int32_t>((webRect.Top() + node->GetRectY()) * scaleY_ + commonProperty.windowTop);
+        auto right = static_cast<int32_t>(left + node->GetRectWidth() * scaleX_);
+        auto bottom = static_cast<int32_t>(top + node->GetRectHeight() * scaleY_);
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
     }
@@ -3624,7 +3626,8 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
     eventInfoNew.SetSource(uiExtensionOffset * GetUiextensionId() + eventInfo.GetViewId());
     AccessibilityElementInfo elementInfo;
     FillElementInfo(eventInfoNew.GetAccessibilityId(), elementInfo, pipeline, Claim(this),
-        FillEventInfoParam { eventInfoNew.GetAccessibilityId(), -1, eventInfoNew.GetWindowId() });
+        FillEventInfoParam { eventInfoNew.GetAccessibilityId(), -1,
+            static_cast<int32_t>(eventInfoNew.GetWindowId()) });
     eventInfoNew.SetElementInfo(elementInfo);
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d accessibilityId:%{public}" PRId64,
         eventInfoNew.GetEventType(), eventInfoNew.GetAccessibilityId());
@@ -6382,8 +6385,8 @@ bool JsAccessibilityManager::RegisterWebInteractionOperationAsChildTree(int64_t 
     auto pattern = webPattern.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
     Accessibility::Registration registration {
-        .windowId = windowId,
-        .parentWindowId = windowId,
+        .windowId = static_cast<int32_t>(windowId),
+        .parentWindowId = static_cast<int32_t>(windowId),
         .parentTreeId = treeId_,
         .elementId = accessibilityId,
     };
@@ -6453,8 +6456,8 @@ bool JsAccessibilityManager::RegisterThirdProviderInteractionOperationAsChildTre
         AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(instance, false);
     Accessibility::Registration innerRegistration {
-        .windowId = registration.windowId,
-        .parentWindowId = registration.parentWindowId,
+        .windowId = static_cast<int32_t>(registration.windowId),
+        .parentWindowId = static_cast<int32_t>(registration.parentWindowId),
         .parentTreeId = registration.parentTreeId,
         .elementId = registration.elementId,
     };
@@ -6731,8 +6734,8 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     auto interactionOperation = std::make_shared<JsInteractionOperation>(windowId);
     interactionOperation->SetHandler(WeakClaim(this));
     Accessibility::Registration registration {
-        .windowId = windowId,
-        .parentWindowId = parentWindowId,
+        .windowId = static_cast<int32_t>(windowId),
+        .parentWindowId = static_cast<int32_t>(parentWindowId),
         .parentTreeId = parentTreeId,
         .elementId = parentElementId,
     };

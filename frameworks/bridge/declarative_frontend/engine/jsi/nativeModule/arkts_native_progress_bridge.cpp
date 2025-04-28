@@ -177,7 +177,8 @@ ArkUINativeModuleValue ProgressBridge::SetProgressColor(ArkUIRuntimeCallInfo* ru
 
         for (int32_t i = 0; i < static_cast<int32_t>(colorlength); i++) {
             colorValues.push_back(gradient.GetColors()[i].GetLinearColor().GetValue());
-            offsetValues.push_back(ArkUILengthType { .number = gradient.GetColors()[i].GetDimension().Value(),
+            offsetValues.push_back(ArkUILengthType {
+                .number = static_cast<ArkUI_Float32>(gradient.GetColors()[i].GetDimension().Value()),
                 .unit = static_cast<int8_t>(gradient.GetColors()[i].GetDimension().Unit()) });
         }
 
@@ -549,8 +550,8 @@ ArkUINativeModuleValue ProgressBridge::SetProgressStyle(ArkUIRuntimeCallInfo* ru
         DEFAULT_BORDER_WIDTH, static_cast<int8_t>(DimensionUnit::VP), DEFAULT_SCALE_COUNT,
         static_cast<uint8_t>(DEFAULT_PROGRESS_STATUS), DEFAULT_SCALE_WIDTH, static_cast<int8_t>(DimensionUnit::VP),
         DEFAULT_STROKE_RADIUS, static_cast<int8_t>(DimensionUnit::PERCENT), true,
-        static_cast<double>(DEFAULT_BORDER_COLOR.GetValue()), nullptr,
-        static_cast<double>(DEFAULT_FONT_COLOR.GetValue()), false, false, false,
+        static_cast<ArkUI_Uint32>(DEFAULT_BORDER_COLOR.GetValue()), nullptr,
+        static_cast<ArkUI_Uint32>(DEFAULT_FONT_COLOR.GetValue()), false, false, false,
         { DEFAULT_CAPSULE_FONT_SIZE, static_cast<int8_t>(DEFAULT_CAPSULE_FONT_UNIT),
             static_cast<uint8_t>(theme->GetTextStyle().GetFontWeight()),
             static_cast<uint8_t>(theme->GetTextStyle().GetFontStyle()), families.get(), fontFamilies.size() } };
