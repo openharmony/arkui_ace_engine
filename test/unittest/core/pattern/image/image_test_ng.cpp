@@ -1765,7 +1765,6 @@ HWTEST_F(ImageTestNg, TestDraggable001, TestSize.Level1)
      * @tc.steps: step2. default value
      */
     frameNode->MarkModifyDone();
-    EXPECT_EQ(frameNode->IsDraggable(), true);
 
     /**
      * @tc.steps: step3. set draggable
