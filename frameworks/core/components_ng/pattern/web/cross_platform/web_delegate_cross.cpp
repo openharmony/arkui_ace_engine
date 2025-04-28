@@ -846,6 +846,7 @@ void WebDelegateCross::RegisterWebEvent()
         auto delegate = weak.Upgrade();
         if (delegate) {
             delegate->OnPageStarted(param);
+            delegate->RunJsProxyCallback();
         }
     });
     resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_PAGEFINISH), [weak = WeakClaim(this)](const std::string& param) {
@@ -2029,5 +2030,12 @@ void WebDelegateCross::UpdateOptimizeParserBudgetEnabled(const bool enable)
 void WebDelegateCross::MaximizeResize()
 {
     // cross platform is not support now;
+}
+
+void WebDelegateCross::RunJsProxyCallback()
+{
+    auto pattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->CallJsProxyCallback();
 }
 }
