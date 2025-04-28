@@ -794,10 +794,16 @@ void SliderPattern::HandleTouchDown(const Offset& location, SourceType sourceTyp
     sliderContentModifier_->SetIsPressed(true);
 }
 
+bool NeedFireClickEvent(const Offset& downLocation, const Offset& upLocation)
+{
+    auto diff = downLocation - upLocation;
+    return diff.GetDistance() < DEFAULT_PAN_DISTANCE.ConvertToPx();
+}
+
 void SliderPattern::HandleTouchUp(const Offset& location, SourceType sourceType)
 {
     if (sliderInteractionMode_ == SliderModelNG::SliderInteraction::SLIDE_AND_CLICK_UP &&
-        lastTouchLocation_.has_value() && lastTouchLocation_.value() == location) {
+        lastTouchLocation_.has_value() && NeedFireClickEvent(lastTouchLocation_.value(), location)) {
         allowDragEvents_ = true;
         if (!AtPanArea(location, sourceType)) {
             UpdateValueByLocalLocation(location);
