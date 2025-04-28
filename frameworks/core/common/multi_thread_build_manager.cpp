@@ -33,7 +33,7 @@ std::unique_ptr<ffrt::queue> aysncUITaskQueue = nullptr;
 #endif
 }
 thread_local bool MultiThreadBuildManager::isThreadSafeScope_ = false;
-thread_local bool MultiThreadBuildManager::isMainThread_ = false;
+thread_local bool MultiThreadBuildManager::isUIThread_ = false;
 
 MultiThreadBuildManager& MultiThreadBuildManager::GetInstance()
 {
@@ -46,6 +46,12 @@ MultiThreadBuildManager::MultiThreadBuildManager()
     InitAysncUITaskQueue();
 }
 
+void MultiThreadBuildManager::InitOnUIThread()
+{
+    isUIThread_ = true;
+    ElementRegister::GetGlobalInstance();
+}
+
 void MultiThreadBuildManager::InitAysncUITaskQueue()
 {
 #ifdef FFRT_SUPPORT
@@ -56,11 +62,7 @@ void MultiThreadBuildManager::InitAysncUITaskQueue()
 
 bool MultiThreadBuildManager::IsOnUIThread()
 {
-    auto container = Container::CurrentSafely();
-    CHECK_NULL_RETURN(container, false);
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_RETURN(taskExecutor, false);
-    return taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
+    return isUIThread_;
 }
 
 bool MultiThreadBuildManager::CheckOnUIThread()

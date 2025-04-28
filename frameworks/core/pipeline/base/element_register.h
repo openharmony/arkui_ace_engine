@@ -45,6 +45,7 @@ public:
     static constexpr ElementIdType UndefinedElementId = static_cast<ElementIdType>(-1);
 
     ACE_FORCE_EXPORT static ElementRegister* GetInstance();
+    static ElementRegister* GetGlobalInstance();
     RefPtr<Element> GetElementById(ElementIdType elementId);
     RefPtr<V2::ElementProxy> GetElementProxyById(ElementIdType elementId);
 
@@ -143,7 +144,6 @@ public:
 private:
     // private constructor
     ElementRegister() = default;
-    static ElementRegister* GetGlobalInstance();
     bool AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced);
     bool AddReferencedSafely(ElementIdType elmtId, const WeakPtr<AceType>& referenced);
     bool ExistsUnSafely(ElementIdType elementId);
@@ -151,8 +151,7 @@ private:
 
     //  Singleton instance
     static thread_local ElementRegister* instance_;
-    static ElementRegister* globalInstance_;
-    static std::recursive_mutex mutex_;
+    static std::mutex mutex_;
 
     // ElementID assigned during initial render
     // first to Component, then synced to Element
