@@ -262,17 +262,6 @@ void RichEditorModelNG::BindSelectionMenu(TextSpanType& editorType, TextResponse
     }
 }
 
-// void RichEditorModelNG::BindSelectionMenu(FrameNode* frameNode, TextSpanType& editorType, TextResponseType& type,
-//     std::function<void()>& buildFunc, SelectMenuParam& menuParam)
-// {
-//     CHECK_NULL_VOID(frameNode);
-//     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
-//     CHECK_NULL_VOID(richEditorPattern);
-//     if (richEditorPattern) {
-//         richEditorPattern->BindSelectionMenu(type, editorType, buildFunc, menuParam);
-//     }
-// }
-
 void RichEditorModelNG::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
@@ -649,15 +638,6 @@ void RichEditorModelNG::SetBarState(FrameNode* frameNode, const std::optional<Di
         ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, DisplayMode, frameNode);
     }
 }
-
-// RefPtr<NG::FrameNode> RichEditorModelNG::CreateFrameNode(int32_t nodeId)
-// {
-//     auto richEditorPattern = AceType::MakeRefPtr<RichEditorPattern>();
-//     richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
-//     richEditorPattern->GetRichEditorController()->SetPattern(WeakPtr(richEditorPattern));
-
-//     return FrameNode::CreateFrameNode(V2::RICH_EDITOR_ETS_TAG, nodeId, richEditorPattern);
-// }
 
 void RichEditorModelNG::SetMaxLength(std::optional<int32_t> value)
 {

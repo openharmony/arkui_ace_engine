@@ -154,7 +154,6 @@ void MockPipelineContext::SetUp()
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
     pipeline_->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     pipeline_->SetupRootElement();
-    //pipeline_->fontManager_ = MockFontManager::Create();
     windowRect_ = { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
     hasModalButtonsRect_ = true;
 }

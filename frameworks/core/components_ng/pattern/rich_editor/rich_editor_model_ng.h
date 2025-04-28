@@ -111,13 +111,6 @@ public:
     static void SetStyledStringMode(FrameNode* frameNode, bool isStyledStringMode);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
-    // static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    // static RefPtr<RichEditorBaseControllerBase> GetRichEditorController(FrameNode* node);
-    // static RefPtr<RichEditorBaseControllerBase> GetRichEditorStyledStringController(FrameNode* node);
-    //static void SetStyledStringMode(FrameNode* node, bool isStyledStringMode);
-    //static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled);
-    // static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& editorType, TextResponseType& type,
-    //     std::function<void()>& buildFunc, SelectMenuParam& menuParam);
     void SetDraggable(bool draggable);
 
 private:
