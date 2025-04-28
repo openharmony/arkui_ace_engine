@@ -581,8 +581,6 @@ private:
         }
         bool isRotate = false;
         auto displayInfo = container->GetDisplayInfo();
-        uint32_t lastKeyboardHeight = pipeline->GetSafeAreaManager() ?
-            pipeline->GetSafeAreaManager()->GetKeyboardInset().Length() : 0;
         if (displayInfo) {
             auto dmRotation = static_cast<int32_t>(displayInfo->GetRotation());
             isRotate = lastRotation != -1 && lastRotation != dmRotation;
@@ -590,10 +588,11 @@ private:
         } else {
             lastRotation = -1;
         }
-        auto alreadyTriggerCallback = textFieldManager->GetFocusFieldAlreadyTriggerWsCallback();
-        textFieldManager->SetFocusFieldAlreadyTriggerWsCallback(false);
-        if (alreadyTriggerCallback && lastRotation == textFieldManager->GetFocusFieldOrientation()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "input already trigger OnWindowSizeChange, go avoid");
+        auto triggerAvoidTaskOrientation = textFieldManager->GetContextTriggerAvoidTaskOrientation();
+        textFieldManager->SetContextTriggerAvoidTaskOrientation(-1);
+        if ((isRotate && lastRotation == triggerAvoidTaskOrientation) ||
+            (textFieldManager->GetLaterAvoid() && NearEqual(0.0f, keyboardRect.Height()))) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "no need to later avoid, trigger avoid now");
             textFieldManager->SetLaterAvoid(false);
             return false;
         }
@@ -603,10 +602,9 @@ private:
             return true;
         }
         // do not avoid immediately when device is in rotation, trigger it after context trigger root rect update
-        if ((textFieldManager->GetLaterAvoid() || isRotate) && !NearZero(lastKeyboardHeight)) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d,"
-                "later avoid %{public}s %{public}f %{public}f",
-                lastRotation, keyboardRect.ToString().c_str(), positionY, height);
+        if (textFieldManager->GetLaterAvoid() || isRotate) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d, later avoid %{public}s %{public}f"
+                "%{public}f", lastRotation, keyboardRect.ToString().c_str(), positionY, height);
             NG::LaterAvoidInfo laterAvoidInfo = {true, keyboardRect, positionY, height, lastRotation };
             textFieldManager->SetLaterAvoidArgs(laterAvoidInfo);
             return true;
