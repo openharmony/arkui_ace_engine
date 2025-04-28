@@ -1702,6 +1702,49 @@ HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen005, TestSize.Leve
 }
 
 /**
+ * @tc.name: ConvertActionTypeToBoolen006
+ * @tc.desc: Test focusing action
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen006, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct JsAccessibilityManager
+    */
+    int64_t elementId = 0;
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->GetOrCreateGestureEventHub();
+    auto gesture = eventHub->GetGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    std::string nodeName = "Click";
+    frameNode->SetNodeName(nodeName);
+
+    /**
+    * @tc.steps: step2. test with nothing, expect return nodeName Click
+    */
+    NG::UIObserverHandler::WillClickHandleFunc willClickHandleFunc = [](
+        AbilityContextInfo&, const GestureEvent&, const ClickInfo&,
+        const RefPtr<FrameNode>& frameNode) -> void {};
+    ASSERT_NE(willClickHandleFunc, nullptr);
+    NG::UIObserverHandler::GetInstance().SetWillClickFunc(willClickHandleFunc);
+
+    NG::UIObserverHandler::DidClickHandleFunc didClickHandleFunc = [](
+        AbilityContextInfo&, const GestureEvent&, const ClickInfo&,
+        const RefPtr<FrameNode>& frameNode) -> void {};
+    ASSERT_NE(didClickHandleFunc, nullptr);
+    NG::UIObserverHandler::GetInstance().SetDidClickFunc(didClickHandleFunc);
+    jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
+        frameNode, elementId, context);
+    EXPECT_EQ(frameNode->GetNodeName(), "Click");
+    NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
+    NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
+}
+
+/**
 * @tc.name: JsAccessibilityManager031
 * @tc.desc: IsUpdateWindowSceneInfo
 * @tc.type: FUNC
