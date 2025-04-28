@@ -18,16 +18,16 @@
 #include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/implementation/swiper_content_transition_proxy_peer.h"
 #include "core/interfaces/native/implementation/swiper_controller_modifier_peer_impl.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/interfaces/native/implementation/indicator_component_controller_peer.h"
 
 namespace OHOS::Ace::NG {
-using IndicatorVariantType = std::variant<SwiperParameters, SwiperDigitalParameters, bool>;
 using ArrowStyleVariantType = std::variant<SwiperArrowParameters, bool>;
 using DisplayCountVariantType = std::variant<int32_t, std::string, Ark_SwiperAutoFill>;
 }
@@ -52,7 +52,7 @@ SwiperParameters Convert(const Ark_IndicatorStyle& src)
 }
 
 template<>
-IndicatorVariantType Convert(const Ark_DotIndicator& src)
+SwiperParameters Convert(const Ark_DotIndicator& src)
 {
     SwiperParameters p;
     p.dimLeft = Converter::OptConvert<Dimension>(src._left);
@@ -76,7 +76,7 @@ IndicatorVariantType Convert(const Ark_DotIndicator& src)
 }
 
 template<>
-IndicatorVariantType Convert(const Ark_DigitIndicator& src)
+SwiperDigitalParameters Convert(const Ark_DigitIndicator& src)
 {
     SwiperDigitalParameters p;
     p.dimLeft = Converter::OptConvert<Dimension>(src._left);
@@ -97,12 +97,6 @@ IndicatorVariantType Convert(const Ark_DigitIndicator& src)
     p.fontColor = Converter::OptConvert<Color>(src._fontColor);
     p.selectedFontColor = Converter::OptConvert<Color>(src._selectedFontColor);
     return p;
-}
-
-template<>
-IndicatorVariantType Convert(const Ark_Boolean& src)
-{
-    return Convert<bool>(src);
 }
 
 template<>
@@ -304,36 +298,51 @@ void IntervalImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     SwiperModelNG::SetAutoPlayInterval(frameNode, Converter::Convert<int32_t>(*value));
 }
+namespace {
+void SetIndicator(FrameNode* frameNode, const Ark_DigitIndicator& src)
+{
+    auto digitParam = Converter::Convert<SwiperDigitalParameters>(src);
+    CheckSwiperDigitalParameters(digitParam);
+    SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
+    SwiperModelNG::SetDigitIndicatorStyle(frameNode, digitParam);
+    SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
+    SwiperModelNG::SetShowIndicator(frameNode, true);
+}
+void SetIndicator(FrameNode* frameNode, const Ark_DotIndicator& src)
+{
+    auto dotParam = Converter::Convert<SwiperParameters>(src);
+    auto isCustomSize = CheckSwiperParameters(dotParam);
+    SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
+    SwiperModelNG::SetDotIndicatorStyle(frameNode, dotParam);
+    SwiperModelNG::SetIsIndicatorCustomSize(frameNode, isCustomSize);
+    SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
+    SwiperModelNG::SetShowIndicator(frameNode, true);
+}
+void SetIndicator(FrameNode* frameNode, const Ark_Boolean& src)
+{
+    auto boolParam = Converter::Convert<bool>(src);
+    SwiperModelNG::SetIndicatorIsBoolean(frameNode, true);
+    SwiperModelNG::SetDotIndicatorStyle(frameNode, SwiperParameters());
+    SwiperModelNG::SetIsIndicatorCustomSize(frameNode, false);
+    SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
+    SwiperModelNG::SetShowIndicator(frameNode, boolParam);
+}
+void SetIndicator(FrameNode* frameNode, const Ark_IndicatorComponentController& src)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto controller = src;
+    CHECK_NULL_VOID(controller);
+    controller->SetSwiperNodeBySwiper(OHOS::Ace::AceType::Claim(frameNode));
+    SwiperModelNG::SetBindIndicator(frameNode, true);
+}
+} // namespace
 void Indicator0Impl(Ark_NativePointer node,
                     const Ark_Union_DotIndicator_DigitIndicator_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto optIndicator = Converter::OptConvert<IndicatorVariantType>(*value);
-    CHECK_NULL_VOID(optIndicator);
-    auto showIndicator = true;
-    if (auto digitParamPtr = std::get_if<SwiperDigitalParameters>(&(*optIndicator)); digitParamPtr) {
-        CheckSwiperDigitalParameters(*digitParamPtr);
-        SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
-        SwiperModelNG::SetDigitIndicatorStyle(frameNode, *digitParamPtr);
-        SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
-    } else {
-        if (auto dotParamPtr = std::get_if<SwiperParameters>(&(*optIndicator)); dotParamPtr) {
-            auto isCustomSize = CheckSwiperParameters(*dotParamPtr);
-            SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
-            SwiperModelNG::SetDotIndicatorStyle(frameNode, *dotParamPtr);
-            SwiperModelNG::SetIsIndicatorCustomSize(frameNode, isCustomSize);
-        }
-        if (auto booleanPtr = std::get_if<bool>(&(*optIndicator)); booleanPtr) {
-            SwiperModelNG::SetIndicatorIsBoolean(frameNode, true);
-            SwiperModelNG::SetDotIndicatorStyle(frameNode, SwiperParameters());
-            SwiperModelNG::SetIsIndicatorCustomSize(frameNode, false);
-            showIndicator = *booleanPtr;
-        }
-        SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
-    }
-    SwiperModelNG::SetShowIndicator(frameNode, showIndicator);
+    Converter::VisitUnion(*value, [frameNode](const auto& value) { SetIndicator(frameNode, value); }, []() {});
 }
 void Indicator1Impl(Ark_NativePointer node,
                     const Ark_Type_SwiperAttribute_indicator_indicator* value)
@@ -341,8 +350,7 @@ void Indicator1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SwiperModelNG::SetIndicator1(frameNode, convValue);
+    Converter::VisitUnion(*value, [frameNode](const auto& value) { SetIndicator(frameNode, value); }, []() {});
 }
 void LoopImpl(Ark_NativePointer node,
               Ark_Boolean value)

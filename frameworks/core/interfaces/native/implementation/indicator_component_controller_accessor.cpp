@@ -15,16 +15,18 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "indicator_component_controller_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace IndicatorComponentControllerAccessor {
 void DestroyPeerImpl(Ark_IndicatorComponentController peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_IndicatorComponentController CtorImpl()
 {
-    return nullptr;
+    return PeerUtils::CreatePeer<IndicatorComponentControllerPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
