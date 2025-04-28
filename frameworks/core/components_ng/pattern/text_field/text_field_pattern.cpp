@@ -8869,7 +8869,6 @@ void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, Window
                 if (displayInfo) {
                     auto dmRotation = static_cast<int32_t>(displayInfo->GetRotation());
                     textFieldManager->SetFocusFieldOrientation(dmRotation);
-                    textFieldManager->SetFocusFieldAlreadyTriggerWsCallback(true);
                 }
             }
         },
