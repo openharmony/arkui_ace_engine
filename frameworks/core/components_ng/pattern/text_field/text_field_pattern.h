@@ -1466,6 +1466,8 @@ public:
 
     void DeleteRange(int32_t start, int32_t end, bool isIME = true) override;
 
+    void DeleteTextRange(int32_t start, int32_t end, TextDeleteDirection direction);
+
     bool SetCaretOffset(int32_t caretPostion) override;
 
     const RefPtr<MultipleClickRecognizer>& GetMultipleClickRecognizer() const
