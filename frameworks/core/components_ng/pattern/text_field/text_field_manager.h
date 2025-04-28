@@ -299,6 +299,9 @@ private:
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);
     bool IsAutoFillPasswordType(const TextFieldInfo& textFieldInfo);
 
+    RefPtr<FrameNode> FindCorrectScrollNode(const SafeAreaInsets::Inset& bottomInset,
+        bool isShowKeyboard);
+
     bool focusFieldIsInline_ = false;
     double inlinePositionY_ = 0.0f;
     double inlineHeight_ = 0.0f;
