@@ -24,6 +24,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { WebviewController, WebviewControllerInternal } from "./arkui-external"
+import { WebviewController as WebviewControllerAni } from "#external"
 import { Resource } from "global/resource"
 import { Callback_String_Void } from "./gridRow"
 import { ComponentBase } from "./../ComponentBase"
@@ -36,6 +37,7 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { Position, ResourceStr } from "./units"
 import { PixelMap } from "./arkui-pixelmap"
 import { PreviewMenuOptions } from "./richEditor"
+import { ArkUIAniModule } from "arkui.ani"
 
 export class WebKeyboardControllerInternal {
     public static fromPtr(ptr: KPointer): WebKeyboardController {
@@ -1489,6 +1491,7 @@ export class WebController implements MaterializedBase {
     }
 }
 export class ArkWebPeer extends ArkCommonMethodPeer {
+    private webviewController?: WebviewController
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -1501,8 +1504,22 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
     }
     setWebOptionsAttribute(value: WebOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeWebOptions(value)
-        ArkUIGeneratedNativeModule._WebInterface_setWebOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        if (TypeChecker.isWebController(value.controller) || TypeChecker.isWebviewController(value.controller)) {
+            thisSerializer.writeWebOptions(value)
+            ArkUIGeneratedNativeModule._WebInterface_setWebOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        } else if (TypeChecker.isWebviewControllerAni(value.controller)) {
+            this.webviewController = new WebviewController()
+            const value_casted = {
+                src: value.src,
+                controller: (this.webviewController as WebviewController),
+                renderMode: value.renderMode,
+                incognitoMode: value.incognitoMode,
+                sharedRenderProcessToken: value.sharedRenderProcessToken
+            } as (WebOptions)
+            thisSerializer.writeWebOptions(value_casted)
+            ArkUIGeneratedNativeModule._WebInterface_setWebOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+            ArkUIAniModule._Web_SetWebOptions(this.peer.ptr, (value.controller as WebviewControllerAni))
+        }
         thisSerializer.release()
     }
     javaScriptAccessAttribute(value: boolean | undefined): void {
@@ -3353,7 +3370,7 @@ export interface Literal_Object_object__String_name_Array_String_methodList {
 }
 export interface WebOptions {
     src: string | Resource;
-    controller: WebController | WebviewController;
+    controller: WebController | WebviewController | WebviewControllerAni;
     renderMode?: RenderMode;
     incognitoMode?: boolean;
     sharedRenderProcessToken?: string;
