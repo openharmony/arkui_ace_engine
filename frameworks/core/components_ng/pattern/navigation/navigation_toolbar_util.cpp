@@ -207,10 +207,12 @@ void UpdateToolbarItemNodeWithConfiguration(
     const RefPtr<FrameNode>& buttonNode, bool enableStatus, bool hideItemText)
 {
     barItemNode->SetBarItemUsedInToolbarConfiguration(true);
-    if (barItem.text.has_value() && !barItem.text.value().empty() && !hideItemText) {
+    if (barItem.text.has_value() && !barItem.text.value().empty()) {
         auto textNode = CreateToolbarItemTextNode(barItem.text.value());
         barItemNode->SetTextNode(textNode);
-        barItemNode->AddChild(textNode);
+        if (!hideItemText) {
+            barItemNode->AddChild(textNode);
+        }
     }
     if ((barItem.icon.has_value() && !barItem.icon.value().empty())
         || (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr)) {
