@@ -18,6 +18,50 @@
 #include "core/components_ng/pattern/corner_mark/corner_mark.h"
 
 namespace OHOS::Ace::NG {
+void Pattern::OnColorModeChange(uint32_t colorMode)
+{
+    if (resourceMgr_) {
+        resourceMgr_->ReloadResources();
+    }
+}
+
+void Pattern::AddResObj(
+    const std::string& key,
+    const RefPtr<ResourceObject>& resObj,
+    std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc)
+{
+    if (resourceMgr_ == nullptr) {
+        resourceMgr_ = MakeRefPtr<PatternResourceManager>();
+    }
+    resourceMgr_->AddResource(key, resObj, std::move(updateFunc));
+}
+
+void Pattern::AddResCache(const std::string& key, const std::string& value)
+{
+    if (resourceMgr_ == nullptr) {
+        resourceMgr_ = MakeRefPtr<PatternResourceManager>();
+    }
+    resourceMgr_->AddResCache(key, value);
+}
+
+std::string Pattern::GetResCacheMapByKey(const std::string& key)
+{
+    if (resourceMgr_ == nullptr) {
+        return "";
+    }
+    return resourceMgr_->GetResCacheMapByKey(key);
+}
+
+void Pattern::RemoveResObj(const std::string& key)
+{
+    if (resourceMgr_) {
+        resourceMgr_->RemoveResource(key);
+        if (resourceMgr_->Empty()) {
+            resourceMgr_ = nullptr;
+        }
+    }
+}
+
 int32_t Pattern::OnRecvCommand(const std::string& command)
 {
     auto json = JsonUtil::ParseJsonString(command);

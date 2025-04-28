@@ -785,6 +785,7 @@ public:
 
     static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
 
+    virtual void UpdateColorMode(uint32_t colorMode) {};
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::vector<std::string> GetFontFamilyName(const std::string& path);

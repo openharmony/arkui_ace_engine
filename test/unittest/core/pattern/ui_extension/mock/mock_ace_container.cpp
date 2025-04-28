@@ -327,4 +327,6 @@ bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool ani
 {
     return true;
 }
+
+void AceContainer::UpdateColorMode(uint32_t colorMode) {}
 } // namespace OHOS::Ace::NG
