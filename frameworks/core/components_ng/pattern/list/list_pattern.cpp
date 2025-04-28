@@ -2201,7 +2201,7 @@ bool ListPattern::CalculateJumpOffset()
         if (pos.second.groupInfo && !pos.second.groupInfo.value().atStart) {
             continue;
         }
-        PositionInfo info = posMap_->GetPositionInfo(pos.first);
+        ListPositionInfo info = posMap_->GetPositionInfo(pos.first);
         if (!Negative(info.mainSize)) {
             currentOffset_ = info.mainPos - pos.second.startPos;
             return true;
