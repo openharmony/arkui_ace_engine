@@ -63,6 +63,7 @@ public:
     void SetKeyboardAppearance(KeyboardAppearance value) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
+    static void SetCustomKeyboard(FrameNode* frameNode, std::function<void()>&& func, bool supportAvoidance);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
     static void SetOnIMEInputComplete(FrameNode* frameNode,
         std::function<void(const RichEditorAbstractSpanResult&)>&& callback);
@@ -98,9 +99,17 @@ public:
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<RichEditorBaseControllerBase> GetRichEditorController(FrameNode* node);
+    static RefPtr<RichEditorBaseControllerBase> GetRichEditorStyledStringController(FrameNode* node);
+    static void SetStyledStringMode(FrameNode* node, bool isStyledStringMode);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled);
+    static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& editorType, TextResponseType& type,
+        std::function<void()>& buildFunc, SelectMenuParam& menuParam);
+    void SetDraggable(bool draggable);
 
 private:
-    void SetDraggable(bool draggable);
+    
     bool isStyledStringMode_ = false;
 };
 } // namespace OHOS::Ace::NG
