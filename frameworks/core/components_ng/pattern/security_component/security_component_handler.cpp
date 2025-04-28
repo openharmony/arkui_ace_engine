@@ -52,7 +52,7 @@ bool SecurityComponentHandler::GetDisplayOffset(RefPtr<FrameNode>& node, double&
 {
     double x = node->GetTransformRelativeOffset().GetX();
     double y = node->GetTransformRelativeOffset().GetY();
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, false);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -65,7 +65,7 @@ bool SecurityComponentHandler::GetDisplayOffset(RefPtr<FrameNode>& node, double&
 bool SecurityComponentHandler::GetWindowRect(RefPtr<FrameNode>& node,
     OHOS::Security::SecurityComponent::SecCompRect& winRect)
 {
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, false);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -814,7 +814,7 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     auto rect = render->GetPaintRectWithTransform();
     buttonInfo.rect_.width_ = rect.Width();
     buttonInfo.rect_.height_ = rect.Height();
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::CurrentSafely());
     CHECK_NULL_RETURN(container, false);
     uint32_t windId = container->GetWindowId();
     auto pipeline = node->GetContextRefPtr();
@@ -1278,7 +1278,7 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEventInner(int32_t
     if (!ret) {
         return -1;
     }
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::CurrentSafely());
     CHECK_NULL_RETURN(container, -1);
     sptr<IRemoteObject> token = container->GetToken();
     if (container->GetParentToken() != nullptr) {
