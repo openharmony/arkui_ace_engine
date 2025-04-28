@@ -142,29 +142,17 @@ void JSRating::SetStarStyle(const JSCallbackInfo& info)
     
     std::string backgroundUri;
     ParseJsMedia(getBackgroundUri, backgroundUri);
-    if (backgroundUri.empty()) {
-        RatingModel::GetInstance()->SetBackgroundSrc("", true);
-    } else {
-        RatingModel::GetInstance()->SetBackgroundSrc(backgroundUri, false);
-    }
+    RatingModel::GetInstance()->SetBackgroundSrc(backgroundUri, backgroundUri.empty());
 
     std::string foregroundUri;
     ParseJsMedia(getForegroundUri, foregroundUri);
-    if (foregroundUri.empty()) {
-        RatingModel::GetInstance()->SetForegroundSrc("", true);
-    } else {
-        RatingModel::GetInstance()->SetForegroundSrc(foregroundUri, false);
-    }
+    RatingModel::GetInstance()->SetForegroundSrc(foregroundUri, foregroundUri.empty());
 
     std::string secondaryUri;
     ParseJsMedia(getSecondaryUri, secondaryUri);
 
     if (secondaryUri.empty()) {
-        if (!backgroundUri.empty()) {
-            RatingModel::GetInstance()->SetSecondarySrc(backgroundUri, false);
-        } else {
-            RatingModel::GetInstance()->SetSecondarySrc("", true);
-        }
+        RatingModel::GetInstance()->SetSecondarySrc(backgroundUri, backgroundUri.empty());
     } else {
         RatingModel::GetInstance()->SetSecondarySrc(secondaryUri, false);
     }
