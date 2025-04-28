@@ -855,6 +855,7 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
 #else
 #endif
 }
+void WebDelegate::OnActivateContent() {}
 void WebDelegate::OnWindowExit() {}
 void WebDelegate::OnPageVisible(const std::string& url) {}
 void WebDelegate::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs) {}

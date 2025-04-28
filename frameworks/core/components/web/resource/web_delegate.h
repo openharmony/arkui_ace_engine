@@ -1010,6 +1010,7 @@ public:
     NWeb::NWebDragData::DragOperation op_ = NWeb::NWebDragData::DragOperation::DRAG_OPERATION_NONE;
     void OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
         const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler);
+    void OnActivateContent();
     void OnWindowExit();
     void OnPageVisible(const std::string& url);
     void OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler);
@@ -1336,6 +1337,7 @@ private:
     EventCallbackV2 onScrollV2_;
     EventCallbackV2 onPermissionRequestV2_;
     EventCallbackV2 onSearchResultReceiveV2_;
+    EventCallbackV2 onActivateContentV2_;
     EventCallbackV2 onWindowExitV2_;
     EventCallbackV2 onPageVisibleV2_;
     EventCallbackV2 onTouchIconUrlV2_;
