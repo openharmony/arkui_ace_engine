@@ -1,0 +1,23 @@
+{
+  "name": "root",
+  "private": true,
+  "//": "DO NOT ADD dependencies or devDependencies clauses to this level! Keep subfolders autonomous.",
+  "scripts": {
+    "prepare": "cd incremental && npm i && cd .. && cd interop && npm i && cd .. && cd arkoala-arkts && npm i && cd .. && cd ui2abc && npm i",
+    "compile": "npm run compile --prefix incremental && npm run compile --prefix interop",
+    "release": "npm run compile && node tools/release.mjs",
+    "ohos-sdk": "npm run ohos-sdk --prefix arkoala-arkts/arkui-common",
+    "ohos-sdk:full": "node ./tools/ohos-tools/ohos-sdk/cli.mjs download",
+    "ohos-sdk:prebuilt": "node tools/ohos-tools/ohos-sdk/cli.mjs prebuilt:download",
+    "ohos-sdk:patch": "npm run ohos-sdk:prebuilt && node tools/ohos-tools/ohos-sdk/oh-sdk-patch.mjs",
+    "ets:plugin:compile": "npm run compile --prefix arkoala-arkts/ets-plugin",
+    "compiler:plugin:compile": "npm run compile --prefix incremental/compiler-plugin",
+    "plugins:compile": "npm run compiler:plugin:compile && npm run ets:plugin:compile",
+    "plugins:patch": "npm run compile:patch --prefix arkoala/tools/arkoala-transformer",
+    "arkoala:plugin": "npm run plugins:compile && npm run plugins:patch",
+    "arkoala:har": "npm run all --prefix arkoala/har",
+    "arkoala:har-arm64": "npm run arkoala:har",
+    "arkoala:har-arm32": "npm run all-arm32 --prefix arkoala/har",
+    "arkoala:har-universal": "npm run all-universal --prefix arkoala/har"
+  }
+}

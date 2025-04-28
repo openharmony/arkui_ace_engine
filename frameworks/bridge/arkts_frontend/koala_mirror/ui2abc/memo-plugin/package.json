@@ -1,0 +1,37 @@
+{
+    "name": "@koalaui/memo-plugin",
+    "main": "lib/MemoTransformer.js",
+    "scripts": {
+        "clean": "rimraf build",
+        "compile": "rollup -c",
+
+        "runtime:clean": "npm run all:clean --prefix ../../incremental",
+        "runtime:prepare": "npm run build:incremental:inc:ui2abc --prefix ../../incremental/runtime",
+        "compile:libarkts": "npm run compile --prefix ../libarkts",
+        "demo:clean": "npm run clean --prefix demo",
+        "demo:run": "npm run compile:libarkts && npm run compile && npm run compile --prefix demo && npm run run --prefix demo",
+        "test": "npm run compile:libarkts && npm run compile && npm run test --prefix test",
+        "demo:disasm": "npm run disasm --prefix demo",
+
+        "compile:deps:harness": "cd ../../incremental/harness && npm run build:harness",
+        "compile:deps": "npm run compile:libarkts && npm run compile && npm run compile:deps:harness && npm run runtime:prepare",
+
+        "compile:annotate": "npm run compile --prefix ../annotate",
+        "executable:annotate:test": "npm run compile:annotate && node ../annotate annotate-test-executable.json",
+        "executable:ui2abc:fast-arktsc": "fast-arktsc --config ./test/arktsconfig-executable.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build/test/test.abc --file-option --restart-stages",
+        "executable:ui2abc:ninja": "cd build && ninja",
+        "executable:ui2abc": "npm run executable:ui2abc:fast-arktsc && npm run executable:ui2abc:ninja",
+        "executable:abc": "bash ../../incremental/tools/panda/arkts/ark ./build/test/test.abc --ark-boot-files ./build/test/test.abc:../../incremental/runtime/build/incremental.abc:../../incremental/harness/build/harness.abc --ark-entry-point @test.ets.basic.test.ETSGLOBAL::main",
+        "executable": "npm run compile:deps && npm run executable:annotate:test && npm run executable:ui2abc && npm run executable:abc",
+
+        "diagnostics": "mocha --config mocharc.diagnostics.json",
+        "test:diagnostics": "npm run compile && npm run diagnostics",
+        "test:all": "npm run test && npm run executable && npm run diagnostics",
+        "recheck:ui2abc:fast-arktsc": "fast-arktsc --config ./recheck-bringup/ui2abcconfig.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build/recheck-bringup/memo-hello-world.abc --file-option",
+        "recheck:ui2abc:ninja": "cd build/recheck-bringup && ninja",
+        "recheck:ui2abc": "npm run recheck:ui2abc:fast-arktsc && npm run recheck:ui2abc:ninja"
+    },
+    "devDependencies": {
+        "@koalaui/harness": "1.5.15+devel"
+    }
+}
