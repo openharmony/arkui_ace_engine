@@ -82,21 +82,15 @@ class ObserveV2 {
   // Map bindId to WeakRef<ViewBuildNodeBase>
   public id2cmp_: { number: WeakRef<ViewBuildNodeBase> } = {} as { number: WeakRef<ViewBuildNodeBase> };
 
-  // Map bindId to WeakRef<MonitorV2>
-  private id2Monitor_: { number: WeakRef<MonitorV2> } = {} as { number: WeakRef<MonitorV2> };
-
-  // Map bindId to WeakRef<ComputedV2>
-  private id2Computed_: { number: WeakRef<ComputedV2> } = {} as { number: WeakRef<ComputedV2> };
-
-  // Map bindId to WeakRef<PersistenceV2Impl>
-  private id2Persistence_: { number: WeakRef<PersistenceV2Impl> } = {} as { number: WeakRef<PersistenceV2Impl> };
+  // Map bindId to WeakRef<MonitorV2 | ComputedV2 | PersistenceV2Impl>
+  private id2Others_: { number: WeakRef<MonitorV2 | ComputedV2 | PersistenceV2Impl> } = {} as { number: WeakRef<MonitorV2 | ComputedV2 | PersistenceV2Impl> };
 
   // Map bindId -> Set of @ObservedV2 class objects
   // reverse dependency map for quickly removing all dependencies of a bindId
   private id2targets_: { number: Set<WeakRef<Object>> } = {} as { number: Set<WeakRef<Object>> };
 
   // Queue of tasks to run in next idle period (used for optimization)
-  private idleTasks_: (Array<[(...any: any[]) => any, ...any[]]> & { first: number, end: number }) =
+  public idleTasks_: (Array<[(...any: any[]) => any, ...any[]]> & { first: number, end: number }) =
     Object.assign(Array(1000).fill([]), { first: 0, end: 0 });
 
   // queued up Set of bindId
@@ -178,15 +172,23 @@ class ObserveV2 {
     let id: number = bound[0];
     let cmp: MonitorV2 | ComputedV2 | PersistenceV2Impl | ViewBuildNodeBase = bound[1];
 
-    if (cmp instanceof ViewBuildNodeBase) {
-      this.id2cmp_[id] = new WeakRef<ViewBuildNodeBase>(cmp);
-    } else if (cmp instanceof ComputedV2) {
-      this.id2Computed_[id] = new WeakRef<ComputedV2>(cmp);
-    } else if (cmp instanceof MonitorV2) {
-      this.id2Monitor_[id] = new WeakRef<MonitorV2>(cmp);
-    } else if (cmp instanceof PersistenceV2Impl) {
-      this.id2Persistence_[id] = new WeakRef<PersistenceV2Impl>(cmp);
+    // element id can be registered from id2cmp in aboutToBeDeletedInternal and unregisterElmtIdsFromIViews
+    // PersistenceV2Impl instance is Singleton
+    if (cmp instanceof ViewBuildNodeBase || cmp instanceof PersistenceV2Impl) {
+      this.id2cmp_[id] = new WeakRef<ViewBuildNodeBase|PersistenceV2Impl>(cmp);
+      return;
+    } 
+    const weakRef = WeakRefPool.get(cmp);
+    // this instance, which maybe MonitorV2/ComputedV2 have been already recorded in id2Others
+    if (this.id2Others_[id] === weakRef) {
+      return;
     }
+    this.id2Others_[id] = weakRef;
+    // register MonitorV2/ComputedV2 instance gc-callback func
+    WeakRefPool.register(cmp, id, () => {
+      delete this.id2Others_[id];
+    });
+    
   }
 
   // clear any previously created dependency view model object to elmtId
@@ -260,47 +262,6 @@ class ObserveV2 {
     this.idleTasks_.first = 0;
     this.idleTasks_.end = 0;
   }
-
-  // do low-priority cleanup unless the deadline is already reached
-  public runIdleCleanup(deadline: number): void {
-    stateMgmtConsole.debug(`UINodeRegisterProxy.runIdleCleanup()`);
-
-    if (Date.now() >= deadline - 1) {
-      return;
-    }
-
-    let iterationCount: number = 0;
-
-    for (let id in this.id2targets_) {
-      if (iterationCount++ % 100 === 0 && Date.now() >= deadline - 1) {
-        return;
-      }
-      if (!this.id2targets_[id]?.size) {
-        delete this.id2targets_[id];
-      }
-    }
-
-    // only need to clean up the ComputedId and MonitorId here, 
-    // element id will clean up in aboutToBeDeletedInternal and unregisterElmtIdsFromIViews
-    for (let id in this.id2Computed_) {
-      if (iterationCount++ % 100 === 0 && Date.now() >= deadline - 1) {
-        return;
-      }
-      if (!this.id2Computed_[id]?.deref()) {
-        delete this.id2Computed_[id];
-      }
-    }
-
-    for (let id in this.id2Monitor_) {
-      if (iterationCount++ % 100 === 0 && Date.now() >= deadline - 1) {
-        return;
-      }
-      if (!this.id2Monitor_[id]?.deref()) {
-        delete this.id2Monitor_[id];
-      }
-    }
-  }
-
 
   /**
    * counts number of WeakRef<Object> entries in id2cmp_ 'map' object
@@ -421,7 +382,11 @@ class ObserveV2 {
 
     this.id2targets_[id] ??= new Set<WeakRef<Object>>();
     this.id2targets_[id].add(weakRef);
-    WeakRefPool.register(target, id, () => this.id2targets_?.[id]?.delete(weakRef) );
+    WeakRefPool.register(target, id, () => {
+      if (this.id2targets_?.[id]?.delete(weakRef) && this.id2targets_[id].size === 0) {
+        delete this.id2targets_[id];
+      }
+    });
   }
 
   /**
@@ -652,7 +617,7 @@ class ObserveV2 {
     stateMgmtConsole.debug(`ObservedV2.updateDirtyComputedProps ${computed.length} props: ${JSON.stringify(computed)} ...`);
     aceDebugTrace.begin(`ObservedV2.updateDirtyComputedProps ${computed.length} @Computed`);
     computed.forEach((id) => {
-      const comp = this.id2Computed_[id]?.deref();
+      const comp = this.id2Others_[id]?.deref();
       if (comp instanceof ComputedV2) {
         const target = comp.getTarget();
         if (target instanceof ViewV2 && !target.isViewActive()) {
@@ -684,7 +649,7 @@ class ObserveV2 {
   public updateDirtyMonitorsOnReuse(monitors: Set<number>): void {
     let monitor: MonitorV2 | undefined;
     monitors.forEach((watchId) => {
-      monitor = this.id2Monitor_[watchId]?.deref();
+      monitor = this.id2Others_[watchId]?.deref();
       if (monitor instanceof MonitorV2) {
         // only update dependency and reset value, no call monitor.
         monitor.notifyChangeOnReuse();
@@ -700,7 +665,7 @@ class ObserveV2 {
     let monitorTarget: Object;
 
     monitors.forEach((watchId) => {
-      monitor = this.id2Monitor_[watchId]?.deref();
+      monitor = this.id2Others_[watchId]?.deref();
       if (monitor instanceof MonitorV2) {
         monitorTarget = monitor.getTarget();
         if (monitorTarget instanceof ViewV2 && !monitorTarget.isViewActive()) {
@@ -953,13 +918,13 @@ class ObserveV2 {
   }
 
   public getComputedInfoById(computedId: number): string {
-    let weak = this.id2Computed_[computedId];
+    let weak = this.id2Others_[computedId];
     let computedV2: ComputedV2;
     return (weak && (computedV2 = weak.deref()) && (computedV2 instanceof ComputedV2)) ? computedV2.getComputedFuncName() : '';
   }
 
   public getMonitorInfoById(computedId: number): string {
-    let weak = this.id2Monitor_[computedId];
+    let weak = this.id2Others_[computedId];
     let monitorV2: MonitorV2;
     return (weak && (monitorV2 = weak.deref()) && (monitorV2 instanceof MonitorV2)) ? monitorV2.getMonitorFuncName() : '';
   }
