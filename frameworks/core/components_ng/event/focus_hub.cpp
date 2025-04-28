@@ -1169,9 +1169,7 @@ void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode, FocusReason focusR
         focusNode->GetFrameName().c_str(),
         SEC_PARAM(focusNode->GetFrameId()));
     if (IsCurrentFocus()) {
-        auto focusManger = GetFocusManager();
-        CHECK_NULL_VOID(focusManger);
-        focusManger->UpdateCurrentFocus(Claim(this), SwitchingUpdateReason::SWITCH_FOCUS);
+        GetFocusManager()->UpdateCurrentFocus(Claim(this), SwitchingUpdateReason::SWITCH_FOCUS);
         if (focusNodeNeedBlur && focusNodeNeedBlur != focusNode) {
             focusNodeNeedBlur->LostFocus();
         }
@@ -1936,10 +1934,10 @@ bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) con
     rect = frameNode->GetPaintRectWithTransform();
 
     //  Calculate currentNode -> childNode offset
-    auto parent = frameNode->GetAncestorNodeOfFrame(true);
+    auto parent = frameNode->GetAncestorNodeOfFrame(false);
     while (parent && parent != GetFrameNode()) {
         rect += parent->GetPaintRectWithTransform().GetOffset();
-        parent = parent->GetAncestorNodeOfFrame(true);
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     return true;
 }
@@ -2179,7 +2177,7 @@ bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) 
     CHECK_NULL_RETURN(parentFrameNode, false);
     auto parentPattern = parentFrameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(parentPattern, false);
-
+ 
     auto scrollAbility = parentPattern->GetScrollOffsetAbility();
     auto scrollFunc = scrollAbility.scrollFunc;
     auto scrollAxis = scrollAbility.axis;
@@ -2363,6 +2361,10 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
     CHECK_NULL_RETURN(curGeometryNode, nullptr);
     RectF curFrameRect = RectF(curFrameOffset, curGeometryNode->GetFrameRect().GetSize());
     curFrameRect.SetOffset(curFrameOffset);
+    TAG_LOGD(AceLogTag::ACE_FOCUS,
+        "Current focus node is %{public}s/%{public}d. Rect is {%{public}f,%{public}f,%{public}f,%{public}f}.",
+        GetFrameName().c_str(), GetFrameId(), curFrameRect.Left(), curFrameRect.Top(), curFrameRect.Right(),
+        curFrameRect.Bottom());
     bool isTabStep = IsFocusStepTab(step);
     double resDistance = !isTabStep ? std::numeric_limits<double>::max() : 0.0f;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -2779,7 +2781,7 @@ void FocusHub::ToJsonValue(
     json->PutExtAttr("focusBox", focusBox, filter);
     json->PutExtAttr("tabStop", tabStop, filter);
 }
-
+ 
 bool FocusHub::IsComponentDirectionRtl()
 {
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();

@@ -17,8 +17,8 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 
@@ -65,7 +65,9 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     if (!hasDeco_) {
         isShow = false;
     }
+
     isTitleShow_ = isShow;
+
     // update container modal padding and border
     auto layoutProperty = containerNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -251,8 +253,7 @@ void ContainerModalPattern::InitContainerEvent()
                     floatingContext->OnTransformTranslateUpdate(
                         { 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
                 },
-                [floatingLayoutProperty, id = Container::CurrentId()]() {
-                    ContainerScope scope(id);
+                [floatingLayoutProperty]() {
                     floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
                 });
         }
@@ -794,7 +795,6 @@ void ContainerModalPattern::InitLayoutProperty()
     auto contentProperty = content->GetLayoutProperty();
     CHECK_NULL_VOID(contentProperty);
     auto buttonsRowProperty = buttonsRow->GetLayoutProperty<LinearLayoutProperty>();
-
     CHECK_NULL_VOID(buttonsRowProperty);
     containerModal->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     column->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -972,13 +972,13 @@ bool ContainerModalPattern::OnDirtyLayoutWrapperSwap(
     const DirtySwapConfig& config)
 {
     CallButtonsRectChange();
-
+ 
     auto considerFloatingWindow = false;
     CallSetContainerWindow(considerFloatingWindow);
     
     return false;
 }
-
+ 
 void ContainerModalPattern::CallSetContainerWindow(bool considerFloatingWindow)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -986,7 +986,7 @@ void ContainerModalPattern::CallSetContainerWindow(bool considerFloatingWindow)
     auto curWindowRect = pipelineContext->GetCurrentWindowRect();
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL;
     GetWindowPaintRectWithoutMeasureAndLayout(curWindowRect, isContainerModal);
-
+ 
     auto borderRadius = 0.0_vp;
     if (considerFloatingWindow) {
         auto windowManager = pipelineContext->GetWindowManager();
@@ -997,17 +997,18 @@ void ContainerModalPattern::CallSetContainerWindow(bool considerFloatingWindow)
         borderRadius = isTitleShow_ ? CONTAINER_OUTER_RADIUS : 0.0_vp;
     }
     auto borderRadiusValue = borderRadius.ConvertToPx();
-
+ 
     auto expectRect = RRect::MakeRect(curWindowRect);
     expectRect.SetRectWithSimpleRadius(curWindowRect, borderRadiusValue, borderRadiusValue);
     if (windowPaintRect_ == expectRect) {
         return;
     }
-
+ 
     // set container window show state to RS
     pipelineContext->SetContainerWindow(isTitleShow_, expectRect);
     windowPaintRect_ = expectRect;
 }
+
 void ContainerModalPattern::UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height)
 {
     CHECK_NULL_VOID(row);
