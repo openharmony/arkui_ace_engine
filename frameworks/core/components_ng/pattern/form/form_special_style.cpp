@@ -31,6 +31,16 @@ void FormSpecialStyle::SetIsLockedByAppLock(bool isLockedByAppLock)
     isLockedByAppLock_ = isLockedByAppLock;
 }
 
+bool FormSpecialStyle::IsForbidden() const
+{
+    return isForbiddenByParentControl_;
+}
+
+bool FormSpecialStyle::IsLocked() const
+{
+    return isLockedByAppLock_;
+}
+
 const char* FormSpecialStyle::GetResource()
 {
     auto formStyleAttribution = GetFormStyleAttribution();
