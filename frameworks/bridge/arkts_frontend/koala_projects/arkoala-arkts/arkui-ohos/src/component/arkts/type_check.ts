@@ -74,6 +74,7 @@ import { FullscreenInfo, PlaybackInfo, PlaybackSpeed, PreparedInfo, SeekMode, Vi
 import { GridAttribute, Callback_Number_Number_ComputedBarAttribute, ComputedBarAttribute, Callback_Number_Number_Void, GridDirection, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, GridItemAlignment, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain, GridLayoutOptions, Callback_Number_Tuple_Number_Number, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number } from "./../grid"
 import { GridAttribute_onItemDragStart_event_type, ListAttribute_onItemDragStart_event_type, AnimationRange_Number } from "./../type-replacements"
 import { Resource } from "global/resource"
+import { WebviewController as WebviewControllerAni } from "#external"
 import { GridItemStyle, GridItemOptions } from "./../griditem"
 import { ImageAnalyzerType, ImageAnalyzerController, ImageAnalyzerConfig, ImageAIOptions } from "./../imageCommon"
 import { IndicatorComponentController } from "./../indicatorcomponent"
@@ -3429,6 +3430,9 @@ export class TypeChecker {
     }
     static isWebviewController(value: Object | string | number | undefined): boolean {
         return value instanceof WebviewController
+    }
+    static isWebviewControllerAni(value: object|string|number|undefined|null): boolean {
+        return value instanceof WebviewControllerAni
     }
     static isWeek(value: Object | string | number | undefined): boolean {
         return value instanceof Week

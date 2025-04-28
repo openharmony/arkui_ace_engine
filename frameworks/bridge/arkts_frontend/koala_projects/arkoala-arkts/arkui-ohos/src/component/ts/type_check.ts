@@ -19118,6 +19118,9 @@ export class TypeChecker {
     static isWebviewController(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof WebviewController")
     }
+    static isWebviewControllerAni(value: object|string|number|undefined|null|boolean): boolean {
+        throw new Error("Can not discriminate value typeof WebviewControllerAni")
+    }
     static isWeek(value: Object | string | number | undefined | boolean): boolean {
         if ((value) === (Week.Mon)) {
             return true
