@@ -207,6 +207,115 @@ HWTEST_F(RichEditorPatternTestOneNg, ShowHandles001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateDecoration001
+ * @tc.desc: test UpdateDecoration
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, UpdateDecoration001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanNode> spanNode = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
+    UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
+    TextStyle textStyle;
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    ASSERT_EQ(updateSpanStyle.updateTextDecoration.has_value(), false);
+}
+
+/**
+ * @tc.name: CreateAndShowSingleHandle001
+ * @tc.desc: test CreateAndShowSingleHandle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, CreateAndShowSingleHandle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create richEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretPosition_ = -1;
+
+    /**
+     * @tc.steps: step2. Construct GestureEvent data and call CreatAndShowSingleHandle
+     */
+    ASSERT_NE(richEditorPattern->selectOverlay_, nullptr);
+    richEditorPattern->previewTextRecord_.previewContent = u"abc";
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->CreateAndShowSingleHandle();
+    EXPECT_FALSE(richEditorPattern->selectOverlay_->IsSingleHandle());
+}
+
+/**
+ * @tc.name: CloseKeyboard001
+ * @tc.desc: test CloseKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, CloseKeyboard001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->CloseKeyboard(false);
+    EXPECT_EQ(richEditorPattern->HasConnection(), false);
+}
+
+/**
+ * @tc.name: InsertSpanByBackData001
+ * @tc.desc: test InsertSpanByBackData
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, InsertSpanByBackData001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"");
+    richEditorPattern->textSelector_ = TextSelector(0, 6);
+    EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
+    richEditorPattern->InsertSpanByBackData(spanString);
+    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
+    richEditorPattern->ClearOperationRecords();
+
+    richEditorPattern->placeholderSpansMap_[u"![id1]"] = AceType::MakeRefPtr<SpanItem>();
+    spanString = AceType::MakeRefPtr<SpanString>(u"test![id1]");
+    auto start = richEditorPattern->operationRecords_.size();
+    richEditorPattern->InsertSpanByBackData(spanString);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
+    richEditorPattern->ClearOperationRecords();
+}
+
+/**
+ * @tc.name: HandleOnShare001
+ * @tc.desc: test rich_editor_select_overlay.cpp HandleOnShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, HandleOnShare001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    richEditorPattern->HandleOnShare();
+    auto value = richEditorPattern->selectOverlay_->GetSelectedText();
+    int32_t ret = value.length();
+    EXPECT_EQ(ret, 0);
+}
+
+/**
  * @tc.name: UpdateTextFieldManager001
  * @tc.desc: test RichEditorPattern UpdateTextFieldManager
  * @tc.type: FUNC
@@ -419,208 +528,4 @@ HWTEST_F(RichEditorPatternTestOneNg, CalcCursorOffsetByPosition001, TestSize.Lev
     ASSERT_EQ(richEditorPattern->GetHost()->GetChildren().empty(), false);
 }
 
-/**
- * @tc.name: UpdateDecoration001
- * @tc.desc: test UpdateDecoration
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, UpdateDecoration001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanNode> spanNode = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
-    UpdateSpanStyle updateSpanStyle;
-    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
-    TextStyle textStyle;
-    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
-    ASSERT_EQ(updateSpanStyle.updateTextDecoration.has_value(), false);
-}
-
-/**
- * @tc.name: CreateAndShowSingleHandle001
- * @tc.desc: test CreateAndShowSingleHandle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, CreateAndShowSingleHandle001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create richEditorPattern
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->caretPosition_ = -1;
-
-    /**
-     * @tc.steps: step2. Construct GestureEvent data and call CreatAndShowSingleHandle
-     */
-    ASSERT_NE(richEditorPattern->selectOverlay_, nullptr);
-    richEditorPattern->previewTextRecord_.previewContent = u"abc";
-    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
-    richEditorPattern->previewTextRecord_.startOffset = 0;
-    richEditorPattern->previewTextRecord_.endOffset = 0;
-    richEditorPattern->CreateAndShowSingleHandle();
-    EXPECT_FALSE(richEditorPattern->selectOverlay_->IsSingleHandle());
-}
-
-/**
- * @tc.name: HandleBlurEvent001
- * @tc.desc: test HandleBlurEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, HandleBlurEvent001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-
-    auto func = []() {};
-
-    richEditorPattern->customKeyboardBuilder_ = func;
-    richEditorPattern->isCustomKeyboardAttached_ = true;
-    focusHub->blurReason_ = BlurReason::FRAME_DESTROY;
-    richEditorPattern->HandleBlurEvent();
-
-    richEditorPattern->customKeyboardBuilder_ = nullptr;
-    richEditorPattern->isCustomKeyboardAttached_ = true;
-    focusHub->blurReason_ = BlurReason::FRAME_DESTROY;
-    richEditorPattern->HandleBlurEvent();
-
-    richEditorPattern->customKeyboardBuilder_ = func;
-    richEditorPattern->isCustomKeyboardAttached_ = true;
-    focusHub->blurReason_ = BlurReason::WINDOW_BLUR;
-    richEditorPattern->HandleBlurEvent();
-
-    richEditorPattern->customKeyboardBuilder_ = nullptr;
-    richEditorPattern->isCustomKeyboardAttached_ = true;
-    focusHub->blurReason_ = BlurReason::WINDOW_BLUR;
-    richEditorPattern->HandleBlurEvent();
-    EXPECT_EQ(richEditorPattern->isEditing_, false);
-}
-
-/**
- * @tc.name: HandleFocusEvent001
- * @tc.desc: test HandleFocusEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, HandleFocusEvent001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->previewLongPress_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->previewLongPress_ = false;
-
-    richEditorPattern->usingMouseRightButton_ = true;
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = false;
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = true;
-    richEditorPattern->isLongPress_ = false;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = true;
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = true;
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = false;
-    richEditorPattern->isLongPress_ = false;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = false;
-    richEditorPattern->isLongPress_ = false;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = false;
-    richEditorPattern->isLongPress_ = false;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
-    richEditorPattern->HandleFocusEvent();
-
-    EXPECT_EQ(richEditorPattern->textSelector_.SelectNothing(), true);
-}
-
-/**
- * @tc.name: CloseKeyboard001
- * @tc.desc: test CloseKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, CloseKeyboard001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->CloseKeyboard(false);
-    EXPECT_EQ(richEditorPattern->HasConnection(), false);
-}
-
-/**
- * @tc.name: InsertSpanByBackData001
- * @tc.desc: test InsertSpanByBackData
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, InsertSpanByBackData001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto spanString = AceType::MakeRefPtr<SpanString>(u"");
-    richEditorPattern->textSelector_ = TextSelector(0, 6);
-    EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
-    richEditorPattern->InsertSpanByBackData(spanString);
-    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
-    richEditorPattern->ClearOperationRecords();
-
-    richEditorPattern->placeholderSpansMap_[u"![id1]"] = AceType::MakeRefPtr<SpanItem>();
-    spanString = AceType::MakeRefPtr<SpanString>(u"test![id1]");
-    auto start = richEditorPattern->operationRecords_.size();
-    richEditorPattern->InsertSpanByBackData(spanString);
-    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
-    richEditorPattern->ClearOperationRecords();
-}
-
-/**
- * @tc.name: HandleOnShare001
- * @tc.desc: test rich_editor_select_overlay.cpp HandleOnShare function
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, HandleOnShare001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-
-    richEditorPattern->HandleOnShare();
-    auto value = richEditorPattern->selectOverlay_->GetSelectedText();
-    int32_t ret = value.length();
-    EXPECT_EQ(ret, 0);
-}
 } // namespace OHOS::Ace::NG
