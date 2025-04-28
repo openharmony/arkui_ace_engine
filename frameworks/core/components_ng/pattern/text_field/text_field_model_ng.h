@@ -316,7 +316,7 @@ public:
     static void SetEllipsisMode(FrameNode* frameNode, const std::optional<EllipsisMode>& modal);
     static void SetStopBackPress(FrameNode* frameNode, const std::optional<bool>& isStopBackPress);
     static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
-    static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
+    static void SetKeyboardAppearance(FrameNode* frameNode, const std::optional<KeyboardAppearance>& value);
     static int32_t GetKeyboardAppearance(FrameNode* frameNode);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick);

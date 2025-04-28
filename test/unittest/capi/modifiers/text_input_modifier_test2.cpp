@@ -34,37 +34,6 @@ namespace GeneratedModifier {
     const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor();
 } // namespace GeneratedModifier
 
-namespace Converter {
-    template<>
-    PreviewText Convert(const Ark_PreviewText& src)
-    {
-        PreviewText previewText = {.value = Convert<std::u16string>(src.value),
-                                   .offset = Convert<int32_t>(src.offset)};
-        return previewText;
-    }
-
-    template<>
-    ChangeValueInfo Convert(const Ark_EditableTextChangeValue& src)
-    {
-        auto optPreviewText = Converter::OptConvert<PreviewText>(src.previewText);
-        ChangeValueInfo changeValue;
-        changeValue.value = Converter::Convert<std::u16string>(src.content);
-        if (optPreviewText.has_value()) {
-            changeValue.previewText = optPreviewText.value();
-        }
-        auto optTextChangeOptions = Converter::OptConvert<Ark_TextChangeOptions>(src.options);
-        if (!optTextChangeOptions.has_value()) {
-            return changeValue;
-        }
-        auto arkTextChangeOptions = optTextChangeOptions.value();
-        changeValue.rangeBefore = Converter::Convert<TextRange>(arkTextChangeOptions.rangeBefore);
-        changeValue.rangeAfter = Converter::Convert<TextRange>(arkTextChangeOptions.rangeAfter);
-        changeValue.oldContent = Converter::Convert<std::u16string>(arkTextChangeOptions.oldContent);
-        changeValue.oldPreviewText = Converter::Convert<PreviewText>(arkTextChangeOptions.oldPreviewText);
-        return changeValue;
-    }
-} // namespace Converter
-
 namespace {
     Ark_EnterKeyType g_EventTestKey{};
     const std::string TEST_CONTENT_ONE = "ContentTestOne";
@@ -76,6 +45,7 @@ namespace {
     static const auto ATTRIBUTE_SHOW_COUNTER_NAME = "showCounter";
     static const auto ATTRIBUTE_SHOW_COUNTER_DEFAULT_VALUE =
         "{\"value\":false,\"options\":{\"thresholdPercentage\":-1,\"highlightBorder\":true}}";
+    static const auto ATTRIBUTE_KEYBOARD_APPEARANCE_NAME = "keyboardAppearance";
 }
 
 class TextInputModifierTest2 : public ModifierTestBase<GENERATED_ArkUITextInputModifier,
@@ -600,6 +570,45 @@ HWTEST_F(TextInputModifierTest2, ShowCounterTestInvalidValues, TestSize.Level1)
     modifier_->setShowCounter(node_, inputIsShowCounter, nullptr);
     resultValue = GetStringAttribute(node_, ATTRIBUTE_SHOW_COUNTER_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+}
+
+/**
+ * @tc.name: setKeyboardAppearanceTest
+ * @tc.desc: Check the functionality of setKeyboardAppearance
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest2, setKeyboardAppearanceTest, TestSize.Level1)
+{
+    typedef std::tuple<Opt_KeyboardAppearance, std::string> TestStep;
+    const std::vector<TestStep> TEST_PLAN = {
+        { Converter::ArkValue<Opt_KeyboardAppearance>(
+            Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_IMMERSIVE), "1" },
+        { Converter::ArkValue<Opt_KeyboardAppearance>(
+            Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_NONE_IMMERSIVE), "0" },
+        { Converter::ArkValue<Opt_KeyboardAppearance>(
+            Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE), "2" },
+        { Converter::ArkValue<Opt_KeyboardAppearance>(
+            Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_DARK_IMMERSIVE), "3" },
+        { Converter::ArkValue<Opt_KeyboardAppearance>(Ark_Empty()), "0" }}; // invalid
+
+    ASSERT_NE(modifier_->setKeyboardAppearance, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
+    EXPECT_EQ(resultStr, "0");
+
+    for (auto& [value, expected] : TEST_PLAN) {
+        modifier_->setKeyboardAppearance(node_, &value);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
+        EXPECT_EQ(resultStr, expected);
+    }
+
+    modifier_->setKeyboardAppearance(node_, nullptr);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
+    EXPECT_EQ(resultStr, "0");
 }
 
 } // namespace OHOS::Ace::NG

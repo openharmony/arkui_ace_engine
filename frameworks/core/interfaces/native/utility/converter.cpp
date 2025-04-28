@@ -1026,6 +1026,27 @@ CaretStyle Convert(const Ark_CaretStyle& src)
 }
 
 template<>
+ChangeValueInfo Convert(const Ark_EditableTextChangeValue& src)
+{
+    auto optPreviewText = Converter::OptConvert<PreviewText>(src.previewText);
+    ChangeValueInfo changeValue;
+    changeValue.value = Converter::Convert<std::u16string>(src.content);
+    if (optPreviewText.has_value()) {
+        changeValue.previewText = optPreviewText.value();
+    }
+    auto optTextChangeOptions = Converter::OptConvert<Ark_TextChangeOptions>(src.options);
+    if (!optTextChangeOptions.has_value()) {
+        return changeValue;
+    }
+    auto arkTextChangeOptions = optTextChangeOptions.value();
+    changeValue.rangeBefore = Converter::Convert<TextRange>(arkTextChangeOptions.rangeBefore);
+    changeValue.rangeAfter = Converter::Convert<TextRange>(arkTextChangeOptions.rangeAfter);
+    changeValue.oldContent = Converter::Convert<std::u16string>(arkTextChangeOptions.oldContent);
+    changeValue.oldPreviewText = Converter::Convert<PreviewText>(arkTextChangeOptions.oldPreviewText);
+    return changeValue;
+}
+
+template<>
 CheckboxSettingData Convert(const Ark_LunarSwitchStyle& src)
 {
     CheckboxSettingData data;
@@ -2066,6 +2087,14 @@ PointT<int32_t> Convert(const Ark_Point& src)
     auto x = Converter::Convert<int32_t>(src.x);
     auto y = Converter::Convert<int32_t>(src.y);
     return PointT<int32_t>(x, y);
+}
+
+template<>
+PreviewText Convert(const Ark_PreviewText& src)
+{
+    PreviewText previewText = {.value = Convert<std::u16string>(src.value),
+        .offset = Convert<int32_t>(src.offset)};
+    return previewText;
 }
 
 template<>
