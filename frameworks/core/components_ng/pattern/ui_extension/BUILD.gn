@@ -52,6 +52,7 @@ build_component_ng("ui_extension_pattern_ng") {
     "dynamic_component/dynamic_model.cpp",
     "dynamic_component/dynamic_node.cpp",
     "dynamic_component/dynamic_pattern.cpp",
+    "dynamic_component/dynamic_touch_delegate.cpp",
   ]
 
   # isolated_component
