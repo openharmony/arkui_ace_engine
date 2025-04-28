@@ -32,9 +32,7 @@ class ACE_EXPORT ContainerModalPattern : public Pattern {
 public:
     ContainerModalPattern() = default;
     ~ContainerModalPattern() override = default;
-
-     void OnColorConfigurationUpdate() override;
-
+    void OnColorConfigurationUpdate() override;
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
         return MakeRefPtr<ContainerModalAccessibilityProperty>();
@@ -210,7 +208,7 @@ public:
     {
         this->enableContainerModalCustomGesture_ = enable;
     }
-    
+
     static void EnableContainerModalCustomGesture(RefPtr<PipelineContext> pipeline, bool enable);
 
 protected:
@@ -275,10 +273,10 @@ protected:
     bool isFocus_ = false;
     bool hideSplitButton_ = false;
     bool isHoveredMenu_ = false;
+    bool isCustomColor_;
     bool isTitleShow_ = false;
     bool enableContainerModalCustomGesture_ = false;
     RRect windowPaintRect_;
-    bool isCustomColor_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_H

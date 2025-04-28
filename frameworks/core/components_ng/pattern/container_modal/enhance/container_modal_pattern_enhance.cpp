@@ -73,7 +73,6 @@ RefPtr<WindowManager> GetNotMovingWindowManager(const RefPtr<FrameNode>& node)
     return windowManager;
 }
 
-
 void BondingMenuItemEvent(WeakPtr<ContainerModalPatternEnhance>& weakPtn, RefPtr<FrameNode>& item, bool isLeftSplit)
 {
     WeakPtr<FrameNode> weakItem = item;
@@ -382,6 +381,8 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
     }
 }
 
+void ContainerModalPatternEnhance::AddPointLight() {}
+
 RefPtr<FrameNode> ContainerModalPatternEnhance::GetOrCreateMenuList(const RefPtr<FrameNode>& targetNode)
 {
     MeasureContext textCtx;
@@ -627,7 +628,7 @@ bool ContainerModalPatternEnhance::OnDirtyLayoutWrapperSwap(
     const DirtySwapConfig& config)
 {
     CallButtonsRectChange();
-
+ 
     auto considerFloatingWindow = true;
     CallSetContainerWindow(considerFloatingWindow);
     
@@ -648,7 +649,6 @@ void ContainerModalPatternEnhance::EnablePanEventOnNode(
         RemovePanEvent(node);
     }
 }
-
 
 void ContainerModalPatternEnhance::EnableTapGestureOnNode(
     RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName)

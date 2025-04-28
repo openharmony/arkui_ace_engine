@@ -47,7 +47,6 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
             TAG_LOGW(AceLogTag::ACE_STATE_STYLE, "the touch info is illegal");
             return;
         }
-
         auto lastPoint = changeTouches.back();
         const auto& type = lastPoint.GetTouchType();
         if (type == TouchType::DOWN) {
@@ -173,7 +172,6 @@ void StateStyleManager::GetCustomNode(RefPtr<CustomNodeBase>& customNode, RefPtr
         if (GetCustomNodeFromSelf(node, customNode, nodeId)) {
             return;
         }
-        CHECK_NULL_VOID(node);
         node = node->GetParent();
     }
 }
@@ -321,7 +319,6 @@ void StateStyleManager::CleanScrollingParentListener()
 {
     auto node = GetFrameNode();
     CHECK_NULL_VOID(node);
-
     auto parent = node->GetAncestorNodeOfFrame(false);
     while (parent) {
         auto pattern = parent->GetPattern();
@@ -346,7 +343,7 @@ void StateStyleManager::Transform(PointF& localPointF, const WeakPtr<FrameNode>&
         CHECK_NULL_VOID(context);
         auto localMat = context->GetLocalTransformMatrix();
         vTrans.emplace_back(localMat);
-        host = host->GetAncestorNodeOfFrame(true);
+        host = host->GetAncestorNodeOfFrame(false);
     }
 
     Point temp(localPointF.GetX(), localPointF.GetY());
@@ -364,11 +361,11 @@ bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& l
     if (IsOutOfPressedRegionWithoutClip(node, sourceType, location)) {
         return true;
     }
-    auto parent = node->GetAncestorNodeOfFrame(true);
+    auto parent = node->GetAncestorNodeOfFrame(false);
     while (parent) {
         auto renderContext = parent->GetRenderContext();
         if (!renderContext) {
-            parent = parent->GetAncestorNodeOfFrame(true);
+            parent = parent->GetAncestorNodeOfFrame(false);
             continue;
         }
         // If the parent node has a "clip" attribute, the press region should be re-evaluated.
@@ -376,7 +373,7 @@ bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& l
         if (clip && IsOutOfPressedRegionWithoutClip(parent, sourceType, location)) {
             return true;
         }
-        parent = parent->GetAncestorNodeOfFrame(true);
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     return false;
 }
