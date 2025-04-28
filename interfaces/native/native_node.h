@@ -1941,6 +1941,40 @@ typedef enum {
      *
      */
     NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_RATIO = 102,
+
+    /**
+     * @brief Defines the translate attribute, which supports for percentile translation input, and can be set, reset,
+     * and obtained as required through APIs.\n
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: distance to translate along the x-axis. The default unit is percentage.
+     * The unit is vp only if value[3] exists and value[3] is 0. The default value of value[0] is <b>0</b>.\n
+     * .value[1].f32: distance to translate along the y-axis. The default unit is percentage.
+     * The unit is vp only if value[4] exists and value[4] is 0. The default value of value[1] is <b>0</b>.\n
+     * .value[2].f32: distance to translate along the z-axis, in vp. The default value is <b>0</b>.\n
+     * .value[3]?.i32: Whether the translation distance along the x-axis is specified as a percentage.
+     *  The value can be 0 or 1. When the value is 1, it is specified as a percentage.
+     *  For example, value[0].f32=0.1 and value[3].i32=1 indicates a 10% shift in the x direction.
+     *  The default value is <b>1</b>.\n
+     * .value[4]?.i32: Whether the translation distance along the y-axis is specified as a percentage.
+     *  The value can be 0 or 1. When the value is 1, it is specified as a percentage.
+     *  For example, value[1].f32=0.1 and value[4].i32=1 indicates a 10% shift in the y direction.
+     *  The default value is <b>1</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: distance to translate along the x-axis. The unit depends on value[3].\n
+     * .value[1].f32: distance to translate along the y-axis. The unit depends on value[4].\n
+     * .value[2].f32: distance to translate along the z-axis. The unit is vp.\n
+     * .value[3].i32: Whether the unit of the X-axis translation distance is in percentage. When value[3].i32 is 0,
+     *  the unit of the X-axis translation distance is vp; when value[3].i32 is 1, the unit of the X-axis translation
+     *  distance is percentage;\n
+     * .value[4].i32: Whether the unit of the Y-axis translation distance is in percentage. When value[4].i32 is 0,
+     *  the unit of the Y-axis translation distance is vp; when value[4].i32 is 1, the unit of the Y-axis translation
+     *  distance is percentage;\n
+     *
+     * @since 20
+     */
+    NODE_TRANSLATE_WITH_PERCENT = 103,
     
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
