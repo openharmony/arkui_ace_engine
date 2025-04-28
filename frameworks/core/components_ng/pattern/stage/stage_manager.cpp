@@ -336,11 +336,12 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
     if (popSize == 0) {
         return true;
     }
-    auto outPageNode = AceType::DynamicCast<FrameNode>(srcPageNode_.Upgrade());
+
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
     bool firstPageTransition = true;
+    auto outPageNode = AceType::DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     auto iter = children.rbegin();
     for (int32_t current = 0; current < popSize; ++current) {
         auto pageNode = *iter;
@@ -588,7 +589,7 @@ RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
         return nullptr;
     }
     if (stageInTrasition_) {
-        return DynamicCast<FrameNode>(animationSrcPage_.Upgrade());
+        return DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     }
     return DynamicCast<FrameNode>(children.front());
 }
