@@ -101,16 +101,6 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         newNode->SetUpdateNodeFunc(std::move(updateNodeFunc));
     }
 
-    if (newNode && (infoLen >= BUILD_PARAM_INDEX_THREE + 1)) {
-        auto updateTsNodeConfig = info[BUILD_PARAM_INDEX_THREE];
-        EcmaVM* vm = info.GetVm();
-        auto updateTsConfig = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(updateTsNodeConfig));
-        auto updateNodeConfig = [updateTsConfig, vm]() mutable {
-            updateTsConfig->ExecuteJS();
-        };
-        newNode->SetUpdateNodeConfig(std::move(updateNodeConfig));
-    }
-
     bool isSupportLazyBuild = false;
     if (infoLen >= BUILD_PARAM_INDEX_FOUR + 1) {
         auto jsLazyBuildSupported = info[BUILD_PARAM_INDEX_FOUR];
@@ -130,6 +120,16 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         stackLayoutAlgorithm->UpdateAlignment(Alignment::TOP_LEFT);
         proxyNode->AddChild(newNode);
         newNode = proxyNode;
+    }
+
+    if (newNode && (infoLen >= BUILD_PARAM_INDEX_THREE + 1)) {
+        auto updateTsNodeConfig = info[BUILD_PARAM_INDEX_THREE];
+        EcmaVM* vm = info.GetVm();
+        auto updateTsConfig = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(updateTsNodeConfig));
+        auto updateNodeConfig = [updateTsConfig, vm]() mutable {
+            updateTsConfig->ExecuteJS();
+        };
+        newNode->SetUpdateNodeConfig(std::move(updateNodeConfig));
     }
     if (parent) {
         if (newNode) {
