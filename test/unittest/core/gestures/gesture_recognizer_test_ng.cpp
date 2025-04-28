@@ -589,7 +589,8 @@ HWTEST_F(GestureRecognizerTestNg, HandlePanGestureAccept_001, TestSize.Level1)
     auto end = [](GestureEvent& info) {};
     panRecognizerPtr->SetOnActionStart(start);
     panRecognizerPtr->SetOnActionEnd(end);
-    panRecognizerPtr->HandlePanGestureAccept(info, PanGestureState::AFTER, panRecognizerPtr->onActionStart_);
+    panRecognizerPtr->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+    panRecognizerPtr->SendCallbackMsg(panRecognizerPtr->onActionStart_, GestureCallbackType::START);
     EXPECT_EQ(panRecognizerPtr->currentCallbackState_, CurrentCallbackState::START);
 }
 
@@ -609,7 +610,8 @@ HWTEST_F(GestureRecognizerTestNg, HandlePanGestureAccept_002, TestSize.Level1)
     auto end = [](GestureEvent& info) {};
     panRecognizerPtr->SetOnActionStart(start);
     panRecognizerPtr->SetOnActionEnd(end);
-    panRecognizerPtr->HandlePanGestureAccept(info, PanGestureState::AFTER, panRecognizerPtr->onActionEnd_);
+    panRecognizerPtr->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+    panRecognizerPtr->SendCallbackMsg(panRecognizerPtr->onActionEnd_, GestureCallbackType::END);
     EXPECT_EQ(panRecognizerPtr->currentCallbackState_, CurrentCallbackState::END);
 }
 

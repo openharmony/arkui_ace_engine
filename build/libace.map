@@ -94,6 +94,7 @@
       OHOS::Ace::NG::DragDropFuncWrapper::*;
       OHOS::Ace::NG::DragControllerFuncWrapper::*;
       OHOS::Ace::NG::DragDropGlobalController::*;
+      OHOS::Ace::NG::Reporter::*;
       OHOS::Ace::WindowUtils::*;
       OHOS::Ace::NG::ParallelPagePattern::*;
       OHOS::Ace::NG::ViewAdvancedRegister::*;

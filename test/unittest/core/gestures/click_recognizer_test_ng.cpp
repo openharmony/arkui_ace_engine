@@ -497,7 +497,7 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest009, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     std::unique_ptr<GestureEventFunc> onAction;
-    clickRecognizer->SendCallbackMsg(onAction);
+    clickRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(clickRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -506,7 +506,7 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest009, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>();
-    clickRecognizer->SendCallbackMsg(onAction);
+    clickRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(clickRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -515,7 +515,7 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest009, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    clickRecognizer->SendCallbackMsg(onAction);
+    clickRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(clickRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -525,7 +525,7 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest009, TestSize.Level1)
      */
     TouchEvent touchEvent;
     clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
-    clickRecognizer->SendCallbackMsg(onAction);
+    clickRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(clickRecognizer->touchPoints_.size(), 1);
 
     /**
@@ -536,7 +536,7 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest009, TestSize.Level1)
     touchEvent.tiltX = 0.0f;
     touchEvent.tiltY = 0.0f;
     clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
-    clickRecognizer->SendCallbackMsg(onAction);
+    clickRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(clickRecognizer->touchPoints_.size(), 1);
 }
 
@@ -1123,7 +1123,7 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerSendCallbackMsgTest001, TestSize.
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    clickRecognizer->SendCallbackMsg(onAction);
+    clickRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(clickRecognizer->touchPoints_.size(), 0);
 }
 

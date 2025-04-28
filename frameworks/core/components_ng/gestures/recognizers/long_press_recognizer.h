@@ -23,6 +23,7 @@
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
+#include "core/components_ng/event/event_constants.h"
 
 namespace OHOS::Ace::NG {
 using OnAccessibilityEventFunc = std::function<void(AccessibilityEventType)>;
@@ -137,7 +138,9 @@ private:
     void DeadlineTimer(int32_t time, bool isCatchMode);
     void DoRepeat();
     void StartRepeatTimer();
-    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, bool isOnAction = false);
+    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, GestureCallbackType type,
+        bool isOnAction = false);
+    void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
     GestureJudgeResult TriggerGestureJudgeCallback();
     void OnResetStatus() override;
     double ConvertPxToVp(double offset) const;
@@ -152,6 +155,7 @@ private:
     CancelableCallback<void()> timer_;
     std::function<void(Offset)> callback_;
     int32_t duration_ = 500;
+    long long inputTime_;
     bool repeat_ = false;
     TimeStamp time_;
     bool useCatchMode_ = true;

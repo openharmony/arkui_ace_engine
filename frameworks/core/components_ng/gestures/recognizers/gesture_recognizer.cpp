@@ -16,6 +16,8 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/manager/event/json_report.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -122,6 +124,7 @@ bool NGGestureRecognizer::ProcessTouchEvent(const TouchEvent& point)
 
 void NGGestureRecognizer::HandleTouchDown(const TouchEvent& point)
 {
+    DragDropBehaviorReporter::GetInstance().UpdateLongPressDurationStart(GetSysTimestamp());
     deviceId_ = point.deviceId;
     deviceType_ = point.sourceType;
     inputEventType_ = (deviceType_ == SourceType::MOUSE) ? InputEventType::MOUSE_BUTTON : InputEventType::TOUCH_SCREEN;
@@ -135,6 +138,7 @@ void NGGestureRecognizer::HandleTouchDown(const TouchEvent& point)
 
 void NGGestureRecognizer::HandleTouchUp(const TouchEvent& point)
 {
+    DragDropBehaviorReporter::GetInstance().UpdateLongPressDurationStart(0);
     auto result = AboutToMinusCurrentFingers(point.id);
     if (result) {
         HandleTouchUpEvent(point);
@@ -145,6 +149,7 @@ void NGGestureRecognizer::HandleTouchUp(const TouchEvent& point)
 
 void NGGestureRecognizer::HandleTouchCancel(const TouchEvent& point)
 {
+    DragDropBehaviorReporter::GetInstance().UpdateLongPressDurationStart(0);
     auto result = AboutToMinusCurrentFingers(point.id);
     if (result) {
         HandleTouchCancelEvent(point);
