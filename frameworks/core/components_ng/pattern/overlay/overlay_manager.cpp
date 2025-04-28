@@ -8482,7 +8482,7 @@ bool OverlayManager::IsCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& 
     return false;
 }
 
-Rect OverlayManager::GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode)
+Rect OverlayManager::GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode, int32_t type)
 {
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_RETURN(mainPipeline, Rect());
@@ -8511,7 +8511,8 @@ Rect OverlayManager::GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode)
     auto isCrossWindow = parentContainer->IsCrossAxisWindow();
     auto isSceneBoard = parentContainer->IsSceneBoardWindow();
     if (isCrossWindow || isSceneBoard) {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(pipeContext->GetInstanceId());
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+            pipeContext->GetInstanceId(), static_cast<SubwindowType>(type));
         CHECK_NULL_RETURN(subwindow, rect);
         rect = subwindow->GetFoldExpandAvailableRect();
     }

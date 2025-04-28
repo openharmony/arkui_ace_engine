@@ -26,6 +26,7 @@ export struct OverlayIndex {
   pathStack: NavPathStack = new NavPathStack()
   paths: NavListItem[] = [
     { name: 'OverlayLevelOrder', path: 'OverlayLevelOrder' },
+    { name: 'OverlayManagerHitTest', path: 'OverlayManagerHitTest' },
   ]
 
   build() {

@@ -3195,7 +3195,8 @@ Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuP
     displayWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
     TAG_LOGI(AceLogTag::ACE_MENU, "GetDisplayWindowRectInfo : %{public}s", displayWindowRect_.ToString().c_str());
     menuWindowRect = Rect(rect.Left(), rect.Top(), rect.Width(), rect.Height());
-    auto availableRect = OverlayManager::GetDisplayAvailableRect(menuPattern->GetHost());
+    auto availableRect = OverlayManager::GetDisplayAvailableRect(
+        menuPattern->GetHost(), static_cast<int32_t>(SubwindowType::TYPE_MENU));
     TAG_LOGI(AceLogTag::ACE_MENU, "GetDisplayAvailableRect : %{public}s", availableRect.ToString().c_str());
     if (canExpandCurrentWindow_ && isExpandDisplay_) {
         menuWindowRect = Rect(availableRect.Left(), availableRect.Top(), availableRect.Width(), availableRect.Height());

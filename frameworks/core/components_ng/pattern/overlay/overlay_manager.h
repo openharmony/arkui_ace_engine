@@ -735,7 +735,7 @@ public:
     static SafeAreaInsets GetSafeAreaInsets(const RefPtr<FrameNode>& frameNode, bool useCurrentWindow = false);
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
     bool IsCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal);
-    static Rect GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode);
+    static Rect GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode, int32_t type);
     void SkipMenuShow(int32_t targetId);
     void ResumeMenuShow(int32_t targetId);
     bool CheckSkipMenuShow(int32_t targetId);
