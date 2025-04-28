@@ -463,6 +463,7 @@ protected:
     float scrollSnapVelocity_ = 0.0f;
     bool isStackFromEnd_ = true;
 private:
+    void CheckAndUpdateAnimateTo(float relativeOffset, float prevOffset);
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
