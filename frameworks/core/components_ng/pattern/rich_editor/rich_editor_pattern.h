@@ -1520,6 +1520,7 @@ private:
     void AdjustSelectRects(SelectRectsType pos, std::vector<RectF>& selectRects);
     RectF GetSelectArea(SelectRectsType pos);
     void AppendSelectRect(std::vector<RectF>& selectRects);
+    RectF CreateNewLineRect(const int32_t position, const bool downStreamFirst);
     bool IsTouchInFrameArea(const PointF& touchPoint);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
     void DeleteForward(int32_t currentPosition, int32_t length);
