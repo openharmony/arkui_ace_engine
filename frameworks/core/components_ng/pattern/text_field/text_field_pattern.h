@@ -1512,6 +1512,8 @@ public:
 
     void TriggerAvoidWhenCaretGoesDown();
 
+    bool CheckIfNeedAvoidOnCaretChange(float caretPos);
+
     bool IsTextEditableForStylus() const override;
     bool IsHandleDragging();
     bool IsLTRLayout()

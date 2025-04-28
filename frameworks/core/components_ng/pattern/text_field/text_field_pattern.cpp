@@ -3431,12 +3431,29 @@ void TextFieldPattern::TriggerAvoidWhenCaretGoesDown()
             CHECK_NULL_VOID(textFieldManager);
             auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
             auto lastCaretPos = textField->GetLastCaretPos();
-            if (!lastCaretPos.has_value() || caretPos > lastCaretPos.value()) {
+            if (!lastCaretPos.has_value() ||
+                (caretPos > lastCaretPos.value() && textField->CheckIfNeedAvoidOnCaretChange(caretPos))) {
                 TAG_LOGI(ACE_KEYBOARD, "Caret Position Goes Down, Retrigger Avoid");
                 textField->TriggerAvoidOnCaretChange();
             }
         });
     }
+}
+
+bool TextFieldPattern::CheckIfNeedAvoidOnCaretChange(float caretPos)
+{
+#if defined(ENABLE_STANDARD_INPUT)
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, true);
+    auto safeAreaMgr = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaMgr, true);
+    auto keyboard = safeAreaMgr->GetKeyboardInset();
+    return keyboard.Length() > 0 && GreatNotEqual(caretPos, keyboard.start - AVOID_OFFSET.ConvertToPx());
+#else
+    return true;
+#endif
 }
 
 void TextFieldPattern::ApplyNormalTheme()
