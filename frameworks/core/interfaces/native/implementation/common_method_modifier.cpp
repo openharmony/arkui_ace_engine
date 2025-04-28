@@ -1403,11 +1403,11 @@ void AssignCast(std::optional<TransitionType>& dst, const Ark_TransitionType& sr
 }
 
 template<>
-void AssignCast(std::optional<FocusDrawLevel>& dst, const Ark_FocusDrawLevel& src)
+void AssignCast(std::optional<int32_t>& dst, const Ark_FocusDrawLevel& src)
 {
     switch (src) {
-        case ARK_FOCUS_DRAW_LEVEL_SELF: dst = FocusDrawLevel::SELF; break;
-        case ARK_FOCUS_DRAW_LEVEL_TOP: dst = FocusDrawLevel::TOP; break;
+        case ARK_FOCUS_DRAW_LEVEL_SELF: dst = static_cast<int32_t>(FocusDrawLevel::SELF); break;
+        case ARK_FOCUS_DRAW_LEVEL_TOP: dst = static_cast<int32_t>(FocusDrawLevel::TOP); break;
         default: LOGE("Unexpected enum value in Ark_FocusDrawLevel: %{public}d", src);
     }
 }
@@ -2770,7 +2770,6 @@ void OnHoverMoveImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     if (!value) {
         ViewAbstract::DisableOnHoverMove(frameNode);
         return;
@@ -4210,33 +4209,21 @@ void Mask0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto mask = Converter::OptConvert<Ark_ProgressMask>(*value);
-    if (!mask) {
-        return;
-    }
-    const auto& progressMask = mask.value()->GetProperty();
+    auto mask = value ? Converter::OptConvert<Ark_ProgressMask>(*value) : std::nullopt;
+    const RefPtr<ProgressMaskProperty>& progressMask = mask && (mask.value()) ?
+        mask.value()->GetProperty() : nullptr;
     ViewAbstract::SetProgressMask(frameNode, progressMask);
 }
 void Mask1Impl(Ark_NativePointer node,
                const Opt_ProgressMask* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto mask = Converter::OptConvert<Ark_ProgressMask>(*value);
-    if (!mask) {
-        return;
-    }
-    const auto& progressMask = mask.value()->GetProperty();
-    ViewAbstract::SetProgressMask(frameNode, progressMask);
+    Mask0Impl(node, value);
 }
 void Mask2Impl(Ark_NativePointer node,
                const Opt_ProgressMask* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
     LOGE("setMask2 is DEPRECATED. Use a setMaskShape0 instead");
+    Mask0Impl(node, value);
 }
 void MaskShape0Impl(Ark_NativePointer node,
                     const Ark_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
@@ -4244,10 +4231,8 @@ void MaskShape0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<RefPtr<BasicShape>>(*value);
-    if (convValue.has_value() && convValue.value()) {
-        ViewAbstract::SetMask(frameNode, convValue.value());
-    }
+    auto convValue = Converter::OptConvert<RefPtr<BasicShape>>(*value).value_or(nullptr);
+    ViewAbstract::SetMask(frameNode, convValue);
 }
 void MaskShape1Impl(Ark_NativePointer node,
                     const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
@@ -4255,10 +4240,8 @@ void MaskShape1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<RefPtr<BasicShape>>(*value);
-    if (convValue.has_value() && convValue.value()) {
-        ViewAbstract::SetMask(frameNode, convValue.value());
-    }
+    auto convValue = Converter::OptConvert<RefPtr<BasicShape>>(*value).value_or(nullptr);
+    ViewAbstract::SetMask(frameNode, convValue);
 }
 void KeyImpl(Ark_NativePointer node,
              const Ark_String* value)
@@ -4771,9 +4754,8 @@ void AccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<FocusDrawLevel>(value);
-    ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode,
-        static_cast<int32_t>(convValue.value_or(FocusDrawLevel::SELF)));
+    auto convValue = Converter::OptConvert<int32_t>(value);
+    ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, convValue);
 }
 void CustomPropertyImpl(Ark_NativePointer node,
                         const Ark_String* name,
@@ -4876,15 +4858,13 @@ void BackgroundBlurStyle1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption convValue;
-    if (options) {
-        if (auto opt = Converter::OptConvert<BlurStyleOption>(*options); opt) {
-            convValue = *opt;
-        }
+    auto opt = options ? Converter::OptConvert<BlurStyleOption>(*options) : std::nullopt;
+    if (opt) {
+        convValue = opt.value();
     }
-    if (style) {
-        if (auto styleValue = Converter::OptConvert<BlurStyle>(*style); styleValue) {
-            convValue.blurStyle = *styleValue;
-        }
+    auto styleValue = style ? Converter::OptConvert<BlurStyle>(*style) : std::nullopt;
+    if (styleValue) {
+        convValue.blurStyle = styleValue.value();
     }
     ViewAbstract::SetBackgroundBlurStyle(frameNode, convValue);
 }

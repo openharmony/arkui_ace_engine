@@ -3502,7 +3502,11 @@ void ViewAbstract::SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basic
             target->ResetProgressMask();
             target->OnProgressMaskUpdate(nullptr);
         }
-        target->UpdateClipMask(basicShape);
+        if (basicShape) {
+            target->UpdateClipMask(basicShape);
+        } else {
+            target->ResetClipMask();
+        }
     }
 }
 

@@ -789,9 +789,9 @@ namespace OHOS::Ace::NG::Converter {
     };
 
     using ArkAccessibilityHoverEventSync = SyncEvent<Ark_AccessibilityHoverEvent>;
+    using ArkAxisEventSync = SyncEvent<Ark_AxisEvent>;
     using ArkClickEventSync = SyncEvent<Ark_ClickEvent>;
     using ArkFocusAxisEventSync = SyncEvent<Ark_FocusAxisEvent>;
-    using ArkAxisEventSync = SyncEvent<Ark_AxisEvent>;
     using ArkGestureEventSync = SyncEvent<Ark_GestureEvent>;
     using ArkHoverEventSync = SyncEvent<Ark_HoverEvent>;
     using ArkKeyEventSync = SyncEvent<Ark_KeyEvent>;
