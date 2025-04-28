@@ -286,6 +286,24 @@ void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent
     touchEvent.targetDisplayId = info.GetTargetDisplayId();
 }
 
+SourceTool ConvertCInputEventToolTypeToSourceTool(int32_t cInputEventToolType)
+{
+    switch (cInputEventToolType) {
+        case static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_FINGER):
+            return SourceTool::FINGER;
+        case static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_PEN):
+            return SourceTool::PEN;
+        case static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_MOUSE):
+            return SourceTool::MOUSE;
+        case static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_TOUCHPAD):
+            return SourceTool::TOUCHPAD;
+        case static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_JOYSTICK):
+            return SourceTool::JOYSTICK;
+        default:
+            return SourceTool::UNKNOWN;
+    }
+}
+
 void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
 {
     ret.repeat = info.GetRepeat();
@@ -1041,7 +1059,7 @@ ArkUI_Int32 setDistanceMap(ArkUIGesture* gesture, int size, int* toolTypeArray, 
     PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.Value() },
         { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.Value() } };
     for (int i = 0; i < size; i++) {
-        SourceTool st = static_cast<SourceTool>(toolTypeArray[i]);
+        SourceTool st = ConvertCInputEventToolTypeToSourceTool(toolTypeArray[i]);
         if (st >= SourceTool::UNKNOWN && st <= SourceTool::JOYSTICK && GreatOrEqual(distanceArray[i], 0.0)) {
             distanceMap[st] = distanceArray[i];
         }
@@ -1060,7 +1078,7 @@ ArkUI_Int32 getDistanceByToolType(ArkUIGestureRecognizer* recognizer, int toolTy
     auto panRecognizer = AceType::DynamicCast<PanRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(panRecognizer, ERROR_CODE_PARAM_INVALID);
     PanDistanceMap distanceMap = panRecognizer->GetDistanceMap();
-    auto iter = distanceMap.find(static_cast<SourceTool>(toolType));
+    auto iter = distanceMap.find(ConvertCInputEventToolTypeToSourceTool(toolType));
     if (iter == distanceMap.end()) {
         return ERROR_CODE_PARAM_INVALID;
     }
