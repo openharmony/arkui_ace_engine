@@ -13,167 +13,594 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "rich_editor_controller_peer_impl.h"
+#include "rich_editor_styled_string_controller_peer_impl.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.h"
+#include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/converter2.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+
+namespace OHOS::Ace::NG::Converter {
+void AssignArkValue(Ark_RichEditorSelection& dst, const BaseEventInfo& src)
+{
+    if (src.GetType() == "SelectionInfo") {
+        auto selectionInfo = static_cast<const SelectionInfo*>(&src);
+        if (selectionInfo) {
+            auto selection = selectionInfo->GetSelection();
+            dst.selection.value0 = Converter::ArkValue<Ark_Number>(selection.selection[0]);
+            dst.selection.value1 = Converter::ArkValue<Ark_Number>(selection.selection[1]);
+        }
+    }
+    LOGE("Arkkoala converter to Ark_RichEditorSelection not fully implemented");
+}
+
+void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
+{
+    if (src.GetType() == "SelectionInfo") {
+        auto selectionInfo = static_cast<const SelectionInfo*>(&src);
+        if (selectionInfo) {
+            auto selection = selectionInfo->GetSelection();
+            dst.start = Converter::ArkValue<Opt_Number>(selection.selection[0]);
+            dst.end = Converter::ArkValue<Opt_Number>(selection.selection[1]);
+        }
+    }
+}
+
+void AssignArkValue(Ark_RichEditorInsertValue& dst, const RichEditorInsertValue& src)
+{
+    dst.insertOffset = Converter::ArkValue<Ark_Number>(src.GetInsertOffset());
+    // dst.insertValue = Converter::ArkValue<Ark_String>(src.GetInsertValue());
+    // dst.previewText = Converter::ArkValue<Opt_String>(src.GetPreviewText());
+}
+
+void AssignArkValue(Ark_RichEditorSpanPosition& dst, const RichEditorAbstractSpanResult& src)
+{
+    dst.spanIndex = Converter::ArkValue<Ark_Number>(src.GetSpanIndex());
+    dst.spanRange.value0 = Converter::ArkValue<Ark_Number>(src.GetSpanRangeStart());
+    dst.spanRange.value1 = Converter::ArkValue<Ark_Number>(src.GetSpanRangeEnd());
+}
+
+void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpanResult& src)
+{
+    dst.type = Converter::ArkValue<Ark_TextDecorationType>(src.GetTextDecoration());
+    dst.color = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(src.GetColor());
+    dst.style.value = Converter::ArkValue<Ark_TextDecorationStyle>(src.GetTextDecorationStyle());
+}
+
+void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src)
+{
+    CHECK_NULL_VOID(src.empty());
+    JsonValue jsonValue;
+    for (auto it = src.begin(); it != src.end(); it++) {
+        jsonValue.Put((it->first.c_str()), it->second);
+    }
+    static std::string list = jsonValue.ToString();
+    dst = Converter::ArkValue<Ark_String>(list);
+}
+
+void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstractSpanResult& src)
+{
+    dst.fontColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(src.GetFontColor());
+    dst.fontSize = Converter::ArkValue<Ark_Number>(src.GetFontSize());
+    dst.fontStyle = Converter::ArkValue<Ark_FontStyle>(src.GetFontStyle());
+    dst.fontWeight = Converter::ArkValue<Ark_Number>(src.GetFontWeight());
+    dst.fontFamily = Converter::ArkValue<Ark_String>(src.GetFontFamily());
+    dst.decoration = Converter::ArkValue<Ark_DecorationStyleResult>(src);
+    // dst.textShadow = implement it
+    LOGW("RichEditor modifier :: textShadow conversion is not implemented yet.");
+    dst.letterSpacing = Converter::ArkValue<Opt_Number>(src.GetLetterspacing());
+    dst.lineHeight = Converter::ArkValue<Opt_Number>(src.GetLineHeight());
+    dst.fontFeature.value = Converter::ArkValue<Ark_String>(src.GetFontFeatures());
+}
+
+void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src)
+{
+    dst.fontSize = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(src.fontSize);
+    dst.fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(src.fontWeight);
+    dst.effectStrategy.value = static_cast<Ark_SymbolEffectStrategy>(src.effectStrategy);
+    dst.renderingStrategy.value = static_cast<Ark_SymbolRenderingStrategy>(src.renderingStrategy);
+}
+
+void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext* ctx)
+{
+    dst.bundleName = Converter::ArkValue<Ark_String>(src.GetBundleName(), ctx);
+    dst.moduleName = Converter::ArkValue<Ark_String>(src.GetModuleName(), ctx);
+    dst.id = Converter::ArkValue<Ark_Number>(src.GetId());
+    dst.type = Converter::ArkValue<Opt_Number>(src.GetType());
+}
+
+void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractSpanResult& src, ConvContext* ctx)
+{
+    dst.spanPosition = Converter::ArkValue<Ark_RichEditorSpanPosition>(src);
+    // dst.value = Converter::ArkValue<Ark_String>(src.GetValue());
+    dst.textStyle = Converter::ArkValue<Ark_RichEditorTextStyleResult>(src);
+    dst.symbolSpanStyle.value = Converter::ArkValue<Ark_RichEditorSymbolSpanStyle>(src.GetSymbolSpanStyle(), ctx);
+    if (src.GetValueResource()) {
+        dst.valueResource.value = Converter::ArkValue<Ark_Resource>(*src.GetValueResource(), ctx);
+    }
+    // dst.previewText = Converter::ArkValue<Opt_String>(src.GetPreviewText());
+}
+
+void AssignArkValue(Ark_TextRange& dst, const TextRange& src)
+{
+    dst.start = Converter::ArkValue<Opt_Number>(src.start);
+    dst.end = Converter::ArkValue<Opt_Number>(src.end);
+}
+
+void AssignArkValue(Ark_RichEditorDeleteValue& dst, const RichEditorDeleteValue& src)
+{
+    dst.offset = Converter::ArkValue<Ark_Number>(src.GetOffset());
+    dst.direction = Converter::ArkValue<Ark_RichEditorDeleteDirection>(src.GetRichEditorDeleteDirection());
+    dst.length = Converter::ArkValue<Ark_Number>(src.GetLength());
+}
+
+void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue& src)
+{
+    auto rangeBefore = src.GetRangeBefore();
+    dst.rangeBefore.start = Converter::ArkValue<Opt_Number>(rangeBefore.start);
+    dst.rangeBefore.end = Converter::ArkValue<Opt_Number>(rangeBefore.end);
+}
+
+template<>
+void AssignCast(std::optional<PlaceholderOptions>& dst, const Ark_PlaceholderStyle& src)
+{
+    PlaceholderOptions ret;
+    ret.fontSize = Converter::OptConvert<Dimension>(src.font.value.size);
+    ret.fontWeight = Converter::OptConvert<FontWeight>(src.font.value.weight);
+    ret.fontColor = Converter::OptConvert<Color>(src.fontColor);
+    ret.fontStyle = Converter::OptConvert<OHOS::Ace::FontStyle>(src.font.value.style);
+    dst = ret;
+}
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichEditorModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
+Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 {
-    return {};
+    // need check
+    auto frameNode = RichEditorModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
-} // RichEditorModifier
+} // namespace RichEditorModifier
 namespace RichEditorInterfaceModifier {
-void SetRichEditorOptions0Impl(Ark_NativePointer node,
-                               const Ark_RichEditorOptions* value)
+void SetRichEditorOptions0Impl(Ark_NativePointer node, const Ark_RichEditorOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_NULL_VOID(value->controller);
+    // obtain the internal RichEditorController
+    // need check
+    RefPtr<RichEditorBaseControllerBase> controller = RichEditorModelNG::GetRichEditorController(frameNode);
+    CHECK_NULL_VOID(controller);
+
+    // pass the internal controller to external management
+    value->controller->AddTargetController(controller);
 }
-void SetRichEditorOptions1Impl(Ark_NativePointer node,
-                               const Ark_RichEditorStyledStringOptions* options)
+void SetRichEditorOptions1Impl(Ark_NativePointer node, const Ark_RichEditorStyledStringOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    RichEditorModelNG::SetStyledStringMode(frameNode, true);
+    CHECK_NULL_VOID(options->controller);
+    // obtain the internal Styled String RichEditorController
+    // need check
+    RefPtr<RichEditorBaseControllerBase> controller = RichEditorModelNG::GetRichEditorStyledStringController(frameNode);
+    CHECK_NULL_VOID(controller);
+
+    options->controller->AddTargetController(controller);
 }
-} // RichEditorInterfaceModifier
+} // namespace RichEditorInterfaceModifier
 namespace RichEditorAttributeModifier {
-void OnReadyImpl(Ark_NativePointer node,
-                 const Opt_Callback_Void* value)
+void OnReadyImpl(Ark_NativePointer node, const Opt_Callback_Void* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto onCallback = [arkCallback = CallbackHelper(value->value)]() { arkCallback.Invoke(); };
+    RichEditorModelNG::SetOnReady(frameNode, std::move(onCallback));
 }
-void OnSelectImpl(Ark_NativePointer node,
-                  const Opt_Callback_RichEditorSelection_Void* value)
+void OnSelectImpl(Ark_NativePointer node, const Opt_Callback_RichEditorSelection_Void* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto onCallback = [arkCallback = CallbackHelper(value->value)](const BaseEventInfo* event) {
+        CHECK_NULL_VOID(event);
+        auto selection = Converter::ArkValue<Ark_RichEditorSelection>(*event);
+        LOGW("OnSelectImpl :: Ark_RichEditorSelection don't fully filled from BaseEventInfo");
+        arkCallback.Invoke(selection);
+    };
+    RichEditorModelNG::SetOnSelect(frameNode, std::move(onCallback));
 }
-void OnSelectionChangeImpl(Ark_NativePointer node,
-                           const Opt_Callback_RichEditorRange_Void* value)
+void OnSelectionChangeImpl(Ark_NativePointer node, const Opt_Callback_RichEditorRange_Void* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto onCallback = [arkCallback = CallbackHelper(value->value)](const BaseEventInfo* event) {
+        CHECK_NULL_VOID(event);
+        auto range = Converter::ArkValue<Ark_RichEditorRange>(*event);
+        arkCallback.Invoke(range);
+    };
+    RichEditorModelNG::SetOnSelectionChange(frameNode, std::move(onCallback));
 }
-void AboutToIMEInputImpl(Ark_NativePointer node,
-                         const Opt_Callback_RichEditorInsertValue_Boolean* value)
+void AboutToIMEInputImpl(Ark_NativePointer node, const Opt_Callback_RichEditorInsertValue_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto onCallback = [arkCallback = CallbackHelper(value->value), frameNode](
+                          const RichEditorInsertValue& param) -> bool {
+        Ark_RichEditorInsertValue data = Converter::ArkValue<Ark_RichEditorInsertValue>(param);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
+        return Converter::Convert<bool>(result);
+    };
+    RichEditorModelNG::SetAboutToIMEInput(frameNode, std::move(onCallback));
 }
-void OnIMEInputCompleteImpl(Ark_NativePointer node,
-                            const Opt_Callback_RichEditorTextSpanResult_Void* value)
+void OnIMEInputCompleteImpl(Ark_NativePointer node, const Opt_Callback_RichEditorTextSpanResult_Void* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto onCallback = [arkCallback = CallbackHelper(value->value)](const RichEditorAbstractSpanResult& param) {
+        Converter::ConvContext ctx;
+        auto data = Converter::ArkValue<Ark_RichEditorTextSpanResult>(param, &ctx);
+        arkCallback.Invoke(data);
+    };
+    RichEditorModelNG::SetOnIMEInputComplete(frameNode, std::move(onCallback));
 }
-void OnDidIMEInputImpl(Ark_NativePointer node,
-                       const Opt_Callback_TextRange_Void* value)
+void OnDidIMEInputImpl(Ark_NativePointer node, const Opt_Callback_TextRange_Void* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto onCallback = [arkCallback = CallbackHelper(value->value)](const TextRange& param) {
+        auto data = Converter::ArkValue<Ark_TextRange>(param);
+        arkCallback.Invoke(data);
+    };
+    RichEditorModelNG::SetOnDidIMEInput(frameNode, std::move(onCallback));
 }
-void AboutToDeleteImpl(Ark_NativePointer node,
-                       const Opt_Callback_RichEditorDeleteValue_Boolean* value)
+void AboutToDeleteImpl(Ark_NativePointer node, const Opt_Callback_RichEditorDeleteValue_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto onCallback = [arkCallback = CallbackHelper(value->value), frameNode](
+                          const RichEditorDeleteValue& param) -> bool {
+        auto data = Converter::ArkValue<Ark_RichEditorDeleteValue>(param);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
+        return Converter::Convert<bool>(result);
+    };
+    RichEditorModelNG::SetAboutToDelete(frameNode, std::move(onCallback));
 }
-void OnDeleteCompleteImpl(Ark_NativePointer node,
-                          const Opt_Callback_Void* value)
+void OnDeleteCompleteImpl(Ark_NativePointer node, const Opt_Callback_Void* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto onCallback = [arkCallback = CallbackHelper(value->value)]() { arkCallback.Invoke(); };
+    RichEditorModelNG::SetOnDeleteComplete(frameNode, std::move(onCallback));
 }
-void CopyOptionsImpl(Ark_NativePointer node,
-                     const Opt_CopyOptions* value)
+void CopyOptionsImpl(Ark_NativePointer node, const Opt_CopyOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto options = Converter::OptConvert<CopyOptions>(*value);
+    if (options.has_value()) {
+        RichEditorModelNG::SetCopyOption(frameNode, options.value());
+    }
 }
-void OnPasteImpl(Ark_NativePointer node,
-                 const Opt_PasteEventCallback* value)
+void OnPasteImpl(Ark_NativePointer node, const Opt_PasteEventCallback* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto onPaste = [arkCallback = CallbackHelper(value->value)](NG::TextCommonEvent& event) -> void {
+        Converter::ConvContext ctx;
+        auto keeper = CallbackKeeper::Claim([&event]() { event.SetPreventDefault(true); });
+        Ark_PasteEvent arkEvent = { .preventDefault = Converter::ArkValue<Opt_Callback_Void>(keeper.ArkValue()) };
+        arkCallback.InvokeSync(Converter::ArkValue<Opt_PasteEvent>(arkEvent));
+    };
+    RichEditorModelNG::SetOnPaste(frameNode, std::move(onPaste));
 }
-void EnableDataDetectorImpl(Ark_NativePointer node,
-                            const Opt_Boolean* value)
+void EnableDataDetectorImpl(Ark_NativePointer node, const Opt_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::optional<bool> convValue;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        convValue = Converter::OptConvert<bool>(*value);
+    }
+    RichEditorModelNG::SetTextDetectEnable(frameNode, convValue.value_or(false));
 }
-void EnablePreviewTextImpl(Ark_NativePointer node,
-                           const Opt_Boolean* value)
+void EnablePreviewTextImpl(Ark_NativePointer node, const Opt_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::optional<bool> convValue;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        convValue = Converter::OptConvert<bool>(*value);
+    }
+    RichEditorModelNG::SetTextDetectEnable(frameNode, convValue.value_or(true));
 }
-void DataDetectorConfigImpl(Ark_NativePointer node,
-                            const Opt_TextDataDetectorConfig* value)
+void DataDetectorConfigImpl(Ark_NativePointer node, const Opt_TextDataDetectorConfig* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto textDetectConfig = Converter::Convert<TextDetectConfig>(value->value);
+    RichEditorModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
 }
-void CaretColorImpl(Ark_NativePointer node,
-                    const Opt_ResourceColor* value)
+void CaretColorImpl(Ark_NativePointer node, const Opt_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    if (value->tag == INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    auto convValue = Converter::OptConvert<Color>(value->value);
+    // need check
+    if (convValue.has_value()) {
+        RichEditorModelNG::SetCaretColor(frameNode, convValue.value());
+    }
 }
-void SelectedBackgroundColorImpl(Ark_NativePointer node,
-                                 const Opt_ResourceColor* value)
+void SelectedBackgroundColorImpl(Ark_NativePointer node, const Opt_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag == INTEROP_TAG_UNDEFINED) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
+        CHECK_NULL_VOID(theme);
+        auto color = theme->GetSelectedBackgroundColor();
+        RichEditorModelNG::SetSelectedBackgroundColor(frameNode, color);
+        return;
+    }
+    auto convValue = Converter::OptConvert<Color>(value->value);
+    if (convValue.has_value()) {
+        // need check
+        RichEditorModelNG::SetSelectedBackgroundColor(frameNode, convValue.value());
+    }
 }
-void OnEditingChangeImpl(Ark_NativePointer node,
-                         const Opt_Callback_Boolean_Void* value)
+void OnEditingChangeImpl(Ark_NativePointer node, const Opt_Callback_Boolean_Void* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto onCallback = [arkCallback = CallbackHelper(value->value)](const bool& param) {
+        Ark_Boolean flag = Converter::ArkValue<Ark_Boolean>(param);
+        arkCallback.Invoke(flag);
+    };
+    RichEditorModelNG::SetOnEditingChange(frameNode, std::move(onCallback));
 }
-void EnterKeyTypeImpl(Ark_NativePointer node,
-                      const Opt_EnterKeyType* value)
+void EnterKeyTypeImpl(Ark_NativePointer node, const Opt_EnterKeyType* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::optional<TextInputAction> convValue;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        convValue = Converter::OptConvert<TextInputAction>(*value);
+    }
+    // need check
+    RichEditorModelNG::SetEnterKeyType(frameNode, convValue.value_or(TextInputAction::UNSPECIFIED));
 }
-void OnSubmitImpl(Ark_NativePointer node,
-                  const Opt_SubmitCallback* value)
+void OnSubmitImpl(Ark_NativePointer node, const Opt_SubmitCallback* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto onCallback = [arkCallback = CallbackHelper(value->value)](int32_t param1, NG::TextFieldCommonEvent& param2) {
+        auto enterKey = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(param1));
+        const auto event = Converter::ArkSubmitEventSync(param2);
+        arkCallback.InvokeSync(enterKey, event.ArkValue());
+    };
+    RichEditorModelNG::SetOnSubmit(frameNode, std::move(onCallback));
 }
-void OnWillChangeImpl(Ark_NativePointer node,
-                      const Opt_Callback_RichEditorChangeValue_Boolean* value)
+void OnWillChangeImpl(Ark_NativePointer node, const Opt_Callback_RichEditorChangeValue_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto onCallback = [arkCallback = CallbackHelper(value->value), frameNode](
+                          const RichEditorChangeValue& param) -> bool {
+        auto data = Converter::ArkValue<Ark_RichEditorChangeValue>(param);
+        LOGW("OnWillChangeImpl :: Ark_RichEditorChangeValue don't fully filled from RichEditorChangeValue");
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
+        return Converter::Convert<bool>(result);
+    };
+    RichEditorModelNG::SetOnWillChange(frameNode, std::move(onCallback));
 }
-void OnDidChangeImpl(Ark_NativePointer node,
-                     const Opt_OnDidChangeCallback* value)
+void OnDidChangeImpl(Ark_NativePointer node, const Opt_OnDidChangeCallback* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto onCallback = [arkCallback = CallbackHelper(value->value)](const RichEditorChangeValue& param) {
+        TextRange inBefore = param.GetRangeBefore();
+        TextRange inAfter = param.GetRangeAfter();
+        Ark_TextRange rangeBefore = Converter::ArkValue<Ark_TextRange>(inBefore);
+        Ark_TextRange rangeAfter = Converter::ArkValue<Ark_TextRange>(inAfter);
+        arkCallback.Invoke(rangeBefore, rangeAfter);
+    };
+    RichEditorModelNG::SetOnDidChange(frameNode, std::move(onCallback));
 }
-void OnCutImpl(Ark_NativePointer node,
-               const Opt_Callback_CutEvent_Void* value)
+void OnCutImpl(Ark_NativePointer node, const Opt_Callback_CutEvent_Void* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto onCut = [arkCallback = CallbackHelper(value->value)](NG::TextCommonEvent& event) {
+        Converter::ConvContext ctx;
+        auto keeper = CallbackKeeper::Claim([&event]() { event.SetPreventDefault(true); });
+        Ark_CutEvent arkEvent = { .preventDefault = Converter::ArkValue<Opt_Callback_Void>(keeper.ArkValue()) };
+        arkCallback.InvokeSync(arkEvent);
+    };
+    RichEditorModelNG::SetOnCut(frameNode, std::move(onCut));
 }
-void OnCopyImpl(Ark_NativePointer node,
-                const Opt_Callback_CopyEvent_Void* value)
+void OnCopyImpl(Ark_NativePointer node, const Opt_Callback_CopyEvent_Void* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto onCopy = [arkCallback = CallbackHelper(value->value)](NG::TextCommonEvent& event) {
+        Converter::ConvContext ctx;
+        auto keeper = CallbackKeeper::Claim([&event]() { event.SetPreventDefault(true); });
+        Ark_CopyEvent arkEvent = { .preventDefault = Converter::ArkValue<Opt_Callback_Void>(keeper.ArkValue()) };
+        arkCallback.InvokeSync(arkEvent);
+    };
+    RichEditorModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
-void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Opt_EditMenuOptions* value)
+void EditMenuOptionsImpl(Ark_NativePointer node, const Opt_EditMenuOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    // auto convValue = Converter::Convert<type>(value-.value);
+    // auto convValue = Converter::OptConvert<type>(*value); // for enums
+    // RichEditorModelNG::SetSelectionMenuOptions(frameNode, convValue);
+    LOGW("RichEditor modifier :: EditMenuOptionsImpl() needs onCreateMenuCallback, onMenuItemClick input");
 }
-void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
-                               const Opt_Boolean* value)
+void EnableKeyboardOnFocusImpl(Ark_NativePointer node, const Opt_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::optional<bool> convValue;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        convValue = Converter::OptConvert<bool>(*value);
+    }
+    RichEditorModelNG::SetRequestKeyboardOnFocus(frameNode, convValue.value_or(true));
 }
-void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                              const Opt_Boolean* value)
+void EnableHapticFeedbackImpl(Ark_NativePointer node, const Opt_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::optional<bool> convValue;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        convValue = Converter::OptConvert<bool>(*value);
+    }
+    // need check
+    RichEditorModelNG::SetEnableHapticFeedback(frameNode, convValue.value_or(false));
 }
-void BarStateImpl(Ark_NativePointer node,
-                  const Opt_BarState* value)
+void BarStateImpl(Ark_NativePointer node, const Opt_BarState* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, INTEROP_TAG_UNDEFINED);
+    auto convValue = Converter::OptConvert<DisplayMode>(*value);
+    if (convValue.has_value()) {
+        // need check
+        RichEditorModelNG::SetBarState(frameNode, convValue.value());
+    }
 }
-void MaxLengthImpl(Ark_NativePointer node,
-                   const Opt_Number* value)
+void MaxLengthImpl(Ark_NativePointer node, const Opt_Number* value) {}
+void MaxLinesImpl(Ark_NativePointer node, const Opt_Number* value) {}
+void KeyboardAppearanceImpl(Ark_NativePointer node, const Opt_KeyboardAppearance* value) {}
+void StopBackPressImpl(Ark_NativePointer node, const Opt_Boolean* value) {}
+void BindSelectionMenuImpl(Ark_NativePointer node, const Opt_RichEditorSpanType* spanType,
+    const Opt_CustomNodeBuilder* content, const Opt_Union_ResponseType_RichEditorResponseType* responseType,
+    const Opt_SelectionMenuOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(spanType);
+    CHECK_NULL_VOID(content);
+    CHECK_NULL_VOID(responseType);
+    CHECK_NULL_VOID(options);
+    CHECK_EQUAL_VOID(options->tag, INTEROP_TAG_UNDEFINED);
+    auto span = spanType->tag == INTEROP_TAG_UNDEFINED
+                    ? NG::TextSpanType::NONE
+                    : Converter::OptConvert<TextSpanType>(spanType->value).value_or(TextSpanType::NONE);
+    auto response = responseType->tag == INTEROP_TAG_UNDEFINED
+                        ? TextResponseType::LONG_PRESS
+                        : Converter::OptConvert<TextResponseType>(*responseType).value_or(TextResponseType::LONG_PRESS);
+    std::function<void()> convBuildFunc = [callback = CallbackHelper(content->value), node]() {
+        auto builderNode = callback.BuildSync(node);
+        NG::ViewStackProcessor::GetInstance()->Push(builderNode);
+    };
+    auto convMenuParam = Converter::OptConvert<SelectMenuParam>(*options);
+    if (convMenuParam.has_value()) {
+        // need check
+        RichEditorModelNG::BindSelectionMenu(frameNode, span, response, convBuildFunc, convMenuParam.value());
+    }
 }
-void MaxLinesImpl(Ark_NativePointer node,
-                  const Opt_Number* value)
+void CustomKeyboardImpl(Ark_NativePointer node, const Opt_CustomNodeBuilder* value, const Opt_KeyboardOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_NULL_VOID(options);
+    if (value->tag == INTEROP_TAG_UNDEFINED) {
+        RichEditorModelNG::SetCustomKeyboard(frameNode, nullptr, false);
+        return;
+    }
+    auto convValue = Converter::OptConvert<Ark_KeyboardOptions>(*options);
+    std::optional<bool> supportAvoidance;
+    if (convValue.has_value()) {
+        supportAvoidance = Converter::OptConvert<bool>(convValue->supportAvoidance);
+    }
+    auto builder = [callback = CallbackHelper(value->value), node]() {
+        auto builderNode = callback.BuildSync(node);
+        NG::ViewStackProcessor::GetInstance()->Push(builderNode);
+    };
+    // need check
+    RichEditorModelNG::SetCustomKeyboard(frameNode, std::move(builder), supportAvoidance.value_or(true));
 }
-void KeyboardAppearanceImpl(Ark_NativePointer node,
-                            const Opt_KeyboardAppearance* value)
+void PlaceholderImpl(Ark_NativePointer node, const Opt_ResourceStr* value, const Opt_PlaceholderStyle* style)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    CHECK_NULL_VOID(style);
+    PlaceholderOptions options;
+    // if (auto value = Converter::OptConvert<PlaceholderOptions>(*style); value) {
+    //     options = *value;
+    // }
+    // if (value->tag == INTEROP_TAG_UNDEFINED) {
+    //     options.value = Converter::OptConvert<std::string>(value->value.value0);
+    // }
+    // need check
+    // options.value = value->tag == INTEROP_TAG_UNDEFINED ? "" : Converter::OptConvert<std::string>(*value);
+    RichEditorModelNG::SetPlaceholder(frameNode, options);
 }
-void StopBackPressImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
-{
-}
-void BindSelectionMenuImpl(Ark_NativePointer node,
-                           const Opt_RichEditorSpanType* spanType,
-                           const Opt_CustomNodeBuilder* content,
-                           const Opt_Union_ResponseType_RichEditorResponseType* responseType,
-                           const Opt_SelectionMenuOptions* options)
-{
-}
-void CustomKeyboardImpl(Ark_NativePointer node,
-                        const Opt_CustomNodeBuilder* value,
-                        const Opt_KeyboardOptions* options)
-{
-}
-void PlaceholderImpl(Ark_NativePointer node,
-                     const Opt_ResourceStr* value,
-                     const Opt_PlaceholderStyle* style)
-{
-}
-} // RichEditorAttributeModifier
+} // namespace RichEditorAttributeModifier
 const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
 {
     static const GENERATED_ArkUIRichEditorModifier ArkUIRichEditorModifierImpl {
@@ -217,4 +644,4 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
     return &ArkUIRichEditorModifierImpl;
 }
 
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

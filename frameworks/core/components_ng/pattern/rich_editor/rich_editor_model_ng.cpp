@@ -76,6 +76,37 @@ RefPtr<RichEditorBaseControllerBase> RichEditorModelNG::GetRichEditorController(
     return richEditorPattern->GetRichEditorController();
 }
 
+RefPtr<RichEditorBaseControllerBase> RichEditorModelNG::GetRichEditorController(FrameNode* node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto pattern = node->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetRichEditorController();
+}
+
+RefPtr<RichEditorBaseControllerBase> RichEditorModelNG::GetRichEditorStyledStringController(FrameNode* node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto pattern = node->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetRichEditorStyledStringController();
+}
+
+void RichEditorModelNG::SetStyledStringMode(FrameNode* node, bool isStyledStringMode)
+{
+    CHECK_NULL_VOID(node);
+    auto richEditorPattern = node->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetSpanStringMode(isStyledStringMode);
+    if (isStyledStringMode) {
+        richEditorPattern->SetRichEditorStyledStringController(AceType::MakeRefPtr<RichEditorStyledStringController>());
+        richEditorPattern->GetRichEditorStyledStringController()->SetPattern(WeakPtr(richEditorPattern));
+    } else {
+        richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+        richEditorPattern->GetRichEditorController()->SetPattern(WeakPtr(richEditorPattern));
+    }
+}
+
 void RichEditorModelNG::SetOnReady(std::function<void()>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
@@ -207,6 +238,16 @@ void RichEditorModelNG::SetCustomKeyboard(std::function<void()>&& func, bool sup
     }
 }
 
+void RichEditorModelNG::SetCustomKeyboard(FrameNode* frameNode, std::function<void()>&& func, bool supportAvoidance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    if (pattern) {
+        pattern->SetCustomKeyboard(std::move(func));
+        pattern->SetCustomKeyboardOption(supportAvoidance);
+    }
+}
+
 void RichEditorModelNG::SetCopyOption(CopyOptions& copyOptions)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOptions);
@@ -220,6 +261,17 @@ void RichEditorModelNG::BindSelectionMenu(TextSpanType& editorType, TextResponse
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     if (pattern) {
         pattern->BindSelectionMenu(type, editorType, buildFunc, menuParam);
+    }
+}
+
+void RichEditorModelNG::BindSelectionMenu(FrameNode* frameNode, TextSpanType& editorType, TextResponseType& type,
+    std::function<void()>& buildFunc, SelectMenuParam& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    if (richEditorPattern) {
+        richEditorPattern->BindSelectionMenu(type, editorType, buildFunc, menuParam);
     }
 }
 
@@ -428,7 +480,6 @@ void RichEditorModelNG::SetOnWillChange(std::function<bool(const RichEditorChang
     eventHub->SetOnWillChange(std::move(func));
 }
 
-
 void RichEditorModelNG::SetOnWillChange(FrameNode* frameNode, std::function<bool(const RichEditorChangeValue&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
@@ -519,6 +570,15 @@ void RichEditorModelNG::SetEnableHapticFeedback(bool isEnabled)
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetEnableHapticFeedback(isEnabled);
 }
+
+void RichEditorModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetEnableHapticFeedback(isEnabled);
+}
+
 void RichEditorModelNG::SetSupportPreviewText(FrameNode* frameNode, bool value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -638,5 +698,13 @@ void RichEditorModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppe
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetKeyboardAppearance(value);
+}
+
+RefPtr<FrameNode> RichEditorModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto richEditorPattern = AceType::MakeRefPtr<RichEditorPattern>();
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    richEditorPattern->GetRichEditorController()->SetPattern(WeakPtr(richEditorPattern));
+    return FrameNode::CreateFrameNode(V2::RICH_EDITOR_ETS_TAG, nodeId, richEditorPattern);
 }
 } // namespace OHOS::Ace::NG
