@@ -591,6 +591,8 @@ void CancelButton0Impl(Ark_NativePointer node,
         optIconOptions = Converter::OptConvert<Ark_IconOptions>(value->value.icon);
     }
     TextFieldModelNG::SetCleanNodeStyle(frameNode, cleanButtonStyle);
+    TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
+    TextFieldModelNG::SetCancelButtonSymbol(frameNode, false);
     if (optIconOptions) {
         TextFieldModelNG::SetCancelIconColor(frameNode, Converter::OptConvert<Color>(optIconOptions->color));
         auto iconSize = Converter::OptConvert<CalcDimension>(optIconOptions->size);
@@ -613,6 +615,8 @@ void CancelButton1Impl(Ark_NativePointer node,
         symbol = Converter::OptConvert<Ark_SymbolGlyphModifier>(value->value.icon);
     }
     TextFieldModelNG::SetCleanNodeStyle(frameNode, cleanButtonStyle);
+    TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
+    TextFieldModelNG::SetCancelButtonSymbol(frameNode, true);
     if (symbol) {
         TextFieldModelNG::SetCancelSymbolIcon(frameNode, nullptr);
         LOGE("TextInputModifier::CancelButton1Impl need to know what data is in value->icon");

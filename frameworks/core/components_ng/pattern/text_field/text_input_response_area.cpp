@@ -1209,6 +1209,12 @@ void CleanNodeResponseArea::LoadingImageProperty()
             }
             iconSize_ = Dimension(iconSizeValue).ConvertToPxDistribute(minFontScale, maxFontScale);
         }
+    } else {
+        auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern);
+        CHECK_NULL_VOID(textFieldPattern);
+        auto theme = textFieldPattern->GetTheme();
+        CHECK_NULL_VOID(theme);
+        iconSize_ = theme->GetCancelIconSize();
     }
     if (textFieldLayoutProperty->HasIconSrc()) {
         iconSrc_ = textFieldLayoutProperty->GetIconSrcValue();
