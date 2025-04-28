@@ -21,6 +21,7 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
+#include "core/interfaces/native/implementation/matrix4_transit_peer.h"
 #include "generated/test_fixtures.h"
 #include "point_light_test.h"
 #include "generated/type_helpers.h"
@@ -1458,6 +1459,33 @@ HWTEST_F(ImageModifierTest, setEnhancedImageQualityValues, TestSize.Level1)
         ASSERT_TRUE(json);
         EXPECT_EQ(tv.first, GetAttrValue<std::string>(json, "enhancedImageQuality"));
     }
+}
+
+/**
+ * @tc.name: setImageMatrixTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setImageMatrixTest, TestSize.Level1)
+{
+    Matrix4TransitPeer* matrix4transit = PeerUtils::CreatePeer<Matrix4TransitPeer>();
+    matrix4transit->matrix = Matrix4::CreateScale(11.0, 7.0, 1.0);
+
+    modifier_->setImageMatrix(node_, matrix4transit);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(property, nullptr);
+    auto result = property->GetImageMatrix();
+    ASSERT_TRUE(result);
+    Matrix4 expected(
+        11.0, 0.0, 0.0, 0.0,
+        0.0, 7.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0
+    );
+    EXPECT_EQ(result.value(), expected);
 }
 
 } // namespace OHOS::Ace::NG

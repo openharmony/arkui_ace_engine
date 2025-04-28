@@ -325,7 +325,7 @@ void StackFromEndImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //ListModelNG::SetStackFromEnd(frameNode, convValue);
+    ListModelNG::SetStackFromEnd(frameNode, convValue);
 }
 void OnScrollImpl(Ark_NativePointer node,
                   const Callback_Number_Number_Void* value)

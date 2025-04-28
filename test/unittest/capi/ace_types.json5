@@ -1721,6 +1721,55 @@
             ]
         },
         {
+            "name": "CalendarPicker",
+            "attributes": [
+                {
+                    "name": "markToday",
+                    "default": "false",
+                },
+            ],
+            "remove": [
+                "setCalendarPickerOptionsTestDefaultValues",
+                "setCalendarPickerOptionsTestValidValues",
+                "setTextStyle0TestDefaultValues",
+                "setTextStyle0TestTextStyleColorValidValues",
+                "setTextStyle0TestTextStyleColorInvalidValues",
+                "setTextStyle0TestTextStyleFontSizeValidValues",
+                "setTextStyle0TestTextStyleFontSizeInvalidValues",
+                "setTextStyle0TestTextStyleFontWeightValidValues",
+                "setTextStyle0TestTextStyleFontWeightInvalidValues",
+                "setTextStyle0TestTextStyleFontFamilyValidValues",
+                "setTextStyle0TestTextStyleFontFamilyInvalidValues",
+                "setTextStyle0TestTextStyleFontStyleValidValues",
+                "setTextStyle0TestTextStyleFontStyleInvalidValues",
+                "setTextStyle1TestDefaultValues",
+                "setTextStyle1TestTextStyleColorValidValues",
+                "setTextStyle1TestTextStyleColorInvalidValues",
+                "setTextStyle1TestTextStyleFontSizeValidValues",
+                "setTextStyle1TestTextStyleFontSizeInvalidValues",
+                "setTextStyle1TestTextStyleFontWeightValidValues",
+                "setTextStyle1TestTextStyleFontWeightInvalidValues",
+                "setTextStyle1TestTextStyleFontFamilyValidValues",
+                "setTextStyle1TestTextStyleFontFamilyInvalidValues",
+                "setTextStyle1TestTextStyleFontStyleValidValues",
+                "setTextStyle1TestTextStyleFontStyleInvalidValues",
+                "setEdgeAlign0TestDefaultValues",
+                "setEdgeAlign0TestEdgeAlignAlignTypeValidValues",
+                "setEdgeAlign0TestEdgeAlignAlignTypeInvalidValues",
+                "setEdgeAlign0TestEdgeAlignOffsetDxValidValues",
+                "setEdgeAlign0TestEdgeAlignOffsetDxInvalidValues",
+                "setEdgeAlign0TestEdgeAlignOffsetDyValidValues",
+                "setEdgeAlign0TestEdgeAlignOffsetDyInvalidValues",
+                "setEdgeAlign1TestDefaultValues",
+                "setEdgeAlign1TestEdgeAlignAlignTypeValidValues",
+                "setEdgeAlign1TestEdgeAlignAlignTypeInvalidValues",
+                "setEdgeAlign1TestEdgeAlignOffsetDxValidValues",
+                "setEdgeAlign1TestEdgeAlignOffsetDxInvalidValues",
+                "setEdgeAlign1TestEdgeAlignOffsetDyValidValues",
+                "setEdgeAlign1TestEdgeAlignOffsetDyInvalidValues",
+            ]
+        },
+        {
             "name": "Component3D",
             "disable": [
                 "setComponent3DOptionsTestDefaultValues",
@@ -4452,6 +4501,10 @@
                 {
                     "name": "fillMode",
                     "default": "FillMode.Forwards",
+                },
+                {
+                    "name": "monitorInvisibleArea",
+                    "default": "false"
                 }
             ],
             "disable": [
@@ -4460,10 +4513,6 @@
                 "setIterationsTestDefaultValues",
                 "setIterationsTestIterationsValidValues",
                 "setIterationsTestIterationsInvalidValues",
-
-                // New API 122
-                "setMonitorInvisibleAreaTestDefaultValues",
-                "setMonitorInvisibleAreaTestMonitorInvisibleAreaValidValues",
             ],
             "remove": [
                 "setPreDecodeTestDefaultValues",

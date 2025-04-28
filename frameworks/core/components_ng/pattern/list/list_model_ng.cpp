@@ -661,6 +661,11 @@ void ListModelNG::SetListMaintainVisibleContentPosition(FrameNode* frameNode, bo
     pattern->SetMaintainVisibleContentPosition(enabled);
 }
 
+void ListModelNG::SetStackFromEnd(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, enabled, frameNode);
+}
+
 void ListModelNG::SetListNestedScroll(FrameNode* frameNode, const std::optional<NestedScrollMode>& forward,
     const std::optional<NestedScrollMode>& backward)
 {

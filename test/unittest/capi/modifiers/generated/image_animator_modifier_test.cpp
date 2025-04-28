@@ -43,7 +43,7 @@ const auto ATTRIBUTE_FILL_MODE_DEFAULT_VALUE = "FillMode.Forwards";
 const auto ATTRIBUTE_ITERATIONS_NAME = "iterations";
 const auto ATTRIBUTE_ITERATIONS_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_MONITOR_INVISIBLE_AREA_NAME = "monitorInvisibleArea";
-const auto ATTRIBUTE_MONITOR_INVISIBLE_AREA_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_MONITOR_INVISIBLE_AREA_DEFAULT_VALUE = "false";
 } // namespace
 
 class ImageAnimatorModifierTest
@@ -433,7 +433,7 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setIterationsTestIterationsValidVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorModifierTest, DISABLED_setMonitorInvisibleAreaTestDefaultValues, TestSize.Level1)
+HWTEST_F(ImageAnimatorModifierTest, setMonitorInvisibleAreaTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -448,8 +448,7 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setMonitorInvisibleAreaTestDefaultV
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(
-    ImageAnimatorModifierTest, DISABLED_setMonitorInvisibleAreaTestMonitorInvisibleAreaValidValues, TestSize.Level1)
+HWTEST_F(ImageAnimatorModifierTest, setMonitorInvisibleAreaTestMonitorInvisibleAreaValidValues, TestSize.Level1)
 {
     Ark_Boolean initValueMonitorInvisibleArea;
 
