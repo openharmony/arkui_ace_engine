@@ -19,6 +19,7 @@ import { ArkComponentRootPeer } from "./component";
 import { ArkCustomComponent } from "./ArkCustomComponent"
 import { int32 } from "@koalaui/common"
 import { InteropNativeModule } from "@koalaui/interop"
+import router from "../ohos.router"
 
 import { CurrentRouterTransitionState, VisibilityHiding, VisibilityShowing, WithRouterTransitionState } from "./handwritten/Router";
 
@@ -91,6 +92,8 @@ export function ArkComponentRoot(
             component.pageTransition()
             if (shown.value) {
                 InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach before WithRouterTransitionState`)
+                InteropNativeModule._NativeLog("AceRouter:ArkComponentRoot NodeAttach, UpdateRouter page visibility state")
+                router.UpdateVisiblePagePeerNode(node);
                 WithRouterTransitionState(undefined, content) // skip first frame and hide router state
                 InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach after WithRouterTransitionState`)
             }

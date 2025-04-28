@@ -26,9 +26,15 @@ import {
     RunEffect,
 } from "@koalaui/runtime"
 import { ArkUINativeModule } from "#components"
-import OhosRouter from "../ohos.router"
-import { UserView } from "../UserView"
-//import { RouteType} from "../component/ArkPageTransitionInterfaces"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
+import router from "../../ohos.router"
+import { EntryPoint, UserView, UserViewBuilder } from "../UserView"
+import { InteropNativeModule, nullptr } from "@koalaui/interop"
+import { PeerNode } from "../../src/PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { Visibility } from "../component"
+import { Serializer } from "../component/peers/Serializer"
+//import { RouteType} from "../generated/ArkPageTransitionInterfaces"
 
 // ----------------------------------------------------------
 // TODO: Remove these constants when enums are fixed in Panda
@@ -52,10 +58,6 @@ export enum RouterTransitionVisibility {
     Hiding = VisibilityHiding
 }
 
-export type MemoFunction =
-/** @memo */
-    () => void
-
 export interface RouterTransitionState {
     pageId: int32
     visibility: int32 // TODO: Use RouterTransitionVisibility enum when enums are fixed in Panda
@@ -64,12 +66,13 @@ export interface RouterTransitionState {
 
 class VisiblePage {
     /** @memo */
-    page: MemoFunction
+    page: UserViewBuilder
     version: int32
     private transitionState: MutableState<RouterTransitionState>
+    peerNode: PeerNode | undefined
 
     constructor(
-        page: MemoFunction,
+        page: UserViewBuilder,
         version: int32,
         visibility: int32, // TODO: Use RouterTransitionVisibility enum when enums are fixed in Panda
         route?: int32 // TODO: Use RouteType enum when enums are fixed in Panda
@@ -77,6 +80,7 @@ class VisiblePage {
         this.page = page
         this.version = version
         this.transitionState = mutableState<RouterTransitionState>({ pageId: version, visibility, route } as RouterTransitionState)
+        this.peerNode = undefined
     }
 
     setTransitionState(visibility: int32, route?: int32) {
@@ -86,16 +90,20 @@ class VisiblePage {
     get transition(): RouterTransitionState {
         return this.transitionState.value
     }
+
+    updatePeerNode(node: PeerNode): void {
+        this.peerNode = node
+    }
 }
 
 class RouterState {
     readonly visiblePages = arrayState<VisiblePage>()
     currentActivePage = mutableState(0)
     constructor(
-        page: MemoFunction,
+        page: UserViewBuilder,
         url: string,
         params?: Map<string, Object>,
-        resolve?: () => void
+        resolve?: (dummy: undefined) => void
     ) {
         this.page = page
         this.url = url
@@ -104,21 +112,26 @@ class RouterState {
         this.visiblePages.push(new VisiblePage(page, this.version.value, VisibilityVisible))
     }
     /** @memo */
-    page: MemoFunction
+    page: UserViewBuilder
     url: string
     params?: Map<string, Object>
-    resolve?: () => void
+    resolve?: (dummy: undefined) => void
     version = mutableState(0)
+
+    updateVisiblePagePeerNode(node: PeerNode, index: number): void {
+        InteropNativeModule._NativeLog("AceRouter:enter RouterState UpdateVisiblePagePeerNode")
+        this.visiblePages.value[index].updatePeerNode(node)
+    }
 }
 
 class RouterStackEntry {
     public url: string
-    public page: MemoFunction
+    public page: UserViewBuilder
     public params?: Map<string, Object>
 
     constructor(
         url: string,
-        page: MemoFunction,
+        page: UserViewBuilder,
         params?: Map<string, Object>,
     ) {
         this.url = url
@@ -129,11 +142,11 @@ class RouterStackEntry {
 
 class RouterRegistryEntry {
     public url: string
-    public page: MemoFunction
+    public page: UserViewBuilder
 
     constructor(
         url: string,
-        page: MemoFunction
+        page: UserViewBuilder
     ) {
         this.url = url
         this.page = page
@@ -149,12 +162,11 @@ export class PageInfo {
     }
 }
 
-export interface Router {
-    register(
-        url: string, page: MemoFunction
-    ): void
+export type PageTransition = () => void
+export type PageClassNameResolver = (page:string) => string | undefined
 
-    provideResolver(resolver: PageRouteResolver): void
+export interface Router {
+    provideClassNameResolver(resolver: PageClassNameResolver): void
 
     push(url: string, params?: Map<string, Object>): Promise<void>
 
@@ -171,6 +183,8 @@ export interface Router {
     pageInfo: PageInfo
 
     onPageTransitionEnd(pageId: int32): void
+
+    UpdateVisiblePagePeerNode(node: PeerNode, index?: number): void
 }
 
 const CURRENT_ROUTER = "ohos.arkoala.router"
@@ -178,20 +192,17 @@ const CURRENT_ROUTER_TRANSITION = "ohos.arkoala.router.transition"
 
 class RouterImpl implements Router {
     stack = new Array<RouterStackEntry>()
-    registry = new Map<string, RouterRegistryEntry>()
     currentLocals?: Map<string, Object>
-    resolver?: PageRouteResolver
+    resolver?: PageClassNameResolver
     private readonly state: RouterState
+    private readonly moduleName: string
 
-    constructor(state: RouterState) {
+    constructor(state: RouterState, moduleName: string) {
         this.state = state
+        this.moduleName = moduleName
     }
 
-    register(url: string, page: MemoFunction): void {
-        this.registry.set(url, new RouterRegistryEntry(url, page))
-    }
-
-    provideResolver(resolver: PageRouteResolver): void {
+    provideClassNameResolver(resolver: PageClassNameResolver): void {
         this.resolver = resolver
     }
 
@@ -216,36 +227,85 @@ class RouterImpl implements Router {
          */
     }
 
+    resolve(route: string): Promise<UserView | EntryPoint> {
+        return new Promise<UserView | EntryPoint>(
+            (resolvePromise: (value: UserView | EntryPoint) => void, rejectPromise: (e: Error) => void) => {
+                let className: string | undefined = "";
+                className = this.resolver?.(route)
+                if (className) {
+                    InteropNativeModule._NativeLog("AceRouter:resolve className: " + route + " " + className)
+                    // TODO: parameters.
+                    let view = ArkUINativeModule._LoadUserView(className, "")
+                    if (view) {
+                        resolvePromise(view as UserView)
+                    } else {
+                        rejectPromise(new Error(`Cannot load class ${className}`))
+                    }
+                } else {
+                    InteropNativeModule._NativeLog("AceRouter:resolve url: " + route);
+                    let className: string = this.getClassName(route)
+                    InteropNativeModule._NativeLog("AceRouter:resolve generated className: " + className);
+                    /** @memo */
+                    let entry = this.RunPage(className)
+                    if (entry) {
+                        resolvePromise(entry)
+                    } else {
+                        rejectPromise(new Error(`Cannot load class ${className}`))
+                    }
+                    rejectPromise(new Error(`Unknown URL ${route}`))
+                }
+        })
+    }
+
+    private getClassName(url: string): string {
+        let className: string = this.moduleName + "/src/main/ets/" + url + "/__EntryWrapper";
+        return className;
+    }
+
+    private RunPage(url: string): EntryPoint {
+        try {
+            //@ts-ignore
+            let runtimeLinker = getNearestNonBootRuntimeLinker();
+            let entryClass = runtimeLinker?.loadClass(url, false);
+            if (!entryClass) {
+                InteropNativeModule._NativeLog("AceRouter: load entryClass failed")
+            } else {
+                let entryInstance = entryClass.createInstance();
+                let entryPoint = entryInstance as EntryPoint;
+                return entryPoint
+            }
+        }
+        //@ts-ignore 
+        catch (e: Error) {
+            InteropNativeModule._NativeLog("AceRouter: catch RunPage error: " + e)
+        }
+        return new EntryPoint()
+    }
+
     pushOrReplace(url: string, push: boolean, params?: Map<string, Object>): Promise<void> {
         return new Promise<void>((
             resolve: (value: undefined) => void,
             reject: (reason: string | undefined) => void
-        ): Promise<void> | undefined => {
-            let entry = this.registry.get(url)
-            console.log(push ? "push" : "replace", url, entry)
-            if (entry) {
-                if (push) {
-                    this.stack.push(new RouterStackEntry(this.state.url, this.state.page, this.state.params))
+        ): Promise<void> => {
+        return this.resolve(url)
+            .then<void>((view: UserView | EntryPoint) => {
+                if (view instanceof UserView) {
+                    InteropNativeModule._NativeLog("AceRouter: load page as UserView")
+                    let page: UserViewBuilder = view.getBuilder()
+                    if (push) {
+                        this.stack.push(new RouterStackEntry(this.state.url, this.state.page, this.state.params))
+                    }
+                    this.activate(new RouterRegistryEntry(url, page), push ? RouteType_Push : RouteType_None, params, resolve)
+                } else if (view instanceof EntryPoint) {
+                    InteropNativeModule._NativeLog("AceRouter: load page as EntryPoint")
+                    let page = view.entry
+                    if (push) {
+                        this.stack.push(new RouterStackEntry(this.state.url, this.state.page, this.state.params))
+                    }
+                    this.activate(new RouterRegistryEntry(url, page), push ? RouteType_Push : RouteType_None, params, resolve)
                 }
-                // TODO: Use RouteType enum values when enums are fixed in Panda
-                this.activate(entry, push ? RouteType_Push : RouteType_None, params, () => resolve(undefined))
-            } else {
-                const memoPromise = this.resolver?.resolve(url)
-                if (memoPromise !== undefined) {
-                    return memoPromise
-                        .then<void>((view: UserView) => {
-                            let page: MemoFunction = view.getBuilder()
-                            if (push) {
-                                this.stack.push(new RouterStackEntry(this.state.url, this.state.page, this.state.params))
-                            }
-                            this.activate(new RouterRegistryEntry(url, page), push ? RouteType_Push : RouteType_None, params, () => resolve(undefined))
-                        })
-                        .catch<void>((error: string | undefined): void => reject(error))
-                }
-                // console.error(`${url} is not registered`)
-                reject(`${url} is not registered`)
-            }
-            return undefined
+            })
+            .catch<void>((error: string | undefined): void => reject(error))
         })
     }
 
@@ -253,13 +313,20 @@ class RouterImpl implements Router {
     hidingPage: number = -1
 
     // TODO: Use RouteType enum as route parameter when enums are fixed in Panda
-    private activate(entry: RouterRegistryEntry, route: int32, params: Map<string, Object> | undefined, resolve: () => void) {
+    private activate(entry: RouterRegistryEntry, route: int32, params: Map<string, Object> | undefined, resolve: (dummy: undefined) => void) {
         const state = this.state
         state.version.value++
         // console.log("activating", RouteType[route], entry.url, "version", state.version.value)
-        let previousVisiblePageIndex = this.findIndexByVersion(state.currentActivePage.value)
+        // let previousVisiblePageIndex = this.findIndexByVersion(state.currentActivePage.value)
+        let previousVisiblePageIndex = state.visiblePages.length - 1
         let previousVisiblePage = state.visiblePages.value[previousVisiblePageIndex]
-        if (previousVisiblePage) previousVisiblePage.setTransitionState(VisibilityHiding, route)
+        InteropNativeModule._NativeLog("AceRouter: previousVisiblePage index " + previousVisiblePageIndex);
+        if (previousVisiblePage) {
+            // previousVisiblePage.setTransitionState(VisibilityHiding, route)
+            previousVisiblePage.transition.visibility = VisibilityHidden
+            previousVisiblePage.transition.route = RouteType_Pop
+            InteropNativeModule._NativeLog("AceRouter: previousVisiblePage visibility " + previousVisiblePage.transition.visibility);
+        }
         state.page = entry.page
         state.url = entry.url
         state.params = params
@@ -270,16 +337,50 @@ class RouterImpl implements Router {
             case RouteType_Push: {
                 newVisiblePage = new VisiblePage(entry.page, state.version.value, VisibilityShowing, route)
                 state.visiblePages.splice(previousVisiblePageIndex + 1, 0, newVisiblePage)
+                let peerNode = state.visiblePages.value[previousVisiblePageIndex].peerNode
+                if (peerNode) {
+                    InteropNativeModule._NativeLog("AceRouter: push and previous page peerNode set invisible");
+                    let visibleValue: Visibility = Visibility.HIDDEN
+                    const thisSerializer : Serializer = Serializer.hold()
+                    let value_type : int32 = RuntimeType.UNDEFINED
+                    value_type = runtimeType(visibleValue)
+                    thisSerializer.writeInt8(value_type as int32)
+                    if ((RuntimeType.UNDEFINED) != (value_type)) {
+                        const value_value  = (visibleValue as Visibility)
+                        thisSerializer.writeInt32(TypeChecker.Visibility_ToNumeric(value_value))
+                    }
+                    ArkUIGeneratedNativeModule._CommonMethod_visibility(peerNode.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+                    thisSerializer.release()
+                }
                 break
             }
             case RouteType_Pop: {
                 const index = this.stack.length // TODO: store uid in registry to find a page
                 newVisiblePage = state.visiblePages.value[index]
                 newVisiblePage.setTransitionState(VisibilityShowing, route)
+                let peerNode = newVisiblePage.peerNode
+                if (peerNode) {
+                    InteropNativeModule._NativeLog("AceRouter: pop and previous page peerNode set visible");
+                    let visibleValue: Visibility = Visibility.VISIBLE
+                    const thisSerializer : Serializer = Serializer.hold()
+                    let value_type : int32 = RuntimeType.UNDEFINED
+                    value_type = runtimeType(visibleValue)
+                    thisSerializer.writeInt8(value_type as int32)
+                    if ((RuntimeType.UNDEFINED) != (value_type)) {
+                        const value_value  = (visibleValue as Visibility)
+                        thisSerializer.writeInt32(TypeChecker.Visibility_ToNumeric(value_value))
+                    }
+                    ArkUIGeneratedNativeModule._CommonMethod_visibility(peerNode.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+                    thisSerializer.release()
+                }
                 // remove all hidden pages removed from the stack
                 for (let i = state.visiblePages.length - 1; i > index; i--) {
                     const visibility = state.visiblePages.value[i].transition.visibility
-                    if (visibility == VisibilityHidden) state.visiblePages.splice(i, undefined)
+                    if (visibility == VisibilityHidden) {
+                        InteropNativeModule._NativeLog("AceRouter: dispose page, index: " + i)
+                        // state.visiblePages.value[i].peerNode?.dispose()
+                        state.visiblePages.splice(i, undefined)
+                    }
                 }
                 break
             }
@@ -331,7 +432,20 @@ class RouterImpl implements Router {
         // }
     }
 
+    UpdateVisiblePagePeerNode(node: PeerNode, index: number = -1): void {
+        InteropNativeModule._NativeLog("AceRouter: router UpdateVisiblePagePeerNode, index: " + index)
+        if (index == -1) {
+            index = this.state.visiblePages.length - 1
+        }
+        if (index < 0) {
+            InteropNativeModule._NativeLog("AceRouter: router page size is zero")
+            return;
+        }
+        this.state.updateVisiblePagePeerNode(node, index)
+    }
+
     push(url: string, params?: Map<string, Object>): Promise<void> {
+        InteropNativeModule._NativeLog("AceRouter: router push")
         return this.pushOrReplace(url, true, params)
     }
 
@@ -340,8 +454,9 @@ class RouterImpl implements Router {
     }
 
     back(url?: string, params?: Map<string, Object>): Promise<void> {
+        InteropNativeModule._NativeLog("AceRouter: router back")
         return new Promise<void>((
-            resolve: () => void,
+            resolve: (dummy: undefined) => void,
             reject: (reason: string | undefined) => void
         ): void => {
             let entry: RouterStackEntry | undefined = undefined
@@ -371,7 +486,16 @@ class RouterImpl implements Router {
     }
 
     clear(): void {
-        this.stack.splice(0, this.stack.length -1)
+        InteropNativeModule._NativeLog("AceRouter: router clear")
+        for (let i = 0; i < this.state.visiblePages.length - 1; i++) {
+            this.state.visiblePages.value[i].peerNode?.dispose();
+        }
+        if (this.state.visiblePages.length > 1) {
+            this.state.visiblePages.splice(0, this.state.visiblePages.length - 1)
+        }
+        if (this.stack.length > 1) {
+            this.stack.splice(0, this.stack.length -1)
+        }
     }
 
     getParam(key: string): Object | undefined {
@@ -379,53 +503,22 @@ class RouterImpl implements Router {
     }
 }
 
-export interface PageRouteResolver {
-    resolve(route: string): Promise<UserView>
-}
-
-class TrivialResolver implements PageRouteResolver {
-    private map: Map<string, string>
-    constructor(map: Map<string, string>) {
-        this.map = map
-    }
-    resolve(route: string): Promise<UserView> {
-        return new Promise<UserView>(
-            (resolvePromise: (value: UserView) => void, rejectPromise: (e: Error) => void) => {
-            let className = this.map.get(route)
-            if (!className) {
-                rejectPromise(new Error(`Unknown URL ${route}`))
-                return
-            }
-            // TODO: parameters.
-            let view = ArkUINativeModule._LoadUserView(className, "")
-            if (!view) {
-                rejectPromise(new Error(`Cannot load class ${className}`))
-                return
-            }
-            resolvePromise(view as UserView)
-        })
-    }
-}
-
 /** @memo */
 export function Routed(
     /** @memo */
     initial: () => void,
+    moduleName: string,
     initialUrl?: string,
 ): void {
     const routerState = remember<RouterState>(() => new RouterState(initial, initialUrl ?? "_initial_"))
-    const router = remember<RouterImpl>(() => {
-        let router = new RouterImpl(routerState)
+    const routerImp = remember<RouterImpl>(() => {
+        let routerImp = new RouterImpl(routerState, moduleName)
         // Install default global router.
-        OhosRouter.setRouter(router)
-        router.provideResolver(new TrivialResolver(new Map<string, string>([
-            ["page1", "ComExampleTrivialApplication"],
-            ["page2", "ComExampleTrivialApplicationPage2"]
-        ])))
-        return router
+        router.setRouter(routerImp)
+        return routerImp
     })
-    RunEffect<(() => void) | undefined>(routerState.resolve, (resolve?: () => void): void => { resolve?.() })
-    contextLocalScope(CURRENT_ROUTER, router, () => {
+    RunEffect<((dummy: undefined) => void) | undefined>(routerState.resolve, (resolve?: (dummy: undefined) => void): void => { resolve?.(undefined) })
+    contextLocalScope(CURRENT_ROUTER, routerImp, () => {
         RepeatByArray(
             routerState.visiblePages.value,
             (page: VisiblePage, index: int32): int32 => { return page.version },

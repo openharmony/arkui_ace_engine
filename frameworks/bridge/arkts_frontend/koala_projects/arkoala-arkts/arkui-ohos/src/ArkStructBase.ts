@@ -81,12 +81,6 @@ export abstract class ArkStructBase<T, T_Options> extends ArkCustomComponentImpl
     ): void
 
     /** @memo */
-    pageTransition(): void {
-        ArkPageTransitionEnter(undefined, undefined, { duration: 100 } as PageTransitionOptions)
-        ArkPageTransitionExit(undefined, undefined, { duration: 100 } as PageTransitionOptions)
-    }
-
-    /** @memo */
     static _instantiateReusable<T extends ArkStructBase<T, T_Options>, T_Options>(
         reuseId: string,
         /** @memo */
