@@ -87,10 +87,10 @@ namespace OHOS::Ace::NG {
 namespace {
 #if defined(ENABLE_STANDARD_INPUT)
 // should be moved to theme
-constexpr float CARET_WIDTH = 1.5f;
 constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
 constexpr Dimension KEYBOARD_AVOID_OFFSET = 24.0_vp;
 #endif
+constexpr float CARET_WIDTH = 1.5f;
 constexpr int32_t IMAGE_SPAN_LENGTH = 1;
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
 constexpr uint32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
@@ -10070,7 +10070,7 @@ RectF RichEditorPattern::GetSelectArea(SelectRectsType pos)
         auto richEditorOverlay = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
         CHECK_NULL_RETURN(richEditorOverlay, rect);
         auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
-        auto caretWidth = Dimension(1.5f, DimensionUnit::VP).ConvertToPx();
+        auto caretWidth = Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx();
         auto selectRect = RectF(caretOffset + paintOffset, SizeF(caretWidth, caretHeight));
         return selectRect.IntersectRectT(contentRect);
     }
@@ -10105,18 +10105,26 @@ void RichEditorPattern::AppendSelectRect(std::vector<RectF>& selectRects)
     CHECK_NULL_VOID(!selectOverlay_->IsSingleHandle());
     auto startPosition = textSelector_.GetTextStart();
     auto endPosition = textSelector_.GetTextEnd();
-    auto height = 0.0f;
-    auto caretWidth = Dimension(1.5f, DimensionUnit::VP).ConvertToPx();
+    CHECK_NULL_VOID(GetParagraphEndPosition(startPosition) != GetParagraphEndPosition(endPosition));
     if (paragraphs_.IsIndexAtParagraphEnd(startPosition + 1)) {
-        auto offset = paragraphs_.ComputeCursorOffset(startPosition, height, false, false);
-        RectF rect = RectF(offset.GetX(), offset.GetY(), caretWidth, height);
-        selectRects.insert(selectRects.begin(), rect);
+        selectRects.insert(selectRects.begin(), CreateNewLineRect(startPosition, false));
     }
     if (paragraphs_.IsIndexAtParagraphEnd(endPosition)) {
-        auto offset = paragraphs_.ComputeCursorOffset(endPosition, height, true, false);
-        RectF rect = RectF(offset.GetX(), offset.GetY(), caretWidth, height);
-        selectRects.emplace_back(rect);
+        selectRects.emplace_back(CreateNewLineRect(endPosition, true));
     }
+}
+
+RectF RichEditorPattern::CreateNewLineRect(const int32_t position, const bool downStreamFirst)
+{
+    auto paragraphInfo = paragraphs_.GetParagraphInfo(position);
+    auto& style = paragraphInfo.paragraphStyle;
+    auto height = 0.0f;
+    auto offset = paragraphs_.ComputeCursorOffset(position, height, downStreamFirst, true);
+    auto caretWidth = Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx();
+    RectF rect = RectF(offset.GetX(), offset.GetY(), 0, height);
+    auto textAlign = TextBase::CheckTextAlignByDirection(style.align, style.direction);
+    TextBase::UpdateSelectedBlankLineRect(rect, caretWidth, textAlign, GetTextContentRect().Width());
+    return rect;  
 }
 
 bool RichEditorPattern::IsTouchInFrameArea(const PointF& touchPoint)

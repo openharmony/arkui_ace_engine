@@ -948,6 +948,8 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetSelectArea101, TestSize.Level1)
     EXPECT_TRUE(res.IsValid());
     res = richEditorPattern->GetSelectArea(SelectRectsType::LEFT_TOP_POINT);
     EXPECT_TRUE(res.IsValid());
+    res = richEditorPattern->GetSelectArea(SelectRectsType::RIGHT_BOTTOM_POINT);
+    EXPECT_TRUE(res.IsValid());
 }
 
 /**
