@@ -1372,6 +1372,7 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
     auto offsetY =
         event.GetGlobalPoint().GetY() + (event.GetInputEventType() == InputEventType::AXIS ? event.GetOffsetY() : 0.0);
     if (NearEqual(offsetY, yLast_, MOVE_THRESHOLD)) { // if changing less than MOVE_THRESHOLD, no need to handle
+        StopHapticController();
         return;
     }
     toss->SetEnd(offsetY);
@@ -1385,6 +1386,7 @@ void TextPickerColumnPattern::HandleDragEnd()
 {
     if (hapticController_) {
         hapticController_->Stop();
+        isHapticPlayOnce_ = false;
     }
     pressed_ = false;
     CHECK_NULL_VOID(GetToss());
@@ -1840,11 +1842,10 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     offsetCurSet_ = 0.0;
 
     if (hapticController_ && isShow_) {
-        if (isEnableHaptic_) {
+        if (isEnableHaptic_ && !isHapticPlayOnce_) {
             hapticController_->HandleDelta(dragDelta);
         }
     }
-    StopHapticController();
     // the abs of drag delta is less than jump interval.
     dragDelta = GetDragDeltaLessThanJumpInterval(offsetY, dragDelta, useRebound, shiftDistance);
 
@@ -1860,6 +1861,7 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
             auto toss = GetToss();
             CHECK_NULL_VOID(toss);
             toss->StopTossAnimation(); // Stop fling animation and start rebound animation implicitly
+            StopHapticController();
         }
     }
     SpringCurveTailEndProcess(useRebound, stopMove);
@@ -2035,6 +2037,8 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
             yOffset_ = 0.0;
         }
 
+        StopHapticController();
+        isHapticPlayOnce_ = true;
         int32_t index = static_cast<int32_t>(currentIndex_) + step;
         auto overFirst = index < 0 && step < 0;
         auto overLast =

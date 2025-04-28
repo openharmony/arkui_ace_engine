@@ -918,6 +918,9 @@ void TimePickerColumnPattern::HandleDragMove(const GestureEvent& event)
     auto offsetY =
         event.GetGlobalPoint().GetY() + (event.GetInputEventType() == InputEventType::AXIS ? event.GetOffsetY() : 0.0);
     if (NearEqual(offsetY, yLast_, 1.0)) { // if changing less than 1.0, no need to handle
+        if (hapticController_) {
+            hapticController_->Stop();
+        }
         return;
     }
     toss->SetEnd(offsetY);
@@ -931,6 +934,7 @@ void TimePickerColumnPattern::HandleDragEnd()
 {
     if (hapticController_) {
         hapticController_->Stop();
+        isHapticPlayOnce_ = false;
     }
     pressed_ = false;
     CHECK_NULL_VOID(GetHost());
@@ -1314,9 +1318,6 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     CHECK_EQUAL_VOID(isTossReadyToStop_, true);
     int32_t dragDelta = static_cast<int32_t>(std::trunc(offsetY - yLast_));
-    if (hapticController_ && isShow_ && isEnableHaptic_ && !stopHaptic_) {
-        hapticController_->HandleDelta(static_cast<double>(dragDelta));
-    }
     yLast_ = offsetY;
     TimePickerScrollDirection dir = dragDelta > 0 ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
     auto host = GetHost();
@@ -1332,15 +1333,15 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
             return;
         }
     }
+    if (hapticController_ && isShow_ && isEnableHaptic_ && !stopHaptic_ && !isHapticPlayOnce_) {
+        hapticController_->HandleDelta(static_cast<double>(dragDelta));
+    }
     offsetCurSet_ = 0.0;
     auto midIndex = GetShowCount() / 2;
     auto shiftDistance = std::abs((dir == TimePickerScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
                                                                          : optionProperties_[midIndex].nextDistance);
     // the abs of drag delta is less than jump interval.
     dragDelta += static_cast<int32_t>(std::trunc(yOffset_));
-    if (hapticController_) {
-        hapticController_->Stop();
-    }
     bool isJump = GreatOrEqual(static_cast<double>(std::abs(dragDelta)), shiftDistance);
     if (isJump) {
         HandleEnterSelectedArea(static_cast<double>(dragDelta), shiftDistance, dir);
@@ -1481,6 +1482,10 @@ void TimePickerColumnPattern::OnAroundButtonClick(RefPtr<TimePickerEventParam> p
             AnimationUtils::StopAnimation(animation_);
             yLast_ = 0.0;
             yOffset_ = 0.0;
+        }
+        if (hapticController_) {
+            isHapticPlayOnce_ = true;
+            hapticController_->Stop();
         }
         auto distance =
             (step > 0 ? optionProperties_[middleIndex].prevDistance : optionProperties_[middleIndex].nextDistance) *

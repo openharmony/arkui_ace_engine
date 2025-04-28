@@ -489,6 +489,7 @@ private:
     bool hasUserDefinedSelectedFontFamily_ = false;
     bool isShow_ = true;
     bool isEnableHaptic_ = true;
+    bool isHapticPlayOnce_ = true;
     bool stopHaptic_ = false;
     bool isTossReadyToStop_ = false;
 

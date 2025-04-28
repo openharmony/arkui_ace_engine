@@ -615,6 +615,7 @@ private:
     bool isDisableTextStyleAnimation_ = false;
     bool isShow_ = true;
     bool isEnableHaptic_ = true;
+    bool isHapticPlayOnce_ = true;
     bool selectedMarkPaint_ = false;
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
 
