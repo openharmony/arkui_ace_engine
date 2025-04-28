@@ -2233,7 +2233,7 @@ ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t sou
     // triggering overScroll, parent always handle it first
     auto overRes = parent->HandleScroll(result.remain, source, NestedState::CHILD_OVER_SCROLL, GetVelocity());
     offset += LessNotEqual(std::abs(overOffset), std::abs(result.remain)) ? overOffset : overRes.remain;
-    bool parentEdgeEffect = result.reachEdge && NearZero(offset);
+    bool parentEdgeEffect = (result.reachEdge || overRes.reachEdge) && NearZero(offset);
     SetCanOverScroll((!NearZero(overOffset) && HasEdgeEffect(offset)) || parentEdgeEffect);
     return { 0, GetCanOverScroll() };
 }
