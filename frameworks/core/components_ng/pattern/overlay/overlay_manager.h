@@ -390,7 +390,7 @@ public:
     void RemoveDragPixelMap();
     void UpdatePixelMapScale(float& scale);
     void RemoveFilter();
-    void RemoveFilterAnimation();
+    void RemoveFilterAnimation(const RefPtr<FrameNode>& menu = nullptr);
     void RemoveEventColumn();
     void UpdatePixelMapPosition(bool isSubwindowOverlay = false);
     void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset, float menuScale = 1.0f,
@@ -660,7 +660,7 @@ public:
     }
     bool CheckPageNeedAvoidKeyboard() const;
     void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
-    void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode);
+    void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode);
     void EraseMenuInfo(int32_t targetId)
     {
         if (menuMap_.find(targetId) != menuMap_.end()) {
@@ -712,6 +712,7 @@ public:
     void SkipMenuShow(int32_t targetId);
     void ResumeMenuShow(int32_t targetId);
     bool CheckSkipMenuShow(int32_t targetId);
+    void UpdateFilterMaskType(const RefPtr<FrameNode>& menuWrapperNode);
 
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
