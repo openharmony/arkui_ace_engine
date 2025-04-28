@@ -1687,4 +1687,30 @@ HWTEST_F(SwiperTestNg, CustomAnimationHandleDragEnd001, TestSize.Level1)
     offset = pattern_->itemPosition_[0].startPos;
     EXPECT_EQ(offset, 100.0f);
 }
+
+/**
+ * @tc.name: CheckTargetPositon001
+ * @tc.desc: Test SwiperPattern CheckTargetPositon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CheckTargetPositon001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. Change contentMainSize_ to a value different from contentMainSizeBeforeAni_
+     */
+    pattern_->contentMainSizeBeforeAni_ = pattern_->contentMainSize_ * 2;
+    pattern_->targetIndex_ = 1;
+    float offset = 0.f;
+    /**
+     * @tc.steps: step3. The offset will be adjusted
+     */
+    pattern_->CheckTargetPositon(offset);
+    EXPECT_EQ(offset, -pattern_->itemPosition_[1].startPos);
+}
 } // namespace OHOS::Ace::NG
