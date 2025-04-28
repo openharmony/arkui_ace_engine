@@ -32,6 +32,9 @@ declare_args() {
   # Enable pgo for building.
   ace_engine_feature_enable_pgo = false
 
+  # Enable pgo for building.
+  ace_engine_feature_enable_mfs = false
+
   # Set pgo profdata path
   ace_engine_feature_pgo_path = ""
 
