@@ -854,11 +854,7 @@ void SetPasteNodeProperties(const RefPtr<FrameNode>& pasteNode, const RefPtr<Sel
     auto pasteButtonRenderContext = pasteNode->GetRenderContext();
     CHECK_NULL_VOID(pasteButtonRenderContext);
     pasteLayoutProperty->UpdateBackgroundLeftPadding(Dimension(horInterval));
-    if (enabled) {
-        pasteButtonRenderContext->UpdateOpacity(1.0);
-    } else {
-        pasteButtonRenderContext->UpdateOpacity(theme->GetDisabledFontColorAlpha());
-    }
+    pasteButtonRenderContext->UpdateOpacity(1.0);
 }
 
 void UpdatePasteOpacityFont(bool isPaste, RefPtr<FrameNode>& leftTextNode, const OptionParam& param,
