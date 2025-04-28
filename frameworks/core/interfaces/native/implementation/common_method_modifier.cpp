@@ -4230,9 +4230,8 @@ void MaskShape0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<RefPtr<BasicShape>>(*value).value_or(nullptr);
-    ViewAbstract::SetMask(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<RefPtr<BasicShape>>(*value) : std::nullopt;
+    ViewAbstract::SetMask(frameNode, convValue.value_or(nullptr));
 }
 void MaskShape1Impl(Ark_NativePointer node,
                     const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
@@ -4240,8 +4239,8 @@ void MaskShape1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<RefPtr<BasicShape>>(*value).value_or(nullptr);
-    ViewAbstract::SetMask(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<RefPtr<BasicShape>>(*value) : std::nullopt;
+    ViewAbstract::SetMask(frameNode, convValue.value_or(nullptr));
 }
 void KeyImpl(Ark_NativePointer node,
              const Ark_String* value)
