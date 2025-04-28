@@ -131,6 +131,21 @@
       "buildFunction": "BindMenuBackgroundEffectBuilder"
     },
     {
+      "name": "MenuDivider",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuDivider.ets",
+      "buildFunction": "MenuDividerBuilder"
+    },
+    {
+      "name": "MenuExpand",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuExpand.ets",
+      "buildFunction": "MenuExpandBuilder"
+    },
+    {
+      "name": "MenuPressStatus",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuPressStatus.ets",
+      "buildFunction": "MenuPressStatusBuilder"
+    },
+    {
       "name": "OverlayIndex",
       "pageSourceFile": "src/main/ets/pages/components/overlay/Index.ets",
       "buildFunction": "OverlayIndexBuilder"
