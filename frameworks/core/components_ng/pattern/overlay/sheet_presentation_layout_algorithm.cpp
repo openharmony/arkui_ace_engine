@@ -276,6 +276,7 @@ void SheetPresentationLayoutAlgorithm::MinusSubwindowDistance(const RefPtr<Frame
     auto subContainer = AceEngine::Get().GetContainer(sheetWrapperPattern->GetSubWindowId());
     CHECK_NULL_VOID(subContainer);
     auto subWindowContext = AceType::DynamicCast<NG::PipelineContext>(subContainer->GetPipelineContext());
+    CHECK_NULL_VOID(subWindowContext);
     auto subWindowGlobalRect = subWindowContext->GetDisplayWindowRectInfo();
     sheetOffsetX_ -= subWindowGlobalRect.Left();
     sheetOffsetY_ -= subWindowGlobalRect.Top();
