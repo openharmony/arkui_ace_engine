@@ -141,6 +141,12 @@
       "buildFunction": "OverlayLevelOrderBuilder"
     },
     {
+      "name": "OverlayManagerHitTest",
+      "pageSourceFile": "src/main/ets/pages/components/overlay/overlayManagerHitTest.ets",
+      "buildFunction": "OverlayManagerHitBuilder"
+    },
+
+    {
       "name": "PopupIndex",
       "pageSourceFile": "src/main/ets/pages/components/popup/Index.ets",
       "buildFunction": "PopupIndexBuilder"
