@@ -244,7 +244,10 @@ def generate_new_arkts_config(path: Paths):
     # need take old arkts config json paths splicing to new arkts config paths
     with open(old_arkts_config_path, 'r', encoding='utf-8') as f:
         old_data = json.load(f)
-        old_data['compilerOptions']['paths'].update(paths)
+        old_paths = old_data['compilerOptions']['paths']
+        for key, value in paths.items():
+            if key not in old_paths:
+                old_paths[key] = value
         with open(new_arkts_config_path, 'w', encoding="utf-8") as f:
             json.dump(old_data, f, indent=2, ensure_ascii=False)
 

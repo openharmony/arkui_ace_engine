@@ -27,7 +27,7 @@ extern "C" {
 #define ARKUI_ANI_MODIFIER_FUNCTION_NAME "GetArkUIAniModifiers"
 
 struct _ArkUINode;
-
+typedef class __ani_ref* ani_ref;
 typedef _ArkUINode* ArkUINodeHandle;
 typedef int ArkUI_Int32;
 
@@ -40,11 +40,14 @@ struct ArkUIAniWebModifier {
         std::function<void(int32_t)>&& onNWebId,
         std::function<void(const std::string&)>&& onHapPath);
 };
-
+struct ArkUIAniCommonModifier {
+    ani_ref* (*getHostContext)();
+};
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
     const ArkUIAniWebModifier* (*getWebAniModifier)();
+    const ArkUIAniCommonModifier* (*getCommonAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

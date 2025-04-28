@@ -24,10 +24,12 @@ ohos_shared_library("arkoala_native_ani") {
 
   include_dirs = [
     "./",
+    "common/",
     "web/",
   ]
 
   sources = [
+    "common/common_module.cpp",
     "load.cpp",
     "module.cpp",
     "web/web_module_methods.cpp",

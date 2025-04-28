@@ -39,6 +39,7 @@ template("arkts_frontend") {
     }
 
     sources = [
+      "ani_context_module.cpp",
       "arkts_ani_utils.cpp",
       "arkts_frontend.cpp",
       "entry/arkts_entry_loader.cpp",

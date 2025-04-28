@@ -16,6 +16,7 @@
 import { KPointer } from "@koalaui/interop"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
+import common from "@ohos.app.ability.common"
 
 export class ArkUIAniModule {
     static {
@@ -29,4 +30,6 @@ export class ArkUIAniModule {
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
 
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap
+
+    native static _Common_GetHostContext(): common.Context
 }

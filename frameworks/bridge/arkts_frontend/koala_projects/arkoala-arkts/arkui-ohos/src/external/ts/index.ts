@@ -16,3 +16,4 @@
 export * from "./multimedia/image"
 export * from "./ui_extension/ui_extension"
 export * from "./web/webview"
+export * from "./application/context"
