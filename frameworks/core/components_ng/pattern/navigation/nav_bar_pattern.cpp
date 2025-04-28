@@ -497,14 +497,7 @@ bool NavBarPattern::CanCoordScrollUp(float offset) const
     CHECK_NULL_RETURN(titleNode, false);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titlePattern, false);
-    bool canScrollUp = false;
-    if (titleMode_ != NavigationTitleMode::FREE) {
-        auto eventHub = GetOrCreateEventHub<NavBarEventHub>();
-        if (eventHub && eventHub->HasOnCoordScrollStartAction()) {
-            canScrollUp = true;
-        }
-    }
-    return (Negative(offset) && !titlePattern->IsCurrentMinTitle()) || canScrollUp;
+    return Negative(offset) && (!titlePattern->IsCurrentMinTitle() || IsNeedHandleScroll());
 }
 
 float NavBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const
