@@ -180,6 +180,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
     void AssignArkValue(Ark_BorderRadiuses& dst, const BorderRadiusProperty& src);
+    void AssignArkValue(Ark_BorderStyle& dst, const BorderStyle& src);
     void AssignArkValue(Ark_Buffer& dst, const std::string& src);
     void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src);
     void AssignArkValue(Ark_CheckboxGroupResult& dst, const CheckboxGroupResult& src);
@@ -198,6 +199,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Edge& dst, const ScrollEdge& src);
     void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
     void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src);
+    void AssignArkValue(Ark_EdgeStyles& dst, const BorderStyleProperty& src);
     void AssignArkValue(Ark_EffectDirection& dst, const OHOS::Ace::CommonSubType& src);
     void AssignArkValue(Ark_EffectScope& dst, const OHOS::Ace::ScopeType& src);
     void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src);
@@ -268,6 +270,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_PixelMap& pixelMap, const RefPtr<OHOS::Ace::PixelMap>& info);
     void AssignArkValue(Ark_Position& dst, const OffsetF& src);
     void AssignArkValue(Ark_PositionWithAffinity& dst, const PositionWithAffinity& src);
+    void AssignArkValue(Ark_Position& dst, const OffsetT<Dimension>& src);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewTextInfo& src, ConvContext *ctx);
     void AssignArkValue(Ark_Rect& dst, const RectF& src);
@@ -359,6 +362,11 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src);
     void AssignArkValue(Array_Number& dst, const std::vector<double>& src);
     void AssignArkValue(Array_ScriptItem& dst, const ScriptItems& src);
+    void AssignArkValue(Ark_Vector2& dst, const DimensionOffset& src);
+    void AssignArkValue(Ark_Vector2& dst, const VectorF& src);
+    void AssignArkValue(Ark_Vector2& dst, const TranslateOptions& src);
+    void AssignArkValue(Ark_Vector3& dst, const Vector3F& src);
+    void AssignArkValue(Ark_Matrix4& dst, const Matrix4& src);
 
     // SORTED_SECTION
     template<> Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value);
