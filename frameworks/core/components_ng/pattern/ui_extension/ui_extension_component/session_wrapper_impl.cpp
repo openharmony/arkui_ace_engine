@@ -1446,15 +1446,14 @@ bool SessionWrapperImpl::SendBusinessData(
     return true;
 }
 
-void SessionWrapperImpl::PostBusinessDataConsumeAsync(uint32_t customId, AAFwk::Want&& data)
+void SessionWrapperImpl::PostBusinessDataConsumeAsync(uint32_t customId, const AAFwk::Want& data)
 {
     UIEXT_LOGI("PostBusinessDataConsumeAsync, businessCode=%{public}u.", customId);
     int32_t callSessionId = GetSessionId();
     CHECK_NULL_VOID(taskExecutor_);
     auto instanceId = GetInstanceIdFromHost();
-    AAFwk::Want businessData = data;
     taskExecutor_->PostTask(
-        [instanceId, weak = hostPattern_, customId, businessData, callSessionId]() {
+        [instanceId, weak = hostPattern_, customId, data, callSessionId]() {
             ContainerScope scope(instanceId);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -1465,20 +1464,19 @@ void SessionWrapperImpl::PostBusinessDataConsumeAsync(uint32_t customId, AAFwk::
                     callSessionId, pattern->GetSessionId());
                 return;
             }
-            pattern->OnUIExtBusinessReceive(static_cast<UIContentBusinessCode>(customId), businessData);
+            pattern->OnUIExtBusinessReceive(static_cast<UIContentBusinessCode>(customId), data);
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionBusinessDataConsumeAsync");
 }
 void SessionWrapperImpl::PostBusinessDataConsumeSyncReply(
-    uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+    uint32_t customId, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply)
 {
     UIEXT_LOGI("PostBusinessDataConsumeSyncReply, businessCode=%{public}u.", customId);
     int32_t callSessionId = GetSessionId();
     CHECK_NULL_VOID(taskExecutor_);
     auto instanceId = GetInstanceIdFromHost();
-    AAFwk::Want businessData = data;
     taskExecutor_->PostSyncTask(
-        [instanceId, weak = hostPattern_, customId, businessData, &reply, callSessionId]() {
+        [instanceId, weak = hostPattern_, customId, data, &reply, callSessionId]() {
             ContainerScope scope(instanceId);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -1490,7 +1488,7 @@ void SessionWrapperImpl::PostBusinessDataConsumeSyncReply(
                 return;
             }
             pattern->OnUIExtBusinessReceiveReply(
-                static_cast<UIContentBusinessCode>(customId), businessData, reply);
+                static_cast<UIContentBusinessCode>(customId), data, reply);
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionBusinessDataConsumeSyncReply");
 }
@@ -1511,9 +1509,9 @@ bool SessionWrapperImpl::RegisterDataConsumer()
             return 0;
         }
         if (reply.has_value()) {
-            sessionWrapper->PostBusinessDataConsumeSyncReply(customId, std::move(data), reply);
+            sessionWrapper->PostBusinessDataConsumeSyncReply(customId, data, reply);
         } else {
-            sessionWrapper->PostBusinessDataConsumeAsync(customId, std::move(data));
+            sessionWrapper->PostBusinessDataConsumeAsync(customId, data);
         }
         return 0;
     };

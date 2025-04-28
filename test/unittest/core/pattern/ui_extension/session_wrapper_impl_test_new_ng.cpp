@@ -1153,7 +1153,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg032, TestSize.L
     int32_t callSessionId = sessionWrapper->GetSessionId();
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 
-    sessionWrapper->PostBusinessDataConsumeAsync(customId, std::move(data));
+    sessionWrapper->PostBusinessDataConsumeAsync(customId, data);
 }
 
 /**
@@ -1180,7 +1180,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg033, TestSize.L
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     int32_t callSessionId = sessionWrapper->GetSessionId();
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    sessionWrapper->PostBusinessDataConsumeSyncReply(customId, std::move(data), reply);
+    sessionWrapper->PostBusinessDataConsumeSyncReply(customId, data, reply);
     EXPECT_NE(patternUpgrade, nullptr);
 }
 

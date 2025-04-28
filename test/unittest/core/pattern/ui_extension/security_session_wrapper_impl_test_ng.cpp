@@ -529,16 +529,16 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg009, 
     std::optional<AAFwk::Want> reply;
     sessionWrapper->OnExtensionDetachToDisplay();
     sessionWrapper->OnExtensionTimeout(0);
-    sessionWrapper->PostBusinessDataConsumeAsync(1, std::move(data));
-    sessionWrapper->PostBusinessDataConsumeSyncReply(1, std::move(data), reply);
+    sessionWrapper->PostBusinessDataConsumeAsync(1, data);
+    sessionWrapper->PostBusinessDataConsumeSyncReply(1, data, reply);
     sessionWrapper->OnConnect();
 
     sessionWrapper->session_->persistentId_ = 1;
     ASSERT_NE(sessionWrapper->hostPattern_.Upgrade()->GetSessionId(), sessionWrapper->GetSessionId());
     sessionWrapper->OnExtensionDetachToDisplay();
     sessionWrapper->OnExtensionTimeout(0);
-    sessionWrapper->PostBusinessDataConsumeAsync(1, std::move(data));
-    sessionWrapper->PostBusinessDataConsumeSyncReply(1, std::move(data), reply);
+    sessionWrapper->PostBusinessDataConsumeAsync(1, data);
+    sessionWrapper->PostBusinessDataConsumeSyncReply(1, data, reply);
     sessionWrapper->OnDisconnect(true);
     sessionWrapper->OnDisconnect(false);
     sessionWrapper->OnConnect();
