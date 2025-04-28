@@ -26,6 +26,7 @@
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/gestures/click_info.h"
+#include "core/components_ng/event/event_constants.h"
 
 namespace OHOS::Ace::NG {
 using OnAccessibilityEventFunc = std::function<void(AccessibilityEventType)>;
@@ -126,7 +127,8 @@ private:
     void DeadlineTimer(CancelableCallback<void()>& deadlineTimer, int32_t time);
     Offset ComputeFocusPoint();
 
-    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type);
+    void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
     GestureJudgeResult TriggerGestureJudgeCallback();
     bool ExceedSlop();
     void InitGlobalValue(SourceType deviceId);

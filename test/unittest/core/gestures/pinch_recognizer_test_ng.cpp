@@ -325,7 +325,7 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTest006, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     std::unique_ptr<GestureEventFunc> onAction;
-    pinchRecognizer->SendCallbackMsg(onAction);
+    pinchRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(pinchRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -334,7 +334,7 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTest006, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>();
-    pinchRecognizer->SendCallbackMsg(onAction);
+    pinchRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(pinchRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -343,7 +343,7 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTest006, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    pinchRecognizer->SendCallbackMsg(onAction);
+    pinchRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(pinchRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -353,7 +353,7 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTest006, TestSize.Level1)
      */
     TouchEvent touchEvent;
     pinchRecognizer->lastTouchEvent_ = touchEvent;
-    pinchRecognizer->SendCallbackMsg(onAction);
+    pinchRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(pinchRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -364,7 +364,7 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTest006, TestSize.Level1)
     touchEvent.tiltX = 0.0f;
     touchEvent.tiltY = 0.0f;
     pinchRecognizer->lastTouchEvent_ = touchEvent;
-    pinchRecognizer->SendCallbackMsg(onAction);
+    pinchRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(pinchRecognizer->touchPoints_.size(), 0);
 }
 
@@ -451,7 +451,7 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerSendCallbackMsgTest001, TestSize.
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    pinchRecognizer->SendCallbackMsg(onAction);
+    pinchRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(pinchRecognizer->touchPoints_.size(), 0);
 }
 
@@ -1394,7 +1394,7 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerPtrHandleTouchMoveEventTest005, T
     GestureEvent info;
     auto callback = std::make_unique<GestureEventFunc>(funtest);
     recognizerTest.inputEventType_ = InputEventType::AXIS;
-    recognizerTest.SendCallbackMsg(callback);
+    recognizerTest.SendCallbackMsg(callback, GestureCallbackType::ACTION);
     EXPECT_EQ(recognizerTest.inputEventType_, InputEventType::AXIS);
 }
 
@@ -2198,17 +2198,17 @@ HWTEST_F(PinchRecognizerTestNg, SendCallbackMsg001, TestSize.Level1)
     RefPtr<GestureInfo> gestureInfo = AceType::MakeRefPtr<GestureInfo>();
     gestureInfo->disposeTag_ = true;
     pinchRecognizerPtr->SetGestureInfo(gestureInfo);
-    pinchRecognizerPtr->SendCallbackMsg(callback);
+    pinchRecognizerPtr->SendCallbackMsg(callback, GestureCallbackType::ACTION);
 
     pinchRecognizerPtr->lastTouchEvent_.SetRollAngle(10.0);
     gestureInfo->disposeTag_ = false;
-    pinchRecognizerPtr->SendCallbackMsg(callback);
+    pinchRecognizerPtr->SendCallbackMsg(callback, GestureCallbackType::ACTION);
     EXPECT_EQ(pinchRecognizerPtr->lastTouchEvent_.rollAngle.has_value(), true);
 
     pinchRecognizerPtr->lastTouchEvent_.SetRollAngle(10.0);
     gestureInfo->disposeTag_ = false;
     pinchRecognizerPtr->SetGestureInfo(nullptr);
-    pinchRecognizerPtr->SendCallbackMsg(callback);
+    pinchRecognizerPtr->SendCallbackMsg(callback, GestureCallbackType::ACTION);
     EXPECT_EQ(pinchRecognizerPtr->lastTouchEvent_.rollAngle.has_value(), true);
 }
 

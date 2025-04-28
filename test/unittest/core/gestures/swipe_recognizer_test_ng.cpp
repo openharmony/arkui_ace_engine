@@ -239,7 +239,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest001, TestSize.
      * @tc.expected: step2. result equals.
      */
     std::unique_ptr<GestureEventFunc> onAction;
-    swipeRecognizer->SendCallbackMsg(onAction);
+    swipeRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -248,7 +248,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest001, TestSize.
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>();
-    swipeRecognizer->SendCallbackMsg(onAction);
+    swipeRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -257,7 +257,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest001, TestSize.
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    swipeRecognizer->SendCallbackMsg(onAction);
+    swipeRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -267,7 +267,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest001, TestSize.
      */
     TouchEvent touchEvent;
     swipeRecognizer->touchPoints_[touchEvent.id] = touchEvent;
-    swipeRecognizer->SendCallbackMsg(onAction);
+    swipeRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 1);
 
     /**
@@ -278,7 +278,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest001, TestSize.
     touchEvent.tiltX = 0.0f;
     touchEvent.tiltY = 0.0f;
     swipeRecognizer->touchPoints_[touchEvent.id] = touchEvent;
-    swipeRecognizer->SendCallbackMsg(onAction);
+    swipeRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 1);
 }
 
@@ -304,7 +304,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest002, TestSize.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
     swipeRecognizer->deviceType_ = SourceType::MOUSE;
-    swipeRecognizer->SendCallbackMsg(onAction);
+    swipeRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -315,7 +315,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest002, TestSize.
     TouchEvent touchEvent;
     swipeRecognizer->prevAngle_ = std::make_optional(VERTICAL_ANGLE);
     swipeRecognizer->touchPoints_[touchEvent.id] = touchEvent;
-    swipeRecognizer->SendCallbackMsg(onAction);
+    swipeRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 1);
 
     /**
@@ -331,7 +331,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest002, TestSize.
     swipeRecognizer->lastTouchEvent_.tiltX = std::make_optional(0.0f);
     swipeRecognizer->lastTouchEvent_.tiltY = std::make_optional(0.0f);
     swipeRecognizer->touchPoints_[touchEvent.id] = touchEvent;
-    swipeRecognizer->SendCallbackMsg(onAction);
+    swipeRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 1);
 }
 
@@ -737,7 +737,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest009, TestSize.Level1)
      * @tc.steps: case1: callback is null
      * @tc.expected: step2. result equals.
      */
-    swipeRecognizer->SendCallbackMsg(nullptr);
+    swipeRecognizer->SendCallbackMsg(nullptr, GestureCallbackType::ACTION);
     EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -749,7 +749,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest009, TestSize.Level1)
     TouchEvent touchEvent1;
     swipeRecognizer->deviceType_ = SourceType::MOUSE;
     swipeRecognizer->lastTouchEvent_ = touchEvent1;
-    swipeRecognizer->SendCallbackMsg(onAction);
+    swipeRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -761,7 +761,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest009, TestSize.Level1)
     touchEvent2.tiltX = 0;
     swipeRecognizer->deviceType_ = SourceType::TOUCH;
     swipeRecognizer->lastTouchEvent_ = touchEvent2;
-    swipeRecognizer->SendCallbackMsg(onAction);
+    swipeRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 0);
 
     /**
@@ -775,7 +775,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest009, TestSize.Level1)
     swipeRecognizer->deviceType_ = SourceType::TOUCH;
     swipeRecognizer->lastTouchEvent_ = touchEvent3;
     swipeRecognizer->prevAngle_ = std::make_optional(0);
-    swipeRecognizer->SendCallbackMsg(onAction);
+    swipeRecognizer->SendCallbackMsg(onAction, GestureCallbackType::ACTION);
     EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 0);
 }
 
