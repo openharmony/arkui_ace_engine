@@ -113,6 +113,7 @@ public:
     virtual void SetWidthAuto(bool isAuto) = 0;
     virtual void SetHeightAuto(bool isAuto) = 0;
     virtual void SetBarAdaptiveHeight(bool barAdaptiveHeight) = 0;
+    virtual void SetNoMinHeightLimit(bool noMinHeightLimit) = 0;
     virtual void SetIsVertical(bool isVertical) = 0;
     virtual void SetScrollable(bool scrollable) = 0;
     virtual void SetAnimationCurve(const RefPtr<Curve>& curve) {};

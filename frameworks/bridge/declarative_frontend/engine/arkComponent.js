@@ -32041,12 +32041,24 @@ class ArkTabsComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, BarWidthModifier.identity, BarWidthModifier, value);
     return this;
   }
-  barHeight(value) {
+  barHeight(value, noMinHeightLimit) {
     if (isUndefined(value) || isNull(value)) {
       modifierWithKey(this._modifiersWithKeys, BarHeightModifier.identity, BarHeightModifier, undefined);
     }
     else {
+      let adaptiveHeight = false;
+      if (value === 'auto') {
+        adaptiveHeight = true;
+        modifierWithKey(this._modifiersWithKeys, BarAdaptiveHeightModifier.identity, BarAdaptiveHeightModifier, adaptiveHeight);
+      } else {
+        modifierWithKey(this._modifiersWithKeys, BarAdaptiveHeightModifier.identity, BarAdaptiveHeightModifier, undefined);
+      }
       modifierWithKey(this._modifiersWithKeys, BarHeightModifier.identity, BarHeightModifier, value);
+    }
+    if (isUndefined(noMinHeightLimit) || isNull(noMinHeightLimit)) {
+      modifierWithKey(this._modifiersWithKeys, NoMinHeightLimitModifier.identity, NoMinHeightLimitModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, NoMinHeightLimitModifier.identity, NoMinHeightLimitModifier, noMinHeightLimit);
     }
     return this;
   }
@@ -32235,6 +32247,19 @@ class BarAdaptiveHeightModifier extends ModifierWithKey {
   }
 }
 BarAdaptiveHeightModifier.identity = Symbol('barAdaptiveHeight');
+class NoMinHeightLimitModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetNoMinHeightLimit(node);
+    } else {
+      getUINativeModule().tabs.setNoMinHeightLimit(node, this.value);
+    }
+  }
+}
+NoMinHeightLimitModifier.identity = Symbol('noMinHeightLimit');
 class BarHeightModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

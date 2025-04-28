@@ -317,6 +317,13 @@ void TabsModelNG::SetBarAdaptiveHeight(bool barAdaptiveHeight)
     tabBarLayoutProperty->UpdateBarAdaptiveHeight(barAdaptiveHeight);
 }
 
+void TabsModelNG::SetNoMinHeightLimit(bool noMinHeightLimit)
+{
+    auto tabBarLayoutProperty = GetTabBarLayoutProperty();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->UpdateNoMinHeightLimit(noMinHeightLimit);
+}
+
 void TabsModelNG::SetIsVertical(bool isVertical)
 {
     auto axis = isVertical ? Axis::VERTICAL : Axis::HORIZONTAL;
@@ -1017,6 +1024,14 @@ void TabsModelNG::SetBarAdaptiveHeight(FrameNode* frameNode, bool barAdaptiveHei
     auto tabBarLayoutProperty = GetTabBarLayoutProperty(frameNode);
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateBarAdaptiveHeight(barAdaptiveHeight);
+}
+
+void TabsModelNG::SetNoMinHeightLimit(FrameNode* frameNode, bool noMinHeightLimit)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabBarLayoutProperty = GetTabBarLayoutProperty(frameNode);
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->UpdateNoMinHeightLimit(noMinHeightLimit);
 }
 
 void TabsModelNG::SetIsCustomAnimation(bool isCustom)

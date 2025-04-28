@@ -55,13 +55,25 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
 
     return this;
   }
-  barHeight(value: Length): TabsAttribute {
+  barHeight(value: Length, noMinHeightLimit?: boolean): TabsAttribute {
     if (isUndefined(value) || isNull(value)) {
       modifierWithKey(this._modifiersWithKeys, BarHeightModifier.identity, BarHeightModifier, undefined);
     } else {
+      let adaptiveHeight = false;
+      if (value === 'auto') {
+        adaptiveHeight = true;
+        modifierWithKey(this._modifiersWithKeys, BarAdaptiveHeightModifier.identity, BarAdaptiveHeightModifier, adaptiveHeight);
+      } else {
+        modifierWithKey(this._modifiersWithKeys, BarAdaptiveHeightModifier.identity, BarAdaptiveHeightModifier, undefined);
+      }
       modifierWithKey(this._modifiersWithKeys, BarHeightModifier.identity, BarHeightModifier, value);
     }
 
+    if (isNull(noMinHeightLimit) || isUndefined(noMinHeightLimit)) {
+      modifierWithKey(this._modifiersWithKeys, NoMinHeightLimitModifier.identity, NoMinHeightLimitModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, NoMinHeightLimitModifier.identity, NoMinHeightLimitModifier, noMinHeightLimit);
+    }
     return this;
   }
   animationCurve(value: Curve | ICurve): TabsAttribute {
@@ -263,6 +275,20 @@ class BarAdaptiveHeightModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class NoMinHeightLimitModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('noMinHeightLimit');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetNoMinHeightLimit(node);
+    } else {
+      getUINativeModule().tabs.setNoMinHeightLimit(node, this.value);
+    }
+  }
+}
 class BarHeightModifier extends ModifierWithKey<Length> {
   constructor(value: Length) {
     super(value);

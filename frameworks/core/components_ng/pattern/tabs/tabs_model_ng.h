@@ -46,6 +46,7 @@ public:
     void SetWidthAuto(bool isAuto) override;
     void SetHeightAuto(bool isAuto) override;
     void SetBarAdaptiveHeight(bool barAdaptiveHeight) override;
+    void SetNoMinHeightLimit(bool noMinHeightLimit) override;
     void SetIsVertical(bool isVertical) override;
     void SetScrollable(bool scrollable) override;
     void SetAnimationCurve(const RefPtr<Curve>& curve) override;
@@ -97,6 +98,7 @@ public:
     static void SetAnimationCurve(FrameNode* frameNode, const RefPtr<Curve>& curve);
     static void SetAnimationDuration(FrameNode* frameNode, float duration);
     static void SetBarAdaptiveHeight(FrameNode* frameNode, bool barAdaptiveHeight);
+    static void SetNoMinHeightLimit(FrameNode* frameNode, bool noMinHeightLimit);
     static void SetScrollableBarModeOptions(FrameNode* frameNode, const ScrollableBarModeOptions& option);
     static void SetClipEdge(FrameNode* frameNode, bool clipEdge);
     static void SetAnimateMode(FrameNode* frameNode, TabAnimateMode mode);
