@@ -103,6 +103,10 @@ public:
     void SetIncognitoMode(bool incognitoMode);
     void SetSharedRenderProcessToken(const std::string& sharedRenderProcessToken);
     void SetNestedScrollExt(NestedScrollOptionsExt const& nestedScroll);
+    const NestedScrollOptionsExt GetNestedScroll() const
+    {
+        return nestedScroll_;
+    }
     void SetRenderMode(RenderMode);
     void SetLayoutMode(WebLayoutMode mode);
 
