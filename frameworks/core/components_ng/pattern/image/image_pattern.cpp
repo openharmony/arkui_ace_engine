@@ -1305,6 +1305,7 @@ void ImagePattern::OnRecycle()
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->RemoveContentModifier(contentMod_);
+    contentMod_ = nullptr;
     UnregisterWindowStateChangedCallback();
     frameNode->SetTrimMemRecycle(false);
 }
