@@ -65,10 +65,18 @@ void SetImageOptions2Impl(Ark_NativePointer node,
 }
 } // ImageInterfaceModifier
 namespace ImageAttributeModifier {
-void AltImpl(Ark_NativePointer node,
-             const Opt_Union_String_Resource_PixelMap* value)
+void AltImpl(Ark_NativePointer node, const Opt_Union_String_Resource_PixelMap* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto info = Converter::OptConvert<ImageSourceInfo>(value->value);
+    if (!info.has_value() || ImageSourceInfo::ResolveURIType(info->GetSrc()) == SrcType::NETWORK) {
+        return;
+    }
+    ImageModelNG::SetAlt(frameNode, info);
 }
+
 void MatchTextDirectionImpl(Ark_NativePointer node,
                             const Opt_Boolean* value)
 {
