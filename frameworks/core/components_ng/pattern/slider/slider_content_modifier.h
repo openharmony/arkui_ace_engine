@@ -315,9 +315,14 @@ public:
         }
     }
 
-    void SetHasEnds(bool hasEnds)
+    void SetHasPrefix(bool hasPrefix)
     {
-        hasEnds_ = hasEnds;
+        hasPrefix_ = hasPrefix;
+    }
+
+    void SetHasSuffix(bool hasSuffix)
+    {
+        hasSuffix_ = hasSuffix;
     }
 
     const std::vector<PointF>& GetStepPointVec() const
@@ -433,7 +438,8 @@ private:
     std::vector<PointF> stepPointVec_;
     ACE_DISALLOW_COPY_AND_MOVE(SliderContentModifier);
     std::function<void()> StepPointCallback_;
-    bool hasEnds_ = false;
+    bool hasPrefix_ = false;
+    bool hasSuffix_ = false;
 };
 
 } // namespace OHOS::Ace::NG

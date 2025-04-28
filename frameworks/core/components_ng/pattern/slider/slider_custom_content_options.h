@@ -23,9 +23,9 @@
 namespace OHOS::Ace::NG {
 
 struct SliderCustomContentOptions {
-    std::string accessibilityText;
-    std::string accessibilityDescription;
-    std::string accessibilityLevel;
+    std::string accessibilityText = "";
+    std::string accessibilityDescription = "";
+    std::string accessibilityLevel = "";
     bool accessibilityGroup = false;
 };
 

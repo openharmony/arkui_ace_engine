@@ -122,9 +122,9 @@ float SliderLayoutAlgorithm::CalculateSliderLength(
     float width, float height, Axis direction, SliderModel::SliderMode mode, bool Ends)
 {
     auto sliderLength = direction == Axis::HORIZONTAL ? width : height;
-    auto outSetRatio = 0.8;
+    Dimension shrinkWidth = 16.0_vp;
     if (mode == SliderModel::SliderMode::OUTSET && Ends) {
-        sliderLength = direction == Axis::HORIZONTAL ? width * outSetRatio : height * outSetRatio;
+        sliderLength = sliderLength - (sliderLength * langRatio) - static_cast<float>(shrinkWidth.ConvertToPx()) / HALF;
     }
     return sliderLength;
 }
@@ -202,14 +202,17 @@ void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             maxHeight = contentRect.Height() * langRatio;
             maxWidth = maxHeight * shortRatio;
         }
-        if (children.size() > 0) {
+        if (pattern->HasPrefix()) {
             auto prefixChild = layoutWrapper->GetOrCreateChildByIndex(0);
             CHECK_NULL_VOID(prefixChild);
             SetChildConstraint(prefixChild, maxWidth, maxHeight);
         }
 
-        if (children.size() > 1) {
-            auto suffixChild = layoutWrapper->GetOrCreateChildByIndex(1);
+        if (pattern->HasSuffix()) {
+            auto suffixChild = layoutWrapper->GetOrCreateChildByIndex(0);
+            if (pattern->HasPrefix()) {
+                suffixChild = layoutWrapper->GetOrCreateChildByIndex(1);
+            }
             CHECK_NULL_VOID(suffixChild);
             SetChildConstraint(suffixChild, maxWidth, maxHeight);
         }
@@ -278,8 +281,10 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto insetModeOffset = (borderBlank + blockSize * HALF);
 
     CalculateBlockOffset(layoutWrapper, contentRect, selectOffset, axis, paintReverse);
-    if (pattern->HasPrefix() || pattern->HasSuffix()) {
+    if (pattern->HasPrefix()) {
         CalculatePrefixOffset(layoutWrapper, contentRect, insetModeOffset, axis, paintReverse);
+    }
+    if (pattern->HasSuffix()) {
         CalculateSuffixOffset(layoutWrapper, contentRect, insetModeOffset, axis, paintReverse);
     }
 }
@@ -310,10 +315,13 @@ void SliderLayoutAlgorithm::CalculateSuffixOffset(
     CHECK_NULL_VOID(pattern);
 
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    if (children.size() < 2) {
+    if (children.size() < 1) {
         return;
     }
-    auto suffixIter = std::next(children.begin(), 1);
+    auto suffixIter = std::next(children.begin(), 0);
+    if (children.size() > 1) {
+        suffixIter = std::next(children.begin(), 1);
+    }
     auto suffixChild = *suffixIter;
     suffixChild->Layout();
 }

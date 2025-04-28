@@ -229,7 +229,7 @@ void SliderContentModifier::AddStepPoint(float startX, float startY, float endX,
     auto stepsLengthY = (endY - startY) * stepRatio;
     int numberOfSteps = std::max(static_cast<int>(std::round((endX - startX) / stepsLengthX) + 1),
         static_cast<int>(std::round((endY - startY) / stepsLengthY) + 1));
-    if (numberOfSteps <= STEPS_MIN_NUMBER && hasEnds_) {
+    if (numberOfSteps <= STEPS_MIN_NUMBER && hasPrefix_ && hasSuffix_) {
         // If there are less than or equal to 2 steps, skip drawing
         canvas.DetachBrush();
         return;
@@ -278,13 +278,25 @@ void SliderContentModifier::DrawStepPoint(float x, float y, int32_t index, RSCan
     int noneModeSteps = numberOfSteps - noneModeNum;
     int insetModeSteps = numberOfSteps - insetModeNum;
     auto model = static_cast<SliderModel::SliderMode>(sliderMode_->Get());
-    if (model == SliderModel::SliderMode::NONE && (index == 1 || index == noneModeSteps) && hasEnds_) {
-        stepPointVec_.emplace_back(PointF(x, y));
-        return;
+    if (model == SliderModel::SliderMode::NONE) {
+        if (index == 1 && hasPrefix_) {
+            stepPointVec_.emplace_back(PointF(x, y));
+            return;
+        }
+        if (index == noneModeSteps && hasSuffix_) {
+            stepPointVec_.emplace_back(PointF(x, y));
+            return;
+        }
     }
-    if (model == SliderModel::SliderMode::INSET && (index == 0 || index == insetModeSteps) && hasEnds_) {
-        stepPointVec_.emplace_back(PointF(x, y));
-        return;
+    if (model == SliderModel::SliderMode::INSET) {
+        if (index == 0 && hasPrefix_) {
+            stepPointVec_.emplace_back(PointF(x, y));
+            return;
+        }
+        if (index == insetModeSteps && hasSuffix_) {
+            stepPointVec_.emplace_back(PointF(x, y));
+            return;
+        }
     }
     canvas.DrawCircle(RSPoint(x, y), isEnlarge_ ? stepSize * HALF * scaleValue_ : stepSize * HALF);
     stepPointVec_.emplace_back(PointF(x, y));

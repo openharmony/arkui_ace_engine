@@ -681,26 +681,28 @@ void JSSlider::SetPrefix(const JSCallbackInfo& args)
     }
 
     NG::SliderPrefixOptions prefixOption;
-    auto prefixOptions = JSRef<JSObject>::Cast(args[1]);
-    if (!prefixOptions->IsEmpty()) {
-        auto accessibilityTextProperty = prefixOptions->GetProperty("accessibilityText");
-        if (!accessibilityTextProperty->IsEmpty()) {
-            prefixOption.accessibilityText = accessibilityTextProperty->ToString();
-        }
+    if (args.Length() > 1) {
+        auto prefixOptions = JSRef<JSObject>::Cast(args[1]);
+        if (!prefixOptions->IsEmpty() && !prefixOptions->IsUndefined()) {
+            auto accessibilityTextProperty = prefixOptions->GetProperty("accessibilityText");
+            if (!accessibilityTextProperty->IsEmpty()) {
+                prefixOption.accessibilityText = accessibilityTextProperty->ToString();
+            }
 
-        auto accessibilityDescriptionProperty = prefixOptions->GetProperty("accessibilityDescription");
-        if (!accessibilityDescriptionProperty->IsEmpty()) {
-            prefixOption.accessibilityDescription = accessibilityDescriptionProperty->ToString();
-        }
+            auto accessibilityDescriptionProperty = prefixOptions->GetProperty("accessibilityDescription");
+            if (!accessibilityDescriptionProperty->IsEmpty()) {
+                prefixOption.accessibilityDescription = accessibilityDescriptionProperty->ToString();
+            }
 
-        auto accessibilityLevelProperty = prefixOptions->GetProperty("accessibilityLevel");
-        if (!accessibilityLevelProperty->IsEmpty()) {
-            prefixOption.accessibilityLevel = accessibilityLevelProperty->ToString();
-        }
+            auto accessibilityLevelProperty = prefixOptions->GetProperty("accessibilityLevel");
+            if (!accessibilityLevelProperty->IsEmpty()) {
+                prefixOption.accessibilityLevel = accessibilityLevelProperty->ToString();
+            }
 
-        auto accessibilityGroupProperty = prefixOptions->GetProperty("accessibilityGroup");
-        if (!accessibilityGroupProperty->IsEmpty()) {
-            prefixOption.accessibilityGroup = accessibilityGroupProperty->ToBoolean();
+            auto accessibilityGroupProperty = prefixOptions->GetProperty("accessibilityGroup");
+            if (!accessibilityGroupProperty->IsEmpty()) {
+                prefixOption.accessibilityGroup = accessibilityGroupProperty->ToBoolean();
+            }
         }
     }
 
@@ -711,10 +713,7 @@ void JSSlider::SetPrefix(const JSCallbackInfo& args)
 
 void JSSlider::SetSuffix(const JSCallbackInfo& args)
 {
-    if (args.Length() < 2) {
-        return;
-    }
-    if (!args[0]->IsObject() || !args[1]->IsObject()) {
+    if (!args[0]->IsObject()) {
         return;
     }
 
@@ -725,28 +724,31 @@ void JSSlider::SetSuffix(const JSCallbackInfo& args)
     }
 
     NG::SliderSuffixOptions suffixOption;
-    JSRef<JSObject> suffixOptions = JSRef<JSObject>::Cast(args[1]);
-    if (!suffixOptions->IsEmpty()) {
-        auto accessibilityTextProperty = suffixOptions->GetProperty("accessibilityText");
-        if (!accessibilityTextProperty->IsEmpty()) {
-            suffixOption.accessibilityText = accessibilityTextProperty->ToString();
-        }
+    if (args.Length() > 1) {
+        JSRef<JSObject> suffixOptions = JSRef<JSObject>::Cast(args[1]);
+        if (!suffixOptions->IsEmpty() && !suffixOptions->IsUndefined()) {
+            auto accessibilityTextProperty = suffixOptions->GetProperty("accessibilityText");
+            if (!accessibilityTextProperty->IsEmpty()) {
+                suffixOption.accessibilityText = accessibilityTextProperty->ToString();
+            }
 
-        auto accessibilityDescriptionProperty = suffixOptions->GetProperty("accessibilityDescription");
-        if (!accessibilityDescriptionProperty->IsEmpty()) {
-            suffixOption.accessibilityDescription = accessibilityDescriptionProperty->ToString();
-        }
+            auto accessibilityDescriptionProperty = suffixOptions->GetProperty("accessibilityDescription");
+            if (!accessibilityDescriptionProperty->IsEmpty()) {
+                suffixOption.accessibilityDescription = accessibilityDescriptionProperty->ToString();
+            }
 
-        auto accessibilityLevelProperty = suffixOptions->GetProperty("accessibilityLevel");
-        if (!accessibilityLevelProperty->IsEmpty()) {
-            suffixOption.accessibilityLevel = accessibilityLevelProperty->ToString();
-        }
+            auto accessibilityLevelProperty = suffixOptions->GetProperty("accessibilityLevel");
+            if (!accessibilityLevelProperty->IsEmpty()) {
+                suffixOption.accessibilityLevel = accessibilityLevelProperty->ToString();
+            }
 
-        auto accessibilityGroupProperty = suffixOptions->GetProperty("accessibilityGroup");
-        if (!accessibilityGroupProperty->IsEmpty()) {
-            suffixOption.accessibilityGroup = accessibilityGroupProperty->ToBoolean();
+            auto accessibilityGroupProperty = suffixOptions->GetProperty("accessibilityGroup");
+            if (!accessibilityGroupProperty->IsEmpty()) {
+                suffixOption.accessibilityGroup = accessibilityGroupProperty->ToBoolean();
+            }
         }
     }
+
     SliderModel::GetInstance()->SetSuffix(refPtrUINode, suffixOption);
 
     args.ReturnSelf();
