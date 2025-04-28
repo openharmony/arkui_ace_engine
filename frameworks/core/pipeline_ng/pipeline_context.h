@@ -1238,7 +1238,7 @@ protected:
     }
 
     void AvoidanceLogic(float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
-        const float safeHeight = 0.0f, const bool supportAvoidance = false);
+        float safeHeight = 0.0f, const bool supportAvoidance = false);
     void OriginalAvoidanceLogic(
         float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     RefPtr<FrameNode> GetContainerModalNode();

@@ -686,6 +686,7 @@ public:
         return overlayNode_;
     }
     bool CheckPageNeedAvoidKeyboard() const;
+    void TriggerCustomKeyboardAvoid(int32_t targetId, float safeHeight);
     void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
     void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode);
     void EraseMenuInfo(int32_t targetId)

@@ -6627,6 +6627,20 @@ void OverlayManager::AvoidCustomKeyboard(int32_t targetId, float safeHeight)
     pattern->SetKeyboardOption(keyboardAvoidance_);
 }
 
+void OverlayManager::TriggerCustomKeyboardAvoid(int32_t targetId, float safeHeight)
+{
+    auto it = customKeyboardMap_.find(targetId);
+    if (it == customKeyboardMap_.end()) {
+        return;
+    }
+    auto customKeyboard = it->second;
+    CHECK_NULL_VOID(customKeyboard);
+    auto pattern = customKeyboard->GetPattern<KeyboardPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetKeyboardSafeHeight(safeHeight);
+    pattern->SetKeyboardAreaChange(keyboardAvoidance_);
+}
+
 // This function will be used in SceneBoard Thread only.
 // if need to show the pop-up component,
 //   it expects to receive the target component bound by the pop-up component to find the windowScene component.

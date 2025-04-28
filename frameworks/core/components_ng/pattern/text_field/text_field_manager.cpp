@@ -129,7 +129,7 @@ void TextFieldManagerNG::TriggerCustomKeyboardAvoid()
     auto host = curPattern->GetHost();
     CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
-    keyboardOverLay->AvoidCustomKeyboard(nodeId, safeHeight);
+    keyboardOverLay->TriggerCustomKeyboardAvoid(nodeId, safeHeight);
 }
 
 void TextFieldManagerNG::TriggerAvoidOnCaretChange()
