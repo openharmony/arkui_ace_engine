@@ -1304,7 +1304,7 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
     if (direction_ == GetDirection() && panEvent_) return;
     auto direction = GetDirection();
-    if (direction_ != direction && isAccessibilityOn_) {
+    if (direction_ != direction && isInitAccessibilityVirtualNode_) {
         ClearSliderVirtualNode();
         InitAccessibilityVirtualNodeTask();
         InitAccessibilityHoverEvent();
