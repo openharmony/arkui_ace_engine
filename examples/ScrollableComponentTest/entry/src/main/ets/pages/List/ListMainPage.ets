@@ -35,6 +35,12 @@ struct IndexPage {
     new TextList(1, 'Back', 'pages/Index'),
     new TextList(2, 'childrenMainSize', 'pages/List/childrenMainSize/ListItemGroupScenario'),
     new TextList(3, 'RepeatList1', 'pages/List/RepeatList/RepeatList1'),
+    new TextList(4, 'AutoSort', 'pages/List/AutoSort/AutoSort'),
+    new TextList(5, 'DeleteAndShift', 'pages/List/DeleteAndShift/DeleteAndShift'),
+    new TextList(6, 'DragAndDropSorting', 'pages/List/DragAndDropSorting/DragAndDropSorting'),
+    new TextList(7, 'FadingEdge', 'pages/List/FadingEdge/FadingEdge'),
+    new TextList(8, 'LoopScrolling', 'pages/List/LoopScrolling/LoopScrolling'),
+    new TextList(9, 'Sideslip', 'pages/List/Sideslip/Sideslip')
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
