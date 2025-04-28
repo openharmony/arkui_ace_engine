@@ -44,6 +44,7 @@ const auto ATTRIBUTE_TEXT_VALUE = "yyy";
 const auto ATTRIBUTE_INPUT_FILTER_NAME("inputFilter");
 const auto ATTRIBUTE_TEXT_OVERFLOW_NAME = "textOverflow";
 const auto ATTRIBUTE_KEYBOARD_APPEARANCE_NAME = "keyboardAppearance";
+const auto ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT = "0";
 const std::u16string ERROR_TEXT = u"error_text";
 const std::u16string ERROR_TEXT2 = u"error_text2";
 const std::string STR_TEST_TEXT("test_text");
@@ -2086,16 +2087,16 @@ HWTEST_F(TextAreaModifierTest, setKeyboardAppearanceTest, TestSize.Level1)
             Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_NONE_IMMERSIVE), "0" },
         { Converter::ArkValue<Opt_KeyboardAppearance>(
             Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE), "2" },
+            { Converter::ArkValue<Opt_KeyboardAppearance>(Ark_Empty()), ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT },
         { Converter::ArkValue<Opt_KeyboardAppearance>(
-            Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_DARK_IMMERSIVE), "3" },
-        { Converter::ArkValue<Opt_KeyboardAppearance>(Ark_Empty()), "0" }}; // invalid
+            Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_DARK_IMMERSIVE), "3" }};
 
     ASSERT_NE(modifier_->setKeyboardAppearance, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
-    EXPECT_EQ(resultStr, "0");
+    EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT);
 
     for (auto& [value, expected] : TEST_PLAN) {
         modifier_->setKeyboardAppearance(node_, &value);
@@ -2107,6 +2108,6 @@ HWTEST_F(TextAreaModifierTest, setKeyboardAppearanceTest, TestSize.Level1)
     modifier_->setKeyboardAppearance(node_, nullptr);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
-    EXPECT_EQ(resultStr, "0");
+    EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT);
 }
 } // namespace OHOS::Ace::NG
