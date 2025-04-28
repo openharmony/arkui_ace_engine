@@ -894,7 +894,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest024, TestSize.Level1)
 
 /**
  * @tc.name: DynamicPatternTest025
- * @tc.desc: Test DynamicPattern Accessibility02
+ * @tc.desc: Test DynamicPattern InitializeAccessibility
  * @tc.type: FUNC
  */
 HWTEST_F(DynamicPatternTestNg, DynamicPatternTest025, TestSize.Level1)
@@ -915,7 +915,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest025, TestSize.Level1)
     EXPECT_NE(dynamicPattern->accessibilityChildTreeCallback_, nullptr);
 
     /**
-     * @tc.steps: step3. Initialize Accessibility Again.
+     * @tc.steps: step3. initialize dynamic pattern again.
      */
     dynamicPattern->InitializeAccessibility();
     EXPECT_NE(dynamicPattern->accessibilityChildTreeCallback_, nullptr);
