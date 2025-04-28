@@ -54,11 +54,8 @@ MarqueeOptions Convert(const Ark_MarqueeOptions& src)
     options.loop = OptConvert<int>(src.loop);
     options.src = OptConvert<std::string>(src.src);
     options.start = OptConvert<bool>(src.start);
-    if (src.fromStart.value) {
-        options.direction = MarqueeDirection::LEFT;
-    } else {
-        options.direction = MarqueeDirection::RIGHT;
-    }
+    auto fromStart = OptConvert<bool>(src.fromStart);
+    options.direction = fromStart.value_or(true) ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT;
     return options;
 }
 
