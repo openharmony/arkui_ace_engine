@@ -138,7 +138,7 @@ void TextPattern::OnAttachToFrameNode()
 void TextPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     dataDetectorAdapter_->aiDetectDelayTask_.Cancel();
-    CloseSelectOverlay();
+    selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
     auto pipeline = pipeline_.Upgrade();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
@@ -163,6 +163,7 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
     pipeline->RemoveWindowStateChangedCallback(node->GetId());
     pipeline->RemoveVisibleAreaChangeNode(node->GetId());
     pipeline->RemoveWindowSizeChangeCallback(node->GetId());
+    RemoveFormVisibleChangeCallback(node->GetId());
 }
 
 void TextPattern::CloseSelectOverlay()
@@ -3040,6 +3041,7 @@ void TextPattern::OnModifyDone()
         }
     }
     RecoverCopyOption();
+    RegisterFormVisibleChangeCallback();
 }
 
 void TextPattern::UpdateMarqueeStartPolicy()
@@ -5517,5 +5519,52 @@ bool TextPattern::IsLocationInFrameRegion(const Offset& localOffset) const
     auto frameSize = geometryNode->GetFrameSize();
     auto frameRect = RectF(OffsetF(0.0f, 0.0f), frameSize);
     return frameRect.IsInRegion(PointF(localOffset.GetX(), localOffset.GetY()));
+}
+
+void TextPattern::RegisterFormVisibleChangeCallback()
+{
+    if (hasRegisterFormVisibleCallback_ || !IsMarqueeOverflow()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto isFormRender = pipeline->IsFormRender();
+    auto formMgr = pipeline->GetFormVisibleManager();
+    if (!isFormRender || !formMgr) {
+        return;
+    }
+    auto formCallback = [weak = WeakClaim(this)](bool visible) {
+        auto textPattern = weak.Upgrade();
+        CHECK_NULL_VOID(textPattern);
+        textPattern->HandleFormVisibleChange(visible);
+    };
+    formMgr->AddFormVisibleChangeNode(host, formCallback);
+    hasRegisterFormVisibleCallback_ = true;
+}
+
+void TextPattern::RemoveFormVisibleChangeCallback(int32_t id)
+{
+    if (!hasRegisterFormVisibleCallback_) {
+        return;
+    }
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto formMgr = pipeline->GetFormVisibleManager();
+    CHECK_NULL_VOID(formMgr);
+    formMgr->RemoveFormVisibleChangeNode(id);
+}
+
+void TextPattern::HandleFormVisibleChange(bool visible)
+{
+    if (!IsMarqueeOverflow() || !contentMod_) {
+        return;
+    }
+    if (visible) {
+        contentMod_->ResumeAnimation();
+    } else {
+        contentMod_->PauseAnimation();
+    }
 }
 } // namespace OHOS::Ace::NG
