@@ -141,11 +141,7 @@ void JSRating::SetStarStyle(const JSCallbackInfo& info)
     auto getSecondaryUri = paramObject->GetProperty("secondaryUri");
     
     std::string backgroundUri;
-    if (getBackgroundUri->IsString()) {
-        backgroundUri = getBackgroundUri->ToString();
-    } else if (!getBackgroundUri->IsNull() && getBackgroundUri->IsObject()) {
-        ParseJsMedia(getBackgroundUri, backgroundUri);
-    }
+    ParseJsMedia(getBackgroundUri, backgroundUri);
     if (backgroundUri.empty()) {
         RatingModel::GetInstance()->SetBackgroundSrc("", true);
     } else {
@@ -153,11 +149,7 @@ void JSRating::SetStarStyle(const JSCallbackInfo& info)
     }
 
     std::string foregroundUri;
-    if (getForegroundUri->IsString()) {
-        foregroundUri = getForegroundUri->ToString();
-    } else if (!getForegroundUri->IsNull() && getForegroundUri->IsObject()) {
-        ParseJsMedia(getForegroundUri, foregroundUri);
-    }
+    ParseJsMedia(getForegroundUri, foregroundUri);
     if (foregroundUri.empty()) {
         RatingModel::GetInstance()->SetForegroundSrc("", true);
     } else {
@@ -165,11 +157,8 @@ void JSRating::SetStarStyle(const JSCallbackInfo& info)
     }
 
     std::string secondaryUri;
-    if (getSecondaryUri->IsString() && !getSecondaryUri->ToString().empty()) {
-        secondaryUri = getSecondaryUri->ToString();
-    } else if (!getSecondaryUri->IsNull() && getSecondaryUri->IsObject()) {
-        ParseJsMedia(getSecondaryUri, secondaryUri);
-    }
+    ParseJsMedia(getSecondaryUri, secondaryUri);
+
     if (secondaryUri.empty()) {
         if (!backgroundUri.empty()) {
             RatingModel::GetInstance()->SetSecondarySrc(backgroundUri, false);

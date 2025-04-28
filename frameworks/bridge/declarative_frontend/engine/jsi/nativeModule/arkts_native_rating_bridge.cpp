@@ -115,31 +115,11 @@ ArkUINativeModuleValue RatingBridge::SetStarStyle(ArkUIRuntimeCallInfo* runtimeC
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     std::string backgroundUri;
-    if (backgroundUriArg->IsString(vm)) {
-        backgroundUri = backgroundUriArg->ToString(vm)->ToString(vm);
-    } else if (backgroundUriArg->IsObject(vm)) {
-        std::string valueResult;
-        ArkTSUtils::ParseJsMedia(vm, backgroundUriArg, valueResult);
-        backgroundUri = valueResult;
-    }
-
+    ArkTSUtils::ParseJsMedia(vm, backgroundUriArg, backgroundUri);
     std::string foregroundUri;
-    if (foregroundUriArg->IsString(vm)) {
-        foregroundUri = foregroundUriArg->ToString(vm)->ToString(vm);
-    } else if (foregroundUriArg->IsObject(vm)) {
-        std::string valueResult;
-        ArkTSUtils::ParseJsMedia(vm, foregroundUriArg, valueResult);
-        foregroundUri = valueResult;
-    }
-
+    ArkTSUtils::ParseJsMedia(vm, foregroundUriArg, foregroundUri);
     std::string secondaryUri;
-    if (secondaryUriArg->IsString(vm)) {
-        secondaryUri = secondaryUriArg->ToString(vm)->ToString(vm);
-    } else if (secondaryUriArg->IsObject(vm)) {
-        std::string valueResult;
-        ArkTSUtils::ParseJsMedia(vm, secondaryUriArg, valueResult);
-        secondaryUri = valueResult;
-    }
+    ArkTSUtils::ParseJsMedia(vm, secondaryUriArg, secondaryUri);
 
     if (secondaryUri.empty() && !backgroundUri.empty()) {
         secondaryUri = backgroundUri;
