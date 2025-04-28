@@ -2782,7 +2782,6 @@ void OnHoverMoveImpl(Ark_NativePointer node,
     };
     ViewAbstract::SetOnHoverMove(frameNode, std::move(onHover));
 }
-
 void OnAccessibilityHoverImpl(Ark_NativePointer node,
                               const AccessibilityCallback* value)
 {
@@ -4230,7 +4229,8 @@ void MaskShape0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<RefPtr<BasicShape>>(*value) : std::nullopt;
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvert<RefPtr<BasicShape>>(*value);
     ViewAbstract::SetMask(frameNode, convValue.value_or(nullptr));
 }
 void MaskShape1Impl(Ark_NativePointer node,
@@ -4238,7 +4238,6 @@ void MaskShape1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto convValue = value ? Converter::OptConvert<RefPtr<BasicShape>>(*value) : std::nullopt;
     ViewAbstract::SetMask(frameNode, convValue.value_or(nullptr));
 }
