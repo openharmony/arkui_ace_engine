@@ -347,6 +347,7 @@ RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSCallbackI
     if (thicknessScaleValue->IsNumber()) {
         lineThicknessScale = thicknessScaleValue->ToNumber<float>();
     }
+    lineThicknessScale = LessNotEqual(lineThicknessScale, 0) ? 1.0f : lineThicknessScale;
     std::optional<TextDecorationOptions> options;
     if (args.Length() > 1 && args[1]->IsObject()) {
         options = JSDecorationSpan::ParseJsDecorationOptions(JSRef<JSObject>::Cast(args[1]));
