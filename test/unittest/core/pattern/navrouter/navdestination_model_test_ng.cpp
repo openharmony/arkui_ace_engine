@@ -1112,4 +1112,289 @@ HWTEST_F(NavDestinationModelTestNg, SetTitleHeight102, TestSize.Level1)
     ViewStackProcessor::GetInstance()->ClearStack();
     NavDestinationModelTestNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: SetOnHiddenTest001
+ * @tc.desc: Branch: if frameNode valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetOnHiddenTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and call SetOnHidden.
+     */
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto navdestinationNode =
+        AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navdestinationNode, nullptr);
+    bool isCallbackCalled = false;
+    NavDestinationModelNG::SetOnHidden(Referenced::RawPtr(navdestinationNode), [&isCallbackCalled]() {
+        isCallbackCalled = true;
+    });
+    /**
+     * @tc.steps: step2. verify the onHidden callback valid.
+     */
+    auto eventHub = navdestinationNode->GetEventHub<NavDestinationEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    ASSERT_NE(eventHub->onHiddenEvent_, nullptr);
+    ASSERT_EQ(isCallbackCalled, false);
+    eventHub->onHiddenEvent_();
+    ASSERT_EQ(isCallbackCalled, true);
+}
+
+/**
+ * @tc.name: SetOnHiddenTest002
+ * @tc.desc: Branch: if frameNode valid && callback == nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetOnHiddenTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and call SetOnHidden.
+     */
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto navdestinationNode =
+        AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navdestinationNode, nullptr);
+    NavDestinationModelNG::SetOnHidden(Referenced::RawPtr(navdestinationNode), nullptr);
+    /**
+     * @tc.steps: step2. verify the onHidden callback valid.
+     */
+    auto eventHub = navdestinationNode->GetEventHub<NavDestinationEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    ASSERT_EQ(eventHub->onHiddenEvent_, nullptr);
+}
+
+/**
+ * @tc.name: SetOnShownTest001
+ * @tc.desc: Branch: if frameNode valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetOnShownTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and call SetOnShown.
+     */
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto navdestinationNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navdestinationNode, nullptr);
+    bool isCallbackCalled = false;
+    NavDestinationModelNG::SetOnShown(Referenced::RawPtr(navdestinationNode), [&isCallbackCalled]() {
+        isCallbackCalled = true;
+    });
+    /**
+     * @tc.steps: step2. verify the onHidden callback valid.
+     */
+    auto eventHub = navdestinationNode->GetEventHub<NavDestinationEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    ASSERT_NE(eventHub->onShownEvent_, nullptr);
+    ASSERT_EQ(isCallbackCalled, false);
+    eventHub->onShownEvent_();
+    ASSERT_EQ(isCallbackCalled, true);
+}
+
+/**
+ * @tc.name: SetOnShownTest002
+ * @tc.desc: Branch: if frameNode valid && callback == nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetOnShownTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and call SetOnHidden.
+     */
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto navdestinationNode =
+        AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navdestinationNode, nullptr);
+    NavDestinationModelNG::SetOnShown(Referenced::RawPtr(navdestinationNode), nullptr);
+    /**
+     * @tc.steps: step2. verify the onHidden callback valid.
+     */
+    auto eventHub = navdestinationNode->GetEventHub<NavDestinationEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    ASSERT_EQ(eventHub->onShownEvent_, nullptr);
+}
+
+/**
+ * @tc.name: CreateEmptyTest001
+ * @tc.desc: Branch: if need create empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, CreateEmptyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and call SetOnShown.
+     */
+    NavDestinationModelNG navdestinationModel;
+    auto emptyFrameNode = AceType::DynamicCast<FrameNode>(navdestinationModel.CreateEmpty());
+    ASSERT_NE(emptyFrameNode, nullptr);
+    auto emptyNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(emptyFrameNode);
+    ASSERT_NE(emptyNavDestination, nullptr);
+    const int32_t emptyNavDestinationChildrenCount = 3;
+    ASSERT_EQ(static_cast<int32_t>(emptyNavDestination->GetChildren().size()), emptyNavDestinationChildrenCount);
+    auto navdestinationContent = emptyNavDestination->GetContentNode();
+    ASSERT_NE(navdestinationContent, nullptr);
+    ASSERT_EQ(navdestinationContent->GetChildren().size(), 0);
+}
+
+/**
+ * @tc.name: SetHideTitleBarTest001
+ * @tc.desc: Branch: if frameNode valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetHideTitleBarTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and call SetOnHidden.
+     */
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto navdestinationNode =
+        AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navdestinationNode, nullptr);
+    auto layoutProperty = navdestinationNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_EQ(layoutProperty->GetHideTitleBar(), std::nullopt);
+    ASSERT_EQ(layoutProperty->GetIsAnimatedTitleBar(), std::nullopt);
+    /**
+     * @tc.steps: step2. verify.
+     */
+    NavDestinationModelNG::SetHideTitleBar(Referenced::RawPtr(navdestinationNode), true, true);
+    ASSERT_EQ(layoutProperty->GetHideTitleBarValue(), true);
+    ASSERT_EQ(layoutProperty->GetIsAnimatedTitleBarValue(), true);
+    NavDestinationModelNG::SetHideTitleBar(Referenced::RawPtr(navdestinationNode), false, false);
+    ASSERT_EQ(layoutProperty->GetHideTitleBarValue(), false);
+    ASSERT_EQ(layoutProperty->GetIsAnimatedTitleBarValue(), false);
+}
+
+/**
+ * @tc.name: SetNavDestinationModeTest001
+ * @tc.desc: Branch: if frameNode valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetNavDestinationModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and call SetOnHidden.
+     */
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto navdestinationNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navdestinationNode, nullptr);
+    ASSERT_EQ(navdestinationNode->mode_, NavDestinationMode::STANDARD);
+    /**
+     * @tc.steps: step2. call the function and verify the value.
+     */
+    NavDestinationModelNG::SetNavDestinationMode(Referenced::RawPtr(navdestinationNode), NavDestinationMode::DIALOG);
+    ASSERT_EQ(navdestinationNode->mode_, NavDestinationMode::DIALOG);
+    NavDestinationModelNG::SetNavDestinationMode(Referenced::RawPtr(navdestinationNode), NavDestinationMode::STANDARD);
+    ASSERT_EQ(navdestinationNode->mode_, NavDestinationMode::STANDARD);
+}
+
+/**
+ * @tc.name: SetRecoverableTest001
+ * @tc.desc: Branch: if use static function and frameNode valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetRecoverableTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and call SetOnHidden.
+     */
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto navdestinationNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navdestinationNode, nullptr);
+    ASSERT_EQ(navdestinationNode->recoverable_, true);
+    /**
+     * @tc.steps: step2. call the function and verify the value.
+     */
+    NavDestinationModelNG::SetRecoverable(Referenced::RawPtr(navdestinationNode), false);
+    ASSERT_EQ(navdestinationNode->recoverable_, false);
+    NavDestinationModelNG::SetRecoverable(Referenced::RawPtr(navdestinationNode), true);
+    ASSERT_EQ(navdestinationNode->recoverable_, true);
+}
+
+/**
+ * @tc.name: SetRecoverableTest002
+ * @tc.desc: Branch: if use non-static function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetRecoverableTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and call SetOnHidden.
+     */
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto navdestinationNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navdestinationNode, nullptr);
+    ASSERT_EQ(navdestinationNode->recoverable_, true);
+    /**
+     * @tc.steps: step2. call the function and verify the value.
+     */
+    navdestinationModel.SetRecoverable(false);
+    ASSERT_EQ(navdestinationNode->recoverable_, false);
+    navdestinationModel.SetRecoverable(true);
+    ASSERT_EQ(navdestinationNode->recoverable_, true);
+}
+
+/**
+ * @tc.name: CanRecoveryTest001
+ * @tc.desc: Branch: if recoverable_ == true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, CanRecoveryTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and call SetOnHidden.
+     */
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto navdestinationNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navdestinationNode, nullptr);
+    ASSERT_EQ(navdestinationNode->recoverable_, true);
+    /**
+     * @tc.steps: step2. call the function and verify the value.
+     */
+    navdestinationNode->fromNavrouterAndNoRouteInfo_ = false;
+    ASSERT_EQ(navdestinationNode->CanRecovery(), true);
+    navdestinationNode->fromNavrouterAndNoRouteInfo_ = true;
+    ASSERT_EQ(navdestinationNode->CanRecovery(), false);
+}
+
+/**
+ * @tc.name: CanRecoveryTest002
+ * @tc.desc: Branch: if recoverable_ == false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, CanRecoveryTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and call SetOnHidden.
+     */
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto navdestinationNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navdestinationNode, nullptr);
+    navdestinationModel.SetRecoverable(false);
+    ASSERT_EQ(navdestinationNode->recoverable_, false);
+    /**
+     * @tc.steps: step2. call the function and verify the value.
+     */
+    navdestinationNode->fromNavrouterAndNoRouteInfo_ = false;
+    ASSERT_EQ(navdestinationNode->CanRecovery(), false);
+    navdestinationNode->fromNavrouterAndNoRouteInfo_ = true;
+    ASSERT_EQ(navdestinationNode->CanRecovery(), false);
+}
 } // namespace OHOS::Ace::NG
