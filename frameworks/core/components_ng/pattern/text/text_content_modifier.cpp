@@ -455,6 +455,8 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
             canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         }
         if (!marqueeSet_) {
+            auto logTag = "DrawText IncludeIndent:" + std::to_string(pManager->GetTextWidthIncludeIndent());
+            textPattern->LogForFormRender(logTag);
             auto paintOffsetY = paintOffset_.GetY();
             auto paragraphs = pManager->GetParagraphs();
             for (auto&& info : paragraphs) {

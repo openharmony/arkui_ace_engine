@@ -2990,6 +2990,8 @@ void TextPattern::OnModifyDone()
     CHECK_NULL_VOID(renderContext);
     auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
     ACE_TEXT_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
+    auto logTag = "OnModifyDone:" + std::to_string(nowTime);
+    LogForFormRender(logTag);
     auto pipeline = host->GetContext();
     if (!(pipeline && pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
         bool shouldClipToContent =
