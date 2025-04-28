@@ -1882,6 +1882,49 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest045, TestSize.Level1)
     EXPECT_EQ(ContainerScope::CurrentId(), -1);
 }
 
+/**
+ * @tc.name: ViewAbstractDisableOnKeyEventDispatchTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnKeyEventDispatchTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    OnKeyConsumeFunc onKeyCallback = [](KeyEventInfo& info) -> bool { return false; };
+    ViewAbstract::SetOnKeyEventDispatch(std::move(onKeyCallback));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto focusHub = node->GetOrCreateFocusHub();
+    auto& callback = focusHub->focusCallbackEvents_->onKeyEventDispatchCallback_;
+    EXPECT_TRUE(callback);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnKeyEventDispatch();
+    EXPECT_FALSE(callback);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    OnKeyConsumeFunc onKeyCallback2 = [](KeyEventInfo& info) -> bool { return false; };
+    ViewAbstract::SetOnKeyEventDispatch(std::move(onKeyCallback2));
+    EXPECT_TRUE(callback);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
 #ifdef SUPPORT_DIGITAL_CROWN
 /**
  * @tc.name: ViewAbstract

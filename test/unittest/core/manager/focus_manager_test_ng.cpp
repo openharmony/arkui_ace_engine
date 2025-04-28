@@ -839,4 +839,36 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest021, TestSize.Level1)
         EXPECT_EQ(focusManager->isFocusActive_, testCase.exceptResult);
     }
 }
+
+/**
+ * @tc.name: FocusManagerTest022
+ * @tc.desc: test focusActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest022, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->SetKeyProcessingMode(KeyProcessingMode::ANCESTOR_EVENT);
+    auto keyProcessingMode = focusManager->GetKeyProcessingMode();
+    EXPECT_EQ(keyProcessingMode, KeyProcessingMode::ANCESTOR_EVENT);
+}
+
+/**
+ * @tc.name: FocusManagerTest023
+ * @tc.desc: test focusActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest023, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->SetKeyProcessingMode(KeyProcessingMode::FOCUS_NAVIGATION);
+    auto keyProcessingMode = focusManager->GetKeyProcessingMode();
+    EXPECT_EQ(keyProcessingMode, KeyProcessingMode::FOCUS_NAVIGATION);
+}
 } // namespace OHOS::Ace::NG
