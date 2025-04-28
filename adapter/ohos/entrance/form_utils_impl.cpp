@@ -90,11 +90,12 @@ int32_t FormUtilsImpl::RequestPublishFormEvent(const AAFwk::Want& want,
     std::vector<AppExecFwk::FormDataProxy> formDataProxies;
     int32_t ret = AppExecFwk::FormMgr::GetInstance().RequestPublishFormWithSnapshot(const_cast<Want&>(want),
         withFormBindingData, formBindingData, formId, formDataProxies);
+    int32_t externalErrorCode = ret;
     if (ret != ERR_OK) {
-        errMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
+        OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(ret, externalErrorCode, errMsg);
     }
     
-    return ret;
+    return externalErrorCode;
 }
 
 int32_t FormUtilsImpl::BackgroundEvent(
