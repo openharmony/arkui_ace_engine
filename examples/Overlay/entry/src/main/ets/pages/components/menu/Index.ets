@@ -39,6 +39,9 @@ export struct MenuIndex {
     { name: 'BindContextMenuIsShown', path: 'BindContextMenuIsShown' },
     { name: 'BindContextMenuTransition', path: 'BindContextMenuTransition' },
     { name: 'BindContextMenuHoverScale', path: 'BindContextMenuHoverScale' },
+    { name: 'MenuDivider', path: 'MenuDivider' },
+    { name: 'MenuExpand', path: 'MenuExpand' },
+    { name: 'MenuPressStatus', path: 'MenuPressStatus' },
   ]
 
   build() {
