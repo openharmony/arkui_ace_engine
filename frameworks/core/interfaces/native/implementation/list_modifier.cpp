@@ -380,6 +380,8 @@ void StackFromEndImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ListModelStatic::SetStackFromEnd(frameNode, convValue);
 }
 void OnScrollImpl(Ark_NativePointer node,
                   const Opt_Callback_Number_Number_Void* value)

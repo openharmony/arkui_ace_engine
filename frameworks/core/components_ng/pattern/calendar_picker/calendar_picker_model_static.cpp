@@ -114,5 +114,13 @@ void CalendarPickerModelStatic::SetEdgeAlign(
         ACE_RESET_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogAlignType, frameNode);
     }
 }
+
+void CalendarPickerModelStatic::SetMarkToday(FrameNode* frameNode, const std::optional<bool>& isMarkToday)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetMarkToday(isMarkToday.value_or(false));
+}
 } // namespace OHOS::Ace::NG
   

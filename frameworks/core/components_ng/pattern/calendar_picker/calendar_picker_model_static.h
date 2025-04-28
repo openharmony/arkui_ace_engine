@@ -26,6 +26,7 @@ public:
     static void SetTextStyle(FrameNode* frameNode, const std::optional<PickerTextStyle>& textStyle);
     static void SetEdgeAlign(FrameNode* frameNode, const std::optional<CalendarEdgeAlign>& alignType,
         const std::optional<DimensionOffset>& offset);
+    static void SetMarkToday(FrameNode* frameNode, const std::optional<bool>& isMarkToday);
 };
 
 } // namespace OHOS::Ace::NG

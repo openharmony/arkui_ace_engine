@@ -30,6 +30,7 @@
      static void SetCopyOption(FrameNode* frameNode, const std::optional<CopyOptions>& copyOption);
      static void SetImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
      static void SetImageRenderMode(FrameNode* frameNode, const std::optional<ImageRenderMode>& imageRenderMode);
+     static void SetImageMatrix(FrameNode* frameNode, const std::optional<Matrix4>& value);
      static void SetImageFit(FrameNode* frameNode, const std::optional<ImageFit>& value);
      static void SetImageSourceSize(FrameNode* frameNode, const std::optional<std::pair<Dimension, Dimension>>& size);
      static void SetImageFill(FrameNode* frameNode, const std::optional<Color>& color);
