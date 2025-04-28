@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -70,40 +71,71 @@ void SetGridItemOptionsImpl(Ark_NativePointer node, const Opt_GridItemOptions* v
 }
 } // namespace GridItemInterfaceModifier
 namespace GridItemAttributeModifier {
-void RowStartImpl(Ark_NativePointer node,
-                  const Opt_Number* value)
+void RowStartImpl(Ark_NativePointer node, const Opt_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag != ARK_TAG_UNDEFINED) {
+        GridItemModelNG::SetRowStart(frameNode, Converter::Convert<int32_t>(value->value));
+    }
 }
-void RowEndImpl(Ark_NativePointer node,
-                const Opt_Number* value)
+void RowEndImpl(Ark_NativePointer node, const Opt_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag != ARK_TAG_UNDEFINED) {
+        GridItemModelNG::SetRowEnd(frameNode, Converter::Convert<int32_t>(value->value));
+    }
 }
-void ColumnStartImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+void ColumnStartImpl(Ark_NativePointer node, const Opt_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag != ARK_TAG_UNDEFINED) {
+        GridItemModelNG::SetColumnStart(frameNode, Converter::Convert<int32_t>(value->value));
+    }
 }
-void ColumnEndImpl(Ark_NativePointer node,
-                   const Opt_Number* value)
+void ColumnEndImpl(Ark_NativePointer node, const Opt_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag != ARK_TAG_UNDEFINED) {
+        GridItemModelNG::SetColumnEnd(frameNode, Converter::Convert<int32_t>(value->value));
+    }
 }
-void ForceRebuildImpl(Ark_NativePointer node,
-                      const Opt_Boolean* value)
+void ForceRebuildImpl(Ark_NativePointer node, const Opt_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridItemModelNG::SetForceRebuild(frameNode, Converter::OptConvert<bool>(*value).value_or(false));
 }
-void SelectableImpl(Ark_NativePointer node,
-                    const Opt_Boolean* value)
+void SelectableImpl(Ark_NativePointer node, const Opt_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridItemModelNG::SetSelectable(frameNode, Converter::OptConvert<bool>(*value).value_or(true));
 }
-void SelectedImpl(Ark_NativePointer node,
-                  const Opt_Boolean* value)
+void SelectedImpl(Ark_NativePointer node, const Opt_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridItemModelNG::SetSelected(frameNode, Converter::OptConvert<bool>(*value).value_or(false));
 }
-void OnSelectImpl(Ark_NativePointer node,
-                  const Opt_Callback_Boolean_Void* value)
+void OnSelectImpl(Ark_NativePointer node, const Opt_Callback_Boolean_Void* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onSelect = [arkCallback = CallbackHelper(value->value)](bool isSelected) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(isSelected));
+    };
+    GridItemModelNG::SetOnSelect(frameNode, onSelect);
 }
-void _onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                 const Callback_Opt_Boolean_Void* callback)
+void _onChangeEvent_selectedImpl(Ark_NativePointer node, const Callback_Opt_Boolean_Void* callback)
 {
 }
 } // GridItemAttributeModifier
