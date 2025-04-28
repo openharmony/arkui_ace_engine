@@ -734,6 +734,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     }): TextAttribute;
     letterSpacing(value: number | string): TextAttribute;
     lineSpacing(value: LengthMetrics, options?: LineSpacingOptions): TextAttribute;
+    optimizeTrailingSpace(trim: boolean): TextAttribute;
     textCase(value: TextCase): TextAttribute;
     baselineOffset(value: number | string): TextAttribute;
     copyOption(value: CopyOptions): TextAttribute;

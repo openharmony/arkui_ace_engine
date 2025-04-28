@@ -2374,6 +2374,20 @@ typedef enum {
     NODE_TEXT_LINE_COUNT = 1031,
 
     /**
+     * @brief Defines whether to optimize whitespace at the end of each line,
+     * which can be set, reset, and obtained as required through APIs.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * value[0].i32: whether to optimize whitespace at the end of each line. The default value is false. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * value[0].i32: whether to optimize whitespace at the end of each line. \n
+     * 
+     * @since 20
+     */
+    NODE_TEXT_OPTIMIZE_TRAILING_SPACE = 1032,
+    
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n

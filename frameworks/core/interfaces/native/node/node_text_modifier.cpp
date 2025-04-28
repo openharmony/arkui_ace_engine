@@ -33,6 +33,7 @@ namespace OHOS::Ace::NG {
 constexpr int DEFAULT_SELECTION = -1;
 constexpr Dimension DEFAULT_LINE_HEIGHT = Dimension(0.0, DimensionUnit::PX);
 constexpr Dimension DEFAULT_LINE_SPACING = Dimension(0.0, DimensionUnit::PX);
+constexpr bool DEFAULT_TRIM_SPACE = false;
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
@@ -1274,6 +1275,27 @@ void ResetOnMarqueeStateChange(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetOnMarqueeStateChange(frameNode, nullptr);
 }
+
+void SetTextOptimizeTrailingSpace(ArkUINodeHandle node, ArkUI_Bool trim)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetOptimizeTrailingSpace(frameNode, trim);
+}
+
+ArkUI_Int32 GetTextOptimizeTrailingSpace(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetOptimizeTrailingSpace(frameNode));
+}
+
+void ResetTextOptimizeTrailingSpace(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetOptimizeTrailingSpace(frameNode, DEFAULT_TRIM_SPACE);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1412,6 +1434,9 @@ const ArkUITextModifier* GetTextModifier()
         .resetOnMarqueeStateChange = ResetOnMarqueeStateChange,
         .setImmutableFontWeight = SetImmutableFontWeight,
         .getLineCount = GetLineCount,
+        .setTextOptimizeTrailingSpace = SetTextOptimizeTrailingSpace,
+        .resetTextOptimizeTrailingSpace = ResetTextOptimizeTrailingSpace,
+        .getTextOptimizeTrailingSpace = GetTextOptimizeTrailingSpace,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
