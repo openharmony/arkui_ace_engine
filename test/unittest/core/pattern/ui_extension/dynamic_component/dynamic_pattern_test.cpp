@@ -517,7 +517,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest012, TestSize.Level1)
     /**
      * @tc.steps: step3. test HandleErrorCallback.
      */
-    dynamicPattern->HandleErrorCallback(DCResultCode::DC_WORKER_HAS_USED_ERROR);
+    dynamicPattern->HandleErrorCallback(DCResultCode::DC_EXCEED_MAX_NUM_IN_WORKER);
     dynamicPattern->HandleErrorCallback(DCResultCode::DC_ONLY_RUN_ON_SCB);
     dynamicPattern->HandleErrorCallback(DCResultCode::DC_INTERNAL_ERROR);
     dynamicPattern->HandleErrorCallback(DCResultCode::DC_PARAM_ERROE);
@@ -653,7 +653,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest015, TestSize.Level1)
 
 /**
  * @tc.name: DynamicPatternTest016
- * @tc.desc: Test HandleErrorCallback case DC_WORKER_HAS_USED_ERROR
+ * @tc.desc: Test HandleErrorCallback case DC_EXCEED_MAX_NUM_IN_WORKER
  * @tc.type: FUNC
  */
 HWTEST_F(DynamicPatternTestNg, DynamicPatternTest016, TestSize.Level1)
@@ -669,7 +669,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest016, TestSize.Level1)
      * @tc.steps: step2. call HandleErrorCallback with DCWORKERHASUSEDERROR.
      * @tc.expected: expect FireOnErrorCallbackOnUI is called with the correct parameters.
      */
-    dynamicPattern->HandleErrorCallback(DCResultCode::DC_WORKER_HAS_USED_ERROR);
+    dynamicPattern->HandleErrorCallback(DCResultCode::DC_EXCEED_MAX_NUM_IN_WORKER);
 #endif
 }
 

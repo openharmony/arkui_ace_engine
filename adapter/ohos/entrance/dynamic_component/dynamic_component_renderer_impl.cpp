@@ -30,6 +30,8 @@ namespace {
 constexpr int32_t INVALID_WINDOW_ID = -1;
 constexpr int32_t WORKER_ERROR = 10002;
 constexpr size_t WORKER_MAX_NUM = 1;
+constexpr size_t WORKER_SIZE_ONE = 1;
+constexpr size_t DC_MAX_NUM_IN_WORKER = 1;
 }
 
 void ApplyAccessibilityElementInfoOffset(Accessibility::AccessibilityElementInfo& output, const OffsetF& offset)
@@ -55,7 +57,7 @@ void ApplyAccessibilityElementInfoOffset(std::list<Accessibility::AccessibilityE
     }
 }
 
-std::set<void *> DynamicComponentRendererImpl::usingWorkers_;
+std::map<void *, int32_t> DynamicComponentRendererImpl::usingWorkers_;
 std::mutex DynamicComponentRendererImpl::usingWorkerMutex_;
 
 DynamicComponentRendererImpl::DynamicComponentRendererImpl(
@@ -107,20 +109,34 @@ bool DynamicComponentRendererImpl::IsRestrictedWorkerThread()
     return runtime_->IsRestrictedWorkerThread();
 }
 
-bool DynamicComponentRendererImpl::CheckWorkerMaxConstraint()
-{
-    std::lock_guard<std::mutex> lock(usingWorkerMutex_);
-    return usingWorkers_.size() < WORKER_MAX_NUM;
-}
-
-bool DynamicComponentRendererImpl::HasWorkerUsing(void *worker)
+bool DynamicComponentRendererImpl::CheckWorkerMaxConstraint(void *worker)
 {
     if (worker == nullptr) {
-        return false;
+        return true;
     }
 
     std::lock_guard<std::mutex> lock(usingWorkerMutex_);
-    return usingWorkers_.find(worker) != usingWorkers_.end();
+    auto iter = usingWorkers_.find(worker);
+    if (iter == usingWorkers_.end()) {
+        return usingWorkers_.size() < WORKER_MAX_NUM;
+    }
+
+    return usingWorkers_.size() < WORKER_MAX_NUM + 1;
+}
+
+bool DynamicComponentRendererImpl::CheckDCMaxConstraintInWorker(void *worker)
+{
+    if (worker == nullptr) {
+        return true;
+    }
+
+    std::lock_guard<std::mutex> lock(usingWorkerMutex_);
+    auto iter = usingWorkers_.find(worker);
+    if (iter == usingWorkers_.end()) {
+        return true;
+    }
+
+    return iter->second < DC_MAX_NUM_IN_WORKER;
 }
 
 void DynamicComponentRendererImpl::AddWorkerUsing(void *worker)
@@ -130,11 +146,13 @@ void DynamicComponentRendererImpl::AddWorkerUsing(void *worker)
     }
 
     std::lock_guard<std::mutex> lock(usingWorkerMutex_);
-    if (usingWorkers_.find(worker) != usingWorkers_.end()) {
+    auto iter = usingWorkers_.find(worker);
+    if (iter == usingWorkers_.end()) {
+        usingWorkers_[worker] = WORKER_SIZE_ONE;
         return;
     }
 
-    usingWorkers_.insert(worker);
+    iter->second++;
 }
 
 void DynamicComponentRendererImpl::DeleteWorkerUsing(void *worker)
@@ -144,11 +162,17 @@ void DynamicComponentRendererImpl::DeleteWorkerUsing(void *worker)
     }
 
     std::lock_guard<std::mutex> lock(usingWorkerMutex_);
-    if (usingWorkers_.find(worker) == usingWorkers_.end()) {
+    auto iter = usingWorkers_.find(worker);
+    if (iter == usingWorkers_.end()) {
         return;
     }
 
-    usingWorkers_.erase(worker);
+    if (iter->second <= WORKER_SIZE_ONE) {
+        usingWorkers_.erase(iter);
+        return;
+    }
+
+    iter->second--;
 }
 
 void DynamicComponentRendererImpl::CreateContent()
