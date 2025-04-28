@@ -438,14 +438,14 @@ public:
         return exp(-ratio * gamma);
     }
 
-    SheetType GetSheetType() const;
+    SheetType GetSheetType();
     bool IsPhoneInLandScape();
     bool IsShowCloseIcon();
     ScrollSizeMode GetScrollSizeMode();
     void InitSheetMode();
-    void GetSheetTypeWithAuto(SheetType& sheetType) const;
-    void GetSheetTypeWithPopup(SheetType& sheetType) const;
-    void GetSheetTypeWithCenter(SheetType& sheetType) const;
+    void GetSheetTypeWithAuto(SheetType& sheetType);
+    void GetSheetTypeWithPopup(SheetType& sheetType);
+    void GetSheetTypeWithCenter(SheetType& sheetType);
 
     void SetUIFirstSwitch(bool isFirstTransition, bool isNone);
 
@@ -461,7 +461,7 @@ public:
 
     void ResetToInvisible();
 
-    bool IsFoldExpand() const;
+    bool IsFoldExpand();
 
     void SetSheetKey(const SheetKey& sheetKey)
     {
@@ -530,12 +530,12 @@ public:
     }
 
     bool IsShowInSubWindowTwoInOne();
-    bool IsShowInSubWindow() const;
-    SheetType ComputeSheetTypeInSubWindow() const;
+    bool IsShowInSubWindow();
+    SheetType ComputeSheetTypeInSubWindow();
     void SheetTransitionAction(float offset, bool isStart, bool isTransitionIn);
     float ComputeTransitionOffset(float sheetHeight);
     void InitSheetTransitionAction(float offset);
-    int32_t GetSubWindowId() const;
+    int32_t GetSubWindowId();
 
     OffsetF GetSheetArrowOffset() const
     {
@@ -675,7 +675,7 @@ public:
     }
 
     // If has dispute about version isolation, suggest use the following. And it does not support SHEET_BOTTOM_OFFSET
-    bool IsSheetBottom() const
+    bool IsSheetBottom()
     {
         auto sheetType = GetSheetType();
         return !(sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_POPUP ||
@@ -754,12 +754,6 @@ public:
     {
         auto scrollNode = scrolNode_.Upgrade();
         return scrollNode;
-    }
-    void SetBottomStyleHotAreaInSubwindow();
-
-    bool IsNotBottomStyleInSubwindow() const
-    {
-        return IsShowInSubWindow() && !IsSheetBottom();
     }
 
 protected:
