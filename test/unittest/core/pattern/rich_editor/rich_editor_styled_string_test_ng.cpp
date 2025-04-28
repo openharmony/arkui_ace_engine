@@ -920,30 +920,6 @@ HWTEST_F(RichEditorStyledStringTestNg, UpdateSpanStyle001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleOnDragDropStyledString001
- * @tc.desc: test HandleOnDragDropStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyledStringTestNg, HandleOnDragDropStyledString001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    ASSERT_NE(event, nullptr);
-    RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-    ASSERT_NE(unifiedData, nullptr);
-    std::string selectedStr = "test123";
-    OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
-    event->SetData(unifiedData);
-    richEditorPattern->HandleOnDragDropStyledString(event);
-    EXPECT_NE(event->GetData(), nullptr);
-}
-
-/**
  * @tc.name: FromStyledString002
  * @tc.desc: test FromStyledString
  * @tc.type: FUNC

@@ -278,34 +278,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, UpdateTextFieldManager001, TestSize.Level
 }
 
 /**
- * @tc.name: HandleUserGestureEvent001
- * @tc.desc: test HandleUserGestureEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleUserGestureEvent001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(EXCEPT_VALUE);
-    ASSERT_FALSE(richEditorPattern->spans_.empty());
-    auto firstSpanItem = richEditorPattern->spans_.front();
-    ASSERT_NE(firstSpanItem, nullptr);
-    firstSpanItem->leadingMargin = std::make_optional<NG::LeadingMargin>();
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
-
-    std::vector<RectF> rects { RectF(0, 0, 5, 5) };
-    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<THIRD_PARAM>(rects));
-    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
-    GestureEvent info;
-    info.SetLocalLocation(Offset(3, 3));
-    richEditorPattern->contentRect_ = RectF(0, 0, 20.0, 20.0);
-    auto gestureFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool { return true; };
-    EXPECT_TRUE(richEditorPattern->HandleUserGestureEvent(info, std::move(gestureFunc)));
-}
-
-/**
  * @tc.name: GetRightWordPosition002
  * @tc.desc: test GetRightWordPosition
  * @tc.type: FUNC
@@ -451,23 +423,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, GetRectsForRange004, TestSize.Level1)
     RectWidthStyle widthStyle = RectWidthStyle::TIGHT;
     auto result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
     EXPECT_TRUE(result.empty());
-}
-
-/**
- * @tc.name: HandleDragStart001
- * @tc.desc: test HandleDragStart
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleDragStart001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto dragEvent = AceType::MakeRefPtr<Ace::DragEvent>();
-    std::string extraParams = "text";
-    richEditorPattern->isDragSponsor_ = true;
-    richEditorPattern->HandleDragStart(dragEvent, extraParams);
-    EXPECT_EQ(richEditorPattern->recoverStart_, -1);
-    EXPECT_EQ(richEditorPattern->recoverEnd_, -1);
 }
 
 /**
@@ -846,22 +801,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveDown, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleBlurEvent
- * @tc.desc: test HandleBlurEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleBlurEvent, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    WeakPtr<Pattern> pattern;
-    richEditorPattern->magnifierController_ = nullptr;
-    richEditorPattern->textSelector_.Update(3, 4);
-    richEditorPattern->HandleBlurEvent();
-    EXPECT_FALSE(richEditorPattern->isEditing_);
-}
-
-/**
  * @tc.name: FireOnSelectionChange001
  * @tc.desc: test FireOnSelectionChange
  * @tc.type: FUNC
@@ -1036,34 +975,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, GetParagraphEndPosition001, TestSize.Leve
     caretPosition = 1;
     richEditorPattern->GetParagraphEndPosition(caretPosition);
     EXPECT_EQ(position, span->position - static_cast<int32_t>(span->content.length()));
-}
-
-/**
- * @tc.name: HandleFocusEvent
- * @tc.desc: test HandleFocusEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleFocusEvent, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isOnlyRequestFocus_ = true;
-    richEditorPattern->HandleFocusEvent();
-    EXPECT_FALSE(richEditorPattern->isOnlyRequestFocus_);
-}
-
-/**
- * @tc.name: HandleDraggableFlag
- * @tc.desc: test HandleDraggableFlag
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleDraggableFlag, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->copyOption_ = CopyOptions::InApp;
-    richEditorPattern->HandleDraggableFlag(false);
-    EXPECT_EQ(richEditorPattern->JudgeContentDraggable(), false);
 }
 
 } // namespace OHOS::Ace::NG

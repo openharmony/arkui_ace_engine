@@ -33,6 +33,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_drag_test_ng.cpp",
     "rich_editor_edit_test_ng.cpp",
     "rich_editor_edit_testone_ng.cpp",
+    "rich_editor_event_test_ng.cpp",
     "rich_editor_keyboard_shortcut_test_ng.cpp",
     "rich_editor_menu_test_ng.cpp",
     "rich_editor_mouse_test.cpp",
