@@ -356,7 +356,7 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, int32_t
     if (Negative(irregularHeight) && Positive(lastIrregularMainSize_)) {
         irregularHeight = lastIrregularMainSize_;
     }
-    if (NearZero(regularHeight)) {
+    if (Negative(regularHeight) && Positive(lastRegularMainSize_)) {
         regularHeight = lastRegularMainSize_;
     }
     if (Negative(irregularHeight)) {
@@ -434,7 +434,7 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
     } else {
         lastIrregularMainSize_ = irregularHeight;
     }
-    if (NearZero(regularHeight)) {
+    if (Negative(regularHeight) && Positive(lastRegularMainSize_)) {
         regularHeight = lastRegularMainSize_;
     } else {
         lastRegularMainSize_ = regularHeight;
@@ -459,7 +459,8 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
         lastIndex = idx;
     }
     if (NonPositive(regularHeight)) {
-        startIndex_ = lastIndex;
+        startIndex_ = std::min(lastIndex, childrenCount_ - 1);
+        currentOffset_ = targetContent - totalHeight;
         return;
     }
     int32_t lines = static_cast<int32_t>(std::floor((targetContent - totalHeight) / regularHeight));
