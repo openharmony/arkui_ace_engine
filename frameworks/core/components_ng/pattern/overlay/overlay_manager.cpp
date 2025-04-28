@@ -4742,6 +4742,7 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
     } else {
         // last page animation
         lastModalContext->OpacityAnimation(option, 0, 1);
+        lastModalContext->UpdateOpacity(1);
 
         // current modal page animation
         option.SetOnFinishEvent(
