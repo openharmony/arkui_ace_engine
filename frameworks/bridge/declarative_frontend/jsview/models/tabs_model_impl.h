@@ -35,6 +35,7 @@ public:
     void SetWidthAuto(bool isAuto) override {};
     void SetHeightAuto(bool isAuto) override {};
     void SetBarAdaptiveHeight(bool barAdaptiveHeight) override {};
+    void SetNoMinHeightLimit(bool NoMinHeightLimit) override {};
     void SetIsVertical(bool isVertical) override;
     void SetScrollable(bool scrollable) override;
     void SetAnimationDuration(float duration) override;

@@ -1306,4 +1306,80 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureFixedMode002, TestSize.
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, TABS_WIDTH / 4 * 3 - itemWidth);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH / 4 * 3);
 }
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmMeasureFixedMode003
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureFixedMode003, TestSize.Level1)
+{
+    auto childCount = 3;
+    TabsModelNG model = CreateTabs();
+    for (int32_t index = 0; index < childCount; index++) {
+        CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    }
+    CreateTabsDone(model);
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
+
+    /**
+     * @tc.steps: steps2. Set axis to horizontal, init bottomTabBarStyle.
+     * @tc.expected: steps2. Verify visibleItemPosition.
+    */
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    for (int32_t index = 0; index < childCount; index++) {
+        tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, index);
+        BottomTabBarStyle bottomTabBarStyle;
+        bottomTabBarStyle.symmetricExtensible = true;
+        tabBarPattern_->SetBottomTabBarStyle(bottomTabBarStyle, index);
+    }
+    auto child1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    auto child2 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+    auto child3 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(2));
+    ViewAbstract::SetWidth(AceType::RawPtr(child1), CalcLength(100.0f));
+    ViewAbstract::SetWidth(AceType::RawPtr(child2), CalcLength(300.0f));
+    ViewAbstract::SetWidth(AceType::RawPtr(child3), CalcLength(200.0f));
+
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 220.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 2);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, 500.0f);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH);
+
+    /**
+     * @tc.steps: steps3. Set barAdaptiveHeight and noMinHeightLimit to true.
+     * @tc.expected: steps3. Verify height of child node.
+     */
+    tabBarLayoutProperty_->UpdateBarAdaptiveHeight(true);
+    tabBarLayoutProperty_->UpdateNoMinHeightLimit(true);
+    ViewAbstract::SetHeight(AceType::RawPtr(child1), CalcLength(10.0f));
+    ViewAbstract::SetHeight(AceType::RawPtr(child2), CalcLength(20.0f));
+    ViewAbstract::SetHeight(AceType::RawPtr(child3), CalcLength(30.0f));
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    EXPECT_EQ(child1->GetGeometryNode()->GetMarginFrameSize().CrossSize(Axis::HORIZONTAL), 30.0f);
+
+    /**
+     * @tc.steps: steps4. Set axis to vertical.
+     * @tc.expected: steps4. Verify visibleItemPosition.
+     */
+    tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
+    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(TABS_WIDTH));
+    tabBarPattern_->visibleItemPosition_.clear();
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    auto itemWidth = TABS_WIDTH / 2 / childCount;
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, TABS_WIDTH / 4);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, TABS_WIDTH / 4 + itemWidth);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, childCount - 1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, TABS_WIDTH / 4 * 3 - itemWidth);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH / 4 * 3);
+}
+
 } // namespace OHOS::Ace::NG

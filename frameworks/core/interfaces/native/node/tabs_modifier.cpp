@@ -205,6 +205,12 @@ void SetBarAdaptiveHeight(ArkUINodeHandle node, ArkUI_Bool value)
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarAdaptiveHeight(frameNode, value);
 }
+void SetNoMinHeightLimit(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetNoMinHeightLimit(frameNode, value);
+}
 void SetTabBarWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -382,6 +388,13 @@ void ResetBarAdaptiveHeight(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarAdaptiveHeight(frameNode, false);
+}
+
+void ResetNoMinHeightLimit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetNoMinHeightLimit(frameNode, false);
 }
 
 void SetTabClip(ArkUINodeHandle node, ArkUI_Bool clipEdge)
@@ -705,6 +718,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .setTabBarHeight = SetTabBarHeight,
         .setBarAdaptiveHeight = SetBarAdaptiveHeight,
         .setAnimationCurve = SetAnimationCurve,
+        .setNoMinHeightLimit = SetNoMinHeightLimit,
         .setAnimationDuration = SetAnimationDuration,
         .resetTabBarMode = ResetTabBarMode,
         .resetScrollableBarModeOptions = ResetScrollableBarModeOptions,
@@ -724,6 +738,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetTabBarHeight = ResetTabBarHeight,
         .resetBarAdaptiveHeight = ResetBarAdaptiveHeight,
         .resetAnimationCurve = ResetAnimationCurve,
+        .resetNoMinHeightLimit = ResetNoMinHeightLimit,
         .resetAnimationDuration = ResetAnimationDuration,
         .setTabClip = SetTabClip,
         .resetTabClip = ResetTabClip,
