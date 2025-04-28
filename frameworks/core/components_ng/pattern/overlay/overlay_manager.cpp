@@ -5499,6 +5499,7 @@ void OverlayManager::PlaySheetTransition(
         ACE_SCOPED_TRACE("Sheet start admission");
         sheetPattern->SetUIFirstSwitch(isFirstTransition, false);
         sheetPattern->UpdateAccessibilityDetents(sheetHeight_);
+        sheetPattern->SetBottomStyleHotAreaInSubwindow();
         AnimationUtils::Animate(
             option,
             [sheetWK = WeakClaim(RawPtr(sheetNode)), offset, isTransitionIn]() {
@@ -6146,17 +6147,16 @@ void OverlayManager::ComputeSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr
             break;
         case SheetType::SHEET_CENTER:
             sheetHeight_ = (sheetHeight + sheetMaxHeight) / SHEET_HALF_SIZE;
+
+            if (sheetStyle.showInSubWindow.value_or(false)) {
+                sheetHeight_ = sheetMaxHeight - sheetPattern->GetSheetOffset();
+            }
             break;
         case SheetType::SHEET_POPUP:
             sheetHeight_ = sheetMaxHeight;
             break;
         default:
             break;
-    }
-    if (sheetStyle.showInSubWindow.value_or(false)) {
-        auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-        CHECK_NULL_VOID(sheetPattern);
-        sheetHeight_ = sheetMaxHeight - sheetPattern->GetSheetOffset();
     }
 }
 
