@@ -11,6 +11,10 @@
     {
       "name": "EntryAbility_label",
       "value": "label"
+    },
+    {
+      "name": "color",
+      "value": "#FF0f1815"
     }
   ]
 }

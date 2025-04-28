@@ -18,34 +18,43 @@
  */
 @Entry
 @Component
-struct ImageExample{
+struct ImageExample {
   build() {
     Column() {
       Flex({ direction: FlexDirection.Column, alignItems: ItemAlign.Start }) {
         Row() {
           // 加载png格式图片
           Image($r('app.media.sky'))
-            .width(110).height(110).margin(15)
+            .width(110)
+            .height(110)
+            .margin(15)
             .overlay('png', { align: Alignment.Bottom, offset: { x: 0, y: 20 } })
             .border({ width: 2, color: Color.Pink })
             .objectFit(ImageFit.TOP_START)
           // 加载gif格式图片
           Image($r('app.media.loading'))
-            .width(110).height(110).margin(15)
+            .width(110)
+            .height(110)
+            .margin(15)
             .overlay('gif', { align: Alignment.Bottom, offset: { x: 0, y: 20 } })
             .border({ width: 2, color: Color.Pink })
             .objectFit(ImageFit.BOTTOM_START)
         }
+
         Row() {
           // 加载svg格式图片
           Image($r('app.media.svg'))
-            .width(110).height(110).margin(15)
+            .width(110)
+            .height(110)
+            .margin(15)
             .overlay('svg', { align: Alignment.Bottom, offset: { x: 0, y: 20 } })
             .border({ width: 2, color: Color.Pink })
             .objectFit(ImageFit.TOP_END)
           // 加载jpg格式图片
           Image($r('app.media.jpg'))
-            .width(110).height(110).margin(15)
+            .width(110)
+            .height(110)
+            .margin(15)
             .overlay('jpg', { align: Alignment.Bottom, offset: { x: 0, y: 20 } })
             .border({ width: 2, color: Color.Pink })
             .objectFit(ImageFit.CENTER)
