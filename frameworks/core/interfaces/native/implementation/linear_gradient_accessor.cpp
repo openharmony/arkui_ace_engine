@@ -22,12 +22,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LinearGradientAccessor {
 void DestroyPeerImpl(Ark_LinearGradient peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_LinearGradient CtorImpl(const Array_ColorStop* colorStops)
 {
     CHECK_NULL_RETURN(colorStops, nullptr);
     auto colors = Converter::Convert<std::vector<std::pair<std::optional<Color>, Dimension>>>(*colorStops);
-    return new LinearGradientPeer{colors};
+    return PeerUtils::CreatePeer<LinearGradientPeer>(colors);
 }
 Ark_NativePointer GetFinalizerImpl()
 {

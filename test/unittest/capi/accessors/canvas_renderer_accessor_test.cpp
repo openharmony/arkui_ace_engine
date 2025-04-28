@@ -1481,9 +1481,9 @@ HWTEST_F(CanvasRendererAccessorTest, createImageData1Test, TestSize.Level1)
                 expectedH = 0;
             }
             Ace::ImageData data { .dirtyWidth = actualW, .dirtyHeight = actualH };
-            Ark_ImageData arkImage = ImageDataPeer::Create(data);
+            Ark_ImageData arkImage = PeerUtils::CreatePeer<ImageDataPeer>(data);
             auto imageData = accessor_->createImageData1(peer_, arkImage);
-            ImageDataPeer::Destroy(arkImage);
+            PeerUtils::DestroyPeer(arkImage);
             ASSERT_NE(imageData, nullptr);
             for (const auto& v : imageData->value.data) {
                 EXPECT_EQ(v, EXPECTED_COLOR);
@@ -1661,7 +1661,7 @@ HWTEST_F(CanvasRendererAccessorTest, putImageData0XYTest, TestSize.Level1)
     auto actualH = DEFAULT_DOUBLE_VALUE;
     std::vector<uint32_t> vbuffer(actualW * actualH);
     Ace::ImageData data { .dirtyWidth = actualW, .dirtyHeight = actualH, .data = vbuffer };
-    Ark_ImageData arkImage = ImageDataPeer::Create(data);
+    Ark_ImageData arkImage = PeerUtils::CreatePeer<ImageDataPeer>(data);
 
     for (const auto& actualX : NUMBER_TEST_PLAN) {
         for (const auto& actualY : NUMBER_TEST_PLAN) {
@@ -1677,7 +1677,7 @@ HWTEST_F(CanvasRendererAccessorTest, putImageData0XYTest, TestSize.Level1)
             EXPECT_EQ(target.y, expectedY);
         }
     }
-    ImageDataPeer::Destroy(arkImage);
+    PeerUtils::DestroyPeer(arkImage);
 }
 
 /**
@@ -1709,12 +1709,12 @@ HWTEST_F(CanvasRendererAccessorTest, putImageData0WHTest, TestSize.Level1)
                 vbuffer.push_back(EXPECTED_COLOR);
             }
             Ace::ImageData data { .dirtyWidth = expectedW, .dirtyHeight = expectedH, .data = vbuffer };
-            Ark_ImageData arkImage = ImageDataPeer::Create(data);
+            Ark_ImageData arkImage = PeerUtils::CreatePeer<ImageDataPeer>(data);
             auto dx = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualX);
             auto dy = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualY);
 
             accessor_->putImageData0(peer_, arkImage, &dx, &dy);
-            ImageDataPeer::Destroy(arkImage);
+            PeerUtils::DestroyPeer(arkImage);
             for (const auto& v : target.data) {
                 EXPECT_EQ(v, EXPECTED_COLOR);
             }
@@ -1738,7 +1738,7 @@ HWTEST_F(CanvasRendererAccessorTest, putImageData1XYTest, TestSize.Level1)
     auto actualH = DEFAULT_DOUBLE_VALUE;
     std::vector<uint32_t> vbuffer(actualW * actualH);
     Ace::ImageData data { .dirtyWidth = actualW, .dirtyHeight = actualH, .data = vbuffer };
-    Ark_ImageData arkImage = ImageDataPeer::Create(data);
+    Ark_ImageData arkImage = PeerUtils::CreatePeer<ImageDataPeer>(data);
 
     for (const auto& actualX : NUMBER_TEST_PLAN) {
         for (const auto& actualY : NUMBER_TEST_PLAN) {
@@ -1758,7 +1758,7 @@ HWTEST_F(CanvasRendererAccessorTest, putImageData1XYTest, TestSize.Level1)
             EXPECT_EQ(target.y, expectedY);
         }
     }
-    ImageDataPeer::Destroy(arkImage);
+    PeerUtils::DestroyPeer(arkImage);
 }
 
 /**
@@ -1791,7 +1791,7 @@ HWTEST_F(CanvasRendererAccessorTest, putImageData1WHTest, TestSize.Level1)
                 vbuffer.push_back(EXPECTED_COLOR);
             }
             Ace::ImageData data { .dirtyWidth = expectedW, .dirtyHeight = expectedH, .data = vbuffer };
-            Ark_ImageData arkImage = ImageDataPeer::Create(data);
+            Ark_ImageData arkImage = PeerUtils::CreatePeer<ImageDataPeer>(data);
             auto dx = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualX);
             auto dy = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualY);
             auto dirtyX = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualDirtyX);
@@ -1800,7 +1800,7 @@ HWTEST_F(CanvasRendererAccessorTest, putImageData1WHTest, TestSize.Level1)
             auto dirtyHeight = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(expectedH);
 
             accessor_->putImageData1(peer_, arkImage, &dx, &dy, &dirtyX, &dirtyY, &dirtyWidth, &dirtyHeight);
-            ImageDataPeer::Destroy(arkImage);
+            PeerUtils::DestroyPeer(arkImage);
             // peer logic
             expectedW = expectedDirtyX < 0 ? std::min(expectedDirtyX + expectedW, expectedW)
                                            : std::min(expectedW - expectedDirtyX, expectedW);
@@ -1837,7 +1837,7 @@ HWTEST_F(CanvasRendererAccessorTest, putImageData1DXYTest, TestSize.Level1)
                 vbuffer.push_back(EXPECTED_COLOR);
             }
             Ace::ImageData data { .dirtyWidth = expectedW, .dirtyHeight = expectedH, .data = vbuffer };
-            Ark_ImageData arkImage = ImageDataPeer::Create(data);
+            Ark_ImageData arkImage = PeerUtils::CreatePeer<ImageDataPeer>(data);
             int32_t expectedDirtyX = static_cast<int32_t>(actualDirtyX);
             int32_t expectedDirtyY = static_cast<int32_t>(actualDirtyY);
             auto dx = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualX);
@@ -1848,7 +1848,7 @@ HWTEST_F(CanvasRendererAccessorTest, putImageData1DXYTest, TestSize.Level1)
             auto dirtyHeight = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(expectedH);
 
             accessor_->putImageData1(peer_, arkImage, &dx, &dy, &dirtyX, &dirtyY, &dirtyWidth, &dirtyHeight);
-            ImageDataPeer::Destroy(arkImage);
+            PeerUtils::DestroyPeer(arkImage);
             // peer logic
             expectedW = expectedDirtyX < 0 ? std::min(expectedDirtyX + expectedW, expectedW)
                                            : std::min(expectedW - expectedDirtyX, expectedW);
