@@ -186,8 +186,8 @@ export struct EditableTitleBar {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
       hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${code}, message: ${message}`);
     }
   }
@@ -464,8 +464,8 @@ struct ImageMenuItem {
     try {
       this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
     } catch (paramError) {
-      let code = (paramError as BusinessError).code;
-      let message = (paramError as BusinessError).message;
+      let code = (paramError as BusinessError)?.code;
+      let message = (paramError as BusinessError)?.message;
       hilog.error(0x3900, 'Ace',
         `EditableTitleBar Faild to get environment param error: ${code}, ${message}`);
     }
@@ -484,8 +484,8 @@ struct ImageMenuItem {
           this.maxFontScale, config.fontSizeScale ?? 1);
         this.buttonGestureModifier.fontSize = this.fontSize;
       } catch (paramError) {
-        let code = (paramError as BusinessError).code;
-        let message = (paramError as BusinessError).message;
+        let code = (paramError as BusinessError)?.code;
+        let message = (paramError as BusinessError)?.message;
         hilog.error(0x3900, 'Ace',
           `EditableTitleBar environmentCallback error: ${code}, ${message}`);
       }
@@ -503,8 +503,8 @@ struct ImageMenuItem {
       }
       return Math.min(this.systemFontScale, this.maxFontScale);
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
       hilog.error(0x3900, 'EditableTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
     }
@@ -882,8 +882,15 @@ struct EditableTitleBarDialog {
   }
 
   async aboutToAppear(): Promise<void> {
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.mainWindowStage = context.windowStage.getMainWindowSync();
+    try {
+      let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+      this.mainWindowStage = context.windowStage.getMainWindowSync();
+    } catch (error) {
+      let code: number = (error as BusinessError)?.code;
+      let message: string = (error as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace', `EditableTitleBar getMainWindowStage error, code: ${code},message:${message}`);
+      return 0;
+    }
     let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
     let rect = properties.windowRect;
     if (px2vp(rect.height) > this.screenWidth) {

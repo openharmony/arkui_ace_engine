@@ -988,17 +988,27 @@ class ImageMenuItem extends ViewPU {
             return m30;
         }
     }
+
     getAccessibilityReadText() {
         if (this.item.value === PUBLIC_BACK) {
-            return getContext()?.resourceManager?.getStringByNameSync('icon_back');
-        }
-        else if (this.item.value === PUBLIC_MORE) {
-            return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
-        }
-        else if (this.item.accessibilityText) {
+            try {
+                return getContext()?.resourceManager?.getStringByNameSync('icon_back');
+            } catch (n30) {
+                let o30 = n30?.code;
+                let p30 = n30?.message;
+                hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar toStringFormat icon_back,code: ${o30},message:${p30}`);
+            }
+        } else if (this.item.value === PUBLIC_MORE) {
+            try {
+                return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+            } catch (n30) {
+                let o30 = n30?.code;
+                let p30 = n30?.message;
+                hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar toStringFormat ohos_toolbar_more,code: ${o30},message:${p30}`);
+            }
+        } else if (this.item.accessibilityText) {
             return this.item.accessibilityText;
-        }
-        else if (this.item.label) {
+        } else if (this.item.label) {
             return this.item.label;
         }
         return ' ';
