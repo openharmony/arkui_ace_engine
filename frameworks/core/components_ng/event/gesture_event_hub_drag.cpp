@@ -54,7 +54,7 @@ namespace {
 constexpr int32_t CREATE_PIXELMAP_TIME = 30;
 constexpr int32_t MAX_BUILDER_DEPTH = 5;
 #endif
-constexpr uint32_t EXTRA_INFO_MAX_LENGTH = 200;
+constexpr uint32_t EXTRA_INFO_MAX_LENGTH = 1024;
 constexpr int32_t DEFAULT_DRAG_DROP_STATUS = 0;
 constexpr int32_t NEW_DRAG_DROP_STATUS = 1;
 constexpr int32_t OLD_DRAG_DROP_STATUS = 3;
@@ -959,7 +959,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto width = pixelMapDuplicated->GetWidth();
     auto height = pixelMapDuplicated->GetHeight();
     auto extraInfoLimited = dragDropInfo.extraInfo.size() > EXTRA_INFO_MAX_LENGTH
-                                ? dragDropInfo.extraInfo.substr(EXTRA_INFO_MAX_LENGTH + 1)
+                                ? dragDropInfo.extraInfo.substr(0, EXTRA_INFO_MAX_LENGTH)
                                 : dragDropInfo.extraInfo;
     auto innerRect = ParseInnerRect(extraInfoLimited, SizeF(width, height));
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), data, scale, innerRect);
