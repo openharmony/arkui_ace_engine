@@ -579,10 +579,6 @@ void GestureEventHub::HandleDragThroughMouse(const RefPtr<FrameNode> frameNode)
 
 bool GestureEventHub::IsNeedSwitchToSubWindow(const PreparedInfoForDrag& dragInfoData) const
 {
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto focusHub = frameNode->GetFocusHub();
-    CHECK_NULL_RETURN(focusHub, false);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto dragDropManager = pipeline->GetDragDropManager();
