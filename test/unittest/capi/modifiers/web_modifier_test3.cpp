@@ -709,4 +709,37 @@ HWTEST_F(WebModifierTest3, setRunJavaScriptOnHeadEndInvalidValues, TestSize.Leve
     }
 #endif
 }
+
+/*
+ * @tc.name: setNestedScrollTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest3, setNestedScrollTest, TestSize.Level1)
+{
+#ifdef WEB_SUPPORTED
+    ASSERT_NE(modifier_->setNestedScroll, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto pattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    Ark_Union_NestedScrollOptions_NestedScrollOptionsExt param;
+
+    TypeHelper::WriteToUnion<Ark_NestedScrollOptionsExt>(param).scrollUp =
+        ArkValue<Opt_NestedScrollMode>(NestedScrollMode::SELF_ONLY);
+    TypeHelper::WriteToUnion<Ark_NestedScrollOptionsExt>(param).scrollDown =
+        ArkValue<Opt_NestedScrollMode>(NestedScrollMode::SELF_FIRST);
+    TypeHelper::WriteToUnion<Ark_NestedScrollOptionsExt>(param).scrollRight =
+        ArkValue<Opt_NestedScrollMode>(NestedScrollMode::PARENT_FIRST);
+    TypeHelper::WriteToUnion<Ark_NestedScrollOptionsExt>(param).scrollLeft =
+        ArkValue<Opt_NestedScrollMode>(NestedScrollMode::PARALLEL);
+
+    modifier_->setNestedScroll(node_, &param);
+    NestedScrollOptionsExt scroll = pattern->GetNestedScroll();
+    EXPECT_EQ(scroll.scrollUp, NestedScrollMode::SELF_ONLY);
+    EXPECT_EQ(scroll.scrollDown, NestedScrollMode::SELF_FIRST);
+    EXPECT_EQ(scroll.scrollRight, NestedScrollMode::PARENT_FIRST);
+    EXPECT_EQ(scroll.scrollLeft, NestedScrollMode::PARALLEL);
+#endif
+}
 } // namespace OHOS::Ace::NG
