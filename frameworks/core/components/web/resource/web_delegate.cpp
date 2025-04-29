@@ -4838,7 +4838,7 @@ void WebDelegate::OnPageFinished(const std::string& param)
             delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_END, param);
             auto pageUrl = delegate->GetUrl();
             if (pageUrl != "about:blank") {
-                TAG_LOGI(AceLogTag::ACE_WEB, "RunJsInit, weburl=%{public}s", pageUrl.c_str());
+                TAG_LOGI(AceLogTag::ACE_WEB, "OnPageFinished:Start to RunJsInit.");
                 webPattern->RunJsInit();
             }
         },
