@@ -2392,7 +2392,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetOrCreate002, TestSize.Level1)
     auto frameNode5 = frameNode1->GetFrameNodeChildByIndex(0);
     EXPECT_NE(frameNode5, nullptr);
     auto frameNode6 = frameNode2->GetFrameNodeChildByIndex(0);
-    EXPECT_EQ(frameNode6, NULL);
+    EXPECT_EQ(frameNode6, nullptr);
     /**
      * @tc.steps: step6. test FrameCount
      * @tc.expected: expect is not nullptr.
