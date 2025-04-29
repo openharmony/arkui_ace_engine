@@ -52,8 +52,18 @@ void UVTaskWrapperImpl::Call(const TaskExecutor::Task& task, uint32_t delayTime)
         return;
     }
 
+    auto callInWorkerTask = [task, delayTime, env = env_] () {
+        UVTaskWrapperImpl::CallInWorker(task, delayTime, env);
+    };
+
+    Call(callInWorkerTask);
+}
+
+void UVTaskWrapperImpl::CallInWorker(const TaskExecutor::Task& task, uint32_t delayTime, napi_env env)
+{
+    LOGD("CallInWorker delayTime: %{public}u", delayTime);
     uv_loop_t *loop = nullptr;
-    napi_get_uv_event_loop(env_, &loop);
+    napi_get_uv_event_loop(env, &loop);
     if (loop == nullptr) {
         LOGW("loop is null");
         return;
